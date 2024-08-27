@@ -30,13 +30,13 @@
 static void cb_client_tcp(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Socket_AddressInfo* addrServer = SOPC_Malloc(sizeof(SOPC_Socket_AddressInfo));
-    SOPC_Socket_AddressInfo* addrClient = SOPC_Malloc(sizeof(SOPC_Socket_AddressInfo));
+    SOPC_Socket_AddressInfo* addrServer = NULL;
+    SOPC_Socket_AddressInfo* addrClient = NULL;
     const char* nodeServ = "192.168.8.3";
     const char* portServ = "80";
     const char* nodeClient = "192.168.8.3";
     const char* portClient = "81";
-    Socket sockClient = NULL;
+    SOPC_Socket sockClient = NULL;
     const bool reuseAddr = false;
     const bool nonBlockingSock = false;
 
@@ -59,10 +59,10 @@ static void cb_client_tcp(void)
 static void cb_server_tcp(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Socket_AddressInfo* addr = SOPC_Malloc(sizeof(SOPC_Socket_AddressInfo));
+    SOPC_Socket_AddressInfo* addr = NULL;
     const char* node = "192.168.8.3";
     const char* port = "80";
-    Socket sockClient, sockServer = NULL;
+    SOPC_Socket sockClient, sockServer = NULL;
     const bool reuseAddr = false;
     const bool nonBlockingSock = false;
 
@@ -89,7 +89,7 @@ static void cb_sender_udp(void)
     const uint32_t bufferSize = 1000;
     const char* node = "192.168.8.3";
     const char* portReceiver = "80";
-    Socket s = 0;
+    SOPC_Socket s = 0;
     const char* msg = "A wonderful message";
 
     SOPC_Buffer* buff = SOPC_Buffer_Create(bufferSize);
@@ -124,8 +124,10 @@ static void cb_receiver_udp(void)
     const char* node = "192.168.8.3";
     const char* port1 = "80";
     int nbReady = 0;
-    SOPC_SocketSet readSet, writeSet, exceptSet;
-    Socket sock1 = 0;
+    SOPC_SocketSet* readSet = SOPC_SocketSet_Create();
+    SOPC_SocketSet* writeSet = SOPC_SocketSet_Create();
+    SOPC_SocketSet* exceptSet = SOPC_SocketSet_Create();
+    SOPC_Socket sock1 = 0;
 
     SOPC_Buffer* buff = SOPC_Buffer_Create(bufferSize);
 
@@ -135,13 +137,13 @@ static void cb_receiver_udp(void)
     SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(addr, NULL, reuseAddr, nonBlockingSocket, &sock1);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    SOPC_SocketSet_Clear(&readSet);
-    SOPC_SocketSet_Clear(&writeSet);
-    SOPC_SocketSet_Clear(&exceptSet);
+    SOPC_SocketSet_Clear(readSet);
+    SOPC_SocketSet_Clear(writeSet);
+    SOPC_SocketSet_Clear(exceptSet);
 
-    SOPC_SocketSet_Add(sock1, &readSet);
+    SOPC_SocketSet_Add(sock1, readSet);
 
-    nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, 0);
+    nbReady = SOPC_Socket_WaitSocketEvents(readSet, writeSet, exceptSet, 0);
     SOPC_ASSERT(nbReady > 0);
     status = SOPC_UDP_Socket_ReceiveFrom(sock1, buff);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -149,6 +151,10 @@ static void cb_receiver_udp(void)
     SOPC_UDP_SocketAddress_Delete(&addr);
     SOPC_UDP_Socket_Close(&sock1);
     SOPC_Buffer_Delete(buff);
+
+    SOPC_SocketSet_Delete(&readSet);
+    SOPC_SocketSet_Delete(&writeSet);
+    SOPC_SocketSet_Delete(&exceptSet);
 }
 
 static void cb_multicast_sender(void)
@@ -159,7 +165,7 @@ static void cb_multicast_sender(void)
     const uint32_t bufferSize = 1000;
     const char* multicastGroup = "232.1.2.100";
     const char* portReceiver = "80";
-    Socket sock = 0;
+    SOPC_Socket sock = 0;
     const char* msg = "A second wonderful message";
     const uint8_t ttlScope = 1;
     SOPC_Buffer* buff = SOPC_Buffer_Create(bufferSize);
@@ -198,8 +204,10 @@ static void cb_multicast_receiver(void)
     const char* port = "80";
     int nbReady = 0;
     const uint8_t ttlScope = 1;
-    SOPC_SocketSet readSet, writeSet, exceptSet;
-    Socket sock = 0;
+    SOPC_SocketSet* readSet = SOPC_SocketSet_Create();
+    SOPC_SocketSet* writeSet = SOPC_SocketSet_Create();
+    SOPC_SocketSet* exceptSet = SOPC_SocketSet_Create();
+    SOPC_Socket sock = 0;
 
     SOPC_Buffer* buff = SOPC_Buffer_Create(bufferSize);
 
@@ -213,14 +221,14 @@ static void cb_multicast_receiver(void)
     status = SOPC_UDP_Socket_Set_MulticastTTL(sock, ttlScope);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    SOPC_SocketSet_Clear(&readSet);
-    SOPC_SocketSet_Clear(&writeSet);
-    SOPC_SocketSet_Clear(&exceptSet);
+    SOPC_SocketSet_Clear(readSet);
+    SOPC_SocketSet_Clear(writeSet);
+    SOPC_SocketSet_Clear(exceptSet);
 
-    SOPC_SocketSet_Add(sock, &readSet);
+    SOPC_SocketSet_Add(sock, readSet);
 
     // Wait for 5 second then timeout
-    nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, 5000);
+    nbReady = SOPC_Socket_WaitSocketEvents(readSet, writeSet, exceptSet, 5000);
     SOPC_ASSERT(nbReady > 0);
     status = SOPC_UDP_Socket_ReceiveFrom(sock, buff);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -228,6 +236,10 @@ static void cb_multicast_receiver(void)
     SOPC_UDP_SocketAddress_Delete(&addrMulticast);
     SOPC_UDP_Socket_Close(&sock);
     SOPC_Buffer_Delete(buff);
+
+    SOPC_SocketSet_Delete(&readSet);
+    SOPC_SocketSet_Delete(&writeSet);
+    SOPC_SocketSet_Delete(&exceptSet);
 }
 
 void suite_test_raw_sockets(int* index)
@@ -251,7 +263,9 @@ void suite_test_raw_sockets(int* index)
     PRINT("Test 1 : ok\n");
 
     SOPC_Socket_AddressInfo* addrinfo = SOPC_UDP_SocketAddress_Create(useIPv6, node, port);
-    status = SOPC_SocketAddress_GetNameInfo(addrinfo, nodeRes, portRes);
+    SOPC_Socket_Address* address = SOPC_Socket_CopyAddress(addrinfo);
+
+    status = SOPC_SocketAddress_GetNameInfo(address, nodeRes, portRes);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_ASSERT(0 == strcmp(node, *nodeRes));
     SOPC_ASSERT(0 == strcmp(port, *portRes));
@@ -260,6 +274,9 @@ void suite_test_raw_sockets(int* index)
     PRINT("Test 2 : ok\n");
 
     *index += 1;
+
+    SOPC_SocketAddress_Delete(&address);
+    SOPC_Socket_AddrInfoDelete(&addrinfo);
 }
 
 void suite_test_udp_sockets(int* index)

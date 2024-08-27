@@ -32,8 +32,6 @@
 
 #include "p_sopc_multicast.h"
 
-#include "p_sopc_sockets.h"
-
 /* Max socket based on max connections allowed by zephyr */
 
 #ifndef CONFIG_NET_L2_ETHERNET
@@ -53,11 +51,11 @@ static SOPC_Dict* dictMCast = NULL;
 static uint64_t socketKeyHash(const uintptr_t data);
 /** Equality for key of type 'int' */
 static bool socketKeyEqual(const uintptr_t a, const uintptr_t b);
-static void linkSockToMCast(Socket sock, struct net_if_mcast_addr* mcAddress);
-static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(Socket sock);
+static void linkSockToMCast(SOPC_Socket sock, struct net_if_mcast_addr* mcAddress);
+static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(SOPC_Socket sock);
 
 #define SOCKET_TO_KEY(s) ((uintptr_t)(s))
-#define KEY_TO_SOCKET(k) ((Socket)(k))
+#define KEY_TO_SOCKET(k) ((int) (k))
 
 static uintptr_t NO_KEY = SOCKET_TO_KEY(SOPC_INVALID_SOCKET);
 static uintptr_t EMPTY_KEY = SOCKET_TO_KEY(-2);
@@ -77,9 +75,9 @@ static bool socketKeyEqual(const uintptr_t a, const uintptr_t b)
 }
 
 /***************************************************/
-static void linkSockToMCast(Socket sock, struct net_if_mcast_addr* mcAddress)
+static void linkSockToMCast(SOPC_Socket sock, struct net_if_mcast_addr* mcAddress)
 {
-    uintptr_t key = SOCKET_TO_KEY(sock);
+    uintptr_t key = SOCKET_TO_KEY(sock->sock);
     if (NULL == dictMCast)
     {
         dictMCast = SOPC_Dict_Create(NO_KEY, &socketKeyHash, &socketKeyEqual, NULL, NULL);
@@ -91,13 +89,13 @@ static void linkSockToMCast(Socket sock, struct net_if_mcast_addr* mcAddress)
 }
 
 /***************************************************/
-static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(Socket sock)
+static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(SOPC_Socket sock)
 {
     if (NULL == dictMCast)
     {
         return 0;
     }
-    uintptr_t key = SOCKET_TO_KEY(sock);
+    uintptr_t key = SOCKET_TO_KEY(sock->sock);
 
     struct net_if_mcast_addr* result = (struct net_if_mcast_addr*) SOPC_Dict_Get(dictMCast, key, NULL);
     SOPC_Dict_Remove(dictMCast, key);
@@ -112,14 +110,14 @@ static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(Socket sock)
 /***************************************************
  * IMPLEMENTATION OF EXTERN FUNCTIONS
  **************************************************/
-SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(Socket sock, const SOPC_Socket_AddressInfo* multicast)
+SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(SOPC_Socket sock, const SOPC_Socket_AddressInfo* multicast)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOT_SUPPORTED;
     struct net_if* ptrNetIf = NULL;
-    if (AF_INET == multicast->ai_family)
+    if (AF_INET == multicast->addrInfo.ai_family)
     {
         // Retrieve IPV4 address
-        struct in_addr* multiAddr = &((struct sockaddr_in*) &multicast->_ai_addr)->sin_addr;
+        struct in_addr* multiAddr = &((struct sockaddr_in*) &multicast->addrInfo._ai_addr)->sin_addr;
         // Check that this is a multicast address
         if (!net_ipv4_is_addr_mcast(multiAddr))
         {
@@ -155,7 +153,7 @@ SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(Socket sock, const SOPC_Socket_A
 }
 
 /***************************************************/
-SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(Socket sock, const SOPC_Socket_AddressInfo* multicast)
+SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(SOPC_Socket sock, const SOPC_Socket_AddressInfo* multicast)
 {
     // Leave a membership
     struct net_if_mcast_addr* mcAddr = getAndUnlinkSockFromMCast(sock);
@@ -168,7 +166,7 @@ SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(Socket sock, const SOPC_Socket_
     struct in_addr* multiAddr = NULL;
     if (NULL != multicast)
     {
-        multiAddr = &((struct sockaddr_in*) &multicast->_ai_addr)->sin_addr;
+        multiAddr = &((struct sockaddr_in*) &multicast->addrInfo._ai_addr)->sin_addr;
     }
     else
     {
@@ -181,7 +179,7 @@ SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(Socket sock, const SOPC_Socket_
 }
 
 /***************************************************/
-SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scope)
+SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(SOPC_Socket sock, uint8_t TTL_scope)
 {
     SOPC_UNUSED_ARG(sock);
     // In zephyr the TTL is common to interface

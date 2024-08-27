@@ -49,7 +49,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateReceiveAddressInfo(const char* interface
 
 SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
                                                   bool setNonBlocking,
-                                                  Socket* sock)
+                                                  SOPC_Socket* sock)
 {
     SOPC_UNUSED_ARG(receiveAddrInfo);
     SOPC_UNUSED_ARG(setNonBlocking);
@@ -59,7 +59,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
 
 SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* sendAddrInfo,
                                                bool setNonBlocking,
-                                               Socket* sock)
+                                               SOPC_Socket* sock)
 {
     SOPC_UNUSED_ARG(sendAddrInfo);
     SOPC_UNUSED_ARG(setNonBlocking);
@@ -67,7 +67,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* 
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
+SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(SOPC_Socket sock,
                                          const SOPC_ETH_Socket_SendAddressInfo* sendAddrInfo,
                                          uint16_t etherType,
                                          SOPC_Buffer* buffer)
@@ -79,7 +79,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
+SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(SOPC_Socket sock,
                                               const SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
                                               bool checkEtherType,
                                               uint16_t etherType,
@@ -93,7 +93,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-void SOPC_ETH_Socket_Close(Socket* sock)
+void SOPC_ETH_Socket_Close(SOPC_Socket* sock)
 {
     SOPC_UNUSED_ARG(sock);
     SOPC_ASSERT(false);

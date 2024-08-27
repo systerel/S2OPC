@@ -57,19 +57,22 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_AddrInfo_Get(bool IPv6,
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo hints;
     memset(&hints, 0, sizeof(SOPC_Socket_AddressInfo));
-    hints.ai_family = (IPv6 ? AF_INET6 : AF_INET);
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_PASSIVE;
-    hints.ai_protocol = IPPROTO_UDP;
+    hints.addrInfo.ai_family = (IPv6 ? AF_INET6 : AF_INET);
+    hints.addrInfo.ai_socktype = SOCK_DGRAM;
+    hints.addrInfo.ai_flags = AI_PASSIVE;
+    hints.addrInfo.ai_protocol = IPPROTO_UDP;
+
+    struct addrinfo* getAddrInfoRes = NULL;
 
     if ((NULL != node || NULL != port) && NULL != addrs)
     {
-        if (getaddrinfo(node, port, &hints, addrs) != 0)
+        if (getaddrinfo(node, port, &hints.addrInfo, &getAddrInfoRes) != 0)
         {
             status = SOPC_STATUS_NOK;
         }
         else
         {
+            *addrs = (SOPC_Socket_AddressInfo*) getAddrInfoRes;
             status = SOPC_STATUS_OK;
         }
     }
@@ -92,7 +95,7 @@ void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** addr)
     SOPC_Socket_AddrInfoDelete(addr);
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scope)
+SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(SOPC_Socket sock, uint8_t TTL_scope)
 {
     int setOptStatus = -1;
 
@@ -115,7 +118,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scop
 static in_addr_t get_ai_addr(const SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ASSERT(NULL != addr);
-    return ((struct sockaddr_in*) addr->ai_addr)->sin_addr.s_addr;
+    return ((struct sockaddr_in*) addr->addrInfo.ai_addr)->sin_addr.s_addr;
 }
 
 static struct ip_mreq SOPC_Internal_Fill_IP_mreq(const in_addr_t multiCastAddr)
@@ -127,7 +130,7 @@ static struct ip_mreq SOPC_Internal_Fill_IP_mreq(const in_addr_t multiCastAddr)
     return membership;
 }
 
-static SOPC_ReturnStatus socket_AddMembership(Socket sock, const SOPC_Socket_AddressInfo* multicast)
+static SOPC_ReturnStatus socket_AddMembership(SOPC_Socket sock, const SOPC_Socket_AddressInfo* multicast)
 {
     int setOptStatus = -1;
 
@@ -136,7 +139,7 @@ static SOPC_ReturnStatus socket_AddMembership(Socket sock, const SOPC_Socket_Add
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (AF_INET6 == multicast->ai_family)
+    if (AF_INET6 == multicast->addrInfo.ai_family)
     {
         return SOPC_STATUS_NOT_SUPPORTED;
     }
@@ -160,7 +163,7 @@ static SOPC_ReturnStatus socket_AddMembership(Socket sock, const SOPC_Socket_Add
     }
 }
 
-static SOPC_ReturnStatus socket_DropMembership(Socket sock)
+static SOPC_ReturnStatus socket_DropMembership(SOPC_Socket sock)
 {
     int setOptStatus = -1;
 
@@ -187,16 +190,16 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
                                                    const char* interfaceName,
                                                    bool setReuseAddr,
                                                    bool setNonBlocking,
-                                                   Socket* pSock)
+                                                   SOPC_Socket* pSock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const int trueInt = true;
     int setOptStatus = -1;
     if (NULL != addr && NULL != pSock)
     {
-        Socket result = (Socket_t*) SOPC_Malloc(sizeof(Socket_t));
+        SOPC_Socket result = SOPC_Malloc(sizeof(*result));
         SOPC_ASSERT(NULL != result);
-        result->sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+        result->sock = socket(addr->addrInfo.ai_family, addr->addrInfo.ai_socktype, addr->addrInfo.ai_protocol);
         result->membership = NULL;
 
         if (SOPC_FREERTOS_INVALID_SOCKET_ID == result->sock)
@@ -254,14 +257,14 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
                                                   const char* interfaceName,
                                                   bool setReuseAddr,
                                                   bool setNonBlocking,
-                                                  Socket* pSock)
+                                                  SOPC_Socket* pSock)
 {
     *pSock = NULL;
     SOPC_ReturnStatus status =
         SOPC_UDP_Socket_CreateNew(listenAddress, interfaceName, setReuseAddr, setNonBlocking, pSock);
     if (SOPC_STATUS_OK == status)
     {
-        int res = bind((*pSock)->sock, listenAddress->ai_addr, listenAddress->ai_addrlen);
+        int res = bind((*pSock)->sock, listenAddress->addrInfo.ai_addr, listenAddress->addrInfo.ai_addrlen);
         if (res == -1)
         {
             status = SOPC_STATUS_NOK;
@@ -269,10 +272,10 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
         else
         {
             bool isMC = false;
-            if (listenAddress->ai_family == AF_INET)
+            if (listenAddress->addrInfo.ai_family == AF_INET)
             {
                 // IPV4: first address byte indicates if this is a multicast address
-                struct sockaddr_in* sAddr = (struct sockaddr_in*) listenAddress->ai_addr;
+                struct sockaddr_in* sAddr = (struct sockaddr_in*) listenAddress->addrInfo.ai_addr;
                 const uint32_t ip = htonl(sAddr->sin_addr.s_addr);
                 isMC = ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
             }
@@ -294,12 +297,12 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress,
                                                const char* interfaceName,
                                                bool setNonBlocking,
-                                               Socket* pSock)
+                                               SOPC_Socket* pSock)
 {
     return SOPC_UDP_Socket_CreateNew(destAddress, interfaceName, false, setNonBlocking, pSock);
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)
+SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(SOPC_Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)
 {
     SOPC_ASSERT(buffer->position == 0);
     if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock) || NULL == destAddr || NULL == buffer)
@@ -323,7 +326,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
     SOPC_Mutex_Lock(mutex);
 
     memcpy(DTCMR_Buffer, buffer->data, buffer->length);
-    ssize_t res = sendto(sock->sock, DTCMR_Buffer, buffer->length, 0, destAddr->ai_addr, destAddr->ai_addrlen);
+    ssize_t res =
+        sendto(sock->sock, DTCMR_Buffer, buffer->length, 0, destAddr->addrInfo.ai_addr, destAddr->addrInfo.ai_addrlen);
 
     SOPC_Mutex_Unlock(mutex);
 #else
@@ -333,7 +337,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
      * https://community.st.com/t5/stm32-mcus/ethernet-not-working-on-stm32h7x3/ta-p/49479
      * (from https://forums.freertos.org/t/stm32h7-eth-tx-fails-depending-on-buffer-address/18087/2)
      */
-    ssize_t res = sendto(sock->sock, buffer->data, buffer->length, 0, destAddr->ai_addr, destAddr->ai_addrlen);
+    ssize_t res =
+        sendto(sock->sock, buffer->data, buffer->length, 0, destAddr->addrInfo.ai_addr, destAddr->addrInfo.ai_addrlen);
 #endif
 
     if (-1 == res || (uint32_t) res != buffer->length)
@@ -344,7 +349,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
+SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(SOPC_Socket sock, SOPC_Buffer* buffer)
 {
     if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock) || NULL == buffer)
     {
@@ -371,7 +376,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
     return SOPC_STATUS_OK;
 }
 
-void SOPC_UDP_Socket_Close(Socket* pSock)
+void SOPC_UDP_Socket_Close(SOPC_Socket* pSock)
 {
     socket_DropMembership(*pSock);
     SOPC_Socket_Close(pSock);

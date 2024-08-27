@@ -236,7 +236,7 @@ struct SOPC_SubScheduler_TransportCtx
     SOPC_SubScheduler_TransportCtx_Clear fctClear;
 
     // specific to SOPC_PubSubProtocol_UDP
-    Socket sock;
+    SOPC_Socket sock;
 
     // specific to SOPC_PubSubProtocol_MQTT
     MqttContextClient* mqttClient;
@@ -272,7 +272,7 @@ static struct
     // specific to SOPC_PubSubProtocol_UDP
     uint16_t nbSockets;
     uint16_t nbMqttTransportContext;
-    Socket* sockArray;
+    SOPC_Socket* sockArray;
 
     /* UADP Security */
     // Array of SOPC_SubScheduler_Security_Pub_Ctx
@@ -446,7 +446,7 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
                                              SOPC_SubTargetVariableConfig* config);
 
 /* The callback for received messages specific to sockets (UDP or raw Ethernet) transport */
-static void on_socket_message_received(void* pInputIdentifier, Socket sock);
+static void on_socket_message_received(void* pInputIdentifier, SOPC_Socket sock);
 
 /** \brief The callback for received messages specific to the MQTT transport
  *
@@ -476,7 +476,7 @@ static void on_mqtt_message_received(uint8_t* data, uint16_t size, void* pInputI
     }
 }
 
-static void on_socket_message_received(void* pInputIdentifier, Socket sock)
+static void on_socket_message_received(void* pInputIdentifier, SOPC_Socket sock)
 {
     SOPC_ASSERT(NULL != pInputIdentifier);
     SOPC_SubScheduler_TransportCtx* transportCtx = pInputIdentifier;

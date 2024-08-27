@@ -25,6 +25,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "p_sopc_sockets.h"
 #include "p_sopc_udp_sockets_custom.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
@@ -213,7 +214,7 @@ int main(int argc, char* argv[])
     uint64_t txtime = 0;
     int clockErr = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    Socket sock = SOPC_INVALID_SOCKET;
+    SOPC_Socket sock = SOPC_INVALID_SOCKET;
     struct timespec sleepTime;
     struct pollfd sockErrPoll;
 
@@ -225,7 +226,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    status = SOPC_UDP_SO_TXTIME_Socket_Option((const char*) interface, &sock, (uint32_t) so_priority);
+    status = SOPC_UDP_SO_TXTIME_Socket_Option((const char*) interface, sock, (uint32_t) so_priority);
     if (SOPC_STATUS_INVALID_PARAMETERS == status)
     {
         printf("Invalid parameters\n");
@@ -265,7 +266,7 @@ int main(int argc, char* argv[])
     txtime = (uint64_t)(sleepTime.tv_sec * ONE_SEC + sleepTime.tv_nsec);
     txtime += wake_delay;
     memset(&sockErrPoll, 0, sizeof(sockErrPoll));
-    sockErrPoll.fd = sock;
+    sockErrPoll.fd = sock->sock;
     if (SOPC_STATUS_OK == status && buffer != NULL)
     {
         printf("\nFirst packet txtime %" PRIu64 "\n", txtime);

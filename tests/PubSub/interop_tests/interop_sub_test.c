@@ -357,7 +357,7 @@ static SOPC_PubSub_SecurityType* retrieve_security_info(uint32_t tokenId,
     }
 }
 
-static void readyToReceive(void* sockContext, Socket sock)
+static void readyToReceive(void* sockContext, SOPC_Socket sock)
 {
     SOPC_UNUSED_ARG(sockContext);
     if (SOPC_Atomic_Int_Get(&stop))
@@ -418,7 +418,7 @@ static void tick(void* tickCtx)
 
 int main(int argc, char** argv)
 {
-    Socket sock;
+    SOPC_Socket sock;
     SOPC_Socket_AddressInfo* listenAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
     if (argc > 1)
     {

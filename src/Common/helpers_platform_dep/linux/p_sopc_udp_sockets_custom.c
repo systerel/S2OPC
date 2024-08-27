@@ -22,6 +22,7 @@
 #include <ifaddrs.h>
 #include <inttypes.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <linux/errqueue.h>
 #include <linux/types.h>
@@ -54,7 +55,7 @@ https://man7.org/linux/man-pages/man8/tc-etf.8.html
 https://lwn.net/Articles/748879/
 */
 
-SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket* sock, uint32_t soPriority)
+SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, SOPC_Socket sock, uint32_t soPriority)
 {
     /* This sample TSN application uses strict txtime with SO_PRIORITY 3 mode by
        default.
@@ -83,18 +84,18 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket
     int res = 0;
     struct ifreq nwInterface;
 
-    if (SOPC_INVALID_SOCKET == *sock || NULL == interface)
+    if (SOPC_INVALID_SOCKET == sock || NULL == interface)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_PRIORITY, &soPriority, sizeof(soPriority));
+    setOptStatus = setsockopt(sock->sock, SOL_SOCKET, SO_PRIORITY, &soPriority, sizeof(soPriority));
     if (setOptStatus < 0)
     {
         return SOPC_STATUS_NOK;
     }
 
-    setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+    setOptStatus = setsockopt(sock->sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
     if (setOptStatus < 0)
     {
         return SOPC_STATUS_NOK;
@@ -103,14 +104,14 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket
     // Configure network devices to use socket FD
     memset(&nwInterface, 0, sizeof(nwInterface));
     strncpy(nwInterface.ifr_name, interface, sizeof(nwInterface.ifr_name) - 1);
-    S2OPC_TEMP_FAILURE_RETRY(res, ioctl(*sock, SIOCGIFINDEX, &nwInterface));
+    S2OPC_TEMP_FAILURE_RETRY(res, ioctl(sock->sock, SIOCGIFINDEX, &nwInterface));
     if (res < 0)
     {
         return SOPC_STATUS_NOK;
     }
 
     // Bind the socket to ethernet hardware
-    setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &nwInterface, sizeof(nwInterface));
+    setOptStatus = setsockopt(sock->sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &nwInterface, sizeof(nwInterface));
     if (setOptStatus < 0)
     {
         SOPC_CONSOLE_PRINTF("Interface selection failed\n");
@@ -126,17 +127,17 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket
     // using TCPDUMP.
     txtimeSock.flags = (useDeadlineMode | receiveErrors);
     // SO_TXTIME - Socket option allows application to add transmission time
-    setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_TXTIME, &txtimeSock, sizeof(txtimeSock));
+    setOptStatus = setsockopt(sock->sock, SOL_SOCKET, SO_TXTIME, &txtimeSock, sizeof(txtimeSock));
     if (setOptStatus < 0)
     {
-        SOPC_UDP_Socket_Close(sock);
+        S2OPC_TEMP_FAILURE_RETRY(res, close(sock->sock));
         return SOPC_STATUS_NOK;
     }
 
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_TX_UDP_send(int sockAddress,
+SOPC_ReturnStatus SOPC_TX_UDP_send(SOPC_Socket sock,
                                    void* txBuffer,
                                    uint32_t txBuffLen,
                                    uint64_t txtime,
@@ -187,7 +188,7 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(int sockAddress,
     controlMessage->cmsg_len = CMSG_LEN(sizeof(uint64_t));
     memcpy(CMSG_DATA(controlMessage), &txtime, sizeof(uint64_t));
     // Send message on socket
-    S2OPC_TEMP_FAILURE_RETRY(res, sendmsg(sockAddress, &message, 0));
+    S2OPC_TEMP_FAILURE_RETRY(res, sendmsg(sock->sock, &message, 0));
 
     if ((uint32_t) res != txBuffLen || res < 1)
     {
@@ -197,7 +198,7 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(int sockAddress,
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(int sockFd)
+SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(SOPC_Socket sock)
 {
     uint8_t messageControl[CMSG_SPACE(sizeof(struct sock_extended_err))];
     unsigned char errBuffer[sizeof(250)];
@@ -213,7 +214,7 @@ SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(int sockFd)
                              .msg_controllen = sizeof(messageControl)};
 
     int res = 0;
-    S2OPC_TEMP_FAILURE_RETRY(res, recvmsg(sockFd, &message, MSG_ERRQUEUE));
+    S2OPC_TEMP_FAILURE_RETRY(res, recvmsg(sock->sock, &message, MSG_ERRQUEUE));
 
     if (res == -1)
     {

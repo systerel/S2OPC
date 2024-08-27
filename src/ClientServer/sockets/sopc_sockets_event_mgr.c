@@ -30,8 +30,6 @@
 #include "sopc_sockets_event_mgr.h"
 #include "sopc_sockets_internal_ctx.h"
 
-#include "p_sopc_sockets.h"
-
 static void SOPC_SocketsInternalEventMgr_LogAcceptEvent(SOPC_InternalSocket* listener,
                                                         SOPC_InternalSocket* connection,
                                                         const char* eventName)

@@ -57,16 +57,16 @@ struct SOPC_ETH_Socket_SendAddressInfo
     struct ifreq sendSrcMACaddr;
 };
 
-static bool SOPC_ETH_Socket_AddMembership(Socket sock, struct packet_mreq* mreq)
+static bool SOPC_ETH_Socket_AddMembership(int sock, struct packet_mreq* mreq)
 {
     int res = setsockopt(sock, SOL_PACKET, PACKET_ADD_MEMBERSHIP, mreq, sizeof(*mreq));
     return res >= 0;
 }
 
-static SOPC_ReturnStatus SOPC_ETH_Socket_AddMemberships(Socket sock,
+static SOPC_ReturnStatus SOPC_ETH_Socket_AddMemberships(int sock,
                                                         const SOPC_ETH_Socket_ReceiveAddressInfo* multicastAddrInfo)
 {
-    if (SOPC_INVALID_SOCKET == sock || NULL == multicastAddrInfo)
+    if (-1 == sock || NULL == multicastAddrInfo)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -188,7 +188,7 @@ static bool set_itfindex_from_string(struct sockaddr_ll* addr, const char* inter
 {
     SOPC_ASSERT(NULL != addr);
     int tmpSock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-    if (tmpSock == SOPC_INVALID_SOCKET)
+    if (tmpSock == -1)
     {
         return false;
     }
@@ -213,7 +213,7 @@ static bool set_mac_addr_from_interface(struct ifreq* ifreq, const char* interfa
 {
     SOPC_ASSERT(NULL != ifreq);
     int tmpSock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-    if (tmpSock == SOPC_INVALID_SOCKET)
+    if (tmpSock == -1)
     {
         return false;
     }
@@ -339,14 +339,19 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateReceiveAddressInfo(const char* interface
 
 SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
                                                   bool setNonBlocking,
-                                                  Socket* sock)
+                                                  SOPC_Socket* sock)
 {
     if (NULL == sock || NULL == receiveAddrInfo)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    *sock = socket(receiveAddrInfo->addr.sll_family, SOCK_RAW, receiveAddrInfo->addr.sll_protocol);
-    if (SOPC_INVALID_SOCKET == *sock)
+    SOPC_Socket_Impl* socketImpl = SOPC_Calloc(1, sizeof(*socketImpl));
+    if (NULL == socketImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    socketImpl->sock = socket(receiveAddrInfo->addr.sll_family, SOCK_RAW, receiveAddrInfo->addr.sll_protocol);
+    if (-1 == socketImpl->sock)
     {
         return SOPC_STATUS_NOK;
     }
@@ -354,42 +359,49 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
     int res = 0;
     if (setNonBlocking)
     {
-        S2OPC_TEMP_FAILURE_RETRY(res, fcntl(*sock, F_SETFL, O_NONBLOCK));
+        S2OPC_TEMP_FAILURE_RETRY(res, fcntl(socketImpl->sock, F_SETFL, O_NONBLOCK));
     }
     SOPC_ReturnStatus status = (res == 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
 
     if (SOPC_STATUS_OK == status)
     {
-        res = bind(*sock, (struct sockaddr*) &receiveAddrInfo->addr, sizeof(receiveAddrInfo->addr));
+        res = bind(socketImpl->sock, (struct sockaddr*) &receiveAddrInfo->addr, sizeof(receiveAddrInfo->addr));
         status = (res == 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
     }
 
     if (SOPC_STATUS_OK == status && receiveAddrInfo->recvMulticast)
     {
-        status = SOPC_ETH_Socket_AddMemberships(*sock, receiveAddrInfo);
+        status = SOPC_ETH_Socket_AddMemberships(socketImpl->sock, receiveAddrInfo);
     }
 
     if (SOPC_STATUS_OK != status)
     {
-        S2OPC_TEMP_FAILURE_RETRY(res, close(*sock));
+        S2OPC_TEMP_FAILURE_RETRY(res, close(socketImpl->sock));
         *sock = SOPC_INVALID_SOCKET;
-
-        return status;
+    }
+    else
+    {
+        *sock = socketImpl;
     }
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* sendAddrInfo,
                                                bool setNonBlocking,
-                                               Socket* sock)
+                                               SOPC_Socket* sock)
 {
     if (NULL == sock || NULL == sendAddrInfo)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    *sock = socket(sendAddrInfo->addr.sll_family, SOCK_RAW, sendAddrInfo->addr.sll_protocol);
-    if (SOPC_INVALID_SOCKET == *sock)
+    SOPC_Socket_Impl* socketImpl = SOPC_Calloc(1, sizeof(*socketImpl));
+    if (NULL == socketImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    socketImpl->sock = socket(sendAddrInfo->addr.sll_family, SOCK_RAW, sendAddrInfo->addr.sll_protocol);
+    if (-1 == socketImpl->sock)
     {
         return SOPC_STATUS_NOK;
     }
@@ -397,19 +409,22 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* 
     int setOptStatus = 0;
     if (setNonBlocking)
     {
-        S2OPC_TEMP_FAILURE_RETRY(setOptStatus, fcntl(*sock, F_SETFL, O_NONBLOCK));
+        S2OPC_TEMP_FAILURE_RETRY(setOptStatus, fcntl(socketImpl->sock, F_SETFL, O_NONBLOCK));
     }
 
     if (setOptStatus < 0)
     {
-        SOPC_ETH_Socket_Close(sock);
+        SOPC_ETH_Socket_Close(&socketImpl);
+        *sock = SOPC_INVALID_SOCKET;
         return SOPC_STATUS_NOK;
     }
+
+    *sock = socketImpl;
 
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
+SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(SOPC_Socket sock,
                                          const SOPC_ETH_Socket_SendAddressInfo* sendAddrInfo,
                                          uint16_t etherType,
                                          SOPC_Buffer* buffer)
@@ -452,8 +467,8 @@ SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
 
         ssize_t sent = 0;
         S2OPC_TEMP_FAILURE_RETRY(
-            sent, sendto(sock, sendBuffer->data, sendBuffer->length, 0, (const struct sockaddr*) &sendAddrInfo->addr,
-                         (socklen_t) sizeof(sendAddrInfo->addr)));
+            sent, sendto(sock->sock, sendBuffer->data, sendBuffer->length, 0,
+                         (const struct sockaddr*) &sendAddrInfo->addr, (socklen_t) sizeof(sendAddrInfo->addr)));
 
         if (sent < 0)
         {
@@ -470,7 +485,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
+SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(SOPC_Socket sock,
                                               const SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
                                               bool checkEtherType,
                                               uint16_t etherType,
@@ -487,7 +502,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
     while (!bres)
     {
         ssize_t recv_len = 0;
-        S2OPC_TEMP_FAILURE_RETRY(recv_len, recv(sock, buffer->data, buffer->current_size, 0));
+        S2OPC_TEMP_FAILURE_RETRY(recv_len, recv(sock->sock, buffer->data, buffer->current_size, 0));
 
         if (recv_len < 0)
         {
@@ -538,12 +553,13 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
     return SOPC_STATUS_OK;
 }
 
-void SOPC_ETH_Socket_Close(Socket* sock)
+void SOPC_ETH_Socket_Close(SOPC_Socket* sock)
 {
-    if (NULL != sock)
+    if (NULL != sock && SOPC_INVALID_SOCKET != *sock)
     {
         int res = 0;
-        S2OPC_TEMP_FAILURE_RETRY(res, close(*sock));
+        S2OPC_TEMP_FAILURE_RETRY(res, close((*sock)->sock));
+        SOPC_Free(*sock);
         *sock = SOPC_INVALID_SOCKET;
     }
 }

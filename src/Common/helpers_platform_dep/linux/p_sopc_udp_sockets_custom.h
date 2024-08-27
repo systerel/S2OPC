@@ -20,8 +20,12 @@
 #ifndef SOPC_P_UDP_SOCKETS_CUSTOM_H_
 #define SOPC_P_UDP_SOCKETS_CUSTOM_H_
 
+#include <inttypes.h>
+
+#include "p_sopc_sockets.h"
+
 #include "sopc_enums.h"
-#include "sopc_udp_sockets.h"
+#include "sopc_raw_sockets.h"
 
 #ifndef SO_TXTIME
 #define SO_TXTIME 61
@@ -64,12 +68,12 @@ typedef struct
  * SOPC_STATUS_INVALID_PARAMETERS
  *  or SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket* sock, uint32_t soPriority);
+SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, SOPC_Socket sock, uint32_t soPriority);
 
 /**
  *  \brief Send data through the UDP socket to given IP address and port
  *
- *  \param sockAddress Value pointed is set with the newly created socket
+ *  \param sock        Value pointed is set with the newly created socket
  *  \param txBuffer    The buffer containing data to be sent.
  *  \param txBuffLen   The network message buffer length
  *  \param txtime      The frame transmission timestamp
@@ -80,7 +84,7 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket
  * SOPC_STATUS_INVALID_PARAMETERS
  *  or SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_TX_UDP_send(int sockAddress,
+SOPC_ReturnStatus SOPC_TX_UDP_send(SOPC_Socket sock,
                                    void* txBuffer,
                                    uint32_t txBuffLen,
                                    uint64_t txtime,
@@ -90,12 +94,12 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(int sockAddress,
 /**
  *  \brief Function for socket error queue
  *
- *  \param sockFd      Socket file descriptor value
+ *  \param sock      Socket file descriptor value
  *
  *  \return            SOPC_STATUS_OK if operation succeeded,
  * SOPC_STATUS_INVALID_PARAMETERS
  *  or SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(int sockFd);
+SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(SOPC_Socket);
 
 #endif /* SOPC_P_UDP_SOCKETS_CUSTOM_H_ */

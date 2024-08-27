@@ -20,45 +20,53 @@
 #ifndef SOPC_P_SOCKETS_H_
 #define SOPC_P_SOCKETS_H_
 
+#include "sopc_raw_sockets.h"
+
 #include "lwip/errno.h"
 #include "lwip/netdb.h"
 #include "lwip/sockets.h"
 
+#define SOPC_FREERTOS_INVALID_SOCKET_ID (-1)
 #define SOPC_MAX_PENDING_CONNECTIONS (2)
-
-typedef struct
-{
-    int sock;
-    struct ip_mreq* membership; // NULL if not used
-} Socket_t;
 
 /**
  *  \brief Socket base type
  */
-typedef Socket_t* Socket;
-#define SOPC_INVALID_SOCKET (NULL)
-#define SOPC_FREERTOS_INVALID_SOCKET_ID (-1)
+struct SOPC_Socket_Impl
+{
+    int sock;
+    struct ip_mreq* membership; // NULL if not used
+};
 
 /**
  *  \brief Socket addressing information for listening or connecting operation type
+ *  \note Internal treatment use the fact it is the first field as property
  */
-typedef struct addrinfo SOPC_Socket_AddressInfo;
+struct SOPC_Socket_AddressInfo
+{
+    struct addrinfo addrInfo;
+};
 
 /**
  *  \brief Socket address information on a connected socket
+ *  \note Internal treatment use the fact it is the first field as property
  */
-typedef struct addrinfo SOPC_Socket_Address;
+struct SOPC_Socket_Address
+{
+    struct addrinfo address;
+};
 
 /**
  *  \brief Set of sockets type
  */
-typedef struct
+struct SOPC_SocketSet
 {
     int fdmax;  /**< max of the set */
     fd_set set; /**< set */
     uint8_t rfu[2];
-} SOPC_SocketSet;
+};
 
-#define SOPC_FREERTOS_SOCKET_IS_VALID(pSock) (NULL != (pSock) && SOPC_FREERTOS_INVALID_SOCKET_ID != (pSock)->sock)
+#define SOPC_FREERTOS_SOCKET_IS_VALID(pSock) \
+    (SOPC_INVALID_SOCKET != (pSock) && SOPC_FREERTOS_INVALID_SOCKET_ID != (pSock)->sock)
 
 #endif /* SOPC_P_SOCKETS_H_ */

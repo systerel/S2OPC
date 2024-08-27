@@ -17,12 +17,9 @@
  * under the License.
  */
 
-#include "sopc_raw_sockets.h"
-
 #include <errno.h>
 #include <fcntl.h>
 #ifndef IPPROTO_TCP
-#include <linux/in.h>
 #include <linux/in6.h>
 #endif
 #include <netinet/tcp.h>
@@ -31,13 +28,16 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include "p_sopc_sockets.h"
+
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_raw_sockets.h"
 #include "sopc_threads.h"
 
 #define SOPC_SECONDS_TO_MILLISECONDS 1000
 
-SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
+SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(SOPC_Socket sock,
                                                        unsigned int firstProbeDelay,
                                                        unsigned int interval,
                                                        unsigned int counter)
@@ -54,28 +54,28 @@ SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
         return status;
     }
 
-    setOptStatus = setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (const void*) &trueInt, sizeof(int));
+    setOptStatus = setsockopt(sock->sock, SOL_SOCKET, SO_KEEPALIVE, (const void*) &trueInt, sizeof(int));
 
     if (setOptStatus != -1)
     {
         setOptStatus =
-            setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, (const void*) &user_timeout, sizeof(user_timeout));
+            setsockopt(sock->sock, IPPROTO_TCP, TCP_USER_TIMEOUT, (const void*) &user_timeout, sizeof(user_timeout));
     }
 
     if (setOptStatus != -1)
     {
         setOptStatus =
-            setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (const void*) &firstProbeDelay, sizeof(firstProbeDelay));
+            setsockopt(sock->sock, IPPROTO_TCP, TCP_KEEPIDLE, (const void*) &firstProbeDelay, sizeof(firstProbeDelay));
     }
 
     if (setOptStatus != -1)
     {
-        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, (const void*) &interval, sizeof(interval));
+        setOptStatus = setsockopt(sock->sock, IPPROTO_TCP, TCP_KEEPINTVL, (const void*) &interval, sizeof(interval));
     }
 
     if (setOptStatus != -1)
     {
-        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (const void*) &counter, sizeof(counter));
+        setOptStatus = setsockopt(sock->sock, IPPROTO_TCP, TCP_KEEPCNT, (const void*) &counter, sizeof(counter));
     }
 
     if (setOptStatus < 0)
@@ -86,7 +86,7 @@ SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock)
+SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(SOPC_Socket sock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const int falseInt = false;
@@ -98,11 +98,11 @@ SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock)
         return status;
     }
 
-    setOptStatus = setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (const void*) &falseInt, sizeof(int));
+    setOptStatus = setsockopt(sock->sock, SOL_SOCKET, SO_KEEPALIVE, (const void*) &falseInt, sizeof(int));
 
     if (setOptStatus != -1)
     {
-        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, (const void*) &zeroInt, sizeof(zeroInt));
+        setOptStatus = setsockopt(sock->sock, IPPROTO_TCP, TCP_USER_TIMEOUT, (const void*) &zeroInt, sizeof(zeroInt));
     }
 
     if (setOptStatus < 0)
@@ -128,18 +128,21 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(const char* hostname, const char* por
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo hints;
     memset(&hints, 0, sizeof(SOPC_Socket_AddressInfo));
-    hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6  can be use to force IPV4 or IPV6
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
+    hints.addrInfo.ai_family = AF_UNSPEC; // AF_INET or AF_INET6  can be use to force IPV4 or IPV6
+    hints.addrInfo.ai_socktype = SOCK_STREAM;
+    hints.addrInfo.ai_flags = AI_PASSIVE;
+
+    struct addrinfo* getAddrInfoRes = NULL;
 
     if ((hostname != NULL || port != NULL) && addrs != NULL)
     {
-        if (getaddrinfo(hostname, port, &hints, addrs) != 0)
+        if (getaddrinfo(hostname, port, &hints.addrInfo, &getAddrInfoRes) != 0)
         {
             status = SOPC_STATUS_NOK;
         }
         else
         {
+            *addrs = (SOPC_Socket_AddressInfo*) getAddrInfoRes;
             status = SOPC_STATUS_OK;
         }
     }
@@ -151,21 +154,21 @@ SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* 
     SOPC_Socket_AddressInfo* res = NULL;
     if (addr != NULL)
     {
-        res = addr->ai_next;
+        res = (SOPC_Socket_AddressInfo*) addr->addrInfo.ai_next;
     }
     return res;
 }
 
 uint8_t SOPC_Socket_AddrInfo_IsIPV6(const SOPC_Socket_AddressInfo* addr)
 {
-    return addr->ai_family == PF_INET6;
+    return addr->addrInfo.ai_family == PF_INET6;
 }
 
 void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs)
 {
     if (addrs != NULL)
     {
-        freeaddrinfo(*addrs);
+        freeaddrinfo(&(*addrs)->addrInfo);
         *addrs = NULL;
     }
 }
@@ -178,7 +181,7 @@ void SOPC_SocketAddress_Delete(SOPC_Socket_Address** addr)
     }
     if (NULL != *addr)
     {
-        SOPC_Free((*addr)->ai_addr);
+        SOPC_Free((*addr)->address.ai_addr);
     }
     SOPC_Free(*addr);
     *addr = NULL;
@@ -186,15 +189,16 @@ void SOPC_SocketAddress_Delete(SOPC_Socket_Address** addr)
 
 SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
 {
-    SOPC_Socket_AddressInfo* result = SOPC_Calloc(1, sizeof(*result));
+    SOPC_Socket_Address* result = SOPC_Calloc(1, sizeof(*result));
     if (NULL != result)
     {
-        result->ai_addr = SOPC_Calloc(1, addr->ai_addrlen);
-        result->ai_addrlen = addr->ai_addrlen;
-        result->ai_family = addr->ai_family;
-        if (NULL != result->ai_addr)
+        result->address.ai_addr = SOPC_Calloc(1, addr->addrInfo.ai_addrlen);
+        result->address.ai_addrlen = addr->addrInfo.ai_addrlen;
+        result->address.ai_family = addr->addrInfo.ai_family;
+        if (NULL != result->address.ai_addr)
         {
-            result->ai_addr = memcpy(result->ai_addr, addr->ai_addr, addr->ai_addrlen);
+            result->address.ai_addr =
+                memcpy(result->address.ai_addr, addr->addrInfo.ai_addr, addr->addrInfo.ai_addrlen);
         }
         else
         {
@@ -205,24 +209,24 @@ SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
     return result;
 }
 
-SOPC_Socket_AddressInfo* SOPC_Socket_GetPeerAddress(Socket sock)
+SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(SOPC_Socket sock)
 {
     if (sock == SOPC_INVALID_SOCKET)
     {
         return NULL;
     }
-    SOPC_Socket_AddressInfo* result = SOPC_Calloc(1, sizeof(*result));
+    SOPC_Socket_Address* result = SOPC_Calloc(1, sizeof(*result));
     struct sockaddr_storage* sockAddrStorage = SOPC_Calloc(1, sizeof(*sockAddrStorage));
     socklen_t sockAddrStorageLen = sizeof(*sockAddrStorage);
     int res = -1;
     if (NULL != result && NULL != sockAddrStorage)
     {
-        res = getpeername(sock, (struct sockaddr*) sockAddrStorage, &sockAddrStorageLen);
+        res = getpeername(sock->sock, (struct sockaddr*) sockAddrStorage, &sockAddrStorageLen);
         if (0 == res)
         {
-            result->ai_family = sockAddrStorage->ss_family;
-            result->ai_addrlen = sockAddrStorageLen;
-            result->ai_addr = (struct sockaddr*) sockAddrStorage;
+            result->address.ai_family = sockAddrStorage->ss_family;
+            result->address.ai_addrlen = sockAddrStorageLen;
+            result->address.ai_addr = (struct sockaddr*) sockAddrStorage;
         }
     }
     if (res != 0)
@@ -234,7 +238,7 @@ SOPC_Socket_AddressInfo* SOPC_Socket_GetPeerAddress(Socket sock)
     return result;
 }
 
-SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* addr, char** host, char** service)
+SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_Address* addr, char** host, char** service)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL == addr || (NULL == host && NULL == service))
@@ -266,7 +270,8 @@ SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* 
     }
     if (SOPC_STATUS_OK == status)
     {
-        int res = getnameinfo(addr->ai_addr, addr->ai_addrlen, hostRes, NI_MAXHOST, serviceRes, NI_MAXSERV, flags);
+        int res = getnameinfo(addr->address.ai_addr, addr->address.ai_addrlen, hostRes, NI_MAXHOST, serviceRes,
+                              NI_MAXSERV, flags);
         if (0 != res)
         {
             status = SOPC_STATUS_NOK;
@@ -291,18 +296,18 @@ SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* 
     return status;
 }
 
-void SOPC_Socket_Clear(Socket* sock)
+void SOPC_Socket_Clear(SOPC_Socket* sock)
 {
     *sock = SOPC_INVALID_SOCKET;
 }
 
-static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
+static SOPC_ReturnStatus Socket_Configure(int sock, bool setNonBlocking)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const int trueInt = true;
     int setOptStatus = -1;
 
-    if (sock != SOPC_INVALID_SOCKET)
+    if (sock != -1)
     {
         status = SOPC_STATUS_OK;
 
@@ -338,59 +343,81 @@ static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
 SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setReuseAddr,
                                         bool setNonBlocking,
-                                        Socket* sock)
+                                        SOPC_Socket* sock)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == addr || NULL == sock)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_Socket_Impl* socketImpl = SOPC_Calloc(1, sizeof(*socketImpl));
+    if (NULL == socketImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     const int trueInt = true;
     int setOptStatus = -1;
-    if (addr != NULL && sock != NULL)
+
+    socketImpl->sock = socket(addr->addrInfo.ai_family, addr->addrInfo.ai_socktype, addr->addrInfo.ai_protocol);
+
+    if (socketImpl->sock != -1)
     {
-        *sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+        status = Socket_Configure(socketImpl->sock, setNonBlocking);
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
+    }
 
-        if (*sock != SOPC_INVALID_SOCKET)
-        {
-            status = Socket_Configure(*sock, setNonBlocking);
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
+    if (SOPC_STATUS_OK == status)
+    {
+        setOptStatus = 0;
+    } // else -1 due to init
 
-        if (SOPC_STATUS_OK == status)
-        {
-            setOptStatus = 0;
-        } // else -1 due to init
+    if (setOptStatus != -1 && setReuseAddr != false)
+    {
+        setOptStatus = setsockopt(socketImpl->sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+    }
 
-        if (setOptStatus != -1 && setReuseAddr != false)
-        {
-            setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
-        }
+    // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
+    if (setOptStatus != -1 && addr->addrInfo.ai_family == AF_INET6)
+    {
+        const int falseInt = false;
+        setOptStatus = setsockopt(socketImpl->sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
+    }
 
-        // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
-        if (setOptStatus != -1 && addr->ai_family == AF_INET6)
-        {
-            const int falseInt = false;
-            setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
-        }
-
-        if (setOptStatus < 0)
-        {
-            status = SOPC_STATUS_NOK;
-        }
+    if (setOptStatus < 0)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *sock = socketImpl;
+    }
+    else
+    {
+        int res = -1;
+        S2OPC_TEMP_FAILURE_RETRY(res, close(socketImpl->sock));
+        SOPC_Free(socketImpl);
+        *sock = SOPC_INVALID_SOCKET;
     }
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
+SOPC_ReturnStatus SOPC_Socket_Listen(SOPC_Socket sock, SOPC_Socket_AddressInfo* addr)
 {
+    if (SOPC_INVALID_SOCKET == sock)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int bindListenStatus = -1;
     if (addr != NULL)
     {
-        bindListenStatus = bind(sock, addr->ai_addr, addr->ai_addrlen);
+        bindListenStatus = bind(sock->sock, addr->addrInfo.ai_addr, addr->addrInfo.ai_addrlen);
         if (bindListenStatus != -1)
         {
-            bindListenStatus = listen(sock, SOMAXCONN);
+            bindListenStatus = listen(sock->sock, SOMAXCONN);
         }
     }
     if (bindListenStatus != -1)
@@ -400,34 +427,51 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock)
+SOPC_ReturnStatus SOPC_Socket_Accept(SOPC_Socket listeningSock, bool setNonBlocking, SOPC_Socket* acceptedSock)
 {
+    if (SOPC_INVALID_SOCKET == listeningSock || NULL == acceptedSock)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_Socket_Impl* acceptedImpl = SOPC_Calloc(1, sizeof(*acceptedImpl));
+    if (NULL == acceptedImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     struct sockaddr remoteAddr;
     socklen_t addrLen = sizeof(remoteAddr);
-    if (listeningSock != -1 && acceptedSock != NULL)
+    if (listeningSock->sock != -1)
     {
-        S2OPC_TEMP_FAILURE_RETRY(*acceptedSock, accept(listeningSock, &remoteAddr, &addrLen));
+        S2OPC_TEMP_FAILURE_RETRY(acceptedImpl->sock, accept(listeningSock->sock, &remoteAddr, &addrLen));
         //        SOPC_CONSOLE_PRINTF("selectserver: new connection from %s on socket %d\n",
         //                inet_ntop(remoteaddr.sa_family,
         //                    get_in_addr((struct sockaddr*)&remoteaddr),
         //                    remoteIP, INET6_ADDRSTRLEN),
         //                acceptSock);
-        if (*acceptedSock != SOPC_INVALID_SOCKET)
+        if (acceptedImpl->sock != -1)
         {
-            status = Socket_Configure(*acceptedSock, setNonBlocking);
+            status = Socket_Configure(acceptedImpl->sock, setNonBlocking);
         }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *acceptedSock = acceptedImpl;
+    }
+    else
+    {
+        SOPC_Socket_Close(&acceptedImpl);
     }
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
+SOPC_ReturnStatus SOPC_Socket_Connect(SOPC_Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int connectStatus = -1;
-    if (addr != NULL && sock != -1)
+    if (addr != NULL && sock != SOPC_INVALID_SOCKET)
     {
-        S2OPC_TEMP_FAILURE_RETRY(connectStatus, connect(sock, addr->ai_addr, addr->ai_addrlen));
+        S2OPC_TEMP_FAILURE_RETRY(connectStatus, connect(sock->sock, addr->addrInfo.ai_addr, addr->addrInfo.ai_addrlen));
         if (connectStatus < 0)
         {
             if (errno == EINPROGRESS)
@@ -444,17 +488,17 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
+SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(SOPC_Socket from, SOPC_Socket to)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo addr;
     struct sockaddr saddr;
     memset(&addr, 0, sizeof(SOPC_Socket_AddressInfo));
     memset(&saddr, 0, sizeof(struct sockaddr));
-    addr.ai_addr = &saddr;
-    addr.ai_addrlen = sizeof(struct sockaddr);
+    addr.addrInfo.ai_addr = &saddr;
+    addr.addrInfo.ai_addrlen = sizeof(struct sockaddr);
 
-    if (0 == getsockname(to, addr.ai_addr, &addr.ai_addrlen))
+    if (0 == getsockname(to->sock, addr.addrInfo.ai_addr, &addr.addrInfo.ai_addrlen))
     {
         status = SOPC_Socket_Connect(from, &addr);
     }
@@ -462,14 +506,14 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
+SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(SOPC_Socket sock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int error = 0;
     socklen_t len = sizeof(int);
-    if (sock != -1)
+    if (sock != SOPC_INVALID_SOCKET)
     {
-        if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0 || error != 0)
+        if (getsockopt(sock->sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0 || error != 0)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -481,23 +525,42 @@ SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
     return status;
 }
 
-void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
+SOPC_SocketSet* SOPC_SocketSet_Create(void)
 {
-    if (sock != -1 && sockSet != NULL)
+    SOPC_SocketSet* res = SOPC_Calloc(1, sizeof(SOPC_SocketSet));
+    if (NULL != res)
     {
-        FD_SET(sock, &sockSet->set);
-        if (sock > sockSet->fdmax)
+        SOPC_SocketSet_Clear(res);
+    }
+    return res;
+}
+
+void SOPC_SocketSet_Delete(SOPC_SocketSet** set)
+{
+    if (NULL != set)
+    {
+        SOPC_Free(*set);
+        *set = NULL;
+    }
+}
+
+void SOPC_SocketSet_Add(SOPC_Socket sock, SOPC_SocketSet* sockSet)
+{
+    if (sock != SOPC_INVALID_SOCKET && sockSet != NULL)
+    {
+        FD_SET(sock->sock, &sockSet->set);
+        if (sock->sock > sockSet->fdmax)
         {
-            sockSet->fdmax = sock;
+            sockSet->fdmax = sock->sock;
         }
     }
 }
 
-bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
+bool SOPC_SocketSet_IsPresent(SOPC_Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (sock != -1 && sockSet != NULL)
+    if (sock != SOPC_INVALID_SOCKET && sockSet != NULL)
     {
-        if (false == FD_ISSET(sock, &sockSet->set))
+        if (false == FD_ISSET(sock->sock, &sockSet->set))
         {
             return false;
         }
@@ -554,7 +617,7 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
     return (int32_t) nbReady;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
+SOPC_ReturnStatus SOPC_Socket_Write(SOPC_Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     ssize_t res = 0;
@@ -563,7 +626,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
         status = SOPC_STATUS_NOK;
         /* Don't generate a SIGPIPE signal if the peer on a stream-
               oriented socket has closed the connection. */
-        S2OPC_TEMP_FAILURE_RETRY(res, send(sock, data, count, MSG_NOSIGNAL));
+        S2OPC_TEMP_FAILURE_RETRY(res, send(sock->sock, data, count, MSG_NOSIGNAL));
 
         if (res >= 0)
         {
@@ -589,13 +652,13 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
+SOPC_ReturnStatus SOPC_Socket_Read(SOPC_Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     ssize_t sReadCount = 0;
     if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0 && NULL != readCount)
     {
-        S2OPC_TEMP_FAILURE_RETRY(sReadCount, recv(sock, data, dataSize, 0));
+        S2OPC_TEMP_FAILURE_RETRY(sReadCount, recv(sock->sock, data, dataSize, 0));
 
         /* Extract of man recv (release 3.54 of the Linux man-pages project):
          * RETURN VALUE
@@ -640,14 +703,14 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
+SOPC_ReturnStatus SOPC_Socket_BytesToRead(SOPC_Socket sock, uint32_t* bytesToRead)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int nbBytes = 0;
     if (sock != SOPC_INVALID_SOCKET && bytesToRead != NULL)
     {
         int res = 0;
-        S2OPC_TEMP_FAILURE_RETRY(res, ioctl(sock, FIONREAD, &nbBytes));
+        S2OPC_TEMP_FAILURE_RETRY(res, ioctl(sock->sock, FIONREAD, &nbBytes));
         if (res == 0 && nbBytes >= 0)
         {
             if ((uint64_t) nbBytes < UINT32_MAX)
@@ -669,14 +732,15 @@ SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
     return status;
 }
 
-void SOPC_Socket_Close(Socket* sock)
+void SOPC_Socket_Close(SOPC_Socket* sock)
 {
     if (sock != NULL && *sock != SOPC_INVALID_SOCKET)
     {
         int res = 0;
-        S2OPC_TEMP_FAILURE_RETRY(res, close(*sock));
+        S2OPC_TEMP_FAILURE_RETRY(res, close((*sock)->sock));
         if (res != -1)
         {
+            SOPC_Free(*sock);
             *sock = SOPC_INVALID_SOCKET;
         }
     }

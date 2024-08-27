@@ -80,7 +80,7 @@ struct SOPC_PubScheduler_TransportCtx
 {
     SOPC_Socket_AddressInfo* udpAddr;
     SOPC_ETH_Socket_SendAddressInfo* ethAddr;
-    Socket sock;
+    SOPC_Socket sock;
 
     SOPC_PubScheduler_TransportCtx_Clear* pFctClear;
     SOPC_PubScheduler_TransportCtx_Send* pFctSend;
@@ -999,7 +999,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
 {
     const char* address = SOPC_PubSubConnection_Get_Address(connection);
     SOPC_PubSubProtocol_Type protocol = SOPC_PubSub_Protocol_From_URI(address);
-    Socket outSock;
+    SOPC_Socket outSock;
     SOPC_Socket_AddressInfo* outUDPaddr = NULL;
     bool allocSuccess = false;
     size_t hostnameLength = 0;

@@ -22,7 +22,7 @@
 
 #include "sopc_raw_sockets.h"
 
-typedef void SOPC_ReadyToReceive(void* sockContext, Socket sock);
+typedef void SOPC_ReadyToReceive(void* sockContext, SOPC_Socket sock);
 typedef void SOPC_Sub_Sockets_Timeout_Cb(void* ctx);
 
 typedef struct SOPC_Sub_Sockets_Timeout
@@ -53,7 +53,7 @@ typedef struct SOPC_Sub_Sockets_Timeout
  */
 void SOPC_Sub_SocketsMgr_Initialize(void* sockContextArray,
                                     size_t sizeOfSockContextElt,
-                                    Socket* socketArray,
+                                    SOPC_Socket* socketArray,
                                     uint16_t nbSockets,
                                     SOPC_ReadyToReceive* pCallback,
                                     const SOPC_Sub_Sockets_Timeout* pTimeout,

@@ -71,14 +71,14 @@
 
 // *** Socket internal functions definitions
 
-static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlocking);
+static inline SOPC_ReturnStatus P_SOCKET_Configure(SOPC_Socket sock, bool setNonBlocking);
 
 // True when the module is initialized
 static bool priv_Initialized = false;
 
 // *** Public SOCKET API functions definitions ***
 
-SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
+SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(SOPC_Socket sock,
                                                        unsigned int time,
                                                        unsigned int interval,
                                                        unsigned int counter)
@@ -90,7 +90,7 @@ SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock)
+SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(SOPC_Socket sock)
 {
     (void) sock;
     return SOPC_STATUS_NOT_SUPPORTED;
@@ -122,19 +122,22 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(const char* hostname,            // H
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo hints;
     memset(&hints, 0, sizeof(SOPC_Socket_AddressInfo));
-    hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6  can be use to force IPV4 or IPV6
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
+    hints.addrInfo.ai_family = AF_UNSPEC; // AF_INET or AF_INET6  can be use to force IPV4 or IPV6
+    hints.addrInfo.ai_socktype = SOCK_STREAM;
+    hints.addrInfo.ai_flags = AI_PASSIVE;
+
+    struct zsock_addrinfo* getAddrInfoRes = NULL;
 
     if ((NULL != hostname || NULL != port) && NULL != addrs)
     {
-        int ret = zsock_getaddrinfo(hostname, port, &hints, addrs);
+        int ret = zsock_getaddrinfo(hostname, port, &hints.addrInfo, &getAddrInfoRes);
         if (ret != 0)
         {
             status = SOPC_STATUS_NOK;
         }
         else
         {
+            *addrs = (SOPC_Socket_AddressInfo*) getAddrInfoRes;
             status = SOPC_STATUS_OK;
         }
     }
@@ -146,21 +149,21 @@ SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* 
     SOPC_Socket_AddressInfo* res = NULL;
     if (NULL != addr)
     {
-        res = addr->ai_next;
+        res = (SOPC_Socket_AddressInfo*) addr->addrInfo.ai_next;
     }
     return res;
 }
 
 uint8_t SOPC_Socket_AddrInfo_IsIPV6(const SOPC_Socket_AddressInfo* addr)
 {
-    return PF_INET6 == addr->ai_family;
+    return addr->addrInfo.ai_family == PF_INET6;
 }
 
 void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs)
 {
     if (NULL != addrs)
     {
-        zsock_freeaddrinfo(*addrs);
+        zsock_freeaddrinfo(&(*addrs)->addrInfo);
         *addrs = NULL;
     }
 }
@@ -173,7 +176,7 @@ void SOPC_SocketAddress_Delete(SOPC_Socket_Address** addr)
     }
     if (NULL != *addr)
     {
-        SOPC_Free((*addr)->ai_addr);
+        SOPC_Free((*addr)->address.ai_addr);
     }
     SOPC_Free(*addr);
     *addr = NULL;
@@ -181,15 +184,16 @@ void SOPC_SocketAddress_Delete(SOPC_Socket_Address** addr)
 
 SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
 {
-    SOPC_Socket_AddressInfo* result = SOPC_Calloc(1, sizeof(*result));
+    SOPC_Socket_Address* result = SOPC_Calloc(1, sizeof(*result));
     if (NULL != result)
     {
-        result->ai_addr = SOPC_Calloc(1, addr->ai_addrlen);
-        result->ai_addrlen = addr->ai_addrlen;
-        result->ai_family = addr->ai_family;
-        if (NULL != result->ai_addr)
+        result->address.ai_addr = SOPC_Calloc(1, addr->addrInfo.ai_addrlen);
+        result->address.ai_addrlen = addr->addrInfo.ai_addrlen;
+        result->address.ai_family = addr->addrInfo.ai_family;
+        if (NULL != result->address.ai_addr)
         {
-            result->ai_addr = memcpy(result->ai_addr, addr->ai_addr, addr->ai_addrlen);
+            result->address.ai_addr =
+                memcpy(result->address.ai_addr, addr->addrInfo.ai_addr, addr->addrInfo.ai_addrlen);
         }
         else
         {
@@ -200,24 +204,24 @@ SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
     return result;
 }
 
-SOPC_Socket_AddressInfo* SOPC_Socket_GetPeerAddress(Socket sock)
+SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(SOPC_Socket sock)
 {
     if (sock == SOPC_INVALID_SOCKET)
     {
         return NULL;
     }
-    SOPC_Socket_AddressInfo* result = SOPC_Calloc(1, sizeof(*result));
+    SOPC_Socket_Address* result = SOPC_Calloc(1, sizeof(*result));
     struct sockaddr_storage* sockAddrStorage = SOPC_Calloc(1, sizeof(*sockAddrStorage));
     socklen_t sockAddrStorageLen = sizeof(*sockAddrStorage);
     int res = -1;
     if (NULL != result && NULL != sockAddrStorage)
     {
-        res = getpeername(sock, (struct sockaddr*) sockAddrStorage, &sockAddrStorageLen);
+        res = getpeername(sock->sock, (struct sockaddr*) sockAddrStorage, &sockAddrStorageLen);
         if (0 == res)
         {
-            result->ai_family = sockAddrStorage->ss_family;
-            result->ai_addrlen = sockAddrStorageLen;
-            result->ai_addr = (struct sockaddr*) sockAddrStorage;
+            result->address.ai_family = sockAddrStorage->ss_family;
+            result->address.ai_addrlen = sockAddrStorageLen;
+            result->address.ai_addr = (struct sockaddr*) sockAddrStorage;
         }
     }
     if (res != 0)
@@ -229,7 +233,7 @@ SOPC_Socket_AddressInfo* SOPC_Socket_GetPeerAddress(Socket sock)
     return result;
 }
 
-SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* addr, char** host, char** service)
+SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_Address* addr, char** host, char** service)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL == addr || (NULL == host && NULL == service))
@@ -261,7 +265,8 @@ SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* 
     }
     if (SOPC_STATUS_OK == status)
     {
-        int res = getnameinfo(addr->ai_addr, addr->ai_addrlen, hostRes, NI_MAXHOST, serviceRes, NI_MAXSERV, flags);
+        int res = getnameinfo(addr->address.ai_addr, addr->address.ai_addrlen, hostRes, NI_MAXHOST, serviceRes,
+                              NI_MAXSERV, flags);
         if (0 != res)
         {
             status = SOPC_STATUS_NOK;
@@ -286,9 +291,12 @@ SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* 
     return status;
 }
 
-void SOPC_Socket_Clear(Socket* sock)
+void SOPC_Socket_Clear(SOPC_Socket* sock)
 {
-    *sock = SOPC_INVALID_SOCKET;
+    if (NULL != sock)
+    {
+        *sock = SOPC_INVALID_SOCKET;
+    }
 }
 
 static inline SOPC_ReturnStatus P_SOCKET_SetNonBlocking(int sock)
@@ -306,7 +314,7 @@ static inline SOPC_ReturnStatus P_SOCKET_SetNonBlocking(int sock)
     }
 }
 
-static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlocking)
+static inline SOPC_ReturnStatus P_SOCKET_Configure(SOPC_Socket sock, bool setNonBlocking)
 {
     if (SOPC_INVALID_SOCKET == sock)
     {
@@ -317,13 +325,13 @@ static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlock
     const int trueInt = true;
 
     // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
-    int setOptStatus = zsock_setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const void*) &trueInt, sizeof(int));
+    int setOptStatus = zsock_setsockopt(sock->sock, IPPROTO_TCP, TCP_NODELAY, (const void*) &trueInt, sizeof(int));
     if (0 == setOptStatus)
     {
         status = SOPC_STATUS_OK;
         if (setNonBlocking != false)
         {
-            status = P_SOCKET_SetNonBlocking(sock);
+            status = P_SOCKET_SetNonBlocking(sock->sock);
         }
     }
 
@@ -333,29 +341,35 @@ static inline SOPC_ReturnStatus P_SOCKET_Configure(Socket sock, bool setNonBlock
 SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setReuseAddr,
                                         bool setNonBlocking,
-                                        Socket* sock)
+                                        SOPC_Socket* sock)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int setOptStatus = 0;
-
     if (NULL == addr || NULL == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    SOPC_Socket_Impl* socketImpl = SOPC_Calloc(1, sizeof(*socketImpl));
+    if (NULL == socketImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    int setOptStatus = -1;
 
-    *sock = zsock_socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-    if (SOPC_INVALID_SOCKET == *sock)
+    socketImpl->sock = zsock_socket(addr->addrInfo.ai_family, addr->addrInfo.ai_socktype, addr->addrInfo.ai_protocol);
+
+    if (ZSOCK_ERROR == socketImpl->sock)
     {
         return SOPC_STATUS_NOK;
     }
-    SOCKETS_DEBUG(" ** SOPC_Socket_CreateNew %d\n", *sock);
+    SOCKETS_DEBUG(" ** SOPC_Socket_CreateNew %d\n", socketImpl->sock);
 
-    status = P_SOCKET_Configure(*sock, setNonBlocking);
+    status = P_SOCKET_Configure(socketImpl, setNonBlocking);
 
     if (SOPC_STATUS_OK == status && setReuseAddr != false)
     {
         const int trueInt = true;
-        setOptStatus = zsock_setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+        setOptStatus =
+            zsock_setsockopt(socketImpl->sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
         if (0 != setOptStatus)
         {
             status = SOPC_STATUS_NOK;
@@ -363,35 +377,46 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
     }
 
     // From IPV6 sockets, allow IPV4 and IPV6 exchanges
-    if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
+    if (SOPC_STATUS_OK == status && AF_INET6 == addr->addrInfo.ai_family)
     {
         const int falseInt = false;
-        setOptStatus = zsock_setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
+        setOptStatus =
+            zsock_setsockopt(socketImpl->sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
         if (0 != setOptStatus)
         {
             status = SOPC_STATUS_NOK;
         }
     }
 
-    if (status != SOPC_STATUS_OK)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Socket_Close(sock);
+        *sock = socketImpl;
     }
-
+    else
+    {
+        int res = -1;
+        S2OPC_TEMP_FAILURE_RETRY(res, close(socketImpl->sock));
+        SOPC_Free(socketImpl);
+        *sock = SOPC_INVALID_SOCKET;
+    }
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
+SOPC_ReturnStatus SOPC_Socket_Listen(SOPC_Socket sock, SOPC_Socket_AddressInfo* addr)
 {
+    if (SOPC_INVALID_SOCKET == sock)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int bindListenStatus = ZSOCK_ERROR;
     if (NULL != addr)
     {
-        bindListenStatus = zsock_bind(sock, addr->ai_addr, addr->ai_addrlen);
+        bindListenStatus = zsock_bind(sock->sock, addr->addrInfo.ai_addr, addr->addrInfo.ai_addrlen);
         if (ZSOCK_ERROR != bindListenStatus)
         {
-            bindListenStatus = zsock_listen(sock, MAX_PENDING_CONNECTION);
-            SOCKETS_DEBUG(" ** SOPC_Socket_Listen %d => status = %d\n", sock, bindListenStatus);
+            bindListenStatus = zsock_listen(sock->sock, MAX_PENDING_CONNECTION);
+            SOCKETS_DEBUG(" ** SOPC_Socket_Listen %d => status = %d\n", sock->sock, bindListenStatus);
         }
     }
     if (ZSOCK_ERROR != bindListenStatus)
@@ -401,44 +426,57 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock)
+SOPC_ReturnStatus SOPC_Socket_Accept(SOPC_Socket listeningSock, bool setNonBlocking, SOPC_Socket* acceptedSock)
 {
+    if (SOPC_INVALID_SOCKET == listeningSock || NULL == acceptedSock)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_Socket_Impl* acceptedImpl = SOPC_Calloc(1, sizeof(*acceptedImpl));
+    if (NULL == acceptedImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     struct sockaddr remoteAddr;
     socklen_t addrLen = 0;
-    if (SOPC_INVALID_SOCKET != listeningSock && NULL != acceptedSock)
+    if (listeningSock->sock != -1)
     {
-        S2OPC_TEMP_FAILURE_RETRY(*acceptedSock, zsock_accept(listeningSock, &remoteAddr, &addrLen));
+        S2OPC_TEMP_FAILURE_RETRY(acceptedImpl->sock, zsock_accept(listeningSock->sock, &remoteAddr, &addrLen));
 
-        if (SOPC_INVALID_SOCKET != *acceptedSock)
+        if (acceptedImpl->sock != -1)
         {
-            SOCKETS_DEBUG(" ** SOPC_Socket_Accept %d => %d, blocking = %d\n", listeningSock, *acceptedSock,
+            SOCKETS_DEBUG(" ** SOPC_Socket_Accept %d => %d, blocking = %d\n", listeningSock->sock, acceptedImpl->sock,
                           !setNonBlocking);
-            status = P_SOCKET_Configure(*acceptedSock, setNonBlocking);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Socket_Close(acceptedSock);
-            }
+            status = P_SOCKET_Configure(acceptedImpl, setNonBlocking);
         }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *acceptedSock = acceptedImpl;
+    }
+    else
+    {
+        SOPC_Socket_Close(&acceptedImpl);
     }
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
+SOPC_ReturnStatus SOPC_Socket_Connect(SOPC_Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int connectStatus = -1;
-    if (addr != NULL && sock != -1)
+    if (addr != NULL && sock != SOPC_INVALID_SOCKET)
     {
-        S2OPC_TEMP_FAILURE_RETRY(connectStatus, zsock_connect(sock, addr->ai_addr, addr->ai_addrlen));
-
+        S2OPC_TEMP_FAILURE_RETRY(connectStatus,
+                                 zsock_connect(sock->sock, addr->addrInfo.ai_addr, addr->addrInfo.ai_addrlen));
         if (connectStatus < 0)
         {
             if (errno == EINPROGRESS)
             {
                 // Non blocking connection started
                 connectStatus = 0;
-                SOCKETS_DEBUG(" ** SOPC_Socket_Connect %d in progress\n", sock);
+                SOCKETS_DEBUG(" ** SOPC_Socket_Connect %d in progress\n", sock->sock);
             }
         }
         if (connectStatus == 0)
@@ -449,16 +487,16 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
+SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(SOPC_Socket from, SOPC_Socket to)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo addr;
     struct sockaddr saddr;
     memset(&addr, 0, sizeof(SOPC_Socket_AddressInfo));
     memset(&saddr, 0, sizeof(struct sockaddr));
-    addr.ai_addr = &saddr;
-    addr.ai_addrlen = sizeof(struct sockaddr);
-    int ret = zsock_getsockname(to, addr.ai_addr, &addr.ai_addrlen);
+    addr.addrInfo.ai_addr = &saddr;
+    addr.addrInfo.ai_addrlen = sizeof(struct sockaddr);
+    int ret = zsock_getsockname(to->sock, addr.addrInfo.ai_addr, &addr.addrInfo.ai_addrlen);
     if (0 == ret)
     {
         status = SOPC_Socket_Connect(from, &addr);
@@ -467,7 +505,7 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
+SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(SOPC_Socket sock)
 {
     if (SOPC_INVALID_SOCKET == sock)
     {
@@ -479,7 +517,7 @@ SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
     //    int error = 0;
     //    socklen_t len = sizeof(int);
     //    int ret = zsock_getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len);
-    //    SOCKETS_DEBUG(" ** SOPC_Socket_CheckAckConnect %d => ret= %d, error=%d\n", sock, ret, error);
+    //    SOCKETS_DEBUG(" ** SOPC_Socket_CheckAckConnect %d => ret= %d, error=%d\n", sock->, ret, error);
     //
     //    if (ret < 0)
     //    {
@@ -494,31 +532,50 @@ SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
     return SOPC_STATUS_OK;
 }
 
-void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
+SOPC_SocketSet* SOPC_SocketSet_Create(void)
+{
+    SOPC_SocketSet* res = SOPC_Calloc(1, sizeof(SOPC_SocketSet));
+    if (NULL != res)
+    {
+        SOPC_SocketSet_Clear(res);
+    }
+    return res;
+}
+
+void SOPC_SocketSet_Delete(SOPC_SocketSet** set)
+{
+    if (NULL != set)
+    {
+        SOPC_Free(*set);
+        *set = NULL;
+    }
+}
+
+void SOPC_SocketSet_Add(SOPC_Socket sock, SOPC_SocketSet* sockSet)
 {
     if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
-        ZSOCK_FD_SET(sock, &sockSet->set);
-        if (sock > sockSet->fdmax)
+        ZSOCK_FD_SET(sock->sock, &sockSet->set);
+        if (sock->sock > sockSet->fdmax)
         {
-            sockSet->fdmax = sock;
+            sockSet->fdmax = sock->sock;
         }
     }
 }
 
-void SOPC_SocketSet_Remove(Socket sock, SOPC_SocketSet* sockSet)
+void SOPC_SocketSet_Remove(SOPC_Socket sock, SOPC_SocketSet* sockSet)
 {
     if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
-        ZSOCK_FD_CLR(sock, &sockSet->set);
+        ZSOCK_FD_CLR(sock->sock, &sockSet->set);
     }
 }
 
-bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
+bool SOPC_SocketSet_IsPresent(SOPC_Socket sock, SOPC_SocketSet* sockSet)
 {
     if (SOPC_INVALID_SOCKET != sock && NULL != sockSet)
     {
-        if (false == ZSOCK_FD_ISSET(sock, &sockSet->set))
+        if (false == ZSOCK_FD_ISSET(sock->sock, &sockSet->set))
         {
             return false;
         }
@@ -594,7 +651,7 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
     return (int32_t) nbReady;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
+SOPC_ReturnStatus SOPC_Socket_Write(SOPC_Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
     if (SOPC_INVALID_SOCKET == sock || NULL == data || count > INT32_MAX || NULL == sentBytes)
     {
@@ -603,9 +660,9 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
 
     ssize_t res = 0;
     errno = 0;
-    S2OPC_TEMP_FAILURE_RETRY(res, send(sock, data, count, 0));
+    S2OPC_TEMP_FAILURE_RETRY(res, send(sock->sock, data, count, 0));
 
-    SOCKETS_DEBUG(" ** send Sock %d \n", sock);
+    SOCKETS_DEBUG(" ** send Sock %d \n", sock->sock);
     SOPC_ReturnStatus result = SOPC_STATUS_NOK;
 
     if (res >= 0)
@@ -620,12 +677,12 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
     if (result != SOPC_STATUS_OK)
     {
         const int err = errno;
-        printk("[Error] Send FAILED on Sock %d. Err=%d(%s)\n", sock, err, strerror(err));
+        printk("[Error] Send FAILED on Sock %d. Err=%d(%s)\n", sock->sock, err, strerror(err));
     }
     return result;
 }
 
-SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
+SOPC_ReturnStatus SOPC_Socket_Read(SOPC_Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
     if (SOPC_INVALID_SOCKET == sock || NULL == data || 0 >= dataSize || NULL == readCount)
     {
@@ -635,7 +692,7 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     SOPC_ReturnStatus result = SOPC_STATUS_NOK;
     errno = 0;
     ssize_t sReadCount = 0;
-    S2OPC_TEMP_FAILURE_RETRY(sReadCount, zsock_recv(sock, data, dataSize, 0));
+    S2OPC_TEMP_FAILURE_RETRY(sReadCount, zsock_recv(sock->sock, data, dataSize, 0));
 
     const int errId = errno;
 
@@ -649,24 +706,24 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
         *readCount = 0;
         if (EWOULDBLOCK == errId)
         {
-            SOCKETS_DEBUG(" ** ReAD Sock SOPC_STATUS_WOULD_BLOCK\n");
+            SOCKETS_DEBUG(" ** Read Sock SOPC_STATUS_WOULD_BLOCK\n");
             result = SOPC_STATUS_WOULD_BLOCK;
         }
         else if (0 == sReadCount)
         {
-            SOCKETS_DEBUG(" ** Read Sock %d CLOSED\n", sock);
+            SOCKETS_DEBUG(" ** Read Sock %d CLOSED\n", sock->sock);
             result = SOPC_STATUS_CLOSED;
         }
         else
         {
             const int err = errno;
-            printk("[Error] Read FAILED on Sock %d. Err= %d(%s)\n", sock, err, strerror(err));
+            printk("[Error] Read FAILED on Sock %d. Err= %d(%s)\n", sock->sock, err, strerror(err));
         }
     }
     return result;
 }
 
-SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
+SOPC_ReturnStatus SOPC_Socket_BytesToRead(SOPC_Socket sock, uint32_t* bytesToRead)
 {
     SOPC_UNUSED_ARG(sock);
     SOPC_UNUSED_ARG(bytesToRead);
@@ -674,19 +731,20 @@ SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
     return SOPC_STATUS_NOK;
 }
 
-void SOPC_Socket_Close(Socket* sock)
+void SOPC_Socket_Close(SOPC_Socket* sock)
 {
     if (NULL != sock && SOPC_INVALID_SOCKET != *sock)
     {
-        SOCKETS_DEBUG(" ** zsock_shutdown Sock %d \n", *sock);
-        zsock_shutdown(*sock, ZSOCK_SHUT_RDWR);
+        SOCKETS_DEBUG(" ** zsock_shutdown Sock %d \n", (*sock)->sock);
+        zsock_shutdown((*sock)->sock, ZSOCK_SHUT_RDWR);
         int res = 0;
-        S2OPC_TEMP_FAILURE_RETRY(res, zsock_close(*sock));
+        S2OPC_TEMP_FAILURE_RETRY(res, zsock_close((*sock)->sock));
         if (0 != res)
         {
             // Failed to close socket. This is unrecoverable
             SOPC_ASSERT(false);
         }
+        SOPC_Free(*sock);
         *sock = SOPC_INVALID_SOCKET;
     }
 }

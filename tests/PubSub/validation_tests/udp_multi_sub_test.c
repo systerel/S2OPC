@@ -34,7 +34,7 @@
 #define NB_ADDRS 100
 
 SOPC_Socket_AddressInfo* addressArr[NB_ADDRS];
-Socket socketArr[NB_ADDRS];
+SOPC_Socket socketArr[NB_ADDRS];
 uint16_t sockIdxArr[NB_ADDRS];
 
 static SOPC_Buffer* buffer = NULL;
@@ -70,7 +70,7 @@ static void uninit_mcast_addrs(void)
     }
 }
 
-static void readyToReceive(void* sockContext, Socket sock)
+static void readyToReceive(void* sockContext, SOPC_Socket sock)
 {
     uint16_t* pSockIdx = sockContext;
     if (SOPC_Atomic_Int_Get(&stop))

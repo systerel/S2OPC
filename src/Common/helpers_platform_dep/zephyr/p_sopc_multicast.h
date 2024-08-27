@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include "sopc_enums.h"
+#include "sopc_raw_sockets.h"
 
 #include "p_sopc_sockets.h"
 
@@ -35,7 +36,7 @@
  * @param multicast The Multicast IPV4 address
  * @return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(Socket sock, const SOPC_Socket_AddressInfo* multicast);
+SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(SOPC_Socket sock, const SOPC_Socket_AddressInfo* multicast);
 
 /**
  * @brief
@@ -44,6 +45,6 @@ SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(Socket sock, const SOPC_Socket_A
  * @param multicast The Multicast IPV4 address, or NULL if unknown
  * @return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(Socket sock, const SOPC_Socket_AddressInfo* multicast);
+SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(SOPC_Socket sock, const SOPC_Socket_AddressInfo* multicast);
 
 #endif /* P_MCAST_H_ */

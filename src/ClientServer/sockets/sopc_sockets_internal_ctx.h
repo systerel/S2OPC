@@ -46,7 +46,7 @@ typedef struct SOPC_InternalSocket
     uint32_t connectionId; /* High-level associated connection id
                              (secure channel connection index when state = CONNECTING/CONNECTED only
                               OR endpoint description configuration index when state = LISTENING only) */
-    Socket sock;
+    SOPC_Socket sock;
     SOPC_AsyncQueue* writeQueue;
     bool isNotWritable; // Indicates when a write attempt blocked, the flag is set until a write event occurs on socket
     bool isUsed;        /* Indicates if the socket is free (false) or used (true) */

@@ -178,7 +178,7 @@ int main(void)
     signal(SIGTERM, Test_StopSignal);
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    Socket sock = SOPC_INVALID_SOCKET;
+    SOPC_Socket sock = SOPC_INVALID_SOCKET;
     SOPC_Socket_AddressInfo* multicastAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
     SOPC_Helper_Endianness_Check();
 

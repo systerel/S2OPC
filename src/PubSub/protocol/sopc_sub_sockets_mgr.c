@@ -38,7 +38,7 @@ static struct
     SOPC_Thread thread;
     void* sockContextArray;
     size_t sizeOfSockContextElt;
-    Socket* socketArray;
+    SOPC_Socket* socketArray;
     uint16_t nbSockets;
     SOPC_ReadyToReceive* pCallback;
     void* callbackCtx;
@@ -63,6 +63,10 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Starting SOPC_Sub_SocketsMgr_ThreadLoop with %d sockets",
                           receptionThread.nbSockets);
 
+    SOPC_SocketSet* readSet = SOPC_SocketSet_Create();
+    SOPC_SocketSet* writeSet = SOPC_SocketSet_Create();
+    SOPC_SocketSet* exceptSet = SOPC_SocketSet_Create();
+
     while (SOPC_Atomic_Int_Get(&receptionThread.stopFlag) == false)
     {
         bool isTimeout = false;
@@ -78,18 +82,17 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
         if (receptionThread.nbSockets > 0)
         {
             int32_t nbReady = 0;
-            SOPC_SocketSet readSet, writeSet, exceptSet;
-            SOPC_SocketSet_Clear(&readSet);
-            SOPC_SocketSet_Clear(&writeSet);
-            SOPC_SocketSet_Clear(&exceptSet);
+            SOPC_SocketSet_Clear(readSet);
+            SOPC_SocketSet_Clear(writeSet);
+            SOPC_SocketSet_Clear(exceptSet);
 
             for (uint16_t i = 0; i < receptionThread.nbSockets; i++)
             {
-                SOPC_SocketSet_Add(receptionThread.socketArray[i], &readSet);
+                SOPC_SocketSet_Add(receptionThread.socketArray[i], readSet);
             }
 
             // Returns number of ready descriptor or -1 in case of error
-            nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, receptionThread.timeout.period_ms);
+            nbReady = SOPC_Socket_WaitSocketEvents(readSet, writeSet, exceptSet, receptionThread.timeout.period_ms);
 
             if (nbReady < 0)
             {
@@ -113,7 +116,7 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
 
                 for (uint16_t i = 0; i < receptionThread.nbSockets; i++)
                 {
-                    if (SOPC_SocketSet_IsPresent(receptionThread.socketArray[i], &readSet) != false)
+                    if (SOPC_SocketSet_IsPresent(receptionThread.socketArray[i], readSet) != false)
                     {
                         if (receptionThread.pCallback != NULL)
                         {
@@ -141,12 +144,17 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
             (*receptionThread.timeout.callback)(receptionThread.timeout.pContext);
         }
     }
+
+    SOPC_SocketSet_Delete(&readSet);
+    SOPC_SocketSet_Delete(&writeSet);
+    SOPC_SocketSet_Delete(&exceptSet);
+
     return NULL;
 }
 
 static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void* sockContextArray,
                                                 size_t sizeOfSockContextElt,
-                                                Socket* socketArray,
+                                                SOPC_Socket* socketArray,
                                                 uint16_t nbSockets,
                                                 SOPC_ReadyToReceive* pCallback,
                                                 const SOPC_Sub_Sockets_Timeout* pTimeout,
@@ -218,7 +226,7 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
 
 void SOPC_Sub_SocketsMgr_Initialize(void* sockContextArray,
                                     size_t sizeOfSockContextElt,
-                                    Socket* socketArray,
+                                    SOPC_Socket* socketArray,
                                     uint16_t nbSockets,
                                     SOPC_ReadyToReceive* pCallback,
                                     const SOPC_Sub_Sockets_Timeout* pTimeout,

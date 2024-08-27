@@ -41,10 +41,10 @@ static struct
     int32_t initDone;
     int32_t stopFlag;
     SOPC_Thread thread;
-    Socket sigServerListeningSock;  /* A local server used to connect a local client for signaling interruption */
-    Socket sigClientSock;           /* A local client used to send signal interrupting "select" blocking call */
-    Socket sigServerConnectionSock; /* Accepted local client connection used to receive signal interrupting "select"
-                                       blocking call*/
+    SOPC_Socket sigServerListeningSock;  /* A local server used to connect a local client for signaling interruption */
+    SOPC_Socket sigClientSock;           /* A local client used to send signal interrupting "select" blocking call */
+    SOPC_Socket sigServerConnectionSock; /* Accepted local client connection used to receive signal interrupting
+                                       "select" blocking call*/
 } receptionThread = {.initDone = false,
                      .stopFlag = 0,
                      .sigServerListeningSock = SOPC_INVALID_SOCKET,
@@ -62,11 +62,6 @@ static bool SOPC_Internal_InitSocketsToInterruptSelect(void)
 
     SOPC_Socket_AddressInfo* addrs = NULL;
     SOPC_Socket_AddressInfo* iter = NULL;
-
-    SOPC_SocketSet readSet, writeSet, exceptSet;
-    SOPC_SocketSet_Clear(&readSet);
-    SOPC_SocketSet_Clear(&writeSet);
-    SOPC_SocketSet_Clear(&exceptSet);
 
     /* Retrieve addressing information for local loopback address */
     status = SOPC_Socket_AddrInfo_Get("127.0.0.1", NULL, &addrs);
@@ -118,7 +113,7 @@ static bool SOPC_Internal_InitSocketsToInterruptSelect(void)
     return SOPC_STATUS_OK == status;
 }
 
-static bool SOPC_Internal_ConsumeSigBytes(Socket sigSocket, SOPC_SocketSet* readSet)
+static bool SOPC_Internal_ConsumeSigBytes(SOPC_Socket sigSocket, SOPC_SocketSet* readSet)
 {
     uint32_t readSigBytes;
 
@@ -134,21 +129,23 @@ static bool SOPC_Internal_ConsumeSigBytes(Socket sigSocket, SOPC_SocketSet* read
 }
 
 // Treat sockets events if some are present or wait for events (until timeout)
-static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
+static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_Socket sigSocket,
+                                                           SOPC_SocketSet* readSet,
+                                                           SOPC_SocketSet* writeSet,
+                                                           SOPC_SocketSet* exceptSet)
 {
     bool result = true;
     uint32_t idx = 0;
     int32_t nbReady = 0;
     SOPC_InternalSocket* uaSock = NULL;
-    SOPC_SocketSet readSet, writeSet, exceptSet;
+    SOPC_SocketSet_Clear(readSet);
+    SOPC_SocketSet_Clear(writeSet);
+    SOPC_SocketSet_Clear(exceptSet);
+
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    SOPC_SocketSet_Clear(&readSet);
-    SOPC_SocketSet_Clear(&writeSet);
-    SOPC_SocketSet_Clear(&exceptSet);
-
     // Add the signal socket to interrupt "select" (WaitSocketsEvents)
-    SOPC_SocketSet_Add(sigSocket, &readSet);
+    SOPC_SocketSet_Add(sigSocket, readSet);
 
     // Add used sockets in the correct socket sets
     for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
@@ -165,18 +162,18 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
             {
                 // Wait for an event indicating connection succeeded/failed in CONNECTING state
                 // or Wait for an event indicating connection is writable again in CONNECTED state
-                SOPC_SocketSet_Add(uaSock->sock, &writeSet);
+                SOPC_SocketSet_Add(uaSock->sock, writeSet);
             }
             else
             {
-                SOPC_SocketSet_Add(uaSock->sock, &readSet);
+                SOPC_SocketSet_Add(uaSock->sock, readSet);
             }
-            SOPC_SocketSet_Add(uaSock->sock, &exceptSet);
+            SOPC_SocketSet_Add(uaSock->sock, exceptSet);
         }
     }
 
     // Returns number of ready descriptor or -1 in case of error
-    nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, 0);
+    nbReady = SOPC_Socket_WaitSocketEvents(readSet, writeSet, exceptSet, 0);
 
     if (nbReady < 0)
     {
@@ -186,7 +183,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
     else if (nbReady > 0)
     {
         /* Consumes bytes sent to signal input event and set result to false in case of close signal */
-        result = SOPC_Internal_ConsumeSigBytes(sigSocket, &readSet);
+        result = SOPC_Internal_ConsumeSigBytes(sigSocket, readSet);
 
         /* Treat the input events available from upper layer level */
         status = SOPC_STATUS_OK;
@@ -205,7 +202,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
                 {
                     /* Socket is currently in connecting attempt: check WRITE events */
 
-                    if (SOPC_SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
+                    if (SOPC_SocketSet_IsPresent(uaSock->sock, writeSet) != false)
                     {
                         // Check connection errors: mandatory when non blocking connection
                         status = SOPC_Socket_CheckAckConnect(uaSock->sock);
@@ -223,7 +220,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
                 {
                     /* Socket is not in connecting state: check READ and WRITE events */
 
-                    if (SOPC_SocketSet_IsPresent(uaSock->sock, &readSet) != false)
+                    if (SOPC_SocketSet_IsPresent(uaSock->sock, readSet) != false)
                     {
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
@@ -241,7 +238,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
                             SOPC_SocketsInternalEventMgr_Dispatcher(INT_SOCKET_CLOSE, uaSock);
                         }
                     }
-                    else if (SOPC_SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
+                    else if (SOPC_SocketSet_IsPresent(uaSock->sock, writeSet) != false)
                     {
                         if (uaSock->state == SOCKET_STATE_CONNECTED)
                         {
@@ -258,7 +255,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
                 }
 
                 // In any state check EXCEPT events
-                if (SOPC_SocketSet_IsPresent(uaSock->sock, &exceptSet) != false)
+                if (SOPC_SocketSet_IsPresent(uaSock->sock, exceptSet) != false)
                 {
                     // TODO: retrieve exception code
                     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -276,11 +273,20 @@ static void* SOPC_SocketsNetworkEventMgr_ThreadLoop(void* nullData)
 {
     SOPC_UNUSED_ARG(nullData);
     bool result = true;
+    SOPC_SocketSet* readSet = SOPC_SocketSet_Create();
+    SOPC_SocketSet* writeSet = SOPC_SocketSet_Create();
+    SOPC_SocketSet* exceptSet = SOPC_SocketSet_Create();
+    SOPC_ASSERT(NULL != readSet && NULL != writeSet && NULL != exceptSet);
+
     while (result)
     {
-        result = SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(receptionThread.sigServerConnectionSock);
+        result = SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(receptionThread.sigServerConnectionSock, readSet,
+                                                                writeSet, exceptSet);
     }
     SOPC_ASSERT(SOPC_Atomic_Int_Get(&receptionThread.stopFlag) != 0);
+    SOPC_SocketSet_Delete(&readSet);
+    SOPC_SocketSet_Delete(&writeSet);
+    SOPC_SocketSet_Delete(&exceptSet);
     return NULL;
 }
 

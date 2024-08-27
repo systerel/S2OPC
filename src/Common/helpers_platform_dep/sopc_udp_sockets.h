@@ -67,7 +67,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
                                                   const char* interfaceName,
                                                   bool setReuseAddr,
                                                   bool setNonBlocking,
-                                                  Socket* sock);
+                                                  SOPC_Socket* sock);
 
 /**
  *  \brief Create a new UDP socket and bind it
@@ -83,7 +83,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress,
                                                const char* interfaceName,
                                                bool setNonBlocking,
-                                               Socket* sock);
+                                               SOPC_Socket* sock);
 
 /**
  *  \brief Send data through the UDP socket to given IP address and port
@@ -96,7 +96,9 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddr
  *  \return        SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_WOULD_BLOCK if partially sent, SOPC_STATUS_NOK
  * otherwise otherwise.
  */
-SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer);
+SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(SOPC_Socket sock,
+                                         const SOPC_Socket_AddressInfo* destAddr,
+                                         SOPC_Buffer* buffer);
 
 /**
  *  \brief Receive data on the UDP socket from given IP address and port
@@ -107,7 +109,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
  *  \return        SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_OUT_OF_MEMORY if possible partial reception,
  * SOPC_STATUS_NOK
  */
-SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer);
+SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(SOPC_Socket sock, SOPC_Buffer* buffer);
 
 /**
  *  \brief Set the Multicast TTL configuration value (default value is 1)
@@ -125,7 +127,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer);
  *
  *  \return        SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise
  */
-SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scope);
+SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(SOPC_Socket sock, uint8_t TTL_scope);
 
 /**
  *  \brief Close the socket connection and/or clear the socket
@@ -134,6 +136,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scop
  *
  *  \param sock     The socket to disconnect and/or clear
  */
-void SOPC_UDP_Socket_Close(Socket* sock);
+void SOPC_UDP_Socket_Close(SOPC_Socket* sock);
 
 #endif /* SOPC_UDP_SOCKETS_H_ */

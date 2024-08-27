@@ -31,27 +31,39 @@
 
 #include "sopc_enums.h"
 
-#define SOPC_INVALID_SOCKET (-1)
+/**
+ *  \brief Socket base type
+ */
+struct SOPC_Socket_Impl
+{
+    int sock;
+};
 
-/* Socket definition */
-
-typedef int Socket;
-
-/* Addr info redefinition */
-
-typedef struct zsock_addrinfo SOPC_Socket_AddressInfo;
+/**
+ *  \brief Socket addressing information for listening or connecting operation type
+ *  \note Internal treatment use the fact it is the first field as property
+ */
+struct SOPC_Socket_AddressInfo
+{
+    struct zsock_addrinfo addrInfo;
+};
 
 /**
  *  \brief Socket address information on a connected socket
+ *  \note Internal treatment use the fact it is the first field as property
  */
-typedef struct zsock_addrinfo SOPC_Socket_Address;
+struct SOPC_Socket_Address
+{
+    struct zsock_addrinfo address;
+};
 
-/* Socket set definition*/
-
-typedef struct
+/**
+ *  \brief Set of sockets type
+ */
+struct SOPC_SocketSet
 {
     int32_t fdmax;    /**< max of the set */
     zsock_fd_set set; /**< set */
-} SOPC_SocketSet;
+};
 
 #endif /* SOPC_ZEPHYR_P_SOCKETS_HEADER_ */

@@ -32,8 +32,7 @@
 
 #include <stdbool.h>
 
-// Platform dependent types
-#include "p_sopc_sockets.h"
+#include "sopc_raw_sockets.h"
 
 #include "sopc_buffer.h"
 #include "sopc_enums.h"
@@ -113,7 +112,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateReceiveAddressInfo(const char* interface
  */
 SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
                                                   bool setNonBlocking,
-                                                  Socket* sock);
+                                                  SOPC_Socket* sock);
 
 /**
  *  \brief Create a new ETH socket using \p sendAddrInfo properties.
@@ -127,7 +126,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
  */
 SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* sendAddrInfo,
                                                bool setNonBlocking,
-                                               Socket* sock);
+                                               SOPC_Socket* sock);
 
 /**
  *  \brief Send data through the ETH socket to given IP address and port
@@ -142,7 +141,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* 
  *                 SOPC_STATUS_WOULD_BLOCK if not all bytes were sent,
  *                 SOPC_STATUS_NOK otherwise otherwise.
  */
-SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
+SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(SOPC_Socket sock,
                                          const SOPC_ETH_Socket_SendAddressInfo* sendAddrInfo,
                                          uint16_t etherType,
                                          SOPC_Buffer* buffer);
@@ -168,7 +167,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
  *                            SOPC_STATUS_OUT_OF_MEMORY in case buffer size might have been insufficient,
  *                            SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
+SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(SOPC_Socket sock,
                                               const SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,
                                               bool checkEtherType,
                                               uint16_t etherType,
@@ -179,6 +178,6 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
  *
  *  \param sock     The socket to disconnect and/or clear
  */
-void SOPC_ETH_Socket_Close(Socket* sock);
+void SOPC_ETH_Socket_Close(SOPC_Socket* sock);
 
 #endif /* SOPC_ETH_SOCKETS_H_ */

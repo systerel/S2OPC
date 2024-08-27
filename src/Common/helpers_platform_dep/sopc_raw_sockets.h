@@ -30,15 +30,31 @@
 #include <stdint.h>
 #include "sopc_enums.h"
 
-// Platform dependent types
 /**
- * The platform-specific implementation of "p_sockets.h" shall provide the actual definition of:
- * - \ref Socket type (e.g. int for LINUX)
- * - \ref SOPC_Socket_AddressInfo for Network Address definition structure (e.g. struct addrinfo for LINUX)
- * - \ref SOPC_Socket_Address for Socket Address definition structure (e.g. struct addrinfo for LINUX)
- * - \ref SOPC_SocketSet type for socket sets (e.g. fd_set for LINUX)
- */
-#include "p_sopc_sockets.h"
+ * \brief Provides a socket implementation
+ * \note Each platform must provide the implementation of \ref SOPC_SocketImpl and all related functions
+ * in \ref sopc_raw_sockets.h */
+typedef struct SOPC_Socket_Impl SOPC_Socket_Impl;
+typedef SOPC_Socket_Impl* SOPC_Socket;
+#define SOPC_INVALID_SOCKET NULL
+
+/**
+ * \brief Provides a socket address info implementation
+ * \note Each platform must provide the implementation of \ref SOPC_Socket_AddressInfo and all related functions
+ * in \ref sopc_raw_sockets.h */
+typedef struct SOPC_Socket_AddressInfo SOPC_Socket_AddressInfo;
+
+/**
+ * \brief Provides a socket address implementation
+ * \note Each platform must provide the implementation of \ref SOPC_Socket_Address and all related functions
+ * in \ref sopc_raw_sockets.h */
+typedef struct SOPC_Socket_Address SOPC_Socket_Address;
+
+/**
+ * \brief Provides a socket set implementation
+ * \note Each platform must provide the implementation of \ref SOPC_SocketSet and all related functions
+ * in \ref sopc_raw_sockets.h */
+typedef struct SOPC_SocketSet SOPC_SocketSet;
 
 /**
  *  \brief Activate the keep alive mechanism. According to RFC1122, this mechanism shall be used with care:
@@ -55,7 +71,7 @@
  *                     SOPC_INVALID_PARAMETERS if parameters are not valid
  *                     SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
+SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(SOPC_Socket sock,
                                                        unsigned int firstProbeDelay,
                                                        unsigned int interval,
                                                        unsigned int counter);
@@ -69,7 +85,7 @@ SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
  *                     SOPC_INVALID_PARAMETERS if parameters are not valid
  *                     SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock);
+SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(SOPC_Socket sock);
 
 /**
  *  \brief Initialize the network communication allowing to use sockets
@@ -132,7 +148,7 @@ void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs);
  *  \return        The newly allocated peer socket address or NULL in case of error.
  *                 Caller is responsible to free the result using ::SOPC_SocketAddress_Delete.
  */
-SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(Socket sock);
+SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(SOPC_Socket sock);
 
 /**
  * \brief Copy the socket address from a socket address information
@@ -171,7 +187,7 @@ void SOPC_SocketAddress_Delete(SOPC_Socket_Address** addr);
  *
  *  \param[out] sock  Value pointed is set to invalid socket value
  */
-void SOPC_Socket_Clear(Socket* sock);
+void SOPC_Socket_Clear(SOPC_Socket* sock);
 
 /**
  *  \brief Create a new socket using the addressing information provided
@@ -188,7 +204,7 @@ void SOPC_Socket_Clear(Socket* sock);
 SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setReuseAddr,
                                         bool setNonBlocking,
-                                        Socket* sock);
+                                        SOPC_Socket* sock);
 
 /**
  *  \brief Configure the socket to listen connections using the given addressing information
@@ -200,7 +216,7 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
  *                 SOPC_INVALID_PARAMETERS if parameters are not valid
  *                 SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr);
+SOPC_ReturnStatus SOPC_Socket_Listen(SOPC_Socket sock, SOPC_Socket_AddressInfo* addr);
 
 /**
  *  \brief Operation to accept a connection on a listening socket
@@ -214,7 +230,7 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
  *                 SOPC_INVALID_PARAMETERS if parameters are not valid
  *                 SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock);
+SOPC_ReturnStatus SOPC_Socket_Accept(SOPC_Socket listeningSock, bool setNonBlocking, SOPC_Socket* acceptedSock);
 
 /**
  *  \brief Operation to establish a connection using the given socket and addressing information
@@ -228,7 +244,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
  *                 SOPC_INVALID_PARAMETERS if parameters are not valid
  *                 SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr);
+SOPC_ReturnStatus SOPC_Socket_Connect(SOPC_Socket sock, SOPC_Socket_AddressInfo* addr);
 
 /**
  * \brief Operation to establish a connection using the given socket to the given local socket.
@@ -242,7 +258,7 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
  *                 SOPC_INVALID_PARAMETERS if parameters are not valid
  *                 SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to);
+SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(SOPC_Socket from, SOPC_Socket to);
 
 /**
  *  \brief Operation to check connection establishment result on a connecting socket
@@ -256,7 +272,20 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to);
  *                 SOPC_INVALID_PARAMETERS if parameters are not valid
  *                 SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock);
+SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(SOPC_Socket sock);
+
+/**
+ *  \brief Create a socket set
+ *
+ *  \return A socket set or NULL in case of failure.
+ */
+SOPC_SocketSet* SOPC_SocketSet_Create(void);
+
+/**
+ *  \brief Delete the pointed socket set and set the pointer to NULL
+ *
+ */
+void SOPC_SocketSet_Delete(SOPC_SocketSet** set);
 
 /**
  *  \brief Add a socket to the given socket set
@@ -264,7 +293,7 @@ SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock);
  *  \param sock       The socket to add to the set (not NULL)
  *  \param sockSet    The socket set to use for the operation (not NULL)
  */
-void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet);
+void SOPC_SocketSet_Add(SOPC_Socket sock, SOPC_SocketSet* sockSet);
 
 /**
  *  \brief Returns if a socket is present in the given socket set
@@ -274,7 +303,7 @@ void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet);
  *
  *  \return           true (!= false) if present, false otherwise
  */
-bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet);
+bool SOPC_SocketSet_IsPresent(SOPC_Socket sock, SOPC_SocketSet* sockSet);
 /**
  *  \brief Clear a socket set
  *
@@ -314,7 +343,7 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
  *                   SOPC_STATUS_WOULD_BLOCK if socket write operation would block,
  *                   SOPC_STATUS_NOK if it failed
  */
-SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes);
+SOPC_ReturnStatus SOPC_Socket_Write(SOPC_Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes);
 
 /**
  *  \brief Read data through the socket
@@ -330,7 +359,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
  *                  SOPC_STATUS_CLOSED in case of disconnection and
  *                  SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount);
+SOPC_ReturnStatus SOPC_Socket_Read(SOPC_Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount);
 
 /**
  *  \brief Retrieve number of bytes available to read on the socket
@@ -342,13 +371,13 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
  *  \return             SOPC_STATUS_OK if operation succeeded,
  *                      SOPC_STATUS_INVALID_PARAMETERS if parameters are not valid, SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead);
+SOPC_ReturnStatus SOPC_Socket_BytesToRead(SOPC_Socket sock, uint32_t* bytesToRead);
 
 /**
  *  \brief Close the socket connection and/or clear the socket
  *
  *  \param sock     The socket to disconnect and/or clear
  */
-void SOPC_Socket_Close(Socket* sock);
+void SOPC_Socket_Close(SOPC_Socket* sock);
 
 #endif /* SOPC_RAW_SOCKETS_H_ */

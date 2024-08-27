@@ -26,26 +26,39 @@
 #define MAX_SEND_ATTEMPTS 20
 #define SLEEP_NEXT_SEND_ATTEMP 50 // milliseconds
 
-#define SOPC_INVALID_SOCKET INVALID_SOCKET
-
 /**
  *  \brief Socket base type
  */
-typedef SOCKET Socket;
+struct SOPC_Socket_Impl
+{
+    SOCKET sock;
+};
 
 /**
  *  \brief Socket addressing information for listening or connecting operation type
+ *  \note Internal treatment use the fact it is the first field as property
  */
-typedef struct addrinfo SOPC_Socket_AddressInfo;
+struct SOPC_Socket_AddressInfo
+{
+    struct addrinfo addrInfo;
+};
 
 /**
  *  \brief Socket address information on a connected socket
+ *  \note Internal treatment use the fact it is the first field as property
+ *
  */
-typedef struct addrinfo SOPC_Socket_Address;
+struct SOPC_Socket_Address
+{
+    struct addrinfo address;
+};
 
 /**
  *  \brief Set of sockets type
  */
-typedef fd_set SOPC_SocketSet;
+struct SOPC_SocketSet
+{
+    fd_set set; /**< set */
+};
 
 #endif /* SOPC_P_SOCKETS_H_ */

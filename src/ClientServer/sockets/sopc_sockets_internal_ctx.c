@@ -106,7 +106,6 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
     {
         sock = &socketsArray[socketIdx];
         SOPC_Socket_Close(&sock->sock);
-        SOPC_Socket_Clear(&sock->sock);
 
         if (sock->connectAddrs != NULL)
         {

@@ -23,30 +23,40 @@
 #include <netdb.h>
 #include <sys/select.h>
 
-#define SOPC_INVALID_SOCKET -1
-
 /**
  *  \brief Socket base type
  */
-typedef int Socket;
+struct SOPC_Socket_Impl
+{
+    int sock;
+};
 
 /**
  *  \brief Socket addressing information for listening or connecting operation type
+ *  \note Internal treatment use the fact it is the first field as property
  */
-typedef struct addrinfo SOPC_Socket_AddressInfo;
+struct SOPC_Socket_AddressInfo
+{
+    struct addrinfo addrInfo;
+};
 
 /**
  *  \brief Socket address information on a connected socket
+ *  \note Internal treatment use the fact it is the first field as property
+ *
  */
-typedef struct addrinfo SOPC_Socket_Address;
+struct SOPC_Socket_Address
+{
+    struct addrinfo address;
+};
 
 /**
  *  \brief Set of sockets type
  */
-typedef struct
+struct SOPC_SocketSet
 {
     int fdmax;  /**< max of the set */
     fd_set set; /**< set */
-} SOPC_SocketSet;
+};
 
 #endif /* SOPC_P_SOCKETS_H_ */
