@@ -87,7 +87,6 @@ set(S2OPC_COMMON_PUBLIC_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/configuration"
     "${CMAKE_CURRENT_SOURCE_DIR}/helpers"
     "${CMAKE_CURRENT_SOURCE_DIR}/helpers_platform_dep"
-    "${CMAKE_CURRENT_SOURCE_DIR}/helpers_platform_dep/${PLATFORM_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/opcua_types"
     "${CMAKE_CURRENT_SOURCE_DIR}/crypto"
     "${CMAKE_CURRENT_SOURCE_DIR}/crypto/lib_itf"
