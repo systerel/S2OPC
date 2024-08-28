@@ -339,7 +339,7 @@ static bool end_connection(struct parse_context_t* ctx)
 static bool SOPC_end_app_certs(struct parse_context_t* ctx)
 {
     // Prepare struct to store the certificates paths
-    ctx->clientConfigPtr->configFromPaths = SOPC_Calloc(sizeof(*ctx->clientConfigPtr->configFromPaths), 1);
+    ctx->clientConfigPtr->configFromPaths = SOPC_Calloc(1, sizeof(*ctx->clientConfigPtr->configFromPaths));
     if (NULL == ctx->clientConfigPtr->configFromPaths)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
@@ -491,7 +491,7 @@ static bool start_user_cert(struct parse_context_t* ctx, const XML_Char** attrs)
     }
 
     SOPC_Session_UserX509* userX509 = &ctx->currentSecConnConfig->sessionConfig.userToken.userX509;
-    userX509->configFromPaths = SOPC_Calloc(sizeof(*userX509->configFromPaths), 1);
+    userX509->configFromPaths = SOPC_Calloc(1, sizeof(*userX509->configFromPaths));
     if (NULL == userX509->configFromPaths)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;

@@ -521,7 +521,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
     SOPC_ASSERT(secConnConfig != NULL);
     SOPC_ASSERT(outClientConnection != NULL);
 
-    SOPC_ClientConnection* res = SOPC_Calloc(sizeof(*res), 1);
+    SOPC_ClientConnection* res = SOPC_Calloc(1, sizeof(*res));
     SOPC_StaMac_Machine* stateMachine = NULL;
 
     if (NULL == res)
