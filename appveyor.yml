@@ -97,7 +97,7 @@ test_script:
         set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
         set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp38-cp38-win_amd64.whl
         pip --version
-        pip install --upgrade wheel cffi setuptools  build
+        pip install --upgrade wheel cffi setuptools==73.0.1  build
         cd %ROOT_DIR%\build
         rm CMakeCache.txt
         cmake -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
@@ -107,7 +107,7 @@ test_script:
         set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
         set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp37-cp37m-win_amd64.whl
         pip --version
-        pip install --upgrade wheel cffi setuptools  build
+        pip install --upgrade wheel cffi setuptools build
         cd %ROOT_DIR%\build
         rm CMakeCache.txt
         cmake -DWITH_PYS2OPC=%WITH_PYS2OPC% -DPYS2OPC_WHEEL_NAME=%PYS2OPC_WHEEL_NAME% -DS2OPC_CLIENTSERVER_ONLY=%S2OPC_CLIENTSERVER_ONLY% -DMBEDTLS_INCLUDE_DIR=%MBEDTLS_BUILD_DIR%/../include -DMBEDTLS_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedtls.lib -DMBEDX509_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedx509.lib -DMBEDCRYPTO_LIBRARY=%MBEDTLS_BUILD_DIR%/library/%CONFIG%/mbedcrypto.lib -DCMAKE_PREFIX_PATH=%LIBS_DIRS% -DPYTHON_EXECUTABLE=%PYTHON%\python.exe .. -G %VS_VERSION%
