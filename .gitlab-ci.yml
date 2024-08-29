@@ -359,8 +359,8 @@ build-linux64-coverity:
 build-zephyr:
   <<: *zephyr_job
   stage: build-others
+  image: registry.gitlab.com/systerel/s2opc/zephyr_build@sha256:47d17149f0b1c613cc408101440654403b0fe0bbd394fe0ee48da48b9d093fde # digest of zephyr_build :v3.2.0-b
   needs: []
-  image: registry.gitlab.com/systerel/s2opc/zephyr_build:v3.2.0-b@sha256:47d17149f0b1c613cc408101440654403b0fe0bbd394fe0ee48da48b9d093fde # digest of zephyr_build :v3.2.0-b
   script:
     - 'ln -s $(pwd) /zephyrproject/s2opc'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client'
@@ -378,7 +378,7 @@ build-zephyr:
 
 build-freertos:
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1
+  image: registry.gitlab.com/systerel/s2opc/freertos_build@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1
   needs: []
   script:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh'

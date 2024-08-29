@@ -264,7 +264,7 @@ build-rpi:
 
 build-zephyr:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/zephyr_build:v3.2.0-b@sha256:47d17149f0b1c613cc408101440654403b0fe0bbd394fe0ee48da48b9d093fde # digest of zephyr_build :v3.2.0-b
+  image: docker.aix.systerel.fr/c838/zephyr_build@sha256:47d17149f0b1c613cc408101440654403b0fe0bbd394fe0ee48da48b9d093fde # digest of zephyr_build :v3.2.0-b
   script:
     - 'ln -s $(pwd) /zephyrproject/s2opc'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client'
@@ -282,7 +282,7 @@ build-zephyr:
 
 build-freertos:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1
+  image: docker.aix.systerel.fr/c838/freertos_build@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1
   script:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh'
     - 'test -f build_freertos/freertos-sopc.elf'
@@ -304,7 +304,7 @@ build-freertos:
 build-pikeos:
   <<: *pikeos_job
   stage: build-others
-  image: docker.aix.systerel.fr/c838/pikeos:1.1@sha256:52814500eeabfcb6596097a218634dce5dbbe19cc416cdeed473ac0fcd59fafb # pikeos:1.1
+  image: docker.aix.systerel.fr/c838/pikeos@sha256:52814500eeabfcb6596097a218634dce5dbbe19cc416cdeed473ac0fcd59fafb # pikeos:1.1
   script:
     - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh'
   artifacts:
