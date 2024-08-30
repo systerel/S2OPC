@@ -22,15 +22,17 @@ set -o nounset
 set -o pipefail
 if [[ "${TRACE-0}" == "1" ]]; then set -o xtrace; fi # debugging by running the script with the flag TRACE=1
 
-FILE_OUTPUT_SERVER=/tmp/toolkit_stderr.txt # File that contains the standard error of the OPCUA server
-FILE_BROWSE_REQUESTS=tests/ClientServer/scripts/browse_packets.txt # File that contains the browse requests responsible for the memory leaks when there is
+FILE_OUTPUT_SERVER="/tmp/toolkit_stderr.txt" # File that contains the standard error of the OPCUA server
+FILE_BROWSE_REQUESTS="tests/ClientServer/scripts/browse_packets.txt" # File that contains the browse requests responsible for the memory leaks when there is
                                              # no specific packet responsible for the leak but multiple.
-WORKING_DIRECTORY=$(pwd) # Path to the root directory of the project
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)" # Path to the directory of the script
+S2OPC_DIR="$(cd ../../../.. && pwd)" # Path to the root directory of the project
 
 # Building the OPCUA server for fuzzing. Takes one argument (TRUE or FALSE). If it set to TRUE then the server accepts
 # unencrypted connections.
 building_server () {
-    cd $WORKING_DIRECTORY
+    cd $S2OPC_DIR
 
     echo -e "\n\n************************************************"
     if [[ $1 == "TRUE" ]]; then
@@ -85,7 +87,7 @@ building_server () {
 
 # Running the server, redirecting its standard error to FILE_OUTPUT_SERVER
 launching_server () {
-    cd $WORKING_DIRECTORY
+    cd $S2OPC_DIR
     cd build/bin
     touch "$FILE_OUTPUT_SERVER"
 
@@ -107,10 +109,10 @@ launching_server () {
 # 4: Ticket 1450 https://gitlab.com/systerel/S2OPC/-/issues/1450
 # 5: Ticket 1449 https://gitlab.com/systerel/S2OPC/-/issues/1449
 run_bug () {
-    cd $WORKING_DIRECTORY
+    cd $SCRIPT_DIR
 
     echo -e "\nTRYING BUG $1\n"
-    python3 tests/ClientServer/scripts/ci_fuzz_ml.py $1
+    python3 faulty_packet_tester.py $1
     echo -e "\nBUG $1 FINISHED\n"
 }
 
@@ -128,7 +130,7 @@ killing_server () {
 
 # Checking potential memory leaks
 checking_memory_leak () {
-    cd $WORKING_DIRECTORY
+    cd $S2OPC_DIR
 
     echo -e "CHECKING FOR MEMORY LEAKS\n"
     if [[ "$(cat $FILE_OUTPUT_SERVER | grep ERROR | wc -l)" == "1" ]]; then

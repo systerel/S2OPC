@@ -1,3 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# Licensed to Systerel under one or more contributor license
+# agreements. See the NOTICE file distributed with this work
+# for additional information regarding copyright ownership.
+# Systerel licenses this file to you under the Apache
+# License, Version 2.0 (the "License"); you may not use this
+# file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
 import socket
 import signal
 import sys
@@ -13,9 +33,6 @@ URL = "opc.tcp://" + HOST + ":" + str(PORT)
 
 # Timeout after which a connection should be closed, useful when no response is given by the server for a browse request
 TIMEOUT = 1
-
-# Path to the file containing the potential memory leaks of the OPCUA server
-PATH_FILE_MEMORY_LEAKS = "/tmp/toolkit_stderr.txt"
 
 # Messages to setup the OPCUA connection and to close the connection
 HELLO_MSG = b"\x48\x45\x4c\x46\x3b\x00\x00\x00\x00\x00\x00\x00\xff\xff\x00\x00\xff\xff\x00\x00\xfb\xff\x04\x00\x05\x00\x00\x00\x1b\x00\x00\x00\x6f\x70\x63\x2e\x74\x63\x70\x3a\x2f\x2f\x31\x39\x32\x2e\x31\x36\x38\x2e\x31\x30\x2e\x31\x3a\x34\x38\x34\x31"
@@ -46,7 +63,7 @@ FILE_BROWSE_REQUESTS = "tests/ClientServer/scripts/browse_packets.txt" # File wh
 
 
 
-def return_security_tokens(packet):
+def get_security_tokens(packet):
     """
     Inputs: "packet", a sequence of bytes, should be the answer of the OpenSecureChannel request
     
@@ -64,7 +81,7 @@ def return_security_tokens(packet):
 
 def creating_msg_createsession(ChannelID, TokenID):
     """
-    Inputs: "ChannelID" and "TokenID", two sequences of 4 bytes each, should be the output of the "return_security_tokens" function
+    Inputs: "ChannelID" and "TokenID", two sequences of 4 bytes each, should be the output of the "get_security_tokens" function
 
     Modify the CreateSession message in order to introduce the ChannelId and TokenID.
 
@@ -78,7 +95,7 @@ def creating_msg_createsession(ChannelID, TokenID):
 
 
 
-def return_identifier_numeric(packet):
+def get_identifier_numeric(packet):
     """
     Inputs: "packet", a sequence of bytes, should be the answer of the CreateSession request
 
@@ -93,8 +110,8 @@ def return_identifier_numeric(packet):
 
 def creating_msg_activatesession(ChannelID, TokenID, IdentifierNumeric):
     """
-    Inputs: "ChannelId" and "TokenID" from the return of "return_security_tokens" function. "IdentifierNumeric" from the return
-    of "return_identifier_numeric".
+    Inputs: "ChannelId" and "TokenID" from the return of "get_security_tokens" function. "IdentifierNumeric" from the return
+    of "get_identifier_numeric".
 
     Modify the ActivateSession message in order to introduce the "ChannelID", "TokenID" and "IdentifierNumeric".
 
@@ -111,8 +128,8 @@ def creating_msg_activatesession(ChannelID, TokenID, IdentifierNumeric):
 
 def replay_msg_browse(browse_msg=None, ChannelID=None, TokenID=None, IdentifierNumeric=None):
     """
-    Inputs: "browse_msg" bytes, the browse request to replay. "ChannelId" and "TokenID" from the return of "return_security_tokens" function. "IdentifierNumeric" from the return
-    of "return_identifier_numeric" function.
+    Inputs: "browse_msg" bytes, the browse request to replay. "ChannelId" and "TokenID" from the return of "get_security_tokens" function. "IdentifierNumeric" from the return
+    of "get_identifier_numeric" function.
 
     Modify the "browse_msg" message in order to introduce the "ChannelID", "TokenID" and "IdentifierNumeric" if possible. 
 
@@ -199,8 +216,8 @@ def random_msg_browse():
 
 def creating_msg_closesession(ChannelID, TokenID, IdentifierNumeric):
     """
-    Inputs: "ChannelId" and "TokenID" from the return of "return_security_tokens" function. "IdentifierNumeric" from the return
-    of "return_identifier_numeric"
+    Inputs: "ChannelId" and "TokenID" from the return of "get_security_tokens" function. "IdentifierNumeric" from the return
+    of "get_identifier_numeric"
 
     Modify the CloseSession message in order to introduce the ChannelID, TokenID and IdentifierNumeric
 
@@ -217,7 +234,7 @@ def creating_msg_closesession(ChannelID, TokenID, IdentifierNumeric):
 
 def creating_msg_closechannel(ChannelID, TokenID):
     """
-    Inputs: "ChannelId" and "TokenID" from the return of "return_security_tokens" function.
+    Inputs: "ChannelId" and "TokenID" from the return of "get_security_tokens" function.
 
     Modify the CloseSecureChannel message in order to introduce the ChannelID and TokenID
 
@@ -256,14 +273,14 @@ def send_request(browse_msg, status, bug_number):
             # OpenSecureChannel request and answer
             s.sendall(OPEN_SECURE_CHANNEL_MSG)
             open_secure_answer = s.recv(1024)
-            ChannelID, TokenID = return_security_tokens(open_secure_answer)
+            ChannelID, TokenID = get_security_tokens(open_secure_answer)
 
             # CreateSession request and answer
             s.sendall(creating_msg_createsession(ChannelID, TokenID))
             session_answer = s.recv(4096) # The answer is more or less 3000 bytes
 
             # ActivateSession
-            IdentifierNumeric = return_identifier_numeric(session_answer)
+            IdentifierNumeric = get_identifier_numeric(session_answer)
             s.sendall(creating_msg_activatesession(ChannelID, TokenID, IdentifierNumeric))
             activate_answer = s.recv(1024)
 
@@ -327,7 +344,7 @@ def send_request(browse_msg, status, bug_number):
 
 def bug4():
     """
-    Sending NUMBER_THREADS random browse requests and recording it inside FILE_BROWSE_REQUESTS.
+    Sending NUMBER_THREADS random browse requests and recording them inside FILE_BROWSE_REQUESTS.
     Bug corresponding to Ticket 1450: https://gitlab.com/systerel/S2OPC/-/issues/1450
     """
     seed(SEED)
@@ -358,7 +375,6 @@ def bug4():
 
 
 
-
 # Handler to interrupt a function after a SIGALARM
 def timeout_handler(num, stack):
     raise TimeoutError
@@ -369,49 +385,40 @@ def timeout_handler(num, stack):
 # MAIN
 ###############################################################################
 
-# Specifying the system to use SIGALARM to stop a function
-signal.signal(signal.SIGALRM, timeout_handler)
+if __name__ == '__main__':
 
-# Status of the request
-status = [0] 
+    # Specifying the system to use SIGALARM to stop a function
+    signal.signal(signal.SIGALRM, timeout_handler)
 
-try:
-    bug_number = int(sys.argv[1])
-    if bug_number == 1:
-        print("TRYING PACKET: ", BROWSE_MSG_BUG1)
-    elif bug_number == 2:
-        print("TRYING PACKET: ", BROWSE_MSG_BUG2)
-    elif bug_number == 3:
-        print("TRYING PACKET: ", BROWSE_MSG_BUG3)
-    elif bug_number == 4:
-        print("TRYING MULTIPLE PACKETS")
-    else:
-        print("TRYING PACKET: ", BROWSE_MSG_BUG5)
+    # Status of the request
+    status = [0] 
 
+    try:
+        bug_number = int(sys.argv[1])
+        if bug_number == 1:
+            print("TRYING PACKET: ", BROWSE_MSG_BUG1)
+            send_request(BROWSE_MSG_BUG1, status, bug_number)
+        elif bug_number == 2:
+            print("TRYING PACKET: ", BROWSE_MSG_BUG2)
+            send_request(BROWSE_MSG_BUG2, status, bug_number)
+            if status[0] == 2:
+                print("\n\nInvalid response from the server, see https://gitlab.com/systerel/S2OPC/-/issues/1442")
+                sys.exit(2)
+        elif bug_number == 3:
+            print("TRYING PACKET: ", BROWSE_MSG_BUG3)
+            send_request(BROWSE_MSG_BUG3, status, bug_number)
+            if status[0] == 3:
+                print("\n\nInvalid response from the server, see https://gitlab.com/systerel/S2OPC/-/issues/1444")
+                sys.exit(3)
+        elif bug_number == 4:
+            print("TRYING MULTIPLE PACKETS")
+            bug4()
+        else:
+            print("TRYING PACKET: ", BROWSE_MSG_BUG5)
+            send_request(BROWSE_MSG_BUG5, status, bug_number) 
 
-    if bug_number == 1:
-        send_request(BROWSE_MSG_BUG1, status, bug_number)
-
-    elif bug_number == 2:
-        send_request(BROWSE_MSG_BUG2, status, bug_number)
-        if status[0] == 2:
-            print("\n\nInvalid response from the server, see https://gitlab.com/systerel/S2OPC/-/issues/1442")
-            sys.exit(2)
-
-    elif bug_number == 3:
-        send_request(BROWSE_MSG_BUG3, status, bug_number)
-        if status[0] == 3:
-            print("\n\nInvalid response from the server, see https://gitlab.com/systerel/S2OPC/-/issues/1444")
-            sys.exit(3)
-
-    elif bug_number == 4:
-        bug4()
-
-    else:
-        send_request(BROWSE_MSG_BUG5, status, bug_number)    
-
-except Exception as e:
-    print(e)
-    sys.exit(1)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
     
 
