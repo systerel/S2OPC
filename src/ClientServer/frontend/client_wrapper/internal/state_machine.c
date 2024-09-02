@@ -2004,14 +2004,6 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
             }
         }
     }
-    else if (pSM->pCbkNotification != NULL)
-    {
-        if (SOPC_IsGoodStatus(pPubResp->ResponseHeader.ServiceResult))
-        {
-            pPubResp->ResponseHeader.ServiceResult = OpcUa_BadNothingToDo;
-        }
-        pSM->pCbkNotification(pSM->subscriptionAppCtx, pPubResp->ResponseHeader.ServiceResult, NULL, 0, NULL, NULL);
-    }
     /* TODO: verify the results[] which contains a status for each Ack */
 
     if (OpcUa_BadTooManyPublishRequests == pPubResp->ResponseHeader.ServiceResult)
