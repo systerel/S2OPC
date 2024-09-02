@@ -172,6 +172,7 @@ build-linux64-ASan:
     WITH_ASAN: 1
     WITH_UBSAN: 1
     BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
+  needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
@@ -183,6 +184,7 @@ build-linux64-pys2opc:
   <<: *build_linux
   variables:
     <<: [*build_linux_variables,*all-tests_build_variables] # add pys2opc
+  needs: []
   rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
     - if: "$ALL_TESTS != null || $WITH_COVERAGE == null && $NO_ASAN != null" # if ASAN is deactivated build PyS2OPC by default (except for coverage)
       when: on_success
@@ -192,6 +194,7 @@ build-linux64-static-conf:
   <<: *build_linux
   variables:
     <<: [*build_linux_variables,*all-builds_build_variables] # add static conf
+  needs: []
   rules: # single case rule of ALL_BUILDS
     - if: "$ALL_BUILDS != null"
       when: on_success
@@ -200,6 +203,7 @@ build-linux64-NoASan-NoPyS2OPC:
   <<: *build_linux
   variables:
     <<: [*build_linux_variables,*nominal_build_variables]
+  needs: []
   rules: # In case of coverage analysis or when nano scope is used (TODO: PyS2OPC shall be built but tests will fail: use another server with subscription in tests)
     - if: "$WITH_COVERAGE != null"
       when: on_success
@@ -207,6 +211,7 @@ build-linux64-NoASan-NoPyS2OPC:
 build-win64: &build_win64
   stage: build-others
   image: docker.aix.systerel.fr/c838/mingw_build@sha256:5cbfd3181a228b9510b402cea6ac83175ac482d348dd2673f6a4c7aeac40f773 # digest of mingw_build:1.14
+  needs: []
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
     - 'export WITH_PYS2OPC=OFF'
@@ -243,6 +248,7 @@ build-win32:
 build-rpi:
   stage: build-others
   image: docker.aix.systerel.fr/c838/rpi-build@sha256:fb91901a09c44038d1ec03f71b2412d4b2ebeb3683030cebc191b6bbf3637b4a # digest of rpi-build:1.6
+  needs: []
   script:
     - *build_command_line
   variables:
@@ -262,6 +268,7 @@ build-rpi:
 build-zephyr:
   stage: build-others
   image: docker.aix.systerel.fr/c838/zephyr_build@sha256:47d17149f0b1c613cc408101440654403b0fe0bbd394fe0ee48da48b9d093fde # digest of zephyr_build :v3.2.0-b
+  needs: []
   script:
     - 'ln -s $(pwd) /zephyrproject/s2opc'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client'
@@ -280,6 +287,7 @@ build-zephyr:
 build-freertos:
   stage: build-others
   image: docker.aix.systerel.fr/c838/freertos_build@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1
+  needs: []
   script:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh'
     - 'test -f build_freertos/freertos-sopc.elf'
@@ -302,6 +310,7 @@ build-pikeos:
   <<: *pikeos_job
   stage: build-others
   image: docker.aix.systerel.fr/c838/pikeos@sha256:52814500eeabfcb6596097a218634dce5dbbe19cc416cdeed473ac0fcd59fafb # pikeos:1.1
+  needs: []
   script:
     - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh'
   artifacts:
@@ -317,6 +326,7 @@ build-pikeos:
 build-fuzz:
   stage: build
   image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #3.0 digest
+  needs: []
   variables:
     TEST_PASSWORD_PRIVATE_KEY : password
   script:
@@ -343,6 +353,7 @@ build-fuzz:
 test-build-from-export:
   <<: *build_linux
   stage: test
+  needs: [build-linux64-ASan]
   script:
     - 'mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
     - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
@@ -380,6 +391,7 @@ test-build-from-export:
 test-check:
   <<: *test_linux
   image: docker.aix.systerel.fr/c838/check@sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8 # digest of check:1.20
+  needs: []
   script:
     - ./.check-code.sh
     # Check generated types are up to date
@@ -438,6 +450,7 @@ test-check:
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-unit-all-tests:
   <<: *test_unit
+  needs: [build-linux64-pys2opc]
   variables:
     TEST_PASSWORD_PRIVATE_KEY : password
     TEST_PASSWORD_USER : password
@@ -502,6 +515,7 @@ test-uactt:
 generate_sbom:
   stage: test
   image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
+  needs: []
   script:
     - python3 -m pip install conan==1.62.0
     - apt install sqlite3 -y
@@ -560,6 +574,7 @@ scan_repository:
 test-zephyr:
   stage: test-others
   image: docker.aix.systerel.fr/c838/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
+  needs : [build-zephyr]
   script:
     - "./samples/embedded/platform_dep/zephyr/ci/test-embedded.sh"
   dependencies:
@@ -574,6 +589,7 @@ test-pikeos:
   <<: *pikeos_job
   stage: test-others
   image: docker.aix.systerel.fr/c838/pikeos:1.1@sha256:52814500eeabfcb6596097a218634dce5dbbe19cc416cdeed473ac0fcd59fafb # pikeos:1.1
+  needs : [build-pikeos]
   script:
     - samples/embedded/platform_dep/pikeos/ci/test-embedded-docker.sh
   dependencies:
