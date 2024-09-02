@@ -590,6 +590,12 @@ test-pikeos:
     - samples/embedded/platform_dep/pikeos/ci/test-embedded-docker.sh
   variables:
     <<: *nominal_test_variables
+  artifacts:
+    name: 'test-pikeos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    paths:
+      - build_pikeos/
+    expire_in: '1 week'
+    when: on_failure
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: on_success
