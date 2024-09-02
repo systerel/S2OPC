@@ -36,11 +36,11 @@ bool SOPC_AddressSpaceUtil_IsHasSubtype(const OpcUa_ReferenceNode* ref, bool isR
 
 SOPC_ExpandedNodeId* SOPC_AddressSpaceUtil_GetTypeDefinition(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* node);
 
-// Static resolution from NodeId using known types + restriction if S2OPC_DYNAMIC_TYPE_RESOLUTION not set
+// Static resolution from NodeId using known types + dynamic using Node references if not found
 const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentType(SOPC_AddressSpace* addSpace,
                                                              const SOPC_NodeId* childNodeId);
 
-// Dynamic resolution from Node using references (not restricted by S2OPC_DYNAMIC_TYPE_RESOLUTION)
+// Dynamic resolution from Node using references
 const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentTypeOfNode(SOPC_AddressSpace* addSpace,
                                                                    SOPC_AddressSpace_Node* child);
 

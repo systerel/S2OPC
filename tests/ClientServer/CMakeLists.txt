@@ -565,7 +565,7 @@ add_test(NAME "validation::client_server_test"
   $<TARGET_FILE:toolkit_test_client>)
 set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
 
-if(S2OPC_EVENT_MANAGEMENT AND S2OPC_DYNAMIC_TYPE_RESOLUTION)
+if(S2OPC_EVENT_MANAGEMENT)
   add_test(NAME "validation::client_server_events_test"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND

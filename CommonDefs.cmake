@@ -253,7 +253,6 @@ option(WITH_PYS2OPC "Also builds PyS2OPC" OFF)
 option(S2OPC_NANO_PROFILE "Use Nano profile only (limited scope of OPC UA services)" OFF)
 option(S2OPC_NODE_MANAGEMENT "Make NodeManagement service set available to clients" OFF)
 option(S2OPC_EVENT_MANAGEMENT "Make OPC UA Events available" OFF)
-option(S2OPC_DYNAMIC_TYPE_RESOLUTION "Activate type resolution using content of address space in addition to static types data" OFF)
 
 # Manage backward compatibilty for previous option names
 
@@ -265,10 +264,6 @@ endif()
 
 if(SOPC_HAS_NODE_MANAGEMENT_SERVICES)
   set(S2OPC_NODE_MANAGEMENT ON)
-endif()
-
-if(SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
-  set(S2OPC_DYNAMIC_TYPE_RESOLUTION ON)
 endif()
 
 # option to load static security data for embedded systems without filesystems
@@ -361,7 +356,6 @@ check_debug_build_type("WITH_UBSAN" "to set compilation flag '-fno-omit-frame-po
 print_if_activated("S2OPC_NANO_PROFILE")
 print_if_activated("S2OPC_NODE_MANAGEMENT")
 print_if_activated("S2OPC_EVENT_MANAGEMENT")
-print_if_activated("S2OPC_DYNAMIC_TYPE_RESOLUTION")
 print_if_activated("WITH_CONST_ADDSPACE")
 print_if_activated("WITH_STATIC_SECURITY_DATA")
 print_if_activated("SECURITY_HARDENING")
@@ -462,8 +456,6 @@ list(APPEND S2OPC_DEFINITIONS  $<$<BOOL:${S2OPC_NANO_PROFILE}>:S2OPC_NANO_PROFIL
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_MANAGEMENT}>:S2OPC_NODE_MANAGEMENT>)
 # Add S2OPC_EVENT_MANAGEMENT to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_EVENT_MANAGEMENT}>:S2OPC_EVENT_MANAGEMENT>)
-# Add S2OPC_DYNAMIC_TYPE_RESOLUTION to compilation definition if option activated
-list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_DYNAMIC_TYPE_RESOLUTION}>:S2OPC_DYNAMIC_TYPE_RESOLUTION>)
 
 ### Define common functions ###
 

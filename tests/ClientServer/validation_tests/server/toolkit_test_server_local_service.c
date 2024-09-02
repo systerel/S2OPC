@@ -385,20 +385,12 @@ static SOPC_ReturnStatus check_writeCustomDataType(const SOPC_AddressSpace* addr
         // [6]: Write array with 2 different DataType into custom Datatype variable node shall fail
         // [7]: Write array with 2 different DataType into abstract Structure Datatype variable node shall succeed
         if (SOPC_IsGoodStatus(writeResp->ResponseHeader.ServiceResult) && SOPC_IsGoodStatus(writeResp->Results[0]) &&
-            SOPC_IsGoodStatus(writeResp->Results[2]) && !SOPC_IsGoodStatus(writeResp->Results[3]) &&
-            SOPC_IsGoodStatus(writeResp->Results[4]) && SOPC_IsGoodStatus(writeResp->Results[5]) &&
-            !SOPC_IsGoodStatus(writeResp->Results[6]) && SOPC_IsGoodStatus(writeResp->Results[7]))
+            SOPC_IsGoodStatus(writeResp->Results[1]) && SOPC_IsGoodStatus(writeResp->Results[2]) &&
+            !SOPC_IsGoodStatus(writeResp->Results[3]) && SOPC_IsGoodStatus(writeResp->Results[4]) &&
+            SOPC_IsGoodStatus(writeResp->Results[5]) && !SOPC_IsGoodStatus(writeResp->Results[6]) &&
+            SOPC_IsGoodStatus(writeResp->Results[7]))
         {
-            // [1] shall only succeed if dynamic type resolution is active
-            // otherwise custom data type cannot be resolved to be the subtype of Structure
-            if (S2OPC_DYNAMIC_TYPE_RESOLUTION == SOPC_IsGoodStatus(writeResp->Results[1]))
-            {
-                status = SOPC_STATUS_OK;
-            }
-            else
-            {
-                status = SOPC_STATUS_INVALID_STATE;
-            }
+            status = SOPC_STATUS_OK;
         }
         else
         {

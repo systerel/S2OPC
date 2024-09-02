@@ -20,8 +20,6 @@
 /** \file
  *
  * \brief  Demo server implementing the Push Model of the certificate management.
- *         S2OPC shall be built with S2OPC_DYNAMIC_TYPE_RESOLUTION option for method call resolution
- *         when caller use instance declaration method from type node definition.
  *
  *         This demo server support the default application group (RsaSha256ApplicationCertificateType)
  *

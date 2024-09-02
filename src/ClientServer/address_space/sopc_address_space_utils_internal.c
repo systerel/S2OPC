@@ -220,10 +220,9 @@ const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentType(SOPC_AddressSpace* 
             result = &typeInfo->subtypeNodeId;
         }
     }
-    else if (S2OPC_DYNAMIC_TYPE_RESOLUTION)
+    else
     {
         // Parent not found in static array of extracted HasSubtype references, start research in address space
-
         void* node;
         bool node_found = false;
 

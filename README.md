@@ -274,7 +274,6 @@ To build S2OPC libraries and tests with default configuration on current stable 
 By setting environment variables S2OPC_NANO_PROFILE, S2OPC_NODE_MANAGEMENT, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
 - S2OPC_NANO_PROFILE (OFF by default): if set to ON, it excludes the features out of the OPC UA server nano scope (excluded services: subscription, monitored items and method calls services)
 - S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service (variable node only without child nodes generation, no NodeId generation, simplified checks on types)
-- S2OPC_DYNAMIC_TYPE_RESOLUTION (OFF by default): if set to ON, type resolution uses the HasSubType references of address space if the already static extracted types of NS0 are not sufficient.
 - BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
 - ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
 - ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,
@@ -282,7 +281,6 @@ etc.)
 - WITH_PYS2OPC (OFF by default): if set to ON, it builds the Python binding wheel for S2OPC and PYS2OPC_WHEEL_NAME variable shall also be set to define the wheel file name.
 - (deprecated) WITH_NANO_EXTENDED: equivalent to S2OPC_NANO_PROFILE set to OFF (default)
 - (deprecated) SOPC_HAS_NODE_MANAGEMENT_SERVICES: equivalent to S2OPC_NODE_MANAGEMENT
-- (deprecated) SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION: equivalent to S2OPC_DYNAMIC_TYPE_RESOLUTION
 
 The generated project file S2OPC*.sln can then be imported in Visual Studio environment.
 

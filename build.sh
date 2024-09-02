@@ -64,7 +64,6 @@ else
     append_cmake_option S2OPC_NANO_PROFILE
     append_cmake_option S2OPC_NODE_MANAGEMENT
     append_cmake_option S2OPC_EVENT_MANAGEMENT
-    append_cmake_option S2OPC_DYNAMIC_TYPE_RESOLUTION
     append_cmake_option CMAKE_TOOLCHAIN_FILE
     append_cmake_option BUILD_SHARED_LIBS
     append_cmake_option CMAKE_INSTALL_PREFIX
@@ -97,7 +96,6 @@ else
     append_cmake_option WITH_GCC_STATIC_ANALYSIS
     append_cmake_option WITH_NANO_EXTENDED
     append_cmake_option SOPC_HAS_NODE_MANAGEMENT_SERVICES
-    append_cmake_option SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION
     echo "cmake $CMAKE_OPTIONS .." >> $CURDIR/build.log
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1
