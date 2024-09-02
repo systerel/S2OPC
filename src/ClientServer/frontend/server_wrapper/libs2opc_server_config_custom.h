@@ -295,6 +295,9 @@ bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint);
  *          SOPC_STATUS_NOK otherwise
  *
  *  \note only one address space can be set, further call will be refused
+ *
+ *  \note if S2OPC_EVENT_MANAGEMENT is defined,
+ *        the available OPC UA event types are initialized from the address space content after calling this function.
  */
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig);
 

@@ -87,6 +87,9 @@ typedef struct SOPC_ConfigServerXML_Custom SOPC_ConfigServerXML_Custom;
  *             otherwise SOPC_STATUS_INVALID_PARAMETERS if a path is invalid or all paths are NULL or
  *             SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *             (toolkit not initialized, server already started).
+ *
+ *  \note if S2OPC_EVENT_MANAGEMENT is defined,
+ *        the available OPC UA event types are initialized from the address space content after calling this function.
  */
 SOPC_ReturnStatus SOPC_ServerConfigHelper_ConfigureFromXML(const char* serverConfigPath,
                                                            const char* addressSpaceConfigPath,

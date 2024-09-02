@@ -200,6 +200,9 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
  *          SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE or
  *          SOPC_STATUS_NOT_SUPPORTED otherwise.
  *
+ *  \note if S2OPC_EVENT_MANAGEMENT shall be defined, in this case the available OPC UA event types
+ *        are those that were present in the address space during server configuration
+ *        (::SOPC_ServerConfigHelper_ConfigureFromXML or ::SOPC_ServerConfigHelper_SetAddressSpace).
  */
 SOPC_ReturnStatus SOPC_ServerHelper_CreateEvent(const SOPC_NodeId* eventTypeId, SOPC_Event** event);
 

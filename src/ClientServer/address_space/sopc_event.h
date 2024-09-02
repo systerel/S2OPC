@@ -19,8 +19,20 @@
 
 /** \file
  *
- * \brief Contains the interface to configure events in the server.
- *        This interface is intended to be used by the server frontend wrapper only.
+ * \brief Interface to manipulate and customize OPC UA event instances.
+ *
+ *        The initial instance should be created using ::SOPC_ServerHelper_CreateEvent
+ *        using an existing event type id in the configured address space.
+ *        Once the event has been customized, it might be triggered using ::SOPC_ServerHelper_TriggerEvent.
+ *
+ *        This module provides dedicated functions to access the variables of base event type easily,
+ *        including EventId, EventType, Time, Severity and Source.
+ *        For other variables of known event subtypes, the generic access functions should be used
+ *        to set variable value (::SOPC_Event_SetVariable or ::SOPC_Event_SetVariableFromStrPath)
+ *        or to get variable value (::SOPC_Event_GetVariableAndType or ::SOPC_Event_GetVariableAndTypeFromStrPath).
+ *
+ * \note It is only possible to access variables defined in the event type of the event instance,
+ *       otherwise access will fail when using generic access functions.
  */
 
 #ifndef SOPC_EVENT_H_
