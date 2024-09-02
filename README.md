@@ -223,7 +223,7 @@ At the end of build process, the binary is available here `build/bin/pubsub_serv
 Tested under Debian 11.
 Prerequisites:
 - Make (tested with GNU Make version 4.3)
-- CMake (>= 3.5, tested with CMake version 3.9.4)
+- CMake (>= 3.5, tested with CMake version 3.23.5)
 - GCC (tested with GCC version 13.3.0)
 - [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.28.8) or  [CycloneCRYPTO](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/Compilation-of-CycloneCRYPTO-(Linux)) (tested with patched version 2.2.4)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
