@@ -543,8 +543,6 @@ scan_sbom:
   image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
   needs:
     - job: generate_sbom
-  dependencies:
-    - "generate_sbom"
   script:
     - trivy sbom sbom.json --severity HIGH,CRITICAL  --exit-code 1 --insecure --output vulnerabilities_table.txt
   artifacts:
@@ -577,8 +575,6 @@ test-zephyr:
   needs : [build-zephyr]
   script:
     - "./samples/embedded/platform_dep/zephyr/ci/test-embedded.sh"
-  dependencies:
-    - build-zephyr
   variables:
     <<: *nominal_test_variables
   rules: # run the task only if Zephyr samples have been compiled
@@ -592,8 +588,6 @@ test-pikeos:
   needs : [build-pikeos]
   script:
     - samples/embedded/platform_dep/pikeos/ci/test-embedded-docker.sh
-  dependencies:
-    - build-pikeos
   variables:
     <<: *nominal_test_variables
   rules:
