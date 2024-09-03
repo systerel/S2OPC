@@ -75,6 +75,8 @@ The main functions for server execution are defined by libs2opc_server.h:
 - ::SOPC_ServerHelper_Serve synchronous alternative to ::SOPC_ServerHelper_StartServer, it blocks until server stopped.
 - ::SOPC_ServerHelper_LocalServiceAsync: execute a local service (add nodes, read, write, etc.) on server asynchronously, service response is provided through callback defined with ::SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse.
 - ::SOPC_ServerHelper_LocalServiceSync: execute a local service (add nodes, read, write, etc.) on server synchronously.
+- ::SOPC_ServerHelper_CreateEvent: create an OPC UA event instance of the given known event type (available only if s2opc is compiled with S2OPC_EVENT_MANAGEMENT=1)
+- ::SOPC_ServerHelper_TriggerEvent: trigger the given OPC UA event instance from the given node as notifier (available only if s2opc is compiled with S2OPC_EVENT_MANAGEMENT=1)
 
 See implementation examples
 <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/demo_server/toolkit_demo_server.c">toolkit_demo_server.c</a> (XML configuration only),
