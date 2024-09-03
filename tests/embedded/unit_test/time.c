@@ -73,7 +73,7 @@ void suite_test_time(int* index)
     SOPC_HighRes_TimeReference* pRealTimeCopy = SOPC_HighRes_TimeReference_Create();
     SOPC_HighRes_TimeReference_Copy(pRealTimeCopy, pRealTime);
     SOPC_HighRes_TimeReference_AddSynchedDuration(pRealTime, duration_us, 0);
-    SOPC_ASSERT(SOPC_HighRes_TimeReference_DeltaUs(pRealTimeCopy, pRealTime) - (duration_us * 1000) == 0);
+    SOPC_ASSERT(SOPC_HighRes_TimeReference_DeltaUs(pRealTimeCopy, pRealTime) - (duration_us) == 0);
     PRINT("Test 9: ok\n");
 
     SOPC_HighRes_TimeReference_GetTime(pRealTime);

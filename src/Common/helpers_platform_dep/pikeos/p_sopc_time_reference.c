@@ -98,7 +98,7 @@ int64_t SOPC_HighRes_TimeReference_DeltaUs(const SOPC_HighRes_TimeReference* tRe
         t1.tp = t->tp;
     }
 
-    return (int64_t)(t1.tp - tRef->tp);
+    return (int64_t)((int64_t)(t1.tp - tRef->tp) / SOPC_MICROSECONDS_TO_NANOSECONDS);
 }
 
 bool SOPC_HighRes_TimeReference_IsExpired(const SOPC_HighRes_TimeReference* t, const SOPC_HighRes_TimeReference* now)
