@@ -186,6 +186,7 @@ SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
     {
         result->ai_addr = SOPC_Calloc(1, addr->ai_addrlen);
         result->ai_addrlen = addr->ai_addrlen;
+        result->ai_family = addr->ai_family;
         if (NULL != result->ai_addr)
         {
             result->ai_addr = memcpy(result->ai_addr, addr->ai_addr, addr->ai_addrlen);
