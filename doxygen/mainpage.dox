@@ -73,10 +73,10 @@ The main functions for server execution are defined by libs2opc_server.h:
 - ::SOPC_ServerHelper_StartServer: starts the server asynchronously, it runs until requested to stop.
 - ::SOPC_ServerHelper_StopServer: stops the server.
 - ::SOPC_ServerHelper_Serve synchronous alternative to ::SOPC_ServerHelper_StartServer, it blocks until server stopped.
-- ::SOPC_ServerHelper_LocalServiceAsync: execute a local service (add nodes, read, write, etc.) on server asynchronously, service response is provided through callback defined with ::SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse.
-- ::SOPC_ServerHelper_LocalServiceSync: execute a local service (add nodes, read, write, etc.) on server synchronously.
-- ::SOPC_ServerHelper_CreateEvent: create an OPC UA event instance of the given known event type (available only if s2opc is compiled with S2OPC_EVENT_MANAGEMENT=1)
-- ::SOPC_ServerHelper_TriggerEvent: trigger the given OPC UA event instance from the given node as notifier (available only if s2opc is compiled with S2OPC_EVENT_MANAGEMENT=1)
+- ::SOPC_ServerHelper_LocalServiceAsync: executes a local service (add nodes, read, write, etc.) on server asynchronously, service response is provided through callback defined with ::SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse.
+- ::SOPC_ServerHelper_LocalServiceSync: executes a local service (add nodes, read, write, etc.) on server synchronously.
+- ::SOPC_ServerHelper_CreateEvent: creates an OPC UA event instance of the given known event type (available only if s2opc is compiled with S2OPC_EVENT_MANAGEMENT=1)
+- ::SOPC_ServerHelper_TriggerEvent: triggers the given OPC UA event instance from the given node as notifier (available only if s2opc is compiled with S2OPC_EVENT_MANAGEMENT=1)
 
 See implementation examples
 <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/demo_server/toolkit_demo_server.c">toolkit_demo_server.c</a> (XML configuration only),
@@ -123,8 +123,8 @@ The main functions for client execution are defined by libs2opc_new_client.h:
 Additional functions are provided and dedicated to subscription related services, it provides management of 1 subscription per connection instance:
 - ::SOPC_ClientHelperNew_CreateSubscription: creates a subscription on a connection and returns the subscription instance.
 - ::SOPC_ClientHelperNew_DeleteSubscription: deletes a subscription instance.
-- ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems: create monitored items on a subscription instance with associated context.
-- ::SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems: delete monitored items on a subscription instance.
+- ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems: creates monitored items on a subscription instance with associated context.
+- ::SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems: deletes monitored items on a subscription instance.
 - ::SOPC_ClientHelperNew_Subscription_AsyncService: executes other subscription related services asynchronously on a subscription instance.
 - ::SOPC_ClientHelperNew_Subscription_SyncService: executes other subscription related services synchronously on a subscription instance.
 
@@ -143,7 +143,7 @@ Main configuration functions and types for client are provided by sopc_toolkit_c
 The functions with `SOPC_ToolkitServer_` prefix shall be ignored.
 
 - (Optional) log configuration with ::SOPC_Common_Initialize
-- ::SOPC_Toolkit_Initialize initializes the toolkit and configure the ::SOPC_ComEvent_Fct application callback to manage received events from toolkit.
+- ::SOPC_Toolkit_Initialize initializes the toolkit and configures the ::SOPC_ComEvent_Fct application callback to manage received events from toolkit.
 - ::SOPC_ToolkitClient_AddSecureChannelConfig adds a new secure channel configuration (::SOPC_SecureChannel_Config).
   In case security is used, the default PKI provider might be used (sopc_pki_stack.h) and certficates shall be loaded (sopc_key_manager.h).
 - ::SOPC_Toolkit_Clear shall be called when toolkit is not used anymore.
