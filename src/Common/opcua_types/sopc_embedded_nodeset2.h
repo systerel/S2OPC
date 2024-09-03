@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#ifndef _sopc_embedded_nodeset2_h
-#define _sopc_embedded_nodeset2_h
+#ifndef SOPC_EMBEDDED_NODESET2_H_
+#define SOPC_EMBEDDED_NODESET2_H_
 
 #include <stdbool.h>
 
@@ -31,6 +31,9 @@ typedef struct SOPC_AddressSpaceTypeInfo
     SOPC_NodeId subtypeNodeId;
 } SOPC_AddressSpaceTypeInfo;
 // Generated from NodeSet2: integer nodeId --> SOPC_NodeId
+
+#ifndef SOPC_NO_EMBEDDED_STATIC_TYPING
+
 #define SOPC_MAX_TYPE_INFO_NODE_ID 1000
 
 const SOPC_AddressSpaceTypeInfo SOPC_Embedded_HasSubTypeBackward[SOPC_MAX_TYPE_INFO_NODE_ID + 1] = {
@@ -1037,4 +1040,11 @@ const SOPC_AddressSpaceTypeInfo SOPC_Embedded_HasSubTypeBackward[SOPC_MAX_TYPE_I
     {OpcUa_NodeClass_Unspecified, false, {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0}},    // 1000
 };
 
-#endif
+#else // SOPC_NO_EMBEDDED_STATIC_TYPING defined
+
+#define SOPC_MAX_TYPE_INFO_NODE_ID 0
+
+const SOPC_AddressSpaceTypeInfo* SOPC_Embedded_HasSubTypeBackward = NULL;
+
+#endif // SOPC_NO_EMBEDDED_STATIC_TYPING
+#endif // SOPC_EMBEDDED_NODESET2_H_

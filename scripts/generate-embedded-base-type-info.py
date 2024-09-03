@@ -89,8 +89,8 @@ c_header = '''
  * under the License.
  */
 
-#ifndef _sopc_embedded_nodeset2_h
-#define _sopc_embedded_nodeset2_h
+#ifndef SOPC_EMBEDDED_NODESET2_H_
+#define SOPC_EMBEDDED_NODESET2_H_
 
 #include <stdbool.h>
 
@@ -356,7 +356,8 @@ def generate_type_node_info(source, out, max_nodeId):
     out.write("    "+"bool hasSubtype;\n")
     out.write("    "+"SOPC_NodeId subtypeNodeId;\n")
     out.write("} SOPC_AddressSpaceTypeInfo;\n")
-    out.write("// Generated from NodeSet2: integer nodeId --> SOPC_NodeId\n")
+    out.write("// Generated from NodeSet2: integer nodeId --> SOPC_NodeId\n\n")
+    out.write("#ifndef SOPC_NO_EMBEDDED_STATIC_TYPING\n\n")
     out.write("#define SOPC_MAX_TYPE_INFO_NODE_ID "+str(max_nodeId)+"\n\n")
     out.write('const SOPC_AddressSpaceTypeInfo SOPC_Embedded_HasSubTypeBackward[SOPC_MAX_TYPE_INFO_NODE_ID + 1] = {\n')
 
@@ -383,7 +384,12 @@ def generate_type_node_info(source, out, max_nodeId):
                 else:
                     out.write("    {"+node_class+", false, "+generate_nodeid(NodeId(0, ID_TYPE_NUMERIC, 0))+"},   // "+str(index)+"\n")
                 index += 1
-            out.write('};\n\n#endif\n')
+            out.write('};\n\n')
+            out.write("#else // SOPC_NO_EMBEDDED_STATIC_TYPING defined\n\n")
+            out.write("#define SOPC_MAX_TYPE_INFO_NODE_ID 0\n\n")
+            out.write('const SOPC_AddressSpaceTypeInfo* SOPC_Embedded_HasSubTypeBackward = NULL;\n\n')
+            out.write('#endif // SOPC_NO_EMBEDDED_STATIC_TYPING\n')
+            out.write('#endif // SOPC_EMBEDDED_NODESET2_H_\n')
             return
 
         check_element(n)
