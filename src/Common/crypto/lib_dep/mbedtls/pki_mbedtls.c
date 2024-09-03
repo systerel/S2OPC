@@ -187,11 +187,11 @@ static int verify_cert(void* checkTrustedAndCRL, mbedtls_x509_crt* crt, int cert
      */
     if (0 != certificate_depth && !checkTrustedAndCRLinChain->disableRevocationCheck)
     {
-        SOPC_CertificateList certList = {.crt = *crt};
         bool matchCRL = false;
         // Unlink cert temporarily for CRL verification
         mbedtls_x509_crt* backupNextCrt = crt->next;
         crt->next = NULL;
+        SOPC_CertificateList certList = {.crt = *crt};
         SOPC_ReturnStatus status = SOPC_STATUS_NOK;
         if (NULL != checkTrustedAndCRLinChain->allCRLs)
         {
