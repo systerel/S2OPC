@@ -33,6 +33,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_common_constants.h"
 #include "sopc_crypto_decl.h"
+#include "sopc_date_time.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
