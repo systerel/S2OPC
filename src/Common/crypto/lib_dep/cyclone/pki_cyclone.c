@@ -33,15 +33,11 @@
 #include "sopc_builtintypes.h"
 #include "sopc_common_constants.h"
 #include "sopc_crypto_decl.h"
-#include "sopc_crypto_profiles.h"
-#include "sopc_crypto_provider.h"
-#include "sopc_date_time.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
-#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
@@ -65,8 +61,6 @@
 #define STR_ISSUERS_CERTS "/issuers/certs"
 #define STR_ISSUERS_CRL "/issuers/crl"
 #define STR_REJECTED "/rejected"
-
-#define HEX_THUMBPRINT_SIZE 40
 
 typedef struct
 {
@@ -128,16 +122,6 @@ static void sopc_remove_cert_from_list(SOPC_CertificateList* pPrev,
 
 // PKI remove certificate from rejected list declaration
 static void sopc_pki_remove_rejected_cert(SOPC_CertificateList** ppRejectedList, const SOPC_CertificateList* pCert);
-
-SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURI(SOPC_PKI_Profile* pProfile, const char* applicationUri)
-{
-    return SOPC_PKIProvider_LeafProfileSetURI(pProfile->leafProfile, applicationUri);
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURL(SOPC_PKI_Profile* pProfile, const char* url)
-{
-    return SOPC_PKIProvider_LeafProfileSetURL(pProfile->leafProfile, url);
-}
 
 SOPC_ReturnStatus SOPC_PKIProvider_CheckSecurityPolicy(const SOPC_CertificateList* pToValidate,
                                                        const SOPC_PKI_LeafProfile* pConfig)
@@ -1157,10 +1141,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
     return status;
 }
 
-static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvider* pPKI,
-                                                                   const SOPC_CertificateList* pToValidate,
-                                                                   const SOPC_PKI_Profile* pProfile,
-                                                                   uint32_t* error)
+SOPC_ReturnStatus SOPC_PKIProvider_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
+                                                                 const SOPC_CertificateList* pToValidate,
+                                                                 const SOPC_PKI_Profile* pProfile,
+                                                                 uint32_t* error)
 {
     if (NULL == pPKI || NULL == pToValidate || NULL == pProfile || NULL == error)
     {
@@ -1259,27 +1243,6 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
 
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
     SOPC_Free(pThumbprint);
-    return status;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(SOPC_PKIProvider* pPKI,
-                                                       const SOPC_CertificateList* pToValidate,
-                                                       const SOPC_PKI_Profile* pProfile,
-                                                       uint32_t* error)
-{
-    if (NULL == pPKI)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (NULL != pPKI->pFnValidateCert)
-    {
-        status = pPKI->pFnValidateCert(pPKI, pToValidate, pProfile, error);
-    }
-    mutStatus = SOPC_Mutex_Unlock(&pPKI->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
 }
 
@@ -1482,7 +1445,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
  *        If there is no root, the content of ppRootCa is set to NULL.
  *        If ppCerts becomes empty, its content is set to NULL.
  */
-static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCerts, SOPC_CertificateList** ppRootCa)
+SOPC_ReturnStatus SOPC_PKIProvider_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
+                                                         SOPC_CertificateList** ppRootCa)
 {
     SOPC_ASSERT(NULL != ppCerts);
     SOPC_ASSERT(NULL != ppRootCa);
@@ -1567,199 +1531,4 @@ void SOPC_PKIProvider_GetListStats(SOPC_CertificateList* pCert,
         }
         pCert = pCert->next;
     }
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrustedCerts,
-                                                  SOPC_CRLList* pTrustedCrl,
-                                                  SOPC_CertificateList* pIssuerCerts,
-                                                  SOPC_CRLList* pIssuerCrl,
-                                                  SOPC_PKIProvider** ppPKI)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_PKIProvider* pPKI = NULL;
-    SOPC_CertificateList* tmp_pTrustedRoots = NULL; /* trusted root CA */
-    SOPC_CertificateList* tmp_pIssuerRoots = NULL;  /* issuer root CA */
-    SOPC_CertificateList* tmp_pAllRoots = NULL;     /* issuer + trusted roots */
-    SOPC_CertificateList* tmp_pAllCerts = NULL;     /* issuer + trusted certs */
-    SOPC_CertificateList* tmp_pAllTrusted = NULL;   /* trusted CAs and certs */
-
-    SOPC_CRLList* tmp_pAllCrl = NULL; /* issuer crl + trusted crl  */
-
-    SOPC_CertificateList* tmp_pTrustedCerts = NULL; /* trusted intermediate CA + trusted certificates */
-    SOPC_CRLList* tmp_pTrustedCrl = NULL;           /* CRLs of trusted intermediate CA and trusted root CA */
-    SOPC_CertificateList* tmp_pIssuerCerts = NULL;  /* issuer intermediate CA + issuer root CA */
-    SOPC_CRLList* tmp_pIssuerCrl = NULL;            /* CRLs of issuer intermediate CA and issuer root CA */
-    bool bTrustedCaFound = false;
-    bool bIssuerCaFound = false;
-    uint32_t listLength = 0;
-
-    if (NULL == ppPKI)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    /* Check the number of certificates plus CRLs of the PKI */
-    status = SOPC_PKIProvider_GetListLength(pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, &listLength);
-    if (SOPC_STATUS_OK != status)
-    {
-        return status;
-    }
-    if (SOPC_PKI_MAX_NB_CERT_AND_CRL < listLength)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI creation error: too many (%" PRIu32
-                               ") certificates and CRLs. The maximum configured is %" PRIu32
-                               ", please change SOPC_PKI_MAX_NB_CERT_AND_CRL",
-                               listLength, (uint32_t) SOPC_PKI_MAX_NB_CERT_AND_CRL);
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    /*
-       - Check that pTrustedCerts is not empty.
-       - Check if there are CAs but no CRLs.
-       - Check if issuerCerts list is only filled with CA.
-       - Check and warn if issuerCerts is not empty but pTrustedCerts is only filed with CA.
-         In this case, if there is no root into pTrustedCerts then
-         no certificates will be accepted during validation process.
-       - Check and warn in case no root defined but trusted certificates defined.
-         In this case, only trusted self-signed issued certificates will be accepted.
-    */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_PKIProvider_CheckLists(pTrustedCerts, pIssuerCerts, pTrustedCrl, pIssuerCrl, &bTrustedCaFound,
-                                             &bIssuerCaFound);
-        if (SOPC_STATUS_OK != status)
-        {
-            return status;
-        }
-    }
-
-    /* Copy the lists */
-    status = SOPC_KeyManager_Certificate_Copy(pTrustedCerts, &tmp_pTrustedCerts);
-    if (SOPC_STATUS_OK == status && NULL != pTrustedCrl)
-    {
-        status = SOPC_KeyManager_CRL_Copy(pTrustedCrl, &tmp_pTrustedCrl);
-    }
-    if (SOPC_STATUS_OK == status && NULL != pIssuerCerts)
-    {
-        status = SOPC_KeyManager_Certificate_Copy(pIssuerCerts, &tmp_pIssuerCerts);
-    }
-    if (SOPC_STATUS_OK == status && NULL != pIssuerCrl)
-    {
-        status = SOPC_KeyManager_CRL_Copy(pIssuerCrl, &tmp_pIssuerCrl);
-    }
-
-    /* Check the CRL-CA association before creating the PKI. */
-    bool bTrustedCRL = false;
-    bool bIssuerCRL = false;
-    if (SOPC_STATUS_OK == status)
-    {
-        if (bTrustedCaFound && NULL != tmp_pTrustedCrl)
-        {
-            status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(tmp_pTrustedCerts, tmp_pTrustedCrl, &bTrustedCRL);
-        }
-        else
-        {
-            bTrustedCRL = true;
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        if (bIssuerCaFound && NULL != tmp_pIssuerCrl)
-        {
-            status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(tmp_pIssuerCerts, tmp_pIssuerCrl, &bIssuerCRL);
-        }
-        else
-        {
-            bIssuerCRL = true;
-        }
-    }
-    if (SOPC_STATUS_OK == status && (!bTrustedCRL || !bIssuerCRL))
-    {
-        if (!bTrustedCRL)
-        {
-            SOPC_Logger_TraceWarning(
-                SOPC_LOG_MODULE_COMMON,
-                "> PKI creation warning: Not all certificate authorities in given trusted certificates have at least "
-                "one certificate revocation list! Certificates issued by these CAs will be refused.");
-        }
-        if (!bIssuerCRL)
-        {
-            SOPC_Logger_TraceWarning(
-                SOPC_LOG_MODULE_COMMON,
-                "> PKI creation warning: Not all certificate authorities in given issuer certificates have at least "
-                "one certificate revocation list! Certificates issued by these CAs will be refused.");
-        }
-    }
-    /* Retrieve the root from list */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = split_root_from_cert_list(&tmp_pTrustedCerts, &tmp_pTrustedRoots);
-    }
-    if (SOPC_STATUS_OK == status && NULL != tmp_pIssuerCerts)
-    {
-        status = split_root_from_cert_list(&tmp_pIssuerCerts, &tmp_pIssuerRoots);
-    }
-    /* Merge trusted and issuer list */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_PKIProvider_MergeCertificates(tmp_pIssuerCerts, tmp_pTrustedCerts, &tmp_pAllCerts);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_PKIProvider_MergeCertificates(tmp_pIssuerRoots, tmp_pTrustedRoots, &tmp_pAllRoots);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_PKIProvider_MergeCRLs(tmp_pIssuerCrl, tmp_pTrustedCrl, &tmp_pAllCrl);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_Certificate_Copy(pTrustedCerts, &tmp_pAllTrusted);
-    }
-    /* Create the PKI */
-    if (SOPC_STATUS_OK == status)
-    {
-        pPKI = SOPC_Calloc(1, sizeof(SOPC_PKIProvider));
-        if (NULL == pPKI)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Initialization(&pPKI->mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        pPKI->pTrustedRoots = tmp_pTrustedRoots;
-        pPKI->pTrustedCerts = tmp_pTrustedCerts;
-        pPKI->pTrustedCrl = tmp_pTrustedCrl;
-        pPKI->pIssuerRoots = tmp_pIssuerRoots;
-        pPKI->pIssuerCerts = tmp_pIssuerCerts;
-        pPKI->pIssuerCrl = tmp_pIssuerCrl;
-        pPKI->pAllCerts = tmp_pAllCerts;
-        pPKI->pAllRoots = tmp_pAllRoots;
-        pPKI->pAllTrusted = tmp_pAllTrusted;
-        pPKI->pAllCrl = tmp_pAllCrl;
-        pPKI->pRejectedList = NULL;
-        pPKI->directoryStorePath = NULL;
-        pPKI->pFnValidateCert = &sopc_PKI_validate_profile_and_certificate;
-        pPKI->isPermissive = false;
-        *ppPKI = pPKI;
-    }
-    else
-    {
-        SOPC_KeyManager_Certificate_Free(tmp_pTrustedRoots);
-        SOPC_KeyManager_Certificate_Free(tmp_pIssuerRoots);
-        SOPC_KeyManager_Certificate_Free(tmp_pAllRoots);
-        SOPC_KeyManager_Certificate_Free(tmp_pAllTrusted);
-        SOPC_KeyManager_Certificate_Free(tmp_pTrustedCerts);
-        SOPC_KeyManager_Certificate_Free(tmp_pIssuerCerts);
-        SOPC_KeyManager_Certificate_Free(tmp_pAllCerts);
-        SOPC_KeyManager_CRL_Free(tmp_pTrustedCrl);
-        SOPC_KeyManager_CRL_Free(tmp_pIssuerCrl);
-        SOPC_KeyManager_CRL_Free(tmp_pAllCrl);
-    }
-
-    return status;
 }

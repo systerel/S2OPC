@@ -1570,9 +1570,9 @@ static SOPC_ReturnStatus sopc_key_manager_check_crl_ca_match(const mbedtls_x509_
     return status;
 }
 
-SOPC_ReturnStatus SOPC_KeyManagerInternal_CertificateList_CheckCRL(mbedtls_x509_crt* pCert,
-                                                                   const mbedtls_x509_crl* pCRL,
-                                                                   bool* bMatch)
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_CheckCRL(SOPC_CertificateList* pCert,
+                                                           const SOPC_CRLList* pCRL,
+                                                           bool* bMatch)
 {
     if (NULL == pCRL || NULL == pCert || NULL == bMatch)
     {
@@ -1581,10 +1581,10 @@ SOPC_ReturnStatus SOPC_KeyManagerInternal_CertificateList_CheckCRL(mbedtls_x509_
 
     /* For each CA, find its CRL. If not found, log and match = false */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int crl_count = 0;             /* Number of CRL for the current CA */
-    bool crl_match = false;        /* Defines whether the current CRL matches the current CA. */
-    bool list_match = true;        /* Defines if all CA have exactly one CRL */
-    mbedtls_x509_crt* crt = pCert; /* Current cert */
+    int crl_count = 0;                   /* Number of CRL for the current CA */
+    bool crl_match = false;              /* Defines whether the current CRL matches the current CA. */
+    bool list_match = true;              /* Defines if all CA have exactly one CRL */
+    mbedtls_x509_crt* crt = &pCert->crt; /* Current cert */
     while (NULL != crt && SOPC_STATUS_OK == status)
     {
         /* Skip certificates that are not authorities */
@@ -1592,7 +1592,7 @@ SOPC_ReturnStatus SOPC_KeyManagerInternal_CertificateList_CheckCRL(mbedtls_x509_
         {
             crl_count = 0;
             crl_match = false;
-            const mbedtls_x509_crl* crl = pCRL;
+            const mbedtls_x509_crl* crl = &pCRL->crl;
             while (NULL != crl && SOPC_STATUS_OK == status)
             {
                 status = sopc_key_manager_check_crl_ca_match(crl, crt, &crl_match);

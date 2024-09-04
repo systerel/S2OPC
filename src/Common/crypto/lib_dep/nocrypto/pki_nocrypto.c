@@ -41,18 +41,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(SOPC_PKIProvider* pPKI,
-                                                       const SOPC_CertificateList* pToValidate,
-                                                       const SOPC_PKI_Profile* pProfile,
-                                                       uint32_t* error)
-{
-    SOPC_UNUSED_ARG(pPKI);
-    SOPC_UNUSED_ARG(pToValidate);
-    SOPC_UNUSED_ARG(pProfile);
-    SOPC_UNUSED_ARG(error);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
 SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI,
                                                           const SOPC_PKI_ChainProfile* pProfile,
                                                           uint32_t** pErrors,
@@ -64,20 +52,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
     SOPC_UNUSED_ARG(pErrors);
     SOPC_UNUSED_ARG(ppThumbprints);
     SOPC_UNUSED_ARG(pLength);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrustedCerts,
-                                                  SOPC_CRLList* pTrustedCrl,
-                                                  SOPC_CertificateList* pIssuerCerts,
-                                                  SOPC_CRLList* pIssuerCrl,
-                                                  SOPC_PKIProvider** ppPKI)
-{
-    SOPC_UNUSED_ARG(pTrustedCerts);
-    SOPC_UNUSED_ARG(pTrustedCrl);
-    SOPC_UNUSED_ARG(pIssuerCerts);
-    SOPC_UNUSED_ARG(pIssuerCrl);
-    SOPC_UNUSED_ARG(ppPKI);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
@@ -118,5 +92,25 @@ void SOPC_PKIProvider_GetListStats(SOPC_CertificateList* pCert,
 SOPC_ReturnStatus SOPC_PKIProvider_CheckCommonName(const SOPC_CertificateList* pToValidate)
 {
     SOPC_UNUSED_ARG(pToValidate);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
+SOPC_ReturnStatus SOPC_PKIProvider_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
+                                                         SOPC_CertificateList** ppRootCa)
+{
+    SOPC_UNUSED_ARG(ppCerts);
+    SOPC_UNUSED_ARG(ppRootCa);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
+SOPC_ReturnStatus SOPC_PKIProvider_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
+                                                                 const SOPC_CertificateList* pToValidate,
+                                                                 const SOPC_PKI_Profile* pProfile,
+                                                                 uint32_t* error)
+{
+    SOPC_UNUSED_ARG(pPKI);
+    SOPC_UNUSED_ARG(pToValidate);
+    SOPC_UNUSED_ARG(pProfile);
+    SOPC_UNUSED_ARG(error);
     return SOPC_STATUS_NOT_SUPPORTED;
 }

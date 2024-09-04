@@ -982,9 +982,9 @@ static SOPC_ReturnStatus sopc_key_manager_check_crl_ca_match(const SOPC_CRLList*
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_KeyManagerInternal_CertificateList_CheckCRL(SOPC_CertificateList* pCert,
-                                                                   const SOPC_CRLList* pCRL,
-                                                                   bool* bMatch)
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_CheckCRL(SOPC_CertificateList* pCert,
+                                                           const SOPC_CRLList* pCRL,
+                                                           bool* bMatch)
 {
     if (NULL == pCRL || NULL == pCert || NULL == bMatch)
     {

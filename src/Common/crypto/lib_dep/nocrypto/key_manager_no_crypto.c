@@ -356,3 +356,13 @@ void SOPC_KeyManager_CSR_Free(SOPC_CSR* pCSR)
 {
     SOPC_UNUSED_ARG(pCSR);
 }
+
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_CheckCRL(SOPC_CertificateList* pCert,
+                                                           const SOPC_CRLList* pCRL,
+                                                           bool* bMatch)
+{
+    SOPC_UNUSED_ARG(pCert);
+    SOPC_UNUSED_ARG(pCRL);
+    SOPC_UNUSED_ARG(bMatch);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}

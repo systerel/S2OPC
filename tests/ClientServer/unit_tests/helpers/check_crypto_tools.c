@@ -452,6 +452,35 @@ START_TEST(test_key_pair_bytes)
     test_key_pair(false);
 }
 
+START_TEST(test_cert_list_check_crl)
+{
+    SOPC_CertificateList* pCerts = NULL;
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_CRLList* pCrls = NULL;
+    // Add to the CRl list a CRL that do not match with cacert.der
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Users_PKI/trusted/crl/user_cacrl.der", &pCrls);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // check fail
+    bool eachCAhaveCrl = true;
+    status = SOPC_KeyManager_CertificateList_CheckCRL(pCerts, pCrls, &eachCAhaveCrl);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!eachCAhaveCrl);
+
+    // Append the CRL list the CRL of cacert.der
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pCrls);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CertificateList_CheckCRL(pCerts, pCrls, &eachCAhaveCrl);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(eachCAhaveCrl);
+
+    SOPC_KeyManager_Certificate_Free(pCerts);
+    SOPC_KeyManager_CRL_Free(pCrls);
+}
+
 Suite* tests_make_suite_crypto_tools(void)
 {
     Suite* s = suite_create("Crypto tools test");
@@ -474,10 +503,11 @@ Suite* tests_make_suite_crypto_tools(void)
     tcase_add_test(tc_check_crypto_list_to_array, test_crypto_check_crl_list_to_array);
 #endif
 
-    TCase *tc_check_app_uri = NULL, *tc_key_pair = NULL;
+    TCase *tc_check_app_uri = NULL, *tc_key_pair = NULL, *tc_cert_list_check_crl = NULL;
 
     tc_check_app_uri = tcase_create("Check application URI");
     tc_key_pair = tcase_create("Update Key / Cert pair");
+    tc_cert_list_check_crl = tcase_create("Check cert list without CRL");
 
     suite_add_tcase(s, tc_check_app_uri);
     tcase_add_test(tc_check_app_uri, test_crypto_check_app_uri);
@@ -485,6 +515,8 @@ Suite* tests_make_suite_crypto_tools(void)
     suite_add_tcase(s, tc_key_pair);
     tcase_add_test(tc_key_pair, test_key_pair_files);
     tcase_add_test(tc_key_pair, test_key_pair_bytes);
+    suite_add_tcase(s, tc_cert_list_check_crl);
+    tcase_add_test(tc_key_pair, test_cert_list_check_crl);
 
     return s;
 }
