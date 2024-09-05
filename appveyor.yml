@@ -61,6 +61,7 @@ test_script:
     - set TEST_PASSWORD_PRIVATE_KEY=password
     - set TEST_PASSWORD_CACERT=S2OPC
     - set TEST_PASSWORD_USER_ME=1234
+    - set TEST_USERNAME=user1
     - set TEST_PASSWORD_USER=password
     - set TEST_CLIENT_XML_CONFIG=S2OPC_Client_Test_Config.xml
 

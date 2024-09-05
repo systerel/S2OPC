@@ -70,6 +70,7 @@ variables:
   TEST_PASSWORD_PRIVATE_KEY : password
   TEST_PASSWORD_CACERT : S2OPC
   TEST_PASSWORD_USER_ME : 1234
+  TEST_USERNAME : user1
   TEST_PASSWORD_USER : password
 
 # Variables for ALL_BUILDS and ALL_TESTS manual pipelines
@@ -538,6 +539,7 @@ test-unit-all-tests:
   needs: [build-linux64-pys2opc-all-tests]
   variables:
     TEST_PASSWORD_PRIVATE_KEY : password
+    TEST_USERNAME : user1
     TEST_PASSWORD_USER : password
     TEST_PASSWORD_CACERT : S2OPC
     TEST_PASSWORD_USER_ME : 1234
