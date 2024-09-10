@@ -34,7 +34,12 @@
 #define SOPC_PKI_STACK_H_
 
 #include "sopc_pki_stack_lib_itf.h"
-#include "sopc_pki_struct_lib_internal.h"
+
+/*
+ * ------------------------------------------------------------------------------------------------
+ * LeafProfile API
+ * ------------------------------------------------------------------------------------------------
+ */
 
 /**
  * \brief Creates the PKIProvider from a directory where certificates are stored.
@@ -88,6 +93,47 @@
 SOPC_ReturnStatus SOPC_PKIProvider_CreateFromStore(const char* directoryStorePath, SOPC_PKIProvider** ppPKI);
 
 /**
+ * \brief Create the PKIProvider from list representation.
+ *
+ * Notions :
+ * - CA is a root CA if it is self-signed.
+ * - \p pTrustedCerts = trusted root CA + trusted link CA + trusted cert.
+ * - \p pTrustedCrl = CRLs of the trusted root CA + trusted link CA.
+ * - \p pIssuerCerts = untrusted root CA + untrusted link CA.
+ * - \p pIssuerCrl = CRLs of the untrusted root CA + untrusted link CA.
+ * - CAs from trusted/certs and issuers/certs allow to verify the signing chain of a cert which is included into
+ *   trusted/certs.
+ * - CAs from trusted/certs allow to verify the signing chain of a cert which is not included into trusted/certs.
+ *
+ * This function checks that :
+ * - the number of certificates plus CRLs does not exceed \c SOPC_PKI_MAX_NB_CERT_AND_CRL .
+ * - at least one cert from \p pTrustedCerts is provided.
+ * - each certificate from \p pIssuerCerts is CA.
+ * - each CA has exactly one Certificate Revocation List (CRL).
+ *
+ * \param pTrustedCerts A valid pointer to the trusted certificate list.
+ * \param pTrustedCrl A valid pointer to the trusted CRL list.
+ * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if not used.
+ * \param pIssuerCrl A valid pointer to the issuer CRL list. NULL if not used.
+ * \param[out] ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
+ *                   ::SOPC_PKIProvider_Free().
+ *
+ * \return  SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *          and SOPC_STATUS_NOK when there was an error.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrustedCerts,
+                                                  SOPC_CRLList* pTrustedCrl,
+                                                  SOPC_CertificateList* pIssuerCerts,
+                                                  SOPC_CRLList* pIssuerCrl,
+                                                  SOPC_PKIProvider** ppPKI);
+
+/*
+ * ------------------------------------------------------------------------------------------------
+ * LeafProfile API
+ * ------------------------------------------------------------------------------------------------
+ */
+
+/**
  * \brief Create a leaf certificate profile from security policy to check certificate properties.
  *
  *        KeyUsage, extendedKeyUsage, URI and HostName of subjectAltName are not configured here then
@@ -105,23 +151,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromStore(const char* directoryStorePat
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIProvider_CreateLeafProfile(const char* securityPolicyUri, SOPC_PKI_LeafProfile** ppProfile);
-
-/**
- * \brief Set the keyUsage and extendedKeyUsage to the leaf profile from the PKI type.
- *
- *        For users : the keyUsage is expected to be filled with digitalSignature and the extendedKeyUsage is not
- *        checked.
- *        For clients : the keyUsage is expected to be filled with digitalSignature, nonRepudiation, keyEncipherment
- *        and dataEncipherment. The extendedKeyUsage is filled with serverAuth.
- *        For server : the keyUsage is expected to be filled with digitalSignature, nonRepudiation, keyEncipherment
- *        and dataEncipherment. The extendedKeyUsage is filled with clientAuth.
- *
- * \param pProfile A valid pointer to the leaf profile.
- * \param PKIType Defines the type of PKI (user, client or server)
- *
- * \return SOPC_STATUS_OK when successful.
- */
-SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetUsageFromType(SOPC_PKI_LeafProfile* pProfile, SOPC_PKI_Type PKIType);
 
 /**
  * \brief Set the application URI to the leaf profile.
@@ -148,11 +177,49 @@ SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURI(SOPC_PKI_LeafProfile* pProf
 SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURL(SOPC_PKI_LeafProfile* pProfile, const char* url);
 
 /**
+ * \brief Set the keyUsage and extendedKeyUsage to the leaf profile from the PKI type.
+ *
+ *        For users : the keyUsage is expected to be filled with digitalSignature and the extendedKeyUsage is not
+ *        checked.
+ *        For clients : the keyUsage is expected to be filled with digitalSignature, nonRepudiation, keyEncipherment
+ *        and dataEncipherment. The extendedKeyUsage is filled with serverAuth.
+ *        For server : the keyUsage is expected to be filled with digitalSignature, nonRepudiation, keyEncipherment
+ *        and dataEncipherment. The extendedKeyUsage is filled with clientAuth.
+ *
+ * \param pProfile A valid pointer to the leaf profile.
+ * \param PKIType Defines the type of PKI (user, client or server)
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetUsageFromType(SOPC_PKI_LeafProfile* pProfile, SOPC_PKI_Type PKIType);
+
+/** \brief Check leaf certificate properties
+ *
+ * \param pToValidate A valid pointer to the Certificate to validate.
+ * \param pProfile A valid pointer to the leaf profile.
+ * \param[out] error Pointer to store the OpcUa error code when certificate validation failed.
+ *
+ * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
+ *
+ * \return SOPC_STATUS_OK when the certificate properties are successfully validated, and
+ *         SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE or SOPC_STATUS_NOK.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateList* pToValidate,
+                                                        const SOPC_PKI_LeafProfile* pProfile,
+                                                        uint32_t* error);
+
+/**
  * \brief Delete a leaf profile.
  *
  * \param ppProfile The leaf profile.
  */
 void SOPC_PKIProvider_DeleteLeafProfile(SOPC_PKI_LeafProfile** ppProfile);
+
+/*
+ * ------------------------------------------------------------------------------------------------
+ * Profile API
+ * ------------------------------------------------------------------------------------------------
+ */
 
 /**
  * \brief Create a PKI profile for a validation process.
@@ -169,6 +236,15 @@ void SOPC_PKIProvider_DeleteLeafProfile(SOPC_PKI_LeafProfile** ppProfile);
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIProvider_CreateProfile(const char* securityPolicyUri, SOPC_PKI_Profile** ppProfile);
+
+/**
+ * \brief Create a minimal PKI profile for user validation process.
+ *
+ * \param ppProfile The newly created profile. You should delete it with ::SOPC_PKIProvider_DeleteProfile .
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_CreateMinimalUserProfile(SOPC_PKI_Profile** ppProfile);
 
 /**
  * \brief Set the properties to the PKI profile from the PKI type.
@@ -190,32 +266,23 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateProfile(const char* securityPolicyUri, 
 SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetUsageFromType(SOPC_PKI_Profile* pProfile, SOPC_PKI_Type PKIType);
 
 /**
- * \brief Set the application URI to the PKI profile.
- *
- * \param pProfile A valid pointer to the PKI profile.
- * \param applicationUri The application URI to set in \p pProfile .
- *
- * \warning If the application URI is already defined in \p pProfile , you can not define it again.
- *
- * \return SOPC_STATUS_OK when successful.
- */
-SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURI(SOPC_PKI_Profile* pProfile, const char* applicationUri);
-
-/**
- * \brief Create a minimal PKI profile for user validation process.
- *
- * \param ppProfile The newly created profile. You should delete it with ::SOPC_PKIProvider_DeleteProfile .
- *
- * \return SOPC_STATUS_OK when successful.
- */
-SOPC_ReturnStatus SOPC_PKIProvider_CreateMinimalUserProfile(SOPC_PKI_Profile** ppProfile);
-
-/**
  * \brief Delete a PKI profile.
  *
  * \param ppProfile The PKI profile.
  */
 void SOPC_PKIProvider_DeleteProfile(SOPC_PKI_Profile** ppProfile);
+
+/** \brief Redefines the directory store where the certificates will be stored with ::SOPC_PKIProvider_WriteToStore
+ *
+ * \param directoryStorePath The directory path where the certificates will be stored.
+ * \param pPKI A valid pointer to the PKIProvider.
+ *
+ * \note The directory is created if \p directoryStorePath does not exist.
+ * \warning In case of error, \p pPKI is unchanged.
+ *
+ * \return SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK in case of error.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, SOPC_PKIProvider* pPKI);
 
 /** \brief Validation function for a certificate with the PKI chain
  *
@@ -239,33 +306,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(SOPC_PKIProvider* pPKI,
                                                        const SOPC_CertificateList* pToValidate,
                                                        const SOPC_PKI_Profile* pProfile,
                                                        uint32_t* error);
-
-/** \brief Check leaf certificate properties
- *
- * \param pToValidate A valid pointer to the Certificate to validate.
- * \param pProfile A valid pointer to the leaf profile.
- * \param[out] error Pointer to store the OpcUa error code when certificate validation failed.
- *
- * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
- *
- * \return SOPC_STATUS_OK when the certificate properties are successfully validated, and
- *         SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE or SOPC_STATUS_NOK.
- */
-SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateList* pToValidate,
-                                                        const SOPC_PKI_LeafProfile* pProfile,
-                                                        uint32_t* error);
-
-/** \brief Redefines the directory store where the certificates will be stored with ::SOPC_PKIProvider_WriteToStore
- *
- * \param directoryStorePath The directory path where the certificates will be stored.
- * \param pPKI A valid pointer to the PKIProvider.
- *
- * \note The directory is created if \p directoryStorePath does not exist.
- * \warning In case of error, \p pPKI is unchanged.
- *
- * \return SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK in case of error.
- */
-SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, SOPC_PKIProvider* pPKI);
 
 /** \brief Write the certificate files in the updatedTrustList folder of the PKI storage.
  *         The updatedTrustList folder is created if it is missing.
@@ -316,17 +356,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(SOPC_PKIProvider* pPKI,
                                                        SOPC_CertificateList** ppIssuerCerts,
                                                        SOPC_CRLList** ppIssuerCrl);
 
-/** \brief Copy the list of certificate that have been rejected.
- *
- * \param pPKI A valid pointer to the PKIProvider.
- * \param[out] ppCert A copy of the PKI rejected list (NULL if no certificate has been rejected).
- *
- * \note The maximum number of certificates returned is \c SOPC_PKI_MAX_NB_CERT_REJECTED.
- *
- * \return SOPC_STATUS_OK when successful.
- */
-SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert);
-
 /** \brief Write the rejected certificates files in the rejected folder of the PKI storage.
  *         The format of the written files is DER.
  *
@@ -342,6 +371,17 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI);
+
+/** \brief Copy the list of certificate that have been rejected.
+ *
+ * \param pPKI A valid pointer to the PKIProvider.
+ * \param[out] ppCert A copy of the PKI rejected list (NULL if no certificate has been rejected).
+ *
+ * \note The maximum number of certificates returned is \c SOPC_PKI_MAX_NB_CERT_REJECTED.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert);
 
 /** \brief Update the PKI with new lists of certificates and CRL.
  *
@@ -367,78 +407,16 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
                                                   const bool bIncludeExistingList);
 
 /**
- * \brief Frees allocated PKIs.
+ * \brief Set the application URI to the PKI profile.
  *
- * \param ppPKI A valid pointer to a PKI.
+ * \param pProfile A valid pointer to the PKI profile.
+ * \param applicationUri The application URI to set in \p pProfile .
  *
- */
-void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI);
-
-/**
- * \brief Gets the leaf profile from the security policy.
- *
- * \param uri a valid pointer to the URI of a security policy configuration.
- *
- * \return The leaf profile extracted from the security policy.
- *
- */
-const SOPC_PKI_LeafProfile* SOPC_PKIProvider_GetLeafProfileFromSecurityPolicy(const char* uri);
-
-/**
- * \brief Gets the chain profile from the security policy.
- *
- * \param uri A valid pointer to the URI of a security policy configuration.
- *
- * \return The chain profile extracted from the security policy.
- *
- */
-const SOPC_PKI_ChainProfile* SOPC_PKIProvider_GetChainProfileFromSecurityPolicy(const char* uri);
-
-#endif /* SOPC_PKI_STACK_H_ */
-
-/**
- * \brief A function to validate the PKI when creating a PKI Provider without security with SOPC_PKIPermissive_Create.
- *
- * \param pPKI A valid pointer to a Public Key Infrastructure.
- *
- * \param pToValidate A valid pointer to a certificate list of certificates to validate.
- *
- * \param pProfile A valid pointer to a leaf profile.
- *
- * \param error A valid pointer to a variable.
+ * \warning If the application URI is already defined in \p pProfile , you can not define it again.
  *
  * \return SOPC_STATUS_OK when successful.
- *
  */
-SOPC_ReturnStatus SOPC_PKIProvider_ValidateAnything(SOPC_PKIProvider* pPKI,
-                                                    const SOPC_CertificateList* pToValidate,
-                                                    const SOPC_PKI_Profile* pProfile,
-                                                    uint32_t* error);
-
-/**
- * \brief Checks the number of certificates and CRLs of a PKI.
- *
- * \param pPKI A valid pointer to a PKI.
- *
- * \param pTrustedCerts A valid pointer to a trusted certificate.
- *
- * \param pTrustedCrl A valid pointer to a trusted Certificate Revocation List (CRL).
- *
- * \param pIssuerCerts A valid pointer to an issuer certificate.
- *
- * \param pIssuerCrl A valid pointer to an issuer Certificate Revocation List (CRL).
- *
- * \param bIncludeExistingList A boolean value to include
- *
- * \return SOPC_STATUS_OK when successful.
- *
- */
-SOPC_ReturnStatus SOPC_PKIProvider_CheckListLength(SOPC_PKIProvider* pPKI,
-                                                   SOPC_CertificateList* pTrustedCerts,
-                                                   SOPC_CRLList* pTrustedCrl,
-                                                   SOPC_CertificateList* pIssuerCerts,
-                                                   SOPC_CRLList* pIssuerCrl,
-                                                   const bool bIncludeExistingList);
+SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURI(SOPC_PKI_Profile* pProfile, const char* applicationUri);
 
 /**
  * \brief Set the endpoint URL used for connection to the PKI profile.
@@ -483,3 +461,12 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI);
+
+/**
+ * \brief Frees allocated PKIs.
+ *
+ * \param ppPKI A valid pointer to a PKI.
+ */
+void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI);
+
+#endif /* SOPC_PKI_STACK_H_ */

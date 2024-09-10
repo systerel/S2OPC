@@ -42,6 +42,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
+#include "sopc_pki_stack_lib_internal_itf.h"
 #include "sopc_pki_struct_lib_internal.h"
 
 #include "key_manager_cyclone.h"
@@ -50,18 +51,6 @@
 #include "pkix/x509_cert_validate.h"
 #include "pkix/x509_crl_validate.h"
 #include "pkix/x509_sign_verify.h"
-
-#ifndef STR_TRUSTLIST_NAME
-#define STR_TRUSTLIST_NAME "/updatedTrustList"
-#endif
-
-#define STR_TRUSTED "/trusted"
-#define STR_TRUSTED_CERTS "/trusted/certs"
-#define STR_TRUSTED_CRL "/trusted/crl"
-#define STR_ISSUERS "/issuers"
-#define STR_ISSUERS_CERTS "/issuers/certs"
-#define STR_ISSUERS_CRL "/issuers/crl"
-#define STR_REJECTED "/rejected"
 
 typedef struct
 {
@@ -1441,11 +1430,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
     return status;
 }
 
-/**
- * \brief Delete the roots of the list ppCerts. Create a new list ppRootCa with all roots from ppCerts.
- *        If there is no root, the content of ppRootCa is set to NULL.
- *        If ppCerts becomes empty, its content is set to NULL.
- */
 SOPC_ReturnStatus SOPC_PKIProvider_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
                                                          SOPC_CertificateList** ppRootCa)
 {

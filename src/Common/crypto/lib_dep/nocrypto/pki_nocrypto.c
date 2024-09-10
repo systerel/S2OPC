@@ -27,12 +27,9 @@
 
 #include <stdio.h>
 #include <string.h>
-
-#include "sopc_common_constants.h"
-#include "sopc_crypto_decl.h"
 #include "sopc_macros.h"
-
 #include "sopc_pki_stack.h"
+#include "sopc_pki_stack_lib_internal_itf.h"
 
 SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI, const SOPC_CertificateList* pCert)
 {

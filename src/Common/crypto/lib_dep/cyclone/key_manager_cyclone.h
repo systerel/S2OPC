@@ -110,25 +110,4 @@ struct SOPC_CSR
 SOPC_ReturnStatus SOPC_KeyManagerInternal_Certificate_GetPublicKey(const SOPC_CertificateList* pCert,
                                                                    SOPC_AsymmetricKey* pKey);
 
-// /**
-//  * \brief Checks if each CA certificate from \p pCert have a revocation list available in \p pCRL.
-//  *
-//  *   This function does not set match to false if there are CRL that do not match any Certificate.
-//  *   This function skips certificates in \p pCert that are not authorities.
-//  * *
-//  * \param pCert       A valid pointer to the crt
-//  * \param pCRL        A valid pointer to the CRL list.
-//  * \param[out] bMatch A valid pointer to a boolean value to the set result of the test.
-//  *                    true value indicates that each CA certificate in \p pCert
-//  *                    has at least one associated CRL in \p pCRL.
-//  *                    Otherwise false.
-//  *
-//  * \note            Content of \p bMatch is unspecified when return value is not SOPC_STATUS_OK.
-//  *
-//  * \return          SOPC_STATUS_OK when successful.
-//  */
-// SOPC_ReturnStatus SOPC_KeyManagerInternal_CertificateList_CheckCRL(SOPC_CertificateList* pCert,
-//                                                                    const SOPC_CRLList* pCRL,
-//                                                                    bool* bMatch);
-
 #endif /* SOPC_KEY_MANAGER_LIB_H_ */

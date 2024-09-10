@@ -37,41 +37,6 @@ TODO :
       (The following issue has been SUBMITTED : https://mantis.opcfoundation.org/view.php?id=8976)
 */
 
-/**
- * \brief Create the PKIProvider from list representation.
- *
- * Notions :
- * - CA is a root CA if it is self-signed.
- * - \p pTrustedCerts = trusted root CA + trusted link CA + trusted cert.
- * - \p pTrustedCrl = CRLs of the trusted root CA + trusted link CA.
- * - \p pIssuerCerts = untrusted root CA + untrusted link CA.
- * - \p pIssuerCrl = CRLs of the untrusted root CA + untrusted link CA.
- * - CAs from trusted/certs and issuers/certs allow to verify the signing chain of a cert which is included into
- *   trusted/certs.
- * - CAs from trusted/certs allow to verify the signing chain of a cert which is not included into trusted/certs.
- *
- * This function checks that :
- * - the number of certificates plus CRLs does not exceed \c SOPC_PKI_MAX_NB_CERT_AND_CRL .
- * - at least one cert from \p pTrustedCerts is provided.
- * - each certificate from \p pIssuerCerts is CA.
- * - each CA has exactly one Certificate Revocation List (CRL).
- *
- * \param pTrustedCerts A valid pointer to the trusted certificate list.
- * \param pTrustedCrl A valid pointer to the trusted CRL list.
- * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if not used.
- * \param pIssuerCrl A valid pointer to the issuer CRL list. NULL if not used.
- * \param[out] ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
- *                   ::SOPC_PKIProvider_Free().
- *
- * \return  SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
- *          and SOPC_STATUS_NOK when there was an error.
- */
-SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrustedCerts,
-                                                  SOPC_CRLList* pTrustedCrl,
-                                                  SOPC_CertificateList* pIssuerCerts,
-                                                  SOPC_CRLList* pIssuerCrl,
-                                                  SOPC_PKIProvider** ppPKI);
-
 /** \brief Verify every certificate of the PKI
  *
  *   Each certificate of the chain is checked for signature, validity and profile.
@@ -80,7 +45,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
  * \param pProfile A valid pointer to the PKI chain profile.
  * \param[out] pErrors Array to store the OpcUa error code when a certificate is invalid.
  * \param[out] ppThumbprints Array to store the certificate thumbprint when a certificate is invalid.
- * \param[out] pLength The length of \p pErrors and \p ppThumbprints .
+ * \param[out] pLength The length of \p pErrors and \p ppThumbprints.
  *
  * \note \p pErrors and \p ppThumbprints are only created and set if the returned status is SOPC_STATUS_NOK.
  *       In case of invalid certificate (SOPC_STATUS_NOK) the thumbprint is associated to the error
@@ -156,65 +121,5 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pTo
  */
 SOPC_ReturnStatus SOPC_PKIProvider_CheckCertificateUsage(const SOPC_CertificateList* pToValidate,
                                                          const SOPC_PKI_LeafProfile* pProfile);
-
-/**
- * \brief Get some statistics about the certificate chain.
- *
- * \param pCert A valid pointer to the certificate chain.
- *
- * \param caCount A valid pointer to store the number of certificate authorities.
- *
- * \param listLength A valid pointer to store the length of the certificate chain.
- *
- * \param rootCount A valid pointer to store the number of self-signed certificates.
- *
- */
-void SOPC_PKIProvider_GetListStats(SOPC_CertificateList* pCert,
-                                   uint32_t* caCount,
-                                   uint32_t* listLength,
-                                   uint32_t* rootCount);
-
-/**
- * \brief Free a PKI provider.
- *
- * \param ppPKI The PKI.
- */
-void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI);
-
-// TODO: complete doc
-/**
- * \brief Delete the roots of the list ppCerts. Create a new list ppRootCa with all roots from ppCerts.
- *        If there is no root, the content of ppRootCa is set to NULL.
- *        If ppCerts becomes empty, its content is set to NULL.
- *
- * \param ppCerts
- *
- * \param ppRootCa
- *
- * \return SOPC_STATUS_OK when successful.
- *
- */
-SOPC_ReturnStatus SOPC_PKIProvider_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
-                                                         SOPC_CertificateList** ppRootCa);
-
-// TODO: complete doc
-/**
- * \brief
- *
- * \param pPKI
- *
- * \param pToValidate
- *
- * \param pProfile
- *
- * \param error
- *
- * \return SOPC_STATUS_OK when successful.
- *
- */
-SOPC_ReturnStatus SOPC_PKIProvider_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
-                                                                 const SOPC_CertificateList* pToValidate,
-                                                                 const SOPC_PKI_Profile* pProfile,
-                                                                 uint32_t* error);
 
 #endif /* SOPC_PKI_STACK_LIB_ITF_H_ */
