@@ -48,7 +48,10 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Initialize(void);
  * \brief Clears the S2OPC client frontend configuration
  *        It shall be done before a call to ::SOPC_CommonHelper_Clear
  *
- * \note The remaining client connection are disconnected and reverse endpoint are closed
+ * \note The remaining client connection are disconnected, subscriptions deleted and reverse endpoint are closed
+ *
+ * \warning The caller must ensure that no further call to access the existing
+ *          configuration, connections and subscriptions after this call.
  */
 void SOPC_ClientConfigHelper_Clear(void);
 
