@@ -77,11 +77,11 @@ typedef enum
  *
  * \warning No blocking operation shall be done in callback
  *
- * \param config  Indicates the connection concerned by the event
+ * \param conn    Indicates the connection concerned by the event
  * \param event   The event that occurred on the connection
  * \param status  Indicates the return status of client connection
  */
-typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
+typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* conn,
                                             SOPC_ClientConnectionEvent event,
                                             SOPC_StatusCode status);
 
