@@ -194,6 +194,10 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
  *          for any other operation and shall be prevented to be used for other operation.
  *          Internal references to \p secureConnection should have been cleared prior to this call.
  *
+ * \warning If a subscription was created on this connection using ::SOPC_ClientHelperNew_CreateSubscription
+ *          and was not deleted since then, it will be automatically deleted and the subscription pointer
+ *          shall not be used anymore after this call.
+ *
  * \param secureConnection  Pointer to the secure connection reference to stop, set to NULL during successful call.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,

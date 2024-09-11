@@ -56,6 +56,9 @@ struct SOPC_ClientConnection
     uint16_t secureConnectionIdx;
     bool isDiscovery;
     SOPC_StaMac_Machine* stateMachine; // only if !isDiscovery
+
+    // Reference on unique subscription (in case of Disconnect call)
+    SOPC_ClientHelper_Subscription* createdSub;
 };
 
 /* The request context is used to manage
@@ -856,10 +859,13 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     SOPC_StaMac_Machine* pSM = NULL;
 
+    SOPC_ClientHelper_Subscription* createdSub = NULL;
+
     if (*secureConnection == sopc_client_helper_config.secureConnections[pSc->secureConnectionIdx])
     {
         status = SOPC_STATUS_OK;
         pSM = pSc->stateMachine;
+        createdSub = pSc->createdSub;
     } // else: SOPC_STATUS_INVALID_STATE;
 
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -869,6 +875,13 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
     if (SOPC_STATUS_OK != status)
     {
         return status;
+    }
+
+    // Delete the subscription if there is still one created
+    if (createdSub != NULL)
+    {
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelperNew_DeleteSubscription(&createdSub);
+        SOPC_UNUSED_RESULT(localStatus); // We still want to disconnect the client connection anyway
     }
 
     if (SOPC_StaMac_IsConnected(pSM))
@@ -1263,6 +1276,11 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
         SOPC_UNUSED_RESULT(SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL));
         SOPC_Free(subInstance);
     }
+    else
+    {
+        // Keep track of the create subscription instance in case it is not deleted on disconnect call
+        secureConnection->createdSub = subInstance;
+    }
 
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -1653,6 +1671,9 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subs
     {
         SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
     }
+
+    // Reset reference from secure connection to the created subscription
+    subscription->secureConnection->createdSub = NULL;
 
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
