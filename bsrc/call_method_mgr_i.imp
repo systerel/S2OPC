@@ -29,7 +29,6 @@ SEES
     message_in_bs,
     message_out_bs,
     request_handle_bs,
-    session_mgr,
     node_id_pointer_bs
 
 DEFINITIONS
@@ -82,10 +81,10 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    StatusCode <-- treat_one_method_call (p_session, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =
+    StatusCode <-- treat_one_method_call (p_user, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =
     PRE
-        p_session : t_session_i &
-        p_session : t_session &
+        p_user    : t_user_i  &
+        p_user    : t_user    &
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = CallMethods_Msg &
@@ -150,10 +149,10 @@ LOCAL_OPERATIONS
     /*
     Check object, method and inputArgument
     */
-    StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg)=
+    StatusCode <-- check_method_call_inputs (p_user, p_req_msg, p_callMethod, p_res_msg)=
     PRE
-        p_session : t_session_i &
-        p_session : t_session &
+        p_user    : t_user_i  &
+        p_user    : t_user    &
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
         p_req_msg = CallMethods_Msg &
@@ -275,16 +274,14 @@ LOCAL_OPERATIONS
 OPERATIONS
 
 
-    StatusCode_service <-- treat_method_call_request (p_session, p_req_msg, p_resp_msg) =
+    StatusCode_service <-- treat_method_call_request (p_user, p_endpoint_config_idx, p_req_msg, p_resp_msg) =
     VAR
-        l_endpoint_config_idx ,
         l_continue,
         l_nb,
         l_status_op,
         l_callMethod
     IN
-        l_endpoint_config_idx <-- session_get_endpoint_config(p_session);
-        IF l_endpoint_config_idx  /= c_endpoint_config_idx_indet THEN
+        IF p_endpoint_config_idx  /= c_endpoint_config_idx_indet THEN
             StatusCode_service, l_nb <-- read_call_method_request (p_req_msg);
             IF StatusCode_service = e_sc_ok THEN
                 l_continue <-- init_iter_callMethods (p_req_msg);
@@ -298,7 +295,7 @@ OPERATIONS
                     WHILE l_continue = TRUE
                     DO
                         l_continue, l_callMethod <-- continue_iter_callMethod;
-                        l_status_op <-- treat_one_method_call (p_session, p_req_msg, p_resp_msg, l_callMethod, l_endpoint_config_idx);
+                        l_status_op <-- treat_one_method_call (p_user, p_req_msg, p_resp_msg, l_callMethod, p_endpoint_config_idx);
                         IF l_status_op = e_sc_bad_out_of_memory THEN
                             l_continue := FALSE;
                             StatusCode_service := e_sc_bad_out_of_memory
@@ -323,14 +320,14 @@ OPERATIONS
 
     /* LOCAL OPERATIONS */
 
-    StatusCode <-- treat_one_method_call (p_session, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =
+    StatusCode <-- treat_one_method_call (p_user, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =
     VAR
         l_rawStatusCode,
         l_method_call_pointer,
         l_nb_out,
         l_arguments_out
     IN
-        StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg);
+        StatusCode <-- check_method_call_inputs (p_user, p_req_msg, p_callMethod, p_res_msg);
         l_rawStatusCode <-- getall_conv_StatusCode_To_RawStatusCode(StatusCode);
         IF StatusCode  = e_sc_ok THEN
             l_method_call_pointer <-- read_CallMethod_Pointer (p_req_msg, p_callMethod);
@@ -345,14 +342,13 @@ OPERATIONS
     END
     ;
 
-    StatusCode <-- check_method_call_inputs (p_session, p_req_msg, p_callMethod, p_res_msg)=
+    StatusCode <-- check_method_call_inputs (p_user, p_req_msg, p_callMethod, p_res_msg)=
     VAR
         l_object,
         l_objectid,
         l_method,
         l_methodid,
         l_nodeClass,
-        l_user,
         l_valid_executable,
         l_valid_user_executable,
         l_object_has_method
@@ -367,9 +363,8 @@ OPERATIONS
                 l_nodeClass <-- get_NodeClass(l_method);
                 IF l_nodeClass = e_ncl_Method THEN
                     /* method is executable by user */
-                    l_user <-- get_session_user_server(p_session);
                     l_valid_executable <-- has_access_level_executable(l_method);
-                    l_valid_user_executable <-- get_user_authorization (e_operation_type_executable, l_methodid, e_aid_UserExecutable, l_user);
+                    l_valid_user_executable <-- get_user_authorization (e_operation_type_executable, l_methodid, e_aid_UserExecutable, p_user);
                     IF l_valid_executable = TRUE &
                         l_valid_user_executable = TRUE
                     THEN

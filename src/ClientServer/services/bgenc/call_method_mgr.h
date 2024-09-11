@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 24/07/2024 17:29:51
+ Date                 : 29/07/2024 16:48:48
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -54,7 +54,6 @@
 #include "message_out_bs.h"
 #include "node_id_pointer_bs.h"
 #include "request_handle_bs.h"
-#include "session_mgr.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -109,7 +108,7 @@ extern void call_method_mgr__check_method_call_arguments(
    const constants__t_msg_i call_method_mgr__p_res_msg,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode);
 extern void call_method_mgr__check_method_call_inputs(
-   const constants__t_session_i call_method_mgr__p_session,
+   const constants__t_user_i call_method_mgr__p_user,
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_CallMethod_i call_method_mgr__p_callMethod,
    const constants__t_msg_i call_method_mgr__p_res_msg,
@@ -119,7 +118,7 @@ extern void call_method_mgr__check_method_call_one_argument_type(
    const constants__t_Argument_i call_method_mgr__p_arg,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode);
 extern void call_method_mgr__treat_one_method_call(
-   const constants__t_session_i call_method_mgr__p_session,
+   const constants__t_user_i call_method_mgr__p_user,
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_msg_i call_method_mgr__p_res_msg,
    const constants__t_CallMethod_i call_method_mgr__p_callMethod,
@@ -130,7 +129,8 @@ extern void call_method_mgr__treat_one_method_call(
    OPERATIONS Clause
   --------------------*/
 extern void call_method_mgr__treat_method_call_request(
-   const constants__t_session_i call_method_mgr__p_session,
+   const constants__t_user_i call_method_mgr__p_user,
+   const constants__t_endpoint_config_idx_i call_method_mgr__p_endpoint_config_idx,
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_msg_i call_method_mgr__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode_service);

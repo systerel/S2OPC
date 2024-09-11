@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 02/12/2024 16:41:01
+ Date                 : 09/12/2024 16:55:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -42,20 +42,18 @@ void call_method_mgr__INITIALISATION(void) {
    OPERATIONS Clause
   --------------------*/
 void call_method_mgr__treat_method_call_request(
-   const constants__t_session_i call_method_mgr__p_session,
+   const constants__t_user_i call_method_mgr__p_user,
+   const constants__t_endpoint_config_idx_i call_method_mgr__p_endpoint_config_idx,
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_msg_i call_method_mgr__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode_service) {
    {
-      constants__t_endpoint_config_idx_i call_method_mgr__l_endpoint_config_idx;
       t_bool call_method_mgr__l_continue;
       t_entier4 call_method_mgr__l_nb;
       constants_statuscodes_bs__t_StatusCode_i call_method_mgr__l_status_op;
       constants__t_CallMethod_i call_method_mgr__l_callMethod;
       
-      session_mgr__session_get_endpoint_config(call_method_mgr__p_session,
-         &call_method_mgr__l_endpoint_config_idx);
-      if (call_method_mgr__l_endpoint_config_idx != constants__c_endpoint_config_idx_indet) {
+      if (call_method_mgr__p_endpoint_config_idx != constants__c_endpoint_config_idx_indet) {
          msg_call_method_bs__read_call_method_request(call_method_mgr__p_req_msg,
             call_method_mgr__StatusCode_service,
             &call_method_mgr__l_nb);
@@ -76,11 +74,11 @@ void call_method_mgr__treat_method_call_request(
                while (call_method_mgr__l_continue == true) {
                   call_method_it__continue_iter_callMethod(&call_method_mgr__l_continue,
                      &call_method_mgr__l_callMethod);
-                  call_method_mgr__treat_one_method_call(call_method_mgr__p_session,
+                  call_method_mgr__treat_one_method_call(call_method_mgr__p_user,
                      call_method_mgr__p_req_msg,
                      call_method_mgr__p_resp_msg,
                      call_method_mgr__l_callMethod,
-                     call_method_mgr__l_endpoint_config_idx,
+                     call_method_mgr__p_endpoint_config_idx,
                      &call_method_mgr__l_status_op);
                   if (call_method_mgr__l_status_op == constants_statuscodes_bs__e_sc_bad_out_of_memory) {
                      call_method_mgr__l_continue = false;
@@ -97,7 +95,7 @@ void call_method_mgr__treat_method_call_request(
 }
 
 void call_method_mgr__treat_one_method_call(
-   const constants__t_session_i call_method_mgr__p_session,
+   const constants__t_user_i call_method_mgr__p_user,
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_msg_i call_method_mgr__p_res_msg,
    const constants__t_CallMethod_i call_method_mgr__p_callMethod,
@@ -109,7 +107,7 @@ void call_method_mgr__treat_one_method_call(
       t_entier4 call_method_mgr__l_nb_out;
       constants__t_ArgumentsPointer_i call_method_mgr__l_arguments_out;
       
-      call_method_mgr__check_method_call_inputs(call_method_mgr__p_session,
+      call_method_mgr__check_method_call_inputs(call_method_mgr__p_user,
          call_method_mgr__p_req_msg,
          call_method_mgr__p_callMethod,
          call_method_mgr__p_res_msg,
@@ -142,7 +140,7 @@ void call_method_mgr__treat_one_method_call(
 }
 
 void call_method_mgr__check_method_call_inputs(
-   const constants__t_session_i call_method_mgr__p_session,
+   const constants__t_user_i call_method_mgr__p_user,
    const constants__t_msg_i call_method_mgr__p_req_msg,
    const constants__t_CallMethod_i call_method_mgr__p_callMethod,
    const constants__t_msg_i call_method_mgr__p_res_msg,
@@ -153,7 +151,6 @@ void call_method_mgr__check_method_call_inputs(
       constants__t_Node_i call_method_mgr__l_method;
       constants__t_NodeId_i call_method_mgr__l_methodid;
       constants__t_NodeClass_i call_method_mgr__l_nodeClass;
-      constants__t_user_i call_method_mgr__l_user;
       t_bool call_method_mgr__l_valid_executable;
       t_bool call_method_mgr__l_valid_user_executable;
       t_bool call_method_mgr__l_object_has_method;
@@ -175,14 +172,12 @@ void call_method_mgr__check_method_call_inputs(
             service_write__get_NodeClass(call_method_mgr__l_method,
                &call_method_mgr__l_nodeClass);
             if (call_method_mgr__l_nodeClass == constants__e_ncl_Method) {
-               session_mgr__get_session_user_server(call_method_mgr__p_session,
-                  &call_method_mgr__l_user);
                service_write__has_access_level_executable(call_method_mgr__l_method,
                   &call_method_mgr__l_valid_executable);
                service_write__get_user_authorization(constants__e_operation_type_executable,
                   call_method_mgr__l_methodid,
                   constants__e_aid_UserExecutable,
-                  call_method_mgr__l_user,
+                  call_method_mgr__p_user,
                   &call_method_mgr__l_valid_user_executable);
                if ((call_method_mgr__l_valid_executable == true) &&
                   (call_method_mgr__l_valid_user_executable == true)) {

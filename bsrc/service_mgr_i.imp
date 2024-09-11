@@ -738,7 +738,8 @@ OPERATIONS
             OR e_msg_monitored_items_set_monitoring_mode_req THEN
                 StatusCode_service <-- treat_subscription_set_monit_mode_monitored_items_req (session, req_msg, resp_msg)
             OR e_msg_method_call_req THEN
-                StatusCode_service <-- treat_method_call_request (session, req_msg, resp_msg)
+                l_user <-- get_session_user_server(session);
+                StatusCode_service <-- treat_method_call_request (l_user, endpoint_config_idx, req_msg, resp_msg)
             OR e_msg_node_add_nodes_req THEN
                 l_bres <-- is_ClientNodeManagementActive;
                 IF l_bres = TRUE
