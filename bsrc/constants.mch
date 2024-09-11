@@ -116,6 +116,17 @@ SETS
     t_CallMethodPointer_i;
     t_Argument_i;
     t_ArgumentsPointer_i;
+    t_Identity_i;
+    t_CriteriaType_i = {c_CriteriaType_indet,
+                        e_CriteriaType_username,
+                        e_CriteriaType_thumbprint,
+                        e_CriteriaType_role,
+                        e_CriteriaType_groupId,
+                        e_CriteriaType_anonymous,
+                        e_CriteriaType_authenticatedUser,
+                        e_CriteriaType_application
+                        };
+    t_Criteria_i; /* (SOPC_String*) */
     t_NodeAttributes_i;
     t_session_token_i; /* (SOPC_NodeId*) */
     t_user_i; /* Server-side user */
@@ -325,7 +336,10 @@ SETS
     t_DataTypeDefinition_i; /* (SOPC_ExtensionObject*) */
     t_ServerUri; /* (SOPC_String*) */
     t_ServerUris; /* (SOPC_String[]) */
-    t_ServerCapabilities /* SOPC_ServerCapabilities_Internal */
+    t_ServerCapabilities; /* SOPC_ServerCapabilities_Internal */
+
+    /* Roles */
+    t_sessionRoles_i /* (SOPC_SLinkedList*) */
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
@@ -359,6 +373,12 @@ CONCRETE_CONSTANTS
     c_HierarchicalReferences_Type_NodeId,
     c_Server_NodeId,
     c_BaseEventType_NodeId,
+    c_Server_ServerCapabilities_RoleSet_NodeId,
+    c_RoleType_NodeId,
+    c_HasComponentType_NodeId,
+    c_HasPropertyType_NodeId,
+
+    c_Identities_QualifiedName,
 
     c_Variant_indet,
     c_DataValue_indet,
@@ -390,6 +410,8 @@ CONCRETE_CONSTANTS
     c_CallMethod_indet,
     c_CallMethodPointer_indet,
     c_Argument_indet,
+    c_Identity_indet,
+    c_Criteria_indet,
     c_ArgumentsPointer_indet,
     c_NodeAttributes_indet,
     c_session_token_indet,
@@ -403,6 +425,8 @@ CONCRETE_CONSTANTS
     c_opcua_duration_indet,
     c_opcua_duration_zero,
     c_notificationQueue_indet,
+    c_sessionRoles_indet,
+    c_sessionRoles_empty,
     c_publishReqQueue_indet,
     c_notifRepublishQueue_indet,
     c_notifRepublishQueueIterator_indet,
@@ -513,6 +537,8 @@ ABSTRACT_CONSTANTS
     t_CallMethodPointer,
     t_Argument,
     t_ArgumentsPointer,
+    t_Identity,
+    t_Criteria,
     t_NodeAttributes,
     t_session_token,
     t_user,
@@ -526,6 +552,7 @@ ABSTRACT_CONSTANTS
     t_sub_seq_num,
     t_timeref,
     t_notificationQueue,
+    t_sessionRoles,
     t_publishReqQueue,
     t_notifRepublishQueue,
     t_notifRepublishQueueIterator,
@@ -634,10 +661,45 @@ PROPERTIES
     c_BaseEventType_NodeId /= c_HierarchicalReferences_Type_NodeId &
     c_BaseEventType_NodeId /= c_Server_NodeId &
 
+    c_Server_ServerCapabilities_RoleSet_NodeId : t_NodeId_i &
+    c_Server_ServerCapabilities_RoleSet_NodeId : t_NodeId &
+
+    c_Server_ServerCapabilities_RoleSet_NodeId /= c_Null_Type_NodeId &
+    c_Server_ServerCapabilities_RoleSet_NodeId /= c_ByteString_Type_NodeId &
+    c_Server_ServerCapabilities_RoleSet_NodeId /= c_Byte_Type_NodeId &
+    c_Server_ServerCapabilities_RoleSet_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_Server_ServerCapabilities_RoleSet_NodeId /= c_Server_NodeId &
+
+    c_RoleType_NodeId : t_NodeId_i &
+    c_RoleType_NodeId : t_NodeId &
+
+    c_RoleType_NodeId /= c_Null_Type_NodeId &
+    c_RoleType_NodeId /= c_ByteString_Type_NodeId &
+    c_RoleType_NodeId /= c_Byte_Type_NodeId &
+    c_RoleType_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_RoleType_NodeId /= c_Server_NodeId &
+
+    c_HasComponentType_NodeId : t_NodeId_i &
+    c_HasComponentType_NodeId : t_NodeId &
+
+    c_HasComponentType_NodeId /= c_Null_Type_NodeId &
+    c_HasComponentType_NodeId /= c_ByteString_Type_NodeId &
+    c_HasComponentType_NodeId /= c_Byte_Type_NodeId &
+    c_HasComponentType_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_HasComponentType_NodeId /= c_Server_NodeId &
+
+    c_HasPropertyType_NodeId : t_NodeId_i &
+    c_HasPropertyType_NodeId : t_NodeId &
+
+    c_HasPropertyType_NodeId /= c_Null_Type_NodeId &
+    c_HasPropertyType_NodeId /= c_ByteString_Type_NodeId &
+    c_HasPropertyType_NodeId /= c_Byte_Type_NodeId &
+    c_HasPropertyType_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_HasPropertyType_NodeId /= c_Server_NodeId &
+
     t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet /: t_ExpandedNodeId &
-
 
     t_Reference <: t_Reference_i &
     c_Reference_indet : t_Reference_i &
@@ -742,6 +804,9 @@ PROPERTIES
     c_QualifiedName_indet : t_QualifiedName_i &
     c_QualifiedName_indet /: t_QualifiedName &
 
+    c_Identities_QualifiedName : t_QualifiedName_i &
+    c_Identities_QualifiedName /: t_QualifiedName &
+
     t_Event <: t_Event_i &
     c_Event_indet : t_Event_i &
     c_Event_indet /: t_Event &
@@ -807,6 +872,14 @@ PROPERTIES
     t_ArgumentsPointer <: t_ArgumentsPointer_i &
     c_ArgumentsPointer_indet : t_ArgumentsPointer_i &
     c_ArgumentsPointer_indet /: t_ArgumentsPointer &
+
+    t_Identity <: t_Identity_i &
+    c_Identity_indet : t_Identity_i &
+    c_Identity_indet /: t_Identity &
+
+    t_Criteria <: t_Criteria_i &
+    c_Criteria_indet : t_Criteria_i &
+    c_Criteria_indet /: t_Criteria &
 
     t_NodeAttributes <: t_NodeAttributes_i &
     c_NodeAttributes_indet : t_NodeAttributes_i &
@@ -878,6 +951,12 @@ PROPERTIES
     t_notificationQueue <: t_notificationQueue_i &
     c_notificationQueue_indet : t_notificationQueue_i &
     c_notificationQueue_indet /: t_notificationQueue &
+
+    t_sessionRoles <: t_sessionRoles_i &
+    c_sessionRoles_indet : t_sessionRoles_i &
+    c_sessionRoles_indet /: t_sessionRoles &
+    c_sessionRoles_empty : t_sessionRoles_i &
+    c_sessionRoles_empty : t_sessionRoles &
 
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
@@ -1384,6 +1463,15 @@ OPERATIONS
     PRE
         p_in : t_ExpandedNodeId_i &
         p_in : t_ExpandedNodeId
+    THEN
+        skip
+    END
+    ;
+
+    free_roles(p_in) =
+    PRE
+        p_in : t_sessionRoles_i &
+        p_in : t_sessionRoles
     THEN
         skip
     END

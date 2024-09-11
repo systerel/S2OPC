@@ -31,6 +31,7 @@ SEES
 DEFINITIONS
     d_variables ==
     s_session,
+    a_session_roles,
     s_client_session,
     a_state,
     a_channel,
@@ -50,6 +51,7 @@ DEFINITIONS
 
     d_typing ==
     s_session                   <: t_session                             &
+    a_session_roles              : t_session +-> t_sessionRoles          &
     s_client_session            <: t_session                             &
     a_state                      : t_session +-> t_sessionState          &
     a_channel                    : t_session +-> t_channel               &
@@ -75,6 +77,7 @@ INVARIANT
 
 INITIALISATION
     s_session                    := {} ||
+    a_session_roles              := {} ||
     s_client_session             := {} ||
     a_state                      := {} ||
     a_channel                    := {} ||
@@ -93,6 +96,27 @@ INITIALISATION
     a_server_client_locales := t_session * {c_LocaleIds_empty}
 
 OPERATIONS
+
+    set_session_roles(p_session, p_roles) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_roles : t_sessionRoles_i &
+        p_roles : t_sessionRoles
+    THEN
+        a_session_roles(p_session) := p_roles
+    END
+    ;
+
+    p_session_roles <-- get_session_roles(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        a_state(p_session) = e_session_userActivated
+    THEN
+        p_session_roles :(p_session_roles : t_sessionRoles_i & p_session_roles = a_session_roles(p_session))
+    END
+    ;
 
     session <-- server_get_session_from_token (session_token) =
     PRE
@@ -266,6 +290,7 @@ OPERATIONS
         is_client : BOOL
     THEN
         s_session                    := s_session - {session}                      ||
+        a_session_roles              := {session} <<| a_session_roles              ||
         a_state                      := {session} <<| a_state                      ||
         a_channel                    := {session} <<| a_channel                    || /* If session had a channel, remove this relation */
         a_client_to_create           := {session} <<| a_client_to_create           ||

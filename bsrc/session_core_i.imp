@@ -36,6 +36,7 @@ SEES
     time_reference_bs
 
 IMPORTS
+    session_roles,
     session_core_1,
     session_core_it,
     session_channel_it,
@@ -71,7 +72,10 @@ PROMOTES
     has_user_token_policy_available,
     allocate_x509_token_from_user,
     is_valid_user_x509_authentication,
-    deallocate_x509_token
+    deallocate_x509_token,
+    get_user_roles,
+    set_session_roles,
+    get_session_roles
 
 LOCAL_OPERATIONS
 

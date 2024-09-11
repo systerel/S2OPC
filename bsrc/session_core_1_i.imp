@@ -91,7 +91,8 @@ PROMOTES
     client_create_session_set_user_token_secu_properties,
     get_session_user_server_certificate,
     client_set_NonceServer,
-    sign_user_token
+    sign_user_token,
+    get_session_roles
 
 LOCAL_OPERATIONS
 
@@ -105,6 +106,15 @@ LOCAL_OPERATIONS
         is_client : BOOL
     THEN
         a_state(p_session) := p_state
+    END
+    ;
+
+    l_delete_session_roles(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : dom(a_state)
+    THEN
+        a_session_roles(p_session) := c_sessionRoles_indet
     END
     ;
 
@@ -130,6 +140,15 @@ OPERATIONS
     END
     ;
 
+    l_delete_session_roles(p_session) =
+    VAR
+        l_old_roles
+    IN
+        l_old_roles <-- reset_server_session_roles(p_session);
+        free_roles(l_old_roles)
+    END
+    ;
+
     l_reset_server_session_preferred_locales(p_session) =
     VAR
         l_old_localeIds
@@ -143,6 +162,13 @@ OPERATIONS
     ;
 
     /* Global operations */
+
+    set_session_roles(p_session, p_roles) =
+    BEGIN
+        l_delete_session_roles(p_session);
+        set_session_roles_2(p_session, p_roles)
+    END
+    ;
 
     p_session <-- init_new_session (is_client) =
     VAR
@@ -213,7 +239,7 @@ OPERATIONS
 
         reset_session_channel(session);
         // a_channel
-
+        l_delete_session_roles(session);
         delete_session_token(session, is_client);
         // a_server_token
         // a_client_token

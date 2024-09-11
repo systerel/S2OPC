@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 28/11/2024 09:51:34
+ Date                 : 09/12/2024 17:00:49
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,10 +56,12 @@
 #define constants__t_CallMethod_i constants_bs__t_CallMethod_i
 #define constants__t_ContinuationPointId_i constants_bs__t_ContinuationPointId_i
 #define constants__t_ContinuationPoint_i constants_bs__t_ContinuationPoint_i
+#define constants__t_Criteria_i constants_bs__t_Criteria_i
 #define constants__t_DataTypeDefinition_i constants_bs__t_DataTypeDefinition_i
 #define constants__t_DataValue_i constants_bs__t_DataValue_i
 #define constants__t_Event_i constants_bs__t_Event_i
 #define constants__t_ExpandedNodeId_i constants_bs__t_ExpandedNodeId_i
+#define constants__t_Identity_i constants_bs__t_Identity_i
 #define constants__t_IndexRange_i constants_bs__t_IndexRange_i
 #define constants__t_Int32 constants_bs__t_Int32
 #define constants__t_LocaleIds_i constants_bs__t_LocaleIds_i
@@ -112,6 +114,7 @@
 #define constants__t_request_context_i constants_bs__t_request_context_i
 #define constants__t_reverse_endpoint_config_idx_i constants_bs__t_reverse_endpoint_config_idx_i
 #define constants__t_server_request_handle_i constants_bs__t_server_request_handle_i
+#define constants__t_sessionRoles_i constants_bs__t_sessionRoles_i
 #define constants__t_session_application_context_i constants_bs__t_session_application_context_i
 #define constants__t_session_i constants_bs__t_session_i
 #define constants__t_session_token_i constants_bs__t_session_token_i
@@ -165,6 +168,16 @@ typedef enum {
    constants__e_bd_inverse,
    constants__e_bd_both
 } constants__t_BrowseDirection_i;
+typedef enum {
+   constants__c_CriteriaType_indet,
+   constants__e_CriteriaType_username,
+   constants__e_CriteriaType_thumbprint,
+   constants__e_CriteriaType_role,
+   constants__e_CriteriaType_groupId,
+   constants__e_CriteriaType_anonymous,
+   constants__e_CriteriaType_authenticatedUser,
+   constants__e_CriteriaType_application
+} constants__t_CriteriaType_i;
 typedef enum {
    constants__c_NodeClass_indet,
    constants__e_ncl_Object,
@@ -346,10 +359,12 @@ typedef enum {
 #define constants__t_CallMethod_i_max constants_bs__t_CallMethod_i_max
 #define constants__t_ContinuationPointId_i_max constants_bs__t_ContinuationPointId_i_max
 #define constants__t_ContinuationPoint_i_max constants_bs__t_ContinuationPoint_i_max
+#define constants__t_Criteria_i_max constants_bs__t_Criteria_i_max
 #define constants__t_DataTypeDefinition_i_max constants_bs__t_DataTypeDefinition_i_max
 #define constants__t_DataValue_i_max constants_bs__t_DataValue_i_max
 #define constants__t_Event_i_max constants_bs__t_Event_i_max
 #define constants__t_ExpandedNodeId_i_max constants_bs__t_ExpandedNodeId_i_max
+#define constants__t_Identity_i_max constants_bs__t_Identity_i_max
 #define constants__t_IndexRange_i_max constants_bs__t_IndexRange_i_max
 #define constants__t_Int32_max constants_bs__t_Int32_max
 #define constants__t_LocaleIds_i_max constants_bs__t_LocaleIds_i_max
@@ -402,6 +417,7 @@ typedef enum {
 #define constants__t_request_context_i_max constants_bs__t_request_context_i_max
 #define constants__t_reverse_endpoint_config_idx_i_max constants_bs__t_reverse_endpoint_config_idx_i_max
 #define constants__t_server_request_handle_i_max constants_bs__t_server_request_handle_i_max
+#define constants__t_sessionRoles_i_max constants_bs__t_sessionRoles_i_max
 #define constants__t_session_application_context_i_max constants_bs__t_session_application_context_i_max
 #define constants__t_session_i_max constants_bs__t_session_i_max
 #define constants__t_session_token_i_max constants_bs__t_session_token_i_max
@@ -434,11 +450,16 @@ typedef enum {
 #define constants__c_CallMethod_indet constants_bs__c_CallMethod_indet
 #define constants__c_ContinuationPointId_indet constants_bs__c_ContinuationPointId_indet
 #define constants__c_ContinuationPoint_indet constants_bs__c_ContinuationPoint_indet
+#define constants__c_Criteria_indet constants_bs__c_Criteria_indet
 #define constants__c_DataTypeDefinition_indet constants_bs__c_DataTypeDefinition_indet
 #define constants__c_DataValue_indet constants_bs__c_DataValue_indet
 #define constants__c_Event_indet constants_bs__c_Event_indet
 #define constants__c_ExpandedNodeId_indet constants_bs__c_ExpandedNodeId_indet
+#define constants__c_HasComponentType_NodeId constants_bs__c_HasComponentType_NodeId
+#define constants__c_HasPropertyType_NodeId constants_bs__c_HasPropertyType_NodeId
 #define constants__c_HierarchicalReferences_Type_NodeId constants_bs__c_HierarchicalReferences_Type_NodeId
+#define constants__c_Identities_QualifiedName constants_bs__c_Identities_QualifiedName
+#define constants__c_Identity_indet constants_bs__c_Identity_indet
 #define constants__c_IndexRange_indet constants_bs__c_IndexRange_indet
 #define constants__c_LocaleIds_empty constants_bs__c_LocaleIds_empty
 #define constants__c_LocaleIds_indet constants_bs__c_LocaleIds_indet
@@ -455,9 +476,11 @@ typedef enum {
 #define constants__c_RegisteredServer_indet constants_bs__c_RegisteredServer_indet
 #define constants__c_RelativePathElt_indet constants_bs__c_RelativePathElt_indet
 #define constants__c_RelativePath_indet constants_bs__c_RelativePath_indet
+#define constants__c_RoleType_NodeId constants_bs__c_RoleType_NodeId
 #define constants__c_ServerUri_empty constants_bs__c_ServerUri_empty
 #define constants__c_Server_Nano_Extended constants_bs__c_Server_Nano_Extended
 #define constants__c_Server_NodeId constants_bs__c_Server_NodeId
+#define constants__c_Server_ServerCapabilities_RoleSet_NodeId constants_bs__c_Server_ServerCapabilities_RoleSet_NodeId
 #define constants__c_SignatureData_indet constants_bs__c_SignatureData_indet
 #define constants__c_Timestamp_null constants_bs__c_Timestamp_null
 #define constants__c_Variant_indet constants_bs__c_Variant_indet
@@ -492,6 +515,8 @@ typedef enum {
 #define constants__c_request_context_indet constants_bs__c_request_context_indet
 #define constants__c_reverse_endpoint_config_idx_indet constants_bs__c_reverse_endpoint_config_idx_indet
 #define constants__c_server_request_handle_any constants_bs__c_server_request_handle_any
+#define constants__c_sessionRoles_empty constants_bs__c_sessionRoles_empty
+#define constants__c_sessionRoles_indet constants_bs__c_sessionRoles_indet
 #define constants__c_session_activation_min_delay constants_bs__c_session_activation_min_delay
 #define constants__c_session_indet constants_bs__c_session_indet
 #define constants__c_session_token_indet constants_bs__c_session_token_indet
@@ -540,6 +565,7 @@ extern void constants__INITIALISATION(void);
   -------------------------------*/
 #define constants__free_ExpandedNodeId constants_bs__free_ExpandedNodeId
 #define constants__free_LocaleIds constants_bs__free_LocaleIds
+#define constants__free_roles constants_bs__free_roles
 #define constants__get_CurrentTimestamp constants_bs__get_CurrentTimestamp
 #define constants__get_SupportedLocales constants_bs__get_SupportedLocales
 #define constants__get_card_t_channel constants_bs__get_card_t_channel

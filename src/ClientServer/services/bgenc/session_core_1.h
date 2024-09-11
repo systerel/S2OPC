@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 27/11/2024 09:15:50
+ Date                 : 09/12/2024 17:00:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -83,6 +83,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__get_server_session_preferred_locales session_core_2__get_server_session_preferred_locales
 #define session_core_1__get_session_app_context session_core_bs__get_session_app_context
 #define session_core_1__get_session_channel session_core_2__get_session_channel
+#define session_core_1__get_session_roles session_core_2__get_session_roles
 #define session_core_1__get_session_state session_core_2__get_session_state
 #define session_core_1__get_session_user_client session_core_bs__get_session_user_client
 #define session_core_1__get_session_user_secu_client session_core_bs__get_session_user_secu_client
@@ -119,6 +120,8 @@ extern void session_core_1__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void session_core_1__l_delete_session_roles(
+   const constants__t_session_i session_core_1__p_session);
 extern void session_core_1__l_reset_server_session_preferred_locales(
    const constants__t_session_i session_core_1__p_session);
 extern void session_core_1__l_set_session_state(
@@ -152,6 +155,9 @@ extern void session_core_1__set_server_session_preferred_locales_or_indet(
 extern void session_core_1__set_session_orphaned(
    const constants__t_session_i session_core_1__session,
    const constants__t_channel_config_idx_i session_core_1__channel_config_idx);
+extern void session_core_1__set_session_roles(
+   const constants__t_session_i session_core_1__p_session,
+   const constants__t_sessionRoles_i session_core_1__p_roles);
 extern void session_core_1__set_session_state(
    const constants__t_session_i session_core_1__session,
    const constants__t_sessionState_i session_core_1__state,

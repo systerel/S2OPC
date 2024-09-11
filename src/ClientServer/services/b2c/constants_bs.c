@@ -33,19 +33,35 @@
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 
-static SOPC_NodeId ByteString_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ByteString);
-static SOPC_NodeId Byte_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Byte);
-static SOPC_NodeId Null_Type = SOPC_NODEID_NS0_NUMERIC(0);
-static SOPC_NodeId HierarchicalReferences_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HierarchicalReferences);
-static SOPC_NodeId Server_NodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server);
-static SOPC_NodeId BaseEventType_NodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
+static SOPC_NodeId ByteString_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ByteString);
+static SOPC_NodeId Byte_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Byte);
+static SOPC_NodeId Null_Type = SOPC_NS0_NUMERIC_NODEID(0);
+static SOPC_NodeId HasComponent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasComponent);
+static SOPC_NodeId HasProperty_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasProperty);
+static SOPC_NodeId HierarchicalReferences_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HierarchicalReferences);
+static SOPC_NodeId Server_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server);
+static SOPC_NodeId BaseEventType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
+static SOPC_NodeId Server_ServerCapabilities_RoleSet_NodeId =
+    SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server_ServerCapabilities_RoleSet);
+static SOPC_NodeId RoleType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_RoleType);
 
 const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId = &ByteString_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId = &Byte_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId = &Null_Type;
+const constants_bs__t_NodeId_i constants_bs__c_HasComponentType_NodeId = &HasComponent_Type;
+const constants_bs__t_NodeId_i constants_bs__c_HasPropertyType_NodeId = &HasProperty_Type;
 const constants_bs__t_NodeId_i constants_bs__c_HierarchicalReferences_Type_NodeId = &HierarchicalReferences_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Server_NodeId = &Server_NodeId;
 const constants_bs__t_NodeId_i constants_bs__c_BaseEventType_NodeId = &BaseEventType_NodeId;
+const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_RoleSet_NodeId =
+    &Server_ServerCapabilities_RoleSet_NodeId;
+const constants_bs__t_NodeId_i constants_bs__c_RoleType_NodeId = &RoleType_NodeId;
+
+#define Identities_QualifiedName_Len 10
+static SOPC_QualifiedName Identities_QualifiedName = {.Name.Data = (unsigned char*) "Identities",
+                                                      .Name.Length = Identities_QualifiedName_Len,
+                                                      .NamespaceIndex = OPCUA_NAMESPACE_INDEX};
+const constants_bs__t_QualifiedName_i constants_bs__c_Identities_QualifiedName = &Identities_QualifiedName;
 
 static char* EmptyLocaleIds[] = {NULL};
 constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty = EmptyLocaleIds;
@@ -242,6 +258,12 @@ void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i co
         SOPC_Free(constants_bs__p_in);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
+}
+
+void constants_bs__free_roles(const constants_bs__t_sessionRoles_i constants_bs__p_in)
+{
+    // Delete the references to the nodeIds in the LinkedList, and delete the LinkedList
+    SOPC_SLinkedList_Delete(constants_bs__p_in);
 }
 
 void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in)

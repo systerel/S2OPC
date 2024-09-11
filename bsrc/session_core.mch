@@ -30,6 +30,7 @@ SEES
 DEFINITIONS
     d_variables ==
     s_session,
+    a_session_roles,
     a_state,
     a_channel,
     a_client_to_create,
@@ -44,6 +45,7 @@ DEFINITIONS
 
     d_typing ==
     s_session <: t_session &
+    a_session_roles : s_session --> t_sessionRoles & // a session shall be associated to roles
     a_state : s_session --> t_sessionState & // a session shall be associated to a state
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
     a_client_to_create : s_session +-> t_channel_config_idx_i & // a client session may be waiting to be created on a channel (not yet established)
@@ -60,6 +62,7 @@ DEFINITIONS
 
     d_init ==
     s_session                    := {} ||
+    a_session_roles              := {} ||
     a_state                      := {} ||
     a_channel                    := {} ||
     a_client_to_create           := {} ||
@@ -124,6 +127,41 @@ INITIALISATION
     d_init
 
 OPERATIONS
+
+    /* Evaluate the roles of the user */
+    p_roles <-- get_user_roles(p_user, p_locales) =
+    PRE
+        p_user : t_user_i &
+        p_user : t_user &
+        p_locales : t_LocaleIds_i &
+        p_locales : t_LocaleIds
+    THEN
+        p_roles :: t_sessionRoles_i
+    END
+    ;
+
+    /* Store the roles in the session */
+    set_session_roles(p_session, p_roles) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        a_state(p_session) = e_session_userActivated &
+        p_roles : t_sessionRoles_i
+    THEN
+        a_session_roles(p_session) := p_roles
+    END
+    ;
+
+    /* Get the roles of the session */
+    p_session_roles <-- get_session_roles(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        a_state(p_session) = e_session_userActivated
+    THEN
+        p_session_roles :(p_session_roles : t_sessionRoles_i & p_session_roles = a_session_roles(p_session))
+    END
+    ;
 
     /* Note: _sm suffix is for (session) State Machine, to indicate a transition */
 

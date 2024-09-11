@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 27/11/2024 09:15:50
+ Date                 : 09/12/2024 17:00:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -60,6 +60,17 @@ void session_core_1__l_set_session_state(
    }
 }
 
+void session_core_1__l_delete_session_roles(
+   const constants__t_session_i session_core_1__p_session) {
+   {
+      constants__t_sessionRoles_i session_core_1__l_old_roles;
+      
+      session_core_2__reset_server_session_roles(session_core_1__p_session,
+         &session_core_1__l_old_roles);
+      constants__free_roles(session_core_1__l_old_roles);
+   }
+}
+
 void session_core_1__l_reset_server_session_preferred_locales(
    const constants__t_session_i session_core_1__p_session) {
    {
@@ -71,6 +82,14 @@ void session_core_1__l_reset_server_session_preferred_locales(
          constants__free_LocaleIds(session_core_1__l_old_localeIds);
       }
    }
+}
+
+void session_core_1__set_session_roles(
+   const constants__t_session_i session_core_1__p_session,
+   const constants__t_sessionRoles_i session_core_1__p_roles) {
+   session_core_1__l_delete_session_roles(session_core_1__p_session);
+   session_core_2__set_session_roles_2(session_core_1__p_session,
+      session_core_1__p_roles);
 }
 
 void session_core_1__init_new_session(
@@ -150,6 +169,7 @@ void session_core_1__set_session_state_closed(
          session_core_1__sc_reason,
          session_core_1__is_client);
       session_core_2__reset_session_channel(session_core_1__session);
+      session_core_1__l_delete_session_roles(session_core_1__session);
       session_core_bs__delete_session_token(session_core_1__session,
          session_core_1__is_client);
       session_core_2__reset_session_to_create(session_core_1__session);

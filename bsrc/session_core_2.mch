@@ -29,6 +29,7 @@ SEES
 
 ABSTRACT_VARIABLES
     s_session,
+    a_session_roles,
     s_client_session,
     a_state,
     a_session_init_time,
@@ -41,6 +42,7 @@ ABSTRACT_VARIABLES
 
 INVARIANT
     s_session         <: t_session                            &
+    a_session_roles    : t_session +-> t_sessionRoles         &
     s_client_session  <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
     a_session_init_time : t_session +-> t_timeref             &
@@ -53,6 +55,7 @@ INVARIANT
 
 INITIALISATION
     s_session          := {} ||
+    a_session_roles    := {} ||
     s_client_session   := {} ||
     a_state            := {} ||
     a_session_init_time := {} ||
@@ -64,6 +67,27 @@ INITIALISATION
     a_server_client_locales := t_session * {c_LocaleIds_empty}
 
 OPERATIONS
+
+    set_session_roles_2(p_session, p_roles) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_roles : t_sessionRoles_i &
+        p_roles : t_sessionRoles
+    THEN
+        a_session_roles(p_session) := p_roles
+    END
+    ;
+
+    p_session_roles <-- get_session_roles(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        a_state(p_session) = e_session_userActivated
+    THEN
+        p_session_roles :(p_session_roles : t_sessionRoles_i & p_session_roles = a_session_roles(p_session))
+    END
+    ;
 
     add_session(p_session, p_is_client, p_timeref) =
     PRE
@@ -314,6 +338,20 @@ OPERATIONS
         p_session    : t_session
     THEN
         p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds = a_server_client_locales(p_session))
+    END
+    ;
+
+    p_roles <-- reset_server_session_roles(p_session) =
+    PRE
+        p_session            : t_session_i &
+        p_session            : t_session
+    THEN
+        /* Retrieve recorded p_roles if not the empty one (constant value) and reset to empty one */
+        p_roles,
+        a_session_roles
+        :(p_roles : t_sessionRoles_i &
+          a_session_roles : t_session --> t_sessionRoles &
+          {p_session} <<| a_session_roles = {p_session} <<| a_session_roles$0)
     END
     ;
 

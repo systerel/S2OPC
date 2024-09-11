@@ -1,0 +1,137 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    session_role_identity_node_i
+
+REFINES
+    session_role_identity_node
+
+SEES
+    constants,
+    address_space_itf
+
+LOCAL_OPERATIONS
+    p_bres <-- l_check_node_NodeClass_and_BrowseName(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_bres := bool(a_NodeClass(p_node) = e_ncl_Variable & a_BrowseName(p_node) = c_Identities_QualifiedName)
+    END
+    ;
+
+    p_bres <-- l_check_ref_isForward_and_RefTypeProperty(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_bres := bool(Reference_IsForward(p_ref) = TRUE & Reference_ReferenceType(p_ref) = c_HasPropertyType_NodeId)
+    END
+    ;
+
+    // Get the node targetted by the ref
+    p_node, p_nodeId <-- l_ref_get_node(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_node,
+        p_nodeId :(p_node : t_Node_i &
+                   p_nodeId : t_NodeId_i &
+                   p_node = a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))) &
+                   p_nodeId = a_NodeId(p_node))
+    END
+
+OPERATIONS
+    p_bres <-- l_check_node_NodeClass_and_BrowseName(p_node) =
+    VAR
+        l_NodeClass,
+        l_browseName,
+        l_browseName_comparison
+    IN
+        p_bres := FALSE;
+        l_NodeClass <-- get_NodeClass(p_node);
+        IF l_NodeClass = e_ncl_Variable THEN
+            l_browseName <-- get_BrowseName(p_node);
+            l_browseName_comparison <-- is_QualifiedNames_Equal(l_browseName, c_Identities_QualifiedName);
+            IF l_browseName_comparison = TRUE THEN
+                p_bres := TRUE
+            END
+        END
+    END
+    ;
+
+    p_bres <-- l_check_ref_isForward_and_RefTypeProperty(p_ref) =
+    VAR
+        l_IsForward,
+        l_RefType_NodeId,
+        l_nodeIdsEqual
+    IN
+        p_bres := FALSE;
+        l_IsForward  <-- get_Reference_IsForward(p_ref);
+        IF l_IsForward = TRUE THEN
+            l_RefType_NodeId <-- get_Reference_ReferenceType(p_ref);
+            l_nodeIdsEqual <-- is_NodeId_equal(l_RefType_NodeId, c_HasPropertyType_NodeId);
+            IF l_nodeIdsEqual = TRUE THEN
+                   p_bres := TRUE
+            END
+        END
+    END
+    ;
+
+    p_node, p_nodeId <-- l_ref_get_node(p_ref) =
+    VAR
+        l_ref_target,
+        l_local_server,
+        l_ref_target_NodeId,
+        l_isvalid,
+        l_ref_target_Node
+    IN
+        p_node := c_Node_indet;
+        p_nodeId := c_NodeId_indet;
+        l_ref_target <-- get_Reference_TargetNode(p_ref);
+        l_local_server, l_ref_target_NodeId <-- getall_conv_ExpandedNodeId_NodeId(l_ref_target);
+        l_isvalid, l_ref_target_Node <-- readall_AddressSpace_Node(l_ref_target_NodeId);
+        IF l_isvalid = TRUE THEN
+            p_node := l_ref_target_Node;
+            p_nodeId := l_ref_target_NodeId
+        END
+    END
+    ;
+
+    p_maybe_node_Identity, p_maybe_nodeId_Identity <-- ref_maybe_get_Identity(p_ref) =
+    VAR
+        l_bres,
+        l_maybe_identity_node,
+        l_maybe_identity_nodeId
+    IN
+        p_maybe_node_Identity := c_Node_indet;
+        p_maybe_nodeId_Identity := c_NodeId_indet;
+        l_bres <-- l_check_ref_isForward_and_RefTypeProperty(p_ref);
+        IF l_bres = TRUE THEN
+            l_maybe_identity_node, l_maybe_identity_nodeId <-- l_ref_get_node(p_ref);
+            l_bres <-- l_check_node_NodeClass_and_BrowseName(l_maybe_identity_node);
+            IF l_bres = TRUE THEN
+                p_maybe_node_Identity := l_maybe_identity_node;
+                p_maybe_nodeId_Identity := l_maybe_identity_nodeId
+            END
+        END
+    END
+END

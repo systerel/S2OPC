@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 26/07/2024 08:43:24
+ Date                 : 11/09/2024 10:08:25
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -116,6 +116,8 @@
 #include "register_nodes_it.h"
 #include "request_handle_bs.h"
 #include "response_write_bs.h"
+#include "role_references_it.h"
+#include "roleset_references_it.h"
 #include "service_add_nodes.h"
 #include "service_add_nodes_1.h"
 #include "service_browse_it.h"
@@ -147,6 +149,14 @@
 #include "session_mgr.h"
 #include "session_mgr_it.h"
 #include "session_request_handle_bs.h"
+#include "session_role_eval.h"
+#include "session_role_identities_bs.h"
+#include "session_role_identities_it.h"
+#include "session_role_identity_bs.h"
+#include "session_role_identity_eval.h"
+#include "session_role_identity_node.h"
+#include "session_roles.h"
+#include "session_roles_granted_bs.h"
 #include "subscription_absent_node.h"
 #include "subscription_absent_node_bs.h"
 #include "subscription_core.h"
@@ -172,6 +182,7 @@
 #include "user_authentication.h"
 #include "user_authentication_bs.h"
 #include "user_authorization_bs.h"
+#include "user_bs.h"
 #include "write_value_pointer_bs.h"
 
 /*------------------------
@@ -190,24 +201,6 @@ void INITIALISATION(void) {
    time_reference_bs__INITIALISATION();
    channel_mgr__INITIALISATION();
    service_mgr_bs__INITIALISATION();
-   session_core_1_it__INITIALISATION();
-   session_core_2__INITIALISATION();
-   session_core_bs__INITIALISATION();
-   session_core_1__INITIALISATION();
-   session_core_it__INITIALISATION();
-   session_channel_it__INITIALISATION();
-   msg_session_bs__INITIALISATION();
-   user_authentication_bs__INITIALISATION();
-   user_authentication__INITIALISATION();
-   session_core__INITIALISATION();
-   session_mgr_it__INITIALISATION();
-   session_request_handle_bs__INITIALISATION();
-   app_cb_call_context_bs__INITIALISATION();
-   session_mgr__INITIALISATION();
-   msg_read_request_bs__INITIALISATION();
-   msg_read_request__INITIALISATION();
-   msg_read_response_bs__INITIALISATION();
-   service_read_it__INITIALISATION();
    msg_node_management_add_nodes_bs__INITIALISATION();
    msg_node_management_add_nodes__INITIALISATION();
    node_management_add_nodes_items_it__INITIALISATION();
@@ -236,6 +229,35 @@ void INITIALISATION(void) {
    service_add_nodes_1__INITIALISATION();
    service_add_nodes__INITIALISATION();
    address_space_itf__INITIALISATION();
+   roleset_references_it__INITIALISATION();
+   role_references_it__INITIALISATION();
+   session_role_identity_node__INITIALISATION();
+   session_role_identities_it__INITIALISATION();
+   session_role_identities_bs__INITIALISATION();
+   user_bs__INITIALISATION();
+   session_role_identity_bs__INITIALISATION();
+   session_role_identity_eval__INITIALISATION();
+   session_role_eval__INITIALISATION();
+   session_roles_granted_bs__INITIALISATION();
+   session_roles__INITIALISATION();
+   session_core_1_it__INITIALISATION();
+   session_core_2__INITIALISATION();
+   session_core_bs__INITIALISATION();
+   session_core_1__INITIALISATION();
+   session_core_it__INITIALISATION();
+   session_channel_it__INITIALISATION();
+   msg_session_bs__INITIALISATION();
+   user_authentication_bs__INITIALISATION();
+   user_authentication__INITIALISATION();
+   session_core__INITIALISATION();
+   session_mgr_it__INITIALISATION();
+   session_request_handle_bs__INITIALISATION();
+   app_cb_call_context_bs__INITIALISATION();
+   session_mgr__INITIALISATION();
+   msg_read_request_bs__INITIALISATION();
+   msg_read_request__INITIALISATION();
+   msg_read_response_bs__INITIALISATION();
+   service_read_it__INITIALISATION();
    service_read_1__INITIALISATION();
    service_read__INITIALISATION();
    service_get_endpoints_bs__INITIALISATION();

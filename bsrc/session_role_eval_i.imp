@@ -1,0 +1,218 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    session_role_eval_i
+
+SEES
+    constants,
+    address_space_itf
+
+REFINES
+    session_role_eval
+
+IMPORTS
+    role_references_it,
+    session_role_identity_node,
+    session_role_identities_it,
+    session_role_identities_bs,
+    session_role_identity_eval
+
+LOCAL_OPERATIONS
+
+    p_bres <-- l_check_ref_isForward_and_RefTypeComponent(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_bres := bool(Reference_IsForward(p_ref) = TRUE & Reference_ReferenceType(p_ref) = c_HasComponentType_NodeId)
+    END
+    ;
+
+    p_bres <-- l_check_node_NodeClass_and_TypeDef(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_bres := bool(a_NodeClass(p_node) = e_ncl_Object & conv_ExpandedNodeId_NodeId(Ref_HasTypeDefinition(p_node)) = c_RoleType_NodeId)
+    END
+
+OPERATIONS
+
+    /* LOCAL OPERATIONS */
+    p_bres <-- l_check_ref_isForward_and_RefTypeComponent(p_ref) =
+    VAR
+        l_IsForward,
+        l_RefType_NodeId,
+        l_nodeIdsEqual
+    IN
+        p_bres := FALSE;
+        l_IsForward  <-- get_Reference_IsForward(p_ref);
+        IF l_IsForward = TRUE THEN
+            l_RefType_NodeId <-- get_Reference_ReferenceType(p_ref);
+            l_nodeIdsEqual <-- is_NodeId_equal(l_RefType_NodeId, c_HasComponentType_NodeId);
+            IF l_nodeIdsEqual = TRUE THEN
+                   p_bres := TRUE
+               END
+        END
+    END
+    ;
+
+    p_bres <-- l_check_node_NodeClass_and_TypeDef(p_node) =
+    VAR
+        l_NodeClass,
+        l_typeDefinition,
+        l_local_server,
+        l_NodeId,
+        l_nodeIdsEqual
+    IN
+        p_bres := FALSE;
+        l_NodeClass <-- get_NodeClass(p_node);
+        IF l_NodeClass = e_ncl_Object THEN
+            /* TypeDefinition must be RoleType which is: NodeId="i=15620" BrowseName="RoleType" */
+            l_typeDefinition <-- get_TypeDefinition(p_node);
+            l_local_server, l_NodeId <-- getall_conv_ExpandedNodeId_NodeId(l_typeDefinition);
+            l_nodeIdsEqual <-- is_NodeId_equal(l_NodeId, c_RoleType_NodeId);
+              IF l_nodeIdsEqual = TRUE THEN
+                   p_bres := TRUE
+               END
+        END
+    END
+    ;
+
+    /* OPERATIONS OF THE MODULE */
+    p_bres <-- role_eval_user(p_user, p_locales, p_role_node) =
+    VAR
+        l_identities_node,
+        l_identities_nodeId,
+        l_continue,
+        l_ref,
+        l_maybe_identity_node,
+        l_maybe_identity_nodeId,
+        l_sc,
+        l_val,
+        l_val_sc,
+        l_val_ts_src,
+        l_val_ts_srv,
+        l_index_range,
+        l_nb_identities,
+        l_bres,
+        l_identityIdx,
+        l_identity
+    IN
+        // The node is a RoleType. Get its reference with BrowseName "Identities".
+        p_bres := FALSE;
+        l_identities_node := c_Node_indet;
+        l_identities_nodeId := c_NodeId_indet;
+        l_continue <-- init_iter_role_references(p_role_node);
+        WHILE
+            l_continue = TRUE
+        DO
+            l_continue, l_ref <-- continue_iter_role_references;
+            l_maybe_identity_node, l_maybe_identity_nodeId <-- ref_maybe_get_Identity(l_ref);
+            IF l_maybe_identity_node /= c_Node_indet THEN
+                l_identities_node := l_maybe_identity_node;
+                l_identities_nodeId := l_maybe_identity_nodeId
+            END
+        INVARIANT
+            /* Refs iterated are the good refs (ie the refs of the p_role_node) */
+            references_to_iterate <: t_Reference &
+            references_iterated   <: t_Reference &
+            references_to_iterate /\ references_iterated = {} &
+            references_to_iterate \/ references_iterated = a_Node_References &
+            starting_node = p_role_node &
+            a_Node_References = ran({starting_node} * (1.. Node_RefIndexEnd(starting_node)) <| RefIndex_Reference) &
+            (l_continue = TRUE => references_to_iterate /= {}) &
+            /* Among these refs we took the corresponding Identity node */
+            {l_identities_node} = a_NodeId~[conv_ExpandedNodeId_NodeId[Reference_TargetNode[dom(a_ref_identity) /\ references_iterated]]]
+        VARIANT
+            card(references_to_iterate)
+        END
+        ;
+        // If we found the node Identity, eval the identities with user
+        IF l_identities_node /= c_Node_indet & l_identities_nodeId /= c_NodeId_indet THEN
+            // Get the value of the variable using a local read service.
+            l_index_range := c_IndexRange_indet;
+            l_sc, l_val, l_val_sc, l_val_ts_src, l_val_ts_srv
+                 <-- read_Node_Attribute(p_user, p_locales, l_identities_node, l_identities_nodeId, e_aid_Value, l_index_range);
+            // Its value is an array of identities. Get the size of the array.
+            l_nb_identities <-- read_variant_nb_identities(l_val, l_identities_node);
+            // Iterate on the array elements.
+            l_continue <-- init_iter_identities(l_nb_identities);
+            WHILE
+                l_continue = TRUE
+            DO
+                l_bres := FALSE;
+                l_continue, l_identityIdx <-- continue_iter_identities;
+                l_identity <-- read_variant_identity(l_val, l_identityIdx);
+                l_bres <-- user_and_identity_match(p_user, l_identity);
+                IF l_bres = TRUE THEN
+                    // One identity matched. Add the role to the roles.
+                    p_bres := TRUE
+                END
+            INVARIANT
+                // Iterator invariants
+                identityIdx_to_iterate <: NAT1 &
+                identityIdx_iterated   <: NAT1 &
+                identityIdx_to_iterate /\ identityIdx_iterated = {} &
+                1..nb_identities = identityIdx_to_iterate \/ identityIdx_iterated &
+                // We use the good variant value
+                a_variant = l_val &
+                a_identities : seq(t_Identity) &
+                nb_identities = size(a_identities) &
+                // p_bres is the result of the final match
+                p_bres = bool({p_user} * ran(identityIdx_iterated <| a_identities) /\ a_user_identity_match /= {})
+            VARIANT
+                card(identityIdx_to_iterate)
+            END
+            ;
+            read_AddressSpace_free_variant(l_val)
+        END
+    END
+    ;
+
+    p_bres, p_maybe_role_node, p_maybe_role_nodeId <-- is_ref_role(p_ref) =
+    VAR
+        l_bValidRoleRef,
+        l_roleSet_Reference_ExpandedNodeId,
+        l_local_server,
+        l_roleSet_Reference_NodeId,
+        l_isvalid,
+        l_roleSet_Reference_Node,
+        l_bValidRoleNode
+     IN
+         p_bres := FALSE;
+         p_maybe_role_node := c_Node_indet;
+         p_maybe_role_nodeId := c_NodeId_indet;
+         l_bValidRoleRef <-- l_check_ref_isForward_and_RefTypeComponent(p_ref);
+        IF l_bValidRoleRef = TRUE THEN
+            /* Get the target node of the reference */
+            l_roleSet_Reference_ExpandedNodeId <-- get_Reference_TargetNode(p_ref);
+            l_local_server, l_roleSet_Reference_NodeId <-- getall_conv_ExpandedNodeId_NodeId(l_roleSet_Reference_ExpandedNodeId);
+            l_isvalid, l_roleSet_Reference_Node <-- readall_AddressSpace_Node(l_roleSet_Reference_NodeId);
+            l_bValidRoleNode <-- l_check_node_NodeClass_and_TypeDef(l_roleSet_Reference_Node);
+            IF l_bValidRoleNode = TRUE THEN
+                p_bres := TRUE;
+                p_maybe_role_node := l_roleSet_Reference_Node;
+                p_maybe_role_nodeId := l_roleSet_Reference_NodeId
+            END
+        END
+     END
+
+END

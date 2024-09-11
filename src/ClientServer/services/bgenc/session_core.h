@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 27/11/2024 09:15:51
+ Date                 : 09/12/2024 17:00:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -42,6 +42,7 @@
 #include "session_channel_it.h"
 #include "session_core_1.h"
 #include "session_core_it.h"
+#include "session_roles.h"
 #include "user_authentication.h"
 
 /*--------------
@@ -75,8 +76,10 @@ extern void session_core__INITIALISATION(void);
 #define session_core__get_local_user user_authentication__get_local_user
 #define session_core__get_server_session_preferred_locales session_core_1__get_server_session_preferred_locales
 #define session_core__get_session_channel session_core_1__get_session_channel
+#define session_core__get_session_roles session_core_1__get_session_roles
 #define session_core__get_session_user_client session_core_1__get_session_user_client
 #define session_core__get_session_user_server session_core_1__get_session_user_server
+#define session_core__get_user_roles session_roles__get_user_roles
 #define session_core__getall_orphaned session_core_1__getall_orphaned
 #define session_core__getall_session_channel session_core_1__getall_session_channel
 #define session_core__getall_to_create session_core_1__getall_to_create
@@ -90,6 +93,7 @@ extern void session_core__INITIALISATION(void);
 #define session_core__server_session_timeout_start_timer session_core_1__server_session_timeout_start_timer
 #define session_core__session_has_user_server session_core_1__session_has_user_server
 #define session_core__set_session_app_context session_core_1__set_session_app_context
+#define session_core__set_session_roles session_core_1__set_session_roles
 #define session_core__set_session_to_create session_core_1__set_session_to_create
 #define session_core__set_session_user_client session_core_1__set_session_user_client
 

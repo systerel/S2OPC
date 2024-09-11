@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.c
 
- Date                 : 27/11/2024 09:15:50
+ Date                 : 09/12/2024 17:00:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -43,6 +43,7 @@ constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants
 constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
 constants__t_timeref_i session_core_2__a_session_init_time_i[constants__t_session_i_max+1];
+constants__t_sessionRoles_i session_core_2__a_session_roles_i[constants__t_session_i_max+1];
 constants__t_sessionState_i session_core_2__a_state_i[constants__t_session_i_max+1];
 t_entier4 session_core_2__card_s_session_i;
 
@@ -50,6 +51,12 @@ t_entier4 session_core_2__card_s_session_i;
    INITIALISATION Clause
   ------------------------*/
 void session_core_2__INITIALISATION(void) {
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         session_core_2__a_session_roles_i[i] = constants__c_sessionRoles_indet;
+      }
+   }
    {
       t_entier4 i;
       for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
@@ -110,6 +117,18 @@ void session_core_2__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void session_core_2__set_session_roles_2(
+   const constants__t_session_i session_core_2__p_session,
+   const constants__t_sessionRoles_i session_core_2__p_roles) {
+   session_core_2__a_session_roles_i[session_core_2__p_session] = session_core_2__p_roles;
+}
+
+void session_core_2__get_session_roles(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_sessionRoles_i * const session_core_2__p_session_roles) {
+   *session_core_2__p_session_roles = session_core_2__a_session_roles_i[session_core_2__p_session];
+}
+
 void session_core_2__add_session(
    const constants__t_session_i session_core_2__p_session,
    const t_bool session_core_2__p_is_client,
@@ -262,6 +281,18 @@ void session_core_2__get_server_session_preferred_locales(
    const constants__t_session_i session_core_2__p_session,
    constants__t_LocaleIds_i * const session_core_2__p_localeIds) {
    *session_core_2__p_localeIds = session_core_2__a_server_client_locales_i[session_core_2__p_session];
+}
+
+void session_core_2__reset_server_session_roles(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_sessionRoles_i * const session_core_2__p_roles) {
+   {
+      constants__t_sessionRoles_i session_core_2__l_old_roles;
+      
+      session_core_2__l_old_roles = session_core_2__a_session_roles_i[session_core_2__p_session];
+      *session_core_2__p_roles = session_core_2__l_old_roles;
+      session_core_2__a_session_roles_i[session_core_2__p_session] = constants__c_sessionRoles_indet;
+   }
 }
 
 void session_core_2__reset_server_session_preferred_locales(

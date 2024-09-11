@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 27/11/2024 09:15:51
+ Date                 : 09/12/2024 17:00:58
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -342,6 +342,8 @@ void session_mgr__server_receive_session_req(
       t_bool session_mgr__l_timer_creation_ok;
       constants__t_user_i session_mgr__l_user;
       constants__t_SignatureData_i session_mgr__l_user_token_signature;
+      constants__t_LocaleIds_i session_mgr__l_locales;
+      constants__t_sessionRoles_i session_mgr__l_userRoles;
       
       *session_mgr__security_failed = false;
       *session_mgr__session = constants__c_session_indet;
@@ -421,6 +423,15 @@ void session_mgr__server_receive_session_req(
                         session_mgr__service_ret);
                      if (*session_mgr__service_ret != constants_statuscodes_bs__e_sc_ok) {
                         session_core__deallocate_user(session_mgr__l_user);
+                     }
+                     else {
+                        session_core__get_server_session_preferred_locales(*session_mgr__session,
+                           &session_mgr__l_locales);
+                        session_core__get_user_roles(session_mgr__l_user,
+                           session_mgr__l_locales,
+                           &session_mgr__l_userRoles);
+                        session_core__set_session_roles(*session_mgr__session,
+                           session_mgr__l_userRoles);
                      }
                   }
                   else if (*session_mgr__security_failed == true) {

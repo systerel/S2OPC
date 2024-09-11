@@ -31,6 +31,7 @@ SEES
     channel_mgr
 
 CONCRETE_VARIABLES
+    a_session_roles_i,
     a_client_session_i,
     card_s_session_i,
     a_state_i,
@@ -43,6 +44,7 @@ CONCRETE_VARIABLES
     a_server_client_locales_i
 
 INVARIANT
+    a_session_roles_i      : t_session_i --> t_sessionRoles_i                        &
     a_client_session_i   : t_session_i --> BOOL                                      &
     card_s_session_i     : NAT                                                       &
     a_state_i            : t_session_i --> t_sessionState_i                          &
@@ -63,6 +65,7 @@ INVARIANT
     a_server_client_locales = t_session <| a_server_client_locales_i
 
 INITIALISATION
+    a_session_roles_i := t_session_i * {c_sessionRoles_indet};
     a_client_session_i := t_session_i * {FALSE};
     card_s_session_i := 0;
     a_state_i    := t_session_i * {e_session_closed};
@@ -75,6 +78,18 @@ INITIALISATION
     a_server_client_locales_i := t_session_i * {c_LocaleIds_empty}
 
 OPERATIONS
+
+    set_session_roles_2(p_session, p_roles) =
+    BEGIN
+        a_session_roles_i(p_session) := p_roles
+    END
+    ;
+
+    p_session_roles <-- get_session_roles(p_session) =
+    BEGIN
+        p_session_roles := a_session_roles_i(p_session)
+    END
+    ;
 
     add_session(p_session, p_is_client, p_timeref) =
     BEGIN
@@ -217,6 +232,16 @@ OPERATIONS
     p_localeIds <-- get_server_session_preferred_locales(p_session) =
     BEGIN
         p_localeIds := a_server_client_locales_i(p_session)
+    END
+    ;
+
+    p_roles <-- reset_server_session_roles(p_session) =
+    VAR
+        l_old_roles
+    IN
+        l_old_roles := a_session_roles_i(p_session);
+        p_roles := l_old_roles;
+        a_session_roles_i(p_session) := c_sessionRoles_indet
     END
     ;
 
