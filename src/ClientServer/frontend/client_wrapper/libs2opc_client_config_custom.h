@@ -124,18 +124,19 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
                                                                   const unsigned char* clientPrivateKey);
 
 /**
- * \brief Creates a new secure channel configuration in client be completed by using the functions below
- * (::SOPC_SecureConnectionConfig_SetServerCertificateFromPath or
- *  ::SOPC_SecureConnectionConfig_SetServerCertificateFromBytes, etc.)
+ * \brief Creates a new secure channel configuration in client
+ *        that shall be completed by using the functions below
+ *        (::SOPC_SecureConnectionConfig_SetServerCertificateFromPath or
+ *         ::SOPC_SecureConnectionConfig_SetServerCertificateFromBytes, etc.)
  *
  * \param userDefinedId  A user defined identifier to retrieve the secure connection configuration
  *                       using ::SOPC_ClientConfigHelper_GetConfigFromId.
  * \param endpointUrl    URL of the endpoint: \verbatim opc.tcp://<host>:<port>[/<name>] \endverbatim
  * \param secuMode       Security mode required for this SecureConnection: None, Sign or SignAndEncrypt.
- *                       If value different from None, SOPC_SecureConnectionConfig_AddServerCertificate* shall be
+ *                       If value different from None, SOPC_SecureConnectionConfig_SetServerCertificate* shall be
  *                       called.
  * \param secuPolicy     Security policy URI required for this SecureConnection.
- *                       If value different from None, SOPC_SecureConnectionConfig_AddServerCertificate* shall be
+ *                       If value different from None, SOPC_SecureConnectionConfig_SetServerCertificate* shall be
  *                       called.
  * \note Returned ::SOPC_SecureConnection_Config is owned by library and shall not be freed.
  *
