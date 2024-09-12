@@ -211,7 +211,7 @@ static bool SOPC_ArrayDimensions_isCompatible(const SOPC_PubSub_ArrayDimension* 
     int32_t src_valueRank = SOPC_Variant_Get_ValueRank(src_variant);
 
     // If variant is a scalar nothing to check
-    if (src_valueRank >= 1)
+    if (SOPC_VariantArrayType_SingleValue != src_variant->ArrayType)
     {
         if (NULL == dest_arrayDimensions->arrayDimensions)
         {
@@ -219,11 +219,19 @@ static bool SOPC_ArrayDimensions_isCompatible(const SOPC_PubSub_ArrayDimension* 
         }
         else if (dest_arrayDimensions->valueRank == src_valueRank)
         {
-            for (int i = 0; res && i < src_valueRank; i++)
+            if (SOPC_VariantArrayType_Array == src_variant->ArrayType)
             {
-                // Array dimension equal to zero means no up boundary
-                const uint32_t dimI = dest_arrayDimensions->arrayDimensions[i];
-                res = ((dimI == 0) || (src_variant->Value.Matrix.ArrayDimensions[i] <= (int32_t) dimI));
+                res = ((dest_arrayDimensions->arrayDimensions[0] == 0) ||
+                       (src_variant->Value.Array.Length <= (int32_t) dest_arrayDimensions->arrayDimensions[0]));
+            }
+            else
+            {
+                for (int i = 0; res && i < src_valueRank; i++)
+                {
+                    // Array dimension equal to zero means no up boundary
+                    const uint32_t dimI = dest_arrayDimensions->arrayDimensions[i];
+                    res = ((dimI == 0) || (src_variant->Value.Matrix.ArrayDimensions[i] <= (int32_t) dimI));
+                }
             }
         }
         else
