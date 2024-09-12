@@ -20,14 +20,32 @@
 
 # Script to format code using clang-format
 
+set -e
+
+function append_newline {
+    if [[ -z "$(tail -c 1 "$1")" ]]; then
+        :
+    else
+        echo >> "$1"
+    fi
+}
+
 SRCS_DIR=./src
 TEST_DIR=./tests
 BSRCS_DIR=./bsrc
 SAMPLE_DIR=./samples
 
-find $SRCS_DIR $TEST_DIR -name "*.[hc]" ! -path "./src/ClientServer/services/bgenc/*" -exec clang-format -style=file -i '{}' \;
-find $SAMPLE_DIR -name "*.[hc]" -exec clang-format -style=file -i '{}' \;
-find $BSRCS_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" \) -exec sed 's/\t/    /g' -i '{}' \;
-find $BSRCS_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" \) -exec sed 's/\s\+$//g' -i '{}' \;
-find . -name CMakeLists.txt -exec sed 's/\t/    /g' -i '{}' \;
-find . -name CMakeLists.txt -exec sed 's/\s\+$//g' -i '{}' \;
+CLANG_FILES=$(find $SRCS_DIR $TEST_DIR $SAMPLE_DIR -name "*.[hc]" ! -path "./src/ClientServer/services/bgenc/*")
+clang-format -style=file -i ${CLANG_FILES}
+# Check newlines
+for f in ${CLANG_FILES}; do
+    append_newline $f
+done
+
+OTHER_FILES=$(find $BSRC_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" \))
+OTHER_FILES="$OTHER_FILES $(find . -name CMakeLists.txt)"
+for f in ${OTHER_FILES}; do
+    sed 's/\t/    /g' -i $f
+    sed 's/\s\+$//g' -i $f
+    append_newline $f
+done
