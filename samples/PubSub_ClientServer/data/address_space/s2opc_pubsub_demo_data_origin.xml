@@ -121,6 +121,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=PubUInt</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=PubUInt16</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=PubUInt32</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubArrayInt</Reference>
     </References>
   </UAObject>
   <UAVariable AccessLevel="3" BrowseName="1:varBool" DataType="Boolean" NodeId="ns=1;s=PubBool" ParentNodeId="ns=1;s=PubVars">
@@ -189,6 +190,21 @@
       <uax:UInt32>4294967295</uax:UInt32>
     </Value>
   </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:PubArrayInt" DataType="Int64" NodeId="ns=1;s=PubArrayInt" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>PubArrayInt</DisplayName>
+    <Description>PubArrayIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfInt64>
+        <uax:Int64>15</uax:Int64>
+        <uax:Int64>-9</uax:Int64>
+        <uax:Int64>0</uax:Int64>
+      </uax:ListOfInt64>
+    </Value>
+  </UAVariable>
 
   <!-- Subscriber -->
   <UAObject BrowseName="1:SubscriberVars" NodeId="ns=1;s=SubVars" ParentNodeId="i=85">
@@ -203,6 +219,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=SubUInt</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=SubUInt16</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=SubUInt32</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=SubArrayInt</Reference>
     </References>
   </UAObject>
   <UAVariable AccessLevel="3" BrowseName="1:varBool" DataType="Boolean" NodeId="ns=1;s=SubBool" ParentNodeId="ns=1;s=SubVars">
@@ -271,5 +288,20 @@
       <uax:UInt32>1</uax:UInt32>
     </Value>
   </UAVariable>
-    
+  <UAVariable AccessLevel="3" BrowseName="1:SubArrayInt" DataType="Int64" NodeId="ns=1;s=SubArrayInt" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>SubArrayInt</DisplayName>
+    <Description>SubArrayIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfInt64>
+        <uax:Int64>-82</uax:Int64>
+        <uax:Int64>52</uax:Int64>
+        <uax:Int64>65</uax:Int64>
+      </uax:ListOfInt64>
+    </Value>
+  </UAVariable>
+
 </UANodeSet>

@@ -1374,6 +1374,7 @@
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=24209</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=AcyclicPubSend</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=AcyclicPubSendStatus</Reference>
+      <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubArrayInt</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubBool</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubInt</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubString</Reference>
@@ -1383,6 +1384,7 @@
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubUInt</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubUInt16</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubUInt32</Reference>
+      <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=SubArrayInt</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=SubBool</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=SubInt</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=SubString</Reference>
@@ -49394,6 +49396,21 @@
       <uax:Byte>0</uax:Byte>
     </Value>
   </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="1:PubArrayInt" DataType="Int64" NodeId="ns=1;s=PubArrayInt" ParentNodeId="ns=1;s=PubVars">
+    <DisplayName>PubArrayInt</DisplayName>
+    <Description>PubArrayIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=PubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfInt64>
+        <uax:Int64>15</uax:Int64>
+        <uax:Int64>-9</uax:Int64>
+        <uax:Int64>0</uax:Int64>
+      </uax:ListOfInt64>
+    </Value>
+  </UAVariable>
   <UAVariable AccessLevel="3" BrowseName="1:varBool" DataType="Boolean" NodeId="ns=1;s=PubBool" ParentNodeId="ns=1;s=PubVars">
     <DisplayName>pubVarBool</DisplayName>
     <Description>pubVarBoolDesc</Description>
@@ -49505,8 +49522,24 @@
       <Reference ReferenceType="HasComponent">ns=1;s=PubUInt</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=PubUInt16</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=PubUInt32</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=PubArrayInt</Reference>
     </References>
   </UAObject>
+  <UAVariable AccessLevel="3" BrowseName="1:SubArrayInt" DataType="Int64" NodeId="ns=1;s=SubArrayInt" ParentNodeId="ns=1;s=SubVars">
+    <DisplayName>SubArrayInt</DisplayName>
+    <Description>SubArrayIntDesc</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=SubVars</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:ListOfInt64>
+        <uax:Int64>-82</uax:Int64>
+        <uax:Int64>52</uax:Int64>
+        <uax:Int64>65</uax:Int64>
+      </uax:ListOfInt64>
+    </Value>
+  </UAVariable>
   <UAVariable AccessLevel="3" BrowseName="1:varBool" DataType="Boolean" NodeId="ns=1;s=SubBool" ParentNodeId="ns=1;s=SubVars">
     <DisplayName>subVarBool</DisplayName>
     <Description>subVarBoolDesc</Description>
@@ -49585,6 +49618,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=SubUInt</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=SubUInt16</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=SubUInt32</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=SubArrayInt</Reference>
     </References>
   </UAObject>
 </UANodeSet>
