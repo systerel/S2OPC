@@ -199,7 +199,7 @@ DEFINITIONS
         Reference_IsForward     : t_Reference --> BOOL             &
 
         Node_RefIndexEnd        : s_Node     --> t_RefIndex  &
-        RefIndex_Reference      : s_Node * t_RefIndex --> t_Reference
+        RefIndex_Reference      : s_Node * t_RefIndex >-> t_Reference
     );
 
     d_adsp_invariant ==

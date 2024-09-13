@@ -21,7 +21,7 @@
 
  File Name            : session_role_identity_node.c
 
- Date                 : 11/09/2024 10:08:08
+ Date                 : 13/09/2024 12:55:58
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -102,14 +102,18 @@ void session_role_identity_node__l_ref_get_node(
       
       *session_role_identity_node__p_node = constants__c_Node_indet;
       *session_role_identity_node__p_nodeId = constants__c_NodeId_indet;
+      session_role_identity_node__l_ref_target_Node = constants__c_Node_indet;
+      session_role_identity_node__l_isvalid = false;
       address_space_itf__get_Reference_TargetNode(session_role_identity_node__p_ref,
          &session_role_identity_node__l_ref_target);
       constants__getall_conv_ExpandedNodeId_NodeId(session_role_identity_node__l_ref_target,
          &session_role_identity_node__l_local_server,
          &session_role_identity_node__l_ref_target_NodeId);
-      address_space_itf__readall_AddressSpace_Node(session_role_identity_node__l_ref_target_NodeId,
-         &session_role_identity_node__l_isvalid,
-         &session_role_identity_node__l_ref_target_Node);
+      if (session_role_identity_node__l_local_server == true) {
+         address_space_itf__readall_AddressSpace_Node(session_role_identity_node__l_ref_target_NodeId,
+            &session_role_identity_node__l_isvalid,
+            &session_role_identity_node__l_ref_target_Node);
+      }
       if (session_role_identity_node__l_isvalid == true) {
          *session_role_identity_node__p_node = session_role_identity_node__l_ref_target_Node;
          *session_role_identity_node__p_nodeId = session_role_identity_node__l_ref_target_NodeId;

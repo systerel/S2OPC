@@ -146,7 +146,7 @@ DEFINITIONS
         Reference_IsForward     : t_Reference +-> BOOL             &
 
         Node_RefIndexEnd        : s_Node     +-> t_RefIndex  &
-        RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
+        RefIndex_Reference      : s_Node * t_RefIndex >+> t_Reference &
 
         IsRangeDefined : t_IndexRange_i --> BOOL &
         IsValid_VariantIndex : t_Variant * t_IndexRange +-> BOOL &

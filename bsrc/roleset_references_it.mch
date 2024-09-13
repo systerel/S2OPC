@@ -37,7 +37,7 @@ INVARIANT
     /* a_Node_RefIndex_Reference mimics RefIndex_Reference with a domain restricted to the starting_node.
        Note: RefIndex_Reference cannot be referenced in invariants.
     */
-    a_Node_RefIndex_Reference : {starting_node} * t_RefIndex +-> t_Reference &
+    a_Node_RefIndex_Reference : {starting_node} * t_RefIndex >+> t_Reference &
     a_Node_References <: t_Reference &
     a_Node_References = ran(a_Node_RefIndex_Reference) &
     references_to_iterate <: t_Reference &

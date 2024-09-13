@@ -21,7 +21,7 @@
 
  File Name            : session_role_eval.c
 
- Date                 : 11/09/2024 10:08:07
+ Date                 : 13/09/2024 12:55:58
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -41,6 +41,34 @@ void session_role_eval__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void session_role_eval__l_get_role_identities_node(
+   const constants__t_Node_i session_role_eval__p_role_node,
+   constants__t_NodeId_i * const session_role_eval__p_node_id,
+   constants__t_Node_i * const session_role_eval__p_node) {
+   {
+      t_bool session_role_eval__l_continue;
+      constants__t_Reference_i session_role_eval__l_ref;
+      constants__t_Node_i session_role_eval__l_maybe_identity_node;
+      constants__t_NodeId_i session_role_eval__l_maybe_identity_nodeId;
+      
+      *session_role_eval__p_node = constants__c_Node_indet;
+      *session_role_eval__p_node_id = constants__c_NodeId_indet;
+      role_references_it__init_iter_role_references(session_role_eval__p_role_node,
+         &session_role_eval__l_continue);
+      while (session_role_eval__l_continue == true) {
+         role_references_it__continue_iter_role_references(&session_role_eval__l_continue,
+            &session_role_eval__l_ref);
+         session_role_identity_node__ref_maybe_get_Identity(session_role_eval__l_ref,
+            &session_role_eval__l_maybe_identity_node,
+            &session_role_eval__l_maybe_identity_nodeId);
+         if (session_role_eval__l_maybe_identity_node != constants__c_Node_indet) {
+            *session_role_eval__p_node = session_role_eval__l_maybe_identity_node;
+            *session_role_eval__p_node_id = session_role_eval__l_maybe_identity_nodeId;
+         }
+      }
+   }
+}
+
 void session_role_eval__l_check_ref_isForward_and_RefTypeComponent(
    const constants__t_Reference_i session_role_eval__p_ref,
    t_bool * const session_role_eval__p_bres) {
@@ -75,22 +103,22 @@ void session_role_eval__l_check_node_NodeClass_and_TypeDef(
       constants__t_NodeId_i session_role_eval__l_NodeId;
       t_bool session_role_eval__l_nodeIdsEqual;
       
-      *session_role_eval__p_bres = false;
       address_space_itf__get_NodeClass(session_role_eval__p_node,
          &session_role_eval__l_NodeClass);
+      session_role_eval__l_nodeIdsEqual = false;
       if (session_role_eval__l_NodeClass == constants__e_ncl_Object) {
          address_space_itf__get_TypeDefinition(session_role_eval__p_node,
             &session_role_eval__l_typeDefinition);
          constants__getall_conv_ExpandedNodeId_NodeId(session_role_eval__l_typeDefinition,
             &session_role_eval__l_local_server,
             &session_role_eval__l_NodeId);
-         address_space_itf__is_NodeId_equal(session_role_eval__l_NodeId,
-            constants__c_RoleType_NodeId,
-            &session_role_eval__l_nodeIdsEqual);
-         if (session_role_eval__l_nodeIdsEqual == true) {
-            *session_role_eval__p_bres = true;
+         if (session_role_eval__l_local_server == true) {
+            address_space_itf__is_NodeId_equal(session_role_eval__l_NodeId,
+               constants__c_RoleType_NodeId,
+               &session_role_eval__l_nodeIdsEqual);
          }
       }
+      *session_role_eval__p_bres = session_role_eval__l_nodeIdsEqual;
    }
 }
 
@@ -103,9 +131,6 @@ void session_role_eval__role_eval_user(
       constants__t_Node_i session_role_eval__l_identities_node;
       constants__t_NodeId_i session_role_eval__l_identities_nodeId;
       t_bool session_role_eval__l_continue;
-      constants__t_Reference_i session_role_eval__l_ref;
-      constants__t_Node_i session_role_eval__l_maybe_identity_node;
-      constants__t_NodeId_i session_role_eval__l_maybe_identity_nodeId;
       constants_statuscodes_bs__t_StatusCode_i session_role_eval__l_sc;
       constants__t_Variant_i session_role_eval__l_val;
       constants__t_RawStatusCode session_role_eval__l_val_sc;
@@ -118,21 +143,9 @@ void session_role_eval__role_eval_user(
       constants__t_Identity_i session_role_eval__l_identity;
       
       *session_role_eval__p_bres = false;
-      session_role_eval__l_identities_node = constants__c_Node_indet;
-      session_role_eval__l_identities_nodeId = constants__c_NodeId_indet;
-      role_references_it__init_iter_role_references(session_role_eval__p_role_node,
-         &session_role_eval__l_continue);
-      while (session_role_eval__l_continue == true) {
-         role_references_it__continue_iter_role_references(&session_role_eval__l_continue,
-            &session_role_eval__l_ref);
-         session_role_identity_node__ref_maybe_get_Identity(session_role_eval__l_ref,
-            &session_role_eval__l_maybe_identity_node,
-            &session_role_eval__l_maybe_identity_nodeId);
-         if (session_role_eval__l_maybe_identity_node != constants__c_Node_indet) {
-            session_role_eval__l_identities_node = session_role_eval__l_maybe_identity_node;
-            session_role_eval__l_identities_nodeId = session_role_eval__l_maybe_identity_nodeId;
-         }
-      }
+      session_role_eval__l_get_role_identities_node(session_role_eval__p_role_node,
+         &session_role_eval__l_identities_nodeId,
+         &session_role_eval__l_identities_node);
       if ((session_role_eval__l_identities_node != constants__c_Node_indet) &&
          (session_role_eval__l_identities_nodeId != constants__c_NodeId_indet)) {
          session_role_eval__l_index_range = constants__c_IndexRange_indet;
@@ -183,11 +196,13 @@ void session_role_eval__is_ref_role(
       constants__t_NodeId_i session_role_eval__l_roleSet_Reference_NodeId;
       t_bool session_role_eval__l_isvalid;
       constants__t_Node_i session_role_eval__l_roleSet_Reference_Node;
-      t_bool session_role_eval__l_bValidRoleNode;
       
       *session_role_eval__p_bres = false;
       *session_role_eval__p_maybe_role_node = constants__c_Node_indet;
       *session_role_eval__p_maybe_role_nodeId = constants__c_NodeId_indet;
+      session_role_eval__l_roleSet_Reference_Node = constants__c_Node_indet;
+      session_role_eval__l_local_server = false;
+      session_role_eval__l_isvalid = false;
       session_role_eval__l_check_ref_isForward_and_RefTypeComponent(session_role_eval__p_ref,
          &session_role_eval__l_bValidRoleRef);
       if (session_role_eval__l_bValidRoleRef == true) {
@@ -196,12 +211,16 @@ void session_role_eval__is_ref_role(
          constants__getall_conv_ExpandedNodeId_NodeId(session_role_eval__l_roleSet_Reference_ExpandedNodeId,
             &session_role_eval__l_local_server,
             &session_role_eval__l_roleSet_Reference_NodeId);
-         address_space_itf__readall_AddressSpace_Node(session_role_eval__l_roleSet_Reference_NodeId,
-            &session_role_eval__l_isvalid,
-            &session_role_eval__l_roleSet_Reference_Node);
-         session_role_eval__l_check_node_NodeClass_and_TypeDef(session_role_eval__l_roleSet_Reference_Node,
-            &session_role_eval__l_bValidRoleNode);
-         if (session_role_eval__l_bValidRoleNode == true) {
+         if (session_role_eval__l_local_server == true) {
+            address_space_itf__readall_AddressSpace_Node(session_role_eval__l_roleSet_Reference_NodeId,
+               &session_role_eval__l_isvalid,
+               &session_role_eval__l_roleSet_Reference_Node);
+         }
+         if (session_role_eval__l_isvalid == true) {
+            session_role_eval__l_check_node_NodeClass_and_TypeDef(session_role_eval__l_roleSet_Reference_Node,
+               &session_role_eval__l_isvalid);
+         }
+         if (session_role_eval__l_isvalid == true) {
             *session_role_eval__p_bres = true;
             *session_role_eval__p_maybe_role_node = session_role_eval__l_roleSet_Reference_Node;
             *session_role_eval__p_maybe_role_nodeId = session_role_eval__l_roleSet_Reference_NodeId;

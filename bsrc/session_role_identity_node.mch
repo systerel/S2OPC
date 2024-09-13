@@ -42,23 +42,19 @@ OPERATIONS
     THEN
         p_maybe_node_Identity,
         p_maybe_nodeId_Identity
-                :(
+        :(
             p_maybe_nodeId_Identity : t_NodeId_i &
             p_maybe_node_Identity : t_Node_i &
 
-            (Reference_IsForward(p_ref) = TRUE &
-            Reference_ReferenceType(p_ref) = c_HasPropertyType_NodeId &
-            a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) = e_ncl_Variable &
-            a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) = c_Identities_QualifiedName
-            =>
-            a_ref_identity(p_ref) = p_maybe_node_Identity &
-            p_maybe_node_Identity = a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) &
-
-            (Reference_IsForward(p_ref) /= TRUE or
-            Reference_ReferenceType(p_ref) /= c_HasPropertyType_NodeId or
-            a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) /= e_ncl_Variable or
-            a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) /= c_Identities_QualifiedName
-            =>
-            p_maybe_node_Identity = c_Node_indet))
+            (p_ref : dom(a_ref_identity) <=>
+                (Reference_IsForward(p_ref) = TRUE &
+                 Reference_ReferenceType(p_ref) = c_HasPropertyType_NodeId &
+                 a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) = e_ncl_Variable &
+                 a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) = c_Identities_QualifiedName)) &
+            (p_ref : dom(a_ref_identity) =>
+                a_ref_identity(p_ref) = p_maybe_node_Identity &
+                p_maybe_node_Identity = a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) &
+            (p_ref /: dom(a_ref_identity) => p_maybe_node_Identity = c_Node_indet)
+        )
      END
 END

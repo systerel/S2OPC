@@ -36,6 +36,27 @@ IMPORTS
 
 LOCAL_OPERATIONS
 
+    p_node_id, p_node <-- l_get_role_identities_node(p_role_node) =
+    PRE
+        p_role_node : t_Node_i &
+        p_role_node : s_Node &
+        conv_ExpandedNodeId_NodeId(Ref_HasTypeDefinition(p_role_node)) = c_RoleType_NodeId
+    THEN
+        p_node_id, p_node :(
+            p_node : t_Node_i &
+            p_node_id : t_NodeId_i &
+            (not(p_node = c_Node_indet & p_node_id = c_NodeId_indet) =>
+                // target node is the one of the role node references which is a ref to identities
+                p_node_id : conv_ExpandedNodeId_NodeId
+                               [Reference_TargetNode[dom(a_ref_identity) /\
+                                RefIndex_Reference[{p_role_node} * (1.. Node_RefIndexEnd(p_role_node))]]
+                               ] &
+                p_node = a_NodeId~(p_node_id)
+            ) // otherwise both are indet
+        )
+    END
+    ;
+
     p_bres <-- l_check_ref_isForward_and_RefTypeComponent(p_ref) =
     PRE
         p_ref : t_Reference_i &
@@ -56,6 +77,46 @@ LOCAL_OPERATIONS
 OPERATIONS
 
     /* LOCAL OPERATIONS */
+    p_node_id, p_node <-- l_get_role_identities_node(p_role_node) =
+    VAR
+        l_continue,
+        l_ref,
+        l_maybe_identity_node,
+        l_maybe_identity_nodeId
+    IN
+        // The node is a RoleType. Get its reference with BrowseName "Identities".
+        p_node := c_Node_indet;
+        p_node_id := c_NodeId_indet;
+        l_continue <-- init_iter_role_references(p_role_node);
+        WHILE
+            l_continue = TRUE
+        DO
+            l_continue, l_ref <-- continue_iter_role_references;
+            l_maybe_identity_node, l_maybe_identity_nodeId <-- ref_maybe_get_Identity(l_ref);
+            IF l_maybe_identity_node /= c_Node_indet THEN
+                p_node := l_maybe_identity_node;
+                p_node_id := l_maybe_identity_nodeId
+            END
+        INVARIANT
+            /* Refs iterated are the good refs (ie the refs of the p_role_node) */
+            references_to_iterate <: t_Reference &
+            references_iterated   <: t_Reference &
+            references_to_iterate /\ references_iterated = {} &
+            references_to_iterate \/ references_iterated = a_Node_References &
+            starting_node = p_role_node &
+            a_Node_References = ran({starting_node} * (1.. Node_RefIndexEnd(starting_node)) <| RefIndex_Reference) &
+            /* Among these refs we took the corresponding Identity node
+             * Note: OPC UA specification indicates that browse name shall be unique and then only 1 node will match but we do not enforce it
+                     in C address space, thus in case several are present the last iterated is kept
+             */
+            p_node_id : conv_ExpandedNodeId_NodeId[Reference_TargetNode[dom(a_ref_identity) /\ references_iterated]] \/ {c_NodeId_indet} &
+            p_node : a_NodeId~[{p_node_id}] \/ {c_Node_indet}
+        VARIANT
+            card(references_to_iterate)
+        END
+    END
+    ;
+
     p_bres <-- l_check_ref_isForward_and_RefTypeComponent(p_ref) =
     VAR
         l_IsForward,
@@ -82,17 +143,19 @@ OPERATIONS
         l_NodeId,
         l_nodeIdsEqual
     IN
-        p_bres := FALSE;
         l_NodeClass <-- get_NodeClass(p_node);
+        l_nodeIdsEqual := FALSE;
         IF l_NodeClass = e_ncl_Object THEN
             /* TypeDefinition must be RoleType which is: NodeId="i=15620" BrowseName="RoleType" */
             l_typeDefinition <-- get_TypeDefinition(p_node);
             l_local_server, l_NodeId <-- getall_conv_ExpandedNodeId_NodeId(l_typeDefinition);
-            l_nodeIdsEqual <-- is_NodeId_equal(l_NodeId, c_RoleType_NodeId);
-              IF l_nodeIdsEqual = TRUE THEN
-                   p_bres := TRUE
-               END
+            IF l_local_server = TRUE
+            THEN
+                l_nodeIdsEqual <-- is_NodeId_equal(l_NodeId, c_RoleType_NodeId)
+            END
         END
+        ;
+        p_bres := l_nodeIdsEqual
     END
     ;
 
@@ -102,9 +165,6 @@ OPERATIONS
         l_identities_node,
         l_identities_nodeId,
         l_continue,
-        l_ref,
-        l_maybe_identity_node,
-        l_maybe_identity_nodeId,
         l_sc,
         l_val,
         l_val_sc,
@@ -116,35 +176,10 @@ OPERATIONS
         l_identityIdx,
         l_identity
     IN
-        // The node is a RoleType. Get its reference with BrowseName "Identities".
         p_bres := FALSE;
-        l_identities_node := c_Node_indet;
-        l_identities_nodeId := c_NodeId_indet;
-        l_continue <-- init_iter_role_references(p_role_node);
-        WHILE
-            l_continue = TRUE
-        DO
-            l_continue, l_ref <-- continue_iter_role_references;
-            l_maybe_identity_node, l_maybe_identity_nodeId <-- ref_maybe_get_Identity(l_ref);
-            IF l_maybe_identity_node /= c_Node_indet THEN
-                l_identities_node := l_maybe_identity_node;
-                l_identities_nodeId := l_maybe_identity_nodeId
-            END
-        INVARIANT
-            /* Refs iterated are the good refs (ie the refs of the p_role_node) */
-            references_to_iterate <: t_Reference &
-            references_iterated   <: t_Reference &
-            references_to_iterate /\ references_iterated = {} &
-            references_to_iterate \/ references_iterated = a_Node_References &
-            starting_node = p_role_node &
-            a_Node_References = ran({starting_node} * (1.. Node_RefIndexEnd(starting_node)) <| RefIndex_Reference) &
-            (l_continue = TRUE => references_to_iterate /= {}) &
-            /* Among these refs we took the corresponding Identity node */
-            {l_identities_node} = a_NodeId~[conv_ExpandedNodeId_NodeId[Reference_TargetNode[dom(a_ref_identity) /\ references_iterated]]]
-        VARIANT
-            card(references_to_iterate)
-        END
-        ;
+        // Get the Identities node in the RoleType node
+        l_identities_nodeId, l_identities_node <-- l_get_role_identities_node(p_role_node);
+
         // If we found the node Identity, eval the identities with user
         IF l_identities_node /= c_Node_indet & l_identities_nodeId /= c_NodeId_indet THEN
             // Get the value of the variable using a local read service.
@@ -173,7 +208,7 @@ OPERATIONS
                 identityIdx_to_iterate /\ identityIdx_iterated = {} &
                 1..nb_identities = identityIdx_to_iterate \/ identityIdx_iterated &
                 // We use the good variant value
-                a_variant = l_val &
+                a_variant = a_Value(l_identities_node) &
                 a_identities : seq(t_Identity) &
                 nb_identities = size(a_identities) &
                 // p_bres is the result of the final match
@@ -194,20 +229,31 @@ OPERATIONS
         l_local_server,
         l_roleSet_Reference_NodeId,
         l_isvalid,
-        l_roleSet_Reference_Node,
-        l_bValidRoleNode
+        l_roleSet_Reference_Node
      IN
          p_bres := FALSE;
          p_maybe_role_node := c_Node_indet;
          p_maybe_role_nodeId := c_NodeId_indet;
+         l_roleSet_Reference_Node := c_Node_indet;
+         l_local_server := FALSE;
+         l_isvalid := FALSE;
          l_bValidRoleRef <-- l_check_ref_isForward_and_RefTypeComponent(p_ref);
-        IF l_bValidRoleRef = TRUE THEN
+         IF l_bValidRoleRef = TRUE
+         THEN
             /* Get the target node of the reference */
             l_roleSet_Reference_ExpandedNodeId <-- get_Reference_TargetNode(p_ref);
             l_local_server, l_roleSet_Reference_NodeId <-- getall_conv_ExpandedNodeId_NodeId(l_roleSet_Reference_ExpandedNodeId);
-            l_isvalid, l_roleSet_Reference_Node <-- readall_AddressSpace_Node(l_roleSet_Reference_NodeId);
-            l_bValidRoleNode <-- l_check_node_NodeClass_and_TypeDef(l_roleSet_Reference_Node);
-            IF l_bValidRoleNode = TRUE THEN
+            IF l_local_server = TRUE
+            THEN
+                l_isvalid, l_roleSet_Reference_Node <-- readall_AddressSpace_Node(l_roleSet_Reference_NodeId)
+            END
+            ;
+            IF l_isvalid = TRUE
+            THEN
+                l_isvalid <-- l_check_node_NodeClass_and_TypeDef(l_roleSet_Reference_Node)
+            END
+            ;
+            IF l_isvalid = TRUE THEN
                 p_bres := TRUE;
                 p_maybe_role_node := l_roleSet_Reference_Node;
                 p_maybe_role_nodeId := l_roleSet_Reference_NodeId

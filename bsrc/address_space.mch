@@ -219,7 +219,7 @@ OPERATIONS
             Reference_IsForward     : t_Reference +-> BOOL             &
 
             Node_RefIndexEnd        : s_Node     +-> t_RefIndex  &
-            RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
+            RefIndex_Reference      : s_Node * t_RefIndex >+> t_Reference &
 
             (sc_addnode = e_sc_ok =>
                 /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */

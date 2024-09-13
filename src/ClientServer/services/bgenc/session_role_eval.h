@@ -21,7 +21,7 @@
 
  File Name            : session_role_eval.h
 
- Date                 : 11/09/2024 10:08:07
+ Date                 : 12/09/2024 16:44:35
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -64,6 +64,10 @@ extern void session_role_eval__l_check_node_NodeClass_and_TypeDef(
 extern void session_role_eval__l_check_ref_isForward_and_RefTypeComponent(
    const constants__t_Reference_i session_role_eval__p_ref,
    t_bool * const session_role_eval__p_bres);
+extern void session_role_eval__l_get_role_identities_node(
+   const constants__t_Node_i session_role_eval__p_role_node,
+   constants__t_NodeId_i * const session_role_eval__p_node_id,
+   constants__t_Node_i * const session_role_eval__p_node);
 
 /*--------------------
    OPERATIONS Clause
