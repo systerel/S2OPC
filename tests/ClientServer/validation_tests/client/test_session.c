@@ -35,6 +35,28 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 
+#if S2OPC_NANO_PROFILE
+#define TEST_SUB_SERVICE_SUPPORTED false
+#else
+#define TEST_SUB_SERVICE_SUPPORTED true
+
+static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subscription* subscription,
+                                                    SOPC_StatusCode status,
+                                                    SOPC_EncodeableType* notificationType,
+                                                    uint32_t nbNotifElts,
+                                                    const void* notification,
+                                                    uintptr_t* monitoredItemCtxArray)
+{
+    SOPC_UNUSED_ARG(subscription);
+    SOPC_UNUSED_ARG(status);
+    SOPC_UNUSED_ARG(notificationType);
+    SOPC_UNUSED_ARG(nbNotifElts);
+    SOPC_UNUSED_ARG(notification);
+    SOPC_UNUSED_ARG(monitoredItemCtxArray);
+}
+
+#endif
+
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_Sign
 #define REQ_SECURITY_POLICY SOPC_SecurityPolicy_Basic256Sha256
@@ -189,6 +211,81 @@ START_TEST(test_username_password)
 }
 END_TEST
 
+START_TEST(test_auto_disco)
+{
+    // Get default log config and set the custom path
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_session_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_ClientConfigHelper_Initialize();
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
+        "auto_disco", DEFAULT_ENDPOINT_URL, OpcUa_MessageSecurityMode_None, SOPC_SecurityPolicy_None);
+    ck_assert_ptr_nonnull(secureConnConfig);
+
+    status = SOPC_SecureConnectionConfig_SetAnonymous(secureConnConfig, "anonymous");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_ClientConnection* secureConnection = NULL;
+    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(secureConnection);
+
+    // No disconnection: automatic disconnection made by clear
+    // Manual verification only by checking log / packets, the goal is to check no memory leak / deadlock occurs
+
+    /* Close the toolkit */
+    SOPC_ClientConfigHelper_Clear();
+    SOPC_CommonHelper_Clear();
+}
+END_TEST
+
+#if TEST_SUB_SERVICE_SUPPORTED
+START_TEST(test_auto_disco_and_sub)
+{
+    // Get default log config and set the custom path
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_auto_disco_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_ClientConfigHelper_Initialize();
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
+        "auto_disco", DEFAULT_ENDPOINT_URL, OpcUa_MessageSecurityMode_None, SOPC_SecurityPolicy_None);
+    ck_assert_ptr_nonnull(secureConnConfig);
+
+    status = SOPC_SecureConnectionConfig_SetAnonymous(secureConnConfig, "anonymous");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_ClientConnection* secureConnection = NULL;
+    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(secureConnection);
+
+    OpcUa_CreateSubscriptionRequest* createSubReq = SOPC_CreateSubscriptionRequest_Create(500, 6, 2, 1000, true, 0);
+    ck_assert_ptr_nonnull(createSubReq);
+
+    SOPC_ClientHelper_Subscription* sub = SOPC_ClientHelperNew_CreateSubscription(
+        secureConnection, createSubReq, SOPC_Client_SubscriptionNotification_Cb, 0);
+    ck_assert_ptr_nonnull(sub);
+
+    // No disconnection: automatic delete subscription and disconnection made by clear
+    // Manual verification only by checking log / packets, the goal is to check no memory leak / deadlock occurs
+
+    /* Close the toolkit */
+    SOPC_ClientConfigHelper_Clear();
+    SOPC_CommonHelper_Clear();
+}
+END_TEST
+#endif
+
 Suite* client_suite_make_session(void)
 {
     Suite* s = NULL;
@@ -201,6 +298,10 @@ Suite* client_suite_make_session(void)
     suite_add_tcase(s, tc_user);
     tcase_add_test(tc_user, test_anonymous);
     tcase_add_test(tc_user, test_username_password);
+    tcase_add_test(tc_user, test_auto_disco);
+#if TEST_SUB_SERVICE_SUPPORTED
+    tcase_add_test(tc_user, test_auto_disco_and_sub);
+#endif
 
     return s;
 }
