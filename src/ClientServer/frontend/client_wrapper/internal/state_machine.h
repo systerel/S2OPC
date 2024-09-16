@@ -45,15 +45,45 @@
 
 #include <stdbool.h>
 
-/* The following includes are required to fetch the SOPC_LibSub_DataChangeCbk type */
 #include "sopc_builtintypes.h"
-#include "sopc_crypto_profiles.h"
-#include "sopc_log_manager.h"
 #include "sopc_types.h"
-#include "sopc_user_app_itf.h"
-#define SKIP_S2OPC_DEFINITIONS
-#include "libs2opc_client.h"
-#include "libs2opc_client_cmds.h"
+
+/**
+  @brief
+    The event passed to the connection SOPC_LibSub_EventCbk.
+    Either an error or a valid response notification.
+*/
+typedef enum _SOPC_StaMac_ApplicativeEvent
+{
+    SOPC_StaMac_ApplicativeEvent_SendFailed,
+    SOPC_StaMac_ApplicativeEvent_Response
+} SOPC_StaMac_ApplicativeEvent;
+
+/**
+  @brief
+    Callback for generic responses to a call to SOPC_StaMac_SendRequest().
+  @param c_id
+    The connection id on which the event happened
+  @param event
+    The type of the event:
+    - SOPC_StaMac_ApplicativeEvent_SendFailed: the request was not sent and \p status holds the reason.
+      In this case, response shall be NULL but the responseContext is valid.
+      The underlying connection is about to be closed.
+    - SOPC_StaMac_ApplicativeEvent_Response: the response pointer and the response context are valid
+      and the \p status is Good.
+  @param status
+    The status code for the event
+  @param response
+    An (OpcUa_<MessageStruct>*) pointing to the OPC-UA response structure.
+    This message is freed by the caller and should not be modified by the callback function.
+  @param responseContext
+    The requestContext given in SOPC_LibSub_AsyncSendRequestOnSession().
+*/
+typedef void SOPC_StaMac_EventCbk(uint32_t c_id,
+                                  SOPC_StaMac_ApplicativeEvent event,
+                                  SOPC_StatusCode status,
+                                  const void* response,
+                                  uintptr_t responseContext);
 
 /* Machine states */
 typedef enum
@@ -107,8 +137,7 @@ typedef struct
  *
  * \param iscConfig               The configuration identifier to use with this machine
  * \param reverseConfigIdx        If the reverse connection mechanism shall be used,
- *                                it shall be set with index of the reverse endpoint configuration returned by
- *                                ::SOPC_ClientCommon_CreateReverseEndpoint.
+ *                                it shall be set with index of the reverse endpoint configuration.
  *                                Otherwise it shall be set to 0.
  * \param iCliId                  The client id of the machine, it shall be unique.
  * \param szPolicyId              Zero-terminated user identity policy id, see SOPC_LibSub_ConnectionCfg
@@ -116,7 +145,6 @@ typedef struct
  * \param szPassword              Zero-terminated password, see SOPC_LibSub_ConnectionCfg
  * \param pUserCertX509           X509 serialized certificate for X509IdentiyToken (DER format)
  * \param pUserKey                Serialized private key for X509IdentiyToken (PEM format)
- * \param cbkLibSubDataChanged    The callback to trigger when a PublishResponse is received
  * \param fPublishInterval        Subscription publish interval, in milliseconds
  * \param iCntMaxKeepAlive        The number of times an empty PublishResponse is not sent
  * \param iCntLifetime            The number of times a PublishResponse cannot be sent
@@ -138,21 +166,14 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPassword,
                                      const SOPC_SerializedCertificate* pUserCertX509,
                                      const SOPC_SerializedAsymmetricKey* pUserKey,
-                                     SOPC_LibSub_DataChangeCbk* cbkLibSubDataChanged,
                                      double fPublishInterval,
                                      uint32_t iCntMaxKeepAlive,
                                      uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
                                      int64_t iTimeoutMs,
-                                     SOPC_LibSub_EventCbk* cbkGenericEvent,
+                                     SOPC_StaMac_EventCbk* cbkGenericEvent,
                                      uintptr_t userContext,
                                      SOPC_StaMac_Machine** ppSM);
-
-/*
- * \brief Changes the callback for data change notifications on subscription
- */
-SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine* pSM,
-                                                          SOPC_ClientHelper_DataChangeCbk* pCbkClientHelper);
 
 /**
  * \brief Deletes and deallocate the machine.
@@ -198,11 +219,6 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
                                           SOPC_StaMac_RequestType requestType);
 
 /*
- * \brief Create subscription associated to the given state machine
- */
-SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM);
-
-/*
  * \brief Create subscription associated to the given state machine using the subscription request (new API)
  */
 SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
@@ -233,43 +249,16 @@ SOPC_ReturnStatus SOPC_StaMac_SetSubscriptionNbTokens(SOPC_StaMac_Machine* pSM, 
 SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM);
 
 /**
- * \brief Context structure to be provided when using ::SOPC_StaMac_CreateMonitoredItem or
- * ::SOPC_StaMac_NewCreateMonitoredItems
+ * \brief Context structure to be provided when using ::SOPC_StaMac_NewCreateMonitoredItems
  */
 typedef struct SOPC_CreateMonitoredItems_Ctx
 {
     OpcUa_CreateMonitoredItemsResponse* Results; /* It shall be allocated if response expected
                                                     or might be NULL if not necessary for application. */
-    uintptr_t outCtxId; /* Contains unique identifier filled by ::SOPC_StaMac_CreateMonitoredItem or
-                           ::SOPC_StaMac_NewCreateMonitoredItems*/
+    uintptr_t outCtxId; /* Contains unique identifier filled by ::SOPC_StaMac_NewCreateMonitoredItems*/
     OpcUa_CreateMonitoredItemsRequest*
         req; /* Contains the request sent to the server (internal use only, freed during treatment)*/
 } SOPC_CreateMonitoredItems_Ctx;
-
-/**
- * \brief Creates a MonitoredItem asynchronously.
- *
- * The \p pAppCtx shall be used to test the effective creation of the MonitoredItem with
- * ::SOPC_StaMac_PopMonItByAppCtx.
- *
- * \param pSM        The state machine with a subscription used to create monitored items
- * \param lszNodeId  An array of describing the NodeIds to add.
-                     It should be at least \p nElems long.
- * \param liAttrId   An array of attributes id. The subscription is created for the attribute lAttrId[i]
- *                   for the node id lszNodeId[i]. It should be at least \p nElems long.
- * \param nElems     The number of elements in previous arrays.
- * \param pAppCtx    The create monitored item application context filled during the call and
- *                   that shall be used to call ::SOPC_StaMac_PopMonItByAppCtx
- * \param lCliHndl   An array of client handles to be filled.
- *
- * \warning The szNodeId must be \0-terminated.
- */
-SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
-                                                  char const* const* lszNodeId,
-                                                  const uint32_t* liAttrId,
-                                                  int32_t nElems,
-                                                  SOPC_CreateMonitoredItems_Ctx* pAppCtx,
-                                                  uint32_t* lCliHndl);
 
 /**
  * \brief Type of callback called on Subscription Notification

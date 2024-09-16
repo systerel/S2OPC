@@ -260,8 +260,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayFinalizeSecureConnection(
 /* Lifetime Count of subscriptions */
 #define TMP_MAX_LIFETIME_COUNT 10
 
-static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
-                                         SOPC_LibSub_ApplicativeEvent event,
+static void SOPC_ClientInternal_EventCbk(uint32_t c_id,
+                                         SOPC_StaMac_ApplicativeEvent event,
                                          SOPC_StatusCode status, /* Note: actually a ReturnStatus */
                                          const void* response,
                                          uintptr_t genContext)
@@ -277,7 +277,7 @@ static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
     {
         isAsync = true;
         SOPC_EncodeableType* pEncType = NULL;
-        if (SOPC_LibSub_ApplicativeEvent_Response == event)
+        if (SOPC_StaMac_ApplicativeEvent_Response == event)
         {
             pEncType = *(SOPC_EncodeableType* const*) response;
         }
@@ -287,7 +287,7 @@ static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
     {
         void* responseContext = genCtx->responseResultCtx;
         SOPC_ASSERT(NULL != responseContext);
-        if (SOPC_LibSub_ApplicativeEvent_Response == event)
+        if (SOPC_StaMac_ApplicativeEvent_Response == event)
         {
             SOPC_EncodeableType* pEncType = *(SOPC_EncodeableType* const*) response;
 
@@ -461,11 +461,11 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
         if (NULL != serviceReqCtx && serviceReqCtx->isDiscoveryModeService)
         {
             // Discovery service call (no session) not managed by state machine: direct call to event callback
-            SOPC_LibSub_ApplicativeEvent libsubEvent = SOPC_LibSub_ApplicativeEvent_Response;
+            SOPC_StaMac_ApplicativeEvent libsubEvent = SOPC_StaMac_ApplicativeEvent_Response;
             if (SE_RCV_DISCOVERY_RESPONSE != event)
             {
                 status = SOPC_STATUS_NOK;
-                libsubEvent = SOPC_LibSub_ApplicativeEvent_SendFailed;
+                libsubEvent = SOPC_StaMac_ApplicativeEvent_SendFailed;
             }
             // Release mutex to avoid possible deadlock in user callback
             mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -554,7 +554,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
     SOPC_ReturnStatus status = SOPC_StaMac_Create(
         secConnConfig->secureChannelConfigIdx, secConnConfig->reverseEndpointConfigIdx,
         secConnConfig->secureConnectionIdx, secConnConfig->sessionConfig.userPolicyId, username, password,
-        pUserCertX509, pUserKey, NULL, TMP_PUBLISH_PERIOD_MS, TMP_MAX_KEEP_ALIVE_COUNT, TMP_MAX_LIFETIME_COUNT,
+        pUserCertX509, pUserKey, TMP_PUBLISH_PERIOD_MS, TMP_MAX_KEEP_ALIVE_COUNT, TMP_MAX_LIFETIME_COUNT,
         SOPC_DEFAULT_PUBLISH_N_TOKEN, TMP_TIMEOUT_MS, SOPC_ClientInternal_EventCbk, 0, &stateMachine);
 
     if (SOPC_STATUS_OK == status)

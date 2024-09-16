@@ -32,6 +32,7 @@
 #include "sopc_atomic.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_hash.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -41,7 +42,6 @@
 
 #include "libs2opc_client_internal.h"
 #include "state_machine.h"
-#include "toolkit_helpers.h"
 
 /* =========
  * Internals
@@ -58,14 +58,11 @@ struct SOPC_StaMac_Machine
     uint32_t iscConfig; /* Toolkit scConfig ID */
     SOPC_ReverseEndpointConfigIdx
         reverseConfigIdx; /* Reverse configuration index > 0 if reverse connection mechanism shall be used */
-    uint32_t iCliId;      /* LibSub connection ID, used by the callback. It shall be unique. */
+    uint32_t iCliId;      /* Connection ID, used by the callback. It shall be unique. */
 
-    /* Keeping three callbacks waiting the deprecated APIs to be removed for the first 2 cbs */
-    SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged;             /* Callback when subscribed data changed */
-    SOPC_ClientHelper_DataChangeCbk* pCbkClientHelperDataChanged; /* Callback when subscribed data changed */
-    SOPC_StaMacNotification_Fct* pCbkNotification;                /* Callback when subscription notification occurs */
+    SOPC_StaMacNotification_Fct* pCbkNotification; /* Callback when subscription notification occurs */
 
-    SOPC_LibSub_EventCbk* pCbkGenericEvent; /* Callback when received event that is out of the LibSub scope */
+    SOPC_StaMac_EventCbk* pCbkGenericEvent; /* Callback when received event that is out of the StaMac scope */
     uintptr_t iSessionCtx;                  /* Toolkit Session Context, used to identify session events */
     uint32_t iSessionID;                    /* S2OPC Session ID */
     SOPC_SLinkedList* pListReqCtx;          /* List of yet-to-be-answered requests,
@@ -74,7 +71,7 @@ struct SOPC_StaMac_Machine
     uint32_t iCntMaxKeepAlive;              /* Number of skipped response before sending an empty KeepAlive */
     uint32_t iCntLifetime;                  /* Number of deprived publish cycles before subscription deletion */
     uint32_t iSubscriptionID;               /* OPC UA subscription ID */
-    bool bSubscriptionCreated;       /* Flag set when subscription created succesfully and subscription ID is set */
+    bool bSubscriptionCreated;       /* Flag set when subscription created successfully and subscription ID is set */
     uintptr_t subscriptionAppCtx;    /* Application context of the subscription (new API only)*/
     uint32_t nMonItClientHandle;     /* Latest client handle generated for monitored items,
                                       * used as unique identifier */
@@ -88,7 +85,7 @@ struct SOPC_StaMac_Machine
                                 wait for next response without fault. */
     uint32_t nTokenUsable;  /* Tokens available to the server
                              * (PublishRequest_sent - PublishResponse_sent) */
-    bool bAckSubscr;        /* Indicates whether an acknowledgement should be sent
+    bool bAckSubscr;        /* Indicates whether an acknowledgment should be sent
                              * in the next PublishRequest */
     uint32_t iAckSeqNum;    /* The sequence number to acknowledge after a PublishResponse */
     const char* szPolicyId; /* See SOPC_LibSub_ConnectionCfg */
@@ -197,13 +194,12 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPassword,
                                      const SOPC_SerializedCertificate* pUserCertX509,
                                      const SOPC_SerializedAsymmetricKey* pUserKey,
-                                     SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged,
                                      double fPublishInterval,
                                      uint32_t iCntMaxKeepAlive,
                                      uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
                                      int64_t iTimeoutMs,
-                                     SOPC_LibSub_EventCbk* pCbkGenericEvent,
+                                     SOPC_StaMac_EventCbk* pCbkGenericEvent,
                                      uintptr_t userContext,
                                      SOPC_StaMac_Machine** ppSM)
 {
@@ -221,8 +217,6 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->iscConfig = iscConfig;
         pSM->reverseConfigIdx = reverseConfigIdx;
         pSM->iCliId = iCliId;
-        pSM->pCbkLibSubDataChanged = pCbkLibSubDataChanged;
-        pSM->pCbkClientHelperDataChanged = NULL;
         pSM->iSessionCtx = 0;
         pSM->iSessionID = 0;
         pSM->pListReqCtx = SOPC_SLinkedList_Create(0);
@@ -324,30 +318,6 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine* pSM,
-                                                          SOPC_ClientHelper_DataChangeCbk* pCbkClientHelper)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == pSM)
-    {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        if ((NULL != pSM->pCbkLibSubDataChanged && NULL != pCbkClientHelper) ||
-            (NULL == pSM->pCbkLibSubDataChanged && NULL == pCbkClientHelper))
-        {
-            /* One and only one callback type should be set */
-            status = SOPC_STATUS_INVALID_STATE;
-        }
-    }
-    if (SOPC_STATUS_OK == status && NULL != pCbkClientHelper)
-    {
-        pSM->pCbkClientHelperDataChanged = pCbkClientHelper;
-    }
-    return status;
-}
-
 void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
 {
     if (NULL != ppSM && NULL != *ppSM)
@@ -399,7 +369,8 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
 
     if (pSM->state != stInit)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "The state machine shall be in stInit state to start a session.");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "The state machine shall be in stInit state to start a session.");
         status = SOPC_STATUS_INVALID_STATE;
     }
 
@@ -434,7 +405,8 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
         }
         else
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unable to identify the type of token to start a session.");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Unable to identify the type of token to start a session.");
             status = SOPC_STATUS_INVALID_STATE;
         }
     }
@@ -461,7 +433,7 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (!SOPC_StaMac_IsConnected(pSM))
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "StopSession on a disconnected machine.");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "StopSession on a disconnected machine.");
         pSM->state = stError;
         status = SOPC_STATUS_NOK;
     }
@@ -533,45 +505,6 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    void* pRequest = NULL;
-
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    if (!pSM->bSubscriptionCreated && stActivated == pSM->state)
-    {
-        /* Creates the subscription */
-        /* The request is freed by the Toolkit */
-        /* TODO: make all value configurable */
-        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Creating subscription.");
-        status = Helpers_NewCreateSubscriptionRequest(pSM->fPublishInterval, pSM->iCntMaxKeepAlive, pSM->iCntLifetime,
-                                                      &pRequest);
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                             SOPC_REQUEST_TYPE_SUBSCRIPTION);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            pSM->state = stCreatingSubscr;
-        }
-        else
-        {
-            pSM->state = stError;
-        }
-    }
-    else
-    {
-        status = SOPC_STATUS_INVALID_STATE;
-    }
-    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    return status;
-}
-
 SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
                                                     OpcUa_CreateSubscriptionRequest* req,
                                                     uintptr_t userAppContext)
@@ -586,7 +519,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (!pSM->bSubscriptionCreated && stActivated == pSM->state)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Creating subscription using provided request.");
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Creating subscription using provided request.");
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_StaMac_SendRequest(pSM, req, userAppContext, SOPC_REQUEST_SCOPE_STATE_MACHINE,
@@ -676,6 +609,40 @@ SOPC_ReturnStatus SOPC_StaMac_SetSubscriptionNbTokens(SOPC_StaMac_Machine* pSM, 
     return SOPC_STATUS_OK;
 }
 
+static SOPC_ReturnStatus Helpers_NewDeleteSubscriptionRequest(uint32_t subscriptionId, void** ppRequest)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_DeleteSubscriptionsRequest* pReq = NULL;
+
+    if (NULL == ppRequest)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_EncodeableObject_Create(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, (void**) &pReq);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        uint32_t* pSubscriptionId = (uint32_t*) SOPC_Malloc(sizeof(uint32_t));
+        if (NULL == pSubscriptionId)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            *pSubscriptionId = subscriptionId;
+            pReq->NoOfSubscriptionIds = 1;
+            pReq->SubscriptionIds = pSubscriptionId;
+            *ppRequest = (void*) pReq;
+        }
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -683,7 +650,7 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM)
 
     if (SOPC_StaMac_HasSubscription(pSM) && stActivated == pSM->state)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Deleting subscription.");
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Deleting subscription.");
 
         if (SOPC_STATUS_OK == status)
         {
@@ -710,130 +677,6 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
-                                                  char const* const* lszNodeId,
-                                                  const uint32_t* liAttrId,
-                                                  int32_t nElems,
-                                                  SOPC_CreateMonitoredItems_Ctx* pAppCtx,
-                                                  uint32_t* lCliHndl)
-{
-    void* pReq = NULL;
-
-    if (NULL == pSM || NULL == lszNodeId || NULL == liAttrId || NULL == pAppCtx || NULL == lCliHndl || 0 >= nElems)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    if (!SOPC_StaMac_HasSubscription(pSM))
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription.");
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    /* Create the NodeIds from the strings */
-    SOPC_NodeId** lpNid = SOPC_Calloc((size_t) nElems, sizeof(SOPC_NodeId*));
-    if (NULL == lpNid)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    for (int i = 0; i < nElems; ++i)
-    {
-        size_t szLen = strlen(lszNodeId[i]);
-        if (INT32_MAX < szLen)
-        {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, NodeId string is too long.");
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-        lpNid[i] = SOPC_NodeId_FromCString(lszNodeId[i], (int32_t) szLen);
-        if (NULL == lpNid[i])
-        {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "creating monitored item, could not convert \"%s\" to NodeId.",
-                        lszNodeId[i]);
-            status = SOPC_STATUS_NOK;
-        }
-    }
-
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    if (stActivated != pSM->state)
-    {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                    "creating monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
-        status = SOPC_STATUS_INVALID_STATE;
-    }
-
-    /* Create the CreateMonitoredItemRequest */
-    if (SOPC_STATUS_OK == status)
-    {
-        for (int i = 0; i < nElems; ++i)
-        {
-            void* nodeId = SOPC_Calloc(1, sizeof(char) * (strlen(lszNodeId[i]) + 1));
-            if (NULL == nodeId)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            else
-            {
-                void* result = NULL;
-                if (pSM->nMonItClientHandle < UINT32_MAX)
-                {
-                    pSM->nMonItClientHandle++;
-                    lCliHndl[i] = pSM->nMonItClientHandle;
-                    strcpy(nodeId, lszNodeId[i]);
-                    result = (void*) SOPC_SLinkedList_Append(pSM->dataIdToNodeIdList, pSM->nMonItClientHandle,
-                                                             (uintptr_t) nodeId);
-                }
-                if (NULL == result)
-                {
-                    SOPC_Free(nodeId);
-                    status = SOPC_STATUS_OUT_OF_MEMORY;
-                }
-            }
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            pAppCtx->req = NULL;
-            pAppCtx->outCtxId = lCliHndl[0];
-            status = Helpers_NewCreateMonitoredItemsRequest(lpNid, liAttrId, nElems, pSM->iSubscriptionID,
-                                                            MONIT_TIMESTAMPS_TO_RETURN, lCliHndl, MONIT_QSIZE, &pReq);
-        }
-    }
-
-    /* Send it */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_StaMac_SendRequest(pSM, pReq, (uintptr_t) pAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                         SOPC_REQUEST_TYPE_SUBSCRIPTION);
-    }
-
-    /* Update the machine, the *pAppCtx, and *pCliHndl */
-    if (SOPC_STATUS_OK == status)
-    {
-        pSM->state = stCreatingMonIt;
-    }
-    else
-    {
-        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
-    }
-
-    for (int i = 0; NULL != lpNid && i < nElems; ++i)
-    {
-        SOPC_Free(lpNid[i]);
-        lpNid[i] = NULL;
-    }
-    SOPC_Free(lpNid);
-    lpNid = NULL;
-
-    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    return status;
-}
-
 SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machine* pSM,
                                                                SOPC_StaMacNotification_Fct* pNotificationCb)
 {
@@ -846,7 +689,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machi
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (NULL != pSM->pCbkNotification || NULL != pSM->pCbkClientHelperDataChanged || NULL != pSM->pCbkLibSubDataChanged)
+    if (NULL != pSM->pCbkNotification)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -873,7 +716,8 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
 
     if (!SOPC_StaMac_HasSubscription(pSM))
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription to create monitored items.");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "the machine shall have a created subscription to create monitored items.");
         return SOPC_STATUS_INVALID_STATE;
     }
 
@@ -885,8 +729,9 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (stActivated != pSM->state)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                    "creating monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "creating monitored item, the machine should be in the stActivated state (is in %i).",
+                               pSM->state);
         status = SOPC_STATUS_INVALID_STATE;
     }
 
@@ -978,7 +823,8 @@ SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
 
     if (!SOPC_StaMac_HasSubscription(pSM))
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription to create monitored items.");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "the machine shall have a created subscription to create monitored items.");
         return SOPC_STATUS_INVALID_STATE;
     }
 
@@ -988,8 +834,9 @@ SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (stActivated != pSM->state)
     {
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                    "deleting monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "deleting monitored item, the machine should be in the stActivated state (is in %i).",
+                               pSM->state);
         status = SOPC_STATUS_INVALID_STATE;
     }
 
@@ -1529,8 +1376,9 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 processingAuthorization = StaMac_GiveAuthorization_stActivating(pSM, event, pEncType);
                 if (!processingAuthorization && SE_SESSION_ACTIVATION_FAILURE == event)
                 {
-                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Session activation failed with status code 0x%X",
-                                (SOPC_StatusCode)(uintptr_t) pParam);
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "Session activation failed with status code 0x%08" PRIX32,
+                                           (SOPC_StatusCode)(uintptr_t) pParam);
                 }
                 break;
             case stClosing:
@@ -1562,22 +1410,22 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             case stInit:
             default:
                 processingAuthorization = false;
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Dispatching in unknown state %s, event %s.",
-                            SOPC_StaMacState_ToString(pSM->state), SOPC_ClientAppComEvent_ToString(event));
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Dispatching in unknown state %s, event %s.",
+                                       SOPC_StaMacState_ToString(pSM->state), SOPC_ClientAppComEvent_ToString(event));
                 break;
             }
 
             /* always authorize processing of service faults */
             if (&OpcUa_ServiceFault_EncodeableType == pEncType)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received ServiceFault");
+                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Received ServiceFault");
                 processingAuthorization = true;
             }
 
             /* Authorize processing of send request failed if it is a timeout of PublishRequest */
             if (SE_SND_REQUEST_FAILED == event)
             {
-                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Dispatching event SE_SND_REQUEST_FAILED");
+                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Dispatching event SE_SND_REQUEST_FAILED");
                 processingAuthorization =
                     StaMac_GiveAuthorization_SendRequestFailed(pSM, event, (SOPC_ReturnStatus) arg, pEncType);
             }
@@ -1622,8 +1470,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     }
                     else
                     {
-                        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Received unknown message in event %s",
-                                    SOPC_ClientAppComEvent_ToString(event));
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Received unknown message in event %s",
+                                               SOPC_ClientAppComEvent_ToString(event));
                         pSM->state = stError;
                     }
                 }
@@ -1634,15 +1482,16 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 }
                 else
                 {
-                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Received unexpected event %d", event);
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Received unexpected event %d", event);
                     pSM->state = stError;
                 }
             }
             else
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                            "Received unexpected message or event '%s' in state '%s', switching to error state",
-                            SOPC_ClientAppComEvent_ToString(event), SOPC_StaMacState_ToString(pSM->state));
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "Received unexpected message or event '%s' in state '%s', switching to error state",
+                    SOPC_ClientAppComEvent_ToString(event), SOPC_StaMacState_ToString(pSM->state));
                 pSM->state = stError;
             }
         }
@@ -1654,7 +1503,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             if (SE_SND_REQUEST_FAILED == event)
             {
                 pSM->state = stClosing;
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Applicative message could not be sent, closing the connection.");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Applicative message could not be sent, closing the connection.");
 
                 if (NULL != pSM->pCbkGenericEvent)
                 {
@@ -1662,7 +1512,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
                     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
                     unlockedMutex = true;
-                    (*pSM->pCbkGenericEvent)(cliId, SOPC_LibSub_ApplicativeEvent_SendFailed, arg, NULL, appCtx);
+                    (*pSM->pCbkGenericEvent)(cliId, SOPC_StaMac_ApplicativeEvent_SendFailed, arg, NULL, appCtx);
                 }
             }
             else
@@ -1673,7 +1523,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
                     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
                     unlockedMutex = true;
-                    (*pSM->pCbkGenericEvent)(cliId, SOPC_LibSub_ApplicativeEvent_Response, SOPC_STATUS_OK, pParam,
+                    (*pSM->pCbkGenericEvent)(cliId, SOPC_StaMac_ApplicativeEvent_Response, SOPC_STATUS_OK, pParam,
                                              appCtx);
                 }
             }
@@ -1761,7 +1611,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
         }
         else
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to pop the request from the pListReqCtx.");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to pop the request from the pListReqCtx.");
         }
         break;
     /* appCtx is session context */
@@ -1780,7 +1630,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
         break;
     default:
         bProcess = false;
-        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected event received by a machine.");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Unexpected event received by a machine.");
         break;
     }
 
@@ -1797,7 +1647,7 @@ static void StaMac_ProcessMsg_ActivateSessionResponse(SOPC_StaMac_Machine* pSM,
 
     pSM->state = stActivated;
     pSM->iSessionID = arg;
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Session activated.");
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Session activated.");
 }
 
 static void StaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
@@ -1817,7 +1667,6 @@ static void StaMac_ProcessMsg_PubResp_NotifData(SOPC_StaMac_Machine* pSM,
                                                 OpcUa_PublishResponse* pPubResp,
                                                 OpcUa_DataChangeNotification* pDataNotif)
 {
-    SOPC_LibSub_Value* plsVal = NULL;
     uintptr_t* newAPImonitoredItemCtxArray = NULL;
     OpcUa_MonitoredItemNotification* pMonItNotif = NULL;
 
@@ -1838,33 +1687,9 @@ static void StaMac_ProcessMsg_PubResp_NotifData(SOPC_StaMac_Machine* pSM,
                     SOPC_Dict_Get(pSM->miCliHandleToUserAppCtxDict, (uintptr_t) pMonItNotif->ClientHandle, &found);
                 if (!found)
                 {
-                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected monitored item client handle not found.");
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "Unexpected monitored item client handle not found.");
                 }
-            }
-        }
-        else // deprecated APIs behavior
-        {
-            SOPC_ReturnStatus status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
-            if (SOPC_STATUS_OK == status)
-            {
-                if (NULL != pSM->pCbkLibSubDataChanged)
-                {
-                    (*pSM->pCbkLibSubDataChanged)(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
-                }
-                else if (NULL != pSM->pCbkClientHelperDataChanged && INT32_MAX >= pSM->iCliId)
-                {
-                    void* nodeId =
-                        (void*) SOPC_SLinkedList_FindFromId(pSM->dataIdToNodeIdList, pMonItNotif->ClientHandle);
-                    if (NULL != nodeId)
-                    {
-                        (*pSM->pCbkClientHelperDataChanged)((int32_t) pSM->iCliId, (char*) nodeId, &pMonItNotif->Value);
-                    }
-                }
-                SOPC_Free(plsVal->value);
-                plsVal->value = NULL;
-                SOPC_Variant_Delete(plsVal->raw_value);
-                SOPC_Free(plsVal);
-                plsVal = NULL;
             }
         }
     }
@@ -1888,7 +1713,6 @@ static void StaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
                                                      OpcUa_PublishResponse* pPubResp,
                                                      OpcUa_EventNotificationList* pEventNotif)
 {
-    SOPC_ASSERT(NULL == pSM->pCbkLibSubDataChanged);
     uintptr_t* newAPImonitoredItemCtxArray = NULL;
     if (NULL != pSM->pCbkNotification && pEventNotif->NoOfEvents > 0)
     {
@@ -1903,7 +1727,7 @@ static void StaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
         newAPImonitoredItemCtxArray[i] = userAppCtx;
         if (!found)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected monitored item client handle not found.");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Unexpected monitored item client handle not found.");
         }
     }
 
@@ -1942,7 +1766,7 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     OpcUa_DataChangeNotification* pDataNotif = NULL;
 
     /* There should be an EncodeableType pointer in the first field of the message struct */
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "PublishResponse received.");
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "PublishResponse received.");
 
     if (!pSM->bSubscriptionCreated)
     {
@@ -1968,7 +1792,7 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     }
     else
     {
-        Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Unexpected number of PublishResponse received.");
     }
 
     /* Traverse the notifications and calls the callback */
@@ -1999,8 +1823,8 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
             }
             else
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected notification type received %s.",
-                            pNotifMsg->NotificationData[iNotif].Body.Object.ObjType->TypeName);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Unexpected notification type received %s.",
+                                       pNotifMsg->NotificationData[iNotif].Body.Object.ObjType->TypeName);
             }
         }
     }
@@ -2029,7 +1853,7 @@ static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pS
     pSM->iSubscriptionID = resp->SubscriptionId;
     pSM->bSubscriptionCreated = true;
     pSM->subscriptionAppCtx = appCtx;
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Subscription %" PRIu32 " created.", pSM->iSubscriptionID);
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Subscription %" PRIu32 " created.", pSM->iSubscriptionID);
     pSM->state = stActivated;
     pSM->fPublishInterval = resp->RevisedPublishingInterval;
     pSM->iCntLifetime = resp->RevisedLifetimeCount;
@@ -2080,7 +1904,7 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
     pSM->bAckSubscr = false;
     pSM->iAckSeqNum = 0;
 
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Subscription deleted.");
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Subscription deleted.");
     pSM->state = stActivated;
 }
 
@@ -2111,8 +1935,8 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
                 if (!result)
                 {
                     pMonItResp->Results[i].StatusCode = OpcUa_BadInternalError;
-                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating monitored item with index '%" PRIi32 ".",
-                                i);
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "Internal error creating monitored item with index '%" PRIi32 ".", i);
                 }
             }
         }
@@ -2123,7 +1947,8 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
             SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[0].MonitoredItemId, MIappCtx->outCtxId);
         if (!result)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating monitored item result context");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Internal error creating monitored item result context");
         }
     }
 
@@ -2168,8 +1993,9 @@ static void StaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* 
             }
             else
             {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error finding monitored item id %" PRIu32,
-                            pMonItReq->MonitoredItemIds[i]);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Internal error finding monitored item id %" PRIu32,
+                                       pMonItReq->MonitoredItemIds[i]);
             }
         }
     }
@@ -2178,7 +2004,8 @@ static void StaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* 
         bool result = SOPC_SLinkedList_Append(pSM->pListDelMonIt, pMonItReq->MonitoredItemIds[0], MIappCtx->outCtxId);
         if (!result)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating delete monitored item result context");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Internal error creating delete monitored item result context");
         }
     }
 
@@ -2220,7 +2047,7 @@ static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
         }
         else
         {
-            Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Unexpected number of PublishResponse received.");
         }
         break;
     default:
@@ -2256,7 +2083,8 @@ static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
             }
             else
             {
-                Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "Unexpected number of PublishResponse received.");
             }
         }
         else
@@ -2281,26 +2109,82 @@ static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
     {
     case SE_SESSION_ACTIVATION_FAILURE:
     case SE_CLOSED_SESSION:
-        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received post-closed closed event or activation failure, ignored.");
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                              "Received post-closed closed event or activation failure, ignored.");
         break;
     case SE_SND_REQUEST_FAILED:
         if (NULL != pParam)
         {
-            Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received post-closed send request failure for message of type %s.",
-                        ((SOPC_EncodeableType*) pParam)->TypeName);
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                  "Received post-closed send request failure for message of type %s.",
+                                  ((SOPC_EncodeableType*) pParam)->TypeName);
         }
         else
         {
-            Helpers_Log(SOPC_LOG_LEVEL_INFO, "Received post-closed send request failure for message of unknown type");
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                  "Received post-closed send request failure for message of unknown type");
         }
         break;
     case SE_SESSION_REACTIVATING:
-        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Reactivating event received, but closed connection are considered lost.");
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                              "Reactivating event received, but closed connection are considered lost.");
         break;
     default:
-        Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Receiving unexpected event %i in closed state, ignored.", event);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Receiving unexpected event %i in closed state, ignored.", event);
         break;
     }
+}
+
+static SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t iSeqNum, void** ppRequest)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_PublishRequest* pReq = NULL;
+
+    if (NULL == ppRequest)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_EncodeableObject_Create(&OpcUa_PublishRequest_EncodeableType, (void**) &pReq);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (bAck)
+        {
+            pReq->NoOfSubscriptionAcknowledgements = 1;
+            status = SOPC_EncodeableObject_Create(&OpcUa_SubscriptionAcknowledgement_EncodeableType,
+                                                  (void**) &pReq->SubscriptionAcknowledgements);
+            if (SOPC_STATUS_OK == status)
+            {
+                pReq->SubscriptionAcknowledgements->SubscriptionId = iSubId;
+                pReq->SubscriptionAcknowledgements->SequenceNumber = iSeqNum;
+            }
+        }
+        else
+        {
+            pReq->NoOfSubscriptionAcknowledgements = 0;
+            pReq->SubscriptionAcknowledgements = NULL;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *ppRequest = pReq;
+    }
+    else if (NULL != pReq)
+    {
+        if (NULL != pReq->SubscriptionAcknowledgements)
+        {
+            SOPC_Free(pReq->SubscriptionAcknowledgements);
+        }
+        SOPC_EncodeableObject_Delete(&OpcUa_PublishRequest_EncodeableType, (void**) &pReq);
+    }
+
+    return status;
 }
 
 /**
@@ -2326,7 +2210,7 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
             while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget && !pSM->tooManyTokenRcvd)
             {
                 /* Send a PublishRequest */
-                Helpers_Log(SOPC_LOG_LEVEL_INFO, "Adding publish token.");
+                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Adding publish token.");
                 status = Helpers_NewPublishRequest(pSM->bAckSubscr, pSM->iSubscriptionID, pSM->iAckSeqNum, &pRequest);
                 if (SOPC_STATUS_OK == status)
                 {
@@ -2361,7 +2245,8 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
                 }
                 else
                 {
-                    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Closing the connection because of the previous error.");
+                    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                          "Closing the connection because of the previous error.");
                 }
             }
             else

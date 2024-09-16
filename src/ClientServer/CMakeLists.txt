@@ -78,13 +78,9 @@ endif()
 set(S2OPC_WRAPPERS_SRC
     "${COMMONWRAPPER_PATH}/libs2opc_common_config.c"
     "${HELPERWRAPPER_PATH}/libs2opc_request_builder.c"
-    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client.c"
     "${CLIENTWRAPPER_PATH}/libs2opc_new_client.c"
-    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_cmds.c"
-    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_common.c"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config.c"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.c"
-    "${CLIENTWRAPPER_PATH}/internal/toolkit_helpers.c"
     "${CLIENTWRAPPER_PATH}/internal/state_machine.c"
     "${SERVERWRAPPER_PATH}/libs2opc_server.c"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config.c"
@@ -99,9 +95,6 @@ list(APPEND WRAPPERS_INCLUDE_FILES
     "${CLIENTWRAPPER_PATH}/libs2opc_new_client.h"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.h"
-    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client.h"
-    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_cmds.h"
-    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_common.h"
     "${SERVERWRAPPER_PATH}/libs2opc_server.h"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config.h"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.h")
@@ -135,7 +128,7 @@ target_include_directories(s2opc_clientserver
   PUBLIC
   "$<BUILD_INTERFACE:${S2OPC_CLIENTSERVER_PUBLIC_INCLUDES}>" # when building (quotes needed to interpret list correclty)
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${COMMONWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${HELPERWRAPPER_PATH}>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/deprecated>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
   "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PUBLIC_INCLUDES}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver> # when installed

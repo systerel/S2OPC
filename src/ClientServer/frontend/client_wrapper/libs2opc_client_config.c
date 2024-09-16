@@ -24,8 +24,6 @@
 #include "libs2opc_client_internal.h"
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
-// TODO: remove, only to set logger in state machine
-#include "toolkit_helpers.h"
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
@@ -59,27 +57,6 @@ bool SOPC_ClientInternal_IsInitialized(void)
     return SOPC_Atomic_Int_Get(&sopc_client_helper_config.initialized);
 }
 
-static void SOPC_ClientHelper_Logger(const SOPC_Log_Level log_level, const char* text)
-{
-    switch (log_level)
-    {
-    case SOPC_LOG_LEVEL_ERROR:
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
-        break;
-    case SOPC_LOG_LEVEL_WARNING:
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
-        break;
-    case SOPC_LOG_LEVEL_INFO:
-        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
-        break;
-    case SOPC_LOG_LEVEL_DEBUG:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
-        break;
-    default:
-        SOPC_ASSERT(false);
-    }
-}
-
 SOPC_ReturnStatus SOPC_ClientConfigHelper_Initialize(void)
 {
     if (!SOPC_CommonHelper_GetInitialized() || SOPC_ClientInternal_IsInitialized())
@@ -104,9 +81,6 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Initialize(void)
 
     SOPC_ReturnStatus status = SOPC_CommonHelper_SetClientComEvent(SOPC_ClientInternal_ToolkitEventCallback);
     SOPC_Atomic_Int_Set(&sopc_client_helper_config.initialized, (int32_t) true);
-
-    // TODO: to be deleted and state machine shall use library logger
-    Helpers_SetLogger(SOPC_ClientHelper_Logger);
 
     if (SOPC_STATUS_OK != status)
     {
