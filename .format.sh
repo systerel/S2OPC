@@ -35,14 +35,14 @@ TEST_DIR=./tests
 BSRCS_DIR=./bsrc
 SAMPLE_DIR=./samples
 
-CLANG_FILES=$(find $SRCS_DIR $TEST_DIR $SAMPLE_DIR -name "*.[hc]" ! -path "./src/ClientServer/services/bgenc/*")
+CLANG_FILES=$(find $SRCS_DIR $TEST_DIR $SAMPLE_DIR -name "*.[hc]" ! \( -path "./src/ClientServer/services/bgenc/*" -or -name "pys2opc.c" \))
 clang-format -style=file -i ${CLANG_FILES}
 # Check newlines
 for f in ${CLANG_FILES}; do
     append_newline $f
 done
 
-OTHER_FILES=$(find $BSRC_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" \))
+OTHER_FILES=$(find $BSRC_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" -or -name "*.pyx"  \))
 OTHER_FILES="$OTHER_FILES $(find . -name CMakeLists.txt)"
 for f in ${OTHER_FILES}; do
     sed 's/\t/    /g' -i $f
