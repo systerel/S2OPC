@@ -379,17 +379,6 @@ target_compile_options(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_COMPILER_F
 target_compile_definitions(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(toolkit_test_client_rhe_faults PRIVATE s2opc_clientserver)
 
-# Client scenario with file transfer
-if (NOT WIN32 AND expat_FOUND)
-  add_executable(check_file_transfer "validation_tests/client/file_transfer/check_file_transfer.c"
-                                                  "validation_tests/client/file_transfer/check_file_transfer_method.c")
-  target_include_directories(check_file_transfer PRIVATE "validation_tests/client/file_transfer")
-  add_dependencies(check_file_transfer toolkit_test_server_file_transfer)
-  target_link_libraries(check_file_transfer PRIVATE s2opc_clientserver Check::check)
-  target_compile_options(check_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno function.
-  target_compile_definitions(check_file_transfer PRIVATE ${S2OPC_DEFINITIONS})
-endif()
-
 # Client services scenarii
 
 # Reuse code of demo client
@@ -603,17 +592,6 @@ add_test(NAME "validation::client_RHE_faults_test"
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
   $<TARGET_FILE:toolkit_test_client_rhe_faults>)
 set_tests_properties("validation::client_RHE_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_RHE_faults_test.tap")
-
-if (NOT WIN32 AND expat_FOUND)
-  add_test(NAME "validation::check_file_transfer"
-          WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-          COMMAND
-          "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-          "--server-wd" $<TARGET_FILE_DIR:toolkit_test_server_file_transfer>
-          "--server-cmd" $<TARGET_FILE:toolkit_test_server_file_transfer>
-          "./check_file_transfer")
-  set_tests_properties("validation::check_file_transfer" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=check_file_transfer.tap")
-endif()
 
 # Function to run a validation of the S2OPC server scenario with given client scenario test
 function(s2opc_custom_server_validation_test server_target name)

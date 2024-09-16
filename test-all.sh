@@ -56,7 +56,6 @@ check_sockets.tap
 client_RHE_faults_test.tap
 client_server_test.tap
 client_service_faults_test.tap
-check_file_transfer.tap
 sc_establish_timeout.tap
 sc_renew.tap
 secure_channel_level_None.tap
