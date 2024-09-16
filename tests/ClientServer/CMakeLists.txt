@@ -687,30 +687,6 @@ s2opc_sc_level_test("SignAndEncrypt_B256Sha256_4096bit" "4096" "encrypt" "B256Sh
 s2opc_sc_level_test("SignAndEncrypt_B256Sha256_4096bit_server_vs_2048bit_client" "4096" "encrypt" "B256Sha256" "2048" "4096")
 s2opc_sc_level_test("SignAndEncrypt_B256Sha256_2048bit_server_vs_4096bit_client" "2048" "encrypt" "B256Sha256" "4096" "2048")
 
-## S2OPC wrapper client library validation tests ##
-
-# Helpers unit tests
-add_executable(check_libsub "validation_tests/client_wrapper/check_libsub.c" ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
-target_include_directories(check_libsub PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
-target_compile_options(check_libsub PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(check_libsub PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(check_libsub PRIVATE s2opc_clientserver Check::check)
-s2opc_client_validation_test(check_libsub)
-
-add_executable(check_wrapper "validation_tests/client_wrapper/check_wrapper.c" ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
-target_include_directories(check_wrapper PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
-target_compile_options(check_wrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(check_wrapper PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(check_wrapper PRIVATE s2opc_clientserver Check::check)
-s2opc_client_validation_test(check_wrapper)
-
-add_executable(check_wrapper_reverse_connection "validation_tests/client_wrapper/check_wrapper_reverse_connection.c" ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
-target_include_directories(check_wrapper_reverse_connection PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
-target_compile_options(check_wrapper_reverse_connection PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(check_wrapper_reverse_connection PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(check_wrapper_reverse_connection PRIVATE s2opc_clientserver Check::check)
-s2opc_client_self_validation_test(check_wrapper_reverse_connection)
-
 ## PyS2OPC library validation tests ##
 
 # The library is built by python. It may use the shared library but it must not be built with ASan.

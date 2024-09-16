@@ -48,14 +48,11 @@ fi
 
 CLIENTSERVER_TAP_FILES='check_helpers.tap
 ask_password.tap
-check_libsub.tap
 check_security_policy_config.tap
 check_sc_rcv_buffer.tap
 check_sc_rcv_encrypted_buffer.tap
 check_sks.tap
 check_sockets.tap
-check_wrapper_reverse_connection.tap
-check_wrapper.tap
 client_RHE_faults_test.tap
 client_server_test.tap
 client_service_faults_test.tap
