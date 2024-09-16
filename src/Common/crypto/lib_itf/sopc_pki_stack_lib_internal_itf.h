@@ -17,65 +17,71 @@
  * under the License.
  */
 
+/** \file sopc_pki_stack_lib_internal_itf.h
+ *
+ * \brief Defines the PKI interface functions used internally.
+ *
+ */
+
 #ifndef SOPC_PKI_STACK_LIB_INT_ITF_H
 #define SOPC_PKI_STACK_LIB_INT_ITF_H
 
 #include "sopc_pki_decl.h"
 
-/**
- * \brief Verifies if a certificate is self-signed or a CA (Certificate Authority) certificate.
- *        If yes to one or both of these conditions, an error is raised.
- *        If no, verifies if the certificate properties are good. If not, an error is raised.
- *        Sets the profile for configuration, and if correct, validates the certificate.
- *        If the certificate is not valid, raises an error.
- *        If there is an error with the certificate, the certificate is added to a certificate rejection list.
+/** \brief Validation function for a certificate with the PKI chain
+ *
+ *  It implements the validation with the certificate chain of the PKI.
  *
  * \param pPKI A valid pointer to the PKIProvider.
- *
  * \param pToValidate A valid pointer to the Certificate to validate.
+ * \param pProfile A valid pointer to the PKI profile.
+ * \param[out] error Pointer to store the OpcUa error code when certificate validation failed.
  *
- * \param pProfile A valid pointer to the PKI chain profile.
+ * \note Default validation function used by PKIProvider when not created by ::SOPC_PKIPermissive_Create (without
+ * security)
  *
- * \param error Ouput error code set when returned status is not SOPC_STATUS_OK.
+ * \warning In case of user PKI, the leaf profile part of \p pProfile is not applied to the certificate.
+ *          The user leaf properties should be checked separately with ::SOPC_PKIProvider_CheckLeafCertificate .
+ *
+ * \return SOPC_STATUS_OK when the certificate is successfully validated, and
+ *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
+ *
+ */
+SOPC_ReturnStatus SOPC_PKIProviderInternal_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
+                                                                         const SOPC_CertificateList* pToValidate,
+                                                                         const SOPC_PKI_Profile* pProfile,
+                                                                         uint32_t* error);
+
+/**
+ * \brief Delete the roots CAs of the list \p ppCerts. Create a new list \p ppRootCa with all roots CA from \p ppCerts .
+ *        If there is no root CA, the content of \p ppRootCa is set to NULL.
+ *        If \p ppCerts becomes empty, its content is set to NULL.
+ *
+ * \param ppCerts A valid pointer to the certificate list to delete the roots CA of.
+ *
+ * \param ppRootCa A valid pointer to the new certificate list with the roots CA from \p ppCerts .
  *
  * \return SOPC_STATUS_OK when successful.
  *
  */
-SOPC_ReturnStatus SOPC_PKIProvider_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
-                                                                 const SOPC_CertificateList* pToValidate,
-                                                                 const SOPC_PKI_Profile* pProfile,
-                                                                 uint32_t* error);
+SOPC_ReturnStatus SOPC_PKIProviderInternal_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
+                                                                 SOPC_CertificateList** ppRootCa);
 
 /**
- * \brief Delete the roots of the list ppCerts. Create a new list ppRootCa with all roots from ppCerts.
- *        If there is no root, the content of ppRootCa is set to NULL.
- *        If ppCerts becomes empty, its content is set to NULL.
+ * \brief Get some statistics about the \p pCert .
  *
- * \param ppCerts A valid pointer to the certificate list to delete the roots of.
+ * \param pCert A valid pointer to the certificate list.
  *
- * \param ppRootCa A valid pointer to the new certificate list with the roots from ppCerts.
+ * \param[out] caCount A valid pointer to store the number of certificate authorities.
  *
- * \return SOPC_STATUS_OK when successful.
+ * \param[out] listLength A valid pointer to store the length of the certificate list.
  *
- */
-SOPC_ReturnStatus SOPC_PKIProvider_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
-                                                         SOPC_CertificateList** ppRootCa);
-
-/**
- * \brief Get some statistics about the certificate chain.
- *
- * \param pCert A valid pointer to the certificate chain.
- *
- * \param caCount A valid pointer to store the number of certificate authorities.
- *
- * \param listLength A valid pointer to store the length of the certificate chain.
- *
- * \param rootCount A valid pointer to store the number of self-signed certificates.
+ * \param[out] rootCount A valid pointer to store the number of root CA (self-signed certificate authority).
  *
  */
-void SOPC_PKIProvider_GetListStats(SOPC_CertificateList* pCert,
-                                   uint32_t* caCount,
-                                   uint32_t* listLength,
-                                   uint32_t* rootCount);
+void SOPC_PKIProviderInternal_GetListStats(SOPC_CertificateList* pCert,
+                                           uint32_t* caCount,
+                                           uint32_t* listLength,
+                                           uint32_t* rootCount);
 
 #endif /* SOPC_PKI_STACK_LIB_INT_ITF_H */

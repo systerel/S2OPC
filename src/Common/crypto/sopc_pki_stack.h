@@ -37,7 +37,7 @@
 
 /*
  * ------------------------------------------------------------------------------------------------
- * LeafProfile API
+ * Create API
  * ------------------------------------------------------------------------------------------------
  */
 
@@ -158,7 +158,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateLeafProfile(const char* securityPolicyU
  * \param pProfile A valid pointer to the leaf profile.
  * \param applicationUri The application URI to set in \p pProfile .
  *
- * \warning If the application URI is already defined in \p pProfile , you can not define it again.
+ * \warning If the application URI is already defined in \p pProfile, you can not define it again.
  *
  * \return SOPC_STATUS_OK when successful.
  */
@@ -264,6 +264,30 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateMinimalUserProfile(SOPC_PKI_Profile** p
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetUsageFromType(SOPC_PKI_Profile* pProfile, SOPC_PKI_Type PKIType);
+
+/**
+ * \brief Set the application URI to the PKI profile.
+ *
+ * \param pProfile A valid pointer to the PKI profile.
+ * \param applicationUri The application URI to set in \p pProfile.
+ *
+ * \warning If the application URI is already defined in \p pProfile, you can not define it again.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURI(SOPC_PKI_Profile* pProfile, const char* applicationUri);
+
+/**
+ * \brief Set the endpoint URL used for connection to the PKI profile.
+ *
+ * \param pProfile A valid pointer to the PKI profile.
+ * \param url The endpoint URL used for connection to set in \p pProfile.
+ *
+ * \warning If the URL is already defined in \p pProfile, you can not define it again.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURL(SOPC_PKI_Profile* pProfile, const char* url);
 
 /**
  * \brief Delete a PKI profile.
@@ -405,30 +429,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
                                                   SOPC_CertificateList* pIssuerCerts,
                                                   SOPC_CRLList* pIssuerCrl,
                                                   const bool bIncludeExistingList);
-
-/**
- * \brief Set the application URI to the PKI profile.
- *
- * \param pProfile A valid pointer to the PKI profile.
- * \param applicationUri The application URI to set in \p pProfile .
- *
- * \warning If the application URI is already defined in \p pProfile , you can not define it again.
- *
- * \return SOPC_STATUS_OK when successful.
- */
-SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURI(SOPC_PKI_Profile* pProfile, const char* applicationUri);
-
-/**
- * \brief Set the endpoint URL used for connection to the PKI profile.
- *
- * \param pProfile A valid pointer to the PKI profile.
- * \param url The endpoint URL used for connection to set in \p pProfile .
- *
- * \warning If the URL is already defined in \p pProfile , you can not define it again.
- *
- * \return SOPC_STATUS_OK when successful.
- */
-SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURL(SOPC_PKI_Profile* pProfile, const char* url);
 
 /** \brief  Remove all the certificates matching with the given thumbprint.
  *          If the Certificate is a CA Certificate then all the CRLs for that CA are removed.

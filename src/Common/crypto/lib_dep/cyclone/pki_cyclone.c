@@ -1131,10 +1131,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
-                                                                 const SOPC_CertificateList* pToValidate,
-                                                                 const SOPC_PKI_Profile* pProfile,
-                                                                 uint32_t* error)
+SOPC_ReturnStatus SOPC_PKIProviderInternal_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
+                                                                         const SOPC_CertificateList* pToValidate,
+                                                                         const SOPC_PKI_Profile* pProfile,
+                                                                         uint32_t* error)
 {
     if (NULL == pPKI || NULL == pToValidate || NULL == pProfile || NULL == error)
     {
@@ -1430,8 +1430,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
-                                                         SOPC_CertificateList** ppRootCa)
+SOPC_ReturnStatus SOPC_PKIProviderInternal_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
+                                                                 SOPC_CertificateList** ppRootCa)
 {
     SOPC_ASSERT(NULL != ppCerts);
     SOPC_ASSERT(NULL != ppRootCa);
@@ -1492,10 +1492,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_SplitRootFromCertList(SOPC_CertificateList** 
     return status;
 }
 
-void SOPC_PKIProvider_GetListStats(SOPC_CertificateList* pCert,
-                                   uint32_t* caCount,
-                                   uint32_t* listLength,
-                                   uint32_t* rootCount)
+void SOPC_PKIProviderInternal_GetListStats(SOPC_CertificateList* pCert,
+                                           uint32_t* caCount,
+                                           uint32_t* listLength,
+                                           uint32_t* rootCount)
 {
     if (NULL == pCert)
     {

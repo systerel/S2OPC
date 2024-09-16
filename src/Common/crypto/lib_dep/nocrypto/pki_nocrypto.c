@@ -75,10 +75,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckSecurityPolicy(const SOPC_CertificateLis
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-void SOPC_PKIProvider_GetListStats(SOPC_CertificateList* pCert,
-                                   uint32_t* caCount,
-                                   uint32_t* listLength,
-                                   uint32_t* rootCount)
+void SOPC_PKIProviderInternal_GetListStats(SOPC_CertificateList* pCert,
+                                           uint32_t* caCount,
+                                           uint32_t* listLength,
+                                           uint32_t* rootCount)
 {
     SOPC_UNUSED_ARG(pCert);
     SOPC_UNUSED_ARG(caCount);
@@ -92,18 +92,18 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckCommonName(const SOPC_CertificateList* p
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
-                                                         SOPC_CertificateList** ppRootCa)
+SOPC_ReturnStatus SOPC_PKIProviderInternal_SplitRootFromCertList(SOPC_CertificateList** ppCerts,
+                                                                 SOPC_CertificateList** ppRootCa)
 {
     SOPC_UNUSED_ARG(ppCerts);
     SOPC_UNUSED_ARG(ppRootCa);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
-                                                                 const SOPC_CertificateList* pToValidate,
-                                                                 const SOPC_PKI_Profile* pProfile,
-                                                                 uint32_t* error)
+SOPC_ReturnStatus SOPC_PKIProviderInternal_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
+                                                                         const SOPC_CertificateList* pToValidate,
+                                                                         const SOPC_PKI_Profile* pProfile,
+                                                                         uint32_t* error)
 {
     SOPC_UNUSED_ARG(pPKI);
     SOPC_UNUSED_ARG(pToValidate);

@@ -869,7 +869,7 @@ static SOPC_ReturnStatus sopc_pki_check_lists(SOPC_CertificateList* pTrustedCert
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: no trusted certificate is provided.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_PKIProvider_GetListStats(pTrustedCerts, &trusted_ca_count, &trusted_list_length, &trusted_root_count);
+    SOPC_PKIProviderInternal_GetListStats(pTrustedCerts, &trusted_ca_count, &trusted_list_length, &trusted_root_count);
     issued_cert_count = trusted_list_length - trusted_ca_count;
     /* trusted CA => trusted CRL*/
     if (0 != trusted_ca_count && NULL == pTrustedCrl)
@@ -877,7 +877,7 @@ static SOPC_ReturnStatus sopc_pki_check_lists(SOPC_CertificateList* pTrustedCert
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
                                  "> PKI creation warning: trusted CA certificates are provided but no CRL.");
     }
-    SOPC_PKIProvider_GetListStats(pIssuerCerts, &issuer_ca_count, &issuer_list_length, &issuer_root_count);
+    SOPC_PKIProviderInternal_GetListStats(pIssuerCerts, &issuer_ca_count, &issuer_list_length, &issuer_root_count);
     /* issuer CA => issuer CRL*/
     if (0 != issuer_ca_count && NULL == pIssuerCrl)
     {
@@ -2129,11 +2129,11 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     /* Retrieve the root from list */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProvider_SplitRootFromCertList(&tmp_pTrustedCerts, &tmp_pTrustedRoots);
+        status = SOPC_PKIProviderInternal_SplitRootFromCertList(&tmp_pTrustedCerts, &tmp_pTrustedRoots);
     }
     if (SOPC_STATUS_OK == status && NULL != tmp_pIssuerCerts)
     {
-        status = SOPC_PKIProvider_SplitRootFromCertList(&tmp_pIssuerCerts, &tmp_pIssuerRoots);
+        status = SOPC_PKIProviderInternal_SplitRootFromCertList(&tmp_pIssuerCerts, &tmp_pIssuerRoots);
     }
     /* Merge trusted and issuer list */
     if (SOPC_STATUS_OK == status)
@@ -2178,7 +2178,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         pPKI->pAllCrl = tmp_pAllCrl;
         pPKI->pRejectedList = NULL;
         pPKI->directoryStorePath = NULL;
-        pPKI->pFnValidateCert = &SOPC_PKIProvider_ValidateProfileAndCertificate;
+        pPKI->pFnValidateCert = &SOPC_PKIProviderInternal_ValidateProfileAndCertificate;
         pPKI->isPermissive = false;
         *ppPKI = pPKI;
     }
