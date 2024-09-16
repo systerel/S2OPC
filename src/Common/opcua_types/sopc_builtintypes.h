@@ -174,7 +174,7 @@ typedef struct SOPC_Guid
 /**
  *  \brief This enum provides fundamental identifier type
  */
-typedef enum SOPC_IdentifierType
+typedef enum _SOPC_IdentifierType
 {
     SOPC_IdentifierType_Numeric = 0x00,
     SOPC_IdentifierType_String = 0x01,
@@ -246,7 +246,7 @@ typedef struct SOPC_LocalizedText
 /**
  *  \brief This enum provides additional information on which data type format transported.
  */
-typedef enum SOPC_ExtObjectBodyEncoding
+typedef enum _SOPC_ExtObjectBodyEncoding
 {
     SOPC_ExtObjBodyEncoding_None = 0x00,
     SOPC_ExtObjBodyEncoding_ByteString = 0x01,
@@ -277,14 +277,14 @@ typedef struct SOPC_ExtensionObject
 
 } SOPC_ExtensionObject;
 
-typedef enum SOPC_VariantArrayTypeFlag
+typedef enum _SOPC_VariantArrayTypeFlag
 {
     SOPC_VariantArrayValueFlag = 128,    // 2^7 => bit 7
     SOPC_VariantArrayDimensionsFlag = 64 // 2^6 => bit 6
 } SOPC_VariantArrayTypeFlag;
 
 // Binary compatible types
-typedef enum SOPC_VariantArrayType
+typedef enum _SOPC_VariantArrayType
 {
     SOPC_VariantArrayType_SingleValue = 0x0,
     SOPC_VariantArrayType_Array = 0x1,

@@ -7047,7 +7047,7 @@ SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buf,
  *
  * The enumerated values are indexes in the sopc_KnownEncodeableTypes array.
  *===========================================================================*/
-typedef enum SOPC_TypeInternalIndex
+typedef enum _SOPC_TypeInternalIndex
 {
 #ifndef OPCUA_EXCLUDE_KeyValuePair
     SOPC_TypeInternalIndex_KeyValuePair,

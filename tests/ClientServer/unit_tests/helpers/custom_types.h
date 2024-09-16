@@ -74,7 +74,7 @@ void OpcUa_S2OPC_CustomDataType2_Clear(void* pValue);
  *
  * The enumerated values are indexes in the sopc_S2OPC_KnownEncodeableTypes array.
  *===========================================================================*/
-typedef enum SOPC_S2OPC_TypeInternalIndex
+typedef enum _SOPC_S2OPC_TypeInternalIndex
 {
 #ifndef OPCUA_EXCLUDE_S2OPC_CustomDataType
     SOPC_TypeInternalIndex_S2OPC_CustomDataType,

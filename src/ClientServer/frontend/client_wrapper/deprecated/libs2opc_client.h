@@ -209,7 +209,7 @@ typedef uint32_t SOPC_LibSub_AttributeId;
     The event passed to the connection SOPC_LibSub_EventCbk.
     Either an error or a valid response notification.
 */
-typedef enum SOPC_LibSub_ApplicativeEvent
+typedef enum _SOPC_LibSub_ApplicativeEvent
 {
     SOPC_LibSub_ApplicativeEvent_SendFailed,
     SOPC_LibSub_ApplicativeEvent_Response

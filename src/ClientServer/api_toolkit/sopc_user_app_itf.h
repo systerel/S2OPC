@@ -382,7 +382,7 @@ typedef uint32_t SOPC_SessionId;
 /**
  *  \brief Client and Server communication events to be managed by applicative code
  */
-typedef enum SOPC_App_Com_Event
+typedef enum _SOPC_App_Com_Event
 {
     /* Client application events */
     SE_REVERSE_ENDPOINT_CLOSED = 0x700, /**< Client side only:<br/>
@@ -455,7 +455,7 @@ typedef enum SOPC_App_Com_Event
 /**
  * \brief Server address space access/modification notifications to applicative code
  */
-typedef enum SOPC_App_AddSpace_Event
+typedef enum _SOPC_App_AddSpace_Event
 {
     /* Server application events */
     AS_WRITE_EVENT = 0x800, /**< Server side only:<BR/>

@@ -850,7 +850,7 @@ TYPE_INDEX_DECL_START = """
  *
  * The enumerated values are indexes in the sopc_{prefix}KnownEncodeableTypes array.
  *===========================================================================*/
-typedef enum SOPC_{prefix}TypeInternalIndex
+typedef enum _SOPC_{prefix}TypeInternalIndex
 {{"""
 
 TYPE_INDEX_DECL_ENCODEABLE_TYPE = """
