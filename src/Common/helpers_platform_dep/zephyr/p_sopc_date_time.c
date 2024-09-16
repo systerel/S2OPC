@@ -165,7 +165,7 @@ static uint64_t P_DATE_TIME_GetCorrected100ns(void)
             // of good quality
             float newFactor = measureLocDuration / measurePtpDuration;
 
-            if (fabs(1.0 - newFactor) >= CLOCK_CORRECTION_RANGE)
+            if (fabs(1.0 - (double) newFactor) >= CLOCK_CORRECTION_RANGE)
             {
                 invalidTimes = true;
             }
@@ -174,7 +174,8 @@ static uint64_t P_DATE_TIME_GetCorrected100ns(void)
                 gMeasureNextSynch += CONFIG_SOPC_PTP_SYNCH_DURATION;
 
                 // Compute precision, based on difference between current and new correction
-                gLocalClockPrecision = 1.0 - fabs((newFactor - gLocalClockCorrFactor) / CLOCK_CORRECTION_RANGE);
+                gLocalClockPrecision =
+                    1.0 - fabs((double) (newFactor - gLocalClockCorrFactor) / CLOCK_CORRECTION_RANGE);
                 // Accept this correction factor
                 gLocalClockCorrFactor = newFactor;
             }
@@ -197,7 +198,7 @@ static uint64_t P_DATE_TIME_GetCorrected100ns(void)
         {
             const uint64_t delta = (nowLocInt - gLastLocSyncDate);
 
-            const float corrFact = (1.0 - gLocalClockCorrFactor) / gLocalClockCorrFactor;
+            const float corrFact = (1.0 - (double) gLocalClockCorrFactor) / (double) gLocalClockCorrFactor;
             const int64_t corr = (int64_t)(delta * corrFact);
             nowPtp += corr;
         }

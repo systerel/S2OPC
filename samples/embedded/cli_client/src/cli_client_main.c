@@ -235,10 +235,10 @@ static void print_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
                 PRINT("%" PRIu64, dv->Value.Value.Uint64);
                 break;
             case SOPC_Float_Id:
-                PRINT("%f", dv->Value.Value.Floatv);
+                PRINT("%f", (double) dv->Value.Value.Floatv);
                 break;
             case SOPC_Double_Id:
-                PRINT("%f", (float) dv->Value.Value.Doublev);
+                PRINT("%f", (double) dv->Value.Value.Doublev);
                 break;
             case SOPC_String_Id:
                 PRINT("<%s>", SAFE_STRING(SOPC_String_GetRawCString(&dv->Value.Value.String)));

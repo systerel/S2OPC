@@ -79,7 +79,7 @@ if [ -z "${GET_BOARD}" ] && [ -z "${GET_APP}" ]; then
     chmod a+rw samples/embedded/cli_pubsub_server/
 
     build stm32h735g_disco cli_client
-    build stm32h735g_disco cli_client -DCONFIG_NET_GPTP=y
+    build nucleo_h745zi_q_m7 cli_client -DCONFIG_NET_GPTP=y
     build mimxrt1064_evk cli_pubsub_server
     build native_posix_64 cli_pubsub_server  -DCONFIG_SOPC_CRYPTO_LIB_NAME=\"nocrypto\" -DCONFIG_MBEDTLS=n
     build native_posix_64 cli_pubsub_server
