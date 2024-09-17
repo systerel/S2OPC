@@ -21,10 +21,10 @@
 #include <string.h>
 
 // Server wrapper
+#include "libs2opc_client.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
-#include "libs2opc_client.h"
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
@@ -280,7 +280,7 @@ static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
     SOPC_PKIProvider* pkiProvider = NULL;
 
     /* Load client/server certificates and server key from C source files (no filesystem needed) */
-    status = SOPC_HelperConfigServer_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
+    status = SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
                                                              sizeof(server_2k_key), server_2k_key);
 
     if (SOPC_STATUS_OK == status)
@@ -712,7 +712,7 @@ void suite_test_server_client(int* index)
     }
 
     /* Clear the server wrapper layer */
-    SOPC_HelperConfigServer_Clear();
+    SOPC_ServerConfigHelper_Clear();
 
     /* Clear the client/server toolkit library (stop all library threads) */
     SOPC_CommonHelper_Clear();
