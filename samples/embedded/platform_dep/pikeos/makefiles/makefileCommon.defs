@@ -38,11 +38,10 @@ S2OPC_PIKEOS_SIGNAL_DIR = ${S2OPC_PLATFORMDEP_PIKEOS_DIR}/signal
 S2OPC_COMMON_OPCUATYPES_DIR = ${S2OPC_COMMON_DIR}/opcua_types
 S2OPC_COMMON_SKS_DIR = ${S2OPC_COMMON_DIR}/sks
 
-$(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c: $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c_
-	cp $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c_ $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c
+# Get build information and fill variables with it
+SRC_COMMIT != git rev-parse HEAD 2>/dev/null ||  echo UNDEFINED
 
-remove_build_info_common:
-	rm -f $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info.c
+CFLAGS += -DBUILD_SRC_COMMIT=\"${SRC_COMMIT}\" -DBUILD_DOCKER_ID=\"N.A.\" -DBUILD_DATE=\"$(date)\"
 
 # Add common S2OPC inclusion path
 CPPFLAGS += -I${S2OPC_SRC_DIR} -I${S2OPC_COMMON_CONFIGURATION_DIR} \
@@ -61,7 +60,7 @@ CFLAGS += -DSOPC_TIME_T_SIZE=8 -DSOPC_PTR_SIZE=8 -DSOPC_MAX_MONITORED_ITEM=10000
 
 # Common C source files necessary
 
-S2OPC_COMMON_CONFIGURATION_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_CONFIGURATION_DIR}/*.c)) $(S2OPC_COMMON_CONFIGURATION_DIR)/sopc_common_build_info
+S2OPC_COMMON_CONFIGURATION_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_CONFIGURATION_DIR}/*.c))
 
 S2OPC_COMMON_CRYPTO_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_CRYPTO_DIR}/*.c))
 
@@ -81,6 +80,8 @@ S2OPC_COMMON_OPCUATYPES_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_OPCUAT
 
 S2OPC_COMMON_SKS_OBJ := $(patsubst %.c,%,$(wildcard ${S2OPC_COMMON_SKS_DIR}/*.c))
 
+S2OPC_BUILD_INFO_OBJ := ${S2OPC_PRJ_DIR}/samples/embedded/platform_dep/pikeos/src/pikeos_build_info
+
 S2OPC_MODLISTTIME += ${S2OPC_PIKEOS_TIME_OBJ}
 
 S2OPC_MODLISTCOMMON += ${S2OPC_COMMON_CONFIGURATION_OBJ} \
@@ -92,7 +93,8 @@ S2OPC_MODLISTCOMMON += ${S2OPC_COMMON_CONFIGURATION_OBJ} \
 		${S2OPC_PLATFORMDEP_PIKEOS_OBJ} \
 		${S2OPC_PIKEOS_SIGNAL_OBJ} \
 		${S2OPC_COMMON_OPCUATYPES_OBJ} \
-		${S2OPC_COMMON_SKS_OBJ}
+		${S2OPC_COMMON_SKS_OBJ} \
+		${S2OPC_BUILD_INFO_OBJ}
 
 # Discard Warning on generated files
 $(ODIR)/${S2OPC_COMMON_OPCUATYPES_DIR}/sopc_types.o: ${S2OPC_COMMON_OPCUATYPES_DIR}/sopc_types.c $(MAKEFILE_LIST)

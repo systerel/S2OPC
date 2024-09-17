@@ -73,6 +73,7 @@ SHARED_POOL=/home/pikeos_user/shared_pool
 export OUT_DIR=${SOPC_ROOT-}/build_pikeos
 
 mkdir -p ${OUT_DIR} ${OUT_DIR}/bin ${OUT_DIR}/lib ${OUT_DIR}/tests
+chmod -R 777 ${OUT_DIR}
 
 BUILD_LOG=${OUT_DIR-}/build_pikeos.log
 

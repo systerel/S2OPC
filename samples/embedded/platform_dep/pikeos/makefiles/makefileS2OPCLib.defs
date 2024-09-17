@@ -65,7 +65,7 @@ libs2opc_addresspaceloader.a: $(addprefix $(ODIR)/, $(addsuffix .o, $(S2OPC_MODL
 
 libs2opc_pubsub.a: $(addprefix $(ODIR)/, $(addsuffix .o, $(S2OPC_MODLISTPUBSUB)))
 
-.PHONY: install_header install uninstall uninstall_header uninstall_build_info_files get_build_info
+.PHONY: install_header install uninstall uninstall_header get_build_info
 
 install: install_header
 
@@ -84,5 +84,3 @@ uninstall: uninstall_header uninstall_build_info_files
 
 uninstall_header:
 	rm -rf $(PIKEOS_INSTALL_DIRECTORY)/include/S2OPC/*
-
-uninstall_build_info_files: remove_build_info_clientserver remove_build_info_pubsub remove_build_info_common

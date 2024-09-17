@@ -30,12 +30,6 @@ SOPC_PUBSUB_PUBLISHER_DIR = ${S2OPC_PUBSUB_DIR}/publisher
 SOPC_PUBSUB_SECURITY_DIR = ${S2OPC_PUBSUB_DIR}/security
 SOPC_PUBSUB_SUBSCRIBER_DIR = ${S2OPC_PUBSUB_DIR}/subscriber
 
-$(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c: $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c_
-	cp $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c_ $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c
-
-remove_build_info_pubsub:
-	rm -f $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info.c
-
 # Add S2OPC inclusion path
 CPPFLAGS += -I${SOPC_PUBSUB_COMMON_DIR} -I${SOPC_PUBSUB_DATASET_DIR} \
 			-I${SOPC_PUBSUB_NETWORK_DIR} -I${SOPC_PUBSUB_PROTOCOL_DIR} \
@@ -44,7 +38,7 @@ CPPFLAGS += -I${SOPC_PUBSUB_COMMON_DIR} -I${SOPC_PUBSUB_DATASET_DIR} \
 
 # PubSub C source files
 
-SOPC_PUBSUB_COMMON_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_COMMON_DIR}/*.c)) $(SOPC_PUBSUB_COMMON_DIR)/sopc_pubsub_build_info
+SOPC_PUBSUB_COMMON_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_COMMON_DIR}/*.c))
 
 SOPC_PUBSUB_DATASET_OBJ := $(patsubst %.c,%,$(wildcard ${SOPC_PUBSUB_DATASET_DIR}/*.c))
 
