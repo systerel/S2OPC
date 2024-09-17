@@ -23,6 +23,8 @@
 #include "libs2opc_client_internal.h"
 #include "libs2opc_common_config.h"
 
+#include "libs2opc_new_client.h"
+
 #include "sopc_assert.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_logger.h"
@@ -1804,4 +1806,122 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_AsyncService(const SOPC_ClientH
                                                               uintptr_t userContext)
 {
     return SOPC_ClientHelper_Subscription_SyncAndAsyncRequest(subscription, subOrMIrequest, false, NULL, userContext);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
+                                                             void* request,
+                                                             uintptr_t userContext)
+{
+    return SOPC_ClientHelper_DiscoveryServiceAsync(secConnConfig, request, userContext);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
+                                                            void* request,
+                                                            void** response)
+{
+    return SOPC_ClientHelper_DiscoveryServiceSync(secConnConfig, request, response);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* secConnConfig,
+                                               SOPC_ClientConnectionEvent_Fct* connectEventCb,
+                                               SOPC_ClientConnection** secureConnection)
+{
+    return SOPC_ClientHelper_Connect(secConnConfig, connectEventCb, secureConnection);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secureConnection)
+{
+    return SOPC_ClientHelper_Disconnect(secureConnection);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secureConnection,
+                                                    void* request,
+                                                    uintptr_t userContext)
+{
+    return SOPC_ClientHelper_ServiceAsync(secureConnection, request, userContext);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceSync(SOPC_ClientConnection* secureConnection,
+                                                   void* request,
+                                                   void** response)
+{
+    return SOPC_ClientHelper_ServiceSync(secureConnection, request, response);
+}
+
+SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
+    SOPC_ClientConnection* secureConnection,
+    OpcUa_CreateSubscriptionRequest* subParams,
+    SOPC_ClientSubscriptionNotification_Fct* subNotifCb,
+    uintptr_t userParam)
+{
+    return SOPC_ClientHelper_CreateSubscription(secureConnection, subParams, subNotifCb, userParam);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subscription** subscription)
+{
+    return SOPC_ClientHelper_DeleteSubscription(subscription);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_ClientHelper_Subscription* subscription,
+                                                                       uint32_t nbPublishTokens)
+{
+    return SOPC_ClientHelper_Subscription_SetAvailableTokens(subscription, nbPublishTokens);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_GetRevisedParameters(SOPC_ClientHelper_Subscription* subscription,
+                                                                         double* revisedPublishingInterval,
+                                                                         uint32_t* revisedLifetimeCount,
+                                                                         uint32_t* revisedMaxKeepAliveCount)
+{
+    return SOPC_ClientHelper_Subscription_GetRevisedParameters(subscription, revisedPublishingInterval,
+                                                               revisedLifetimeCount, revisedMaxKeepAliveCount);
+}
+
+uintptr_t SOPC_ClientHelperNew_Subscription_GetUserParam(const SOPC_ClientHelper_Subscription* subscription)
+{
+    return SOPC_ClientHelper_Subscription_GetUserParam(subscription);
+}
+
+SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(const SOPC_ClientHelper_Subscription* subscription)
+{
+    return SOPC_ClientHelper_GetSecureConnection(subscription);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_GetSubscriptionId(const SOPC_ClientHelper_Subscription* subscription,
+                                                         uint32_t* pSubscriptionId)
+{
+    return SOPC_ClientHelper_GetSubscriptionId(subscription, pSubscriptionId);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+    const SOPC_ClientHelper_Subscription* subscription,
+    OpcUa_CreateMonitoredItemsRequest* monitoredItemsReq,
+    const uintptr_t* monitoredItemCtxArray,
+    OpcUa_CreateMonitoredItemsResponse* monitoredItemsResp)
+{
+    return SOPC_ClientHelper_Subscription_CreateMonitoredItems(subscription, monitoredItemsReq, monitoredItemCtxArray,
+                                                               monitoredItemsResp);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(
+    const SOPC_ClientHelper_Subscription* subscription,
+    OpcUa_DeleteMonitoredItemsRequest* delMonitoredItemsReq,
+    OpcUa_DeleteMonitoredItemsResponse* delMonitoredItemsResp)
+{
+    return SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, delMonitoredItemsReq,
+                                                               delMonitoredItemsResp);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SyncService(const SOPC_ClientHelper_Subscription* subscription,
+                                                                void* subOrMIrequest,
+                                                                void** subOrMIresponse)
+{
+    return SOPC_ClientHelper_Subscription_SyncService(subscription, subOrMIrequest, subOrMIresponse);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_AsyncService(const SOPC_ClientHelper_Subscription* subscription,
+                                                                 void* subOrMIrequest,
+                                                                 uintptr_t userContext)
+{
+    return SOPC_ClientHelper_Subscription_AsyncService(subscription, subOrMIrequest, userContext);
 }
