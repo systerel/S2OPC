@@ -29,9 +29,9 @@
 
 #include <stdio.h>
 
+#include "libs2opc_client.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
-#include "libs2opc_client.h"
 #include "libs2opc_request_builder.h"
 
 #include "sopc_askpass.h"
@@ -180,7 +180,7 @@ int main(int argc, char* const argv[])
     SOPC_ClientConnection* secureConnection = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Connect(readConnCfg, ClientConnectionEvent, &secureConnection);
+        status = SOPC_ClientHelper_Connect(readConnCfg, ClientConnectionEvent, &secureConnection);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Example_wrapper_subscribe: Failed to connect\n");
@@ -192,8 +192,8 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         subscription =
-            SOPC_ClientHelperNew_CreateSubscription(secureConnection, SOPC_CreateSubscriptionRequest_CreateDefault(),
-                                                    SubscriptionNotification_Cb, (uintptr_t) NULL);
+            SOPC_ClientHelper_CreateSubscription(secureConnection, SOPC_CreateSubscriptionRequest_CreateDefault(),
+                                                 SubscriptionNotification_Cb, (uintptr_t) NULL);
         if (NULL == subscription)
         {
             status = SOPC_STATUS_NOK;
@@ -204,7 +204,7 @@ int main(int argc, char* const argv[])
             double revisedPublishingInterval = 0;
             uint32_t revisedLifetimeCount = 0;
             uint32_t revisedMaxKeepAliveCount = 0;
-            SOPC_ReturnStatus localStatus = SOPC_ClientHelperNew_Subscription_GetRevisedParameters(
+            SOPC_ReturnStatus localStatus = SOPC_ClientHelper_Subscription_GetRevisedParameters(
                 subscription, &revisedPublishingInterval, &revisedLifetimeCount, &revisedMaxKeepAliveCount);
             if (SOPC_STATUS_OK == localStatus)
             {
@@ -239,8 +239,8 @@ int main(int argc, char* const argv[])
     {
         // Our context is the array of node ids
         const uintptr_t* nodeIdsCtxArray = (const uintptr_t*) &argv[1];
-        status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(subscription, createMIreq, nodeIdsCtxArray,
-                                                                        &createMIresp);
+        status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(subscription, createMIreq, nodeIdsCtxArray,
+                                                                     &createMIresp);
         if (SOPC_STATUS_OK != status)
         {
             OpcUa_CreateMonitoredItemsRequest_Clear(createMIreq);
@@ -314,7 +314,7 @@ int main(int argc, char* const argv[])
         OpcUa_DeleteMonitoredItemsResponse_Initialize(&deleteMIresp);
 
         // Our context is the array of node ids
-        status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
+        status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
         if (SOPC_STATUS_OK != status)
         {
             OpcUa_DeleteMonitoredItemsRequest_Clear(deleteMIreq);
@@ -339,7 +339,7 @@ int main(int argc, char* const argv[])
     // Close the subscription
     if (NULL != subscription)
     {
-        SOPC_ReturnStatus localStatus = SOPC_ClientHelperNew_DeleteSubscription(&subscription);
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelper_DeleteSubscription(&subscription);
         if (SOPC_STATUS_OK != localStatus)
         {
             printf("<Example_wrapper_subscribe: Failed to delete subscription\n");
@@ -349,7 +349,7 @@ int main(int argc, char* const argv[])
     // Close the connection
     if (NULL != secureConnection)
     {
-        SOPC_ReturnStatus localStatus = SOPC_ClientHelperNew_Disconnect(&secureConnection);
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelper_Disconnect(&secureConnection);
         if (SOPC_STATUS_OK != localStatus)
         {
             printf("<Example_wrapper_subscribe: Failed to disconnect\n");

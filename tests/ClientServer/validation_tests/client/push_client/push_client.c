@@ -666,7 +666,7 @@ int main(int argc, char* const argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Connect(scConfig, SOPC_Client_ConnEventCb, &secureConnection);
+        status = SOPC_ClientHelper_Connect(scConfig, SOPC_Client_ConnEventCb, &secureConnection);
     }
 
     // Manage future update of the server certificate
@@ -877,7 +877,7 @@ int main(int argc, char* const argv[])
     }
 
     /* 3) Disconnect then clear the client config */
-    status = SOPC_ClientHelperNew_Disconnect(&secureConnection);
+    status = SOPC_ClientHelper_Disconnect(&secureConnection);
     if (SOPC_STATUS_OK != status)
     {
         printf("%s", usage);

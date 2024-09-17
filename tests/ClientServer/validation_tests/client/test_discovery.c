@@ -22,8 +22,8 @@
 
 #include "test_suite_client.h"
 
-#include "libs2opc_client_config_custom.h"
 #include "libs2opc_client.h"
+#include "libs2opc_client_config_custom.h"
 #include "libs2opc_request_builder.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_mem_alloc.h"
@@ -58,7 +58,7 @@ START_TEST(test_getEndpoints)
     ck_assert_ptr_nonnull(getEpReq);
     OpcUa_GetEndpointsResponse* getEpResp = NULL;
 
-    status = SOPC_ClientHelperNew_DiscoveryServiceSync(secureConnConfig, getEpReq, (void**) &getEpResp);
+    status = SOPC_ClientHelper_DiscoveryServiceSync(secureConnConfig, getEpReq, (void**) &getEpResp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     ValidateGetEndpointsResponse(getEpResp);
@@ -185,7 +185,7 @@ START_TEST(test_registerServer)
 
     OpcUa_RegisterServerResponse* pResp = NULL;
 
-    status = SOPC_ClientHelperNew_DiscoveryServiceSync(secureConnConfig, (void*) pReq, (void**) &pResp);
+    status = SOPC_ClientHelper_DiscoveryServiceSync(secureConnConfig, (void*) pReq, (void**) &pResp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     ck_assert((pResp->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask) == 0);

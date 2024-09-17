@@ -23,9 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "libs2opc_client.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_client_config_custom.h"
-#include "libs2opc_client.h"
 #include "libs2opc_request_builder.h"
 
 #include "opcua_statuscodes.h"
@@ -192,7 +192,7 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                                                     const void* notification,
                                                     uintptr_t* monitoredItemCtxArray)
 {
-    uintptr_t userCtx = SOPC_ClientHelperNew_Subscription_GetUserParam(subscription);
+    uintptr_t userCtx = SOPC_ClientHelper_Subscription_GetUserParam(subscription);
     SOPC_ASSERT(12 == userCtx);
 
     if (SOPC_IsGoodStatus(status) && &OpcUa_DataChangeNotification_EncodeableType == notificationType)
@@ -588,7 +588,7 @@ static SOPC_ReturnStatus test_non_reg_issue_1428_create_MI(SOPC_ClientHelper_Sub
     if (SOPC_STATUS_OK == status)
     {
         OpcUa_CreateMonitoredItemsResponse_Initialize(&createMonItResp);
-        status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+        status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
             subscription, createMonItReq, (const uintptr_t*) monitoredItemIndexes, &createMonItResp);
     }
 
@@ -620,8 +620,8 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
     if (TEST_SUB_SERVICE_SUPPORTED)
     {
         /* In case the subscription service shall not be supported, check service response is unsupported service*/
-        SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelperNew_CreateSubscription(
-            connection, createSubReq, SOPC_Client_SubscriptionNotification_Cb, 12);
+        SOPC_ClientHelper_Subscription* subscription =
+            SOPC_ClientHelper_CreateSubscription(connection, createSubReq, SOPC_Client_SubscriptionNotification_Cb, 12);
         SOPC_ASSERT(NULL != subscription);
         OpcUa_CreateMonitoredItemsRequest* createMonItReq =
             SOPC_CreateMonitoredItemsRequest_Create(0, 3, OpcUa_TimestampsToReturn_Both);
@@ -674,7 +674,7 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
         if (SOPC_STATUS_OK == status)
         {
             OpcUa_CreateMonitoredItemsResponse_Initialize(&createMonItResp);
-            status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+            status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
                 subscription, createMonItReq, (const uintptr_t*) monitoredItemIndexes, &createMonItResp);
         }
 
@@ -725,8 +725,7 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
         SOPC_ReturnStatus delMIstatus = SOPC_STATUS_OK;
         if (deleteMonitoredItems)
         {
-            delMIstatus =
-                SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, delMonItReq, &delMonItResp);
+            delMIstatus = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, delMonItReq, &delMonItResp);
             OpcUa_CreateMonitoredItemsResponse_Clear(&createMonItResp);
 
             // Check DeleteMonitoredItems response
@@ -756,7 +755,7 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
             status = test_non_reg_issue_1428_create_MI(subscription);
         }
 
-        SOPC_ReturnStatus delSubStatus = SOPC_ClientHelperNew_DeleteSubscription(&subscription);
+        SOPC_ReturnStatus delSubStatus = SOPC_ClientHelper_DeleteSubscription(&subscription);
 
         if (SOPC_STATUS_OK == status)
         {
@@ -778,7 +777,7 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
         // Reset expected result
         test_results_set_service_result(false);
 
-        status = SOPC_ClientHelperNew_ServiceAsync(connection, createSubReq, OpcUa_BadServiceUnsupported);
+        status = SOPC_ClientHelper_ServiceAsync(connection, createSubReq, OpcUa_BadServiceUnsupported);
 
         printf(">>Test_Client_Toolkit: create subscription sending\n");
 
@@ -843,7 +842,7 @@ int main(void)
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_ClientHelperNew_DiscoveryServiceAsync(reverseSecureConnConfig, getGetEndpoints_message(), 1);
+            status = SOPC_ClientHelper_DiscoveryServiceAsync(reverseSecureConnConfig, getGetEndpoints_message(), 1);
         }
         printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
     }
@@ -873,7 +872,7 @@ int main(void)
         for (size_t i = 0; SOPC_STATUS_OK == status && i < nbSecConnCfgs; i++)
         {
             status =
-                SOPC_ClientHelperNew_Connect(secureConnConfigArray[i], SOPC_Client_ConnEventCb, &secureConnections[i]);
+                SOPC_ClientHelper_Connect(secureConnConfigArray[i], SOPC_Client_ConnEventCb, &secureConnections[i]);
         }
     }
 
@@ -884,7 +883,7 @@ int main(void)
         /* Create a service request message and send it through session (read service)*/
         // msg freed when sent
         // Use 1 as read request context
-        status = SOPC_ClientHelperNew_ServiceAsync(secureConnections[0], getReadRequest_message(), 1);
+        status = SOPC_ClientHelper_ServiceAsync(secureConnections[0], getReadRequest_message(), 1);
         printf(">>Test_Client_Toolkit: read request sending\n");
     }
 
@@ -909,7 +908,7 @@ int main(void)
         test_results_set_WriteRequest(pWriteReqCopy);
 
         // Use 1 as write request context
-        status = SOPC_ClientHelperNew_ServiceAsync(secureConnections[1], pWriteReqSent, 1);
+        status = SOPC_ClientHelper_ServiceAsync(secureConnections[1], pWriteReqSent, 1);
         printf(">>Test_Client_Toolkit: write request sending\n");
     }
 
@@ -928,7 +927,7 @@ int main(void)
         /* The callback will call the verification */
         // msg freed when sent
         // Use 2 as read request context
-        status = SOPC_ClientHelperNew_ServiceAsync(secureConnections[0], getReadRequest_verif_message(), 2);
+        status = SOPC_ClientHelper_ServiceAsync(secureConnections[0], getReadRequest_verif_message(), 2);
         printf(">>Test_Client_Toolkit: read request sending\n");
     }
 
@@ -952,7 +951,7 @@ int main(void)
     {
         if (NULL != secureConnections[i])
         {
-            SOPC_ReturnStatus discoStatus = SOPC_ClientHelperNew_Disconnect(&secureConnections[i]);
+            SOPC_ReturnStatus discoStatus = SOPC_ClientHelper_Disconnect(&secureConnections[i]);
             SOPC_ASSERT(SOPC_STATUS_OK == discoStatus);
         }
     }

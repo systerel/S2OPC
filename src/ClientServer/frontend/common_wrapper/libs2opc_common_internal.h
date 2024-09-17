@@ -41,7 +41,7 @@
 /**
  * \brief Defines a function to be called for client side communication events.
  *        It should be called by a client wrapper to be record/unrecord its events callback
- *        (automatically done by ::SOPC_ClientHelperNew_Initialize)
+ *        (automatically done by ::SOPC_ClientHelper_Initialize)
  *
  * \note The callback definition and use is protected by a mutex
  *

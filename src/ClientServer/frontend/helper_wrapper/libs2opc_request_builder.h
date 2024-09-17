@@ -681,7 +681,7 @@ OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_Create(double re
  * \param subscriptionId   The identifier of the subscription for which monitored items will be created
  *                         or 0 if set automatically by client wrapper API.
  *                         It will be set automatically if it used with
- *                         ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems.
+ *                         ::SOPC_ClientHelper_Subscription_CreateMonitoredItems.
  *                         If subscription is managed manually it is contained in the
  *                         ::OpcUa_CreateSubscriptionResponse received previously.
  * \param nbMonitoredItems Number of monitored items to create
@@ -705,7 +705,7 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefaul
  * \param subscriptionId   The identifier of the subscription for which monitored items will be created
  *                         or 0 if set automatically by client wrapper API.
  *                         It will be set automatically if it used with
- *                         ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems.
+ *                         ::SOPC_ClientHelper_Subscription_CreateMonitoredItems.
  *                         If subscription is managed manually it is contained in the
  *                         ::OpcUa_CreateSubscriptionResponse received previously.
  * \param nbMonitoredItems Number of monitored items to create
@@ -729,7 +729,7 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefaul
  * \param subscriptionId        The identifier of the subscription for which monitored items will be created
  *                              or 0 if set automatically by client wrapper API.
  *                              It will be set automatically if it used with
- *                              ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems.
+ *                              ::SOPC_ClientHelper_Subscription_CreateMonitoredItems.
  *                              If subscription is managed manually it is contained in the
  *                              ::OpcUa_CreateSubscriptionResponse received previously.
  * \param nbMonitoredItems      Number of MonitoredItem to create with the request.
@@ -984,7 +984,7 @@ SOPC_ExtensionObject* SOPC_MonitoredItem_EventFilter(OpcUa_EventFilter* eventFil
  * \param clientHandle     Client-supplied id of the MonitoredItem, it will be provided in Notifications of the
  *                         ::OpcUa_PublishResponse messages received.
  *                         This parameter will be IGNORED when \p createMIrequest is used with
- *                         ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems.
+ *                         ::SOPC_ClientHelper_Subscription_CreateMonitoredItems.
  * \param samplingInterval The interval defines the sampling interval for the monitored item.
  *                         The value 0 indicates that the Server should use the fastest practical rate
  *                         or is based on an exception-based model.
@@ -1020,8 +1020,8 @@ SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
  * \param subscriptionId        The identifier of the subscription for which monitored items will be created
  *                              or 0 if set automatically by client wrapper API.
  *                              It will be set automatically if it used with
- *                               ::SOPC_ClientHelperNew_Subscription_SyncService or
- *                               ::SOPC_ClientHelperNew_Subscription_AsyncService.
+ *                               ::SOPC_ClientHelper_Subscription_SyncService or
+ *                               ::SOPC_ClientHelper_Subscription_AsyncService.
  *                              If subscription is managed manually it is contained in the
  *                              ::OpcUa_CreateSubscriptionResponse received previously.
  * \param nbMonitoredItems      Number of MonitoredItem to modify with the request.
@@ -1082,8 +1082,8 @@ SOPC_ReturnStatus SOPC_ModifyMonitoredItemsRequest_SetMonitoredItemParams(
  * \param subscriptionId        The identifier of the subscription for which monitored items will be created
  *                              or 0 if set automatically by client wrapper API.
  *                              It will be set automatically if it used with
- *                               ::SOPC_ClientHelperNew_Subscription_SyncService or
- *                               ::SOPC_ClientHelperNew_Subscription_AsyncService.
+ *                               ::SOPC_ClientHelper_Subscription_SyncService or
+ *                               ::SOPC_ClientHelper_Subscription_AsyncService.
  *                              If subscription is managed manually it is contained in the
  *                              ::OpcUa_CreateSubscriptionResponse received previously.
  * \param nbMonitoredItems      Number of MonitoredItem to delete with the request.

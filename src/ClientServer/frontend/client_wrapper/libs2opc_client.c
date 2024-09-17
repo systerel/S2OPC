@@ -734,23 +734,23 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
-                                                             void* request,
-                                                             uintptr_t userContext)
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
+                                                          void* request,
+                                                          uintptr_t userContext)
 {
     return SOPC_ClientHelperInternal_DiscoveryService(false, secConnConfig, request, NULL, userContext);
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
-                                                            void* request,
-                                                            void** response)
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
+                                                         void* request,
+                                                         void** response)
 {
     return SOPC_ClientHelperInternal_DiscoveryService(true, secConnConfig, request, response, 0);
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* secConnConfig,
-                                               SOPC_ClientConnectionEvent_Fct* connectEventCb,
-                                               SOPC_ClientConnection** secureConnection)
+SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secConnConfig,
+                                            SOPC_ClientConnectionEvent_Fct* connectEventCb,
+                                            SOPC_ClientConnection** secureConnection)
 {
     if (NULL == secConnConfig || NULL == connectEventCb || NULL == secureConnection)
     {
@@ -860,7 +860,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secureConnection)
+SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureConnection)
 {
     if (NULL == secureConnection || NULL == *secureConnection)
     {
@@ -899,7 +899,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
     // Delete the subscription if there is still one created
     if (createdSub != NULL)
     {
-        SOPC_ReturnStatus localStatus = SOPC_ClientHelperNew_DeleteSubscription(&createdSub);
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelper_DeleteSubscription(&createdSub);
         SOPC_UNUSED_RESULT(localStatus); // We still want to disconnect the client connection anyway
     }
 
@@ -1140,16 +1140,14 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secureConnection,
-                                                    void* request,
-                                                    uintptr_t userContext)
+SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureConnection,
+                                                 void* request,
+                                                 uintptr_t userContext)
 {
     return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext);
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceSync(SOPC_ClientConnection* secureConnection,
-                                                   void* request,
-                                                   void** response)
+SOPC_ReturnStatus SOPC_ClientHelper_ServiceSync(SOPC_ClientConnection* secureConnection, void* request, void** response)
 {
     return SOPC_ClientHelperInternal_Service(true, secureConnection, request, response, 0);
 }
@@ -1189,7 +1187,7 @@ static void SOPC_StaMacNotification_Cbk(uintptr_t subscriptionAppCtx,
     }
 }
 
-SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
+SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
     SOPC_ClientConnection* secureConnection,
     OpcUa_CreateSubscriptionRequest* subParams,
     SOPC_ClientSubscriptionNotification_Fct* subNotifCb,
@@ -1313,8 +1311,8 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
     }
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_ClientHelper_Subscription* subscription,
-                                                                       uint32_t nbPublishTokens)
+SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SetAvailableTokens(SOPC_ClientHelper_Subscription* subscription,
+                                                                    uint32_t nbPublishTokens)
 {
     if (nbPublishTokens == 0 || NULL == subscription || NULL == subscription->secureConnection)
     {
@@ -1344,10 +1342,10 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_Clie
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_GetRevisedParameters(SOPC_ClientHelper_Subscription* subscription,
-                                                                         double* revisedPublishingInterval,
-                                                                         uint32_t* revisedLifetimeCount,
-                                                                         uint32_t* revisedMaxKeepAliveCount)
+SOPC_ReturnStatus SOPC_ClientHelper_Subscription_GetRevisedParameters(SOPC_ClientHelper_Subscription* subscription,
+                                                                      double* revisedPublishingInterval,
+                                                                      uint32_t* revisedLifetimeCount,
+                                                                      uint32_t* revisedMaxKeepAliveCount)
 {
     if (NULL == subscription || NULL == subscription->secureConnection)
     {
@@ -1369,7 +1367,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_GetRevisedParameters(SOPC_Cl
     return status;
 }
 
-uintptr_t SOPC_ClientHelperNew_Subscription_GetUserParam(const SOPC_ClientHelper_Subscription* subscription)
+uintptr_t SOPC_ClientHelper_Subscription_GetUserParam(const SOPC_ClientHelper_Subscription* subscription)
 {
     if (NULL == subscription || NULL == subscription->secureConnection)
     {
@@ -1382,7 +1380,7 @@ uintptr_t SOPC_ClientHelperNew_Subscription_GetUserParam(const SOPC_ClientHelper
     return subscription->userParam;
 }
 
-SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(const SOPC_ClientHelper_Subscription* subscription)
+SOPC_ClientConnection* SOPC_ClientHelper_GetSecureConnection(const SOPC_ClientHelper_Subscription* subscription)
 {
     if (NULL == subscription || NULL == subscription->secureConnection)
     {
@@ -1413,8 +1411,8 @@ SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(const SOPC_Clien
     return subscription->secureConnection;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_GetSubscriptionId(const SOPC_ClientHelper_Subscription* subscription,
-                                                         uint32_t* pSubscriptionId)
+SOPC_ReturnStatus SOPC_ClientHelper_GetSubscriptionId(const SOPC_ClientHelper_Subscription* subscription,
+                                                      uint32_t* pSubscriptionId)
 {
     if (NULL == subscription || NULL == pSubscriptionId)
     {
@@ -1435,7 +1433,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_GetSubscriptionId(const SOPC_ClientHelper
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
     const SOPC_ClientHelper_Subscription* subscription,
     OpcUa_CreateMonitoredItemsRequest* monitoredItemsReq,
     const uintptr_t* monitoredItemCtxArray,
@@ -1521,7 +1519,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(
+SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
     const SOPC_ClientHelper_Subscription* subscription,
     OpcUa_DeleteMonitoredItemsRequest* delMonitoredItemsReq,
     OpcUa_DeleteMonitoredItemsResponse* delMonitoredItemsResp)
@@ -1606,7 +1604,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subscription** ppSubscription)
+SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscription** ppSubscription)
 {
     if (NULL == ppSubscription || NULL == *ppSubscription || NULL == (*ppSubscription)->secureConnection)
     {
@@ -1738,7 +1736,7 @@ static void* SOPC_ClientHelperInternal_ConfigAndFilterService(const SOPC_ClientH
     return request;
 }
 
-static SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SyncAndAsyncRequest(
+static SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SyncAndAsyncRequest(
     const SOPC_ClientHelper_Subscription* subscription,
     void* subOrMIrequest,
     bool isSync,
@@ -1775,11 +1773,11 @@ static SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SyncAndAsyncRequest(
         {
             if (isSync)
             {
-                status = SOPC_ClientHelperNew_ServiceSync(subscription->secureConnection, request, subOrMIresponse);
+                status = SOPC_ClientHelper_ServiceSync(subscription->secureConnection, request, subOrMIresponse);
             }
             else
             {
-                status = SOPC_ClientHelperNew_ServiceAsync(subscription->secureConnection, request, asyncUserCtx);
+                status = SOPC_ClientHelper_ServiceAsync(subscription->secureConnection, request, asyncUserCtx);
             }
         }
         else
@@ -1794,18 +1792,16 @@ static SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SyncAndAsyncRequest(
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SyncService(const SOPC_ClientHelper_Subscription* subscription,
-                                                                void* subOrMIrequest,
-                                                                void** subOrMIresponse)
+SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SyncService(const SOPC_ClientHelper_Subscription* subscription,
+                                                             void* subOrMIrequest,
+                                                             void** subOrMIresponse)
 {
-    return SOPC_ClientHelperNew_Subscription_SyncAndAsyncRequest(subscription, subOrMIrequest, true, subOrMIresponse,
-                                                                 0);
+    return SOPC_ClientHelper_Subscription_SyncAndAsyncRequest(subscription, subOrMIrequest, true, subOrMIresponse, 0);
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_AsyncService(const SOPC_ClientHelper_Subscription* subscription,
-                                                                 void* subOrMIrequest,
-                                                                 uintptr_t userContext)
+SOPC_ReturnStatus SOPC_ClientHelper_Subscription_AsyncService(const SOPC_ClientHelper_Subscription* subscription,
+                                                              void* subOrMIrequest,
+                                                              uintptr_t userContext)
 {
-    return SOPC_ClientHelperNew_Subscription_SyncAndAsyncRequest(subscription, subOrMIrequest, false, NULL,
-                                                                 userContext);
+    return SOPC_ClientHelper_Subscription_SyncAndAsyncRequest(subscription, subOrMIrequest, false, NULL, userContext);
 }

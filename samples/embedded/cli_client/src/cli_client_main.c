@@ -38,8 +38,8 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
-#include "libs2opc_client_config_custom.h"
 #include "libs2opc_client.h"
+#include "libs2opc_client_config_custom.h"
 #include "libs2opc_request_builder.h"
 
 // project includes
@@ -316,7 +316,7 @@ static void client_tester(int cnxIndex)
     /* Browse specified node */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(gMultiConnection[cnxIndex], req, (void**) &resp);
         SOPC_ASSERT(NULL != resp);
     }
 
@@ -456,7 +456,7 @@ static SOPC_DataValue* Server_ReadSingleNode(const SOPC_NodeId* pNid, int cnxInd
         SOPC_Free(request);
         return NULL;
     }
-    status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], request, (void**) &response);
+    status = SOPC_ClientHelper_ServiceSync(gMultiConnection[cnxIndex], request, (void**) &response);
     if (status != SOPC_STATUS_OK)
     {
         LOG_WARNING("Read Value failed from Service sync with code  %d", (int) status);
@@ -506,7 +506,7 @@ static bool Server_WriteSingleNode(const SOPC_NodeId* pNid, SOPC_DataValue* pDv,
     }
     else
     {
-        status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], request, (void**) &response);
+        status = SOPC_ClientHelper_ServiceSync(gMultiConnection[cnxIndex], request, (void**) &response);
 
         if (status != SOPC_STATUS_OK)
         {
@@ -644,7 +644,7 @@ static int cmd_demo_deconfigure(WordList* pList)
     }
     else
     {
-        SOPC_ReturnStatus status = SOPC_ClientHelperNew_Disconnect(&gMultiConnection[cnxIndex]);
+        SOPC_ReturnStatus status = SOPC_ClientHelper_Disconnect(&gMultiConnection[cnxIndex]);
         if (SOPC_STATUS_OK != status)
         {
             PRINT("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", status);
@@ -789,7 +789,7 @@ static int cmd_demo_connect(WordList* pList)
         PRINT(STR_INVALID_INDEX);
         return 0;
     }
-    SOPC_ReturnStatus status = SOPC_ClientHelperNew_Disconnect(&gMultiConnection[cnxIndex]);
+    SOPC_ReturnStatus status = SOPC_ClientHelper_Disconnect(&gMultiConnection[cnxIndex]);
 
     if (NULL == gMultiConfiguration[cnxIndex])
     {
@@ -797,8 +797,8 @@ static int cmd_demo_connect(WordList* pList)
 
         return 0;
     }
-    status = SOPC_ClientHelperNew_Connect(gMultiConfiguration[cnxIndex], client_ConnectionEventCallback,
-                                          &gMultiConnection[cnxIndex]);
+    status = SOPC_ClientHelper_Connect(gMultiConfiguration[cnxIndex], client_ConnectionEventCallback,
+                                       &gMultiConnection[cnxIndex]);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -856,7 +856,7 @@ static int cmd_demo_disconnect(WordList* pList)
         PRINT("\nClient already disconnected!\n");
         return 0;
     }
-    SOPC_ReturnStatus status = SOPC_ClientHelperNew_Disconnect(&gMultiConnection[cnxIndex]);
+    SOPC_ReturnStatus status = SOPC_ClientHelper_Disconnect(&gMultiConnection[cnxIndex]);
     if (SOPC_STATUS_OK != status)
     {
         PRINT("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", status);

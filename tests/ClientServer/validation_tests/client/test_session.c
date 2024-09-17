@@ -27,8 +27,8 @@
 #include "sopc_helper_askpass.h"
 #include "test_suite_client.h"
 
-#include "libs2opc_client_config_custom.h"
 #include "libs2opc_client.h"
+#include "libs2opc_client_config_custom.h"
 #include "libs2opc_request_builder.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
@@ -141,11 +141,11 @@ START_TEST(test_anonymous)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_ClientConnection* secureConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
+    status = SOPC_ClientHelper_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(secureConnection);
 
-    status = SOPC_ClientHelperNew_Disconnect(&secureConnection);
+    status = SOPC_ClientHelper_Disconnect(&secureConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_null(secureConnection);
 
@@ -197,11 +197,11 @@ START_TEST(test_username_password)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_ClientConnection* secureConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
+    status = SOPC_ClientHelper_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(secureConnection);
 
-    status = SOPC_ClientHelperNew_Disconnect(&secureConnection);
+    status = SOPC_ClientHelper_Disconnect(&secureConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_null(secureConnection);
 
@@ -231,7 +231,7 @@ START_TEST(test_auto_disco)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_ClientConnection* secureConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
+    status = SOPC_ClientHelper_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(secureConnection);
 
@@ -265,14 +265,14 @@ START_TEST(test_auto_disco_and_sub)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_ClientConnection* secureConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
+    status = SOPC_ClientHelper_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(secureConnection);
 
     OpcUa_CreateSubscriptionRequest* createSubReq = SOPC_CreateSubscriptionRequest_Create(500, 6, 2, 1000, true, 0);
     ck_assert_ptr_nonnull(createSubReq);
 
-    SOPC_ClientHelper_Subscription* sub = SOPC_ClientHelperNew_CreateSubscription(
+    SOPC_ClientHelper_Subscription* sub = SOPC_ClientHelper_CreateSubscription(
         secureConnection, createSubReq, SOPC_Client_SubscriptionNotification_Cb, 0);
     ck_assert_ptr_nonnull(sub);
 

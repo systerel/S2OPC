@@ -29,9 +29,9 @@
 
 #include <stdio.h>
 
+#include "libs2opc_client.h"
 #include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
-#include "libs2opc_client.h"
 #include "libs2opc_request_builder.h"
 
 #include "sopc_askpass.h"
@@ -191,7 +191,7 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         status =
-            SOPC_ClientHelperNew_DiscoveryServiceSync(discConnCfg, getEndpointsRequest, (void**) &getEndpointsResponse);
+            SOPC_ClientHelper_DiscoveryServiceSync(discConnCfg, getEndpointsRequest, (void**) &getEndpointsResponse);
     }
 
     if (SOPC_STATUS_OK == status)

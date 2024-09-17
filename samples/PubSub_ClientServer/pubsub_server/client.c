@@ -21,8 +21,8 @@
 #include "sopc_pki_stack.h"
 #include "sopc_types.h"
 
-#include "libs2opc_client_config_custom.h"
 #include "libs2opc_client.h"
+#include "libs2opc_client_config_custom.h"
 
 #include "client.h"
 #include "config.h"
@@ -580,7 +580,7 @@ SOPC_ReturnStatus Client_GetSecurityKeys(SOPC_SecureConnection_Config* config,
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Client_GetSecurityKeys %s", config->scConfig.url);
 
     SOPC_ClientConnection* secureConnection = NULL;
-    SOPC_ReturnStatus status = SOPC_ClientHelperNew_Connect(config, &ClientConnectionEvent, &secureConnection);
+    SOPC_ReturnStatus status = SOPC_ClientHelper_Connect(config, &ClientConnectionEvent, &secureConnection);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -589,7 +589,7 @@ SOPC_ReturnStatus Client_GetSecurityKeys(SOPC_SecureConnection_Config* config,
         OpcUa_CallRequest* callReq = newCallRequest_client(CLIENT_SECURITY_GROUPID, StartingTokenId, requestedKeys);
         if (NULL != callReq)
         {
-            status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) callReq, (void**) &callResp);
+            status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) callReq, (void**) &callResp);
         }
         else
         {
@@ -613,7 +613,7 @@ SOPC_ReturnStatus Client_GetSecurityKeys(SOPC_SecureConnection_Config* config,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Disconnect(&secureConnection);
+        status = SOPC_ClientHelper_Disconnect(&secureConnection);
     }
 
     return status;

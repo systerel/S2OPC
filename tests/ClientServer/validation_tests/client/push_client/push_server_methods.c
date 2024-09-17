@@ -162,7 +162,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Read(SOPC_ClientConnection* secureConnecti
     SOPC_ReturnStatus status = SOPC_CallRequest_SetMethodToCall(req, 0, &gServerTrustList, &gFileType_ReadId, 2, Read);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -218,7 +218,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Close(SOPC_ClientConnection* secureConnect
         SOPC_CallRequest_SetMethodToCall(req, 0, &gServerTrustList, &gFileType_CloseId, 1, &Close);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -256,7 +256,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Open(SOPC_ClientConnection* secureConnecti
         SOPC_CallRequest_SetMethodToCall(req, 0, &gServerTrustList, &gServerFileType_OpenId, 1, &Open);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -309,7 +309,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Write(SOPC_ClientConnection* secureConnect
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -347,7 +347,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_CloseAndUpdate(SOPC_ClientConnection* secu
         SOPC_CallRequest_SetMethodToCall(req, 0, &gServerTrustList, &gServerTrustList_CloseAndUpdateId, 1, &Close);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -392,7 +392,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_AddCertificate(SOPC_ClientConnection* secu
                                                                 &gServerTrustList_AddCertificateId, 2, AddCertificate);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -433,7 +433,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_RemoveCertificate(SOPC_ClientConnection* s
         req, 0, &gServerTrustList, &gServerTrustList_RemoveCertificateId, 2, RemoveCertificate);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -489,7 +489,7 @@ SOPC_ReturnStatus SOPC_TEST_ServerConfiguration_CreateSigningRequest_GetResponse
         req, 0, &gServerConfiguration, &gServerConfiguration_CreateSigningRequestId, 5, CSRinputArguments);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) resp);
     }
 
     return status;
@@ -602,7 +602,7 @@ SOPC_ReturnStatus SOPC_TEST_ServerConfiguration_UpdateCertificate(SOPC_ClientCon
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -652,7 +652,7 @@ SOPC_ReturnStatus SOPC_TEST_ServerConfiguration_GetRejectedList(SOPC_ClientConne
                                                                 &gServerConfiguration_GetRejectedListId, 0, NULL);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -700,7 +700,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_OpenWithMasks(SOPC_ClientConnection* secur
                                                                 &gServerTrustList_OpenWithMasksId, 1, &OpenWithMasks);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) &resp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) req, (void**) &resp);
     }
     if (SOPC_STATUS_OK == status)
     {

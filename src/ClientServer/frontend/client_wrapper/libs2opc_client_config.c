@@ -120,7 +120,7 @@ void SOPC_ClientConfigHelper_Clear(void)
 
     // Note: we shall release the mutex as disconnect is blocking and disconnection callback uses it
     // This is acceptable as the application shall not do any further actions on connection after that, moreover
-    // iteration on secure connections is safe since the SOPC_ClientHelperNew_Disconnect makes some checks that the
+    // iteration on secure connections is safe since the SOPC_ClientHelper_Disconnect makes some checks that the
     // provided connection is still valid in configuration.
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -131,7 +131,7 @@ void SOPC_ClientConfigHelper_Clear(void)
         secureConnection = sopc_client_helper_config.secureConnections[i];
         if (NULL != secureConnection)
         {
-            SOPC_ClientHelperNew_Disconnect(&secureConnection);
+            SOPC_ClientHelper_Disconnect(&secureConnection);
         }
     }
     mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);

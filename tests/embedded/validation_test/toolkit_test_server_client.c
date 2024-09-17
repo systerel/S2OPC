@@ -182,7 +182,7 @@ static SOPC_ReturnStatus client_send_write_test(SOPC_ClientConnection* secureCon
     // Call the write service
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, writeRequest, (void**) &writeResponse);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, writeRequest, (void**) &writeResponse);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -231,7 +231,7 @@ static SOPC_ReturnStatus client_send_read_req_test(SOPC_ClientConnection* secure
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, readRequest, (void**) &readResponse);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, readRequest, (void**) &readResponse);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -659,7 +659,7 @@ void suite_test_server_client(int* index)
     // Connect Client to server
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Connect(clientConfiguration, client_ConnectionEventCallback, &secureConnection);
+        status = SOPC_ClientHelper_Connect(clientConfiguration, client_ConnectionEventCallback, &secureConnection);
     }
 
     /* Run a write service test */
@@ -695,7 +695,7 @@ void suite_test_server_client(int* index)
     /* client request to close the connection */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Disconnect(&secureConnection);
+        status = SOPC_ClientHelper_Disconnect(&secureConnection);
     }
 
     /* Clear client wrapper layer*/

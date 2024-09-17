@@ -561,7 +561,7 @@ cdef class _AsyncRequestHandler:
         if isLocalService:
             status = SOPC_ServerHelper_LocalServiceAsync(request._request, request._requestContext)
         elif connection != NULL:
-            status = SOPC_ClientHelperNew_ServiceAsync(connection, request._request, request._requestContext)
+            status = SOPC_ClientHelper_ServiceAsync(connection, request._request, request._requestContext)
         else:
             assert False, '_send_generic_request: !isLocalService => connection != NULL'
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
@@ -2156,7 +2156,7 @@ cdef class _C_BaseClientConnectionHandler:
                                                     uintptr_t* monitoredItemCtxArray) noexcept with gil:
         cdef const OpcUa_DataChangeNotification* notifs = NULL
         cdef uintptr_t index_ctx
-        cdef SOPC_ClientConnection* secureConnection = SOPC_ClientHelperNew_GetSecureConnection(subscription)
+        cdef SOPC_ClientConnection* secureConnection = SOPC_ClientHelper_GetSecureConnection(subscription)
         cdef uintptr_t id_sc = <uintptr_t> (<void*> secureConnection)
         cdef uintptr_t id_sub = <uintptr_t> (<void*> subscription)
         nodeIds_list: list[str] = BaseClientConnectionHandler._list_nodeIds_handler[id_sub]
@@ -2232,7 +2232,7 @@ class BaseClientConnectionHandler:
         c_cliConHandler: _C_BaseClientConnectionHandler = self._c_cliConHandler
         if NULL != c_cliConHandler._secureConnection:
             self._connected = False
-            status = SOPC_ClientHelperNew_Disconnect(&(c_cliConHandler._secureConnection))
+            status = SOPC_ClientHelper_Disconnect(&(c_cliConHandler._secureConnection))
             return status == SOPC_ReturnStatus.SOPC_STATUS_OK
         return False
 
@@ -2354,12 +2354,12 @@ class BaseClientConnectionHandler:
         if subscription_config == NULL:
             raise MemoryError
         # create a subscription
-        cdef SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelperNew_CreateSubscription(c_cliConHandler._secureConnection,
+        cdef SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelper_CreateSubscription(c_cliConHandler._secureConnection,
                                                             subscription_config,
                                                             c_cliConHandler._callback_subscriptionNotification, <uintptr_t> NULL)
         if subscription == NULL:
             raise MemoryError
-        status = SOPC_ClientHelperNew_Subscription_SetAvailableTokens(subscription, nbPublishTokens)
+        status = SOPC_ClientHelper_Subscription_SetAvailableTokens(subscription, nbPublishTokens)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Failed to create the subscription', status)
         c_cliConHandler._subscription = subscription
@@ -2417,7 +2417,7 @@ class BaseClientConnectionHandler:
         cdef OpcUa_CreateMonitoredItemsResponse* createMIresp = <OpcUa_CreateMonitoredItemsResponse*> calloc(1, sizeof(OpcUa_CreateMonitoredItemsResponse))
         OpcUa_CreateMonitoredItemsResponse_Initialize(createMIresp)
         cdef const uintptr_t* monitoredItemCtxArray = <const uintptr_t*> nodeIdsCtxArray
-        status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(c_cliConHandler._subscription, createMIreq,
+        status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(c_cliConHandler._subscription, createMIreq,
                                                                         monitoredItemCtxArray, createMIresp)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Failed to create monitored items', status)
@@ -2461,7 +2461,7 @@ class BaseClientConnectionHandler:
         cdef OpcUa_DeleteMonitoredItemsResponse deleteMIresp
         OpcUa_DeleteMonitoredItemsResponse_Initialize(&deleteMIresp)
 
-        status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(c_cliConHandler._subscription, deleteMIreq, &deleteMIresp)
+        status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(c_cliConHandler._subscription, deleteMIreq, &deleteMIresp)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             OpcUa_DeleteMonitoredItemsRequest_Clear(deleteMIreq)
             free(deleteMIreq)
@@ -2472,7 +2472,7 @@ class BaseClientConnectionHandler:
 
         # Close the subscription
         if NULL != c_cliConHandler._subscription:
-            localStatus = SOPC_ClientHelperNew_DeleteSubscription(&(c_cliConHandler._subscription))
+            localStatus = SOPC_ClientHelper_DeleteSubscription(&(c_cliConHandler._subscription))
             free(c_cliConHandler._subscription)
             c_cliConHandler._subscription = NULL
             if (SOPC_ReturnStatus.SOPC_STATUS_OK != localStatus):
@@ -2601,7 +2601,7 @@ class PyS2OPC_Client(PyS2OPC):
         status = SOPC_SecureConnectionConfig_SetReqLifetime(sConnCfg, sc_lifetime)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK and status != SOPC_ReturnStatus.SOPC_STATUS_INVALID_STATE:
             raise SOPC_Failure('Failed to configure the SC lifetime', status)
-        status = SOPC_ClientHelperNew_Connect(sConnCfg, _callback_client_connection_event, &secureConnection)
+        status = SOPC_ClientHelper_Connect(sConnCfg, _callback_client_connection_event, &secureConnection)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Could not connect to the server with the given configuration', status)
 

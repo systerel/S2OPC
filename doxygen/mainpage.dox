@@ -39,10 +39,6 @@ You will find documentation on the Python binding for S2OPC on following page:
 
 The Client / Server API is composed of high-level (wrapper) API and low-level API. The prefered way to use S2OPC is to use only the high-level API.
 Note that the low-level API will be subject to important changes and refactoring in the future release since the high-level API is designed to address any application need.
-The high-level client API was newly redesigned with this goal in mind for S2OPC 1.5.0 release, 
-the previous client wrapper design is still available but becomes deprecated and will be removed in S2OPC 1.6.0 release.
-
-\note High-level client API prefixed with `SOPC_ClientHelperNew` in S2OPC 1.5.0 release will be renamed to `SOPC_ClientHelper` in S2OPC 1.6.0 release.
 
 \subsection common_client_server High-level Common Client/Server API
 
@@ -95,8 +91,6 @@ Also see the <a href="https://gitlab.com/systerel/S2OPC/-/wikis/Demo">demonstrat
 
 \subsection client High-Level Client API (new) 
 
-\note The previous high-level client API are deprecated and should not be used anymore. They will be removed in a S2OPC 1.6.0 release.
-
 The high-level client API provides functions for configuration (endpoints and security, user type) and functions to manage client execution (start/stop, service execution, etc.).
 
 The main configuration functions are defined by libs2opc_client_config.h:
@@ -104,7 +98,7 @@ The main configuration functions are defined by libs2opc_client_config.h:
 - ::SOPC_ClientConfigHelper_Clear shall be called when client wrapper module is not used anymore.
 - ::SOPC_ClientConfigHelper_ConfigureFromXML loads configuration from XML configuration files (client connection endpoint and security, user type) and
   returns the array of configured connections. See \ref client_xml_config "XML file examples".
-- ::SOPC_ClientConfigHelper_SetServiceAsyncResponse sets a callback to use services in an asynchronous way (see ::SOPC_ClientHelperNew_ServiceAsync).
+- ::SOPC_ClientConfigHelper_SetServiceAsyncResponse sets a callback to use services in an asynchronous way (see ::SOPC_ClientHelper_ServiceAsync).
 - ::SOPC_ClientConfigHelper_SetClientKeyPasswordCallback sets a callback to provide the password to decrypt the private key of the client (if encrypted).
 - ::SOPC_ClientConfigHelper_SetUserNamePasswordCallback sets a callback to retrieve user/password for connection using UserName type for session activation.
 - ::SOPC_ClientConfigHelper_SetUserKeyPasswordCallback sets a callback to retrieve user private key decryption password for connection using X509 user type (if encrypted).
@@ -113,20 +107,20 @@ The main configuration functions are defined by libs2opc_client_config.h:
 In case the dedicated XML configuration files are not used to configure client, use the additional configuration functions located in libs2opc_client_config_custom.h.
 
 The main functions for client execution are defined by libs2opc_new_client.h:
-- ::SOPC_ClientHelperNew_DiscoveryServiceAsync: executes a discovery service asynchronously for a connection configuration.
-- ::SOPC_ClientHelperNew_DiscoveryServiceSync: executes a discovery service synchronously for a connection configuration.
-- ::SOPC_ClientHelperNew_Connect: establishes a connection and returns the connection instance.
-- ::SOPC_ClientHelperNew_Disconnect: disconnects a connection instance.
-- ::SOPC_ClientHelperNew_ServiceAsync: executes a service asynchronously on a connection instance.
-- ::SOPC_ClientHelperNew_ServiceSync: executes a service synchronously on a connection instance.
+- ::SOPC_ClientHelper_DiscoveryServiceAsync: executes a discovery service asynchronously for a connection configuration.
+- ::SOPC_ClientHelper_DiscoveryServiceSync: executes a discovery service synchronously for a connection configuration.
+- ::SOPC_ClientHelper_Connect: establishes a connection and returns the connection instance.
+- ::SOPC_ClientHelper_Disconnect: disconnects a connection instance.
+- ::SOPC_ClientHelper_ServiceAsync: executes a service asynchronously on a connection instance.
+- ::SOPC_ClientHelper_ServiceSync: executes a service synchronously on a connection instance.
 
 Additional functions are provided and dedicated to subscription related services, it provides management of 1 subscription per connection instance:
-- ::SOPC_ClientHelperNew_CreateSubscription: creates a subscription on a connection and returns the subscription instance.
-- ::SOPC_ClientHelperNew_DeleteSubscription: deletes a subscription instance.
-- ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems: creates monitored items on a subscription instance with associated context.
-- ::SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems: deletes monitored items on a subscription instance.
-- ::SOPC_ClientHelperNew_Subscription_AsyncService: executes other subscription related services asynchronously on a subscription instance.
-- ::SOPC_ClientHelperNew_Subscription_SyncService: executes other subscription related services synchronously on a subscription instance.
+- ::SOPC_ClientHelper_CreateSubscription: creates a subscription on a connection and returns the subscription instance.
+- ::SOPC_ClientHelper_DeleteSubscription: deletes a subscription instance.
+- ::SOPC_ClientHelper_Subscription_CreateMonitoredItems: creates monitored items on a subscription instance with associated context.
+- ::SOPC_ClientHelper_Subscription_DeleteMonitoredItems: deletes monitored items on a subscription instance.
+- ::SOPC_ClientHelper_Subscription_AsyncService: executes other subscription related services asynchronously on a subscription instance.
+- ::SOPC_ClientHelper_Subscription_SyncService: executes other subscription related services synchronously on a subscription instance.
 
 
 See implementation examples

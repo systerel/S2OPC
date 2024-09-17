@@ -22,7 +22,7 @@
  * \privatesection
  *
  * \brief Internal module used to manage the wrapper for client config. It should not be used outside of the client
- * wraper implementation.
+ * wrapper implementation.
  *
  */
 
@@ -100,7 +100,6 @@ bool SOPC_ClientInternal_IsEncryptedClientKey(void);
  *        cert Sha1.
  *
  * \param secConnConfig      the secure connection configuration for the session to activate.
- *                           (NULL if the old client API is used, old API will be removed in version 1.6.0)
  * \param[out] outPassword   the newly allocated password.
  *
  * \return                   true in case of success, otherwise false.

@@ -20,7 +20,7 @@
 #ifndef CHECK_PUSH_CLIENT_METHOD_H_
 #define CHECK_PUSH_CLIENT_METHOD_H_
 
-#include "libs2opc_new_client.h"
+#include "libs2opc_client.h"
 #include "libs2opc_request_builder.h"
 
 /* Test methods of the TrustList of the server */

@@ -23,9 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "libs2opc_client.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
-#include "libs2opc_client.h"
 #include "libs2opc_request_builder.h"
 
 #include "opcua_identifiers.h"
@@ -121,7 +121,7 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                                                     const void* notification,
                                                     uintptr_t* monitoredItemCtxArray)
 {
-    uintptr_t userCtx = SOPC_ClientHelperNew_Subscription_GetUserParam(subscription);
+    uintptr_t userCtx = SOPC_ClientHelper_Subscription_GetUserParam(subscription);
     const char* currentSelectClause = NULL;
     SOPC_ASSERT(12 == userCtx);
     if (&OpcUa_EventNotificationList_EncodeableType == notificationType)
@@ -282,7 +282,7 @@ static SOPC_ClientHelper_Subscription* create_subscription(SOPC_ClientConnection
     }
     /* In case the subscription service shall not be supported, check service response is unsupported service*/
     SOPC_ClientHelper_Subscription* subscription =
-        SOPC_ClientHelperNew_CreateSubscription(connection, createSubReq, SOPC_Client_SubscriptionNotification_Cb, 12);
+        SOPC_ClientHelper_CreateSubscription(connection, createSubReq, SOPC_Client_SubscriptionNotification_Cb, 12);
     return subscription;
 }
 
@@ -413,7 +413,7 @@ static OpcUa_CreateMonitoredItemsResponse* create_monitored_item_event(SOPC_Clie
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+        status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
             subscription, createMonItReq, (const uintptr_t*) &monitoredItemNames[nbMIs], createMonItResp);
     }
     if (SOPC_STATUS_OK != status)
@@ -476,7 +476,7 @@ static OpcUa_CreateMonitoredItemsResponse* create_monitored_item_event_index_ran
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+        status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
             subscription, createMonItReq, (const uintptr_t*) &monitoredItemNames[nbMIs], createMonItResp);
     }
     if (SOPC_STATUS_OK != status)
@@ -885,7 +885,7 @@ static SOPC_ReturnStatus delete_monitored_items(SOPC_ClientHelper_Subscription* 
 
     if (deleteMonitoredItems)
     {
-        status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, delMonItReq, &delMonItResp);
+        status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, delMonItReq, &delMonItResp);
         SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) ppCreateMonItResp);
 
         // Check DeleteMonitoredItems response
@@ -979,7 +979,7 @@ static SOPC_ReturnStatus call_gen_events_method(SOPC_ClientConnection* secureCon
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, callMethod, (void**) &callMethodResp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, callMethod, (void**) &callMethodResp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -1139,7 +1139,7 @@ int main(void)
     /* Create anonymous user connection */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Connect(secureConnConfigArray[0], SOPC_Client_ConnEventCb, &secureConnection);
+        status = SOPC_ClientHelper_Connect(secureConnConfigArray[0], SOPC_Client_ConnEventCb, &secureConnection);
     }
 
     bool connCreated = false;
@@ -1239,7 +1239,7 @@ int main(void)
     uint32_t subId = 0;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_GetSubscriptionId(sub, &subId);
+        status = SOPC_ClientHelper_GetSubscriptionId(sub, &subId);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
     if (SOPC_STATUS_OK == status)
@@ -1622,14 +1622,14 @@ int main(void)
 
     if (subCreated)
     {
-        tmpStatus = SOPC_ClientHelperNew_DeleteSubscription(&sub);
+        tmpStatus = SOPC_ClientHelper_DeleteSubscription(&sub);
         status = (SOPC_STATUS_OK == status ? tmpStatus : status);
     }
 
     /* Close the connection */
     if (connCreated)
     {
-        tmpStatus = SOPC_ClientHelperNew_Disconnect(&secureConnection);
+        tmpStatus = SOPC_ClientHelper_Disconnect(&secureConnection);
         status = (SOPC_STATUS_OK == status ? tmpStatus : status);
     }
 

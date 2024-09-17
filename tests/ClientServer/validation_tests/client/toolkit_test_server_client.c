@@ -22,9 +22,9 @@
 #include <string.h>
 
 // Server wrapper
+#include "libs2opc_client.h"
 #include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
-#include "libs2opc_client.h"
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
@@ -268,7 +268,7 @@ static SOPC_ReturnStatus client_send_write_test(SOPC_ClientConnection* secureCon
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, writeRequest, (void**) &writeResponse);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, writeRequest, (void**) &writeResponse);
     }
 
     if (SOPC_STATUS_OK == status && (writeResponse->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask) != 0 &&
@@ -302,7 +302,7 @@ static SOPC_ReturnStatus client_send_read_req_test(SOPC_ClientConnection* secure
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, readRequest, (void**) &readResponse);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, readRequest, (void**) &readResponse);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -401,7 +401,7 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(SOPC_ClientConnection* s
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) addNodesReq, (void**) &addNodesResp);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) addNodesReq, (void**) &addNodesResp);
     }
     else
     {
@@ -660,7 +660,7 @@ START_TEST(test_server_client)
     SOPC_ClientConnection* connection = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Connect(secConnConfig, &SOPC_Client_ConnEventCb, &connection);
+        status = SOPC_ClientHelper_Connect(secConnConfig, &SOPC_Client_ConnEventCb, &connection);
     }
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -716,7 +716,7 @@ START_TEST(test_server_client)
     /* client request to close the connection */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_Disconnect(&connection);
+        status = SOPC_ClientHelper_Disconnect(&connection);
     }
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 

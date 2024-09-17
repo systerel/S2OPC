@@ -114,7 +114,7 @@ const char* SOPC_ClientConfigHelper_GetUserIdFromConfig(const SOPC_SecureConnect
  * \brief Type of callback to provide asynchronous service response
  *
  * \param response     An asynchronous response to a local service request sent using
- *                     ::SOPC_ClientHelperNew_ServiceAsync
+ *                     ::SOPC_ClientHelper_ServiceAsync
  *                     Response will be a pointer to the service response corresponding to sent request:
  *                     \li ::OpcUa_ReadResponse
  *                     \li ::OpcUa_WriteResponse
@@ -130,7 +130,7 @@ const char* SOPC_ClientConfigHelper_GetUserIdFromConfig(const SOPC_SecureConnect
  *                     In case of sending failure the response is NULL and only the userContext is provided.
  *
  * \param userContext  The context that was provided with the corresponding request provided on
- *                     ::SOPC_ClientHelperNew_ServiceAsync call
+ *                     ::SOPC_ClientHelper_ServiceAsync call
  *
  * \warning The callback function shall not do anything blocking or long treatment since it will block any other
  *          callback call (other instance of response, data change notification, etc.).
@@ -141,7 +141,7 @@ typedef void SOPC_ServiceAsyncResp_Fct(SOPC_EncodeableType* type, const void* re
  * \brief Defines the service response callback to be used.
  *
  * This is optional if not used or only synchronous version used.
- * This shall be defined before starting the server and using ::SOPC_ClientHelperNew_ServiceAsync.
+ * This shall be defined before starting the server and using ::SOPC_ClientHelper_ServiceAsync.
  *
  * \param asyncRespCb  The service asynchronous response callback to be used
  *
@@ -190,7 +190,6 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetUserNamePasswordCallback(
  * \brief Type of callback to retrieve password for decryption of the user private key
  *
  * \param      secConnConfig the secure connection configuration for the session to activate
- *                           (NULL if the old client API is used, old API will be removed in version 1.6.0)
  * \param      userCertThumb user certificate thumbprint containing the public key paired
  *                           with the private key to decrypt
  * \param[out] outPassword   the newly allocated password which shall be a zero-terminated string in case
