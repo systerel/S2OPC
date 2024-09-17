@@ -44,11 +44,11 @@ cd $HOST_DIR
 #**********************************
 # Delete the build directories
 #**********************************
-# rm -rf build_zephyr/* 2>/dev/null # TODO : clean all & avoid rebuilds
-mkdir -p build_zephyr
+rm -rf build_zephyr/* build_freertos/* 2>/dev/null
+mkdir -p build_zephyr build_freertos
 # local user is different from docker container user
 # therefore, access rights issues can occur.
-chmod a+rw build_zephyr
+chmod a+rw build_zephyr build_freertos
 chmod a+rw samples/embedded/cli_client/
 chmod a+rw samples/embedded/cli_pubsub_server/
 cd $HIL_DIR
@@ -106,15 +106,15 @@ index=0
         LOG_FILE=$LOG_PATH/compile_${OS}_${APP}_${BOARD}.log
         OUT_FILE=$HOST_DIR/build_${OS}/${APP}_${BOARD}.${EXTENSION}
         if ! [ -f $OUT_FILE ] ; then
-          echo "Building $(basename ${OUT_FILE}) for board $BOARD (see $LOG_FILE)"
+          echo "Building $(basename ${OUT_FILE}) for board $BOARD"
            ${HIL_DIR}/compile.sh "$OS" "$BOARD" "$APP" "$EXTENSION" > $LOG_FILE 2>&1
+        [ -f $OUT_FILE ] || fail "Missing output file ${OUT_FILE} (see $LOG_FILE)"
         else
           echo "Not rebuilding $(basename ${OUT_FILE})"
         fi 
-        [ -f $OUT_FILE ] || fail "Missing output file ${OUT_FILE}"
         
         LOG_FILE=$LOG_PATH/flash_${OS}_${APP}_${BOARD}.log
-        echo "Flash $APP/$OS on board $BOARD #$SERIAL"
+        echo "Flash $APP/$OS on board $BOARD SN=$SERIAL"
         ${HIL_DIR}/flash_app.sh "$SERIAL" "${APP}_${BOARD}.${EXTENSION}" "${OS}" > $LOG_FILE 2>&1
         [ $? != 0 ]  && cat $LOG_FILE && fail "Flashing failed"
         ((index=index+1))
@@ -124,13 +124,16 @@ done
 for TEST in $TEST_NAME_LIST; do
     #Launch the test
     echo "Running test '$TEST'"
-    python3 ${HIL_DIR}/executor.py "$TEST" "$BUILD_CFG_LIST" "$HARDWARE_CAPACITY" "$LOG_PATH"
+    LOG_FILE=$LOG_PATH/execute_${TEST}.log
+    python3 ${HIL_DIR}/executor.py "$TEST" "$BUILD_CFG_LIST" "$HARDWARE_CAPACITY" "$LOG_FILE"
     RET=$?
     if [ $RET -ne 0 ]; then
-        echo "ERRORS detected, results available in ${LOG_PATH}"
+        tail -n 20 ${LOG_FILE}
+        echo "ERRORS detected, full results available in ${LOG_FILE}"
         exit 1
+    else
+        echo "Test '$TEST' OK!"
     fi
 done
 
 echo "All tests OK"
-exit 0

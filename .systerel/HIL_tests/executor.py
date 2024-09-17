@@ -122,27 +122,35 @@ class RemoteProcess:
         self.SN = get_json_arg(test_info,['BOARD_SN'])
         self.port=None
         board_name = get_json_arg(build_info,["board"])
-        os = get_json_arg(build_info,["OS"])
-        capabilities = get_json_arg(hardware_capa_json,["capabilities",board_name,"comm_config"])
-        self.comm_protocol= capabilities[0]
-        self.comm_options= capabilities[1]
-        self.format=get_json_arg(hardware_capa_json,["os_specificities",os,"target_write_prefix"])
-        self.port_init()
-    def port_init(self):
-        script_path = Path(__file__).parent / (f"../comm/{self.comm_protocol}")
-        script_path = script_path.resolve()
+        _os = get_json_arg(build_info,["OS"])
+        self.comm_protocol, self.comm_options \
+            = get_json_arg(hardware_capa_json,["capabilities",board_name,"comm_config"])
+        self.format=get_json_arg(hardware_capa_json,["os_specificities",_os,"target_write_prefix"])
+        
+        try:
+            script_path = Path(__file__).parent / "comm" / self.comm_protocol
+            script_path = str(script_path.resolve())
+            if not os.path.isfile(script_path):
+                logger.error(f"File not found : {script_path}")
+                raise
+        except Exception as E:
+            logger.error(E)
+            raise Exception(f"Unknown communication protocol {self.comm_protocol} for board {board_name}")
+        
         result = subprocess.run([script_path, 'get_dev', self.SN], capture_output=True, text=True)
         port = result.stdout.strip()
         _DEBUG(port)
         if port:
+            logger.info(f"Detected port {port}")
             self.port = port
             self.script_path = script_path
             subprocess.run([script_path, 'init_port', port, self.comm_options], check=True)
             _DEBUG(f"Port : {port} configured")
         else:
-            _DEBUG("No port detected")
-            logger.error("No port detected")
-            raise RuntimeError("No port detected")
+            msg=f"No port detected for Board SN={self.SN}"
+            _DEBUG(msg)
+            logger.error(msg)
+            raise RuntimeError(msg)
     def __str__(self): return f"[PROC OS={self.build_info['OS']}, APP={self.build_info['app']} BOARD={self.SN}]"
 
     def write(self, text: str):
@@ -230,11 +238,10 @@ if __name__ == '__main__':
     test_key = get_arg(1)
     build_config_path = get_arg(2)
     hardware_capa_path = get_arg(3)
-    log_path= get_arg(4)
-    filepath3 = Path(log_path) / "execution.log"
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(filename=filepath3,
-                        filemode='a',
+    log_file = get_arg(4)
+    logger = logging.getLogger(test_key)
+    logging.basicConfig(filename=Path(log_file),
+                        filemode='w',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                         datefmt='%H:%M:%S',
                         level=logging.INFO)
