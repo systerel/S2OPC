@@ -40,8 +40,8 @@
  * to call other subscription related services on the subscription instance.
  */
 
-#ifndef LIBS2OPC_NEW_CLIENT_H_
-#define LIBS2OPC_NEW_CLIENT_H_
+#ifndef LIBS2OPC_CLIENT_H_
+#define LIBS2OPC_CLIENT_H_
 
 #include <stdbool.h>
 #include <stdint.h>

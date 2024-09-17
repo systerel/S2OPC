@@ -31,7 +31,7 @@
 
 #include <stdbool.h>
 
-#include "libs2opc_new_client.h"
+#include "libs2opc_client.h"
 
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_config.h"

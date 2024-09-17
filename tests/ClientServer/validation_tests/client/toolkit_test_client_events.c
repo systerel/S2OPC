@@ -25,7 +25,7 @@
 
 #include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
-#include "libs2opc_new_client.h"
+#include "libs2opc_client.h"
 #include "libs2opc_request_builder.h"
 
 #include "opcua_identifiers.h"

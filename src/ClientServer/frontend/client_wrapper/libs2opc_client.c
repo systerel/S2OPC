@@ -19,9 +19,9 @@
 
 #include <string.h>
 
+#include "libs2opc_client.h"
 #include "libs2opc_client_internal.h"
 #include "libs2opc_common_config.h"
-#include "libs2opc_new_client.h"
 
 #include "sopc_assert.h"
 #include "sopc_encodeabletype.h"

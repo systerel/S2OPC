@@ -22,7 +22,7 @@
 #include "sopc_types.h"
 
 #include "libs2opc_client_config_custom.h"
-#include "libs2opc_new_client.h"
+#include "libs2opc_client.h"
 
 #include "client.h"
 #include "config.h"

@@ -78,7 +78,7 @@ endif()
 set(S2OPC_WRAPPERS_SRC
     "${COMMONWRAPPER_PATH}/libs2opc_common_config.c"
     "${HELPERWRAPPER_PATH}/libs2opc_request_builder.c"
-    "${CLIENTWRAPPER_PATH}/libs2opc_new_client.c"
+    "${CLIENTWRAPPER_PATH}/libs2opc_client.c"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config.c"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.c"
     "${CLIENTWRAPPER_PATH}/internal/state_machine.c"
@@ -92,7 +92,7 @@ set(S2OPC_WRAPPERS_SRC
 list(APPEND WRAPPERS_INCLUDE_FILES
     "${COMMONWRAPPER_PATH}/libs2opc_common_config.h"
     "${HELPERWRAPPER_PATH}/libs2opc_request_builder.h"
-    "${CLIENTWRAPPER_PATH}/libs2opc_new_client.h"
+    "${CLIENTWRAPPER_PATH}/libs2opc_client.h"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.h"
     "${SERVERWRAPPER_PATH}/libs2opc_server.h"
