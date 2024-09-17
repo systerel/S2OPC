@@ -59,7 +59,7 @@ typedef SOPC_Mutex_Impl* SOPC_Mutex;
 /**
  * \brief Create a Condition variable.
  * @param cond A non-NULL pointer to a condition to be created
- * @return SOPC_STATUS_OK in case of success. In case of failure, cond is set ::to SOPC_INVALID_COND
+ * @return SOPC_STATUS_OK in case of success. In case of failure, cond is set to ::SOPC_INVALID_COND
  * (if not NULL).
  */
 SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond);
@@ -83,7 +83,7 @@ SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond);
 /**
  * \brief Create a Mutex
  * @param mut A non-NULL pointer to a Mutex to be created
- * @return SOPC_STATUS_OK in case of success. In case of failure, cond is set ::to SOPC_INVALID_MUTEX
+ * @return SOPC_STATUS_OK in case of success. In case of failure, cond is set to ::SOPC_INVALID_MUTEX
  * (if not NULL).
  */
 SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut);

@@ -32,7 +32,7 @@
 /**
  * @brief
  *      Create a multicast group and sets sock in that group
- * @param sock The socket to register in multicast group
+ * @param sock The socket to register in multicast group. Caller must ensure \p sock is not NULL
  * @param multicast The Multicast IPV4 address
  * @return SOPC_STATUS_OK in case of success
  */
@@ -41,7 +41,7 @@ SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(SOPC_Socket sock, const SOPC_Soc
 /**
  * @brief
  *      Removes a multicast group
- * @param sock The socket to remove from a multicast group
+ * @param sock The socket to remove from a multicast group. Caller must ensure \p sock is not NULL
  * @param multicast The Multicast IPV4 address, or NULL if unknown
  * @return SOPC_STATUS_OK in case of success
  */

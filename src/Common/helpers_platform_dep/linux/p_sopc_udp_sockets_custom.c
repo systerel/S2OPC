@@ -153,6 +153,10 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(SOPC_Socket sock,
     static struct in_addr mcastAddr;
     struct sockaddr_in sockIpAddr;
 
+    if (SOPC_INVALID_SOCKET == sock)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     if (!inet_aton(node, &mcastAddr))
     {
         return SOPC_STATUS_NOK;
@@ -200,6 +204,11 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(SOPC_Socket sock,
 
 SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(SOPC_Socket sock)
 {
+    if (SOPC_INVALID_SOCKET == sock)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     uint8_t messageControl[CMSG_SPACE(sizeof(struct sock_extended_err))];
     unsigned char errBuffer[sizeof(250)];
     struct sock_extended_err* sockErr;

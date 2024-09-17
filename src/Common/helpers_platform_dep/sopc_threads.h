@@ -29,6 +29,8 @@
 #ifndef SOPC_THREADS_H_
 #define SOPC_THREADS_H_
 
+#include <stddef.h>
+
 #include "sopc_enums.h"
 #include "sopc_mutexes.h"
 
@@ -42,7 +44,7 @@
  *       case of embedded target with limited RAM, the implementation must provide an internal mechanism to
  *       fine tune the thread stacks dimensioning.
  * \note Each platform must provide the implementation of \ref SOPC_Thread_Impl and all related functions
- * in \ref sopc_thread.h */
+ * in this file */
 typedef struct SOPC_Thread_Impl SOPC_Thread_Impl;
 typedef SOPC_Thread_Impl* SOPC_Thread;
 #define SOPC_INVALID_THREAD NULL
@@ -111,7 +113,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
  *                  Each thread can and shall be joined once only when terminating.
  *                  In case of success the pointed thread value becomes ::SOPC_INVALID_THREAD
  *
- * \return          SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
+ * \return          SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS if \p thread is NULL
  *                  or SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread);

@@ -353,6 +353,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
     socketImpl->sock = socket(receiveAddrInfo->addr.sll_family, SOCK_RAW, receiveAddrInfo->addr.sll_protocol);
     if (-1 == socketImpl->sock)
     {
+        SOPC_Free(socketImpl);
         return SOPC_STATUS_NOK;
     }
 
@@ -378,6 +379,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
     {
         S2OPC_TEMP_FAILURE_RETRY(res, close(socketImpl->sock));
         *sock = SOPC_INVALID_SOCKET;
+        SOPC_Free(socketImpl);
     }
     else
     {

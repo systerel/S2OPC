@@ -32,7 +32,7 @@
 
 /**
  * \brief Provides a socket implementation
- * \note Each platform must provide the implementation of \ref SOPC_SocketImpl and all related functions
+ * \note Each platform must provide the implementation of \ref SOPC_Socket_Impl and all related functions
  * in \ref sopc_raw_sockets.h */
 typedef struct SOPC_Socket_Impl SOPC_Socket_Impl;
 typedef SOPC_Socket_Impl* SOPC_Socket;
@@ -164,8 +164,10 @@ SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr);
  * \brief Get address information as C strings from the given socket address
  *
  * \param      addr    The socket address to use to get information as C string
- * \param[out] host    (optional) The host information of the address as C string (i.e. IP)
- * \param[out] service (optional) The service information of the address as C string (i.e. port)
+ * \param[out] host    (optional) The host information of the address as C string (i.e. IP).
+ *                     Must be deallocated by caller (if non-NULL)
+ * \param[out] service (optional) The service information of the address as C string (i.e. port).
+ *                     Must be deallocated by caller (if non-NULL)
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS if parameters are invalid (NULL for addr or both NULL for outputs)

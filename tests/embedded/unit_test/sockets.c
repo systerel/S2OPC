@@ -245,7 +245,8 @@ static void cb_multicast_receiver(void)
 void suite_test_raw_sockets(int* index)
 {
     PRINT("\n TEST %d: sopc_raw_sockets.h \n", *index);
-    SOPC_Thread p0, p1 = SOPC_INVALID_THREAD;
+    SOPC_Thread p0 = SOPC_INVALID_THREAD;
+    SOPC_Thread p1 = SOPC_INVALID_THREAD;
     const char* node = "192.168.8.3";
     const char* port = "80";
     const bool useIPv6 = false;
@@ -283,7 +284,10 @@ void suite_test_udp_sockets(int* index)
 {
     PRINT("\n TEST %d: sopc_udp_socket.h \n", *index);
 
-    SOPC_Thread p0, p1, p2, p3 = SOPC_INVALID_THREAD;
+    SOPC_Thread p0 = SOPC_INVALID_THREAD;
+    SOPC_Thread p1 = SOPC_INVALID_THREAD;
+    SOPC_Thread p2 = SOPC_INVALID_THREAD;
+    SOPC_Thread p3 = SOPC_INVALID_THREAD;
 
     SOPC_ReturnStatus status = SOPC_Thread_CreatePrioritized(&p0, (void*) cb_receiver_udp, NULL, 60, "UDP_Receiver");
     SOPC_ASSERT(SOPC_STATUS_OK == status);

@@ -368,7 +368,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(SOPC_Socket listeningSock, bool setNonBlock
         if (SOPC_PIKEOS_INVALID_SOCKET_ID != sock)
         {
             // A new socket must be created.
-            *acceptedSock = SOPC_Calloc(1, sizeof(*acceptedSock));
+            *acceptedSock = SOPC_Calloc(1, sizeof(**acceptedSock));
             status = (NULL == *acceptedSock ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
             if (SOPC_STATUS_OK == status)
             {

@@ -157,24 +157,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(SOPC_Socket sock,
     return SOPC_STATUS_OK; // Already done in SOPC_UDP_Socket_CreateToReceive
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(SOPC_Socket sock,
-                                                 const char* interfaceName,
-                                                 const SOPC_Socket_AddressInfo* multicast)
-{
-    if (NULL != interfaceName)
-    {
-        // Not supported in ZEPHYR
-        return SOPC_STATUS_NOT_SUPPORTED;
-    }
-
-    if (multicast == NULL)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    return P_MULTICAST_DropIpV4Membership(sock, multicast);
-}
-
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
                                                   const char* interfaceName,
                                                   bool setReuseAddr,

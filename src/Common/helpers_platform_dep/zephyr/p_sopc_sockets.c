@@ -359,6 +359,7 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
 
     if (ZSOCK_ERROR == socketImpl->sock)
     {
+        SOPC_Free(socketImpl);
         return SOPC_STATUS_NOK;
     }
     SOCKETS_DEBUG(" ** SOPC_Socket_CreateNew %d\n", socketImpl->sock);
@@ -440,11 +441,11 @@ SOPC_ReturnStatus SOPC_Socket_Accept(SOPC_Socket listeningSock, bool setNonBlock
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     struct sockaddr remoteAddr;
     socklen_t addrLen = 0;
-    if (listeningSock->sock != -1)
+    if (listeningSock->sock != ZSOCK_ERROR)
     {
         S2OPC_TEMP_FAILURE_RETRY(acceptedImpl->sock, zsock_accept(listeningSock->sock, &remoteAddr, &addrLen));
 
-        if (acceptedImpl->sock != -1)
+        if (acceptedImpl->sock != ZSOCK_ERROR)
         {
             SOCKETS_DEBUG(" ** SOPC_Socket_Accept %d => %d, blocking = %d\n", listeningSock->sock, acceptedImpl->sock,
                           !setNonBlocking);

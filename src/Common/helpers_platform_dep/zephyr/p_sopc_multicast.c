@@ -113,6 +113,7 @@ static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(SOPC_Socket sock)
 SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(SOPC_Socket sock, const SOPC_Socket_AddressInfo* multicast)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOT_SUPPORTED;
+    SOPC_ASSERT(NULL != sock);
     struct net_if* ptrNetIf = NULL;
     if (AF_INET == multicast->addrInfo.ai_family)
     {
@@ -155,6 +156,7 @@ SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(SOPC_Socket sock, const SOPC_Soc
 /***************************************************/
 SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(SOPC_Socket sock, const SOPC_Socket_AddressInfo* multicast)
 {
+    SOPC_ASSERT(NULL != sock);
     // Leave a membership
     struct net_if_mcast_addr* mcAddr = getAndUnlinkSockFromMCast(sock);
     struct net_if* ptrNetIf = net_if_get_first_by_type(&NET_L2_GET_NAME(ETHERNET));

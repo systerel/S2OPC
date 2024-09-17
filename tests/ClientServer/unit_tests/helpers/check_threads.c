@@ -105,6 +105,8 @@ START_TEST(test_thread_exec)
     status = SOPC_Thread_Create(&thread, NULL, &cpt, "test_exec");
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     ck_assert_ptr_eq(SOPC_INVALID_THREAD, thread);
+    status = SOPC_Thread_Join(NULL);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = SOPC_Thread_Join(&thread);
     ck_assert(status == SOPC_STATUS_NOK);
     ck_assert_ptr_eq(SOPC_INVALID_THREAD, thread);

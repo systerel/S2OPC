@@ -100,6 +100,6 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(SOPC_Socket sock,
  * SOPC_STATUS_INVALID_PARAMETERS
  *  or SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(SOPC_Socket);
+SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(SOPC_Socket sock);
 
 #endif /* SOPC_P_UDP_SOCKETS_CUSTOM_H_ */

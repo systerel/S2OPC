@@ -453,7 +453,7 @@ SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
     {
         struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
         SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
-        vSemaphoreDelete(&mutI->handle);
+        vSemaphoreDelete(mutI->handle);
         SOPC_Free(mutI);
         *mut = SOPC_INVALID_MUTEX;
         status = SOPC_STATUS_OK;

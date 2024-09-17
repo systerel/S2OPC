@@ -279,15 +279,23 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
 // Join then destroy a thread
 SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == thread)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    if (NULL != thread && SOPC_INVALID_THREAD != *thread)
+    if (SOPC_INVALID_THREAD != *thread)
     {
         status = P_THREAD_Join(*thread);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        *thread = SOPC_INVALID_THREAD;
+        if (SOPC_STATUS_OK == status)
+        {
+            *thread = SOPC_INVALID_THREAD;
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
 
     return status;

@@ -154,8 +154,8 @@ static SOPC_ReturnStatus destroy_thread(SOPC_Thread_Impl** ppThrWks)
         pWks->pStartFct = NULL;
         pWks->pStartArgs = NULL;
         SOPC_Free(*ppThrWks);
-        return SOPC_STATUS_OK;
         *ppThrWks = SOPC_INVALID_THREAD;
+        return SOPC_STATUS_OK;
     }
     return SOPC_STATUS_NOK;
 }
