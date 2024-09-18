@@ -228,7 +228,7 @@ Prerequisites:
 - [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.28.8) or  [CycloneCRYPTO](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/Compilation-of-CycloneCRYPTO-(Linux)) (tested with patched version 2.2.4)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
 - [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.6.2 compiled with CMake)
-- Python3 (tested with version 3.10.12)
+- Python3 (tested with version 3.10.12, >= 3.9 for PyS2OPC compatibility)
 - [Paho](https://github.com/eclipse/paho.mqtt.c) only needed for PubSub with MQTT (tested with version 1.3.4 compiled with CMake)
 
 To build S2OPC library, samples and tests with default configuration on current stable release:
@@ -262,7 +262,7 @@ Tested under Windows 10 (32 and 64 bits) and Windows Server 2016 (64 bits).
 Prerequisites:
 - Visual Studio (tested with Visual Studio 2017)
 - CMake (tested with CMake version 3.16.2 and 3.22.2)
-- Python3 (tested with Python version >= 3.6.3)
+- Python3 (tested with Python version >= 3.9)
 - [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.28.8)
 - [expat](https://libexpat.github.io/) (tested with expat version 2.6.2)
 - [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14 compiled with CMake)
