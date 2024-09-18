@@ -20,6 +20,7 @@
 # set -o errexit  # Cannot be used here since scirpt wont work
 set -o nounset
 set -o pipefail
+set -x
 
 function _help() {
     echo "$1 setup the environment required to build the FreeRTOS sample in the dedicated docker. This scirpt mainly calls build-freertos-samples-docker.sh"
@@ -28,14 +29,18 @@ function _help() {
     echo "Example:"
     echo "     $1 -- --nocrypto"
 }
-
+GET_APP=
+GET_BOARD=
 OPT_ADD=
+OPT_IT=
 OPT_EXEC=/sopc/samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh
 while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
 shift
 [[ "${PARAM-}" =~ --h(elp)? ]] && _help $0 && exit 0
-[[ "${PARAM-}" =~ --?it ]] && OPT_EXEC= && continue
+[[ "${PARAM-}" =~ --?it ]] && OPT_EXEC= && OPT_IT=-ti && continue
+[[ ${PARAM} == "-b" ]] && GET_BOARD=$1 && shift && continue
+[[ ${PARAM} == "-a" ]] && GET_APP=$1 && shift && continue
 [[ "${PARAM-}" == "--" ]] && OPT_ADD="-- $*" && break
 echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
 done
@@ -55,4 +60,8 @@ echo "Using image FREERTOS_DIGEST=${FREERTOS_DIGEST-}"
 rm -rf ${SOPC_DIR}/build_freertos/* 2> /dev/null
 mkdir -p ${SOPC_DIR}/build_freertos && chmod 777 ${SOPC_DIR}/build_freertos || exit 2
 
-docker run --rm -ti -v ${SOPC_DIR}:/sopc -u root ${FREERTOS_DIGEST} ${OPT_EXEC} ${OPT_ADD}
+docker run --rm ${OPT_IT} -v ${SOPC_DIR}:/sopc -u root ${FREERTOS_DIGEST} ${OPT_EXEC} ${OPT_ADD}
+
+#Conversion .elf to .bin
+[[ -z ${OPT_IT} ]] && ! [[ -z ${GET_APP} ]] && ! [[ -z ${GET_BOARD} ]] && \
+arm-none-eabi-objcopy -O binary ${SOPC_DIR}/build_freertos/freertos-sopc.elf ${SOPC_DIR}/build_freertos/${GET_APP}_${GET_BOARD}.bin

@@ -24,10 +24,13 @@ cd "$(dirname "$0")"/../../../../..
 HOST_DIR=$(pwd)
 
 function usage() {
-    echo "Builds a predefined set of Zephyr applications"
+    echo "By default builds a predefined set of Zephyr applications"
+    echo "To build a specific Zephyr applications use -b <BOARD> -a <APPLICATION>"
     echo "Usage:"
     echo "  $0    : build predefined application/boards"
     echo "  $0 -i : Start an interactive session in zephyr docker. see ${SCRIPT} for more help"
+    echo "  $0 -b : Allows user to specify a <BOARD>"
+    echo "  $0 -a : Allows user to specify an <APPLICATION>"
     echo "  $0 -h : This help"
     exit 0
 }
@@ -39,20 +42,14 @@ while [[ ! -z $1 ]]; do
     shift
     [[ ${PARAM} == "-h" ]] && usage && exit 1
     [[ ${PARAM} == "-i" ]] && IS_INTERACTIVE=true && continue
+    [[ ${PARAM} == "-b" ]] && GET_BOARD=$1 && shift && continue
+    [[ ${PARAM} == "-a" ]] && GET_APP=$1 && shift && continue
     echo "Unknown parameter : ${PARAM}"
     exit 2
 done
 
 source .docker-images.sh
 docker inspect ${ZEPHYR_DIGEST} 2>/dev/null >/dev/null  || fail "Docker image not installed: ${ZEPHYR_DIGEST}" 
-
-rm -rf build_zephyr/* 2>/dev/null
-mkdir -p build_zephyr
-# local user is different from docker container user
-# therefore, access rights issues can occur.
-chmod a+rw build_zephyr
-chmod a+rw samples/embedded/cli_client/
-chmod a+rw samples/embedded/cli_pubsub_server/
 
 echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
 $IS_INTERACTIVE && echo "Running an interactive session on ${ZEPHYR_DIGEST}" && \
@@ -72,24 +69,39 @@ function build() {
   wait $!
   echo "Result = $?"
 }
-build stm32h735g_disco cli_client
-build stm32h735g_disco cli_client -DCONFIG_NET_GPTP=y
-build mimxrt1064_evk cli_pubsub_server
-build native_posix_64 cli_pubsub_server  -DCONFIG_SOPC_CRYPTO_LIB_NAME=\"nocrypto\" -DCONFIG_MBEDTLS=n
-build native_posix_64 cli_pubsub_server
-build native_posix_64 cli_client
+if [ -z "${GET_BOARD}" ] && [ -z "${GET_APP}" ]; then
+    rm -rf build_zephyr/* 2>/dev/null
+    mkdir -p build_zephyr
+    # local user is different from docker container user
+    # therefore, access rights issues can occur.
+    chmod a+rw build_zephyr
+    chmod a+rw samples/embedded/cli_client/
+    chmod a+rw samples/embedded/cli_pubsub_server/
 
-# Check results
-EXPECTED_FILES="cli_client_stm32h735g_disco.bin cli_pubsub_server_mimxrt1064_evk.bin  cli_pubsub_server_native_posix_64.bin cli_client_native_posix_64.bin"
-RESULT=true
+    build stm32h735g_disco cli_client
+    build stm32h735g_disco cli_client -DCONFIG_NET_GPTP=y
+    build mimxrt1064_evk cli_pubsub_server
+    build native_posix_64 cli_pubsub_server  -DCONFIG_SOPC_CRYPTO_LIB_NAME=\"nocrypto\" -DCONFIG_MBEDTLS=n
+    build native_posix_64 cli_pubsub_server
+    build native_posix_64 cli_client
+    # Check results
+    EXPECTED_FILES="cli_client_stm32h735g_disco.bin cli_pubsub_server_mimxrt1064_evk.bin  cli_pubsub_server_native_posix_64.bin cli_client_native_posix_64.bin"
+    RESULT=true
+    if ! ${RESULT} ; then
+        echo "Build failed. To run docker manually: $0 -i"
+        exit 200
+    fi
+elif [ -z "${GET_BOARD}" ] || [ -z "${GET_APP}" ]; then
+    echo "Missing argument board or app see ./build-zephyr-samples.sh -h" && exit 1
+else
+    printf "\n\e[0;36mChosen boards : $GET_BOARD Chosen app :$GET_APP \033[39m"
+    build $GET_BOARD $GET_APP
+fi
+
 for f in ${EXPECTED_FILES} ; do
-	[ ! -f build_zephyr/${f} ] && echo "File not build : ${f}" && RESULT=false
-	[ -f build_zephyr/${f} ] && echo "File OK : ${f}"
+    [ ! -f build_zephyr/${f} ] && echo "File not build : ${f}" && RESULT=false
+    [ -f build_zephyr/${f} ] && echo "File OK : ${f}"
 done
 
-if ! ${RESULT} ; then
-	echo "Build failed. To run docker manually: $0 -i"
-	exit 200
-fi
 echo "Build Successful"
 

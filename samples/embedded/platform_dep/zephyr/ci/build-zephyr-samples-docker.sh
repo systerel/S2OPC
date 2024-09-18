@@ -87,4 +87,5 @@ cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD}.bin 2>&1 |tee -a ${OUTDIR}/
 echo " ** Build ${APP} OK " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 
 ls -l ${OUTDIR}/
+chmod -R 777 build
 
