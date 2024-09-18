@@ -36,3 +36,4 @@ In all cases, refer to the wiki for limitations and other target ports.
 - Create a folder `platform_dep/<os>/`
 - Implement the services described in `platform_dep/include/` in  `platform_dep/<os>/src/`
 - If the CMake configuration is not compatible or if the build is specific, add the specific rules in `platform_dep/<os>/`
+- To support HIL tests, a script ` ci/build-<os>-samples.sh` must be provided. It shall take two options: `-a <APP>` (application name) and `-b <BOARD>` (the target board). This script is expected to produce a file in S2OPC root folder `build_<OS>/<APP>_<BOARD>.<EXT>` (`<EXT>` can be `bin` or `elf` for example)

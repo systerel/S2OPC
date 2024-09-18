@@ -51,6 +51,7 @@ cd ../../../..
 SOPC_DIR=`pwd`
 
 echo "SOPC_DIR=${SOPC_DIR-}"
+[[ $GET_BOARD != nucleo_h723zg ]] && echo "Only board nucleo_h723zg is supported currently"
 [[ -z "${SOPC_DIR-}" ]] && echo 'SOPC_DIR must be set!' && exit 1
 ! [[ -d  "${SOPC_DIR-}/src/Common" ]] && echo 'SOPC_DIR is invalid!' && exit 1
 

@@ -1,0 +1,42 @@
+{
+    "build":
+        {
+            "config_freertos_723_server": {"OS": "freertos", "app": "cli_pubsub_server", "board": "nucleo_h723zg", "crypto": "mbedtls", "dynamic_ip": true, "flash_type": "bin"},
+            "config_zephyr_745_server": {"OS": "zephyr", "app": "cli_pubsub_server", "board": "nucleo_h745zi_q_m7", "crypto": "mbedtls", "dynamic_ip": true, "flash_type": "bin"},
+            "config_zephyr_723_client": {"OS": "zephyr", "app": "cli_client", "board": "nucleo_h723zg", "crypto": "mbedtls", "dynamic_ip": true, "flash_type": "bin"},
+            "config_zephyr_745_client": {"OS": "zephyr", "app": "cli_client", "board": "nucleo_h745zi_q_m7", "crypto": "mbedtls", "dynamic_ip": true, "flash_type": "bin"}
+        },
+    "tests":
+        {
+            "test2Boards": { "builds":
+            [
+
+                {"name":"server1", "build_name": "config_zephyr_745_server", "BOARD_SN": "003B00223137510F39383538"},
+                {"name" :"client1", "build_name": "config_zephyr_723_client", "BOARD_SN": "001900273331510B33323639"}
+            ],
+             "test_script": "test2Boards.json"
+        },
+            "test3Boards2os": { "builds":
+            [
+
+                {"name":"server1", "build_name": "config_zephyr_745_server", "BOARD_SN": "003B00223137510F39383538"},
+                {"name":"server2", "build_name": "config_freertos_723_server", "BOARD_SN": "004200393132511738363431"},
+                {"name" :"client1", "build_name": "config_zephyr_723_client", "BOARD_SN": "001900273331510B33323639"}
+            ],
+             "test_script": "test3Boards2os.json"
+        },
+            "testBuildFreertos": { "builds":
+            [
+
+                {"name":"server2", "build_name": "config_freertos_723_server", "BOARD_SN": "004200393132511738363431"}
+            ],
+             "test_script": "testBuildFreertos.json"
+        },
+            "test1client": { "builds":
+            [
+                {"name":"client", "build_name": "config_zephyr_723_client", "BOARD_SN": "004200393132511738363431"}
+            ],
+             "test_script": "test1client.json"
+          }
+        }
+}

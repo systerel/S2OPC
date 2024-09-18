@@ -49,7 +49,7 @@
 #     - test-zephyr
 #     - test-pikeos
 #
-# CI pipeline manual run with 'HIL_TESTS = 1' and 'CROSS_COMPILE = 1':
+# CI pipeline manual run with 'HIL_TESTS = 1':
 # - jobs run in stages:
 #   - hil:
 #     - hil-tests
@@ -137,6 +137,9 @@ generation:
     when: always
     expire_in: '1 week'
   rules:
+  rules:
+    - if: "$HIL_TESTS != null"
+      when: never
     - if: "$NO_GEN == null && \
            $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && \
@@ -153,22 +156,24 @@ generation:
 
 hil-tests:
   stage: hil
+  needs: []
   tags:
       - hil
   image: docker.aix.systerel.fr/c838/build@sha256:14c9a28afc61ebe7b413798735f4a70989d36b155b720782ddb95f9db02d3a0e # digest of build:1.40
   script:
-    - ' cd samples/embedded/HIL_ITF/ '
+    - ' cd .systerel/HIL_tests'
     - ./launch.sh
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
-      - '*.log'
-      - 'samples/embedded/HIL_ITF/'  # Required by tests / coverage
+      - '.systerel/HIL_tests/logs'
+      - 'build_freertos'
+      - 'build_zephyr'
     expire_in: '1 week'
     when: always
   rules:
-    - if: "$HIL_TESTS != null && $CROSS_COMPILE != null"
-      when: on_success
+    - if: "$HIL_TESTS != null"
+      when: always
 
 ###
 # Compilation jobs
@@ -204,9 +209,12 @@ build-linux64-ASan:
     BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
   needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
+    - if: "$HIL_TESTS != null"
+      when: never
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
+           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null && \
+           $HIL_TESTS == null" # avoid ASAN build in most of nightly builds
       when: on_success
 
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
@@ -258,8 +266,6 @@ build-win64: &build_win64
       - '$BUILD_DIR/bin'
     expire_in: '1 week'
   rules:
-   - if: "$HIL_TESTS != null"
-     when: never
    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
      when: always # run even if previous job in pipeline failed
 
@@ -274,8 +280,6 @@ build-win32:
       - '$BUILD_DIR/bin/'
     expire_in: '1 week'
   rules:
-   - if: "$HIL_TESTS != null"
-     when: never
    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
      when: always # run even if previous job in pipeline failed
 
@@ -296,8 +300,6 @@ build-rpi:
       - '$BUILD_DIR/bin'
     expire_in: '1 week'
   rules:
-   - if: "$HIL_TESTS != null"
-     when: never
    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
      when: always # run even if previous job in pipeline failed
 
@@ -317,8 +319,6 @@ build-zephyr:
       - 'build_zephyr/'
     expire_in: '1 week'
   rules:
-    - if: "$HIL_TESTS != null"
-      when: never
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
 
@@ -341,8 +341,6 @@ build-freertos:
     when: always
     expire_in: '1 week'
   rules:
-    - if: "$HIL_TESTS != null"
-      when: never
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
 
@@ -360,8 +358,6 @@ build-pikeos:
     when: always
     expire_in: '1 week'
   rules:
-    - if: "$HIL_TESTS != null"
-      when: never
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
 
@@ -418,7 +414,7 @@ test-build-from-export:
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
-           $ALL_BUILDS == null && $ALL_TESTS == null"
+           $ALL_BUILDS == null && $ALL_TESTS == null && $HIL_TESTS == null"
       when: on_success
 
 .test-linux: &test_linux
@@ -467,7 +463,7 @@ test-check:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $ALL_TESTS == null && $ALL_BUILDS == null"
+           $ALL_TESTS == null && $ALL_BUILDS == null && $HIL_TESTS == null"
       when: on_success
 
 .test-unit: &test_unit
@@ -508,7 +504,7 @@ test-unit:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_DOC == null && \
-           $ALL_TESTS == null" # + excludes ALL_TESTS
+           $ALL_TESTS == null && $HIL_TESTS == null" # + excludes ALL_TESTS
       when: on_success
 
 .test-uactt: &test_uactt
@@ -620,8 +616,6 @@ test-zephyr:
   variables:
     <<: *nominal_test_variables
   rules: # run the task only if Zephyr samples have been compiled
-    - if: "$HIL_TESTS != null"
-      when: never
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: on_success
 
@@ -641,8 +635,6 @@ test-pikeos:
     expire_in: '1 week'
     when: on_failure
   rules:
-    - if: "$HIL_TESTS != null"
-      when: never
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: on_success
 
