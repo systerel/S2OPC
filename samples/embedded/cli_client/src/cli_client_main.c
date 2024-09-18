@@ -31,7 +31,7 @@
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"
 #include "sopc_date_time.h"
-#include "sopc_encodeabletype.h"
+#include "sopc_encodeable.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -47,7 +47,9 @@
 
 static int stopSignal = 0;
 static SOPC_SecureConnection_Config* gConfiguration = NULL;
-static SOPC_ClientConnection* gConnection = NULL;
+static SOPC_SecureConnection_Config* gMultiConfiguration[MAX_CONFIG] = {NULL};
+// static SOPC_ClientConnection* gConnection = NULL;
+static SOPC_ClientConnection* gMultiConnection[MAX_CONFIG] = {NULL};
 static char* epURL = NULL;
 
 /***************************************************/
@@ -70,7 +72,12 @@ static int cmd_demo_dbg(WordList* pList);
 static int cmd_demo_log(WordList* pList);
 static int cmd_demo_quit(WordList* pList);
 static int cmd_demo_configure(WordList* pList);
+static int cmd_demo_deconfigure(WordList* pList);
 static int cmd_demo_connect(WordList* pList);
+static int cmd_demo_read(WordList* pList);
+static int cmd_demo_write(WordList* pList);
+static int cmd_demo_list(WordList* pList);
+static int cmd_demo_disconnect(WordList* pList);
 
 /** Configuration of a command line */
 typedef struct
@@ -80,11 +87,19 @@ typedef struct
     const char* description;
 } CLI_config_t;
 
-static const CLI_config_t CLI_config[] = {
-    {"help", cmd_demo_help, "Display help"},      {"quit", cmd_demo_quit, "Quit demo"},
-    {"info", cmd_demo_info, "Show demo info"},    {"dbg", cmd_demo_dbg, "Show target debug info"},
-    {"log", cmd_demo_log, "Set log level"},       {"conf", cmd_demo_configure, "Configure client [<endpoint>]"},
-    {"conn", cmd_demo_connect, "Connect client"}, {NULL, NULL, NULL}};
+static const CLI_config_t CLI_config[] = {{"help", cmd_demo_help, "Display help"},
+                                          {"quit", cmd_demo_quit, "Quit demo"},
+                                          {"info", cmd_demo_info, "Show demo info"},
+                                          {"dbg", cmd_demo_dbg, "Show target debug info"},
+                                          {"log", cmd_demo_log, "Set log level"},
+                                          {"conf", cmd_demo_configure, "Configure client [<endpoint>] [<cnxIndex>]"},
+                                          {"deconf", cmd_demo_deconfigure, "Deconfigure client [<cnxIndex>]"},
+                                          {"read", cmd_demo_read, "Print content of  <NodeId> from server <cnxIndex>"},
+                                          {"write", cmd_demo_write, "Write value to server"},
+                                          {"disc", cmd_demo_disconnect, "Disconnect client <cnxIndex>"},
+                                          {"list", cmd_demo_list, "List all configured endpoints"},
+                                          {"conn", cmd_demo_connect, "Connect client <cnxIndex>"},
+                                          {NULL, NULL, NULL}};
 
 /***************************************************/
 /* This function receives a pointer to a C string.
@@ -123,6 +138,126 @@ static const char* CLI_GetNextWord(WordList* pList)
 }
 
 /***************************************************/
+/** Prints on console a human-readable representation of a nid and a Datavalue
+
+ * @param nid The NodeId to display
+ * @param dv The DataValue to display
+ */
+static void print_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
+{
+    char* nidStr = SOPC_NodeId_ToCString(nid);
+    SOPC_ASSERT(NULL != nid && NULL != nidStr);
+
+    PRINT("- %.25s", nidStr);
+
+    if (NULL != dv)
+    {
+        int result = -1;
+        static char status[22];
+        if (dv->Status & SOPC_BadStatusMask)
+        {
+            result = sprintf(status, "BAD 0x%08" PRIX32, dv->Status);
+        }
+        else if (dv->Status & SOPC_UncertainStatusMask)
+        {
+            result = sprintf(status, "UNCERTAIN 0x%08" PRIX32, dv->Status);
+        }
+        else
+        {
+            result = sprintf(status, "GOOD");
+        }
+        SOPC_ASSERT(result > 0);
+
+        const char* type = "";
+        switch (dv->Value.ArrayType)
+        {
+        case SOPC_VariantArrayType_Matrix:
+            type = " ; [MAT]";
+            break;
+        case SOPC_VariantArrayType_Array:
+            type = " ; [ARR]";
+            break;
+        case SOPC_VariantArrayType_SingleValue:
+        default:
+            break;
+        }
+        PRINT(" ; Status = %s%s", status, type);
+        if (type[0] == 0)
+        {
+            static const char* typeName[] = {
+                "Null",           "Boolean",       "SByte",         "Byte",          "Int16",           "UInt16",
+                "Int32",          "UInt32",        "Int64",         "UInt64",        "Float",           "Double",
+                "String",         "DateTime",      "Guid",          "ByteString",    "XmlElement",      "NodeId",
+                "ExpandedNodeId", "StatusCode",    "QualifiedName", "LocalizedText", "ExtensionObject", "DataValue",
+                "Variant",        "DiagnosticInfo"};
+
+            const SOPC_BuiltinId typeId = dv->Value.BuiltInTypeId;
+            if (typeId <= sizeof(typeName) / sizeof(*typeName) - 1)
+            {
+                PRINT(" ; Type=%.12s ; Val = ", typeName[typeId]);
+            }
+            else
+            {
+                PRINT(" ; Type=%.12s ; Val = ", "<Invalid>");
+            }
+
+            switch (typeId)
+            {
+            case SOPC_Boolean_Id:
+                PRINT("%" PRId32, (int32_t) dv->Value.Value.Boolean);
+                break;
+            case SOPC_SByte_Id:
+                PRINT("%" PRId32, (uint32_t) dv->Value.Value.Sbyte);
+                break;
+            case SOPC_Byte_Id:
+                PRINT("%" PRId32, (int32_t) dv->Value.Value.Byte);
+                break;
+            case SOPC_UInt16_Id:
+                PRINT("%" PRIu16, dv->Value.Value.Uint16);
+                break;
+            case SOPC_Int16_Id:
+                PRINT("%" PRId16, dv->Value.Value.Int16);
+                break;
+            case SOPC_Int32_Id:
+                PRINT("%" PRId32, dv->Value.Value.Int32);
+                break;
+            case SOPC_UInt32_Id:
+                PRINT("%" PRIu32, dv->Value.Value.Uint32);
+                break;
+            case SOPC_Int64_Id:
+                PRINT("%" PRId64, dv->Value.Value.Int64);
+                break;
+            case SOPC_UInt64_Id:
+                PRINT("%" PRIu64, dv->Value.Value.Uint64);
+                break;
+            case SOPC_Float_Id:
+                PRINT("%f", dv->Value.Value.Floatv);
+                break;
+            case SOPC_Double_Id:
+                PRINT("%f", (float) dv->Value.Value.Doublev);
+                break;
+            case SOPC_String_Id:
+                PRINT("<%s>", SAFE_STRING(SOPC_String_GetRawCString(&dv->Value.Value.String)));
+                break;
+            case SOPC_StatusCode_Id:
+                PRINT("0x%08" PRIX32, dv->Value.Value.Status);
+                break;
+            default:
+                PRINT("(...)");
+                break;
+            }
+        }
+    }
+    else
+    {
+        PRINT("<no value>");
+    }
+    PRINT("\n");
+
+    SOPC_Free(nidStr);
+}
+
+/***************************************************/
 // Callback for unexpected connection events
 static void client_ConnectionEventCallback(SOPC_ClientConnection* config,
                                            SOPC_ClientConnectionEvent event,
@@ -158,7 +293,7 @@ static void log_UserCallback(const char* timestampUtc,
 }
 
 /***************************************************/
-static void client_tester(void)
+static void client_tester(int cnxIndex)
 {
     static const char* root_node_id = "ns=0;i=85";
     PRINT("Browse Root.Objects\n");
@@ -171,7 +306,12 @@ static void client_tester(void)
     /* Browse specified node */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelperNew_ServiceSync(gConnection, req, (void**) &resp);
+        if (cnxIndex > MAX_CONFIG || cnxIndex < 0)
+        {
+            PRINT("\nPlease enter number between [0 and %d[\n", MAX_CONFIG);
+        }
+        else
+            status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], req, (void**) &resp);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -198,7 +338,7 @@ static void client_tester(void)
             PRINT("Call to Browse service through failed with return code: 0x%08" PRIX32 "\n",
                   resp->ResponseHeader.ServiceResult);
         }
-        SOPC_EncodeableObject_Delete(resp->encodeableType, (void**) &resp);
+        SOPC_Encodeable_Delete(resp->encodeableType, (void**) &resp);
     }
     else
     {
@@ -243,6 +383,7 @@ static void* CLI_thread_exec(void* arg)
     PRINT("Command-Line interface Terminated\n");
     return NULL;
 }
+
 /***************************************************/
 void SOPC_Platform_Main(void)
 {
@@ -288,6 +429,98 @@ void SOPC_Platform_Main(void)
     SOPC_Platform_Shutdown(true);
 }
 
+/*****************************************************************/
+static SOPC_DataValue* Server_ReadSingleNode(const SOPC_NodeId* pNid, int cnxIndex)
+{
+    OpcUa_ReadRequest* request = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
+    OpcUa_ReadResponse* response = NULL;
+    SOPC_ASSERT(NULL != request);
+
+    SOPC_ReturnStatus status;
+    status = SOPC_ReadRequest_SetReadValue(request, 0, pNid, SOPC_AttributeId_Value, NULL);
+    if (status != SOPC_STATUS_OK)
+    {
+        LOG_WARNING("Read Value failed from SetReadValue with code  %d", (int) status);
+        SOPC_Free(request);
+        return NULL;
+    }
+    if (cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    {
+        PRINT("\nPlease enter number between [0 and %d[\n", MAX_CONFIG);
+        return 0;
+    }
+    status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], request, (void**) &response);
+    if (status != SOPC_STATUS_OK)
+    {
+        LOG_WARNING("Read Value failed from Service sync with code  %d", (int) status);
+        SOPC_ASSERT(NULL == response);
+        SOPC_Free(request);
+        return NULL;
+    }
+
+    SOPC_DataValue* result = NULL;
+    if (response != NULL && response->NoOfResults == 1)
+    {
+        // Allocate the result only if the response contains exactly the expected content
+        result = (SOPC_DataValue*) SOPC_Malloc(sizeof(*result));
+        SOPC_ASSERT(NULL != result);
+        SOPC_DataValue_Initialize(result);
+        SOPC_DataValue_Copy(result, &response->Results[0]);
+    }
+    OpcUa_ReadResponse_Clear(response);
+    SOPC_Free(response);
+    return result;
+}
+
+/***************************************************/
+/***
+ * Request the server to update a node value
+ * @param pNid The nodeId to modify
+ * @param pDv The DataValue to write
+ *
+ */
+static bool Server_WriteSingleNode(const SOPC_NodeId* pNid, SOPC_DataValue* pDv, int cnxIndex)
+{
+    OpcUa_WriteRequest* request = SOPC_WriteRequest_Create(1);
+    OpcUa_WriteResponse* response = NULL;
+    SOPC_ASSERT(NULL != request);
+
+    SOPC_ReturnStatus status;
+    status = SOPC_WriteRequest_SetWriteValue(request, 0, pNid, SOPC_AttributeId_Value, NULL, pDv);
+    if (status != SOPC_STATUS_OK)
+    {
+        LOG_WARNING("SetWriteValue failed with code  %d", status);
+        SOPC_Free(request);
+    }
+    else
+    {
+        if (cnxIndex > MAX_CONFIG || cnxIndex < 0)
+        {
+            PRINT("\nPlease enter number between [0 and %d[\n", MAX_CONFIG);
+            return 0;
+        }
+        status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], request, (void**) &response);
+
+        if (status != SOPC_STATUS_OK)
+        {
+            LOG_WARNING("ServiceAsync failed with code  (%d)", status);
+            SOPC_Free(request);
+        }
+        else
+        {
+            PRINT("Write sucessful\n");
+        }
+    }
+
+    return status == SOPC_STATUS_OK;
+}
+
+/*****************************************************************/
+static void Server_GetEndpoint(const SOPC_SecureConnection_Config* Config)
+{
+    PRINT(" Url : %s \r\n ", Config->scConfig.url);
+}
+
 /*---------------------------------------------------------------------------
  *                            CLI implementation
  *---------------------------------------------------------------------------*/
@@ -327,47 +560,31 @@ static int cmd_demo_info(WordList* pList)
 /***************************************************/
 static int cmd_demo_configure(WordList* pList)
 {
-    if (NULL != gConfiguration)
-    {
-        bool configureClient = false;
-        PRINT("\nClient already configured!\n");
-        PRINT("Do you want to overwrite Configuration ? [y/n]\n");
-        char* overwriteBuffer = SOPC_Shell_ReadLine();
-        char* wordList = overwriteBuffer;
-
-        const char* word = CLI_GetNextWord(&wordList);
-        if (word != NULL && word[0] != 0)
-        {
-            if (0 == strcmp(word, "y"))
-            {
-                SOPC_ClientConfigHelper_Clear();
-                SOPC_ReturnStatus status = SOPC_ClientConfigHelper_Initialize();
-                if (SOPC_STATUS_OK != status)
-                {
-                    PRINT("Failed to initialized client toolkit with status %d\n", status);
-                }
-                else
-                {
-                    configureClient = true;
-                }
-            }
-            else if (0 == strcmp(word, "n"))
-            {
-                PRINT("Configuration not modified \n");
-            }
-            else
-            {
-                PRINT("Unknown response \n Nothing done !\n");
-            }
-        }
-        SOPC_Free(overwriteBuffer);
-        if (!configureClient)
-        {
-            return 0;
-        }
-    }
-
     const char* word = CLI_GetNextWord(pList);
+    const char* cnxStr = CLI_GetNextWord(pList);
+
+    if (cnxStr[0] == 0 || word[0] == 0)
+    {
+        PRINT("usage: demo conf <address> <cnxIndex>\n");
+        PRINT("<cnxIndex> must be < %d and > 0\n", MAX_CONFIG);
+        PRINT("<cnxIndex = 0> is used for default configuration\r\n");
+        return 0;
+    }
+    int cnxIndex;
+    int n = sscanf(cnxStr, "%d", &cnxIndex);
+    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    {
+        PRINT("\nPlease enter a number between [0 and %d[\n", MAX_CONFIG);
+        return 0;
+    }
+    if (NULL != gMultiConfiguration[cnxIndex])
+    {
+        PRINT("\nClient cnxIndex %d already configured\n", cnxIndex);
+        return 0;
+    }
+    OpcUa_MessageSecurityMode security_mode;
+    security_mode = OpcUa_MessageSecurityMode_None;
+
     SOPC_Free(epURL);
     if (word[0] != 0)
     {
@@ -377,36 +594,205 @@ static int cmd_demo_configure(WordList* pList)
     {
         PRINT("Using default endpoint address '%s'\n", CONFIG_SOPC_ENDPOINT_ADDRESS);
         epURL = SOPC_strdup(CONFIG_SOPC_ENDPOINT_ADDRESS);
+        cnxIndex = 0;
     }
     SOPC_ASSERT(epURL != NULL);
 
     /* configure the connection */
-    gConfiguration = SOPC_ClientConfigHelper_CreateSecureConnection("CLI_Client", epURL, OpcUa_MessageSecurityMode_None,
-                                                                    SOPC_SecurityPolicy_None);
+    gConfiguration =
+        SOPC_ClientConfigHelper_CreateSecureConnection("CLI_Client", epURL, security_mode, SOPC_SecurityPolicy_None);
     if (NULL == gConfiguration)
     {
         PRINT("\nSOPC_ClientConfigHelper_CreateSecureConnection failed \n");
     }
     else
     {
+        gMultiConfiguration[cnxIndex] = gConfiguration;
         PRINT("\nCreated connection to %s\n", epURL);
     }
+
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_deconfigure(WordList* pList)
+{
+    const char* cnxStr = CLI_GetNextWord(pList);
+    if (cnxStr[0] == 0)
+    {
+        PRINT("usage: demo deconf <cnxIndex>\n");
+        PRINT("<cnxIndex> must be < %d and > 0\n", MAX_CONFIG);
+        return 0;
+    }
+    int cnxIndex;
+    int n = sscanf(cnxStr, "%d", &cnxIndex);
+    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    {
+        PRINT("\nPlease enter a valid number\n");
+        return 0;
+    }
+    if (NULL == gMultiConfiguration[cnxIndex])
+    {
+        PRINT("\nNo configuration on %d\n", cnxIndex);
+        return 0;
+    }
+    else
+    {
+        if (cnxIndex > MAX_CONFIG || cnxIndex < 0)
+        {
+            PRINT("\nPlease enter number between [0 and %d[\n", MAX_CONFIG);
+            return 0;
+        }
+        SOPC_ReturnStatus status = SOPC_ClientHelperNew_Disconnect(&gMultiConnection[cnxIndex]);
+        if (SOPC_STATUS_OK != status)
+        {
+            PRINT("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", status);
+        }
+        else
+        {
+            PRINT("\nDisconnected\r\n");
+        }
+        // SOPC_Free(gMultiConfiguration[cnxIndex]);
+        gMultiConfiguration[cnxIndex] = NULL;
+
+        PRINT("\nCleared configuration on cnxIndex %d\n", cnxIndex);
+    }
+
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_read(WordList* pList)
+{
+    const char* cnxStr = CLI_GetNextWord(pList);
+    const char* nodeIdC = CLI_GetNextWord(pList);
+    if (nodeIdC[0] == 0)
+    {
+        PRINT("usage: demo read <cnx_index> <nodeid> \n");
+        return 0;
+    }
+    int cnxIndex;
+    sscanf(cnxStr, "%d", &cnxIndex);
+    SOPC_NodeId nid;
+    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, (int32_t) strlen(nodeIdC));
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    SOPC_DataValue* dv = Server_ReadSingleNode(&nid, cnxIndex);
+
+    if (NULL == dv)
+    {
+        PRINT("Failed to read node '%s'\n", nodeIdC);
+        SOPC_NodeId_Clear(&nid);
+        return 1;
+    }
+
+    print_VarValue(&nid, dv);
+
+    SOPC_NodeId_Clear(&nid);
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_write(WordList* pList)
+{
+    const char* cnxStr = CLI_GetNextWord(pList);
+    const char* nodeIdC = CLI_GetNextWord(pList);
+    const char* dvC = CLI_GetNextWord(pList);
+    if (dvC[0] == 0)
+    {
+        PRINT("usage: demo write <cnx_index> <nodeid> <value>\n");
+        PRINT("<value> must be prefixed by b for a BOOL, s for a String, B for a byte,\n");
+        PRINT("        i for a INT32, u for a UINT32\n");
+        PRINT("Other formats not implemented here.\n");
+        return 0;
+    }
+    int cnxIndex;
+    int n = sscanf(cnxStr, "%d", &cnxIndex);
+    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    {
+        PRINT("\nPlease enter a valid number\n");
+        return 0;
+    }
+    SOPC_NodeId nid;
+    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, (int32_t) strlen(nodeIdC));
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_DataValue dv;
+    SOPC_DataValue_Initialize(&dv);
+
+    dv.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    dv.Value.DoNotClear = false;
+    if (dvC[0] == 's')
+    {
+        dv.Value.BuiltInTypeId = SOPC_String_Id;
+        status = SOPC_String_InitializeFromCString(&dv.Value.Value.String, dvC + 1);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
+    else if (dvC[0] == 'b')
+    {
+        dv.Value.BuiltInTypeId = SOPC_Boolean_Id;
+
+        dv.Value.Value.Boolean = (bool) atoi(dvC + 1);
+    }
+    else if (dvC[0] == 'B')
+    {
+        dv.Value.BuiltInTypeId = SOPC_Byte_Id;
+
+        dv.Value.Value.Byte = (SOPC_Byte) atoi(dvC + 1);
+    }
+    else if (dvC[0] == 'i')
+    {
+        dv.Value.BuiltInTypeId = SOPC_Int32_Id;
+
+        dv.Value.Value.Int32 = (int32_t) atoi(dvC + 1);
+    }
+    else if (dvC[0] == 'u')
+    {
+        dv.Value.BuiltInTypeId = SOPC_UInt32_Id;
+
+        dv.Value.Value.Uint32 = (uint32_t) atoi(dvC + 1);
+    }
+    else
+    {
+        PRINT("Invalid format for <value>\n");
+        return 0;
+    }
+
+    Server_WriteSingleNode(&nid, &dv, cnxIndex);
+    SOPC_NodeId_Clear(&nid);
+    SOPC_DataValue_Clear(&dv);
     return 0;
 }
 
 /***************************************************/
 static int cmd_demo_connect(WordList* pList)
 {
-    SOPC_UNUSED_ARG(pList);
+    const char* cnxStr = CLI_GetNextWord(pList);
 
-    if (NULL == gConfiguration)
+    if (cnxStr[0] == 0)
     {
-        PRINT("\nClient not configured!\n");
+        PRINT("usage: demo conn <cnxIndex>\n");
+        PRINT("<cnxIndex> must be < %d and > 0\n", MAX_CONFIG);
         return 0;
     }
+    int cnxIndex;
+    int n = sscanf(cnxStr, "%d", &cnxIndex);
+    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    {
+        PRINT("\nPlease enter a valid number\n");
+        return 0;
+    }
+    SOPC_ReturnStatus status = SOPC_ClientHelperNew_Disconnect(&gMultiConnection[cnxIndex]);
 
-    SOPC_ReturnStatus status =
-        SOPC_ClientHelperNew_Connect(gConfiguration, client_ConnectionEventCallback, &gConnection);
+    if (NULL == gMultiConfiguration[cnxIndex])
+    {
+        PRINT("\nClient not configured!\n");
+
+        return 0;
+    }
+    status = SOPC_ClientHelperNew_Connect(gMultiConfiguration[cnxIndex], client_ConnectionEventCallback,
+                                          &gMultiConnection[cnxIndex]);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -414,12 +800,65 @@ static int cmd_demo_connect(WordList* pList)
     }
     else
     {
-        client_tester();
-        status = SOPC_ClientHelperNew_Disconnect(&gConnection);
-        if (SOPC_STATUS_OK != status)
+        client_tester(cnxIndex);
+    }
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_list(WordList* pList)
+{
+    SOPC_UNUSED_ARG(pList);
+    PRINT("\nHere is the list of configured clients\r\n");
+    for (int i = 0; i < MAX_CONFIG; i++)
+    {
+        if (NULL != gMultiConfiguration[i])
         {
-            PRINT("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", status);
+            PRINT("\ncnxIndex : %d", i);
+            Server_GetEndpoint(gMultiConfiguration[i]);
         }
+    }
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_disconnect(WordList* pList)
+{
+    const char* cnxStr = CLI_GetNextWord(pList);
+
+    if (cnxStr[0] == 0)
+    {
+        PRINT("usage: demo disc <cnxIndex>\n");
+        PRINT("<cnxIndex> must be < %d and > 0\n", MAX_CONFIG);
+        return 0;
+    }
+    int cnxIndex;
+    int n = sscanf(cnxStr, "%d", &cnxIndex);
+    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    {
+        PRINT("\nPlease enter a valid number\n");
+        return 0;
+    }
+
+    if (NULL == gMultiConfiguration[cnxIndex])
+    {
+        PRINT("\nClient not configured!\n");
+        return 0;
+    }
+
+    if (NULL == gMultiConnection[cnxIndex])
+    {
+        PRINT("\nClient already disconnected!\n");
+        return 0;
+    }
+    SOPC_ReturnStatus status = SOPC_ClientHelperNew_Disconnect(&gMultiConnection[cnxIndex]);
+    if (SOPC_STATUS_OK != status)
+    {
+        PRINT("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", status);
+    }
+    else
+    {
+        PRINT("\nDisconnected\r\n");
     }
     return 0;
 }

@@ -39,4 +39,12 @@
 #define CONFIG_SOPC_ENDPOINT_ADDRESS "opc.tcp://localhost:4841"
 #endif
 
+/***************************************************/
+/**              CONFIGURATION FOR READ WRITE      */
+/***************************************************/
+#define SAFE_STRING(s) ((NULL == (s)) ? "<NULL>" : (s))
+
+#ifndef MAX_CONFIG
+#define MAX_CONFIG 16
+#endif
 #endif /* TEST_CONFIG_H_ */
