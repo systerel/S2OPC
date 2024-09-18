@@ -46,11 +46,6 @@ S2OPCDIR=$(pwd)
 SAMPLESDIR=${S2OPCDIR}/samples/embedded
 OUTDIR=${S2OPCDIR}/build_zephyr
 
-#echo "OUTDIR=$OUTDIR"
-#echo "S2OPCDIR=$S2OPCDIR"
-#echo "SAMPLESDIR=$SAMPLESDIR"
-#echo "OUTDIR=$OUTDIR"
-
 mkdir -p ${OUTDIR} || exit 2
 
 [ `whoami` != 'user' ] && echo "Unexpected user `whoami`. Is this script executed within the docker?" && exit 2
@@ -82,6 +77,7 @@ sudo rm -rf build || return  1
 
 echo "Command : 'west build -b ${BOARD} -- ${ADD_CONF} . '"
 west build -b ${BOARD} -- ${ADD_CONF} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
+chmod --recursive 777 build
 mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
 if ! [ -f build/zephyr/zephyr.bin ] ; then
   echo " ** Build ${APP} failed " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
