@@ -52,6 +52,10 @@ static SOPC_SecureConnection_Config* gMultiConfiguration[MAX_CONFIG] = {NULL};
 static SOPC_ClientConnection* gMultiConnection[MAX_CONFIG] = {NULL};
 static char* epURL = NULL;
 
+#define IS_INVALID_CFG_IDX(cnxIndex) ((cnxIndex) >= MAX_CONFIG || (cnxIndex) < 0)
+
+#define STR_INVALID_INDEX "\nInvalid index!\n"
+
 /***************************************************/
 /**               HELPER LOG MACROS                */
 /***************************************************/
@@ -295,6 +299,12 @@ static void log_UserCallback(const char* timestampUtc,
 /***************************************************/
 static void client_tester(int cnxIndex)
 {
+    if (IS_INVALID_CFG_IDX(cnxIndex))
+    {
+        PRINT(STR_INVALID_INDEX);
+        return;
+    }
+
     static const char* root_node_id = "ns=0;i=85";
     PRINT("Browse Root.Objects\n");
 
@@ -306,12 +316,8 @@ static void client_tester(int cnxIndex)
     /* Browse specified node */
     if (SOPC_STATUS_OK == status)
     {
-        if (cnxIndex > MAX_CONFIG || cnxIndex < 0)
-        {
-            PRINT("\nPlease enter number between [0 and %d[\n", MAX_CONFIG);
-        }
-        else
-            status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], req, (void**) &resp);
+        status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], req, (void**) &resp);
+        SOPC_ASSERT(NULL != resp);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -432,6 +438,12 @@ void SOPC_Platform_Main(void)
 /*****************************************************************/
 static SOPC_DataValue* Server_ReadSingleNode(const SOPC_NodeId* pNid, int cnxIndex)
 {
+    if (IS_INVALID_CFG_IDX(cnxIndex))
+    {
+        PRINT(STR_INVALID_INDEX);
+        return 0;
+    }
+
     OpcUa_ReadRequest* request = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
     OpcUa_ReadResponse* response = NULL;
     SOPC_ASSERT(NULL != request);
@@ -444,17 +456,11 @@ static SOPC_DataValue* Server_ReadSingleNode(const SOPC_NodeId* pNid, int cnxInd
         SOPC_Free(request);
         return NULL;
     }
-    if (cnxIndex > MAX_CONFIG || cnxIndex < 0)
-    {
-        PRINT("\nPlease enter number between [0 and %d[\n", MAX_CONFIG);
-        return 0;
-    }
     status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], request, (void**) &response);
     if (status != SOPC_STATUS_OK)
     {
         LOG_WARNING("Read Value failed from Service sync with code  %d", (int) status);
         SOPC_ASSERT(NULL == response);
-        SOPC_Free(request);
         return NULL;
     }
 
@@ -481,6 +487,12 @@ static SOPC_DataValue* Server_ReadSingleNode(const SOPC_NodeId* pNid, int cnxInd
  */
 static bool Server_WriteSingleNode(const SOPC_NodeId* pNid, SOPC_DataValue* pDv, int cnxIndex)
 {
+    if (IS_INVALID_CFG_IDX(cnxIndex))
+    {
+        PRINT(STR_INVALID_INDEX);
+        return 0;
+    }
+
     OpcUa_WriteRequest* request = SOPC_WriteRequest_Create(1);
     OpcUa_WriteResponse* response = NULL;
     SOPC_ASSERT(NULL != request);
@@ -494,11 +506,6 @@ static bool Server_WriteSingleNode(const SOPC_NodeId* pNid, SOPC_DataValue* pDv,
     }
     else
     {
-        if (cnxIndex > MAX_CONFIG || cnxIndex < 0)
-        {
-            PRINT("\nPlease enter number between [0 and %d[\n", MAX_CONFIG);
-            return 0;
-        }
         status = SOPC_ClientHelperNew_ServiceSync(gMultiConnection[cnxIndex], request, (void**) &response);
 
         if (status != SOPC_STATUS_OK)
@@ -572,9 +579,9 @@ static int cmd_demo_configure(WordList* pList)
     }
     int cnxIndex;
     int n = sscanf(cnxStr, "%d", &cnxIndex);
-    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    if (n == 0 || IS_INVALID_CFG_IDX(cnxIndex))
     {
-        PRINT("\nPlease enter a number between [0 and %d[\n", MAX_CONFIG);
+        PRINT(STR_INVALID_INDEX);
         return 0;
     }
     if (NULL != gMultiConfiguration[cnxIndex])
@@ -621,14 +628,13 @@ static int cmd_demo_deconfigure(WordList* pList)
     if (cnxStr[0] == 0)
     {
         PRINT("usage: demo deconf <cnxIndex>\n");
-        PRINT("<cnxIndex> must be < %d and > 0\n", MAX_CONFIG);
         return 0;
     }
     int cnxIndex;
     int n = sscanf(cnxStr, "%d", &cnxIndex);
-    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    if (n == 0 || IS_INVALID_CFG_IDX(cnxIndex))
     {
-        PRINT("\nPlease enter a valid number\n");
+        PRINT(STR_INVALID_INDEX);
         return 0;
     }
     if (NULL == gMultiConfiguration[cnxIndex])
@@ -638,11 +644,6 @@ static int cmd_demo_deconfigure(WordList* pList)
     }
     else
     {
-        if (cnxIndex > MAX_CONFIG || cnxIndex < 0)
-        {
-            PRINT("\nPlease enter number between [0 and %d[\n", MAX_CONFIG);
-            return 0;
-        }
         SOPC_ReturnStatus status = SOPC_ClientHelperNew_Disconnect(&gMultiConnection[cnxIndex]);
         if (SOPC_STATUS_OK != status)
         {
@@ -672,7 +673,13 @@ static int cmd_demo_read(WordList* pList)
         return 0;
     }
     int cnxIndex;
-    sscanf(cnxStr, "%d", &cnxIndex);
+    int n = sscanf(cnxStr, "%d", &cnxIndex);
+    if (n == 0 || IS_INVALID_CFG_IDX(cnxIndex))
+    {
+        PRINT(STR_INVALID_INDEX);
+        return 0;
+    }
+
     SOPC_NodeId nid;
     SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, (int32_t) strlen(nodeIdC));
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -710,9 +717,9 @@ static int cmd_demo_write(WordList* pList)
     }
     int cnxIndex;
     int n = sscanf(cnxStr, "%d", &cnxIndex);
-    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    if (n == 0 || IS_INVALID_CFG_IDX(cnxIndex))
     {
-        PRINT("\nPlease enter a valid number\n");
+        PRINT(STR_INVALID_INDEX);
         return 0;
     }
     SOPC_NodeId nid;
@@ -773,14 +780,13 @@ static int cmd_demo_connect(WordList* pList)
     if (cnxStr[0] == 0)
     {
         PRINT("usage: demo conn <cnxIndex>\n");
-        PRINT("<cnxIndex> must be < %d and > 0\n", MAX_CONFIG);
         return 0;
     }
     int cnxIndex;
     int n = sscanf(cnxStr, "%d", &cnxIndex);
-    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    if (n == 0 || IS_INVALID_CFG_IDX(cnxIndex))
     {
-        PRINT("\nPlease enter a valid number\n");
+        PRINT(STR_INVALID_INDEX);
         return 0;
     }
     SOPC_ReturnStatus status = SOPC_ClientHelperNew_Disconnect(&gMultiConnection[cnxIndex]);
@@ -809,7 +815,7 @@ static int cmd_demo_connect(WordList* pList)
 static int cmd_demo_list(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
-    PRINT("\nHere is the list of configured clients\r\n");
+    PRINT("\nList of configured clients:\r\n");
     for (int i = 0; i < MAX_CONFIG; i++)
     {
         if (NULL != gMultiConfiguration[i])
@@ -829,14 +835,13 @@ static int cmd_demo_disconnect(WordList* pList)
     if (cnxStr[0] == 0)
     {
         PRINT("usage: demo disc <cnxIndex>\n");
-        PRINT("<cnxIndex> must be < %d and > 0\n", MAX_CONFIG);
         return 0;
     }
     int cnxIndex;
     int n = sscanf(cnxStr, "%d", &cnxIndex);
-    if (n == 0 || cnxIndex > MAX_CONFIG || cnxIndex < 0)
+    if (n == 0 || IS_INVALID_CFG_IDX(cnxIndex))
     {
-        PRINT("\nPlease enter a valid number\n");
+        PRINT(STR_INVALID_INDEX);
         return 0;
     }
 
