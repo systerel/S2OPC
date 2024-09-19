@@ -89,7 +89,7 @@ See XML configuration schemas and examples:
 
 Also see the <a href="https://gitlab.com/systerel/S2OPC/-/wikis/Demo">demonstration wiki section</a> for explanation on how to run the server and configure it.
 
-\subsection client High-Level Client API (new) 
+\subsection client High-Level Client API
 
 The high-level client API provides functions for configuration (endpoints and security, user type) and functions to manage client execution (start/stop, service execution, etc.).
 
@@ -106,7 +106,7 @@ The main configuration functions are defined by libs2opc_client_config.h:
 
 In case the dedicated XML configuration files are not used to configure client, use the additional configuration functions located in libs2opc_client_config_custom.h.
 
-The main functions for client execution are defined by libs2opc_new_client.h:
+The main functions for client execution are defined by libs2opc_client.h:
 - ::SOPC_ClientHelper_DiscoveryServiceAsync: executes a discovery service asynchronously for a connection configuration.
 - ::SOPC_ClientHelper_DiscoveryServiceSync: executes a discovery service synchronously for a connection configuration.
 - ::SOPC_ClientHelper_Connect: establishes a connection and returns the connection instance.

@@ -84,7 +84,7 @@ Client side (e.g.: `samples/ClientServer/demo_client`):
 - Send a service on session request (read, write, browse, subscribe, etc.)
 - Send a discovery service request (getEndpoints, findServer, registerServer, etc.)
 - Automated client libraries wrapper (simplified interface, automated subscription):
-  see `src/ClientServer/frontend/client_wrapper/libs2opc_client_config.h` and `src/ClientServer/frontend/client_wrapper/libs2opc_new_client.h` (e.g. `samples/ClientServer/client_wrapper`) 
+  see `src/ClientServer/frontend/client_wrapper/libs2opc_client_config.h` and `src/ClientServer/frontend/client_wrapper/libs2opc_client.h` (e.g. `samples/ClientServer/client_wrapper`)
 - Python wrapper PyS2OPC for a client: see  `src/ClientServer/frontend/pys2opc/README.md`
 
 Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):

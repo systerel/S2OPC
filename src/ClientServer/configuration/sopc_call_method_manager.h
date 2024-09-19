@@ -55,6 +55,7 @@ typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
  * \param nbOutputArgs    a valid pointer in which the number of output argument is written by the function
  * \param outputArgs      a valid pointer to an ::SOPC_Variant[] in which the output arguments are allocated and written
  *                        by the function
+ * \param param           user defined parameter provided to ::SOPC_MethodCallManager_AddMethod
  *
  * \return status code of the function. Should be SOPC_STATUS_OK if succeeded.
  */

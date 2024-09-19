@@ -226,6 +226,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(SOPC_Cre
 /**
  * \brief Type of callback to provide to receive asynchronous local service response
  *
+ * \param type         The ::SOPC_EncodeableType of the provided \p response
  * \param response     An asynchronous response to a local service request sent using
  *                     ::SOPC_ServerHelper_LocalServiceAsync (see authorized requests).
  *                     Response will be a pointer to one of the following types:

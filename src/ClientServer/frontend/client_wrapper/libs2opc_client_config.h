@@ -113,7 +113,8 @@ const char* SOPC_ClientConfigHelper_GetUserIdFromConfig(const SOPC_SecureConnect
 /**
  * \brief Type of callback to provide asynchronous service response
  *
- * \param response     An asynchronous response to a local service request sent using
+ * \param type         The ::SOPC_EncodeableType of the provided response \p response
+ * \param response     An asynchronous response to a service request sent using
  *                     ::SOPC_ClientHelper_ServiceAsync
  *                     Response will be a pointer to the service response corresponding to sent request:
  *                     \li ::OpcUa_ReadResponse
