@@ -308,7 +308,7 @@ build-zephyr:
   image: docker pull docker.aix.systerel.fr/c838/zephyr_build:v3.6.0-b@sha256:13069418dd7b0317f93f02986b01f285f0f66956670f2fecded9850ace85d734 # digest of zephyr_build :v3.6.0-b
   needs: []
   script:
-    - 'ln -s $(pwd) /zephyrproject/s2opc'
+    - 'ln -s $(pwd) /zephyrproject/modules/lib/s2opc'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_posix_64 cli_pubsub_server'

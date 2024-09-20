@@ -53,7 +53,7 @@ docker inspect ${ZEPHYR_DIGEST} 2>/dev/null >/dev/null  || fail "Docker image no
 
 echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
 $IS_INTERACTIVE && echo "Running an interactive session on ${ZEPHYR_DIGEST}" && \
-    (docker run -it --rm -v ${HOST_DIR}:/zephyrproject/s2opc -w /zephyrproject/s2opc ${ZEPHYR_DIGEST})
+    (docker run -it --rm -v ${HOST_DIR}:/zephyrproject/modules/lib/s2opc -w /zephyrproject/modules/lib/s2opc ${ZEPHYR_DIGEST})
 $IS_INTERACTIVE && exit 1
 
 function build() {
@@ -64,7 +64,7 @@ function build() {
   export ADD_CONF=$*
   echo "Starting docker to build ${APP} for ${BOARD}"
 
-  (docker run --rm -v ${HOST_DIR}:/zephyrproject/s2opc -w /zephyrproject/s2opc ${ZEPHYR_DIGEST}\
+  (docker run --rm -v ${HOST_DIR}:/zephyrproject/modules/lib/s2opc -w /zephyrproject/modules/lib/s2opc ${ZEPHYR_DIGEST}\
      samples/embedded/platform_dep/zephyr/ci/${SCRIPT} ${BOARD} ${APP} ${ADD_CONF})&
   wait $!
   echo "Result = $?"
