@@ -360,14 +360,12 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
 
     socketImpl->sock = socket(addr->addrInfo.ai_family, addr->addrInfo.ai_socktype, addr->addrInfo.ai_protocol);
 
-    if (socketImpl->sock != -1)
+    if (socketImpl->sock < 0)
     {
-        status = Socket_Configure(socketImpl->sock, setNonBlocking);
+        SOPC_Free(socketImpl);
+        return SOPC_STATUS_NOK;
     }
-    else
-    {
-        status = SOPC_STATUS_NOK;
-    }
+    status = Socket_Configure(socketImpl->sock, setNonBlocking);
 
     if (SOPC_STATUS_OK == status)
     {

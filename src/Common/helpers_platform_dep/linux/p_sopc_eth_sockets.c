@@ -405,6 +405,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* 
     socketImpl->sock = socket(sendAddrInfo->addr.sll_family, SOCK_RAW, sendAddrInfo->addr.sll_protocol);
     if (-1 == socketImpl->sock)
     {
+        SOPC_Free(socketImpl);
         return SOPC_STATUS_NOK;
     }
 
