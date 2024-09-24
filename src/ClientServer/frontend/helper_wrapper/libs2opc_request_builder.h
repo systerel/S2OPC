@@ -688,7 +688,7 @@ OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_Create(double re
  * \param nodeIdsToMonitor Array of node ids to monitor (for attribute Value by default)
  * \param ts               Define the timestamps (source, server) to be returned for any monitored item.
  */
-OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefault(uint32_t subscriptionId,
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefault(const uint32_t subscriptionId,
                                                                                   size_t nbMonitoredItems,
                                                                                   const SOPC_NodeId* nodeIdsToMonitor,
                                                                                   OpcUa_TimestampsToReturn ts);

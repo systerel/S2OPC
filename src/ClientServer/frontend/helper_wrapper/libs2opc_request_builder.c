@@ -1111,7 +1111,7 @@ OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_CreateDefault(vo
                                                  true, 0);
 }
 
-OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint32_t subscriptionId,
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(const uint32_t subscriptionId,
                                                                            size_t nbMonitoredItems,
                                                                            OpcUa_TimestampsToReturn ts)
 {
@@ -1216,7 +1216,7 @@ SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(
     return status;
 }
 
-OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefault(uint32_t subscriptionId,
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefault(const uint32_t subscriptionId,
                                                                                   size_t nbMonitoredItems,
                                                                                   const SOPC_NodeId* nodeIdsToMonitor,
                                                                                   OpcUa_TimestampsToReturn ts)
