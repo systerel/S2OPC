@@ -687,6 +687,8 @@ OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_Create(double re
  * \param nbMonitoredItems Number of monitored items to create
  * \param nodeIdsToMonitor Array of node ids to monitor (for attribute Value by default)
  * \param ts               Define the timestamps (source, server) to be returned for any monitored item.
+ *
+ * \return a new allocated CreateMonitoredItems request in case of success, NULL otherwise.
  */
 OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefault(const uint32_t subscriptionId,
                                                                                   size_t nbMonitoredItems,
@@ -716,6 +718,9 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefaul
  *                         OPC UA specification</a>.
  *
  * \param ts               Define the timestamps (source, server) to be returned for any monitored item.
+ *
+ * \return allocated CreateMonitoredItems request in case of success, NULL in case of failure
+ *         (invalid parameters or out of memory)
  */
 OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings(
     uint32_t subscriptionId,
