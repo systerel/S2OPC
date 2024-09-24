@@ -81,11 +81,11 @@ if [ -z "${GET_BOARD}" ] && [ -z "${GET_APP}" ]; then
     build stm32h735g_disco cli_client
     build nucleo_h745zi_q_m7 cli_client -DCONFIG_NET_GPTP=y
     build mimxrt1064_evk cli_pubsub_server
-    build native_posix_64 cli_pubsub_server  -DCONFIG_SOPC_CRYPTO_LIB_NAME=\"nocrypto\" -DCONFIG_MBEDTLS=n
-    build native_posix_64 cli_pubsub_server
-    build native_posix_64 cli_client
+    build stm32h747i_disco_m7 cli_pubsub_server -DCONFIG_SOPC_CRYPTO_LIB_NAME=\"nocrypto\" -DCONFIG_MBEDTLS=n
+    build stm32h747i_disco_m7 cli_pubsub_server
+
     # Check results
-    EXPECTED_FILES="cli_client_stm32h735g_disco.bin cli_pubsub_server_mimxrt1064_evk.bin  cli_pubsub_server_native_posix_64.bin cli_client_native_posix_64.bin"
+    EXPECTED_FILES="cli_client_stm32h735g_disco.bin cli_client_nucleo_h745zi_q_m7.bin cli_pubsub_server_mimxrt1064_evk.bin  cli_pubsub_server_stm32h747i_disco_m7.bin"
     RESULT=true
     if ! ${RESULT} ; then
         echo "Build failed. To run docker manually: $0 -i"
