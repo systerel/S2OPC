@@ -156,7 +156,7 @@ class SOPC_Failure(Exception):
     """
     def __init__(self, message: str,  status: ReturnStatus|None = None):
         super().__init__(message)
-        self._status, self._message = status, message
+        self._message, self._status = message, status
 
     def what(self):
         """
@@ -172,6 +172,29 @@ class ClientConnectionFailure(Exception):
     It is raised when an attempt to use the closed connection it is made.
     """
     pass
+
+class ServiceFailure(Exception):
+    """
+    Failure sub class to manage service failure
+    """
+    def __init__(self, message: str,  status: StatusCode|None = None):
+        super().__init__(message)
+        self._message, self._status = message, status
+
+    def what(self):
+        """
+        Return error message
+        """
+        if self._status is None:
+            return self._message
+        return '{} (Code {})'.format(self._message, StatusCode.get_name_from_id(self._status))
+
+class ServiceFault(ServiceFailure):
+    """
+    ServiceFailure sub class to manage service fault
+    """
+    def __init__(self, message: str,  status: StatusCode|None = None):
+        super().__init__(message, status)
 
 class PyS2OPC:
     """
@@ -521,11 +544,15 @@ class AsyncResponse(Response):
         Returns the response to the request if there is an available response (received).
         Otherwise returns None.
         The response type depends on the service used: `ReadResponse`, `WriteResponse`, `BrowseResponse`.
+        Note: if an service failure occurs, raise an `Exception` sub class : `ServiceFailure`
         """
         asyncReqHdlr: _AsyncRequestHandler = self._asyncReqHdlr
         cdef _Request request = asyncReqHdlr._dRequestContext
         if request._eventResponseReceived.is_set():
-            return asyncReqHdlr._dResponseContext._parse_generic_response()
+            if asyncReqHdlr._dServiceException is not None: # Service failed
+                raise asyncReqHdlr._dServiceException
+            if asyncReqHdlr._dResponseContext is not None:
+                return asyncReqHdlr._dResponseContext._parse_generic_response()
         return None
 
 cdef class _AsyncRequestHandler:
@@ -536,10 +563,13 @@ cdef class _AsyncRequestHandler:
     # Object variable #
     cdef _Request _dRequestContext
     cdef Response _dResponseContext
+    cdef Exception _dServiceException
+    """Handle service failure exception"""
 
     def __cinit__(self):
         self._dRequestContext = None
         self._dResponseContext = None
+        self._dServiceException = None
 
     cdef Response _send_generic_request(self, isLocalService: bool, SOPC_ClientConnection* connection, request: _Request, bWaitResponse: bool):
         """
@@ -600,7 +630,11 @@ cdef class _AsyncRequestHandler:
 
     def _wait_for_response(self, request: _Request) -> (Response | None):
         request._eventResponseReceived.wait()
-        return self._dResponseContext._parse_generic_response()
+        if self._dServiceException is not None: # Service failed
+            raise self._dServiceException
+        if self._dResponseContext is not None:
+            return self._dResponseContext._parse_generic_response()
+        return None
 
     cdef void _on_response(self, SOPC_EncodeableType* type, const void* response, uintptr_t userContext, float timestamp):
         """
@@ -614,20 +648,32 @@ cdef class _AsyncRequestHandler:
         hence it is the most accurate instant when the response was received by the Python layer.
 
         Finish by setting the eventResponseReceived handler.
+
+        Note: if an service failure occurs, store an `Exception` sub class : `ServiceFailure` or `ServiceFault`.
+        This exception will be raised in the `_AsyncRequestHandler._wait_for_response` function
+        or in the `AsyncResponse.get_response` function in case of asynchronous response.
         """
         cdef void* response_cpy = NULL
-        status = SOPC_EncodeableObject_Create(type, &response_cpy)
-        if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
-            raise SOPC_Failure('_on_response: SOPC_EncodeableObject_Create failed', status)
-        status = SOPC_EncodeableObject_Copy(type, response_cpy, response)
-        if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
-            raise SOPC_Failure('_on_response: SOPC_EncodeableObject_Copy failed', status)
+        cdef _Request request = self._dRequestContext
+        cdef OpcUa_ServiceFault* serviceFault = NULL
 
-        if type == &OpcUa_ReadResponse_EncodeableType or type == &OpcUa_WriteResponse_EncodeableType or type == &OpcUa_BrowseResponse_EncodeableType:
+        if type == NULL or response == NULL:
+            self._dServiceException = ServiceFailure('ServiceFailure : No response from server (maybe disconnected ?)', StatusCode.BadCommunicationError)
+        elif type == &OpcUa_ServiceFault_EncodeableType:
+            serviceFault = <OpcUa_ServiceFault*> response
+            self._dServiceException = ServiceFault('ServiceFault received from server', serviceFault.ResponseHeader.ServiceResult)
+        elif type == &OpcUa_ReadResponse_EncodeableType or type == &OpcUa_WriteResponse_EncodeableType or type == &OpcUa_BrowseResponse_EncodeableType:
+            status = SOPC_EncodeableObject_Create(type, &response_cpy)
+            if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
+                raise SOPC_Failure('_on_response: SOPC_EncodeableObject_Create failed', status)
+            status = SOPC_EncodeableObject_Copy(type, response_cpy, response)
+            if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
+                raise SOPC_Failure('_on_response: SOPC_EncodeableObject_Copy failed', status)
             # push response and userContext in its class (Response)
             self._dResponseContext = Response.c_new_response(response_cpy, userContext)
+        else:
+            self._dServiceException = ServiceFailure('ServiceFailure : Response type does not match the type of the sent request', StatusCode.BadUnexpectedError)
 
-        cdef _Request request = self._dRequestContext
         request._eventResponseReceived.set()
 
 
@@ -1097,8 +1143,6 @@ cdef void _callback_client_connection_event(SOPC_ClientConnection* conn, SOPC_Cl
         connectHandler._connected = False
 
 cdef void _callback_ClientServiceAsyncResp(SOPC_EncodeableType* type, const void* response, uintptr_t userContext) noexcept with gil:
-    if type == NULL or response == NULL:
-        return # TODO : Manage this case (no response from server)
     asyncReqHandler: _AsyncRequestHandler = BaseClientConnectionHandler._req_handler.pop(userContext)
     timestamp = time.time()
     asyncReqHandler._on_response(type, response, userContext, timestamp)
