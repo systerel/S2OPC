@@ -361,7 +361,7 @@ class ConnectionHandler(BaseClientConnectionHandler):
 
 
 if __name__ == '__main__':
-    logger_ = TapLogger('validation_pys2opc.tap')
+    logger_ = TapLogger('validation_pys2opc_client.tap')
 
     with PyS2OPC_Client.initialize():
         configs = PyS2OPC_Client.load_client_configuration_from_file(os.path.join('S2OPC_Client_Test_Config.xml'))

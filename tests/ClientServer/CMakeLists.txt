@@ -675,21 +675,33 @@ if(WITH_PYS2OPC)
   set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/pys2opc")
   # TODO: This variable must be the one defined in ../src/ClientServer/frontend/pys2opc/CMakeLists.txt
   set(PYS2OPC_TEST_INSTALL_PATH "${CMAKE_BINARY_DIR}/pys2opc_install")
+  set(WITH_SERVER ON)
 
   # Validation test
   function(pys2opc_validation_test name)
     get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
     set(test_name "validation::${name}")
-    add_test(NAME "${test_name}"
-      WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-      COMMAND
-      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-      "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
-      "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${no_ext_name}"
-      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/${name}"
-      )
+    if(WITH_SERVER)
+      add_test(NAME "${test_name}"
+        WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+        COMMAND
+        "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+        "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
+        "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${no_ext_name}"
+        "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/${name}"
+        )
+    else()
+      add_test(NAME "${test_name}"
+        WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+        COMMAND "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/${name}"
+        )
+    endif()
     # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
-    set(new_env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/interop_tools"
+    # new_env (PYTHONPATH) get (in order) : pys2opc, common.py, wait_server.py, utils.py
+    set(new_env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}\
+${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/interop_tools\
+${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/scripts\
+${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/samples/ClientServer/pys2opc/client"
       "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
     if(WITH_ASAN OR WITH_UBSAN OR WITH_TSAN)
       set(new_env ${new_env} "LD_PRELOAD=/usr/local/lib64/libasan.so")
@@ -700,6 +712,8 @@ if(WITH_PYS2OPC)
   endfunction()
 
   pys2opc_validation_test("pys2opc_client.py")
+  set(WITH_SERVER OFF)
+  pys2opc_validation_test("pys2opc_server.py")
 endif()
 
 ## S2OPC fuzzing tests: to be run manually ##
