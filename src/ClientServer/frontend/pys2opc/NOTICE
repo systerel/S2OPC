@@ -1,1 +1,14 @@
-../../../../NOTICE
+S2OPC - Safe and Secure OPC-UA
+Copyright 2016-2020 Systerel
+
+Unless specifically indicated otherwise in a file, S2OPC
+files are licensed under the Apache License Version 2.0, as
+can be found in `LICENSE`. The mbedtls library is also
+distributed under the Apache 2.0 license.
+OPC UA Stack code generated with the OPC foundation code
+generator tool (UA-ModelCompiler) is distributed under the
+OPC Foundation MIT License 1.00.
+In demo client samples the argparse argument parsing code
+ with a MIT-style license is used.
+
+For more information, please visit https://s2opc.com.

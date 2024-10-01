@@ -187,6 +187,8 @@ find . -name "*.sh" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_SH || { echo 
 find . -type f -name "make-*" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_SH || { echo 'Expected header:' ; cat $HEADER_SH ; err=1 ; }
 find . -name "*.xsl" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_XSL || { echo 'Expected header:' ; cat $HEADER_XSL ; err=1 ; }
 find . -name "*.defs" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_DEFS || { echo 'Expected header: '; cat $HEADER_DEFS ; err=1 ; }
+diff -q LICENSE src/ClientServer/frontend/pys2opc/LICENSE || { echo 'src/ClientServer/frontend/pys2opc/LICENSE is not up-to-date with expected LICENSE: '; cat LICENSE ; err=1 ; }
+diff -q NOTICE src/ClientServer/frontend/pys2opc/NOTICE || { echo 'src/ClientServer/frontend/pys2opc/NOTICE is not up-to-date with expected NOTICE: '; cat NOTICE ; err=1 ; }
 
 if [[ 0 -eq $err ]] ; then
     echo "All copyrights are OK"
