@@ -514,10 +514,13 @@ class NodesetMerger(NSFinder):
         ns0nidPattern = re.compile('i=([0-9]+)')
         # Find Node Ids greater than intMaxId in NS 0
         nodes_to_remove = []
+        # Some nodes cannot be removed as they are expected by later operations
+        nodes_to_keep = [2253, 2254, 2255]
         for _, nid in self._iter_nid_nodes():
             match = ns0nidPattern.match(nid)
+            nidI = int(match.group(1))
             if match:
-                if int(match.group(1)) > intMaxId:
+                if nidI > intMaxId and nidI not in nodes_to_keep:
                     nodes_to_remove.append(nid)
         # Delete the concerned nodes and references associated
         self._remove_nids_and_refs(nodes_to_remove)
