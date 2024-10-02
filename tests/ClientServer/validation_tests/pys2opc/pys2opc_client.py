@@ -27,7 +27,8 @@ TODO: get endpoints,
 makes a read,
 makes a write,
 check that the change in value is received through the subscription,
-browse some nodes.
+browse some nodes,
+callMethod (counter_testObject).
 
 Does this again with two or more connections in parallel.
 
@@ -41,7 +42,7 @@ import threading
 import os
 import sys
 
-from pys2opc import PyS2OPC_Client, BaseClientConnectionHandler, VariantType, AttributeId, NodeClass, DataValue, StatusCode, SOPC_Failure
+from pys2opc import PyS2OPC_Client, BaseClientConnectionHandler, VariantType, AttributeId, NodeClass, DataValue, StatusCode, SOPC_Failure, Variant
 
 from tap_logger import TapLogger
 # WARNING, the following import makes a dependency on freeopcua
@@ -342,6 +343,48 @@ class ConnectionHandler(BaseClientConnectionHandler):
         backwardNodes = set(ref.nodeId for ref in result.references if not ref.isForward)
         self.logger.add_test('Backward is correct', {backwardNid} == backwardNodes)
 
+    def _test_CallMethodResult(self, objectNodeId: str, methodNodeId: str, inputArgList: list[Variant] = [], variantListOutputExpected: list[Variant] = []):
+        """
+        Generic test CallMethod function.
+        Tests method result status and expected output (compare method result output variant with `variantListOutputExpected`)
+        """
+        resCallMethod = self.call_method(objectNodeId=objectNodeId, methodNodeId=methodNodeId, inputArgList=inputArgList)
+        self.logger.add_test('Result of CallMethod status code for method node {}.'.format(methodNodeId), resCallMethod.is_ok())
+        self.logger.add_test('Counter values correpond to expected value. Expected = {}. Result = {}.'
+                             .format(variantListOutputExpected, resCallMethod.outputResults), variantListOutputExpected == resCallMethod.outputResults)
+
+    def _test_counter_testObject(self):
+        """
+        Tests `GetCounter` and `AddToCounter` method
+        """
+        varAdd2 = Variant(2, VariantType.UInt32)
+        # Read `Counter` node to setup expected variant
+        resDV: DataValue = self.read_nodes(nodeIds=['ns=1;s=TestObject_Counter'])
+        varExpected = resDV.results[0].variant
+
+        # Test GetCounter method (check that we get the same value as the one read previously)
+        self._test_CallMethodResult("ns=1;s=TestObject", "ns=1;s=MethodO", [], [varExpected])
+        # Test AddToCounter method (add 2)
+        self._test_CallMethodResult("ns=1;s=TestObject", "ns=1;s=MethodI", [varAdd2], [])
+        varExpected.value = varExpected.value + 2
+        # Check with GetCounter method that 2 really has been add to `Counter` node.
+        self._test_CallMethodResult("ns=1;s=TestObject", "ns=1;s=MethodO", [], [varExpected])
+
+        # Test bad argument type input
+        varBadType = Variant(2, VariantType.Int32)
+        BadTypeMismatch: int = 0x80740000
+        resCallMethod = self.call_method("ns=1;s=TestObject", "ns=1;s=MethodI", [varBadType])
+        self.logger.add_test('Calling method {} with invalid argument type fails'.format("ns=1;s=MethodI"), not(resCallMethod.is_ok()))
+        self.logger.add_test('CallMethod fails with BadTypeMismatch code. Expected = 0x{:08X}. Result = 0x{:08X}.'
+                             .format(resCallMethod.inputArgResults[0], BadTypeMismatch), resCallMethod.inputArgResults[0] == BadTypeMismatch)
+
+    def test_callMethod(self):
+        """
+        Tests Call requests.
+        """
+        self.logger.begin_section('CallMethod Tests -')
+        self._test_counter_testObject()
+
     def configure_subscription(self):
         ConnectionHandler.sub_count = ConnectionHandler.sub_count + 1
         nids = []
@@ -376,6 +419,8 @@ if __name__ == '__main__':
                 connection.test_write()
                 print('Browse Tests')
                 connection.test_browse()
+                print('CallMethod Tests')
+                connection.test_callMethod()
 
         # Do the read/write with multiple connections
         print('Asynch Write/Reads on new connections')
