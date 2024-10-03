@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include <fcntl.h>
+#include <zephyr/posix/fcntl.h>
 #include <stdlib.h>
 
 #include <zephyr/kernel.h>
@@ -66,7 +66,7 @@ static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo
     if (SOPC_STATUS_OK == status && setReuseAddr)
     {
         const int trueInt = true;
-        setOptStatus = setsockopt(socketImpl->sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+        setOptStatus = zsock_setsockopt(socketImpl->sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
         if (setOptStatus < 0)
         {
             status = SOPC_STATUS_NOK;
@@ -89,7 +89,7 @@ static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo
         size_t ifr_name_len = sizeof(ifr.ifr_name);
         strncpy(ifr.ifr_name, interfaceName, ifr_name_len);
         ifr.ifr_name[ifr_name_len - 1] = '\0';
-        setOptStatus = setsockopt(socketImpl->sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &ifr, sizeof(struct ifreq));
+        setOptStatus = zsock_setsockopt(socketImpl->sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &ifr, sizeof(struct ifreq));
         if (setOptStatus < 0)
         {
             status = SOPC_STATUS_NOK;
@@ -257,7 +257,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(SOPC_Socket sock, SOPC_Buffer* buf
     SOPC_Buffer_Reset(buffer);
 
     S2OPC_TEMP_FAILURE_RETRY(
-        recv_len, recvfrom(sock->sock, buffer->data, buffer->maximum_size, 0, (struct sockaddr*) &saddr, &slen));
+        recv_len, zsock_recvfrom(sock->sock, buffer->data, buffer->maximum_size, 0, (struct sockaddr*) &saddr, &slen));
 
     if (recv_len >= 0)
     {

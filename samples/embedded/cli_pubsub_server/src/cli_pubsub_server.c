@@ -890,7 +890,7 @@ void SOPC_Platform_Main(void)
     SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerHelper_StartServer failed");
 
     // Check for server status after some time. (Start is asynchronous)
-    SOPC_Sleep(100);
+    SOPC_Sleep(5000);
     SOPC_ASSERT(SOPC_Atomic_Int_Get(&gStopped) == 0 && "Server failed to start.");
 
     // Setup default values of Cache using AddressSpace content

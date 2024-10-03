@@ -18,7 +18,7 @@
  */
 
 #include <errno.h>
-#include <fcntl.h>
+#include <zephyr/posix/fcntl.h>
 #include <stdlib.h>
 
 #include <zephyr/kernel.h>
@@ -216,7 +216,7 @@ SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(SOPC_Socket sock)
     int res = -1;
     if (NULL != result && NULL != sockAddrStorage)
     {
-        res = getpeername(sock->sock, (struct sockaddr*) sockAddrStorage, &sockAddrStorageLen);
+        res = zsock_getpeername(sock->sock, (struct sockaddr*) sockAddrStorage, &sockAddrStorageLen);
         if (0 == res)
         {
             result->address.ai_family = sockAddrStorage->ss_family;
@@ -265,7 +265,7 @@ SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_Address* addr
     }
     if (SOPC_STATUS_OK == status)
     {
-        int res = getnameinfo(addr->address.ai_addr, addr->address.ai_addrlen, hostRes, NI_MAXHOST, serviceRes,
+        int res = zsock_getnameinfo(addr->address.ai_addr, addr->address.ai_addrlen, hostRes, NI_MAXHOST, serviceRes,
                               NI_MAXSERV, flags);
         if (0 != res)
         {
@@ -301,8 +301,8 @@ void SOPC_Socket_Clear(SOPC_Socket* sock)
 
 static inline SOPC_ReturnStatus P_SOCKET_SetNonBlocking(int sock)
 {
-    int fl = fcntl(sock, F_GETFL, 0);
-    int setOptStatus = fcntl(sock, F_SETFL, fl | O_NONBLOCK);
+    int fl = zsock_fcntl(sock, F_GETFL, 0);
+    int setOptStatus = zsock_fcntl(sock, F_SETFL, fl | O_NONBLOCK);
     if (setOptStatus == 0)
     {
         return SOPC_STATUS_OK;
@@ -396,7 +396,7 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
     else
     {
         int res = -1;
-        S2OPC_TEMP_FAILURE_RETRY(res, close(socketImpl->sock));
+        S2OPC_TEMP_FAILURE_RETRY(res, zsock_close(socketImpl->sock));
         SOPC_Free(socketImpl);
         *sock = SOPC_INVALID_SOCKET;
     }
@@ -661,7 +661,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(SOPC_Socket sock, const uint8_t* data, uint3
 
     ssize_t res = 0;
     errno = 0;
-    S2OPC_TEMP_FAILURE_RETRY(res, send(sock->sock, data, count, 0));
+    S2OPC_TEMP_FAILURE_RETRY(res, zsock_send(sock->sock, data, count, 0));
 
     SOCKETS_DEBUG(" ** send Sock %d \n", sock->sock);
     SOPC_ReturnStatus result = SOPC_STATUS_NOK;
