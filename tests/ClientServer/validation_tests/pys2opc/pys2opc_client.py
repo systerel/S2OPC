@@ -42,7 +42,7 @@ import threading
 import os
 import sys
 
-from pys2opc import PyS2OPC_Client, BaseClientConnectionHandler, VariantType, AttributeId, NodeClass, DataValue, StatusCode, SOPC_Failure, Variant
+from pys2opc import PyS2OPC_Client, BaseClientConnectionHandler, VariantType, AttributeId, NodeClass, DataValue, StatusCode, SOPC_Failure, Variant, ServiceFailure, AsyncResponse
 
 from tap_logger import TapLogger
 # WARNING, the following import makes a dependency on freeopcua
@@ -343,6 +343,41 @@ class ConnectionHandler(BaseClientConnectionHandler):
         backwardNodes = set(ref.nodeId for ref in result.references if not ref.isForward)
         self.logger.add_test('Backward is correct', {backwardNid} == backwardNodes)
 
+    def _test_serviceFailure_NothingToDo(self):
+        """
+        Tests ServiceFailure (BadNothingToDo) in both (A)Synchronous ways.
+        To do tihs, simply perform a read service without any nodes as arguments.
+        """
+        # Synchronous service
+        BadNothingToDo: int = 0x800F0000
+        res_failure: int = 0
+        try:
+            self.read_nodes(nodeIds=[]) # Service failure (because NothingToDo)
+        except ServiceFailure as sf:
+            res_failure = sf.status
+        self.logger.add_test('(Synchronous) Service failure with BadNothingToDo code. Expected = 0x{:08X}. Result = 0x{:08X}.'
+                             .format(res_failure, BadNothingToDo), res_failure == BadNothingToDo)
+        # Asynchronous service
+        res_failure = 0
+        resp_received = None
+        try:
+            resp_async: AsyncResponse = self.read_nodes(nodeIds=[], bWaitResponse=False)
+            t0 = time.time()
+            while (resp_received is None and (time.time() - t0) < 1): # TimeOut wait async response = 1s
+                time.sleep(.05)
+                resp_received = resp_async.get_response()
+        except ServiceFailure as sf:
+            res_failure = sf.status
+        self.logger.add_test('(Asynchronous) Service failure with BadNothingToDo code. Expected = 0x{:08X}. Result = 0x{:08X}.'
+                             .format(res_failure, BadNothingToDo), res_failure == BadNothingToDo)
+
+    def test_serviceFailure(self):
+        """
+        Tests Service Failure.
+        """
+        self.logger.begin_section('ServiceFailure Tests -')
+        self._test_serviceFailure_NothingToDo()
+
     def _test_CallMethodResult(self, objectNodeId: str, methodNodeId: str, inputArgList: list[Variant] = [], variantListOutputExpected: list[Variant] = []):
         """
         Generic test CallMethod function.
@@ -419,6 +454,8 @@ if __name__ == '__main__':
                 connection.test_write()
                 print('Browse Tests')
                 connection.test_browse()
+                print('ServiceFailure Tests')
+                connection.test_serviceFailure()
                 print('CallMethod Tests')
                 connection.test_callMethod()
 
