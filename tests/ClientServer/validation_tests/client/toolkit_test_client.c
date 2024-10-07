@@ -197,7 +197,6 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
 
     if (SOPC_IsGoodStatus(status) && &OpcUa_DataChangeNotification_EncodeableType == notificationType)
     {
-        test_results_set_service_result(true);
         const OpcUa_DataChangeNotification* notifs = (const OpcUa_DataChangeNotification*) notification;
         for (uint32_t i = 0; i < nbNotifElts; i++)
         {
@@ -215,7 +214,10 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                 expectedResult = false;
             }
         }
-        test_results_set_service_result(expectedResult);
+        if (expectedResult)
+        {
+            test_results_set_service_result(true);
+        }
     }
 }
 
@@ -610,6 +612,9 @@ static SOPC_ReturnStatus test_non_reg_issue_1428_create_MI(SOPC_ClientHelper_Sub
 
 static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
 {
+    // Reset expected result
+    test_results_set_service_result(false);
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_CreateSubscriptionRequest* createSubReq = SOPC_CreateSubscriptionRequest_Create(500, 6, 2, 1000, true, 0);
     if (TEST_SUB_SERVICE_SUPPORTED)
@@ -713,9 +718,6 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
 
         if (SOPC_STATUS_OK == status)
         {
-            // Reset expected result
-            test_results_set_service_result(false);
-
             /* Wait until expected notifications are received */
             status = wait_service_response();
         }
