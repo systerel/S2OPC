@@ -22,6 +22,7 @@
  * \brief Interface implementation to manage the TrustListType.
  */
 #include <inttypes.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "opcua_statuscodes.h"
@@ -29,6 +30,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_date_time.h"
+#include "sopc_encodeable.h"
 #include "sopc_helper_encode.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -37,6 +39,7 @@
 #include "sopc_pki_struct_lib_internal.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_trustlist.h"
+#include "sopc_trustlist_internal_helper.h"
 
 /*---------------------------------------------------------------------------
  *                             Constants
@@ -55,76 +58,140 @@
  *---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------
- *                      Prototype of static functions
+ *                       Public Trustlist helper functions
  *---------------------------------------------------------------------------*/
+OpcUa_TrustListDataType* SOPC_TrustList_DecodeTrustListData(SOPC_ByteString* trustListData)
+{
+    // Check parameter
+    SOPC_ASSERT(trustListData != NULL);
 
-static SOPC_ReturnStatus trustlist_attach_certs_to_raw_arrays(const SOPC_TrLst_Mask specifiedLists,
-                                                              const SOPC_CertificateList* pTrustedCerts,
-                                                              SOPC_SerializedCertificate** pRawTrustedCertArray,
-                                                              uint32_t* pLenTrustedCertArray,
-                                                              const SOPC_CRLList* pTrustedCrls,
-                                                              SOPC_SerializedCRL** pRawTrustedCrlArray,
-                                                              uint32_t* pLenTrustedCrlArray,
-                                                              const SOPC_CertificateList* pIssuerCerts,
-                                                              SOPC_SerializedCertificate** pRawIssuerCertArray,
-                                                              uint32_t* pLenIssuerCertArray,
-                                                              const SOPC_CRLList* pIssuerCrls,
-                                                              SOPC_SerializedCRL** pRawIssuerCrlArray,
-                                                              uint32_t* pLenIssuerCrlArray);
+    SOPC_Buffer* pToDecode = SOPC_Buffer_Attach(trustListData->Data, (uint32_t) trustListData->Length);
+    if (NULL == pToDecode)
+    {
+        return NULL;
+    }
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(pToDecode, 0);
+    OpcUa_TrustListDataType* pTrustList = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        pTrustList = SOPC_Calloc(1, sizeof(*pTrustList));
+        OpcUa_TrustListDataType_Initialize(pTrustList);
+        status = (NULL != pTrustList ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY);
+    }
+    /* Decode the byteString */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_EncodeableObject_Decode(pTrustList->encodeableType, pTrustList, pToDecode, 0);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("TrustList:%s:Decode: function failed\n", pTrustList->encodeableType->TypeName);
+        }
+    }
+    if (SOPC_STATUS_OK != status && NULL != pTrustList)
+    {
+        SOPC_Encodeable_Delete(pTrustList->encodeableType, (void**) &pTrustList);
+    }
 
-static SOPC_ReturnStatus trustlist_attach_raw_array_to_bs_array(const void* pArray,
-                                                                uint32_t lenArray,
-                                                                SOPC_ByteString** pByteStringArray,
-                                                                bool bIsCRL,
-                                                                uint32_t* pByteLenTot);
+    SOPC_Free(pToDecode);
+    return pTrustList;
+}
 
-static SOPC_ReturnStatus trustlist_attach_raw_arrays_to_bs_arrays(
-    const SOPC_SerializedCertificate* pRawTrustedCertArray,
-    const uint32_t lenTrustedCertArray,
-    SOPC_ByteString** pBsTrustedCertArray,
-    const SOPC_SerializedCRL* pRawTrustedCrlArray,
-    const uint32_t lenTrustedCrlArray,
-    SOPC_ByteString** pBsTrustedCrlArray,
-    const SOPC_SerializedCertificate* pRawIssuerCertArray,
-    const uint32_t lenIssuerCertArray,
-    SOPC_ByteString** pBsIssuerCertArray,
-    const SOPC_SerializedCRL* pRawIssuerCrlArray,
-    const uint32_t lenIssuerCrlArray,
-    SOPC_ByteString** pBsIssuerCrlArray,
-    uint32_t* pByteLenTot);
+SOPC_ReturnStatus SOPC_TrustList_EncodeTrustListData(OpcUa_TrustListDataType* trustList, SOPC_ByteString* trustListData)
+{
+    // Check parameters
+    SOPC_ASSERT(trustList != NULL);
+    SOPC_ASSERT(trustListData != NULL);
 
-static SOPC_ReturnStatus trustList_write_bs_array_to_cert_list(SOPC_ByteString* pArray,
-                                                               uint32_t length,
-                                                               SOPC_CertificateList** ppCert);
-static SOPC_ReturnStatus trustList_write_bs_array_to_crl_list(SOPC_ByteString* pArray,
-                                                              uint32_t length,
-                                                              SOPC_CRLList** ppCrl);
-static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataType* pDecode,
-                                                      SOPC_CertificateList** ppTrustedCerts,
-                                                      SOPC_CRLList** ppTrustedCrls,
-                                                      SOPC_CertificateList** ppIssuerCerts,
-                                                      SOPC_CRLList** ppIssuerCrls);
+    SOPC_Buffer* pEncoded = SOPC_Buffer_CreateResizable(1024, SOPC_DEFAULT_MAX_STRING_LENGTH);
+    if (NULL == pEncoded)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
-static bool trustlist_is_valid_masks(SOPC_TrLst_Mask mask);
-static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustList, uint8_t depth);
+    /* Encode the byteString */
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Encode(trustList->encodeableType, trustList, pEncoded, 0);
+    if (SOPC_STATUS_OK == status)
+    {
+        trustListData->Data = pEncoded->data;
+        trustListData->Length = (int32_t) pEncoded->length;
+        // Moved data
+        pEncoded->data = NULL;
+        pEncoded->length = 0;
+    }
+    else
+    {
+        printf("TrustList:%s:Encode: function failed\n", trustList->encodeableType->TypeName);
+    }
 
-/*---------------------------------------------------------------------------
- *                       Static functions (implementation)
- *---------------------------------------------------------------------------*/
+    SOPC_Buffer_Delete(pEncoded);
+    return status;
+}
 
-static SOPC_ReturnStatus trustlist_attach_certs_to_raw_arrays(const SOPC_TrLst_Mask specifiedLists,
-                                                              const SOPC_CertificateList* pTrustedCerts,
-                                                              SOPC_SerializedCertificate** pRawTrustedCertArray,
-                                                              uint32_t* pLenTrustedCertArray,
-                                                              const SOPC_CRLList* pTrustedCrls,
-                                                              SOPC_SerializedCRL** pRawTrustedCrlArray,
-                                                              uint32_t* pLenTrustedCrlArray,
-                                                              const SOPC_CertificateList* pIssuerCerts,
-                                                              SOPC_SerializedCertificate** pRawIssuerCertArray,
-                                                              uint32_t* pLenIssuerCertArray,
-                                                              const SOPC_CRLList* pIssuerCrls,
-                                                              SOPC_SerializedCRL** pRawIssuerCrlArray,
-                                                              uint32_t* pLenIssuerCrlArray)
+SOPC_ReturnStatus trustList_write_bs_array_to_cert_list(SOPC_ByteString* pArray,
+                                                        uint32_t length,
+                                                        SOPC_CertificateList** ppCert)
+{
+    if (NULL == pArray || 0 == length || NULL == ppCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_CertificateList* pCert = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ByteString* pBsCert = NULL;
+
+    for (uint32_t idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
+    {
+        pBsCert = &pArray[idx];
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCert);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pCert);
+        pCert = NULL;
+    }
+    *ppCert = pCert;
+    return status;
+}
+
+SOPC_ReturnStatus trustList_write_bs_array_to_crl_list(SOPC_ByteString* pArray, uint32_t length, SOPC_CRLList** ppCrl)
+{
+    if (NULL == pArray || 0 == length || NULL == ppCrl)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_CRLList* pCrl = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ByteString* pBsCert = NULL;
+
+    for (uint32_t idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
+    {
+        pBsCert = &pArray[idx];
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCrl);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_CRL_Free(pCrl);
+        pCrl = NULL;
+    }
+    *ppCrl = pCrl;
+    return status;
+}
+
+SOPC_ReturnStatus trustlist_attach_certs_to_raw_arrays(const SOPC_TrLst_Mask specifiedLists,
+                                                       const SOPC_CertificateList* pTrustedCerts,
+                                                       SOPC_SerializedCertificate** pRawTrustedCertArray,
+                                                       uint32_t* pLenTrustedCertArray,
+                                                       const SOPC_CRLList* pTrustedCrls,
+                                                       SOPC_SerializedCRL** pRawTrustedCrlArray,
+                                                       uint32_t* pLenTrustedCrlArray,
+                                                       const SOPC_CertificateList* pIssuerCerts,
+                                                       SOPC_SerializedCertificate** pRawIssuerCertArray,
+                                                       uint32_t* pLenIssuerCertArray,
+                                                       const SOPC_CRLList* pIssuerCrls,
+                                                       SOPC_SerializedCRL** pRawIssuerCrlArray,
+                                                       uint32_t* pLenIssuerCrlArray)
 {
     SOPC_ASSERT(NULL != pRawTrustedCertArray);
     SOPC_ASSERT(NULL != pRawTrustedCrlArray);
@@ -190,11 +257,11 @@ static SOPC_ReturnStatus trustlist_attach_certs_to_raw_arrays(const SOPC_TrLst_M
     return status;
 }
 
-static SOPC_ReturnStatus trustlist_attach_raw_array_to_bs_array(const void* pGenArray,
-                                                                uint32_t lenArray,
-                                                                SOPC_ByteString** pByteStringArray,
-                                                                bool bIsCRL,
-                                                                uint32_t* pByteLenTot)
+SOPC_ReturnStatus trustlist_attach_raw_array_to_bs_array(const void* pGenArray,
+                                                         uint32_t lenArray,
+                                                         SOPC_ByteString** pByteStringArray,
+                                                         bool bIsCRL,
+                                                         uint32_t* pByteLenTot)
 {
     if (NULL == pGenArray || 0 == lenArray || NULL == pByteStringArray || NULL == pByteLenTot)
     {
@@ -267,20 +334,19 @@ static SOPC_ReturnStatus trustlist_attach_raw_array_to_bs_array(const void* pGen
     return status;
 }
 
-static SOPC_ReturnStatus trustlist_attach_raw_arrays_to_bs_arrays(
-    const SOPC_SerializedCertificate* pRawTrustedCertArray,
-    const uint32_t lenTrustedCertArray,
-    SOPC_ByteString** pBsTrustedCertArray,
-    const SOPC_SerializedCRL* pRawTrustedCrlArray,
-    const uint32_t lenTrustedCrlArray,
-    SOPC_ByteString** pBsTrustedCrlArray,
-    const SOPC_SerializedCertificate* pRawIssuerCertArray,
-    const uint32_t lenIssuerCertArray,
-    SOPC_ByteString** pBsIssuerCertArray,
-    const SOPC_SerializedCRL* pRawIssuerCrlArray,
-    const uint32_t lenIssuerCrlArray,
-    SOPC_ByteString** pBsIssuerCrlArray,
-    uint32_t* pByteLenTot)
+SOPC_ReturnStatus trustlist_attach_raw_arrays_to_bs_arrays(const SOPC_SerializedCertificate* pRawTrustedCertArray,
+                                                           const uint32_t lenTrustedCertArray,
+                                                           SOPC_ByteString** pBsTrustedCertArray,
+                                                           const SOPC_SerializedCRL* pRawTrustedCrlArray,
+                                                           const uint32_t lenTrustedCrlArray,
+                                                           SOPC_ByteString** pBsTrustedCrlArray,
+                                                           const SOPC_SerializedCertificate* pRawIssuerCertArray,
+                                                           const uint32_t lenIssuerCertArray,
+                                                           SOPC_ByteString** pBsIssuerCertArray,
+                                                           const SOPC_SerializedCRL* pRawIssuerCrlArray,
+                                                           const uint32_t lenIssuerCrlArray,
+                                                           SOPC_ByteString** pBsIssuerCrlArray,
+                                                           uint32_t* pByteLenTot)
 {
     if ((NULL == pRawTrustedCertArray && 0 < lenTrustedCertArray) ||
         (NULL == pRawTrustedCrlArray && 0 < lenTrustedCrlArray) ||
@@ -335,61 +401,22 @@ static SOPC_ReturnStatus trustlist_attach_raw_arrays_to_bs_arrays(
     return status;
 }
 
-static SOPC_ReturnStatus trustList_write_bs_array_to_cert_list(SOPC_ByteString* pArray,
-                                                               uint32_t length,
-                                                               SOPC_CertificateList** ppCert)
-{
-    if (NULL == pArray || 0 == length || NULL == ppCert)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+/*---------------------------------------------------------------------------
+ *                      Prototype of static functions
+ *---------------------------------------------------------------------------*/
 
-    SOPC_CertificateList* pCert = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ByteString* pBsCert = NULL;
-    uint32_t idx = 0;
+static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataType* pDecode,
+                                                      SOPC_CertificateList** ppTrustedCerts,
+                                                      SOPC_CRLList** ppTrustedCrls,
+                                                      SOPC_CertificateList** ppIssuerCerts,
+                                                      SOPC_CRLList** ppIssuerCrls);
 
-    for (idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
-    {
-        pBsCert = &pArray[idx];
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCert);
-    }
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_KeyManager_Certificate_Free(pCert);
-        pCert = NULL;
-    }
-    *ppCert = pCert;
-    return status;
-}
+static bool trustlist_is_valid_masks(SOPC_TrLst_Mask mask);
+static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustList, uint8_t depth);
 
-static SOPC_ReturnStatus trustList_write_bs_array_to_crl_list(SOPC_ByteString* pArray,
-                                                              uint32_t length,
-                                                              SOPC_CRLList** ppCrl)
-{
-    if (NULL == pArray || 0 == length || NULL == ppCrl)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    SOPC_CRLList* pCrl = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ByteString* pBsCert = NULL;
-    uint32_t idx = 0;
-
-    for (idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
-    {
-        pBsCert = &pArray[idx];
-        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCrl);
-    }
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_KeyManager_CRL_Free(pCrl);
-        pCrl = NULL;
-    }
-    *ppCrl = pCrl;
-    return status;
-}
+/*---------------------------------------------------------------------------
+ *                       Static functions (implementation)
+ *---------------------------------------------------------------------------*/
 
 static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataType* pDecode,
                                                       SOPC_CertificateList** ppTrustedCerts,

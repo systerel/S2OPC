@@ -27,11 +27,28 @@
 #include "libs2opc_client_config_custom.h"
 #include "push_server_methods.h"
 
-SOPC_ReturnStatus create_custom_secure_connection(const char* clientCertPath,
-                                                  const char* clientKeyPath,
-                                                  bool encrypted,
-                                                  const char* clientPKIStorePath,
-                                                  const char* serverCertPath,
-                                                  SOPC_SecureConnection_Config** scConfig);
+/**
+ * @brief Create a secure connection in Sign mode.
+ *
+ * @param[in] clientCertPath The path of the Client certificate.
+ * @param[in] clientKeyPath The path of the Client private key.
+ * @param[in] encrypted If its private key is encrypted or not.
+ * @param[in] clientPKIStorePath The path of the Client PKI store.
+ * @param[in] serverCertPath The path of the Server certificate.
+ * @param[out] scConfig The secure connection returned by the toolkit in case of success.
+ * NULL if failed.
+ * @return SOPC_ReturnStatus
+ *
+ * @remark The serverCertPath needs to be precised and the server endpoint is
+ * "opc.tcp://localhost:4841", userPolicy is fixed and connection mode is username/password
+ * with username="me". The password of the username needs to be defined as global variable
+ * under TEST_PASSWORD_USER_ME.
+ */
+SOPC_ReturnStatus SOPC_Create_Custom_Secure_Connection(const char* clientCertPath,
+                                                       const char* clientKeyPath,
+                                                       bool encrypted,
+                                                       const char* clientPKIStorePath,
+                                                       const char* serverCertPath,
+                                                       SOPC_SecureConnection_Config** scConfig);
 
 #endif /* PUSH_CLIENT_CONNECTION_HELPER_H_ */
