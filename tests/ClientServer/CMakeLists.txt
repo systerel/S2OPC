@@ -796,7 +796,7 @@ make_pki(push_client "S2OPC_Demo_PKI_Client")
 # Test the different scenarios (with multiple clients)
 
 # Tests are disabled when compiling with Cyclone because some crypto functions useful for the tests are not implemented (CSR functions for example)
-if(NOT S2OPC_CRYPTO_CYCLONE)
+if(NOT S2OPC_CRYPTO_CYCLONE AND UNIX)
   function(add_push_test_scenario scenario_name python_script_scenario nb_password input_csr)
     set(test_name "validation::${scenario_name}")
     add_test(NAME "${test_name}"
