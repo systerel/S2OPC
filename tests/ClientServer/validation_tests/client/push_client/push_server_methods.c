@@ -197,13 +197,6 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Read(SOPC_ClientConnection* secureConnecti
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
-        }
-    }
 
     SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
@@ -234,13 +227,6 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Close(SOPC_ClientConnection* secureConnect
             printf(
                 "Warning: TrustList.Close operation failed ! Next operation might require timeout to occur before "
                 "being accepted.\n");
-        }
-    }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
         }
     }
 
@@ -295,13 +281,6 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Open(SOPC_ClientConnection* secureConnecti
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
-        }
-    }
 
     SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
@@ -347,13 +326,6 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Write(SOPC_ClientConnection* secureConnect
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
-        }
-    }
 
     SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
@@ -393,13 +365,6 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_CloseAndUpdate(SOPC_ClientConnection* secu
         else
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-    }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
         }
     }
 
@@ -444,13 +409,6 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_AddCertificate(SOPC_ClientConnection* secu
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
-        }
-    }
 
     SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
@@ -490,13 +448,6 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_RemoveCertificate(SOPC_ClientConnection* s
         else
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-    }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
         }
     }
 
@@ -539,14 +490,6 @@ SOPC_ReturnStatus SOPC_TEST_ServerConfiguration_CreateSigningRequest_GetResponse
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) req, (void**) resp);
-    }
-
-    if (status != SOPC_STATUS_OK)
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
-        }
     }
 
     return status;
@@ -686,13 +629,6 @@ SOPC_ReturnStatus SOPC_TEST_ServerConfiguration_UpdateCertificate(SOPC_ClientCon
             status = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
-        }
-    }
 
     SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
@@ -737,13 +673,6 @@ SOPC_ReturnStatus SOPC_TEST_ServerConfiguration_GetRejectedList(SOPC_ClientConne
         else
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-    }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
         }
     }
 
@@ -794,13 +723,6 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_OpenWithMasks(SOPC_ClientConnection* secur
         else
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-    }
-    else
-    {
-        if (req != NULL)
-        {
-            SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
         }
     }
 
