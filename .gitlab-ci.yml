@@ -204,7 +204,6 @@ build-linux64-ASan:
   variables:
     <<: [*build_linux_variables,*nominal_build_variables]
     WITH_ASAN: 1
-    S2OPC_DYNAMIC_TYPE_RESOLUTION: 1
     WITH_UBSAN: 1
   needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
