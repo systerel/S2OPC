@@ -32,7 +32,7 @@ class CompressorRecipe(ConanFile):
         self.requires("mbedtls/2.28.8")
         self.requires("paho-mqtt-c/1.3.4")
         self.requires("libcheck/0.14.0@Systerel+S2OPC/default")
-        self.requires("doxygen/1.8.18")
+        self.requires("doxygen/1.12.0@Systerel+S2OPC/default")
         self.requires("gmp/6.2.1",override=True) #Sub-depency of mpfr, gcc and isl
         self.requires("mpfr/4.1.0",override=True) #Sub-depency of gcc
         self.requires("zlib/1.2.13",override=True) #Sub-depency of gcc, binutils, doxygen, mbedtls and openssl

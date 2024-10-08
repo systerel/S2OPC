@@ -162,7 +162,7 @@ hil-tests:
   needs: []
   tags:
       - hil
-  image: docker.aix.systerel.fr/c838/build@sha256:14c9a28afc61ebe7b413798735f4a70989d36b155b720782ddb95f9db02d3a0e # digest of build:1.40
+  image: docker.aix.systerel.fr/c838/build@sha256:3c1b82290e986ffb1124463a7822c4387a3d9503887ad96238460480d8920a0d # digest of build:1.44
   script:
     - ' cd .systerel/HIL_tests'
     - ./launch.sh
@@ -184,11 +184,11 @@ hil-tests:
 
 .build-linux: &build_linux
   stage: build
-  image: docker.aix.systerel.fr/c838/build@sha256:6bad583c26d0bb5b6cf47fc3423b7b2d88f69f164ecd4cfeaef07c189f69e35f # digest of build:1.43
+  image: docker.aix.systerel.fr/c838/build@sha256:3c1b82290e986ffb1124463a7822c4387a3d9503887ad96238460480d8920a0d # digest of build:1.44
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR || exit 1'
   variables: &build_linux_variables
-    DOCKER_DIGEST: 'sha256:6bad583c26d0bb5b6cf47fc3423b7b2d88f69f164ecd4cfeaef07c189f69e35f'
+    DOCKER_DIGEST: 'sha256:3c1b82290e986ffb1124463a7822c4387a3d9503887ad96238460480d8920a0d'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
