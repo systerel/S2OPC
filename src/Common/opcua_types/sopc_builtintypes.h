@@ -1050,8 +1050,8 @@ SOPC_ReturnStatus SOPC_ExtensionObject_CreateObject(SOPC_ExtensionObject* extObj
  *                         - (0) if left == right
  *                         - (+1) if left > right
  *
- * \return               SOPC_STATUS_OK if the comparison succeeded,
- *                       SOPC_STATUS_UNSUPPORTED if the type is not supported.
+ * \return                 SOPC_STATUS_OK if the comparison succeeded,
+ *                         SOPC_STATUS_UNSUPPORTED if the type is not supported.
  */
 typedef SOPC_ReturnStatus(SOPC_VariantValue_PfnCompCustom)(const void* customContext,
                                                            SOPC_BuiltinId builtInTypeId,

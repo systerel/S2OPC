@@ -205,7 +205,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetWriteNotifCallback(SOPC_WriteNotif_
  */
 typedef bool SOPC_CreateMI_NodeAvail_Fct(const SOPC_NodeId* nodeId,
                                          OpcUa_NodeClass* outNodeClass,
-                                         SOPC_StatusCode* outUnavailabilityStatus);
+                                         SOPC_StatusCode* outBadStatus);
 
 /**
  * \brief Defines the callback called by CreateMonitoredItem service when a NodeId is not already part of server.

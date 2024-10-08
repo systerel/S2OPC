@@ -87,7 +87,7 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnEncode)(const void* value,
  *  \return                  ::SOPC_STATUS_OK in case of success, the appropriate error status otherwise.
  */
 typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnDecode)(void* value,
-                                                           SOPC_Buffer* msgBuffer,
+                                                           SOPC_Buffer* buffer,
                                                            uint32_t nestedStructLevel);
 
 /**
