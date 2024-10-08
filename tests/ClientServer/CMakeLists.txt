@@ -795,31 +795,34 @@ make_pki(push_client "S2OPC_Demo_PKI_Client")
 ## Tests.
 # Test the different scenarios (with multiple clients)
 
-function(add_push_test_scenario scenario_name python_script_scenario nb_password input_csr)
-  set(test_name "validation::${scenario_name}")
-  add_test(NAME "${test_name}"
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" ${nb_password}
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-  "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
-  "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/${python_script_scenario}" ${input_csr})
-  set_tests_properties("${test_name}" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${scenario_name}.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
-endfunction()
+# Tests are disabled when compiling with Cyclone because some crypto functions useful for the tests are not implemented (CSR functions for example)
+if(NOT S2OPC_CRYPTO_CYCLONE)
+  function(add_push_test_scenario scenario_name python_script_scenario nb_password input_csr)
+    set(test_name "validation::${scenario_name}")
+    add_test(NAME "${test_name}"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" ${nb_password}
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
+    "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/${python_script_scenario}" ${input_csr})
+    set_tests_properties("${test_name}" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${scenario_name}.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
+  endfunction()
 
-add_push_test_scenario(push_server_self_signed test_tl_self_signed.py 7 "")
-add_push_test_scenario(push_server_revoke test_tl_revoke_client.py 7 "")
-add_push_test_scenario(push_server_untrusted test_tl_untrusted.py 12 "")
-add_push_test_scenario(push_server_trusted_int test_tl_trusted_int.py 8 "")
+  add_push_test_scenario(push_server_self_signed test_tl_self_signed.py 7 "")
+  add_push_test_scenario(push_server_revoke test_tl_revoke_client.py 7 "")
+  add_push_test_scenario(push_server_untrusted test_tl_untrusted.py 12 "")
+  add_push_test_scenario(push_server_trusted_int test_tl_trusted_int.py 8 "")
 
-## CSR tests
-# Success UpdateCertificate and 3 invalid CSR
-add_push_test_scenario(push_server_csr_invalid test_csr_invalid.py 5 "")
+  ## CSR tests
+  # Success UpdateCertificate and 3 invalid CSR
+  add_push_test_scenario(push_server_csr_invalid test_csr_invalid.py 5 "")
 
-# Success scenarios: do only one test? But without losing discriminatory nature.
-# These two tests need to set up the env variable TEST_PASSWORD_CACERT which is the password of the private key of cacert
-# and TEST_PASSWORD_USER_ME which is the password of the user "me" (because the client user uses a connection by username/password)
-add_push_test_scenario(push_server_csr_valid_noNewKey test_csr_valid.py 6 noNewKey)
-add_push_test_scenario(push_server_csr_valid_newKey test_csr_valid.py 6 newKey)
+  # Success scenarios: do only one test? But without losing discriminatory nature.
+  # These two tests need to set up the env variable TEST_PASSWORD_CACERT which is the password of the private key of cacert
+  # and TEST_PASSWORD_USER_ME which is the password of the user "me" (because the client user uses a connection by username/password)
+  add_push_test_scenario(push_server_csr_valid_noNewKey test_csr_valid.py 6 noNewKey)
+  add_push_test_scenario(push_server_csr_valid_newKey test_csr_valid.py 6 newKey)
+endif()
