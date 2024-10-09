@@ -40,3 +40,4 @@ the legal rights to contribute.
 * Paul Chabas <paul.chabas@systerel.fr>
 * Darrys Abdelkrim <darrys.abdelkrim-stg@systerel.fr>
 * Thomas Bouston <thomas.bouston-stg@systerel.fr>
+* Florent Macaire <florent.macaire@systerel.fr>
