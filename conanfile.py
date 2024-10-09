@@ -38,4 +38,4 @@ class CompressorRecipe(ConanFile):
         self.requires("zlib/1.2.13",override=True) #Sub-depency of gcc, binutils, doxygen, mbedtls and openssl
         self.requires("isl/0.24",override=True) #Sub-depency of gcc
         self.requires("openssl/3.2.0",override=True) #Sub-depency of paho-mqtt-c and cmake
-        self.requires("cmake/3.9.4@Systerel+S2OPC/default")
+        self.requires("cmake/3.23.5@Systerel+S2OPC/default")
