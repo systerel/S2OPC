@@ -33,6 +33,19 @@ PUBSUB_TEST_DIR=${BUILD_DIR}/tests/PubSub
 PUBSUB_CTEST_FILE="${PUBSUB_TEST_DIR}/CTestTestfile.cmake"
 TAP_DIR="${BUILD_DIR}/bin"
 
+if [ -z $S2OPC_CRYPTO_CYCLONE ]; then
+    # if the variable is not set.
+    PUSH_SERVER_TAP_FILES='push_server_csr_invalid.tap
+push_server_csr_valid_newKey.tap
+push_server_csr_valid_noNewKey.tap
+push_server_revoke.tap
+push_server_self_signed.tap
+push_server_trusted_int.tap
+push_server_untrusted.tap'
+else
+    PUSH_SERVER_TAP_FILES=''
+fi
+
 CLIENTSERVER_TAP_FILES='check_helpers.tap
 ask_password.tap
 check_libsub.tap
@@ -49,13 +62,6 @@ client_service_faults_test.tap
 check_file_transfer.tap
 sc_establish_timeout.tap
 sc_renew.tap
-push_server_csr_invalid.tap
-push_server_csr_valid_newKey.tap
-push_server_csr_valid_noNewKey.tap
-push_server_revoke.tap
-push_server_self_signed.tap
-push_server_trusted_int.tap
-push_server_untrusted.tap
 secure_channel_level_None.tap
 secure_channel_level_SignAndEncrypt_B256Sha256_2048bit.tap
 secure_channel_level_SignAndEncrypt_B256Sha256_2048bit_server_vs_4096bit_client.tap
@@ -78,7 +84,8 @@ s2opc_browse.tap
 s2opc_wrapper_browse.tap
 s2opc_discovery.tap
 s2opc_wrapper_get_endpoints.tap
-s2opc_wrapper_subscribe.tap'
+s2opc_wrapper_subscribe.tap
+'${PUSH_SERVER_TAP_FILES}''
 
 PUBSUB_TAP_FILES='interop_pub_test.tap
 interop_sub_test.tap
