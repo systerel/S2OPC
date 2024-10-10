@@ -562,47 +562,27 @@ target_compile_definitions(toolkit_test_discovery_server PRIVATE ${S2OPC_DEFINIT
 
 #Note: use absolute path for scripts to allow ctest to be run from another another path
 
-add_test(NAME "validation::client_server_test"
+# Function to add validation test
+function(s2opc_validation_test target_name bin_name)
+  add_test(NAME "validation::${target_name}"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
-  $<TARGET_FILE:toolkit_test_client>)
-set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
+  $<TARGET_FILE:${bin_name}>)
+  set_tests_properties("validation::${target_name}" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${target_name}.tap")
+endfunction()
+
+s2opc_validation_test(client_server_test toolkit_test_client)
+s2opc_validation_test(client_service_faults_test toolkit_test_client_service_faults)
+s2opc_validation_test(client_RHE_faults_test toolkit_test_client_rhe_faults)
 
 if(S2OPC_EVENT_MANAGEMENT)
-  add_test(NAME "validation::client_server_events_test"
-    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-    COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-    "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
-    "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
-    $<TARGET_FILE:toolkit_test_client_events>)
-  set_tests_properties("validation::client_server_events_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_events_test.tap")
+  s2opc_validation_test(client_server_events_test toolkit_test_client_events)
 endif()
 
-add_test(NAME "validation::client_service_faults_test"
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-  "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
-  "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
-  $<TARGET_FILE:toolkit_test_client_service_faults>)
-set_tests_properties("validation::client_service_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_service_faults_test.tap")
-
-add_test(NAME "validation::client_RHE_faults_test"
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-  "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
-  "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
-  $<TARGET_FILE:toolkit_test_client_rhe_faults>)
-set_tests_properties("validation::client_RHE_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_RHE_faults_test.tap")
 
 if (NOT WIN32 AND expat_FOUND)
   add_test(NAME "validation::check_file_transfer"
