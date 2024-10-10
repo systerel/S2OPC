@@ -383,7 +383,7 @@ if __name__ == '__main__':
         try:
             connections = [PyS2OPC_Client.connect(cfg, ConnectionHandler) for _, cfg in configs.items()]
         except SOPC_Failure as f:
-            print(f.what())
+            print(f)
         for conn in connections:
             conn.set_logger(logger_)
             conn.configure_subscription()

@@ -34,13 +34,15 @@
 #include "sopc_service_call_context.h"
 #include "sopc_user_app_itf.h"
 
-// Defined only for autopxd to generate a type (for compilation) but not used
+// All structures used in PYX files must be defined as follows, because :
+// 1. It allows autopxd to generate this structure in the PXD
+//    (necessary for function declarations using these structures)
+// 2. Allows compilation of PYX files to have the symbol in a `.h` (otherwise there's a compile warning).
 typedef struct SOPC_CallContext
 {
     bool placeholder;
 } SOPC_CallContext;
 
-// Defined only for autopxd to generate a type (for compilation) but not used
 typedef struct SOPC_ClientConnection
 {
     bool placeholder;

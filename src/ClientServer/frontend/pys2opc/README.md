@@ -12,5 +12,4 @@ See https://gitlab.com/systerel/S2OPC/ for more information.
 
 # PyS2OPC
 
-This new PyS2OPC has been created using a new wrapper technology : Cython,
-and is based on the new Client/Server API of S2OPC Version 1.6.
+PyS2OPC has been created using AutoPXD+Cython to create a binding from S2OPC C library. It is based on the client/server frontend API of S2OPC.

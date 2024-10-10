@@ -19,9 +19,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Allow annotation with list (/ builtin data structure) typing for 3.7 <= python < 3.9
-from __future__ import annotations
-
 from contextlib import contextmanager
 from functools import total_ordering
 import time
@@ -34,13 +31,9 @@ from binascii import hexlify
 import uuid
 from libc.stdlib cimport calloc, free
 from libc.string cimport strncpy
+from libc.stdint cimport UINT8_MAX, UINT16_MAX, UINT32_MAX
 
 VERSION = json.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'version.json')))['version']
-
-# Define Max
-UINT8_MAX: int = 255
-UINT16_MAX: int = 65535
-UINT32_MAX: int = 4294967295
 
 class NamedMembers:
     """
@@ -152,19 +145,12 @@ class VariantType(NamedMembers):
 
 class SOPC_Failure(Exception):
     """
-    Failure sub class to manage failure from S2OPC code
+    Exception sub class to manage failure from S2OPC code
     """
-    def __init__(self, message: str,  status: ReturnStatus|None = None):
-        super().__init__(message)
-        self._message, self._status = message, status
 
-    def what(self):
-        """
-        Return error message
-        """
-        if self._status is None:
-            return self._message
-        return '{} (Code {})'.format(self._message, ReturnStatus.get_name_from_id(self._status))
+    def __init__(self, message: str,  status: ReturnStatus|None = None):
+        super().__init__(message if status is None else '{} (Code {})'.format(message, ReturnStatus.get_name_from_id(status)))
+        self.status = status
 
 class ClientConnectionFailure(Exception):
     """
@@ -175,19 +161,11 @@ class ClientConnectionFailure(Exception):
 
 class ServiceFailure(Exception):
     """
-    Failure sub class to manage service failure
+    Exception sub class to manage service failure
     """
     def __init__(self, message: str,  status: StatusCode|None = None):
-        super().__init__(message)
-        self._message, self._status = message, status
-
-    def what(self):
-        """
-        Return error message
-        """
-        if self._status is None:
-            return self._message
-        return '{} (Code {})'.format(self._message, StatusCode.get_name_from_id(self._status))
+        super().__init__(message if status is None else '{} (Code {})'.format(message, StatusCode.get_name_from_id(status)))
+        self.status = status
 
 class ServiceFault(ServiceFailure):
     """
@@ -544,7 +522,7 @@ class AsyncResponse(Response):
         Returns the response to the request if there is an available response (received).
         Otherwise returns None.
         The response type depends on the service used: `ReadResponse`, `WriteResponse`, `BrowseResponse`.
-        Note: if an service failure occurs, raise an `Exception` sub class : `ServiceFailure`
+        Note: if a service failure occurs, raise an `Exception` sub class : `ServiceFailure`
         """
         asyncReqHdlr: _AsyncRequestHandler = self._asyncReqHdlr
         cdef _Request request = asyncReqHdlr._dRequestContext
@@ -649,7 +627,7 @@ cdef class _AsyncRequestHandler:
 
         Finish by setting the eventResponseReceived handler.
 
-        Note: if an service failure occurs, store an `Exception` sub class : `ServiceFailure` or `ServiceFault`.
+        Note: if a service failure occurs, store an `Exception` sub class : `ServiceFailure` or `ServiceFault`.
         This exception will be raised in the `_AsyncRequestHandler._wait_for_response` function
         or in the `AsyncResponse.get_response` function in case of asynchronous response.
         """
@@ -1168,8 +1146,8 @@ cdef class _C_Configurations:
 
     @staticmethod
     cdef SOPC_SecureConnection_Config* getConfig(_C_Configurations configs, size_t configIdx):
-       assert configs._nbConfigs > configIdx
-       return configs._scConfigArray[configIdx]
+        assert configs._nbConfigs > configIdx
+        return configs._scConfigArray[configIdx]
 
 class ConnectionConfiguration:
     """
@@ -1731,7 +1709,7 @@ cdef class _C_Variant:
                 return Variant(bytestring_to_bytes(&(pVariant.Value.XmlElt)), sopc_type)
             elif sopc_type == SOPC_BuiltinId.SOPC_NodeId_Id:
                 return Variant(nodeid_to_str(pVariant.Value.NodeId), sopc_type)
-            #elif sopc_type == libsub.SOPC_ExpandedNodeId_Id:
+            #elif sopc_type == SOPC_BuiltinId.SOPC_ExpandedNodeId_Id:
             #    return Variant(pVariant.Value., sopc_type)
             elif sopc_type == SOPC_BuiltinId.SOPC_StatusCode_Id:
                 return Variant(pVariant.Value.Status, sopc_type)
@@ -2607,7 +2585,7 @@ class PyS2OPC_Client(PyS2OPC):
         It can be optionally used in a `with` statement, which automatically disconnects the connection. See `BaseClientConnectionHandler`
         """
         if sc_lifetime > UINT32_MAX:
-            raise ValueError("sc_lifetime is too large (must be less than UINT8_MAX)")
+            raise ValueError("sc_lifetime is too large (must be less than UINT32_MAX)")
         cdef SOPC_SecureConnection_Config * sConnCfg = _C_Configurations.getConfig(connCfg._configs, connCfg._cfgIdx)
         assert NULL != sConnCfg, "Unexpected failure to load configuration"
         status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(_callback_get_client_key_password)

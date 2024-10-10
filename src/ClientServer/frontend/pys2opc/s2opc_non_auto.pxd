@@ -1,6 +1,3 @@
-# FILE is not automatically resolved by autopxd
-from libc.stdio cimport FILE
-
 # import C bool representation
 from libcpp cimport bool
 
