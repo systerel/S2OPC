@@ -80,8 +80,8 @@ static void assert_read_uint64(const char* nodeId, uint64_t expected)
 {
     OpcUa_ReadResponse* readResponse = get_read_response(nodeId);
     const SOPC_Variant* var = &readResponse->Results[0].Value;
-    ck_assert(SOPC_VariantArrayType_SingleValue == var->ArrayType);
-    ck_assert(SOPC_UInt64_Id == var->BuiltInTypeId);
+    ck_assert_uint_eq(SOPC_VariantArrayType_SingleValue, var->ArrayType);
+    ck_assert_uint_eq(SOPC_UInt64_Id, var->BuiltInTypeId);
     ck_assert_uint_eq(var->Value.Uint64, expected);
 
     SOPC_EncodeableObject_Delete(readResponse->encodeableType, (void**) &readResponse);
@@ -92,8 +92,8 @@ static void assert_read_uint16(const char* nodeId, uint16_t expected)
 {
     OpcUa_ReadResponse* readResponse = get_read_response(nodeId);
     const SOPC_Variant* var = &readResponse->Results[0].Value;
-    ck_assert(SOPC_VariantArrayType_SingleValue == var->ArrayType);
-    ck_assert(SOPC_UInt16_Id == var->BuiltInTypeId);
+    ck_assert_uint_eq(SOPC_VariantArrayType_SingleValue, var->ArrayType);
+    ck_assert_uint_eq(SOPC_UInt16_Id, var->BuiltInTypeId);
     ck_assert_uint_eq(var->Value.Uint16, expected);
 
     SOPC_EncodeableObject_Delete(readResponse->encodeableType, (void**) &readResponse);
@@ -104,8 +104,8 @@ static void assert_read_bool(const char* nodeId, bool expected)
 {
     OpcUa_ReadResponse* readResponse = get_read_response(nodeId);
     const SOPC_Variant* var = &readResponse->Results[0].Value;
-    ck_assert(SOPC_VariantArrayType_SingleValue == var->ArrayType);
-    ck_assert(SOPC_Boolean_Id == var->BuiltInTypeId);
+    ck_assert_uint_eq(SOPC_VariantArrayType_SingleValue, var->ArrayType);
+    ck_assert_uint_eq(SOPC_Boolean_Id, var->BuiltInTypeId);
     ck_assert(var->Value.Boolean == expected);
     SOPC_EncodeableObject_Delete(readResponse->encodeableType, (void**) &readResponse);
 }

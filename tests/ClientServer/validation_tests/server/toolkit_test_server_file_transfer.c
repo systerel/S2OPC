@@ -64,7 +64,7 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
     // Server endpoints and PKI configuration
     const char* xml_server_cfg_path = "./S2OPC_Server_UACTT_Config.xml";
     // Server address space configuration
-    const char* xml_address_space_path = "./ft_data/address_space.xml";
+    const char* xml_address_space_path = "./ft_data/s2opc_file_transfer.xml";
     // User credentials and authorizations
     const char* xml_users_cfg_path = "./S2OPC_UACTT_Users.xml";
 

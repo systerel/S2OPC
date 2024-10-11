@@ -157,6 +157,9 @@ if (expat_FOUND)
     target_compile_options(toolkit_demo_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE)
     target_compile_definitions(toolkit_demo_file_transfer PRIVATE ${S2OPC_DEFINITIONS})
     target_compile_definitions(toolkit_demo_file_transfer PRIVATE "WITH_EXPAT")
+    add_custom_command(
+      TARGET toolkit_demo_file_transfer POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_file_transfer.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ft_data/s2opc_file_transfer.xml)
   endif()
 else()
   message(WARNING "Demo file transfer toolkit_demo_file_transfer executable will not be compiled since Expat library not available.")

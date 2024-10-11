@@ -32,6 +32,9 @@ function gen_nodeset() {
 # Generate demo NodeSet for Micro profile + node management
 gen_nodeset s2opc_node_mgt.xml s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
+# Generate demo NodeSet for Micro profile + file transfer
+gen_nodeset s2opc_file_transfer.xml s2opc_base_nodeset_origin.xml s2opc_base_file_transfer_origin.xml
+
 # Generate demo NodeSet for Micro profile
 gen_nodeset s2opc.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 

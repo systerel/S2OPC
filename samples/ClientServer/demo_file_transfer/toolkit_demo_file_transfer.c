@@ -43,7 +43,7 @@
 // Server endpoints and PKI configuration
 #define XML_SERVER_CFG_PATH "./S2OPC_Server_Demo_Config.xml"
 // Server address space configuration
-#define XML_ADDRESS_SPACE_PATH "./ft_data/address_space.xml"
+#define XML_ADDRESS_SPACE_PATH "./ft_data/s2opc_file_transfer.xml"
 // User credentials and authorizations
 #define XML_USERS_CFG_PATH "./S2OPC_Users_Demo_Config.xml"
 

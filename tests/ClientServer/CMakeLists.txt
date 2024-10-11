@@ -379,6 +379,20 @@ target_compile_options(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_COMPILER_F
 target_compile_definitions(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(toolkit_test_client_rhe_faults PRIVATE s2opc_clientserver)
 
+# Client scenario with file transfer
+if (NOT WIN32 AND expat_FOUND)
+  add_executable(check_file_transfer "validation_tests/client/file_transfer/check_file_transfer.c"
+                                                  "validation_tests/client/file_transfer/check_file_transfer_method.c")
+  target_include_directories(check_file_transfer PRIVATE "validation_tests/client/file_transfer")
+  add_dependencies(check_file_transfer toolkit_test_server_file_transfer)
+  target_link_libraries(check_file_transfer PRIVATE s2opc_clientserver Check::check)
+  target_compile_options(check_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno function.
+  target_compile_definitions(check_file_transfer PRIVATE ${S2OPC_DEFINITIONS})
+  add_custom_command(
+      TARGET check_file_transfer POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/ft_data/bin_file.a ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ft_data/bin_file.a)
+endif()
+
 # Client services scenarii
 
 # Reuse code of demo client
@@ -403,11 +417,7 @@ if (NOT WIN32 AND expat_FOUND)
   target_link_libraries(toolkit_test_server_file_transfer PRIVATE s2opc_clientserver)
   target_compile_options(toolkit_test_server_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno and mkstemp functions.
   target_compile_definitions(toolkit_test_server_file_transfer PRIVATE ${S2OPC_DEFINITIONS} "WITH_EXPAT")
-  add_custom_command(
-        TARGET toolkit_test_server_file_transfer POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/ft_data/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ft_data/
-  )
-  endif()
+endif()
 
 # Server scenario (configured for UACTT)
 
