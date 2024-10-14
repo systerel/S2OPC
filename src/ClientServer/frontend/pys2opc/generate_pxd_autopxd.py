@@ -33,7 +33,7 @@ if __name__ == '__main__':
         text = fileR.read()
         # Change declaration to be able to execute C code without the GIL 
         # e.g. SOPC_ServerHelper_Serve should not take it in order C callbacks are able to take it in parallel
-        text_with_nogil = text.replace("cdef extern from \"s2opc_includes_pys2opc.h\":", "cdef extern from \"s2opc_includes_pys2opc.h\" nogil:")
+        text_with_nogil = re.sub(r'cdef extern from "(\w+\.h)":', r'cdef extern from "\1" nogil:', text)
         fileR.close()
 
         # Insert the cython language level at the beginning of the PXD file 
