@@ -24,7 +24,7 @@
 #include "sopc_askpass.h"
 #include "sopc_assert.h"
 #include "sopc_logger.h"
-#include "sopc_pki_stack_lib_itf.h"
+#include "sopc_pki_stack.h"
 
 static bool AskKeyPass_FromTerminal(char** outPassword)
 {
