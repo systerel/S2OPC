@@ -577,6 +577,28 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
     return status;
 }
 
+static void SOPC_ClientHelperInternal_ClearClientConnection(SOPC_ClientConnection* connection)
+{
+    if (NULL != connection)
+    {
+        SOPC_ReturnStatus mutStatus;
+
+        SOPC_StaMac_Delete(&connection->stateMachine);
+        if (SOPC_INVALID_COND != connection->syncCond)
+        {
+            mutStatus = SOPC_Condition_Clear(&connection->syncCond);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        }
+        if (SOPC_INVALID_MUTEX != connection->syncConnMutex)
+        {
+            mutStatus = SOPC_Mutex_Clear(&connection->syncConnMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        }
+        sopc_client_helper_config.secureConnections[connection->secureConnectionIdx] = NULL;
+        SOPC_Free(connection);
+    }
+}
+
 static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynchronous,
                                                                     SOPC_SecureConnection_Config* secConnConfig,
                                                                     void* request,
@@ -657,6 +679,10 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             }
         }
 
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_ClientHelperInternal_ClearClientConnection(res);
+        }
         mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
@@ -828,15 +854,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
     }
     else
     {
-        if (NULL != res && NULL != res->stateMachine)
-        {
-            SOPC_StaMac_Delete(&res->stateMachine);
-        }
-        if (NULL != res)
-        {
-            sopc_client_helper_config.secureConnections[res->secureConnectionIdx] = NULL;
-            SOPC_Free(res);
-        }
+        SOPC_ClientHelperInternal_ClearClientConnection(res);
     }
 
     return status;
@@ -862,7 +880,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
 
     SOPC_ClientHelper_Subscription* createdSub = NULL;
 
-    if (*secureConnection == sopc_client_helper_config.secureConnections[pSc->secureConnectionIdx])
+    if (pSc == sopc_client_helper_config.secureConnections[pSc->secureConnectionIdx])
     {
         status = SOPC_STATUS_OK;
         pSM = pSc->stateMachine;
@@ -918,15 +936,9 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
         mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        mutStatus = SOPC_Condition_Clear(&(*secureConnection)->syncCond);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        mutStatus = SOPC_Mutex_Clear(&(*secureConnection)->syncConnMutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        SOPC_ClientHelperInternal_ClearClientConnection(pSc);
 
-        sopc_client_helper_config.secureConnections[(*secureConnection)->secureConnectionIdx] = NULL;
-        SOPC_Free(*secureConnection);
         *secureConnection = NULL;
-        SOPC_StaMac_Delete(&pSM);
 
         mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
