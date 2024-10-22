@@ -675,13 +675,12 @@ if(WITH_PYS2OPC)
   set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/pys2opc")
   # TODO: This variable must be the one defined in ../src/ClientServer/frontend/pys2opc/CMakeLists.txt
   set(PYS2OPC_TEST_INSTALL_PATH "${CMAKE_BINARY_DIR}/pys2opc_install")
-  set(WITH_SERVER ON)
 
   # Validation test
-  function(pys2opc_validation_test name)
+  function(pys2opc_validation_test name with_server)
     get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
     set(test_name "validation::${name}")
-    if(WITH_SERVER)
+    if(with_server)
       add_test(NAME "${test_name}"
         WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
         COMMAND
@@ -711,9 +710,8 @@ ${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/samples/ClientServer/pys2opc/client"
       ENVIRONMENT "${new_env}")
   endfunction()
 
-  pys2opc_validation_test("pys2opc_client.py")
-  set(WITH_SERVER OFF)
-  pys2opc_validation_test("pys2opc_server.py")
+  pys2opc_validation_test("pys2opc_client.py" YES)
+  pys2opc_validation_test("pys2opc_server.py" NO)
 endif()
 
 ## S2OPC fuzzing tests: to be run manually ##
