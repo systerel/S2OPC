@@ -66,6 +66,8 @@ SOPC_ReturnStatus SOPC_TrustList_Initialize(void);
 /**
  * \brief Get the TrustList configuration with the default values.
  *
+ * \note TOFU mode is disabled with this default configuration.
+ *
  * \param groupType        Define the certificate group type of the TrustList.
  * \param pPKI             A valid pointer to the PKI of the TrustList.
  * \param maxTrustListSize Define the maximum size in byte of the TrustList.
@@ -81,6 +83,8 @@ SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Ty
 
 /**
  * \brief Get the TrustList configuration for the TOFU state.
+ *        The TOFU state (Trust On First Use) allows to configure the TrustList of an empty PKI
+ *        for the first time.
  *
  * \param groupType        Define the certificate group type of the TrustList.
  * \param pPKI             A valid pointer to the PKI of the TrustList.

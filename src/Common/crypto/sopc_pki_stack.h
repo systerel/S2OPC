@@ -469,7 +469,10 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI);
  * ::SOPC_PKIProvider_UpdateFromList or ::SOPC_PKIProvider_RemoveCertificate.
  *
  * \warning It is mandatory to define an associated behavior to allow calls to these functions.
- * \note Callback is used to re-evaluate the currently used certificates (application/user) or to leave a TOFU state.
+ * \note Callback is used to re-evaluate the currently used certificates or to leave a TOFU state.
+ *       (As example, ::SOPC_ToolkitClient_AsyncReEvalSecureChannels is used for the callback of the application PKI
+ *        and ::SOPC_ToolkitServer_AsyncReEvalUserCertSessions is used for the callback of the user PKI)
+ * \warning The callback shall not do anything blocking and shall not modify the content of its associated \p pPKI .
  *
  * \param pPKI A valid pointer to the PKIProvider for which an update callback will be defined
  * \param pUpdateCb The callback to be called when an update is done

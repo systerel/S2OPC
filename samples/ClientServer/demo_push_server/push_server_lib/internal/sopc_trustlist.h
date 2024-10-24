@@ -116,7 +116,8 @@ typedef struct SOPC_TrustListContext
     SOPC_TrLst_VarCfg varIds;      /*!< The structure which gather all the variable nodIds
                                         belonging to the TrustList */
     SOPC_TrLst_TimeEvent eventMgr; /*!< Structure to manage the trustlist activity timeout. */
-    bool isTOFU;                   /*!< True when TOFU state otherwise False. */
+    bool isTOFU;                   /*!< True when TOFU state otherwise False. The TOFU mode (Trust On First Use) allows
+                                        to configure the TrustList of an empty PKI for the first time. */
     SOPC_PKIProvider* pPKI;        /*!< A valid pointer to the PKI that belongs to the TrustList */
     SOPC_TrLst_OpeningCtx opnCtx;  /*!< The current data of an open trustlist */
 } SOPC_TrustListContext;
@@ -153,7 +154,8 @@ struct SOPC_TrustList_Config
     SOPC_TrustList_Type groupType; /*!< Define the certificate group type of the TrustList. */
     SOPC_PKIProvider* pPKI;        /*!< A valid pointer to the PKI of the TrustList. */
     uint32_t maxTrustListSize;     /*!< Define the maximum size in byte for the TrustList. */
-    bool isTOFU;                   /*!< True when TOFU otherwise False. */
+    bool isTOFU;                   /*!< True when TOFU otherwise False. The TOFU mode (Trust On First Use) allows
+                                        to configure the TrustList of an empty PKI for the first time. */
 };
 
 /**
