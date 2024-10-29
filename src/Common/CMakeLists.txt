@@ -45,6 +45,10 @@ if (S2OPC_CRYPTO_CYCLONE)
   list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES cyclone_crypto cyclone_common)
 elseif(S2OPC_CRYPTO_MBEDTLS)
   list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES mbedtls mbedx509 mbedcrypto)
+  # Fix static linking not working on windows with bcrypt
+  if(WIN32)
+    list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES bcrypt)
+  endif()
 endif()
 list(APPEND S2OPC_COMMON_PUBLIC_LINK_LIBRARIES ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
 
