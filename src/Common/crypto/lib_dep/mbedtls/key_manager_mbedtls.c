@@ -389,14 +389,14 @@ static int sopc_md5_update_pwd_iv(mbedtls_md5_context* ctx,
     /*  S = pIv[0..7]
         pSum[0..15]  = MD5(pwd || S)
     */
-    int errLib = mbedtls_md5_update_ret(ctx, pwd, pwdLen);
+    int errLib = MBEDTLS_MD5_UPDATE(ctx, pwd, pwdLen);
     if (0 == errLib)
     {
-        errLib = mbedtls_md5_update_ret(ctx, pIv, 8);
+        errLib = MBEDTLS_MD5_UPDATE(ctx, pIv, 8);
     }
     if (0 == errLib)
     {
-        errLib = mbedtls_md5_finish_ret(ctx, pSum);
+        errLib = MBEDTLS_MD5_FINISH(ctx, pSum);
     }
     return errLib;
 }
@@ -422,7 +422,7 @@ static int sopc_create_aes256_key_with_pbkdf1_md5(unsigned char* pKey,
 
     mbedtls_md5_context ctx = {0};
     unsigned char sum[16];
-    int errLib = mbedtls_md5_starts_ret(&ctx);
+    int errLib = MBEDTLS_MD5_STARTS(&ctx);
     if (0 == errLib)
     {
         errLib = sopc_md5_update_pwd_iv(&ctx, pIv, pwd, pwdLen, sum);
@@ -430,11 +430,11 @@ static int sopc_create_aes256_key_with_pbkdf1_md5(unsigned char* pKey,
     if (0 == errLib)
     {
         memcpy(pKey, sum, SOPC_CBC_BLOCK_SIZE_BYTES);
-        errLib = mbedtls_md5_starts_ret(&ctx);
+        errLib = MBEDTLS_MD5_STARTS(&ctx);
     }
     if (0 == errLib)
     {
-        errLib = mbedtls_md5_update_ret(&ctx, sum, SOPC_CBC_BLOCK_SIZE_BYTES);
+        errLib = MBEDTLS_MD5_UPDATE(&ctx, sum, SOPC_CBC_BLOCK_SIZE_BYTES);
     }
     if (0 == errLib)
     {

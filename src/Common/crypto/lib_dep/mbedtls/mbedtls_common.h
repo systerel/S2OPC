@@ -56,6 +56,9 @@
 #define MBEDTLS_RSA_SET_PADDING(prsa, padding, hash_id) mbedtls_rsa_set_padding(prsa, padding, (int) hash_id)
 #define MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, oid, oid_len, val, val_len) \
     mbedtls_x509write_csr_set_extension(ctx, oid, oid_len, val, val_len)
+#define MBEDTLS_MD5_UPDATE(ctx, pwd, pwdLen) mbedtls_md5_update_ret(ctx, pwd, pwdLen)
+#define MBEDTLS_MD5_FINISH(ctx, pSum) mbedtls_md5_finish_ret(ctx, pSum)
+#define MBEDTLS_MD5_STARTS(ctx) mbedtls_md5_starts_ret(ctx)
 
 #elif MBEDTLS_VERSION_MAJOR == 3
 /* MBEDTLS V3 */
@@ -70,6 +73,9 @@
 #define MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, oid, oid_len, val, val_len) \
     mbedtls_x509write_csr_set_extension(ctx, oid, oid_len, 0, val, val_len)
 
+#define MBEDTLS_MD5_UPDATE(ctx, pwd, pwdLen) mbedtls_md5_update(ctx, pwd, pwdLen)
+#define MBEDTLS_MD5_FINISH(ctx, pSum) mbedtls_md5_finish(ctx, pSum)
+#define MBEDTLS_MD5_STARTS(ctx) mbedtls_md5_starts(ctx)
 
 #define MBEDTLS_PK_PARSE_KEY(ctx, key, keylen, pwd, pwdlen, f_rng, p_rng) \
     mbedtls_pk_parse_key(ctx, key, keylen, pwd, pwdlen, f_rng, p_rng)
