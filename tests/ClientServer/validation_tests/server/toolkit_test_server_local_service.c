@@ -631,7 +631,10 @@ int main(int argc, char* argv[])
     }
 
     // Configure the callback
-    SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    }
 
     // Server certificates configuration
     if (SOPC_STATUS_OK == status)

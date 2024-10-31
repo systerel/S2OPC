@@ -514,16 +514,21 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void)
     pConfig->serverConfig.freeCstringsFlag = true;
 
     // Server state initialization
-    SOPC_Mutex_Initialization(&sopc_server_helper_config.stateMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Initialization(&sopc_server_helper_config.stateMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     sopc_server_helper_config.state = SOPC_SERVER_STATE_CONFIGURING;
 
     // Data for synchronous local service call
-    SOPC_Condition_Init(&sopc_server_helper_config.syncLocalServiceCond);
-    SOPC_Mutex_Initialization(&sopc_server_helper_config.syncLocalServiceMutex);
+    mutStatus = SOPC_Condition_Init(&sopc_server_helper_config.syncLocalServiceCond);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = SOPC_Mutex_Initialization(&sopc_server_helper_config.syncLocalServiceMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     // Data used only when server is running with synchronous Serve function
-    SOPC_Condition_Init(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
-    SOPC_Mutex_Initialization(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    mutStatus = SOPC_Condition_Init(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = SOPC_Mutex_Initialization(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_ServerHelper_AdressSpaceNotifCb);
     if (SOPC_STATUS_OK != status)

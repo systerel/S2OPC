@@ -208,10 +208,12 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
         SOPC_KeyManager_CRL_Free(crl);
 #else // WITH_STATIC_SECURITY_DATA == false
         /* Configure the callback */
-        SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+        status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         /* Load client/server certificates and server key from files */
-        status = SOPC_ServerConfigHelper_SetKeyCertPairFromPath(default_server_cert, default_key_cert, true);
-
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ServerConfigHelper_SetKeyCertPairFromPath(default_server_cert, default_key_cert, true);
+        }
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
