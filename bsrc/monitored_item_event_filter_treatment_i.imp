@@ -45,11 +45,8 @@ OPERATIONS
         l_nbSelectClauses,
         l_nbWhereElts,
         l_WhereClauseSc,
-        l_oneInvalidWhereClause,
         l_scSelectClauses,
-        l_oneInvalidSelectClause,
-        l_selectClauseIdx,
-        l_selectStatusCode
+        l_oneInvalidSelectClause
     IN
         filterCtx := c_monitoringFilterCtx_indet;
         filterResult := c_filterResult_indet;
@@ -144,8 +141,7 @@ OPERATIONS
     VAR
         l_bres,
         l_nbSelectClauses,
-        l_nbWhereClauseElements,
-        l_oneValidWhereClause
+        l_nbWhereClauseElements
     IN
 
         notifTriggered := FALSE;

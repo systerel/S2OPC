@@ -491,13 +491,7 @@ OPERATIONS
         l_includedSubtypes,
         l_targetName,
         l_browseDirection,
-
-        l_name_empty,
-        l_translate_statusCode,
-
-        l_continue_source,
-        l_size,
-        l_index
+        l_name_empty
     IN
         /* Get RelativePathElt info for browse */
         l_referenceTypeId <-- read_RelativePathElt_ReferenceTypeId(relativePathElt);
@@ -596,9 +590,7 @@ OPERATIONS
         l_size,
         l_index,
         l_continue_source,
-        l_translate_statusCode,
-        l_includedSubtypes,
-        l_targetName
+        l_translate_statusCode
     IN
         statusCode_operation := e_sc_bad_nothing_to_do;
         l_size <--get_BrowsePathSourceSize;

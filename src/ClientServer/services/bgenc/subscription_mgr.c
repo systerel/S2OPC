@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 08/04/2024 12:58:59
+ Date                 : 31/10/2024 22:02:05
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -757,18 +757,15 @@ void subscription_mgr__local_create_delete_notification_on_set_monit_mode_change
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
    const constants__t_monitoringMode_i subscription_mgr__p_prevMonitMode,
    const constants__t_monitoringMode_i subscription_mgr__p_newMonitMode) {
-   {
-      
-      if ((subscription_mgr__p_prevMonitMode == constants__e_monitoringMode_disabled) &&
-         (subscription_mgr__p_newMonitMode != constants__e_monitoringMode_disabled)) {
-         subscription_mgr__local_create_notification_if_node_changed_or_monitMode_enabling(subscription_mgr__p_monitoredItemPointer,
-            true,
-            true);
-      }
-      else if ((subscription_mgr__p_prevMonitMode != constants__e_monitoringMode_disabled) &&
-         (subscription_mgr__p_newMonitMode == constants__e_monitoringMode_disabled)) {
-         subscription_core__clear_monitored_item_notifications(subscription_mgr__p_monitoredItemPointer);
-      }
+   if ((subscription_mgr__p_prevMonitMode == constants__e_monitoringMode_disabled) &&
+      (subscription_mgr__p_newMonitMode != constants__e_monitoringMode_disabled)) {
+      subscription_mgr__local_create_notification_if_node_changed_or_monitMode_enabling(subscription_mgr__p_monitoredItemPointer,
+         true,
+         true);
+   }
+   else if ((subscription_mgr__p_prevMonitMode != constants__e_monitoringMode_disabled) &&
+      (subscription_mgr__p_newMonitMode == constants__e_monitoringMode_disabled)) {
+      subscription_core__clear_monitored_item_notifications(subscription_mgr__p_monitoredItemPointer);
    }
 }
 

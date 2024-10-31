@@ -73,8 +73,6 @@ OPERATIONS
     notifTriggered <-- evaluate_where_clause (p_filterCtx, p_nbWhereElts, p_event) =
     VAR
         l_eventTypeId,
-        l_continue,
-        l_whereEltIdx,
         l_whereOfTypeId,
         l_nodeIdsEqual,
         l_isEventTypeRetained

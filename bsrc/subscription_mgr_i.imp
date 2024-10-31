@@ -960,7 +960,6 @@ OPERATIONS
 
     local_create_notification_on_monitored_item_if_event_selected (p_monitoredItemPointer, p_event, p_sub_id, p_mi_id) =
     VAR
-        l_notification_with_locales_triggered,
         l_monitoredItemId,
         l_subscription,
         l_valid_subscription,
@@ -1021,8 +1020,7 @@ OPERATIONS
     VAR
         l_continue,
         l_iterator,
-        l_monitoredItemPointer,
-        l_isEventMI
+        l_monitoredItemPointer
     IN
         l_continue, l_iterator <-- init_iter_monitored_item (p_monitoredItemQueue);
         WHILE l_continue = TRUE DO
@@ -1046,7 +1044,6 @@ OPERATIONS
     local_create_notification_on_monitored_items_if_data_changed (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
     VAR
         l_notification_triggered,
-        l_notification_with_locales_triggered,
         l_monitoredItemId,
         l_subscription,
         l_valid_subscription,
@@ -1330,16 +1327,7 @@ OPERATIONS
     ;
 
     local_create_delete_notification_on_set_monit_mode_change (p_monitoredItemPointer, p_prevMonitMode, p_newMonitMode) =
-    VAR
-        l_monitoredItemId,
-        l_subscription,
-        l_nid,
-        l_aid,
-        l_indexRange,
-        l_timestampToReturn,
-        l_monitMode,
-        l_clientHandle
-    IN
+    BEGIN
         IF p_prevMonitMode = e_monitoringMode_disabled & p_newMonitMode /= e_monitoringMode_disabled
         THEN
             /* Generate a notification when the monitoring mode is not disabled anymore */

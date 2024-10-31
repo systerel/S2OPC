@@ -985,7 +985,6 @@ OPERATIONS
         l_monitoringMode,
         l_clientHandle,
         l_mi_available_notifs,
-        l_available_notifs,
         l_isEvent,
         l_offset_from_maxint
     IN
@@ -1199,7 +1198,6 @@ OPERATIONS
         l_nb_data_notifs,
         l_nb_event_notifs,
         l_max_configured_notifications,
-        l_max_nb_notifications,
         l_NotificationAvailable,
         l_MoreNotifications,
         l_notifRepublishQueue,
@@ -1660,7 +1658,6 @@ OPERATIONS
         l_nb_data_notifs,
         l_nb_event_notifs,
         l_max_configured_notifications,
-        l_max_nb_notifications,
         l_NotificationAvailable,
         l_MessageSent,
         l_KeepAliveCounter,
@@ -1838,7 +1835,6 @@ OPERATIONS
         l_nb_data_notifs,
         l_nb_event_notifs,
         l_max_configured_notifications,
-        l_max_nb_notifications,
         l_nb_repub_notifs,
         l_bres,
         l_notifMsg,

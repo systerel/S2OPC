@@ -534,7 +534,6 @@ OPERATIONS
         l_valid_encrypt,
         l_bret,
         l_valid_user_token_sign,
-        l_valid_write_user_token_sign,
         l_user_token_type,
         l_user_token_signature,
         l_app_context

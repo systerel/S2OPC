@@ -888,8 +888,7 @@ OPERATIONS
         l_session,
         l_ret,
         l_secu_failed,
-        l_buffer_out,
-        l_channel_cfg
+        l_buffer_out
     IN
         valid_req := FALSE;
         sc := e_sc_bad_decoding_error;
@@ -948,7 +947,6 @@ OPERATIONS
         l_resp_msg_header,
         l_valid_resp_header,
         l_resp_msg,
-        l_valid_resp,
         l_request_handle,
         l_validated_req_handle,
         l_session
@@ -1063,8 +1061,7 @@ OPERATIONS
         l_resp_msg_header,
         l_endpoint_config_idx,
         l_ret,
-        l_buffer_out,
-        l_channel_cfg
+        l_buffer_out
     IN
         sc := c_StatusCode_indet;
         valid_req := FALSE;

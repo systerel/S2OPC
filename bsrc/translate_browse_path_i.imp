@@ -414,8 +414,7 @@ OPERATIONS
         l_index,
         l_expandedNodeId,
         l_local_server,
-        l_nodeId,
-        l_source_copy
+        l_nodeId
     IN
         statusCode_operation := e_sc_ok;
         l_size <-- get_BrowsePathResultSize;
@@ -457,13 +456,9 @@ OPERATIONS
     out_statusCode_operation <-- copy_browsePathResult_to_msg(browsePath, in_statusCode_operation) =
     VAR
         l_size,
-        l_continue,
-        l_index,
         l_size_result,
         l_size_remaining,
         l_statusCode_alloc,
-        l_expandedNodeId,
-        l_remainingIndex,
         l_statusCode_op
     IN
         out_statusCode_operation := in_statusCode_operation;
@@ -500,9 +495,7 @@ OPERATIONS
     VAR
         l_continue,
         l_index,
-        l_expandedNodeId,
-        l_remainingIndex,
-        l_statusCode_alloc
+        l_expandedNodeId
     IN
         statusCode_alloc := e_sc_ok;
         out_statusCode_operation := in_statusCode_operation;
@@ -622,10 +615,8 @@ OPERATIONS
     VAR
         l_continue,
         l_continue_1,
-        l_source_copy,
         l_index,
-        l_relativePathElt,
-        l_statusCode
+        l_relativePathElt
     IN
         statusCode_operation <-- update_one_browse_path_source(source);
 

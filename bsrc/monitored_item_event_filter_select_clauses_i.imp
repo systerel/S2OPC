@@ -40,7 +40,6 @@ OPERATIONS
         l_selectStatusCode,
         l_clauseResult,
         l_selectClauseIdx,
-        l_selectClauseTypeId,
         l_oneValidSelectClause
     IN
         l_oneValidSelectClause := FALSE;
