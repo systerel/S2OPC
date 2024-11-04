@@ -2744,10 +2744,10 @@ class PyS2OPC_Client(PyS2OPC):
         if ConnectionHandlerClass is not None:
             assert issubclass(ConnectionHandlerClass, BaseClientConnectionHandler)
             connection = ConnectionHandlerClass(c_connection)
-            # Set connection handler
-            PyS2OPC_Client._dConnectHandler[id_sc] = connection
         else:
             connection = BaseClientConnectionHandler(c_connection)
+        # Set connection handler
+        PyS2OPC_Client._dConnectHandler[id_sc] = connection
         return connection
 
     @staticmethod

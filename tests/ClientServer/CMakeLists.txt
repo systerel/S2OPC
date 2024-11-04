@@ -733,6 +733,7 @@ ${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/samples/ClientServer/pys2opc/client"
   endfunction()
 
   pys2opc_validation_test("pys2opc_client.py" YES)
+  pys2opc_validation_test("pys2opc_client_server_disco.py" NO)
   pys2opc_validation_test("pys2opc_server.py" NO)
 endif()
 
