@@ -1133,7 +1133,7 @@ class PyS2OPC_Server(PyS2OPC):
 
     # @staticmethod : Python 3.9 does not support both and report error on staticmethod is not callable
     @contextmanager
-    def serve():
+    def serve() -> None:
         """
         Starts the server asynchronously.
         Server information node is updated and endpoints are asynchronously requested to be opened.
@@ -1155,10 +1155,10 @@ class PyS2OPC_Server(PyS2OPC):
         try:
             yield
         finally:
-            return PyS2OPC_Server.stop_serve()
+            PyS2OPC_Server.stop_serve()
 
     @staticmethod
-    def serving():
+    def serving() -> bool:
         """
         Returns true if the server is in service, otherwise false.
         """
