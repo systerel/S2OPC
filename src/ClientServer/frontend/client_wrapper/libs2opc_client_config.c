@@ -580,6 +580,13 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(SOPC_C
                 SOPC_Logger_TraceError(
                     SOPC_LOG_MODULE_CLIENTSERVER, "Connection %s [%" PRIu16 "]: Failed to load server certificate %s.",
                     secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx, secConnConfig->serverCertPath);
+
+                // A NOK status creating certificate holder hilight an upstream bad configuration, to comply with
+                // documentation return invalid parameters
+                if (SOPC_STATUS_NOK == status)
+                {
+                    status = SOPC_STATUS_INVALID_PARAMETERS;
+                }
             }
         }
         else
