@@ -28,7 +28,9 @@ makes a read,
 makes a write,
 check that the change in value is received through the subscription,
 browse some nodes,
-callMethod (counter_testObject).
+service failures,
+callMethod (counter_testObject),
+client clear.
 
 Does this again with two or more connections in parallel.
 
@@ -484,6 +486,10 @@ if __name__ == '__main__':
         finally:
             for conn in connections:
                 conn.disconnect()
+
+    logger_.begin_section('Client clear Tests -')
+    logger_.add_test('Client uninitialized.', not(PyS2OPC_Client._initialized_cli))
+    logger_.add_test('Dictionary containing all connection configurations is cleared.', configs == {})
 
     logger_.finalize_report()
     sys.exit(1 if logger_.has_failed_tests else 0)

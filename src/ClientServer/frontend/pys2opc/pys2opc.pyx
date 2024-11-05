@@ -2620,6 +2620,8 @@ class PyS2OPC_Client(PyS2OPC):
     Used to create clients only.
     """
 
+    _dConfigHandler = {}
+    """  Stores known connection configurations {id: ConnectionConfiguration} """
     _dConnectHandler = {}
     """  Stores known active connections {id: ConnectionHandler()} """
 
@@ -2669,6 +2671,7 @@ class PyS2OPC_Client(PyS2OPC):
         """
         Clear the client configuration and clear/stop the toolkit if applicable.
         """
+        PyS2OPC_Client._dConfigHandler.clear()
         SOPC_ClientConfigHelper_Clear()
         PyS2OPC._initialized_cli = False
         if PyS2OPC._initialized_srv == False:
@@ -2701,7 +2704,8 @@ class PyS2OPC_Client(PyS2OPC):
                 raise SOPC_Failure('Configuration ID {} is not unique in XML configuration {}'
                                    .format(configId, xml_client_config_path))
             result[configId] = ConnectionConfiguration(configs, i)
-
+        # Set config handler
+        PyS2OPC_Client._dConfigHandler = result
         return result
 
     @staticmethod
