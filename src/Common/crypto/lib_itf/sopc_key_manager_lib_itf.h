@@ -58,6 +58,7 @@
  * \note            Content of the key is unspecified when return value is not SOPC_STATUS_OK.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  SOPC_STATUS_OUT_OF_MEMORY in case of memory allocation failure,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* buffer,

@@ -86,7 +86,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
 
     key = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
     if (NULL == key)
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     key->isBorrowedFromCert = false;
     mbedtls_pk_init(&key->pk);
 
@@ -100,6 +100,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     SOPC_ASSERT(0 == res);
 
     res = -1;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     // MbedTLS fix: mbedtls_pk_parse_key needs a NULL terminated buffer to parse
     // PEM keys.
@@ -107,19 +108,16 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     {
         uint8_t* null_terminated_buffer = SOPC_Calloc(1 + lenBuf, sizeof(uint8_t));
 
-        if (null_terminated_buffer == NULL)
-        {
-            SOPC_Free(key);
-            mbedtls_entropy_free(&entropy);
-            mbedtls_ctr_drbg_free(&ctr_drbg);
-            return SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        status = null_terminated_buffer == NULL ? SOPC_STATUS_OUT_OF_MEMORY : status;
 
-        memcpy(null_terminated_buffer, buffer, lenBuf);
-        res = is_public ? mbedtls_pk_parse_public_key(&key->pk, null_terminated_buffer, 1 + lenBuf)
-                        : MBEDTLS_PK_PARSE_KEY(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0,
-                                               mbedtls_ctr_drbg_random, &ctr_drbg);
-        SOPC_Free(null_terminated_buffer);
+        if (SOPC_STATUS_OK == status)
+        {
+            memcpy(null_terminated_buffer, buffer, lenBuf);
+            res = is_public ? mbedtls_pk_parse_public_key(&key->pk, null_terminated_buffer, 1 + lenBuf)
+                            : MBEDTLS_PK_PARSE_KEY(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0,
+                                                   mbedtls_ctr_drbg_random, &ctr_drbg);
+            SOPC_Free(null_terminated_buffer);
+        }
     }
 
     if (0 != res)
@@ -130,15 +128,16 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
 
     mbedtls_entropy_free(&entropy);
     mbedtls_ctr_drbg_free(&ctr_drbg);
-    if (0 != res)
+    if (0 != res || SOPC_STATUS_OK != status)
     {
         SOPC_Free(key);
-        return SOPC_STATUS_NOK;
+    }
+    else
+    {
+        *ppKey = key;
     }
 
-    *ppKey = key;
-
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 /**
@@ -179,21 +178,22 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
     int res = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, NULL, 0);
     SOPC_ASSERT(0 == res);
 
-    res = mbedtls_pk_parse_keyfile(&key->pk, szPath, password, mbedtls_ctr_drbg_random, &ctr_drbg);
-    if (0 != res)
-    {
-        SOPC_Free(key);
-        mbedtls_entropy_free(&entropy);
-        mbedtls_ctr_drbg_free(&ctr_drbg);
-        return SOPC_STATUS_NOK;
-    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    res = MBEDTLS_PK_PARSE_KEY_FILE(&key->pk, szPath, password, mbedtls_ctr_drbg_random, &ctr_drbg);
+    status = 0 != res ? SOPC_STATUS_NOK : status;
 
     mbedtls_entropy_free(&entropy);
     mbedtls_ctr_drbg_free(&ctr_drbg);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(key);
+    }
+    else
+    {
+        *ppKey = key;
+    }
 
-    *ppKey = key;
-
-    return SOPC_STATUS_OK;
+    return status;
 #else
     return SOPC_STATUS_NOK;
 #endif

@@ -73,7 +73,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     key = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
     if (NULL == key)
     {
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     key->isBorrowedFromCert = false;

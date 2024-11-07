@@ -53,6 +53,7 @@
     mbedtls_rsa_rsassa_pss_verify(ctx, NULL, NULL, MBEDTLS_RSA_PUBLIC, md_alg, hashlen, hash, sig)
 #define MBEDTLS_PK_PARSE_KEY(ctx, key, keylen, pwd, pwdlen, f_rng, p_rng) \
     mbedtls_pk_parse_key(ctx, key, keylen, pwd, pwdlen)
+#define MBEDTLS_PK_PARSE_KEY_FILE(ctx, path, password, f_rng, p_rng) mbedtls_pk_parse_keyfile(ctx, path, password)
 #define MBEDTLS_RSA_SET_PADDING(prsa, padding, hash_id) mbedtls_rsa_set_padding(prsa, padding, (int) hash_id)
 #define MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, oid, oid_len, val, val_len) \
     mbedtls_x509write_csr_set_extension(ctx, oid, oid_len, val, val_len)
@@ -79,6 +80,8 @@
 
 #define MBEDTLS_PK_PARSE_KEY(ctx, key, keylen, pwd, pwdlen, f_rng, p_rng) \
     mbedtls_pk_parse_key(ctx, key, keylen, pwd, pwdlen, f_rng, p_rng)
+#define MBEDTLS_PK_PARSE_KEY_FILE(ctx, path, password, f_rng, p_rng) \
+    mbedtls_pk_parse_keyfile(ctx, path, password, f_rng, p_rng)
 
 // These defines shall be set before including any other MBEDTLS headers
 #ifndef MBEDTLS_ALLOW_PRIVATE_ACCESS
