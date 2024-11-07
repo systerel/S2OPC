@@ -603,6 +603,17 @@ add_test(NAME "validation::client_RHE_faults_test"
   $<TARGET_FILE:toolkit_test_client_rhe_faults>)
 set_tests_properties("validation::client_RHE_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_RHE_faults_test.tap")
 
+if (NOT WIN32 AND expat_FOUND)
+  add_test(NAME "validation::check_file_transfer"
+          WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+          COMMAND
+          "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+          "--server-wd" $<TARGET_FILE_DIR:toolkit_test_server_file_transfer>
+          "--server-cmd" $<TARGET_FILE:toolkit_test_server_file_transfer>
+          "./check_file_transfer")
+  set_tests_properties("validation::check_file_transfer" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=check_file_transfer.tap")
+endif()
+
 # Function to run a validation of the S2OPC server scenario with given client scenario test
 function(s2opc_custom_server_validation_test server_target name)
   get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory

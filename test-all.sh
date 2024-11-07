@@ -54,6 +54,7 @@ check_sc_rcv_encrypted_buffer.tap
 check_sks.tap
 check_sockets.tap
 client_RHE_faults_test.tap
+check_file_transfer.tap
 client_server_test.tap
 client_service_faults_test.tap
 sc_establish_timeout.tap
