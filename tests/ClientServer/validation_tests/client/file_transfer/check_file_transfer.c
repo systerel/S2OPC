@@ -24,9 +24,9 @@
 #include <sys/stat.h>
 
 #include "check_file_transfer_method.h"
+#include "libs2opc_client.h"
 #include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
-#include "libs2opc_new_client.h"
 #include "libs2opc_request_builder.h"
 
 #include "opcua_statuscodes.h"
@@ -68,7 +68,7 @@ static OpcUa_ReadResponse* get_read_response(const char* nodeId)
         SOPC_ReadRequest_SetReadValueFromStrings(readRequest, 0, nodeId, SOPC_AttributeId_Value, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    status = SOPC_ClientHelperNew_ServiceSync(gConnection, readRequest, (void**) &readResponse);
+    status = SOPC_ClientHelper_ServiceSync(gConnection, readRequest, (void**) &readResponse);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(readResponse);
     ck_assert_int_eq(readResponse->NoOfResults, 1);
@@ -194,7 +194,7 @@ START_TEST(browse_file_type)
                                                                 OpcUa_BrowseResultMask_All);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    status = SOPC_ClientHelperNew_ServiceSync(gConnection, browseRequest, (void**) &browseResponse);
+    status = SOPC_ClientHelper_ServiceSync(gConnection, browseRequest, (void**) &browseResponse);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(browseResponse->NoOfResults, nbBrowsedItems);
 
@@ -938,7 +938,7 @@ static void setup(void)
     /* Create client configuration */
     SOPC_SecureConnection_Config* scConfig = client_create_configuration();
     // Connect client to server
-    SOPC_ReturnStatus status = SOPC_ClientHelperNew_Connect(scConfig, client_ConnectionEventCallback, &gConnection);
+    SOPC_ReturnStatus status = SOPC_ClientHelper_Connect(scConfig, client_ConnectionEventCallback, &gConnection);
 
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_ptr_nonnull(gConnection);
@@ -954,7 +954,7 @@ static void teardown(void)
     res = remove_file(ITEM_2_PATH);
     ck_assert(0 == res);
 
-    SOPC_ReturnStatus status = SOPC_ClientHelperNew_Disconnect(&gConnection);
+    SOPC_ReturnStatus status = SOPC_ClientHelper_Disconnect(&gConnection);
     ck_assert(SOPC_STATUS_OK == status);
 
     /* Clear the toolkit library */

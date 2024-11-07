@@ -62,7 +62,7 @@ uint32_t SOPC_TEST_FileTransfer_OpenMethod(SOPC_ClientConnection* scConnection,
                                                                            nbOfInputParams, pVariantCallRequest);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_ClientHelperNew_ServiceSync(scConnection, callRequest, (void**) callResponse);
+    status = SOPC_ClientHelper_ServiceSync(scConnection, callRequest, (void**) callResponse);
     OpcUa_CallResponse* resp = *callResponse;
     if (SOPC_STATUS_OK == status && NULL != resp && 1 == resp->NoOfResults)
     {
@@ -102,7 +102,7 @@ void SOPC_TEST_FileTransfer_CloseMethod(SOPC_ClientConnection* scConnection,
                                                                            nbOfInputParams, pVariantCallRequest);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_ClientHelperNew_ServiceSync(scConnection, callRequest, (void**) callResponse);
+    status = SOPC_ClientHelper_ServiceSync(scConnection, callRequest, (void**) callResponse);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Variant_Delete(pVariantCallRequest);
@@ -134,7 +134,7 @@ void SOPC_TEST_FileTransfer_WriteMethod(SOPC_ClientConnection* scConnection,
                                                                            nbOfInputParams, pVariantCallRequest);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_ClientHelperNew_ServiceSync(scConnection, callRequest, (void**) callResponse);
+    status = SOPC_ClientHelper_ServiceSync(scConnection, callRequest, (void**) callResponse);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Variant_Delete(pVariantCallRequest);
@@ -166,7 +166,7 @@ void SOPC_TEST_FileTransfer_ReadMethod(SOPC_ClientConnection* scConnection,
                                                                            nbOfInputParams, pVariantCallRequest);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_ClientHelperNew_ServiceSync(scConnection, callRequest, (void**) callResponse);
+    status = SOPC_ClientHelper_ServiceSync(scConnection, callRequest, (void**) callResponse);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Variant_Delete(pVariantCallRequest);
@@ -198,7 +198,7 @@ void SOPC_TEST_FileTransfer_SetPositionMethod(SOPC_ClientConnection* scConnectio
                                                                            nbOfInputParams, pVariantCallRequest);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_ClientHelperNew_ServiceSync(scConnection, callRequest, (void**) callResponse);
+    status = SOPC_ClientHelper_ServiceSync(scConnection, callRequest, (void**) callResponse);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Variant_Delete(pVariantCallRequest);
@@ -225,7 +225,7 @@ uint64_t SOPC_TEST_FileTransfer_GetPositionMethod(SOPC_ClientConnection* scConne
                                                                            nbOfInputParams, pVariantCallRequest);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_ClientHelperNew_ServiceSync(scConnection, callRequest, (void**) callResponse);
+    status = SOPC_ClientHelper_ServiceSync(scConnection, callRequest, (void**) callResponse);
     OpcUa_CallResponse* resp = *callResponse;
     if (SOPC_STATUS_OK == status && NULL != resp && 1 == resp->NoOfResults)
     {

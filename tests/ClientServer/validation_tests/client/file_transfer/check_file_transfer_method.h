@@ -20,7 +20,7 @@
 #ifndef CHECK_FILE_TRANSFER_METHOD_H_
 #define CHECK_FILE_TRANSFER_METHOD_H_
 
-#include "libs2opc_new_client.h"
+#include "libs2opc_client.h"
 
 #define INVALID_FILE_HANDLE 0x0u
 #define INVALID_POSITION 0xFFFFFFFFFFFFFFFFu
