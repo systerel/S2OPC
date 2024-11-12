@@ -276,6 +276,10 @@ static SOPC_InternalSocket* SOPC_SocketsEventMgr_CreateServerSocket(const char* 
                         if (SOPC_STATUS_OK == status)
                         {
                             status = SOPC_Socket_Listen(freeSocket->sock, p);
+                            if (SOPC_STATUS_OK != status)
+                            {
+                                SOPC_Socket_Close(&freeSocket->sock);
+                            }
                         }
 
                         if (SOPC_STATUS_OK == status)
