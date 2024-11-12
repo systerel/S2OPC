@@ -57,6 +57,33 @@ INITIALISATION
 
 OPERATIONS
 
+    service_class <-- get_msg_service_class (msg_typ) =
+    PRE
+        msg_typ : t_msg_type_i &
+        msg_typ : t_msg_type
+    THEN
+        service_class
+        :(  service_class : t_msg_service_class_i &
+            service_class : t_msg_service_class   &
+
+            (   msg_typ : s_discovery_service_reqs \/ s_discovery_service_resps
+                =>
+                service_class = e_msg_discovery_service_class) &
+            (   msg_typ : s_service_on_session_reqs \/ s_service_on_session_resps
+                =>
+                service_class = e_msg_session_service_class) &
+            (   msg_typ : s_session_treatment_reqs \/ s_session_treatment_resps
+                =>
+                service_class = e_msg_session_treatment_class) &
+            (   not(msg_typ : s_discovery_service_reqs  \/ s_discovery_service_resps)  &
+                not(msg_typ : s_service_on_session_reqs \/ s_service_on_session_resps) &
+                not(msg_typ : s_session_treatment_reqs  \/ s_session_treatment_resps)
+                =>
+                service_class = e_msg_service_fault_class)
+        )
+    END
+    ;
+
     valid, resp_typ <-- client_service_fault_to_resp_type (msg_buffer) =
     PRE
         a_msg_in_type = e_msg_service_fault_resp &

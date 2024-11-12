@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 21/06/2024 07:39:51
+ Date                 : 12/11/2024 17:42:38
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -137,6 +137,9 @@ extern void service_mgr__encode_session_service_resp(
 extern void service_mgr__get_response_type(
    const constants__t_msg_type_i service_mgr__req_msg_typ,
    constants__t_msg_type_i * const service_mgr__resp_msg_typ);
+extern void service_mgr__l_get_msg_service_class(
+   const constants__t_msg_type_i service_mgr__msg_typ,
+   constants__t_msg_service_class_i * const service_mgr__service_class);
 extern void service_mgr__local_client_discovery_service_request(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
@@ -253,6 +256,9 @@ extern void service_mgr__client_snd_msg_failure(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_client_request_handle_i service_mgr__request_handle,
    const constants_statuscodes_bs__t_StatusCode_i service_mgr__error_status);
+extern void service_mgr__get_msg_service_class(
+   const constants__t_msg_type_i service_mgr__msg_typ,
+   constants__t_msg_service_class_i * const service_mgr__service_class);
 extern void service_mgr__internal_server_inactive_session_prio_event(
    const constants__t_session_i service_mgr__p_session,
    const constants__t_sessionState service_mgr__p_newSessionState,

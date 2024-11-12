@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 08/04/2024 12:58:38
+ Date                 : 12/11/2024 17:42:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -68,9 +68,6 @@ extern void io_dispatch_mgr__INITIALISATION(void);
 extern void io_dispatch_mgr__get_msg_header_type(
    const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
    constants__t_msg_header_type_i * const io_dispatch_mgr__header_type);
-extern void io_dispatch_mgr__get_msg_service_class(
-   const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
-   constants__t_msg_service_class_i * const io_dispatch_mgr__service_class);
 extern void io_dispatch_mgr__l_may_close_secure_channel_without_session(
    t_bool * const io_dispatch_mgr__l_is_one_sc_closing);
 extern void io_dispatch_mgr__l_set_app_call_context_channel_config(

@@ -168,6 +168,24 @@ LOCAL_OPERATIONS
     THEN
         endpoint_config_idx :: t_endpoint_config_idx_i
     END
+    ;
+
+    bres, session <-- local_client_validate_and_drop_session_req_session_handle (channel, req_handle) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel_connected &
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
+        a_msg_in_type : s_service_on_session_resps
+    THEN
+        CHOICE
+            bres := TRUE ||
+            session :( session : t_session_i & session : t_session)
+        OR
+            bres := FALSE ||
+            session := c_session_indet
+        END
+    END
 
 OPERATIONS
 
@@ -271,6 +289,37 @@ OPERATIONS
         END
     END
     ;
+
+    bres, session <-- local_client_validate_and_drop_session_req_session_handle (channel, req_handle) =
+    VAR
+        l_session,
+        l_valid_session,
+        l_session_state,
+        l_session_channel
+    IN
+        session := c_session_indet;
+        l_session <-- client_get_session_and_remove_request_handle (req_handle);
+        l_valid_session <-- is_valid_session (l_session);
+        IF l_valid_session = TRUE
+        THEN
+            l_session_state <-- get_session_state_or_closed (l_session);
+            l_session_channel <-- get_session_channel (l_session);
+            IF l_session_state = e_session_userActivated &
+                l_session_channel = channel
+            THEN
+                bres <-- is_session_valid_for_service (channel, l_session)
+            ELSE
+                bres := FALSE
+            END
+        ELSE
+            bres := FALSE
+        END
+        ;
+        IF bres = TRUE
+        THEN
+            session := l_session
+        END
+    END;
 
     /* END OF LOCAL OPERATIONS */
 
@@ -544,29 +593,34 @@ OPERATIONS
         ret := l_ret
     END;
 
+    bres <-- client_validate_session_service_req_failed (channel, req_handle) =
+    VAR
+        l_session,
+        l_session_state
+    IN
+        bres, l_session <-- local_client_validate_and_drop_session_req_session_handle (channel, req_handle);
+        IF bres = TRUE
+        THEN
+            l_session_state <-- get_session_state_or_closed (l_session);
+            // session in invalid state or invalid channel used => close session
+            bres := bool(l_session_state /= e_session_closed)
+        END
+    END;
+
     bres, session <-- client_validate_session_service_resp (channel, req_handle) =
     VAR
         l_session,
         l_valid_session,
-        l_session_state,
-        l_session_channel
+        l_session_state
     IN
         session := c_session_indet;
-        l_session <-- client_get_session_and_remove_request_handle (req_handle);
-        l_valid_session <-- is_valid_session (l_session);
-        l_session_state <-- get_session_state_or_closed (l_session);
-        IF l_valid_session = TRUE
+        bres, l_session <-- local_client_validate_and_drop_session_req_session_handle (channel, req_handle);
+        IF bres = FALSE
         THEN
-            l_session_channel <-- get_session_channel (l_session);
-            IF l_session_state = e_session_userActivated &
-                l_session_channel = channel
+            l_valid_session <-- is_valid_session (l_session);
+            IF l_valid_session = TRUE
             THEN
-                bres <-- is_session_valid_for_service (channel, l_session)
-            ELSE
-                bres := FALSE
-            END;
-            IF bres = FALSE
-            THEN
+                l_session_state <-- get_session_state_or_closed (l_session);
                 // session in invalid state or invalid channel used => close session
                 IF l_session_state /= e_session_userActivated
                 THEN
@@ -574,11 +628,9 @@ OPERATIONS
                 ELSE
                     local_client_close_session (l_session, e_sc_bad_secure_channel_id_invalid)
                 END
-            ELSE
-                session := l_session
             END
         ELSE
-            bres := FALSE
+            session := l_session
         END
     END;
 

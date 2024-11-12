@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 30/05/2024 08:35:54
+ Date                 : 19/11/2024 16:41:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -160,6 +160,103 @@ void service_mgr__get_response_type(
    default:
       break;
    }
+}
+
+void service_mgr__l_get_msg_service_class(
+   const constants__t_msg_type_i service_mgr__msg_typ,
+   constants__t_msg_service_class_i * const service_mgr__service_class) {
+   switch (service_mgr__msg_typ) {
+   case constants__e_msg_discovery_find_servers_req:
+   case constants__e_msg_discovery_find_servers_resp:
+   case constants__e_msg_discovery_find_servers_on_network_req:
+   case constants__e_msg_discovery_find_servers_on_network_resp:
+   case constants__e_msg_discovery_get_endpoints_req:
+   case constants__e_msg_discovery_get_endpoints_resp:
+   case constants__e_msg_discovery_register_server_req:
+   case constants__e_msg_discovery_register_server_resp:
+   case constants__e_msg_discovery_register_server2_req:
+   case constants__e_msg_discovery_register_server2_resp:
+      *service_mgr__service_class = constants__e_msg_discovery_service_class;
+      break;
+   case constants__e_msg_session_create_req:
+   case constants__e_msg_session_create_resp:
+   case constants__e_msg_session_activate_req:
+   case constants__e_msg_session_activate_resp:
+   case constants__e_msg_session_close_req:
+   case constants__e_msg_session_close_resp:
+   case constants__e_msg_session_cancel_req:
+   case constants__e_msg_session_cancel_resp:
+      *service_mgr__service_class = constants__e_msg_session_treatment_class;
+      break;
+   case constants__e_msg_node_add_nodes_req:
+   case constants__e_msg_node_add_nodes_resp:
+   case constants__e_msg_node_add_references_req:
+   case constants__e_msg_node_add_references_resp:
+   case constants__e_msg_node_delete_nodes_req:
+   case constants__e_msg_node_delete_nodes_resp:
+   case constants__e_msg_node_delete_references_req:
+   case constants__e_msg_node_delete_references_resp:
+   case constants__e_msg_view_browse_req:
+   case constants__e_msg_view_browse_resp:
+   case constants__e_msg_view_browse_next_req:
+   case constants__e_msg_view_browse_next_resp:
+   case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
+   case constants__e_msg_view_translate_browse_paths_to_node_ids_resp:
+   case constants__e_msg_view_register_nodes_req:
+   case constants__e_msg_view_register_nodes_resp:
+   case constants__e_msg_view_unregister_nodes_req:
+   case constants__e_msg_view_unregister_nodes_resp:
+   case constants__e_msg_query_first_req:
+   case constants__e_msg_query_first_resp:
+   case constants__e_msg_query_next_req:
+   case constants__e_msg_query_next_resp:
+   case constants__e_msg_attribute_read_req:
+   case constants__e_msg_attribute_read_resp:
+   case constants__e_msg_attribute_history_read_req:
+   case constants__e_msg_attribute_history_read_resp:
+   case constants__e_msg_attribute_write_req:
+   case constants__e_msg_attribute_write_resp:
+   case constants__e_msg_attribute_history_update_req:
+   case constants__e_msg_attribute_history_update_resp:
+   case constants__e_msg_method_call_req:
+   case constants__e_msg_method_call_resp:
+   case constants__e_msg_monitored_items_create_req:
+   case constants__e_msg_monitored_items_create_resp:
+   case constants__e_msg_monitored_items_modify_req:
+   case constants__e_msg_monitored_items_modify_resp:
+   case constants__e_msg_monitored_items_set_monitoring_mode_req:
+   case constants__e_msg_monitored_items_set_monitoring_mode_resp:
+   case constants__e_msg_monitored_items_set_triggering_req:
+   case constants__e_msg_monitored_items_set_triggering_resp:
+   case constants__e_msg_monitored_items_delete_req:
+   case constants__e_msg_monitored_items_delete_resp:
+   case constants__e_msg_subscription_create_req:
+   case constants__e_msg_subscription_create_resp:
+   case constants__e_msg_subscription_modify_req:
+   case constants__e_msg_subscription_modify_resp:
+   case constants__e_msg_subscription_set_publishing_mode_req:
+   case constants__e_msg_subscription_set_publishing_mode_resp:
+   case constants__e_msg_subscription_publish_req:
+   case constants__e_msg_subscription_publish_resp:
+   case constants__e_msg_subscription_republish_req:
+   case constants__e_msg_subscription_republish_resp:
+   case constants__e_msg_subscription_transfer_subscriptions_req:
+   case constants__e_msg_subscription_transfer_subscriptions_resp:
+   case constants__e_msg_subscription_delete_subscriptions_req:
+   case constants__e_msg_subscription_delete_subscriptions_resp:
+      *service_mgr__service_class = constants__e_msg_session_service_class;
+      break;
+   default:
+      *service_mgr__service_class = constants__e_msg_service_fault_class;
+      break;
+   }
+}
+
+void service_mgr__get_msg_service_class(
+   const constants__t_msg_type_i service_mgr__msg_typ,
+   constants__t_msg_service_class_i * const service_mgr__service_class) {
+   service_mgr__l_get_msg_service_class(service_mgr__msg_typ,
+      service_mgr__service_class);
 }
 
 void service_mgr__treat_session_local_service_req(
@@ -1688,9 +1785,12 @@ void service_mgr__client_snd_msg_failure(
       t_bool service_mgr__l_is_applicative;
       constants__t_application_context_i service_mgr__l_app_context;
       constants__t_msg_type_i service_mgr__l_exp_resp_msg_typ;
+      constants__t_msg_service_class_i service_mgr__l_exp_resp_msg_class;
+      t_bool service_mgr__l_trigger_app_treatment;
       t_bool service_mgr__l_bres;
       constants__t_session_i service_mgr__l_session;
       
+      service_mgr__l_trigger_app_treatment = false;
       request_handle_bs__is_valid_req_handle(service_mgr__request_handle,
          &service_mgr__l_valid_req_handle);
       request_handle_bs__get_req_handle_channel(service_mgr__request_handle,
@@ -1699,11 +1799,10 @@ void service_mgr__client_snd_msg_failure(
          (service_mgr__l_req_handle_channel == service_mgr__channel)) {
          request_handle_bs__get_req_handle_resp_typ(service_mgr__request_handle,
             &service_mgr__l_exp_resp_msg_typ);
-         switch (service_mgr__l_exp_resp_msg_typ) {
-         case constants__e_msg_session_create_resp:
-         case constants__e_msg_session_activate_resp:
-         case constants__e_msg_session_close_resp:
-         case constants__e_msg_session_cancel_resp:
+         service_mgr__l_get_msg_service_class(service_mgr__l_exp_resp_msg_typ,
+            &service_mgr__l_exp_resp_msg_class);
+         switch (service_mgr__l_exp_resp_msg_class) {
+         case constants__e_msg_session_treatment_class:
             session_mgr__client_validate_session_service_resp(service_mgr__channel,
                service_mgr__request_handle,
                &service_mgr__l_bres,
@@ -1713,20 +1812,31 @@ void service_mgr__client_snd_msg_failure(
                   constants_statuscodes_bs__e_sc_bad_request_interrupted);
             }
             break;
+         case constants__e_msg_session_service_class:
+            session_mgr__client_validate_session_service_req_failed(service_mgr__channel,
+               service_mgr__request_handle,
+               &service_mgr__l_trigger_app_treatment);
+            break;
+         case constants__e_msg_discovery_service_class:
+            service_mgr__l_trigger_app_treatment = true;
+            break;
          default:
+            service_mgr__l_trigger_app_treatment = false;
+            break;
+         }
+         if (service_mgr__l_trigger_app_treatment == true) {
             request_handle_bs__get_req_handle_app_context(service_mgr__request_handle,
                &service_mgr__l_is_applicative,
                &service_mgr__l_app_context);
             request_handle_bs__get_req_handle_req_typ(service_mgr__request_handle,
                &service_mgr__l_req_typ);
-            request_handle_bs__client_remove_req_handle(service_mgr__request_handle);
             if (service_mgr__l_is_applicative == true) {
                service_response_cb_bs__cli_snd_failure(service_mgr__l_req_typ,
                   service_mgr__l_app_context,
                   service_mgr__error_status);
             }
-            break;
          }
+         request_handle_bs__client_remove_req_handle(service_mgr__request_handle);
       }
    }
 }

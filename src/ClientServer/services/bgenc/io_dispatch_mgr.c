@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 21/06/2024 07:39:37
+ Date                 : 12/11/2024 17:42:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -130,96 +130,6 @@ void io_dispatch_mgr__get_msg_header_type(
    }
 }
 
-void io_dispatch_mgr__get_msg_service_class(
-   const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
-   constants__t_msg_service_class_i * const io_dispatch_mgr__service_class) {
-   switch (io_dispatch_mgr__msg_typ) {
-   case constants__e_msg_discovery_find_servers_req:
-   case constants__e_msg_discovery_find_servers_resp:
-   case constants__e_msg_discovery_find_servers_on_network_req:
-   case constants__e_msg_discovery_find_servers_on_network_resp:
-   case constants__e_msg_discovery_get_endpoints_req:
-   case constants__e_msg_discovery_get_endpoints_resp:
-   case constants__e_msg_discovery_register_server_req:
-   case constants__e_msg_discovery_register_server_resp:
-   case constants__e_msg_discovery_register_server2_req:
-   case constants__e_msg_discovery_register_server2_resp:
-      *io_dispatch_mgr__service_class = constants__e_msg_discovery_service_class;
-      break;
-   case constants__e_msg_session_create_req:
-   case constants__e_msg_session_create_resp:
-   case constants__e_msg_session_activate_req:
-   case constants__e_msg_session_activate_resp:
-   case constants__e_msg_session_close_req:
-   case constants__e_msg_session_close_resp:
-   case constants__e_msg_session_cancel_req:
-   case constants__e_msg_session_cancel_resp:
-      *io_dispatch_mgr__service_class = constants__e_msg_session_treatment_class;
-      break;
-   case constants__e_msg_node_add_nodes_req:
-   case constants__e_msg_node_add_nodes_resp:
-   case constants__e_msg_node_add_references_req:
-   case constants__e_msg_node_add_references_resp:
-   case constants__e_msg_node_delete_nodes_req:
-   case constants__e_msg_node_delete_nodes_resp:
-   case constants__e_msg_node_delete_references_req:
-   case constants__e_msg_node_delete_references_resp:
-   case constants__e_msg_view_browse_req:
-   case constants__e_msg_view_browse_resp:
-   case constants__e_msg_view_browse_next_req:
-   case constants__e_msg_view_browse_next_resp:
-   case constants__e_msg_view_translate_browse_paths_to_node_ids_req:
-   case constants__e_msg_view_translate_browse_paths_to_node_ids_resp:
-   case constants__e_msg_view_register_nodes_req:
-   case constants__e_msg_view_register_nodes_resp:
-   case constants__e_msg_view_unregister_nodes_req:
-   case constants__e_msg_view_unregister_nodes_resp:
-   case constants__e_msg_query_first_req:
-   case constants__e_msg_query_first_resp:
-   case constants__e_msg_query_next_req:
-   case constants__e_msg_query_next_resp:
-   case constants__e_msg_attribute_read_req:
-   case constants__e_msg_attribute_read_resp:
-   case constants__e_msg_attribute_history_read_req:
-   case constants__e_msg_attribute_history_read_resp:
-   case constants__e_msg_attribute_write_req:
-   case constants__e_msg_attribute_write_resp:
-   case constants__e_msg_attribute_history_update_req:
-   case constants__e_msg_attribute_history_update_resp:
-   case constants__e_msg_method_call_req:
-   case constants__e_msg_method_call_resp:
-   case constants__e_msg_monitored_items_create_req:
-   case constants__e_msg_monitored_items_create_resp:
-   case constants__e_msg_monitored_items_modify_req:
-   case constants__e_msg_monitored_items_modify_resp:
-   case constants__e_msg_monitored_items_set_monitoring_mode_req:
-   case constants__e_msg_monitored_items_set_monitoring_mode_resp:
-   case constants__e_msg_monitored_items_set_triggering_req:
-   case constants__e_msg_monitored_items_set_triggering_resp:
-   case constants__e_msg_monitored_items_delete_req:
-   case constants__e_msg_monitored_items_delete_resp:
-   case constants__e_msg_subscription_create_req:
-   case constants__e_msg_subscription_create_resp:
-   case constants__e_msg_subscription_modify_req:
-   case constants__e_msg_subscription_modify_resp:
-   case constants__e_msg_subscription_set_publishing_mode_req:
-   case constants__e_msg_subscription_set_publishing_mode_resp:
-   case constants__e_msg_subscription_publish_req:
-   case constants__e_msg_subscription_publish_resp:
-   case constants__e_msg_subscription_republish_req:
-   case constants__e_msg_subscription_republish_resp:
-   case constants__e_msg_subscription_transfer_subscriptions_req:
-   case constants__e_msg_subscription_transfer_subscriptions_resp:
-   case constants__e_msg_subscription_delete_subscriptions_req:
-   case constants__e_msg_subscription_delete_subscriptions_resp:
-      *io_dispatch_mgr__service_class = constants__e_msg_session_service_class;
-      break;
-   default:
-      *io_dispatch_mgr__service_class = constants__e_msg_service_fault_class;
-      break;
-   }
-}
-
 void io_dispatch_mgr__l_may_close_secure_channel_without_session(
    t_bool * const io_dispatch_mgr__l_is_one_sc_closing) {
    {
@@ -295,7 +205,7 @@ void io_dispatch_mgr__receive_msg_buffer(
             &io_dispatch_mgr__l_is_client);
          io_dispatch_mgr__get_msg_header_type(io_dispatch_mgr__l_msg_type,
             &io_dispatch_mgr__l_msg_header_type);
-         io_dispatch_mgr__get_msg_service_class(io_dispatch_mgr__l_msg_type,
+         service_mgr__get_msg_service_class(io_dispatch_mgr__l_msg_type,
             &io_dispatch_mgr__l_msg_service_class);
          io_dispatch_mgr__l_set_app_call_context_channel_config(io_dispatch_mgr__channel);
          switch (io_dispatch_mgr__l_msg_header_type) {
@@ -376,7 +286,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                      &io_dispatch_mgr__l_valid_resp,
                      &io_dispatch_mgr__l_exp_msg_type);
                   if (io_dispatch_mgr__l_valid_resp == true) {
-                     io_dispatch_mgr__get_msg_service_class(io_dispatch_mgr__l_exp_msg_type,
+                     service_mgr__get_msg_service_class(io_dispatch_mgr__l_exp_msg_type,
                         &io_dispatch_mgr__l_msg_service_class);
                   }
                }
@@ -750,7 +660,7 @@ void io_dispatch_mgr__server_treat_local_service_request(
          channel_mgr__is_valid_endpoint_config_idx(io_dispatch_mgr__endpoint_config_idx,
             &io_dispatch_mgr__l_valid_endpoint_config);
          if (io_dispatch_mgr__l_valid_endpoint_config == true) {
-            io_dispatch_mgr__get_msg_service_class(io_dispatch_mgr__l_msg_typ,
+            service_mgr__get_msg_service_class(io_dispatch_mgr__l_msg_typ,
                &io_dispatch_mgr__l_msg_service_class);
             service_mgr__server_receive_local_service_req(io_dispatch_mgr__endpoint_config_idx,
                io_dispatch_mgr__l_msg_service_class,

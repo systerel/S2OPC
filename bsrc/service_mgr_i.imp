@@ -129,6 +129,33 @@ LOCAL_OPERATIONS
     END
     ;
 
+    service_class <-- l_get_msg_service_class (msg_typ) =
+    PRE
+        msg_typ : t_msg_type_i &
+        msg_typ : t_msg_type
+    THEN
+        service_class
+        :(  service_class : t_msg_service_class_i &
+            service_class : t_msg_service_class   &
+
+            (   msg_typ : s_discovery_service_reqs \/ s_discovery_service_resps
+                =>
+                service_class = e_msg_discovery_service_class) &
+            (   msg_typ : s_service_on_session_reqs \/ s_service_on_session_resps
+                =>
+                service_class = e_msg_session_service_class) &
+            (   msg_typ : s_session_treatment_reqs \/ s_session_treatment_resps
+                =>
+                service_class = e_msg_session_treatment_class) &
+            (   not(msg_typ : s_discovery_service_reqs  \/ s_discovery_service_resps)  &
+                not(msg_typ : s_service_on_session_reqs \/ s_service_on_session_resps) &
+                not(msg_typ : s_session_treatment_reqs  \/ s_session_treatment_resps)
+                =>
+                service_class = e_msg_service_fault_class)
+        )
+    END
+    ;
+
     StatusCode_service <-- treat_session_local_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
@@ -499,6 +526,102 @@ OPERATIONS
                 resp_msg_typ := e_msg_subscription_delete_subscriptions_resp
             END
         END
+    END
+    ;
+
+    service_class <-- l_get_msg_service_class (msg_typ) =
+    BEGIN
+        CASE msg_typ OF
+            EITHER e_msg_discovery_find_servers_req,
+                e_msg_discovery_find_servers_resp,
+                e_msg_discovery_find_servers_on_network_req,
+                e_msg_discovery_find_servers_on_network_resp,
+                e_msg_discovery_get_endpoints_req,
+                e_msg_discovery_get_endpoints_resp,
+                e_msg_discovery_register_server_req,
+                e_msg_discovery_register_server_resp,
+                e_msg_discovery_register_server2_req,
+                e_msg_discovery_register_server2_resp
+            THEN
+                service_class := e_msg_discovery_service_class
+            OR e_msg_session_create_req,
+                e_msg_session_create_resp,
+                e_msg_session_activate_req,
+                e_msg_session_activate_resp,
+                e_msg_session_close_req,
+                e_msg_session_close_resp,
+                e_msg_session_cancel_req,
+                e_msg_session_cancel_resp
+            THEN
+                service_class := e_msg_session_treatment_class
+            OR e_msg_node_add_nodes_req,
+                e_msg_node_add_nodes_resp,
+                e_msg_node_add_references_req,
+                e_msg_node_add_references_resp,
+                e_msg_node_delete_nodes_req,
+                e_msg_node_delete_nodes_resp,
+                e_msg_node_delete_references_req,
+                e_msg_node_delete_references_resp,
+                e_msg_view_browse_req,
+                e_msg_view_browse_resp,
+                e_msg_view_browse_next_req,
+                e_msg_view_browse_next_resp,
+                e_msg_view_translate_browse_paths_to_node_ids_req,
+                e_msg_view_translate_browse_paths_to_node_ids_resp,
+                e_msg_view_register_nodes_req,
+                e_msg_view_register_nodes_resp,
+                e_msg_view_unregister_nodes_req,
+                e_msg_view_unregister_nodes_resp,
+                e_msg_query_first_req,
+                e_msg_query_first_resp,
+                e_msg_query_next_req,
+                e_msg_query_next_resp,
+                e_msg_attribute_read_req,
+                e_msg_attribute_read_resp,
+                e_msg_attribute_history_read_req,
+                e_msg_attribute_history_read_resp,
+                e_msg_attribute_write_req,
+                e_msg_attribute_write_resp,
+                e_msg_attribute_history_update_req,
+                e_msg_attribute_history_update_resp,
+                e_msg_method_call_req,
+                e_msg_method_call_resp,
+                e_msg_monitored_items_create_req,
+                e_msg_monitored_items_create_resp,
+                e_msg_monitored_items_modify_req,
+                e_msg_monitored_items_modify_resp,
+                e_msg_monitored_items_set_monitoring_mode_req,
+                e_msg_monitored_items_set_monitoring_mode_resp,
+                e_msg_monitored_items_set_triggering_req,
+                e_msg_monitored_items_set_triggering_resp,
+                e_msg_monitored_items_delete_req,
+                e_msg_monitored_items_delete_resp,
+                e_msg_subscription_create_req,
+                e_msg_subscription_create_resp,
+                e_msg_subscription_modify_req,
+                e_msg_subscription_modify_resp,
+                e_msg_subscription_set_publishing_mode_req,
+                e_msg_subscription_set_publishing_mode_resp,
+                e_msg_subscription_publish_req,
+                e_msg_subscription_publish_resp,
+                e_msg_subscription_republish_req,
+                e_msg_subscription_republish_resp,
+                e_msg_subscription_transfer_subscriptions_req,
+                e_msg_subscription_transfer_subscriptions_resp,
+                e_msg_subscription_delete_subscriptions_req,
+                e_msg_subscription_delete_subscriptions_resp
+            THEN
+                service_class := e_msg_session_service_class
+            ELSE
+                service_class := e_msg_service_fault_class
+            END
+        END
+    END
+    ;
+
+    service_class <-- get_msg_service_class (msg_typ) =
+    BEGIN
+        service_class <-- l_get_msg_service_class(msg_typ)
     END
     ;
 
@@ -1522,22 +1645,21 @@ OPERATIONS
         l_is_applicative,
         l_app_context,
         l_exp_resp_msg_typ,
+        l_exp_resp_msg_class,
+        l_trigger_app_treatment,
         l_bres,
         l_session
     IN
+        l_trigger_app_treatment := FALSE;
         l_valid_req_handle <-- is_valid_req_handle (request_handle);
         l_req_handle_channel <-- get_req_handle_channel (request_handle);
         IF l_valid_req_handle = TRUE &
             l_req_handle_channel = channel
         THEN
             l_exp_resp_msg_typ <-- get_req_handle_resp_typ (request_handle);
-            CASE l_exp_resp_msg_typ OF
-                EITHER
-                    e_msg_session_create_resp,
-                    e_msg_session_activate_resp,
-                    e_msg_session_close_resp,
-                    e_msg_session_cancel_resp
-                THEN
+            l_exp_resp_msg_class <-- l_get_msg_service_class (l_exp_resp_msg_typ);
+            CASE l_exp_resp_msg_class OF
+                EITHER e_msg_session_treatment_class THEN
                     /* It was session treatment sending which failed */
                     l_bres, l_session <-- client_validate_session_service_resp (channel, request_handle);
                     IF l_bres = TRUE
@@ -1545,17 +1667,29 @@ OPERATIONS
                         /* Close session since state is now invalid (req message not sent) */
                         client_close_session (l_session, e_sc_bad_request_interrupted)
                     END
-                ELSE
-                    /*It means it's application request and we have an app context that can be used*/
-                    l_is_applicative, l_app_context <-- get_req_handle_app_context (request_handle);
-                    l_req_typ <-- get_req_handle_req_typ (request_handle);
-                    client_remove_req_handle (request_handle);
-                    IF l_is_applicative = TRUE
-                    THEN
-                        cli_snd_failure (l_req_typ, l_app_context, error_status)
-                    END
+                OR e_msg_session_service_class THEN
+                    /* It is linked to a session, we shall not trigger applicative treatment if the session is closed. */
+                    l_trigger_app_treatment <-- client_validate_session_service_req_failed (channel, request_handle)
+                OR e_msg_discovery_service_class THEN
+                    /* Not linked to as session and it has already been verified it is on  a connected channel. */
+                    l_trigger_app_treatment := TRUE
+                ELSE /* INCLUDES e_msg_service_fault_class => unexpected response type */
+                    l_trigger_app_treatment := FALSE
                 END
             END
+            ;
+            IF l_trigger_app_treatment = TRUE
+            THEN
+                /*It means it's application request and we have an app context that can be used*/
+                l_is_applicative, l_app_context <-- get_req_handle_app_context (request_handle);
+                l_req_typ <-- get_req_handle_req_typ (request_handle);
+                IF l_is_applicative = TRUE
+                THEN
+                    cli_snd_failure (l_req_typ, l_app_context, error_status)
+                END
+            END
+            ;
+            client_remove_req_handle (request_handle)
         END
     END
     ;

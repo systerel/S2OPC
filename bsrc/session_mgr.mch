@@ -117,6 +117,18 @@ OPERATIONS
     END
     ;
 
+    bres <-- client_validate_session_service_req_failed (channel, req_handle) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel_connected &
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
+        a_msg_in_type : s_service_on_session_resps
+    THEN
+        bres :: BOOL
+    END
+    ;
+
     bres, session <-- client_validate_session_service_resp (channel, req_handle) =
     PRE
         channel : t_channel_i &

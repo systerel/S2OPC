@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 30/05/2024 08:36:02
+ Date                 : 12/11/2024 17:42:42
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -88,6 +88,11 @@ extern void session_mgr__local_client_close_session_if_needed(
    const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason);
 extern void session_mgr__local_client_close_sessions_on_SC_final_connection_failure(
    const constants__t_channel_config_idx_i session_mgr__channel_config_idx);
+extern void session_mgr__local_client_validate_and_drop_session_req_session_handle(
+   const constants__t_channel_i session_mgr__channel,
+   const constants__t_client_request_handle_i session_mgr__req_handle,
+   t_bool * const session_mgr__bres,
+   constants__t_session_i * const session_mgr__session);
 extern void session_mgr__local_session_get_endpoint_config(
    const constants__t_session_i session_mgr__p_session,
    constants__t_endpoint_config_idx_i * const session_mgr__endpoint_config_idx);
@@ -155,6 +160,10 @@ extern void session_mgr__client_validate_session_service_req(
    constants_statuscodes_bs__t_StatusCode_i * const session_mgr__ret,
    constants__t_channel_i * const session_mgr__channel,
    constants__t_session_token_i * const session_mgr__session_token);
+extern void session_mgr__client_validate_session_service_req_failed(
+   const constants__t_channel_i session_mgr__channel,
+   const constants__t_client_request_handle_i session_mgr__req_handle,
+   t_bool * const session_mgr__bres);
 extern void session_mgr__client_validate_session_service_resp(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_client_request_handle_i session_mgr__req_handle,

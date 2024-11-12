@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 30/05/2024 08:36:02
+ Date                 : 19/11/2024 16:41:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -147,6 +147,46 @@ void session_mgr__local_session_get_endpoint_config(
             channel_mgr__server_get_endpoint_config(session_mgr__l_channel,
                session_mgr__endpoint_config_idx);
          }
+      }
+   }
+}
+
+void session_mgr__local_client_validate_and_drop_session_req_session_handle(
+   const constants__t_channel_i session_mgr__channel,
+   const constants__t_client_request_handle_i session_mgr__req_handle,
+   t_bool * const session_mgr__bres,
+   constants__t_session_i * const session_mgr__session) {
+   {
+      constants__t_session_i session_mgr__l_session;
+      t_bool session_mgr__l_valid_session;
+      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_channel_i session_mgr__l_session_channel;
+      
+      *session_mgr__session = constants__c_session_indet;
+      session_request_handle_bs__client_get_session_and_remove_request_handle(session_mgr__req_handle,
+         &session_mgr__l_session);
+      session_core__is_valid_session(session_mgr__l_session,
+         &session_mgr__l_valid_session);
+      if (session_mgr__l_valid_session == true) {
+         session_core__get_session_state_or_closed(session_mgr__l_session,
+            &session_mgr__l_session_state);
+         session_core__get_session_channel(session_mgr__l_session,
+            &session_mgr__l_session_channel);
+         if ((session_mgr__l_session_state == constants__e_session_userActivated) &&
+            (session_mgr__l_session_channel == session_mgr__channel)) {
+            session_core__is_session_valid_for_service(session_mgr__channel,
+               session_mgr__l_session,
+               session_mgr__bres);
+         }
+         else {
+            *session_mgr__bres = false;
+         }
+      }
+      else {
+         *session_mgr__bres = false;
+      }
+      if (*session_mgr__bres == true) {
+         *session_mgr__session = session_mgr__l_session;
       }
    }
 }
@@ -478,6 +518,26 @@ void session_mgr__client_validate_session_service_req(
    }
 }
 
+void session_mgr__client_validate_session_service_req_failed(
+   const constants__t_channel_i session_mgr__channel,
+   const constants__t_client_request_handle_i session_mgr__req_handle,
+   t_bool * const session_mgr__bres) {
+   {
+      constants__t_session_i session_mgr__l_session;
+      constants__t_sessionState session_mgr__l_session_state;
+      
+      session_mgr__local_client_validate_and_drop_session_req_session_handle(session_mgr__channel,
+         session_mgr__req_handle,
+         session_mgr__bres,
+         &session_mgr__l_session);
+      if (*session_mgr__bres == true) {
+         session_core__get_session_state_or_closed(session_mgr__l_session,
+            &session_mgr__l_session_state);
+         *session_mgr__bres = (session_mgr__l_session_state != constants__e_session_closed);
+      }
+   }
+}
+
 void session_mgr__client_validate_session_service_resp(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_client_request_handle_i session_mgr__req_handle,
@@ -487,28 +547,18 @@ void session_mgr__client_validate_session_service_resp(
       constants__t_session_i session_mgr__l_session;
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
-      constants__t_channel_i session_mgr__l_session_channel;
       
       *session_mgr__session = constants__c_session_indet;
-      session_request_handle_bs__client_get_session_and_remove_request_handle(session_mgr__req_handle,
+      session_mgr__local_client_validate_and_drop_session_req_session_handle(session_mgr__channel,
+         session_mgr__req_handle,
+         session_mgr__bres,
          &session_mgr__l_session);
-      session_core__is_valid_session(session_mgr__l_session,
-         &session_mgr__l_valid_session);
-      session_core__get_session_state_or_closed(session_mgr__l_session,
-         &session_mgr__l_session_state);
-      if (session_mgr__l_valid_session == true) {
-         session_core__get_session_channel(session_mgr__l_session,
-            &session_mgr__l_session_channel);
-         if ((session_mgr__l_session_state == constants__e_session_userActivated) &&
-            (session_mgr__l_session_channel == session_mgr__channel)) {
-            session_core__is_session_valid_for_service(session_mgr__channel,
-               session_mgr__l_session,
-               session_mgr__bres);
-         }
-         else {
-            *session_mgr__bres = false;
-         }
-         if (*session_mgr__bres == false) {
+      if (*session_mgr__bres == false) {
+         session_core__is_valid_session(session_mgr__l_session,
+            &session_mgr__l_valid_session);
+         if (session_mgr__l_valid_session == true) {
+            session_core__get_session_state_or_closed(session_mgr__l_session,
+               &session_mgr__l_session_state);
             if (session_mgr__l_session_state != constants__e_session_userActivated) {
                session_mgr__local_client_close_session(session_mgr__l_session,
                   constants_statuscodes_bs__e_sc_bad_invalid_state);
@@ -518,12 +568,9 @@ void session_mgr__client_validate_session_service_resp(
                   constants_statuscodes_bs__e_sc_bad_secure_channel_id_invalid);
             }
          }
-         else {
-            *session_mgr__session = session_mgr__l_session;
-         }
       }
       else {
-         *session_mgr__bres = false;
+         *session_mgr__session = session_mgr__l_session;
       }
    }
 }
