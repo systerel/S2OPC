@@ -46,8 +46,10 @@ APP=$3
 EXTENSION=$4
 # EXTENSION is the extension of the file, here .bin.
 # For now only .bin files are supported.
+IP_ADDRESS=$5
+[ -z "${IP_ADDRESS}" ] && fail "Missing 'IP_ADDRESS' for compilation stage"
 
 cd ${HOST_DIR}/samples/embedded/platform_dep/${OS}/ci || fail "Missing folder '${HOST_DIR}/samples/embedded/platform_dep/${OS}/ci'"
 [ -x ./build-${OS}-samples.sh ] || fail "Missing or invalid build script 'build-${OS}-samples.sh' in '$(pwd)'"
-./build-${OS}-samples.sh -b $BOARD -a $APP
+./build-${OS}-samples.sh -b $BOARD -a $APP --ip $IP_ADDRESS
 

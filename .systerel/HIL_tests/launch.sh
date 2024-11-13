@@ -101,18 +101,21 @@ index=0
         # !!!!! Not used yet as only .bin are supported for now !!!!!
         EXTENSION=$(jq -r ".build.${BUILD_NAME}.flash_type " "$BUILD_CFG_LIST")
         [ -z "${EXTENSION}" ] && fail "Missing 'EXTENSION' field in 'builds' ($BUILD)"
+        # Identify the ip address involved in the test
+        IP_ADDRESS=$(jq -r ".build.${BUILD_NAME}.IP_ADDRESS" "$BUILD_CFG_LIST")
+        [ -z "${IP_ADDRESS}" ] && fail "Missing 'IP_ADDRESS' field in 'builds' ($BUILD)"
         #Compile and flash the right application on the right board according to previous parameters
-        
+
         LOG_FILE=$LOG_PATH/compile_${OS}_${APP}_${BOARD}.log
         OUT_FILE=$HOST_DIR/build_${OS}/${APP}_${BOARD}.${EXTENSION}
         if ! [ -f $OUT_FILE ] ; then
           echo "Building $(basename ${OUT_FILE}) for board $BOARD"
-           ${HIL_DIR}/compile.sh "$OS" "$BOARD" "$APP" "$EXTENSION" > $LOG_FILE 2>&1
+           ${HIL_DIR}/compile.sh "$OS" "$BOARD" "$APP" "$EXTENSION" "$IP_ADDRESS" > $LOG_FILE 2>&1
         [ -f $OUT_FILE ] || fail "Missing output file ${OUT_FILE} (see $LOG_FILE)"
         else
           echo "Not rebuilding $(basename ${OUT_FILE})"
-        fi 
-        
+        fi
+
         LOG_FILE=$LOG_PATH/flash_${OS}_${APP}_${BOARD}.log
         echo "Flash $APP/$OS on board $BOARD SN=$SERIAL"
         ${HIL_DIR}/flash_app.sh "$SERIAL" "${APP}_${BOARD}.${EXTENSION}" "${OS}" > $LOG_FILE 2>&1
