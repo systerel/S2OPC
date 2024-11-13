@@ -27,16 +27,18 @@ function usage() {
     echo "By default builds a predefined set of Zephyr applications"
     echo "To build a specific Zephyr applications use -b <BOARD> -a <APPLICATION>"
     echo "Usage:"
-    echo "  $0    : build predefined application/boards"
-    echo "  $0 -i : Start an interactive session in zephyr docker. see ${SCRIPT} for more help"
-    echo "  $0 -b : Allows user to specify a <BOARD>"
-    echo "  $0 -a : Allows user to specify an <APPLICATION>"
-    echo "  $0 -h : This help"
+    echo "  $0                      : build predefined application/boards"
+    echo "  $0 -i                   : Start an interactive session in zephyr docker. see ${SCRIPT} for more help"
+    echo "  $0 -b                   : Allows user to specify a <BOARD>"
+    echo "  $0 -a                   : Allows user to specify an <APPLICATION>"
+    echo "  $0 --ip <IP_ADDRESS>    : Configure IP Adress of ethernet interface"
+    echo "  $0 -h                   : This help"
     exit 0
 }
 
 # interactive?
 IS_INTERACTIVE=false
+OPT_IP_ADDRESS=
 while [[ ! -z $1 ]]; do
     PARAM=$1
     shift
@@ -44,12 +46,14 @@ while [[ ! -z $1 ]]; do
     [[ ${PARAM} == "-i" ]] && IS_INTERACTIVE=true && continue
     [[ ${PARAM} == "-b" ]] && GET_BOARD=$1 && shift && continue
     [[ ${PARAM} == "-a" ]] && GET_APP=$1 && shift && continue
+    [[ ${PARAM-} == "--ip" ]] && OPT_IP_ADDRESS="--ip $1" && shift && continue
+
     echo "Unknown parameter : ${PARAM}"
     exit 2
 done
 
 source .docker-images.sh
-docker inspect ${ZEPHYR_DIGEST} 2>/dev/null >/dev/null  || fail "Docker image not installed: ${ZEPHYR_DIGEST}" 
+docker inspect ${ZEPHYR_DIGEST} 2>/dev/null >/dev/null  || fail "Docker image not installed: ${ZEPHYR_DIGEST}"
 
 echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
 $IS_INTERACTIVE && echo "Running an interactive session on ${ZEPHYR_DIGEST}" && \
@@ -65,7 +69,7 @@ function build() {
   echo "Starting docker to build ${APP} for ${BOARD}"
 
   (docker run --rm -v ${HOST_DIR}:/zephyrproject/modules/lib/s2opc -w /zephyrproject/modules/lib/s2opc ${ZEPHYR_DIGEST}\
-     samples/embedded/platform_dep/zephyr/ci/${SCRIPT} ${BOARD} ${APP} ${ADD_CONF})&
+     samples/embedded/platform_dep/zephyr/ci/${SCRIPT} ${BOARD} ${APP} ${OPT_IP_ADDRESS} ${ADD_CONF})&
   wait $!
   echo "Result = $?"
 }

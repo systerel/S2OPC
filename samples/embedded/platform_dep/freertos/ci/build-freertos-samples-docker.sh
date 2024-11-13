@@ -28,17 +28,24 @@ function _help() {
     echo "    --lazy : do not reinstall S2OPC sources (avoids full rebuild)"
 }
 
+function fail() {
+    echo $*
+    exit 1
+}
+
 OPT_LAZY=false
+IP_ADDRESS=
 while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
 shift
 [[ "${PARAM-}" =~ --h(elp)? ]] && _help $0 && exit 0
 [[ "${PARAM-}" =~ --lazy ]] && OPT_LAZY=true && OPT_INSTALL="--lazy" && continue
+[[ "${PARAM-}" == "--ip" ]] && IP_ADDRESS=$1 && shift && continue
 [[ "${PARAM-}" == "--" ]] && break
 echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
 done
 
-export GCC=arm-none-eabi-gcc 
+export GCC=arm-none-eabi-gcc
 
 cd `dirname $0`/../../../../..
 export SOPC_ROOT=`pwd`
@@ -101,17 +108,17 @@ function build_asm_file() {
 }
 
 function build_link() {
-    L_OPT_CPU='-mcpu=cortex-m7 --specs=nosys.specs  --specs=nano.specs  -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb' 
+    L_OPT_CPU='-mcpu=cortex-m7 --specs=nosys.specs  --specs=nano.specs  -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb'
     L_LINK_SCRIPT=-T"${WS-}/STM32H723ZGTX_FLASH.ld"
     L_LINK_MAP='-Wl,-Map="freertos-sopc.map"'
-    
+
     # Create list of .o files
     O_LIST=${OUT_DIR-}/objects.list
     find ${WS-}/build/ -name '*.o' | sed 's/^\(.*\)$/"\1"/g' | sort > ${O_LIST-}
     NB_O_FOUND=$(cat ${O_LIST-} | wc -l)
     echo "Found ${NB_O_FOUND-} object files..."
     [[ "${NB_O_FOUND-}" != "${NB_O_FILES-}" ]] && echo "Mismatching number of 'obj' files: ${NB_O_FOUND-} (but ${NB_O_FILES-} were built)" && exit 4
-    
+
     # Link
     # Original line from StmCubeIde:
     #   arm-none-eabi-gcc -o "H723-SOPC2.elf" @"objects.list"   -mcpu=cortex-m7 -T"C:\Users\jeremie\STM32CubeIDE\workspace_1.8.0\H723-SOPC2\STM32H723ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H723-SOPC2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
@@ -125,6 +132,17 @@ function build_link() {
 
 rm -f ${OUT_DIR-}/build.log ${OUT_DIR-}/build.err
 cd ${BUILD_DIR-} || exit 3
+
+# Configure new Ip address if needed
+if [ ! -z ${IP_ADDRESS} ]; then
+    IFS='.' read -ra PARSED_IP_ADDRESS <<< "$IP_ADDRESS"
+    TARGET_PATH=$WS/LWIP/App/lwip.c
+    for index in {0..3} ; do
+        sed -i "s/^\(\s*IP_ADDRESS\[\s*${index}\s*\]\s*=\s*\)[0-9]\+\(\s*;\)/\1${PARSED_IP_ADDRESS[$index]}\2/g" $TARGET_PATH || exit $?
+        # Check that pattern exist
+        grep -q "\s*IP_ADDRESS\[\s*${index}\s*\]\s*=\s*[0-9]\+\s*;" $TARGET_PATH || fail "Ip pattern not found in $TARGET_PATH"
+    done
+fi
 
 NB_O_FILES=0
 

@@ -33,6 +33,7 @@ GET_APP=
 GET_BOARD=
 OPT_ADD=
 OPT_IT=
+OPT_IP_ADDRESS=
 OPT_EXEC=/sopc/samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh
 while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
@@ -41,6 +42,7 @@ shift
 [[ "${PARAM-}" =~ --?it ]] && OPT_EXEC= && OPT_IT=-ti && continue
 [[ ${PARAM} == "-b" ]] && GET_BOARD=$1 && shift && continue
 [[ ${PARAM} == "-a" ]] && GET_APP=$1 && shift && continue
+[[ ${PARAM} == "--ip" ]] && OPT_IP_ADDRESS="--ip $1" && shift && continue
 [[ "${PARAM-}" == "--" ]] && OPT_ADD="-- $*" && break
 echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
 done
@@ -61,7 +63,7 @@ echo "Using image FREERTOS_DIGEST=${FREERTOS_DIGEST-}"
 rm -rf ${SOPC_DIR}/build_freertos/* 2> /dev/null
 mkdir -p ${SOPC_DIR}/build_freertos && chmod 777 ${SOPC_DIR}/build_freertos || exit 2
 
-docker run --rm ${OPT_IT} -v ${SOPC_DIR}:/sopc -u root ${FREERTOS_DIGEST} ${OPT_EXEC} ${OPT_ADD}
+docker run --rm ${OPT_IT} -v ${SOPC_DIR}:/sopc -u root ${FREERTOS_DIGEST} ${OPT_EXEC} ${OPT_IP_ADDRESS} ${OPT_ADD}
 
 #Conversion .elf to .bin
 [[ -z ${OPT_IT} ]] && ! [[ -z ${GET_APP} ]] && ! [[ -z ${GET_BOARD} ]] && \

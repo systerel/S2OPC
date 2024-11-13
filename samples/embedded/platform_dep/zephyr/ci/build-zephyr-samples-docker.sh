@@ -32,6 +32,7 @@ function usage() {
     echo "Usage:"
     echo "  $0    : build a predefined application/board"
     echo "  $0 <BOARD> <APP> : build the <APP> sample application (default 'cli_pubsub_server') for board <BOARD> (default 'mimxrt1064_evk')"
+    echo "  $0 --ip <IP_ADDRESS> : Configure IP Adress of ethernet interface"
     echo "  $0 -h : This help"
     exit 0
 }
@@ -40,6 +41,7 @@ function usage() {
 
 P0=$0
 cd $(dirname $P0) || exit 1
+SCRIPT_DIR=$(pwd)
 cd ../../../../..
 
 S2OPCDIR=$(pwd)
@@ -58,14 +60,18 @@ cd ${SAMPLESDIR} || exit 4
 # User in docker and outside docker could have different UID which leads to warnings from git
 git config --global --add safe.directory ${S2OPCDIR}
 
+OPT_IP_ADDRESS=
+
 export BOARD=$1
 shift
 export APP=$1
 shift
+[[ $1 == "--ip" ]] && shift && IP_ADDRESS=$1 && shift
 export ADD_CONF=$*
 
 [[ -z $BOARD ]] && export BOARD=mimxrt1064_evk && echo "Using default board ${BOARD}"
 [[ -z $APP ]]   && export APP=cli_pubsub_server && echo "Using default application ${APP}"
+[[ ! -z ${IP_ADDRESS} ]] && OPT_IP_ADDRESS="-DCONFIG_SOPC_ETH_ADDRESS=\"${IP_ADDRESS}\" -DCONFIG_SOPC_ENDPOINT_ADDRESS=\"opc.tcp://${IP_ADDRESS}:4841\"" && echo "Configure new Ip address ${IP_ADDRESS}"
 [[ ! -z ${ADD_CONF} ]] && echo "Using additional extra configuration : '${ADD_CONF}'"
 
 west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
@@ -75,8 +81,8 @@ echo " ** Building ${APP} ... " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 cd ${SAMPLESDIR}/${APP} || return 1
 sudo rm -rf build || return  1
 
-echo "Command : 'west build -b ${BOARD} -- ${ADD_CONF} . '"
-west build -b ${BOARD} -- ${ADD_CONF} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
+echo "Command : 'west build -b ${BOARD} -- ${OPT_IP_ADDRESS} ${ADD_CONF} . '"
+west build -b ${BOARD} -- ${OPT_IP_ADDRESS} ${ADD_CONF} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
 chmod --recursive 777 build
 mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
 if ! [ -f build/zephyr/zephyr.bin ] ; then
