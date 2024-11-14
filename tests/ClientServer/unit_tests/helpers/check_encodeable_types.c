@@ -739,8 +739,6 @@ START_TEST(test_UserEncodeableTypeNS1)
     OpcUa_Custom_CustomWithNS0DataType_Initialize(&instCDTNS0);
 
     instCDTNS0.fieldb = true;
-    // TODO remove: Not necessary
-    // SOPC_EncodeableObject_Initialize(instCDTNS0.keyPair.encodeableType, &instCDTNS0.keyPair);
     status = SOPC_String_AttachFromCstring(&instCDTNS0.keyPair.Key.Name, "CustomKey");
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     instCDTNS0.keyPair.Value.BuiltInTypeId = SOPC_Boolean_Id;
@@ -779,8 +777,8 @@ START_TEST(test_UserEncodeableTypeNS2)
     SOPC_EncodeableType* pEncoder = NULL;
 
     const uint16_t NS_1 = 1;
-    const uint16_t NS_INDEX = 2;
-    ck_assert_uint_eq(NS_INDEX, OpcUa_Custom2_CustomWithNS1DataType_EncodeableType.NamespaceIndex);
+    const uint16_t NS_2 = 2;
+    ck_assert_uint_eq(NS_2, OpcUa_Custom2_CustomWithNS1DataType_EncodeableType.NamespaceIndex);
 
     // Encoder is not registered
     pEncoder = SOPC_EncodeableType_GetEncodeableType(NS_1, OpcUaId_Custom_CustomDataType);
@@ -843,15 +841,15 @@ START_TEST(test_UserEncodeableTypeNS2)
     ck_assert(extObj.Encoding == SOPC_ExtObjBodyEncoding_ByteString);
     // Binary type identifier is the one expected but was not found in known encTypes
     ck_assert_int_le(extObj.TypeId.NamespaceUri.Length, 0);
-    ck_assert_int_eq(NS_INDEX, extObj.TypeId.NodeId.Namespace);
+    ck_assert_int_eq(NS_2, extObj.TypeId.NodeId.Namespace);
     ck_assert_int_eq(SOPC_IdentifierType_Numeric, extObj.TypeId.NodeId.IdentifierType);
     ck_assert_int_eq(OpcUaId_Custom2_CustomWithNS1DataType_Encoding_DefaultBinary, extObj.TypeId.NodeId.Data.Numeric);
 
     // Encodeable type is not registered
-    pEncoder = SOPC_EncodeableType_GetEncodeableType(NS_INDEX, OpcUaId_Custom2_CustomWithNS1DataType);
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(NS_2, OpcUaId_Custom2_CustomWithNS1DataType);
     ck_assert_ptr_null(pEncoder);
     pEncoder =
-        SOPC_EncodeableType_GetEncodeableType(NS_INDEX, OpcUaId_Custom2_CustomWithNS1DataType_Encoding_DefaultBinary);
+        SOPC_EncodeableType_GetEncodeableType(NS_2, OpcUaId_Custom2_CustomWithNS1DataType_Encoding_DefaultBinary);
     ck_assert_ptr_null(pEncoder);
 
     // Now registers the whole table of encodeable types for NS2 Custom Types to be able to decode it
@@ -859,7 +857,7 @@ START_TEST(test_UserEncodeableTypeNS2)
         SOPC_EncodeableType_RegisterTypesArray(SOPC_Custom2_TypeInternalIndex_SIZE, sopc_Custom2_KnownEncodeableTypes);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    pEncoder = SOPC_EncodeableType_GetEncodeableType(NS_INDEX, OpcUaId_Custom2_CustomWithNS1DataType);
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(NS_2, OpcUaId_Custom2_CustomWithNS1DataType);
     ck_assert_ptr_nonnull(pEncoder);
 
     // Try to decode an extension object for REGISTERED encType
@@ -876,10 +874,13 @@ START_TEST(test_UserEncodeableTypeNS2)
     instCNS1DT = (OpcUa_Custom2_CustomWithNS1DataType*) extObj.Body.Object.Value;
     ck_assert(true == instCNS1DT->custom2.fieldb);
     ck_assert_int_eq(instCNS1DT->custom2.fieldu, 42);
+    ck_assert(false == instCNS1DT->custom1.fieldb);
     int compareRes = strcmp(SOPC_String_GetRawCString(&instCNS1DT->custom1.keyPair.Key.Name), "CustomKey");
     ck_assert_int_eq(0, compareRes);
     ck_assert(SOPC_Boolean_Id == instCNS1DT->custom1.keyPair.Value.BuiltInTypeId);
     ck_assert(true == instCNS1DT->custom1.keyPair.Value.Value.Boolean);
+    // Clear the extension object prior to unregister NS1 custom type,
+    // otherwise clear on nested custom NS1 type will be ignored after unregister.
     SOPC_ExtensionObject_Clear(&extObj);
 
     // Now unregisters the whole table of encodeable types for NS1 Custom Types
@@ -887,7 +888,7 @@ START_TEST(test_UserEncodeableTypeNS2)
         SOPC_EncodeableType_UnRegisterTypesArray(SOPC_Custom_TypeInternalIndex_SIZE, sopc_Custom_KnownEncodeableTypes);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // Reset the buffer position, clear ExtObj and decode buffer again but with NS1 unregistered
+    // Reset the buffer position and decode buffer again but with NS1 unregistered
     status = SOPC_Buffer_SetPosition(buf, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_ExtensionObject_Read(&extObj, buf, 0);

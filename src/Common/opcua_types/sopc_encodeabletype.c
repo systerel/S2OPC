@@ -254,7 +254,6 @@ SOPC_ReturnStatus SOPC_EncodeableType_UnRegisterTypesArray(size_t nsTypesArrayLe
     SOPC_ReturnStatus localStatus = SOPC_STATUS_OK;
     const SOPC_EncodeableType* nsType = NULL;
     const uint16_t nsIndex = nsTypesArray[0]->NamespaceIndex;
-
     for (size_t i = 0; i < nsTypesArrayLen; i++)
     {
         nsType = nsTypesArray[i];
@@ -369,13 +368,12 @@ static inline bool checkEncodeableTypeDescIsValid(const SOPC_EncodeableType_Fiel
 static SOPC_EncodeableType* getKnownEncodeableType(SOPC_EncodeableType* encType,
                                                    const SOPC_EncodeableType_FieldDescriptor* desc)
 {
-    const uint32_t typeIndex = desc->typeIndex;
     SOPC_EncodeableType* encTypeZeroId = NULL;
     if (desc->isSameNs)
     {
-        SOPC_ASSERT(typeIndex < SOPC_TypeInternalIndex_SIZE &&
+        SOPC_ASSERT(desc->typeIndex < SOPC_TypeInternalIndex_SIZE &&
                     "Field descriptor type index cannot be greater than SOPC_TypeInternalIndex_SIZE");
-        return encType->namespaceTypesArray[typeIndex];
+        return encType->namespaceTypesArray[desc->typeIndex];
     }
     else
     {
@@ -546,45 +544,51 @@ static SOPC_ReturnStatus SOPC_EncodeableObject_InternalInitialize(SOPC_Encodeabl
     // The first field of all non-builtin OPC UA type instances is its encodeable type
     *((SOPC_EncodeableType**) pValue) = type;
 
-    for (int32_t i = 0; i < type->NoOfFields; ++i)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    for (int32_t i = 0; i < type->NoOfFields && SOPC_STATUS_OK == status; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
         bool validDesc = checkEncodeableTypeDescIsValid(desc);
         if (!validDesc)
         {
-            return SOPC_STATUS_NOT_SUPPORTED;
-        }
-        void* pField = (char*) pValue + desc->offset;
-        SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
-
-        if (desc->isArrayLength)
-        {
-            int32_t* pLength = NULL;
-            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
-            void** pArray = NULL;
-
-            SOPC_ASSERT(desc->isBuiltIn);
-            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-            pLength = pField;
-
-            // Increment to obtain the array content field
-            ++i;
-            SOPC_ASSERT(i < type->NoOfFields);
-            arrayDesc = &type->Fields[i];
-            pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
-            initFunction = getPfnInitialize(type, arrayDesc);
-
-            // Initialize array fields to 0, array is not allocated by init (unknown length)
-            *pLength = 0;
-            *pArray = NULL;
+            status = SOPC_STATUS_NOT_SUPPORTED;
         }
         else
         {
-            initFunction = getPfnInitialize(type, desc);
-            initFunction(pField);
+            void* pField = (char*) pValue + desc->offset;
+            SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
+
+            if (desc->isArrayLength)
+            {
+                int32_t* pLength = NULL;
+                const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+                void** pArray = NULL;
+
+                SOPC_ASSERT(desc->isBuiltIn);
+                SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+                pLength = pField;
+
+                // Increment to obtain the array content field
+                ++i;
+                SOPC_ASSERT(i < type->NoOfFields);
+                arrayDesc = &type->Fields[i];
+                pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
+                // initFunction is not used since we initialize to empty/unallocated array
+                // initFunction = getPfnInitialize(type, arrayDesc);
+
+                // Initialize array fields to 0, array is not allocated by init (unknown length)
+                *pLength = 0;
+                *pArray = NULL;
+            }
+            else
+            {
+                initFunction = getPfnInitialize(type, desc);
+                initFunction(pField);
+            }
         }
     }
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
@@ -691,6 +695,9 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
         return SOPC_STATUS_INVALID_STATE;
     }
 
+    const uint32_t prevLength = buf->length;
+    const uint32_t prevPosition = buf->position;
+
     nestedStructLevel++;
     status = SOPC_STATUS_OK;
 
@@ -700,41 +707,50 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
         bool validDesc = checkEncodeableTypeDescIsValid(desc);
         if (!validDesc)
         {
-            return SOPC_STATUS_NOT_SUPPORTED;
-        }
-        const void* pField = (const char*) pValue + desc->offset;
-
-        if (!desc->isToEncode)
-        {
-            // Skip this field
-        }
-        else if (desc->isArrayLength)
-        {
-            const int32_t* pLength = NULL;
-            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
-            const void* const* pArray = NULL;
-            size_t size = 0;
-            SOPC_EncodeableObject_PfnEncode* encodeFunction = NULL;
-
-            SOPC_ASSERT(desc->isBuiltIn);
-            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-            pLength = pField;
-
-            // Increment to obtain the array content field
-            ++i;
-            SOPC_ASSERT(i < type->NoOfFields);
-            arrayDesc = &type->Fields[i];
-            pArray = retrieveConstArrayAddressPtr(pValue, arrayDesc);
-            size = getAllocationSize(type, arrayDesc);
-            encodeFunction = getPfnEncode(arrayDesc);
-
-            status = SOPC_Write_Array(buf, pLength, pArray, size, encodeFunction, nestedStructLevel);
+            status = SOPC_STATUS_NOT_SUPPORTED;
         }
         else
         {
-            SOPC_EncodeableObject_PfnEncode* encodeFunction = getPfnEncode(desc);
-            status = encodeFunction(pField, buf, nestedStructLevel);
+            const void* pField = (const char*) pValue + desc->offset;
+
+            if (!desc->isToEncode)
+            {
+                // Skip this field
+            }
+            else if (desc->isArrayLength)
+            {
+                const int32_t* pLength = NULL;
+                const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+                const void* const* pArray = NULL;
+                size_t size = 0;
+                SOPC_EncodeableObject_PfnEncode* encodeFunction = NULL;
+
+                SOPC_ASSERT(desc->isBuiltIn);
+                SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+                pLength = pField;
+
+                // Increment to obtain the array content field
+                ++i;
+                SOPC_ASSERT(i < type->NoOfFields);
+                arrayDesc = &type->Fields[i];
+                pArray = retrieveConstArrayAddressPtr(pValue, arrayDesc);
+                size = getAllocationSize(type, arrayDesc);
+                encodeFunction = getPfnEncode(arrayDesc);
+
+                status = SOPC_Write_Array(buf, pLength, pArray, size, encodeFunction, nestedStructLevel);
+            }
+            else
+            {
+                SOPC_EncodeableObject_PfnEncode* encodeFunction = getPfnEncode(desc);
+                status = encodeFunction(pField, buf, nestedStructLevel);
+            }
         }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        // Restore initial position and length buffer states (ignore possibly written data)
+        buf->length = prevLength;
+        buf->position = prevPosition;
     }
 
     return status;
@@ -770,45 +786,48 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
         bool validDesc = checkEncodeableTypeDescIsValid(desc);
         if (!validDesc)
         {
-            return SOPC_STATUS_NOT_SUPPORTED;
-        }
-        void* pField = (char*) pValue + desc->offset;
-        SOPC_EncodeableObject_PfnDecode* decodeFunction = NULL;
-
-        if (!desc->isToEncode)
-        {
-            // Skip this field
-        }
-        else if (desc->isArrayLength)
-        {
-            int32_t* pLength = NULL;
-            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
-            void** pArray = NULL;
-            size_t size = 0;
-            SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
-            SOPC_EncodeableObject_PfnClear* clearFunction = NULL;
-
-            SOPC_ASSERT(desc->isBuiltIn);
-            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-            pLength = pField;
-
-            // Increment to obtain the array content field
-            ++i;
-            SOPC_ASSERT(i < type->NoOfFields);
-            arrayDesc = &type->Fields[i];
-            pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
-            size = getAllocationSize(type, arrayDesc);
-            decodeFunction = getPfnDecode(arrayDesc);
-            initFunction = getPfnInitialize(type, arrayDesc);
-            clearFunction = getPfnClear(type, arrayDesc);
-
-            status = SOPC_Read_Array(buf, pLength, pArray, size, decodeFunction, initFunction, clearFunction,
-                                     nestedStructLevel);
+            status = SOPC_STATUS_NOT_SUPPORTED;
         }
         else
         {
-            decodeFunction = getPfnDecode(desc);
-            status = decodeFunction(pField, buf, nestedStructLevel);
+            void* pField = (char*) pValue + desc->offset;
+            SOPC_EncodeableObject_PfnDecode* decodeFunction = NULL;
+
+            if (!desc->isToEncode)
+            {
+                // Skip this field
+            }
+            else if (desc->isArrayLength)
+            {
+                int32_t* pLength = NULL;
+                const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+                void** pArray = NULL;
+                size_t size = 0;
+                SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
+                SOPC_EncodeableObject_PfnClear* clearFunction = NULL;
+
+                SOPC_ASSERT(desc->isBuiltIn);
+                SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+                pLength = pField;
+
+                // Increment to obtain the array content field
+                ++i;
+                SOPC_ASSERT(i < type->NoOfFields);
+                arrayDesc = &type->Fields[i];
+                pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
+                size = getAllocationSize(type, arrayDesc);
+                decodeFunction = getPfnDecode(arrayDesc);
+                initFunction = getPfnInitialize(type, arrayDesc);
+                clearFunction = getPfnClear(type, arrayDesc);
+
+                status = SOPC_Read_Array(buf, pLength, pArray, size, decodeFunction, initFunction, clearFunction,
+                                         nestedStructLevel);
+            }
+            else
+            {
+                decodeFunction = getPfnDecode(desc);
+                status = decodeFunction(pField, buf, nestedStructLevel);
+            }
         }
     }
 
@@ -838,58 +857,61 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
         bool validDesc = checkEncodeableTypeDescIsValid(desc);
         if (!validDesc)
         {
-            return SOPC_STATUS_NOT_SUPPORTED;
-        }
-        const void* pSrcField = (const char*) srcValue + desc->offset;
-        void* pDestField = (char*) destValue + desc->offset;
-
-        if (desc->isArrayLength)
-        {
-            const int32_t* pSrcLength = pSrcField;
-            int32_t* pDestLength = pDestField;
-
-            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
-            void** pArrayDest = NULL;
-            const void* const* pArraySource = NULL;
-            size_t size = 0;
-            SOPC_EncodeableObject_PfnCopy* copyFunction = NULL;
-
-            SOPC_ASSERT(desc->isBuiltIn);
-            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-
-            // Increment to obtain the array content field
-            ++i;
-            SOPC_ASSERT(i < type->NoOfFields);
-            if (*pSrcLength > 0)
-            {
-                arrayDesc = &type->Fields[i];
-                pArrayDest = retrieveArrayAddressPtr(destValue, arrayDesc);
-                pArraySource = retrieveConstArrayAddressPtr(srcValue, arrayDesc);
-                size = getAllocationSize(type, arrayDesc);
-                copyFunction = getPfnCopy(arrayDesc, true);
-
-                // Allocate array of source length with source elements size
-                // Note: overwrite previous pointer if dest was not cleared
-                *pArrayDest = SOPC_Calloc((size_t) *pSrcLength, size);
-                if (NULL != *pArrayDest)
-                {
-                    status = SOPC_Copy_Array(*pSrcLength, *pArrayDest, *pArraySource, size, copyFunction);
-                }
-                else
-                {
-                    status = SOPC_STATUS_OUT_OF_MEMORY;
-                }
-            } // else NULL array with 0 length
-            if (SOPC_STATUS_OK == status)
-            {
-                // Set dest length
-                *pDestLength = *pSrcLength;
-            }
+            status = SOPC_STATUS_NOT_SUPPORTED;
         }
         else
         {
-            SOPC_EncodeableObject_PfnCopy* copyFunction = getPfnCopy(desc, false);
-            status = copyFunction(pDestField, pSrcField);
+            const void* pSrcField = (const char*) srcValue + desc->offset;
+            void* pDestField = (char*) destValue + desc->offset;
+
+            if (desc->isArrayLength)
+            {
+                const int32_t* pSrcLength = pSrcField;
+                int32_t* pDestLength = pDestField;
+
+                const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+                void** pArrayDest = NULL;
+                const void* const* pArraySource = NULL;
+                size_t size = 0;
+                SOPC_EncodeableObject_PfnCopy* copyFunction = NULL;
+
+                SOPC_ASSERT(desc->isBuiltIn);
+                SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+
+                // Increment to obtain the array content field
+                ++i;
+                SOPC_ASSERT(i < type->NoOfFields);
+                if (*pSrcLength > 0)
+                {
+                    arrayDesc = &type->Fields[i];
+                    pArrayDest = retrieveArrayAddressPtr(destValue, arrayDesc);
+                    pArraySource = retrieveConstArrayAddressPtr(srcValue, arrayDesc);
+                    size = getAllocationSize(type, arrayDesc);
+                    copyFunction = getPfnCopy(arrayDesc, true);
+
+                    // Allocate array of source length with source elements size
+                    // Note: overwrite previous pointer if dest was not cleared
+                    *pArrayDest = SOPC_Calloc((size_t) *pSrcLength, size);
+                    if (NULL != *pArrayDest)
+                    {
+                        status = SOPC_Copy_Array(*pSrcLength, *pArrayDest, *pArraySource, size, copyFunction);
+                    }
+                    else
+                    {
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                    }
+                } // else NULL array with 0 length
+                if (SOPC_STATUS_OK == status)
+                {
+                    // Set dest length
+                    *pDestLength = *pSrcLength;
+                }
+            }
+            else
+            {
+                SOPC_EncodeableObject_PfnCopy* copyFunction = getPfnCopy(desc, false);
+                status = copyFunction(pDestField, pSrcField);
+            }
         }
     }
 
@@ -937,51 +959,54 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
         bool validDesc = checkEncodeableTypeDescIsValid(desc);
         if (!validDesc)
         {
-            return SOPC_STATUS_NOT_SUPPORTED;
-        }
-        const void* pRightField = (const char*) rightValue + desc->offset;
-        const void* pLeftField = (const char*) leftValue + desc->offset;
-
-        if (desc->isArrayLength)
-        {
-            const int32_t* pLeftLength = pLeftField;
-            const int32_t* pRightLength = pRightField;
-
-            const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
-            const void* const* pArrayLeft = NULL;
-            const void* const* pArrayRight = NULL;
-            size_t size = 0;
-            SOPC_EncodeableObject_PfnComp* compFunction = NULL;
-
-            SOPC_ASSERT(desc->isBuiltIn);
-            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-
-            // Increment to obtain the array content field
-            ++i;
-            SOPC_ASSERT(i < type->NoOfFields);
-            if (*pLeftLength < *pRightLength)
-            {
-                resultComp = -1;
-            }
-            else if (*pLeftLength > *pRightLength)
-            {
-                resultComp = 1;
-            }
-            else if (*pLeftLength > 0)
-            {
-                arrayDesc = &type->Fields[i];
-                pArrayLeft = retrieveConstArrayAddressPtr(leftValue, arrayDesc);
-                pArrayRight = retrieveConstArrayAddressPtr(rightValue, arrayDesc);
-                size = getAllocationSize(type, arrayDesc);
-                compFunction = getPfnCompare(arrayDesc);
-
-                status = SOPC_Comp_Array(*pLeftLength, *pArrayLeft, *pArrayRight, size, compFunction, &resultComp);
-            } // else both have length == 0
+            status = SOPC_STATUS_NOT_SUPPORTED;
         }
         else
         {
-            SOPC_EncodeableObject_PfnComp* compFunction = getPfnCompare(desc);
-            status = compFunction(pLeftField, pRightField, &resultComp);
+            const void* pRightField = (const char*) rightValue + desc->offset;
+            const void* pLeftField = (const char*) leftValue + desc->offset;
+
+            if (desc->isArrayLength)
+            {
+                const int32_t* pLeftLength = pLeftField;
+                const int32_t* pRightLength = pRightField;
+
+                const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
+                const void* const* pArrayLeft = NULL;
+                const void* const* pArrayRight = NULL;
+                size_t size = 0;
+                SOPC_EncodeableObject_PfnComp* compFunction = NULL;
+
+                SOPC_ASSERT(desc->isBuiltIn);
+                SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+
+                // Increment to obtain the array content field
+                ++i;
+                SOPC_ASSERT(i < type->NoOfFields);
+                if (*pLeftLength < *pRightLength)
+                {
+                    resultComp = -1;
+                }
+                else if (*pLeftLength > *pRightLength)
+                {
+                    resultComp = 1;
+                }
+                else if (*pLeftLength > 0)
+                {
+                    arrayDesc = &type->Fields[i];
+                    pArrayLeft = retrieveConstArrayAddressPtr(leftValue, arrayDesc);
+                    pArrayRight = retrieveConstArrayAddressPtr(rightValue, arrayDesc);
+                    size = getAllocationSize(type, arrayDesc);
+                    compFunction = getPfnCompare(arrayDesc);
+
+                    status = SOPC_Comp_Array(*pLeftLength, *pArrayLeft, *pArrayRight, size, compFunction, &resultComp);
+                } // else both have length == 0
+            }
+            else
+            {
+                SOPC_EncodeableObject_PfnComp* compFunction = getPfnCompare(desc);
+                status = compFunction(pLeftField, pRightField, &resultComp);
+            }
         }
     }
 
