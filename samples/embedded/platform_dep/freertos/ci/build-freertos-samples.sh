@@ -20,7 +20,6 @@
 # set -o errexit  # Cannot be used here since scirpt wont work
 set -o nounset
 set -o pipefail
-set -x
 
 function _help() {
     echo "$1 setup the environment required to build the FreeRTOS sample in the dedicated docker. This scirpt mainly calls build-freertos-samples-docker.sh"
