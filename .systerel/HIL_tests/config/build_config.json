@@ -12,7 +12,7 @@
             [
 
                 {"name":"server1", "build_name": "config_zephyr_745_server_101", "BOARD_SN": "003B00223137510F39383538"},
-                {"name" :"client1", "build_name": "config_zephyr_723_client_3", "BOARD_SN": "001900273331510B33323639"}
+                {"name" :"client1", "build_name": "config_zephyr_723_client_3", "BOARD_SN": "003600303039510734393838"}
             ],
              "test_script": "test2Boards.json"
         },
@@ -21,7 +21,7 @@
 
                 {"name":"server1", "build_name": "config_zephyr_745_server_101", "BOARD_SN": "003B00223137510F39383538"},
                 {"name":"server2", "build_name": "config_freertos_723_server_100", "BOARD_SN": "004200393132511738363431"},
-                {"name" :"client1", "build_name": "config_zephyr_723_client_3", "BOARD_SN": "001900273331510B33323639"}
+                {"name" :"client1", "build_name": "config_zephyr_723_client_3", "BOARD_SN": "003600303039510734393838"}
             ],
              "test_script": "test3Boards2os.json"
         },

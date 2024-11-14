@@ -58,7 +58,7 @@ if ! [ -z "$DEV" ] ; then
     echo "Found disk as '${DEV}'"
     umount "$MOUNT" 2> /dev/null
     mkdir -p "$MOUNT"
-    mount "$MOUNT" || exit 2
+    mount "$MOUNT" || fail "failed to mount $MOUNT"
     echo "$DEV mounted on $MOUNT"
 else
     fail "Please connect the board with SN:${DEVICE_ID}"
