@@ -55,6 +55,8 @@
 # (see gitlab issues #25394 and #383355)
 variables:
   FF_ENABLE_BASH_EXIT_CODE_CHECK: "true"
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
 
 .nominal_build_variables: &nominal_build_variables
   S2OPC_NODE_MANAGEMENT: 1
@@ -138,7 +140,8 @@ generation: &gen
            $S2OPC_PUBSUB_ONLY == null &&\
            $ALL_BUILDS == null && \
            $ALL_TESTS == null && \
-           $WITH_DOC == null"
+           $WITH_DOC == null && \
+           $WITH_SONAR == null"
       when: on_success
 
 proof_obligations:
@@ -211,7 +214,8 @@ build-linux64-ASan:
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $GEN_PROOF_OBLIGATIONS == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
+           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null  && \
+           $WITH_SONAR == null" # avoid ASAN build in most of nightly builds
       when: on_success
 
 build-linux-faulty-packet:
@@ -282,7 +286,8 @@ build-linux64-pys2opc-all-tests:
       - 'cd .. && ./clean.sh || exit $?'
       - *build_command_line
   rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
-    - if: "$ALL_TESTS != null || $WITH_COVERAGE == null && $NO_ASAN != null" # if ASAN is deactivated build PyS2OPC by default (except for coverage)
+    - if: "$ALL_TESTS != null || $WITH_COVERAGE == null && $NO_ASAN != null && \
+           $WITH_SONAR == null" # if ASAN is deactivated build PyS2OPC by default (except for coverage)
       when: on_success
 
 # Used when ALL_BUILDS set (tests use static configuration)
@@ -469,7 +474,8 @@ test-build-from-export:
            $WITH_COVERITY == null && \
            $WITH_COVERAGE == null && $WITH_DOC == null && \
            $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
-           $ALL_BUILDS == null && $ALL_TESTS == null"
+           $ALL_BUILDS == null && $ALL_TESTS == null  && \
+           $WITH_SONAR == null"
       when: on_success
 
 .test-linux: &test_linux
@@ -516,7 +522,8 @@ test-check:
            $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
            $WITH_COVERITY == null && \
            $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $ALL_TESTS == null && $ALL_BUILDS == null"
+           $ALL_TESTS == null && $ALL_BUILDS == null  && \
+           $WITH_SONAR == null"
       when: on_success
 
 .test-unit: &test_unit
@@ -561,8 +568,8 @@ test-unit:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
-           $WITH_COVERITY == null && $WITH_DOC == null && \
-           $ALL_TESTS == null" # + excludes ALL_TESTS
+           $TEST_NETWORK_FUZZ == null && $WITH_COVERITY == null && $WITH_DOC == null && \
+           $ALL_TESTS == null && $WITH_SONAR == null" # + excludes ALL_TESTS
       when: on_success
 
 .test-uactt: &test_uactt
@@ -694,6 +701,39 @@ coverage-analysis:
     expire_in: '1 week'
   rules:
     - if: "$WITH_COVERAGE != null"
+    
+get-sonar-binaries:
+  stage: .pre
+  artifacts:
+    paths:
+      - build-wrapper/
+      - sonar-scanner/
+    expire_in: '1 week'
+    when: on_success
+  image: registry.gitlab.com/systerel/s2opc/build-deps@sha256:991ae0bf5395688400efad504fd26741386d767b0ab961262df5b34fde761466 # digest of build-deps:1.0
+  script:
+    - apt-get update && apt-get install ca-certificates -y
+    # Download sonar-scanner
+    - curl -sSLo ./sonar-scanner.zip 'https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-linux-x64.zip'
+    - unzip -o sonar-scanner.zip
+    - mv sonar-scanner-6.2.1.4610-linux-x64 sonar-scanner
+    # Download build-wrapper
+    - curl -sSLo ./build-wrapper-linux-x86.zip "${SONAR_HOST_URL}/static/cpp/build-wrapper-linux-x86.zip"
+    - unzip -oj build-wrapper-linux-x86.zip -d ./build-wrapper
+  rules:
+    - if: "$WITH_SONAR != null"
+    
+build-sonar:
+  stage: build
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:9ae17c9abdb644bcafe99ce1d0fbac0e1c4c256e17265a5bfd0b0e3d7315322e # digest of build:1.45
+  dependencies: [get-sonar-binaries]
+  script:
+    # Run the build inside the build wrapper
+    - build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output ./build.sh
+    # Run the sonar-scanner in the same stage as the build
+    - sonar-scanner/bin/sonar-scanner -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}" -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
+  rules:
+    - if: "$WITH_SONAR != null"
 
 ###
 # Documentation generation and publication
