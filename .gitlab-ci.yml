@@ -214,6 +214,27 @@ build-linux64-ASan:
            $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
       when: on_success
 
+build-linux-faulty-packet:
+  <<: *build_linux
+  stage : build-others
+  variables:
+    <<: [*build_linux_variables,*nominal_build_variables]
+    WITH_ASAN: 1
+    WITH_UBSAN: 1
+    BUILD_DIR: build_faulty
+    CMAKE_C_FLAGS: "-DSOPC_MAX_SESSIONS=50 -DSOPC_MAX_SECURE_CONNECTIONS=51"
+  needs : []
+  artifacts:
+    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty'
+    paths:
+      - '*.log'
+      - 'build_faulty/bin'
+  rules :
+    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
+           $NO_ASAN == null || $ALL_TESTS != null"
+      when : on_success
+
 # Used by ALL_BUILDS to check we still manage to build with missing libs
 # (Paho for PubSub and Expat for ClientServer)
 build-with_missing_libs:
@@ -434,20 +455,6 @@ build-fuzz:
     - if: "$TEST_NETWORK_FUZZ != null"
       when: always
 
-build-faulty-packet:
-  stage: build
-  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #3.0 digest
-  script:
-    - apt-get update -y && apt-get install -y openssl
-    - pip install multiprocess
-    - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh
-  artifacts:
-    name: 'bug4_packets.txt'
-    paths:
-      - "./tests/ClientServer/scripts/browse_packets.txt"
-    when: on_failure
-    expire_in: "30 days"
-
 ###
 # Test jobs
 ###
@@ -591,6 +598,23 @@ test-unit:
       - '**/*.*.gcno' # coverage analysis
     when: always
     expire_in: '1 week'
+
+test-faulty-packets :
+  stage: test-others
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
+  needs : [build-linux-faulty-packet]
+  script:
+    - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin/toolkit_test_server
+  artifacts:
+    name: 'bug4_packets.txt'
+    paths:
+      - "/tmp/browse_packets.txt"
+      - "tests/ClientServer/scripts/*.tap"
+    when: on_failure
+    expire_in: "30 days"
+  rules :
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG || $FAULTY_PACKET != null"
+      when: on_success
 
 # Test uactt for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:

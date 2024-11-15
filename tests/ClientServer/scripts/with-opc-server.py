@@ -35,10 +35,24 @@ def log(msg):
     print(msg)
     sys.stdout.flush()
 
+def parse_env(string_env):
+    pairs = string_env.split()
+    env = {}
+    for pair in pairs :
+        if "=" in pair :
+            key, value = pair.split('=',1)
+            env[key] = value
+        else :
+            print("Malformed pair {} expect \"Variable=Value\" format", pair)
+            return None
+    return env
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--server-cmd', metavar='CMD', help='The command to start the background server')
     parser.add_argument('--server-wd', metavar='DIR', help='The directory to run the server in')
+    parser.add_argument('--server-env', metavar='ENV', help='Environment variable to run along the server')
     parser.add_argument('--wait-server', action='store_true', default=False,
                         help='Wait for the server to exit instead of killing it when the client is done')
     parser.add_argument('--wait-timeout',
@@ -53,8 +67,11 @@ if __name__ == '__main__':
         sys.stderr.write('Missing server command.\n')
         sys.exit(1)
 
+    env=None
+    if None != args.server_env:
+        env = parse_env(args.server_env)
     log('Starting server')
-    server_process = subprocess.Popen(shlex.split(args.server_cmd), cwd=args.server_wd)
+    server_process = subprocess.Popen(shlex.split(args.server_cmd), cwd=args.server_wd, env=env)
 
     if not wait_server.wait_server(wait_server.DEFAULT_URL, wait_server.TIMEOUT):
         log('Timeout for starting server')
@@ -77,7 +94,7 @@ if __name__ == '__main__':
         test_ret = 0
     except subprocess.TimeoutExpired as e:
         # Nominal exit
-        log('Test time out')  
+        log('Test time out')
         test_ret = 0
     except subprocess.CalledProcessError as e:
         test_ret = e.returncode
