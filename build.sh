@@ -32,6 +32,7 @@
 
 CURDIR=`pwd`
 EXEC_DIR=bin
+set -e
 
 if [[ $CMAKE_TOOLCHAIN_FILE ]]; then
     BUILD_DIR=${BUILD_DIR:-build_toolchain}
@@ -81,7 +82,6 @@ else
     append_cmake_option WARNINGS_AS_ERRORS
     append_cmake_option PUBSUB_STATIC_CONFIG
     append_cmake_option CMAKE_BUILD_TYPE RelWithDebInfo
-    append_cmake_option CMAKE_C_FLAGS
     append_cmake_option CMAKE_EXE_LINKER_FLAGS
     append_cmake_option S2OPC_CRYPTO_MBEDTLS
     append_cmake_option S2OPC_CRYPTO_CYCLONE
@@ -94,8 +94,10 @@ else
     append_cmake_option SECURITY_HARDENING
     append_cmake_option PYS2OPC_WHEEL_NAME
     append_cmake_option WITH_GCC_STATIC_ANALYSIS
-    echo "cmake $CMAKE_OPTIONS .." >> $CURDIR/build.log
-    cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
+    # append_cmake_option doesn't permit to handle multiple variables because of multiple evaluations of quotes
+
+    echo "cmake $CMAKE_OPTIONS -DCMAKE_C_FLAGS=\"$CMAKE_C_FLAGS\" .." >> $CURDIR/build.log
+    cmake $CMAKE_OPTIONS -DCMAKE_C_FLAGS="$CMAKE_C_FLAGS" .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1
 fi
 if [[ $? != 0 ]]; then
