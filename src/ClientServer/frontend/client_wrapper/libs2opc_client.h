@@ -340,11 +340,16 @@ typedef void SOPC_ClientSubscriptionNotification_Fct(const SOPC_ClientHelper_Sub
  * \param subParams        The subscription creation request containing subscription parameters
  *                         (created using ::SOPC_CreateSubscriptionRequest_CreateDefault or
  *                          :: SOPC_CreateSubscriptionRequest_Create)
+ *                         Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment.
+ *
  * \param subNotifCb       The callback to be called on subscription notification
  * \param userParam        The user parameter associated to the subscription that can be accessed using
  *                         ::SOPC_ClientHelper_Subscription_GetUserParam
  *
  * \return The subscription instance or NULL in case of error (invalid parameters, subscription already created, etc.)
+ *
+ * \note The provided \p subParams memory is managed by the function after this call (even in case of error)
+ *       and shall not be accessed nor freed after call.
  */
 SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
     SOPC_ClientConnection* secureConnection,
@@ -443,11 +448,20 @@ SOPC_ReturnStatus SOPC_ClientHelper_GetSubscriptionId(const SOPC_ClientHelper_Su
  *                              SubscriptionId and ClientHandle parameters are ignored and set automatically.
  *                              Simplified way to create it is to use ::SOPC_CreateMonitoredItemsRequest_CreateDefault
  *                              or ::SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings.
+ *                              Note: it shall be allocated on heap since it will be freed by S2OPC library during
+ *                                    treatment.
+ *
  * \param monitoredItemCtxArray (optional) The array of context for monitored items to be created
  *                              (might be freed by caller after call only content is recorded in subscription)
  * \param[out] monitoredItemsResp    (optional) Pointer to the empty response that will be filled
  *                                   with the response received from the server and containing the status result
  *                                   and server monitored items ids.
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if creation failed.
+ *
+ * \note The provided \p monitoredItemsReq memory is managed by the function after this call (even in case of error)
+ *       and shall not be accessed nor freed after call.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
     const SOPC_ClientHelper_Subscription* subscription,
@@ -463,8 +477,16 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
  * \param subscription             The subscription instance on which monitored items shall be created
  * \param delMonitoredItemsReq     The delete monitored items requests to use for creation parameters.
  *                                 SubscriptionId parameter is ignored and set automatically.
+ *                                 Note: it shall be allocated on heap since it will be freed by S2OPC library during
+ *                                       treatment.
  * \param[out] delMonitoredItemsResp  (optional) Pointer to the empty response that will be filled
  *                                    with the response received from the server and containing the status result.
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if deletion failed.
+ *
+ * \note The provided \p delMonitoredItemsReq memory is managed by the function after this call (even in case of error)
+ *       and shall not be accessed nor freed after call.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
     const SOPC_ClientHelper_Subscription* subscription,
@@ -486,6 +508,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
  *                         - ::OpcUa_ModifyMonitoredItemsRequest
  *                         - ::OpcUa_SetMonitoringModeRequest
  *                         - ::OpcUa_SetTriggeringRequest
+ *                         Note: it shall be allocated on heap since it will be freed by S2OPC library during
+ *                               treatment.
  *
  * \param[out] subOrMIresponse  Pointer into which instance of response complying with the OPC UA request is provided:
  *                     \li ::OpcUa_ModifySubscriptionResponse
@@ -501,7 +525,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
  *
- * \note request memory is managed by the client after a successful return or in case of timeout
+ * \note The provided \p subOrMIrequest memory is managed by the function after this call (even in case of error)
+ *       and shall not be accessed nor freed after call.
  * \note caller is responsible of output response memory after successful call. E.g. use ::SOPC_EncodeableObject_Delete.
  *
  * \warning service synchronous call shall only be called from the application thread and shall not be called from
@@ -530,6 +555,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SyncService(const SOPC_ClientHe
  *                         - ::OpcUa_ModifyMonitoredItemsRequest
  *                         - ::OpcUa_SetMonitoringModeRequest
  *                         - ::OpcUa_SetTriggeringRequest
+ *                         Note: it shall be allocated on heap since it will be freed by S2OPC library during
+ *                               treatment.
  *
  * \param userContext  User defined context that will be provided with the corresponding response in
  *                     ::SOPC_LocalServiceAsyncResp_Fct
@@ -537,7 +564,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SyncService(const SOPC_ClientHe
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the client is not running.
  *
- * \note request memory is managed by the client after a successful return
+ * \note The provided \p subOrMIrequest memory is managed by the function after this call (even in case of error)
+ *       and shall not be accessed nor freed after call.
  *
  * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
  *          and prior to call ::SOPC_ClientConfigHelper_Clear.

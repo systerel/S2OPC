@@ -1195,113 +1195,127 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
     SOPC_ClientSubscriptionNotification_Fct* subNotifCb,
     uintptr_t userParam)
 {
+    bool requestInStaMac = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ClientHelper_Subscription* subInstance = NULL;
+
     if (NULL == secureConnection || NULL == subParams || NULL == subNotifCb)
     {
-        return NULL;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (!SOPC_ClientInternal_IsInitialized())
-    {
-        return NULL;
-    }
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_StaMac_Machine* pSM = NULL;
-
-    if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx])
+    if (SOPC_STATUS_OK == status && !SOPC_ClientInternal_IsInitialized())
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    SOPC_ClientHelper_Subscription* subInstance = SOPC_Calloc(1, sizeof(*subInstance));
-    if (NULL == subInstance)
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
-    }
-    else
-    {
-        subInstance->subNotifCb = subNotifCb;
-    }
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    /* Get SM and configure notification CB */
-    if (SOPC_STATUS_OK == status)
-    {
-        pSM = secureConnection->stateMachine;
-        status = SOPC_StaMac_HasSubscription(pSM) ? SOPC_STATUS_INVALID_STATE : SOPC_STATUS_OK;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_StaMac_NewConfigureNotificationCallback(pSM, SOPC_StaMacNotification_Cbk);
-    }
-    /* Create the unified context for client helper layer */
-    SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
-    if (SOPC_STATUS_OK == status)
-    {
-        reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateNoSync(secureConnection->secureConnectionIdx,
-                                                                  (uintptr_t) subInstance);
-        status = (NULL != reqCtx) ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
-    }
-    /* Create the subscription */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_StaMac_NewCreateSubscription(pSM, subParams, (uintptr_t) reqCtx);
-    }
+        SOPC_StaMac_Machine* pSM = NULL;
 
-    /* Release the lock so that the event handler can work properly while waiting */
-
-    /* Wait for the monitored item to be created */
-    if (SOPC_STATUS_OK == status)
-    {
-        int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
-        int count = 0;
-        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
-               count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+        if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx])
         {
-            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-            SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
 
-            mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-            ++count;
-        }
-        if (SOPC_StaMac_HasSubscription(pSM))
+        subInstance = SOPC_Calloc(1, sizeof(*subInstance));
+        if (NULL == subInstance)
         {
-            subInstance->secureConnection = secureConnection;
-            subInstance->subscriptionId = SOPC_StaMac_HasSubscriptionId(pSM);
-            subInstance->userParam = userParam;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
-        else if (SOPC_StaMac_IsError(pSM))
+        else
         {
-            status = SOPC_STATUS_NOK;
+            subInstance->subNotifCb = subNotifCb;
         }
-        else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+
+        /* Get SM and configure notification CB */
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_STATUS_TIMEOUT;
-            SOPC_StaMac_SetError(pSM);
+            pSM = secureConnection->stateMachine;
+            status = SOPC_StaMac_HasSubscription(pSM) ? SOPC_STATUS_INVALID_STATE : SOPC_STATUS_OK;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_NewConfigureNotificationCallback(pSM, SOPC_StaMacNotification_Cbk);
+        }
+        /* Create the unified context for client helper layer */
+        SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
+        if (SOPC_STATUS_OK == status)
+        {
+            reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateNoSync(secureConnection->secureConnectionIdx,
+                                                                      (uintptr_t) subInstance);
+            status = (NULL != reqCtx) ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        /* Create the subscription */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_NewCreateSubscription(pSM, subParams, (uintptr_t) reqCtx);
+            requestInStaMac = true;
+        }
+
+        /* Release the lock so that the event handler can work properly while waiting */
+
+        /* Wait for the monitored item to be created */
+        if (SOPC_STATUS_OK == status)
+        {
+            int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
+            int count = 0;
+            while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
+                   count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+            {
+                mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+                SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+                SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+
+                mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+                SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+                ++count;
+            }
+            if (SOPC_StaMac_HasSubscription(pSM))
+            {
+                subInstance->secureConnection = secureConnection;
+                subInstance->subscriptionId = SOPC_StaMac_HasSubscriptionId(pSM);
+                subInstance->userParam = userParam;
+            }
+            else if (SOPC_StaMac_IsError(pSM))
+            {
+                status = SOPC_STATUS_NOK;
+            }
+            else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+                SOPC_StaMac_SetError(pSM);
+            }
+        }
+
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_UNUSED_RESULT(SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL));
+            SOPC_Free(subInstance);
+        }
+        else
+        {
+            // Keep track of the create subscription instance in case it is not deleted on disconnect call
+            secureConnection->createdSub = subInstance;
+        }
+
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        // Free the allocated context if the subscription creation failed, otherwise kept during subscription lifetime
+        if (SOPC_STATUS_OK != status && NULL != reqCtx)
+        {
+            SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
         }
     }
 
-    if (SOPC_STATUS_OK != status)
+    // Free the provided request if the subscription creation failed and request not provided to StaMac
+    if (!requestInStaMac && NULL != subParams)
     {
-        SOPC_UNUSED_RESULT(SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL));
-        SOPC_Free(subInstance);
-    }
-    else
-    {
-        // Keep track of the create subscription instance in case it is not deleted on disconnect call
-        secureConnection->createdSub = subInstance;
-    }
-
-    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    // Free the allocated context if the subscription creation failed, otherwise kept during subscription lifetime
-    if (SOPC_STATUS_OK != status && NULL != reqCtx)
-    {
-        SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
+        SOPC_EncodeableObject_Delete(subParams->encodeableType, (void**) &subParams);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -1441,82 +1455,94 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
     const uintptr_t* monitoredItemCtxArray,
     OpcUa_CreateMonitoredItemsResponse* monitoredItemsResp)
 {
+    bool requestInStaMac = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
     if (NULL == subscription || NULL == subscription->secureConnection || NULL == monitoredItemsReq)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (!SOPC_ClientInternal_IsInitialized())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    SOPC_CreateMonitoredItems_Ctx* appCtx = NULL;
-
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (subscription->secureConnection !=
-        sopc_client_helper_config.secureConnections[subscription->secureConnection->secureConnectionIdx])
+    if (SOPC_STATUS_OK == status && !SOPC_ClientInternal_IsInitialized())
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        appCtx = SOPC_Calloc(1, sizeof(*appCtx));
-        if (NULL != appCtx)
+        SOPC_CreateMonitoredItems_Ctx* appCtx = NULL;
+
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        if (subscription->secureConnection !=
+            sopc_client_helper_config.secureConnections[subscription->secureConnection->secureConnectionIdx])
         {
-            appCtx->Results = monitoredItemsResp;
+            status = SOPC_STATUS_INVALID_STATE;
         }
-        else
+
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
+            appCtx = SOPC_Calloc(1, sizeof(*appCtx));
+            if (NULL != appCtx)
+            {
+                appCtx->Results = monitoredItemsResp;
+            }
+            else
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
         }
+
+        SOPC_StaMac_Machine* pSM = subscription->secureConnection->stateMachine;
+
+        /* Create the monitored items and wait for its creation */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_NewCreateMonitoredItems(pSM, monitoredItemsReq, monitoredItemCtxArray, appCtx);
+            requestInStaMac = true;
+        }
+
+        /* Wait for the monitored items to be created */
+        if (SOPC_STATUS_OK == status)
+        {
+            const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
+            int count = 0;
+            while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_PopMonItByAppCtx(pSM, appCtx) &&
+                   count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+            {
+                /* Release the lock so that the event handler can work properly while waiting */
+                mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+                SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+                SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+
+                mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+                SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+                ++count;
+            }
+            /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
+             *  and NOK is returned. */
+            if (SOPC_StaMac_IsError(pSM))
+            {
+                status = SOPC_STATUS_NOK;
+            }
+            else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+                SOPC_StaMac_SetError(pSM);
+            }
+        }
+        SOPC_Free(appCtx);
+
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
-    SOPC_StaMac_Machine* pSM = subscription->secureConnection->stateMachine;
-
-    /* Create the monitored items and wait for its creation */
-    if (SOPC_STATUS_OK == status)
+    // Free the provided request if the creation failed and request not provided to StaMac
+    if (!requestInStaMac && NULL != monitoredItemsReq)
     {
-        status = SOPC_StaMac_NewCreateMonitoredItems(pSM, monitoredItemsReq, monitoredItemCtxArray, appCtx);
+        SOPC_EncodeableObject_Delete(monitoredItemsReq->encodeableType, (void**) &monitoredItemsReq);
     }
-
-    /* Wait for the monitored items to be created */
-    if (SOPC_STATUS_OK == status)
-    {
-        const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
-        int count = 0;
-        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_PopMonItByAppCtx(pSM, appCtx) &&
-               count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
-        {
-            /* Release the lock so that the event handler can work properly while waiting */
-            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-            SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
-
-            mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-            ++count;
-        }
-        /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
-         *  and NOK is returned. */
-        if (SOPC_StaMac_IsError(pSM))
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
-        {
-            status = SOPC_STATUS_TIMEOUT;
-            SOPC_StaMac_SetError(pSM);
-        }
-    }
-    SOPC_Free(appCtx);
-
-    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -1526,82 +1552,94 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
     OpcUa_DeleteMonitoredItemsRequest* delMonitoredItemsReq,
     OpcUa_DeleteMonitoredItemsResponse* delMonitoredItemsResp)
 {
+    bool requestInStaMac = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
     if (NULL == subscription || NULL == subscription->secureConnection || NULL == delMonitoredItemsReq)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (!SOPC_ClientInternal_IsInitialized())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    SOPC_DeleteMonitoredItems_Ctx* appCtx = NULL;
-
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (subscription->secureConnection !=
-        sopc_client_helper_config.secureConnections[subscription->secureConnection->secureConnectionIdx])
+    if (SOPC_STATUS_OK == status && !SOPC_ClientInternal_IsInitialized())
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        appCtx = SOPC_Calloc(1, sizeof(*appCtx));
-        if (NULL != appCtx)
+        SOPC_DeleteMonitoredItems_Ctx* appCtx = NULL;
+
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        if (subscription->secureConnection !=
+            sopc_client_helper_config.secureConnections[subscription->secureConnection->secureConnectionIdx])
         {
-            appCtx->Results = delMonitoredItemsResp;
+            status = SOPC_STATUS_INVALID_STATE;
         }
-        else
+
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
+            appCtx = SOPC_Calloc(1, sizeof(*appCtx));
+            if (NULL != appCtx)
+            {
+                appCtx->Results = delMonitoredItemsResp;
+            }
+            else
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
         }
+
+        SOPC_StaMac_Machine* pSM = subscription->secureConnection->stateMachine;
+
+        /* Delete the monitored items and wait for its deletion */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_NewDeleteMonitoredItems(pSM, delMonitoredItemsReq, appCtx);
+            requestInStaMac = true;
+        }
+
+        /* Wait for the monitored items to be created */
+        if (SOPC_STATUS_OK == status)
+        {
+            const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
+            int count = 0;
+            while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_PopDeleteMonItByAppCtx(pSM, appCtx) &&
+                   count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+            {
+                /* Release the lock so that the event handler can work properly while waiting */
+                mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+                SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+                SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
+
+                mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+                SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+                ++count;
+            }
+            /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
+             *  and NOK is returned. */
+            if (SOPC_StaMac_IsError(pSM))
+            {
+                status = SOPC_STATUS_NOK;
+            }
+            else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+                SOPC_StaMac_SetError(pSM);
+            }
+        }
+        SOPC_Free(appCtx);
+
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
-    SOPC_StaMac_Machine* pSM = subscription->secureConnection->stateMachine;
-
-    /* Delete the monitored items and wait for its deletion */
-    if (SOPC_STATUS_OK == status)
+    // Free the provided request if the deletion failed and request not provided to StaMac
+    if (!requestInStaMac && NULL != delMonitoredItemsReq)
     {
-        status = SOPC_StaMac_NewDeleteMonitoredItems(pSM, delMonitoredItemsReq, appCtx);
+        SOPC_EncodeableObject_Delete(delMonitoredItemsReq->encodeableType, (void**) &delMonitoredItemsReq);
     }
-
-    /* Wait for the monitored items to be created */
-    if (SOPC_STATUS_OK == status)
-    {
-        const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
-        int count = 0;
-        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_PopDeleteMonItByAppCtx(pSM, appCtx) &&
-               count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
-        {
-            /* Release the lock so that the event handler can work properly while waiting */
-            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-            SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
-
-            mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-            ++count;
-        }
-        /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
-         *  and NOK is returned. */
-        if (SOPC_StaMac_IsError(pSM))
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
-        {
-            status = SOPC_STATUS_TIMEOUT;
-            SOPC_StaMac_SetError(pSM);
-        }
-    }
-    SOPC_Free(appCtx);
-
-    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -1745,51 +1783,63 @@ static SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SyncAndAsyncRequest(
     void** subOrMIresponse,
     uintptr_t asyncUserCtx)
 {
+    bool requestServiceCalled = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
     if (NULL == subscription || NULL == subscription->secureConnection || NULL == subOrMIrequest ||
         (isSync && NULL == subOrMIresponse))
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (!SOPC_ClientInternal_IsInitialized())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (subscription->secureConnection !=
-        sopc_client_helper_config.secureConnections[subscription->secureConnection->secureConnectionIdx])
+    if (SOPC_STATUS_OK == status && !SOPC_ClientInternal_IsInitialized())
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    void* request = NULL;
-
     if (SOPC_STATUS_OK == status)
     {
-        request = SOPC_ClientHelperInternal_ConfigAndFilterService(subscription, subOrMIrequest);
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        if (NULL != request)
+        if (subscription->secureConnection !=
+            sopc_client_helper_config.secureConnections[subscription->secureConnection->secureConnectionIdx])
         {
-            if (isSync)
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+
+        void* request = NULL;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            request = SOPC_ClientHelperInternal_ConfigAndFilterService(subscription, subOrMIrequest);
+
+            if (NULL != request)
             {
-                status = SOPC_ClientHelper_ServiceSync(subscription->secureConnection, request, subOrMIresponse);
+                if (isSync)
+                {
+                    status = SOPC_ClientHelper_ServiceSync(subscription->secureConnection, request, subOrMIresponse);
+                }
+                else
+                {
+                    status = SOPC_ClientHelper_ServiceAsync(subscription->secureConnection, request, asyncUserCtx);
+                }
+                requestServiceCalled = true;
             }
             else
             {
-                status = SOPC_ClientHelper_ServiceAsync(subscription->secureConnection, request, asyncUserCtx);
+                status = SOPC_STATUS_INVALID_PARAMETERS;
             }
         }
-        else
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
+
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
-    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    // Free the provided request if the deletion failed and request not provided to Service* function
+    if (!requestServiceCalled && NULL != subOrMIrequest)
+    {
+        SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) subOrMIrequest, (void**) &subOrMIrequest);
+    }
 
     return status;
 }

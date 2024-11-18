@@ -509,37 +509,49 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
                                                     OpcUa_CreateSubscriptionRequest* req,
                                                     uintptr_t userAppContext)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool requestSentToServices = false;
+
     if (NULL == pSM || NULL == req || &OpcUa_CreateSubscriptionRequest_EncodeableType != req->encodeableType)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    if (!pSM->bSubscriptionCreated && stActivated == pSM->state)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Creating subscription using provided request.");
-        if (SOPC_STATUS_OK == status)
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        if (!pSM->bSubscriptionCreated && stActivated == pSM->state)
         {
-            status = SOPC_StaMac_SendRequest(pSM, req, userAppContext, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                             SOPC_REQUEST_TYPE_SUBSCRIPTION);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            pSM->state = stCreatingSubscr;
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Creating subscription using provided request.");
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_StaMac_SendRequest(pSM, req, userAppContext, SOPC_REQUEST_SCOPE_STATE_MACHINE,
+                                                 SOPC_REQUEST_TYPE_SUBSCRIPTION);
+                requestSentToServices = (SOPC_STATUS_OK == status);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                pSM->state = stCreatingSubscr;
+            }
+            else
+            {
+                pSM->state = stError;
+            }
         }
         else
         {
-            pSM->state = stError;
+            status = SOPC_STATUS_INVALID_STATE;
         }
+        mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
-    else
+
+    if (!requestSentToServices && NULL != req)
     {
-        status = SOPC_STATUS_INVALID_STATE;
+        SOPC_EncodeableObject_Delete(req->encodeableType, (void**) &req);
     }
-    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
     return status;
 }
 
@@ -709,105 +721,116 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
                                                       const uintptr_t* userAppCtxArray,
                                                       SOPC_CreateMonitoredItems_Ctx* pAppCtx)
 {
+    bool requestSentToServices = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
     if (NULL == pSM || NULL == req || 0 >= req->NoOfItemsToCreate || NULL == pAppCtx)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (!SOPC_StaMac_HasSubscription(pSM))
+    if (SOPC_STATUS_OK == status && !SOPC_StaMac_HasSubscription(pSM))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "the machine shall have a created subscription to create monitored items.");
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    uint32_t nElems = (uint32_t) req->NoOfItemsToCreate;
-
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (stActivated != pSM->state)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "creating monitored item, the machine should be in the stActivated state (is in %i).",
-                               pSM->state);
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    /* Prepare context to keep a copy of request */
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            SOPC_EncodeableObject_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
-    }
+        uint32_t nElems = (uint32_t) req->NoOfItemsToCreate;
 
-    /* Fill the unique client handle parameters an record the user context associated to the MI  */
-    if (SOPC_STATUS_OK == status)
-    {
-        for (uint32_t i = 0; i < nElems; ++i)
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        if (stActivated != pSM->state)
         {
-            bool alreadyUsedCliHandle = false;
-            uint32_t cpt = 0;
-            if (SOPC_STATUS_OK == status && pSM->nMonItClientHandle < UINT32_MAX)
-            {
-                do
-                {
-                    cpt++;
-                    pSM->nMonItClientHandle++;
-                    uintptr_t result = SOPC_Dict_Get(pSM->miCliHandleToUserAppCtxDict,
-                                                     (uintptr_t) pSM->nMonItClientHandle, &alreadyUsedCliHandle);
-                    SOPC_UNUSED_RESULT(result);
-                    if (!alreadyUsedCliHandle && DICT_TOMBSTONE == (uintptr_t) cpt)
-                    {
-                        alreadyUsedCliHandle = true; // Tombstone value
-                    }
-                } while (cpt < UINT32_MAX && alreadyUsedCliHandle); // Ensure that a free handle id is found
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "creating monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
 
-                if (!alreadyUsedCliHandle)
+        /* Prepare context to keep a copy of request */
+        if (SOPC_STATUS_OK == status)
+        {
+            status =
+                SOPC_EncodeableObject_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
+        }
+
+        /* Fill the unique client handle parameters an record the user context associated to the MI  */
+        if (SOPC_STATUS_OK == status)
+        {
+            for (uint32_t i = 0; i < nElems; ++i)
+            {
+                bool alreadyUsedCliHandle = false;
+                uint32_t cpt = 0;
+                if (SOPC_STATUS_OK == status && pSM->nMonItClientHandle < UINT32_MAX)
                 {
-                    const uintptr_t userCtx = (userAppCtxArray != NULL ? userAppCtxArray[i] : 0);
-                    bool result = SOPC_Dict_Insert(pSM->miCliHandleToUserAppCtxDict,
-                                                   (uintptr_t) pSM->nMonItClientHandle, userCtx);
-                    if (!result)
+                    do
                     {
-                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                        cpt++;
+                        pSM->nMonItClientHandle++;
+                        uintptr_t result = SOPC_Dict_Get(pSM->miCliHandleToUserAppCtxDict,
+                                                         (uintptr_t) pSM->nMonItClientHandle, &alreadyUsedCliHandle);
+                        SOPC_UNUSED_RESULT(result);
+                        if (!alreadyUsedCliHandle && DICT_TOMBSTONE == (uintptr_t) cpt)
+                        {
+                            alreadyUsedCliHandle = true; // Tombstone value
+                        }
+                    } while (cpt < UINT32_MAX && alreadyUsedCliHandle); // Ensure that a free handle id is found
+
+                    if (!alreadyUsedCliHandle)
+                    {
+                        const uintptr_t userCtx = (userAppCtxArray != NULL ? userAppCtxArray[i] : 0);
+                        bool result = SOPC_Dict_Insert(pSM->miCliHandleToUserAppCtxDict,
+                                                       (uintptr_t) pSM->nMonItClientHandle, userCtx);
+                        if (!result)
+                        {
+                            status = SOPC_STATUS_OUT_OF_MEMORY;
+                        }
                     }
-                }
-                if (SOPC_STATUS_OK == status)
-                {
-                    req->ItemsToCreate[i].RequestedParameters.ClientHandle = pSM->nMonItClientHandle;
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        req->ItemsToCreate[i].RequestedParameters.ClientHandle = pSM->nMonItClientHandle;
+                    }
                 }
             }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                pAppCtx->outCtxId = pSM->nMonItClientHandle; // latest handle as context
+                req->SubscriptionId = pSM->iSubscriptionID;
+                status = SOPC_EncodeableObject_Copy(&OpcUa_CreateMonitoredItemsRequest_EncodeableType,
+                                                    (void*) pAppCtx->req, (void*) req);
+            }
+        }
+
+        /* Send it */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_SendRequest(pSM, req, (uintptr_t) pAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
+                                             SOPC_REQUEST_TYPE_SUBSCRIPTION);
+            requestSentToServices = (SOPC_STATUS_OK == status);
+        }
+        else
+        {
+            SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
         }
 
         if (SOPC_STATUS_OK == status)
         {
-            pAppCtx->outCtxId = pSM->nMonItClientHandle; // latest handle as context
-            req->SubscriptionId = pSM->iSubscriptionID;
-            status = SOPC_EncodeableObject_Copy(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void*) pAppCtx->req,
-                                                (void*) req);
+            pSM->state = stCreatingMonIt;
         }
+
+        mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
-    /* Send it */
-    if (SOPC_STATUS_OK == status)
+    if (!requestSentToServices && NULL != req)
     {
-        status = SOPC_StaMac_SendRequest(pSM, req, (uintptr_t) pAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                         SOPC_REQUEST_TYPE_SUBSCRIPTION);
+        SOPC_EncodeableObject_Delete(req->encodeableType, (void**) &req);
     }
-    else
-    {
-        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        pSM->state = stCreatingMonIt;
-    }
-
-    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -816,80 +839,91 @@ SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
                                                       OpcUa_DeleteMonitoredItemsRequest* req,
                                                       SOPC_DeleteMonitoredItems_Ctx* outAppCtx)
 {
+    bool requestSentToServices = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
     if (NULL == pSM || NULL == req || 0 >= req->NoOfMonitoredItemIds || NULL == outAppCtx)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (!SOPC_StaMac_HasSubscription(pSM))
+    if (SOPC_STATUS_OK == status && !SOPC_StaMac_HasSubscription(pSM))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "the machine shall have a created subscription to create monitored items.");
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (stActivated != pSM->state)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "deleting monitored item, the machine should be in the stActivated state (is in %i).",
-                               pSM->state);
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    /* Prepare context to keep a copy of request */
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            SOPC_EncodeableObject_Create(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
-    }
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    uintptr_t clientHandle = 0;
-    bool findClientHandle = false;
-    if (SOPC_STATUS_OK == status)
-    {
-        for (uint32_t i = 0; !findClientHandle && i < (uint32_t) req->NoOfMonitoredItemIds; i++)
+        if (stActivated != pSM->state)
         {
-            clientHandle =
-                SOPC_Dict_Get(pSM->miIdToCliHandleDict, (uintptr_t) req->MonitoredItemIds[i], &findClientHandle);
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "deleting monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
+            status = SOPC_STATUS_INVALID_STATE;
         }
-        if (!findClientHandle)
+
+        /* Prepare context to keep a copy of request */
+        if (SOPC_STATUS_OK == status)
         {
-            // No valid monitored item id found
-            status = SOPC_STATUS_INVALID_PARAMETERS;
+            status = SOPC_EncodeableObject_Create(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType,
+                                                  (void**) &outAppCtx->req);
         }
+
+        uintptr_t clientHandle = 0;
+        bool findClientHandle = false;
+        if (SOPC_STATUS_OK == status)
+        {
+            for (uint32_t i = 0; !findClientHandle && i < (uint32_t) req->NoOfMonitoredItemIds; i++)
+            {
+                clientHandle =
+                    SOPC_Dict_Get(pSM->miIdToCliHandleDict, (uintptr_t) req->MonitoredItemIds[i], &findClientHandle);
+            }
+            if (!findClientHandle)
+            {
+                // No valid monitored item id found
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
+        }
+
+        /* Fill the subscription id and copy the request */
+        if (SOPC_STATUS_OK == status)
+        {
+            outAppCtx->outCtxId = clientHandle; // first valid client handle
+            req->SubscriptionId = pSM->iSubscriptionID;
+            status = SOPC_EncodeableObject_Copy(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType,
+                                                (void*) outAppCtx->req, (void*) req);
+        }
+
+        /* Send it */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_SendRequest(pSM, req, (uintptr_t) outAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
+                                             SOPC_REQUEST_TYPE_SUBSCRIPTION);
+            requestSentToServices = (SOPC_STATUS_OK == status);
+        }
+        else
+        {
+            SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            pSM->state = stDeletingMonIt;
+        }
+
+        mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
-    /* Fill the subscription id and copy the request */
-    if (SOPC_STATUS_OK == status)
+    if (!requestSentToServices && NULL != req)
     {
-        outAppCtx->outCtxId = clientHandle; // first valid client handle
-        req->SubscriptionId = pSM->iSubscriptionID;
-        status = SOPC_EncodeableObject_Copy(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void*) outAppCtx->req,
-                                            (void*) req);
+        SOPC_EncodeableObject_Delete(req->encodeableType, (void**) &req);
     }
-
-    /* Send it */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_StaMac_SendRequest(pSM, req, (uintptr_t) outAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                         SOPC_REQUEST_TYPE_SUBSCRIPTION);
-    }
-    else
-    {
-        SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        pSM->state = stDeletingMonIt;
-    }
-
-    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
