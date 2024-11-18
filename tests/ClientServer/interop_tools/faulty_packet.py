@@ -18,6 +18,21 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# This script is designed to test the non-regression of an S2OPC server when handling erroneous packets
+# after the connection and session have been established.
+#
+# The tests are presented in the form of scenarios and expect servers with specific configurations.
+#
+# Test scenarios 1, 2, 3, and 4 expect a server with the following characteristics:
+# - Ability to connect with an anonymous user in None security mode
+# - The anonymous user does not require special rights on the address space
+#
+# Test scenario 5 expects a server that:
+# - Rejects unsecured access, i.e., None security mode
+#
+# Notes: The OPC UA standard is backward compatible. In this context, the offsets used to obtain identifiers,
+# status codes, and other information are hardcoded for time-saving purposes, as they are not expected to change.
+
 import socket
 import signal
 import sys
@@ -454,8 +469,8 @@ def single_client(scenario_context, logger) :
             logger.add_test(f"""Expected status code from server match. expected {expected_status_code}
                             received {hex(int.from_bytes(received_status_code, 'little'))
                             if received_status_code != None else None}""", not(status & STATUS_CHECK_RESPONSE_STATUS_MASK))
-            logger.add_test(f"""Expected diagnostic from server match. expected {expected_diagnostic} 
-                            received {bytes(received_diagnostic_info) if received_diagnostic_info != None else None}""", 
+            logger.add_test(f"""Expected diagnostic from server match. expected {expected_diagnostic}
+                            received {bytes(received_diagnostic_info) if received_diagnostic_info != None else None}""",
                             not(status & STATUS_CHECK_RESPONSE_DIAGNOSTIC_MASK))
 
     signal.alarm(0)
