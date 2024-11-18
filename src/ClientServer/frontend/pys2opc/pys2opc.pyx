@@ -19,6 +19,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# Disclamer :
+# - All potentially blocking calls to S2OPC C library must be excuted in a *nogil* section.
+# - Any callback called from S2OPC and modifying python variables must be executed in a *with gil* section.
+
 from contextlib import contextmanager
 from functools import total_ordering
 import time
@@ -446,10 +450,10 @@ class PyS2OPC:
                                                 logLevel = logLevel,
                                                 logSystem = SOPC_Log_System.SOPC_LOG_SYSTEM_FILE,
                                                 logSysConfig = log_file_conf_u)
-
         status = SOPC_ReturnStatus.SOPC_STATUS_OK
-        if not SOPC_CommonHelper_GetInitialized():
-            status = SOPC_CommonHelper_Initialize(&log_config)
+        with nogil:
+            if not SOPC_CommonHelper_GetInitialized():
+                status = SOPC_CommonHelper_Initialize(&log_config)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Library common initialization failed ', status)
 
@@ -461,12 +465,15 @@ class PyS2OPC:
 
         Performs toolkit common clear.
         """
-        SOPC_CommonHelper_Clear()
+        with nogil:
+            SOPC_CommonHelper_Clear()
 
     @staticmethod
     def get_version() -> str:
         """Returns complete version string (PyS2OPC, S2OPC_Common, S2OPC_ClientServer)"""
-        cdef SOPC_Toolkit_Build_Info build_info = SOPC_CommonHelper_GetBuildInfo()
+        cdef SOPC_Toolkit_Build_Info build_info
+        with nogil:
+            build_info = SOPC_CommonHelper_GetBuildInfo()
         return 'PyS2OPC v' + VERSION + '\n' + \
                'S2OPC_Common       - Version: {}, SrcCommit: {}, DockerId: {}, BuildDate: {}\n'.format(
                 build_info.commonBuildInfo.buildVersion.decode('UTF-8'),build_info.commonBuildInfo.buildSrcCommit.decode('UTF-8'),
@@ -906,12 +913,13 @@ cdef class _AsyncRequestHandler:
         """
         request._timestampSent = time.time()
         self._dRequestContext = request
-        if isLocalService:
-            status = SOPC_ServerHelper_LocalServiceAsync(request._request, request._requestContext)
-        elif connection != NULL:
-            status = SOPC_ClientHelper_ServiceAsync(connection, request._request, request._requestContext)
-        else:
-            assert False, '_send_generic_request: !isLocalService => connection != NULL'
+        with nogil:
+            if isLocalService:
+                status = SOPC_ServerHelper_LocalServiceAsync(request._request, request._requestContext)
+            elif connection != NULL:
+                status = SOPC_ClientHelper_ServiceAsync(connection, request._request, request._requestContext)
+            else:
+                assert False, '_send_generic_request: !isLocalService => connection != NULL'
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('ServiceAsync failed to send request.', status)
         if bWaitResponse:
@@ -1081,7 +1089,8 @@ class PyS2OPC_Server(PyS2OPC):
         if logMaxFileNumber > UINT16_MAX:
             raise ValueError("logMaxFileNumber is too large (must be less than UINT16_MAX)")
         PyS2OPC.initialize(logLevel, logPath, logFileMaxBytes, logMaxFileNumber)
-        status = SOPC_ServerConfigHelper_Initialize()
+        with nogil:
+            status = SOPC_ServerConfigHelper_Initialize()
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Library server initialization failed ', status)
         PyS2OPC._initialized_srv = True
@@ -1095,7 +1104,8 @@ class PyS2OPC_Server(PyS2OPC):
         """
         Clear the server configuration and clear/stop the toolkit if applicable.
         """
-        SOPC_ServerConfigHelper_Clear()
+        with nogil:
+            SOPC_ServerConfigHelper_Clear()
         PyS2OPC._initialized_srv = False
         if PyS2OPC._initialized_cli == False:
             PyS2OPC._clear()
@@ -1113,23 +1123,29 @@ class PyS2OPC_Server(PyS2OPC):
             xml_users_config_path: path to users credential and rights configuration XML file ([s2opc_clientserver_users_config.xsd](https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_users_config.xsd?ref_type=heads) schema)
             address_space_handler: None (no write notification) or an instance of a subclass of `BaseAddressSpaceHandler`
         """
-        # Set Password Callback
-        SOPC_ServerConfigHelper_SetKeyPasswordCallback(_callback_get_server_key_password)
-        # Set LocalServiceAsync Callback
-        SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(_callback_LocalServiceAsyncResp)
+        with nogil:
+            # Set Password Callback
+            SOPC_ServerConfigHelper_SetKeyPasswordCallback(_callback_get_server_key_password)
+            # Set LocalServiceAsync Callback
+            SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(_callback_LocalServiceAsyncResp)
 
         b_xml_server_config_path = xml_server_config_path.encode()
         b_xml_address_space_config_path = xml_address_space_config_path.encode()
         b_xml_users_config_path = xml_users_config_path.encode()
-        status = SOPC_ServerConfigHelper_ConfigureFromXML(b_xml_server_config_path, b_xml_address_space_config_path,
-                                                          b_xml_users_config_path, NULL)
+        cdef const char* c_xml_server_config_path = b_xml_server_config_path
+        cdef const char* c_xml_address_space_config_path = b_xml_address_space_config_path
+        cdef const char* c_xml_users_config_path = b_xml_users_config_path
+        with nogil:
+            status = SOPC_ServerConfigHelper_ConfigureFromXML(c_xml_server_config_path, c_xml_address_space_config_path,
+                                                            c_xml_users_config_path, NULL)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Server configuration (from XML) failed ', status)
         # Set address space handler
         if address_space_handler is not None:
             assert isinstance(address_space_handler, BaseAddressSpaceHandler)
             PyS2OPC_Server._adds_handler = address_space_handler
-            SOPC_ServerConfigHelper_SetWriteNotifCallback(_callback_write_notification)
+            with nogil:
+                SOPC_ServerConfigHelper_SetWriteNotifCallback(_callback_write_notification)
 
     # @staticmethod : Python 3.9 does not support both and report error on staticmethod is not callable
     @contextmanager
@@ -1148,7 +1164,8 @@ class PyS2OPC_Server(PyS2OPC):
         If you don't have applicative application, and callbacks are enough,
         see instead `PyS2OPC_Server.serve_forever`.
         """
-        status = SOPC_ServerHelper_StartServer(_callback_stop_server)
+        with nogil:
+            status = SOPC_ServerHelper_StartServer(_callback_stop_server)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('StartServer failed.', status)
         PyS2OPC_Server._serving = True
@@ -1172,7 +1189,8 @@ class PyS2OPC_Server(PyS2OPC):
 
         Note: Server stops after 5 seconds for shutdown phase to indicate shutdown in ServerState node
         """
-        status = SOPC_ServerHelper_StopServer()
+        with nogil:
+            status = SOPC_ServerHelper_StopServer()
         while PyS2OPC_Server._serving: # wait for _callback_stop_server
             time.sleep(0.1)
         return status
@@ -2267,7 +2285,9 @@ cdef class _C_BaseClientConnectionHandler:
                                                     uintptr_t* monitoredItemCtxArray) noexcept with gil:
         cdef const OpcUa_DataChangeNotification* notifs = NULL
         cdef uintptr_t index_ctx
-        cdef SOPC_ClientConnection* secureConnection = SOPC_ClientHelper_GetSecureConnection(subscription)
+        cdef SOPC_ClientConnection* secureConnection = NULL
+        with nogil:
+            secureConnection = SOPC_ClientHelper_GetSecureConnection(subscription)
         cdef uintptr_t id_sc = <uintptr_t> (<void*> secureConnection)
         cdef uintptr_t id_sub = <uintptr_t> (<void*> subscription)
         nodeIds_list: list[str] = BaseClientConnectionHandler._list_nodeIds_handler[id_sub]
@@ -2343,7 +2363,8 @@ class BaseClientConnectionHandler:
         c_cliConHandler: _C_BaseClientConnectionHandler = self._c_cliConHandler
         if NULL != c_cliConHandler._secureConnection:
             self._connected = False
-            status = SOPC_ClientHelper_Disconnect(&(c_cliConHandler._secureConnection))
+            with nogil:
+                status = SOPC_ClientHelper_Disconnect(&(c_cliConHandler._secureConnection))
             return status == SOPC_ReturnStatus.SOPC_STATUS_OK
         return False
 
@@ -2490,12 +2511,15 @@ class BaseClientConnectionHandler:
         if subscription_config == NULL:
             raise MemoryError
         # create a subscription
-        cdef SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelper_CreateSubscription(c_cliConHandler._secureConnection,
-                                                            subscription_config,
-                                                            c_cliConHandler._callback_subscriptionNotification, <uintptr_t> NULL)
-        if subscription == NULL:
-            raise MemoryError
-        status = SOPC_ClientHelper_Subscription_SetAvailableTokens(subscription, nbPublishTokens)
+        cdef SOPC_ClientHelper_Subscription* subscription = NULL
+        cdef uint32_t c_nbPublishTokens = nbPublishTokens
+        with nogil:
+            subscription = SOPC_ClientHelper_CreateSubscription(c_cliConHandler._secureConnection,
+                            subscription_config,
+                            c_cliConHandler._callback_subscriptionNotification, <uintptr_t> NULL)
+            if subscription == NULL:
+                raise MemoryError
+            status = SOPC_ClientHelper_Subscription_SetAvailableTokens(subscription, c_nbPublishTokens)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Failed to create the subscription', status)
         c_cliConHandler._subscription = subscription
@@ -2553,8 +2577,9 @@ class BaseClientConnectionHandler:
         cdef OpcUa_CreateMonitoredItemsResponse* createMIresp = <OpcUa_CreateMonitoredItemsResponse*> calloc(1, sizeof(OpcUa_CreateMonitoredItemsResponse))
         OpcUa_CreateMonitoredItemsResponse_Initialize(createMIresp)
         cdef const uintptr_t* monitoredItemCtxArray = <const uintptr_t*> nodeIdsCtxArray
-        status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(c_cliConHandler._subscription, createMIreq,
-                                                                        monitoredItemCtxArray, createMIresp)
+        with nogil:
+            status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(c_cliConHandler._subscription, createMIreq,
+                                                                            monitoredItemCtxArray, createMIresp)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Failed to create monitored items', status)
         free(nodeIdsCtxArray)
@@ -2597,7 +2622,8 @@ class BaseClientConnectionHandler:
         cdef OpcUa_DeleteMonitoredItemsResponse deleteMIresp
         OpcUa_DeleteMonitoredItemsResponse_Initialize(&deleteMIresp)
 
-        status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(c_cliConHandler._subscription, deleteMIreq, &deleteMIresp)
+        with nogil:
+            status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(c_cliConHandler._subscription, deleteMIreq, &deleteMIresp)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             OpcUa_DeleteMonitoredItemsRequest_Clear(deleteMIreq)
             free(deleteMIreq)
@@ -2608,9 +2634,10 @@ class BaseClientConnectionHandler:
 
         # Close the subscription
         if NULL != c_cliConHandler._subscription:
-            localStatus = SOPC_ClientHelper_DeleteSubscription(&(c_cliConHandler._subscription))
-            free(c_cliConHandler._subscription)
-            c_cliConHandler._subscription = NULL
+            with nogil:
+                localStatus = SOPC_ClientHelper_DeleteSubscription(&(c_cliConHandler._subscription))
+                free(c_cliConHandler._subscription)
+                c_cliConHandler._subscription = NULL
             if (SOPC_ReturnStatus.SOPC_STATUS_OK != localStatus):
                 raise SOPC_Failure('Failed to delete subscription', status)
 
@@ -2656,7 +2683,8 @@ class PyS2OPC_Client(PyS2OPC):
         if logMaxFileNumber > UINT16_MAX:
             raise ValueError("logMaxFileNumber is too large (must be less than UINT16_MAX)")
         PyS2OPC.initialize(logLevel, logPath, logFileMaxBytes, logMaxFileNumber)
-        status = SOPC_ClientConfigHelper_Initialize()
+        with nogil:
+            status = SOPC_ClientConfigHelper_Initialize()
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Library client initialization failed', status)
         PyS2OPC._initialized_cli = True
@@ -2672,7 +2700,8 @@ class PyS2OPC_Client(PyS2OPC):
         Clear the client configuration and clear/stop the toolkit if applicable.
         """
         PyS2OPC_Client._dConfigHandler.clear()
-        SOPC_ClientConfigHelper_Clear()
+        with nogil:
+            SOPC_ClientConfigHelper_Clear()
         PyS2OPC._initialized_cli = False
         if PyS2OPC._initialized_srv == False:
             PyS2OPC._clear()
@@ -2687,14 +2716,16 @@ class PyS2OPC_Client(PyS2OPC):
             xml_client_config_path: Path to client configuration XML file ([s2opc_clientserver_config.xsd](https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd?ref_type=heads) schema)
         """
         b_xml_client_config_path = xml_client_config_path.encode()
+        cdef const char* c_xml_client_config_path = b_xml_client_config_path
         cdef size_t nbConfigs = 0
         cdef SOPC_SecureConnection_Config** scConfigArray = NULL
-        status = SOPC_ClientConfigHelper_ConfigureFromXML(b_xml_client_config_path, NULL, &nbConfigs, &scConfigArray)
-        if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
-            raise SOPC_Failure('Client configuration (from XML {}) failed'.format(xml_client_config_path), status)
-        status = SOPC_ClientConfigHelper_SetServiceAsyncResponse(_callback_ClientServiceAsyncResp)
-        if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
-            raise SOPC_Failure('Failed to configure client service async callback', status)
+        with nogil:
+            status = SOPC_ClientConfigHelper_ConfigureFromXML(c_xml_client_config_path, NULL, &nbConfigs, &scConfigArray)
+            if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
+                raise SOPC_Failure('Client configuration (from XML {}) failed'.format(xml_client_config_path), status)
+            status = SOPC_ClientConfigHelper_SetServiceAsyncResponse(_callback_ClientServiceAsyncResp)
+            if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
+                raise SOPC_Failure('Failed to configure client service async callback', status)
         result : dict = {}
         configs = _C_Configurations.c_new_conf(nbConfigs, scConfigArray)
         for i in range(configs._nbConfigs):
@@ -2725,23 +2756,25 @@ class PyS2OPC_Client(PyS2OPC):
         if sc_lifetime > UINT32_MAX:
             raise ValueError("sc_lifetime is too large (must be less than UINT32_MAX)")
         cdef SOPC_SecureConnection_Config * sConnCfg = _C_Configurations.getConfig(connCfg._configs, connCfg._cfgIdx)
-        assert NULL != sConnCfg, "Unexpected failure to load configuration"
-        status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(_callback_get_client_key_password)
-        if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
-            raise SOPC_Failure('Failed to configure the client key password callback', status)
-        status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(_callback_get_client_username_password)
-        if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
-            raise SOPC_Failure('Failed to configure the client username password callback', status)
-        status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(_callback_get_client_user_cert_key_password)
-        if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
-            raise SOPC_Failure('Failed to configure the client user X509 key password callback', status)
         cdef SOPC_ClientConnection* secureConnection = NULL
-        status = SOPC_SecureConnectionConfig_SetReqLifetime(sConnCfg, sc_lifetime)
-        if status != SOPC_ReturnStatus.SOPC_STATUS_OK and status != SOPC_ReturnStatus.SOPC_STATUS_INVALID_STATE:
-            raise SOPC_Failure('Failed to configure the SC lifetime', status)
-        status = SOPC_ClientHelper_Connect(sConnCfg, _callback_client_connection_event, &secureConnection)
-        if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
-            raise SOPC_Failure('Could not connect to the server with the given configuration', status)
+        cdef uint32_t c_sc_lifetime = sc_lifetime
+        with nogil:
+            assert NULL != sConnCfg, "Unexpected failure to load configuration"
+            status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(_callback_get_client_key_password)
+            if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
+                raise SOPC_Failure('Failed to configure the client key password callback', status)
+            status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(_callback_get_client_username_password)
+            if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
+                raise SOPC_Failure('Failed to configure the client username password callback', status)
+            status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(_callback_get_client_user_cert_key_password)
+            if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
+                raise SOPC_Failure('Failed to configure the client user X509 key password callback', status)
+            status = SOPC_SecureConnectionConfig_SetReqLifetime(sConnCfg, c_sc_lifetime)
+            if status != SOPC_ReturnStatus.SOPC_STATUS_OK and status != SOPC_ReturnStatus.SOPC_STATUS_INVALID_STATE:
+                raise SOPC_Failure('Failed to configure the SC lifetime', status)
+            status = SOPC_ClientHelper_Connect(sConnCfg, _callback_client_connection_event, &secureConnection)
+            if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
+                raise SOPC_Failure('Could not connect to the server with the given configuration', status)
 
         cdef uintptr_t id_sc = <uintptr_t> (<void*> secureConnection)
         c_connection = _C_BaseClientConnectionHandler.c_new_ClientConHandler(secureConnection)
