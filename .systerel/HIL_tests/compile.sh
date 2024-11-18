@@ -22,6 +22,7 @@
 #         $2 : The board name
 #         $3 : S2OPC demo application to compile
 #         $4 : EXTENSION is the extension of the file, (e.g. '.bin')
+#         $5 : IP_ADDRESS set to ethernet interface
 # Sends the right parameters for an S2OPC demo application to an interface script
 
 cd $(dirname $0)

@@ -22,9 +22,12 @@ set -o nounset
 set -o pipefail
 
 function _help() {
-    echo "$1 setup the environment required to build the FreeRTOS sample in the dedicated docker. This scirpt mainly calls build-freertos-samples-docker.sh"
-    echo "Usage: $1 [--help] [-it] -- [any options to pass to build script]"
+    echo "$1 setup the environment required to build the FreeRTOS sample in the dedicated docker. This script mainly calls build-freertos-samples-docker.sh"
+    echo "Usage: $1 [--help] [-it] [-a <APPLICATION>] [-b <BOARD>] [--ip <IP_ADDRESS>] -- [any options to pass to build script]"
     echo "    -it : Start the docker in interactive mode rather than building the sample"
+    echo "    -a <APPLICATION> : Select the application to build, following values accepected [cli_client| cli_pubsub_server]"
+    echo "    -b <BOARD> : Select the target board, in the case of this demo only nucleo_h723zg is supported"
+    echo "    --ip <IP_ADDRESS> : Configure the IP_ADDRESS of the ethernet interface"
     echo "Example:"
     echo "     $1 -- --nocrypto"
 }

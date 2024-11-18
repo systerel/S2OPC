@@ -24,8 +24,9 @@ set -o pipefail
 function _help() {
     echo "$1 build the FreeRTOS sample. This script must be called from within the docker."
     echo "This script reproduces the options used by STMCubeIde for a specific build on STM23H723. It may not be adapted to any other target."
-    echo "Usage: $1 [--help] [--lazy] -- [any options to pass to build script]"
+    echo "Usage: $1 [--help] [--lazy] [--ip <IP_ADDRESS>] -- [any options to pass to build script]"
     echo "    --lazy : do not reinstall S2OPC sources (avoids full rebuild)"
+    echo "    --ip <IP_ADDRESS>  : Configure compilation to set configured IP_ADDRESS to ethernet interface, default 192.168.42.12"
 }
 
 function fail() {
@@ -34,7 +35,7 @@ function fail() {
 }
 
 OPT_LAZY=false
-IP_ADDRESS=
+IP_ADDRESS="192.168.42.12"
 while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
 shift
