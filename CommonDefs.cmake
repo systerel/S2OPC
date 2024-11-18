@@ -254,18 +254,6 @@ option(S2OPC_NANO_PROFILE "Use Nano profile only (limited scope of OPC UA servic
 option(S2OPC_NODE_MANAGEMENT "Make NodeManagement service set available to clients" OFF)
 option(S2OPC_EVENT_MANAGEMENT "Make OPC UA Events available" OFF)
 
-# Manage backward compatibilty for previous option names
-
-if(DEFINED WITH_NANO_EXTENDED)
-  if(NOT WITH_NANO_EXTENDED)
-    set(S2OPC_NANO_PROFILE ON)
-  endif()
-endif()
-
-if(SOPC_HAS_NODE_MANAGEMENT_SERVICES)
-  set(S2OPC_NODE_MANAGEMENT ON)
-endif()
-
 # option to load static security data for embedded systems without filesystems
 option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)
 # option to put non-writeable data in const part of the memory

@@ -240,26 +240,14 @@
  * defined.
  * */
 #ifndef S2OPC_NODE_MANAGEMENT
-#ifndef SOPC_HAS_NODE_MANAGEMENT_SERVICES
 #define S2OPC_NODE_MANAGEMENT false
-#else
-/* backward compatibility for deprecated name */
-#define S2OPC_NODE_MANAGEMENT SOPC_HAS_NODE_MANAGEMENT_SERVICES
-#endif
 #endif
 
 /* PROFILE MANAGEMENT */
 
 #ifndef S2OPC_NANO_PROFILE
-#ifndef WITH_NANO_EXTENDED
 #define S2OPC_NANO_PROFILE false
-/* backward compatibility for deprecated name */
-#elif WITH_NANO_EXTENDED
-#define S2OPC_NANO_PROFILE false
-#else
-#define S2OPC_NANO_PROFILE true
-#endif /* WITH_NANO_EXTENDED */
-#endif /* S2OPC_NANO_PROFILE */
+#endif
 
 #include "sopc_config_constants_check.h"
 

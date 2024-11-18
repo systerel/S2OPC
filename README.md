@@ -279,8 +279,6 @@ By setting environment variables S2OPC_NANO_PROFILE, S2OPC_NODE_MANAGEMENT, BUIL
 - ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,
 etc.)
 - WITH_PYS2OPC (OFF by default): if set to ON, it builds the Python binding wheel for S2OPC and PYS2OPC_WHEEL_NAME variable shall also be set to define the wheel file name.
-- (deprecated) WITH_NANO_EXTENDED: equivalent to S2OPC_NANO_PROFILE set to OFF (default)
-- (deprecated) SOPC_HAS_NODE_MANAGEMENT_SERVICES: equivalent to S2OPC_NODE_MANAGEMENT
 
 The generated project file S2OPC*.sln can then be imported in Visual Studio environment.
 

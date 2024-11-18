@@ -94,8 +94,6 @@ else
     append_cmake_option SECURITY_HARDENING
     append_cmake_option PYS2OPC_WHEEL_NAME
     append_cmake_option WITH_GCC_STATIC_ANALYSIS
-    append_cmake_option WITH_NANO_EXTENDED
-    append_cmake_option SOPC_HAS_NODE_MANAGEMENT_SERVICES
     echo "cmake $CMAKE_OPTIONS .." >> $CURDIR/build.log
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1
