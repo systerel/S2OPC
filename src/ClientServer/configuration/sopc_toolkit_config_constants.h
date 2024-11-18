@@ -243,6 +243,11 @@
 #define S2OPC_NODE_MANAGEMENT false
 #endif
 
+/** @brief Event management services activation for servers */
+#ifndef S2OPC_EVENT_MANAGEMENT
+#define S2OPC_EVENT_MANAGEMENT false
+#endif
+
 /* PROFILE MANAGEMENT */
 
 #ifndef S2OPC_NANO_PROFILE
