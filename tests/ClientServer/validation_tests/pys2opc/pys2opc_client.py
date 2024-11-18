@@ -65,7 +65,7 @@ class PyS2OPC_Client_Test():
         return pwd
 
     @staticmethod
-    def get_username_password():
+    def get_username_password(connConfigUserId: str):
         username = os.getenv(TEST_USERNAME_ENV_NAME)
         if username == None:
             print('The following environment variable is missing: ' + TEST_USERNAME_ENV_NAME)

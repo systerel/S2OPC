@@ -62,7 +62,7 @@ class PyS2OPC_Client_Test():
         return pwd
 
     @staticmethod
-    def get_username_password() -> tuple[str, str]:
+    def get_username_password(connConfigUserId: str) -> tuple[str, str]:
         username = os.getenv(TEST_USERNAME_ENV_NAME)
         if username is None:
             print("{} not set: set it or enter it interactively".format(TEST_USERNAME_ENV_NAME))

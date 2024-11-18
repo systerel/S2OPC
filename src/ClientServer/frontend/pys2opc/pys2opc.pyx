@@ -1442,7 +1442,8 @@ cdef void uuid_to_guid(uid, SOPC_Guid* guid_dest):
 # --- Client --- #
 
 cdef bool _callback_get_client_username_password(const SOPC_SecureConnection_Config* secConnConfig, char** outUserName, char** outPassword) noexcept with gil:
-    userName, password = PyS2OPC_Client.get_username_password()
+    connConfigUserId: str = secConnConfig.userDefinedId.decode()
+    userName, password = PyS2OPC_Client.get_username_password(connConfigUserId)
     if None == userName or None == password:
         return False
 
@@ -2802,7 +2803,7 @@ class PyS2OPC_Client(PyS2OPC):
         return PyS2OPC._get_password('Client private key password: ')
 
     @staticmethod
-    def get_username_password() -> tuple[str, str]:
+    def get_username_password(connConfigUserId: str) -> tuple[str, str]:
         """
         Default method that is called during configuration phase if the UserPolicy requires a user,
         it shall return the username and password associated as a 2-tuples of string.
@@ -2812,6 +2813,8 @@ class PyS2OPC_Client(PyS2OPC):
 
         It is possible to overwrite this function by assiging a new implementation to `PyS2OPC_Client.get_username_password`
         to obtain a different behavior.
+        Args:
+            connConfigUserId: the XML user defined id to retrieve the secure connection configuration
         """
         username = PyS2OPC._get_password('UserName of user: ')
         pwd = PyS2OPC._get_password('Password for user: ')
