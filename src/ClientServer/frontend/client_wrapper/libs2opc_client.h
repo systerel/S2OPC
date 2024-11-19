@@ -172,6 +172,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_C
 /**
  * \brief Establishes the connection in a blocking way (synchronously).
  *
+ * \warning A single connection can be established for a given secure connection \p secConnConfig .
+ *
  * \param secConnConfig          The secure connection configuration to establish
  * \param connectEventCb         Callback called on connection event, it is only used in case of further
  *                               unexpected disconnection
@@ -181,7 +183,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_C
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_CLOSED in case of failure,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE
- *         if the configuration is not possible (toolkit not initialized, connection state unexpected).
+ *         if the configuration is not possible (toolkit not initialized, connection state unexpected, connection
+ *         already established).
  */
 SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secConnConfig,
                                             SOPC_ClientConnectionEvent_Fct* connectEventCb,

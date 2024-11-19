@@ -140,6 +140,8 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
  *                       called.
  * \note Returned ::SOPC_SecureConnection_Config is owned by library and shall not be freed.
  *
+ * \note A single connection can be established with ::SOPC_ClientHelper_Connect using the returned configuration.
+ *
  * \return SOPC_SecureConnectionConfig pointer to configuration structure to be filled
  *         with SOPC_SecureConnectionConfig_Set* functions
  *         (::SOPC_SecureConnectionConfig_SetServerCertificateFromPath, etc.).
