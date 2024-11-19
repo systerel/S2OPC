@@ -767,8 +767,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_TriggerEvent(const SOPC_NodeId* notifierNode
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    SOPC_ToolkitServer_TriggerEvent(sopc_server_helper_config.endpointIndexes[0], notifierNodeId, event,
-                                    optSubscriptionId, optMonitoredItemId);
+    SOPC_ToolkitServer_TriggerEvent(notifierNodeId, event, optSubscriptionId, optMonitoredItemId);
 
     return SOPC_STATUS_OK;
 }

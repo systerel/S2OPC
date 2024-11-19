@@ -116,7 +116,6 @@ typedef enum SOPC_Services_Event
     APP_TO_SE_TRIGGER_EVENT,         /**< Server side only:<BR/>
                                         Trigger the provided event from the given node notifier with possibly subscription
                                         filtering.
-                                        id = endpoint description config index<BR/>
                                         params = (SOPC_Internal_EventContext*) triggered event context
                                       */
     /* App to Services events : client side */

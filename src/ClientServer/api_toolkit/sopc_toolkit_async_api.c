@@ -48,8 +48,7 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
                                requestContext);
 }
 
-void SOPC_ToolkitServer_TriggerEvent(SOPC_EndpointConfigIdx endpointConfigIdx,
-                                     const SOPC_NodeId* notifierNodeId,
+void SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
                                      SOPC_Event* event,
                                      uint32_t optSubscriptionId,
                                      uint32_t optMonitoredItemId)
@@ -62,7 +61,7 @@ void SOPC_ToolkitServer_TriggerEvent(SOPC_EndpointConfigIdx endpointConfigIdx,
     eventCtx->event = event;
     eventCtx->optSubscriptionId = optSubscriptionId;
     eventCtx->optMonitoredItemId = optMonitoredItemId;
-    SOPC_Services_EnqueueEvent(APP_TO_SE_TRIGGER_EVENT, endpointConfigIdx, (uintptr_t) eventCtx, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_TRIGGER_EVENT, 0, (uintptr_t) eventCtx, 0);
 }
 
 void SOPC_ToolkitServer_AsyncReEvalSecureChannels(bool ownCert)

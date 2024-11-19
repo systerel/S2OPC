@@ -471,7 +471,6 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         }
         break;
     case APP_TO_SE_TRIGGER_EVENT:
-        // id =  endpoint configuration index
         // params =  (SOPC_Internal_EventContext*)
         eventContext = (SOPC_Internal_EventContext*) params;
         SOPC_ASSERT(NULL != eventContext);
@@ -479,9 +478,8 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         nodeId2 = SOPC_Event_GetEventTypeId(eventContext->event);
         nodeIdStr2 = (NULL == nodeId2 ? SOPC_strdup("") : SOPC_NodeId_ToCString(nodeId2));
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ServicesMgr: APP_TO_SE_TRIGGER_EVENT epCfgIdx=%" PRIu32
-                               " eventTypeId=%s, notifierId=%s",
-                               id, nodeIdStr2, nodeIdStr);
+                               "ServicesMgr: APP_TO_SE_TRIGGER_EVENT eventTypeId=%s, notifierId=%s", nodeIdStr2,
+                               nodeIdStr);
 
         // Update the receiveTime variable (and time variable if not set)
         currentTime = SOPC_Time_GetCurrentTimeUTC();
@@ -493,16 +491,15 @@ static void onServiceEvent(SOPC_EventHandler* handler,
             SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
 
-        SOPC_ASSERT(id <= INT32_MAX);
         io_dispatch_mgr__internal_server_event_triggered(&eventContext->notifierNodeId, eventContext->event,
                                                          eventContext->optSubscriptionId,
                                                          eventContext->optMonitoredItemId, &bres);
         if (!bres)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "ServicesMgr: failure in treatment of APP_TO_SE_TRIGGER_EVENT epCfgIdx=%" PRIu32
-                                   " eventTypeId=%s, notifierId=%s",
-                                   id, nodeIdStr2, nodeIdStr);
+                                   "ServicesMgr: failure in treatment of APP_TO_SE_TRIGGER_EVENT eventTypeId=%s, "
+                                   "notifierId=%s",
+                                   nodeIdStr2, nodeIdStr);
         }
         SOPC_Free(nodeIdStr);
         SOPC_Free(nodeIdStr2);

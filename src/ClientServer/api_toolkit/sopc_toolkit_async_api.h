@@ -82,7 +82,6 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
 /**
  * \brief Triggers the given event from the given node as notifier
  *
- * \param endpointConfigIdx   Endpoint description configuration index provided to
  * \param notifierNodeId      NodeId of the node notifier for the triggered event
  * \param event               The event to be triggered
  * \param optSubscriptionId   (optional) The subscriptionId for which the event is triggered or 0.
@@ -90,8 +89,7 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
  *
  * Note: the provided event and its content is automatically deallocated by the toolkit
  */
-void SOPC_ToolkitServer_TriggerEvent(SOPC_EndpointConfigIdx endpointConfigIdx,
-                                     const SOPC_NodeId* notifierNodeId,
+void SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
                                      SOPC_Event* event,
                                      uint32_t optSubscriptionId,
                                      uint32_t optMonitoredItemId);
