@@ -245,8 +245,7 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint16_t nsIndex, uint32_t 
  *
  *  \return               A status code indicating the result of operation
  */
-SOPC_ReturnStatus SOPC_EncodeableType_RegisterTypesArray(size_t nsTypesArrayLen,
-                                                         const SOPC_EncodeableType** nsTypesArray);
+SOPC_ReturnStatus SOPC_EncodeableType_RegisterTypesArray(size_t nsTypesArrayLen, SOPC_EncodeableType** nsTypesArray);
 
 /**
  * \brief       UnRegisters an encodeable types array.
@@ -256,8 +255,7 @@ SOPC_ReturnStatus SOPC_EncodeableType_RegisterTypesArray(size_t nsTypesArrayLen,
  *
  *  \return               A status code indicating the result of operation
  */
-SOPC_ReturnStatus SOPC_EncodeableType_UnRegisterTypesArray(size_t nsTypesArrayLen,
-                                                           const SOPC_EncodeableType** nsTypesArray);
+SOPC_ReturnStatus SOPC_EncodeableType_UnRegisterTypesArray(size_t nsTypesArrayLen, SOPC_EncodeableType** nsTypesArray);
 
 /**
  *  \brief          Retrieve a defined encodeable type with the given type Id.

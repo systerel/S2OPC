@@ -213,8 +213,7 @@ void SOPC_EncodeableType_RemoveAllUserTypes(void)
     g_UserEncodeableTypes = NULL;
 }
 
-SOPC_ReturnStatus SOPC_EncodeableType_RegisterTypesArray(size_t nsTypesArrayLen,
-                                                         const SOPC_EncodeableType** nsTypesArray)
+SOPC_ReturnStatus SOPC_EncodeableType_RegisterTypesArray(size_t nsTypesArrayLen, SOPC_EncodeableType** nsTypesArray)
 {
     if (0 == nsTypesArrayLen || NULL == nsTypesArray)
     {
@@ -222,7 +221,7 @@ SOPC_ReturnStatus SOPC_EncodeableType_RegisterTypesArray(size_t nsTypesArrayLen,
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ReturnStatus localStatus = SOPC_STATUS_OK;
-    const SOPC_EncodeableType* nsType = NULL;
+    SOPC_EncodeableType* nsType = NULL;
     const uint16_t nsIndex = nsTypesArray[0]->NamespaceIndex;
     for (size_t i = 0; i < nsTypesArrayLen; i++)
     {
@@ -243,8 +242,7 @@ SOPC_ReturnStatus SOPC_EncodeableType_RegisterTypesArray(size_t nsTypesArrayLen,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_EncodeableType_UnRegisterTypesArray(size_t nsTypesArrayLen,
-                                                           const SOPC_EncodeableType** nsTypesArray)
+SOPC_ReturnStatus SOPC_EncodeableType_UnRegisterTypesArray(size_t nsTypesArrayLen, SOPC_EncodeableType** nsTypesArray)
 {
     if (0 == nsTypesArrayLen || NULL == nsTypesArray)
     {
@@ -252,7 +250,7 @@ SOPC_ReturnStatus SOPC_EncodeableType_UnRegisterTypesArray(size_t nsTypesArrayLe
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ReturnStatus localStatus = SOPC_STATUS_OK;
-    const SOPC_EncodeableType* nsType = NULL;
+    SOPC_EncodeableType* nsType = NULL;
     const uint16_t nsIndex = nsTypesArray[0]->NamespaceIndex;
     for (size_t i = 0; i < nsTypesArrayLen; i++)
     {
