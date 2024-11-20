@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 27/11/2024 09:15:41
+ Date                 : 28/11/2024 09:51:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -306,6 +306,7 @@ typedef enum {
    constants__e_operation_type_addnode
 } constants__t_operation_type_i;
 typedef enum {
+   constants__e_session_closed,
    constants__e_session_init,
    constants__e_session_creating,
    constants__e_session_created,
@@ -313,8 +314,7 @@ typedef enum {
    constants__e_session_userActivated,
    constants__e_session_scActivating,
    constants__e_session_scOrphaned,
-   constants__e_session_closing,
-   constants__e_session_closed
+   constants__e_session_closing
 } constants__t_sessionState_i;
 typedef enum {
    constants__c_subscriptionState_indet,
