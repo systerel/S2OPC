@@ -418,7 +418,7 @@ static OpcUa_CreateMonitoredItemsResponse* create_monitored_item_event(SOPC_Clie
     }
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Free(createMonItResp);
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) &createMonItResp);
         createMonItResp = NULL;
     }
     return createMonItResp;
@@ -912,10 +912,6 @@ static SOPC_ReturnStatus delete_monitored_items(SOPC_ClientHelper_Subscription* 
             }
         }
         OpcUa_DeleteMonitoredItemsResponse_Clear(&delMonItResp);
-    }
-    if (SOPC_STATUS_OK != status || !deleteMonitoredItems)
-    {
-        SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &delMonItReq);
     }
     return status;
 }

@@ -591,6 +591,10 @@ static SOPC_ReturnStatus test_non_reg_issue_1428_create_MI(SOPC_ClientHelper_Sub
         status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
             subscription, createMonItReq, (const uintptr_t*) monitoredItemIndexes, &createMonItResp);
     }
+    else
+    {
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &createMonItReq);
+    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -599,10 +603,6 @@ static SOPC_ReturnStatus test_non_reg_issue_1428_create_MI(SOPC_ClientHelper_Sub
         {
             status = SOPC_STATUS_NOK;
         }
-    }
-    else
-    {
-        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &createMonItReq);
     }
 
     OpcUa_CreateMonitoredItemsResponse_Clear(&createMonItResp);
