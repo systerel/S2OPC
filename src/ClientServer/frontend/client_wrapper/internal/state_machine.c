@@ -88,13 +88,12 @@ struct SOPC_StaMac_Machine
     bool bAckSubscr;        /* Indicates whether an acknowledgment should be sent
                              * in the next PublishRequest */
     uint32_t iAckSeqNum;    /* The sequence number to acknowledge after a PublishResponse */
-    const char* szPolicyId; /* See SOPC_LibSub_ConnectionCfg */
-    const char* szUsername; /* See SOPC_LibSub_ConnectionCfg */
-    const char* szPassword; /* See SOPC_LibSub_ConnectionCfg */
+    const char* szPolicyId; /* Zero-terminated user identity policy id */
+    const char* szUsername; /* Zero-terminated username */
+    const char* szPassword; /* Zero-terminated password */
     SOPC_SerializedCertificate*
         pUserCertX509;                      /* X509 serialized certificate for X509IdentiyToken (DER or PEM format) */
     SOPC_SerializedAsymmetricKey* pUserKey; /* Serialized private key for X509IdentiyToken (DER or PEM format) */
-    int64_t iTimeoutMs;                     /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
     SOPC_SLinkedList* dataIdToNodeIdList;   /* A list of data ids to node ids */
     SOPC_Dict* miCliHandleToUserAppCtxDict; /* A dictionary of monitored client handles to user app contexts
                                                      (new API only)*/
@@ -194,11 +193,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPassword,
                                      const SOPC_SerializedCertificate* pUserCertX509,
                                      const SOPC_SerializedAsymmetricKey* pUserKey,
-                                     double fPublishInterval,
-                                     uint32_t iCntMaxKeepAlive,
-                                     uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
-                                     int64_t iTimeoutMs,
                                      SOPC_StaMac_EventCbk* pCbkGenericEvent,
                                      uintptr_t userContext,
                                      SOPC_StaMac_Machine** ppSM)
@@ -220,9 +215,9 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->iSessionCtx = 0;
         pSM->iSessionID = 0;
         pSM->pListReqCtx = SOPC_SLinkedList_Create(0);
-        pSM->fPublishInterval = fPublishInterval;
-        pSM->iCntMaxKeepAlive = iCntMaxKeepAlive;
-        pSM->iCntLifetime = iCntLifetime;
+        pSM->fPublishInterval = 0;
+        pSM->iCntMaxKeepAlive = 0;
+        pSM->iCntLifetime = 0;
         pSM->iSubscriptionID = 0;
         pSM->bSubscriptionCreated = false;
         pSM->nMonItClientHandle = 0;
@@ -239,7 +234,6 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->szPassword = NULL;
         pSM->pUserCertX509 = NULL;
         pSM->pUserKey = NULL;
-        pSM->iTimeoutMs = iTimeoutMs;
         pSM->dataIdToNodeIdList = SOPC_SLinkedList_Create(0);
         pSM->miCliHandleToUserAppCtxDict = SOPC_Dict_Create(0, uintptr_hash, direct_equal, NULL, NULL);
         SOPC_Dict_SetTombstoneKey(pSM->miCliHandleToUserAppCtxDict, DICT_TOMBSTONE); // Necessary for remove
@@ -1100,12 +1094,6 @@ bool SOPC_StaMac_PopDeleteMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_DeleteMon
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return bHasMonIt;
-}
-
-int64_t SOPC_StaMac_GetTimeout(SOPC_StaMac_Machine* pSM)
-{
-    SOPC_ASSERT(NULL != pSM);
-    return pSM->iTimeoutMs;
 }
 
 uintptr_t SOPC_StaMac_GetUserContext(SOPC_StaMac_Machine* pSM)

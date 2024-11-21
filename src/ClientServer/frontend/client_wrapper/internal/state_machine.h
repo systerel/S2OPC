@@ -140,17 +140,12 @@ typedef struct
  *                                it shall be set with index of the reverse endpoint configuration.
  *                                Otherwise it shall be set to 0.
  * \param iCliId                  The client id of the machine, it shall be unique.
- * \param szPolicyId              Zero-terminated user identity policy id, see SOPC_LibSub_ConnectionCfg
- * \param szUsername              Zero-terminated username, see SOPC_LibSub_ConnectionCfg
- * \param szPassword              Zero-terminated password, see SOPC_LibSub_ConnectionCfg
+ * \param szPolicyId              Zero-terminated user identity policy id
+ * \param szUsername              Zero-terminated username
+ * \param szPassword              Zero-terminated password
  * \param pUserCertX509           X509 serialized certificate for X509IdentiyToken (DER format)
  * \param pUserKey                Serialized private key for X509IdentiyToken (PEM format)
- * \param fPublishInterval        Subscription publish interval, in milliseconds
- * \param iCntMaxKeepAlive        The number of times an empty PublishResponse is not sent
- * \param iCntLifetime            The number of times a PublishResponse cannot be sent
- *                                before killing the subscription
  * \param iTokenTarget            Number of subscription tokens the server should always have
- * \param iTimeoutMs              Timeout for the synchronous calls
  * \param cbkGenericEvent         Callback for generic responses to a call to SOPC_LibSub_AsyncSendRequestOnSession()
  * \param userContext             Caller defined user context that could be retrieved or set using accessors
  * \param ppSM                    The returned machine, when successful
@@ -166,11 +161,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPassword,
                                      const SOPC_SerializedCertificate* pUserCertX509,
                                      const SOPC_SerializedAsymmetricKey* pUserKey,
-                                     double fPublishInterval,
-                                     uint32_t iCntMaxKeepAlive,
-                                     uint32_t iCntLifetime,
                                      uint32_t iTokenTarget,
-                                     int64_t iTimeoutMs,
                                      SOPC_StaMac_EventCbk* cbkGenericEvent,
                                      uintptr_t userContext,
                                      SOPC_StaMac_Machine** ppSM);
@@ -387,9 +378,6 @@ bool SOPC_StaMac_PopMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitored
  *        When it returns true, it is considered acknowledged and the application context is removed from state machine.
  */
 bool SOPC_StaMac_PopDeleteMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_DeleteMonitoredItems_Ctx* pAppCtx);
-
-/** \brief Returns the timeout of the machine, used for the synchronous calls. */
-int64_t SOPC_StaMac_GetTimeout(SOPC_StaMac_Machine* pSM);
 
 /**
  * \brief Returns the user context provided to SOPC_StaMac_Create or modified through SOPC_StaMac_SetUserContext

@@ -249,19 +249,6 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayFinalizeSecureConnection(
     return status;
 }
 
-/*
- * TODO: remove when old API removed and removed from StaMac creation.
-         Those are ignored when using new API.
- */
-/* Connection global timeout */
-#define TMP_TIMEOUT_MS 10000
-/* Default publish period */
-#define TMP_PUBLISH_PERIOD_MS 500
-/* Default max keep alive count */
-#define TMP_MAX_KEEP_ALIVE_COUNT 3
-/* Lifetime Count of subscriptions */
-#define TMP_MAX_LIFETIME_COUNT 10
-
 static void SOPC_ClientInternal_EventCbk(uint32_t c_id,
                                          SOPC_StaMac_ApplicativeEvent event,
                                          SOPC_StatusCode status, /* Note: actually a ReturnStatus */
@@ -556,8 +543,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
     SOPC_ReturnStatus status = SOPC_StaMac_Create(
         secConnConfig->secureChannelConfigIdx, secConnConfig->reverseEndpointConfigIdx,
         secConnConfig->secureConnectionIdx, secConnConfig->sessionConfig.userPolicyId, username, password,
-        pUserCertX509, pUserKey, TMP_PUBLISH_PERIOD_MS, TMP_MAX_KEEP_ALIVE_COUNT, TMP_MAX_LIFETIME_COUNT,
-        SOPC_DEFAULT_PUBLISH_N_TOKEN, TMP_TIMEOUT_MS, SOPC_ClientInternal_EventCbk, 0, &stateMachine);
+        pUserCertX509, pUserKey, SOPC_DEFAULT_PUBLISH_N_TOKEN, SOPC_ClientInternal_EventCbk, 0, &stateMachine);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1261,10 +1247,9 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
         /* Wait for the monitored item to be created */
         if (SOPC_STATUS_OK == status)
         {
-            int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
             int count = 0;
             while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
-                   count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+                   count * CONNECTION_TIMEOUT_MS_STEP < SOPC_REQUEST_TIMEOUT_MS)
             {
                 mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
                 SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -1284,7 +1269,7 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
             {
                 status = SOPC_STATUS_NOK;
             }
-            else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+            else if (count * CONNECTION_TIMEOUT_MS_STEP >= SOPC_REQUEST_TIMEOUT_MS)
             {
                 status = SOPC_STATUS_TIMEOUT;
                 SOPC_StaMac_SetError(pSM);
@@ -1505,10 +1490,9 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
         /* Wait for the monitored items to be created */
         if (SOPC_STATUS_OK == status)
         {
-            const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
             int count = 0;
             while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_PopMonItByAppCtx(pSM, appCtx) &&
-                   count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+                   count * CONNECTION_TIMEOUT_MS_STEP < SOPC_REQUEST_TIMEOUT_MS)
             {
                 /* Release the lock so that the event handler can work properly while waiting */
                 mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -1520,13 +1504,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
                 SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
                 ++count;
             }
-            /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
+            /* When the request timeoutHint is lower than SOPC_REQUEST_TIMEOUT_MS, the machine will go in error,
              *  and NOK is returned. */
             if (SOPC_StaMac_IsError(pSM))
             {
                 status = SOPC_STATUS_NOK;
             }
-            else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+            else if (count * CONNECTION_TIMEOUT_MS_STEP >= SOPC_REQUEST_TIMEOUT_MS)
             {
                 status = SOPC_STATUS_TIMEOUT;
                 SOPC_StaMac_SetError(pSM);
@@ -1602,10 +1586,9 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
         /* Wait for the monitored items to be created */
         if (SOPC_STATUS_OK == status)
         {
-            const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
             int count = 0;
             while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_PopDeleteMonItByAppCtx(pSM, appCtx) &&
-                   count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+                   count * CONNECTION_TIMEOUT_MS_STEP < SOPC_REQUEST_TIMEOUT_MS)
             {
                 /* Release the lock so that the event handler can work properly while waiting */
                 mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -1617,13 +1600,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
                 SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
                 ++count;
             }
-            /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
+            /* When the request timeoutHint is lower than SOPC_REQUEST_TIMEOUT_MS, the machine will go in error,
              *  and NOK is returned. */
             if (SOPC_StaMac_IsError(pSM))
             {
                 status = SOPC_STATUS_NOK;
             }
-            else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+            else if (count * CONNECTION_TIMEOUT_MS_STEP >= SOPC_REQUEST_TIMEOUT_MS)
             {
                 status = SOPC_STATUS_TIMEOUT;
                 SOPC_StaMac_SetError(pSM);
@@ -1685,10 +1668,9 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
     /* Wait for the subscription to be deleted */
     if (SOPC_STATUS_OK == status)
     {
-        int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
         int count = 0;
         while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_HasSubscription(pSM) &&
-               count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
+               count * CONNECTION_TIMEOUT_MS_STEP < SOPC_REQUEST_TIMEOUT_MS)
         {
             mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -1698,13 +1680,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
-        /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
+        /* When the request timeoutHint is lower than SOPC_REQUEST_TIMEOUT_MS, the machine will go in error,
          *  and NOK is returned. */
         if (SOPC_StaMac_IsError(pSM))
         {
             status = SOPC_STATUS_NOK;
         }
-        else if (count * CONNECTION_TIMEOUT_MS_STEP >= timeout_ms)
+        else if (count * CONNECTION_TIMEOUT_MS_STEP >= SOPC_REQUEST_TIMEOUT_MS)
         {
             status = SOPC_STATUS_TIMEOUT;
             SOPC_StaMac_SetError(pSM);
