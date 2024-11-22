@@ -28,9 +28,9 @@
 #include <check.h>
 #include <stdlib.h>
 
+#include "libs2opc_client.h"
 #include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
-#include "libs2opc_new_client.h"
 #include "libs2opc_request_builder.h"
 
 #include "sopc_helper_askpass.h"
@@ -199,62 +199,61 @@ START_TEST(test_wrapper_create_connection)
     /* connect using a valid configuration */
 
     SOPC_ClientConnection* valid_scConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_ClientHelperNew_Disconnect(&valid_scConnection);
+    status = SOPC_ClientHelper_Disconnect(&valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Related issue https://gitlab.com/systerel/S2OPC/-/issues/1512
 
     // /* connect multiple times using a valid configuration */
     // SOPC_ClientConnection* scConnection[5] = {NULL, NULL, NULL, NULL, NULL};
-    // status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[0]);
+    // status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[0]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
-    // status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[1]);
+    // status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[1]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
-    // status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[2]);
+    // status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[2]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
-    // status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[3]);
+    // status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[3]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
-    // status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[4]);
+    // status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &scConnection[4]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    // status = SOPC_ClientHelperNew_Disconnect(&scConnection[0]);
+    // status = SOPC_ClientHelper_Disconnect(&scConnection[0]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
-    // status = SOPC_ClientHelperNew_Disconnect(&scConnection[1]);
+    // status = SOPC_ClientHelper_Disconnect(&scConnection[1]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
-    // status = SOPC_ClientHelperNew_Disconnect(&scConnection[2]);
+    // status = SOPC_ClientHelper_Disconnect(&scConnection[2]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
-    // status = SOPC_ClientHelperNew_Disconnect(&scConnection[3]);
+    // status = SOPC_ClientHelper_Disconnect(&scConnection[3]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
-    // status = SOPC_ClientHelperNew_Disconnect(&scConnection[4]);
+    // status = SOPC_ClientHelper_Disconnect(&scConnection[4]);
     // ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* connect using an invalid configuration */
-    status = SOPC_ClientHelperNew_Connect(invalid_secureConnConfig, &handle_failedConnEvent, &invalid_scConnection);
+    status = SOPC_ClientHelper_Connect(invalid_secureConnConfig, &handle_failedConnEvent, &invalid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_CLOSED, status);
     ck_assert_ptr_null(invalid_scConnection);
 
     /* Connect when no failure event callback is set */
-    status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, NULL, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(valid_secureConnConfig, NULL, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     ck_assert_ptr_null(valid_scConnection);
 
     /* Connect when secure connection config is NULL */
-    status = SOPC_ClientHelperNew_Connect(NULL, handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(NULL, handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     ck_assert_ptr_null(valid_scConnection);
 
     /* Connect when secure connection is NULL */
-    status =
-        SOPC_ClientHelperNew_Connect(valid_secureConnConfig, handle_failedConnEvent, (SOPC_ClientConnection**) NULL);
+    status = SOPC_ClientHelper_Connect(valid_secureConnConfig, handle_failedConnEvent, (SOPC_ClientConnection**) NULL);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     ck_assert_ptr_null(valid_scConnection);
 
     SOPC_ClientConfigHelper_Clear();
 
     /* connect without wrapper being initialized */
-    status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_INVALID_STATE, status);
 }
 END_TEST
@@ -324,15 +323,15 @@ START_TEST(test_wrapper_security_connection)
 
     /* connect using a valid configuration */
     SOPC_ClientConnection* valid_scConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    status = SOPC_ClientHelperNew_Disconnect(&valid_scConnection);
+    status = SOPC_ClientHelper_Disconnect(&valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* connect using an invalid configuration */
-    status = SOPC_ClientHelperNew_Connect(invalid_cert_path_secureConnConfig, &handle_failedConnEvent,
-                                          &invalid_scConnection);
+    status =
+        SOPC_ClientHelper_Connect(invalid_cert_path_secureConnConfig, &handle_failedConnEvent, &invalid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     ck_assert_ptr_null(invalid_scConnection);
 
@@ -353,33 +352,33 @@ START_TEST(test_wrapper_disconnect)
     /* connect using a valid configuration */
 
     SOPC_ClientConnection* valid_scConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* disconnect a valid endpoint */
-    status = SOPC_ClientHelperNew_Disconnect(&valid_scConnection);
+    status = SOPC_ClientHelper_Disconnect(&valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* disconnect a NULL handler secure connection */
-    status = SOPC_ClientHelperNew_Disconnect(NULL);
+    status = SOPC_ClientHelper_Disconnect(NULL);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
 
     /* disconnect a secure connection set to NULL  */
     SOPC_ClientConnection* scConnection = NULL;
-    status = SOPC_ClientHelperNew_Disconnect(&scConnection);
+    status = SOPC_ClientHelper_Disconnect(&scConnection);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
 
     /* disconnect an already closed connection */
-    status = SOPC_ClientHelperNew_Disconnect(&valid_scConnection);
+    status = SOPC_ClientHelper_Disconnect(&valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
 
-    status = SOPC_ClientHelperNew_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(valid_secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_ClientConfigHelper_Clear();
 
     /* disconnect after wrapper has been closed */
-    status = SOPC_ClientHelperNew_Disconnect(&valid_scConnection);
+    status = SOPC_ClientHelper_Disconnect(&valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_INVALID_STATE, status);
 }
 END_TEST
@@ -394,62 +393,62 @@ START_TEST(test_wrapper_create_subscription)
         "Test", VALID_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
     ck_assert_ptr_nonnull(secureConnConfig);
     SOPC_ClientConnection* valid_scConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* create a valid subscription */
     OpcUa_CreateSubscriptionRequest* subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
     ck_assert_ptr_nonnull(subscriptionRequest);
-    SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelperNew_CreateSubscription(
+    SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelper_CreateSubscription(
         valid_scConnection, subscriptionRequest, handle_subscriptionNotification, (uintptr_t) NULL);
     ck_assert_ptr_nonnull(subscription);
 
     /* Call the subscription a second time */
     subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
-    SOPC_ClientHelper_Subscription* invalid_subscription = SOPC_ClientHelperNew_CreateSubscription(
+    SOPC_ClientHelper_Subscription* invalid_subscription = SOPC_ClientHelper_CreateSubscription(
         valid_scConnection, subscriptionRequest, handle_subscriptionNotification, (uintptr_t) NULL);
     ck_assert_ptr_null(invalid_subscription);
 
     /* Unsubscribe and delete the subscription */
-    status = SOPC_ClientHelperNew_DeleteSubscription(&subscription);
+    status = SOPC_ClientHelper_DeleteSubscription(&subscription);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
     /* Invalid parameters */
-    invalid_subscription = SOPC_ClientHelperNew_CreateSubscription(NULL, subscriptionRequest,
-                                                                   handle_subscriptionNotification, (uintptr_t) NULL);
+    invalid_subscription = SOPC_ClientHelper_CreateSubscription(NULL, subscriptionRequest,
+                                                                handle_subscriptionNotification, (uintptr_t) NULL);
     ck_assert_ptr_null(invalid_subscription);
 
-    invalid_subscription = SOPC_ClientHelperNew_CreateSubscription(valid_scConnection, NULL,
-                                                                   handle_subscriptionNotification, (uintptr_t) NULL);
+    invalid_subscription = SOPC_ClientHelper_CreateSubscription(valid_scConnection, NULL,
+                                                                handle_subscriptionNotification, (uintptr_t) NULL);
     ck_assert_ptr_null(invalid_subscription);
 
     subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
     invalid_subscription =
-        SOPC_ClientHelperNew_CreateSubscription(valid_scConnection, subscriptionRequest, NULL, (uintptr_t) NULL);
+        SOPC_ClientHelper_CreateSubscription(valid_scConnection, subscriptionRequest, NULL, (uintptr_t) NULL);
     ck_assert_ptr_null(invalid_subscription);
 
     /* Disconnect */
-    status = SOPC_ClientHelperNew_Disconnect(&valid_scConnection);
+    status = SOPC_ClientHelper_Disconnect(&valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Create a subscription after disconnect
     subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
     ck_assert_ptr_nonnull(subscriptionRequest);
 
-    subscription = SOPC_ClientHelperNew_CreateSubscription(valid_scConnection, subscriptionRequest,
-                                                           handle_subscriptionNotification, (uintptr_t) NULL);
+    subscription = SOPC_ClientHelper_CreateSubscription(valid_scConnection, subscriptionRequest,
+                                                        handle_subscriptionNotification, (uintptr_t) NULL);
     ck_assert_ptr_null(subscription);
 
-    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_ClientConfigHelper_Clear();
 
     subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
     ck_assert_ptr_nonnull(subscriptionRequest);
-    subscription = SOPC_ClientHelperNew_CreateSubscription(valid_scConnection, subscriptionRequest,
-                                                           handle_subscriptionNotification, (uintptr_t) NULL);
+    subscription = SOPC_ClientHelper_CreateSubscription(valid_scConnection, subscriptionRequest,
+                                                        handle_subscriptionNotification, (uintptr_t) NULL);
     ck_assert_ptr_null(subscription);
 }
 END_TEST
@@ -486,14 +485,14 @@ START_TEST(test_wrapper_add_monitored_items)
         "Test", VALID_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
     ck_assert_ptr_nonnull(secureConnConfig);
     SOPC_ClientConnection* valid_scConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* create a valid subscription */
     OpcUa_CreateSubscriptionRequest* subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
     ck_assert_ptr_nonnull(subscriptionRequest);
 
-    SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelperNew_CreateSubscription(
+    SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelper_CreateSubscription(
         valid_scConnection, subscriptionRequest, handle_subscriptionNotification, (uintptr_t) NULL);
     ck_assert_ptr_nonnull(subscription);
 
@@ -504,18 +503,18 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert_ptr_nonnull(monitoredItemsRequest);
 
     /* Invalid Parameters */
-    status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
-        NULL, monitoredItemsRequest, (const uintptr_t*) NULL, (OpcUa_CreateMonitoredItemsResponse*) &response);
+    status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(NULL, monitoredItemsRequest, (const uintptr_t*) NULL,
+                                                                 (OpcUa_CreateMonitoredItemsResponse*) &response);
     ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
 
-    status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(subscription, NULL, (const uintptr_t*) NULL,
-                                                                    (OpcUa_CreateMonitoredItemsResponse*) &response);
+    status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(subscription, NULL, (const uintptr_t*) NULL,
+                                                                 (OpcUa_CreateMonitoredItemsResponse*) &response);
     ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
 
     /* Create subscription monitored items */
     monitoredItemsRequest = SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings(
         subscriptionId, nbMonitoredItems1, nodeIds1, OpcUa_TimestampsToReturn_Both);
-    status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+    status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
         subscription, monitoredItemsRequest, (const uintptr_t*) NULL, (OpcUa_CreateMonitoredItemsResponse*) &response);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems1, response.NoOfResults);
@@ -530,7 +529,7 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert_ptr_nonnull(monitoredItemsRequest);
 
     OpcUa_CreateMonitoredItemsResponse_Initialize(&response);
-    status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+    status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
         subscription, monitoredItemsRequest, (const uintptr_t*) NULL, (OpcUa_CreateMonitoredItemsResponse*) &response);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems2, response.NoOfResults);
@@ -545,7 +544,7 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert_ptr_nonnull(monitoredItemsRequest);
 
     OpcUa_CreateMonitoredItemsResponse_Initialize(&response);
-    status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+    status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
         subscription, monitoredItemsRequest, (const uintptr_t*) NULL, (OpcUa_CreateMonitoredItemsResponse*) &response);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems3, response.NoOfResults);
@@ -564,7 +563,7 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert_ptr_nonnull(monitoredItemsRequest);
 
     OpcUa_CreateMonitoredItemsResponse_Initialize(&response);
-    status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+    status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
         subscription, monitoredItemsRequest, (const uintptr_t*) NULL, (OpcUa_CreateMonitoredItemsResponse*) &response);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems3_plus_unknown, response.NoOfResults);
@@ -585,7 +584,7 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert_ptr_nonnull(monitoredItemsRequest);
 
     OpcUa_CreateMonitoredItemsResponse_Initialize(&response);
-    status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+    status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(
         subscription, monitoredItemsRequest, (const uintptr_t*) NULL, (OpcUa_CreateMonitoredItemsResponse*) &response);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems2_plus_2_unknown, response.NoOfResults);
@@ -607,7 +606,7 @@ START_TEST(test_wrapper_add_monitored_items)
         SOPC_DeleteMonitoredItemsRequest_Create(0, nbMonitoredItems1, (const uint32_t*) monitoredItemsIds1);
     ck_assert_ptr_nonnull(deleteMIreq);
 
-    status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
+    status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems1, deleteMIresp.NoOfResults);
     ck_assert_ptr_nonnull(deleteMIresp.Results);
@@ -619,7 +618,7 @@ START_TEST(test_wrapper_add_monitored_items)
     deleteMIreq = SOPC_DeleteMonitoredItemsRequest_Create(0, nbMonitoredItems2, (const uint32_t*) monitoredItemsIds2);
     ck_assert_ptr_nonnull(deleteMIreq);
 
-    status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
+    status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems2, deleteMIresp.NoOfResults);
     ck_assert_ptr_nonnull(deleteMIresp.Results);
@@ -632,7 +631,7 @@ START_TEST(test_wrapper_add_monitored_items)
                                                           (const uint32_t*) monitoredItemsIds2_plus_2_unknown);
     ck_assert_ptr_nonnull(deleteMIreq);
 
-    status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
+    status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems2_plus_2_unknown, deleteMIresp.NoOfResults);
     ck_assert_ptr_nonnull(deleteMIresp.Results);
@@ -647,7 +646,7 @@ START_TEST(test_wrapper_add_monitored_items)
     deleteMIreq = SOPC_DeleteMonitoredItemsRequest_Create(0, nbMonitoredItems3, (const uint32_t*) monitoredItemsIds3);
     ck_assert_ptr_nonnull(deleteMIreq);
 
-    status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
+    status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems3, deleteMIresp.NoOfResults);
     ck_assert_ptr_nonnull(deleteMIresp.Results);
@@ -662,7 +661,7 @@ START_TEST(test_wrapper_add_monitored_items)
                                                           (const uint32_t*) monitoredItemsIds3_plus_unknown);
     ck_assert_ptr_nonnull(deleteMIreq);
 
-    status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
+    status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
     ck_assert_int_eq((int32_t) nbMonitoredItems3_plus_unknown, deleteMIresp.NoOfResults);
     ck_assert_ptr_nonnull(deleteMIresp.Results);
     ck_assert(SOPC_IsGoodStatus(deleteMIresp.Results[0]));
@@ -671,9 +670,9 @@ START_TEST(test_wrapper_add_monitored_items)
     ck_assert(!SOPC_IsGoodStatus(deleteMIresp.Results[3]));
     OpcUa_DeleteMonitoredItemsResponse_Clear(&deleteMIresp);
 
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_DeleteSubscription(&subscription));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_DeleteSubscription(&subscription));
 
-    status = SOPC_ClientHelperNew_Disconnect(&valid_scConnection);
+    status = SOPC_ClientHelper_Disconnect(&valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_ClientConfigHelper_Clear();
@@ -700,7 +699,7 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
         "Test", VALID_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
     ck_assert_ptr_nonnull(secureConnConfig);
     SOPC_ClientConnection* valid_scConnection = NULL;
-    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
+    status = SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &valid_scConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* create a valid subscription */
@@ -708,7 +707,7 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     ck_assert_ptr_nonnull(subRequest);
 
     /* create a subscription */
-    check_subscription_callback = SOPC_ClientHelperNew_CreateSubscription(
+    check_subscription_callback = SOPC_ClientHelper_CreateSubscription(
         valid_scConnection, subRequest, handle_subscriptionNotification_datachange, (uintptr_t) NULL);
     ck_assert_ptr_nonnull(check_subscription_callback);
 
@@ -719,9 +718,9 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
                                                                   OpcUa_TimestampsToReturn_Both);
     ck_assert_ptr_nonnull(monitoredItemsRequest);
 
-    status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(check_subscription_callback, monitoredItemsRequest,
-                                                                    (const uintptr_t*) NULL,
-                                                                    (OpcUa_CreateMonitoredItemsResponse*) &response);
+    status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(check_subscription_callback, monitoredItemsRequest,
+                                                                 (const uintptr_t*) NULL,
+                                                                 (OpcUa_CreateMonitoredItemsResponse*) &response);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq((int32_t) nbMonitoredItems1, response.NoOfResults);
     ck_assert_ptr_nonnull(response.Results);
@@ -759,15 +758,15 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
         SOPC_DeleteMonitoredItemsRequest_Create(0, nbMonitoredItems1, (const uint32_t*) monitoredItemsIds1);
     ck_assert_ptr_nonnull(deleteMIreq);
     status =
-        SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(check_subscription_callback, deleteMIreq, &deleteMIresp);
+        SOPC_ClientHelper_Subscription_DeleteMonitoredItems(check_subscription_callback, deleteMIreq, &deleteMIresp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(deleteMIresp.NoOfResults, (int32_t) nbMonitoredItems1);
     ck_assert(SOPC_IsGoodStatus(deleteMIresp.Results[0]));
     OpcUa_DeleteMonitoredItemsResponse_Clear(&deleteMIresp);
 
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_DeleteSubscription(&check_subscription_callback));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_DeleteSubscription(&check_subscription_callback));
 
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_Disconnect(&valid_scConnection));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&valid_scConnection));
 
     SOPC_ClientConfigHelper_Clear();
 }
@@ -779,8 +778,8 @@ START_TEST(test_wrapper_unsubscribe)
 
     /* Invalid parameters */
     SOPC_ClientHelper_Subscription* subscription = NULL;
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelperNew_DeleteSubscription(NULL));
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelperNew_DeleteSubscription(&subscription));
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelper_DeleteSubscription(NULL));
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelper_DeleteSubscription(&subscription));
 
     /* Connecting to a valid endpoint */
     SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
@@ -788,40 +787,40 @@ START_TEST(test_wrapper_unsubscribe)
     ck_assert_ptr_nonnull(secureConnConfig);
     SOPC_ClientConnection* scConnection = NULL;
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
 
     /* create a valid subscription */
     OpcUa_CreateSubscriptionRequest* subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
     ck_assert_ptr_nonnull(subscriptionRequest);
 
-    subscription = SOPC_ClientHelperNew_CreateSubscription(scConnection, subscriptionRequest,
-                                                           handle_subscriptionNotification, (uintptr_t) NULL);
+    subscription = SOPC_ClientHelper_CreateSubscription(scConnection, subscriptionRequest,
+                                                        handle_subscriptionNotification, (uintptr_t) NULL);
     ck_assert_ptr_nonnull(subscription);
 
     /* Delete subscription */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_DeleteSubscription(&subscription));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_DeleteSubscription(&subscription));
     ck_assert_ptr_null(subscription);
 
     /* Delete once again */
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelperNew_DeleteSubscription(&subscription));
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelper_DeleteSubscription(&subscription));
     ck_assert_ptr_null(subscription);
 
     // Cannot create a subscription after deleting one before. https://gitlab.com/systerel/S2OPC/-/issues/1513
     // /* create subscription again */
-    // subscription = SOPC_ClientHelperNew_CreateSubscription(scConnection, subscriptionRequest,
+    // subscription = SOPC_ClientHelper_CreateSubscription(scConnection, subscriptionRequest,
     //                                                        handle_subscriptionNotification, (uintptr_t) NULL);
     // ck_assert_ptr_nonnull(subscription);
 
     /* disconnect */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_Disconnect(&scConnection));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&scConnection));
 
     /* Unsubscribe after disconnect */
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelperNew_DeleteSubscription(&subscription));
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelper_DeleteSubscription(&subscription));
 
     SOPC_ClientConfigHelper_Clear();
 
     /* delete subscription after toolkit is closed*/
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelperNew_DeleteSubscription(&subscription));
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, SOPC_ClientHelper_DeleteSubscription(&subscription));
 }
 END_TEST
 
@@ -842,7 +841,7 @@ START_TEST(test_wrapper_read)
     ck_assert_ptr_nonnull(secureConnConfig);
     SOPC_ClientConnection* scConnection = NULL;
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
 
     /* Create a read request for one value */
     OpcUa_ReadRequest* readRequest = SOPC_ReadRequest_Create(numberNodesToRead1, OpcUa_TimestampsToReturn_Both);
@@ -852,15 +851,15 @@ START_TEST(test_wrapper_read)
 
     /* Invalid parameters */
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS,
-                     SOPC_ClientHelperNew_ServiceSync(NULL, readRequest, (void**) &response));
+                     SOPC_ClientHelper_ServiceSync(NULL, readRequest, (void**) &response));
     ck_assert_ptr_null(response);
 
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS,
-                     SOPC_ClientHelperNew_ServiceSync(scConnection, NULL, (void**) &response));
+                     SOPC_ClientHelper_ServiceSync(scConnection, NULL, (void**) &response));
 
     readRequest = SOPC_ReadRequest_Create(numberNodesToRead1, OpcUa_TimestampsToReturn_Both);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS,
-                     SOPC_ClientHelperNew_ServiceSync(scConnection, readRequest, (void**) NULL));
+                     SOPC_ClientHelper_ServiceSync(scConnection, readRequest, (void**) NULL));
 
     /* read one node */
     readRequest = SOPC_ReadRequest_Create(numberNodesToRead1, OpcUa_TimestampsToReturn_Both);
@@ -868,7 +867,7 @@ START_TEST(test_wrapper_read)
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ReadRequest_SetReadValueFromStrings(readRequest, 0, nodeIds1[0],
                                                                               SOPC_AttributeId_Value, NULL));
 
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, readRequest, (void**) &response));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, readRequest, (void**) &response));
     ck_assert_ptr_nonnull(response);
     ck_assert_int_eq((int32_t) numberNodesToRead1, response->NoOfResults);
     ck_assert(SOPC_IsGoodStatus(response->Results[0].Status));
@@ -888,7 +887,7 @@ START_TEST(test_wrapper_read)
                                                                               SOPC_AttributeId_Value, NULL));
 
     /* read multiple nodes */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, readRequest, (void**) &response));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, readRequest, (void**) &response));
     ck_assert_ptr_nonnull(response);
     ck_assert_int_eq((int32_t) numberNodesToRead2, response->NoOfResults);
     ck_assert(SOPC_IsGoodStatus(response->Results[0].Status));
@@ -910,7 +909,7 @@ START_TEST(test_wrapper_read)
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ReadRequest_SetReadValueFromStrings(readRequest, 1, nodeIds3[1],
                                                                               SOPC_AttributeId_Value, NULL));
 
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, readRequest, (void**) &response));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, readRequest, (void**) &response));
     ck_assert_ptr_nonnull(response);
     ck_assert_int_eq((int32_t) numberNodesToRead3, response->NoOfResults);
     ck_assert(!SOPC_IsGoodStatus(response->Results[0].Status));
@@ -930,7 +929,7 @@ START_TEST(test_wrapper_read)
                                                                                   SOPC_AttributeId_Value, NULL));
     }
 
-    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, readRequest, (void**) &response));
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, readRequest, (void**) &response));
 
     ck_assert_ptr_nonnull(response);
     ck_assert_int_ge(response->NoOfResults, 0);
@@ -945,15 +944,15 @@ START_TEST(test_wrapper_read)
     SOPC_EncodeableObject_Delete(response->encodeableType, (void**) &response);
 
     /* Disconnect */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_Disconnect(&scConnection));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&scConnection));
 
     /* read node after disconnect */
     readRequest = SOPC_ReadRequest_Create(numberNodesToRead2, OpcUa_TimestampsToReturn_Both);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS,
-                     SOPC_ClientHelperNew_ServiceSync(scConnection, readRequest, (void**) &response));
+                     SOPC_ClientHelper_ServiceSync(scConnection, readRequest, (void**) &response));
 
     ck_assert_uint_eq(SOPC_STATUS_OK,
-                      SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+                      SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
 
     SOPC_ClientConfigHelper_Clear();
 
@@ -961,7 +960,7 @@ START_TEST(test_wrapper_read)
     readRequest = SOPC_ReadRequest_Create(numberNodesToRead2, OpcUa_TimestampsToReturn_Both);
     ck_assert_ptr_nonnull(readRequest);
     ck_assert_int_eq(SOPC_STATUS_INVALID_STATE,
-                     SOPC_ClientHelperNew_ServiceSync(scConnection, readRequest, (void**) &response));
+                     SOPC_ClientHelper_ServiceSync(scConnection, readRequest, (void**) &response));
 }
 END_TEST
 
@@ -981,7 +980,7 @@ START_TEST(test_wrapper_write)
     ck_assert_ptr_nonnull(secureConnConfig);
     SOPC_ClientConnection* scConnection = NULL;
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
 
     /* Create a write request for one value */
     OpcUa_WriteRequest* writeRequest = SOPC_WriteRequest_Create(numberNodesToWrite1);
@@ -1000,7 +999,7 @@ START_TEST(test_wrapper_write)
                                                                                 SOPC_AttributeId_Value, NULL, &value));
 
     /* write one node */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, writeRequest, (void**) &response));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, writeRequest, (void**) &response));
     ck_assert_ptr_nonnull(response);
     ck_assert_int_eq((int32_t) numberNodesToWrite1, response->NoOfResults);
     ck_assert(SOPC_IsGoodStatus(response->Results[0]));
@@ -1032,7 +1031,7 @@ START_TEST(test_wrapper_write)
                                                                                 SOPC_AttributeId_Value, NULL, val2));
 
     /* write multiple nodes */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, writeRequest, (void**) &response));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, writeRequest, (void**) &response));
     ck_assert_ptr_nonnull(response);
     ck_assert_int_eq((int32_t) numberNodesToWrite2, response->NoOfResults);
     ck_assert(SOPC_IsGoodStatus(response->Results[0]));
@@ -1042,15 +1041,15 @@ START_TEST(test_wrapper_write)
     SOPC_EncodeableObject_Delete(response->encodeableType, (void**) &response);
 
     /* Disconnect */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_Disconnect(&scConnection));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&scConnection));
 
     /* write node after disconnect */
     writeRequest = SOPC_WriteRequest_Create(numberNodesToWrite2);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS,
-                     SOPC_ClientHelperNew_ServiceSync(scConnection, writeRequest, (void**) &response));
+                     SOPC_ClientHelper_ServiceSync(scConnection, writeRequest, (void**) &response));
 
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
 
     SOPC_ClientConfigHelper_Clear();
 
@@ -1058,7 +1057,7 @@ START_TEST(test_wrapper_write)
     writeRequest = SOPC_WriteRequest_Create(numberNodesToWrite2);
     ck_assert_ptr_nonnull(writeRequest);
     ck_assert_int_eq(SOPC_STATUS_INVALID_STATE,
-                     SOPC_ClientHelperNew_ServiceSync(scConnection, writeRequest, (void**) &response));
+                     SOPC_ClientHelper_ServiceSync(scConnection, writeRequest, (void**) &response));
 }
 END_TEST
 
@@ -1077,7 +1076,7 @@ START_TEST(test_wrapper_browse)
     ck_assert_ptr_nonnull(secureConnConfig);
     SOPC_ClientConnection* scConnection = NULL;
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
 
     OpcUa_BrowseRequest* browseRequest = SOPC_BrowseRequest_Create(numberNodesToBrowse1, 0, NULL);
     ck_assert_ptr_nonnull(browseRequest);
@@ -1089,7 +1088,7 @@ START_TEST(test_wrapper_browse)
 
     /* Browse */
     /*  Root/ - Hierarchical references */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, browseRequest, (void**) &response));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, browseRequest, (void**) &response));
     ck_assert_int_eq((int32_t) numberNodesToBrowse1, response->NoOfResults);
     ck_assert_ptr_nonnull(response->Results);
     ck_assert_int_eq(3, response->Results[0].NoOfReferences);
@@ -1128,7 +1127,7 @@ START_TEST(test_wrapper_browse)
                                          true, 0, OpcUa_BrowseResultMask_All));
     /* Browse */
     /* Root/ and Root/Objects - Hierarchical references */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, browseRequest, (void**) &response));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, browseRequest, (void**) &response));
     ck_assert_int_eq((int32_t) numberNodesToBrowse2, response->NoOfResults);
     ck_assert_ptr_nonnull(response->Results);
     ck_assert(SOPC_IsGoodStatus(response->Results[0].StatusCode));
@@ -1155,7 +1154,7 @@ START_TEST(test_wrapper_browse)
     //                                      true, 0, OpcUa_BrowseResultMask_All));
     // /* Browse */
     // /* Root/ and Root/Objects - Hierarchical references */
-    // ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, browseRequest, (void**)
+    // ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, browseRequest, (void**)
     // &response)); ck_assert_int_eq((int32_t) numberNodesToBrowse3, response->NoOfResults);
     // ck_assert_ptr_nonnull(response->Results);
     // ck_assert(SOPC_IsGoodStatus(response->Results[0].StatusCode));
@@ -1173,7 +1172,7 @@ START_TEST(test_wrapper_browse)
 
     // /* Browse Next */
     // OpcUa_BrowseNextResponse* browseNextResponse = NULL;
-    // ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_ServiceSync(scConnection, browseNextRequest,
+    // ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceSync(scConnection, browseNextRequest,
     // browseNextResponse)); ck_assert_int_eq((int32_t) nbContinuationPoint, response->NoOfResults);
     // ck_assert_ptr_nonnull(response->Results);
     // ck_assert(SOPC_IsGoodStatus(response->Results[0].StatusCode));
@@ -1187,7 +1186,7 @@ START_TEST(test_wrapper_browse)
     // SOPC_EncodeableObject_Delete(browseNextResponse->encodeableType, (void**) browseNextResponse);
 
     /* Disconnect */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_Disconnect(&scConnection));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&scConnection));
 
     SOPC_ClientConfigHelper_Clear();
 }
@@ -1203,7 +1202,7 @@ START_TEST(test_wrapper_get_endpoints)
     ck_assert_ptr_nonnull(secureConnConfig);
     SOPC_ClientConnection* scConnection = NULL;
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     SOPC_ClientHelperNew_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
 
     /* Create valid get endpoint request */
     OpcUa_GetEndpointsRequest* valid_getEndpointRequest = SOPC_GetEndpointsRequest_Create(VALID_ENDPOINT_URL);
@@ -1216,7 +1215,7 @@ START_TEST(test_wrapper_get_endpoints)
 
     /* Get valid Endpoint request */
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     SOPC_ClientHelperNew_ServiceSync(scConnection, valid_getEndpointRequest, (void**) &response));
+                     SOPC_ClientHelper_ServiceSync(scConnection, valid_getEndpointRequest, (void**) &response));
     ck_assert_int_eq(3, response->NoOfEndpoints);
     ck_assert_ptr_nonnull(response->Endpoints);
 
@@ -1225,7 +1224,7 @@ START_TEST(test_wrapper_get_endpoints)
 
     /* Get Enpoint request */
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     SOPC_ClientHelperNew_ServiceSync(scConnection, nofilter_getEndpointrequest, (void**) &response));
+                     SOPC_ClientHelper_ServiceSync(scConnection, nofilter_getEndpointrequest, (void**) &response));
     ck_assert_int_eq(3, response->NoOfEndpoints);
     ck_assert_ptr_nonnull(response->Endpoints);
 
@@ -1233,7 +1232,7 @@ START_TEST(test_wrapper_get_endpoints)
     SOPC_EncodeableObject_Delete(response->encodeableType, (void**) &response);
 
     /* Disconnect */
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelperNew_Disconnect(&scConnection));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&scConnection));
 
     SOPC_ClientConfigHelper_Clear();
 }
