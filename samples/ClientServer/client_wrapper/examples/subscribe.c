@@ -243,8 +243,6 @@ int main(int argc, char* const argv[])
                                                                      &createMIresp);
         if (SOPC_STATUS_OK != status)
         {
-            OpcUa_CreateMonitoredItemsRequest_Clear(createMIreq);
-            SOPC_Free(createMIreq);
             printf("<Example_wrapper_subscribe: Failed to create monitored items\n");
         }
         else
@@ -298,6 +296,11 @@ int main(int argc, char* const argv[])
                 status = SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(deleteMIreq, i,
                                                                              createMIresp.Results[i].MonitoredItemId);
             }
+            if (SOPC_STATUS_OK != status)
+            {
+                OpcUa_DeleteMonitoredItemsRequest_Clear(deleteMIreq);
+                SOPC_Free(deleteMIreq);
+            }
         }
         else
         {
@@ -317,8 +320,6 @@ int main(int argc, char* const argv[])
         status = SOPC_ClientHelper_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
         if (SOPC_STATUS_OK != status)
         {
-            OpcUa_DeleteMonitoredItemsRequest_Clear(deleteMIreq);
-            SOPC_Free(deleteMIreq);
             printf("<Example_wrapper_subscribe: Failed to delete monitored items\n");
         }
         else
