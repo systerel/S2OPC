@@ -1,7 +1,6 @@
 # Continuous Integration configuration with gitlab.com
 # See https://gitlab.com/help/ci/yaml/README.md
 
-
 #########################################################
 # Default CI pipeline configuration:
 # - preset variables: 'S2OPC_NODE_MANAGEMENT = 1' set
@@ -62,21 +61,19 @@ variables:
   S2OPC_NODE_MANAGEMENT: 1
   S2OPC_EVENT_MANAGEMENT: 1
   S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE: 1
+  S2OPC_HAS_AUDITING: 1
 
 .nominal_test_variables: &nominal_test_variables
-  S2OPC_NODE_MANAGEMENT: 1
-  S2OPC_EVENT_MANAGEMENT: 1
-  S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE: 1
   TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
   TEST_CLIENT_XML_CONFIG: S2OPC_Client_Test_Config.xml
-  TEST_PASSWORD_PRIVATE_KEY : password
-  TEST_PASSWORD_CACERT : S2OPC
-  TEST_PASSWORD_USER_ME : 1234
-  TEST_PASSWORD_USER_SECUADMIN : 1234
-  TEST_USERNAME : user1
-  TEST_PASSWORD_USER : password
+  TEST_PASSWORD_PRIVATE_KEY: password
+  TEST_PASSWORD_CACERT: S2OPC
+  TEST_PASSWORD_USER_ME: 1234
+  TEST_PASSWORD_USER_SECUADMIN: 1234
+  TEST_USERNAME: user1
+  TEST_PASSWORD_USER: password
 
 # Variables for ALL_BUILDS and ALL_TESTS manual pipelines
 
@@ -105,10 +102,10 @@ workflow:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "web"'
-    - if: '$CI_COMMIT_TAG'
-    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+    - if: "$CI_COMMIT_TAG"
+    - if: "$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS"
       when: never
-    - if: '$CI_COMMIT_BRANCH'
+    - if: "$CI_COMMIT_BRANCH"
 
 .zephyr-job: &zephyr_job
   tags:
@@ -128,22 +125,22 @@ generation: &gen
     - rm ./src/ClientServer/services/bgenc/constants_bs.h_
     - ./.check_generated_code.sh
   artifacts:
-    name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - 'pre-build.log'
+      - "pre-build.log"
     when: always
-    expire_in: '1 week'
+    expire_in: "1 week"
   rules:
     - if: "$NO_GEN == null && \
-           $WINDOWS_TEST == null && \
-           $CROSS_COMPILE == null && \
-           $GEN_PROOF_OBLIGATIONS == null && \
-           $WITH_COVERITY == null && \
-           $S2OPC_PUBSUB_ONLY == null &&\
-           $ALL_BUILDS == null && \
-           $ALL_TESTS == null && \
-           $WITH_DOC == null && \
-           $WITH_SONAR == null"
+        $WINDOWS_TEST == null && \
+        $CROSS_COMPILE == null && \
+        $GEN_PROOF_OBLIGATIONS == null && \
+        $WITH_COVERITY == null && \
+        $S2OPC_PUBSUB_ONLY == null &&\
+        $ALL_BUILDS == null && \
+        $ALL_TESTS == null && \
+        $WITH_DOC == null && \
+        $WITH_SONAR == null"
       when: on_success
 
 proof_obligations:
@@ -152,10 +149,10 @@ proof_obligations:
     - ./.pre-build-ext.sh POs
     - cat po_status.log
   artifacts:
-    name: 'bpos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "bpos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - 'pre-build.log'
-      - 'po_status.log'
+      - "pre-build.log"
+      - "po_status.log"
     when: always
     expire_in: "30 days"
   rules:
@@ -169,8 +166,8 @@ check_commit_signature:
   script:
     - ./.check_signed_commit.sh
   rules:
-   - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
-     when: always
+    - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
+      when: always
 
 check_commit_validity:
   stage: doc
@@ -180,8 +177,8 @@ check_commit_validity:
     # Unnecessary for R-O access on public project: ${CI_JOB_TOKEN}
     - './.check_ref_commit.sh -v "${SOPC_CURRENT_MILESTONE}" "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}" "${CI_MERGE_REQUEST_IID}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}"'
   rules:
-   - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
-     when: always
+    - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
+      when: always
 ###
 # Compilation jobs
 ###
@@ -190,61 +187,63 @@ check_commit_validity:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/build@sha256:20edbadef44599912096cd2c7323964a6665d1f1196251e2ae61dde11ae09ae3 # digest of build:1.52
   script:
-    - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?'
+    - &build_command_line "./build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?"
   variables: &build_linux_variables
-    CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_DIGEST: 'sha256:20edbadef44599912096cd2c7323964a6665d1f1196251e2ae61dde11ae09ae3'
+    CMAKE_INSTALL_PREFIX: "../install_linux64"
+    DOCKER_DIGEST: "sha256:20edbadef44599912096cd2c7323964a6665d1f1196251e2ae61dde11ae09ae3"
     BUILD_DIR: build
   artifacts:
-    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - '*.log'
-      - 'install_linux64/'
-      - 'build/'  # Required by tests / coverage
-    expire_in: '1 week'
+      - "*.log"
+      - "install_linux64/"
+      - "build/" # Required by tests / coverage
+    expire_in: "1 week"
     when: always
 
 # Used by "normal" pipeline
 build-linux64-ASan:
   <<: *build_linux
   variables:
-    <<: [*build_linux_variables,*nominal_build_variables]
+    <<: [*build_linux_variables, *nominal_build_variables]
     WITH_ASAN: 1
     WITH_UBSAN: 1
   needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $GEN_PROOF_OBLIGATIONS == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null  && \
-           $WITH_SONAR == null" # avoid ASAN build in most of nightly builds
+        $GEN_PROOF_OBLIGATIONS == null && \
+        $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
+        $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null  && \
+        $WITH_SONAR == null" # avoid ASAN build in most of nightly builds
       when: on_success
 
 build-linux-faulty-packet:
   <<: *build_linux
-  stage : build-others
+  stage: build-others
   variables:
-    <<: [*build_linux_variables,*nominal_build_variables]
+    <<: [*build_linux_variables, *nominal_build_variables]
     WITH_ASAN: 1
     WITH_UBSAN: 1
+    S2OPC_HAS_AUDITING: 1
+    S2OPC_EVENT_MANAGEMENT: 1
     BUILD_DIR: build_faulty
     CMAKE_C_FLAGS: "-DSOPC_MAX_SESSIONS=50 -DSOPC_MAX_SECURE_CONNECTIONS=51"
-  needs : []
+  needs: []
   artifacts:
-    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty'
+    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty"
     paths:
-      - '*.log'
-      - 'build_faulty/bin/toolkit_test_server'
-      - 'build_faulty/bin/*.xml'
-      - 'build_faulty/bin/S2OPC_Demo_PKI'
-      - 'build_faulty/bin/S2OPC_Users_PKI'
-      - 'build_faulty/bin/server_public'
-      - 'build_faulty/bin/server_private'
-      - 'build_faulty/bin/user_public'
-    expire_in: '30 days'
-  rules :
+      - "*.log"
+      - "build_faulty/bin/toolkit_test_server"
+      - "build_faulty/bin/*.xml"
+      - "build_faulty/bin/S2OPC_Demo_PKI"
+      - "build_faulty/bin/S2OPC_Users_PKI"
+      - "build_faulty/bin/server_public"
+      - "build_faulty/bin/server_private"
+      - "build_faulty/bin/user_public"
+    expire_in: "30 days"
+  rules:
     - if: "$ALL_BUILDS != null"
-      when : on_success
+      when: on_success
 
 # Used by ALL_BUILDS to check we still manage to build with missing libs
 # (Paho for PubSub and Expat for ClientServer)
@@ -281,22 +280,22 @@ build-with_no_crypto:
 build-linux64-pys2opc-all-tests:
   <<: *build_linux
   variables:
-    <<: [*build_linux_variables,*all-tests_build_variables] # add pys2opc
+    <<: [*build_linux_variables, *all-tests_build_variables] # add pys2opc
   needs: []
   script: # build and install shared libs, then build static libs and binaries
-      - 'ENABLE_SAMPLES=0 ENABLE_TESTING=0 BUILD_SHARED_LIBS=1 ./build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?'
-      - 'cd .. && ./clean.sh || exit $?'
-      - *build_command_line
+    - "ENABLE_SAMPLES=0 ENABLE_TESTING=0 BUILD_SHARED_LIBS=1 ./build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?"
+    - "cd .. && ./clean.sh || exit $?"
+    - *build_command_line
   rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
     - if: "$ALL_TESTS != null || $WITH_COVERAGE == null && $NO_ASAN != null && \
-           $WITH_SONAR == null" # if ASAN is deactivated build PyS2OPC by default (except for coverage)
+        $WITH_SONAR == null" # if ASAN is deactivated build PyS2OPC by default (except for coverage)
       when: on_success
 
 # Used when ALL_BUILDS set (tests use static configuration)
 build-linux64-static-conf:
   <<: *build_linux
   variables:
-    <<: [*build_linux_variables,*all-builds_build_variables] # add static conf
+    <<: [*build_linux_variables, *all-builds_build_variables] # add static conf
   needs: []
   rules: # single case rule of ALL_BUILDS
     - if: "$ALL_BUILDS != null"
@@ -305,7 +304,7 @@ build-linux64-static-conf:
 build-linux64-NoASan-NoPyS2OPC:
   <<: *build_linux
   variables:
-    <<: [*build_linux_variables,*nominal_build_variables]
+    <<: [*build_linux_variables, *nominal_build_variables]
   needs: []
   rules: # In case of coverage analysis or when nano scope is used (TODO: PyS2OPC shall be built but tests will fail: use another server with subscription in tests)
     - if: "$WITH_COVERAGE != null"
@@ -317,71 +316,71 @@ build-win64: &build_win64
   needs: []
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
-    - 'export WITH_PYS2OPC=OFF'
+    - "export WITH_PYS2OPC=OFF"
     - *build_command_line
   variables: &build_win64_variables
-    CMAKE_INSTALL_PREFIX: '../install_win64'
-    CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-    DOCKER_DIGEST: 'sha256:d158e52c51d2f97d4bd13bcc93ebbe5793025c0032dd7e6116bdf9293fc790bf'
+    CMAKE_INSTALL_PREFIX: "../install_win64"
+    CMAKE_TOOLCHAIN_FILE: "toolchain-mingw32-w64_x86_64.cmake"
+    DOCKER_DIGEST: "sha256:d158e52c51d2f97d4bd13bcc93ebbe5793025c0032dd7e6116bdf9293fc790bf"
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
     WARNINGS_AS_ERRORS: 0 # Some format warnings remain on MinGW
   artifacts:
-    name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - '$BUILD_DIR/bin'
-      - 'install_win64/'
-    expire_in: '1 week'
+      - "$BUILD_DIR/bin"
+      - "install_win64/"
+    expire_in: "1 week"
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
-     when: always # run even if previous job in pipeline failed
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
+      when: always # run even if previous job in pipeline failed
 
 build-win32:
   <<: *build_win64
   variables:
     <<: *build_win64_variables
-    CMAKE_INSTALL_PREFIX: '../install_win32'
-    CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64.cmake'
+    CMAKE_INSTALL_PREFIX: "../install_win32"
+    CMAKE_TOOLCHAIN_FILE: "toolchain-mingw32-w64.cmake"
   artifacts:
-    name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - '$BUILD_DIR/bin/'
-      - 'install_win32/'
-    expire_in: '1 week'
+      - "$BUILD_DIR/bin/"
+      - "install_win32/"
+    expire_in: "1 week"
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
-     when: always # run even if previous job in pipeline failed
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
+      when: always # run even if previous job in pipeline failed
 
 build-rpi:
   stage: build-others
   image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:070b1ca58667ee5908902ba3eb03e5fa05993d3a86d2c8ddeb6f7f41ed62609c # digest of rpi-build:1.9
   needs: []
   script:
-    - '. /usr/local/cross_venv/bin/activate'
+    - ". /usr/local/cross_venv/bin/activate"
     - *build_command_line
   variables:
-    CMAKE_INSTALL_PREFIX: '../install_rpi'
-    CMAKE_TOOLCHAIN_FILE: '/toolchain-rpi.cmake'
-    DOCKER_DIGEST: 'sha256:070b1ca58667ee5908902ba3eb03e5fa05993d3a86d2c8ddeb6f7f41ed62609c'
+    CMAKE_INSTALL_PREFIX: "../install_rpi"
+    CMAKE_TOOLCHAIN_FILE: "/toolchain-rpi.cmake"
+    DOCKER_DIGEST: "sha256:070b1ca58667ee5908902ba3eb03e5fa05993d3a86d2c8ddeb6f7f41ed62609c"
     BUILD_DIR: build_toolchain
     # Note: building of PyS2OPC C generated file fails due to "conditional branch out of range" if not compiled with O0.
     # In order to have S2OPC built with optimisations, it is also possible to build PyS2OPC alone in a second step.
     CMAKE_BUILD_TYPE: Debug
     WITH_PYS2OPC: 1
     # Note: it might be renamed to "...-linux_armv7l.whl" if needed for installation
-    PYS2OPC_WHEEL_NAME: 'pys2opc-1.6.0-cp39-cp39-linux_arm.whl'
+    PYS2OPC_WHEEL_NAME: "pys2opc-1.6.0-cp39-cp39-linux_arm.whl"
   artifacts:
-    name: 'bin-rpi-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "bin-rpi-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - '$BUILD_DIR/bin'
-      - '$BUILD_DIR/bin'
-      - '$BUILD_DIR/lib'
-      - '*.log'
-      - 'install_rpi/'
-    expire_in: '1 week'
+      - "$BUILD_DIR/bin"
+      - "$BUILD_DIR/bin"
+      - "$BUILD_DIR/lib"
+      - "*.log"
+      - "install_rpi/"
+    expire_in: "1 week"
   rules:
-   - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
-     when: always # run even if previous job in pipeline failed
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
+      when: always # run even if previous job in pipeline failed
 
 # Used by coverity, also starts the analysis
 build-linux64-coverity:
@@ -391,7 +390,7 @@ build-linux64-coverity:
   script: |-
     mkdir build
     cd build
-    cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DS2OPC_NODE_MANAGEMENT=1 -DS2OPC_EVENT_MANAGEMENT=1 ..
+    cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DS2OPC_NODE_MANAGEMENT=1 -DS2OPC_EVENT_MANAGEMENT=1 -DS2OPC_HAS_AUDITING=1 -DS2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE=1 ..
     /opt/cov-analysis-linux64/bin/cov-build --dir cov-int make
     tar czf cov-int.tar.gz cov-int
     curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC
@@ -403,19 +402,19 @@ build-zephyr:
   stage: build-others
   image: # digest of zephyr_build :v4.1.0
     name: registry.gitlab.com/systerel/s2opc/zephyr_build@sha256:a3361ba6c51ce52026650d6ed5b9344db7d99343b803fc4eaf4c9c4d39f14536
-    entrypoint: [''] # Needs cause of issue with `sh` https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3622
+    entrypoint: [""] # Needs cause of issue with `sh` https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3622
   needs: []
   script:
-    - 'ln -s $(pwd) /zephyrproject/modules/lib/s2opc'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh nucleo_h745zi_q/stm32h745xx/m7 cli_client -DCONFIG_NET_GPTP=y'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server --nocrypto'
+    - "ln -s $(pwd) /zephyrproject/modules/lib/s2opc"
+    - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client"
+    - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh nucleo_h745zi_q/stm32h745xx/m7 cli_client -DCONFIG_NET_GPTP=y"
+    - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server"
+    - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server --nocrypto"
   artifacts:
-    name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - 'build_zephyr/'
-    expire_in: '1 week'
+      - "build_zephyr/"
+    expire_in: "1 week"
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
@@ -425,18 +424,18 @@ build-freertos:
   image: registry.gitlab.com/systerel/s2opc/freertos_build@sha256:d3da42d15ae8e1973d388cd09e75fc3dfb316763d6fd10115d0fe790e3c81346 # freertos_build:v1.2.2
   needs: []
   script:
-    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_client'
-    - 'test -f build_freertos/cli_client_NUCLEO-H723ZG.elf'
-    - 'rm -rf /tmp/ws_freertos/build'
-    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_pubsub_server --nocrypto'
-    - 'test -f build_freertos/cli_pubsub_server_NUCLEO-H723ZG.elf'
-    - 'rm -rf /tmp/ws_freertos/build'
+    - "samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_client"
+    - "test -f build_freertos/cli_client_NUCLEO-H723ZG.elf"
+    - "rm -rf /tmp/ws_freertos/build"
+    - "samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_pubsub_server --nocrypto"
+    - "test -f build_freertos/cli_pubsub_server_NUCLEO-H723ZG.elf"
+    - "rm -rf /tmp/ws_freertos/build"
   artifacts:
-    name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - 'build_freertos/'
+      - "build_freertos/"
     when: always
-    expire_in: '1 week'
+    expire_in: "1 week"
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
@@ -450,36 +449,36 @@ test-build-from-export:
   stage: test
   needs: [build-linux64-ASan]
   script:
-    - 'mkdir -p -p ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build'
-    - 'cp ${CI_PROJECT_DIR}/samples/ClientServer/CMakeLists.example.txt ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/CMakeLists.txt'
-    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build'
-    - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
-    - 'cmake --build .'
-    - 'mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
-    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
-    - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
-    - 'cmake --build .'
-    - 'mkdir -p ${CI_PROJECT_DIR}/samples/PubSub/build_samples'
-    - 'cd ${CI_PROJECT_DIR}/samples/PubSub/build_samples'
-    - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
-    - 'cmake --build .'
-    - 'mkdir -p ${CI_PROJECT_DIR}/samples/PubSub_ClientServer/build_samples'
-    - 'cd ${CI_PROJECT_DIR}/samples/PubSub_ClientServer/build_samples'
-    - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
-    - 'cmake --build .'
-    - 'mkdir -p ${CI_PROJECT_DIR}/samples/embedded/build_samples'
-    - 'cd ${CI_PROJECT_DIR}/samples/embedded/build_samples'
-    - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
-    - 'cmake --build .'
+    - "mkdir -p -p ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build"
+    - "cp ${CI_PROJECT_DIR}/samples/ClientServer/CMakeLists.example.txt ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/CMakeLists.txt"
+    - "cd ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build"
+    - "s2opc_DIR=${CI_PROJECT_DIR}/build cmake .."
+    - "cmake --build ."
+    - "mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/build_samples"
+    - "cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples"
+    - "s2opc_DIR=${CI_PROJECT_DIR}/build cmake .."
+    - "cmake --build ."
+    - "mkdir -p ${CI_PROJECT_DIR}/samples/PubSub/build_samples"
+    - "cd ${CI_PROJECT_DIR}/samples/PubSub/build_samples"
+    - "s2opc_DIR=${CI_PROJECT_DIR}/build cmake .."
+    - "cmake --build ."
+    - "mkdir -p ${CI_PROJECT_DIR}/samples/PubSub_ClientServer/build_samples"
+    - "cd ${CI_PROJECT_DIR}/samples/PubSub_ClientServer/build_samples"
+    - "s2opc_DIR=${CI_PROJECT_DIR}/build cmake .."
+    - "cmake --build ."
+    - "mkdir -p ${CI_PROJECT_DIR}/samples/embedded/build_samples"
+    - "cd ${CI_PROJECT_DIR}/samples/embedded/build_samples"
+    - "s2opc_DIR=${CI_PROJECT_DIR}/build cmake .."
+    - "cmake --build ."
   artifacts:
   rules:
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
-           $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
-           $WITH_COVERITY == null && \
-           $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
-           $ALL_BUILDS == null && $ALL_TESTS == null  && \
-           $WITH_SONAR == null"
+        $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
+        $WITH_COVERITY == null && \
+        $WITH_COVERAGE == null && $WITH_DOC == null && \
+        $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
+        $ALL_BUILDS == null && $ALL_TESTS == null  && \
+        $WITH_SONAR == null"
       when: on_success
 
 .test-linux: &test_linux
@@ -493,41 +492,41 @@ test-check:
   script:
     - ./.check-code.sh
     # Check generated types are up to date
-    - './scripts/gen-sopc-types.py ./schemas/Opc.Ua.Types.bsd'
-    - './scripts/generate-embedded-base-type-info.py ./schemas/Opc.Ua.NodeSet2.xml src/Common/opcua_types/sopc_embedded_nodeset2.h'
+    - "./scripts/gen-sopc-types.py ./schemas/Opc.Ua.Types.bsd"
+    - "./scripts/generate-embedded-base-type-info.py ./schemas/Opc.Ua.NodeSet2.xml src/Common/opcua_types/sopc_embedded_nodeset2.h"
     # Check test types are up to date
-    - './scripts/gen-sopc-types.py --types_prefix Custom --ns_index 1 ./tests/ClientServer/data/types/customTypes.bsd --files_path ./tests/ClientServer/unit_tests/helpers/'
-    - './scripts/gen-sopc-types.py --types_prefix Custom2 --ns_index 2 ./tests/ClientServer/data/types/level2Types.bsd --files_path ./tests/ClientServer/unit_tests/helpers/ --imported_ns_prefixes Custom'
-    - './.format.sh'
+    - "./scripts/gen-sopc-types.py --types_prefix Custom --ns_index 1 ./tests/ClientServer/data/types/customTypes.bsd --files_path ./tests/ClientServer/unit_tests/helpers/"
+    - "./scripts/gen-sopc-types.py --types_prefix Custom2 --ns_index 2 ./tests/ClientServer/data/types/level2Types.bsd --files_path ./tests/ClientServer/unit_tests/helpers/ --imported_ns_prefixes Custom"
+    - "./.format.sh"
     # Check that generated files are up to date
-    - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/src/test_address_space.c --const_addspace'
-    - '${CI_PROJECT_DIR}/scripts/generate-s2opc_pubsub-static-config.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/config_pubsub.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/pubsub_config_static.c'
-    - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/embedded_address_space.c --const_addspace'
-    - './.format.sh'
-    - './.verify-no-git-changes.sh'
+    - "${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/src/test_address_space.c --const_addspace"
+    - "${CI_PROJECT_DIR}/scripts/generate-s2opc_pubsub-static-config.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/config_pubsub.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/pubsub_config_static.c"
+    - "${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/embedded_address_space.c --const_addspace"
+    - "./.format.sh"
+    - "./.verify-no-git-changes.sh"
     # Check generated demo nodesets are up to date
-    - 'cd samples/ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
-    - './.verify-no-git-changes.sh'
-    - 'cd samples/PubSub_ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
-    - './.format.sh'
-    - './.verify-no-git-changes.sh'
+    - "cd samples/ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -"
+    - "./.verify-no-git-changes.sh"
+    - "cd samples/PubSub_ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -"
+    - "./.format.sh"
+    - "./.verify-no-git-changes.sh"
   variables:
-      DOCKER_DIGEST: 'sha256:8be8c50cd484989c987b6c28ded2e03f30e81ec27bb53e41cecde8cdc3bb86c8'
+    DOCKER_DIGEST: "sha256:8be8c50cd484989c987b6c28ded2e03f30e81ec27bb53e41cecde8cdc3bb86c8"
   artifacts:
-    name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - 'pre-build-check.log'
-      - 'clang_tidy.log'
-      - 'build-analyzer/analyzer-report'
+      - "pre-build-check.log"
+      - "clang_tidy.log"
+      - "build-analyzer/analyzer-report"
     when: on_failure
-    expire_in: '1 week'
+    expire_in: "1 week"
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
-           $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
-           $WITH_COVERITY == null && \
-           $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $ALL_TESTS == null && $ALL_BUILDS == null  && \
-           $WITH_SONAR == null"
+        $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
+        $WITH_COVERITY == null && \
+        $WITH_COVERAGE == null && $WITH_DOC == null && \
+        $ALL_TESTS == null && $ALL_BUILDS == null  && \
+        $WITH_SONAR == null"
       when: on_success
 
 .test-unit: &test_unit
@@ -536,19 +535,19 @@ test-check:
     - ipv6
   image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
   script:
-    - './.set-bin-root.sh'
-    - './test-all.sh'
+    - "./.set-bin-root.sh"
+    - "./test-all.sh"
   artifacts:
-    name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - 'build/bin/**/*.tap'
-      - 'build/bin/**/*.log'
-      - 'build/tests/**/Testing'
-      - 'build/samples/**/Testing'
-      - 'build/**/*.*.gcda' # coverage analysis
-      - 'build/**/*.*.gcno' # coverage analysis
+      - "build/bin/**/*.tap"
+      - "build/bin/**/*.log"
+      - "build/tests/**/Testing"
+      - "build/samples/**/Testing"
+      - "build/**/*.*.gcda" # coverage analysis
+      - "build/**/*.*.gcno" # coverage analysis
     when: always
-    expire_in: '1 week'
+    expire_in: "1 week"
 # Common rules defined by test-unit job below
 
 # Test unit for ALL_TESTS variable (add dynamic configuration)
@@ -556,12 +555,12 @@ test-unit-all-tests:
   <<: *test_unit
   needs: [build-linux64-pys2opc-all-tests]
   variables:
-    TEST_PASSWORD_PRIVATE_KEY : password
-    TEST_USERNAME : user1
-    TEST_PASSWORD_USER : password
-    TEST_PASSWORD_CACERT : S2OPC
-    TEST_PASSWORD_USER_ME : 1234
-    TEST_PASSWORD_USER_SECUADMIN : 1234
+    TEST_PASSWORD_PRIVATE_KEY: password
+    TEST_USERNAME: user1
+    TEST_PASSWORD_USER: password
+    TEST_PASSWORD_CACERT: S2OPC
+    TEST_PASSWORD_USER_ME: 1234
+    TEST_PASSWORD_USER_SECUADMIN: 1234
   rules:
     - if: "$ALL_TESTS != null"
       when: on_success
@@ -570,22 +569,22 @@ test-unit-all-tests:
 test-unit:
   <<: *test_unit
   variables:
-    <<: *nominal_test_variables
+    <<: [*nominal_build_variables, *nominal_test_variables]
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
-           $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
-           $WITH_COVERITY == null && $WITH_DOC == null && \
-           $ALL_TESTS == null && $ALL_BUILDS == null && \
-           $WITH_SONAR == null" # + excludes ALL_TESTS, and ALL_BUILDS since it has a special test job
+        $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
+        $WITH_COVERITY == null && $WITH_DOC == null && \
+        $ALL_TESTS == null && $ALL_BUILDS == null && \
+        $WITH_SONAR == null" # + excludes ALL_TESTS, and ALL_BUILDS since it has a special test job
       when: on_success
 
 # Test unit for (ALL_BUILDS && NOT ALL_TESTS) variables
 test-unit-all-builds:
   <<: *test_unit
   variables:
-    <<: [*nominal_test_variables,*all-builds_build_variables]
+    <<: [*nominal_test_variables, *all-builds_build_variables]
   rules:
-    - if: "$ALL_BUILDS != null && $ALL_TESTS == null" 
+    - if: "$ALL_BUILDS != null && $ALL_TESTS == null"
       when: on_success
 
 .test-uactt: &test_uactt
@@ -593,28 +592,28 @@ test-unit-all-builds:
   image: com.systerel.fr:5000/c838/uactt-linux@sha256:a0ae7d8858cf7da2a5cb02631807a6181f3511cc6c59498a2f2d4d92d95c048f # uactt-linux:1.8
   script:
     - ulimit -n 1024
-    - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
+    - "cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh"
   artifacts:
-    name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - 'build/bin/**/*.tap'
-      - 'build/bin/**/*.log'
-      - 'tests/ClientServer/acceptance_tools/*.log'
-      - '**/*.*.gcda' # coverage analysis
-      - '**/*.*.gcno' # coverage analysis
+      - "build/bin/**/*.tap"
+      - "build/bin/**/*.log"
+      - "tests/ClientServer/acceptance_tools/*.log"
+      - "**/*.*.gcda" # coverage analysis
+      - "**/*.*.gcno" # coverage analysis
     when: always
-    expire_in: '1 week'
+    expire_in: "1 week"
 
 # Test uactt for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
   <<: *test_uactt
   variables:
     LINUX_UACTT: 1
-    TEST_PASSWORD_PRIVATE_KEY : password
+    TEST_PASSWORD_PRIVATE_KEY: password
   rules:
     - if: "$ALL_TESTS != null && \
-           $S2OPC_PUBSUB_ONLY == null && \
-           $ALL_BUILDS == null" # + no UACTT tests on PubSub + excludes ALL_BUILDS
+        $S2OPC_PUBSUB_ONLY == null && \
+        $ALL_BUILDS == null" # + no UACTT tests on PubSub + excludes ALL_BUILDS
 
 # Test uactt for NOT ALL_TESTS variable
 test-uactt:
@@ -624,32 +623,30 @@ test-uactt:
     LINUX_UACTT: 1
   rules:
     - if: "$NO_TESTS != null || $WINDOWS_TEST != null || \
-           $CROSS_COMPILE != null || $GEN_PROOF_OBLIGATIONS != null || \
-           $WITH_COVERITY != null || \
-           $WITH_COVERAGE != null || $WITH_DOC != null || \
-           $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null"
+        $CROSS_COMPILE != null || $GEN_PROOF_OBLIGATIONS != null || \
+        $WITH_COVERITY != null || \
+        $WITH_COVERAGE != null || $WITH_DOC != null || \
+        $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null"
       when: never
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG || $RUN_UACTT != null"
       when: on_success
 
-test-faulty-packets :
+test-faulty-packets:
   stage: test-others
   image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
-  needs : [build-linux-faulty-packet]
+  needs: [build-linux-faulty-packet]
   script:
-    - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin/toolkit_test_server
+    - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin
   artifacts:
-    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_test_faulty'
+    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_test_faulty"
     paths:
-      - 'build_faulty/bin/**/*.log'
-      - '/tmp/browse_packets.txt'
-      - 'tests/ClientServer/scripts/*.tap'
-    when: on_failure
+      - "build_faulty/bin/**/*.log"
+      - "/tmp/browse_packets.txt"
+      - "tests/ClientServer/scripts/*.tap"
     expire_in: "30 days"
-  rules :
+  rules:
     - if: "$ALL_BUILDS != null"
       when: on_success
-
 
 ###
 # Test others jobs
@@ -678,12 +675,13 @@ windows-appveyor:
   script:
     - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds | grep "created"'
   rules:
-    - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null && $WINDOWS_ARTIFACTS == null || $CI_COMMIT_TAG || \
-           $CI_COMMIT_BRANCH == 'master' && $ALL_TESTS == null && \
-           $GEN_PROOF_OBLIGATIONS == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
-           $NO_ASAN == null && $NO_GEN == null && \
-           $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null" # Avoid to run job on master for all nightly build except ALL_BUILDS
+    - if:
+        "$ALL_BUILDS != null || $WINDOWS_TEST != null && $WINDOWS_ARTIFACTS == null || $CI_COMMIT_TAG || \
+        $CI_COMMIT_BRANCH == 'master' && $ALL_TESTS == null && \
+        $GEN_PROOF_OBLIGATIONS == null && \
+        $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+        $NO_ASAN == null && $NO_GEN == null && \
+        $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null" # Avoid to run job on master for all nightly build except ALL_BUILDS
       when: always # run even if previous job in pipeline failed
 
 windows-appveyor-artifacts:
@@ -696,10 +694,10 @@ windows-appveyor-artifacts:
   rules:
     - if: "$WINDOWS_TEST != null && $WINDOWS_ARTIFACTS != null"
   artifacts:
-    name: 'windows-artifacts-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "windows-artifacts-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - '*.zip'
-    expire_in: '1 week'
+      - "*.zip"
+    expire_in: "1 week"
 
 ###
 # Analysis jobs
@@ -707,25 +705,24 @@ windows-appveyor-artifacts:
 
 coverage-analysis:
   stage: analyses
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d  # digest of test:2.16
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
   script:
     - ./.gen_coverage.sh
   artifacts:
-    name: 'coverage-report-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "coverage-report-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - 'report'
-    expire_in: '1 week'
+      - "report"
+    expire_in: "1 week"
   rules:
     - if: "$WITH_COVERAGE != null"
-    
-    
+
 sonar-analysis:
   stage: analyses
   image: registry.gitlab.com/systerel/s2opc/sonarqube@sha256:4baaa859d74163e40467c5fa630ad205a83a4190b7fe472d32f071619a31ca5e # digest of sonarqube:1.0
   needs: []
   variables:
-      SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-      GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
+    GIT_DEPTH: "0" # Tells git to fetch all the branches of the project, required by the analysis task
   script:
     # Run the build inside the build wrapper
     - /work/build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output ./build.sh
@@ -753,12 +750,12 @@ pages:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
     # PyS2OPC relies on subscriptions
-    - cmake -DS2OPC_NODE_MANAGEMENT=yes -DS2OPC_EVENT_MANAGEMENT=yes -DWITH_PYS2OPC=yes ..
+    - cmake -DS2OPC_NODE_MANAGEMENT=yes -DS2OPC_EVENT_MANAGEMENT=yes -DS2OPC_HAS_AUDITING=yes -DS2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE=yes -DWITH_PYS2OPC=yes ..
     - cmake --build . --target doc
     - mv apidoc/html ../public/
   artifacts:
     paths:
-    - public
+      - public
     expire_in: 30 days
 
 check_doc:
@@ -771,11 +768,11 @@ check_doc:
   variables:
     <<: *build_linux_variables
   artifacts:
-    name: 'check_doc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "check_doc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - '$BUILD_DIR/doc.log'
-    expire_in: '1 week'
+      - "$BUILD_DIR/doc.log"
+    expire_in: "1 week"
     when: on_failure
   rules:
-   - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
-     when: on_success
+    - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+      when: on_success

@@ -56,10 +56,14 @@ typedef enum
  * thread.
  *
  * \param optLogConfig the custom log configuration or NULL to keep default configuration
+ * \param optAuditConfig the custom audit configuration or NULL for non-auditing applications.
+ *        The content of optAuditConfig may be freed/modified after call. If S2OPC_HAS_AUDITING is not defined, this
+ *        parameter shall be NULL.
  *
  * \result SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE in case of double initialization.
  */
-SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogConfig);
+SOPC_ReturnStatus SOPC_CommonHelper_Initialize(const SOPC_Log_Configuration* optLogConfig,
+                                               const SOPC_Audit_Configuration* optAuditConfig);
 
 /**
  * \brief Clears the S2OPC Client/Server frontend library (stop threads, clear common configuration, etc.)

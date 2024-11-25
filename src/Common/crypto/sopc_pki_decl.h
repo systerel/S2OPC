@@ -144,9 +144,16 @@ typedef struct SOPC_PKI_Profile SOPC_PKI_Profile;
 typedef struct SOPC_PKI_ChainProfile SOPC_PKI_ChainProfile;
 typedef struct SOPC_PKI_LeafProfile SOPC_PKI_LeafProfile;
 
+typedef struct SOPC_PKI_Cert_Failure_Context
+{
+    char* invalidURI;
+    char* invalidHostname;
+} SOPC_PKI_Cert_Failure_Context;
+
 typedef SOPC_ReturnStatus SOPC_FnValidateCert(SOPC_PKIProvider* pPKI,
                                               const SOPC_CertificateList* pToValidate,
                                               const SOPC_PKI_Profile* pProfile,
-                                              uint32_t* error);
+                                              uint32_t* error,
+                                              SOPC_PKI_Cert_Failure_Context* context);
 
 #endif /* SOPC_CRYPTO_PKI_DECL_H_ */

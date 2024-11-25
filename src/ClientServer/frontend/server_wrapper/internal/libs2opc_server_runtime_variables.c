@@ -25,6 +25,7 @@
 #include "opcua_identifiers.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
+#include "sopc_audit.h"
 #include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
@@ -119,7 +120,7 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Bui
     runtimeVariables.build_info.BuildDate = buildDate;
 
     runtimeVariables.service_level = 255;
-    runtimeVariables.auditing = false;
+    runtimeVariables.auditing = SOPC_Audit_IsAuditing();
 
     runtimeVariables.maximum_operations_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
     runtimeVariables.maximum_heavy_operations_per_request = SOPC_MAX_HEAVY_OPERATIONS_PER_MSG;
@@ -160,7 +161,7 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_
     runtimeVariables.build_info.BuildDate = build_info->BuildDate;
 
     runtimeVariables.service_level = 255;
-    runtimeVariables.auditing = false;
+    runtimeVariables.auditing = SOPC_Audit_IsAuditing();
 
     runtimeVariables.maximum_operations_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
     runtimeVariables.maximum_heavy_operations_per_request = SOPC_MAX_HEAVY_OPERATIONS_PER_MSG;

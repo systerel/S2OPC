@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 09/12/2024 17:07:54
+ Date                 : 06/10/2025 10:18:04
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -62,6 +62,7 @@ extern void session_mgr__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define session_mgr__allocate_x509_token_from_user session_core__allocate_x509_token_from_user
+#define session_mgr__clear_audit_info session_core__clear_audit_info
 #define session_mgr__client_secure_channel_lost_session_sm session_core__client_secure_channel_lost_session_sm
 #define session_mgr__deallocate_x509_token session_core__deallocate_x509_token
 #define session_mgr__find_channel_to_close session_core__find_channel_to_close
@@ -74,6 +75,7 @@ extern void session_mgr__INITIALISATION(void);
 #define session_mgr__is_valid_user_x509_authentication session_core__is_valid_user_x509_authentication
 #define session_mgr__server_secure_channel_lost_session_sm session_core__server_secure_channel_lost_session_sm
 #define session_mgr__session_has_user_server session_core__session_has_user_server
+#define session_mgr__set_request_audit_info session_core__set_request_audit_info
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

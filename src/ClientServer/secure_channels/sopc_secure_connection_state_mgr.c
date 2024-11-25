@@ -34,18 +34,20 @@
 #include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_event_timer_manager.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_protocol_constants.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
+#include "sopc_secure_channels_audit.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config_internal.h"
 
-bool SC_InitNewConnection(uint32_t* newConnectionIdx)
+bool SC_InitNewConnection(uint32_t* newConnectionIdx, char* peerInfo)
 {
     bool result = false;
     SOPC_SecureConnection* scConnection = NULL;
@@ -88,6 +90,9 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
         {
             result = false;
         }
+
+        // Initialize alternative client audit info context (for server side)
+        scConnection->altClientAuditInfo = peerInfo;
 
         // Initialize state
         scConnection->state = SECURE_CONNECTION_STATE_TCP_INIT;
@@ -192,6 +197,10 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
                 SOPC_SecretBuffer_DeleteClear(scConnection->clientNonce);
                 scConnection->clientNonce = NULL;
             }
+
+            // Clear alternative client audit info context
+            SOPC_Free(scConnection->altClientAuditInfo);
+            scConnection->altClientAuditInfo = NULL;
 
             if (!socketFailure)
             {
@@ -469,14 +478,14 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
     }
 }
 
-// Note: 3 last params are for server side only and can be NULL for a client
 static void SC_CloseSecureConnection(
     SOPC_SecureConnection* scConnection,
     uint32_t scConnectionIdx,
     bool immediateClose, /* Flag to indicate if we immediately close the socket connection or gently (error message)*/
     bool socketFailure,  /* Flag indicating if the socket connection is already closed */
     SOPC_StatusCode errorStatus,
-    const char* reason)
+    const char* reason,
+    OpcUa_RequestHeader* reqHeader) /* Optional request header for audit (server side only) */
 {
     SOPC_ASSERT((socketFailure && immediateClose) || !socketFailure); // socketFailure == true => immediateClose == true
     SOPC_ASSERT(scConnection != NULL);
@@ -484,6 +493,7 @@ static void SC_CloseSecureConnection(
     uint32_t scConfigIdx = scConnection->secureChannelConfigIdx;
     const bool isScConnected = (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
                                 scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
+
     if (!isScConnected)
     {
         // De-activate of SC connection timeout
@@ -492,6 +502,7 @@ static void SC_CloseSecureConnection(
     }
     if (!scConnection->isServerConnection)
     {
+        SOPC_ASSERT(NULL == reqHeader);
         // CLIENT case
         if (isScConnected)
         {
@@ -527,6 +538,7 @@ static void SC_CloseSecureConnection(
     }
     else
     {
+        SOPC_Audit_TriggerEvent_CloseSecuredChannel(reason, errorStatus, reqHeader, scConnection);
         // SERVER case
         if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED &&
             scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSING)
@@ -586,6 +598,10 @@ static void SC_CloseSecureConnection(
                                                                    (uintptr_t) NULL, scConnectionIdx);
                 }
             }
+        }
+        if (NULL != reqHeader)
+        {
+            SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
         }
     }
 }
@@ -1273,6 +1289,11 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
             // Set current security token properties as precedent one
             scConnection->precedentSecurityToken = scConnection->currentSecurityToken;
         }
+        else
+        {
+            // Set the secure channel id in config
+            scConfig->secureChannelId = opnResp->SecurityToken.ChannelId;
+        }
 
         // Define the current security key set
         scConnection->currentSecuKeySets = newSecuKeySets;
@@ -1738,7 +1759,9 @@ static bool SC_ServerTransition_TcpReverseInit_To_TcpInit(SOPC_SecureConnection*
 static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* scConnection,
                                                        SOPC_Buffer* opnReqMsgBuffer,
                                                        uint32_t* requestHandle,
-                                                       SOPC_StatusCode* errorStatus)
+                                                       OpcUa_RequestHeader** reqHeader,
+                                                       SOPC_StatusCode* detailedErrorStatus,
+                                                       SOPC_StatusCode* tcpErrorStatus)
 {
     // Important note: errorStatus shall be one of the errors that can be sent with a OPC UA TCP error message (part4
     // Table 38)
@@ -1749,31 +1772,31 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
     SOPC_ASSERT(scConnection->isServerConnection);
     SOPC_ASSERT(scConnection->serverAsymmSecuInfo.securityPolicyUri != NULL); // set by chunks manager
     SOPC_ASSERT(scConnection->serverAsymmSecuInfo.validSecurityModes != 0);   // set by chunks manager
-    SOPC_ASSERT(NULL != errorStatus);
+    SOPC_ASSERT(NULL != tcpErrorStatus);
+    SOPC_ASSERT(NULL != detailedErrorStatus);
 
+    *detailedErrorStatus = SOPC_GoodGenericStatus;
     bool result = false;
     bool validSecurityRequested = false;
     SOPC_Endpoint_Config* epConfig = NULL;
-    OpcUa_RequestHeader* reqHeader = NULL;
     OpcUa_OpenSecureChannelRequest* opnReq = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     epConfig = SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
     SOPC_ASSERT(epConfig != NULL);
 
-    status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+    status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) reqHeader);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ASSERT(reqHeader != NULL);
+        SOPC_ASSERT(*reqHeader != NULL);
         result = true;
     }
 
     if (result)
     {
-        // TODO: check timestamp + timeout ?
-        *requestHandle = reqHeader->RequestHandle;
+        // TODO: check timeout ?
+        *requestHandle = (*reqHeader)->RequestHandle;
     }
-
     if (result)
     {
         status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_OpenSecureChannelRequest_EncodeableType,
@@ -1796,8 +1819,9 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                                    scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
 
             // Note: since property was already adapted to server on HEL, it shall be the same
-            //*errorStatus = OpcUa_BadProtocolVersionUnsupported; => not a TCP error message authorized error
-            *errorStatus = OpcUa_BadTcpInternalError;
+            // OpcUa_BadProtocolVersionUnsupported; => not a TCP error message authorized error
+            *detailedErrorStatus = OpcUa_BadProtocolVersionUnsupported;
+            *tcpErrorStatus = OpcUa_BadTcpInternalError;
             result = false;
         }
         if (result && opnReq->RequestType != OpcUa_SecurityTokenRequestType_Issue)
@@ -1806,7 +1830,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                                    "ScStateMgr OPN: invalid request type epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                                    scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             // Cannot renew in SC_Init state
-            *errorStatus = OpcUa_BadTcpSecureChannelUnknown;
+            *tcpErrorStatus = OpcUa_BadTcpSecureChannelUnknown;
             result = false;
         }
 
@@ -1838,8 +1862,9 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                 "ScStateMgr OPN: invalid security parameters requested=%u epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                 opnReq->SecurityMode, scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             result = false;
-            //*errorStatus = OpcUa_BadSecurityModeRejected; => not a TCP error message authorized error
-            *errorStatus = OpcUa_BadSecurityChecksFailed;
+            // OpcUa_BadSecurityModeRejected; => not a TCP error message authorized error
+            *detailedErrorStatus = OpcUa_BadSecurityModeRejected;
+            *tcpErrorStatus = OpcUa_BadSecurityChecksFailed;
         }
         else if (!scConnection->serverAsymmSecuInfo.isSecureModeActive &&
                  opnReq->SecurityMode != OpcUa_MessageSecurityMode_None)
@@ -1848,7 +1873,8 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                                    "ScStateMgr OPN: certificates expected epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32,
                                    scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
             // Certificates were absent in asym. header and it is not compatible with the security mode requested
-            *errorStatus = OpcUa_BadSecurityChecksFailed;
+            *detailedErrorStatus = OpcUa_BadNoValidCertificates;
+            *tcpErrorStatus = OpcUa_BadSecurityChecksFailed;
             result = false;
         }
 
@@ -1885,7 +1911,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                         opnReq->ClientNonce.Data, (uint32_t) opnReq->ClientNonce.Length);
                     if (NULL == scConnection->clientNonce)
                     {
-                        *errorStatus = OpcUa_BadTcpInternalError;
+                        *tcpErrorStatus = OpcUa_BadTcpInternalError;
                         result = false;
                     }
                 }
@@ -1897,7 +1923,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                                            " scCfgIdx=%" PRIu32,
                                            scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
                     result = false;
-                    *errorStatus = OpcUa_BadNonceInvalid;
+                    *tcpErrorStatus = OpcUa_BadNonceInvalid;
                 }
             }
         }
@@ -1909,7 +1935,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         if (nconfig == NULL || !get_certificate_der(scConnection->serverAsymmSecuInfo.clientCertificate, &cert_buffer))
         {
             result = false;
-            *errorStatus = OpcUa_BadTcpInternalError;
+            *tcpErrorStatus = OpcUa_BadTcpInternalError;
         }
 
         if (result && NULL != cert_buffer)
@@ -1925,6 +1951,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             nconfig->reqSecuPolicyUri = scConnection->serverAsymmSecuInfo.securityPolicyUri;
             nconfig->requestedLifetime = opnReq->RequestedLifetime;
             nconfig->url = epConfig->endpointURL;
+            nconfig->clientAuditInfo = SOPC_strdup(scConnection->altClientAuditInfo);
             // Set maximum send message size
             nconfig->internalProtocolData = scConnection->tcpMsgProperties.sendMaxMessageSize;
             idx = SOPC_ToolkitServer_AddSecureChannelConfig(nconfig);
@@ -1949,8 +1976,12 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
     {
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTING;
     }
+    else
+    {
+        // If detailed error status not set, set same as tcp error status
+        *detailedErrorStatus = SOPC_GoodGenericStatus == *detailedErrorStatus ? *tcpErrorStatus : *detailedErrorStatus;
+    }
 
-    SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
     SOPC_EncodeableObject_Delete(&OpcUa_OpenSecureChannelRequest_EncodeableType, (void**) &opnReq);
     // Clear the temporary security info recorded by chunks manager
     scConnection->serverAsymmSecuInfo.clientCertificate = NULL;
@@ -2106,13 +2137,16 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                                                             uint32_t scConnectionIdx,
                                                             uint32_t requestId,
                                                             uint32_t requestHandle,
-                                                            SOPC_StatusCode* errorStatus)
+                                                            SOPC_StatusCode* detailedErrorStatus,
+                                                            SOPC_StatusCode* tcpErrorStatus)
 {
     SOPC_ASSERT(scConnection != NULL);
     SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
     SOPC_ASSERT(scConnection->isServerConnection);
     SOPC_ASSERT(scConnection->cryptoProvider != NULL);
-    SOPC_ASSERT(NULL != errorStatus);
+    SOPC_ASSERT(NULL != detailedErrorStatus);
+    SOPC_ASSERT(NULL != tcpErrorStatus);
+    *detailedErrorStatus = SOPC_GoodGenericStatus;
 
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -2135,7 +2169,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     }
     else
     {
-        *errorStatus = OpcUa_BadOutOfMemory;
+        *tcpErrorStatus = OpcUa_BadOutOfMemory;
     }
     // Note: do not let size of headers for chunks manager since it is not a fixed size
 
@@ -2157,6 +2191,8 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
 
     if (result)
     {
+        // Update secure channel id in config
+        scConfig->secureChannelId = scConnection->currentSecurityToken.secureChannelId;
         // Fill the server nonce and generate key sets if applicable
         SOPC_SecretBuffer* serverNonce = NULL;
         if (scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None)
@@ -2168,21 +2204,22 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
             if (SOPC_STATUS_OK == status)
             {
                 result = SC_DeriveSymmetricKeySets(true, scConnection->cryptoProvider, scConnection->clientNonce,
-                                                   serverNonce, &scConnection->currentSecuKeySets, errorStatus);
+                                                   serverNonce, &scConnection->currentSecuKeySets, tcpErrorStatus);
 
-                if (!result && OpcUa_BadNonceInvalid == *errorStatus)
+                if (!result && OpcUa_BadNonceInvalid == *tcpErrorStatus)
                 {
                     // Nonce invalid : security issue shall not report detailed status code
                     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                            "ScStateMgr: invalid Nonce in OPN request epCfgIdx=%" PRIu32
                                            " scCfgIdx=%" PRIu32,
                                            scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
-                    *errorStatus = OpcUa_BadSecurityChecksFailed;
+                    *detailedErrorStatus = OpcUa_BadNonceInvalid;
+                    *tcpErrorStatus = OpcUa_BadSecurityChecksFailed;
                 }
             }
             else
             {
-                *errorStatus = OpcUa_BadTcpInternalError;
+                *tcpErrorStatus = OpcUa_BadTcpInternalError;
                 result = false;
             }
 
@@ -2196,13 +2233,13 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                     if (SOPC_STATUS_OK != status)
                     {
                         result = false;
-                        *errorStatus = OpcUa_BadOutOfMemory;
+                        *tcpErrorStatus = OpcUa_BadOutOfMemory;
                     }
                 }
                 else
                 {
                     result = false;
-                    *errorStatus = OpcUa_BadTcpInternalError;
+                    *tcpErrorStatus = OpcUa_BadTcpInternalError;
                 }
             }
 
@@ -2211,9 +2248,9 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
             scConnection->clientNonce = NULL;
         }
     }
-    else if (SOPC_GoodGenericStatus == *errorStatus)
+    else if (SOPC_GoodGenericStatus == *tcpErrorStatus)
     {
-        *errorStatus = OpcUa_BadTcpInternalError;
+        *tcpErrorStatus = OpcUa_BadTcpInternalError;
     }
 
     if (result)
@@ -2237,7 +2274,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         if (SOPC_STATUS_OK != status)
         {
             result = false;
-            *errorStatus = OpcUa_BadEncodingError;
+            *tcpErrorStatus = OpcUa_BadEncodingError;
         }
     }
 
@@ -2247,10 +2284,14 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_OPN, scConnectionIdx, (uintptr_t) opnRespBuffer,
                                                        requestId);
     }
-    else if (opnRespBuffer != NULL)
+    else
     {
-        // Buffer will not be used anymore
-        SOPC_Buffer_Delete(opnRespBuffer);
+        *detailedErrorStatus = SOPC_GoodGenericStatus == *detailedErrorStatus ? *tcpErrorStatus : *detailedErrorStatus;
+        if (opnRespBuffer != NULL)
+        {
+            // Buffer will not be used anymore
+            SOPC_Buffer_Delete(opnRespBuffer);
+        }
     }
 
     OpcUa_ResponseHeader_Clear(&respHeader);
@@ -2263,6 +2304,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
                                                                 SOPC_Buffer* opnReqMsgBuffer,
                                                                 uint32_t* requestHandle,
                                                                 uint32_t* requestedLifetime,
+                                                                OpcUa_RequestHeader** reqHeader,
                                                                 SOPC_StatusCode* errorStatus)
 {
     // Important note: errorStatus shall be one of the errors that can be sent with a OPC UA TCP error message (part4
@@ -2278,24 +2320,23 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
 
     bool result = false;
     SOPC_SecureChannel_Config* scConfig = NULL;
-    OpcUa_RequestHeader* reqHeader = NULL;
     OpcUa_OpenSecureChannelRequest* opnReq = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     SOPC_ASSERT(scConfig != NULL);
 
-    status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+    status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) reqHeader);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ASSERT(reqHeader != NULL);
+        SOPC_ASSERT(*reqHeader != NULL);
         result = true;
     }
 
     if (result)
     {
         // TODO: check timestamp + timeout ?
-        *requestHandle = reqHeader->RequestHandle;
+        *requestHandle = (*reqHeader)->RequestHandle;
     }
 
     if (result)
@@ -2387,7 +2428,6 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW;
     }
 
-    SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
     SOPC_EncodeableObject_Delete(&OpcUa_OpenSecureChannelRequest_EncodeableType, (void**) &opnReq);
 
     return result;
@@ -2602,11 +2642,13 @@ static bool initServerSC(uint32_t socketIndex,
                          uint32_t serverEndpointConfigIdx,
                          bool reverseConn,
                          uint16_t reverseConnIdx,
-                         uint32_t* connIdx)
+                         uint32_t* connIdx,
+                         char* peerInfo)
 {
-    bool result = SC_InitNewConnection(connIdx);
+    bool result = SC_InitNewConnection(connIdx, peerInfo);
     if (!result)
     {
+        SOPC_Free(peerInfo);
         return false;
     }
 
@@ -2658,14 +2700,14 @@ static void onClientSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         //       it is the error to send. It can be changed to more precise errors by checking again the
         //       state (CONNECTED* allows precise error).
         SC_CloseSecureConnection(scConnection, scIdx, false, false, OpcUa_BadSecurityChecksFailed,
-                                 "Invalid state to receive an OPN request");
+                                 "Invalid state to receive an OPN request", NULL);
         return;
     }
 
     if (!SC_ReadAndCheckOpcUaMessageType(&OpcUa_OpenSecureChannelResponse_EncodeableType, (SOPC_Buffer*) msg))
     {
         SC_CloseSecureConnection(scConnection, scIdx, false, false, OpcUa_BadRequestNotAllowed,
-                                 "Unexpected OpenSecureChannel request received by client");
+                                 "Unexpected OpenSecureChannel request received by client", NULL);
         return;
     }
 
@@ -2680,7 +2722,7 @@ static void onClientSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
             status = (status == SOPC_GoodGenericStatus ? OpcUa_BadTcpInternalError : status);
 
             SC_CloseSecureConnection(scConnection, scIdx, false, false, status,
-                                     "Failure during OpenSecureChannel response treatment");
+                                     "Failure during OpenSecureChannel response treatment", NULL);
             return;
         }
 
@@ -2711,7 +2753,7 @@ static void onClientSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
 
             // Manage renew failure ? => nothing can be done since secu token will be expire
             SC_CloseSecureConnection(scConnection, scIdx, false, false, status,
-                                     "Failure during OpenSecureChannel RENEW response treatment");
+                                     "Failure during OpenSecureChannel RENEW response treatment", NULL);
             return;
         }
 
@@ -2737,7 +2779,7 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         //       it is the error to send. It can be changed to more precise errors by checking again the
         //       state (CONNECTED* allows precise error).
         SC_CloseSecureConnection(scConnection, scIdx, false, false, OpcUa_BadSecurityChecksFailed,
-                                 "Invalid state to receive an OPN request");
+                                 "Invalid state to receive an OPN request", NULL);
         return;
     }
 
@@ -2748,23 +2790,31 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         // the current state
         SC_CloseSecureConnection(scConnection, scIdx, false, false, OpcUa_BadSecurityChecksFailed,
                                  "TCP UA OPN message content is not the one expected (wrong type: "
-                                 "request/response or message type)");
+                                 "request/response or message type)",
+                                 NULL);
         return;
     }
 
     if (scConnection->state == SECURE_CONNECTION_STATE_SC_INIT)
     {
-        SOPC_StatusCode status = SOPC_GoodGenericStatus;
+        SOPC_StatusCode detailedStatus = SOPC_GoodGenericStatus;
+        SOPC_StatusCode tcpStatus = SOPC_GoodGenericStatus;
         uint32_t requestHandle;
+        OpcUa_RequestHeader* reqHeader = NULL;
 
-        if (!SC_ServerTransition_ScInit_To_ScConnecting(scConnection, msg, &requestHandle, &status) ||
-            !SC_ServerTransition_ScConnecting_To_ScConnected(scConnection, scIdx, requestId, requestHandle, &status))
+        if (!SC_ServerTransition_ScInit_To_ScConnecting(scConnection, msg, &requestHandle, &reqHeader, &detailedStatus,
+                                                        &tcpStatus) ||
+            !SC_ServerTransition_ScConnecting_To_ScConnected(scConnection, scIdx, requestId, requestHandle,
+                                                             &detailedStatus, &tcpStatus))
         {
             // Ensure we set an error status if the transition to Connected state fails
-            status = (status == SOPC_GoodGenericStatus ? OpcUa_BadTcpInternalError : status);
+            tcpStatus = (tcpStatus == SOPC_GoodGenericStatus ? OpcUa_BadTcpInternalError : tcpStatus);
 
-            SC_CloseSecureConnection(scConnection, scIdx, false, false, status,
-                                     "Failure during new OpenSecureChannel request treatment");
+            SOPC_Audit_TriggerEvent_OpenSecuredChannel("Invalid state to receive an OPN request", detailedStatus,
+                                                       reqHeader, scConnection, false, NULL);
+
+            SC_CloseSecureConnection(scConnection, scIdx, false, false, tcpStatus,
+                                     "Failure during new OpenSecureChannel request treatment", reqHeader);
             return;
         }
 
@@ -2772,6 +2822,8 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         SOPC_EventTimer_Cancel(scConnection->connectionTimeoutTimerId);
         scConnection->connectionTimeoutTimerId = 0;
 
+        SOPC_Audit_TriggerEvent_OpenSecuredChannel("OPN request successful", SOPC_GoodGenericStatus, reqHeader,
+                                                   scConnection, false, NULL);
         SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CONNECTED, scConnection->serverEndpointConfigIdx,
                                (uintptr_t) scConnection->secureChannelConfigIdx, scIdx);
 
@@ -2785,7 +2837,7 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
                                                            scConnection->serverEndpointConfigIdx, (uintptr_t) NULL,
                                                            (uintptr_t) scConnection->serverReverseConnIdx);
         }
-
+        SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
         return;
     }
     else if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED)
@@ -2793,21 +2845,29 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         SOPC_StatusCode status = SOPC_GoodGenericStatus;
         uint32_t requestHandle;
         uint32_t requestedLifetime;
+        OpcUa_RequestHeader* reqHeader = NULL;
 
         // transition: Connected => ConnectedRenew
         if (!SC_ServerTransition_ScConnected_To_ScConnectedRenew(scConnection, msg, &requestHandle, &requestedLifetime,
-                                                                 &status) ||
+                                                                 &reqHeader, &status) ||
             !SC_ServerTransition_ScConnectedRenew_To_ScConnected(scConnection, scIdx, requestId, requestHandle,
                                                                  requestedLifetime, &status))
         {
+            // The OpenSecureChannel Service shall generate an audit Event of type AuditOpenSecureChannelEventType [...]
+            // for the requestType RENEW are only created if the renew fails.
+            SOPC_Audit_TriggerEvent_OpenSecuredChannel("Invalid state to receive an OPN request", status, reqHeader,
+                                                       scConnection, false, NULL);
             // Ensure we set an error status if the transition to Connected state fails
             status = (status == SOPC_GoodGenericStatus ? OpcUa_BadTcpInternalError : status);
 
             // TODO: send a service fault ?
             SC_CloseSecureConnection(scConnection, scIdx, false, false, status,
-                                     "Failure during renew OpenSecureChannel request treatment");
+                                     "Failure during renew OpenSecureChannel request treatment", reqHeader);
         }
-
+        else
+        {
+            SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+        }
         return;
     }
 
@@ -2836,6 +2896,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
     case INT_EP_SC_CREATE:
     {
         /* id = endpoint description configuration index,
+           params = (char*) "<IP>:<PORT>-" peer info when available (or NULL) <br/>
            auxParam = socket index */
 
         SOPC_ASSERT(auxParam <= UINT32_MAX);
@@ -2843,7 +2904,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                "ScStateMgr: INT_EP_SC_CREATE epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
                                auxParam);
 
-        result = initServerSC((uint32_t) auxParam, eltId, false, 0, &connectionIdx);
+        result = initServerSC((uint32_t) auxParam, eltId, false, 0, &connectionIdx, (char*) params);
         if (result)
         {
             // notify socket that connection is accepted
@@ -2880,7 +2941,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         {
             // Note: we do not know the socket index yet, it will be set by
             // SC_ServerTransition_TcpReverserInit_To_TcpInit after SOCKET_CONNECTION
-            result = initServerSC(0, eltId, true, (uint16_t) auxParam, &connectionIdx);
+            result = initServerSC(0, eltId, true, (uint16_t) auxParam, &connectionIdx,
+                                  SOPC_strdup(epConfig->clientsToConnect[auxParam].clientEndpointURL));
             if (result)
             {
                 scConnection = SC_GetConnection(connectionIdx);
@@ -2918,13 +2980,13 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         else if (scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT || !scConnection->isServerConnection)
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTcpMessageTypeInvalid,
-                                     "Hello message received not expected");
+                                     "Hello message received not expected", NULL);
         }
         else if (!SC_ServerTransition_TcpInit_To_TcpNegotiate(scConnection, buffer, &errorStatus) ||
                  !SC_ServerTransition_TcpNegotiate_To_ScInit(scConnection, eltId, buffer, &errorStatus))
         {
-            SC_CloseSecureConnection(scConnection, eltId, false, false, errorStatus,
-                                     "Error on HELLO message treatment");
+            SC_CloseSecureConnection(scConnection, eltId, false, false, errorStatus, "Error on HELLO message treatment",
+                                     NULL);
         }
 
         SOPC_Buffer_Delete(buffer);
@@ -2945,12 +3007,12 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         else if (scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN || scConnection->isServerConnection)
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTcpMessageTypeInvalid,
-                                     "ReverseHello message received not expected");
+                                     "ReverseHello message received not expected", NULL);
         }
         else if (!SC_ClientPrepareTransition_TcpReverseInit_To_TcpInit(buffer, &serverURI, &serverURL))
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, errorStatus,
-                                     "Error on ReverseHello message treatment");
+                                     "Error on ReverseHello message treatment", NULL);
         }
         else
         {
@@ -2976,7 +3038,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         else if (scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_INIT || scConnection->isServerConnection)
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTcpMessageTypeInvalid,
-                                     "ReverseHello message received not expected");
+                                     "ReverseHello message received not expected", NULL);
         }
         else
         {
@@ -2989,7 +3051,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                 // Error case: close the secure connection if invalid state or unexpected error.
                 //  (client case only on SOCKET_CONNECTION event)
                 SC_CloseSecureConnection(scConnection, eltId, false, false, 0,
-                                         "SecureConnection: closed on INT_SC_RCV_RHE_TRANSITION");
+                                         "SecureConnection: closed on INT_SC_RCV_RHE_TRANSITION", NULL);
             }
         }
 
@@ -3008,13 +3070,13 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         else if (scConnection->state != SECURE_CONNECTION_STATE_TCP_NEGOTIATE || scConnection->isServerConnection)
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTcpMessageTypeInvalid,
-                                     "Unexpected Hello message received");
+                                     "Unexpected Hello message received", NULL);
         }
         else if (!SC_ClientTransition_TcpNegotiate_To_ScInit(scConnection, buffer) ||
                  !SC_ClientTransition_ScInit_To_ScConnecting(scConnection, eltId))
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadInvalidArgument,
-                                     "Invalid Hello message received");
+                                     "Invalid Hello message received", NULL);
         }
 
         SOPC_Buffer_Delete(buffer);
@@ -3067,18 +3129,23 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                 // SERVER side
                 if (SC_ReadAndCheckOpcUaMessageType(&OpcUa_CloseSecureChannelRequest_EncodeableType, buffer))
                 {
+                    OpcUa_RequestHeader* reqHeader = NULL;
+                    status =
+                        SOPC_DecodeMsg_HeaderOrBody(buffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+                    SOPC_UNUSED_RESULT(status);
+
                     // Just close the socket without any error (Part 6 §7.1.4)
                     SC_CloseSecureConnection(scConnection, eltId,
                                              true,  // consider immediate close since client should have closed now
                                              false, // still request to close socket just in case client did not
-                                             OpcUa_BadSecureChannelClosed, "CLO request message received");
+                                             OpcUa_BadSecureChannelClosed, "CLO request message received", reqHeader);
                 }
                 else
                 {
                     // Close the socket after reporting an error (Part 6 §7.1.4)
                     // Note: use a security check failure error since it is an incorrect use of protocol
                     SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadSecurityChecksFailed,
-                                             "Invalid CLO request message");
+                                             "Invalid CLO request message", NULL);
                 }
             }
             else
@@ -3087,7 +3154,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                 // Note: use a security check failure error since either SC is not established or unexpected type of
                 // message was sent
                 SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadSecurityChecksFailed,
-                                         "Failure when encoding a message to send on the secure connection");
+                                         "Failure when encoding a message to send on the secure connection", NULL);
             }
         }
         // else: nothing to do (=> socket should already be required to close)
@@ -3128,7 +3195,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                 // Error case: close the socket with security check failure since SC is not established
                 SC_CloseSecureConnection(
                     scConnection, eltId, false, false, OpcUa_BadSecurityChecksFailed,
-                    "SecureConnection: received an OpcUa message on not established secure connection");
+                    "SecureConnection: received an OpcUa message on not established secure connection", NULL);
 
                 // In other case, buffer has been transmitted to services layer
                 SOPC_Buffer_Delete((SOPC_Buffer*) params);
@@ -3187,7 +3254,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                                    ") / reason (scIdx=%" PRIu32 ")",
                                    errorStatus, eltId);
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadDecodingError,
-                                     "Invalid abort message received");
+                                     "Invalid abort message received", NULL);
         }
 
         // Always delete buffer if not NULL
@@ -3204,7 +3271,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         if (scConnection != NULL)
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, (SOPC_StatusCode) auxParam,
-                                     "Failure when receiving a message on the secure connection");
+                                     "Failure when receiving a message on the secure connection", NULL);
         } // else: nothing to do (=> socket should already be required to close)
         break;
     }
@@ -3227,7 +3294,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         if (scConnection != NULL)
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, (SOPC_StatusCode) auxParam,
-                                     "Failure when encoding a message to send on the secure connection");
+                                     "Failure when encoding a message to send on the secure connection", NULL);
         } // else: nothing to do (=> socket should already be required to close)
         break;
     }
@@ -3272,7 +3339,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             SC_CloseSecureConnection(scConnection, eltId,
                                      true,  // consider immediate close since server should have closed now
                                      false, // still request to close socket just in case server did not
-                                     errorStatus, errorReason);
+                                     errorStatus, errorReason, NULL);
             SOPC_Free(errorReason);
         }
         else
@@ -3285,7 +3352,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             SC_CloseSecureConnection(scConnection, eltId,
                                      true,  // consider immediate close since server should have closed now
                                      false, // still request to close socket just in case server did not
-                                     OpcUa_BadSecureChannelClosed, "ERR message received");
+                                     OpcUa_BadSecureChannelClosed, "ERR message received", NULL);
         }
 
         // Always delete buffer if not NULL
@@ -3304,7 +3371,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         if (scConnection != NULL)
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadSecureChannelClosed,
-                                     "Endpoint secure connection closed");
+                                     "Endpoint secure connection closed", NULL);
         }
         break;
     }
@@ -3321,7 +3388,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         {
             SC_CloseSecureConnection(scConnection, eltId,
                                      true, // it shall be closed immediately now
-                                     false, (SOPC_StatusCode) auxParam, (char*) params);
+                                     false, (SOPC_StatusCode) auxParam, (char*) params, NULL);
         }
         break;
     }
@@ -3410,7 +3477,7 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             // Error case: close the secure connection if invalid state or unexpected error.
             //  (client case only on SOCKET_CONNECTION event)
             SC_CloseSecureConnection(scConnection, eltId, false, false, 0,
-                                     "SecureConnection: closed on SOCKET_CONNECTION");
+                                     "SecureConnection: closed on SOCKET_CONNECTION", NULL);
         }
         break;
 
@@ -3425,7 +3492,7 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         {
             // Since there was a socket failure, consider the socket close now
             SC_CloseSecureConnection(scConnection, eltId, true, true, 0,
-                                     "SecureConnection: disconnected (SOCKET_FAILURE event)");
+                                     "SecureConnection: disconnected (SOCKET_FAILURE event)", NULL);
         }
         break;
 
@@ -3471,7 +3538,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
         {
             // SC_SC_CONNECTION_TIMEOUT will be generated in close SC function fpr client side
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTimeout,
-                                     "SecureConnection: disconnected (TIMER_SC_CONNECTION_TIMEOUT event)");
+                                     "SecureConnection: disconnected (TIMER_SC_CONNECTION_TIMEOUT event)", NULL);
         }
         break;
     }
@@ -3511,7 +3578,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
         {
             // Error case: close the connection
             SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadTcpInternalError,
-                                     "Open secure channel forced renew failed");
+                                     "Open secure channel forced renew failed", NULL);
         }
         break;
     }
@@ -3592,11 +3659,18 @@ static void SOPC_Internal_Sc_RevalidatePeerCert(SOPC_SecureConnection* conn, uin
 
     if (NULL != pkiProvider)
     {
-        SOPC_StatusCode errorStatus = OpcUa_BadUnexpectedError;
+        SOPC_Audit_Certificate_Error_Context context = {0};
+        SOPC_PKI_Cert_Failure_Context failCtx = {0};
+        context.opcua_error_code = OpcUa_BadUnexpectedError;
         SOPC_PKI_Type PKIType = isServer ? SOPC_PKI_TYPE_SERVER_APP : SOPC_PKI_TYPE_CLIENT_APP;
         const SOPC_CertificateList* cert = SC_PeerCertificate(conn);
-        SOPC_ReturnStatus status =
-            SOPC_CryptoProvider_Certificate_Validate(conn->cryptoProvider, pkiProvider, PKIType, cert, &errorStatus);
+
+        SOPC_Audit_Create_CertificateFailure_Context_Initialize(&context, cert);
+        SOPC_ReturnStatus status = SOPC_CryptoProvider_Certificate_Validate(conn->cryptoProvider, pkiProvider, PKIType,
+                                                                            cert, &context.opcua_error_code, &failCtx);
+        // Note : transfer of allocated items in failCtx to context
+        context.invalidHostname = failCtx.invalidHostname;
+        context.invalidURI = failCtx.invalidURI;
 
         if (SOPC_STATUS_OK != status)
         {
@@ -3608,8 +3682,16 @@ static void SOPC_Internal_Sc_RevalidatePeerCert(SOPC_SecureConnection* conn, uin
                                      connIdx, thumbprint);
             SOPC_Free(pThumbprint);
             SC_CloseSecureConnection(conn, connIdx, false, false, OpcUa_BadSecurityChecksFailed,
-                                     "Certificate is not valid anymore after PKI trust list update");
+                                     "Certificate is not valid anymore after PKI trust list update", NULL);
         }
+        if (0 != context.opcua_error_code)
+        {
+            // Event must be raised before references are cleared
+            SOPC_Audit_TriggerEvent_CertificateFailure(&context, conn->altClientAuditInfo,
+                                                       SOPC_Time_GetCurrentTimeUTC(), NULL);
+        }
+
+        SOPC_Audit_Create_CertificateFailure_Context_Clear(&context);
     }
     else
     {
@@ -3678,7 +3760,8 @@ static void SOPC_Internal_Sc_CheckOwnCertChange(SOPC_SecureConnection* conn, uin
                 connIdx, thumbprint);
             SOPC_Free(pThumbprint);
             SC_CloseSecureConnection(conn, connIdx, false, false, OpcUa_BadSecurityChecksFailed,
-                                     "Certificate is not valid anymore after application (key /) certificate update");
+                                     "Certificate is not valid anymore after application (key /) certificate update",
+                                     NULL);
         }
 
         SOPC_Free(scCertData);
@@ -3778,7 +3861,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scCfgIdx);
         if (scConfig != NULL)
         {
-            result = SC_InitNewConnection(&idx);
+            result = SC_InitNewConnection(&idx, NULL);
             if (result)
             {
                 SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -3841,7 +3924,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         if (!result)
         {
-            SC_CloseSecureConnection(scConnection, idx, true, true, OpcUa_BadResourceUnavailable, errorMsg);
+            SC_CloseSecureConnection(scConnection, idx, true, true, OpcUa_BadResourceUnavailable, errorMsg, NULL);
         }
         break;
     case SC_DISCONNECT:
@@ -3860,7 +3943,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 {
                     // Server side
                     SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadSecureChannelClosed,
-                                             SC_DISCONNECT_status_code_to_reason(errorStatus));
+                                             SC_DISCONNECT_status_code_to_reason(errorStatus), NULL);
                 }
                 else
                 {
@@ -3873,7 +3956,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             {
                 SC_CloseSecureConnection(
                     scConnection, eltId, false, false, OpcUa_BadTcpInternalError,
-                    "Invalid secure connection state or error when sending a close secure channel request");
+                    "Invalid secure connection state or error when sending a close secure channel request", NULL);
             }
         }
         // else => nothing to do, services should be notified that SC was already closed before calling disconnect
@@ -3927,7 +4010,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                      scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW))
         {
             SC_CloseSecureConnection(scConnection, eltId, false, false, (SOPC_StatusCode) params,
-                                     "Error requested by services layer");
+                                     "Error requested by services layer", NULL);
         } // else: this event is only used by server and send failure on abort message should be ignored
         break;
     case SC_DISCONNECTED_ACK:

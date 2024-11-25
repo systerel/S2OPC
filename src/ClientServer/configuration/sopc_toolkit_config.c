@@ -87,7 +87,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
     {
         /* Initialize with default log configuration */
         SOPC_Log_Configuration defaultLogConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-        status = SOPC_Common_Initialize(defaultLogConfiguration);
+        status = SOPC_Common_Initialize(&defaultLogConfiguration, NULL);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -275,9 +275,10 @@ static void SOPC_ToolkitServer_ClearScConfig_WithoutLock(uint32_t serverScConfig
     {
         SOPC_ASSERT(!scConfig->isClientSc);
         // In case of server it is an internally created config
-        // => only client certificate was specifically allocated
+        // => only client certificate / client info was specifically allocated
         // Exceptional case: configuration added internally and shall be freed on clear call
         SOPC_KeyCertPair_Delete(&scConfig->peerAppCert);
+        SOPC_Free(scConfig->clientAuditInfo);
         SOPC_Free(scConfig);
         tConfig.serverScConfigs[serverScConfigIdxWithoutOffset] = NULL;
     }

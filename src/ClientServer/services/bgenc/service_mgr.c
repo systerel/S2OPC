@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 29/08/2025 12:49:57
+ Date                 : 20/11/2025 11:22:00
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -921,6 +921,7 @@ void service_mgr__server_receive_session_treatment_req(
    {
       constants__t_msg_header_i service_mgr__l_req_msg_header;
       constants__t_msg_i service_mgr__l_req_msg;
+      constants__t_channel_config_idx_i service_mgr__l_channel_config_idx;
       constants__t_server_request_handle_i service_mgr__l_request_handle;
       constants__t_session_token_i service_mgr__l_session_token;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
@@ -939,6 +940,10 @@ void service_mgr__server_receive_session_treatment_req(
          service_mgr__valid_req_header,
          &service_mgr__l_req_msg_header);
       if (*service_mgr__valid_req_header == true) {
+         channel_mgr__get_channel_info(service_mgr__channel,
+            &service_mgr__l_channel_config_idx);
+         session_mgr__set_request_audit_info(service_mgr__l_channel_config_idx,
+            service_mgr__l_req_msg_header);
          message_in_bs__server_read_msg_header_req_handle(service_mgr__l_req_msg_header,
             &service_mgr__l_request_handle);
          message_in_bs__read_msg_req_header_session_token(service_mgr__l_req_msg_header,
@@ -994,6 +999,7 @@ void service_mgr__server_receive_session_treatment_req(
                service_mgr__sc,
                &service_mgr__l_buffer_out);
          }
+         session_mgr__clear_audit_info();
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
       *service_mgr__buffer_out = service_mgr__l_buffer_out;

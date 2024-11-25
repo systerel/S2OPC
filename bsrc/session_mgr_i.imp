@@ -49,7 +49,9 @@ PROMOTES
     getall_valid_session_channel,
     allocate_x509_token_from_user,
     is_valid_user_x509_authentication,
-    deallocate_x509_token
+    deallocate_x509_token,
+    set_request_audit_info,
+    clear_audit_info
 
 LOCAL_OPERATIONS
 
@@ -451,12 +453,12 @@ OPERATIONS
         security_failed := FALSE; /* Only evaluated in case of user authentication attempt */
         session := c_session_indet;
         service_ret := c_StatusCode_indet;
+        l_channel_config_idx <-- get_channel_info (channel);
         CASE req_typ OF
             EITHER e_msg_session_create_req THEN
                 // SESSION CREATION REQUEST
                 // If there is no way to activate a session, it means service is not supported for this secure channel
                 // This status code is reported in all error cases
-                l_channel_config_idx <-- get_channel_info (channel);
                 l_endpoint_config_idx <-- server_get_endpoint_config (channel);
                 /* Check at least 1 user policy available for using a session */
                 l_has_user_token_policy_available <-- has_user_token_policy_available (l_channel_config_idx, l_endpoint_config_idx);
@@ -487,7 +489,8 @@ OPERATIONS
                 ELSE
                     /* session creation is locked for this secure channel for now or max number of sessions for this SC is reached */
                     service_ret := e_sc_bad_too_many_sessions
-                END
+                END;
+                server_notify_session_create(l_channel_config_idx, req_msg, resp_msg, session, service_ret)
             OR e_msg_session_activate_req THEN
                 // SESSION ACTIVATION REQUEST
                 // TODO: add a local operation for rest
@@ -533,7 +536,8 @@ OPERATIONS
                 ELSE
                     // session token was not correct
                     service_ret := e_sc_bad_session_id_invalid
-                END
+                END;
+                server_notify_session_activate(l_channel_config_idx, req_msg, session, service_ret)
             OR e_msg_session_close_req THEN
                 // SESSION CLOSE REQUEST
                 // TODO: add a local operation for rest
@@ -546,6 +550,13 @@ OPERATIONS
                         l_session_state = e_session_userActivating or
                         l_session_state = e_session_userActivated
                     THEN
+                        IF l_session_state /= e_session_created
+                        THEN
+                            /* Set the user context for Audit event generation (only if activated session) */
+                            l_user <-- get_session_user_server (session);
+                            set_app_call_context_session (session, l_user)
+                        END
+                        ;
                         l_session_channel <-- get_session_channel (session);
                         IF l_session_channel = channel
                         THEN
@@ -564,7 +575,8 @@ OPERATIONS
                     END
                 ELSE
                     // session token was not correct => return error
-                    service_ret := e_sc_bad_session_id_invalid
+                    service_ret := e_sc_bad_session_id_invalid;
+                    server_notify_session_closed(session, service_ret)
                 END
             ELSE
                 service_ret := e_sc_bad_service_unsupported

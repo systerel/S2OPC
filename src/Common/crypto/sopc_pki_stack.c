@@ -188,7 +188,8 @@ static SOPC_ReturnStatus sopc_pki_check_lists(SOPC_CertificateList* pTrustedCert
 static SOPC_ReturnStatus sopc_pki_validate_anything(SOPC_PKIProvider* pPKI,
                                                     const SOPC_CertificateList* pToValidate,
                                                     const SOPC_PKI_Profile* pProfile,
-                                                    uint32_t* error);
+                                                    uint32_t* error,
+                                                    SOPC_PKI_Cert_Failure_Context* context);
 
 static SOPC_ReturnStatus sopc_pki_check_list_length(SOPC_PKIProvider* pPKI,
                                                     SOPC_CertificateList* pTrustedCerts,
@@ -941,12 +942,14 @@ static SOPC_ReturnStatus sopc_pki_check_list_length(SOPC_PKIProvider* pPKI,
 static SOPC_ReturnStatus sopc_pki_validate_anything(SOPC_PKIProvider* pPKI,
                                                     const SOPC_CertificateList* pToValidate,
                                                     const SOPC_PKI_Profile* pProfile,
-                                                    uint32_t* error)
+                                                    uint32_t* error,
+                                                    SOPC_PKI_Cert_Failure_Context* context)
 {
     SOPC_UNUSED_ARG(pPKI);
     SOPC_UNUSED_ARG(pToValidate);
     SOPC_UNUSED_ARG(pProfile);
     SOPC_UNUSED_ARG(error);
+    SOPC_UNUSED_ARG(context);
     return SOPC_STATUS_OK;
 }
 
@@ -1282,12 +1285,14 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateMinimalUserProfile(SOPC_PKI_Profile** p
 
 SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateList* pToValidate,
                                                         const SOPC_PKI_LeafProfile* pProfile,
-                                                        uint32_t* error)
+                                                        uint32_t* error,
+                                                        SOPC_PKI_Cert_Failure_Context* context)
 {
 #ifdef WITH_NO_CRYPTO
     SOPC_UNUSED_ARG(pToValidate);
     SOPC_UNUSED_ARG(pProfile);
     SOPC_UNUSED_ARG(error);
+    SOPC_UNUSED_ARG(context);
     return SOPC_STATUS_NOT_SUPPORTED;
 #else
     if (NULL == pToValidate || NULL == pProfile || NULL == error)
@@ -1321,7 +1326,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
     }
     if (NULL != pProfile->sanURL)
     {
-        status = SOPC_PKIProvider_CheckHostName(pToValidate, pProfile->sanURL);
+        char** invalidHostname = (NULL != context ? &context->invalidHostname : NULL);
+        status = SOPC_PKIProvider_CheckHostName(pToValidate, pProfile->sanURL, invalidHostname);
         if (SOPC_STATUS_OK != status)
         {
             currentError = SOPC_CertificateValidationError_HostNameInvalid;
@@ -1342,6 +1348,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
             {
                 firstError = currentError;
                 bErrorFound = true;
+            }
+            if (NULL != context)
+            {
+                context->invalidURI = SOPC_strdup(pProfile->sanApplicationUri);
             }
         }
     }
@@ -2026,13 +2036,15 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromStore(const char* directoryStorePat
 SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(SOPC_PKIProvider* pPKI,
                                                        const SOPC_CertificateList* pToValidate,
                                                        const SOPC_PKI_Profile* pProfile,
-                                                       uint32_t* error)
+                                                       uint32_t* error,
+                                                       SOPC_PKI_Cert_Failure_Context* context)
 {
 #ifdef WITH_NO_CRYPTO
     SOPC_UNUSED_ARG(pPKI);
     SOPC_UNUSED_ARG(pToValidate);
     SOPC_UNUSED_ARG(pProfile);
     SOPC_UNUSED_ARG(error);
+    SOPC_UNUSED_ARG(context);
     return SOPC_STATUS_NOT_SUPPORTED;
 #else
     if (NULL == pPKI)
@@ -2044,7 +2056,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(SOPC_PKIProvider* pPKI,
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != pPKI->pFnValidateCert)
     {
-        status = pPKI->pFnValidateCert(pPKI, pToValidate, pProfile, error);
+        status = pPKI->pFnValidateCert(pPKI, pToValidate, pProfile, error, context);
     }
     mutStatus = SOPC_Mutex_Unlock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);

@@ -128,7 +128,8 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
     }
 }
 
-SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogConfig)
+SOPC_ReturnStatus SOPC_CommonHelper_Initialize(const SOPC_Log_Configuration* optLogConfig,
+                                               const SOPC_Audit_Configuration* optAuditConfig)
 {
     if (SOPC_Atomic_Int_Get(&sopc_helper_config.initialized))
     {
@@ -137,7 +138,7 @@ SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogCon
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL != optLogConfig)
     {
-        status = SOPC_Common_Initialize(*optLogConfig);
+        status = SOPC_Common_Initialize(optLogConfig, optAuditConfig);
     }
     if (SOPC_STATUS_OK == status)
     {

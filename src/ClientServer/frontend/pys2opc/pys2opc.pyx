@@ -429,7 +429,9 @@ class PyS2OPC:
 
     # @staticmethod : Python 3.9 does not support both and report error on staticmethod is not callable
     @contextmanager
-    def initialize(logLevel: SOPC_Log_Level=SOPC_Log_Level.SOPC_LOG_LEVEL_DEBUG, logPath: str='logs/', logFileMaxBytes: int=1048576, logMaxFileNumber: int=50) -> None:
+    def initialize(logLevel: SOPC_Log_Level=SOPC_Log_Level.SOPC_LOG_LEVEL_DEBUG, logPath: str='logs/',
+                   logFileMaxBytes: int=1048576, logMaxFileNumber: int=50,
+                   auditEntryPath: str = None, auditOptions: SOPC_Audit_OptionMask = SOPC_Audit_OptionMask.SOPC_Audit_Options_NoOptions) -> None:
         """
         Common initialization (Client/Server): configure log, start toolkit threads, etc.
         Automatically called by `PyS2OPC_Client.initialize` or `PyS2OPC_Server.initialize` if not done.
@@ -450,10 +452,25 @@ class PyS2OPC:
                                                 logLevel = logLevel,
                                                 logSystem = SOPC_Log_System.SOPC_LOG_SYSTEM_FILE,
                                                 logSysConfig = log_file_conf_u)
+
+        cdef SOPC_Audit_Configuration auditCfg
+        auditCfg = SOPC_Audit_Configuration(auditEntryPath = NULL,
+                                            logMaxBytes = 1024 * 1024,
+                                            logMaxFiles = 100,
+                                            options = auditOptions)
+        if auditEntryPath is not None:
+            auditCfg.auditEntryPath = auditEntryPath
+
         status = SOPC_ReturnStatus.SOPC_STATUS_OK
-        with nogil:
-            if not SOPC_CommonHelper_GetInitialized():
-                status = SOPC_CommonHelper_Initialize(&log_config)
+        if auditOptions == SOPC_Audit_OptionMask.SOPC_Audit_Options_NoOptions:
+            with nogil:
+                if not SOPC_CommonHelper_GetInitialized():
+                        status = SOPC_CommonHelper_Initialize(&log_config, NULL)
+        else:
+            with nogil:
+                if not SOPC_CommonHelper_GetInitialized():
+                        status = SOPC_CommonHelper_Initialize(&log_config, &auditCfg)
+
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Library common initialization failed ', status)
 
@@ -1060,7 +1077,9 @@ class PyS2OPC_Server(PyS2OPC):
 
     # @staticmethod : Python 3.9 does not support both and report error on staticmethod is not callable
     @contextmanager
-    def initialize(logLevel: SOPC_Log_Level=SOPC_Log_Level.SOPC_LOG_LEVEL_DEBUG, logPath: str='logs/', logFileMaxBytes: int=1048576, logMaxFileNumber: int=50) -> None:
+    def initialize(logLevel: SOPC_Log_Level=SOPC_Log_Level.SOPC_LOG_LEVEL_DEBUG, logPath: str='logs/',
+                   logFileMaxBytes: int=1048576, logMaxFileNumber: int=50,
+                   auditEntryPath: str = None, auditOptions: SOPC_Audit_OptionMask = SOPC_Audit_OptionMask.SOPC_Audit_Options_NoOptions) -> None:
         """
         Toolkit initialization for Server.
         Call common initialization.
@@ -1083,12 +1102,17 @@ class PyS2OPC_Server(PyS2OPC):
                      logPath is created if it does not exist.
             logFileMaxBytes: The maximum size of the log files, before changing the log index.
             logMaxFileNumber: The maximum number of log indexes before cycling logs and reusing the first log.
+            auditEntryPath: The path for Audit entry files. (Same behavior as logPath)
+            auditOptions: The activated Audit options. If no option is defined (SOPC_Audit_Options_NoOptions), then
+                          the audit feature is deactivated.
         """
         if logFileMaxBytes > UINT32_MAX:
             raise ValueError("logFileMaxBytes is too large (must be less than UINT32_MAX)")
         if logMaxFileNumber > UINT16_MAX:
             raise ValueError("logMaxFileNumber is too large (must be less than UINT16_MAX)")
-        PyS2OPC.initialize(logLevel, logPath, logFileMaxBytes, logMaxFileNumber)
+
+        PyS2OPC.initialize(logLevel, logPath, logFileMaxBytes, logMaxFileNumber,
+                           auditEntryPath = auditEntryPath, auditOptions = auditOptions)
         with nogil:
             status = SOPC_ServerConfigHelper_Initialize()
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:

@@ -30,6 +30,7 @@ typedef enum
                                   Creates a new SC connection to be associated with the given secure channel listener
                                   configuration index and socket index.<br/>
                                   id = endpoint description configuration index<br/>
+                                  params = (char*) "<IP>:<PORT>-" peer info when available (or NULL) <br/>
                                   auxParam = socket index */
     INT_EP_SC_CLOSE,           /**<
                                   Closes the SC connection with the given connection index associated with this SC listener.<br/>

@@ -1049,7 +1049,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProvider_ValidateCertificate(authn->pUsrPKI, pUserCert, pProfile, &errorStatus);
+            status = SOPC_PKIProvider_ValidateCertificate(authn->pUsrPKI, pUserCert, pProfile, &errorStatus, NULL);
             if (SOPC_STATUS_OK == status)
             {
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;

@@ -84,6 +84,7 @@ typedef enum
                                        the given new socket connection index. Requests to create a new
                                        SC connection by triggering INT_EP_SC_CREATE output event.<br/>
                                        id = endpoint description config index <br/>
+                                       params = (char*) "<IP>:<PORT>-" peer info when available (or NULL) <br/>
                                        auxParam = (uint32_t) new connection socket index
                                    */
     SOCKET_LISTENER_FAILURE,        /**< A failure occurred on the socket connection listener for the given

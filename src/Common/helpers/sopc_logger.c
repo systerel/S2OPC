@@ -36,8 +36,6 @@ static char* filePath = NULL;
 static SOPC_Log_Instance* commonTrace = NULL;
 static SOPC_Log_Instance* clientServerTrace = NULL;
 static SOPC_Log_Instance* pubSubTrace = NULL;
-static SOPC_Log_Instance* secuAudit = NULL;
-static SOPC_Log_Instance* opcUaAudit = NULL;
 
 // User section logs:
 typedef SOPC_Log_Instance* UserLogElement;
@@ -50,16 +48,15 @@ static void userLogArray_Free_Func(void* data)
     SOPC_Log_ClearInstance(&elt);
 }
 
-static const char* SOPC_Log_SecuAuditCategory = "SecuAudit";
-
 /*
- * \brief Initializes the file logger and create the necessary log file(s)
+ * \brief Initializes the file logger and create the necessary log file(s), assuming that commonTrace is the master
+ * instance.
  *
  * \param pLogInst  An existing log instance used to print in the same log file
 
  *
  * */
-static bool SOPC_Logger_AuditInitialize(void);
+static bool SOPC_Logger_InstancesInitialize(void);
 
 bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration)
 {
@@ -91,15 +88,14 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
                                                    .logFileName = filePath,
                                                    .logMaxBytes = logCfg->logMaxBytes,
                                                    .logMaxFiles = logCfg->logMaxFiles};
-        secuAudit = SOPC_Log_CreateFileInstance(&conf, SOPC_Log_SecuAuditCategory);
-        result = SOPC_Logger_AuditInitialize();
+        commonTrace = SOPC_Log_CreateFileInstance(&conf, "Common");
+        result = SOPC_Logger_InstancesInitialize();
 
         break;
     }
     case SOPC_LOG_SYSTEM_USER:
-        secuAudit = SOPC_Log_CreateUserInstance(SOPC_Log_SecuAuditCategory,
-                                                logConfiguration->logSysConfig.userSystemLogConfig.doLog);
-        result = SOPC_Logger_AuditInitialize();
+        commonTrace = SOPC_Log_CreateUserInstance("Common", logConfiguration->logSysConfig.userSystemLogConfig.doLog);
+        result = SOPC_Logger_InstancesInitialize();
         break;
     case SOPC_LOG_SYSTEM_NO_LOG:
         result = true;
@@ -132,7 +128,7 @@ SOPC_Log_Instance* SOPC_Logger_AddUserInstance(const char* category)
     }
     if (NULL != userLogArray)
     {
-        result = SOPC_Log_CreateInstanceAssociation(secuAudit, category);
+        result = SOPC_Log_CreateInstanceAssociation(commonTrace, category);
     }
     if (result != NULL)
     {
@@ -146,47 +142,22 @@ SOPC_Log_Instance* SOPC_Logger_AddUserInstance(const char* category)
     return result;
 }
 
-static bool SOPC_Logger_AuditInitialize(void)
+static bool SOPC_Logger_InstancesInitialize(void)
 {
     bool result = false;
-    if (secuAudit != NULL)
+    if (commonTrace != NULL)
     {
-        result = SOPC_Log_SetLogLevel(secuAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for secu audit
-
-        if (result != false)
+        result = true;
+        clientServerTrace = SOPC_Log_CreateInstanceAssociation(commonTrace, "ClientServer");
+        if (clientServerTrace == NULL)
         {
-            commonTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "Common");
-            if (commonTrace == NULL)
-            {
-                SOPC_CONSOLE_PRINTF("WARNING: Common log creation failed, no Common log will be recorded !");
-            }
-
-            clientServerTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "ClientServer");
-            if (clientServerTrace == NULL)
-            {
-                SOPC_CONSOLE_PRINTF(
-                    "WARNING: ClientServer log creation failed, no ClientServer log will be recorded !");
-            }
-
-            pubSubTrace = SOPC_Log_CreateInstanceAssociation(secuAudit, "PubSub");
-            if (pubSubTrace == NULL)
-            {
-                SOPC_CONSOLE_PRINTF("WARNING: PubSub log creation failed, no PubSub log will be recorded !");
-            }
-
-            opcUaAudit = SOPC_Log_CreateInstanceAssociation(secuAudit, "OpcUa");
-            if (opcUaAudit == NULL)
-            {
-                SOPC_CONSOLE_PRINTF("WARNING: OpcUa audit log creation failed, no OpcUa audit log will be recorded !");
-            }
-            else
-            {
-                SOPC_Log_SetLogLevel(opcUaAudit, SOPC_LOG_LEVEL_INFO); // Set INFO level for opcUa audit
-            }
+            SOPC_CONSOLE_PRINTF("WARNING: ClientServer log creation failed, no ClientServer log will be recorded !");
         }
-        else
+
+        pubSubTrace = SOPC_Log_CreateInstanceAssociation(commonTrace, "PubSub");
+        if (pubSubTrace == NULL)
         {
-            SOPC_Log_ClearInstance(&secuAudit);
+            SOPC_CONSOLE_PRINTF("WARNING: PubSub log creation failed, no PubSub log will be recorded !");
         }
     }
     else
@@ -219,17 +190,9 @@ SOPC_Log_Level SOPC_Logger_GetTraceLogLevel(void)
 
 void SOPC_Logger_SetConsoleOutput(bool activate)
 {
-    if (secuAudit != NULL)
-    {
-        SOPC_Log_SetConsoleOutput(secuAudit, activate);
-    }
     if (commonTrace != NULL)
     {
         SOPC_Log_SetConsoleOutput(commonTrace, activate);
-    }
-    if (opcUaAudit != NULL)
-    {
-        SOPC_Log_SetConsoleOutput(opcUaAudit, activate);
     }
     if (clientServerTrace != NULL)
     {
@@ -300,60 +263,12 @@ void SOPC_Logger_TraceDebug(SOPC_Log_Module logModule, const char* format, ...)
     va_end(args);
 }
 
-void SOPC_Logger_TraceSecurityAudit(const char* format, ...)
-{
-    va_list args;
-    if (secuAudit != NULL)
-    {
-        va_start(args, format);
-        SOPC_Log_VTrace(secuAudit, SOPC_LOG_LEVEL_INFO, format, args);
-        va_end(args);
-    }
-}
-
-void SOPC_Logger_TraceSecurityAuditWarning(const char* format, ...)
-{
-    va_list args;
-    if (secuAudit != NULL)
-    {
-        va_start(args, format);
-        SOPC_Log_VTrace(secuAudit, SOPC_LOG_LEVEL_WARNING, format, args);
-        va_end(args);
-    }
-}
-
-void SOPC_Logger_TraceOpcUaAudit(const char* format, ...)
-{
-    va_list args;
-    if (opcUaAudit != NULL)
-    {
-        va_start(args, format);
-        SOPC_Log_VTrace(opcUaAudit, SOPC_LOG_LEVEL_INFO, format, args);
-        va_end(args);
-    }
-}
-
-void SOPC_Logger_TraceOpcUaAuditWarning(const char* format, ...)
-{
-    va_list args;
-    if (opcUaAudit != NULL)
-    {
-        va_start(args, format);
-        SOPC_Log_VTrace(opcUaAudit, SOPC_LOG_LEVEL_WARNING, format, args);
-        va_end(args);
-    }
-}
-
 void SOPC_Logger_Clear(void)
 {
     if (userLogArray == NULL)
     {
         SOPC_Array_Delete(userLogArray);
         userLogArray = NULL;
-    }
-    if (commonTrace != NULL)
-    {
-        SOPC_Log_ClearInstance(&commonTrace);
     }
     if (clientServerTrace != NULL)
     {
@@ -363,14 +278,9 @@ void SOPC_Logger_Clear(void)
     {
         SOPC_Log_ClearInstance(&pubSubTrace);
     }
-    if (opcUaAudit != NULL)
+    if (commonTrace != NULL)
     {
-        SOPC_Log_ClearInstance(&opcUaAudit);
-    }
-    // secuAudit is the "actual" instance and must be deleted last.
-    if (secuAudit != NULL)
-    {
-        SOPC_Log_ClearInstance(&secuAudit);
+        SOPC_Log_ClearInstance(&commonTrace);
     }
     SOPC_Free(filePath);
     filePath = NULL;

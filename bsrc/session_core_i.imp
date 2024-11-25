@@ -41,7 +41,8 @@ IMPORTS
     session_core_it,
     session_channel_it,
     msg_session_bs,
-    user_authentication
+    user_authentication,
+    session_audit_bs
 
 PROMOTES
     server_get_session_from_token,
@@ -75,7 +76,13 @@ PROMOTES
     deallocate_x509_token,
     compute_user_roles,
     set_session_roles,
-    get_session_roles
+    get_session_roles,
+    /* session_audit_bs */
+    set_request_audit_info,
+    clear_audit_info,
+    server_notify_session_create,
+    server_notify_session_activate,
+    server_notify_session_closed
 
 LOCAL_OPERATIONS
 
@@ -914,6 +921,8 @@ OPERATIONS
                 set_session_orphaned (p_session, c_channel_config_idx_indet);
                 set_session_state (p_session, e_session_scOrphaned, FALSE)
             ELSE
+                /* may generate audit event */
+                server_notify_session_closed(p_session, e_sc_bad_secure_channel_closed);
                 set_session_state_closed (p_session, e_sc_bad_secure_channel_closed , FALSE)
             END
         END
@@ -925,8 +934,11 @@ OPERATIONS
         l_continue,
         l_session,
         l_dom,
-        l_channel
+        l_channel,
+        l_channel_config_idx
     IN
+        l_channel_config_idx <-- get_channel_info (p_lost_channel);
+        set_no_req_audit_info (l_channel_config_idx); /* Set info for audit event generation */
         l_continue <-- init_iter_session;
         IF  l_continue = TRUE THEN  /* Only for proving */
             WHILE l_continue = TRUE DO
@@ -956,6 +968,8 @@ OPERATIONS
                 card(sessions_to_iterate)
             END
         END
+        ;
+        clear_audit_info
     END
     ;
 
@@ -990,6 +1004,8 @@ OPERATIONS
         channel_do_nothing (channel); /* Avoid unused variable */
         /* TODO: actions on pending requests or current subscriptions to manage (see request) */
         server_close_session_check_req (close_req_msg, close_resp_msg);
+        /* may generate audit event */
+        server_notify_session_closed(session, e_sc_ok);
         /* No need to store the handle since we will send response in same step */
         set_session_state_closed (session, e_sc_ok , FALSE);
         ret := e_sc_ok
@@ -1014,6 +1030,8 @@ OPERATIONS
 
     server_close_session_sm (session, sc_reason) =
     BEGIN
+        /* may generate audit event */
+        server_notify_session_closed(session, sc_reason);
         set_session_state_closed (session, sc_reason, FALSE)
     END
     ;
@@ -1135,6 +1153,12 @@ OPERATIONS
             IF l_has_session_to_close = TRUE
             THEN
                 l_is_client <-- is_client_session (l_session_to_close);
+                IF l_is_client = FALSE
+                THEN
+                    /* may generate audit event */
+                    server_notify_session_closed (l_session_to_close, e_sc_bad_session_not_activated)
+                END
+                ;
                 set_session_state_closed (l_session_to_close, e_sc_bad_session_not_activated, l_is_client)
             END
         END
@@ -1158,6 +1182,8 @@ OPERATIONS
                 THEN
                     l_is_client <-- is_client_session (l_session);
                     set_session_state_closed (l_session, e_sc_ok, l_is_client)
+                    // Note: do not trigger audit event with server_notify_session_closed on UNINIT
+                    //       (even if expected on server shutdown by specification, it is not possible)
                 END
             INVARIANT
                 sessions_to_iterate <: t_session &

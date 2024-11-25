@@ -1014,6 +1014,74 @@ OPERATIONS
     END
     ;
 
+    /* session_audit_bs */
+    set_request_audit_info (p_channel_config, req_msg_header) =
+    PRE
+        p_channel_config : t_channel_config_idx_i &
+        p_channel_config : t_channel_config_idx   &
+        req_msg_header : t_msg_header_i &
+        req_msg_header : t_msg_header &
+        req_msg_header = c_msg_in_header
+    THEN
+        skip
+    END
+    ;
+
+    clear_audit_info =
+    BEGIN
+        skip
+    END
+    ;
+
+    server_notify_session_create(p_channel_config, req_msg, resp_msg, session, oper_ret_code) =
+    PRE
+        p_channel_config : t_channel_config_idx_i &
+        p_channel_config : t_channel_config_idx   &
+        req_msg : t_msg_i &
+        req_msg : t_msg &
+        req_msg = c_msg_in &
+        a_msg_in_type = e_msg_session_create_req &
+        resp_msg : t_msg_i &
+        resp_msg : t_msg &
+        resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_session_create_resp &
+        session : t_session_i &
+        session : t_session &
+        oper_ret_code : t_StatusCode_i &
+        oper_ret_code : t_StatusCode
+    THEN
+        skip
+    END
+    ;
+
+    server_notify_session_activate(p_channel_config, req_msg, session, oper_ret_code) =
+    PRE
+        p_channel_config : t_channel_config_idx_i &
+        p_channel_config : t_channel_config_idx   &
+        req_msg : t_msg_i &
+        req_msg : t_msg &
+        req_msg = c_msg_in &
+        a_msg_in_type = e_msg_session_activate_req &
+        session : t_session_i &
+        session : t_session &
+        oper_ret_code : t_StatusCode_i &
+        oper_ret_code : t_StatusCode
+    THEN
+        skip
+    END
+    ;
+
+    server_notify_session_closed(session, oper_ret_code) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        oper_ret_code : t_StatusCode_i &
+        oper_ret_code : t_StatusCode
+    THEN
+        skip
+    END
+    ;
+
     session_core_UNINITIALISATION =
     BEGIN
         d_init

@@ -505,7 +505,6 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                                                uintptr_t params,
                                                uintptr_t auxParam)
 {
-    SOPC_UNUSED_ARG(params);
     SOPC_SecureListener* scListener = NULL;
     SOPC_SecureConnection* sc = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -542,18 +541,21 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
     case SOCKET_LISTENER_CONNECTION:
     {
         /* id = endpoint description config index,
+           params = (char*) "<IP>:<PORT>-" peer info when available (or NULL)
            auxParam = new connection socket index */
         SOPC_ASSERT(auxParam <= UINT32_MAX);
 
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ScListenerMgr: SOCKET_LISTENER_CONNECTION epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR,
-                               eltId, auxParam);
+                               "ScListenerMgr: SOCKET_LISTENER_CONNECTION epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR
+                               " from %s",
+                               eltId, auxParam, (0 == params ? "<Unknown>" : (char*) params));
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
 
         if (NULL == scListener || scListener->state != SECURE_LISTENER_STATE_OPENED)
         {
             // Error case: require socket closure
             SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, 0);
+            SOPC_Free((void*) params);
         }
         else
         {
@@ -565,7 +567,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                 {
                     // Create a connection token for this server socket connection: we need RHE to know if a waiting
                     // connection will match the endpoint URL (and server URI if defined in configuration)
-                    result = SC_InitNewConnection(&newScIdx);
+                    result = SC_InitNewConnection(&newScIdx, NULL);
                     if (result)
                     {
                         result = SOPC_SecureListenerStateMgr_AddConnection(scListener, newScIdx);
@@ -603,11 +605,12 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                         SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, 0);
                     }
                 }
+                SOPC_Free((void*) params);
             }
             else
             {
                 // Request creation of a new secure connection with given socket
-                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CREATE, eltId, (uintptr_t) NULL, auxParam);
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CREATE, eltId, params, auxParam);
             }
         }
         break;

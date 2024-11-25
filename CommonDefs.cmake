@@ -353,6 +353,7 @@ print_if_activated("S2OPC_NODE_MANAGEMENT")
 print_if_activated("S2OPC_NODE_ADD_OPTIONAL")
 print_if_activated("S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE")
 print_if_activated("S2OPC_EVENT_MANAGEMENT")
+print_if_activated("S2OPC_HAS_AUDITING")
 print_if_activated("WITH_CONST_ADDSPACE")
 print_if_activated("WITH_STATIC_SECURITY_DATA")
 print_if_activated("SECURITY_HARDENING")
@@ -467,6 +468,16 @@ list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_DELETE_CHILD_NODES}>:S2OPC_N
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES}>:S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES>)
 # Add S2OPC_EVENT_MANAGEMENT to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_EVENT_MANAGEMENT}>:S2OPC_EVENT_MANAGEMENT>)
+# Add S2OPC_HAS_AUDITING to compilation definition if option activated
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_HAS_AUDITING}>:S2OPC_HAS_AUDITING>)
+
+# Check Auditing/Events dependancy
+if (${S2OPC_HAS_AUDITING})
+  if (${S2OPC_EVENT_MANAGEMENT})
+  else()
+    message(FATAL_ERROR "S2OPC_HAS_AUDITING cannot be used without S2OPC_EVENT_MANAGEMENT")
+  endif()
+endif()
 
 ### Define common functions ###
 

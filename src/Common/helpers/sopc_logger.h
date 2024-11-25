@@ -139,20 +139,6 @@ void SOPC_Logger_TraceSecurityAudit(const char* format, ...) LOGGER_FUNC_FORMAT;
 void SOPC_Logger_TraceSecurityAuditWarning(const char* format, ...) LOGGER_FUNC_FORMAT;
 
 /**
- * \brief Log a trace for the OPC UA audit log
- *
- * \param format    String specifying how subsequent arguments are converted for output
- */
-void SOPC_Logger_TraceOpcUaAudit(const char* format, ...) LOGGER_FUNC_FORMAT;
-
-/**
- * \brief Log a warning trace for the OPC UA audit log
- *
- * \param format    String specifying how subsequent arguments are converted for output
- */
-void SOPC_Logger_TraceOpcUaAuditWarning(const char* format, ...) LOGGER_FUNC_FORMAT;
-
-/**
  * \brief Clears the logger and close the current log files
  * */
 void SOPC_Logger_Clear(void);

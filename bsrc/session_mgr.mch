@@ -509,5 +509,23 @@ OPERATIONS
     BEGIN
         skip
     END
+    ;
+
+    set_request_audit_info (p_channel_config, req_msg_header) =
+    PRE
+        p_channel_config : t_channel_config_idx_i &
+        p_channel_config : t_channel_config_idx   &
+        req_msg_header : t_msg_header_i &
+        req_msg_header : t_msg_header &
+        req_msg_header = c_msg_in_header
+    THEN
+        skip
+    END
+    ;
+
+    clear_audit_info =
+    BEGIN
+        skip
+    END
 
 END

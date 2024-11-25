@@ -994,11 +994,14 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
  *   and also handle the signature chain up to the certificate authority.
  *   The verifications are not endorsed by the SOPC_CryptoProvider, but by the PKIProvider.
  *
- * \param pProvider An initialized cryptographic context.
- * \param pPKI      An initialized public key infrastructure (PKIProvider).
- * \param PKIType   Defines the type of PKI (user, client or server)
- * \param pCert     A valid pointer to the Certificate to validate.
- * \param error     Ouput error code set when returned status is not SOPC_STATUS_OK (see sopc_pki_stack.h for values)
+ * \param pProvider    An initialized cryptographic context.
+ * \param pPKI         An initialized public key infrastructure (PKIProvider).
+ * \param PKIType      Defines the type of PKI (user, client or server)
+ * \param pCert        A valid pointer to the Certificate to validate.
+ * \param error        Output error code set when returned status is not SOPC_STATUS_OK (see
+ *                     SOPC_CertificateValidationError_XXXX in sopc_crypto_decl.h for values)
+ * \param[out] context Pointer to store more details when certificate validation failed. Can be NULL. Only
+ *                     significant when return value is not \p SOPC_STATUS_OK.
  *
  * \note            Contents of the outputs is unspecified when return value is SOPC_STATUS_NOK.
  *
@@ -1012,6 +1015,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
                                                            SOPC_PKIProvider* pPKI,
                                                            const SOPC_PKI_Type PKIType,
                                                            const SOPC_CertificateList* pCert,
-                                                           uint32_t* error);
+                                                           uint32_t* error,
+                                                           SOPC_PKI_Cert_Failure_Context* context);
 
 #endif /* SOPC_CRYPTO_PROVIDER_H_ */

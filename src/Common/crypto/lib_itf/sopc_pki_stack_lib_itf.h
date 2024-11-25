@@ -103,11 +103,15 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckSecurityPolicy(const SOPC_CertificateLis
  * \param pToValidate A valid pointer to the Certificate to validate.
  *
  * \param url A valid URL extracted from a certificate.
+ * \param certUrl An optional pointer. If not NULL, it will be allocated and filled with a copy of the hostname
+ *        found in \p pToValidate
  *
  * \return SOPC_STATUS_OK when successful.
  *
  */
-SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pToValidate, const char* url);
+SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pToValidate,
+                                                 const char* url,
+                                                 char** certUrl);
 
 /**
  * \brief Checks if the certificate uses are matching the required uses.

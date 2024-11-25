@@ -22,12 +22,62 @@
 #include "sopc_toolkit_async_api.h"
 
 #include "sopc_assert.h"
+#include "sopc_audit.h"
+#include "sopc_buffer.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_services_api.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_types.h"
+
+static void event_ForEachVar_Fct(const char* qnPath,
+                                 SOPC_Variant* var,
+                                 const SOPC_NodeId* dataType,
+                                 int32_t valueRank,
+                                 uintptr_t user_data)
+{
+    SOPC_UNUSED_ARG(var);
+    SOPC_UNUSED_ARG(dataType);
+    SOPC_UNUSED_ARG(valueRank);
+    SOPC_Buffer* buff = (SOPC_Buffer*) user_data;
+    // Insert separator (except on first element)
+    if (0 != buff->length)
+    {
+        SOPC_Buffer_PrintCString(buff, ", ");
+    }
+
+    // Insert "key":"value"
+    SOPC_Buffer_PrintCString(buff, "\"");
+    SOPC_Buffer_PrintCString(buff, qnPath);
+    SOPC_Buffer_PrintCString(buff, "\":\"");
+    SOPC_ReturnStatus status = SOPC_Variant_Dump(buff, var);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Buffer_PrintCString(buff, "<Invalid Variant>");
+    }
+    SOPC_Buffer_PrintCString(buff, "\"");
+}
+
+/**
+ * Allocates a ::SOPC_Buffer and fills it with a JSON-like rendering.
+ * Returns NULL in case of error. Otherwise, the buffer will always be NULL-terminated.
+ * The caller must clear the returned buffer with SOPC_Buffer_Delete after use.
+ */
+static SOPC_Buffer* event_To_JSON(SOPC_Event* event)
+{
+    SOPC_Buffer* buff = SOPC_Buffer_Create(SOPC_LOG_MAX_USER_LINE_LENGTH);
+    if (NULL == buff)
+    {
+        return NULL;
+    }
+
+    SOPC_Event_ForEachVar(event, &event_ForEachVar_Fct, (uintptr_t) buff);
+    uint32_t pos = (buff->position < buff->maximum_size ? buff->position : buff->length - 1);
+    buff->data[pos] = 0;
+    return buff;
+}
 
 void SOPC_ToolkitServer_AsyncOpenEndpoint(SOPC_EndpointConfigIdx endpointConfigIdx)
 {
@@ -59,6 +109,19 @@ void SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
     SOPC_Internal_EventContext* eventCtx = SOPC_Calloc(1, sizeof(*eventCtx));
     SOPC_ReturnStatus status = SOPC_NodeId_Copy(&eventCtx->notifierNodeId, notifierNodeId);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    SOPC_Log_Instance* pEntry = SOPC_Audit_LogEntry();
+    if (NULL != pEntry)
+    {
+        // Convert the event into a JSON-like string.
+        SOPC_Buffer* line = event_To_JSON(event);
+        if (line != NULL)
+        {
+            SOPC_Log_Trace(pEntry, SOPC_LOG_LEVEL_INFO, "{%s}", (const char*) line->data);
+            SOPC_Buffer_Delete(line);
+        }
+    }
+
     eventCtx->event = event;
     eventCtx->optSessionId = optSessionId;
     eventCtx->optSubscriptionId = optSubscriptionId;

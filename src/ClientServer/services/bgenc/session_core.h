@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 09/12/2024 17:07:54
+ Date                 : 07/10/2025 09:58:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -39,6 +39,7 @@
    IMPORTS Clause
   -----------------*/
 #include "msg_session_bs.h"
+#include "session_audit_bs.h"
 #include "session_channel_it.h"
 #include "session_core_1.h"
 #include "session_core_it.h"
@@ -65,6 +66,7 @@ extern void session_core__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define session_core__allocate_x509_token_from_user user_authentication__allocate_x509_token_from_user
+#define session_core__clear_audit_info session_audit_bs__clear_audit_info
 #define session_core__client_gen_activate_orphaned_session_internal_event session_core_1__client_gen_activate_orphaned_session_internal_event
 #define session_core__client_gen_activate_user_session_internal_event session_core_1__client_gen_activate_user_session_internal_event
 #define session_core__client_gen_create_session_internal_event session_core_1__client_gen_create_session_internal_event
@@ -88,10 +90,14 @@ extern void session_core__INITIALISATION(void);
 #define session_core__is_valid_user_x509_authentication user_authentication__is_valid_user_x509_authentication
 #define session_core__reset_session_to_create session_core_1__reset_session_to_create
 #define session_core__server_get_session_from_token session_core_1__server_get_session_from_token
+#define session_core__server_notify_session_activate session_audit_bs__server_notify_session_activate
+#define session_core__server_notify_session_closed session_audit_bs__server_notify_session_closed
+#define session_core__server_notify_session_create session_audit_bs__server_notify_session_create
 #define session_core__server_session_timeout_evaluation session_core_1__server_session_timeout_evaluation
 #define session_core__server_session_timeout_msg_received session_core_1__server_session_timeout_msg_received
 #define session_core__server_session_timeout_start_timer session_core_1__server_session_timeout_start_timer
 #define session_core__session_has_user_server session_core_1__session_has_user_server
+#define session_core__set_request_audit_info session_audit_bs__set_request_audit_info
 #define session_core__set_session_app_context session_core_1__set_session_app_context
 #define session_core__set_session_roles session_core_1__set_session_roles
 #define session_core__set_session_to_create session_core_1__set_session_to_create

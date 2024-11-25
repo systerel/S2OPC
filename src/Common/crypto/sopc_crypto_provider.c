@@ -1457,7 +1457,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
                                                            SOPC_PKIProvider* pPKI,
                                                            const SOPC_PKI_Type pPKIType,
                                                            const SOPC_CertificateList* pCert,
-                                                           uint32_t* error)
+                                                           uint32_t* error,
+                                                           SOPC_PKI_Cert_Failure_Context* context)
 {
     SOPC_ASSERT(NULL != error);
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -1493,7 +1494,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCert, pPKIProfile, error);
+        status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCert, pPKIProfile, error, context);
     }
 
     SOPC_PKIProvider_DeleteProfile(&pPKIProfile);

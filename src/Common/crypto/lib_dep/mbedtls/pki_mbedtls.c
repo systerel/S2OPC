@@ -389,7 +389,9 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckSecurityPolicy(const SOPC_CertificateLis
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pToValidate, const char* url)
+SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pToValidate,
+                                                 const char* url,
+                                                 char** certUrl)
 {
     // TODO : Add a domain name resolution (issue #1189)
 
@@ -457,6 +459,12 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pTo
                     SOPC_LOG_MODULE_COMMON,
                     "> PKI validation : dnsName %.*s of certificate thumbprint %s is not the expected one (%s)",
                     (int) pBuf->len, (const char*) pBuf->p, thumbprint, pHostName);
+                if (NULL != certUrl && NULL == *certUrl)
+                {
+                    *certUrl = SOPC_Malloc(pBuf->len + 1);
+                    memcpy(*certUrl, (const char*) pBuf->p, pBuf->len);
+                    (*certUrl)[pBuf->len] = 0;
+                }
             }
         }
         /* next iteration */
@@ -917,7 +925,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
 SOPC_ReturnStatus SOPC_PKIProviderInternal_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
                                                                          const SOPC_CertificateList* pToValidate,
                                                                          const SOPC_PKI_Profile* pProfile,
-                                                                         uint32_t* error)
+                                                                         uint32_t* error,
+                                                                         SOPC_PKI_Cert_Failure_Context* context)
 {
     if (NULL == pPKI || NULL == pToValidate || NULL == pProfile || NULL == error)
     {
@@ -973,7 +982,7 @@ SOPC_ReturnStatus SOPC_PKIProviderInternal_ValidateProfileAndCertificate(SOPC_PK
     /* Apply verification on the certificate */
     if (pProfile->bApplyLeafProfile)
     {
-        status = SOPC_PKIProvider_CheckLeafCertificate(pToValidateCpy, pProfile->leafProfile, &currentError);
+        status = SOPC_PKIProvider_CheckLeafCertificate(pToValidateCpy, pProfile->leafProfile, &currentError, context);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
@@ -1021,6 +1030,10 @@ SOPC_ReturnStatus SOPC_PKIProviderInternal_ValidateProfileAndCertificate(SOPC_PK
 
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
     SOPC_Free(pThumbprint);
+    if (SOPC_STATUS_OK == status)
+    {
+        *error = 0;
+    }
     return status;
 }
 

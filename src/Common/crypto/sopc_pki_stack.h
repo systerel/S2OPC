@@ -198,6 +198,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetUsageFromType(SOPC_PKI_LeafProf
  * \param pToValidate A valid pointer to the Certificate to validate.
  * \param pProfile A valid pointer to the leaf profile.
  * \param[out] error Pointer to store the OpcUa error code when certificate validation failed.
+ * \param[out] context Optional pointer to store some additional context when certificate validation failed.
  *
  * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
  *
@@ -206,7 +207,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetUsageFromType(SOPC_PKI_LeafProf
  */
 SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateList* pToValidate,
                                                         const SOPC_PKI_LeafProfile* pProfile,
-                                                        uint32_t* error);
+                                                        uint32_t* error,
+                                                        SOPC_PKI_Cert_Failure_Context* context);
 
 /**
  * \brief Delete a leaf profile.
@@ -316,6 +318,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, 
  * \param pToValidate A valid pointer to the Certificate to validate.
  * \param pProfile A valid pointer to the PKI profile.
  * \param[out] error Pointer to store the OpcUa error code when certificate validation failed.
+ * \param[out] context Pointer to store more details when certificate validation failed. Can be NULL. Only
+ *  significant when return value is not \p SOPC_STATUS_OK.
  *
  * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
  *       The certificate is internally stored if it is rejected.
@@ -329,7 +333,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, 
 SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(SOPC_PKIProvider* pPKI,
                                                        const SOPC_CertificateList* pToValidate,
                                                        const SOPC_PKI_Profile* pProfile,
-                                                       uint32_t* error);
+                                                       uint32_t* error,
+                                                       SOPC_PKI_Cert_Failure_Context* context);
 
 /** \brief Write the certificate files in the updatedTrustList folder of the PKI storage.
  *         The updatedTrustList folder is created if it is missing.

@@ -36,6 +36,8 @@
  * \param pToValidate A valid pointer to the Certificate to validate.
  * \param pProfile A valid pointer to the PKI profile.
  * \param[out] error Pointer to store the OpcUa error code when certificate validation failed.
+ * \param[out] context Pointer to store more details when certificate validation failed. Can be NULL. Only
+ *  significant when return value is not \p SOPC_STATUS_OK
  *
  * \note Default validation function used by PKIProvider when not created by ::SOPC_PKIPermissive_Create (without
  * security)
@@ -50,7 +52,8 @@
 SOPC_ReturnStatus SOPC_PKIProviderInternal_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
                                                                          const SOPC_CertificateList* pToValidate,
                                                                          const SOPC_PKI_Profile* pProfile,
-                                                                         uint32_t* error);
+                                                                         uint32_t* error,
+                                                                         SOPC_PKI_Cert_Failure_Context* context);
 
 /**
  * \brief Delete the roots CAs of the list \p ppCerts. Create a new list \p ppRootCa with all roots CA from \p ppCerts .

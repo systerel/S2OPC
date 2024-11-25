@@ -310,7 +310,7 @@ static SOPC_ReturnStatus is_cert_comply_with_security_policy(const SOPC_Extensio
     if (SOPC_STATUS_OK == status)
     {
         // Let the lib-specific code handle the verification for the current security policy
-        status = SOPC_PKIProvider_CheckLeafCertificate(pCrtUser, pProfile, &validError);
+        status = SOPC_PKIProvider_CheckLeafCertificate(pCrtUser, pProfile, &validError, NULL);
         if (SOPC_STATUS_OK != status)
         {
             char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pCrtUser);

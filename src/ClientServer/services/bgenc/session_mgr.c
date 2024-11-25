@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 03/03/2025 09:32:36
+ Date                 : 07/10/2025 09:58:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -346,10 +346,10 @@ void session_mgr__server_receive_session_req(
       *session_mgr__security_failed = false;
       *session_mgr__session = constants__c_session_indet;
       *session_mgr__service_ret = constants_statuscodes_bs__c_StatusCode_indet;
+      channel_mgr__get_channel_info(session_mgr__channel,
+         &session_mgr__l_channel_config_idx);
       switch (session_mgr__req_typ) {
       case constants__e_msg_session_create_req:
-         channel_mgr__get_channel_info(session_mgr__channel,
-            &session_mgr__l_channel_config_idx);
          channel_mgr__server_get_endpoint_config(session_mgr__channel,
             &session_mgr__l_endpoint_config_idx);
          session_core__has_user_token_policy_available(session_mgr__l_channel_config_idx,
@@ -388,6 +388,11 @@ void session_mgr__server_receive_session_req(
          else {
             *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_too_many_sessions;
          }
+         session_core__server_notify_session_create(session_mgr__l_channel_config_idx,
+            session_mgr__req_msg,
+            session_mgr__resp_msg,
+            *session_mgr__session,
+            *session_mgr__service_ret);
          break;
       case constants__e_msg_session_activate_req:
          session_core__server_get_session_from_token(session_mgr__session_token,
@@ -444,6 +449,10 @@ void session_mgr__server_receive_session_req(
          else {
             *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_session_id_invalid;
          }
+         session_core__server_notify_session_activate(session_mgr__l_channel_config_idx,
+            session_mgr__req_msg,
+            *session_mgr__session,
+            *session_mgr__service_ret);
          break;
       case constants__e_msg_session_close_req:
          session_core__server_get_session_from_token(session_mgr__session_token,
@@ -456,6 +465,12 @@ void session_mgr__server_receive_session_req(
             if (((session_mgr__l_session_state == constants__e_session_created) ||
                (session_mgr__l_session_state == constants__e_session_userActivating)) ||
                (session_mgr__l_session_state == constants__e_session_userActivated)) {
+               if (session_mgr__l_session_state != constants__e_session_created) {
+                  session_core__get_session_user_server(*session_mgr__session,
+                     &session_mgr__l_user);
+                  app_cb_call_context_bs__set_app_call_context_session(*session_mgr__session,
+                     session_mgr__l_user);
+               }
                session_core__get_session_channel(*session_mgr__session,
                   &session_mgr__l_session_channel);
                if (session_mgr__l_session_channel == session_mgr__channel) {
@@ -479,6 +494,8 @@ void session_mgr__server_receive_session_req(
          }
          else {
             *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_session_id_invalid;
+            session_core__server_notify_session_closed(*session_mgr__session,
+               *session_mgr__service_ret);
          }
          break;
       default:

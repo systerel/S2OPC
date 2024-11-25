@@ -201,6 +201,8 @@ typedef struct SOPC_SecureConnection
     // flag indicating if the new (current) security token shall be used to send MSG otherwise use precedent until
     // new one activated by client (reception of MSG with new token)
     bool serverNewSecuTokenActive;
+    // Alternative client audit info allowing to identify it when no auditEntryId available
+    char* altClientAuditInfo;
 
     /* Server or Client side connection */
     bool isServerConnection;

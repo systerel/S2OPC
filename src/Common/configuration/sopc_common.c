@@ -29,13 +29,13 @@
 static bool bCommon_IsInitialized = false;
 
 /* Functions */
-
 bool SOPC_Common_IsInitialized(void)
 {
     return bCommon_IsInitialized;
 }
 
-SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration)
+SOPC_ReturnStatus SOPC_Common_Initialize(const SOPC_Log_Configuration* optLogConfig,
+                                         const SOPC_Audit_Configuration* optAuditConfig)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     bool res = false;
@@ -61,7 +61,13 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
     SOPC_Helper_Endianness_Check();
 
     /* Initialize logs */
-    res = SOPC_Logger_Initialize(&logConfiguration);
+    res = SOPC_Logger_Initialize(optLogConfig);
+
+    if (true == res)
+    {
+        /* Initialize Audit */
+        res = SOPC_Audit_Initialize(optAuditConfig);
+    }
 
     /* Set the IsInitialized status if everything was successful */
     if (true == res)
@@ -76,6 +82,8 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
 void SOPC_Common_Clear(void)
 {
     bCommon_IsInitialized = false;
+
+    SOPC_Audit_Clear();
     SOPC_Logger_Clear();
 }
 

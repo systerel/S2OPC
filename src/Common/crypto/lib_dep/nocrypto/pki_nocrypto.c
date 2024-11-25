@@ -52,10 +52,13 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pToValidate, const char* url)
+SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pToValidate,
+                                                 const char* url,
+                                                 char** certUrl)
 {
     SOPC_UNUSED_ARG(pToValidate);
     SOPC_UNUSED_ARG(url);
+    SOPC_UNUSED_ARG(certUrl);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
@@ -103,11 +106,13 @@ SOPC_ReturnStatus SOPC_PKIProviderInternal_SplitRootFromCertList(SOPC_Certificat
 SOPC_ReturnStatus SOPC_PKIProviderInternal_ValidateProfileAndCertificate(SOPC_PKIProvider* pPKI,
                                                                          const SOPC_CertificateList* pToValidate,
                                                                          const SOPC_PKI_Profile* pProfile,
-                                                                         uint32_t* error)
+                                                                         uint32_t* error,
+                                                                         SOPC_PKI_Cert_Failure_Context* context)
 {
     SOPC_UNUSED_ARG(pPKI);
     SOPC_UNUSED_ARG(pToValidate);
     SOPC_UNUSED_ARG(pProfile);
     SOPC_UNUSED_ARG(error);
+    SOPC_UNUSED_ARG(context);
     return SOPC_STATUS_NOT_SUPPORTED;
 }

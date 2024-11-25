@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 09/12/2024 17:07:54
+ Date                 : 06/10/2025 10:18:03
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -796,6 +796,8 @@ void session_core__l_server_secure_channel_lost_session_sm(
                false);
          }
          else {
+            session_audit_bs__server_notify_session_closed(session_core__p_session,
+               constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
             session_core_1__set_session_state_closed(session_core__p_session,
                constants_statuscodes_bs__e_sc_bad_secure_channel_closed,
                false);
@@ -811,7 +813,11 @@ void session_core__server_secure_channel_lost_session_sm(
       constants__t_session_i session_core__l_session;
       t_bool session_core__l_dom;
       constants__t_channel_i session_core__l_channel;
+      constants__t_channel_config_idx_i session_core__l_channel_config_idx;
       
+      channel_mgr__get_channel_info(session_core__p_lost_channel,
+         &session_core__l_channel_config_idx);
+      session_audit_bs__set_no_req_audit_info(session_core__l_channel_config_idx);
       session_core_it__init_iter_session(&session_core__l_continue);
       if (session_core__l_continue == true) {
          while (session_core__l_continue == true) {
@@ -826,6 +832,7 @@ void session_core__server_secure_channel_lost_session_sm(
                session_core__l_session);
          }
       }
+      session_audit_bs__clear_audit_info();
    }
 }
 
@@ -868,6 +875,8 @@ void session_core__server_close_session_req_and_resp_sm(
    channel_mgr__channel_do_nothing(session_core__channel);
    session_core_1__server_close_session_check_req(session_core__close_req_msg,
       session_core__close_resp_msg);
+   session_audit_bs__server_notify_session_closed(session_core__session,
+      constants_statuscodes_bs__e_sc_ok);
    session_core_1__set_session_state_closed(session_core__session,
       constants_statuscodes_bs__e_sc_ok,
       false);
@@ -896,6 +905,8 @@ void session_core__client_close_session_sm(
 void session_core__server_close_session_sm(
    const constants__t_session_i session_core__session,
    const constants_statuscodes_bs__t_StatusCode_i session_core__sc_reason) {
+   session_audit_bs__server_notify_session_closed(session_core__session,
+      session_core__sc_reason);
    session_core_1__set_session_state_closed(session_core__session,
       session_core__sc_reason,
       false);
@@ -1012,6 +1023,10 @@ void session_core__may_close_unactivated_session(void) {
          if (session_core__l_has_session_to_close == true) {
             session_core_1__is_client_session(session_core__l_session_to_close,
                &session_core__l_is_client);
+            if (session_core__l_is_client == false) {
+               session_audit_bs__server_notify_session_closed(session_core__l_session_to_close,
+                  constants_statuscodes_bs__e_sc_bad_session_not_activated);
+            }
             session_core_1__set_session_state_closed(session_core__l_session_to_close,
                constants_statuscodes_bs__e_sc_bad_session_not_activated,
                session_core__l_is_client);

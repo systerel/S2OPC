@@ -23,6 +23,7 @@
 #include "sopc_enums.h"
 
 #include <inttypes.h>
+#include "sopc_audit.h"
 #include "sopc_log_manager.h"
 
 /**
@@ -35,14 +36,16 @@ bool SOPC_Common_IsInitialized(void);
 /**
  * \brief Initializes Common module
  *
- * \param[in] logConfiguration  log configuration
+ * \param[in] optLogConfig  log configuration. If set to NULL, no logging is performed.
+ * \param[in] optAuditConfig  audit configuration. If set to NULL, no auditing is performed.
  *
  * \return SOPC_STATUS_OK if initialization is a success
  *         SOPC_STATUS_INVALID_PARAMETERS if logConfiguration is invalid
  *         SOPC_STATUS_INVALID_STATE if initialization has already been done.
  *         SOPC_STATUS_NOK else
  */
-SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration);
+SOPC_ReturnStatus SOPC_Common_Initialize(const SOPC_Log_Configuration* optLogConfig,
+                                         const SOPC_Audit_Configuration* optAuditConfig);
 
 /**
  * \brief clear common library (including logs)

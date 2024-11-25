@@ -67,21 +67,19 @@ variables:
   S2OPC_NODE_MANAGEMENT: 1
   S2OPC_EVENT_MANAGEMENT: 1
   S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE: 1
+  S2OPC_HAS_AUDITING: 1
 
 .nominal_test_variables: &nominal_test_variables
-  S2OPC_NODE_MANAGEMENT: 1
-  S2OPC_EVENT_MANAGEMENT: 1
-  S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE: 1
   TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
   TEST_CLIENT_XML_CONFIG: S2OPC_Client_Test_Config.xml
-  TEST_PASSWORD_PRIVATE_KEY : password
-  TEST_PASSWORD_CACERT : S2OPC
-  TEST_PASSWORD_USER_ME : 1234
-  TEST_PASSWORD_USER_SECUADMIN : 1234
-  TEST_USERNAME : user1
-  TEST_PASSWORD_USER : password
+  TEST_PASSWORD_PRIVATE_KEY: password
+  TEST_PASSWORD_CACERT: S2OPC
+  TEST_PASSWORD_USER_ME: 1234
+  TEST_PASSWORD_USER_SECUADMIN: 1234
+  TEST_USERNAME: user1
+  TEST_PASSWORD_USER: password
 
 # Variables for ALL_BUILDS and ALL_TESTS manual pipelines
 
@@ -265,6 +263,8 @@ build-linux-faulty-packet:
     <<: [*build_linux_variables,*nominal_build_variables]
     WITH_ASAN: 1
     WITH_UBSAN: 1
+    S2OPC_HAS_AUDITING: 1
+    S2OPC_EVENT_MANAGEMENT: 1
     BUILD_DIR: build_faulty
     CMAKE_C_FLAGS: "-DSOPC_MAX_SESSIONS=50 -DSOPC_MAX_SECURE_CONNECTIONS=51"
   needs : []
@@ -590,7 +590,7 @@ test-unit-all-tests:
 test-unit:
   <<: *test_unit
   variables:
-    <<: *nominal_test_variables
+    <<: [*nominal_build_variables,*nominal_test_variables]
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_DOC == null && \
@@ -654,7 +654,7 @@ test-faulty-packets :
   image: docker.aix.systerel.fr/c838/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
   needs : [build-linux-faulty-packet]
   script:
-    - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin/toolkit_test_server
+    - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_test_faulty'
     paths:
@@ -813,7 +813,7 @@ pages:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
     # PyS2OPC relies on subscriptions
-    - cmake -DS2OPC_NODE_MANAGEMENT=yes -DS2OPC_EVENT_MANAGEMENT=yes -DWITH_PYS2OPC=yes ..
+    - cmake -DS2OPC_NODE_MANAGEMENT=yes -DS2OPC_EVENT_MANAGEMENT=yes -DS2OPC_HAS_AUDITING=yes -DS2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE=yes -DWITH_PYS2OPC=yes ..
     - cmake --build . --target doc
     - mv apidoc/html ../public/
   artifacts:

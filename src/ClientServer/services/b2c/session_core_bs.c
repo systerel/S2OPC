@@ -41,6 +41,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_secret_buffer.h"
+#include "sopc_secure_channels_audit.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
@@ -166,7 +167,7 @@ void session_core_bs__may_validate_server_certificate(
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_CryptoProvider_Certificate_Validate(cp, pSCCfg->clientConfigPtr->clientPKI,
-                                                              SOPC_PKI_TYPE_CLIENT_APP, serverCert, &errorCode);
+                                                              SOPC_PKI_TYPE_CLIENT_APP, serverCert, &errorCode, NULL);
             *session_core_bs__valid_cert = (SOPC_STATUS_OK == status);
 
             if (SOPC_STATUS_OK != status)
@@ -584,7 +585,7 @@ static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData,
     if (SOPC_STATUS_OK == status)
     {
         uint32_t error = 0;
-        status = SOPC_PKIProvider_CheckLeafCertificate(certificate, pLeafProfile, &error);
+        status = SOPC_PKIProvider_CheckLeafCertificate(certificate, pLeafProfile, &error, NULL);
     }
     if (SOPC_STATUS_OK != status)
     {

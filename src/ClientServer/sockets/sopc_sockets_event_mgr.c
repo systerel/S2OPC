@@ -23,6 +23,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_buffer.h"
+#include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
@@ -30,10 +31,12 @@
 #include "sopc_sockets_event_mgr.h"
 #include "sopc_sockets_internal_ctx.h"
 
-static void SOPC_SocketsInternalEventMgr_LogAcceptEvent(SOPC_InternalSocket* listener,
-                                                        SOPC_InternalSocket* connection,
-                                                        const char* eventName)
+static void SOPC_SocketsInternalEventMgr_LogAcceptEventAndSetPeerInfo(SOPC_InternalSocket* listener,
+                                                                      SOPC_InternalSocket* connection,
+                                                                      const char* eventName,
+                                                                      char** peerInfo)
 {
+    *peerInfo = NULL;
     char* peerHost = NULL;
     char* peerService = NULL;
     char* selfHost = NULL;
@@ -44,6 +47,41 @@ static void SOPC_SocketsInternalEventMgr_LogAcceptEvent(SOPC_InternalSocket* lis
                           eventName, (selfHost ? selfHost : "<Unknown Address>"),
                           (selfService ? selfService : "<Unknown port>"), (peerHost ? peerHost : "<Unknown Address>"),
                           (peerService ? peerService : "<Unknown port>"), connection->socketIdx);
+    if (NULL != peerHost)
+    {
+        *peerInfo = SOPC_strdup(peerHost);
+    }
+    else
+    {
+        *peerInfo = SOPC_strdup("<UnknownAddress>:");
+    }
+    if (NULL != *peerInfo && NULL != peerService)
+    {
+        SOPC_ReturnStatus status = SOPC_STATUS_OK;
+        char* newPeerInfo = NULL;
+        status = SOPC_StrConcat(*peerInfo, ":", &newPeerInfo);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Free(*peerInfo);
+            *peerInfo = newPeerInfo;
+            newPeerInfo = NULL;
+        }
+        status = SOPC_StrConcat(*peerInfo, peerService, &newPeerInfo);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Free(*peerInfo);
+            *peerInfo = newPeerInfo;
+            newPeerInfo = NULL;
+        }
+        status = SOPC_StrConcat(*peerInfo, "-", &newPeerInfo);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Free(*peerInfo);
+            *peerInfo = newPeerInfo;
+            newPeerInfo = NULL;
+        }
+        SOPC_Free(newPeerInfo);
+    }
     SOPC_Free(peerHost);
     SOPC_Free(peerService);
     SOPC_Free(selfHost);
@@ -659,6 +697,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
     SOPC_InternalSocket* acceptSock = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t socketIdx = socketElt->socketIdx;
+    char* peerInfo = NULL;
 
     switch (event)
     {
@@ -688,7 +727,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
             if (SOPC_STATUS_OK == status)
             {
                 acceptSock->addr = SOPC_Socket_GetPeerAddress(acceptSock->sock);
-                SOPC_SocketsInternalEventMgr_LogAcceptEvent(socketElt, acceptSock, "Connection accepted on");
+                SOPC_SocketsInternalEventMgr_LogAcceptEventAndSetPeerInfo(socketElt, acceptSock,
+                                                                          "Connection accepted on", &peerInfo);
                 acceptSock->isServerConnection = true;
                 acceptSock->listenerSocketIdx = socketElt->socketIdx;
                 // Set initial state of new socket
@@ -701,7 +741,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                 // association with connection index
                 SOPC_Sockets_Emit(SOCKET_LISTENER_CONNECTION,
                                   socketElt->connectionId, // endpoint description config index
-                                  (uintptr_t) NULL, acceptSock->socketIdx);
+                                  (uintptr_t) peerInfo, acceptSock->socketIdx);
             }
             else
             {
