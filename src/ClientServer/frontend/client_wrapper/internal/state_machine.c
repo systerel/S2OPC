@@ -1726,11 +1726,19 @@ static void LockedStaMac_ProcessMsg_PubResp_NotifData(SOPC_StaMac_Machine* pSM,
             pDataNotif->NoOfMonitoredItems = 0;
         }
 
+        // Callback shall not be called with locked mutex to avoid possible deadlock
+        SOPC_ReturnStatus status = SOPC_Mutex_Unlock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+
         pSM->pCbkNotification(pSM->subscriptionAppCtx, pPubResp->ResponseHeader.ServiceResult,
                               &OpcUa_DataChangeNotification_EncodeableType, (uint32_t) pDataNotif->NoOfMonitoredItems,
                               pDataNotif, newAPImonitoredItemCtxArray);
 
         SOPC_Free(newAPImonitoredItemCtxArray);
+
+        // Restore lock on state machine
+        status = SOPC_Mutex_Lock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 }
 
