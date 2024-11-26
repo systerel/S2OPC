@@ -33,4 +33,11 @@ uid=$(id -u $SUDO_USER)
 # Mount point is the path of this script
 mount_point="$PWD/$(dirname "$0")"
 
-docker run --ulimit nofile=1024:1024 $network_host --rm $interactive --user "$uid" --volume="$mount_point":"$mount_point" --workdir "$PWD" --entrypoint /bin/bash "$IMAGE" -c "$*"
+# Creating fake /etc/passwd file for local user
+TMP_FILE=$(mktemp)
+echo "docker_user:x:1000:1000::/tmp:/sbin/nologin" > $TMP_FILE
+docker run --ulimit nofile=1024:1024 $network_host --rm $interactive --user "$uid" \
+    --volume="$mount_point":"$mount_point" --volume "$TMP_FILE:/etc/passwd" \
+    --workdir "$PWD" --entrypoint /bin/bash "$IMAGE" -c "$*"
+
+rm -f $TMP_FILE
