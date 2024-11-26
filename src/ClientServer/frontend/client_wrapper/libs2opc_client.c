@@ -1160,10 +1160,6 @@ static void SOPC_StaMacNotification_Cbk(uintptr_t subscriptionAppCtx,
     {
         return;
     }
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (NULL != (SOPC_ClientHelper_ReqCtx*) subscriptionAppCtx)
     {
         SOPC_ClientHelper_ReqCtx* subCtx = (SOPC_ClientHelper_ReqCtx*) subscriptionAppCtx;
