@@ -27,6 +27,7 @@ function _help() {
     echo "Usage: $1 [--help] [--lazy] [--ip <IP_ADDRESS>] -- [any options to pass to build script]"
     echo "    --lazy : do not reinstall S2OPC sources (avoids full rebuild)"
     echo "    --ip <IP_ADDRESS>  : Configure compilation to set configured IP_ADDRESS to ethernet interface, default 192.168.42.12"
+    echo "    --help : print this help and return"
 }
 
 function fail() {

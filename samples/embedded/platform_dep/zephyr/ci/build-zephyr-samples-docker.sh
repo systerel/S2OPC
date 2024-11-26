@@ -29,11 +29,10 @@ function fail() {
 
 function usage() {
     echo  "Builds a given Zephyr application"
-    echo "Usage:"
-    echo "  $0    : build a predefined application/board"
-    echo "  $0 <BOARD> <APP> : build the <APP> sample application (default 'cli_pubsub_server') for board <BOARD> (default 'mimxrt1064_evk')"
-    echo "  $0 --ip <IP_ADDRESS> : Configure IP Adress of ethernet interface"
-    echo "  $0 -h : This help"
+    echo "Usage: $0 [BOARD] [APP] [--ip <IP_ADDRESS>] [-h] "
+    echo " <BOARD> <APP> : build the <APP> sample application (default 'cli_pubsub_server') for board <BOARD> (default 'mimxrt1064_evk')"
+    echo " --ip <IP_ADDRESS> : Configure IP Adress of ethernet interface"
+    echo " -h : Print this help and return"
     exit 0
 }
 
@@ -61,6 +60,7 @@ cd ${SAMPLESDIR} || exit 4
 git config --global --add safe.directory ${S2OPCDIR}
 
 OPT_IP_ADDRESS=
+IP_ADDRESS=
 
 export BOARD=$1
 shift

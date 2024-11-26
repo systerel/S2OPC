@@ -26,7 +26,7 @@ HOST_DIR=$(pwd)
 function usage() {
     echo "By default builds a predefined set of Zephyr applications"
     echo "To build a specific Zephyr applications use -b <BOARD> -a <APPLICATION>"
-    echo "Usage:"
+    echo "Usage : $0 [-h] [-i] [-a <APPLICATION>] [-b <BOARD>] [--ip <IP_ADDRESS>] "
     echo "  $0                      : build predefined application/boards"
     echo "  $0 -i                   : Start an interactive session in zephyr docker. see ${SCRIPT} for more help"
     echo "  $0 -b                   : Allows user to specify a <BOARD>"
@@ -39,6 +39,9 @@ function usage() {
 # interactive?
 IS_INTERACTIVE=false
 OPT_IP_ADDRESS=
+GET_BOARD=
+GET_APP=
+
 while [[ ! -z $1 ]]; do
     PARAM=$1
     shift
