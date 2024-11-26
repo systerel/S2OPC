@@ -102,74 +102,77 @@ struct SOPC_StaMac_Machine
 };
 
 /* Internal functions */
-static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
-                                   uintptr_t* pAppCtx,
-                                   SOPC_StaMac_RequestScope* pRequestScope,
-                                   SOPC_StaMac_RequestType* pRequestType,
-                                   SOPC_App_Com_Event event,
-                                   uint32_t arg,
-                                   void* pParam,
-                                   uintptr_t appCtx);
+static bool LockedStaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
+                                         uintptr_t* pAppCtx,
+                                         SOPC_StaMac_RequestScope* pRequestScope,
+                                         SOPC_StaMac_RequestType* pRequestType,
+                                         SOPC_App_Com_Event event,
+                                         uint32_t arg,
+                                         void* pParam,
+                                         uintptr_t appCtx);
 
-static bool StaMac_GiveAuthorization_stActivating(SOPC_StaMac_Machine* pSM,
-                                                  SOPC_App_Com_Event event,
-                                                  SOPC_EncodeableType* pEncType);
-static bool StaMac_GiveAuthorization_stClosing(SOPC_StaMac_Machine* pSM,
-                                               SOPC_App_Com_Event event,
-                                               SOPC_EncodeableType* pEncType);
-static bool StaMac_GiveAuthorization_stActivated(SOPC_StaMac_Machine* pSM,
-                                                 SOPC_App_Com_Event event,
-                                                 SOPC_EncodeableType* pEncType);
-static bool StaMac_GiveAuthorization_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
-                                                      SOPC_App_Com_Event event,
-                                                      SOPC_EncodeableType* pEncType);
-static bool StaMac_GiveAuthorization_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
+static bool LockedStaMac_GiveAuthorization_stActivating(SOPC_StaMac_Machine* pSM,
+                                                        SOPC_App_Com_Event event,
+                                                        SOPC_EncodeableType* pEncType);
+static bool LockedStaMac_GiveAuthorization_stClosing(SOPC_StaMac_Machine* pSM,
                                                      SOPC_App_Com_Event event,
                                                      SOPC_EncodeableType* pEncType);
-static bool StaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
-                                                      SOPC_App_Com_Event event,
-                                                      SOPC_EncodeableType* pEncType);
+static bool LockedStaMac_GiveAuthorization_stActivated(SOPC_StaMac_Machine* pSM,
+                                                       SOPC_App_Com_Event event,
+                                                       SOPC_EncodeableType* pEncType);
+static bool LockedStaMac_GiveAuthorization_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
+                                                            SOPC_App_Com_Event event,
+                                                            SOPC_EncodeableType* pEncType);
+static bool LockedStaMac_GiveAuthorization_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
+                                                           SOPC_App_Com_Event event,
+                                                           SOPC_EncodeableType* pEncType);
+static bool LockedStaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
+                                                            SOPC_App_Com_Event event,
+                                                            SOPC_EncodeableType* pEncType);
 
-static void StaMac_ProcessMsg_ActivateSessionResponse(SOPC_StaMac_Machine* pSM,
-                                                      uint32_t arg,
-                                                      void* pParam,
-                                                      uintptr_t appCtx);
-static void StaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
-                                                   uint32_t arg,
-                                                   void* pParam,
-                                                   uintptr_t appCtx);
-static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx);
-static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pSM,
+static void LockedStaMac_ProcessMsg_ActivateSessionResponse(SOPC_StaMac_Machine* pSM,
+                                                            uint32_t arg,
+                                                            void* pParam,
+                                                            uintptr_t appCtx);
+static void LockedStaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
                                                          uint32_t arg,
                                                          void* pParam,
                                                          uintptr_t appCtx);
-static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
-                                                           uint32_t arg,
-                                                           void* pParam,
-                                                           uintptr_t appCtx);
-static void StaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
-                                                           uint32_t arg,
-                                                           void* pParam,
-                                                           uintptr_t appCtx);
-static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pSM,
-                                                         uint32_t arg,
-                                                         void* pParam,
-                                                         uintptr_t appCtx);
-static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
-                                           uint32_t arg,
-                                           void* pParam,
-                                           SOPC_StaMac_RequestType reqType);
-static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
-                                                  uint32_t arg,
-                                                  void* pParam,
-                                                  uintptr_t appCtx);
-static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
-                                        SOPC_App_Com_Event event,
-                                        uint32_t arg,
-                                        void* pParam,
-                                        uintptr_t appCtx);
+static void LockedStaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM,
+                                                    uint32_t arg,
+                                                    void* pParam,
+                                                    uintptr_t appCtx);
+static void LockedStaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pSM,
+                                                               uint32_t arg,
+                                                               void* pParam,
+                                                               uintptr_t appCtx);
+static void LockedStaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
+                                                                 uint32_t arg,
+                                                                 void* pParam,
+                                                                 uintptr_t appCtx);
+static void LockedStaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
+                                                                 uint32_t arg,
+                                                                 void* pParam,
+                                                                 uintptr_t appCtx);
+static void LockedStaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pSM,
+                                                               uint32_t arg,
+                                                               void* pParam,
+                                                               uintptr_t appCtx);
+static void LockedStaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
+                                                 uint32_t arg,
+                                                 void* pParam,
+                                                 SOPC_StaMac_RequestType reqType);
+static void LockedStaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
+                                                        uint32_t arg,
+                                                        void* pParam,
+                                                        uintptr_t appCtx);
+static void LockedStaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
+                                              SOPC_App_Com_Event event,
+                                              uint32_t arg,
+                                              void* pParam,
+                                              uintptr_t appCtx);
 
-static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState);
+static void LockedStaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState);
 
 /* ==================
  * API implementation
@@ -1108,9 +1111,9 @@ void SOPC_StaMac_SetUserContext(SOPC_StaMac_Machine* pSM, uintptr_t userContext)
     pSM->userContext = userContext;
 }
 
-static bool StaMac_GiveAuthorization_stActivating(SOPC_StaMac_Machine* pSM,
-                                                  SOPC_App_Com_Event event,
-                                                  SOPC_EncodeableType* pEncType)
+static bool LockedStaMac_GiveAuthorization_stActivating(SOPC_StaMac_Machine* pSM,
+                                                        SOPC_App_Com_Event event,
+                                                        SOPC_EncodeableType* pEncType)
 {
     bool authorization = false;
     SOPC_UNUSED_ARG(pSM);
@@ -1128,9 +1131,9 @@ static bool StaMac_GiveAuthorization_stActivating(SOPC_StaMac_Machine* pSM,
     return authorization;
 }
 
-static bool StaMac_GiveAuthorization_stClosing(SOPC_StaMac_Machine* pSM,
-                                               SOPC_App_Com_Event event,
-                                               SOPC_EncodeableType* pEncType)
+static bool LockedStaMac_GiveAuthorization_stClosing(SOPC_StaMac_Machine* pSM,
+                                                     SOPC_App_Com_Event event,
+                                                     SOPC_EncodeableType* pEncType)
 {
     bool authorization = false;
 
@@ -1149,9 +1152,9 @@ static bool StaMac_GiveAuthorization_stClosing(SOPC_StaMac_Machine* pSM,
     return authorization;
 }
 
-static bool StaMac_GiveAuthorization_stActivated(SOPC_StaMac_Machine* pSM,
-                                                 SOPC_App_Com_Event event,
-                                                 SOPC_EncodeableType* pEncType)
+static bool LockedStaMac_GiveAuthorization_stActivated(SOPC_StaMac_Machine* pSM,
+                                                       SOPC_App_Com_Event event,
+                                                       SOPC_EncodeableType* pEncType)
 {
     bool authorization = false;
 
@@ -1172,9 +1175,9 @@ static bool StaMac_GiveAuthorization_stActivated(SOPC_StaMac_Machine* pSM,
     return authorization;
 }
 
-static bool StaMac_GiveAuthorization_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
-                                                      SOPC_App_Com_Event event,
-                                                      SOPC_EncodeableType* pEncType)
+static bool LockedStaMac_GiveAuthorization_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
+                                                            SOPC_App_Com_Event event,
+                                                            SOPC_EncodeableType* pEncType)
 {
     bool authorization = false;
 
@@ -1195,9 +1198,9 @@ static bool StaMac_GiveAuthorization_stCreatingSubscr(SOPC_StaMac_Machine* pSM,
     return authorization;
 }
 
-static bool StaMac_GiveAuthorization_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
-                                                     SOPC_App_Com_Event event,
-                                                     SOPC_EncodeableType* pEncType)
+static bool LockedStaMac_GiveAuthorization_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
+                                                           SOPC_App_Com_Event event,
+                                                           SOPC_EncodeableType* pEncType)
 {
     bool authorization = false;
 
@@ -1219,9 +1222,9 @@ static bool StaMac_GiveAuthorization_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
     return authorization;
 }
 
-static bool StaMac_GiveAuthorization_stDeletingMonIt(SOPC_StaMac_Machine* pSM,
-                                                     SOPC_App_Com_Event event,
-                                                     SOPC_EncodeableType* pEncType)
+static bool LockedStaMac_GiveAuthorization_stDeletingMonIt(SOPC_StaMac_Machine* pSM,
+                                                           SOPC_App_Com_Event event,
+                                                           SOPC_EncodeableType* pEncType)
 {
     bool authorization = false;
 
@@ -1243,9 +1246,9 @@ static bool StaMac_GiveAuthorization_stDeletingMonIt(SOPC_StaMac_Machine* pSM,
     return authorization;
 }
 
-static bool StaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
-                                                      SOPC_App_Com_Event event,
-                                                      SOPC_EncodeableType* pEncType)
+static bool LockedStaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
+                                                            SOPC_App_Com_Event event,
+                                                            SOPC_EncodeableType* pEncType)
 {
     bool authorization = false;
 
@@ -1360,7 +1363,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     bool unlockedMutex = false;
-    bProcess = StaMac_IsEventTargeted(pSM, &appCtx, &requestScope, &requestType, event, arg, pParam, toolkitCtx);
+    bProcess = LockedStaMac_IsEventTargeted(pSM, &appCtx, &requestScope, &requestType, event, arg, pParam, toolkitCtx);
 
     if (bProcess)
     {
@@ -1395,7 +1398,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             {
             /* Session states */
             case stActivating:
-                processingAuthorization = StaMac_GiveAuthorization_stActivating(pSM, event, pEncType);
+                processingAuthorization = LockedStaMac_GiveAuthorization_stActivating(pSM, event, pEncType);
                 if (!processingAuthorization && SE_SESSION_ACTIVATION_FAILURE == event)
                 {
                     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1404,29 +1407,29 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 }
                 break;
             case stClosing:
-                processingAuthorization = StaMac_GiveAuthorization_stClosing(pSM, event, pEncType);
+                processingAuthorization = LockedStaMac_GiveAuthorization_stClosing(pSM, event, pEncType);
                 break;
             /* Main state */
             case stActivated:
-                processingAuthorization = StaMac_GiveAuthorization_stActivated(pSM, event, pEncType);
+                processingAuthorization = LockedStaMac_GiveAuthorization_stActivated(pSM, event, pEncType);
                 break;
             /* Creating* states */
             case stCreatingSubscr:
-                processingAuthorization = StaMac_GiveAuthorization_stCreatingSubscr(pSM, event, pEncType);
+                processingAuthorization = LockedStaMac_GiveAuthorization_stCreatingSubscr(pSM, event, pEncType);
                 break;
             case stCreatingMonIt:
-                processingAuthorization = StaMac_GiveAuthorization_stCreatingMonIt(pSM, event, pEncType);
+                processingAuthorization = LockedStaMac_GiveAuthorization_stCreatingMonIt(pSM, event, pEncType);
                 break;
             /* Deleting states */
             case stDeletingMonIt:
-                processingAuthorization = StaMac_GiveAuthorization_stDeletingMonIt(pSM, event, pEncType);
+                processingAuthorization = LockedStaMac_GiveAuthorization_stDeletingMonIt(pSM, event, pEncType);
                 break;
             case stDeletingSubscr:
-                processingAuthorization = StaMac_GiveAuthorization_stDeletingSubscr(pSM, event, pEncType);
+                processingAuthorization = LockedStaMac_GiveAuthorization_stDeletingSubscr(pSM, event, pEncType);
                 break;
             /* Invalid states */
             case stError:
-                StaMac_ProcessEvent_stError(pSM, event, arg, pParam, appCtx);
+                LockedStaMac_ProcessEvent_stError(pSM, event, arg, pParam, appCtx);
                 processingAuthorization = false;
                 break;
             case stInit:
@@ -1457,38 +1460,38 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             {
                 if (SE_ACTIVATED_SESSION == event)
                 {
-                    StaMac_ProcessMsg_ActivateSessionResponse(pSM, arg, pParam, appCtx);
+                    LockedStaMac_ProcessMsg_ActivateSessionResponse(pSM, arg, pParam, appCtx);
                 }
                 else if (SE_CLOSED_SESSION == event)
                 {
-                    StaMac_ProcessMsg_CloseSessionResponse(pSM, arg, pParam, appCtx);
+                    LockedStaMac_ProcessMsg_CloseSessionResponse(pSM, arg, pParam, appCtx);
                 }
                 else if (SE_RCV_SESSION_RESPONSE == event)
                 {
                     if (&OpcUa_PublishResponse_EncodeableType == pEncType)
                     {
-                        StaMac_ProcessMsg_PublishResponse(pSM, arg, pParam, appCtx);
+                        LockedStaMac_ProcessMsg_PublishResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_CreateMonitoredItemsResponse_EncodeableType == pEncType)
                     {
-                        StaMac_ProcessMsg_CreateMonitoredItemsResponse(pSM, arg, pParam, appCtx);
+                        LockedStaMac_ProcessMsg_CreateMonitoredItemsResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_DeleteMonitoredItemsResponse_EncodeableType == pEncType)
                     {
-                        StaMac_ProcessMsg_DeleteMonitoredItemsResponse(pSM, arg, pParam, appCtx);
+                        LockedStaMac_ProcessMsg_DeleteMonitoredItemsResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_CreateSubscriptionResponse_EncodeableType == pEncType)
                     {
-                        StaMac_ProcessMsg_CreateSubscriptionResponse(pSM, arg, pParam, appCtx);
+                        LockedStaMac_ProcessMsg_CreateSubscriptionResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_DeleteSubscriptionsResponse_EncodeableType == pEncType)
                     {
-                        StaMac_ProcessMsg_DeleteSubscriptionResponse(pSM, arg, pParam, appCtx);
+                        LockedStaMac_ProcessMsg_DeleteSubscriptionResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_ServiceFault_EncodeableType == pEncType)
                     {
                         /* give appCtx, and not internal app context, to know more about the service fault */
-                        StaMac_ProcessMsg_ServiceFault(pSM, arg, pParam, requestType);
+                        LockedStaMac_ProcessMsg_ServiceFault(pSM, arg, pParam, requestType);
                     }
                     else
                     {
@@ -1500,7 +1503,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 else if (SE_SND_REQUEST_FAILED == event)
                 {
                     // Use same processing as service fault: it concerns only publish request
-                    StaMac_ProcessEvent_SendRequestFailed(pSM, arg, pParam, appCtx);
+                    LockedStaMac_ProcessEvent_SendRequestFailed(pSM, arg, pParam, appCtx);
                 }
                 else
                 {
@@ -1551,7 +1554,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             }
         }
 
-        StaMac_PostProcessActions(pSM, oldState);
+        LockedStaMac_PostProcessActions(pSM, oldState);
     }
 
     if (!unlockedMutex)
@@ -1577,14 +1580,14 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
  * When returns true, the event is targeted to this machine, the pAppCtx is set if not NULL,
  * as well as the request scope.
  */
-static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
-                                   uintptr_t* pAppCtx,
-                                   SOPC_StaMac_RequestScope* pRequestScope,
-                                   SOPC_StaMac_RequestType* pRequestType,
-                                   SOPC_App_Com_Event event,
-                                   uint32_t arg,
-                                   void* pParam,
-                                   uintptr_t toolkitCtx)
+static bool LockedStaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
+                                         uintptr_t* pAppCtx,
+                                         SOPC_StaMac_RequestScope* pRequestScope,
+                                         SOPC_StaMac_RequestType* pRequestType,
+                                         SOPC_App_Com_Event event,
+                                         uint32_t arg,
+                                         void* pParam,
+                                         uintptr_t toolkitCtx)
 {
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(pParam);
@@ -1659,10 +1662,10 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
     return bProcess;
 }
 
-static void StaMac_ProcessMsg_ActivateSessionResponse(SOPC_StaMac_Machine* pSM,
-                                                      uint32_t arg,
-                                                      void* pParam,
-                                                      uintptr_t appCtx)
+static void LockedStaMac_ProcessMsg_ActivateSessionResponse(SOPC_StaMac_Machine* pSM,
+                                                            uint32_t arg,
+                                                            void* pParam,
+                                                            uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(pParam);
     SOPC_UNUSED_ARG(appCtx);
@@ -1672,10 +1675,10 @@ static void StaMac_ProcessMsg_ActivateSessionResponse(SOPC_StaMac_Machine* pSM,
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Session activated.");
 }
 
-static void StaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
-                                                   uint32_t arg,
-                                                   void* pParam,
-                                                   uintptr_t appCtx)
+static void LockedStaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
+                                                         uint32_t arg,
+                                                         void* pParam,
+                                                         uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(pParam);
@@ -1685,9 +1688,9 @@ static void StaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
     pSM->state = stError;
 }
 
-static void StaMac_ProcessMsg_PubResp_NotifData(SOPC_StaMac_Machine* pSM,
-                                                OpcUa_PublishResponse* pPubResp,
-                                                OpcUa_DataChangeNotification* pDataNotif)
+static void LockedStaMac_ProcessMsg_PubResp_NotifData(SOPC_StaMac_Machine* pSM,
+                                                      OpcUa_PublishResponse* pPubResp,
+                                                      OpcUa_DataChangeNotification* pDataNotif)
 {
     uintptr_t* newAPImonitoredItemCtxArray = NULL;
     OpcUa_MonitoredItemNotification* pMonItNotif = NULL;
@@ -1731,9 +1734,9 @@ static void StaMac_ProcessMsg_PubResp_NotifData(SOPC_StaMac_Machine* pSM,
     }
 }
 
-static void StaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
-                                                     OpcUa_PublishResponse* pPubResp,
-                                                     OpcUa_EventNotificationList* pEventNotif)
+static void LockedStaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
+                                                           OpcUa_PublishResponse* pPubResp,
+                                                           OpcUa_EventNotificationList* pEventNotif)
 {
     uintptr_t* newAPImonitoredItemCtxArray = NULL;
     if (NULL != pSM->pCbkNotification && pEventNotif->NoOfEvents > 0)
@@ -1767,7 +1770,7 @@ static void StaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
     }
 }
 
-static void StaMac_TreatTooManyPublishRequests(SOPC_StaMac_Machine* pSM)
+static void LockedStaMac_TreatTooManyPublishRequests(SOPC_StaMac_Machine* pSM)
 {
     // Adapt the target to avoid sending too many requests
     if (!pSM->tooManyTokenRcvd && pSM->nTokenTarget > 1)
@@ -1778,7 +1781,10 @@ static void StaMac_TreatTooManyPublishRequests(SOPC_StaMac_Machine* pSM)
     pSM->tooManyTokenRcvd = true;
 }
 
-static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx)
+static void LockedStaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM,
+                                                    uint32_t arg,
+                                                    void* pParam,
+                                                    uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(appCtx); // Nothing in context
@@ -1830,7 +1836,7 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
                 SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[iNotif].Encoding);
 
                 pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[iNotif].Body.Object.Value;
-                StaMac_ProcessMsg_PubResp_NotifData(pSM, pPubResp, pDataNotif);
+                LockedStaMac_ProcessMsg_PubResp_NotifData(pSM, pPubResp, pDataNotif);
             }
             else if (&OpcUa_EventNotificationList_EncodeableType ==
                          pNotifMsg->NotificationData[iNotif].Body.Object.ObjType &&
@@ -1841,7 +1847,7 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
                 // New API compatible only
                 OpcUa_EventNotificationList* pEventNotif =
                     (OpcUa_EventNotificationList*) pNotifMsg->NotificationData[iNotif].Body.Object.Value;
-                StaMac_ProcessMsg_PubResp_EventNotifList(pSM, pPubResp, pEventNotif);
+                LockedStaMac_ProcessMsg_PubResp_EventNotifList(pSM, pPubResp, pEventNotif);
             }
             else
             {
@@ -1854,7 +1860,7 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
 
     if (OpcUa_BadTooManyPublishRequests == pPubResp->ResponseHeader.ServiceResult)
     {
-        StaMac_TreatTooManyPublishRequests(pSM);
+        LockedStaMac_TreatTooManyPublishRequests(pSM);
     }
     else
     {
@@ -1862,10 +1868,10 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     }
 }
 
-static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pSM,
-                                                         uint32_t arg,
-                                                         void* pParam,
-                                                         uintptr_t appCtx)
+static void LockedStaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pSM,
+                                                               uint32_t arg,
+                                                               void* pParam,
+                                                               uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(appCtx);
@@ -1882,10 +1888,10 @@ static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pS
     pSM->iCntMaxKeepAlive = resp->RevisedMaxKeepAliveCount;
 }
 
-static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pSM,
-                                                         uint32_t arg,
-                                                         void* pParam,
-                                                         uintptr_t appCtx)
+static void LockedStaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pSM,
+                                                               uint32_t arg,
+                                                               void* pParam,
+                                                               uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(appCtx);
@@ -1930,10 +1936,10 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
     pSM->state = stActivated;
 }
 
-static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
-                                                           uint32_t arg,
-                                                           void* pParam,
-                                                           uintptr_t appCtx)
+static void LockedStaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
+                                                                 uint32_t arg,
+                                                                 void* pParam,
+                                                                 uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(arg);
 
@@ -1985,10 +1991,10 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
     pSM->state = stActivated;
 }
 
-static void StaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
-                                                           uint32_t arg,
-                                                           void* pParam,
-                                                           uintptr_t appCtx)
+static void LockedStaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
+                                                                 uint32_t arg,
+                                                                 void* pParam,
+                                                                 uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(arg);
 
@@ -2042,10 +2048,10 @@ static void StaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* 
     pSM->state = stActivated;
 }
 
-static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
-                                           uint32_t arg,
-                                           void* pParam,
-                                           SOPC_StaMac_RequestType reqType)
+static void LockedStaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
+                                                 uint32_t arg,
+                                                 void* pParam,
+                                                 SOPC_StaMac_RequestType reqType)
 {
     SOPC_UNUSED_ARG(arg);
     OpcUa_ServiceFault* servFault = (OpcUa_ServiceFault*) pParam;
@@ -2059,7 +2065,7 @@ static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
 
             if (OpcUa_BadTooManyPublishRequests == servFault->ResponseHeader.ServiceResult)
             {
-                StaMac_TreatTooManyPublishRequests(pSM);
+                LockedStaMac_TreatTooManyPublishRequests(pSM);
             }
             else
             {
@@ -2079,10 +2085,10 @@ static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
     }
 }
 
-static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
-                                                  uint32_t arg,
-                                                  void* pParam,
-                                                  uintptr_t appCtx)
+static void LockedStaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
+                                                        uint32_t arg,
+                                                        void* pParam,
+                                                        uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(appCtx);
@@ -2117,11 +2123,11 @@ static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
     }
 }
 
-static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
-                                        SOPC_App_Com_Event event,
-                                        uint32_t arg,
-                                        void* pParam,
-                                        uintptr_t appCtx)
+static void LockedStaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
+                                              SOPC_App_Com_Event event,
+                                              uint32_t arg,
+                                              void* pParam,
+                                              uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(pSM);
     SOPC_UNUSED_ARG(arg);
@@ -2214,7 +2220,7 @@ static SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, u
  *
  * Machine's mutex shall already be locked by the caller.
  */
-static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState)
+static void LockedStaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState)
 {
     SOPC_ASSERT(NULL != pSM);
 
