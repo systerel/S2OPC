@@ -12,7 +12,7 @@
           </dataset>
         </message>
         <message groupId="15" groupVersion="1" publishingInterval="1000.">
-          <dataset writerId="1">
+          <dataset writerId="1" timestamp="true">
             <!-- one to many -->
             <variable nodeId="ns=1;s=PubInt" displayName="varInt" dataType="Int64"/>
             <variable nodeId="ns=1;s=PubUInt" displayName="varUInt" dataType="UInt64"/>

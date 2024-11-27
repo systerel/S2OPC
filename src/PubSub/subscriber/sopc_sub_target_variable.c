@@ -100,6 +100,9 @@ bool SOPC_SubTargetVariable_SetVariables(SOPC_SubTargetVariableConfig* targetCon
             {
                 // Nominal case
                 SOPC_Variant_Move(&value->Value.Value, variant);
+                // Transmit received timestamp
+                // If no timestamp this one should be equal to zero
+                value->Value.SourceTimestamp = (SOPC_DateTime) SOPC_Dataset_LL_DataSetMsg_Get_Timestamp(dsm);
             }
         }
         else

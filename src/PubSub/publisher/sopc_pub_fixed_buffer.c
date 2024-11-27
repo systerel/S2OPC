@@ -22,6 +22,7 @@
 #include "sopc_assert.h"
 #include "sopc_buffer.h"
 #include "sopc_dataset_ll_layer.h"
+#include "sopc_date_time.h"
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -37,12 +38,21 @@ struct SOPC_PubFixedBuffer_DataSetField_Position
     uint32_t position;
 };
 
+typedef struct SOPC_PubFixedBuffer_Dsm_DynamicInfo
+{
+    // Pointer to dsm_sequence_number stored in SOPC_Dataset_LL_NetworkMessage structure
+    const uint16_t* sequence_number;
+    uint32_t sequence_number_position;
+    // Pointer to dataset_message_timestamp stored in SOPC_DataSet_LL_NetworkMessage structure
+    const uint64_t* timestamp;
+    uint32_t timestamp_position;
+} SOPC_PubFixedBuffer_Dsm_DynamicInfo;
+
 struct SOPC_PubFixedBuffer_Buffer_Ctx
 {
-    // Array of pointers to dsm_sequence_number stored in SOPC_Dataset_LL_NetworkMessage structure
-    const uint16_t** dsm_sequence_numbers;
-    uint32_t* dsm_sequence_number_positions;
-    size_t dsm_sequence_numbers_len;
+    // Array of pointer to sequenceNumber and timestamp stored in SOPC_DataSet_LL_NetworkMessage structure
+    SOPC_PubFixedBuffer_Dsm_DynamicInfo* dynamic_dsm_info;
+    size_t nb_dynamic_dsm_info;
 
     // Array of tuple pointer to dataSetField stored in SOPC_Dataset_LL_NetworkMessage structure and position in
     // preencoded buffer
@@ -59,14 +69,11 @@ static SOPC_PubFixedBuffer_Buffer_Ctx* PubFixedBuffer_Create_Preencode_Buffer(SO
     SOPC_ASSERT(NULL != preencode_structure);
 
     uint8_t nbDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
-    preencode_structure->dsm_sequence_numbers_len = (size_t) nbDsm;
-    preencode_structure->dsm_sequence_numbers =
-        SOPC_Calloc(preencode_structure->dsm_sequence_numbers_len, sizeof(uint16_t*));
-    preencode_structure->dsm_sequence_number_positions =
-        SOPC_Calloc(preencode_structure->dsm_sequence_numbers_len, sizeof(uint32_t));
 
-    SOPC_ASSERT(NULL != preencode_structure->dsm_sequence_numbers);
-    SOPC_ASSERT(NULL != preencode_structure->dsm_sequence_number_positions);
+    preencode_structure->nb_dynamic_dsm_info = (size_t) nbDsm;
+    preencode_structure->dynamic_dsm_info =
+        SOPC_Calloc(preencode_structure->nb_dynamic_dsm_info, sizeof(*preencode_structure->dynamic_dsm_info));
+    SOPC_ASSERT(NULL != preencode_structure->dynamic_dsm_info);
 
     for (uint8_t iDsm = 0; iDsm < nbDsm; iDsm++)
     {
@@ -97,14 +104,28 @@ SOPC_PubFixedBuffer_DataSetField_Position* SOPC_PubFixedBuffer_Get_DataSetField_
 static void PubFixedBuffer_Initialize_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm)
 {
     SOPC_PubFixedBuffer_Buffer_Ctx* preencode_structure = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
+    SOPC_ASSERT(NULL != preencode_structure);
 
     uint8_t nbDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
-    SOPC_ASSERT(preencode_structure->dsm_sequence_numbers_len == nbDsm);
+    SOPC_ASSERT(preencode_structure->nb_dynamic_dsm_info == nbDsm);
     size_t index_dsf = 0;
     for (int i = 0; i < nbDsm; i++)
     {
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
-        preencode_structure->dsm_sequence_numbers[i] = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumberPointer(dsm);
+        const SOPC_DataSet_LL_UadpDataSetMessageContentMask* dsmContentMask =
+            SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
+        if (NULL != dsmContentMask)
+        {
+            SOPC_PubFixedBuffer_Dsm_DynamicInfo* dynamicDsmInfo = &preencode_structure->dynamic_dsm_info[i];
+            if (dsmContentMask->dataSetMessageSequenceNumberFlag)
+            {
+                dynamicDsmInfo->sequence_number = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumberPointer(dsm);
+            }
+            if (dsmContentMask->timestampFlag)
+            {
+                dynamicDsmInfo->timestamp = SOPC_Dataset_LL_DataSetMsg_Get_TimestampPointer(dsm);
+            }
+        }
         uint16_t nbDsf = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
         SOPC_ASSERT(preencode_structure->dataSetFields_len >= nbDsf + index_dsf);
         for (uint16_t j = 0; j < nbDsf; j++)
@@ -162,8 +183,7 @@ void SOPC_PubFixedBuffer_Delete_Preencode_Buffer(SOPC_PubFixedBuffer_Buffer_Ctx*
     if (NULL != preencode)
     {
         SOPC_Free(preencode->dataSetFields);
-        SOPC_Free(preencode->dsm_sequence_numbers);
-        SOPC_Free(preencode->dsm_sequence_number_positions);
+        SOPC_Free(preencode->dynamic_dsm_info);
         SOPC_Buffer_Delete(preencode->buffer);
         SOPC_Free(preencode);
         preencode = NULL;
@@ -174,11 +194,23 @@ bool SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(SOPC_PubFixedBuffer_
                                                             uint32_t position,
                                                             size_t index)
 {
-    if (NULL == preencode || index >= preencode->dsm_sequence_numbers_len)
+    if (NULL == preencode || index >= preencode->nb_dynamic_dsm_info)
     {
         return false;
     }
-    preencode->dsm_sequence_number_positions[index] = position;
+    preencode->dynamic_dsm_info[index].sequence_number_position = position;
+    return true;
+}
+
+bool SOPC_PubFixedBuffer_Set_DSM_Timestamp_Position_At(SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
+                                                       uint32_t position,
+                                                       size_t index)
+{
+    if (NULL == preencode || index >= preencode->nb_dynamic_dsm_info)
+    {
+        return false;
+    }
+    preencode->dynamic_dsm_info[index].timestamp_position = position;
     return true;
 }
 
@@ -201,12 +233,24 @@ static void update_buffer(SOPC_Buffer* buffer, const void* data, uint32_t positi
 SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode)
 {
     SOPC_ASSERT(NULL != preencode);
-    SOPC_ASSERT(NULL != preencode->dsm_sequence_numbers);
-    SOPC_ASSERT(NULL != preencode->dsm_sequence_number_positions);
-    for (size_t i = 0; i < preencode->dsm_sequence_numbers_len; i++)
+    SOPC_ASSERT(NULL != preencode->dynamic_dsm_info);
+
+    for (size_t i = 0; i < preencode->nb_dynamic_dsm_info; i++)
     {
-        update_buffer(preencode->buffer, preencode->dsm_sequence_numbers[i],
-                      preencode->dsm_sequence_number_positions[i], sizeof(**preencode->dsm_sequence_numbers));
+        SOPC_PubFixedBuffer_Dsm_DynamicInfo* dynamicDsmInfo = &preencode->dynamic_dsm_info[i];
+        if (NULL != dynamicDsmInfo->sequence_number)
+        {
+            update_buffer(preencode->buffer, dynamicDsmInfo->sequence_number, dynamicDsmInfo->sequence_number_position,
+                          sizeof(*dynamicDsmInfo->sequence_number));
+        }
+
+        if (NULL != dynamicDsmInfo->timestamp)
+        {
+            // Update Timestamp here
+            uint64_t dsmTimestamp = (uint64_t) SOPC_Time_GetCurrentTimeUTC();
+            update_buffer(preencode->buffer, &dsmTimestamp, dynamicDsmInfo->timestamp_position,
+                          sizeof(*dynamicDsmInfo->timestamp));
+        }
     }
     for (size_t i = 0; i < preencode->dataSetFields_len; i++)
     {

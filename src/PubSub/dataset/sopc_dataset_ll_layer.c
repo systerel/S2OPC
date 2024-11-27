@@ -22,6 +22,7 @@
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_conf.h"
+#include "sopc_time_reference.h"
 
 #include "sopc_dataset_ll_layer.h"
 #include "sopc_logger.h"
@@ -36,6 +37,7 @@ struct SOPC_Dataset_LL_DataSetMessage
 {
     SOPC_DataSet_LL_UadpDataSetMessageContentMask conf;
 
+    uint64_t dataset_message_timestamp;
     SOPC_Dataset_LL_DataSetField* dataset_fields;
     uint16_t dataset_fields_length;
     uint16_t dataset_writer_id;
@@ -366,6 +368,24 @@ void SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(SOPC_Dataset_LL_DataSetMessag
 {
     SOPC_ASSERT(NULL != dsm);
     dsm->dataset_message_sequence_number = sn;
+}
+
+uint64_t SOPC_Dataset_LL_DataSetMsg_Get_Timestamp(const SOPC_Dataset_LL_DataSetMessage* dsm)
+{
+    SOPC_ASSERT(NULL != dsm);
+    return dsm->dataset_message_timestamp;
+}
+
+void SOPC_Dataset_LL_DataSetMsg_Set_Timestamp(SOPC_Dataset_LL_DataSetMessage* dsm, uint64_t timestamp)
+{
+    SOPC_ASSERT(NULL != dsm);
+    dsm->dataset_message_timestamp = timestamp;
+}
+
+const uint64_t* SOPC_Dataset_LL_DataSetMsg_Get_TimestampPointer(const SOPC_Dataset_LL_DataSetMessage* dsm)
+{
+    SOPC_ASSERT(NULL != dsm);
+    return &dsm->dataset_message_timestamp;
 }
 
 uint16_t SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(const SOPC_Dataset_LL_DataSetMessage* dsm)

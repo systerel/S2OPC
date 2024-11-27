@@ -60,6 +60,7 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
                                                             bool isAcyclic,
                                                             uint16_t dataSetId,
                                                             bool useSeqNum,
+                                                            bool useTimestamp,
                                                             uint16_t nbVar)
 {
     SOPC_PublishedDataSet* dataset = SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, dataSetIndex);
@@ -73,7 +74,7 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
     }
     SOPC_DataSetWriter_Set_DataSet(writer, dataset);
     SOPC_DataSetWriter_Set_Id(writer, dataSetId);
-    const SOPC_DataSetWriter_Options dsmOptions = {.noUseSeqNum = !useSeqNum};
+    const SOPC_DataSetWriter_Options dsmOptions = {.noUseSeqNum = !useSeqNum, .notTimestamp = !useTimestamp};
     SOPC_DataSetWriter_Set_Options(writer, &dsmOptions);
 
     return dataset;
@@ -237,7 +238,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
         SOPC_ASSERT(NULL != writer);
         // WriterId = 50
-        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, 0, 50, 1, 1);
+        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, 0, 50, 1, 0, 1);
         alloc = NULL != dataset;
     }
     if (alloc)
@@ -252,7 +253,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 1);
         SOPC_ASSERT(NULL != writer);
         // WriterId = 51
-        dataset = SOPC_PubSubConfig_InitDataSet(config, 1, writer, 0, 51, 1, 2);
+        dataset = SOPC_PubSubConfig_InitDataSet(config, 1, writer, 0, 51, 1, 0, 2);
         alloc = NULL != dataset;
     }
     if (alloc)
@@ -289,7 +290,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
         SOPC_ASSERT(NULL != writer);
         // WriterId = 52
-        dataset = SOPC_PubSubConfig_InitDataSet(config, 2, writer, 0, 52, 1, 1);
+        dataset = SOPC_PubSubConfig_InitDataSet(config, 2, writer, 0, 52, 1, 0, 1);
         alloc = NULL != dataset;
     }
     if (alloc)

@@ -53,6 +53,11 @@ bool SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(SOPC_PubFixedBuffer_
                                                             uint32_t position,
                                                             size_t index);
 
+/* Set position of dataSetMessage timestamp in final buffer */
+bool SOPC_PubFixedBuffer_Set_DSM_Timestamp_Position_At(SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
+                                                       uint32_t position,
+                                                       size_t index);
+
 SOPC_PubFixedBuffer_DataSetField_Position* SOPC_PubFixedBuffer_Get_DataSetField_Position_At(
     SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
     size_t index);

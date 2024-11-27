@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
@@ -109,7 +110,6 @@ const bool DATASET_LL_DSM_IS_VALID = true;
 const bool DATASET_LL_DSM_STATUS_ENABLED = false;
 const bool DATASET_LL_DSM_MAJOR_VERSION_ENABLED = false;
 const bool DATASET_LL_DSM_MINOR_VERSION_ENABLED = false;
-const bool DATASET_LL_DSM_TIMESTAMP_ENABLED = false;
 const bool DATASET_LL_DSM_PICOSECONDS_ENABLED = false;
 
 // Security Header Flag
@@ -1092,7 +1092,6 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
             SOPC_ASSERT(conf->dataSetMessageType <= DataSet_LL_MessageType_KeepAlive && "Unsupported Message type");
             // - Timestamp enabled
             Network_Message_Set_Bool_Bit(&byte, 4, conf->timestampFlag);
-            SOPC_ASSERT(DATASET_LL_DSM_TIMESTAMP_ENABLED == conf->timestampFlag && "Timestamp not supported");
 
             Network_Message_Set_Bool_Bit(&byte, 5, conf->picoSecondsFlag);
             SOPC_ASSERT(DATASET_LL_DSM_PICOSECONDS_ENABLED == conf->picoSecondsFlag && "Picoseconds not supported");
@@ -1110,12 +1109,31 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
                 uint32_t bufferPayloadPosition = 0;
                 status = SOPC_Buffer_GetPosition(*buffer_payload, &bufferPayloadPosition);
                 SOPC_ASSERT(SOPC_STATUS_OK == status);
-                SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(
+                res = SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(
                     preencode, bufferPayloadPosition + bufferPosition, (size_t) i);
+                SOPC_ASSERT(res);
             }
             uint16_t dsmSN = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(dsm);
             status = SOPC_UInt16_Write(&dsmSN, *buffer_payload, 0);
             res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_DsmSeqNum_Failed);
+        }
+
+        // DataSetMessage Timestamp
+        if (SOPC_STATUS_OK == status && conf->timestampFlag)
+        {
+            if (preencodedEnabled)
+            {
+                uint32_t bufferPayloadPosition = 0;
+                status = SOPC_Buffer_GetPosition(*buffer_payload, &bufferPayloadPosition);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+                res = SOPC_PubFixedBuffer_Set_DSM_Timestamp_Position_At(
+                    preencode, bufferPayloadPosition + bufferPosition, (size_t) i);
+                SOPC_ASSERT(res);
+            }
+            uint64_t dsmTimestamp = (uint64_t) SOPC_Time_GetCurrentTimeUTC();
+            SOPC_Dataset_LL_DataSetMsg_Set_Timestamp(dsm, dsmTimestamp);
+            status = SOPC_UInt64_Write(&dsmTimestamp, *buffer_payload, 0);
+            res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_DsmTimestamp_Failed);
         }
 
         // If message is not a keep alive type, encode data fields
@@ -1154,7 +1172,6 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
                 SOPC_Free(bufferPayload_dsfPositions);
             }
         }
-
         if (NULL != dsmSizeBufferPos && SOPC_STATUS_OK == status)
         {
             // Write the DSM size at the payload start
@@ -1416,10 +1433,13 @@ static SOPC_NetworkMessage_Error_Code decode_dataSetMessage(
     /** Timestamp **/
     if (dsm_conf.timestampFlag && SOPC_STATUS_OK == status)
     {
-        // not managed yet
         uint64_t timestamp;
         status = SOPC_UInt64_Read(&timestamp, buffer_payload, 0);
-        code = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Unsupported_DsmTimeStamp);
+        code = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Read_DsmTimeStamp);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Dataset_LL_DataSetMsg_Set_Timestamp(dsm, timestamp);
+        }
     }
 
     /** PicoSeconds **/

@@ -52,6 +52,7 @@ ATTRIBUTE_MESSAGE_FIXED_SIZE = "publisherFixedSize"
 TAG_DATASET = "dataset"
 ATTRIBUTE_DATASET_WRITERID = "writerId"
 ATTRIBUTE_DATASET_SEQ_NUM = "useSequenceNumber"
+ATTRIBUTE_DATASET_TIMESTAMP = "timestamp"
 TAG_VARIABLE = "variable"
 ATTRIBUTE_VARIABLE_NODEID = "nodeId"
 ATTRIBUTE_VARIABLE_NAME = "displayName"
@@ -411,6 +412,7 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
 
     writerId = int(getOptionalAttribute(dataset, ATTRIBUTE_DATASET_WRITERID, 0))
     useSeqNum = getOptionalAttribute(dataset, ATTRIBUTE_DATASET_SEQ_NUM, 1)
+    useTimestamp = getOptionalAttribute(dataset, ATTRIBUTE_DATASET_TIMESTAMP, 0)
     result.add("""
     /*** DataSetMessage No %d of message %d ***/
     """ % (dsIndex+1, msgContext.id))
@@ -437,13 +439,13 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, %d);
         SOPC_ASSERT(NULL != writer);
         // WriterId = %d
-        dataset = SOPC_PubSubConfig_InitDataSet(config, %d, writer, %d, %d, %s, %d);
+        dataset = SOPC_PubSubConfig_InitDataSet(config, %d, writer, %d, %d, %s, %s, %d);
         alloc = NULL != dataset;
     }
     if (alloc)
     {""" % (dsIndex,
             writerId,
-            GContext.pubDataSetIndex, msgContext.cnxContext.acyclicPublisher, writerId, useSeqNum, len(variables)))
+            GContext.pubDataSetIndex, msgContext.cnxContext.acyclicPublisher, writerId, useSeqNum, useTimestamp, len(variables)))
             GContext.pubDataSetIndex += 1
         elif mode == SUB_MODE:
 
@@ -756,6 +758,7 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
                                                             bool isAcyclic,
                                                             uint16_t dataSetId,
                                                             bool useSeqNum,
+                                                            bool useTimestamp,
                                                             uint16_t nbVar)
 {
     SOPC_PublishedDataSet* dataset = SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, dataSetIndex);
@@ -769,7 +772,7 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
     }
     SOPC_DataSetWriter_Set_DataSet(writer, dataset);
     SOPC_DataSetWriter_Set_Id(writer, dataSetId);
-    const SOPC_DataSetWriter_Options dsmOptions = {.noUseSeqNum = !useSeqNum};
+    const SOPC_DataSetWriter_Options dsmOptions = {.noUseSeqNum = !useSeqNum, .notTimestamp = !useTimestamp};
     SOPC_DataSetWriter_Set_Options(writer, &dsmOptions);
 
     return dataset;
