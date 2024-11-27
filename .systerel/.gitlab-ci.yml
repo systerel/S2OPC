@@ -235,9 +235,7 @@ build-linux-faulty-packet:
       - '*.log'
       - 'build_faulty/bin'
   rules :
-    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $NO_ASAN == null || $ALL_TESTS != null"
+    - if: "$ALL_BUILDS != null"
       when : on_success
 
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
@@ -605,7 +603,7 @@ test-faulty-packets :
     when: on_failure
     expire_in: "30 days"
   rules :
-    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG || $FAULTY_PACKET != null"
+    - if: "$ALL_BUILDS != null"
       when: on_success
 
 # Generate the Software Bill Of Materials according to the conan.lock file.
