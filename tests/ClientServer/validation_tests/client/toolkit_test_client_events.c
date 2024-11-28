@@ -43,7 +43,7 @@
 static const uint32_t sleepTimeout = 200;
 // Loop timeout in milliseconds
 static const uint32_t loopTimeout = 10000;
-static const uint32_t failureLoopTimeout = 2000;
+static const uint32_t failureLoopTimeout = 3000;
 
 static const char* testObjectNodeIdStr = "ns=1;s=TestObject";
 static const char* genEventMethodIdStr = "ns=1;s=GenEventMethod";
@@ -1040,7 +1040,7 @@ static int32_t waitEventReceivedAndResult(const bool expectSuccessFirstMI,
     {
         localLoopTimeoutMs = failureLoopTimeout;
     }
-    while (!eventNotifReceived && (!hasSecondMI || !eventNotifReceived2) &&
+    while ((!eventNotifReceived || (hasSecondMI && !eventNotifReceived2)) &&
            loopCpt * sleepTimeout <= localLoopTimeoutMs)
     {
         loopCpt++;
