@@ -220,7 +220,7 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                     }
                 }
             }
-            expNbEventsReceivedWhenOverflow = (nbEventsBeforeOverflow == nbEventsReceived);
+            expNbEventsReceivedWhenOverflow = (nbEventsBeforeOverflow + 1 == nbEventsReceived);
         }
     }
 }
@@ -1114,7 +1114,7 @@ static int32_t waitOverflowEventReceived(void)
     {
         return 1;
     }
-    while (!overflowReceived && !expNbEventsReceivedWhenOverflow && loopCpt * sleepTimeout <= loopTimeout)
+    while ((!overflowReceived || !expNbEventsReceivedWhenOverflow) && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
