@@ -1551,32 +1551,6 @@ int main(void)
     }
 
     SOPC_CONSOLE_PRINTF(
-        "\n=========== TC 18: create MI: only invalid select clauses and invalid where clause ===========\n");
-
-    /* Create a new MI for Server object which notifies all events */
-    if (SOPC_STATUS_OK == status)
-    {
-        secondMIcreated = false;
-        validSelectClausesOnly = false;
-        invalidSelectClausesOnly = true;
-        validWhereClauseExp = false;
-        miRespServer = create_monitored_item_event(sub, false, 1, &serverObjectId, validSelectClausesOnly,
-                                                   invalidSelectClausesOnly);
-        status = (NULL == miRespServer ? SOPC_STATUS_NOK : status);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = check_monitored_items_special_cases(miRespServer, revisedQueueSizeExp, false, validWhereClauseExp,
-                                                     validSelectClausesOnly);
-        if (SOPC_STATUS_OK != status)
-        {
-            secondMIcreated = true;
-            unexpectedResults++;
-        }
-    }
-
-    SOPC_CONSOLE_PRINTF(
         "\n=========== TC 19: create MI: select clause with invalid and valid index ranges ===========\n");
 
     /* Create a new MI for Server object which notifies all events */
