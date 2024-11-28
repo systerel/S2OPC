@@ -105,7 +105,7 @@ static bool expectOverflow = false;
 static bool overflowReceived = false;
 static const uint32_t nbEventsBeforeOverflow = SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE;
 static uint32_t nbEventsReceived = 0;
-static bool correctNbEventsReceived = false;
+static bool expNbEventsReceivedWhenOverflow = false;
 
 static bool is_eventQueueOverflowTypeId(SOPC_Variant* var)
 {
@@ -139,6 +139,7 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                                     i, (const char*) monitoredItemCtxArray[i]);
                 event = &eventList->Events[i];
                 localExpectedContentReceived = (NB_SELECT_CLAUSES == event->NoOfEventFields);
+                // all clauses present case
                 if (localExpectedContentReceived)
                 {
                     for (int32_t j = 0; j < event->NoOfEventFields; j++)
@@ -160,6 +161,7 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                         }
                     }
                 }
+                // index range clauses present case
                 else if (NB_SELECT_CLAUSES_INDEX_RANGE == event->NoOfEventFields)
                 {
                     localExpectedContentReceived = true;
@@ -190,17 +192,21 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                 {
                     if (monitoredItemNames[0] == (char*) monitoredItemCtxArray[i])
                     {
+                        // Nominal case for first MI: record received flag + expected content flag
                         if (!expectOverflow)
                         {
                             expectedContentReceived = localExpectedContentReceived;
                             eventNotifReceived = true;
                         }
+                        // EventQueueOverflowCase case for first MI: record overflow Event and number of events received
                         else if (0 == nbEventsReceived &&
                                  is_eventQueueOverflowTypeId(&event->EventFields[EVENT_TYPE_FIELD_IDX]))
                         {
                             overflowReceived = true;
                             nbEventsReceived++;
                         }
+                        // EventQueueOverflowCase case for first MI: record number of events received which are not
+                        // overflow event
                         else if (!is_eventQueueOverflowTypeId(&event->EventFields[EVENT_TYPE_FIELD_IDX]))
                         {
                             nbEventsReceived++;
@@ -208,12 +214,13 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                     }
                     else if (monitoredItemNames[1] == (char*) monitoredItemCtxArray[i])
                     {
+                        // Nominal case for second MI: record received flag + expected content flag
                         expectedContentReceived2 = localExpectedContentReceived;
                         eventNotifReceived2 = true;
                     }
                 }
             }
-            correctNbEventsReceived = (nbEventsBeforeOverflow == nbEventsReceived);
+            expNbEventsReceivedWhenOverflow = (nbEventsBeforeOverflow == nbEventsReceived);
         }
     }
 }
@@ -1107,7 +1114,7 @@ static int32_t waitOverflowEventReceived(void)
     {
         return 1;
     }
-    while (!overflowReceived && !correctNbEventsReceived && loopCpt * sleepTimeout <= loopTimeout)
+    while (!overflowReceived && !expNbEventsReceivedWhenOverflow && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
@@ -1164,6 +1171,7 @@ int main(void)
     bool validWhereClauseExp = false;
 
     int32_t unexpectedResults = 0;
+    // Create a subscription
     if (SOPC_STATUS_OK == status)
     {
         connCreated = true;
@@ -1171,12 +1179,13 @@ int main(void)
         status = (NULL == sub ? SOPC_STATUS_NOK : status);
     }
 
+    // Create the first MI for events on TestObject node with all clauses (valid and invalid clauses)
     if (SOPC_STATUS_OK == status)
     {
         subCreated = true;
+        // Requested queue size 0 => default queue size
         miRespTestObj =
             create_monitored_item_event(sub, true, 0, NULL, validSelectClausesOnly, invalidSelectClausesOnly);
-        // Requested queue size 0 => default queue size
         revisedQueueSizeExp = SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE;
         status = (NULL == miRespTestObj ? SOPC_STATUS_NOK : status);
     }
@@ -1184,16 +1193,19 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         firstMIcreated = true;
+        // Check response content + revised queue size
         status = check_monitored_items(miRespTestObj, revisedQueueSizeExp);
     }
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 1: base event type ===========\n");
+    // Generate events with default options
     if (SOPC_STATUS_OK == status)
     {
         firstMIid = miRespTestObj->Results[0].MonitoredItemId;
         status = call_gen_events_method(secureConnection, 0, NULL, 0, 0);
     }
 
+    // Check events received for the first MI
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(true, false, false);
@@ -1201,41 +1213,48 @@ int main(void)
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 2: condition event type ===========\n");
 
+    // Generate events with specific type
     if (SOPC_STATUS_OK == status)
     {
+        // activate condition type event field expected
         notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = true;
         status = call_gen_events_method(secureConnection, 1, &conditionTypeId, 0, 0);
     }
 
+    // Check events received for the first MI
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(true, false, false);
     }
 
-    /* Create a new MI for Server object which notifies all events */
+    /* Create a second MI for Server object with all clauses (valid and invalid clauses) */
     if (SOPC_STATUS_OK == status)
     {
+        // Requested queue size 1 => minimum queue size
         miRespServer =
             create_monitored_item_event(sub, false, 1, NULL, validSelectClausesOnly, invalidSelectClausesOnly);
-        // Requested queue size 1 => minimum queue size
         revisedQueueSizeExp = SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE;
         status = (NULL == miRespServer ? SOPC_STATUS_NOK : status);
     }
 
     if (SOPC_STATUS_OK == status)
     {
+        // Check response content + revised queue size
         secondMIcreated = true;
         status = check_monitored_items(miRespServer, revisedQueueSizeExp);
     }
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 3: alarm condition type (TestObject + Server) ===========\n");
+    // Generate events with specific type
     if (SOPC_STATUS_OK == status)
     {
         secondMIid = miRespServer->Results[0].MonitoredItemId;
+        // activate alarm condition type event field expected (in addition to condition with is parent type)
         notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = true;
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, 0, 0);
     }
 
+    // Check events received for the first and second MIs
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(true, true, true);
@@ -1243,28 +1262,32 @@ int main(void)
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 4: alarm type + valid subscription id (TestObject + Server) ===========\n");
     uint32_t subId = 0;
+    // Retrieve the subscription Id
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ClientHelper_GetSubscriptionId(sub, &subId);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
+    // Generate events with specific type only for the created subscription
     if (SOPC_STATUS_OK == status)
     {
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, subId, 0);
     }
-
+    // Check events received for the first and second MIs
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(true, true, true);
     }
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 5: alarm type + invalid subscription id ===========\n");
+    // Generate events with specific type and a subscription Id which IS NOT the created subscriptionId
     if (SOPC_STATUS_OK == status)
     {
+        // By default use UINT32_MAX as subId unless it is the actual current subId, then use 1 which is not...
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId,
                                         (subId == UINT32_MAX ? 1 : UINT32_MAX), 0);
     }
-
+    // Check NO event is received for both MIs
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(false, true, false);
@@ -1272,77 +1295,92 @@ int main(void)
 
     SOPC_CONSOLE_PRINTF(
         "\n=========== TC 6: alarm type + valid subscription id + valid MI id  (TestObject) ===========\n");
+    // Generate events with specific type only for the created subscription and only for the first MI
     if (SOPC_STATUS_OK == status)
     {
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, subId, firstMIid);
     }
-
+    // Check events received for the first MI only and none received for the second MI
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(true, true, false);
     }
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 7: alarm type + valid subscription id + valid MI id  (Server) ===========\n");
+    // Generate events with specific type only for the created subscription and only for the second MI
     if (SOPC_STATUS_OK == status)
     {
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, subId, secondMIid);
     }
-
+    // Check events received for the second MI only and none received for the first MI
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(false, true, true);
     }
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 8: alarm type + valid subscription id + invalid MI id ===========\n");
+    // Generate events with specific type only for the created subscription and using a NOT expected MI id
     if (SOPC_STATUS_OK == status)
     {
-        status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, subId,
-                                        (firstMIid == UINT32_MAX ? 1 : UINT32_MAX));
+        // By default use UINT32_MAX as "invalid" MIid, unless it is the actual first or second MIid,
+        // then use 1 unless it is the second MIid already used, then use 2 which cannot be used.
+        status = call_gen_events_method(
+            secureConnection, 0, &alarmConditionTypeId, subId,
+            (firstMIid == UINT32_MAX || secondMIid == UINT32_MAX ? (firstMIid == 1 || secondMIid == 1 ? 2 : 1)
+                                                                 : UINT32_MAX));
     }
-
+    // Check NO event is received for both MIs
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(false, true, false);
     }
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 9: alarm type + invalid subscription id + invalid MI id ===========\n");
+    // Generate events with specific type with NOT the created subscription and using a NOT expected MI id
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, (subId == UINT32_MAX ? 1 : UINT32_MAX),
-                                   (firstMIid == UINT32_MAX ? 1 : UINT32_MAX));
+        // Note : see the 2 previous invalid ids cases for id choice logic
+        status = call_gen_events_method(
+            secureConnection, 0, &alarmConditionTypeId, (subId == UINT32_MAX ? 1 : UINT32_MAX),
+            (firstMIid == UINT32_MAX || secondMIid == UINT32_MAX ? (firstMIid == 1 || secondMIid == 1 ? 2 : 1)
+                                                                 : UINT32_MAX));
     }
-
+    // Check NO event is received for both MIs
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(false, true, false);
     }
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 10: alarm type + valid MI id  (TestObject) ===========\n");
+    // Generate events with specific type only on first MI (but without subscription id provided)
     if (SOPC_STATUS_OK == status)
     {
-        // Generate events only on first MI
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, 0, firstMIid);
     }
-
+    // Check events received for the first MI only and none received for the second MI
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(true, true, false);
     }
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 11: alarm type + invalid MI id ===========\n");
+    // Generate events with specific type with "invalid" MI id (but without subscription id provided)
     if (SOPC_STATUS_OK == status)
     {
-        status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, 0,
-                                        (firstMIid == UINT32_MAX ? 1 : UINT32_MAX));
+        // By default use UINT32_MAX as "invalid" MIid, unless it is the actual first or second MIid,
+        // then use 1 unless it is the second MIid already used, then use 2 which cannot be used.
+        status = call_gen_events_method(
+            secureConnection, 0, &alarmConditionTypeId, 0,
+            (firstMIid == UINT32_MAX || secondMIid == UINT32_MAX ? (firstMIid == 1 || secondMIid == 1 ? 2 : 1)
+                                                                 : UINT32_MAX));
     }
-
+    // Check NO event is received for both MIs
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(false, true, false);
     }
 
-    /* Delete and recreate second MI with WHERE clause element filter on Alarm&Condition type */
+    /* Delete second MI  */
     if (SOPC_STATUS_OK == status && secondMIcreated)
     {
         status = delete_monitored_items(sub, &miRespServer);
@@ -1355,18 +1393,18 @@ int main(void)
     SOPC_CONSOLE_PRINTF(
         "\n=========== TC 12: base event type (TestObject + !Server (WHERE=AlarmConditionType)) ===========\n");
 
-    /* Create a new MI for Server object which notifies all events */
+    /* Create a second MI for Server object with WHERE clause element filter on Alarm&Condition type */
     if (SOPC_STATUS_OK == status)
     {
+        // Requested queue size INT32_MAX => maximum queue size
         miRespServer = create_monitored_item_event(sub, false, INT32_MAX, &alarmConditionTypeId, validSelectClausesOnly,
                                                    invalidSelectClausesOnly);
-        // Requested queue size INT32_MAX => maximum queue size
         revisedQueueSizeExp = SOPC_MAX_NOTIFICATION_QUEUE_SIZE;
         status = (NULL == miRespServer ? SOPC_STATUS_NOK : status);
     }
-
     if (SOPC_STATUS_OK == status)
     {
+        // Check response content + revised queue size
         secondMIcreated = true;
         status = check_monitored_items(miRespServer, revisedQueueSizeExp);
     }
@@ -1374,11 +1412,14 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         secondMIid = miRespServer->Results[0].MonitoredItemId;
+        // de-activate condition type and alarm condition type event field
         notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = false;
         notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = false;
+        // Generate events without specific type and with default parameters
         status = call_gen_events_method(secureConnection, 0, NULL, 0, 0);
     }
-
+    // Check event is received for first MI
+    // but not for the second since it filters AlarmConditionType using WHERE clause
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(true, true, false);
@@ -1390,10 +1431,13 @@ int main(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        // activate condition type event field expected
         notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = true;
+        // Generate events with specific type ConditionType
         status = call_gen_events_method(secureConnection, 0, &conditionTypeId, 0, 0);
     }
-
+    // Check event is received for first MI
+    // but not for the second since it filters AlarmConditionType using WHERE clause
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(true, true, false);
@@ -1403,15 +1447,18 @@ int main(void)
         "\n=========== TC 14: alarm condition type (TestObject + Server (WHERE=AlarmConditionType)) ===========\n");
     if (SOPC_STATUS_OK == status)
     {
+        // activate alarm condition type event field expected
         notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = true;
+        // Generate events with specific type AlarmConditionType
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, 0, 0);
     }
-
+    // Check event is received for first MI and second MI
+    // (since it filters AlarmConditionType using WHERE clause)
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitEventReceivedAndResult(true, true, true);
     }
-
+    // Delete the first MI
     if (SOPC_STATUS_OK == status && firstMIcreated)
     {
         status = delete_monitored_items(sub, &miRespTestObj);
@@ -1420,7 +1467,7 @@ int main(void)
             firstMIcreated = false;
         }
     }
-
+    // Delete the second MI
     if (SOPC_STATUS_OK == status && secondMIcreated)
     {
         status = delete_monitored_items(sub, &miRespServer);
@@ -1433,6 +1480,8 @@ int main(void)
     SOPC_CONSOLE_PRINTF(
         "\n=========== TC 15: base event type (TestObject): EventQueueOverflow (even with WHERE for condition "
         "type) ===========\n");
+    // Create the first MI for events on TestObject node with all clauses (valid and invalid clauses) and ConditionType
+    // for WHERE clause
     if (SOPC_STATUS_OK == status)
     {
         miRespTestObj = create_monitored_item_event(sub, true, 1, &conditionTypeId, validSelectClausesOnly,
@@ -1444,36 +1493,41 @@ int main(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        // Check response content + revised queue size
         status = check_monitored_items(miRespTestObj, revisedQueueSizeExp);
     }
 
+    // Generate a lot of events to trigger the EventQueueOverflow event
     if (SOPC_STATUS_OK == status)
     {
         firstMIcreated = true;
         firstMIid = miRespTestObj->Results[0].MonitoredItemId;
+        // activate condition type event field expected and deactivate alarm condition type event field
         notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = true;
         notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = false;
         expectOverflow = true;
         nbEventsReceived = 0;
-        correctNbEventsReceived = false;
+        expNbEventsReceivedWhenOverflow = false;
         status = call_gen_events_method(secureConnection, nbEventsBeforeOverflow + 1, &conditionTypeId, 0, 0);
     }
 
+    // Check overflow event is received with the expected number of events (queue max size + overflow)
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitOverflowEventReceived();
         expectOverflow = true;
         nbEventsReceived = 0;
-        correctNbEventsReceived = false;
+        expNbEventsReceivedWhenOverflow = false;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        // Expecting no event
+        // Expecting no event after overflow
         unexpectedResults += waitEventReceivedAndResult(false, false, false);
     }
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 16: create MI: only valid select clauses (no filter result) ===========\n");
+    // Create the second MI for events on Server node with valid clauses only and ConditionType for WHERE clause
     if (SOPC_STATUS_OK == status)
     {
         validSelectClausesOnly = true;
@@ -1483,16 +1537,16 @@ int main(void)
         status = (NULL == miRespServer ? SOPC_STATUS_NOK : status);
     }
 
+    // Expecting creation SUCCESS
     if (SOPC_STATUS_OK == status)
     {
         secondMIcreated = true;
-        // Expecting SUCCESS
         status = check_monitored_items_special_cases(miRespServer, revisedQueueSizeExp, true, validWhereClauseExp,
                                                      validSelectClausesOnly);
         unexpectedResults = (SOPC_STATUS_OK != status ? unexpectedResults + 1 : unexpectedResults);
     }
 
-    /* Delete and recreate second MI with WHERE clause element filter on Alarm&Condition type */
+    /* Delete second MI */
     if (SOPC_STATUS_OK == status)
     {
         status = delete_monitored_items(sub, &miRespServer);
@@ -1500,7 +1554,7 @@ int main(void)
 
     SOPC_CONSOLE_PRINTF("\n=========== TC 17: create MI: only invalid select clauses ===========\n");
 
-    /* Create a new MI for Server object which notifies all events */
+    /* Create second MI with only invalid clauses and AlarmConditionType for WHERE clause */
     if (SOPC_STATUS_OK == status)
     {
         secondMIcreated = false;
@@ -1510,10 +1564,9 @@ int main(void)
                                                    invalidSelectClausesOnly);
         status = (NULL == miRespServer ? SOPC_STATUS_NOK : status);
     }
-
+    // Expecting creation FAILURE
     if (SOPC_STATUS_OK == status)
     {
-        // Expecting FAILURE
         status = check_monitored_items_special_cases(miRespServer, revisedQueueSizeExp, false, validWhereClauseExp,
                                                      validSelectClausesOnly);
         if (SOPC_STATUS_OK != status)
@@ -1526,7 +1579,7 @@ int main(void)
     SOPC_CONSOLE_PRINTF(
         "\n=========== TC 18: create MI: only invalid select clauses and invalid where clause ===========\n");
 
-    /* Create a new MI for Server object which notifies all events */
+    /* Create second MI with only invalid clauses and ServerObject for WHERE clause which is invalid => not a type */
     if (SOPC_STATUS_OK == status)
     {
         secondMIcreated = false;
@@ -1538,9 +1591,9 @@ int main(void)
         status = (NULL == miRespServer ? SOPC_STATUS_NOK : status);
     }
 
+    // Expecting creation FAILURE
     if (SOPC_STATUS_OK == status)
     {
-        // Expecting FAILURE
         status = check_monitored_items_special_cases(miRespServer, revisedQueueSizeExp, false, validWhereClauseExp,
                                                      validSelectClausesOnly);
         if (SOPC_STATUS_OK != status)
@@ -1553,7 +1606,7 @@ int main(void)
     SOPC_CONSOLE_PRINTF(
         "\n=========== TC 19: create MI: select clause with invalid and valid index ranges ===========\n");
 
-    /* Create a new MI for Server object which notifies all events */
+    /* Create second MI with index range select clauses for Server object */
     if (SOPC_STATUS_OK == status)
     {
         secondMIcreated = false;
@@ -1563,7 +1616,7 @@ int main(void)
         miRespServer = create_monitored_item_event_index_ranges(sub);
         status = (NULL == miRespServer ? SOPC_STATUS_NOK : status);
     }
-
+    // Expecting creation SUCCESS
     if (SOPC_STATUS_OK == status)
     {
         secondMIid = miRespServer->Results[0].MonitoredItemId;
@@ -1575,20 +1628,21 @@ int main(void)
         }
     }
 
+    // Generate events only on second MI
     if (SOPC_STATUS_OK == status)
     {
-        // Generate events only on second MI
         status = call_gen_events_method(secureConnection, 0, NULL, subId, secondMIid);
     }
 
+    // Expect only events on second MI
     if (SOPC_STATUS_OK == status)
     {
-        // Expect only events on second MI
         unexpectedResults += waitEventReceivedAndResult(false, true, true);
     }
 
     // TODO: add more degraded cases: unsupported/invalid where operator, empty select clauses, etc.
 
+    // Delete MIs at the end of test if flagged as needed (even in case of unexpected failure)
     if (firstMIcreated)
     {
         tmpStatus = delete_monitored_items(sub, &miRespTestObj);
