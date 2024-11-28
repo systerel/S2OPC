@@ -316,11 +316,17 @@ static OpcUa_CreateMonitoredItemsResponse* create_monitored_item_event(SOPC_Clie
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (isTestObject)
     {
+        // TestObject shall always be the first MI since we use monitoredItemNames[0] == "TestObject" to determine it is
+        // the first MI in SOPC_Client_SubscriptionNotification_Cb
+        SOPC_ASSERT(0 == nbMIs);
         status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemIdFromStrings(createMonItReq, 0, testObjectNodeIdStr,
                                                                                 SOPC_AttributeId_EventNotifier, NULL);
     }
     else
     {
+        // Server shall always be the second MI since we use monitoredItemNames[1] == "Server" to determine it is
+        // the second MI in SOPC_Client_SubscriptionNotification_Cb
+        SOPC_ASSERT(1 == nbMIs);
         status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(createMonItReq, 0, &serverObjectId,
                                                                      SOPC_AttributeId_EventNotifier, NULL);
     }
@@ -438,8 +444,12 @@ static OpcUa_CreateMonitoredItemsResponse* create_monitored_item_event_index_ran
     {
         return NULL;
     }
-    SOPC_ReturnStatus status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemIdFromStrings(
-        createMonItReq, 0, testObjectNodeIdStr, SOPC_AttributeId_EventNotifier, NULL);
+
+    // Server shall always be the second MI since we use monitoredItemNames[1] == "Server" to determine it is
+    // the second MI in SOPC_Client_SubscriptionNotification_Cb
+    SOPC_ASSERT(1 == nbMIs);
+    SOPC_ReturnStatus status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(
+        createMonItReq, 0, &serverObjectId, SOPC_AttributeId_EventNotifier, NULL);
 
     OpcUa_EventFilter* eventFilter = NULL;
     if (SOPC_STATUS_OK == status)
@@ -1311,6 +1321,7 @@ int main(void)
     SOPC_CONSOLE_PRINTF("\n=========== TC 10: alarm type + valid MI id  (TestObject) ===========\n");
     if (SOPC_STATUS_OK == status)
     {
+        // Generate events only on first MI
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, 0, firstMIid);
     }
 
@@ -1334,8 +1345,8 @@ int main(void)
     /* Delete and recreate second MI with WHERE clause element filter on Alarm&Condition type */
     if (SOPC_STATUS_OK == status && secondMIcreated)
     {
-        tmpStatus = delete_monitored_items(sub, &miRespServer);
-        if (SOPC_STATUS_OK == tmpStatus)
+        status = delete_monitored_items(sub, &miRespServer);
+        if (SOPC_STATUS_OK == status)
         {
             secondMIcreated = false;
         }
@@ -1362,6 +1373,7 @@ int main(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        secondMIid = miRespServer->Results[0].MonitoredItemId;
         notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = false;
         notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = false;
         status = call_gen_events_method(secureConnection, 0, NULL, 0, 0);
@@ -1438,6 +1450,7 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         firstMIcreated = true;
+        firstMIid = miRespTestObj->Results[0].MonitoredItemId;
         notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = true;
         notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = false;
         expectOverflow = true;
@@ -1473,6 +1486,7 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         secondMIcreated = true;
+        // Expecting SUCCESS
         status = check_monitored_items_special_cases(miRespServer, revisedQueueSizeExp, true, validWhereClauseExp,
                                                      validSelectClausesOnly);
         unexpectedResults = (SOPC_STATUS_OK != status ? unexpectedResults + 1 : unexpectedResults);
@@ -1499,6 +1513,7 @@ int main(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        // Expecting FAILURE
         status = check_monitored_items_special_cases(miRespServer, revisedQueueSizeExp, false, validWhereClauseExp,
                                                      validSelectClausesOnly);
         if (SOPC_STATUS_OK != status)
@@ -1525,6 +1540,7 @@ int main(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        // Expecting FAILURE
         status = check_monitored_items_special_cases(miRespServer, revisedQueueSizeExp, false, validWhereClauseExp,
                                                      validSelectClausesOnly);
         if (SOPC_STATUS_OK != status)
@@ -1576,6 +1592,7 @@ int main(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        secondMIid = miRespServer->Results[0].MonitoredItemId;
         secondMIcreated = true;
         status = check_monitored_items_index_ranges(miRespServer);
         if (SOPC_STATUS_OK != status)
@@ -1586,11 +1603,13 @@ int main(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        // Generate events only on second MI
         status = call_gen_events_method(secureConnection, 0, NULL, subId, secondMIid);
     }
 
     if (SOPC_STATUS_OK == status)
     {
+        // Expect only events on second MI
         unexpectedResults += waitEventReceivedAndResult(false, true, true);
     }
 
