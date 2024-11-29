@@ -29,6 +29,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_network_layer.h"
 #include "sopc_pub_fixed_buffer.h"
+#include "sopc_pubsub_security.h"
 
 struct SOPC_PubFixedBuffer_DataSetField_Position
 {
@@ -53,6 +54,15 @@ struct SOPC_PubFixedBuffer_Buffer_Ctx
     // Array of pointer to sequenceNumber and timestamp stored in SOPC_DataSet_LL_NetworkMessage structure
     SOPC_PubFixedBuffer_Dsm_DynamicInfo* dynamic_dsm_info;
     size_t nb_dynamic_dsm_info;
+
+    // Position of Nonce Message in security header of network message
+    uint32_t nm_nonceMessage_position;
+
+    // Position of token Id in security header of network message
+    uint32_t nm_tokenId_position;
+
+    // Position of signature and last position used to sign
+    uint32_t signPosition;
 
     // Array of tuple pointer to dataSetField stored in SOPC_Dataset_LL_NetworkMessage structure and position in
     // preencoded buffer
@@ -141,7 +151,8 @@ static void PubFixedBuffer_Initialize_Preencode_Buffer(SOPC_Dataset_LL_NetworkMe
     }
 }
 
-SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm)
+SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm,
+                                                                         SOPC_PubSub_SecurityType* security)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_PubFixedBuffer_Buffer_Ctx* preencode = PubFixedBuffer_Create_Preencode_Buffer(nm);
@@ -155,23 +166,29 @@ SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Da
         PubFixedBuffer_Initialize_Preencode_Buffer(nm);
         SOPC_Buffer* buffer_payload = NULL;
         SOPC_NetworkMessage_Error_Code code =
-            SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &preencode->buffer, &buffer_payload);
+            SOPC_UADP_NetworkMessage_Encode_Buffers(nm, security, &preencode->buffer, &buffer_payload);
         if (SOPC_NetworkMessage_Error_Code_None != code || NULL == preencode->buffer || NULL == buffer_payload)
         {
             status = SOPC_STATUS_NOK;
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                   "Failed to preencode PUB message, SOPC_UADP_NetworkMessage_Error_Code is : %08X",
+                                   "Failed to preencode PUB message, SOPC_NetworkMessage_Error_Code is : %08X",
                                    (unsigned) code);
         }
         else
         {
+            // Don't sign the buffer.
             code = SOPC_UADP_NetworkMessage_BuildFinalMessage(NULL, preencode->buffer, &buffer_payload);
             if (SOPC_NetworkMessage_Error_Code_None != code || NULL == preencode->buffer || NULL != buffer_payload)
             {
                 status = SOPC_STATUS_NOK;
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_PUBSUB,
-                    "Failed to merge preencode buffer, SOPC_UADP_NetworkMessage_Error_Code is : %08X", (unsigned) code);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                       "Failed to merge preencode buffer, SOPC_NetworkMessage_Error_Code is : %08X",
+                                       (unsigned) code);
+            }
+            if (SOPC_STATUS_OK == status && NULL != security)
+            {
+                // Signature is set at the end of the networkMessage
+                SOPC_PubFixedBuffer_Set_Sign_Position(preencode, preencode->buffer->length);
             }
         }
     }
@@ -221,6 +238,24 @@ void SOPC_PubFixedBuffer_DataSetFieldPosition_Set_Position(SOPC_PubFixedBuffer_D
     dsfPos->position = position;
 }
 
+void SOPC_PubFixedBuffer_Set_Nonce_Message_Position(SOPC_PubFixedBuffer_Buffer_Ctx* preencode, uint32_t position)
+{
+    SOPC_ASSERT(NULL != preencode);
+    preencode->nm_nonceMessage_position = position;
+}
+
+void SOPC_PubFixedBuffer_Set_TokenId_Position(SOPC_PubFixedBuffer_Buffer_Ctx* preencode, uint32_t position)
+{
+    SOPC_ASSERT(NULL != preencode);
+    preencode->nm_tokenId_position = position;
+}
+
+void SOPC_PubFixedBuffer_Set_Sign_Position(SOPC_PubFixedBuffer_Buffer_Ctx* preencode, uint32_t position)
+{
+    SOPC_ASSERT(NULL != preencode);
+    preencode->signPosition = position;
+}
+
 /** Update value in buffer at position gived with data. Length correspond to the number of bytes to update */
 static void update_buffer(SOPC_Buffer* buffer, const void* data, uint32_t position, uint32_t length)
 {
@@ -230,11 +265,13 @@ static void update_buffer(SOPC_Buffer* buffer, const void* data, uint32_t positi
     SOPC_Buffer_Write(buffer, (const uint8_t*) data, length);
 }
 
-SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode)
+SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
+                                                   const SOPC_PubSub_SecurityType* security)
 {
     SOPC_ASSERT(NULL != preencode);
     SOPC_ASSERT(NULL != preencode->dynamic_dsm_info);
-
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Buffer* updatedBuffer = preencode->buffer;
     for (size_t i = 0; i < preencode->nb_dynamic_dsm_info; i++)
     {
         SOPC_PubFixedBuffer_Dsm_DynamicInfo* dynamicDsmInfo = &preencode->dynamic_dsm_info[i];
@@ -243,7 +280,6 @@ SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ct
             update_buffer(preencode->buffer, dynamicDsmInfo->sequence_number, dynamicDsmInfo->sequence_number_position,
                           sizeof(*dynamicDsmInfo->sequence_number));
         }
-
         if (NULL != dynamicDsmInfo->timestamp)
         {
             // Update Timestamp here
@@ -252,14 +288,72 @@ SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ct
                           sizeof(*dynamicDsmInfo->timestamp));
         }
     }
-    for (size_t i = 0; i < preencode->dataSetFields_len; i++)
+    if (SOPC_STATUS_OK == status && 0 != preencode->nm_tokenId_position && NULL != security)
+    {
+        if (NULL == security->groupKeys)
+        {
+            updatedBuffer = NULL;
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            status = SOPC_Buffer_SetPosition(updatedBuffer, preencode->nm_tokenId_position);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+            status = SOPC_UInt32_Write(&security->groupKeys->tokenId, updatedBuffer, 0);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+        }
+    }
+    if (SOPC_STATUS_OK == status && 0 != preencode->nm_nonceMessage_position && NULL != security)
+    {
+        if (NULL == security->groupKeys)
+        {
+            updatedBuffer = NULL;
+            status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            uint32_t nonceRandomLength = 0;
+            status = SOPC_Buffer_SetPosition(updatedBuffer, preencode->nm_nonceMessage_position);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+            status = SOPC_CryptoProvider_PubSubGetLength_MessageRandom(security->provider, &nonceRandomLength);
+            SOPC_ASSERT(4 == nonceRandomLength && // Size is fixed to 4 bytes. See OPCUA Spec Part 14 - Table 75
+                        nonceRandomLength + 4 <= UINT8_MAX && // check before cast to uint8
+                        SOPC_STATUS_OK == status);
+            status = SOPC_PubSub_Security_Write_Nonce(security, updatedBuffer, (uint8_t) nonceRandomLength);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+        }
+    }
+    for (size_t i = 0; i < preencode->dataSetFields_len && SOPC_STATUS_OK == status; i++)
     {
         SOPC_PubFixedBuffer_DataSetField_Position* dsfPos =
             SOPC_PubFixedBuffer_Get_DataSetField_Position_At(preencode, i);
         const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetField_Get_Variant(dsfPos->dataSetField);
-        SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(preencode->buffer, dsfPos->position);
+        status = SOPC_Buffer_SetPosition(updatedBuffer, dsfPos->position);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
-        SOPC_Variant_Write(variant, preencode->buffer, 0);
+        status = SOPC_Variant_Write(variant, updatedBuffer, 0);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to update variant");
+            updatedBuffer = NULL;
+        }
     }
-    return preencode->buffer;
+    if (SOPC_STATUS_OK == status && 0 != preencode->signPosition && NULL != security)
+    {
+        if (NULL == security->groupKeys)
+        {
+            status = SOPC_STATUS_NOK;
+            updatedBuffer = NULL;
+        }
+        else
+        {
+            SOPC_Buffer_SetPosition(updatedBuffer, preencode->signPosition);
+            status = SOPC_PubSub_Security_Sign(security, updatedBuffer);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to sign updated buffer");
+                updatedBuffer = NULL;
+            }
+        }
+    }
+    return updatedBuffer;
 }

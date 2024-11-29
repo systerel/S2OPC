@@ -34,9 +34,12 @@ typedef struct SOPC_PubFixedBuffer_DataSetField_Position SOPC_PubFixedBuffer_Dat
  * @brief Create and initialize preencode context against nm.
  *
  * @param nm NetworkMessage used to initialize preencoded buffer context.
+ * @param security security structure used to initialize preencoded buffer context. Can be NULL if none use
+ *
  * @return SOPC_STATUS_OK in case of success.
  */
-SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm);
+SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm,
+                                                                         SOPC_PubSub_SecurityType* security);
 
 /**
  * @brief Free memory allocated by ::SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer.
@@ -46,7 +49,8 @@ SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Da
 void SOPC_PubFixedBuffer_Delete_Preencode_Buffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode);
 
 /* Return pointer to updated preencode buffer stored in preencode. This buffer should'nt be free by user */
-SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode);
+SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
+                                                   const SOPC_PubSub_SecurityType* security);
 
 /* Set position of dataSetMessage sequence number in final buffer */
 bool SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
@@ -57,6 +61,15 @@ bool SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(SOPC_PubFixedBuffer_
 bool SOPC_PubFixedBuffer_Set_DSM_Timestamp_Position_At(SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
                                                        uint32_t position,
                                                        size_t index);
+
+/* Set position of Nonce message of security header */
+void SOPC_PubFixedBuffer_Set_Nonce_Message_Position(SOPC_PubFixedBuffer_Buffer_Ctx* preencode, uint32_t position);
+
+/* Set position of tokenId in security header */
+void SOPC_PubFixedBuffer_Set_TokenId_Position(SOPC_PubFixedBuffer_Buffer_Ctx* preencode, uint32_t position);
+
+/* Set position of signature in final buffer */
+void SOPC_PubFixedBuffer_Set_Sign_Position(SOPC_PubFixedBuffer_Buffer_Ctx* preencode, uint32_t position);
 
 SOPC_PubFixedBuffer_DataSetField_Position* SOPC_PubFixedBuffer_Get_DataSetField_Position_At(
     SOPC_PubFixedBuffer_Buffer_Ctx* preencode,

@@ -449,9 +449,10 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     const SOPC_WriterGroup_Options* writerGroupOptions = SOPC_WriterGroup_Get_Options(group);
     if (result && writerGroupOptions->useFixedSizeBuffer)
     {
-        if (NULL != context->security)
+        if (SOPC_SecurityMode_SignAndEncrypt == smode)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cannot use security with fixed size buffer optimisation");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                   "Cannot use SignAndEncrypt security policy with fixed size buffer optimisation");
             result = false;
         }
         else
@@ -461,7 +462,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
             result = (SOPC_STATUS_OK == status);
             if (result)
             {
-                status = SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(context->message);
+                status = SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(context->message, context->security);
                 result = (SOPC_STATUS_OK == status);
             }
         }

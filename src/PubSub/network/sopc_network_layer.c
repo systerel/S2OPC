@@ -811,14 +811,17 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
     bool signedEnabled = false;
     bool encryptedEnabled = false;
 
-    bool preencodedEnabled = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enabled(nm);
+    bool preencodeEnabled = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enabled(nm);
     SOPC_PubFixedBuffer_Buffer_Ctx* preencode = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
     SOPC_Dataset_LL_NetworkMessage_Header* header = NULL;
     uint8_t dsm_count = 0;
     uint32_t bufferPosition = 0;
+    const uint32_t zero = 0;
+    uint8_t nonceLength = 0;
 
+    // If preencode enabled and security enabled, postpone fully filling the security header and keep positions of it.
     if (NULL == buffer_header || NULL == buffer_payload || NULL != *buffer_header || NULL != *buffer_payload ||
-        NULL == nm || (securityEnabled && NULL == security->groupKeys))
+        NULL == nm || (securityEnabled && NULL == security->groupKeys && !preencodeEnabled))
     {
         return SOPC_NetworkMessage_Error_Code_InvalidParameters;
     }
@@ -956,8 +959,22 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
         res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UInt32_Write(&security->groupKeys->tokenId, *buffer_header, 0);
-            res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_TokenId_Failed);
+            if (preencodeEnabled)
+            {
+                // Token Id is not accessible in preencode mode. Keep position for later
+                uint32_t tokenIdPosition = 0;
+                status = SOPC_Buffer_GetPosition(*buffer_header, &tokenIdPosition);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+                SOPC_PubFixedBuffer_Set_TokenId_Position(preencode, tokenIdPosition);
+                // Write 4 bytes of zeros
+                status = SOPC_UInt32_Write(&zero, *buffer_header, 0);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+            }
+            else
+            {
+                status = SOPC_UInt32_Write(&security->groupKeys->tokenId, *buffer_header, 0);
+                res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_TokenId_Failed);
+            }
         }
 
         if (SOPC_STATUS_OK == status)
@@ -968,11 +985,10 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
             SOPC_ASSERT(4 == nonceRandomLength && // Size is fixed to 4 bytes. See OPCUA Spec Part 14 - Table 75
                         nonceRandomLength + 4 <= UINT8_MAX); // check before cast to uint8
 
-
             // Random bytes + SequenceNumber 32 bits
             if (SOPC_STATUS_OK == status)
             {
-                uint8_t nonceLength = (uint8_t)(nonceRandomLength + 4);
+                nonceLength = (uint8_t)(nonceRandomLength + 4);
                 status = SOPC_Byte_Write(&nonceLength, *buffer_header, 0);
                 res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
             }
@@ -980,11 +996,26 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PubSub_Security_Write_Nonce(security, *buffer_header, (uint8_t) nonceRandomLength);
-            checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
+            // Nonce message is not accessible in preencode mode. Keep it's position for later
+            if (preencodeEnabled)
+            {
+                uint32_t noncePosition = 0;
+                status = SOPC_Buffer_GetPosition(*buffer_header, &noncePosition);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+                SOPC_PubFixedBuffer_Set_Nonce_Message_Position(preencode, noncePosition);
+                for (uint8_t i = 0; i < nonceLength; i++)
+                {
+                    // Write zeros and update later
+                    status = SOPC_Byte_Write((const SOPC_Byte*) &zero, *buffer_header, 0);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
+                }
+            }
+            else
+            {
+                status = SOPC_PubSub_Security_Write_Nonce(security, *buffer_header, (uint8_t) nonceRandomLength);
+                checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
+            }
         }
-
-
 
         if (DATASET_LL_SECURITY_FOOTER_ENABLED && SOPC_STATUS_OK == status)
         {
@@ -996,7 +1027,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
 
     // payload: write Payload buffer.
 
-    // Information used when prencoding buffer
+    // Information used when preencoding buffer
     size_t indexDataSetField = 0;
 
     if (SOPC_STATUS_OK == status)
@@ -1014,8 +1045,6 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
             res = SOPC_NetworkMessage_Error_Write_Alloc_Failed;
         }
 
-        const uint16_t zero = 0;
-
         // DataSet Message size(2 bytes)
         // Sizes are unknown yet. Write Zeros, and store current position to write it later
         for (int i = 0; SOPC_STATUS_OK == status && i < dsm_count; i++)
@@ -1025,7 +1054,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
 
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_UInt16_Write(&zero, *buffer_payload, 0);
+                status = SOPC_UInt16_Write((const uint16_t*) &zero, *buffer_payload, 0);
                 res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_DsmPreSize_Failed);
             }
         }
@@ -1102,7 +1131,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
         // DataSetMessage Sequence Number
         if (SOPC_STATUS_OK == status && conf->dataSetMessageSequenceNumberFlag)
         {
-            if (preencodedEnabled)
+            if (preencodeEnabled)
             {
                 uint32_t bufferPayloadPosition = 0;
                 status = SOPC_Buffer_GetPosition(*buffer_payload, &bufferPayloadPosition);
@@ -1119,7 +1148,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
         // DataSetMessage Timestamp
         if (SOPC_STATUS_OK == status && conf->timestampFlag)
         {
-            if (preencodedEnabled)
+            if (preencodeEnabled)
             {
                 uint32_t bufferPayloadPosition = 0;
                 status = SOPC_Buffer_GetPosition(*buffer_payload, &bufferPayloadPosition);
@@ -1138,7 +1167,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
         if (SOPC_STATUS_OK == status && DataSet_LL_MessageType_KeepAlive != conf->dataSetMessageType)
         {
             uint32_t* bufferPayload_dsfPositions = NULL;
-            if (preencodedEnabled)
+            if (preencodeEnabled)
             {
                 uint16_t nbVariant = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
                 bufferPayload_dsfPositions = SOPC_Calloc(nbVariant, sizeof(uint32_t));
@@ -1152,7 +1181,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
                 status = Network_DataSetFields_To_UADP(*buffer_payload, dsm, bufferPayload_dsfPositions);
                 res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_DsmField_Failed);
             }
-            if (preencodedEnabled && SOPC_STATUS_OK == status)
+            if (preencodeEnabled && SOPC_STATUS_OK == status)
             {
                 uint16_t nbVariant = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
                 for (int j = 0; j < nbVariant; j++)
@@ -1300,14 +1329,17 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_BuildFinalMessage(SOPC_P
 SOPC_Buffer* SOPC_UADP_NetworkMessage_Get_PreencodedBuffer(SOPC_Dataset_LL_NetworkMessage* nm,
                                                            SOPC_PubSub_SecurityType* security)
 {
-    if (NULL == nm || NULL != security)
+    if (NULL == nm)
     {
         return NULL;
     }
     SOPC_PubFixedBuffer_Buffer_Ctx* preencode = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
-    SOPC_Buffer* buffer = SOPC_PubFixedBuffer_Get_UpdatedBuffer(preencode);
-    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(buffer, 0);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_Buffer* buffer = SOPC_PubFixedBuffer_Get_UpdatedBuffer(preencode, security);
+    if (NULL != buffer)
+    {
+        SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(buffer, 0);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
     return buffer;
 }
 
