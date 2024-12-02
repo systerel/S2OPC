@@ -885,11 +885,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_security_mode_insufficient:
         *status = OpcUa_BadSecurityModeInsufficient;
         break;
-    /* status code not present in generated file
     case constants_statuscodes_bs__e_sc_bad_not_executable:
         *status = OpcUa_BadNotExecutable;
         break;
-    */
     case constants_statuscodes_bs__e_sc_bad_no_communication:
         *status = OpcUa_BadNoCommunication;
         break;
@@ -1255,11 +1253,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
     case OpcUa_BadSecurityModeInsufficient:
         *bstatus = constants_statuscodes_bs__e_sc_bad_security_mode_insufficient;
         break;
-    /* status code not present in generated file
     case OpcUa_BadNotExecutable:
         *bstatus = constants_statuscodes_bs__e_sc_bad_not_executable;
         break;
-    */
     case OpcUa_BadNoCommunication:
         *bstatus = constants_statuscodes_bs__e_sc_bad_no_communication;
         break;
