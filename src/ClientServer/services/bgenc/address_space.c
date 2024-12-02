@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 26/07/2024 08:42:55
+ Date                 : 02/12/2024 17:14:35
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -221,6 +221,7 @@ void address_space__treat_write_1(
       constants__t_Timestamp address_space__l_source_ts;
       constants__t_Timestamp address_space__l_server_ts;
       t_bool address_space__l_server_ts_null;
+      t_bool address_space__l_local_treatment;
       constants__t_RawStatusCode address_space__l_raw_sc;
       
       *address_space__node = constants__c_Node_indet;
@@ -255,8 +256,10 @@ void address_space__treat_write_1(
                   &address_space__l_server_ts);
                constants__is_Timestamps_Null(address_space__l_server_ts,
                   &address_space__l_server_ts_null);
+               address_space_authorization__is_local_service_treatment(&address_space__l_local_treatment);
                if ((address_space__l_compatible_type == true) &&
-                  (address_space__l_server_ts_null == true)) {
+                  ((address_space__l_server_ts_null == true) ||
+                  (address_space__l_local_treatment == true))) {
                   data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(address_space__dataValue,
                      &address_space__l_source_ts);
                   data_value_pointer_bs__get_conv_DataValue_Status(address_space__dataValue,

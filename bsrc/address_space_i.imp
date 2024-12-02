@@ -487,6 +487,7 @@ OPERATIONS
         l_source_ts,
         l_server_ts,
         l_server_ts_null,
+        l_local_treatment,
         l_raw_sc
     IN
         node := c_Node_indet;
@@ -505,9 +506,10 @@ OPERATIONS
                       <-- is_variable_compat_type(l_dv_datatype_nid, l_dv_datatype_vr, l_var_datatype_nid, l_var_vr);
                     free_node_id_pointer(l_dv_datatype_nid);
                     l_server_ts <-- get_conv_DataValue_ServerTimestamp(dataValue);
-                    /* Only null server timestamp allowed since we do not support to write it */
+                    /* Only null server timestamp allowed since we do not support to write it (ignore when it is a local treatment) */
                     l_server_ts_null <-- is_Timestamps_Null(l_server_ts);
-                    IF l_compatible_type = TRUE & l_server_ts_null = TRUE THEN
+                    l_local_treatment <-- is_local_service_treatment;
+                    IF l_compatible_type = TRUE & (l_server_ts_null = TRUE or l_local_treatment = TRUE) THEN
                         l_source_ts <-- get_conv_DataValue_SourceTimestamp(dataValue);
                         l_raw_sc <-- get_conv_DataValue_Status(dataValue);
                         l_access_write <-- has_access_level_write(node, l_raw_sc, l_source_ts);
