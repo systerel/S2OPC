@@ -161,8 +161,9 @@ static bool test_waiting_activate_session_and_close_ep(SOPC_ReverseEndpointConfi
     }
 
     // Wait the reverse endpoint to close and activation failure since secure connection was not yet established
-    while ((SOPC_Atomic_Int_Get(&sessionsActivatedContextVal) + SOPC_Atomic_Int_Get(&sessionFailureContextVal)) == 0 &&
-           SOPC_Atomic_Int_Get(&reverseEpClosed) == 0 && loopCpt * sleepTimeout <= loopTimeout4secs)
+    while (((SOPC_Atomic_Int_Get(&sessionsActivatedContextVal) + SOPC_Atomic_Int_Get(&sessionFailureContextVal)) == 0 ||
+            SOPC_Atomic_Int_Get(&reverseEpClosed) == 0) &&
+           loopCpt * sleepTimeout <= loopTimeout4secs)
     {
         loopCpt++;
         SOPC_Sleep(sleepTimeout);
