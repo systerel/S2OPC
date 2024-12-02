@@ -62,6 +62,11 @@
 #define SOPC_DEFAULT_MI_DISCARD_OLDEST true
 #endif
 
+/* Inhibit the server status value if provided to configure write request */
+#ifndef SOPC_WRITE_REQUEST_INHIBIT_SERVER_TS
+#define SOPC_WRITE_REQUEST_INHIBIT_SERVER_TS true
+#endif
+
 // Macro used to check if msgPtr is valid and element index is valid in this message
 #define CHECK_ELEMENT_EXISTS(msgPtr, fieldNoOf, index) \
     (NULL != (msgPtr) && ((msgPtr)->fieldNoOf) > 0 && (index) < (size_t)((msgPtr)->fieldNoOf))
@@ -336,6 +341,11 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_DataValue_Copy(&writeVal->Value, value);
+#if SOPC_WRITE_REQUEST_INHIBIT_SERVER_TS
+        // Reset server timestamp as it cannot be written
+        writeVal->Value.ServerTimestamp = 0;
+        writeVal->Value.ServerPicoSeconds = 0;
+#endif
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -364,6 +374,11 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValue(OpcUa_WriteRequest* writeReque
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_DataValue_Copy(&writeVal->Value, value);
+#if SOPC_WRITE_REQUEST_INHIBIT_SERVER_TS
+        // Reset server timestamp as it cannot be written
+        writeVal->Value.ServerTimestamp = 0;
+        writeVal->Value.ServerPicoSeconds = 0;
+#endif
     }
     if (SOPC_STATUS_OK != status)
     {
