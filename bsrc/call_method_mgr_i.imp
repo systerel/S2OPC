@@ -175,6 +175,7 @@ LOCAL_OPERATIONS
                 e_sc_bad_invalid_argument,
                 e_sc_bad_method_invalid,
                 e_sc_bad_not_executable,
+                e_sc_bad_user_access_denied,
                 e_sc_ok
             } &
 
@@ -379,8 +380,11 @@ OPERATIONS
                         ELSE
                             StatusCode := e_sc_bad_method_invalid
                         END
-                    ELSE
+                    ELSIF l_valid_executable = FALSE
+                    THEN
                         StatusCode := e_sc_bad_not_executable
+                    ELSE
+                        StatusCode := e_sc_bad_user_access_denied
                     END
                 ELSE
                     /* Node has not method class */
