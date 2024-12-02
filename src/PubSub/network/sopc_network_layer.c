@@ -942,6 +942,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
     // security header
     if (securityEnabled && SOPC_STATUS_OK == status)
     {
+        uint32_t nonceRandomLength;
         byte = 0;
         // - NetworkMessage Signed
         Network_Message_Set_Bool_Bit(&byte, 0, signedEnabled);
@@ -961,12 +962,12 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
 
         if (SOPC_STATUS_OK == status)
         {
-            uint32_t nonceRandomLength;
             status = SOPC_CryptoProvider_PubSubGetLength_MessageRandom(security->provider, &nonceRandomLength);
             res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
 
             SOPC_ASSERT(4 == nonceRandomLength && // Size is fixed to 4 bytes. See OPCUA Spec Part 14 - Table 75
                         nonceRandomLength + 4 <= UINT8_MAX); // check before cast to uint8
+
 
             // Random bytes + SequenceNumber 32 bits
             if (SOPC_STATUS_OK == status)
@@ -975,18 +976,15 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
                 status = SOPC_Byte_Write(&nonceLength, *buffer_header, 0);
                 res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
             }
-            if (SOPC_STATUS_OK == status)
-            {
-                status = SOPC_Buffer_Write(*buffer_header, security->msgNonceRandom, nonceRandomLength);
-                res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
-            }
         }
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_UInt32_Write(&security->sequenceNumber, *buffer_header, 0);
-            res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
+            status = SOPC_PubSub_Security_Write_Nonce(security, *buffer_header, (uint8_t) nonceRandomLength);
+            checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
         }
+
+
 
         if (DATASET_LL_SECURITY_FOOTER_ENABLED && SOPC_STATUS_OK == status)
         {

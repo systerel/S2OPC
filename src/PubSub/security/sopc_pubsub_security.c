@@ -21,6 +21,7 @@
 #include "sopc_assert.h"
 #include "sopc_buffer.h"
 #include "sopc_crypto_provider.h"
+#include "sopc_encoder.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_constants.h"
 #include "sopc_secret_buffer.h"
@@ -188,6 +189,29 @@ void SOPC_PubSub_Security_Clear(SOPC_PubSub_SecurityType* security)
         security->msgNonceRandom = NULL;
         SOPC_CryptoProvider_Free(security->provider);
     }
+}
+
+SOPC_ReturnStatus SOPC_PubSub_Security_Write_Nonce(const SOPC_PubSub_SecurityType* security,
+                                                   SOPC_Buffer* dst,
+                                                   uint8_t nonceRandomLength)
+{
+    // See OPCUA Spec Part 14 - Table 75 - revision 1.04
+    // The only algorithms used is AES-CTR for now
+    const uint8_t AES_CTR_nonceRandomLength = 4;
+    if (NULL == security || NULL == dst || AES_CTR_nonceRandomLength != nonceRandomLength)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    // Random bytes
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(dst, security->msgNonceRandom, (uint32_t) nonceRandomLength);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Sequence Number
+        status = SOPC_UInt32_Write(&security->sequenceNumber, dst, 0);
+    }
+    return status;
 }
 
 SOPC_ExposedBuffer* SOPC_PubSub_Security_Random(const SOPC_CryptoProvider* provider)

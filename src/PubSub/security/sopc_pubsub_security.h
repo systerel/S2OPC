@@ -109,6 +109,21 @@ SOPC_ReturnStatus SOPC_PubSub_Security_GetSignSize(const SOPC_PubSub_SecurityTyp
 SOPC_ReturnStatus SOPC_PubSub_Security_Sign(const SOPC_PubSub_SecurityType* security, SOPC_Buffer* src);
 
 /**
+ * @brief Get Nonce message and write it in buffer.
+ *
+ * @param security SOPC_PubSub_SecurityType object containing SecurityProfile and Keys. Should not be NULL.
+ * @param dst buffer in which we add Nonce message. Should not be NULL
+ * @param nonceRandomLength Length of pseudo-random bytes to include in Nonce message. This length is determined by
+ * security policy.
+ *
+ * @return SOPC_STATUS_OK if succeed, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters, SOPC_STATUS_NOK if
+ * failed to build Nonce message or write it in buffer.
+ */
+SOPC_ReturnStatus SOPC_PubSub_Security_Write_Nonce(const SOPC_PubSub_SecurityType* security,
+                                                   SOPC_Buffer* dst,
+                                                   uint8_t nonceRandomLength);
+
+/**
  * \brief Verify the signature of a buffer.
  *
  * Signature's Byte should be at end of the buffer.
