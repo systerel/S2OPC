@@ -50,16 +50,6 @@ typedef struct
 
 static SOPC_ReturnStatus SOPC_EncodeableObject_InternalInitialize(SOPC_EncodeableType* type, void* pValue);
 
-SOPC_ReturnStatus SOPC_EncodeableObject_EncodeToByteString(SOPC_EncodeableType* type,
-                                                           const void* pValue,
-                                                           SOPC_Buffer* buf,
-                                                           SOPC_ByteString* byteString,
-                                                           uint32_t nestedStructLevel);
-
-SOPC_ReturnStatus SOPC_EncodeableObject_DecodeFromByteString(SOPC_ByteString* byteString,
-                                                             SOPC_Buffer* buf,
-                                                             uint32_t nestedStructLevel);
-
 static uint64_t typeId_hash(const uintptr_t data)
 {
     return ((uint64_t)((const SOPC_EncodeableType_UserTypeKey*) data)->typeId) +
@@ -764,27 +754,6 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_EncodeableObject_EncodeToByteString(SOPC_EncodeableType* type,
-                                                           const void* pValue,
-                                                           SOPC_Buffer* buf,
-                                                           SOPC_ByteString* byteString,
-                                                           uint32_t nestedStructLevel)
-{
-    if (NULL != byteString)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    SOPC_ReturnStatus status = SOPC_EncodeableObject_Encode(type, pValue, buf, nestedStructLevel);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    return SOPC_ByteString_Write(byteString, buf, nestedStructLevel);
-}
-
 SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
                                                void* pValue,
                                                SOPC_Buffer* buf,
@@ -866,33 +835,6 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
     }
 
     return status;
-}
-
-SOPC_ReturnStatus SOPC_EncodeableObject_DecodeFromByteString(SOPC_ByteString* byteString,
-                                                             SOPC_Buffer* buf,
-                                                             uint32_t nestedStructLevel)
-{
-    SOPC_EncodeableType* byteStringtype =
-        SOPC_EncodeableType_GetEncodeableType(OPCUA_NAMESPACE_INDEX, SOPC_ByteString_Id);
-
-    if (NULL == byteStringtype || byteString != NULL || buf != NULL || nestedStructLevel != 0)
-        return SOPC_STATUS_NOK;
-
-    SOPC_Buffer* byteStringBuffer = SOPC_Buffer_Create(sizeof(byteString->Data));
-
-    if (NULL != byteStringBuffer)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    SOPC_ReturnStatus status = SOPC_ByteString_Read(byteString, buf, nestedStructLevel);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    return SOPC_EncodeableObject_Decode(byteStringtype, buf, byteStringBuffer, nestedStructLevel);
 }
 
 SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* destValue, const void* srcValue)

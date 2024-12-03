@@ -3202,6 +3202,64 @@ SOPC_ReturnStatus SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer* buffer,
     return status;
 }
 
+SOPC_ReturnStatus SOPC_EncodeableObject_EncodeToByteString(SOPC_EncodeableType* type,
+                                                           const void* srcValue,
+                                                           SOPC_ByteString* destByteString)
+{
+    if (NULL == type || NULL == srcValue || NULL == destByteString)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_Buffer* pEncoded =
+        SOPC_Buffer_CreateResizable((uint32_t) type->AllocationSize, SOPC_DEFAULT_MAX_STRING_LENGTH);
+
+    if (NULL == pEncoded)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Encode(type, srcValue, pEncoded, 0);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        destByteString->Data = pEncoded->data;
+        destByteString->Length = (int32_t) pEncoded->length;
+        pEncoded->data = NULL;
+        pEncoded->length = 0;
+    }
+
+    SOPC_Buffer_Delete(pEncoded);
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableObject_DecodeFromByteString(SOPC_EncodeableType* type,
+                                                             const SOPC_ByteString* srcByteString,
+                                                             void* destValue)
+{
+    if (NULL == type || NULL == srcByteString || NULL == destValue)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_Buffer* pToDecode = SOPC_Buffer_Attach(srcByteString->Data, (uint32_t) srcByteString->Length);
+
+    if (NULL == pToDecode)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(pToDecode, 0);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_EncodeableObject_Decode(type, destValue, pToDecode, 0);
+    }
+
+    SOPC_Free(pToDecode);
+    return status;
+}
+
 const SOPC_BuiltInType_Encoding SOPC_BuiltInType_EncodingTable[SOPC_BUILTINID_MAX + 1] = {
     {NULL, NULL},
     {SOPC_Boolean_WriteAux, SOPC_Boolean_ReadAux},

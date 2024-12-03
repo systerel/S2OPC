@@ -227,6 +227,44 @@ SOPC_ReturnStatus SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer* buffer,
                                               void** encodeableObj);
 
 /**
+ * \brief Encode an encodeable object of the given encodeable type into an OPC UA ByteString.
+ *
+ * \param type               The encodeable type of the object instance to encode.
+ * \param srcValue           The object instance of the appropriate encodeable type to encode.
+ *                           It shall at least have allocation size described in the encodeable type
+ *                           and shall be the C structure corresponding to an instance of the encodeable type
+ *                           (The first field of the structure shall be a ::SOPC_EncodeableType*
+ *                            which value shall be \p type. The following fields shall have types described by \p type)
+ *
+ * \param destByteString    The empty OPC UA ByteString in which the encodeable object will be encoded.
+ *
+ *  \return                 A status code indicating the result of operation
+ */
+SOPC_ReturnStatus SOPC_EncodeableObject_EncodeToByteString(SOPC_EncodeableType* type,
+                                                           const void* srcValue,
+                                                           SOPC_ByteString* destByteString);
+
+/**
+ * \brief Decode an encodeable object of the given encodeable type from an OPC UA ByteString.
+ *
+ * \param type               The encodeable type of the object instance to decode.
+ *
+ * \param srcByteString      The OPC UA ByteString to decode to fill the encodeable object content
+ *                           (content is not modified by the function call)
+ * \param destValue          An initialized object instance of the appropriate encodeable type to decode.
+ *                           It shall at least have allocation size described in the encodeable type
+ *                           and shall be the C structure corresponding to an instance of the encodeable type
+ *                           (The first field of the structure shall be a ::SOPC_EncodeableType*
+ *                            which value shall be \p type.
+ *                            The following fields shall have types described by \p type)
+ *
+ *  \return                   A status code indicating the result of operation
+ */
+SOPC_ReturnStatus SOPC_EncodeableObject_DecodeFromByteString(SOPC_EncodeableType* type,
+                                                             const SOPC_ByteString* srcByteString,
+                                                             void* destValue);
+
+/**
  *  \brief Generic built-in type encoding. Provides all the generic service
  *  functions for encoding and decoding a built-in type.
  */
