@@ -118,15 +118,19 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
 - Server discovery services: getEndpoints, findServers
 - Server Nano profile services: read, write, browse, browseNext (1 continuation point per session), translateBrowsePath, registerNodes
 - Server Micro profile and additional services (only if not compiled with S2OPC_NANO_PROFILE set to 1):
-  - subscription (no subscription transfer),
+  - subscription (no subscription transfer)
   - method call
   - add nodes (variable node only) if library compiled with S2OPC_NODE_MANAGEMENT set to 1
 - Server local services: read, write, browse and discovery services
 - Server address space modification:
   - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control
   - notification: write notification events are reported through application API
+- Server events notification:
+  - Create and trigger event instances for event types of address space on EventNotifier nodes
+  - Subscription events monitored items management with limited filtering features (where clause empty or 1 simple OfType element)
 - Client instantiation: multiple secure channel instances and session instances
-- Client services requests: any discovery service or service on session request. Requests are only forwarded to server (no functional behavior)
+- Client subscription service: automated management of 1 subscription per connection with monitored items
+- Client services requests: any discovery service or service on session request. Some request builders are provided, requests are only forwarded to server (no functional behavior).
 - Address space with all mandatory attributes: AccessLevel, (AccessLevelEx), (ArrayDimensions), BrowseName, ContainsNoLoop, DataType, (DataTypeDefinition),
   DisplayName, EvenNotifier, Executable, Historizing, IsAbstract, NodeClass, NodeId, Symmetric, UserAccessLevel, UserExecutable, Value, ValueRank (and References)
 
