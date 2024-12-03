@@ -904,6 +904,46 @@ START_TEST(test_UserEncodeableTypeNS2)
 }
 END_TEST
 
+START_TEST(test_EncodeAndDecode_ToAndFrom_ByteString)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_EnumField enumFieldSrc = {0};
+    OpcUa_EnumField enumFieldDest = {0};
+    OpcUa_EnumField_Initialize(&enumFieldSrc);
+    OpcUa_EnumField_Initialize(&enumFieldDest);
+    enumFieldSrc.Value = 64;
+    SOPC_ByteString* destByteString = SOPC_ByteString_Create();
+    ck_assert_ptr_nonnull(destByteString);
+
+    status = SOPC_EncodeableObject_EncodeToByteString(enumFieldSrc.encodeableType, (const void*) &enumFieldSrc,
+                                                      destByteString);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(destByteString->Data);
+
+    status = SOPC_EncodeableObject_DecodeFromByteString(enumFieldDest.encodeableType, destByteString,
+                                                        (void*) &enumFieldDest);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(enumFieldSrc.Value, enumFieldDest.Value);
+
+    /* Decode again to compare memory (to check all fields) */
+    SOPC_ByteString* newByteString = SOPC_ByteString_Create();
+    ck_assert_ptr_nonnull(newByteString);
+
+    status = SOPC_EncodeableObject_EncodeToByteString(enumFieldDest.encodeableType, (const void*) &enumFieldDest,
+                                                      newByteString);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(destByteString->Data);
+    ck_assert_int_eq(destByteString->Length, newByteString->Length);
+
+    int cmpRes = memcmp(destByteString->Data, newByteString->Data, (size_t) destByteString->Length);
+    ck_assert_int_eq(0, cmpRes);
+
+    SOPC_EncodeableObject_Clear(enumFieldDest.encodeableType, &enumFieldDest);
+    SOPC_ByteString_Delete(destByteString);
+    SOPC_ByteString_Delete(newByteString);
+}
+END_TEST
+
 Suite* tests_make_suite_encodeable_types(void)
 {
     Suite* s;
@@ -922,6 +962,7 @@ Suite* tests_make_suite_encodeable_types(void)
     tcase_add_test(tc_encodeable_types, test_UserEncodeableType);
     tcase_add_test(tc_encodeable_types, test_UserEncodeableTypeNS1);
     tcase_add_test(tc_encodeable_types, test_UserEncodeableTypeNS2);
+    tcase_add_test(tc_encodeable_types, test_EncodeAndDecode_ToAndFrom_ByteString);
     suite_add_tcase(s, tc_encodeable_types);
 
     return s;
