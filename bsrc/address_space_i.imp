@@ -101,11 +101,13 @@ DEFINITIONS
        ({FALSE |-> e_sc_bad_node_id_unknown,
          TRUE  |-> {FALSE |-> e_sc_bad_not_writable,
                     TRUE  |-> {FALSE |-> e_sc_bad_type_mismatch,
-                               TRUE |-> {FALSE |-> e_sc_bad_not_writable,
-                                         TRUE |-> {FALSE |-> e_sc_bad_user_access_denied,
-                                                   TRUE |-> d_VariantIndex_HasRange_Valid(dVal, idxRange, locale)
-                                                  }(bool(e_operation_type_write |-> nid |-> aid |-> user : s_AuthorizedOperations))
-                                        }(bool(a_NodeId~(nid) |-> DataValue_StatusCode(dVal) |-> DataValue_SourceTimestamp(dVal): s_access_write))
+                               TRUE |-> {FALSE |-> e_sc_bad_write_not_supported,
+                                         TRUE  |-> {FALSE |-> e_sc_bad_not_writable,
+                                                    TRUE |-> {FALSE |-> e_sc_bad_user_access_denied,
+                                                              TRUE |-> d_VariantIndex_HasRange_Valid(dVal, idxRange, locale)
+                                                             }(bool(e_operation_type_write |-> nid |-> aid |-> user : s_AuthorizedOperations))
+                                                   }(bool(a_NodeId~(nid) |-> DataValue_StatusCode(dVal) |-> DataValue_SourceTimestamp(dVal): s_access_write))
+                                        }(bool(DataValue_ServerTimestamp(dVal) = c_Timestamp_null or local_service_treatment = TRUE))
                                }(bool(d_Type_IsVariableSubtype
                                      (DataValue_LocalDataType(dVal), DataValue_ValueRank(dVal),
                                       a_DataType(a_NodeId~(nid)), a_ValueRank(a_NodeId~(nid)))))
