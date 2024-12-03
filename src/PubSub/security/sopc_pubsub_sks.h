@@ -60,6 +60,11 @@ typedef struct SOPC_PubSubSKS_Keys
 void SOPC_PubSubSKS_Init(void);
 
 /**
+ * @brief Clear the PubSubSKS and set SKManager to NULL.
+ */
+void SOPC_PubSubSKS_Clear(void);
+
+/**
  * \brief Set the Security Keys Manager to use to retrieve the keys for UADP secure exchanges
  * Only one SK Manager is used. Set to NULL to stop the service.
  *

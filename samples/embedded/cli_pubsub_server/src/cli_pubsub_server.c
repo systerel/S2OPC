@@ -644,6 +644,7 @@ static void clearPubSub(void)
         g_skmanager = NULL;
     }
 
+    SOPC_PubSubSKS_Clear();
     Cache_Clear();
 }
 

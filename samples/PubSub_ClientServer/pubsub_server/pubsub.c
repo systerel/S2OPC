@@ -494,7 +494,7 @@ void PubSub_Stop(void)
 
     Client_Stop();
 
-    SOPC_PubSubSKS_SetSkManager(NULL);
+    SOPC_PubSubSKS_Clear();
     SOPC_SKscheduler_StopAndClear(g_skScheduler);
     SOPC_Free(g_skScheduler);
     g_skScheduler = NULL;

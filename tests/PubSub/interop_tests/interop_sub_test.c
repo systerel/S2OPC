@@ -238,6 +238,7 @@ static void clear_setupConnection(void)
         SOPC_Free(g_skmanager);
         g_skmanager = NULL;
     }
+    SOPC_PubSubSKS_Clear();
 }
 
 static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)

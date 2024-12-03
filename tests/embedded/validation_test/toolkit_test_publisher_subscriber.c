@@ -299,6 +299,7 @@ void suite_test_publisher_subscriber(int* index)
     SOPC_SKManager_Clear(skmanager);
     SOPC_Free(skmanager);
     skmanager = NULL;
+    SOPC_PubSubSKS_Clear();
     SOPC_PubSourceVariableConfig_Delete(sourceConfig);
     sourceConfig = NULL;
     SOPC_SubTargetVariableConfig_Delete(targetConfig);
