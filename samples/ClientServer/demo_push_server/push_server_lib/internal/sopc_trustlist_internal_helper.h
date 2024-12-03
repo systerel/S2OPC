@@ -33,7 +33,7 @@
  * @brief Convert a Trustlist in ByteString form into the OPC UA TrustList object.
  *
  * @param[in] trustListData The ByteString TL to convert.
- * @return OpcUa_TrustListDataType* A pointer to the OPC UA TrustList.
+ * @return OpcUa_TrustListDataType* A pointer to the OPC UA TrustList. Returns NULL pointer if decode mechanism failed.
  */
 OpcUa_TrustListDataType* SOPC_TrustList_DecodeTrustListData(SOPC_ByteString* trustListData);
 

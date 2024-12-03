@@ -31,6 +31,7 @@
 #include "sopc_crypto_provider.h"
 #include "sopc_date_time.h"
 #include "sopc_encodeable.h"
+#include "sopc_encoder.h"
 #include "sopc_helper_encode.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -65,34 +66,26 @@ OpcUa_TrustListDataType* SOPC_TrustList_DecodeTrustListData(SOPC_ByteString* tru
     // Check parameter
     SOPC_ASSERT(trustListData != NULL);
 
-    SOPC_Buffer* pToDecode = SOPC_Buffer_Attach(trustListData->Data, (uint32_t) trustListData->Length);
-    if (NULL == pToDecode)
+    OpcUa_TrustListDataType* pTrustList = NULL;
+
+    pTrustList = SOPC_Calloc(1, sizeof(*pTrustList));
+
+    if (NULL == pTrustList)
     {
         return NULL;
     }
-    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(pToDecode, 0);
-    OpcUa_TrustListDataType* pTrustList = NULL;
-    if (SOPC_STATUS_OK == status)
-    {
-        pTrustList = SOPC_Calloc(1, sizeof(*pTrustList));
-        OpcUa_TrustListDataType_Initialize(pTrustList);
-        status = (NULL != pTrustList ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY);
-    }
+
+    OpcUa_TrustListDataType_Initialize(pTrustList);
+
     /* Decode the byteString */
-    if (SOPC_STATUS_OK == status)
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_DecodeFromByteString(pTrustList->encodeableType, trustListData, pTrustList);
+    if (SOPC_STATUS_OK != status)
     {
-        status = SOPC_EncodeableObject_Decode(pTrustList->encodeableType, pTrustList, pToDecode, 0);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("TrustList:%s:Decode: function failed\n", pTrustList->encodeableType->TypeName);
-        }
-    }
-    if (SOPC_STATUS_OK != status && NULL != pTrustList)
-    {
-        SOPC_Encodeable_Delete(pTrustList->encodeableType, (void**) &pTrustList);
+        printf("TrustList:%s:Decode: function failed\n", pTrustList->encodeableType->TypeName);
+        SOPC_EncodeableObject_Delete(pTrustList->encodeableType, (void**) &pTrustList);
     }
 
-    SOPC_Free(pToDecode);
     return pTrustList;
 }
 
@@ -102,28 +95,14 @@ SOPC_ReturnStatus SOPC_TrustList_EncodeTrustListData(OpcUa_TrustListDataType* tr
     SOPC_ASSERT(trustList != NULL);
     SOPC_ASSERT(trustListData != NULL);
 
-    SOPC_Buffer* pEncoded = SOPC_Buffer_CreateResizable(1024, SOPC_DEFAULT_MAX_STRING_LENGTH);
-    if (NULL == pEncoded)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
     /* Encode the byteString */
-    SOPC_ReturnStatus status = SOPC_EncodeableObject_Encode(trustList->encodeableType, trustList, pEncoded, 0);
-    if (SOPC_STATUS_OK == status)
-    {
-        trustListData->Data = pEncoded->data;
-        trustListData->Length = (int32_t) pEncoded->length;
-        // Moved data
-        pEncoded->data = NULL;
-        pEncoded->length = 0;
-    }
-    else
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_EncodeToByteString(trustList->encodeableType, trustList, trustListData);
+    if (SOPC_STATUS_OK != status)
     {
         printf("TrustList:%s:Encode: function failed\n", trustList->encodeableType->TypeName);
     }
 
-    SOPC_Buffer_Delete(pEncoded);
     return status;
 }
 
@@ -963,19 +942,13 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
     {
         return SOPC_STATUS_OK;
     }
-    SOPC_Buffer* pToDecode =
-        SOPC_Buffer_Attach(pEncodedTrustListDataType->Data, (uint32_t) pEncodedTrustListDataType->Length);
-    if (NULL == pToDecode)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
+
     OpcUa_TrustListDataType trustListDataType = {0};
     OpcUa_TrustListDataType_Initialize(&trustListDataType);
-    SOPC_EncodeableType* type = &OpcUa_TrustListDataType_EncodeableType;
-    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(pToDecode, 0);
 
     /* Decode the byteString */
-    status = SOPC_EncodeableObject_Decode(type, (void*) &trustListDataType, pToDecode, 0);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_DecodeFromByteString(
+        trustListDataType.encodeableType, pEncodedTrustListDataType, (void*) &trustListDataType);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Decode: EncodeableObject function failed",
@@ -1012,8 +985,7 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
     }
 
     /* Clear */
-    SOPC_EncodeableObject_Clear(type, &trustListDataType);
-    SOPC_Free(pToDecode);
+    SOPC_EncodeableObject_Clear(trustListDataType.encodeableType, &trustListDataType);
 
     return status;
 }
