@@ -85,7 +85,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15005</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=15007" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15007" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -97,7 +97,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15008" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15008" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -109,7 +109,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15009" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15009" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -121,7 +121,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15010" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15010" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -133,7 +133,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15011" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15011" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15006" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -941,7 +941,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15006</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15058" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15006" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15058" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15006" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -970,7 +970,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15005</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=15060" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15060" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -982,7 +982,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15061" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15061" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -994,7 +994,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15062" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15062" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -1006,7 +1006,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15063" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15063" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -1018,7 +1018,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15064" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15064" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15059" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -1826,7 +1826,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15059</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15159" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15059" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15159" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15059" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -1856,7 +1856,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15005</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=15161" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15161" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -1868,7 +1868,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15162" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15162" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -1880,7 +1880,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15163" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15163" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -1892,7 +1892,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15164" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15164" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -1904,7 +1904,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15165" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15165" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15160" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -2758,7 +2758,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15212" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15212" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Safety_Client_ID</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2766,7 +2766,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15315" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15315" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_A</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2774,7 +2774,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15316" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15316" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_B</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2782,7 +2782,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15317" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15317" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2790,7 +2790,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15318" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15318" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2798,7 +2798,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15319" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15319" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2806,7 +2806,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15320" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15320" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2814,7 +2814,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15321" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15321" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2822,7 +2822,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15322" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15322" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2830,7 +2830,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15323" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15323" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2838,7 +2838,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15324" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15324" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2846,7 +2846,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15325" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15325" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2854,7 +2854,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15326" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15326" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2862,7 +2862,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15327" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15327" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2870,7 +2870,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15328" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15328" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2878,7 +2878,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15329" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15329" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2886,7 +2886,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15330" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15330" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2894,7 +2894,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15331" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15331" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2902,7 +2902,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15332" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15332" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2910,7 +2910,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15333" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15333" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2918,7 +2918,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15334" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15334" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2926,7 +2926,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15335" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15335" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2934,7 +2934,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15336" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15336" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2942,7 +2942,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15337" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15337" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2950,7 +2950,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15338" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15338" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2958,7 +2958,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15339" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15339" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2966,7 +2966,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15340" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15340" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15210" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2974,7 +2974,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15341" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15341" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_OpType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2982,7 +2982,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15342" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15342" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15210" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_SubOptType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -2990,7 +2990,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15210</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15343" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15160" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15343" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15160" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -3008,7 +3008,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15005</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15345" BrowseName="1:OperationState" ParentNodeId="ns=1;i=15005" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15345" BrowseName="1:OperationState" ParentNodeId="ns=1;i=15005" DataType="String" AccessLevel="99">
     <DisplayName>OperationState</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -3066,7 +3066,7 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15349" BrowseName="1:Executable" ParentNodeId="ns=1;i=15346" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15349" BrowseName="1:Executable" ParentNodeId="ns=1;i=15346" DataType="Boolean" AccessLevel="99">
     <DisplayName>Executable</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -3127,7 +3127,7 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
     </References>
   </UAObjectType>
-  <UAVariable NodeId="ns=1;i=15081" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15081" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -3139,7 +3139,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15082" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15082" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -3151,7 +3151,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15083" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15083" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -3163,7 +3163,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15084" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15084" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -3175,7 +3175,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15085" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15085" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15080" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -4028,7 +4028,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15352" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15352" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Safety_Client_ID</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4036,7 +4036,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15353" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15353" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_A</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4044,7 +4044,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15354" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15354" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_B</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4052,7 +4052,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15355" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15355" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4060,7 +4060,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15356" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15356" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4068,7 +4068,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15357" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15357" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4076,7 +4076,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15358" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15358" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4084,7 +4084,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15359" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15359" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4092,7 +4092,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15360" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15360" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4100,7 +4100,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15361" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15361" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4108,7 +4108,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15362" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15362" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4116,7 +4116,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15363" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15363" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4124,7 +4124,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15364" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15364" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4132,7 +4132,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15365" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15365" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4140,7 +4140,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15366" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15366" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4148,7 +4148,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15367" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15367" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4156,7 +4156,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15368" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15368" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4164,7 +4164,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15369" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15369" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4172,7 +4172,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15370" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15370" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4180,7 +4180,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15371" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15371" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4188,7 +4188,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15372" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15372" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4196,7 +4196,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15373" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15373" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4204,7 +4204,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15374" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15374" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4212,7 +4212,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15375" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15375" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4220,7 +4220,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15376" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15376" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4228,7 +4228,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15377" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15377" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4236,7 +4236,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15378" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15378" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15350" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4244,7 +4244,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15379" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15379" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_OpType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4252,7 +4252,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15350</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15380" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15380" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15350" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_SubOptType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4268,7 +4268,7 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">ns=1;i=15080</Reference>
     </References>
   </UAObjectType>
-  <UAVariable NodeId="ns=1;i=15265" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15215" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15265" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15215" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4334,7 +4334,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15383" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15383" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Safety_Client_ID</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4342,7 +4342,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15384" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15384" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_A</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4350,7 +4350,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15385" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15385" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_B</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4358,7 +4358,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15386" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15386" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4366,7 +4366,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15387" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15387" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4374,7 +4374,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15388" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15388" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4382,7 +4382,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15389" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15389" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4390,7 +4390,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15390" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15390" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4398,7 +4398,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15391" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15391" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4406,7 +4406,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15392" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15392" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4414,7 +4414,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15393" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15393" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4422,7 +4422,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15394" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15394" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4430,7 +4430,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15395" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15395" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4438,7 +4438,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15396" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15396" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4446,7 +4446,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15397" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15397" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4454,7 +4454,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15398" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15398" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4462,7 +4462,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15399" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15399" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4470,7 +4470,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15400" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15400" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4478,7 +4478,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15401" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15401" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4486,7 +4486,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15402" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15402" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4494,7 +4494,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15403" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15403" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4502,7 +4502,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15404" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15404" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4510,7 +4510,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15405" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15405" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4518,7 +4518,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15406" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15406" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4526,7 +4526,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15407" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15407" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4534,7 +4534,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15408" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15408" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4542,7 +4542,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15409" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15409" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15381" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4550,7 +4550,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15410" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15410" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_OpType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4558,7 +4558,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15411" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15411" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15381" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_SubOptType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4566,7 +4566,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15381</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15628" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15266" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15628" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15266" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -4607,7 +4607,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15629</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=15631" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15631" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -4619,7 +4619,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15632" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15632" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -4631,7 +4631,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15633" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15633" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -4643,7 +4643,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15634" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15634" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -4655,7 +4655,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15635" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15635" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15630" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -5463,7 +5463,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15630</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15680" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15630" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15680" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15630" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -5492,7 +5492,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15629</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=15682" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15682" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -5504,7 +5504,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15683" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15683" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -5516,7 +5516,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15684" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15684" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -5528,7 +5528,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15685" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15685" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -5540,7 +5540,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15686" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15686" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15681" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -6348,7 +6348,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15681</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15731" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15681" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15731" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15681" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -6378,7 +6378,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15629</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=15733" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15733" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -6390,7 +6390,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15734" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15734" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -6402,7 +6402,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15735" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15735" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -6414,7 +6414,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15736" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15736" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -6426,7 +6426,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15737" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15737" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15732" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -7280,7 +7280,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15414" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15414" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Safety_Client_ID</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7288,7 +7288,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15415" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15415" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_A</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7296,7 +7296,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15416" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15416" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_B</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7304,7 +7304,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15417" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15417" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7312,7 +7312,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15418" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15418" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7320,7 +7320,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15419" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15419" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7328,7 +7328,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15420" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15420" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7336,7 +7336,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15421" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15421" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7344,7 +7344,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15422" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15422" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7352,7 +7352,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15423" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15423" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7360,7 +7360,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15424" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15424" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7368,7 +7368,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15425" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15425" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7376,7 +7376,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15426" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15426" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7384,7 +7384,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15427" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15427" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7392,7 +7392,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15428" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15428" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7400,7 +7400,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15429" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15429" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7408,7 +7408,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15430" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15430" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7416,7 +7416,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15431" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15431" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7424,7 +7424,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15432" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15432" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7432,7 +7432,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15433" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15433" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7440,7 +7440,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15434" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15434" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7448,7 +7448,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15435" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15435" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7456,7 +7456,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15436" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15436" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7464,7 +7464,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15437" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15437" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7472,7 +7472,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15438" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15438" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7480,7 +7480,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15439" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15439" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7488,7 +7488,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15440" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15440" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15412" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7496,7 +7496,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15441" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15441" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_OpType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7504,7 +7504,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15442" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15442" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15412" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_SubOptType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7512,7 +7512,7 @@
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15412</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15782" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15732" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15782" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15732" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7530,7 +7530,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15629</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15784" BrowseName="1:OperationState" ParentNodeId="ns=1;i=15629" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15784" BrowseName="1:OperationState" ParentNodeId="ns=1;i=15629" DataType="String" AccessLevel="99">
     <DisplayName>OperationState</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7587,7 +7587,7 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15788" BrowseName="1:Executable" ParentNodeId="ns=1;i=15785" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15788" BrowseName="1:Executable" ParentNodeId="ns=1;i=15785" DataType="Boolean" AccessLevel="99">
     <DisplayName>Executable</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -7636,7 +7636,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15471</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=15473" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15473" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -7647,7 +7647,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15474" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15474" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -7658,7 +7658,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15475" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15475" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -7669,7 +7669,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15476" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15476" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -7680,7 +7680,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15477" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15477" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15472" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -8445,7 +8445,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15472</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15522" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15472" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15522" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15472" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -8472,7 +8472,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15471</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=15524" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15524" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -8483,7 +8483,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15525" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15525" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -8494,7 +8494,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15526" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15526" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -8505,7 +8505,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15527" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15527" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -8516,7 +8516,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15528" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15528" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15523" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -9281,7 +9281,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15523</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15573" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15523" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15573" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15523" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -9309,7 +9309,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15471</Reference>
     </References>
   </UAObject>
-  <UAVariable NodeId="ns=1;i=15575" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15575" BrowseName="1:ActivationState" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="99">
     <DisplayName>ActivationState</DisplayName>
     <Description>Variable used to indicate the state of the activation.</Description>
     <References>
@@ -9320,7 +9320,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetActivatable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15576" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15576" BrowseName="1:PreloadState" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="99">
     <DisplayName>PreloadState</DisplayName>
     <Description>Variable used to indicate the state of the preload.</Description>
     <References>
@@ -9331,7 +9331,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">NotYetPreloadable</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15577" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15577" BrowseName="1:ConfigurationItemId" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="99">
     <DisplayName>ConfigurationItemId</DisplayName>
     <Description>Identification of the configuration item.</Description>
     <References>
@@ -9342,7 +9342,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">DEHG2_XIO___37##0005</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15578" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15578" BrowseName="1:CurrentVersion" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="99">
     <DisplayName>CurrentVersion</DisplayName>
     <Description>Version of the current configuration item running in STEP.</Description>
     <References>
@@ -9353,7 +9353,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">yyyymmdd_hhmm</String>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15579" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15579" BrowseName="1:PreloadedVersion" ParentNodeId="ns=1;i=15574" DataType="String" AccessLevel="99">
     <DisplayName>PreloadedVersion</DisplayName>
     <Description>Version of the preloaded configuration item in STEP.</Description>
     <References>
@@ -10162,210 +10162,210 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15445" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15445" BrowseName="1:Safety_Client_ID" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Safety_Client_ID</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15446" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15446" BrowseName="1:Scrambled_GID_A" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_A</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15447" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15447" BrowseName="1:Scrambled_GID_B" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Scrambled_GID_B</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15448" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15448" BrowseName="1:Freshness_A_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15449" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15449" BrowseName="1:Freshness_B_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15450" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15450" BrowseName="1:Freshness_A_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15451" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15451" BrowseName="1:Freshness_B_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Freshness_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15452" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15452" BrowseName="1:Identification_A_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15453" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15453" BrowseName="1:Identification_B_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15454" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15454" BrowseName="1:Identification_A_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15455" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15455" BrowseName="1:Identification_B_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Identification_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15456" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15456" BrowseName="1:Checksum1_A_Conf_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15457" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15457" BrowseName="1:Checksum1_B_Conf_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15458" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15458" BrowseName="1:Checksum1_A_CSS_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15459" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15459" BrowseName="1:Checksum1_B_CSS_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15460" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15460" BrowseName="1:Checksum1_A_Conf_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15461" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15461" BrowseName="1:Checksum1_B_Conf_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_Conf_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15462" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15462" BrowseName="1:Checksum1_A_CSS_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_A_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15463" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15463" BrowseName="1:Checksum1_B_CSS_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum1_B_CSS_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15464" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15464" BrowseName="1:Status_Primary" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15465" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15465" BrowseName="1:Status_Code_Primary" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15466" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15466" BrowseName="1:Status_Secondary" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15467" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15467" BrowseName="1:Status_Code_Secondary" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="99">
     <DisplayName>Status_Code_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15468" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15468" BrowseName="1:Checksum2_A_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15469" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15469" BrowseName="1:Checksum2_B_Primary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Primary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15470" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15470" BrowseName="1:Checksum2_A_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_A_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15793" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15793" BrowseName="1:Checksum2_B_Secondary" ParentNodeId="ns=1;i=15443" DataType="UInt32" AccessLevel="99">
     <DisplayName>Checksum2_B_Secondary</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15794" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15794" BrowseName="1:Command_OpType" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_OpType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15795" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15795" BrowseName="1:Command_SubOptType" ParentNodeId="ns=1;i=15443" DataType="Byte" AccessLevel="99">
     <DisplayName>Command_SubOptType</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15443</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15624" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15574" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15624" BrowseName="1:isSafetyRelevant" ParentNodeId="ns=1;i=15574" DataType="Boolean" AccessLevel="99">
     <DisplayName>isSafetyRelevant</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -10381,7 +10381,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15471</Reference>
     </References>
   </UAMethod>
-  <UAVariable NodeId="ns=1;i=15626" BrowseName="1:OperationState" ParentNodeId="ns=1;i=15471" DataType="String" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15626" BrowseName="1:OperationState" ParentNodeId="ns=1;i=15471" DataType="String" AccessLevel="99">
     <DisplayName>OperationState</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
@@ -10435,7 +10435,7 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15792" BrowseName="1:Executable" ParentNodeId="ns=1;i=15789" DataType="Boolean" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15792" BrowseName="1:Executable" ParentNodeId="ns=1;i=15789" DataType="Boolean" AccessLevel="99">
     <DisplayName>Executable</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>

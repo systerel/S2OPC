@@ -25,7 +25,7 @@ HEADER_FILENAME = 'address_space_header.xml.part'
 FOOTER_FILENAME = 'address_space_footer.xml.part'
 
 variable_template = '''
-  <UAVariable DataType="Boolean" NodeId="{node_id}" BrowseName="{browse_name}" UserAccessLevel="3" AccessLevel="3">
+  <UAVariable DataType="Boolean" NodeId="{node_id}" BrowseName="{browse_name}" UserAccessLevel="99" AccessLevel="99">
     <DisplayName>{display_name}</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>

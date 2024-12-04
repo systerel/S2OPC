@@ -64,7 +64,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=PubStatusCode</Reference>
     </References>
   </UAObject>
-  <UAVariable AccessLevel="3" BrowseName="1:pubString" DataType="String" NodeId="ns=1;s=PubString" ParentNodeId="ns=1;s=PubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:pubString" DataType="String" NodeId="ns=1;s=PubString" ParentNodeId="ns=1;s=PubVars">
     <DisplayName>pubString</DisplayName>
     <Description>pubStringDesc</Description>
     <References>
@@ -75,7 +75,7 @@
       <uax:String></uax:String>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:pubByte" DataType="Byte" NodeId="ns=1;s=PubByte" ParentNodeId="ns=1;s=PubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:pubByte" DataType="Byte" NodeId="ns=1;s=PubByte" ParentNodeId="ns=1;s=PubVars">
     <DisplayName>pubByte</DisplayName>
     <Description>pubByteDesc</Description>
     <References>
@@ -86,7 +86,7 @@
       <uax:Byte>127</uax:Byte>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:pubUInt32" DataType="UInt32" NodeId="ns=1;s=PubUInt32" ParentNodeId="ns=1;s=PubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:pubUInt32" DataType="UInt32" NodeId="ns=1;s=PubUInt32" ParentNodeId="ns=1;s=PubVars">
     <DisplayName>pubUInt32</DisplayName>
     <Description>pubUInt32Desc</Description>
     <References>
@@ -97,7 +97,7 @@
       <uax:UInt32>1</uax:UInt32>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:varInt16" DataType="Int16" NodeId="ns=1;s=PubInt16" ParentNodeId="ns=1;s=PubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:varInt16" DataType="Int16" NodeId="ns=1;s=PubInt16" ParentNodeId="ns=1;s=PubVars">
     <DisplayName>pubInt16</DisplayName>
     <Description>pubIntDesc</Description>
     <References>
@@ -108,7 +108,7 @@
       <uax:Int16>0</uax:Int16>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:varBool" DataType="Boolean" NodeId="ns=1;s=PubBool" ParentNodeId="ns=1;s=PubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:varBool" DataType="Boolean" NodeId="ns=1;s=PubBool" ParentNodeId="ns=1;s=PubVars">
     <DisplayName>pubBool</DisplayName>
     <Description>pubBoolDesc</Description>
     <References>
@@ -119,7 +119,7 @@
       <uax:Boolean>true</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:pubStatusCode" DataType="StatusCode" NodeId="ns=1;s=PubStatusCode" ParentNodeId="ns=1;s=PubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:pubStatusCode" DataType="StatusCode" NodeId="ns=1;s=PubStatusCode" ParentNodeId="ns=1;s=PubVars">
     <DisplayName>PubStatusCode</DisplayName>
     <Description>PubStatusCodeDesc</Description>
     <References>
@@ -143,7 +143,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=SubStatusCode</Reference>
     </References>
   </UAObject>
-  <UAVariable AccessLevel="3" BrowseName="1:subString" DataType="String" NodeId="ns=1;s=SubString" ParentNodeId="ns=1;s=SubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:subString" DataType="String" NodeId="ns=1;s=SubString" ParentNodeId="ns=1;s=SubVars">
     <DisplayName>subString</DisplayName>
     <Description>subStringDesc</Description>
     <References>
@@ -154,7 +154,7 @@
       <uax:String></uax:String>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:subByte" DataType="Byte" NodeId="ns=1;s=SubByte" ParentNodeId="ns=1;s=SubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:subByte" DataType="Byte" NodeId="ns=1;s=SubByte" ParentNodeId="ns=1;s=SubVars">
     <DisplayName>subByte</DisplayName>
     <Description>subByteDesc</Description>
     <References>
@@ -165,7 +165,7 @@
       <uax:Byte>127</uax:Byte>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:subUInt32" DataType="UInt32" NodeId="ns=1;s=SubUInt32" ParentNodeId="ns=1;s=SubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:subUInt32" DataType="UInt32" NodeId="ns=1;s=SubUInt32" ParentNodeId="ns=1;s=SubVars">
     <DisplayName>subUInt32</DisplayName>
     <Description>subUInt32Desc</Description>
     <References>
@@ -176,7 +176,7 @@
       <uax:UInt32>1</uax:UInt32>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:subInt16" DataType="Int16" NodeId="ns=1;s=SubInt16" ParentNodeId="ns=1;s=SubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:subInt16" DataType="Int16" NodeId="ns=1;s=SubInt16" ParentNodeId="ns=1;s=SubVars">
     <DisplayName>subVarInt16</DisplayName>
     <Description>subVarInt16Desc</Description>
     <References>
@@ -187,7 +187,7 @@
       <uax:Int16>1</uax:Int16>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:subBool" DataType="Boolean" NodeId="ns=1;s=SubBool" ParentNodeId="ns=1;s=SubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:subBool" DataType="Boolean" NodeId="ns=1;s=SubBool" ParentNodeId="ns=1;s=SubVars">
     <DisplayName>subBool</DisplayName>
     <Description>subBoolDesc</Description>
     <References>
@@ -198,7 +198,7 @@
       <uax:Boolean>true</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="3" BrowseName="1:subStatusCode" DataType="StatusCode" NodeId="ns=1;s=SubStatusCode" ParentNodeId="ns=1;s=SubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:subStatusCode" DataType="StatusCode" NodeId="ns=1;s=SubStatusCode" ParentNodeId="ns=1;s=SubVars">
     <DisplayName>SubStatusCode</DisplayName>
     <Description>SubStatusCodeDesc</Description>
     <References>
