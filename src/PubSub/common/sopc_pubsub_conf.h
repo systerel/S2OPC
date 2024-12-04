@@ -347,8 +347,10 @@ SOPC_DataSetWriter* SOPC_WriterGroup_Get_DataSetWriter_At(const SOPC_WriterGroup
 /*******************/
 typedef struct SOPC_DataSetWriter_Options
 {
-    bool noUseSeqNum; // Negative logic to get default value with 0-fill initializer (Calloc)
-    bool noTimestamp; // Negative logic to get default value with 0-fill initializer (Calloc)
+    // Negative logic to get default value with 0-fill initializer (Calloc)
+    bool noUseSeqNum;
+    bool noTimestamp;
+    bool disableEmission;
 } SOPC_DataSetWriter_Options;
 
 uint16_t SOPC_DataSetWriter_Get_Id(const SOPC_DataSetWriter* writer);

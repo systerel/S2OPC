@@ -127,7 +127,7 @@ const SOPC_UADP_Configuration* SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig_Co
 bool SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(SOPC_Dataset_LL_NetworkMessage* nm, uint8_t dsm_nb);
 
 /**
- * \brief Free the given networkMessage and its attibutes
+ * \brief Free the given networkMessage and its atributes
  */
 void SOPC_Dataset_LL_NetworkMessage_Delete(SOPC_Dataset_LL_NetworkMessage* nm);
 
@@ -137,6 +137,8 @@ uint8_t SOPC_Dataset_LL_NetworkMessage_GetVersion(const SOPC_Dataset_LL_NetworkM
 void SOPC_Dataset_LL_NetworkMessage_SetVersion(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint8_t version);
 
 uint8_t SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(SOPC_Dataset_LL_NetworkMessage* nm);
+
+uint8_t SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsgEnable(SOPC_Dataset_LL_NetworkMessage* nm);
 
 SOPC_Dataset_LL_DataSetMessage* SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(SOPC_Dataset_LL_NetworkMessage* nm,
                                                                                  int index);
@@ -182,6 +184,12 @@ void SOPC_Dataset_LL_DataSetMsg_Set_WriterId(SOPC_Dataset_LL_DataSetMessage* dsm
 
 // dataset writer id
 uint16_t SOPC_Dataset_LL_DataSetMsg_Get_WriterId(const SOPC_Dataset_LL_DataSetMessage* dsm);
+
+// set flag to enable dataSetMessage emission
+void SOPC_Dataset_LL_DataSetMsg_Set_EnableEmission(SOPC_Dataset_LL_DataSetMessage* dsm, bool enableEmission);
+
+// get flag to enable dataSetMessage emission
+bool SOPC_Dataset_LL_DataSetMsg_Get_EnableEmission(SOPC_Dataset_LL_DataSetMessage* dsm);
 
 // Set UADP conf associated to the DSM
 void SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(SOPC_Dataset_LL_DataSetMessage* dsm,

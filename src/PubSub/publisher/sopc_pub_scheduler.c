@@ -98,11 +98,14 @@ typedef struct SOPC_DataSetMessageCtx_t
 {
     SOPC_SourceVariableCtx* sourceVariables; // sourceVariables to retrieve to user
     uint16_t sequenceNumber;                 // DataSetMessage Sequence Number
+    const SOPC_DataSetWriter* dataSetWriter; // DataSetWriter on which we rely
+    bool enableEmission;
 } SOPC_DataSetMessageCtx_t;
 
 typedef struct MessageCtx
 {
     SOPC_WriterGroup* group; /* TODO: There's seem to be a problem as there may be multiple DSM but only one group */
+    SOPC_Conf_PublisherId pubId;
     SOPC_Dataset_NetworkMessage* message;
     SOPC_Dataset_NetworkMessage* messageKeepAlive;
     SOPC_Array* dataSetMessageCtx;
@@ -112,17 +115,18 @@ typedef struct MessageCtx
     uint64_t publishingIntervalUs;
     int32_t publishingOffsetUs; /**< Negative = not used */
     const char* mqttTopic;
-    bool warned; /**< Have we warned about expired messages yet? */
+    bool warned;            /**< Have we warned about expired messages yet? */
+    uint32_t nbOfDsmActive; /* If no DataSetMessage is active the NetworkMessage should NOT be emitted */
     uint64_t keepAliveTimeUs;
 } MessageCtx;
 
 /* TODO: use SOPC_Array, which already does that, and uses size_t */
 typedef struct MessageCtx_Array
 {
-    uint64_t length;         // Size of this array is SOPC_PubScheduler_Nb_Message
-    uint64_t current;        // Nb of messages already initialized. Monotonic.
-    MessageCtx* array;       // MessageCtx: array of context for each message
-    SOPC_Mutex acyclicMutex; // Mutex used for acyclic send
+    uint64_t length;        // Size of this array is SOPC_PubScheduler_Nb_Message
+    uint64_t current;       // Nb of messages already initialized. Monotonic.
+    MessageCtx* array;      // MessageCtx: array of context for each message
+    SOPC_Mutex sendingLock; // Mutex used for acyclic send
 } MessageCtx_Array;
 
 // Total of message
@@ -274,7 +278,7 @@ static bool MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config)
     if (result)
     {
         pubSchedulerCtx.messages.length = length;
-        result = SOPC_STATUS_OK == SOPC_Mutex_Initialization(&pubSchedulerCtx.messages.acyclicMutex);
+        result = SOPC_STATUS_OK == SOPC_Mutex_Initialization(&pubSchedulerCtx.messages.sendingLock);
     }
     return result;
 }
@@ -306,9 +310,9 @@ static void MessageCtx_Array_Clear(void)
     pubSchedulerCtx.messages.array = NULL;
     pubSchedulerCtx.messages.current = 0;
     pubSchedulerCtx.messages.length = 0;
-    if (SOPC_INVALID_MUTEX != pubSchedulerCtx.messages.acyclicMutex)
+    if (SOPC_INVALID_MUTEX != pubSchedulerCtx.messages.sendingLock)
     {
-        SOPC_Mutex_Clear(&pubSchedulerCtx.messages.acyclicMutex);
+        SOPC_Mutex_Clear(&pubSchedulerCtx.messages.sendingLock);
     }
 }
 
@@ -326,6 +330,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     SOPC_ASSERT(ctx != NULL);
     SOPC_ASSERT(pubSchedulerCtx.messages.current < pubSchedulerCtx.messages.length);
 
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     MessageCtx* context = &(pubSchedulerCtx.messages.array[pubSchedulerCtx.messages.current]);
 
     context->transport = ctx;
@@ -356,12 +361,14 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     bool result = true;
 
     context->group = group;
+    context->pubId = pubId;
     SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
     context->warned = false;
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group, false);
     context->messageKeepAlive = NULL; // by default NULL and set only if publisher is acyclic
     context->keepAliveTimeUs = 0;     // by default equal to 0 and set only if publisher is acyclic
     context->next_timeout = SOPC_HighRes_TimeReference_Create();
+    context->nbOfDsmActive = 0;
     SOPC_HighRes_TimeReference_Copy(context->next_timeout, tRef);
     context->dataSetMessageCtx =
         SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, clear_dataSetMessageCtx_array);
@@ -422,14 +429,22 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
         SOPC_SourceVariableCtx* sourceVariableCtx = SOPC_PubSourceVariable_SourceVariablesCtx_Create(dataset);
         result = NULL != sourceVariableCtx;
+        const SOPC_DataSetWriter_Options* options = SOPC_DataSetWriter_Get_Options(writer);
         if (result)
         {
-            SOPC_DataSetMessageCtx_t dataSetMsgCtx = {.sequenceNumber = 1, .sourceVariables = sourceVariableCtx};
+            SOPC_DataSetMessageCtx_t dataSetMsgCtx = {.sequenceNumber = 1,
+                                                      .sourceVariables = sourceVariableCtx,
+                                                      .dataSetWriter = writer,
+                                                      .enableEmission = !options->disableEmission};
             result = SOPC_Array_Append(context->dataSetMessageCtx, dataSetMsgCtx);
         }
         if (!result)
         {
             SOPC_PubSourceVariable_SourceVariableCtx_Delete(&sourceVariableCtx);
+        }
+        if (!options->disableEmission)
+        {
+            context->nbOfDsmActive++;
         }
     }
 
@@ -458,7 +473,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         else
         {
             // Initialise dataSetFields with empty values
-            SOPC_ReturnStatus status = initialize_DataSetField_from_WriterGroup(context->message, group);
+            status = initialize_DataSetField_from_WriterGroup(context->message, group);
             result = (SOPC_STATUS_OK == status);
             if (result)
             {
@@ -497,7 +512,7 @@ static MessageCtx* MessageCtxArray_FindMostExpired(void)
     for (size_t i = 0; i < messages->length; ++i)
     {
         MessageCtx* cursor = &messages->array[i];
-        if (NULL == worse || SOPC_HighRes_TimeReference_IsExpired(cursor->next_timeout, worse->next_timeout))
+        if ((NULL == worse || SOPC_HighRes_TimeReference_IsExpired(cursor->next_timeout, worse->next_timeout)))
         {
             worse = cursor;
         }
@@ -533,6 +548,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
     SOPC_ASSERT(NULL != context);
     SOPC_Dataset_NetworkMessage* message = context->message;
+    SOPC_PubSub_SecurityType* security = context->security;
 
     SOPC_WriterGroup* group = context->group;
     SOPC_ASSERT(NULL != message && NULL != group);
@@ -545,93 +561,112 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     size_t nbDsmCtx = SOPC_Array_Size(context->dataSetMessageCtx);
     SOPC_ASSERT(nDsm == nbDsmCtx);
 
-    const bool isPreencoded = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enabled(message);
+    const bool isPreencode = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enabled(message);
 
     for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
     {
-        // Note : It has been asserted that there are as many DataSetMessages as DataSetWriters
-        SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, (int) iDsm);
-        const SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, (uint8_t) iDsm);
-
         // Retrieve DSM context
         SOPC_DataSetMessageCtx_t* dsmCtx = SOPC_Array_Get_Ptr(context->dataSetMessageCtx, iDsm);
         SOPC_ASSERT(NULL != dsmCtx);
 
-        // Monotonically increase DSM sequence number
-        SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, dsmCtx->sequenceNumber);
-        dsmCtx->sequenceNumber++;
+        // Note : It has been asserted that there are as many DataSetMessages as DataSetWriters
+        SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, (int) iDsm);
 
-        uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
-        const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
-        SOPC_ASSERT(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
+        bool oldFlagEnableEmission = SOPC_Dataset_LL_DataSetMsg_Get_EnableEmission(dsm);
+        SOPC_Dataset_LL_DataSetMsg_Set_EnableEmission(dsm, dsmCtx->enableEmission);
 
-        SOPC_DataValue* values =
-            SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, dsmCtx->sourceVariables);
-        SOPC_ASSERT(NULL != values);
-
-        /* Check value-type compatibility and encode */
-        /* TODO: simplify and externalize the type check */
-        for (size_t iField = 0; iField < nbFields && typeCheckingSuccess; ++iField)
+        // If the dsm state of emission change, we have to preencode the networkMessage and recapture positions in
+        // buffer
+        if (isPreencode && dsmCtx->enableEmission != oldFlagEnableEmission)
         {
-            /* TODO: this function should take a size_t */
-            SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, (uint16_t) iField);
-            SOPC_ASSERT(NULL != fieldData);
-            SOPC_DataValue* dv = &values[iField];
-
-            bool isCompatible = false;
-            bool isBad = false;
-            if (isPreencoded)
+            SOPC_UADP_NetworkMessage_Delete_PreencodedBuffer(message);
+            SOPC_ReturnStatus status = SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(message, security);
+            if (SOPC_STATUS_OK != status)
             {
-                isCompatible = SOPC_PubSubHelpers_IsPreencodeCompatibleVariant(fieldData, &dv->Value);
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                         "Failed to re build the preencode network message after changing dsm state");
             }
-            else
-            {
-                isCompatible = SOPC_PubSubHelpers_IsCompatibleVariant(fieldData, &dv->Value, &isBad);
-            }
-
-            // We also want to consider case the value was valid but provided with Bad status, therefore we
-            // do not consider isNullOrBad in the first condition
-            if (isCompatible && 0 != (dv->Status & SOPC_BadStatusMask))
-            {
-                // If status is bad and value has not status type, set value as a Bad status code
-                // (see spec part 14 - 1.05: Table 26: DataSetMessage field representation options)
-                if (SOPC_StatusCode_Id != dv->Value.BuiltInTypeId)
-                {
-                    SOPC_Variant_Clear(&dv->Value);
-                    dv->Value.BuiltInTypeId = SOPC_StatusCode_Id;
-                    dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-                    dv->Value.Value.Status = dv->Status;
-                }
-            }
-            else if (!isCompatible || isBad)
-            {
-                // If value is Bad whereas the data value status code is not bad, it is considered as an
-                // error since this is not the type expected for this value from an OpcUa server.
-
-                if (!isCompatible)
-                {
-                    dv->Status = OpcUa_BadTypeMismatch;
-                    SOPC_Logger_TraceError(
-                        SOPC_LOG_MODULE_PUBSUB,
-                        "GetSourceVariables returned values incompatible with the current PubSub configuration");
-                }
-                typeCheckingSuccess = false;
-            }
-            SOPC_NetworkMessage_Set_Variant_At(message, (uint8_t) iDsm, (uint16_t) iField, &dv->Value, fieldData);
         }
 
-        /* Always destroy the created DataValues */
-        for (size_t iField = 0; iField < nbFields; ++iField)
+        if (dsmCtx->enableEmission)
         {
-            SOPC_DataValue_Clear(&values[iField]);
+            const SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, (uint8_t) iDsm);
+
+            // Monotonically increase DSM sequence number
+            SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, dsmCtx->sequenceNumber);
+            dsmCtx->sequenceNumber++;
+
+            uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
+            const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
+            SOPC_ASSERT(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
+
+            SOPC_DataValue* values =
+                SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, dsmCtx->sourceVariables);
+            SOPC_ASSERT(NULL != values);
+
+            /* Check value-type compatibility and encode */
+            /* TODO: simplify and externalize the type check */
+            for (size_t iField = 0; iField < nbFields && typeCheckingSuccess; ++iField)
+            {
+                /* TODO: this function should take a size_t */
+                SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, (uint16_t) iField);
+                SOPC_ASSERT(NULL != fieldData);
+                SOPC_DataValue* dv = &values[iField];
+
+                bool isCompatible = false;
+                bool isBad = false;
+                if (isPreencode)
+                {
+                    isCompatible = SOPC_PubSubHelpers_IsPreencodeCompatibleVariant(fieldData, &dv->Value);
+                }
+                else
+                {
+                    isCompatible = SOPC_PubSubHelpers_IsCompatibleVariant(fieldData, &dv->Value, &isBad);
+                }
+
+                // We also want to consider case the value was valid but provided with Bad status, therefore we
+                // do not consider isNullOrBad in the first condition
+                if (isCompatible && 0 != (dv->Status & SOPC_BadStatusMask))
+                {
+                    // If status is bad and value has not status type, set value as a Bad status code
+                    // (see spec part 14 - 1.05: Table 26: DataSetMessage field representation options)
+                    if (SOPC_StatusCode_Id != dv->Value.BuiltInTypeId)
+                    {
+                        SOPC_Variant_Clear(&dv->Value);
+                        dv->Value.BuiltInTypeId = SOPC_StatusCode_Id;
+                        dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+                        dv->Value.Value.Status = dv->Status;
+                    }
+                }
+                else if (!isCompatible || isBad)
+                {
+                    // If value is Bad whereas the data value status code is not bad, it is considered as an
+                    // error since this is not the type expected for this value from an OpcUa server.
+
+                    if (!isCompatible)
+                    {
+                        dv->Status = OpcUa_BadTypeMismatch;
+                        SOPC_Logger_TraceError(
+                            SOPC_LOG_MODULE_PUBSUB,
+                            "GetSourceVariables returned values incompatible with the current PubSub configuration");
+                    }
+                    typeCheckingSuccess = false;
+                }
+                SOPC_NetworkMessage_Set_Variant_At(message, (uint8_t) iDsm, (uint16_t) iField, &dv->Value, fieldData);
+            }
+
+            /* Always destroy the created DataValues */
+            for (size_t iField = 0; iField < nbFields; ++iField)
+            {
+                SOPC_DataValue_Clear(&values[iField]);
+            }
+            SOPC_Free(values);
         }
-        SOPC_Free(values);
     }
 
     /* Finally send it */
     if (typeCheckingSuccess)
     {
-        SOPC_PubSub_SecurityType* security = context->security;
         if (NULL != security)
         {
             // Update keys
@@ -677,7 +712,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         else
         {
             errorCode = SOPC_NetworkMessage_Error_Code_None;
-            if (isPreencoded)
+            if (isPreencode)
             {
                 buffer = SOPC_UADP_NetworkMessage_Get_PreencodedBuffer(message, security);
                 if (NULL == buffer)
@@ -720,7 +755,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         if (NULL != buffer)
         {
             context->transport->pFctSend(context->transport, buffer);
-            if (!isPreencoded)
+            if (!isPreencode)
             {
                 SOPC_Buffer_Delete(buffer);
                 buffer = NULL;
@@ -801,7 +836,7 @@ static void* thread_start_publish(void* arg)
     SOPC_ASSERT(NULL != now);
     SOPC_ASSERT(NULL != nextTimeout);
 
-    status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+    status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.sendingLock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     while (!SOPC_Atomic_Int_Get(&pubSchedulerCtx.quit))
@@ -809,23 +844,30 @@ static void* thread_start_publish(void* arg)
         /* Wake-up: find which message(s) needs to be sent */
         SOPC_HighRes_TimeReference_GetTime(now);
 
-        /* If a message needs to be sent, send it */
         MessageCtx* context = MessageCtxArray_FindMostExpired();
+        /* Check if message has expired and need to be reschedule and eventually sent */
         if (SOPC_HighRes_TimeReference_IsExpired(context->next_timeout, now))
         {
-            if (context->transport->isAcyclic)
+            uint64_t duration = context->publishingIntervalUs;
+            int32_t offset = context->publishingOffsetUs;
+
+            /* If a message needs to be sent, send it */
+            if (context->nbOfDsmActive)
             {
-                send_keepAlive_message(context);
-                /* Re-schedule keep alive message */
-                SOPC_HighRes_TimeReference_AddSynchedDuration(context->next_timeout, context->keepAliveTimeUs, -1);
+                if (context->transport->isAcyclic)
+                {
+                    send_keepAlive_message(context);
+                    duration = context->keepAliveTimeUs;
+                    offset = -1;
+                }
+                else
+                {
+                    MessageCtx_send_publish_message(context);
+                }
             }
-            else
-            {
-                MessageCtx_send_publish_message(context);
-                /* Re-schedule this message */
-                SOPC_HighRes_TimeReference_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
-                                                              context->publishingOffsetUs);
-            }
+
+            /* Re-schedule message */
+            SOPC_HighRes_TimeReference_AddSynchedDuration(context->next_timeout, duration, offset);
 
             if (SOPC_HighRes_TimeReference_IsExpired(context->next_timeout, now) && !context->warned)
             {
@@ -838,19 +880,18 @@ static void* thread_start_publish(void* arg)
                 context->warned = true; /* Avoid being spammed @ 10kHz and being even slower because of this */
             }
         }
-
         /* Otherwise sleep until there is a message to send */
         else
         {
             SOPC_HighRes_TimeReference_Copy(nextTimeout, context->next_timeout);
-            status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+            status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.sendingLock);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
             SOPC_HighRes_TimeReference_SleepUntil(nextTimeout);
-            status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+            status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.sendingLock);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
     }
-    status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+    status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.sendingLock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread stopped");
@@ -1198,14 +1239,112 @@ bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
     {
         return false;
     }
-    status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+    status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.sendingLock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_HighRes_TimeReference_GetTime(ctx->next_timeout);
     SOPC_HighRes_TimeReference_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
     MessageCtx_send_publish_message(ctx);
-    status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+    status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.sendingLock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     return true;
+}
+
+static MessageCtx* MessageCtx_GetFromPublisherId_WriterGroupId(SOPC_Conf_PublisherId* pubId, uint16_t writerGroupId)
+{
+    MessageCtx_Array* messages = &pubSchedulerCtx.messages;
+    MessageCtx* mes = NULL;
+
+    SOPC_ASSERT(messages->length > 0 && messages->current == messages->length);
+
+    bool found = false;
+    for (size_t i = 0; i < messages->length && !found; ++i)
+    {
+        MessageCtx* cursor = &messages->array[i];
+        SOPC_ReturnStatus status = SOPC_Helper_PublisherId_Compare(pubId, &cursor->pubId, &found);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        if (writerGroupId == SOPC_WriterGroup_Get_Id(cursor->group) && found)
+        {
+            mes = cursor;
+        }
+        else
+        {
+            found = false;
+        }
+    }
+
+    return mes;
+}
+
+static SOPC_DataSetMessageCtx_t* DataSetMessage_GetFrom_DataSetWriterId(MessageCtx* context, uint16_t dataSetWriterId)
+{
+    SOPC_DataSetMessageCtx_t* dsmCtxFound = NULL;
+    if (NULL != context)
+    {
+        size_t nbDsmCtx = SOPC_Array_Size(context->dataSetMessageCtx);
+        for (size_t iDsm = 0; iDsm < nbDsmCtx && NULL == dsmCtxFound; iDsm++)
+        {
+            // Retrieve DSM context
+            SOPC_DataSetMessageCtx_t* dsmCtx = SOPC_Array_Get_Ptr(context->dataSetMessageCtx, iDsm);
+            SOPC_ASSERT(NULL != dsmCtx);
+            if (dataSetWriterId == SOPC_DataSetWriter_Get_Id(dsmCtx->dataSetWriter))
+            {
+                dsmCtxFound = dsmCtx;
+            }
+        }
+    }
+    return dsmCtxFound;
+}
+
+static SOPC_ReturnStatus SOPC_PubScheduler_Set_EnableEmission_DataSetMessage(SOPC_Conf_PublisherId* pubId,
+                                                                             uint16_t writerGroupId,
+                                                                             uint16_t dataSetWriterId,
+                                                                             bool enableEmission)
+{
+    if (NULL == pubId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
+    MessageCtx* context = MessageCtx_GetFromPublisherId_WriterGroupId(pubId, writerGroupId);
+    SOPC_DataSetMessageCtx_t* dsmCtx = NULL;
+    if (NULL != context)
+    {
+        dsmCtx = DataSetMessage_GetFrom_DataSetWriterId(context, dataSetWriterId);
+    }
+    if (NULL != dsmCtx)
+    {
+        SOPC_Mutex_Lock(&pubSchedulerCtx.messages.sendingLock);
+        if (dsmCtx->enableEmission != enableEmission)
+        {
+            if (enableEmission)
+            {
+                context->nbOfDsmActive++;
+            }
+            else
+            {
+                context->nbOfDsmActive--;
+            }
+        }
+        dsmCtx->enableEmission = enableEmission;
+        SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.sendingLock);
+        status = SOPC_STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_PubScheduler_Enable_DataSetMessage(SOPC_Conf_PublisherId* pubId,
+                                                          uint16_t writerGroupId,
+                                                          uint16_t dataSetWriterId)
+{
+    return SOPC_PubScheduler_Set_EnableEmission_DataSetMessage(pubId, writerGroupId, dataSetWriterId, true);
+}
+
+SOPC_ReturnStatus SOPC_PubScheduler_Disable_DataSetMessage(SOPC_Conf_PublisherId* pubId,
+                                                           uint16_t writerGroupId,
+                                                           uint16_t dataSetWriterId)
+{
+    return SOPC_PubScheduler_Set_EnableEmission_DataSetMessage(pubId, writerGroupId, dataSetWriterId, false);
 }
 
 SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_NetworkMessage* networkMessage,

@@ -201,6 +201,12 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_BuildFinalMessage(SOPC_P
  */
 SOPC_Buffer* SOPC_UADP_NetworkMessage_Get_PreencodedBuffer(SOPC_Dataset_LL_NetworkMessage* nm,
                                                            SOPC_PubSub_SecurityType* security);
+/**
+ * @brief Remove preencoded context and free associated memory
+ *
+ * @param nm NetworkMessage containing preencoded structure
+ */
+void SOPC_UADP_NetworkMessage_Delete_PreencodedBuffer(SOPC_Dataset_LL_NetworkMessage* nm);
 
 /**
  * \brief A callback for ReaderGroup identification. When a network message is received, this

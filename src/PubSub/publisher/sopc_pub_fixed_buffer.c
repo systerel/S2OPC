@@ -35,7 +35,7 @@ struct SOPC_PubFixedBuffer_DataSetField_Position
 {
     // Pointer to DataSetField stored in SOPC_Dataset_LL_NetworkMessage structure
     const SOPC_Dataset_LL_DataSetField* dataSetField;
-    // Position in preencoded buffer
+    // Position in preencode buffer
     uint32_t position;
 };
 
@@ -65,11 +65,11 @@ struct SOPC_PubFixedBuffer_Buffer_Ctx
     uint32_t signPosition;
 
     // Array of tuple pointer to dataSetField stored in SOPC_Dataset_LL_NetworkMessage structure and position in
-    // preencoded buffer
+    // preencode buffer
     SOPC_PubFixedBuffer_DataSetField_Position* dataSetFields;
     size_t dataSetFields_len;
 
-    // Preencoded network message
+    // Preencode network message
     SOPC_Buffer* buffer;
 };
 
@@ -88,7 +88,10 @@ static SOPC_PubFixedBuffer_Buffer_Ctx* PubFixedBuffer_Create_Preencode_Buffer(SO
     for (uint8_t iDsm = 0; iDsm < nbDsm; iDsm++)
     {
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, iDsm);
-        preencode_structure->dataSetFields_len += SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
+        if (SOPC_Dataset_LL_DataSetMsg_Get_EnableEmission(dsm))
+        {
+            preencode_structure->dataSetFields_len += SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
+        }
     }
 
     preencode_structure->dataSetFields =
@@ -119,34 +122,39 @@ static void PubFixedBuffer_Initialize_Preencode_Buffer(SOPC_Dataset_LL_NetworkMe
     uint8_t nbDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
     SOPC_ASSERT(preencode_structure->nb_dynamic_dsm_info == nbDsm);
     size_t index_dsf = 0;
+    size_t index_dsm = 0;
     for (int i = 0; i < nbDsm; i++)
     {
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
-        const SOPC_DataSet_LL_UadpDataSetMessageContentMask* dsmContentMask =
-            SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
-        if (NULL != dsmContentMask)
+        if (SOPC_Dataset_LL_DataSetMsg_Get_EnableEmission(dsm))
         {
-            SOPC_PubFixedBuffer_Dsm_DynamicInfo* dynamicDsmInfo = &preencode_structure->dynamic_dsm_info[i];
-            if (dsmContentMask->dataSetMessageSequenceNumberFlag)
+            const SOPC_DataSet_LL_UadpDataSetMessageContentMask* dsmContentMask =
+                SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
+            if (NULL != dsmContentMask)
             {
-                dynamicDsmInfo->sequence_number = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumberPointer(dsm);
+                SOPC_PubFixedBuffer_Dsm_DynamicInfo* dynamicDsmInfo = &preencode_structure->dynamic_dsm_info[index_dsm];
+                if (dsmContentMask->dataSetMessageSequenceNumberFlag)
+                {
+                    dynamicDsmInfo->sequence_number = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumberPointer(dsm);
+                }
+                if (dsmContentMask->timestampFlag)
+                {
+                    dynamicDsmInfo->timestamp = SOPC_Dataset_LL_DataSetMsg_Get_TimestampPointer(dsm);
+                }
             }
-            if (dsmContentMask->timestampFlag)
+            uint16_t nbDsf = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
+            SOPC_ASSERT(preencode_structure->dataSetFields_len >= nbDsf + index_dsf);
+            for (uint16_t j = 0; j < nbDsf; j++)
             {
-                dynamicDsmInfo->timestamp = SOPC_Dataset_LL_DataSetMsg_Get_TimestampPointer(dsm);
+                const SOPC_Dataset_LL_DataSetField* dsf = SOPC_Dataset_LL_DataSetMsg_Get_ConstDataSetField_At(dsm, j);
+                SOPC_ASSERT(NULL != dsf);
+                SOPC_PubFixedBuffer_DataSetField_Position* dsfPosition =
+                    SOPC_PubFixedBuffer_Get_DataSetField_Position_At(preencode_structure, index_dsf);
+                SOPC_ASSERT(NULL != dsfPosition);
+                dsfPosition->dataSetField = dsf;
+                index_dsf++;
             }
-        }
-        uint16_t nbDsf = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
-        SOPC_ASSERT(preencode_structure->dataSetFields_len >= nbDsf + index_dsf);
-        for (uint16_t j = 0; j < nbDsf; j++)
-        {
-            const SOPC_Dataset_LL_DataSetField* dsf = SOPC_Dataset_LL_DataSetMsg_Get_ConstDataSetField_At(dsm, j);
-            SOPC_ASSERT(NULL != dsf);
-            SOPC_PubFixedBuffer_DataSetField_Position* dsfPosition =
-                SOPC_PubFixedBuffer_Get_DataSetField_Position_At(preencode_structure, index_dsf);
-            SOPC_ASSERT(NULL != dsfPosition);
-            dsfPosition->dataSetField = dsf;
-            index_dsf++;
+            index_dsm++;
         }
     }
 }
@@ -256,7 +264,7 @@ void SOPC_PubFixedBuffer_Set_Sign_Position(SOPC_PubFixedBuffer_Buffer_Ctx* preen
     preencode->signPosition = position;
 }
 
-/** Update value in buffer at position gived with data. Length correspond to the number of bytes to update */
+/** Update value in buffer at position given with data. Length correspond to the number of bytes to update */
 static void update_buffer(SOPC_Buffer* buffer, const void* data, uint32_t position, uint32_t length)
 {
     SOPC_ASSERT(NULL != buffer);

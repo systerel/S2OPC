@@ -104,6 +104,7 @@
     </xs:attribute>
     <xs:attribute name="useSequenceNumber" type="xs:boolean" use="optional"/> <!-- true (default) to enable DataSetMessageSequenceNumber -->
     <xs:attribute name="timestamp" type="xs:boolean" use="optional"/> <!-- true to enable DataSetMessageTimestamp, default false -->
+    <xs:attribute name="enableEmission" type="xs:boolean" use="optional"/> <!-- true (default) to enable Dataset Emission at start up -->
   </xs:complexType>
   <xs:complexType name="variable">
     <xs:attribute name="nodeId" type="xs:string" use="required"/>

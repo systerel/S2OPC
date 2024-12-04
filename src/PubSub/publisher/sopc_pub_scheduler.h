@@ -49,6 +49,34 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
  */
 bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId);
 
+/**
+ * @brief Enable the emission of a dataSetMessage identified by the tuple [pubId, writerGroupId, dataSetWriterId].
+ *
+ * @param pubId pointer to Publisher Id to identify the dataSetMessage. Must NOT be NULL
+ * @param writerGroupId Writer Group Id to identify the dataSetMessage
+ * @param dataSetWriterId DataSet Writer Id to identify the dataSetMessage
+ * @return SOPC_STATUS_OK in case of success or if the DataSetMessage was already enabled.
+ * SOPC_STATUS_NOK if no dataSetMessage was found with tuple [pubId, writerGroupId, dataSetWriterId].
+ * SOPC_STATUS_INVALID_PARAMETERS in case of wrong parameter.
+ */
+SOPC_ReturnStatus SOPC_PubScheduler_Enable_DataSetMessage(SOPC_Conf_PublisherId* pubId,
+                                                          uint16_t writerGroupId,
+                                                          uint16_t dataSetWriterId);
+
+/**
+ * @brief Disable the emission of a dataSetMessage identified by the tuple [pubId, writerGroupId, dataSetWriterId].
+ *
+ * @param pubId pointer to Publisher Id to identify the dataSetMessage. Must NOT be NULL
+ * @param writerGroupId Writer Group Id to identify the dataSetMessage
+ * @param dataSetWriterId DataSet Writer Id to identify the dataSetMessage
+ * @return SOPC_STATUS_OK in case of success or if the DataSetMessage was already disabled.
+ * SOPC_STATUS_NOK if no dataSetMessage was found with tuple [pubId, writerGroupId, dataSetWriterId].
+ * SOPC_STATUS_INVALID_PARAMETERS in case of wrong parameter.
+ */
+SOPC_ReturnStatus SOPC_PubScheduler_Disable_DataSetMessage(SOPC_Conf_PublisherId* pubId,
+                                                           uint16_t writerGroupId,
+                                                           uint16_t dataSetWriterId);
+
 void SOPC_PubScheduler_Stop(void);
 
 #endif /* SOPC_PUB_SCHEDULER_H_ */

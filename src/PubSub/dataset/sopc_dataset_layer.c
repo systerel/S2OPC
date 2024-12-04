@@ -95,6 +95,9 @@ SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_Wr
         conf.timestampFlag = !option->noTimestamp;
 
         SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, &conf);
+
+        SOPC_Dataset_LL_DataSetMsg_Set_EnableEmission(msg_dsm, !option->disableEmission);
+
         if (!isKeepAlive)
         {
             const uint16_t nbFields = SOPC_PublishedDataSet_Nb_FieldMetaData(SOPC_DataSetWriter_Get_DataSet(conf_dsw));

@@ -815,6 +815,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
     SOPC_PubFixedBuffer_Buffer_Ctx* preencode = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
     SOPC_Dataset_LL_NetworkMessage_Header* header = NULL;
     uint8_t dsm_count = 0;
+    uint8_t dsm_count_enable = 0;
     uint32_t bufferPosition = 0;
     const uint32_t zero = 0;
     uint8_t nonceLength = 0;
@@ -840,6 +841,14 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
         header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
         SOPC_ASSERT(NULL != header);
         dsm_count = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
+        for (uint8_t iDsm = 0; iDsm < dsm_count; iDsm++)
+        {
+            if (SOPC_Dataset_LL_DataSetMsg_Get_EnableEmission(
+                    SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, iDsm)))
+            {
+                dsm_count_enable++;
+            }
+        }
     }
 
     if (SOPC_STATUS_OK == status && NULL != security)
@@ -929,12 +938,17 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
     // payload header
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Buffer_Write(*buffer_header, &dsm_count, 1);
+        status = SOPC_Buffer_Write(*buffer_header, &dsm_count_enable, 1);
         res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
 
+        // At this point we don't know which dataSetMessage is enabled or not we have to check each dsm
         for (int i = 0; i < dsm_count && SOPC_STATUS_OK == status; i++)
         {
             SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
+            if (!SOPC_Dataset_LL_DataSetMsg_Get_EnableEmission(dsm))
+            {
+                continue;
+            }
             // - writer id
             uint16_t byte_2 = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
             status = SOPC_UInt16_Write(&byte_2, *buffer_header, 0);
@@ -1036,9 +1050,9 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
         SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 
-    if (DATASET_LL_PAYLOAD_HEADER_ENABLED && dsm_count > 1 && SOPC_STATUS_OK == status)
+    if (DATASET_LL_PAYLOAD_HEADER_ENABLED && dsm_count_enable > 1 && SOPC_STATUS_OK == status)
     {
-        dsmSizeBufferPos = SOPC_Calloc(dsm_count, sizeof(*dsmSizeBufferPos));
+        dsmSizeBufferPos = SOPC_Calloc(dsm_count_enable, sizeof(*dsmSizeBufferPos));
         if (NULL == dsmSizeBufferPos)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1047,7 +1061,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
 
         // DataSet Message size(2 bytes)
         // Sizes are unknown yet. Write Zeros, and store current position to write it later
-        for (int i = 0; SOPC_STATUS_OK == status && i < dsm_count; i++)
+        for (int i = 0; SOPC_STATUS_OK == status && i < dsm_count_enable; i++)
         {
             status = SOPC_Buffer_GetPosition(*buffer_payload, &dsmSizeBufferPos[i]);
             res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_DsmPreSize_Failed);
@@ -1060,16 +1074,22 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
         }
     }
 
+    // At this point we don't know which dataSetMessage is enabled or not we have to check each dsm
+    int indexDsmEnable = 0;
     for (int i = 0; i < dsm_count && SOPC_STATUS_OK == status; i++)
     {
+        SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
+        SOPC_ASSERT(NULL != dsm);
+        if (!SOPC_Dataset_LL_DataSetMsg_Get_EnableEmission(dsm))
+        {
+            continue;
+        }
         // dsmStartBufferPos is set with buffer position before DSM content
         uint32_t dsmStartBufferPos;
         bool dsmFlags2Enable = false;
         status = SOPC_Buffer_GetPosition(*buffer_payload, &dsmStartBufferPos);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-        SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
-        SOPC_ASSERT(NULL != dsm);
         const SOPC_DataSet_LL_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
         SOPC_ASSERT(NULL != conf);
 
@@ -1137,7 +1157,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
                 status = SOPC_Buffer_GetPosition(*buffer_payload, &bufferPayloadPosition);
                 SOPC_ASSERT(SOPC_STATUS_OK == status);
                 res = SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(
-                    preencode, bufferPayloadPosition + bufferPosition, (size_t) i);
+                    preencode, bufferPayloadPosition + bufferPosition, (size_t) indexDsmEnable);
                 SOPC_ASSERT(res);
             }
             uint16_t dsmSN = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(dsm);
@@ -1154,7 +1174,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
                 status = SOPC_Buffer_GetPosition(*buffer_payload, &bufferPayloadPosition);
                 SOPC_ASSERT(SOPC_STATUS_OK == status);
                 res = SOPC_PubFixedBuffer_Set_DSM_Timestamp_Position_At(
-                    preencode, bufferPayloadPosition + bufferPosition, (size_t) i);
+                    preencode, bufferPayloadPosition + bufferPosition, (size_t) indexDsmEnable);
                 SOPC_ASSERT(res);
             }
             uint64_t dsmTimestamp = (uint64_t) SOPC_Time_GetCurrentTimeUTC();
@@ -1208,10 +1228,10 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
 
             const uint16_t dsmSize = (uint16_t)(dsmEndBufferPos - dsmStartBufferPos);
             bool writeOk = true;
-            writeOk &= (SOPC_STATUS_OK == SOPC_Buffer_SetPosition(*buffer_payload, dsmSizeBufferPos[i]));
+            writeOk &= (SOPC_STATUS_OK == SOPC_Buffer_SetPosition(*buffer_payload, dsmSizeBufferPos[indexDsmEnable]));
             writeOk &= (SOPC_STATUS_OK == SOPC_UInt16_Write(&dsmSize, *buffer_payload, 0));
             writeOk &= (SOPC_STATUS_OK == SOPC_Buffer_SetPosition(*buffer_payload, dsmEndBufferPos));
-
+            indexDsmEnable++;
             if (!writeOk)
             {
                 set_status_default(&status, &res, SOPC_UADP_NetworkMessage_Error_Write_DsmSize_Failed);
@@ -1341,6 +1361,19 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Get_PreencodedBuffer(SOPC_Dataset_LL_Netwo
         SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
     return buffer;
+}
+
+void SOPC_UADP_NetworkMessage_Delete_PreencodedBuffer(SOPC_Dataset_LL_NetworkMessage* nm)
+{
+    if (NULL == nm)
+    {
+        return;
+    }
+    SOPC_PubFixedBuffer_Buffer_Ctx* preencode = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
+    if (NULL != preencode)
+    {
+        SOPC_PubFixedBuffer_Delete_Preencode_Buffer(preencode);
+    }
 }
 
 /**
