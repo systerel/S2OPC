@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 12/11/2024 17:42:34
+ Date                 : 04/12/2024 16:26:29
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -185,7 +185,6 @@ void io_dispatch_mgr__receive_msg_buffer(
       constants__t_msg_header_type_i io_dispatch_mgr__l_msg_header_type;
       constants__t_msg_service_class_i io_dispatch_mgr__l_msg_service_class;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
-      t_bool io_dispatch_mgr__l_valid_req_context;
       t_bool io_dispatch_mgr__l_valid_req_header;
       t_bool io_dispatch_mgr__l_valid_req;
       t_bool io_dispatch_mgr__l_async_resp;
@@ -211,10 +210,7 @@ void io_dispatch_mgr__receive_msg_buffer(
          switch (io_dispatch_mgr__l_msg_header_type) {
          case constants__e_msg_request_type:
             io_dispatch_mgr__l_valid_req = false;
-            service_mgr__is_valid_request_context(io_dispatch_mgr__request_context,
-               &io_dispatch_mgr__l_valid_req_context);
-            if ((io_dispatch_mgr__l_is_client == false) &&
-               (io_dispatch_mgr__l_valid_req_context == true)) {
+            if (io_dispatch_mgr__l_is_client == false) {
                io_dispatch_mgr__l_valid_req_header = false;
                switch (io_dispatch_mgr__l_msg_service_class) {
                case constants__e_msg_session_treatment_class:
@@ -908,7 +904,6 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
    {
       t_bool io_dispatch_mgr__l_valid_session;
       constants__t_msg_type_i io_dispatch_mgr__l_msg_typ;
-      t_bool io_dispatch_mgr__l_valid_req_context;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       constants_statuscodes_bs__t_StatusCode_i io_dispatch_mgr__l_sc;
       constants__t_channel_i io_dispatch_mgr__l_channel;
@@ -918,11 +913,8 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
          &io_dispatch_mgr__l_valid_session);
       service_mgr__bless_msg_out(io_dispatch_mgr__p_publish_resp_msg,
          &io_dispatch_mgr__l_msg_typ);
-      service_mgr__is_valid_request_context(io_dispatch_mgr__p_req_context,
-         &io_dispatch_mgr__l_valid_req_context);
-      if ((((io_dispatch_mgr__l_valid_session == true) &&
+      if (((io_dispatch_mgr__l_valid_session == true) &&
          (io_dispatch_mgr__l_msg_typ == constants__e_msg_subscription_publish_resp)) &&
-         (io_dispatch_mgr__l_valid_req_context == true)) &&
          (io_dispatch_mgr__p_statusCode != constants_statuscodes_bs__c_StatusCode_indet)) {
          service_mgr__server_send_publish_response(io_dispatch_mgr__p_session,
             io_dispatch_mgr__p_req_handle,

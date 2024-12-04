@@ -224,7 +224,6 @@ OPERATIONS
         l_msg_header_type,
         l_msg_service_class,
         l_buffer_out,
-        l_valid_req_context,
         l_valid_req_header,
         l_valid_req,
         l_async_resp,
@@ -245,9 +244,7 @@ OPERATIONS
             CASE l_msg_header_type OF
                 EITHER e_msg_request_type THEN
                     l_valid_req := FALSE;
-                    l_valid_req_context <-- is_valid_request_context (request_context);
-                    IF l_is_client = FALSE &
-                        l_valid_req_context = TRUE
+                    IF l_is_client = FALSE
                     THEN
                         l_valid_req_header := FALSE;
                         /* Server receiving a request: OK */
@@ -777,7 +774,6 @@ OPERATIONS
     VAR
         l_valid_session,
         l_msg_typ,
-        l_valid_req_context,
         l_buffer_out,
         l_sc,
         l_channel,
@@ -785,9 +781,8 @@ OPERATIONS
     IN
         l_valid_session <-- is_valid_session (p_session);
         l_msg_typ <-- bless_msg_out (p_publish_resp_msg);
-        l_valid_req_context <-- is_valid_request_context (p_req_context);
         IF l_valid_session = TRUE & l_msg_typ = e_msg_subscription_publish_resp &
-            l_valid_req_context = TRUE & p_statusCode /= c_StatusCode_indet
+            p_statusCode /= c_StatusCode_indet
         THEN
             bres, l_sc, l_buffer_out, l_channel
               <-- server_send_publish_response (p_session, p_req_handle, p_statusCode, l_msg_typ, p_publish_resp_msg);
