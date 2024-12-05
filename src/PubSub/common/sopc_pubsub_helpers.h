@@ -23,6 +23,7 @@
 #include <stdbool.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_dataset_ll_layer.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_udp_sockets.h"
 
@@ -90,5 +91,8 @@ bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
 SOPC_ReturnStatus SOPC_Helper_PublisherId_Compare(const SOPC_Conf_PublisherId* pubIdLeft,
                                                   const SOPC_Conf_PublisherId* pubIdRight,
                                                   bool* comp);
+
+/* Convert a PublisherId from dataset module to one of Configuration module */
+SOPC_Conf_PublisherId SOPC_Helper_Convert_PublisherId(const SOPC_Dataset_LL_PublisherId* src);
 
 #endif /* SOPC_PUBSUB_HELPERS_H_ */

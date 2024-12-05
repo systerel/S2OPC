@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_dataset_ll_layer.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
 #include "sopc_logger.h"
@@ -361,4 +362,51 @@ SOPC_ReturnStatus SOPC_Helper_PublisherId_Compare(const SOPC_Conf_PublisherId* p
         }
     }
     return status;
+}
+
+SOPC_Conf_PublisherId SOPC_Helper_Convert_PublisherId(const SOPC_Dataset_LL_PublisherId* src)
+{
+    SOPC_Conf_PublisherId result;
+    if (NULL == src)
+    {
+        static const SOPC_Conf_PublisherId nullPubId = {.type = SOPC_Null_PublisherId};
+        return nullPubId;
+    }
+
+    switch (src->type)
+    {
+    case DataSet_LL_PubId_Byte_Id:
+    {
+        result.type = SOPC_UInteger_PublisherId;
+        result.data.uint = src->data.byte;
+        break;
+    }
+    case DataSet_LL_PubId_UInt16_Id:
+    {
+        result.type = SOPC_UInteger_PublisherId;
+        result.data.uint = src->data.uint16;
+        break;
+    }
+    case DataSet_LL_PubId_UInt32_Id:
+    {
+        result.type = SOPC_UInteger_PublisherId;
+        result.data.uint = src->data.uint32;
+        break;
+    }
+    case DataSet_LL_PubId_UInt64_Id:
+    {
+        result.type = SOPC_UInteger_PublisherId;
+        result.data.uint = src->data.uint64;
+        break;
+    }
+    case DataSet_LL_PubId_String_Id:
+    {
+        result.type = SOPC_String_PublisherId;
+        result.data.string = src->data.string;
+        break;
+    }
+    default:
+        result.type = SOPC_Null_PublisherId;
+    }
+    return result;
 }

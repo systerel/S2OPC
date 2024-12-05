@@ -29,6 +29,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_network_layer.h"
 #include "sopc_pub_fixed_buffer.h"
+#include "sopc_pubsub_helpers.h"
 #include "sopc_version.h"
 
 /**
@@ -38,9 +39,6 @@
  *  - Re- allocate memory of the returned buffer if needed
  *  - Manage other type of publisher id type. Only uint32_t is managed
  */
-
-/* Convert a PublisherId from dataset module to one of Configuration module */
-static SOPC_Conf_PublisherId Network_Layer_Convert_PublisherId(const SOPC_Dataset_LL_PublisherId* src);
 
 /*
  * Check if security mode as enum is equals to security mode as boolean
@@ -1810,7 +1808,7 @@ static inline SOPC_NetworkMessage_Error_Code Decode_SecurityHeader(SOPC_Buffer* 
     {
         /* TODO: maybe this message is encrypted but we are not in the right group to decrypt it */
         security = getSecurity_Func(
-            securityTokenId, Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)),
+            securityTokenId, SOPC_Helper_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)),
             group_id);
         // Checked the security configuration of subscriber
         if (NULL == security ||
@@ -2014,7 +2012,7 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
         {
             SOPC_PubSub_SecurityType* security = readerConf->pGetSecurity_Func(
                 SOPC_PUBSUB_SKS_DEFAULT_TOKENID,
-                Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), group_id);
+                SOPC_Helper_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), group_id);
             // if security is NULL, there is no reader configured with security sign or encrypt/sign
             if (NULL != security && !Network_Check_ReceivedSecurityMode(security->mode, false, false))
             {
@@ -2065,7 +2063,7 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
         if (NULL != reader)
         {
             SOPC_Conf_PublisherId pubId =
-                Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header));
+                SOPC_Helper_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header));
             code = decode_dataSetMessage(dsm, buffer_payload, pubId, group_id, size, readerConf);
             status = (SOPC_NetworkMessage_Error_Code_None == code) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
@@ -2235,53 +2233,6 @@ void SOPC_UADP_NetworkMessage_Delete(SOPC_UADP_NetworkMessage* uadp_nm)
         SOPC_Dataset_LL_NetworkMessage_Delete(uadp_nm->nm);
         SOPC_Free(uadp_nm);
     }
-}
-
-static SOPC_Conf_PublisherId Network_Layer_Convert_PublisherId(const SOPC_Dataset_LL_PublisherId* src)
-{
-    SOPC_Conf_PublisherId result;
-    if (NULL == src)
-    {
-        static const SOPC_Conf_PublisherId nullPubId = {.type = SOPC_Null_PublisherId};
-        return nullPubId;
-    }
-
-    switch (src->type)
-    {
-    case DataSet_LL_PubId_Byte_Id:
-    {
-        result.type = SOPC_UInteger_PublisherId;
-        result.data.uint = src->data.byte;
-        break;
-    }
-    case DataSet_LL_PubId_UInt16_Id:
-    {
-        result.type = SOPC_UInteger_PublisherId;
-        result.data.uint = src->data.uint16;
-        break;
-    }
-    case DataSet_LL_PubId_UInt32_Id:
-    {
-        result.type = SOPC_UInteger_PublisherId;
-        result.data.uint = src->data.uint32;
-        break;
-    }
-    case DataSet_LL_PubId_UInt64_Id:
-    {
-        result.type = SOPC_UInteger_PublisherId;
-        result.data.uint = src->data.uint64;
-        break;
-    }
-    case DataSet_LL_PubId_String_Id:
-    {
-        result.type = SOPC_String_PublisherId;
-        result.data.string = src->data.string;
-        break;
-    }
-    default:
-        result.type = SOPC_Null_PublisherId;
-    }
-    return result;
 }
 
 static bool Network_Check_ReceivedSecurityMode(SOPC_SecurityMode_Type mode, bool ssigned, bool encrypted)
