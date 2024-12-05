@@ -144,35 +144,45 @@ OPERATIONS
             IF l_session_cp_id = p_continuationPointId THEN
                 bres := TRUE;
                 /* Clear the continuation point */
+                clear_continuation_point(l_session_cp);
                 session_hasContinuationPoint_i(p_session) := FALSE;
-                session_ContinuationPoint_i(p_session) := c_ContinuationPoint_indet;
-                clear_continuation_point(l_session_cp)
+                session_ContinuationPoint_i(p_session) := c_ContinuationPoint_indet
             END
         END
     END
     ;
 
     set_session_closed (p_session) =
-    BEGIN
-        clear_continuation_point(session_ContinuationPoint_i(p_session));
-        session_hasContinuationPoint_i(p_session) := FALSE;
-        session_ContinuationPoint_i(p_session) := c_ContinuationPoint_indet
+    VAR
+        l_session_has_cp
+    IN
+        l_session_has_cp := session_hasContinuationPoint_i(p_session);
+        IF l_session_has_cp = TRUE THEN
+            clear_continuation_point(session_ContinuationPoint_i(p_session));
+            session_hasContinuationPoint_i(p_session) := FALSE;
+            session_ContinuationPoint_i(p_session) := c_ContinuationPoint_indet
+        END
     END
     ;
 
     continuation_points_UNINITIALISATION =
     VAR
         l_continue,
-        l_session
+        l_session,
+        l_session_has_cp
     IN
         l_continue <-- init_iter_session;
         WHILE
             l_continue   = TRUE
         DO
             l_continue, l_session <-- continue_iter_session;
-            clear_continuation_point(session_ContinuationPoint_i(l_session));
-            session_hasContinuationPoint_i(l_session) := FALSE;
-            session_ContinuationPoint_i(l_session) := c_ContinuationPoint_indet
+            l_session_has_cp := session_hasContinuationPoint_i(l_session);
+            IF l_session_has_cp = TRUE
+            THEN
+                clear_continuation_point(session_ContinuationPoint_i(l_session));
+                session_hasContinuationPoint_i(l_session) := FALSE;
+                session_ContinuationPoint_i(l_session) := c_ContinuationPoint_indet
+            END
         INVARIANT
             l_continue = bool(sessions_to_iterate /= {}) &
             sessions_to_iterate /\ sessions_iterated = {} &
