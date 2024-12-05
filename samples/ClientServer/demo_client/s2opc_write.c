@@ -327,7 +327,9 @@ static bool ParseValue(const char* val)
         SOPC_ASSERT(false);
     }
 
-    g_dv.SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
+    // TODO: issue #1540: add option to the sample to activate writing of value timestamp (and status)
+    // Define the source timestamp of the value
+    // g_dv.SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
 
     return 0 != scanRes;
 }

@@ -143,7 +143,9 @@ static SOPC_DataValue* ParseValue(SOPC_BuiltinId builtinId, const char* val)
         break;
     }
 
-    dv->SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
+    // TODO: issue #1540: add option to the sample to activate writing of value timestamp (and status)
+    // Define the source timestamp of the value
+    // dv.SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
 
     if (0 == scanRes)
     {
