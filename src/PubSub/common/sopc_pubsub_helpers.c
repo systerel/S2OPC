@@ -325,3 +325,40 @@ bool SOPC_PubSubHelpers_IsPreencodeCompatibleVariant(const SOPC_FieldMetaData* f
     }
     return res;
 }
+
+SOPC_ReturnStatus SOPC_Helper_PublisherId_Compare(const SOPC_Conf_PublisherId* pubIdLeft,
+                                                  const SOPC_Conf_PublisherId* pubIdRight,
+                                                  bool* comp)
+{
+    if (pubIdLeft == NULL || NULL == pubIdRight || NULL == comp)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    *comp = false;
+    if (pubIdLeft->type == pubIdRight->type)
+    {
+        int32_t match = -1;
+        switch (pubIdLeft->type)
+        {
+        case SOPC_UInteger_PublisherId:
+            if (pubIdLeft->data.uint == pubIdRight->data.uint)
+            {
+                *comp = true;
+            }
+            break;
+        case SOPC_String_PublisherId:
+            status = SOPC_String_Compare(&pubIdLeft->data.string, &pubIdRight->data.string, false, &match);
+            if (SOPC_STATUS_OK == status)
+            {
+                *comp = (0 == match);
+            }
+            break;
+        case SOPC_Null_PublisherId:
+        default:
+            *comp = true;
+            break;
+        }
+    }
+    return status;
+}

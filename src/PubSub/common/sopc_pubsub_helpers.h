@@ -76,4 +76,19 @@ bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
                                          size_t* portIdx,
                                          size_t* portLength);
 
+/**
+ * @brief Compare type and value of two SOPC_Conf_PublisherId. The two SOPC_Conf_PublisherId are considered as equal if
+ * they have the same type and the same value. In case both SOPC_Conf_PublisherId have type SOPC_Null_PublisherId they
+ * are considered equal and function change value of comp to true.
+ *
+ * @param pubIdLeft publisherId to compare, must NOT be NULL
+ * @param pubIdRight publisherId to compare, must NOT be NULL
+ * @param comp [OUT] true if their type and value are equal, false otherwise. Must NOT be NULL
+ * @return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
+ * SOPC_STATUS_NOK in case of unexpected issue
+ */
+SOPC_ReturnStatus SOPC_Helper_PublisherId_Compare(const SOPC_Conf_PublisherId* pubIdLeft,
+                                                  const SOPC_Conf_PublisherId* pubIdRight,
+                                                  bool* comp);
+
 #endif /* SOPC_PUBSUB_HELPERS_H_ */

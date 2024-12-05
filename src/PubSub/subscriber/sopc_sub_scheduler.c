@@ -315,43 +315,6 @@ static struct
                   .writerCtx = NULL,
                   .dsmSnGapCallback = NULL,
                   .minTimeoutSub = 0};
-/**
- * @brief Compare type and value of two SOPC_Conf_PublisherId. The two SOPC_Conf_PublisherId are considered as equal if
- * they have the same type and the same value. In case both SOPC_Conf_PublisherId have type SOPC_Null_PublisherId they
- * are considered equal and function return true.
- *
- * @param pubIdLeft
- * @param pubIdRight
- * @return true if their type and value are equal
- * @return false otherwise
- */
-static bool compare_publisherId(const SOPC_Conf_PublisherId* pubIdLeft, const SOPC_Conf_PublisherId* pubIdRight)
-{
-    SOPC_ASSERT(NULL != pubIdLeft && NULL != pubIdRight);
-    bool result = false;
-    if (pubIdLeft->type == pubIdRight->type)
-    {
-        int32_t match = -1;
-        switch (pubIdLeft->type)
-        {
-        case SOPC_UInteger_PublisherId:
-            if (pubIdLeft->data.uint == pubIdRight->data.uint)
-            {
-                result = true;
-            }
-            break;
-        case SOPC_String_PublisherId:
-            SOPC_String_Compare(&pubIdLeft->data.string, &pubIdRight->data.string, false, &match);
-            result = (0 == match);
-            break;
-        case SOPC_Null_PublisherId:
-        default:
-            result = true;
-            break;
-        }
-    }
-    return result;
-}
 
 // Update the state of a single DSM
 static void SOPC_SubScheduler_UpdateDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new)
@@ -1040,8 +1003,9 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
         const SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
         // Note that if writerId is zero, we want to store all elements since the order is used
         // for the same PubId in that case.
-        found = compare_publisherId(&ctx->pubId, pubId) && writerId != 0 && ctx->writerId == writerId &&
-                ctx->groupId == groupId;
+        SOPC_ReturnStatus status = SOPC_Helper_PublisherId_Compare(&ctx->pubId, pubId, &found);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        found &= writerId != 0 && ctx->writerId == writerId && ctx->groupId == groupId;
     }
 
     if (!found)
@@ -1078,7 +1042,10 @@ static SOPC_SubScheduler_Writer_Ctx* findWriterContext(const SOPC_Conf_Publisher
         ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
         if (ctx->pubId.type == pubId->type && ctx->writerId == writerId && ctx->groupId == groupId)
         {
-            if (compare_publisherId(&ctx->pubId, pubId))
+            bool find = false;
+            SOPC_ReturnStatus status = SOPC_Helper_PublisherId_Compare(&ctx->pubId, pubId, &find);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+            if (find)
             {
                 return ctx;
             }
@@ -1180,7 +1147,9 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ct
         SOPC_SubScheduler_Security_Pub_Ctx* ctx =
             SOPC_Array_Get(schedulerCtx.securityCtx, SOPC_SubScheduler_Security_Pub_Ctx*, i);
 
-        bool found = compare_publisherId(&ctx->pubId, &pubId);
+        bool found = false;
+        SOPC_ReturnStatus status = SOPC_Helper_PublisherId_Compare(&ctx->pubId, &pubId, &found);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         if (found)
         {
             return ctx;
