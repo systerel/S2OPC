@@ -35,7 +35,7 @@ mount_point="$PWD/$(dirname "$0")"
 
 # Creating fake /etc/passwd file for local user
 TMP_FILE=$(mktemp)
-echo "docker_user:x:1000:1000::/tmp:/sbin/nologin" > $TMP_FILE
+echo "docker_user:x:$uid:$uid::/tmp:/sbin/nologin" > $TMP_FILE
 docker run --ulimit nofile=1024:1024 $network_host --rm $interactive --user "$uid" \
     --volume="$mount_point":"$mount_point" --volume "$TMP_FILE:/etc/passwd" \
     --workdir "$PWD" --entrypoint /bin/bash "$IMAGE" -c "$*"
