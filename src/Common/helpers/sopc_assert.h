@@ -68,7 +68,7 @@
 #define SOPC_ASSERT(c)                                   \
     do                                                   \
     {                                                    \
-        if (!(c))                                        \
+        while (!(c))                                     \
         {                                                \
             SOPC_Assert_Failure(SOPC_ASSERT_CONTEXT(c)); \
         }                                                \
