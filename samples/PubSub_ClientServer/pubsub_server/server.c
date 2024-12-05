@@ -63,6 +63,12 @@ static int32_t pubSubStopRequested = false;
 static int32_t pubSubStartRequested = false;
 static int32_t pubAcyclicSendRequest = false;
 static int32_t pubAcyclicSendWriterId = 0;
+static int32_t pubFilteringDsmEmissionRequest = false;
+
+static struct publisherDsmIdentifier pubFilteringDsmId = {.pubId = {.type = SOPC_UInteger_PublisherId, .data.uint = 0},
+                                                          .writerGroupId = 0,
+                                                          .dataSetWriterId = 0,
+                                                          .enableEmission = false};
 
 static SOPC_AddressSpace* address_space = NULL;
 static uint8_t lastPubSubCommand = 0;
@@ -76,6 +82,14 @@ typedef enum PublisherSendStatus
     PUBLISHER_ACYCLIC_ERROR = 3,
 } PublisherSendStatus;
 
+typedef enum PublisherFlagDsmEmissionStatus
+{
+    PUBLISHER_FLAG_DSM_EMISSION_NOT_TRIGGERED = 0,
+    PUBLISHER_FLAG_DSM_EMISSION_IN_PROGRESS = 1,
+    PUBLISHER_FLAG_DSM_EMISSION_SUCCESS = 2,
+    PUBLISHER_FLAG_DSM_EMISSION_ERROR = 3,
+} PublisherFlagDsmEmissionStatus;
+
 static SOPC_ReturnStatus Server_SetAddressSpace(void);
 
 static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
@@ -83,6 +97,7 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
                                       SOPC_StatusCode opStatus);
 static void Server_Event_Write(OpcUa_WriteValue* pwv);
 static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state);
+static void Server_request_change_DsmFilteringStatus(PublisherFlagDsmEmissionStatus state);
 
 /* SOPC_ReturnStatus Server_SetRuntimeVariables(void); */
 
@@ -168,6 +183,84 @@ static SOPC_StatusCode Server_Method_Func_AcyclicSend(const SOPC_CallContext* ca
     return code;
 }
 
+static SOPC_StatusCode Server_Method_Func_DataSetMessageFiltering(const SOPC_CallContext* callContextPtr,
+                                                                  const SOPC_NodeId* objectId,
+                                                                  uint32_t nbInputArgs,
+                                                                  const SOPC_Variant* inputArgs,
+                                                                  uint32_t* nbOutputArgs,
+                                                                  SOPC_Variant** outputArgs,
+                                                                  void* param)
+{
+    SOPC_UNUSED_ARG(param);
+    SOPC_UNUSED_ARG(nbOutputArgs);
+    SOPC_UNUSED_ARG(outputArgs);
+    SOPC_UNUSED_ARG(objectId);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != inputArgs);
+
+    // We expect 4 parameters Publisher Id, WriterGroup id and DataSetMessage Id, enableEmission
+    if (4 != nbInputArgs || SOPC_UInt64_Id != inputArgs[0].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType || SOPC_UInt16_Id != inputArgs[1].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[1].ArrayType || SOPC_UInt16_Id != inputArgs[2].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[2].ArrayType || SOPC_Boolean_Id != inputArgs[3].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[3].ArrayType)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    static SOPC_NodeId* nidDataSetMessageFilteringStatus = NULL;
+    if (NULL == nidDataSetMessageFilteringStatus)
+    {
+        nidDataSetMessageFilteringStatus =
+            SOPC_NodeId_FromCString(NODEID_DSM_FILTERING_STATUS, strlen(NODEID_DSM_FILTERING_STATUS));
+    }
+
+    SOPC_ASSERT(NULL != nidDataSetMessageFilteringStatus);
+
+    // Check that DatasetMessage filtering status is not in progress
+    SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    SOPC_DataValue* dv = NULL;
+    SOPC_StatusCode code = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, nidDataSetMessageFilteringStatus, NULL, &dv);
+    if (!SOPC_IsGoodStatus(code) || SOPC_Int32_Id != dv->Value.BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != dv->Value.ArrayType ||
+        dv->Value.Value.Int32 == PUBLISHER_FLAG_DSM_EMISSION_IN_PROGRESS)
+    {
+        code = OpcUa_BadInvalidState;
+    }
+    else
+    {
+        // Update acyclic send status
+        dv->Value.Value.Int32 = PUBLISHER_FLAG_DSM_EMISSION_IN_PROGRESS;
+        SOPC_DateTime ts = 0;
+        code = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, nidDataSetMessageFilteringStatus, NULL, &dv->Value, NULL,
+                                                  &ts, NULL);
+
+        // If Status is different to IN PROGRESS request flags shall false
+        int32_t filteringRequested = SOPC_Atomic_Int_Get(&pubFilteringDsmEmissionRequest);
+        // If a request is already in progress don't access shared memory
+        if (SOPC_IsGoodStatus(code) && !filteringRequested)
+        {
+            /* Command processing */
+            uint64_t PubId = inputArgs[0].Value.Uint64;
+            uint16_t WgId = inputArgs[1].Value.Uint16;
+            uint16_t dsmId = inputArgs[2].Value.Uint16;
+            bool enableEmission = inputArgs[3].Value.Boolean;
+            pubFilteringDsmId.pubId.data.uint = PubId;
+            pubFilteringDsmId.writerGroupId = WgId;
+            pubFilteringDsmId.dataSetWriterId = dsmId;
+            pubFilteringDsmId.enableEmission = enableEmission;
+            SOPC_Atomic_Int_Set(&pubFilteringDsmEmissionRequest, true);
+        }
+    }
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+    SOPC_NodeId_Clear(nidDataSetMessageFilteringStatus);
+    SOPC_Free(nidDataSetMessageFilteringStatus);
+    nidDataSetMessageFilteringStatus = NULL;
+    return code;
+}
+
 /**
  * Add OPC UA demo methods into the given method call manager
  */
@@ -195,6 +288,23 @@ static SOPC_ReturnStatus Server_AddMethods(SOPC_MethodCallManager* mcm)
     else
     {
         status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        sNodeId = "ns=1;s=DataSetMessageFiltering";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        if (NULL != methodId)
+        {
+            methodFunc = &Server_Method_Func_DataSetMessageFiltering;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, NULL, NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
     return status;
 }
@@ -456,8 +566,6 @@ SOPC_ReturnStatus Server_StartServer(void)
     SOPC_Atomic_Int_Set(&serverOnline, true);
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server started");
 
-    /* TODO: Integrate runtime variables */
-
     return status;
 }
 
@@ -509,6 +617,26 @@ int32_t Server_PubAcyclicSend_Requested(void)
         SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, 0);
     }
     return writerGroupId;
+}
+
+struct publisherDsmIdentifier Server_PubFilteringDataSetMessage_Requested(void)
+{
+    int32_t enableDsmRequest = SOPC_Atomic_Int_Get(&pubFilteringDsmEmissionRequest);
+    struct publisherDsmIdentifier pubDsmId = {
+        .pubId = {.type = SOPC_Null_PublisherId}, .writerGroupId = 0, .dataSetWriterId = 0};
+    if (enableDsmRequest)
+    {
+        // Access shared memory protected by request flag
+        pubDsmId = pubFilteringDsmId;
+        if (pubDsmId.pubId.data.uint == 0 && pubDsmId.writerGroupId == 0 && pubDsmId.dataSetWriterId == 0)
+        {
+            Server_request_change_DsmFilteringStatus(PUBLISHER_FLAG_DSM_EMISSION_ERROR);
+            printf("# Warning : [publisherId, writerGroupId, dataSetWriterId] can't be equal to [0, 0, 0]\n");
+        }
+        /* Reset since reqest is transmitted on return */
+        SOPC_Atomic_Int_Set(&pubFilteringDsmEmissionRequest, 0);
+    }
+    return pubDsmId;
 }
 
 SOPC_ReturnStatus Server_WritePubSubNodes(void)
@@ -671,6 +799,34 @@ bool Server_Trigger_Publisher(uint16_t writerGroupId)
     return res;
 }
 
+bool Server_Trigger_FilteringDsmEmission(struct publisherDsmIdentifier pubDsmId)
+{
+    if (!Server_IsRunning())
+    {
+        return false;
+    }
+    bool res = false;
+    if (pubDsmId.enableEmission)
+    {
+        res = SOPC_PubScheduler_Enable_DataSetMessage(&pubDsmId.pubId, pubDsmId.writerGroupId,
+                                                      pubDsmId.dataSetWriterId) == SOPC_STATUS_OK;
+    }
+    else
+    {
+        res = SOPC_PubScheduler_Disable_DataSetMessage(&pubDsmId.pubId, pubDsmId.writerGroupId,
+                                                       pubDsmId.dataSetWriterId) == SOPC_STATUS_OK;
+    }
+    if (res)
+    {
+        Server_request_change_DsmFilteringStatus(PUBLISHER_FLAG_DSM_EMISSION_SUCCESS);
+    }
+    else
+    {
+        Server_request_change_DsmFilteringStatus(PUBLISHER_FLAG_DSM_EMISSION_ERROR);
+    }
+    return res;
+}
+
 void Server_StopAndClear(void)
 {
     SOPC_UNUSED_RESULT(SOPC_ServerHelper_StopServer());
@@ -761,6 +917,60 @@ static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
     }
 }
 
+static void Server_request_change_DsmFilteringStatus(PublisherFlagDsmEmissionStatus state)
+{
+    /* Create a WriteRequest with a single WriteValue */
+    OpcUa_WriteRequest* request = NULL;
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    OpcUa_WriteValue* wv = SOPC_Calloc(1, sizeof(OpcUa_WriteValue));
+
+    /* Avoid the creation of the NodeId each call of the function */
+    static SOPC_NodeId* nidDsmFilteringStatus = NULL;
+    if (NULL == nidDsmFilteringStatus)
+    {
+        nidDsmFilteringStatus =
+            SOPC_NodeId_FromCString(NODEID_DSM_FILTERING_STATUS, strlen(NODEID_DSM_FILTERING_STATUS));
+    }
+
+    if (NULL == request || NULL == wv || NULL == nidDsmFilteringStatus)
+    {
+        SOPC_Free(wv);
+        SOPC_Free(nidDsmFilteringStatus);
+    }
+    else
+    {
+        SOPC_DataValue* dv = &wv->Value;
+        SOPC_Variant* val = &dv->Value;
+
+        request->NoOfNodesToWrite = 1;
+        request->NodesToWrite = wv;
+
+        wv->AttributeId = 13;
+        dv->SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
+        val->BuiltInTypeId = SOPC_Int32_Id;
+        val->ArrayType = SOPC_VariantArrayType_SingleValue;
+        val->Value.Int32 = (int32_t) state;
+
+        status = SOPC_NodeId_Copy(&wv->NodeId, nidDsmFilteringStatus);
+        SOPC_NodeId_Clear(nidDsmFilteringStatus);
+        SOPC_Free(nidDsmFilteringStatus);
+        nidDsmFilteringStatus = NULL;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ServerHelper_LocalServiceAsync(request, 0);
+        }
+        else
+        {
+            SOPC_Free(wv);
+            wv = NULL;
+            SOPC_Free(request);
+            request = NULL;
+        }
+    }
+}
+
 static void Server_Event_Write(OpcUa_WriteValue* pwv)
 {
     if (NULL == pwv)
@@ -792,7 +1002,6 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
         nidConfig = SOPC_NodeId_FromCString(NODEID_PUBSUB_CONFIG, strlen(NODEID_PUBSUB_CONFIG));
         nidCommand = SOPC_NodeId_FromCString(NODEID_PUBSUB_COMMAND, strlen(NODEID_PUBSUB_COMMAND));
     }
-    SOPC_ASSERT(NULL != nidConfig && NULL != nidCommand);
 
     /* If config changes, store the new configuration path in global cache */
     int32_t cmpConfig = -1;

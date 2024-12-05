@@ -48,6 +48,15 @@ SOPC_ReturnStatus Server_LoadAddressSpace(void);
 SOPC_ReturnStatus Server_StartServer(void);
 bool Server_IsRunning(void);
 
+/** Intercat with Pub module */
+struct publisherDsmIdentifier
+{
+    SOPC_Conf_PublisherId pubId;
+    uint16_t writerGroupId;
+    uint16_t dataSetWriterId;
+    bool enableEmission;
+};
+
 SOPC_ReturnStatus Server_WritePubSubNodes(void);
 bool Server_Trigger_Publisher(uint16_t writerGroupId);
 void Server_StopAndClear(void);
@@ -57,6 +66,9 @@ bool Server_PubSubStop_Requested(void);
 bool Server_PubSubStart_Requested(void);
 int32_t Server_PubAcyclicSend_Requested(void);
 
+struct publisherDsmIdentifier Server_PubFilteringDataSetMessage_Requested(void);
+
+bool Server_Trigger_FilteringDsmEmission(struct publisherDsmIdentifier pubDsmId);
 /* Interacting with the Sub module */
 
 SOPC_Array* Server_GetConfigurationPaths(void); /* Returns an array of char* */

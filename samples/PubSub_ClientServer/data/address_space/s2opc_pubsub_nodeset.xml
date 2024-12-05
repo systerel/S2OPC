@@ -192,6 +192,7 @@
       <Reference ReferenceType="HasSubtype">i=852</Reference>
       <Reference ReferenceType="HasSubtype">i=12077</Reference>
       <Reference ReferenceType="HasSubtype">i=890</Reference>
+      <Reference ReferenceType="HasSubtype">ns=1;s=PublisherMethodStatusType</Reference>
     </References>
     <Definition Name="Enumeration" />
   </UADataType>
@@ -797,7 +798,7 @@
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=20013</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=20041</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=20072</Reference>
-      <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PublisherObject</Reference>
+      <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=Publisher</Reference>
     </References>
   </UAObjectType>
   <UAObjectType NodeId="i=61" BrowseName="FolderType">
@@ -1374,6 +1375,7 @@
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=24208</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=24209</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=AcyclicPubSendStatus</Reference>
+      <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=DataSetMessageFilteringStatus</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubArrayInt</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubBool</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PubInt</Reference>
@@ -2733,6 +2735,8 @@
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=8254</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=15039</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=AcyclicSend_Input</Reference>
+      <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=DataSetMessageFiltering_Input</Reference>
+      <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=PublisherMethodStatus</Reference>
     </References>
   </UAVariableType>
   <UAVariableType NodeId="i=69" BrowseName="DataTypeDescriptionType" ReleaseStatus="Deprecated" DataType="String">
@@ -5853,7 +5857,7 @@
       <Reference ReferenceType="Organizes">ns=1;s=PubSubStartStop</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=PubSubStatus</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=PubVars</Reference>
-      <Reference ReferenceType="Organizes">ns=1;s=PublisherObject</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=Publisher</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=SubVars</Reference>
     </References>
   </UAObject>
@@ -49374,24 +49378,24 @@
       <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
     </References>
   </UAObject>
-  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="Byte" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="ns=1;s=PublisherObject">
+  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="Byte" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="ns=1;s=Publisher">
     <DisplayName>Publisher Acyclic Send Status</DisplayName>
     <Description>Status of acyclic pub request : 0 = not_trigger; 1 = in_progress; 2 = sent; 3 = error</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=PublisherObject</Reference>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=Publisher</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
-      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=PublisherObject</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=Publisher</Reference>
     </References>
     <Value>
       <uax:Byte>0</uax:Byte>
     </Value>
   </UAVariable>
-  <UAMethod NodeId="ns=1;s=AcyclicSend" BrowseName="AcyclicSend" ParentNodeId="ns=1;s=PublisherObject">
+  <UAMethod NodeId="ns=1;s=AcyclicSend" BrowseName="AcyclicSend" ParentNodeId="ns=1;s=Publisher">
     <DisplayName>Trigger publisher acyclic send</DisplayName>
     <Description>Trigger acyclic send of a networkMessage identified by it's WriterGroupId</Description>
     <References>
       <Reference ReferenceType="HasProperty">ns=1;s=AcyclicSend_Input</Reference>
-      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=PublisherObject</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=Publisher</Reference>
     </References>
   </UAMethod>
   <UAVariable NodeId="ns=1;s=AcyclicSend_Input" BrowseName="InputArguments" ParentNodeId="ns=1;s=AcyclicSend" DataType="i=296" ValueRank="1">
@@ -49421,7 +49425,102 @@
       </uax:ListOfExtensionObject>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="99" BrowseName="1:PubArrayInt" DataType="Int64" NodeId="ns=1;s=PubArrayInt" ParentNodeId="ns=1;s=PubVars">
+  <UAMethod NodeId="ns=1;s=DataSetMessageFiltering" BrowseName="DataSetMessageFiltering" ParentNodeId="ns=1;s=Publisher">
+    <DisplayName>Trigger DataSetMessage filtering</DisplayName>
+    <Description>Trigger DataSetMessage filtering identified by (PublisherId, WriterGroupId, DataSetMessage Id)</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=DataSetMessageFiltering_Input</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=Publisher</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable AccessLevel="3" BrowseName="DataSetMessageFilteringStatus" DataType="ns=1;s=PublisherMethodStatusType" NodeId="ns=1;s=DataSetMessageFilteringStatus" ParentNodeId="ns=1;s=Publisher">
+    <DisplayName>DataSetMessage filtering status</DisplayName>
+    <Description>Status of DataSetMessage filtering request : 0 = not_trigger; 1 = in_progress; 2 = sent; 3 = error</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=Publisher</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=Publisher</Reference>
+    </References>
+    <Value>
+      <uax:Int32>0</uax:Int32>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=DataSetMessageFiltering_Input" BrowseName="InputArguments" ParentNodeId="ns=1;s=DataSetMessageFiltering" DataType="i=296" ValueRank="1">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=DataSetMessageFiltering</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Publisher Id</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=9</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Writer Group Id</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=5</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>DataSetMessage Id</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=5</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Emission flag</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=1</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" BrowseName="1:PubArrayInt" DataType="Int64" ValueRank="1" NodeId="ns=1;s=PubArrayInt" ParentNodeId="ns=1;s=PubVars">
     <DisplayName>PubArrayInt</DisplayName>
     <Description>PubArrayIntDesc</Description>
     <References>
@@ -49550,18 +49649,57 @@
       <Reference ReferenceType="HasComponent">ns=1;s=PubArrayInt</Reference>
     </References>
   </UAObject>
-  <UAObject NodeId="ns=1;s=PublisherObject" BrowseName="PublisherObject" ParentNodeId="i=85" EventNotifier="1">
-    <DisplayName>PublisherObject</DisplayName>
-    <Description>PublisherObject</Description>
-    <Description Locale="en">PublisherObject</Description>
+  <UAObject NodeId="ns=1;s=Publisher" BrowseName="Publisher" ParentNodeId="i=85" EventNotifier="1">
+    <DisplayName>Publisher</DisplayName>
+    <Description>Publisher</Description>
+    <Description Locale="en">Publisher</Description>
     <References>
       <Reference ReferenceType="HasComponent">ns=1;s=AcyclicSend</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=AcyclicPubSendStatus</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=DataSetMessageFiltering</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=DataSetMessageFilteringStatus</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=AcyclicPubSendStatus</Reference>
+      <Reference ReferenceType="Organizes">ns=1;s=DataSetMessageFilteringStatus</Reference>
     </References>
   </UAObject>
+  <UAVariable NodeId="ns=1;s=PublisherMethodStatus" BrowseName="EnumStrings" ParentNodeId="ns=1;s=PublisherMethodStatusType" DataType="LocalizedText" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>EnumStrings</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=PublisherMethodStatusType</Reference>
+    </References>
+    <Value>
+      <uax:ListOfLocalizedText>
+        <uax:LocalizedText>
+          <uax:Text>NotTrigger</uax:Text>
+        </uax:LocalizedText>
+        <uax:LocalizedText>
+          <uax:Text>InProgress</uax:Text>
+        </uax:LocalizedText>
+        <uax:LocalizedText>
+          <uax:Text>Success</uax:Text>
+        </uax:LocalizedText>
+        <uax:LocalizedText>
+          <uax:Text>Error</uax:Text>
+        </uax:LocalizedText>
+      </uax:ListOfLocalizedText>
+    </Value>
+  </UAVariable>
+  <UADataType NodeId="ns=1;s=PublisherMethodStatusType" BrowseName="PublisherMethodStatusType">
+    <DisplayName>PublisherMethodStatus</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=PublisherMethodStatus</Reference>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=29</Reference>
+    </References>
+    <Definition Name="PublisherMethodStatus">
+      <Field Name="NotTrigger" Value="0" />
+      <Field Name="InProgress" Value="1" />
+      <Field Name="Success" Value="2" />
+      <Field Name="Error" Value="3" />
+    </Definition>
+  </UADataType>
   <UAVariable AccessLevel="99" BrowseName="1:SubArrayInt" DataType="Int64" NodeId="ns=1;s=SubArrayInt" ParentNodeId="ns=1;s=SubVars">
     <DisplayName>SubArrayInt</DisplayName>
     <Description>SubArrayIntDesc</Description>

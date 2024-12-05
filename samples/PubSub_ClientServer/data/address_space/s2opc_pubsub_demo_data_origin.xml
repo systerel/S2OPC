@@ -49,13 +49,15 @@
 
   <!-- PubSub commands and status -->
   <!-- Publisher Object -->
-  <UAObject NodeId="ns=1;s=PublisherObject" BrowseName="PublisherObject" ParentNodeId="i=85" EventNotifier="1">
-    <DisplayName>PublisherObject</DisplayName>
-    <Description>PublisherObject</Description>
-    <Description Locale="en">PublisherObject</Description>
+  <UAObject NodeId="ns=1;s=Publisher" BrowseName="Publisher" ParentNodeId="i=85" EventNotifier="1">
+    <DisplayName>Publisher</DisplayName>
+    <Description>Publisher</Description>
+    <Description Locale="en">Publisher</Description>
     <References>
       <Reference ReferenceType="HasComponent">ns=1;s=AcyclicSend</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=AcyclicPubSendStatus</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=DataSetMessageFiltering</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=DataSetMessageFilteringStatus</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
     </References>
@@ -93,12 +95,12 @@
       <uax:Byte>2</uax:Byte>
     </Value>
   </UAVariable>
-  <UAMethod NodeId="ns=1;s=AcyclicSend" BrowseName="AcyclicSend" ParentNodeId="ns=1;s=PublisherObject">
+  <UAMethod NodeId="ns=1;s=AcyclicSend" BrowseName="AcyclicSend" ParentNodeId="ns=1;s=Publisher">
     <DisplayName>Trigger publisher acyclic send</DisplayName>
     <Description>Trigger acyclic send of a networkMessage identified by it's WriterGroupId</Description>
     <References>
       <Reference ReferenceType="HasProperty">ns=1;s=AcyclicSend_Input</Reference>
-      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=PublisherObject</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=Publisher</Reference>
     </References>
   </UAMethod>
   <UAVariable NodeId="ns=1;s=AcyclicSend_Input" BrowseName="InputArguments" ParentNodeId="ns=1;s=AcyclicSend" DataType="i=296" ValueRank="1">
@@ -128,19 +130,147 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="Byte" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="ns=1;s=PublisherObject">
+  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="Byte" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="ns=1;s=Publisher">
     <DisplayName>Publisher Acyclic Send Status</DisplayName>
     <Description>Status of acyclic pub request : 0 = not_trigger; 1 = in_progress; 2 = sent; 3 = error</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=PublisherObject</Reference>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=Publisher</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
       <uax:Byte>0</uax:Byte>
     </Value>
   </UAVariable>
-
-
+  <UAMethod NodeId="ns=1;s=DataSetMessageFiltering" BrowseName="DataSetMessageFiltering" ParentNodeId="ns=1;s=Publisher">
+    <DisplayName>Trigger DataSetMessage filtering</DisplayName>
+    <Description>Trigger DataSetMessage filtering identified by (PublisherId, WriterGroupId, DataSetMessage Id)</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=DataSetMessageFiltering_Input</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=Publisher</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="ns=1;s=DataSetMessageFiltering_Input" BrowseName="InputArguments" ParentNodeId="ns=1;s=DataSetMessageFiltering" DataType="i=296" ValueRank="1">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=DataSetMessageFiltering</Reference>
+    </References>
+   <Value>
+      <ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>Publisher Id</Name>
+              <DataType>
+                <Identifier>i=9</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>Writer Group Id</Name>
+              <DataType>
+                <Identifier>i=5</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>DataSetMessage Id</Name>
+              <DataType>
+                <Identifier>i=5</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>Emission flag</Name>
+              <DataType>
+                <Identifier>i=1</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+      </ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="DataSetMessageFilteringStatus" DataType="ns=1;s=PublisherMethodStatusType" NodeId="ns=1;s=DataSetMessageFilteringStatus" ParentNodeId="ns=1;s=Publisher">
+    <DisplayName>DataSetMessage filtering status</DisplayName>
+    <Description>Status of DataSetMessage filtering request : 0 = not_trigger; 1 = in_progress; 2 = sent; 3 = error</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=Publisher</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int32>0</uax:Int32>
+    </Value>
+  </UAVariable>
+  <UADataType NodeId="ns=1;s=PublisherMethodStatusType" BrowseName="PublisherMethodStatusType">
+    <DisplayName>PublisherMethodStatus</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=PublisherMethodStatus</Reference>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=29</Reference>
+    </References>
+    <Definition Name="PublisherMethodStatus">
+      <Field Name="NotTrigger" Value="0" />
+      <Field Name="InProgress" Value="1" />
+      <Field Name="Success" Value="2" />
+      <Field Name="Error" Value="3" />
+    </Definition>
+  </UADataType>
+  <UAVariable NodeId="ns=1;s=PublisherMethodStatus" BrowseName="EnumStrings" ParentNodeId="ns=1;s=PublisherMethodStatusType" DataType="LocalizedText" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>EnumStrings</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=PublisherMethodStatusType</Reference>
+    </References>
+    <Value>
+      <uax:ListOfLocalizedText>
+        <uax:LocalizedText>
+          <uax:Text>NotTrigger</uax:Text>
+        </uax:LocalizedText>
+        <uax:LocalizedText>
+          <uax:Text>InProgress</uax:Text>
+        </uax:LocalizedText>
+        <uax:LocalizedText>
+          <uax:Text>Success</uax:Text>
+        </uax:LocalizedText>
+        <uax:LocalizedText>
+          <uax:Text>Error</uax:Text>
+        </uax:LocalizedText>
+      </uax:ListOfLocalizedText>
+    </Value>
+  </UAVariable>
   <!-- PubSub exchanged variables -->
 
   <!-- Publisher -->
@@ -225,7 +355,7 @@
       <uax:UInt32>4294967295</uax:UInt32>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="99" BrowseName="1:PubArrayInt" DataType="Int64" NodeId="ns=1;s=PubArrayInt" ParentNodeId="ns=1;s=PubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:PubArrayInt" DataType="Int64" ValueRank="1" NodeId="ns=1;s=PubArrayInt" ParentNodeId="ns=1;s=PubVars">
     <DisplayName>PubArrayInt</DisplayName>
     <Description>PubArrayIntDesc</Description>
     <References>

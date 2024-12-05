@@ -262,6 +262,22 @@ int main(int argc, char* const argv[])
             }
             status = SOPC_STATUS_OK;
         }
+        /* Tuple [PublisherId, WriterGroupId, DataSetWriterId] cannot be equal to [0, 0, 0]. If FilteringDsmEmission
+         * hasn't been trigger then publisherId type is NUll */
+        struct publisherDsmIdentifier pubDsmId = Server_PubFilteringDataSetMessage_Requested();
+        if (pubDsmId.pubId.type != SOPC_Null_PublisherId)
+        {
+            status = Server_Trigger_FilteringDsmEmission(pubDsmId) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            if (SOPC_STATUS_OK != status)
+            {
+                printf("# Warning: Filtering DataSetMessage request fail for tuple [ publisherId : %" PRIu64
+                       ", WriterGroupId : %" PRIu16 ", dataSetWriterId : %" PRIu16
+                       " ]. \n"
+                       "Check that PubSub is started and configuration match the tuple furnish\n",
+                       pubDsmId.pubId.data.uint, pubDsmId.writerGroupId, pubDsmId.dataSetWriterId);
+            }
+            status = SOPC_STATUS_OK;
+        }
     }
 
     /* Clean and quit */
