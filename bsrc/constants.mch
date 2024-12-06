@@ -29,7 +29,7 @@ SETS
     t_ExpandedNodeId_i; /* (SOPC_ExpandedNodeId*) */
 
     /* Address space references */
-    t_Reference_i;
+    t_Reference_i; /* (OpcUa_ReferenceNode*) */
 
     /* The node classes */
     t_NodeClass_i = {c_NodeClass_indet,
@@ -337,9 +337,15 @@ SETS
     t_ServerUri; /* (SOPC_String*) */
     t_ServerUris; /* (SOPC_String[]) */
     t_ServerCapabilities; /* SOPC_ServerCapabilities_Internal */
+    t_NamespaceUri; /* (SOPC_String*) */
 
     /* Roles */
-    t_sessionRoles_i /* (SOPC_SLinkedList*) */
+    t_sessionRoles_i; /* (SOPC_SLinkedList*) */
+    t_RolePermissionTypes_i; /* (SOPC_Variant*) that contains OpcUa_RolePermissionType object(s) */
+
+    t_PermissionType_i; /* OpcUa_PermissionType */
+
+    t_NamespaceIdx /* uint16_t */
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
@@ -367,6 +373,8 @@ CONCRETE_CONSTANTS
 
     k_n_UserAuthAttempts_max,
 
+    k_n_NamespaceIndex_max,
+
     c_Null_Type_NodeId,
     c_ByteString_Type_NodeId,
     c_Byte_Type_NodeId,
@@ -377,7 +385,13 @@ CONCRETE_CONSTANTS
     c_RoleType_NodeId,
     c_HasComponentType_NodeId,
     c_HasPropertyType_NodeId,
+    c_Server_NamespaceArray_NodeId,
+    c_NamespaceMetadataType_NodeId,
+    c_Server_Namespaces_NodeId,
+    c_RolePermissionType_NodeId,
 
+    c_NamespaceUri_QualifiedName,
+    c_DefaultRolePermissions_QualifiedName,
     c_Identities_QualifiedName,
 
     c_Variant_indet,
@@ -427,6 +441,8 @@ CONCRETE_CONSTANTS
     c_notificationQueue_indet,
     c_sessionRoles_indet,
     c_sessionRoles_empty,
+    c_RolePermissionTypes_indet,
+    c_PermissionType_none,
     c_publishReqQueue_indet,
     c_notifRepublishQueue_indet,
     c_notifRepublishQueueIterator_indet,
@@ -469,6 +485,7 @@ CONCRETE_CONSTANTS
     c_RegisteredServer2Info_indet,
     c_DataTypeDefinition_indet,
     c_ServerUri_empty,
+    c_NamespaceUri_empty,
 
     t_counter,
     t_ValueRank,
@@ -495,6 +512,7 @@ ABSTRACT_CONSTANTS
 
     conv_ExpandedNodeId_NodeId,
     conv_NodeId_ExpandedNodeId,
+    conv_NodeId_NamespaceIdx,
 
     t_BrowseDirection,
     t_TimestampsToReturn,
@@ -522,6 +540,7 @@ ABSTRACT_CONSTANTS
     cast_t_CallMethod,
     cast_t_channel,
     cast_t_channel_config_idx,
+    cast_t_NamespaceIdx,
     cast_t_subscription,
     cast_t_ReadValue,
     cast_t_WriteValue,
@@ -553,6 +572,7 @@ ABSTRACT_CONSTANTS
     t_timeref,
     t_notificationQueue,
     t_sessionRoles,
+    t_RolePermissionTypes,
     t_publishReqQueue,
     t_notifRepublishQueue,
     t_notifRepublishQueueIterator,
@@ -669,6 +689,7 @@ PROPERTIES
     c_Server_ServerCapabilities_RoleSet_NodeId /= c_Byte_Type_NodeId &
     c_Server_ServerCapabilities_RoleSet_NodeId /= c_HierarchicalReferences_Type_NodeId &
     c_Server_ServerCapabilities_RoleSet_NodeId /= c_Server_NodeId &
+    c_Server_ServerCapabilities_RoleSet_NodeId /= c_BaseEventType_NodeId &
 
     c_RoleType_NodeId : t_NodeId_i &
     c_RoleType_NodeId : t_NodeId &
@@ -678,6 +699,8 @@ PROPERTIES
     c_RoleType_NodeId /= c_Byte_Type_NodeId &
     c_RoleType_NodeId /= c_HierarchicalReferences_Type_NodeId &
     c_RoleType_NodeId /= c_Server_NodeId &
+    c_RoleType_NodeId /= c_BaseEventType_NodeId &
+    c_RoleType_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
 
     c_HasComponentType_NodeId : t_NodeId_i &
     c_HasComponentType_NodeId : t_NodeId &
@@ -687,6 +710,9 @@ PROPERTIES
     c_HasComponentType_NodeId /= c_Byte_Type_NodeId &
     c_HasComponentType_NodeId /= c_HierarchicalReferences_Type_NodeId &
     c_HasComponentType_NodeId /= c_Server_NodeId &
+    c_HasComponentType_NodeId /= c_BaseEventType_NodeId &
+    c_HasComponentType_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
+    c_HasComponentType_NodeId /= c_RoleType_NodeId &
 
     c_HasPropertyType_NodeId : t_NodeId_i &
     c_HasPropertyType_NodeId : t_NodeId &
@@ -696,6 +722,72 @@ PROPERTIES
     c_HasPropertyType_NodeId /= c_Byte_Type_NodeId &
     c_HasPropertyType_NodeId /= c_HierarchicalReferences_Type_NodeId &
     c_HasPropertyType_NodeId /= c_Server_NodeId &
+    c_HasPropertyType_NodeId /= c_BaseEventType_NodeId &
+    c_HasPropertyType_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
+    c_HasPropertyType_NodeId /= c_RoleType_NodeId &
+    c_HasPropertyType_NodeId /= c_HasComponentType_NodeId &
+
+    c_Server_NamespaceArray_NodeId : t_NodeId_i &
+    c_Server_NamespaceArray_NodeId : t_NodeId &
+
+    c_Server_NamespaceArray_NodeId /= c_Null_Type_NodeId &
+    c_Server_NamespaceArray_NodeId /= c_ByteString_Type_NodeId &
+    c_Server_NamespaceArray_NodeId /= c_Byte_Type_NodeId &
+    c_Server_NamespaceArray_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_Server_NamespaceArray_NodeId /= c_Server_NodeId &
+    c_Server_NamespaceArray_NodeId /= c_BaseEventType_NodeId &
+    c_Server_NamespaceArray_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
+    c_Server_NamespaceArray_NodeId /= c_RoleType_NodeId &
+    c_Server_NamespaceArray_NodeId /= c_HasComponentType_NodeId &
+    c_Server_NamespaceArray_NodeId /= c_HasPropertyType_NodeId &
+
+    c_NamespaceMetadataType_NodeId : t_NodeId_i &
+    c_NamespaceMetadataType_NodeId : t_NodeId &
+
+    c_NamespaceMetadataType_NodeId /= c_Null_Type_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_ByteString_Type_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_Byte_Type_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_Server_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_BaseEventType_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_RoleType_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_HasComponentType_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_HasPropertyType_NodeId &
+    c_NamespaceMetadataType_NodeId /= c_Server_NamespaceArray_NodeId &
+
+    c_Server_Namespaces_NodeId : t_NodeId_i &
+    c_Server_Namespaces_NodeId : t_NodeId &
+
+    c_Server_Namespaces_NodeId /= c_Null_Type_NodeId &
+    c_Server_Namespaces_NodeId /= c_ByteString_Type_NodeId &
+    c_Server_Namespaces_NodeId /= c_Byte_Type_NodeId &
+    c_Server_Namespaces_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_Server_Namespaces_NodeId /= c_Server_NodeId &
+    c_Server_Namespaces_NodeId /= c_BaseEventType_NodeId &
+    c_Server_Namespaces_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
+    c_Server_Namespaces_NodeId /= c_RoleType_NodeId &
+    c_Server_Namespaces_NodeId /= c_HasComponentType_NodeId &
+    c_Server_Namespaces_NodeId /= c_HasPropertyType_NodeId &
+    c_Server_Namespaces_NodeId /= c_Server_NamespaceArray_NodeId &
+    c_Server_Namespaces_NodeId /= c_NamespaceMetadataType_NodeId &
+
+    c_RolePermissionType_NodeId : t_NodeId_i &
+    c_RolePermissionType_NodeId : t_NodeId &
+
+    c_RolePermissionType_NodeId /= c_Null_Type_NodeId &
+    c_RolePermissionType_NodeId /= c_ByteString_Type_NodeId &
+    c_RolePermissionType_NodeId /= c_Byte_Type_NodeId &
+    c_RolePermissionType_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_RolePermissionType_NodeId /= c_Server_NodeId &
+    c_RolePermissionType_NodeId /= c_BaseEventType_NodeId &
+    c_RolePermissionType_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
+    c_RolePermissionType_NodeId /= c_RoleType_NodeId &
+    c_RolePermissionType_NodeId /= c_HasComponentType_NodeId &
+    c_RolePermissionType_NodeId /= c_HasPropertyType_NodeId &
+    c_RolePermissionType_NodeId /= c_Server_NamespaceArray_NodeId &
+    c_RolePermissionType_NodeId /= c_NamespaceMetadataType_NodeId &
+    c_RolePermissionType_NodeId /= c_Server_Namespaces_NodeId &
 
     t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
@@ -746,6 +838,8 @@ PROPERTIES
     k_n_nodesToAdd_max : NAT &
 
     k_n_UserAuthAttempts_max : NAT &
+
+    k_n_NamespaceIndex_max : NAT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -804,8 +898,14 @@ PROPERTIES
     c_QualifiedName_indet : t_QualifiedName_i &
     c_QualifiedName_indet /: t_QualifiedName &
 
+    c_NamespaceUri_QualifiedName : t_QualifiedName_i &
+    c_NamespaceUri_QualifiedName : t_QualifiedName &
+
+    c_DefaultRolePermissions_QualifiedName : t_QualifiedName_i &
+    c_DefaultRolePermissions_QualifiedName : t_QualifiedName &
+
     c_Identities_QualifiedName : t_QualifiedName_i &
-    c_Identities_QualifiedName /: t_QualifiedName &
+    c_Identities_QualifiedName : t_QualifiedName &
 
     t_Event <: t_Event_i &
     c_Event_indet : t_Event_i &
@@ -956,7 +1056,12 @@ PROPERTIES
     c_sessionRoles_indet : t_sessionRoles_i &
     c_sessionRoles_indet /: t_sessionRoles &
     c_sessionRoles_empty : t_sessionRoles_i &
-    c_sessionRoles_empty : t_sessionRoles &
+    c_sessionRoles_empty /: t_sessionRoles &
+
+    t_RolePermissionTypes <: t_RolePermissionTypes_i &
+    c_RolePermissionTypes_indet : t_RolePermissionTypes_i &
+
+    c_PermissionType_none : t_PermissionType_i &
 
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
@@ -1030,6 +1135,10 @@ PROPERTIES
     cast_t_channel_config_idx : NAT +-> t_channel_config_idx_i &
     cast_t_channel_config_idx : perm(t_channel_config_idx) &
 
+    cast_t_NamespaceIdx : NAT +-> t_NamespaceIdx &
+    1..k_n_NamespaceIndex_max = dom(cast_t_NamespaceIdx) &
+    cast_t_NamespaceIdx : perm(t_NamespaceIdx) &
+
     t_timer_id <: t_timer_id_i &
     c_timer_id_indet : t_timer_id_i &
     c_timer_id_indet /: t_timer_id &
@@ -1069,6 +1178,8 @@ PROPERTIES
     t_DataTypeDefinition = t_DataTypeDefinition_i - {c_DataTypeDefinition_indet} &
 
     c_ServerUri_empty : t_ServerUri &
+
+    c_NamespaceUri_empty : t_NamespaceUri &
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,
@@ -1215,6 +1326,7 @@ PROPERTIES
 
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
     conv_NodeId_ExpandedNodeId : t_NodeId >-> t_ExpandedNodeId &
+    conv_NodeId_NamespaceIdx : t_NodeId --> t_NamespaceIdx &
 
     k_n_read_resp_max <= card(t_ReadValue) &
     k_n_WriteResponse_max <= card(t_WriteValue) &
@@ -1251,6 +1363,14 @@ OPERATIONS
     END
     ;
 
+    p_nsIndex <-- get_cast_t_NamespaceIdx(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_NamespaceIdx)
+    THEN
+        p_nsIndex := cast_t_NamespaceIdx(p_ind)
+    END
+    ;
 
     p_res <-- is_t_endpoint_config_idx(p_endpoint_config_idx) =
     PRE
@@ -1358,6 +1478,15 @@ OPERATIONS
                                  p_local_server = FALSE &
                                  p_nid = c_NodeId_indet)
                                )
+    END
+    ;
+
+    p_idx <-- get_NodeId_NamespaceIndex(p_nodeId) =
+    PRE
+        p_nodeId : t_NodeId_i &
+        p_nodeId : t_NodeId
+    THEN
+        p_idx := conv_NodeId_NamespaceIdx(p_nodeId)
     END
     ;
 

@@ -48,9 +48,10 @@ OPERATIONS
     END
     ;
 
-    b_roles <-- pop_session_roles =
+    p_roles <-- pop_session_roles =
     BEGIN
-        b_roles :: t_sessionRoles_i ||
+        // p_roles = s_sessionRoles
+        p_roles :: t_sessionRoles_i ||
         s_sessionRoles := {}
     END
 

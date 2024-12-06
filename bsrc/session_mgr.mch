@@ -456,6 +456,15 @@ OPERATIONS
     END
     ;
 
+    p_session_roles <-- get_session_roles(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        p_session_roles :: t_sessionRoles_i
+    END
+    ;
+
     p_user <-- get_local_user (endpoint_config_idx) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &

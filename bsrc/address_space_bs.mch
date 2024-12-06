@@ -51,6 +51,9 @@ DEFINITIONS
         a_ContainsNoLoops,
         a_Symmetric,
 
+        /* Optional attributes */
+        a_RolePermissions,
+
         Ref_HasTypeDefinition,
 
         Reference_SourceNode,
@@ -85,6 +88,9 @@ DEFINITIONS
         a_NodeClass   : s_Node --> t_NodeClass     &
         a_BrowseName  : s_Node --> t_QualifiedName &
         a_DisplayName : s_Node --> t_LocalizedText &
+
+        /* Optional attributes */
+        a_RolePermissions : s_Node +-> t_RolePermissionTypes &
 
         a_Value       : s_Node +-> t_Variant   &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
@@ -217,6 +223,20 @@ OPERATIONS
             nid_valid := FALSE ||
             node := c_Node_indet
         END
+    END
+    ;
+
+    sc, rolePermissions <-- read_AddressSpace_RolePermissions(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : s_Node
+    THEN
+        sc,
+        rolePermissions : (sc : t_StatusCode_i &
+                           rolePermissions : t_RolePermissionTypes_i &
+                           (sc = e_sc_ok & p_node : dom(a_RolePermissions) => rolePermissions = a_RolePermissions(p_node)) &
+                           (sc = e_sc_ok & p_node /: dom(a_RolePermissions) => rolePermissions = c_RolePermissionTypes_indet) &
+                           (sc /= e_sc_ok => rolePermissions = c_RolePermissionTypes_indet))
     END
     ;
 

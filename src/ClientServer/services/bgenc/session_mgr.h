@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 12/11/2024 17:42:42
+ Date                 : 09/12/2024 17:07:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -67,6 +67,7 @@ extern void session_mgr__INITIALISATION(void);
 #define session_mgr__find_channel_to_close session_core__find_channel_to_close
 #define session_mgr__get_local_user session_core__get_local_user
 #define session_mgr__get_server_session_preferred_locales session_core__get_server_session_preferred_locales
+#define session_mgr__get_session_roles session_core__get_session_roles
 #define session_mgr__get_session_user_server session_core__get_session_user_server
 #define session_mgr__getall_valid_session_channel session_core__getall_valid_session_channel
 #define session_mgr__is_valid_session session_core__is_valid_session

@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 26/07/2024 08:42:55
+ Date                 : 10/10/2024 09:37:38
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -61,8 +61,8 @@ extern void address_space__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define address_space__address_space_bs_UNINITIALISATION address_space_authorization__address_space_bs_UNINITIALISATION
 #define address_space__check_object_has_method address_space_typing__check_object_has_method
+#define address_space__clear_user_roles address_space_authorization__clear_user_roles
 #define address_space__exec_callMethod address_space_authorization__exec_callMethod
 #define address_space__get_BrowseName address_space_authorization__get_BrowseName
 #define address_space__get_DisplayName address_space_authorization__get_DisplayName
@@ -79,6 +79,7 @@ extern void address_space__INITIALISATION(void);
 #define address_space__get_conv_Variant_Type address_space_authorization__get_conv_Variant_Type
 #define address_space__get_conv_Variant_ValueRank address_space_authorization__get_conv_Variant_ValueRank
 #define address_space__get_user_authorization address_space_authorization__get_user_authorization
+#define address_space__get_user_roles address_space_authorization__get_user_roles
 #define address_space__has_access_level_executable address_space_authorization__has_access_level_executable
 #define address_space__is_AddressSpace_constant address_space_authorization__is_AddressSpace_constant
 #define address_space__is_IndexRangeDefined address_space_authorization__is_IndexRangeDefined
@@ -90,6 +91,7 @@ extern void address_space__INITIALISATION(void);
 #define address_space__read_AddressSpace_free_variant address_space_authorization__read_AddressSpace_free_variant
 #define address_space__readall_AddressSpace_Node address_space_authorization__readall_AddressSpace_Node
 #define address_space__set_local_service_treatment address_space_authorization__set_local_service_treatment
+#define address_space__set_user_roles address_space_authorization__set_user_roles
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -142,6 +144,7 @@ extern void address_space__addNode_AddressSpace(
    const constants__t_NodeAttributes_i address_space__p_nodeAttributes,
    const constants__t_ExpandedNodeId_i address_space__p_typeDefId,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__sc_addnode);
+extern void address_space__address_space_UNINITIALISATION(void);
 extern void address_space__check_nodeId_isValid(
    const constants__t_NodeId_i address_space__nodeid,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__statusCode,
@@ -150,6 +153,11 @@ extern void address_space__is_mandatory_attribute(
    const constants__t_NodeClass_i address_space__p_ncl,
    const constants__t_AttributeId_i address_space__p_aid,
    t_bool * const address_space__bres);
+extern void address_space__read_AddressSpace_Identities_value(
+   const constants__t_Node_i address_space__p_identities_node,
+   const constants__t_NodeId_i address_space__p_identities_nid,
+   constants__t_Variant_i * const address_space__p_val,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__p_sc);
 extern void address_space__read_Node_Attribute(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,

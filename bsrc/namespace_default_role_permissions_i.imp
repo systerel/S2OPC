@@ -1,0 +1,145 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    namespace_default_role_permissions_i
+
+REFINES
+    namespace_default_role_permissions
+
+PROMOTES
+    delete_rolePermissions
+
+IMPORTS
+    namespace_metadata_refs_it,
+    namespace_uri,
+    namespaces_uri_eval_bs,
+    namespace_default_role_permissions_value
+
+SEES
+    constants,
+    address_space_bs
+
+LOCAL_OPERATIONS
+    // Check that ref is forward and that RefType is p_RefType_NodeId
+    p_bres <-- l_ref_check_isForward_and_RefType(p_ref, p_RefType_NodeId) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference &
+        p_RefType_NodeId : t_NodeId_i &
+        p_RefType_NodeId : t_NodeId
+    THEN
+        p_bres := bool(Reference_IsForward(p_ref) = TRUE & Reference_ReferenceType(p_ref) = p_RefType_NodeId)
+    END
+
+OPERATIONS
+
+    p_bres <-- l_ref_check_isForward_and_RefType(p_ref, p_RefType_NodeId) =
+    VAR
+        l_IsForward,
+        l_RefType_NodeId,
+        l_nodeIdsEqual
+    IN
+        p_bres := FALSE;
+        l_IsForward  <-- get_Reference_IsForward(p_ref);
+        IF l_IsForward = TRUE
+        THEN
+            l_RefType_NodeId <-- get_Reference_ReferenceType(p_ref);
+            l_nodeIdsEqual <-- is_NodeId_equal(l_RefType_NodeId, p_RefType_NodeId);
+            IF l_nodeIdsEqual = TRUE
+            THEN
+                p_bres := TRUE
+            END
+        END
+    END
+    ;
+
+    p_bres <-- check_reference_isForward_and_RefType(p_ref, p_RefType_NodeId) =
+    BEGIN
+        p_bres <-- l_ref_check_isForward_and_RefType(p_ref, p_RefType_NodeId)
+    END
+    ;
+
+    /* OPERATION OF THE MODULE */
+    p_bres, p_maybe_val_DefaultRolePermissions <-- namespacemetadata_and_uri_match(p_namespaceUri, p_namespacemetadata_Node) =
+    VAR
+        l_continue,
+        l_ref,
+        l_bres,
+        l_val_DefaultRolePermissions,
+        l_val_NamespaceUri
+    IN
+        // Iterate on the the refs of the NamespaceMetadata. If the URI and NamespaceURI match, return the DefaultRolePermissions
+        p_maybe_val_DefaultRolePermissions := c_RolePermissionTypes_indet;
+        l_val_DefaultRolePermissions := c_RolePermissionTypes_indet;
+        p_bres := FALSE;
+        l_continue <-- init_iter_namespacemetadata_refs(p_namespacemetadata_Node);
+        WHILE
+            l_continue = TRUE
+        DO
+            l_continue, l_ref <-- continue_iter_namespacemetadata_refs;
+            l_bres <-- l_ref_check_isForward_and_RefType(l_ref, c_HasPropertyType_NodeId);
+            IF l_bres = TRUE
+            THEN
+                IF l_val_DefaultRolePermissions = c_RolePermissionTypes_indet
+                THEN
+                    l_val_DefaultRolePermissions <-- ref_maybe_get_DefaultRolePermissions(l_ref)
+                END
+                ;
+                l_val_NamespaceUri <-- ref_maybe_get_NamespaceUri(l_ref);
+                IF l_val_NamespaceUri /= c_Variant_indet THEN
+                    // Value is a single string
+                    p_bres <-- compare_namespaceUri_and_value_uri(p_namespaceUri, l_val_NamespaceUri)
+                END
+                ;
+                read_AddressSpace_free_variant(l_val_NamespaceUri)
+            END
+        INVARIANT
+            // Glue with spec variables
+            /* Note: glue might be done using the B choice operator but is not available in B atelier.
+                     An other way will have the same kind of issue than in get_permissions_of_role.
+
+            a_ns_uri = %node.({node * 1..Node_RefIndexEnd(node)} : dom(RefIndex_Reference |> (dom(Reference_IsForward |> {TRUE})  /\
+                                                                                              dom(Reference_ReferenceType |> {c_HasPropertyType_NodeId}) /\
+                                                                                              dom(a_ref_namespaceUri;a_variant_value_uri)))
+                              | choice(a_variant_value_uri[a_ref_namespaceUri[RefIndex_Reference[{node * 1..Node_RefIndexEnd(node)}]]])) &
+            a_ns_default_role_permissions =  ...
+            */
+            // Iterator invariants
+            nsMeta_references_to_iterate <: t_Reference &
+            nsMeta_references_iterated   <: t_Reference &
+            nsMeta_references_to_iterate /\ nsMeta_references_iterated = {} &
+            nsMeta_references_to_iterate \/ nsMeta_references_iterated = nsMeta_a_Node_References &
+            nsMeta_a_Node_References = ran({nsMeta_starting_node} * (1.. Node_RefIndexEnd(nsMeta_starting_node)) <| RefIndex_Reference) &
+            p_bres = bool(p_namespaceUri : ran(ran(nsMeta_references_iterated <| a_ref_namespaceUri) <| a_variant_value_uri)) &
+            (p_bres = TRUE & l_val_DefaultRolePermissions /= c_RolePermissionTypes_indet
+            => l_val_DefaultRolePermissions : ran(a_ref_namespaceUri~[a_variant_value_uri~[{p_namespaceUri}]] <| a_ref_default_role_permissions))
+        VARIANT
+            card(nsMeta_references_to_iterate)
+        END
+        ;
+        IF p_bres = TRUE
+        THEN
+            p_maybe_val_DefaultRolePermissions := l_val_DefaultRolePermissions
+        ELSE
+            delete_rolePermissions(l_val_DefaultRolePermissions)
+        END
+    END
+
+END

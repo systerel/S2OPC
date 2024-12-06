@@ -43,10 +43,11 @@ IMPORTS
     argument_pointer_bs
 
 PROMOTES
-    address_space_bs_UNINITIALISATION,
+    address_space_UNINITIALISATION,
     is_mandatory_attribute,
     is_AddressSpace_constant,
     read_Node_Attribute,
+    read_AddressSpace_Identities_value,
     readall_AddressSpace_Node,
     get_NodeClass,
     get_BrowseName,
@@ -65,7 +66,10 @@ PROMOTES
     read_AddressSpace_free_variant,
     is_local_service_treatment,
     set_local_service_treatment,
-    get_user_authorization ,
+    get_user_authorization,
+    set_user_roles,
+    get_user_roles,
+    clear_user_roles,
     has_access_level_executable,
     get_EventNotifier,
     get_InputArguments,
@@ -327,7 +331,7 @@ OPERATIONS
         l_nb_out,
         l_arguments_out
     IN
-        StatusCode <-- check_method_call_inputs (p_user, p_req_msg, p_callMethod, p_res_msg);
+        StatusCode <-- check_method_call_inputs(p_user, p_req_msg, p_callMethod, p_res_msg);
         l_rawStatusCode <-- getall_conv_StatusCode_To_RawStatusCode(StatusCode);
         IF StatusCode  = e_sc_ok THEN
             l_method_call_pointer <-- read_CallMethod_Pointer (p_req_msg, p_callMethod);
@@ -351,7 +355,8 @@ OPERATIONS
         l_nodeClass,
         l_valid_executable,
         l_valid_user_executable,
-        l_object_has_method
+        l_object_has_method,
+        l_roles
     IN
         l_objectid <-- read_CallMethod_Objectid (p_req_msg, p_callMethod);
         /* Treat e_sc_bad_node_id_invalid and e_sc_bad_node_id_unknown */
@@ -364,7 +369,8 @@ OPERATIONS
                 IF l_nodeClass = e_ncl_Method THEN
                     /* method is executable by user */
                     l_valid_executable <-- has_access_level_executable(l_method);
-                    l_valid_user_executable <-- get_user_authorization (e_operation_type_executable, l_methodid, e_aid_UserExecutable, p_user);
+                    l_roles <-- get_user_roles(p_user);
+                    l_valid_user_executable <-- get_user_authorization (e_operation_type_executable, l_methodid, e_aid_UserExecutable, p_user, l_roles);
                     IF l_valid_executable = TRUE &
                         l_valid_user_executable = TRUE
                     THEN

@@ -73,7 +73,7 @@ PROMOTES
     allocate_x509_token_from_user,
     is_valid_user_x509_authentication,
     deallocate_x509_token,
-    get_user_roles,
+    compute_user_roles,
     set_session_roles,
     get_session_roles
 
@@ -113,6 +113,59 @@ LOCAL_OPERATIONS
             )
         OR
             res_activated := FALSE
+        END
+    END
+    ;
+
+    ret <-- l_server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel_connected   &
+        session : t_session_i &
+        session : s_session &
+        a_state(session) : {e_session_created, e_session_userActivated,
+                            e_session_scOrphaned} &
+        user : t_user_i &
+        user : t_user &
+        activate_req_msg : t_msg_i &
+        activate_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_activate_req &
+        activate_resp_msg : t_msg_i &
+        activate_resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_resp
+    THEN
+        // TODO: split in 2 operations sc/user activation determined by session_mgr ?
+
+        IF a_channel(session) = channel // current channel is the channel associated to the current session
+        THEN
+            /* UserActivateReq */
+            CHOICE
+                a_state(session) := e_session_userActivated ||
+                a_user_server(session) := user ||
+                ret := e_sc_ok
+                // modify credential if user was already associated, sends response
+            OR
+                ret :: {e_sc_bad_invalid_state, e_sc_bad_application_signature_invalid}
+                // sends response with error
+            END
+        ELSIF a_state(session) : {e_session_scOrphaned, e_session_userActivated} &
+            a_user_server(session) = user // user provided in activate request is the user associated to the current session
+        THEN
+            /* ScActivateReq */
+            CHOICE
+                a_client_orphaned := {session} <<| a_client_orphaned ||
+                a_channel(session) := channel         ||
+                a_state(session) := e_session_userActivated ||
+                ret := e_sc_ok
+            OR
+                ret := e_sc_bad_application_signature_invalid
+                // sends response with error
+            END
+        ELSE
+            ret :: {e_sc_bad_invalid_argument,
+                    e_sc_bad_invalid_state}
         END
     END
     ;
@@ -341,6 +394,109 @@ OPERATIONS
             set_server_session_preferred_locales_or_indet (session, l_localeIds);
             set_session_state (session, e_session_userActivated, FALSE)
         END
+    END
+    ;
+
+    ret <-- l_server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
+    VAR
+        l_channel,
+        l_state,
+        l_user,
+        l_is_same_user,
+        l_valid,
+        l_ret
+    IN
+        l_channel <-- get_session_channel (session);
+        l_state <-- get_session_state (session);
+        IF l_state = e_session_created
+        THEN
+            /* Channel must be the same and user must be set */
+            IF l_channel = channel
+            THEN
+                l_valid <-- server_internal_activate_req_and_resp (channel,
+                                                                   session,
+                                                                   e_session_userActivating,
+                                                                   user,
+                                                                   activate_req_msg,
+                                                                   activate_resp_msg);
+                IF l_valid = TRUE THEN
+                    l_ret := e_sc_ok
+                ELSE
+                    /* Note: it also might be an unexpected internal error */
+                    l_ret := e_sc_bad_application_signature_invalid
+                END
+            ELSE
+                l_ret := e_sc_bad_invalid_argument
+            END
+        ELSIF l_state = e_session_userActivated
+        THEN
+            l_user <-- get_session_user_server (session);
+            /* User changed XOR channel changed */
+            IF l_channel = channel
+            THEN
+                l_valid <-- server_internal_activate_req_and_resp (channel,
+                                                                   session,
+                                                                   e_session_userActivating,
+                                                                   user,
+                                                                   activate_req_msg,
+                                                                   activate_resp_msg);
+                IF l_valid = TRUE THEN
+                    l_ret := e_sc_ok
+                ELSE
+                    /* Note: it also might be an unexpected internal error */
+                    l_ret := e_sc_bad_application_signature_invalid
+                END
+            ELSIF l_channel /= channel
+            THEN
+                l_is_same_user <-- is_same_user_server (l_user, user);
+                /* User shall remain the same if channel is different */
+                IF l_is_same_user = TRUE
+                THEN
+                    l_valid <-- server_internal_activate_req_and_resp (channel,
+                        session,
+                        e_session_scActivating,
+                        user,
+                        activate_req_msg,
+                        activate_resp_msg);
+                    IF l_valid = TRUE THEN
+                        l_ret := e_sc_ok
+                    ELSE
+                        /* Note: it also might be an unexpected internal error */
+                        l_ret := e_sc_bad_application_signature_invalid
+                    END
+                ELSE
+                    l_ret := e_sc_bad_invalid_state
+                END
+            ELSE
+                l_ret := e_sc_bad_invalid_state
+            END
+        ELSIF l_state = e_session_scOrphaned
+        THEN
+            l_user <-- get_session_user_server (session);
+            l_is_same_user <-- is_same_user_server (l_user, user);
+            /* Channel changed */
+            IF l_channel /= channel &
+                l_is_same_user = TRUE
+            THEN
+                l_valid <-- server_internal_activate_req_and_resp (channel,
+                                                                   session,
+                                                                   e_session_scActivating,
+                                                                   user,
+                                                                   activate_req_msg,
+                                                                   activate_resp_msg);
+                IF l_valid = TRUE THEN
+                    l_ret := e_sc_ok
+                ELSE
+                    /* Note: it also might be an unexpected internal error */
+                    l_ret := e_sc_bad_application_signature_invalid
+                END
+            ELSE
+                l_ret := e_sc_bad_invalid_state
+            END
+        ELSE
+            l_ret := e_sc_bad_invalid_state
+        END;
+        ret := l_ret
     END
     ;
 
@@ -653,104 +809,15 @@ OPERATIONS
 
     ret <-- server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
     VAR
-        l_channel,
-        l_state,
-        l_user,
-        l_is_same_user,
-        l_valid,
-        l_ret
+        l_userRoles
     IN
-        l_channel <-- get_session_channel (session);
-        l_state <-- get_session_state (session);
-        IF l_state = e_session_created
+        ret <-- l_server_activate_session_req_and_resp_sm(channel, session, user, activate_req_msg, activate_resp_msg);
+        IF ret = e_sc_ok
         THEN
-            /* Channel must be the same and user must be set */
-            IF l_channel = channel
-            THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel,
-                                                                   session,
-                                                                   e_session_userActivating,
-                                                                   user,
-                                                                   activate_req_msg,
-                                                                   activate_resp_msg);
-                IF l_valid = TRUE THEN
-                    l_ret := e_sc_ok
-                ELSE
-                    /* Note: it also might be an unexpected internal error */
-                    l_ret := e_sc_bad_application_signature_invalid
-                END
-            ELSE
-                l_ret := e_sc_bad_invalid_argument
-            END
-        ELSIF l_state = e_session_userActivated
-        THEN
-            l_user <-- get_session_user_server (session);
-            /* User changed XOR channel changed */
-            IF l_channel = channel
-            THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel,
-                                                                   session,
-                                                                   e_session_userActivating,
-                                                                   user,
-                                                                   activate_req_msg,
-                                                                   activate_resp_msg);
-                IF l_valid = TRUE THEN
-                    l_ret := e_sc_ok
-                ELSE
-                    /* Note: it also might be an unexpected internal error */
-                    l_ret := e_sc_bad_application_signature_invalid
-                END
-            ELSIF l_channel /= channel
-            THEN
-                l_is_same_user <-- is_same_user_server (l_user, user);
-                /* User shall remain the same if channel is different */
-                IF l_is_same_user = TRUE
-                THEN
-                    l_valid <-- server_internal_activate_req_and_resp (channel,
-                        session,
-                        e_session_scActivating,
-                        user,
-                        activate_req_msg,
-                        activate_resp_msg);
-                    IF l_valid = TRUE THEN
-                        l_ret := e_sc_ok
-                    ELSE
-                        /* Note: it also might be an unexpected internal error */
-                        l_ret := e_sc_bad_application_signature_invalid
-                    END
-                ELSE
-                    l_ret := e_sc_bad_invalid_state
-                END
-            ELSE
-                l_ret := e_sc_bad_invalid_state
-            END
-        ELSIF l_state = e_session_scOrphaned
-        THEN
-            l_user <-- get_session_user_server (session);
-            l_is_same_user <-- is_same_user_server (l_user, user);
-            /* Channel changed */
-            IF l_channel /= channel &
-                l_is_same_user = TRUE
-            THEN
-                l_valid <-- server_internal_activate_req_and_resp (channel,
-                                                                   session,
-                                                                   e_session_scActivating,
-                                                                   user,
-                                                                   activate_req_msg,
-                                                                   activate_resp_msg);
-                IF l_valid = TRUE THEN
-                    l_ret := e_sc_ok
-                ELSE
-                    /* Note: it also might be an unexpected internal error */
-                    l_ret := e_sc_bad_application_signature_invalid
-                END
-            ELSE
-                l_ret := e_sc_bad_invalid_state
-            END
-        ELSE
-            l_ret := e_sc_bad_invalid_state
-        END;
-        ret := l_ret
+            /* If session is activated, assign roles to the session. */
+            l_userRoles <-- compute_user_roles(user);
+            set_session_roles(session, l_userRoles)
+        END
     END
     ;
 

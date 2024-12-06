@@ -40,6 +40,9 @@ SOPC_Variant* util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl);
 SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn, bool deepCopy);
 
 SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt, bool deepCopy);
+/* Asserts noOfRolePermissions > 0 */
+SOPC_Variant* util_variant__new_Variant_from_RolePermissions(OpcUa_RolePermissionType* rolePermissionsArray,
+                                                             int32_t noOfRolePermissions);
 
 /**
  * On success, returns a deep copy of the input variant with new locales, and free the input variant.

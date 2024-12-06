@@ -34,15 +34,19 @@ DEFINITIONS
     "address_space.def"
 
 ABSTRACT_VARIABLES
-    d_adsp_variables
+    d_adsp_variables,
+    d_adsp_nodes_typing
 
 INVARIANT
-    d_adsp_invariant
+    d_adsp_invariant &
+    d_adsp_nodes_typing_invariant
 
 INITIALISATION
-    d_adsp_variables
+    d_adsp_variables,
+    d_adsp_nodes_typing
     :(
-        d_adsp_invariant
+        d_adsp_invariant &
+        d_adsp_nodes_typing_invariant
     )
 
 OPERATIONS

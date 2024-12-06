@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 09/12/2024 16:55:10
+ Date                 : 09/12/2024 17:07:43
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -154,6 +154,7 @@ void call_method_mgr__check_method_call_inputs(
       t_bool call_method_mgr__l_valid_executable;
       t_bool call_method_mgr__l_valid_user_executable;
       t_bool call_method_mgr__l_object_has_method;
+      constants__t_sessionRoles_i call_method_mgr__l_roles;
       
       msg_call_method_bs__read_CallMethod_Objectid(call_method_mgr__p_req_msg,
          call_method_mgr__p_callMethod,
@@ -174,10 +175,13 @@ void call_method_mgr__check_method_call_inputs(
             if (call_method_mgr__l_nodeClass == constants__e_ncl_Method) {
                service_write__has_access_level_executable(call_method_mgr__l_method,
                   &call_method_mgr__l_valid_executable);
+               service_write__get_user_roles(call_method_mgr__p_user,
+                  &call_method_mgr__l_roles);
                service_write__get_user_authorization(constants__e_operation_type_executable,
                   call_method_mgr__l_methodid,
                   constants__e_aid_UserExecutable,
                   call_method_mgr__p_user,
+                  call_method_mgr__l_roles,
                   &call_method_mgr__l_valid_user_executable);
                if ((call_method_mgr__l_valid_executable == true) &&
                   (call_method_mgr__l_valid_user_executable == true)) {

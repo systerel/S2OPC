@@ -44,7 +44,7 @@ DEFINITIONS
 OPERATIONS
 
     /* Operation of the module */
-    p_roles <-- get_user_roles(p_user, p_locales) =
+    p_roles <-- compute_user_roles(p_user) =
     VAR
         l_nid_valid,
         l_roleSet_node,
@@ -71,7 +71,7 @@ OPERATIONS
                 l_bValidRoleRef, l_maybe_role_node, l_maybe_role_nodeId <-- is_ref_role(l_ref);
                 IF l_bValidRoleRef = TRUE THEN
                     /* Evaluate if the role should be granted to user */
-                    l_bres <-- role_eval_user(p_user, p_locales, l_maybe_role_node);
+                    l_bres <-- role_eval_user(p_user, l_maybe_role_node);
                     IF l_bres = TRUE THEN
                         add_role_to_session(l_maybe_role_nodeId)
                     END
@@ -84,7 +84,6 @@ OPERATIONS
                 references_to_iterate \/ references_iterated = a_Node_References &
                 starting_node = l_roleSet_node &
                 a_Node_References = ran({starting_node} * (1.. Node_RefIndexEnd(starting_node)) <| RefIndex_Reference) &
-                (l_continue = TRUE => references_to_iterate /= {}) &
                 s_sessionRoles = { roleNodeId | roleNodeId : t_NodeId &
                     // the nodeId is a role ref
                     roleNodeId : conv_ExpandedNodeId_NodeId[Reference_TargetNode[(references_iterated /\ s_role_node_refs)]] &

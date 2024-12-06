@@ -1,0 +1,175 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    namespaces_default_role_permissions_i
+
+REFINES
+    namespaces_default_role_permissions
+
+PROMOTES
+    delete_rolePermissions
+
+SEES
+    constants,
+    address_space_bs
+
+IMPORTS
+    namespaces_refs_it,
+    namespace_default_role_permissions
+
+LOCAL_OPERATIONS
+
+    /* OPERATIONS WITH REFERENCE */
+
+    // Get the node targeted by the ref
+    p_node <-- l_ref_get_node(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_node :(p_node : t_Node_i &
+                (p_node : t_Node => p_node = a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) &
+                (p_node /: t_Node => p_node = c_Node_indet))
+    END
+    ;
+
+    /* OPERATIONS WITH NODE */
+
+    // Check that the node is Object and NamespaceMetadataType
+    p_bres <-- l_node_check_NodeClass_and_TypeDef(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_bres := bool(a_NodeClass(p_node) = e_ncl_Object & conv_ExpandedNodeId_NodeId(Ref_HasTypeDefinition(p_node)) = c_NamespaceMetadataType_NodeId)
+    END
+
+OPERATIONS
+    /* LOCAL OPERATIONS */
+    p_node <-- l_ref_get_node(p_ref) =
+    VAR
+        l_ref_target,
+        l_local_server,
+        l_ref_target_NodeId,
+        l_isvalid,
+        l_ref_target_Node
+    IN
+        p_node := c_Node_indet;
+        l_ref_target <-- get_Reference_TargetNode(p_ref);
+        l_local_server, l_ref_target_NodeId <-- getall_conv_ExpandedNodeId_NodeId(l_ref_target);
+        IF l_local_server = TRUE
+        THEN
+            l_isvalid, l_ref_target_Node <-- readall_AddressSpace_Node(l_ref_target_NodeId);
+            IF l_isvalid = TRUE
+            THEN
+                p_node := l_ref_target_Node
+            END
+        END
+    END
+    ;
+
+    p_bres <-- l_node_check_NodeClass_and_TypeDef(p_node) =
+    VAR
+        l_NodeClass,
+        l_typeDefinition,
+        l_local_server,
+        l_NodeId,
+        l_nodeIdsEqual
+    IN
+        p_bres := FALSE;
+        l_NodeClass <-- get_NodeClass(p_node);
+        IF l_NodeClass = e_ncl_Object
+        THEN
+            /* TypeDefinition must be NamespaceMetadataType which is: NodeId="i=11616" */
+            l_typeDefinition <-- get_TypeDefinition(p_node);
+            l_local_server, l_NodeId <-- getall_conv_ExpandedNodeId_NodeId(l_typeDefinition);
+            l_nodeIdsEqual <-- is_NodeId_equal(l_NodeId, c_NamespaceMetadataType_NodeId);
+            IF l_nodeIdsEqual = TRUE
+            THEN
+                p_bres := TRUE
+            END
+        END
+    END
+    ;
+
+    /* OPERATION OF THE MODULE */
+    p_val_DefaultRolePermissions <-- get_DefaultRolePermissions(p_namespaceUri) =
+    VAR
+        l_nid_valid,
+        l_Server_Namespaces_node,
+        l_continue,
+        l_ref,
+        l_bres,
+        l_maybe_val_DefaultRolePermissions,
+        l_bValidRef,
+        l_ref_target_Node,
+        l_bValidNode
+    IN
+        p_val_DefaultRolePermissions := c_RolePermissionTypes_indet;
+        l_bValidNode := FALSE;
+        l_nid_valid, l_Server_Namespaces_node <-- readall_AddressSpace_Node(c_Server_Namespaces_NodeId);
+        l_continue := FALSE;
+        IF l_nid_valid = TRUE THEN
+            l_continue <-- init_iter_namespaces_refs(l_Server_Namespaces_node)
+        END
+        ;
+        // Namespaces node may be absent. In this case l_nid_valid = FALSE, l_continue remains FALSE, and
+        // p_DefaultRolePermissions remains c_RolePermissionTypes_indet.
+
+        WHILE
+            l_continue = TRUE
+        DO
+            /* Iterate on the namespaces of the server */
+            l_continue, l_ref <-- continue_iter_namespaces_refs;
+            l_bValidRef <-- check_reference_isForward_and_RefType(l_ref, c_HasComponentType_NodeId);
+            IF l_bValidRef = TRUE THEN
+                /* Get the target node of the reference */
+                l_ref_target_Node <-- l_ref_get_node(l_ref);
+                IF l_ref_target_Node /= c_Node_indet
+                THEN
+                    l_bValidNode <-- l_node_check_NodeClass_and_TypeDef(l_ref_target_Node)
+                END
+                ;
+                IF l_bValidNode = TRUE THEN
+                    // When we found a Namespace, check if it is the good one. If it is, return its DefaultRolePermissions
+                    l_bres, l_maybe_val_DefaultRolePermissions <-- namespacemetadata_and_uri_match(p_namespaceUri, l_ref_target_Node);
+                    IF l_bres = TRUE THEN
+                        p_val_DefaultRolePermissions := l_maybe_val_DefaultRolePermissions
+                    END
+                END
+            END
+            // If we did not find any Namespace with URI p_namespaceUri, p_DefaultRolePermissions remains c_Variant_indet.
+        INVARIANT
+            // Iterator invariants
+            ns_references_to_iterate <: t_Reference &
+            ns_references_iterated   <: t_Reference &
+            ns_references_to_iterate /\ ns_references_iterated = {} &
+            ns_references_to_iterate \/ ns_references_iterated = ns_a_Node_References &
+            ns_starting_node = l_Server_Namespaces_node &
+            ns_a_Node_References = ran({ns_starting_node} * (1.. Node_RefIndexEnd(ns_starting_node)) <| RefIndex_Reference) &
+            (p_namespaceUri : ran(a_NodeId~[conv_ExpandedNodeId_NodeId[Reference_TargetNode[ns_references_iterated]]] <| a_ns_uri)
+            => p_val_DefaultRolePermissions : ran(a_ns_uri~[{p_namespaceUri}] <| a_ns_default_role_permissions)) &
+            (p_namespaceUri /: ran(a_NodeId~[conv_ExpandedNodeId_NodeId[Reference_TargetNode[ns_references_iterated]]] <| a_ns_uri)
+            => p_val_DefaultRolePermissions = c_RolePermissionTypes_indet)
+        VARIANT
+            card(ns_references_to_iterate)
+        END
+    END
+END

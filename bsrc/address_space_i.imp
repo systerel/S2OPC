@@ -38,7 +38,6 @@ IMPORTS
     gen_subscription_event_bs
 
 PROMOTES
-    address_space_bs_UNINITIALISATION,
     is_AddressSpace_constant,
     readall_AddressSpace_Node,
     get_NodeClass,
@@ -60,6 +59,9 @@ PROMOTES
     is_local_service_treatment,
     set_local_service_treatment,
     get_user_authorization,
+    set_user_roles,
+    get_user_roles,
+    clear_user_roles,
     has_access_level_executable,
     get_InputArguments,
     get_conv_Variant_ValueRank,
@@ -490,7 +492,8 @@ OPERATIONS
         l_server_ts,
         l_server_ts_null,
         l_local_treatment,
-        l_raw_sc
+        l_raw_sc,
+        l_roles
     IN
         node := c_Node_indet;
         prev_dataValue := c_DataValue_indet;
@@ -517,7 +520,8 @@ OPERATIONS
                         l_access_write <-- has_access_level_write(node, l_raw_sc, l_source_ts);
                         IF l_access_write = TRUE THEN
                             /* Access authorized */
-                            l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
+                            l_roles <-- get_user_roles(p_user);
+                            l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user, l_roles);
                             IF l_authorized_write = TRUE THEN
                                 serviceStatusCode, prev_dataValue <-- set_Value(p_user, p_locales, node, l_variant, l_compat_with_conv, index_range);
                                 IF serviceStatusCode = e_sc_ok THEN
@@ -615,7 +619,8 @@ OPERATIONS
         l_user_write_auth,
         l_is_range_defined,
         l_user_executable_auth,
-        l_local_treatment
+        l_local_treatment,
+        l_roles
     IN
         sc := e_sc_ok;
         val_sc <-- get_const_RawStatusCode_Good;
@@ -661,11 +666,13 @@ OPERATIONS
                 OR e_aid_Symmetric THEN
                     sc, val <-- read_AddressSpace_Symmetric_value(p_node)
                 OR e_aid_UserAccessLevel THEN
-                    l_user_read_auth <-- get_user_authorization(e_operation_type_read, p_nid, e_aid_Value, p_user);
-                    l_user_write_auth <-- get_user_authorization(e_operation_type_write, p_nid, e_aid_Value, p_user);
+                    l_roles <-- get_user_roles(p_user);
+                    l_user_read_auth <-- get_user_authorization(e_operation_type_read, p_nid, e_aid_Value, p_user, l_roles);
+                    l_user_write_auth <-- get_user_authorization(e_operation_type_write, p_nid, e_aid_Value, p_user, l_roles);
                     sc, val <-- read_AddressSpace_UserAccessLevel_value(p_node, l_user_read_auth, l_user_write_auth)
                 OR e_aid_UserExecutable THEN
-                    l_user_executable_auth <-- get_user_authorization(e_operation_type_executable, p_nid, e_aid_Executable, p_user);
+                    l_roles <-- get_user_roles(p_user);
+                    l_user_executable_auth <-- get_user_authorization(e_operation_type_executable, p_nid, e_aid_Executable, p_user, l_roles);
                     sc, val <-- read_AddressSpace_UserExecutable_value(p_node, l_user_executable_auth)
                 OR e_aid_DataTypeDefinition THEN
                     sc, val <-- read_AddressSpace_DataTypeDefinition_value(p_node, l_local_treatment)
@@ -683,12 +690,30 @@ OPERATIONS
 
     /* END LOCAL_OPERATIONS */
 
+    p_val, p_sc <-- read_AddressSpace_Identities_value(p_identities_node, p_identities_nid) =
+    VAR
+        l_val_sc,
+        l_val_ts_src
+    IN
+        p_sc, p_val, l_val_sc, l_val_ts_src
+            <-- read_AddressSpace_Raw_Node_Value_value(p_identities_node, p_identities_nid, e_aid_Value)
+    END
+    ;
+
+    address_space_UNINITIALISATION =
+    BEGIN
+        address_space_bs_UNINITIALISATION;
+        address_space_default_role_permissions_array_bs_UNINITIALISATION
+    END
+    ;
+
     sc, val, val_sc, val_ts_src, val_ts_srv <-- read_Node_Attribute(p_user, p_locales, p_node, p_nid, p_aid, p_index_range) =
     VAR
         l_is_mandatory_attribute,
         l_ncl,
         l_access_read,
-        l_user_auth
+        l_user_auth,
+        l_roles
     IN
         sc := e_sc_bad_attribute_id_invalid;
         val_sc <-- get_const_RawStatusCode_BadInvalidState;
@@ -701,7 +726,8 @@ OPERATIONS
             IF l_ncl = e_ncl_Variable & p_aid = e_aid_Value THEN
                 l_access_read <-- has_access_level_read(p_node);
                 IF l_access_read = TRUE THEN
-                    l_user_auth <-- get_user_authorization(e_operation_type_read, p_nid, p_aid, p_user);
+                    l_roles <-- get_user_roles(p_user);
+                    l_user_auth <-- get_user_authorization(e_operation_type_read, p_nid, p_aid, p_user, l_roles);
                     IF l_user_auth = TRUE THEN
                         sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_locales, p_node, p_nid, p_aid, p_index_range)
                     ELSE

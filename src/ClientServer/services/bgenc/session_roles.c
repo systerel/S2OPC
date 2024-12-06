@@ -21,7 +21,7 @@
 
  File Name            : session_roles.c
 
- Date                 : 14/08/2024 11:58:08
+ Date                 : 30/09/2024 13:04:32
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -41,9 +41,8 @@ void session_roles__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void session_roles__get_user_roles(
+void session_roles__compute_user_roles(
    const constants__t_user_i session_roles__p_user,
-   const constants__t_LocaleIds_i session_roles__p_locales,
    constants__t_sessionRoles_i * const session_roles__p_roles) {
    {
       t_bool session_roles__l_nid_valid;
@@ -72,7 +71,6 @@ void session_roles__get_user_roles(
                &session_roles__l_maybe_role_nodeId);
             if (session_roles__l_bValidRoleRef == true) {
                session_role_eval__role_eval_user(session_roles__p_user,
-                  session_roles__p_locales,
                   session_roles__l_maybe_role_node,
                   &session_roles__l_bres);
                if (session_roles__l_bres == true) {

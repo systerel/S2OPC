@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 09/12/2024 16:55:15
+ Date                 : 09/12/2024 17:07:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -611,26 +611,38 @@ void service_mgr__treat_session_service_req(
    const constants__t_msg_i service_mgr__resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service,
    t_bool * const service_mgr__async_resp_msg) {
-   *service_mgr__async_resp_msg = false;
-   if (constants__c_Server_Nano_Extended == true) {
-      service_mgr__treat_session_nano_extended_service_req(service_mgr__endpoint_config_idx,
-         service_mgr__session,
-         service_mgr__req_typ,
-         service_mgr__req_handle,
-         service_mgr__req_ctx,
-         service_mgr__req_header,
-         service_mgr__req_msg,
-         service_mgr__resp_msg,
-         service_mgr__StatusCode_service,
-         service_mgr__async_resp_msg);
-   }
-   else {
-      service_mgr__treat_session_nano_service_req(service_mgr__endpoint_config_idx,
-         service_mgr__session,
-         service_mgr__req_typ,
-         service_mgr__req_msg,
-         service_mgr__resp_msg,
-         service_mgr__StatusCode_service);
+   {
+      constants__t_user_i service_mgr__l_user;
+      constants__t_sessionRoles_i service_mgr__l_roles;
+      
+      *service_mgr__async_resp_msg = false;
+      session_mgr__get_session_user_server(service_mgr__session,
+         &service_mgr__l_user);
+      session_mgr__get_session_roles(service_mgr__session,
+         &service_mgr__l_roles);
+      address_space_itf__set_user_roles(service_mgr__l_user,
+         service_mgr__l_roles);
+      if (constants__c_Server_Nano_Extended == true) {
+         service_mgr__treat_session_nano_extended_service_req(service_mgr__endpoint_config_idx,
+            service_mgr__session,
+            service_mgr__req_typ,
+            service_mgr__req_handle,
+            service_mgr__req_ctx,
+            service_mgr__req_header,
+            service_mgr__req_msg,
+            service_mgr__resp_msg,
+            service_mgr__StatusCode_service,
+            service_mgr__async_resp_msg);
+      }
+      else {
+         service_mgr__treat_session_nano_service_req(service_mgr__endpoint_config_idx,
+            service_mgr__session,
+            service_mgr__req_typ,
+            service_mgr__req_msg,
+            service_mgr__resp_msg,
+            service_mgr__StatusCode_service);
+      }
+      address_space_itf__clear_user_roles();
    }
 }
 
@@ -1922,6 +1934,6 @@ void service_mgr__service_mgr_UNINITIALISATION(void) {
    service_set_view__service_set_view_UNINITIALISATION();
    service_set_discovery_server__service_set_discovery_server_UNINITIALISATION();
    service_mgr_bs__service_mgr_bs_UNINITIALISATION();
-   address_space_itf__address_space_bs_UNINITIALISATION();
+   address_space_itf__address_space_UNINITIALISATION();
 }
 

@@ -1,0 +1,72 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    namespaces_refs_it_i
+
+REFINES
+    namespaces_refs_it
+
+SEES
+    constants,
+    address_space_bs
+
+CONCRETE_VARIABLES
+    Node,
+    RefIndex,
+    RefIndexEnd
+
+INVARIANT
+    Node        : t_Node_i &
+    Node        : t_Node &
+    RefIndex    : NAT &
+    RefIndex    : t_RefIndex &
+    RefIndexEnd : NAT &
+    RefIndexEnd : t_RefIndex &
+    RefIndex    : 0..RefIndexEnd &
+
+    ns_starting_node = Node &
+    ns_references_to_iterate = ns_a_Node_RefIndex_Reference[{ns_starting_node} * (1.. RefIndex)] &
+    ns_references_iterated = ns_a_Node_RefIndex_Reference[{ns_starting_node} * (RefIndex.. RefIndexEnd)] &
+    ns_next_reference_index = RefIndex
+
+INITIALISATION
+    Node        := c_Node_indet;
+    RefIndex    := 0;
+    RefIndexEnd := 0
+
+OPERATIONS
+
+    p_continue <-- init_iter_namespaces_refs(p_node) =
+    BEGIN
+        Node        := p_node;
+        RefIndex    := 1;
+        RefIndexEnd <-- get_Node_RefIndexEnd(p_node);
+        p_continue := bool(RefIndexEnd >= RefIndex)
+    END
+    ;
+
+    p_continue, p_ref <-- continue_iter_namespaces_refs =
+    BEGIN
+       p_ref <-- get_RefIndex_Reference(Node, RefIndex);
+       RefIndex := RefIndex + 1;
+       p_continue := bool(RefIndex <= RefIndexEnd)
+    END
+
+END

@@ -42,6 +42,7 @@ PROMOTES
     server_secure_channel_lost_session_sm,
     session_has_user_server,
     get_session_user_server,
+    get_session_roles,
     get_local_user,
     get_server_session_preferred_locales,
     find_channel_to_close,
@@ -445,9 +446,7 @@ OPERATIONS
         l_nb_sessions_on_SC,
         l_timer_creation_ok,
         l_user,
-        l_user_token_signature,
-        l_locales,
-        l_userRoles
+        l_user_token_signature
     IN
         security_failed := FALSE; /* Only evaluated in case of user authentication attempt */
         session := c_session_indet;
@@ -512,11 +511,6 @@ OPERATIONS
                                 IF service_ret /= e_sc_ok
                                 THEN
                                     deallocate_user (l_user)
-                                ELSE
-                                    /* If session is activated, assign roles to the session. */
-                                    l_locales <-- get_server_session_preferred_locales(session);
-                                    l_userRoles <-- get_user_roles(l_user, l_locales);
-                                    set_session_roles(session, l_userRoles) // l_userRoles may be c_sessionRoles_empty
                                 END
                             ELSIF security_failed = TRUE
                             THEN

@@ -1,0 +1,70 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    role_permissions_value_it_i
+
+REFINES
+    role_permissions_value_it
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+    currentRolePermissionIdx_i,
+    nb_rolePermissions_i
+
+INVARIANT
+    currentRolePermissionIdx_i : NAT &
+    nb_rolePermissions_i : NAT &
+
+    nb_rolePermissions = nb_rolePermissions_i &
+    currentRolePermissionIdx_i : 0..nb_rolePermissions_i &
+
+    (nb_rolePermissions_i = 0 =>
+        rolePermissionsIdx_to_iterate = {} &
+        rolePermissionsIdx_iterated = {}) &
+
+    (nb_rolePermissions_i /= 0 =>
+        rolePermissionsIdx_to_iterate = currentRolePermissionIdx_i+1..nb_rolePermissions_i &
+        rolePermissionsIdx_iterated = 1..currentRolePermissionIdx_i)
+
+INITIALISATION
+    currentRolePermissionIdx_i := 0;
+    nb_rolePermissions_i := 0
+
+OPERATIONS
+
+    p_continue <-- init_iter_rolePermissions(p_nb_rolePermissions) =
+    BEGIN
+        nb_rolePermissions_i := p_nb_rolePermissions;
+        currentRolePermissionIdx_i := 0;
+        p_continue := bool (0 < p_nb_rolePermissions)
+    END
+    ;
+
+    p_continue, p_rolePermissionIdx <-- continue_iter_rolePermissions =
+    BEGIN
+        currentRolePermissionIdx_i := currentRolePermissionIdx_i + 1;
+        p_rolePermissionIdx := currentRolePermissionIdx_i;
+        p_continue := bool (currentRolePermissionIdx_i < nb_rolePermissions_i)
+    END
+
+END
+

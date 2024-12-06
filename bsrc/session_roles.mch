@@ -21,16 +21,13 @@ MACHINE
     session_roles
 
 SEES
-    constants,
-    constants_statuscodes_bs
+    constants
 
 OPERATIONS
-    p_roles <-- get_user_roles(p_user, p_locales) =
+    p_roles <-- compute_user_roles(p_user) =
     PRE
         p_user : t_user_i &
-        p_user : t_user &
-        p_locales : t_LocaleIds_i &
-        p_locales : t_LocaleIds
+        p_user : t_user
     THEN
         p_roles :: t_sessionRoles_i
     END

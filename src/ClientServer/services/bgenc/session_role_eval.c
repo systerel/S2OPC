@@ -21,7 +21,7 @@
 
  File Name            : session_role_eval.c
 
- Date                 : 13/09/2024 12:55:58
+ Date                 : 30/09/2024 14:56:17
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -124,7 +124,6 @@ void session_role_eval__l_check_node_NodeClass_and_TypeDef(
 
 void session_role_eval__role_eval_user(
    const constants__t_user_i session_role_eval__p_user,
-   const constants__t_LocaleIds_i session_role_eval__p_locales,
    const constants__t_Node_i session_role_eval__p_role_node,
    t_bool * const session_role_eval__p_bres) {
    {
@@ -133,54 +132,50 @@ void session_role_eval__role_eval_user(
       t_bool session_role_eval__l_continue;
       constants_statuscodes_bs__t_StatusCode_i session_role_eval__l_sc;
       constants__t_Variant_i session_role_eval__l_val;
-      constants__t_RawStatusCode session_role_eval__l_val_sc;
-      constants__t_Timestamp session_role_eval__l_val_ts_src;
-      constants__t_Timestamp session_role_eval__l_val_ts_srv;
-      constants__t_IndexRange_i session_role_eval__l_index_range;
       t_entier4 session_role_eval__l_nb_identities;
       t_bool session_role_eval__l_bres;
       t_entier4 session_role_eval__l_identityIdx;
       constants__t_Identity_i session_role_eval__l_identity;
       
       *session_role_eval__p_bres = false;
+      session_role_eval__l_nb_identities = 0;
+      session_role_eval__l_continue = false;
+      session_role_eval__l_sc = constants_statuscodes_bs__e_sc_bad_generic;
+      session_role_eval__l_val = constants__c_Variant_indet;
       session_role_eval__l_get_role_identities_node(session_role_eval__p_role_node,
          &session_role_eval__l_identities_nodeId,
          &session_role_eval__l_identities_node);
       if ((session_role_eval__l_identities_node != constants__c_Node_indet) &&
          (session_role_eval__l_identities_nodeId != constants__c_NodeId_indet)) {
-         session_role_eval__l_index_range = constants__c_IndexRange_indet;
-         address_space_itf__read_Node_Attribute(session_role_eval__p_user,
-            session_role_eval__p_locales,
-            session_role_eval__l_identities_node,
+         address_space_itf__read_AddressSpace_Identities_value(session_role_eval__l_identities_node,
             session_role_eval__l_identities_nodeId,
-            constants__e_aid_Value,
-            session_role_eval__l_index_range,
-            &session_role_eval__l_sc,
             &session_role_eval__l_val,
-            &session_role_eval__l_val_sc,
-            &session_role_eval__l_val_ts_src,
-            &session_role_eval__l_val_ts_srv);
+            &session_role_eval__l_sc);
+      }
+      if (session_role_eval__l_sc == constants_statuscodes_bs__e_sc_ok) {
          session_role_identities_bs__read_variant_nb_identities(session_role_eval__l_val,
             session_role_eval__l_identities_node,
             &session_role_eval__l_nb_identities);
+      }
+      if (session_role_eval__l_nb_identities > 0) {
          session_role_identities_it__init_iter_identities(session_role_eval__l_nb_identities,
             &session_role_eval__l_continue);
-         while (session_role_eval__l_continue == true) {
-            session_role_eval__l_bres = false;
-            session_role_identities_it__continue_iter_identities(&session_role_eval__l_continue,
-               &session_role_eval__l_identityIdx);
-            session_role_identities_bs__read_variant_identity(session_role_eval__l_val,
-               session_role_eval__l_identityIdx,
-               &session_role_eval__l_identity);
-            session_role_identity_eval__user_and_identity_match(session_role_eval__p_user,
-               session_role_eval__l_identity,
-               &session_role_eval__l_bres);
-            if (session_role_eval__l_bres == true) {
-               *session_role_eval__p_bres = true;
-            }
-         }
-         address_space_itf__read_AddressSpace_free_variant(session_role_eval__l_val);
       }
+      while (session_role_eval__l_continue == true) {
+         session_role_eval__l_bres = false;
+         session_role_identities_it__continue_iter_identities(&session_role_eval__l_continue,
+            &session_role_eval__l_identityIdx);
+         session_role_identities_bs__read_variant_identity(session_role_eval__l_val,
+            session_role_eval__l_identityIdx,
+            &session_role_eval__l_identity);
+         session_role_identity_eval__user_and_identity_match(session_role_eval__p_user,
+            session_role_eval__l_identity,
+            &session_role_eval__l_bres);
+         if (session_role_eval__l_bres == true) {
+            *session_role_eval__p_bres = true;
+         }
+      }
+      address_space_itf__read_AddressSpace_free_variant(session_role_eval__l_val);
    }
 }
 

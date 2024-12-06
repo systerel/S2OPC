@@ -223,6 +223,7 @@ void address_space__treat_write_1(
       t_bool address_space__l_server_ts_null;
       t_bool address_space__l_local_treatment;
       constants__t_RawStatusCode address_space__l_raw_sc;
+      constants__t_sessionRoles_i address_space__l_roles;
       
       *address_space__node = constants__c_Node_indet;
       *address_space__prev_dataValue = constants__c_DataValue_indet;
@@ -269,10 +270,13 @@ void address_space__treat_write_1(
                      address_space__l_source_ts,
                      &address_space__l_access_write);
                   if (address_space__l_access_write == true) {
+                     address_space_authorization__get_user_roles(address_space__p_user,
+                        &address_space__l_roles);
                      address_space_authorization__get_user_authorization(constants__e_operation_type_write,
                         address_space__nid,
                         address_space__aid,
                         address_space__p_user,
+                        address_space__l_roles,
                         &address_space__l_authorized_write);
                      if (address_space__l_authorized_write == true) {
                         address_space_authorization__set_Value(address_space__p_user,
@@ -435,6 +439,7 @@ void address_space__read_AddressSpace_Attribute_value(
       t_bool address_space__l_is_range_defined;
       t_bool address_space__l_user_executable_auth;
       t_bool address_space__l_local_treatment;
+      constants__t_sessionRoles_i address_space__l_roles;
       
       *address_space__sc = constants_statuscodes_bs__e_sc_ok;
       constants_statuscodes_bs__get_const_RawStatusCode_Good(address_space__val_sc);
@@ -521,15 +526,19 @@ void address_space__read_AddressSpace_Attribute_value(
                address_space__val);
             break;
          case constants__e_aid_UserAccessLevel:
+            address_space_authorization__get_user_roles(address_space__p_user,
+               &address_space__l_roles);
             address_space_authorization__get_user_authorization(constants__e_operation_type_read,
                address_space__p_nid,
                constants__e_aid_Value,
                address_space__p_user,
+               address_space__l_roles,
                &address_space__l_user_read_auth);
             address_space_authorization__get_user_authorization(constants__e_operation_type_write,
                address_space__p_nid,
                constants__e_aid_Value,
                address_space__p_user,
+               address_space__l_roles,
                &address_space__l_user_write_auth);
             address_space_authorization__read_AddressSpace_UserAccessLevel_value(address_space__p_node,
                address_space__l_user_read_auth,
@@ -538,10 +547,13 @@ void address_space__read_AddressSpace_Attribute_value(
                address_space__val);
             break;
          case constants__e_aid_UserExecutable:
+            address_space_authorization__get_user_roles(address_space__p_user,
+               &address_space__l_roles);
             address_space_authorization__get_user_authorization(constants__e_operation_type_executable,
                address_space__p_nid,
                constants__e_aid_Executable,
                address_space__p_user,
+               address_space__l_roles,
                &address_space__l_user_executable_auth);
             address_space_authorization__read_AddressSpace_UserExecutable_value(address_space__p_node,
                address_space__l_user_executable_auth,
@@ -582,6 +594,30 @@ void address_space__read_AddressSpace_Attribute_value(
    }
 }
 
+void address_space__read_AddressSpace_Identities_value(
+   const constants__t_Node_i address_space__p_identities_node,
+   const constants__t_NodeId_i address_space__p_identities_nid,
+   constants__t_Variant_i * const address_space__p_val,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space__p_sc) {
+   {
+      constants__t_RawStatusCode address_space__l_val_sc;
+      constants__t_Timestamp address_space__l_val_ts_src;
+      
+      address_space_authorization__read_AddressSpace_Raw_Node_Value_value(address_space__p_identities_node,
+         address_space__p_identities_nid,
+         constants__e_aid_Value,
+         address_space__p_sc,
+         address_space__p_val,
+         &address_space__l_val_sc,
+         &address_space__l_val_ts_src);
+   }
+}
+
+void address_space__address_space_UNINITIALISATION(void) {
+   address_space_authorization__address_space_bs_UNINITIALISATION();
+   address_space_authorization__address_space_default_role_permissions_array_bs_UNINITIALISATION();
+}
+
 void address_space__read_Node_Attribute(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,
@@ -599,6 +635,7 @@ void address_space__read_Node_Attribute(
       constants__t_NodeClass_i address_space__l_ncl;
       t_bool address_space__l_access_read;
       t_bool address_space__l_user_auth;
+      constants__t_sessionRoles_i address_space__l_roles;
       
       *address_space__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
       constants_statuscodes_bs__get_const_RawStatusCode_BadInvalidState(address_space__val_sc);
@@ -616,10 +653,13 @@ void address_space__read_Node_Attribute(
             address_space_authorization__has_access_level_read(address_space__p_node,
                &address_space__l_access_read);
             if (address_space__l_access_read == true) {
+               address_space_authorization__get_user_roles(address_space__p_user,
+                  &address_space__l_roles);
                address_space_authorization__get_user_authorization(constants__e_operation_type_read,
                   address_space__p_nid,
                   address_space__p_aid,
                   address_space__p_user,
+                  address_space__l_roles,
                   &address_space__l_user_auth);
                if (address_space__l_user_auth == true) {
                   address_space__read_AddressSpace_Attribute_value(address_space__p_user,

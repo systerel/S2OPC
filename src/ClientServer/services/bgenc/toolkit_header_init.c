@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 11/09/2024 10:08:25
+ Date                 : 30/10/2024 16:34:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -37,11 +37,16 @@
   ---------------------*/
 #include "address_space.h"
 #include "address_space_authorization.h"
+#include "address_space_authorization_session_roles_it_bs.h"
 #include "address_space_bs.h"
 #include "address_space_itf.h"
 #include "address_space_local.h"
+#include "address_space_namespaces.h"
+#include "address_space_namespaces_metadata.h"
 #include "address_space_typing.h"
 #include "address_space_typing_bs.h"
+#include "address_space_user_permissions.h"
+#include "address_space_user_permissions_bs.h"
 #include "app_cb_call_context_bs.h"
 #include "argument_pointer_bs.h"
 #include "browse_treatment.h"
@@ -65,6 +70,7 @@
 #include "constants_bs.h"
 #include "constants_statuscodes_bs.h"
 #include "data_value_pointer_bs.h"
+#include "default_role_permissions_array_bs.h"
 #include "gen_subscription_event_bs.h"
 #include "io_dispatch_mgr.h"
 #include "message_in_bs.h"
@@ -108,6 +114,16 @@
 #include "msg_translate_browse_path_bs.h"
 #include "msg_unregister_nodes.h"
 #include "msg_unregister_nodes_bs.h"
+#include "namespace_array_bs.h"
+#include "namespace_array_it.h"
+#include "namespace_default_role_permissions.h"
+#include "namespace_default_role_permissions_value.h"
+#include "namespace_default_role_permissions_value_bs.h"
+#include "namespace_metadata_refs_it.h"
+#include "namespace_uri.h"
+#include "namespaces_default_role_permissions.h"
+#include "namespaces_refs_it.h"
+#include "namespaces_uri_eval_bs.h"
 #include "node_id_pointer_bs.h"
 #include "node_management_add_nodes_items_it.h"
 #include "notification_republish_queue_bs.h"
@@ -116,6 +132,9 @@
 #include "register_nodes_it.h"
 #include "request_handle_bs.h"
 #include "response_write_bs.h"
+#include "role_permissions_value_eval.h"
+#include "role_permissions_value_eval_bs.h"
+#include "role_permissions_value_it.h"
 #include "role_references_it.h"
 #include "roleset_references_it.h"
 #include "service_add_nodes.h"
@@ -205,8 +224,27 @@ void INITIALISATION(void) {
    msg_node_management_add_nodes__INITIALISATION();
    node_management_add_nodes_items_it__INITIALISATION();
    user_authorization_bs__INITIALISATION();
+   address_space_authorization_session_roles_it_bs__INITIALISATION();
+   namespace_array_it__INITIALISATION();
+   namespace_array_bs__INITIALISATION();
    data_value_pointer_bs__INITIALISATION();
    address_space_bs__INITIALISATION();
+   namespaces_refs_it__INITIALISATION();
+   namespace_metadata_refs_it__INITIALISATION();
+   namespace_uri__INITIALISATION();
+   namespaces_uri_eval_bs__INITIALISATION();
+   namespace_default_role_permissions_value_bs__INITIALISATION();
+   namespace_default_role_permissions_value__INITIALISATION();
+   namespace_default_role_permissions__INITIALISATION();
+   namespaces_default_role_permissions__INITIALISATION();
+   default_role_permissions_array_bs__INITIALISATION();
+   address_space_namespaces_metadata__INITIALISATION();
+   address_space_namespaces__INITIALISATION();
+   role_permissions_value_it__INITIALISATION();
+   role_permissions_value_eval_bs__INITIALISATION();
+   role_permissions_value_eval__INITIALISATION();
+   address_space_user_permissions_bs__INITIALISATION();
+   address_space_user_permissions__INITIALISATION();
    address_space_local__INITIALISATION();
    address_space_authorization__INITIALISATION();
    address_space_typing_bs__INITIALISATION();

@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes.c
 
- Date                 : 25/08/2022 12:09:49
+ Date                 : 10/10/2024 09:37:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -60,6 +60,7 @@ void service_add_nodes__local_treat_add_nodes_index(
       constants__t_NodeId_i service_add_nodes__l_node_id;
       t_bool service_add_nodes__l_authorized_add_node;
       constants__t_NodeId_i service_add_nodes__l_new_nid;
+      constants__t_sessionRoles_i service_add_nodes__l_roles;
       
       service_add_nodes__l_new_nid = constants__c_NodeId_indet;
       msg_node_management_add_nodes__getall_add_node_item_req_params(service_add_nodes__p_req_msg,
@@ -80,10 +81,13 @@ void service_add_nodes__local_treat_add_nodes_index(
                &service_add_nodes__l_local_server_exp_node_id,
                &service_add_nodes__l_node_id);
             if (service_add_nodes__l_local_server_exp_node_id == true) {
+               service_add_nodes_1__get_user_roles(service_add_nodes__p_user,
+                  &service_add_nodes__l_roles);
                service_add_nodes_1__get_user_authorization(constants__e_operation_type_addnode,
                   service_add_nodes__l_node_id,
                   constants__e_aid_NodeId,
                   service_add_nodes__p_user,
+                  service_add_nodes__l_roles,
                   &service_add_nodes__l_authorized_add_node);
                if (service_add_nodes__l_authorized_add_node == false) {
                   service_add_nodes__l_sc = constants_statuscodes_bs__e_sc_bad_user_access_denied;

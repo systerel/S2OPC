@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 09/12/2024 17:00:57
+ Date                 : 09/12/2024 17:07:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -69,6 +69,7 @@ extern void session_core__INITIALISATION(void);
 #define session_core__client_gen_activate_user_session_internal_event session_core_1__client_gen_activate_user_session_internal_event
 #define session_core__client_gen_create_session_internal_event session_core_1__client_gen_create_session_internal_event
 #define session_core__client_get_token_from_session session_core_1__client_get_token_from_session
+#define session_core__compute_user_roles session_roles__compute_user_roles
 #define session_core__deallocate_user user_authentication__deallocate_user
 #define session_core__deallocate_x509_token user_authentication__deallocate_x509_token
 #define session_core__drop_user_server session_core_1__drop_user_server
@@ -79,7 +80,6 @@ extern void session_core__INITIALISATION(void);
 #define session_core__get_session_roles session_core_1__get_session_roles
 #define session_core__get_session_user_client session_core_1__get_session_user_client
 #define session_core__get_session_user_server session_core_1__get_session_user_server
-#define session_core__get_user_roles session_roles__get_user_roles
 #define session_core__getall_orphaned session_core_1__getall_orphaned
 #define session_core__getall_session_channel session_core_1__getall_session_channel
 #define session_core__getall_to_create session_core_1__getall_to_create
@@ -106,6 +106,13 @@ extern void session_core__l_client_secure_channel_lost_session_sm(
    const constants__t_channel_i session_core__p_lost_channel,
    const constants__t_session_i session_core__p_session,
    const constants__t_channel_config_idx_i session_core__p_channel_config_idx);
+extern void session_core__l_server_activate_session_req_and_resp_sm(
+   const constants__t_channel_i session_core__channel,
+   const constants__t_session_i session_core__session,
+   const constants__t_user_i session_core__user,
+   const constants__t_msg_i session_core__activate_req_msg,
+   const constants__t_msg_i session_core__activate_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__ret);
 extern void session_core__l_server_secure_channel_lost_session_sm(
    const t_bool session_core__p_dom,
    const constants__t_channel_i session_core__p_channel,

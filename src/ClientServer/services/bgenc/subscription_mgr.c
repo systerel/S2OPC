@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 27/11/2024 09:15:53
+ Date                 : 09/12/2024 17:07:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -360,6 +360,7 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_event_sele
       constants__t_TimestampsToReturn_i subscription_mgr__l_timestampToReturn;
       constants__t_monitoringMode_i subscription_mgr__l_monitoringMode;
       constants__t_client_handle_i subscription_mgr__l_clientHandle;
+      constants__t_sessionRoles_i subscription_mgr__l_roles;
       
       subscription_core__getall_monitoredItemPointer(subscription_mgr__p_monitoredItemPointer,
          &subscription_mgr__l_monitoredItemId,
@@ -390,10 +391,13 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_event_sele
          if (subscription_mgr__l_session_valid == true) {
             session_mgr__get_session_user_server(subscription_mgr__l_session,
                &subscription_mgr__l_user);
+            session_mgr__get_session_roles(subscription_mgr__l_session,
+               &subscription_mgr__l_roles);
             address_space_itf__get_user_authorization(constants__e_operation_type_read,
                subscription_mgr__l_nid,
                subscription_mgr__l_aid,
                subscription_mgr__l_user,
+               subscription_mgr__l_roles,
                &subscription_mgr__l_valid_user_access);
             session_mgr__get_server_session_preferred_locales(subscription_mgr__l_session,
                &subscription_mgr__l_locales);
@@ -459,6 +463,7 @@ void subscription_mgr__local_create_notification_on_monitored_items_if_data_chan
       constants__t_TimestampsToReturn_i subscription_mgr__l_timestampToReturn;
       constants__t_monitoringMode_i subscription_mgr__l_monitoringMode;
       constants__t_client_handle_i subscription_mgr__l_clientHandle;
+      constants__t_sessionRoles_i subscription_mgr__l_roles;
       
       subscription_core__getall_monitoredItemPointer(subscription_mgr__p_monitoredItemPointer,
          &subscription_mgr__l_monitoredItemId,
@@ -482,10 +487,13 @@ void subscription_mgr__local_create_notification_on_monitored_items_if_data_chan
          if (subscription_mgr__l_session_valid == true) {
             session_mgr__get_session_user_server(subscription_mgr__l_session,
                &subscription_mgr__l_user);
+            session_mgr__get_session_roles(subscription_mgr__l_session,
+               &subscription_mgr__l_roles);
             address_space_itf__get_user_authorization(constants__e_operation_type_read,
                subscription_mgr__l_nid,
                subscription_mgr__l_aid,
                subscription_mgr__l_user,
+               subscription_mgr__l_roles,
                &subscription_mgr__l_valid_user_access);
             session_mgr__get_server_session_preferred_locales(subscription_mgr__l_session,
                &subscription_mgr__l_locales);

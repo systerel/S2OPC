@@ -44,6 +44,10 @@ static SOPC_NodeId BaseEventType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEv
 static SOPC_NodeId Server_ServerCapabilities_RoleSet_NodeId =
     SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server_ServerCapabilities_RoleSet);
 static SOPC_NodeId RoleType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_RoleType);
+static SOPC_NodeId Server_NamespaceArray_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server_NamespaceArray);
+static SOPC_NodeId Server_Namespaces_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server_Namespaces);
+static SOPC_NodeId NamespaceMetadataType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_NamespaceMetadataType);
+static SOPC_NodeId RolePermissionType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_RolePermissionType);
 
 const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId = &ByteString_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId = &Byte_Type;
@@ -56,12 +60,22 @@ const constants_bs__t_NodeId_i constants_bs__c_BaseEventType_NodeId = &BaseEvent
 const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_RoleSet_NodeId =
     &Server_ServerCapabilities_RoleSet_NodeId;
 const constants_bs__t_NodeId_i constants_bs__c_RoleType_NodeId = &RoleType_NodeId;
+const constants_bs__t_NodeId_i constants_bs__c_NamespaceMetadataType_NodeId = &NamespaceMetadataType_NodeId;
+const constants_bs__t_NodeId_i constants_bs__c_Server_NamespaceArray_NodeId = &Server_NamespaceArray_NodeId;
+const constants_bs__t_NodeId_i constants_bs__c_Server_Namespaces_NodeId = &Server_Namespaces_NodeId;
+const constants_bs__t_NodeId_i constants_bs__c_RolePermissionType_NodeId = &RolePermissionType_NodeId;
 
-#define Identities_QualifiedName_Len 10
-static SOPC_QualifiedName Identities_QualifiedName = {.Name.Data = (unsigned char*) "Identities",
-                                                      .Name.Length = Identities_QualifiedName_Len,
-                                                      .NamespaceIndex = OPCUA_NAMESPACE_INDEX};
+#define SOPC_NS0_QUALIFIED_NAME(name)                                        \
+    {                                                                        \
+        OPCUA_NAMESPACE_INDEX, { sizeof(name) - 1, true, (SOPC_Byte*) name } \
+    }
+static SOPC_QualifiedName Identities_QualifiedName = SOPC_NS0_QUALIFIED_NAME("Identities");
 const constants_bs__t_QualifiedName_i constants_bs__c_Identities_QualifiedName = &Identities_QualifiedName;
+static SOPC_QualifiedName DefaultRolePermissions_QualifiedName = SOPC_NS0_QUALIFIED_NAME("DefaultRolePermissions");
+const constants_bs__t_QualifiedName_i constants_bs__c_DefaultRolePermissions_QualifiedName =
+    &DefaultRolePermissions_QualifiedName;
+static SOPC_QualifiedName NamespaceUri_QualifiedName = SOPC_NS0_QUALIFIED_NAME("NamespaceUri");
+const constants_bs__t_QualifiedName_i constants_bs__c_NamespaceUri_QualifiedName = &NamespaceUri_QualifiedName;
 
 static char* EmptyLocaleIds[] = {NULL};
 constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty = EmptyLocaleIds;
@@ -159,6 +173,12 @@ void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
                                       constants_bs__t_channel_i* const constants_bs__p_channel)
 {
     *constants_bs__p_channel = (uint32_t) constants_bs__p_ind; // TODO: add precondition in B model
+}
+
+void constants_bs__get_cast_t_NamespaceIdx(const t_entier4 constants_bs__p_ind,
+                                           constants_bs__t_NamespaceIdx* const constants_bs__p_nsIndex)
+{
+    *constants_bs__p_nsIndex = (uint16_t) constants_bs__p_ind;
 }
 
 void constants_bs__get_cast_t_channel_config_idx(const t_entier4 constants_bs__p_ind,
@@ -318,4 +338,11 @@ void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_
             SOPC_Free(*constants_bs__p_out);
         }
     }
+}
+
+void constants_bs__get_NodeId_NamespaceIndex(const constants_bs__t_NodeId_i constants_bs__p_nodeId,
+                                             constants_bs__t_NamespaceIdx* const constants_bs__p_idx)
+{
+    SOPC_ASSERT(NULL != constants_bs__p_nodeId);
+    *constants_bs__p_idx = constants_bs__p_nodeId->Namespace;
 }

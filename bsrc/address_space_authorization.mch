@@ -26,179 +26,44 @@ SEES
     data_value_pointer_bs
 
 DEFINITIONS
-    d_adsp_variables ==
-        s_Node,
-
-        a_NodeId,
-        a_NodeClass,
-        a_BrowseName,
-        a_DisplayName,
-        a_Value,
-        a_Value_StatusCode,
-        a_Value_SourceTimestamp,
-        a_IsAbstract,
-        a_EventNotifier,
-        a_DataType,
-        a_ValueRank,
-        a_ArrayDimensions,
-        a_AccessLevel,
-        a_AccessLevelEx,
-        a_UserAccessLevel,
-        a_Historizing,
-        a_Executable,
-        a_UserExecutable,
-        a_DataTypeDefinition,
-        a_ContainsNoLoops,
-        a_Symmetric,
-
-        Ref_HasTypeDefinition,
-
-        Reference_SourceNode,
-        Reference_ReferenceType,
-        Reference_TargetNode,
-        Reference_IsForward,
-
-        Node_RefIndexEnd,
-        RefIndex_Reference,
-
-        IsRangeDefined, /* <=> range string != NULL */
-        IsValid_VariantIndex, /* Valid (or none) index range value for Variant */
-        HasRange_VariantIndex, /* Valid index range but has no range in  Variant */
-
-        /* LocalizedText supported locales */
-        IsSupportedLocales_Variant,
-
-        NodeAttributesType,
-
-        ParentNode,
-        IsParentChildRefTypeSuitable,
-        IsTypeDefSuitable,
-        ConstantAddressSpace;
-
-    d_adsp_inv ==
-    (
-        /* Address Space nodes */
-        s_Node <: t_Node &
-
-        /* Attributes */
-        a_NodeId      : s_Node >-> t_NodeId        &
-        a_NodeClass   : s_Node --> t_NodeClass     &
-        a_BrowseName  : s_Node --> t_QualifiedName &
-        a_DisplayName : s_Node --> t_LocalizedText &
-
-        a_Value       : s_Node +-> t_Variant   &
-        dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) & /* All Variable have value but not all VariableType */
-        dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-
-        /* + Value attribute meta-data */
-        a_Value_StatusCode : s_Node +-> t_RawStatusCode &
-        dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
-        a_Value_SourceTimestamp : s_Node +-> t_Timestamp &
-        dom(a_Value_SourceTimestamp) = dom(a_NodeClass|>{e_ncl_Variable}) &
-
-        a_IsAbstract : s_Node +-> BOOL &
-        dom(a_IsAbstract) = dom(a_NodeClass|>{e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType}) &
-
-        a_EventNotifier : s_Node +-> t_Byte &
-        dom(a_EventNotifier) = dom(a_NodeClass|>{e_ncl_Object, e_ncl_View}) &
-
-        a_DataType : s_Node +-> t_NodeId &
-        dom(a_DataType) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-
-        a_ValueRank : s_Node +-> t_ValueRank &
-        dom(a_ValueRank) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-
-        a_ArrayDimensions : s_Node +-> t_ArrayDimensions &
-        dom(a_ArrayDimensions) = dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
-
-        a_AccessLevel : s_Node +-> t_access_level &
-        dom(a_AccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) &
-
-        a_AccessLevelEx : s_Node +-> t_access_level_ex &
-        dom(a_AccessLevelEx) = dom(a_NodeClass|>{e_ncl_Variable}) &
-
-        a_UserAccessLevel : s_Node +-> t_access_level &
-        dom(a_UserAccessLevel) = dom(a_NodeClass|>{e_ncl_Variable}) & /* Dynamic value evaluation depending on authorization of user */
-
-        a_Historizing : s_Node +-> BOOL &
-        dom(a_Historizing) = dom(a_NodeClass|>{e_ncl_Variable}) &
-
-        a_Executable : s_Node +-> BOOL &
-        dom(a_Executable) = dom(a_NodeClass|>{e_ncl_Method}) &
-
-        a_UserExecutable : s_Node +-> BOOL &
-        dom(a_UserExecutable) = dom(a_NodeClass|>{e_ncl_Method}) &
-
-        a_ContainsNoLoops : s_Node +-> BOOL &
-        dom(a_ContainsNoLoops) = dom(a_NodeClass|>{e_ncl_View}) &
-
-        a_Symmetric : s_Node +-> BOOL &
-        dom(a_Symmetric) = dom(a_NodeClass|>{e_ncl_ReferenceType}) &
-
-        a_DataTypeDefinition : s_Node +-> t_DataTypeDefinition_i &
-        dom(a_DataTypeDefinition) = dom(a_NodeClass|>{e_ncl_DataType}) &
-
-        Ref_HasTypeDefinition : s_Node +-> t_ExpandedNodeId &
-
-        Reference_SourceNode    : t_Reference +-> t_NodeId         &
-        Reference_ReferenceType : t_Reference +-> t_NodeId         &
-        Reference_TargetNode    : t_Reference +-> t_ExpandedNodeId &
-        Reference_IsForward     : t_Reference +-> BOOL             &
-
-        Node_RefIndexEnd        : s_Node     +-> t_RefIndex  &
-        RefIndex_Reference      : s_Node * t_RefIndex >+> t_Reference &
-
-        IsRangeDefined : t_IndexRange_i --> BOOL &
-        IsValid_VariantIndex : t_Variant * t_IndexRange +-> BOOL &
-        HasRange_VariantIndex  : t_Variant * t_IndexRange +-> BOOL &
-
-        IsSupportedLocales_Variant : t_Variant * t_LocaleIds --> BOOL &
-
-        /* Relation used to check nodes attributes are well typed regarding the NodeClass */
-        NodeAttributesType : t_NodeAttributes --> t_NodeClass &
-
-        ParentNode : s_Node +-> s_Node &
-        IsParentChildRefTypeSuitable : t_NodeClass * t_NodeId * t_NodeId +-> BOOL & /* child class, reference type, parent */
-        IsTypeDefSuitable : t_NodeClass * t_NodeId +-> BOOL & /* node class, type definition node id */
-        ConstantAddressSpace : BOOL
-    );
-
-    d_adsp_init ==
-        d_adsp_inv;
+    "address_space.def";
 
     d_variables ==
-        s_access_read,
-        s_access_write,
-        s_executable,
-        s_AuthorizedOperations;
+        a_DataTypeDefinition,
+        IsSupportedLocales_Variant,
+        NodeAttributesType,
+        ParentNode
+    ;
 
     d_inv ==
-    (
-        s_access_read <: t_Node_i &
-        s_access_write <: t_Node_i * t_RawStatusCode * t_Timestamp &
-        s_executable <: t_Node_i &
-        s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user
-        )
+        (a_DataTypeDefinition : s_Node +-> t_DataTypeDefinition_i &
+        dom(a_DataTypeDefinition) = dom(a_NodeClass|>{e_ncl_DataType}) &
+        IsSupportedLocales_Variant : t_Variant * t_LocaleIds --> BOOL &
+        NodeAttributesType : t_NodeAttributes --> t_NodeClass &
+        ParentNode : s_Node +-> s_Node
+    )
 
 ABSTRACT_VARIABLES
-    local_service_treatment,
     d_adsp_variables,
     d_variables
 
 INVARIANT
-    local_service_treatment : BOOL &
-    d_adsp_inv &
+    d_adsp_invariant &
     d_inv
 
 INITIALISATION
-    local_service_treatment := FALSE ||
-    d_adsp_variables :( d_adsp_init) ||
-    d_variables :( d_inv)
+    d_adsp_variables,
+    d_variables
+    :(
+        d_adsp_invariant &
+        d_inv
+    )
 
 OPERATIONS
 
     /* Operations implemented by the module */
-    p_authorized <-- get_user_authorization(p_operation_type, p_node_id, p_attribute_id, p_user) =
+    // It is the responsibility of the caller function to ensure p_roles are the roles of p_user
+    p_authorized <-- get_user_authorization(p_operation_type, p_node_id, p_attribute_id, p_user, p_roles) =
     PRE
         p_operation_type : t_operation_type_i &
         p_operation_type : t_operation_type   &
@@ -207,9 +72,41 @@ OPERATIONS
         p_attribute_id   : t_AttributeId_i    &
         p_attribute_id   : t_AttributeId      &
         p_user           : t_user_i           &
-        p_user           : t_user
+        p_user           : t_user             &
+        p_roles          : t_sessionRoles_i   &
+        p_roles          : t_sessionRoles
     THEN
         p_authorized := bool(p_operation_type |-> p_node_id |-> p_attribute_id |-> p_user : s_AuthorizedOperations)
+    END
+    ;
+
+    set_user_roles(p_user, p_roles) =
+    PRE
+        p_user           : t_user_i &
+        p_user           : t_user &
+        p_roles          : t_sessionRoles_i &
+        p_roles          : t_sessionRoles
+    THEN
+        /* Variables are declared in address_space definition file */
+        a_set_user := p_user ||
+        a_set_roles := p_roles
+    END
+    ;
+
+    p_roles <-- get_user_roles(p_user) =
+    PRE
+        p_user           : t_user_i &
+        p_user           : t_user
+    THEN
+        p_roles :(p_roles : t_sessionRoles_i &
+                  (p_user = a_set_user => p_roles = a_set_roles))
+    END
+    ;
+
+    clear_user_roles =
+    BEGIN
+        a_set_user := c_user_indet ||
+        a_set_roles := c_sessionRoles_indet
     END
     ;
 
@@ -255,8 +152,14 @@ OPERATIONS
     PRE
         p_val : BOOL
     THEN
-        local_service_treatment := p_val ||
-        d_variables :( d_inv )
+        local_service_treatment := p_val
+    END
+    ;
+
+    /* Operation promoted from default_role_permissions_array_bs */
+    address_space_default_role_permissions_array_bs_UNINITIALISATION =
+    BEGIN
+        skip
     END
     ;
 
@@ -264,8 +167,7 @@ OPERATIONS
     /* Needs UNINIT to deallocate address space access */
     address_space_bs_UNINITIALISATION =
     BEGIN
-        ConstantAddressSpace :: BOOL ||
-        d_variables :( d_inv )
+        d_adsp_variables :( d_adsp_invariant )
     END
     ;
 
@@ -298,6 +200,20 @@ OPERATIONS
             nid_valid := FALSE ||
             node := c_Node_indet
         END
+    END
+    ;
+
+    sc, rolePermissions <-- read_AddressSpace_RolePermissions(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : s_Node
+    THEN
+        sc,
+        rolePermissions : (sc : t_StatusCode_i &
+            rolePermissions : t_RolePermissionTypes_i &
+            (sc = e_sc_ok & p_node : dom(a_RolePermissions) => rolePermissions = a_RolePermissions(p_node)) &
+            (sc = e_sc_ok & p_node /: dom(a_RolePermissions) => rolePermissions = c_RolePermissionTypes_indet) &
+            (sc /= e_sc_ok => rolePermissions = c_RolePermissionTypes_indet))
     END
     ;
 
@@ -685,9 +601,7 @@ OPERATIONS
     END
     ;
 
-    /* Raw node value access without locale nor index range: to be used for DataChange evaluation in subscription
-     * Important note: variant is a shallow copy and its usage scope shall be limited to the current S2OPC event treatment execution.
-     */
+    /* Raw node value access without locale nor index range nor user access: to be used for DataChange evaluation in subscription */
     sc, variant, val_sc, val_ts_src <-- read_AddressSpace_Raw_Node_Value_value(p_node, p_nid, p_aid) =
     PRE
         p_node : t_Node_i &
@@ -1076,12 +990,12 @@ OPERATIONS
         p_call_method_pointer : t_CallMethodPointer_i &
         p_call_method_pointer : t_CallMethodPointer
     THEN
-        d_variables, /* Any address space change is possible */
+        d_adsp_variables, /* Any address space change is possible */
         p_rawStatusCode,
         p_nb_out,
         p_out_arguments
         :(
-            d_inv &
+            d_adsp_invariant &
             p_rawStatusCode : t_RawStatusCode &
             p_nb_out : NAT &
             p_out_arguments : t_ArgumentsPointer_i &

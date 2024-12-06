@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.h
 
- Date                 : 24/07/2024 17:29:55
+ Date                 : 10/10/2024 09:37:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -57,9 +57,10 @@ extern void service_add_nodes_1__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define service_add_nodes_1__address_space_bs_UNINITIALISATION call_method_mgr__address_space_bs_UNINITIALISATION
+#define service_add_nodes_1__address_space_UNINITIALISATION call_method_mgr__address_space_UNINITIALISATION
 #define service_add_nodes_1__check_nodeId_isValid call_method_mgr__check_nodeId_isValid
 #define service_add_nodes_1__check_object_has_method call_method_mgr__check_object_has_method
+#define service_add_nodes_1__clear_user_roles call_method_mgr__clear_user_roles
 #define service_add_nodes_1__get_BrowseName call_method_mgr__get_BrowseName
 #define service_add_nodes_1__get_DisplayName call_method_mgr__get_DisplayName
 #define service_add_nodes_1__get_EventNotifier call_method_mgr__get_EventNotifier
@@ -75,6 +76,7 @@ extern void service_add_nodes_1__INITIALISATION(void);
 #define service_add_nodes_1__get_conv_Variant_Type call_method_mgr__get_conv_Variant_Type
 #define service_add_nodes_1__get_conv_Variant_ValueRank call_method_mgr__get_conv_Variant_ValueRank
 #define service_add_nodes_1__get_user_authorization call_method_mgr__get_user_authorization
+#define service_add_nodes_1__get_user_roles call_method_mgr__get_user_roles
 #define service_add_nodes_1__has_access_level_executable call_method_mgr__has_access_level_executable
 #define service_add_nodes_1__is_AddressSpace_constant call_method_mgr__is_AddressSpace_constant
 #define service_add_nodes_1__is_IndexRangeDefined call_method_mgr__is_IndexRangeDefined
@@ -83,12 +85,14 @@ extern void service_add_nodes_1__INITIALISATION(void);
 #define service_add_nodes_1__is_mandatory_attribute call_method_mgr__is_mandatory_attribute
 #define service_add_nodes_1__is_transitive_subtype call_method_mgr__is_transitive_subtype
 #define service_add_nodes_1__is_valid_ReferenceTypeId call_method_mgr__is_valid_ReferenceTypeId
+#define service_add_nodes_1__read_AddressSpace_Identities_value call_method_mgr__read_AddressSpace_Identities_value
 #define service_add_nodes_1__read_AddressSpace_clear_value call_method_mgr__read_AddressSpace_clear_value
 #define service_add_nodes_1__read_AddressSpace_free_variant call_method_mgr__read_AddressSpace_free_variant
 #define service_add_nodes_1__read_Node_Attribute call_method_mgr__read_Node_Attribute
 #define service_add_nodes_1__read_variable_compat_type call_method_mgr__read_variable_compat_type
 #define service_add_nodes_1__readall_AddressSpace_Node call_method_mgr__readall_AddressSpace_Node
 #define service_add_nodes_1__set_local_service_treatment call_method_mgr__set_local_service_treatment
+#define service_add_nodes_1__set_user_roles call_method_mgr__set_user_roles
 #define service_add_nodes_1__treat_method_call_request call_method_mgr__treat_method_call_request
 #define service_add_nodes_1__treat_write_request call_method_mgr__treat_write_request
 

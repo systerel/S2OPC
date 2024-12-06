@@ -36,10 +36,11 @@ IMPORTS
    but it would trigger a bug in the project check. */
 
 PROMOTES
-    address_space_bs_UNINITIALISATION,
+    address_space_UNINITIALISATION,
     is_mandatory_attribute,
     is_AddressSpace_constant,
     read_Node_Attribute,
+    read_AddressSpace_Identities_value,
     readall_AddressSpace_Node,
     get_NodeClass,
     get_BrowseName,
@@ -59,7 +60,10 @@ PROMOTES
     read_AddressSpace_free_variant,
     is_local_service_treatment,
     set_local_service_treatment,
-    get_user_authorization ,
+    get_user_authorization,
+    set_user_roles,
+    get_user_roles,
+    clear_user_roles,
     has_access_level_executable,
     get_InputArguments,
     get_conv_Variant_ValueRank,

@@ -21,7 +21,7 @@
 
  File Name            : service_write.h
 
- Date                 : 24/07/2024 17:29:58
+ Date                 : 10/10/2024 09:37:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -58,9 +58,10 @@ extern void service_write__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define service_write__addNode_AddressSpace service_write_1__addNode_AddressSpace
-#define service_write__address_space_bs_UNINITIALISATION service_write_1__address_space_bs_UNINITIALISATION
+#define service_write__address_space_UNINITIALISATION service_write_1__address_space_UNINITIALISATION
 #define service_write__check_nodeId_isValid service_write_1__check_nodeId_isValid
 #define service_write__check_object_has_method service_write_1__check_object_has_method
+#define service_write__clear_user_roles service_write_1__clear_user_roles
 #define service_write__exec_callMethod service_write_1__exec_callMethod
 #define service_write__get_BrowseName service_write_1__get_BrowseName
 #define service_write__get_DisplayName service_write_1__get_DisplayName
@@ -77,6 +78,7 @@ extern void service_write__INITIALISATION(void);
 #define service_write__get_conv_Variant_Type service_write_1__get_conv_Variant_Type
 #define service_write__get_conv_Variant_ValueRank service_write_1__get_conv_Variant_ValueRank
 #define service_write__get_user_authorization service_write_1__get_user_authorization
+#define service_write__get_user_roles service_write_1__get_user_roles
 #define service_write__has_access_level_executable service_write_1__has_access_level_executable
 #define service_write__is_AddressSpace_constant service_write_1__is_AddressSpace_constant
 #define service_write__is_IndexRangeDefined service_write_1__is_IndexRangeDefined
@@ -85,12 +87,14 @@ extern void service_write__INITIALISATION(void);
 #define service_write__is_mandatory_attribute service_write_1__is_mandatory_attribute
 #define service_write__is_transitive_subtype service_write_1__is_transitive_subtype
 #define service_write__is_valid_ReferenceTypeId service_write_1__is_valid_ReferenceTypeId
+#define service_write__read_AddressSpace_Identities_value service_write_1__read_AddressSpace_Identities_value
 #define service_write__read_AddressSpace_clear_value service_write_1__read_AddressSpace_clear_value
 #define service_write__read_AddressSpace_free_variant service_write_1__read_AddressSpace_free_variant
 #define service_write__read_Node_Attribute service_write_1__read_Node_Attribute
 #define service_write__read_variable_compat_type service_write_1__read_variable_compat_type
 #define service_write__readall_AddressSpace_Node service_write_1__readall_AddressSpace_Node
 #define service_write__set_local_service_treatment service_write_1__set_local_service_treatment
+#define service_write__set_user_roles service_write_1__set_user_roles
 
 /*--------------------
    OPERATIONS Clause

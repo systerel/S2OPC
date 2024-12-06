@@ -37,12 +37,10 @@ INITIALISATION
     s_role_node_refs :(s_role_node_refs <: t_Reference)
 
 OPERATIONS
-    p_bres <-- role_eval_user(p_user, p_locales, p_role_node) =
+    p_bres <-- role_eval_user(p_user, p_role_node) =
     PRE
         p_user : t_user_i &
         p_user : t_user &
-        p_locales : t_LocaleIds_i &
-        p_locales : t_LocaleIds &
         p_role_node : t_Node_i &
         p_role_node : s_Node &
         conv_ExpandedNodeId_NodeId(Ref_HasTypeDefinition(p_role_node)) = c_RoleType_NodeId

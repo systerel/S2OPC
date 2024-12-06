@@ -83,6 +83,7 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : t_session &
+        p_session : dom(a_session_roles) &
         a_state(p_session) = e_session_userActivated
     THEN
         p_session_roles :(p_session_roles : t_sessionRoles_i & p_session_roles = a_session_roles(p_session))
@@ -346,12 +347,14 @@ OPERATIONS
         p_session            : t_session_i &
         p_session            : t_session
     THEN
-        /* Retrieve recorded p_roles if not the empty one (constant value) and reset to empty one */
+        /* Retrieve recorded p_roles and reset to indet roles */
         p_roles,
         a_session_roles
         :(p_roles : t_sessionRoles_i &
-          a_session_roles : t_session --> t_sessionRoles &
-          {p_session} <<| a_session_roles = {p_session} <<| a_session_roles$0)
+          a_session_roles : t_session +-> t_sessionRoles &
+          a_session_roles = {p_session} <<| a_session_roles$0 &
+          (p_session : dom(a_session_roles$0) => p_roles = a_session_roles$0(p_session)) &
+          (p_session /: dom(a_session_roles$0) => p_roles = c_sessionRoles_indet))
     END
     ;
 

@@ -21,7 +21,7 @@
 
  File Name            : session_roles.h
 
- Date                 : 14/08/2024 11:58:08
+ Date                 : 30/09/2024 13:04:32
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -57,9 +57,8 @@ extern void session_roles__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void session_roles__get_user_roles(
+extern void session_roles__compute_user_roles(
    const constants__t_user_i session_roles__p_user,
-   const constants__t_LocaleIds_i session_roles__p_locales,
    constants__t_sessionRoles_i * const session_roles__p_roles);
 
 #endif

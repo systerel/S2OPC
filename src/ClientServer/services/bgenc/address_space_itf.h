@@ -21,7 +21,7 @@
 
  File Name            : address_space_itf.h
 
- Date                 : 24/07/2024 17:29:49
+ Date                 : 10/10/2024 09:37:38
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,9 +56,10 @@ extern void address_space_itf__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define address_space_itf__address_space_bs_UNINITIALISATION service_add_nodes__address_space_bs_UNINITIALISATION
+#define address_space_itf__address_space_UNINITIALISATION service_add_nodes__address_space_UNINITIALISATION
 #define address_space_itf__check_nodeId_isValid service_add_nodes__check_nodeId_isValid
 #define address_space_itf__check_object_has_method service_add_nodes__check_object_has_method
+#define address_space_itf__clear_user_roles service_add_nodes__clear_user_roles
 #define address_space_itf__get_BrowseName service_add_nodes__get_BrowseName
 #define address_space_itf__get_DisplayName service_add_nodes__get_DisplayName
 #define address_space_itf__get_EventNotifier service_add_nodes__get_EventNotifier
@@ -74,6 +75,7 @@ extern void address_space_itf__INITIALISATION(void);
 #define address_space_itf__get_conv_Variant_Type service_add_nodes__get_conv_Variant_Type
 #define address_space_itf__get_conv_Variant_ValueRank service_add_nodes__get_conv_Variant_ValueRank
 #define address_space_itf__get_user_authorization service_add_nodes__get_user_authorization
+#define address_space_itf__get_user_roles service_add_nodes__get_user_roles
 #define address_space_itf__has_access_level_executable service_add_nodes__has_access_level_executable
 #define address_space_itf__is_AddressSpace_constant service_add_nodes__is_AddressSpace_constant
 #define address_space_itf__is_IndexRangeDefined service_add_nodes__is_IndexRangeDefined
@@ -82,12 +84,14 @@ extern void address_space_itf__INITIALISATION(void);
 #define address_space_itf__is_mandatory_attribute service_add_nodes__is_mandatory_attribute
 #define address_space_itf__is_transitive_subtype service_add_nodes__is_transitive_subtype
 #define address_space_itf__is_valid_ReferenceTypeId service_add_nodes__is_valid_ReferenceTypeId
+#define address_space_itf__read_AddressSpace_Identities_value service_add_nodes__read_AddressSpace_Identities_value
 #define address_space_itf__read_AddressSpace_clear_value service_add_nodes__read_AddressSpace_clear_value
 #define address_space_itf__read_AddressSpace_free_variant service_add_nodes__read_AddressSpace_free_variant
 #define address_space_itf__read_Node_Attribute service_add_nodes__read_Node_Attribute
 #define address_space_itf__read_variable_compat_type service_add_nodes__read_variable_compat_type
 #define address_space_itf__readall_AddressSpace_Node service_add_nodes__readall_AddressSpace_Node
 #define address_space_itf__set_local_service_treatment service_add_nodes__set_local_service_treatment
+#define address_space_itf__set_user_roles service_add_nodes__set_user_roles
 #define address_space_itf__treat_add_nodes_request service_add_nodes__treat_add_nodes_request
 #define address_space_itf__treat_method_call_request service_add_nodes__treat_method_call_request
 #define address_space_itf__treat_write_request service_add_nodes__treat_write_request

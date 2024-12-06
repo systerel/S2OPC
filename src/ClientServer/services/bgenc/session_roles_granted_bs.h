@@ -21,7 +21,7 @@
 
  File Name            : session_roles_granted_bs.h
 
- Date                 : 07/08/2024 14:47:34
+ Date                 : 07/10/2024 16:11:07
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -52,6 +52,6 @@ extern void session_roles_granted_bs__add_role_to_session(
    const constants__t_NodeId_i session_roles_granted_bs__p_role_nodeId);
 extern void session_roles_granted_bs__initialize_session_roles(void);
 extern void session_roles_granted_bs__pop_session_roles(
-   constants__t_sessionRoles_i * const session_roles_granted_bs__b_roles);
+   constants__t_sessionRoles_i * const session_roles_granted_bs__p_roles);
 
 #endif

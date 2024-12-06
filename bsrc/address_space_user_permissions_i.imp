@@ -1,0 +1,147 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    address_space_user_permissions_i
+
+REFINES
+    address_space_user_permissions
+
+IMPORTS
+    address_space_authorization_session_roles_it_bs,
+    address_space_namespaces,
+    role_permissions_value_eval,
+    address_space_user_permissions_bs
+
+PROMOTES
+    address_space_default_role_permissions_array_bs_UNINITIALISATION,
+    is_operation_authorized
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    address_space_bs
+
+INVARIANT
+    /* Permission is defined for a node only if the node NS has default permissions (see spec 1.05 part 3 §5.2.9) */
+    a_node_has_permissions = dom(conv_NodeId_NamespaceIdx |> dom(a_default_role_permissions))
+
+LOCAL_OPERATIONS
+    p_rolePermissions <-- l_read_AddressSpace_RolePermissionsOrDefault(p_nodeId) =
+    PRE
+        p_nodeId : t_NodeId_i &
+        p_nodeId : t_NodeId   &
+        /* This node is subject to permissions (NS has DRP) */
+        p_nodeId : dom(conv_NodeId_NamespaceIdx |> dom(a_default_role_permissions))
+    THEN
+        p_rolePermissions :(p_rolePermissions : t_RolePermissionTypes_i &
+                            /* Either Node has permissions in dedicated attribute */
+                            (p_nodeId : ran(a_NodeId) & a_NodeId~(p_nodeId) : dom(a_RolePermissions) =>
+                                p_rolePermissions = a_RolePermissions(a_NodeId~(p_nodeId))) &
+                            /* Or use the DRP of the Node namespace */
+                            (not (p_nodeId : ran(a_NodeId) & a_NodeId~(p_nodeId) : dom(a_RolePermissions)) =>
+                                p_rolePermissions = a_default_role_permissions(conv_NodeId_NamespaceIdx(p_nodeId)))
+                           )
+    END
+
+OPERATIONS
+
+    p_rolePermissions <-- l_read_AddressSpace_RolePermissionsOrDefault(p_nodeId) =
+    VAR
+        l_nodeRolePermissions,
+        l_sc,
+        l_nodeNSidx,
+        l_isvalid,
+        l_node
+    IN
+        l_sc := e_sc_bad_generic;
+        l_nodeRolePermissions := c_RolePermissionTypes_indet;
+        l_isvalid, l_node <-- readall_AddressSpace_Node(p_nodeId);
+        IF l_isvalid = TRUE
+        THEN
+            l_sc, l_nodeRolePermissions <-- read_AddressSpace_RolePermissions(l_node)
+        END
+        ;
+        IF l_sc /= e_sc_ok
+        THEN
+            l_nodeNSidx <-- get_NodeId_NamespaceIndex(p_nodeId);
+            p_rolePermissions <-- get_Namespace_DefaultRolePermissions(l_nodeNSidx)
+        ELSE
+            p_rolePermissions := l_nodeRolePermissions
+        END
+    END
+    ;
+
+    bres <-- has_AddressSpace_RolePermissions(p_nodeId) =
+    VAR
+        l_nodeNSidx
+    IN
+        l_nodeNSidx <-- get_NodeId_NamespaceIndex(p_nodeId);
+        bres <-- has_Namespace_DefaultRolePermissions(l_nodeNSidx)
+    END
+    ;
+
+    p_permissions <-- read_AddressSpace_UserRolePermissions(p_nodeId, p_user, p_roles) =
+    VAR
+        l_rolePermissions,
+        l_continue,
+        l_role,
+        l_user_permissions
+    IN
+        init_user_permissions(p_user);
+        // Start with no permissions granted
+        // Get RolePermissions of the node or the DefaultRolePermissions of its namespace
+        l_rolePermissions <-- l_read_AddressSpace_RolePermissionsOrDefault(p_nodeId);
+        IF l_rolePermissions = c_RolePermissionTypes_indet
+        THEN
+            p_permissions := c_PermissionType_none
+        ELSE
+            // Iterate on each user granted role and evaluate associated permissions for the node
+            l_continue <-- init_iter_roles(p_user, p_roles);
+            WHILE
+                l_continue = TRUE
+            DO
+                l_continue, l_role <-- continue_iter_roles;
+                l_user_permissions <-- get_permissions_of_role(l_role, l_rolePermissions);
+                add_user_permissions(p_user, l_user_permissions)
+            INVARIANT
+                roles_to_iterate <: s_roles &
+                roles_iterated   <: s_roles &
+                roles_to_iterate /\ roles_iterated = {} &
+                roles_to_iterate \/ roles_iterated = s_roles &
+                s_user_permissions = a_role_permissions[roles_iterated * {l_rolePermissions}]
+                /* Note: here is what we wanted to express to link treatment and a_user_node_permissions,
+                   but access to a_user_node_permissions$0 is denied.
+
+                a_user_node_permissions : t_user * t_NodeId --> t_PermissionType_i &
+                {p_user |-> p_nodeId} <<| a_user_node_permissions = {p_user |-> p_nodeId}  <<| a_user_node_permissions$0 &
+                a_user_node_permissions(p_user |-> p_nodeId) = conv_merge_user_permission(s_user_permissions)
+                */
+            VARIANT
+                card(roles_to_iterate)
+            END
+            ;
+            // Getting RolePermissions (attribute or DefaultRolePermissions) returns a copy of the variant. Free it.
+            delete_rolePermissions(l_rolePermissions);
+            clear_iter_roles;
+            p_permissions <-- get_merged_user_permissions(p_user)
+        END
+    END
+
+END

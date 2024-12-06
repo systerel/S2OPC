@@ -1,0 +1,84 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    role_permissions_value_eval_i
+
+REFINES
+    role_permissions_value_eval
+
+IMPORTS
+    role_permissions_value_it,
+    role_permissions_value_eval_bs
+
+SEES
+    constants,
+    address_space_bs
+
+OPERATIONS
+
+    p_role_permissions <-- get_permissions_of_role(p_role_nodeId, p_rolesPermissions) =
+    VAR
+        l_nb_rolePermissions,
+        l_continue,
+        l_rolePermissionIdx,
+        l_roleId,
+        l_roleIds_match,
+        l_role_permissions
+    IN
+        init_user_role_permissions(p_role_nodeId);
+        l_nb_rolePermissions <-- read_variant_rolePermissions(p_rolesPermissions);
+        // Iterate on the value variant array of RolePermission in p_rolePermissions
+        l_continue <-- init_iter_rolePermissions(l_nb_rolePermissions);
+        p_role_permissions := c_PermissionType_none;
+        WHILE
+            l_continue = TRUE
+        DO
+            l_continue, l_rolePermissionIdx <-- continue_iter_rolePermissions;
+            l_roleId <-- read_rolePermissions_roleId(p_rolesPermissions, l_rolePermissionIdx);
+            /* Check if user role matches the role-permissions array element */
+            l_roleIds_match <-- is_NodeId_equal(p_role_nodeId, l_roleId);
+            IF l_roleIds_match = TRUE
+            THEN
+                // Note: there should be only 1 match but does not seem guaranteed by specification
+                /* Extract the permissions associated to the role */
+                l_role_permissions <-- read_rolePermissions_permissions(p_rolesPermissions, l_rolePermissionIdx);
+                add_user_role_permissions(p_role_nodeId, l_role_permissions)
+            END
+        INVARIANT
+            rolePermissionsIdx_to_iterate <: NAT1 &
+            rolePermissionsIdx_iterated   <: NAT1 &
+            rolePermissionsIdx_to_iterate /\ rolePermissionsIdx_iterated = {} &
+            1..nb_rolePermissions = rolePermissionsIdx_to_iterate \/ rolePermissionsIdx_iterated &
+            /* Permissions of the iterated index for which roleId is p_role_nodeId */
+            s_user_role_permissions = a_permissions[dom(rolePermissionsIdx_iterated <| a_roles |> {p_role_nodeId})]
+            /* Note: here is what we wanted to express to link treatment and a_role_permissions, but access to a_role_permissions$0 is denied.
+
+            a_role_permissions : t_NodeId * t_RolePermissionTypes --> t_PermissionType_i &
+            {p_role_nodeId |-> p_rolesPermissions} <<| a_role_permissions = {p_role_nodeId |-> p_rolesPermissions} <<| a_role_permissions$0 &
+            a_role_permissions(p_role_nodeId |-> p_rolesPermissions) = conv_merge_user_role_permission(s_user_role_permissions)
+            */
+        VARIANT
+            card(rolePermissionsIdx_to_iterate)
+        END
+        ;
+        p_role_permissions <-- get_merged_user_role_permissions(p_role_nodeId)
+    END
+
+END

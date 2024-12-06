@@ -24,7 +24,11 @@ REFINES
     address_space_authorization
 
 IMPORTS
-    user_authorization_bs
+    user_authorization_bs,
+    address_space_user_permissions
+
+PROMOTES
+    address_space_default_role_permissions_array_bs_UNINITIALISATION
 
 EXTENDS
     address_space_bs,
@@ -51,6 +55,10 @@ DEFINITIONS
     d_access_level_executable ==
         node |-> TRUE : a_Executable
 
+CONCRETE_VARIABLES
+    a_set_user_i,
+    a_set_roles_i
+
 INVARIANT
     s_access_read = { node |
         node : t_Node_i &
@@ -76,7 +84,8 @@ INVARIANT
         node : s_Node &
         (local_service_treatment = TRUE or d_access_level_executable)}
     &
-    s_AuthorizedOperations = {operation_type, node_id, attribute_id, user |
+    s_AuthorizedOperations =
+     {operation_type, node_id, attribute_id, user |
         operation_type : t_operation_type_i &
         operation_type : t_operation_type   &
         node_id        : t_NodeId_i         &
@@ -85,12 +94,31 @@ INVARIANT
         attribute_id   : t_AttributeId      &
         user           : t_user_i           &
         user           : t_user             &
+        /* always authorized for a local treatment */
         (local_service_treatment = TRUE or
-            operation_type, node_id, attribute_id, user : s_AuthorizedOperations_bs)
-        }
+         /* OTHERWISE authorized by access level AND permission mechanisms (or no permission in NS) */
+         (operation_type, node_id, attribute_id, user : s_AuthorizedOperations_bs &
+           (node_id /: a_node_has_permissions or
+            (node_id : a_node_has_permissions &
+              (a_user_node_permissions(user |-> node_id) |-> operation_type : a_permissions_authorizes_operation))
+           )
+         )
+        )
+     }
+    &
+    a_set_user_i : t_user_i
+    &
+    a_set_roles_i : t_sessionRoles_i
+    &
+    a_set_user = a_set_user_i &
+    a_set_roles = a_set_roles_i
+
+
+INITIALISATION
+    a_set_user_i := c_user_indet;
+    a_set_roles_i := c_sessionRoles_indet
 
 OPERATIONS
-
     bres <-- has_access_level_read(node) =
     VAR
         l_access_level,
@@ -152,16 +180,49 @@ OPERATIONS
     END
     ;
 
-    p_authorized <-- get_user_authorization(p_operation_type, p_node_id, p_attribute_id, p_user) =
+    set_user_roles(p_user, p_roles) =
+    BEGIN
+        a_set_user_i := p_user;
+        a_set_roles_i := p_roles
+    END
+    ;
+
+    p_roles <-- get_user_roles(p_user) =
+    BEGIN
+        IF p_user = a_set_user_i
+        THEN
+            p_roles := a_set_roles_i
+        ELSE
+            p_roles := c_sessionRoles_indet
+        END
+    END
+    ;
+
+    clear_user_roles =
+    BEGIN
+        a_set_user_i := c_user_indet;
+        a_set_roles_i := c_sessionRoles_indet
+    END
+    ;
+
+    p_authorized <-- get_user_authorization(p_operation_type, p_node_id, p_attribute_id, p_user, p_roles) =
     VAR
-        l_local_service_treatment
+        l_local_service_treatment,
+        l_has_permissions,
+        l_permissions
     IN
         l_local_service_treatment <-- is_local_service_treatment;
         IF l_local_service_treatment = TRUE THEN
             p_authorized := TRUE
         ELSE
-            p_authorized <-- get_user_authorization_bs(p_operation_type, p_node_id, p_attribute_id, p_user)
+            // User-defined callback
+            p_authorized <-- get_user_authorization_bs(p_operation_type, p_node_id, p_attribute_id, p_user);
+            l_has_permissions <-- has_AddressSpace_RolePermissions(p_node_id);
+            IF p_authorized = TRUE & l_has_permissions = TRUE
+            THEN
+                l_permissions <-- read_AddressSpace_UserRolePermissions(p_node_id, p_user, p_roles);
+                p_authorized <-- is_operation_authorized(l_permissions, p_operation_type)
+            END
         END
     END
-
 END

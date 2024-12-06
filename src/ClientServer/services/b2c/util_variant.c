@@ -158,6 +158,53 @@ SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* l
     return pvar;
 }
 
+SOPC_Variant* util_variant__new_Variant_from_RolePermissions(OpcUa_RolePermissionType* rolePermissionsArray,
+                                                             int32_t noOfRolePermissions)
+{
+    SOPC_ASSERT(noOfRolePermissions > 0 && rolePermissionsArray != NULL);
+
+    SOPC_Variant* pvar = SOPC_Variant_Create();
+
+    if (NULL == pvar)
+    {
+        return NULL;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    bool res = false;
+
+    // Initialize variant and create extObjects.
+    res = SOPC_Variant_Initialize_Array(pvar, SOPC_ExtensionObject_Id, noOfRolePermissions);
+    if (res)
+    {
+        // Variant extensionObjects are now allocated.
+        for (int32_t i = 0; i < noOfRolePermissions; i++)
+        {
+            // Create the encodeableObject that will be pointed by the extensionObjects in the variant.
+            OpcUa_RolePermissionType* rolePerm = NULL;
+            status = SOPC_ExtensionObject_CreateObject(&pvar->Value.Array.Content.ExtObjectArr[i],
+                                                       &OpcUa_RolePermissionType_EncodeableType, (void**) &rolePerm);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_EncodeableObject_Copy(&OpcUa_RolePermissionType_EncodeableType, (void*) rolePerm,
+                                                    (const void*) &rolePermissionsArray[i]);
+            }
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Variant_Delete(pvar);
+        pvar = NULL;
+    }
+
+    return pvar;
+}
+
 bool util_variant__copy_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant* dest,
                                                                           const SOPC_Variant* src,
                                                                           char** preferredLocales)

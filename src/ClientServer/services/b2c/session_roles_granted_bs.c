@@ -58,8 +58,8 @@ extern void session_roles_granted_bs__initialize_session_roles(void)
 }
 
 extern void session_roles_granted_bs__pop_session_roles(
-    constants__t_sessionRoles_i* const session_roles_granted_bs__b_roles)
+    constants__t_sessionRoles_i* const session_roles_granted_bs__p_roles)
 {
-    SOPC_ASSERT(NULL != session_roles_granted_bs__b_roles);
-    *session_roles_granted_bs__b_roles = sessionRoles;
+    SOPC_ASSERT(NULL != session_roles_granted_bs__p_roles);
+    *session_roles_granted_bs__p_roles = sessionRoles;
 }

@@ -44,10 +44,11 @@ PROMOTES
     treat_write_request,
     treat_method_call_request,
 
-    address_space_bs_UNINITIALISATION,
+    address_space_UNINITIALISATION,
     is_mandatory_attribute,
     is_AddressSpace_constant,
     read_Node_Attribute,
+    read_AddressSpace_Identities_value,
     readall_AddressSpace_Node,
     get_NodeClass,
     get_BrowseName,
@@ -67,6 +68,9 @@ PROMOTES
     is_local_service_treatment,
     set_local_service_treatment,
     get_user_authorization,
+    set_user_roles,
+    get_user_roles,
+    clear_user_roles,
     has_access_level_executable,
     get_EventNotifier,
     get_InputArguments,
@@ -155,7 +159,8 @@ OPERATIONS
         l_local_server_exp_node_id,
         l_node_id,
         l_authorized_add_node,
-        l_new_nid
+        l_new_nid,
+        l_roles
     IN
         l_new_nid := c_NodeId_indet;
         l_sc, l_parentExpNid, l_refTypeId, l_reqExpNodeId, l_browseName, l_nodeClass, l_nodeAttributes, l_typeDefId
@@ -171,7 +176,8 @@ OPERATIONS
                 IF l_local_server_exp_node_id = TRUE
                 THEN
                     /* TODO in user authorization callback: add node class ? Or aux parameter ? */
-                    l_authorized_add_node <-- get_user_authorization(e_operation_type_addnode, l_node_id, e_aid_NodeId, p_user);
+                    l_roles <-- get_user_roles(p_user);
+                    l_authorized_add_node <-- get_user_authorization(e_operation_type_addnode, l_node_id, e_aid_NodeId, p_user, l_roles); // Add real locales
                     IF l_authorized_add_node = FALSE
                     THEN
                         l_sc := e_sc_bad_user_access_denied

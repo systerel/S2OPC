@@ -829,9 +829,17 @@ OPERATIONS
     ;
 
     StatusCode_service, async_resp_msg <-- treat_session_service_req (endpoint_config_idx, session, req_typ, req_handle,
-                                                                      req_ctx, req_header, req_msg, resp_msg) =
-    BEGIN
+        req_ctx, req_header, req_msg, resp_msg) =
+    VAR
+        l_user,
+        l_roles
+    IN
         async_resp_msg := FALSE;
+        l_user <-- get_session_user_server(session);
+        // Retrieve the roles of the session
+        l_roles <-- get_session_roles(session);
+        // Store the roles in the user
+        set_user_roles(l_user, l_roles);
         IF c_Server_Nano_Extended = TRUE
         THEN
             StatusCode_service, async_resp_msg <-- treat_session_nano_extended_service_req
@@ -839,6 +847,8 @@ OPERATIONS
         ELSE
             StatusCode_service <-- treat_session_nano_service_req (endpoint_config_idx, session, req_typ, req_msg, resp_msg)
         END
+        ;
+        clear_user_roles
     END
     ;
 
@@ -1752,7 +1762,7 @@ OPERATIONS
         service_set_view_UNINITIALISATION;
         service_set_discovery_server_UNINITIALISATION;
         service_mgr_bs_UNINITIALISATION;
-        address_space_bs_UNINITIALISATION
+        address_space_UNINITIALISATION
     END
 
 END

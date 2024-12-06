@@ -1,0 +1,70 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+ IMPLEMENTATION
+    namespace_array_it_i
+
+REFINES
+    namespace_array_it
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+    currentnamespaceUriIdx_i,
+    nb_namespaceUris_i
+
+INVARIANT
+    currentnamespaceUriIdx_i : NAT &
+    nb_namespaceUris_i : NAT &
+
+    nb_namespaceUris = nb_namespaceUris_i &
+    currentnamespaceUriIdx_i : 0..nb_namespaceUris_i &
+
+    (nb_namespaceUris_i = 0 =>
+        namespaceUrisIdx_to_iterate = {} &
+        namespaceUrisIdx_iterated = {}) &
+
+    (nb_namespaceUris_i /= 0 =>
+        namespaceUrisIdx_to_iterate = currentnamespaceUriIdx_i+1..nb_namespaceUris_i &
+        namespaceUrisIdx_iterated = 1..currentnamespaceUriIdx_i)
+
+INITIALISATION
+    currentnamespaceUriIdx_i := 0;
+    nb_namespaceUris_i := 0
+
+OPERATIONS
+
+    p_continue <-- init_iter_namespaceUris(p_nb_namespaceUris) =
+    BEGIN
+        nb_namespaceUris_i := p_nb_namespaceUris;
+        currentnamespaceUriIdx_i := 0;
+        p_continue := bool (0 < p_nb_namespaceUris & p_nb_namespaceUris < k_n_NamespaceIndex_max)
+    END
+    ;
+
+    p_continue, p_namespaceUriIdx <-- continue_iter_namespaceUris =
+    BEGIN
+        currentnamespaceUriIdx_i := currentnamespaceUriIdx_i + 1;
+        p_namespaceUriIdx := currentnamespaceUriIdx_i;
+        p_continue := bool (currentnamespaceUriIdx_i < nb_namespaceUris_i)
+    END
+
+END
+

@@ -686,6 +686,30 @@ void address_space_bs__read_AddressSpace_Raw_Node_Value_value(
     }
 }
 
+void address_space_bs__read_AddressSpace_RolePermissions(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_RolePermissionTypes_i* const address_space_bs__rolePermissions)
+{
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_not_found;
+    *address_space_bs__rolePermissions = constants_bs__c_RolePermissionTypes_indet;
+    int32_t* node_noOfRolePermissions =
+        SOPC_AddressSpace_Get_NoOfRolePermissions(address_space_bs__nodes, address_space_bs__p_node);
+    if (*node_noOfRolePermissions > 0)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+        OpcUa_RolePermissionType** rolePermissions =
+            SOPC_AddressSpace_Get_RolePermissions(address_space_bs__nodes, address_space_bs__p_node);
+        // Variant contains some RolePermissions, it is checked by construction.
+        *address_space_bs__rolePermissions =
+            util_variant__new_Variant_from_RolePermissions(*rolePermissions, *node_noOfRolePermissions);
+        if (NULL == *address_space_bs__rolePermissions)
+        {
+            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        }
+    }
+}
+
 void address_space_bs__read_AddressSpace_Symmetric_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,

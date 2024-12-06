@@ -21,7 +21,7 @@
 
  File Name            : session_role_eval.h
 
- Date                 : 12/09/2024 16:44:35
+ Date                 : 30/09/2024 13:04:31
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,6 +49,7 @@
   --------------*/
 #include "address_space_itf.h"
 #include "constants.h"
+#include "constants_statuscodes_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -79,7 +80,6 @@ extern void session_role_eval__is_ref_role(
    constants__t_NodeId_i * const session_role_eval__p_maybe_role_nodeId);
 extern void session_role_eval__role_eval_user(
    const constants__t_user_i session_role_eval__p_user,
-   const constants__t_LocaleIds_i session_role_eval__p_locales,
    const constants__t_Node_i session_role_eval__p_role_node,
    t_bool * const session_role_eval__p_bres);
 

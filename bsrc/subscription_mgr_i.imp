@@ -974,7 +974,8 @@ OPERATIONS
         l_indexRange,
         l_timestampToReturn,
         l_monitoringMode,
-        l_clientHandle
+        l_clientHandle,
+        l_roles
     IN
         l_monitoredItemId,
         l_subscription,
@@ -1003,7 +1004,8 @@ OPERATIONS
                          "For example, the Server shall set the event field to Bad_UserAccessDenied
                           if the value is not accessible to the user associated with the Session."
                 */
-                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user);
+                l_roles <-- get_session_roles(l_session);
+                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user, l_roles);
                 l_locales <-- get_server_session_preferred_locales(l_session)
             END
         END
@@ -1057,7 +1059,8 @@ OPERATIONS
         l_indexRange,
         l_timestampToReturn,
         l_monitoringMode,
-        l_clientHandle
+        l_clientHandle,
+        l_roles
     IN
         l_monitoredItemId,
         l_subscription,
@@ -1082,7 +1085,8 @@ OPERATIONS
                 /* TODO: when user access right property will be modifiable previous user right shall be
                 checked to notify a user access denied status when it is newly denied for the user
                 */
-                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user);
+                l_roles <-- get_session_roles(l_session);
+                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user, l_roles);
                 l_locales <-- get_server_session_preferred_locales(l_session)
             END
         END

@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "address_space_user_permissions.h"
 #include "user_authorization_bs.h"
 
 /*-----------------
@@ -53,6 +54,12 @@
 #include "constants_statuscodes_bs.h"
 #include "data_value_pointer_bs.h"
 
+/*----------------------------
+   CONCRETE_VARIABLES Clause
+  ----------------------------*/
+extern constants__t_sessionRoles_i address_space_authorization__a_set_roles_i;
+extern constants__t_user_i address_space_authorization__a_set_user_i;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -65,6 +72,7 @@ extern void address_space_authorization__INITIALISATION(void);
 #define address_space_authorization__addNode_AddressSpace_Variable address_space_bs__addNode_AddressSpace_Variable
 #define address_space_authorization__addNode_check_valid_node_attributes_type address_space_bs__addNode_check_valid_node_attributes_type
 #define address_space_authorization__address_space_bs_UNINITIALISATION address_space_bs__address_space_bs_UNINITIALISATION
+#define address_space_authorization__address_space_default_role_permissions_array_bs_UNINITIALISATION address_space_user_permissions__address_space_default_role_permissions_array_bs_UNINITIALISATION
 #define address_space_authorization__exec_callMethod address_space_bs__exec_callMethod
 #define address_space_authorization__gen_addNode_event address_space_bs__gen_addNode_event
 #define address_space_authorization__get_AccessLevel address_space_bs__get_AccessLevel
@@ -104,6 +112,7 @@ extern void address_space_authorization__INITIALISATION(void);
 #define address_space_authorization__read_AddressSpace_NodeClass_value address_space_bs__read_AddressSpace_NodeClass_value
 #define address_space_authorization__read_AddressSpace_NodeId_value address_space_bs__read_AddressSpace_NodeId_value
 #define address_space_authorization__read_AddressSpace_Raw_Node_Value_value address_space_bs__read_AddressSpace_Raw_Node_Value_value
+#define address_space_authorization__read_AddressSpace_RolePermissions address_space_bs__read_AddressSpace_RolePermissions
 #define address_space_authorization__read_AddressSpace_Symmetric_value address_space_bs__read_AddressSpace_Symmetric_value
 #define address_space_authorization__read_AddressSpace_UserAccessLevel_value address_space_bs__read_AddressSpace_UserAccessLevel_value
 #define address_space_authorization__read_AddressSpace_UserExecutable_value address_space_bs__read_AddressSpace_UserExecutable_value
@@ -121,12 +130,17 @@ extern void address_space_authorization__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void address_space_authorization__clear_user_roles(void);
 extern void address_space_authorization__get_user_authorization(
    const constants__t_operation_type_i address_space_authorization__p_operation_type,
    const constants__t_NodeId_i address_space_authorization__p_node_id,
    const constants__t_AttributeId_i address_space_authorization__p_attribute_id,
    const constants__t_user_i address_space_authorization__p_user,
+   const constants__t_sessionRoles_i address_space_authorization__p_roles,
    t_bool * const address_space_authorization__p_authorized);
+extern void address_space_authorization__get_user_roles(
+   const constants__t_user_i address_space_authorization__p_user,
+   constants__t_sessionRoles_i * const address_space_authorization__p_roles);
 extern void address_space_authorization__has_access_level_executable(
    const constants__t_Node_i address_space_authorization__node,
    t_bool * const address_space_authorization__bres);
@@ -138,5 +152,8 @@ extern void address_space_authorization__has_access_level_write(
    const constants__t_RawStatusCode address_space_authorization__raw_sc,
    const constants__t_Timestamp address_space_authorization__source_ts,
    t_bool * const address_space_authorization__bres);
+extern void address_space_authorization__set_user_roles(
+   const constants__t_user_i address_space_authorization__p_user,
+   const constants__t_sessionRoles_i address_space_authorization__p_roles);
 
 #endif

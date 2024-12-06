@@ -78,6 +78,8 @@ SETS
     t_opcua_duration_i;
     t_notificationQueue_i;
     t_sessionRoles_i;
+    t_RolePermissionTypes_i;
+    t_PermissionType_i;
     t_publishReqQueue_i;
     t_notifRepublishQueue_i;
     t_notifRepublishQueueIterator_i;
@@ -104,7 +106,9 @@ SETS
     t_DataTypeDefinition_i;
     t_ServerUri;
     t_ServerUris;
-    t_ServerCapabilities
+    t_ServerCapabilities;
+    t_NamespaceUri;
+    t_NamespaceIdx
 
 CONCRETE_CONSTANTS
     c_Server_Nano_Extended,
@@ -128,6 +132,7 @@ CONCRETE_CONSTANTS
     k_n_unregisterNodes_max,
     k_n_nodesToAdd_max,
     k_n_UserAuthAttempts_max,
+    k_n_NamespaceIndex_max,
 
     c_Null_Type_NodeId,
     c_ByteString_Type_NodeId,
@@ -139,7 +144,13 @@ CONCRETE_CONSTANTS
     c_RoleType_NodeId,
     c_HasComponentType_NodeId,
     c_HasPropertyType_NodeId,
+    c_Server_NamespaceArray_NodeId,
+    c_NamespaceMetadataType_NodeId,
+    c_Server_Namespaces_NodeId,
+    c_RolePermissionType_NodeId,
 
+    c_NamespaceUri_QualifiedName,
+    c_DefaultRolePermissions_QualifiedName,
     c_Identities_QualifiedName,
 
     c_Variant_indet,
@@ -184,6 +195,8 @@ CONCRETE_CONSTANTS
     c_notificationQueue_indet,
     c_sessionRoles_indet,
     c_sessionRoles_empty,
+    c_RolePermissionTypes_indet,
+    c_PermissionType_none,
     c_publishReqQueue_indet,
     c_notifRepublishQueue_indet,
     c_notifRepublishQueueIterator_indet,
@@ -222,7 +235,8 @@ CONCRETE_CONSTANTS
     c_MdnsDiscoveryConfig_indet,
     c_RegisteredServer2Info_indet,
     c_DataTypeDefinition_indet,
-    c_ServerUri_empty
+    c_ServerUri_empty,
+    c_NamespaceUri_empty
 
 ABSTRACT_CONSTANTS
 
@@ -258,6 +272,8 @@ ABSTRACT_CONSTANTS
     t_request_context,
     t_channel_config_idx,
     cast_t_channel_config_idx,
+    cast_t_NamespaceIdx,
+
     t_endpoint_config_idx,
     t_reverse_endpoint_config_idx,
     t_client_request_handle,
@@ -274,6 +290,7 @@ ABSTRACT_CONSTANTS
     t_timeref,
     t_notificationQueue,
     t_sessionRoles,
+    t_RolePermissionTypes,
     t_notifRepublishQueue,
     t_notifRepublishQueueIterator,
     t_publishReqQueue,
@@ -299,7 +316,8 @@ ABSTRACT_CONSTANTS
     t_RegisteredServer2Info,
     t_DataTypeDefinition,
 
-    conv_ExpandedNodeId_NodeId
+    conv_ExpandedNodeId_NodeId,
+    conv_NodeId_NamespaceIdx
 
 PROPERTIES
     c_Server_Nano_Extended : BOOL &
@@ -328,6 +346,7 @@ PROPERTIES
     k_n_unregisterNodes_max : NAT &
     k_n_nodesToAdd_max : NAT &
     k_n_UserAuthAttempts_max : NAT &
+    k_n_NamespaceIndex_max : NAT &
 
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
@@ -373,6 +392,18 @@ PROPERTIES
 
     c_HasPropertyType_NodeId : t_NodeId_i &
     c_HasPropertyType_NodeId : t_NodeId &
+
+    c_Server_NamespaceArray_NodeId : t_NodeId_i &
+    c_Server_NamespaceArray_NodeId : t_NodeId &
+
+    c_NamespaceMetadataType_NodeId : t_NodeId_i &
+    c_NamespaceMetadataType_NodeId : t_NodeId &
+
+    c_Server_Namespaces_NodeId : t_NodeId_i &
+    c_Server_Namespaces_NodeId : t_NodeId &
+
+    c_RolePermissionType_NodeId : t_NodeId_i &
+    c_RolePermissionType_NodeId : t_NodeId &
 
     t_byte_buffer <: t_byte_buffer_i &
     c_byte_buffer_indet : t_byte_buffer_i &
@@ -448,7 +479,12 @@ PROPERTIES
     c_sessionRoles_indet : t_sessionRoles_i &
     c_sessionRoles_indet /: t_sessionRoles &
     c_sessionRoles_empty : t_sessionRoles_i &
-    c_sessionRoles_empty : t_sessionRoles &
+    c_sessionRoles_empty /: t_sessionRoles &
+
+    t_RolePermissionTypes <: t_RolePermissionTypes_i &
+    c_RolePermissionTypes_indet : t_RolePermissionTypes_i &
+
+    c_PermissionType_none : t_PermissionType_i &
 
     t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
@@ -520,6 +556,9 @@ PROPERTIES
     cast_t_channel_config_idx : NAT +-> t_channel_config_idx_i &
     cast_t_channel_config_idx : perm(t_channel_config_idx) &
 
+    cast_t_NamespaceIdx : NAT +-> t_NamespaceIdx &
+    cast_t_NamespaceIdx : perm(t_NamespaceIdx) &
+
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet /: t_endpoint_config_idx &
@@ -545,8 +584,15 @@ PROPERTIES
     t_QualifiedName <: t_QualifiedName_i &
     c_QualifiedName_indet : t_QualifiedName_i &
     c_QualifiedName_indet /: t_QualifiedName &
+
+    c_NamespaceUri_QualifiedName : t_QualifiedName_i &
+    c_NamespaceUri_QualifiedName : t_QualifiedName &
+
+    c_DefaultRolePermissions_QualifiedName : t_QualifiedName_i &
+    c_DefaultRolePermissions_QualifiedName : t_QualifiedName &
+
     c_Identities_QualifiedName : t_QualifiedName_i &
-    c_Identities_QualifiedName /: t_QualifiedName &
+    c_Identities_QualifiedName : t_QualifiedName &
 
     t_Event <: t_Event_i &
     c_Event_indet : t_Event_i &
@@ -607,7 +653,10 @@ PROPERTIES
 
     c_ServerUri_empty : t_ServerUri &
 
+    c_NamespaceUri_empty : t_NamespaceUri &
+
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
+    conv_NodeId_NamespaceIdx : t_NodeId --> t_NamespaceIdx &
 
     t_BrowsePath <: t_BrowsePath_i &
     c_browsePath_indet : t_BrowsePath_i &
@@ -678,6 +727,15 @@ OPERATIONS
     END
     ;
 
+    p_nsIndex <-- get_cast_t_NamespaceIdx(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_NamespaceIdx)
+    THEN
+        p_nsIndex := cast_t_NamespaceIdx(p_ind)
+    END
+    ;
+
     p_res <-- is_t_endpoint_config_idx(p_endpoint_config_idx) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i
@@ -738,6 +796,15 @@ OPERATIONS
                                 (p_local_server = FALSE =>
                                     p_nid = c_NodeId_indet)
                                )
+    END
+    ;
+
+    p_idx <-- get_NodeId_NamespaceIndex(p_nodeId) =
+    PRE
+        p_nodeId : t_NodeId_i &
+        p_nodeId : t_NodeId
+    THEN
+        p_idx := conv_NodeId_NamespaceIdx(p_nodeId)
     END
     ;
 

@@ -1,0 +1,121 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    address_space_namespaces_metadata_i
+
+REFINES
+    address_space_namespaces_metadata
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    address_space_bs
+
+IMPORTS
+    namespace_array_it,
+    namespace_array_bs,
+    namespaces_default_role_permissions,
+    default_role_permissions_array_bs
+
+PROMOTES
+    address_space_default_role_permissions_array_bs_UNINITIALISATION,
+    has_DefaultRolePermissions_at_idx,
+    get_DefaultRolePermissions_at_idx,
+    delete_rolePermissions
+
+INVARIANT
+    a_default_role_permissions = a_default_role_permissions_bs |> t_RolePermissionTypes
+
+LOCAL_OPERATIONS
+    l_fill_default_role_permissions(p_val) =
+    PRE
+        p_val : t_Variant_i &
+        p_val : t_Variant &
+        p_val = a_variant &
+        p_val = a_Value(a_NodeId~(c_Server_NamespaceArray_NodeId)) &
+        a_default_role_permissions_bs = {}
+    THEN
+        a_default_role_permissions_bs :(a_default_role_permissions_bs /= {}) ||
+        nbr_default_role_permissions_bs:= card(dom(a_default_role_permissions_bs))
+    END
+
+OPERATIONS
+    /* LOCAL OPERATIONS */
+    l_fill_default_role_permissions(p_val) =
+    VAR
+        l_continue,
+        l_namespaceUriIdx,
+        l_namespaceUri,
+        l_val_DefaultRolePermissions,
+        l_namespaceUriIdxNS,
+        l_nb_namespaces
+    IN
+        // Get the number of namespaces URIs in the array
+        l_nb_namespaces <-- read_variant_nb_namespaceUris(p_val);
+        init_array_of_DefaultRolePermissions(l_nb_namespaces);
+        l_continue <-- init_iter_namespaceUris(l_nb_namespaces);
+        WHILE
+            l_continue = TRUE
+        DO
+            l_continue, l_namespaceUriIdx <-- continue_iter_namespaceUris;
+            l_namespaceUri <-- read_variant_namespaceUri(p_val, l_namespaceUriIdx);
+            l_val_DefaultRolePermissions <-- get_DefaultRolePermissions(l_namespaceUri);
+            l_namespaceUriIdxNS <-- get_cast_t_NamespaceIdx(l_namespaceUriIdx);
+            add_DefaultRolePermissions_at_idx(l_namespaceUri, l_namespaceUriIdxNS, l_val_DefaultRolePermissions)
+        INVARIANT
+            // Iterator invariants
+            namespaceUrisIdx_to_iterate <: NAT1 &
+            namespaceUrisIdx_iterated   <: NAT1 &
+            namespaceUrisIdx_to_iterate /\ namespaceUrisIdx_iterated = {} &
+            1..nb_namespaceUris = namespaceUrisIdx_to_iterate \/ namespaceUrisIdx_iterated &
+            dom(a_default_role_permissions_bs) = cast_t_NamespaceIdx[namespaceUrisIdx_iterated]
+        VARIANT
+            card(namespaceUrisIdx_to_iterate)
+        END
+    END
+    ;
+
+    /* OPERATIONS OF THE MODULE */
+    may_initialize_default_role_permissions =
+    VAR
+        l_nid_valid,
+        l_Server_NamespaceArray_node,
+        l_sc,
+        l_val,
+        l_val_sc,
+        l_val_ts_src,
+        l_b_is_initialized
+    IN
+        l_b_is_initialized <-- is_default_role_permissions_initialized;
+        IF l_b_is_initialized = FALSE THEN
+            // Read the value of the server NamespaceArray which is the "namespace table" (OPC UA)
+            l_nid_valid, l_Server_NamespaceArray_node <-- readall_AddressSpace_Node(c_Server_NamespaceArray_NodeId);
+            IF l_nid_valid = TRUE THEN
+                l_sc, l_val, l_val_sc, l_val_ts_src
+                    <-- read_AddressSpace_Raw_Node_Value_value(l_Server_NamespaceArray_node, c_Server_NamespaceArray_NodeId, e_aid_Value);
+                IF l_sc = e_sc_ok
+                THEN
+                    l_fill_default_role_permissions(l_val);
+                    read_AddressSpace_free_variant(l_val) /* Frees the shallow copy only */
+                END
+            END
+        END
+    END
+END

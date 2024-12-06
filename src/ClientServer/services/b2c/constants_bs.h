@@ -39,6 +39,7 @@
 #include "sopc_address_space.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
+#include "sopc_enum_types.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_time_reference.h"
@@ -58,9 +59,6 @@
   -----------------------------*/
 typedef OpcUa_ApplicationDescription* constants_bs__t_ApplicationDescription_i;
 typedef OpcUa_Argument* constants_bs__t_Argument_i;
-typedef OpcUa_IdentityMappingRuleType* constants_bs__t_Identity_i;
-typedef SOPC_String* constants_bs__t_Criteria_i;
-typedef SOPC_SLinkedList* constants_bs__t_sessionRoles_i;
 typedef SOPC_Variant* constants_bs__t_ArgumentsPointer_i;
 typedef void* constants_bs__t_ArrayDimensions_i;
 typedef uint32_t constants_bs__t_BrowseNodeClassMask_i;
@@ -72,19 +70,24 @@ typedef OpcUa_CallMethodRequest* constants_bs__t_CallMethodPointer_i;
 typedef int32_t constants_bs__t_CallMethod_i;
 typedef uint64_t constants_bs__t_ContinuationPointId_i;
 typedef SOPC_ContinuationPointData constants_bs__t_ContinuationPoint_i;
+typedef SOPC_String* constants_bs__t_Criteria_i;
 typedef SOPC_ExtensionObject* constants_bs__t_DataTypeDefinition_i;
 typedef SOPC_DataValue* constants_bs__t_DataValue_i;
 typedef SOPC_Event* constants_bs__t_Event_i;
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
+typedef OpcUa_IdentityMappingRuleType* constants_bs__t_Identity_i;
 typedef SOPC_String* constants_bs__t_IndexRange_i;
 typedef int32_t constants_bs__t_Int32;
 typedef char** constants_bs__t_LocaleIds_i;
 typedef SOPC_LocalizedText* constants_bs__t_LocalizedText_i;
 typedef OpcUa_MdnsDiscoveryConfiguration* constants_bs__t_MdnsDiscoveryConfig_i;
+typedef uint16_t constants_bs__t_NamespaceIdx;
+typedef SOPC_String* constants_bs__t_NamespaceUri;
 typedef SOPC_ExtensionObject* constants_bs__t_NodeAttributes_i;
 typedef SOPC_NodeId* constants_bs__t_NodeId_i;
 typedef SOPC_AddressSpace_Node* constants_bs__t_Node_i;
 typedef SOPC_ByteString* constants_bs__t_Nonce_i;
+typedef OpcUa_PermissionType constants_bs__t_PermissionType_i;
 typedef SOPC_QualifiedName* constants_bs__t_QualifiedName_i;
 typedef SOPC_StatusCode constants_bs__t_RawStatusCode;
 typedef OpcUa_ReferenceNode* constants_bs__t_Reference_i;
@@ -92,6 +95,7 @@ typedef SOPC_RegisterServer2Record_Internal* constants_bs__t_RegisteredServer2In
 typedef OpcUa_RegisteredServer* constants_bs__t_RegisteredServer_i;
 typedef OpcUa_RelativePathElement* constants_bs__t_RelativePathElt_i;
 typedef OpcUa_RelativePath* constants_bs__t_RelativePath_i;
+typedef SOPC_Variant* constants_bs__t_RolePermissionTypes_i;
 typedef SOPC_ServerCapabilities_Internal constants_bs__t_ServerCapabilities;
 typedef SOPC_String* constants_bs__t_ServerUri;
 typedef SOPC_String* constants_bs__t_ServerUris;
@@ -128,6 +132,7 @@ typedef SOPC_SLinkedList* constants_bs__t_publishReqQueue_i;
 typedef uint32_t constants_bs__t_request_context_i;
 typedef SOPC_ReverseEndpointConfigIdx constants_bs__t_reverse_endpoint_config_idx_i;
 typedef uint32_t constants_bs__t_server_request_handle_i;
+typedef SOPC_SLinkedList* constants_bs__t_sessionRoles_i;
 typedef SOPC_Internal_SessionAppContext* constants_bs__t_session_application_context_i;
 typedef SOPC_SessionId constants_bs__t_session_i;
 typedef SOPC_NodeId* constants_bs__t_session_token_i;
@@ -155,41 +160,53 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_ArgumentsPointer_indet NULL
 #define constants_bs__c_ArrayDimensions_indet 0
 extern const constants_bs__t_NodeId_i constants_bs__c_BaseEventType_NodeId;
-extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_RoleSet_NodeId;
-extern const constants_bs__t_NodeId_i constants_bs__c_RoleType_NodeId;
-extern const constants_bs__t_NodeId_i constants_bs__c_HasComponentType_NodeId;
-extern const constants_bs__t_NodeId_i constants_bs__c_HasPropertyType_NodeId;
-extern const constants_bs__t_QualifiedName_i constants_bs__c_Identities_QualifiedName;
 #define constants_bs__c_BrowseNodeClassMask_indet 0
 #define constants_bs__c_BrowseResultMask_all 63
 #define constants_bs__c_BrowseResultMask_indet 0
 #define constants_bs__c_BrowseResultReferences_indet NULL
 extern const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
-#define constants_bs__c_CallMethod_indet 0
 #define constants_bs__c_CallMethodPointer_indet NULL
+#define constants_bs__c_CallMethod_indet 0
 #define constants_bs__c_ContinuationPointId_indet 0
 #define constants_bs__c_ContinuationPoint_indet sopc_continuationPointData_empty;
+#define constants_bs__c_Criteria_indet NULL
 #define constants_bs__c_DataTypeDefinition_indet NULL
 #define constants_bs__c_DataValue_indet NULL
+extern const constants_bs__t_QualifiedName_i constants_bs__c_DefaultRolePermissions_QualifiedName;
+#define constants_bs__c_Event_indet NULL
 #define constants_bs__c_ExpandedNodeId_indet NULL
+extern const constants_bs__t_NodeId_i constants_bs__c_HasComponentType_NodeId;
+extern const constants_bs__t_NodeId_i constants_bs__c_HasPropertyType_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_HierarchicalReferences_Type_NodeId;
+extern const constants_bs__t_QualifiedName_i constants_bs__c_Identities_QualifiedName;
+#define constants_bs__c_Identity_indet NULL
 #define constants_bs__c_IndexRange_indet 0
 extern constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty;
 #define constants_bs__c_LocaleIds_indet NULL
 #define constants_bs__c_LocalizedText_indet 0
 #define constants_bs__c_MdnsDiscoveryConfig_indet NULL
+extern const constants_bs__t_NodeId_i constants_bs__c_NamespaceMetadataType_NodeId;
+extern const constants_bs__t_QualifiedName_i constants_bs__c_NamespaceUri_QualifiedName;
+#define constants_bs__c_NamespaceUri_empty 0
 #define constants_bs__c_NodeAttributes_indet NULL
 #define constants_bs__c_NodeId_indet NULL
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_Nonce_indet 0
 extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
+#define constants_bs__c_PermissionType_none OpcUa_PermissionType_None
 #define constants_bs__c_QualifiedName_indet 0
 #define constants_bs__c_Reference_indet 0
 #define constants_bs__c_RegisteredServer2Info_indet NULL
 #define constants_bs__c_RegisteredServer_indet NULL
 #define constants_bs__c_RelativePathElt_indet 0
 #define constants_bs__c_RelativePath_indet 0
+extern const constants_bs__t_NodeId_i constants_bs__c_RolePermissionType_NodeId;
+#define constants_bs__c_RolePermissionTypes_indet NULL
+extern const constants_bs__t_NodeId_i constants_bs__c_RoleType_NodeId;
+#define constants_bs__c_ServerUri_empty 0
+extern const constants_bs__t_NodeId_i constants_bs__c_Server_NamespaceArray_NodeId;
+extern const constants_bs__t_NodeId_i constants_bs__c_Server_Namespaces_NodeId;
 
 #if S2OPC_NANO_PROFILE
 #define constants_bs__c_Server_Nano_Extended false
@@ -197,7 +214,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_Server_Nano_Extended true
 #endif
 extern const constants_bs__t_NodeId_i constants_bs__c_Server_NodeId;
-
+extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_RoleSet_NodeId;
 #define constants_bs__c_SignatureData_indet NULL
 #define constants_bs__c_Timestamp_null \
     (SOPC_Value_Timestamp) { 0, 0 }
@@ -233,6 +250,8 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_NodeId;
 #define constants_bs__c_request_context_indet 0
 #define constants_bs__c_reverse_endpoint_config_idx_indet 0
 #define constants_bs__c_server_request_handle_any 0
+#define constants_bs__c_sessionRoles_empty NULL
+#define constants_bs__c_sessionRoles_indet NULL
 #define constants_bs__c_session_activation_min_delay SOPC_SESSION_ACTIVATION_MIN_DELAY_SECS
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0
@@ -243,15 +262,12 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_NodeId;
 #define constants_bs__c_timeref_indet 0
 #define constants_bs__c_user_indet 0
 #define constants_bs__c_user_token_indet NULL
-#define constants_bs__c_sessionRoles_indet NULL
-#define constants_bs__c_sessionRoles_empty NULL
-#define constants_bs__c_Identity_indet NULL
-#define constants_bs__c_Criteria_indet NULL
 #define constants_bs__k_n_BrowsePathResPerElt_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
 #define constants_bs__k_n_BrowsePathResPerPath_max SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES
 #define constants_bs__k_n_BrowseResponse_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_BrowseTarget_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_IndexRange_max 0
+#define constants_bs__k_n_NamespaceIndex_max UINT16_MAX
 #define constants_bs__k_n_UserAuthAttempts_max SOPC_MAX_SESSION_AUTH_ATTEMPTS
 #define constants_bs__k_n_WriteResponse_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_genericOperationPerReq_max SOPC_MAX_OPERATIONS_PER_MSG
@@ -291,6 +307,8 @@ extern void constants_bs__get_cast_t_CallMethod(const t_entier4 constants_bs__p_
                                                 constants_bs__t_CallMethod_i* const constants_bs__p_callMethod);
 extern void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
                                              constants_bs__t_channel_i* const constants_bs__p_channel);
+extern void constants_bs__get_cast_t_NamespaceIdx(const t_entier4 constants_bs__p_ind,
+                                                  constants_bs__t_NamespaceIdx* const constants_bs__p_nsIndex);
 extern void constants_bs__get_cast_t_channel_config_idx(
     const t_entier4 constants_bs__p_ind,
     constants_bs__t_channel_config_idx_i* const constants_bs__p_config);
@@ -301,6 +319,8 @@ extern void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__
 extern void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,
                                                   t_bool* const constants_bs__p_alloc,
                                                   constants_bs__t_ExpandedNodeId_i* const constants_bs__p_out);
+extern void constants_bs__get_NodeId_NamespaceIndex(const constants_bs__t_NodeId_i constants_bs__p_nodeId,
+                                                    constants_bs__t_NamespaceIdx* const constants_bs__p_idx);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
     t_bool* const constants_bs__p_local_server,

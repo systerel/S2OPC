@@ -80,15 +80,11 @@ DEFINITIONS
         a_ContainsNoLoops,
         a_Symmetric,
 
+        /* Optional attributes */
+        a_RolePermissions,
+
         /* Properties */
         a_NodeClass_Attribute,
-
-        /* Types */
-        Type_IsTransitiveSubtype,
-        Type_IsReferenceTypeIdValid,
-
-        /* Objects */
-        Object_HasMethod,
 
         Variant_LocalDataType,
         Variant_ValueRank,
@@ -101,6 +97,16 @@ DEFINITIONS
 
         Node_RefIndexEnd,
         RefIndex_Reference
+        ;
+
+    d_adsp_nodes_typing ==
+
+        /* Types */
+        Type_IsTransitiveSubtype,
+        Type_IsReferenceTypeIdValid,
+
+        /* Objects */
+        Object_HasMethod
         ;
 
     d_adsp_variables ==
@@ -126,7 +132,9 @@ DEFINITIONS
         s_executable,
 
         /* User authorization */
-        s_AuthorizedOperations
+        s_AuthorizedOperations,
+        a_set_user,
+        a_set_roles
     ;
 
     d_adsp_nodes_invariant ==
@@ -138,6 +146,9 @@ DEFINITIONS
         a_NodeClass   : s_Node --> t_NodeClass     &
         a_BrowseName  : s_Node --> t_QualifiedName &
         a_DisplayName : s_Node --> t_LocalizedText &
+
+        /* Optional attributes */
+        a_RolePermissions : s_Node +-> t_RolePermissionTypes &
 
         a_Value : s_Node +-> t_Variant &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
@@ -178,13 +189,6 @@ DEFINITIONS
         /* Properties */
         a_NodeClass_Attribute : t_NodeClass * t_AttributeId --> BOOL &
 
-        /* Types */
-        Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
-        Type_IsReferenceTypeIdValid <: t_NodeId &
-
-        /* Objects */
-        Object_HasMethod : t_NodeId <-> t_NodeId &
-
         Variant_LocalDataType : t_Variant --> t_NodeId &
         Variant_ValueRank : t_Variant --> t_ConcreteValueRank &
 
@@ -200,6 +204,17 @@ DEFINITIONS
 
         Node_RefIndexEnd        : s_Node     --> t_RefIndex  &
         RefIndex_Reference      : s_Node * t_RefIndex >-> t_Reference
+    );
+
+    d_adsp_nodes_typing_invariant ==
+    (
+        /* Types */
+        Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
+        Type_IsReferenceTypeIdValid <: t_NodeId &
+
+        /* Objects */
+        Object_HasMethod : t_NodeId <-> t_NodeId
+
     );
 
     d_adsp_invariant ==
@@ -221,7 +236,9 @@ DEFINITIONS
         s_executable <: t_Node_i &
 
         /* User authorization */
-        s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user
+        s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user &
+        a_set_user : t_user_i &
+        a_set_roles : t_sessionRoles_i
     );
 
     d_adsp_add_operation ==
@@ -367,7 +384,7 @@ DEFINITIONS
     ;
 
     d_adsp_UNINIT ==
-    address_space_bs_UNINITIALISATION =
+    address_space_UNINITIALISATION =
     BEGIN
         d_adsp_variables :( d_adsp_invariant )
     END
@@ -908,6 +925,28 @@ DEFINITIONS
     END
     ;
 
+    /* Local read of Identities values of the address space. */
+    p_val, p_sc <-- read_AddressSpace_Identities_value(p_identities_node, p_identities_nid) =
+    PRE
+        p_identities_node : t_Node_i &
+        p_identities_node : s_Node &
+        p_identities_nid : t_NodeId_i &
+        p_identities_nid : t_NodeId &
+        p_identities_nid = a_NodeId(p_identities_node) &
+        /* TODO: unprovable because missing TODO postcondition in caller */
+        a_BrowseName(p_identities_node) = c_Identities_QualifiedName &
+        a_NodeClass(p_identities_node) = e_ncl_Variable
+    THEN
+        p_val,
+        p_sc : (
+          p_sc : t_StatusCode_i &
+          p_sc : t_StatusCode &
+          p_val : t_Variant_i &
+          (p_val = a_Value(p_identities_node) & p_sc = e_sc_ok or
+          p_val = c_Variant_indet & p_sc = e_sc_bad_out_of_memory))
+    END
+    ;
+
     /* Promoted */
     read_AddressSpace_clear_value(val) =
     PRE
@@ -940,7 +979,7 @@ DEFINITIONS
     END
     ;
 
-    p_authorized <-- get_user_authorization (p_operation_type, p_node_id, p_attribute_id, p_user) =
+    p_authorized <-- get_user_authorization(p_operation_type, p_node_id, p_attribute_id, p_user, p_roles) =
     PRE
         p_operation_type : t_operation_type_i &
         p_operation_type : t_operation_type   &
@@ -949,9 +988,39 @@ DEFINITIONS
         p_attribute_id   : t_AttributeId_i    &
         p_attribute_id   : t_AttributeId      &
         p_user           : t_user_i           &
-        p_user           : t_user
+        p_user           : t_user             &
+        p_roles          : t_sessionRoles_i
     THEN
         p_authorized := bool(p_operation_type |-> p_node_id |-> p_attribute_id |-> p_user : s_AuthorizedOperations)
+    END
+    ;
+
+    set_user_roles(p_user, p_roles) =
+    PRE
+        p_user           : t_user_i &
+        p_user           : t_user &
+        p_roles          : t_sessionRoles_i &
+        p_roles          : t_sessionRoles
+    THEN
+        a_set_user := p_user ||
+        a_set_roles := p_roles
+    END
+    ;
+
+    p_roles <-- get_user_roles(p_user) =
+    PRE
+        p_user           : t_user_i &
+        p_user           : t_user
+    THEN
+        p_roles :(p_roles : t_sessionRoles_i &
+                  (p_user = a_set_user => p_roles = a_set_roles))
+    END
+    ;
+
+    clear_user_roles =
+    BEGIN
+        a_set_user := c_user_indet ||
+        a_set_roles := c_sessionRoles_indet
     END
     ;
 

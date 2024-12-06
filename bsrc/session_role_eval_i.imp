@@ -22,6 +22,7 @@ IMPLEMENTATION
 
 SEES
     constants,
+    constants_statuscodes_bs,
     address_space_itf
 
 REFINES
@@ -51,7 +52,11 @@ LOCAL_OPERATIONS
                                [Reference_TargetNode[dom(a_ref_identity) /\
                                 RefIndex_Reference[{p_role_node} * (1.. Node_RefIndexEnd(p_role_node))]]
                                ] &
-                p_node = a_NodeId~(p_node_id)
+                        /* TODO: link ref_maybe_get_Identity postcondition i.e.
+                         a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(<identities_ref>)))) = e_ncl_Variable &
+                         a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(<identities_ref>)))) = c_Identities_QualifiedName))
+                        */
+                p_node |-> p_node_id : a_NodeId
             ) // otherwise both are indet
         )
     END
@@ -110,6 +115,12 @@ OPERATIONS
                      in C address space, thus in case several are present the last iterated is kept
              */
             p_node_id : conv_ExpandedNodeId_NodeId[Reference_TargetNode[dom(a_ref_identity) /\ references_iterated]] \/ {c_NodeId_indet} &
+            a_NodeClass[a_NodeId~[conv_ExpandedNodeId_NodeId[Reference_TargetNode[dom(a_ref_identity) /\ references_iterated]]]] = {e_ncl_Variable} &
+            a_BrowseName[a_NodeId~[conv_ExpandedNodeId_NodeId[Reference_TargetNode[dom(a_ref_identity) /\ references_iterated]]]] = {c_Identities_QualifiedName} &
+            /* TODO: link ref_maybe_get_Identity postcondition i.e.
+                     a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(<identities_ref>)))) = e_ncl_Variable &
+                     a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(<identities_ref>)))) = c_Identities_QualifiedName))
+            */
             p_node : a_NodeId~[{p_node_id}] \/ {c_Node_indet}
         VARIANT
             card(references_to_iterate)
@@ -160,65 +171,72 @@ OPERATIONS
     ;
 
     /* OPERATIONS OF THE MODULE */
-    p_bres <-- role_eval_user(p_user, p_locales, p_role_node) =
+    p_bres <-- role_eval_user(p_user, p_role_node) =
     VAR
         l_identities_node,
         l_identities_nodeId,
         l_continue,
         l_sc,
         l_val,
-        l_val_sc,
-        l_val_ts_src,
-        l_val_ts_srv,
-        l_index_range,
         l_nb_identities,
         l_bres,
         l_identityIdx,
         l_identity
     IN
         p_bres := FALSE;
+        l_nb_identities := 0;
+        l_continue := FALSE;
+        l_sc := e_sc_bad_generic;
+        l_val := c_Variant_indet;
         // Get the Identities node in the RoleType node
         l_identities_nodeId, l_identities_node <-- l_get_role_identities_node(p_role_node);
-
         // If we found the node Identity, eval the identities with user
         IF l_identities_node /= c_Node_indet & l_identities_nodeId /= c_NodeId_indet THEN
             // Get the value of the variable using a local read service.
-            l_index_range := c_IndexRange_indet;
-            l_sc, l_val, l_val_sc, l_val_ts_src, l_val_ts_srv
-                 <-- read_Node_Attribute(p_user, p_locales, l_identities_node, l_identities_nodeId, e_aid_Value, l_index_range);
-            // Its value is an array of identities. Get the size of the array.
-            l_nb_identities <-- read_variant_nb_identities(l_val, l_identities_node);
-            // Iterate on the array elements.
-            l_continue <-- init_iter_identities(l_nb_identities);
-            WHILE
-                l_continue = TRUE
-            DO
-                l_bres := FALSE;
-                l_continue, l_identityIdx <-- continue_iter_identities;
-                l_identity <-- read_variant_identity(l_val, l_identityIdx);
-                l_bres <-- user_and_identity_match(p_user, l_identity);
-                IF l_bres = TRUE THEN
-                    // One identity matched. Add the role to the roles.
-                    p_bres := TRUE
-                END
-            INVARIANT
-                // Iterator invariants
-                identityIdx_to_iterate <: NAT1 &
-                identityIdx_iterated   <: NAT1 &
-                identityIdx_to_iterate /\ identityIdx_iterated = {} &
-                1..nb_identities = identityIdx_to_iterate \/ identityIdx_iterated &
-                // We use the good variant value
-                a_variant = a_Value(l_identities_node) &
-                a_identities : seq(t_Identity) &
-                nb_identities = size(a_identities) &
-                // p_bres is the result of the final match
-                p_bres = bool({p_user} * ran(identityIdx_iterated <| a_identities) /\ a_user_identity_match /= {})
-            VARIANT
-                card(identityIdx_to_iterate)
-            END
-            ;
-            read_AddressSpace_free_variant(l_val)
+            l_val, l_sc
+                <-- read_AddressSpace_Identities_value(l_identities_node, l_identities_nodeId)
         END
+        ;
+        IF l_sc = e_sc_ok
+        THEN
+            // Its value is an array of identities. Get the size of the array.
+            l_nb_identities <-- read_variant_nb_identities(l_val, l_identities_node)
+        END
+        ;
+        IF l_nb_identities > 0
+        THEN
+            // Iterate on the array elements.
+            l_continue <-- init_iter_identities(l_nb_identities)
+        END
+        ;
+        WHILE
+            l_continue = TRUE
+        DO
+            l_bres := FALSE;
+            l_continue, l_identityIdx <-- continue_iter_identities;
+            l_identity <-- read_variant_identity(l_val, l_identityIdx);
+            l_bres <-- user_and_identity_match(p_user, l_identity);
+            IF l_bres = TRUE THEN
+                // One identity matched. Add the role to the roles.
+                p_bres := TRUE
+            END
+        INVARIANT
+            // Iterator invariants
+            identityIdx_to_iterate <: NAT1 &
+            identityIdx_iterated   <: NAT1 &
+            identityIdx_to_iterate /\ identityIdx_iterated = {} &
+            1..nb_identities = identityIdx_to_iterate \/ identityIdx_iterated &
+            // We use the good variant value
+            a_variant = a_Value(l_identities_node) &
+            a_identities : seq(t_Identity) &
+            nb_identities = size(a_identities) &
+            // p_bres is the result of the final match
+            p_bres = bool({p_user} * ran(identityIdx_iterated <| a_identities) /\ a_user_identity_match /= {})
+        VARIANT
+            card(identityIdx_to_iterate)
+        END
+        ;
+        read_AddressSpace_free_variant(l_val)
     END
     ;
 

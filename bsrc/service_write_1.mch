@@ -44,17 +44,21 @@ DEFINITIONS
 
 ABSTRACT_VARIABLES
     d_adsp_variables,
+    d_adsp_nodes_typing,
     d_variables
 
 INVARIANT
     d_adsp_invariant &
+    d_adsp_nodes_typing_invariant &
     d_inv
 
 INITIALISATION
     d_adsp_variables,
+    d_adsp_nodes_typing,
     d_variables
     :(
         d_adsp_invariant &
+        d_adsp_nodes_typing_invariant &
         d_inv
     )
 
