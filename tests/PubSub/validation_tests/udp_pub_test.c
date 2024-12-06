@@ -72,6 +72,7 @@ static SOPC_Dataset_LL_NetworkMessage* UDP_Pub_Test_Get_NetworkMessage(void)
     };
 
     SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, &conf);
+    SOPC_Dataset_LL_DataSetMsg_Set_EnableEmission(dsm, true);
     SOPC_Variant variant;
     // variant 1
     SOPC_Variant_Initialize(&variant);

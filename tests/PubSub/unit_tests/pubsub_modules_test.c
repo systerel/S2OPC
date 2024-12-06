@@ -518,6 +518,7 @@ START_TEST(test_hl_network_msg_encode)
     };
 
     SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, &conf);
+    SOPC_Dataset_LL_DataSetMsg_Set_EnableEmission(msg_dsm, true);
 
     for (uint16_t i = 0; i < NB_VARS; i++)
     {
@@ -610,6 +611,7 @@ START_TEST(test_hl_network_msg_encode_uni_keep_alive_dsm)
 
     SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, (uint16_t)(DATASET_MSG_WRITER_ID_BASE));
     SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, &conf);
+    SOPC_Dataset_LL_DataSetMsg_Set_EnableEmission(msg_dsm, true);
 
     // Check network message content
     check_network_msg_content_uni_keep_alive_dsm(nm);
@@ -706,6 +708,7 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
         };
 
         SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, &conf);
+        SOPC_Dataset_LL_DataSetMsg_Set_EnableEmission(msg_dsm, true);
         SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, (uint16_t)(DATASET_MSG_WRITER_ID_BASE + imsg));
         bool res = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm, nb_vars);
         ck_assert_int_eq(true, res);
