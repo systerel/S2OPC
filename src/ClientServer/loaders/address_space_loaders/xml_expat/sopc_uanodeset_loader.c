@@ -2962,6 +2962,15 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_NODE;
         break;
     case PARSE_NODE_ROLE_PERMISSIONS:
+        if (NULL == ctx->rolepermissions)
+        {
+            // We do not expect empty array as RolePermissions attribute
+            LOG_XML_ERROR(ctx->helper_ctx.parser,
+                          "Empty value for RolePermissions attribute is not allowed: server does not allow to change "
+                          "it at runtime.");
+            XML_StopParser(ctx->helper_ctx.parser, false);
+            return;
+        }
         ctx->state = PARSE_NODE;
         break;
     case PARSE_NODE_VALUE_SCALAR:
