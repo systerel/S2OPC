@@ -33,7 +33,7 @@ function gen_nodeset() {
 # Ensure paths are relative from the current script directory
 cd $(dirname "$0")
 # Generate demo NodeSet for Micro profile
-gen_nodeset s2opc_pubsub_nodeset.xml --remove-max-node-management ../../../ClientServer/data/address_space/s2opc_base_nodeset_origin.xml s2opc_pubsub_demo_data_origin.xml
+gen_nodeset s2opc_pubsub_nodeset.xml --remove-max-node-management ../../../ClientServer/data/address_space/s2opc_base_nodeset_origin.xml ../../../ClientServer/data/address_space/s2opc_demo_role_permissions_origin.xml s2opc_pubsub_demo_data_origin.xml
 
 # Generate demo NodeSet with limited base info data
 # "i=92" and "i=93": remove data types XML and Binary descriptions (deprecated nodes)

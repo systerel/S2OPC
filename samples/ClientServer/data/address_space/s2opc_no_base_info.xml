@@ -32,8 +32,8 @@
 
 <UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd" LastModified="2022-03-29T00:00:00Z">
   <NamespaceUris>
+    <Uri>urn:S2OPC:localhost</Uri>
     <Uri>https://www.systerel.fr/S2OPC/demo/data/origin</Uri>
-    <Uri>https://www.systerel.fr/S2OPC/demo/data/origin2</Uri>
   </NamespaceUris>
   <Models>
     <Model ModelUri="http://opcfoundation.org/UA/" XmlSchemaUri="http://opcfoundation.org/UA/2008/02/Types.xsd" Version="1.04.11" PublicationDate="2022-03-29T00:00:00Z" />
@@ -1923,7 +1923,7 @@
     </References>
     <Value>
       <uax:ListOfString>
-        <uax:String>https://www.systerel.fr/S2OPC/demo/data/origin</uax:String>
+        <uax:String>urn:S2OPC:localhost</uax:String>
       </uax:ListOfString>
     </Value>
   </UAVariable>
@@ -1935,8 +1935,8 @@
     <Value>
       <uax:ListOfString>
         <uax:String>http://opcfoundation.org/UA/</uax:String>
+        <uax:String>urn:S2OPC:localhost</uax:String>
         <uax:String>https://www.systerel.fr/S2OPC/demo/data/origin</uax:String>
-        <uax:String>https://www.systerel.fr/S2OPC/demo/data/origin2</uax:String>
       </uax:ListOfString>
     </Value>
   </UAVariable>
@@ -3303,6 +3303,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=15607</Reference>
       <Reference ReferenceType="HasComponent">i=15668</Reference>
       <Reference ReferenceType="HasComponent">i=15680</Reference>
+      <Reference ReferenceType="HasComponent">i=15704</Reference>
       <Reference ReferenceType="HasComponent">i=15716</Reference>
     </References>
   </UAObject>
@@ -3317,6 +3318,13 @@
     <DisplayName>Operator</DisplayName>
     <References>
       <Reference ReferenceType="HasProperty">i=16225</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=15620</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=15704" BrowseName="SecurityAdmin">
+    <DisplayName>SecurityAdmin</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16258</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=15620</Reference>
     </References>
   </UAObject>
@@ -3363,6 +3371,17 @@
           <uax:Body>
             <uax:RoleId>
               <uax:Identifier>i=15716</uax:Identifier>
+            </uax:RoleId>
+            <uax:Permissions>32</uax:Permissions>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=16126</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:RoleId>
+              <uax:Identifier>i=15704</uax:Identifier>
             </uax:RoleId>
             <uax:Permissions>4128</uax:Permissions>
           </uax:Body>
@@ -3411,6 +3430,23 @@
         <uax:Body>
           <uax:CriteriaType>6</uax:CriteriaType>
           <uax:Criteria>NULL</uax:Criteria>
+        </uax:Body>
+      </uax:ExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="i=16258" BrowseName="Identities" ParentNodeId="i=15704" DataType="i=15634" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>Identities</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <uax:ExtensionObject>
+        <uax:TypeId>
+          <uax:Identifier>i=15728</uax:Identifier>
+        </uax:TypeId>
+        <uax:Body>
+          <uax:CriteriaType>1</uax:CriteriaType>
+          <uax:Criteria>secuAdmin</uax:Criteria>
         </uax:Body>
       </uax:ExtensionObject>
     </Value>
@@ -3493,10 +3529,6 @@
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
-    <RolePermissions>
-      <RolePermission Permissions="32">i=15668</RolePermission>
-      <RolePermission Permissions="96">i=15716</RolePermission>
-    </RolePermissions>
     <Value>
       <uax:Int64>-1000</uax:Int64>
     </Value>
@@ -3956,8 +3988,8 @@
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.TRACKs</Reference>
     </References>
   </UAObject>
-  <UAObject NodeId="ns=1;i=15957" BrowseName="1:https://www.systerel.fr/S2OPC/demo/data/origin">
-    <DisplayName>https://www.systerel.fr/S2OPC/demo/data/origin</DisplayName>
+  <UAObject NodeId="ns=1;i=15957" BrowseName="1:urn:S2OPC:localhost">
+    <DisplayName>urn:S2OPC:localhost</DisplayName>
     <References>
       <Reference ReferenceType="HasProperty">ns=1;i=15958</Reference>
       <Reference ReferenceType="HasProperty">i=15959</Reference>
@@ -3966,7 +3998,6 @@
       <Reference ReferenceType="HasProperty">i=15962</Reference>
       <Reference ReferenceType="HasProperty">i=15963</Reference>
       <Reference ReferenceType="HasProperty">i=15964</Reference>
-      <Reference ReferenceType="HasProperty">ns=1;i=16134</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
     </References>
   </UAObject>
@@ -3976,50 +4007,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
     </References>
     <Value>
-      <uax:String>https://www.systerel.fr/S2OPC/demo/data/origin</uax:String>
-    </Value>
-  </UAVariable>
-  <UAVariable NodeId="ns=1;i=16134" BrowseName="DefaultRolePermissions" DataType="i=96" ValueRank="1" ArrayDimensions="0">
-    <DisplayName>DefaultRolePermissions</DisplayName>
-    <References>
-      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-    </References>
-    <Value>
-      <uax:ListOfExtensionObject>
-        <uax:ExtensionObject>
-          <uax:TypeId>
-            <uax:Identifier>i=16126</uax:Identifier>
-          </uax:TypeId>
-          <uax:Body>
-            <uax:RoleId>
-              <uax:Identifier>i=15668</uax:Identifier>
-            </uax:RoleId>
-            <uax:Permissions>32</uax:Permissions>
-          </uax:Body>
-        </uax:ExtensionObject>
-        <uax:ExtensionObject>
-          <uax:TypeId>
-            <uax:Identifier>i=16126</uax:Identifier>
-          </uax:TypeId>
-          <uax:Body>
-            <uax:RoleId>
-              <uax:Identifier>i=15680</uax:Identifier>
-            </uax:RoleId>
-            <uax:Permissions>4192</uax:Permissions>
-          </uax:Body>
-        </uax:ExtensionObject>
-        <uax:ExtensionObject>
-          <uax:TypeId>
-            <uax:Identifier>i=16126</uax:Identifier>
-          </uax:TypeId>
-          <uax:Body>
-            <uax:RoleId>
-              <uax:Identifier>i=15716</uax:Identifier>
-            </uax:RoleId>
-            <uax:Permissions>32</uax:Permissions>
-          </uax:Body>
-        </uax:ExtensionObject>
-      </uax:ListOfExtensionObject>
+      <uax:String>urn:S2OPC:localhost</uax:String>
     </Value>
   </UAVariable>
   <UAMethod NodeId="ns=1;s=AddVariableMethod" BrowseName="AddVariableMethod" ParentNodeId="ns=1;s=TestObject">
@@ -5398,8 +5386,8 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
   </UAVariable>
-  <UAObject NodeId="ns=2;i=15957" BrowseName="2:https://www.systerel.fr/S2OPC/demo/data/origin2">
-    <DisplayName>https://www.systerel.fr/S2OPC/demo/data/origin2</DisplayName>
+  <UAObject NodeId="ns=2;i=15957" BrowseName="2:https://www.systerel.fr/S2OPC/demo/data/origin">
+    <DisplayName>https://www.systerel.fr/S2OPC/demo/data/origin</DisplayName>
     <References>
       <Reference ReferenceType="HasProperty">ns=2;i=15958</Reference>
       <Reference ReferenceType="HasProperty">i=15959</Reference>
@@ -5408,7 +5396,6 @@
       <Reference ReferenceType="HasProperty">i=15962</Reference>
       <Reference ReferenceType="HasProperty">i=15963</Reference>
       <Reference ReferenceType="HasProperty">i=15964</Reference>
-      <Reference ReferenceType="HasProperty">ns=1;i=16134</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
     </References>
   </UAObject>
@@ -5418,7 +5405,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
     </References>
     <Value>
-      <uax:String>https://www.systerel.fr/S2OPC/demo/data/origin2</uax:String>
+      <uax:String>https://www.systerel.fr/S2OPC/demo/data/origin</uax:String>
     </Value>
   </UAVariable>
   <UAObject BrowseName="2:BLOCKs" NodeId="ns=2;s=Objects.15362.BLOCKs" ParentNodeId="ns=1;i=15361">

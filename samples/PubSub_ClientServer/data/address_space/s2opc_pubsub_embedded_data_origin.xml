@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
 <UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <NamespaceUris>
-    <Uri>https://www.systerel.fr/S2OPC/demo/data/origin</Uri>
+    <Uri>urn:S2OPC:localhost</Uri>
   </NamespaceUris>
   <Models>
-    <Model ModelUri="https://www.systerel.fr/S2OPC/demo/data/origin" Version="1.0.0" PublicationDate="2023-04-01T00:00:00Z">
+    <Model ModelUri="urn:S2OPC:localhost" Version="1.0.0" PublicationDate="2023-04-01T00:00:00Z">
       <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.04.11" PublicationDate="2022-03-29T00:00:00Z" />
     </Model>
   </Models>

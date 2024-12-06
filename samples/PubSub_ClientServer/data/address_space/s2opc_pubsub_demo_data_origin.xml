@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
 <UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <NamespaceUris>
-    <Uri>https://www.systerel.fr/S2OPC/demo/data/origin</Uri>
+    <Uri>urn:S2OPC:localhost</Uri>
   </NamespaceUris>
   <Models>
-    <Model ModelUri="https://www.systerel.fr/S2OPC/demo/data/origin" Version="1.0.0" PublicationDate="2023-04-01T00:00:00Z">
+    <Model ModelUri="urn:S2OPC:localhost" Version="1.0.0" PublicationDate="2023-04-01T00:00:00Z">
       <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.04.11" PublicationDate="2022-03-29T00:00:00Z" />
     </Model>
   </Models>
@@ -47,6 +47,38 @@
     <Alias Alias="HasDescription">i=39</Alias>
   </Aliases>
 
+  <!-- NamespaceMetadataType for NS1 -->
+  <UAObject NodeId="ns=1;i=15957" BrowseName="1:urn:S2OPC:localhost">
+    <DisplayName>urn:S2OPC:localhost</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;i=15958</Reference>
+      <Reference ReferenceType="HasProperty">i=15959</Reference>
+      <Reference ReferenceType="HasProperty">i=15960</Reference>
+      <Reference ReferenceType="HasProperty">i=15961</Reference>
+      <Reference ReferenceType="HasProperty">i=15962</Reference>
+      <Reference ReferenceType="HasProperty">i=15963</Reference>
+      <Reference ReferenceType="HasProperty">i=15964</Reference>
+      <!-- DefaultUserRolePermissions and AccessRestriction mechanism not managed yet -->
+      <!--
+      <Reference ReferenceType="HasProperty">ns=1;i=16135</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=16136</Reference>
+      -->
+      <Reference ReferenceType="HasComponent" IsForward="false">i=11715</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
+    </References>
+  </UAObject>
+  <!-- References of the NamespaceMetadataType NS1 -->
+  <UAVariable NodeId="ns=1;i=15958" BrowseName="NamespaceUri" DataType="String">
+    <DisplayName>NamespaceUri</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15957</Reference>
+    </References>
+    <Value>
+      <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">urn:S2OPC:localhost</String>
+    </Value>
+  </UAVariable>
+  
   <!-- PubSub commands and status -->
   <!-- Publisher Object -->
   <UAObject NodeId="ns=1;s=Publisher" BrowseName="Publisher" ParentNodeId="i=85" EventNotifier="1">

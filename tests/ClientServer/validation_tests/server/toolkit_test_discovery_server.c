@@ -42,9 +42,10 @@
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DATA_NAMESPACE_URI "https://www.systerel.fr/S2OPC/demo/data/origin"
 
 /* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
-static const char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI};
+static const char* default_app_namespace_uris[] = {DEFAULT_APPLICATION_URI, DATA_NAMESPACE_URI};
 static const char* default_locale_ids[] = {"en-US"};
 
 static const bool secuActive = true;

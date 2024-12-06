@@ -234,6 +234,32 @@
       </ExtensionObject>
     </Value>
   </UAVariable>
+  <UAObject NodeId="i=15704" BrowseName="SecurityAdmin">
+    <DisplayName>SecurityAdmin</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16258</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=15606</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=15620</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="i=16258" BrowseName="Identities" ParentNodeId="i=15704" DataType="i=15634" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>Identities</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">i=15704</Reference>
+    </References>
+    <Value>
+      <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <TypeId>
+          <Identifier>i=15728</Identifier>
+        </TypeId>
+        <Body>
+          <CriteriaType>1</CriteriaType> <!-- Username -->
+          <Criteria>secuAdmin</Criteria>
+        </Body>
+      </ExtensionObject>
+    </Value>
+  </UAVariable>
   <!-- Definiton of the role-related references nodes of the NamespaceMetadataType NS0 -->
   <UAVariable NodeId="i=16134" BrowseName="DefaultRolePermissions" DataType="i=96" ValueRank="1" ArrayDimensions="0">
     <DisplayName>DefaultRolePermissions</DisplayName>
@@ -276,6 +302,18 @@
           <Body>
             <RoleId>
               <Identifier>i=15716</Identifier> <!-- ConfigureAdmin -->
+            </RoleId>
+            <Permissions>32</Permissions> <!-- Read -->
+          </Body>
+        </ExtensionObject>
+        <!-- 4th RolePermission -->
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=16126</Identifier>
+          </TypeId>
+          <Body>
+            <RoleId>
+              <Identifier>i=15704</Identifier> <!-- SecurityAdmin -->
             </RoleId>
             <Permissions>4128</Permissions> <!-- Read + Call -->
           </Body>
