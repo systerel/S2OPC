@@ -763,11 +763,24 @@ SOPC_ReturnStatus SOPC_ServerHelper_TriggerEvent(const SOPC_NodeId* notifierNode
                                                  uint32_t optSubscriptionId,
                                                  uint32_t optMonitoredItemId)
 {
-    if (!SOPC_ServerInternal_IsStarted())
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == notifierNodeId || NULL == event)
     {
-        return SOPC_STATUS_INVALID_STATE;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_ToolkitServer_TriggerEvent(notifierNodeId, event, optSubscriptionId, optMonitoredItemId);
+    if (SOPC_STATUS_OK == status && !SOPC_ServerInternal_IsStarted())
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ToolkitServer_TriggerEvent(notifierNodeId, event, optSubscriptionId, optMonitoredItemId);
+    }
+    else
+    {
+        // Deallocate the event if it is not triggered
+        SOPC_Event_Delete(&event);
+    }
 
-    return SOPC_STATUS_OK;
+    return status;
 }
