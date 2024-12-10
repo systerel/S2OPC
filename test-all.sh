@@ -109,6 +109,7 @@ pubsub_server_test.tap'
 PYS2OPC_TAP_FILES=$'\nvalidation_pys2opc_client.tap
 validation_pys2opc_client_server_disco.tap
 validation_pys2opc_server.tap
+validation_pys2opc_role_permissions.tap
 pys2opc_server-0-read-write.py.tap
 pys2opc_server-1-browse.py.tap
 pys2opc_server-2-subscribe.py.tap

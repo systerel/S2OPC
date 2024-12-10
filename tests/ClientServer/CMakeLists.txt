@@ -701,6 +701,12 @@ if(WITH_PYS2OPC)
   set(PYS2OPC_TEST_PATH "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/pys2opc")
   # TODO: This variable must be the one defined in ../src/ClientServer/frontend/pys2opc/CMakeLists.txt
   set(PYS2OPC_TEST_INSTALL_PATH "${CMAKE_BINARY_DIR}/pys2opc_install")
+  # py_env (PYTHONPATH) get (in order) : pys2opc, common.py|tap_logger.py, wait_server.py, utils.py
+  set(py_env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}\
+${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/interop_tools\
+${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/scripts\
+${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/samples/ClientServer/pys2opc/client"
+      "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 
   # Validation test
   function(pys2opc_validation_test name with_server)
@@ -722,23 +728,34 @@ if(WITH_PYS2OPC)
         )
     endif()
     # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
-    # new_env (PYTHONPATH) get (in order) : pys2opc, common.py, wait_server.py, utils.py
-    set(new_env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}\
-${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/interop_tools\
-${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/scripts\
-${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/samples/ClientServer/pys2opc/client"
-      "LD_LIBRARY_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
     if(WITH_ASAN OR WITH_UBSAN OR WITH_TSAN)
-      set(new_env ${new_env} "LD_PRELOAD=/usr/local/lib64/libasan.so")
+      set(py_env ${py_env} "LD_PRELOAD=/usr/local/lib64/libasan.so")
     endif()
     # TODO: make the test depends on pys2opc_install
     set_tests_properties(${test_name} PROPERTIES
-      ENVIRONMENT "${new_env}")
+      ENVIRONMENT "${py_env}")
   endfunction()
 
   pys2opc_validation_test("pys2opc_client.py" YES)
   pys2opc_validation_test("pys2opc_client_server_disco.py" NO)
   pys2opc_validation_test("pys2opc_server.py" NO)
+
+## Role Permissions validation tests ##
+  set(TOOLKIT_DEMO_SERVER "toolkit_demo_server")
+  set(TEST_ADDRESS_SPACE_XML_ROLE_PERMISSIONS "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_role_test.xml")
+  set(USERS_TESTS_ROLES_CONFIG_XML  "${S2OPC_ROOT_PATH}/tests/ClientServer/data/config/S2OPC_Users_Tests_Roles_Config.xml")
+  set (env_role ${py_env} "TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=${TEST_ADDRESS_SPACE_XML_ROLE_PERMISSIONS};TEST_USERS_XML_CONFIG=${USERS_TESTS_ROLES_CONFIG_XML}")
+  add_test(NAME "validation::pys2opc_test_role_permissions.py"
+    WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+    "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+    "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/pys2opc_test_role_permissions.py"
+  )
+  set_tests_properties("validation::pys2opc_test_role_permissions.py" PROPERTIES ENVIRONMENT "${env_role}")
+
 endif()
 
 ## S2OPC fuzzing tests: to be run manually ##

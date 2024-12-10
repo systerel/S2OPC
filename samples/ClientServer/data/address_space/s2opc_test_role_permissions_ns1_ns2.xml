@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+-->
+
+<!-- Definiton of nodes (on NS=1 with DRP, and NS=2 without DRP) related to role permissions tests -->
+
+<UANodeSet xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd">
+  <NamespaceUris>
+    <Uri>urn:S2OPC:localhost</Uri>
+    <Uri>urn:S2OPC:localhost_no_DRP</Uri>
+  </NamespaceUris>
+  <Models>
+    <Model ModelUri="http://opcfoundation.org/UA/" Version="1.04.11" PublicationDate="2013-12-02T00:00:00Z" />
+  </Models>
+  <Aliases>
+    <Alias Alias="Boolean">i=1</Alias>
+    <Alias Alias="SByte">i=2</Alias>
+    <Alias Alias="Byte">i=3</Alias>
+    <Alias Alias="Int16">i=4</Alias>
+    <Alias Alias="UInt16">i=5</Alias>
+    <Alias Alias="Int32">i=6</Alias>
+    <Alias Alias="UInt32">i=7</Alias>
+    <Alias Alias="Int64">i=8</Alias>
+    <Alias Alias="UInt64">i=9</Alias>
+    <Alias Alias="Float">i=10</Alias>
+    <Alias Alias="Double">i=11</Alias>
+    <Alias Alias="DateTime">i=13</Alias>
+    <Alias Alias="String">i=12</Alias>
+    <Alias Alias="ByteString">i=15</Alias>
+    <Alias Alias="Guid">i=14</Alias>
+    <Alias Alias="XmlElement">i=16</Alias>
+    <Alias Alias="NodeId">i=17</Alias>
+    <Alias Alias="ExpandedNodeId">i=18</Alias>
+    <Alias Alias="QualifiedName">i=20</Alias>
+    <Alias Alias="LocalizedText">i=21</Alias>
+    <Alias Alias="StatusCode">i=19</Alias>
+    <Alias Alias="Structure">i=22</Alias>
+    <Alias Alias="Number">i=26</Alias>
+    <Alias Alias="Integer">i=27</Alias>
+    <Alias Alias="UInteger">i=28</Alias>
+    <Alias Alias="HasComponent">i=47</Alias>
+    <Alias Alias="HasOrderedComponent">i=49</Alias>
+    <Alias Alias="HasProperty">i=46</Alias>
+    <Alias Alias="Organizes">i=35</Alias>
+    <Alias Alias="HasEventSource">i=36</Alias>
+    <Alias Alias="HasNotifier">i=48</Alias>
+    <Alias Alias="HasSubtype">i=45</Alias>
+    <Alias Alias="HasTypeDefinition">i=40</Alias>
+    <Alias Alias="HasModellingRule">i=37</Alias>
+    <Alias Alias="HasEncoding">i=38</Alias>
+    <Alias Alias="HasDescription">i=39</Alias>
+  </Aliases>
+
+  <!-- NamespaceMetadataType for NS1 -->
+  <UAObject NodeId="ns=1;i=15957" BrowseName="1:urn:S2OPC:localhost">
+    <DisplayName>urn:S2OPC:localhost</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;i=15958</Reference>
+      <Reference ReferenceType="HasProperty">i=15959</Reference>
+      <Reference ReferenceType="HasProperty">i=15960</Reference>
+      <Reference ReferenceType="HasProperty">i=15961</Reference>
+      <Reference ReferenceType="HasProperty">i=15962</Reference>
+      <Reference ReferenceType="HasProperty">i=15963</Reference>
+      <Reference ReferenceType="HasProperty">i=15964</Reference>
+      <!-- DefaultRolePermissions for NS1 -->
+      <Reference ReferenceType="HasProperty">ns=1;i=16134</Reference>
+      <!--
+      <Reference ReferenceType="HasProperty">ns=1;i=16135</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=16136</Reference>
+      -->
+      <Reference ReferenceType="HasComponent" IsForward="false">i=11715</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
+    </References>
+  </UAObject>
+  <!-- References of the NamespaceMetadataType NS1 -->
+  <UAVariable NodeId="ns=1;i=15958" BrowseName="NamespaceUri" DataType="String">
+    <DisplayName>NamespaceUri</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15957</Reference>
+    </References>
+    <Value>
+      <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">urn:S2OPC:localhost</String>
+    </Value>
+  </UAVariable>
+  <!-- Definiton of the role-related references nodes of the NamespaceMetadataType NS1 -->
+  <UAVariable NodeId="ns=1;i=16134" BrowseName="DefaultRolePermissions" DataType="i=96" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>DefaultRolePermissions</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15957</Reference>
+    </References>
+    <Value>
+      <ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=16126</Identifier> <!-- OpcUaId_RolePermissionType_Encoding_DefaultXml -->
+          </TypeId>
+          <Body>
+            <RoleId>
+              <Identifier>i=15668</Identifier> <!-- Observer -->
+            </RoleId>
+            <Permissions>32</Permissions> <!-- Read -->
+          </Body>
+        </ExtensionObject>
+      </ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+
+  <!-- NamespaceMetadataType for NS2 -->
+  <UAObject NodeId="ns=2;i=15957" BrowseName="2:urn:S2OPC:localhost_no_DRP">
+    <DisplayName>urn:S2OPC:localhost_no_DRP</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=2;i=15958</Reference>
+      <Reference ReferenceType="HasProperty">i=15959</Reference>
+      <Reference ReferenceType="HasProperty">i=15960</Reference>
+      <Reference ReferenceType="HasProperty">i=15961</Reference>
+      <Reference ReferenceType="HasProperty">i=15962</Reference>
+      <Reference ReferenceType="HasProperty">i=15963</Reference>
+      <Reference ReferenceType="HasProperty">i=15964</Reference>
+      <!-- No DefaultRolePermissions defined for NS2 
+      <Reference ReferenceType="HasProperty">ns=2;i=16134</Reference>
+      <Reference ReferenceType="HasProperty">ns=2;i=16135</Reference>
+      <Reference ReferenceType="HasProperty">ns=2;i=16136</Reference>
+      -->
+      <Reference ReferenceType="HasComponent" IsForward="false">i=11715</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
+    </References>
+  </UAObject>
+  <!-- References of the NamespaceMetadataType NS2 -->
+  <UAVariable NodeId="ns=2;i=15958" BrowseName="NamespaceUri" DataType="String">
+    <DisplayName>NamespaceUri</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=2;i=15957</Reference>
+    </References>
+    <Value>
+      <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">urn:S2OPC:localhost_no_DRP</String>
+    </Value>
+  </UAVariable>
+
+
+<!-- Applicative tests nodes NS1 -->
+
+  <UAObject BrowseName="1:TestRolesFolder" NodeId="ns=1;s=TestRolesFolder" ParentNodeId="i=85">
+    <DisplayName>TestRolesFolder</DisplayName>
+    <Description>TestRolesFolder</Description>
+    <References>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAVariable AccessLevel="99" BrowseName="1:Int64_DRP_no_RP" DataType="Int64" NodeId="ns=1;s=Int64_DRP_no_RP">
+    <DisplayName>Int64_DRP_no_RP</DisplayName>
+    <Description>Int64_DRP_no_RP</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestRolesFolder</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Int64>-1000</uax:Int64>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" BrowseName="1:Int64_DRP_RP" DataType="Int64" NodeId="ns=1;s=Int64_DRP_RP">
+    <DisplayName>Int64_DRP_RP</DisplayName>
+    <Description>Int64_DRP_RP</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestRolesFolder</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <RolePermissions>
+      <RolePermission Permissions="64">i=15668</RolePermission> <!-- Write for Observer (i=15668) : Overides DRP Observer -->
+    </RolePermissions>
+    <Value>
+      <uax:Int64>-1000</uax:Int64>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" BrowseName="1:Int64_DRP_RP_2" DataType="Int64" NodeId="ns=1;s=Int64_DRP_RP_2">
+    <DisplayName>Int64_DRP_RP_2</DisplayName>
+    <Description>Int64_DRP_RP_2</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestRolesFolder</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <RolePermissions>
+      <RolePermission Permissions="96">i=15680</RolePermission> <!-- Read + Write for Operator (i=15680) -->
+    </RolePermissions>
+    <Value>
+      <uax:Int64>-1000</uax:Int64>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="99" BrowseName="1:Int64_RP" DataType="Int64" NodeId="ns=1;s=Int64_RP">
+    <DisplayName>Int64_RP</DisplayName>
+    <Description>Int64_RP</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestRolesFolder</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <RolePermissions>
+      <RolePermission Permissions="0">i=15668</RolePermission> <!-- None for Observer (i=15668) -->
+      <RolePermission Permissions="32">i=15680</RolePermission> <!-- Read for Operator (i=15680) -->
+      <RolePermission Permissions="64">i=15716</RolePermission> <!-- Write for ConfigureAdmin (i=15716) -->
+    </RolePermissions>
+    <Value>
+      <uax:Int64>-1000</uax:Int64>
+    </Value>
+  </UAVariable>
+  <!-- Test Roles Object -->
+  <UAObject NodeId="ns=1;s=TestObject" BrowseName="TestObject" ParentNodeId="ns=1;s=TestRolesFolder" EventNotifier="1">
+    <DisplayName>TestObject</DisplayName>
+    <Description>TestObject</Description>
+    <Description Locale="en">TestObject</Description>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestRolesFolder</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=TestObject_Counter</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=MethodNoArg</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
+    </References>
+  </UAObject>
+  <!-- Test Roles Object : variable -->
+  <UAVariable NodeId="ns=1;s=TestObject_Counter" BrowseName="1:Counter" DataType="UInt32" AccessLevel="99">
+    <DisplayName>Counter</DisplayName>
+    <Description/>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <RolePermissions>
+      <RolePermission Permissions="32">i=15668</RolePermission> <!-- Read for Observer (i=15668) -->
+      <RolePermission Permissions="4192">i=15680</RolePermission> <!-- Read + Write + Call for Operator (i=15680) -->
+    </RolePermissions>
+    <Value>
+      <uax:UInt32>0</uax:UInt32>
+    </Value>
+  </UAVariable>
+  <!-- Test Roles Object : method -->
+  <UAMethod NodeId="ns=1;s=MethodNoArg" BrowseName="MethodNoArg" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>IncrementCounter</DisplayName>
+    <Description>IncrementCounter</Description>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
+    </References>
+    <RolePermissions>
+      <RolePermission Permissions="32">i=15668</RolePermission> <!-- Read for Observer (i=15668) -->
+      <RolePermission Permissions="4192">i=15680</RolePermission> <!-- Read + Write + Call for Operator (i=15680) -->
+    </RolePermissions>
+  </UAMethod>
+
+
+<!-- Applicative tests nodes NS2 -->
+
+  <UAVariable AccessLevel="99" BrowseName="2:Int64_RP_no_DRP" DataType="Int64" NodeId="ns=2;s=Int64_RP_no_DRP">
+    <DisplayName>Int64_RP_no_DRP</DisplayName>
+    <Description>Int64_RP_no_DRP</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestRolesFolder</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <RolePermissions>
+      <RolePermission Permissions="32">i=15668</RolePermission> <!-- Read (only) for Observer (i=15668) : useless because no DRP for NS=2 -->
+    </RolePermissions>
+    <Value>
+      <uax:Int64>-1000</uax:Int64>
+    </Value>
+  </UAVariable>
+
+</UANodeSet>

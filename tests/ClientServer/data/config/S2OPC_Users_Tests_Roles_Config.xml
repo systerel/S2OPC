@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC_Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_users_config.xsd">
+  <Anonymous>
+    <!-- Anonymous -->
+    <UserAuthorization write="true" read="true" execute="true" addnode="true"/>
+  </Anonymous>
+  <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
+    <!-- "user1" pwd=password -->
+    <UserPassword user="user1" hash="55c6b4d28fffb9ff1bc8951560eb8d07665aa41a25cd7687a2588c7381814195" salt="c64fd08487e0dc2706583c4416a2e17f">
+      <UserAuthorization write="true" read="true" execute="true" addnode="true"/>
+    </UserPassword>
+    <!-- "me" pwd=1234 -->
+    <UserPassword user="me" hash="847d892ffaccb9822d417866f9d491389b29134b3c73c3a429ac95c627f9d40a" salt="17faf802f81c2503d3043042e79004b4">
+      <UserAuthorization write="true" read="true" execute="true" addnode="true"/>
+    </UserPassword>
+  </UserPasswordConfiguration>
+  <UserCertificates>
+    <PublicKeyInfrastructure path="./S2OPC_Users_PKI" write="true" read="true" execute="true" addnode="true"/>
+    <UserCertificateRights path="user_public/user_2k_cert.der" write="true" read="true" execute="true" addnode="true"/>
+  </UserCertificates>
+</S2OPC_Users>
