@@ -600,16 +600,17 @@ SOPC_StatusCode SOPC_Method_Func_GenEvent(const SOPC_CallContext* callContextPtr
         nbEvents = inputArgs[0].Value.Uint32;
     }
 
-    for (uint32_t i = 1; i <= nbEvents; i++)
+    for (uint32_t i = 0; i < nbEvents; i++)
     {
-        SOPC_Event* eventInstCopy = eventInst;
-        if (i != nbEvents)
-        {
-            eventInstCopy = SOPC_Event_CreateCopy(eventInst, true);
-            SOPC_ASSERT(NULL != eventInstCopy);
-        }
+        SOPC_Event* eventInstCopy = SOPC_Event_CreateCopy(eventInst, true);
+        SOPC_ASSERT(NULL != eventInstCopy);
         status = SOPC_ServerHelper_TriggerEvent(&TestObject, eventInstCopy, inputArgs[2].Value.Uint32,
                                                 inputArgs[3].Value.Uint32);
+    }
+
+    if (NULL != eventInst)
+    {
+        SOPC_Event_Delete(&eventInst);
     }
 
     SOPC_LocalizedText_Clear(&lt);
