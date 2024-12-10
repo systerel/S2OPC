@@ -488,7 +488,7 @@ static SOPC_ReturnStatus compare_monitored_item_LT_values(char** localeIds,
                                                           const SOPC_Variant* newValue,
                                                           int32_t* comparison)
 {
-    SOPC_Variant* tmpOldValue = util_variant__new_Variant_from_Variant(oldValue);
+    SOPC_Variant* tmpOldValue = util_variant__new_Variant_from_Variant(oldValue, false);
     SOPC_Variant* tmpNewValue = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
     if (NULL != tmpOldValue)
@@ -498,7 +498,7 @@ static SOPC_ReturnStatus compare_monitored_item_LT_values(char** localeIds,
     }
     if (NULL != tmpOldValue)
     {
-        tmpNewValue = util_variant__new_Variant_from_Variant(newValue);
+        tmpNewValue = util_variant__new_Variant_from_Variant(newValue, false);
     }
     if (NULL != tmpNewValue)
     {

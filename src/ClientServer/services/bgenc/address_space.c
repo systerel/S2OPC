@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 02/12/2024 17:14:35
+ Date                 : 10/12/2024 14:25:12
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -434,6 +434,7 @@ void address_space__read_AddressSpace_Attribute_value(
       t_bool address_space__l_user_write_auth;
       t_bool address_space__l_is_range_defined;
       t_bool address_space__l_user_executable_auth;
+      t_bool address_space__l_local_treatment;
       
       *address_space__sc = constants_statuscodes_bs__e_sc_ok;
       constants_statuscodes_bs__get_const_RawStatusCode_Good(address_space__val_sc);
@@ -447,6 +448,7 @@ void address_space__read_AddressSpace_Attribute_value(
          *address_space__sc = constants_statuscodes_bs__e_sc_bad_index_range_no_data;
       }
       else {
+         address_space_authorization__is_local_service_treatment(&address_space__l_local_treatment);
          switch (address_space__p_aid) {
          case constants__e_aid_AccessLevel:
             address_space_authorization__read_AddressSpace_AccessLevel_value(address_space__p_node,
@@ -460,6 +462,7 @@ void address_space__read_AddressSpace_Attribute_value(
             break;
          case constants__e_aid_BrowseName:
             address_space_authorization__read_AddressSpace_BrowseName_value(address_space__p_node,
+               address_space__l_local_treatment,
                address_space__sc,
                address_space__val);
             break;
@@ -470,12 +473,14 @@ void address_space__read_AddressSpace_Attribute_value(
             break;
          case constants__e_aid_DataType:
             address_space_authorization__read_AddressSpace_DataType_value(address_space__p_node,
+               address_space__l_local_treatment,
                address_space__sc,
                address_space__val);
             break;
          case constants__e_aid_DisplayName:
             address_space_authorization__read_AddressSpace_DisplayName_value(address_space__p_locales,
                address_space__p_node,
+               address_space__l_local_treatment,
                address_space__sc,
                address_space__val);
             break;
@@ -506,6 +511,7 @@ void address_space__read_AddressSpace_Attribute_value(
             break;
          case constants__e_aid_NodeId:
             address_space_authorization__read_AddressSpace_NodeId_value(address_space__p_node,
+               address_space__l_local_treatment,
                address_space__sc,
                address_space__val);
             break;
@@ -544,6 +550,7 @@ void address_space__read_AddressSpace_Attribute_value(
             break;
          case constants__e_aid_DataTypeDefinition:
             address_space_authorization__read_AddressSpace_DataTypeDefinition_value(address_space__p_node,
+               address_space__l_local_treatment,
                address_space__sc,
                address_space__val);
             break;
@@ -551,6 +558,7 @@ void address_space__read_AddressSpace_Attribute_value(
             address_space_authorization__read_AddressSpace_Value_value(address_space__p_locales,
                address_space__p_node,
                address_space__p_index_range,
+               address_space__l_local_treatment,
                address_space__sc,
                address_space__val,
                address_space__val_sc,
@@ -563,6 +571,7 @@ void address_space__read_AddressSpace_Attribute_value(
             break;
          case constants__e_aid_ArrayDimensions:
             address_space_authorization__read_AddressSpace_ArrayDimensions_value(address_space__p_node,
+               address_space__l_local_treatment,
                address_space__sc,
                address_space__val);
             break;

@@ -148,23 +148,28 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
     switch (attribId)
     {
     case SOPC_AttributeId_NodeId:
-        val = util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, node));
+        // Make a deep copy to avoid any possible address space change side-effect,  WriteValue shall be used for that
+        val = util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, node),
+                                                    true);
         break;
     case SOPC_AttributeId_NodeClass:
         val = util_variant__new_Variant_from_NodeClass(
             *SOPC_AddressSpace_Get_NodeClass(addSpaceAccess->addSpaceRef, node));
         break;
     case SOPC_AttributeId_BrowseName:
+        // Make a deep copy to avoid any possible address space change side-effect,  WriteValue shall be used for that
         val = util_variant__new_Variant_from_QualifiedName(
-            SOPC_AddressSpace_Get_BrowseName(addSpaceAccess->addSpaceRef, node));
+            SOPC_AddressSpace_Get_BrowseName(addSpaceAccess->addSpaceRef, node), true);
         break;
     case SOPC_AttributeId_DisplayName:
+        // Make a deep copy to avoid any possible address space change side-effect,  WriteValue shall be used for that
         val = util_variant__new_Variant_from_LocalizedText(
-            SOPC_AddressSpace_Get_DisplayName(addSpaceAccess->addSpaceRef, node));
+            SOPC_AddressSpace_Get_DisplayName(addSpaceAccess->addSpaceRef, node), true);
         break;
     case SOPC_AttributeId_Description:
+        // Make a deep copy to avoid any possible address space change side-effect,  WriteValue shall be used for that
         val = util_variant__new_Variant_from_LocalizedText(
-            SOPC_AddressSpace_Get_Description(addSpaceAccess->addSpaceRef, node));
+            SOPC_AddressSpace_Get_Description(addSpaceAccess->addSpaceRef, node), true);
         break;
     case SOPC_AttributeId_WriteMask:
         val =
@@ -178,10 +183,14 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
         val = util_variant__new_Variant_from_Bool(*SOPC_AddressSpace_Get_IsAbstract(addSpaceAccess->addSpaceRef, node));
         break;
     case SOPC_AttributeId_Value:
-        val = util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Get_Value(addSpaceAccess->addSpaceRef, node));
+        // Make a deep copy to avoid any possible address space change side-effect,  WriteValue shall be used for that
+        val = util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Get_Value(addSpaceAccess->addSpaceRef, node),
+                                                     true);
         break;
     case SOPC_AttributeId_DataType:
-        val = util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Get_DataType(addSpaceAccess->addSpaceRef, node));
+        // Make a deep copy to avoid any possible address space change side-effect,  WriteValue shall be used for that
+        val = util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Get_DataType(addSpaceAccess->addSpaceRef, node),
+                                                    true);
         break;
     case SOPC_AttributeId_ValueRank:
         val = util_variant__new_Variant_from_int32(*SOPC_AddressSpace_Get_ValueRank(addSpaceAccess->addSpaceRef, node));

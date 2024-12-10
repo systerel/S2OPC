@@ -19,7 +19,7 @@
 
 /** \file
  *
- * Utils to produce some Variants for basic C types: int, float, strings...
+ * Utils to produce some Variants from built-in types: int, float, strings...
  */
 
 #ifndef UTIL_VARIANT_H_
@@ -28,19 +28,18 @@
 #include "sopc_types.h"
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer
- *  (and only the following malloc, not the pnid, so don't use SOPC_*_Clear).
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
-SOPC_Variant* util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid);
+SOPC_Variant* util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid, bool deepCopy);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
 SOPC_Variant* util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl);
 
-SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn);
+SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn, bool deepCopy);
 
-SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt);
+SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt, bool deepCopy);
 
 /**
  * The input variant is returned as result or is freed if the output variant is a new structure
@@ -54,50 +53,54 @@ bool util_variant__copy_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_V
                                                                           char** preferredLocales);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
 SOPC_Variant* util_variant__new_Variant_from_Indet(void);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
-SOPC_Variant* util_variant__new_Variant_from_Variant(const SOPC_Variant* pvara);
+SOPC_Variant* util_variant__new_Variant_from_Variant(const SOPC_Variant* pvara, bool deepCopy);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
 SOPC_Variant* util_variant__new_Variant_from_Bool(bool b);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
 SOPC_Variant* util_variant__new_Variant_from_Byte(uint8_t i);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
 SOPC_Variant* util_variant__new_Variant_from_uint32(uint32_t i);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
 SOPC_Variant* util_variant__new_Variant_from_int64(int64_t i);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
 SOPC_Variant* util_variant__new_Variant_from_int32(int32_t i);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
 SOPC_Variant* util_variant__new_Variant_from_double(double f);
 
 /**
- * The returned Variant is malloced and shall be freed by the consumer.
- * The string is not copied.
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
  */
-SOPC_Variant* util_variant__new_Variant_from_ByteString(SOPC_ByteString buf);
+SOPC_Variant* util_variant__new_Variant_from_ByteString(SOPC_ByteString* bs, bool deepCopy);
+
+/**
+ * The returned Variant is allocated and shall be deleted (or freed + cleared) by consumer
+ */
+SOPC_Variant* util_variant__new_Variant_from_ExtensionObject(SOPC_ExtensionObject* extObj, bool deepCopy);
 
 /**
  * The \p source variant content is copied into \p dest applying:

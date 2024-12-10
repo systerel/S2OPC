@@ -614,7 +614,8 @@ OPERATIONS
         l_user_read_auth,
         l_user_write_auth,
         l_is_range_defined,
-        l_user_executable_auth
+        l_user_executable_auth,
+        l_local_treatment
     IN
         sc := e_sc_ok;
         val_sc <-- get_const_RawStatusCode_Good;
@@ -626,19 +627,25 @@ OPERATIONS
         IF p_aid /= e_aid_Value & l_is_range_defined = TRUE THEN
             sc := e_sc_bad_index_range_no_data
         ELSE
+            /* A local service treatment implies to use a deep copy as value will be used out
+               of the scope of the current S2OPC event treatment.
+               When service treatment is not local, the message (and value) is encoded which makes
+               deep copy useless.
+            */
+            l_local_treatment <-- is_local_service_treatment;
             CASE p_aid OF
                 EITHER e_aid_AccessLevel THEN
                     sc, val <-- read_AddressSpace_AccessLevel_value(p_node)
                 OR e_aid_AccessLevelEx THEN
                     sc, val <-- read_AddressSpace_AccessLevelEx_value(p_node)
                 OR e_aid_BrowseName THEN
-                    sc, val <-- read_AddressSpace_BrowseName_value(p_node)
+                    sc, val <-- read_AddressSpace_BrowseName_value(p_node, l_local_treatment)
                 OR e_aid_ContainsNoLoops THEN
                     sc, val <-- read_AddressSpace_ContainsNoLoops_value(p_node)
                 OR e_aid_DataType THEN
-                    sc, val <-- read_AddressSpace_DataType_value(p_node)
+                    sc, val <-- read_AddressSpace_DataType_value(p_node, l_local_treatment)
                 OR e_aid_DisplayName THEN
-                    sc, val <-- read_AddressSpace_DisplayName_value(p_locales, p_node)
+                    sc, val <-- read_AddressSpace_DisplayName_value(p_locales, p_node, l_local_treatment)
                 OR e_aid_EventNotifier THEN
                     sc, val <-- read_AddressSpace_EventNotifier_value(p_node)
                 OR e_aid_Executable THEN
@@ -650,7 +657,7 @@ OPERATIONS
                 OR e_aid_NodeClass THEN
                     sc, val <-- read_AddressSpace_NodeClass_value(p_node)
                 OR e_aid_NodeId THEN
-                    sc, val <-- read_AddressSpace_NodeId_value(p_node)
+                    sc, val <-- read_AddressSpace_NodeId_value(p_node, l_local_treatment)
                 OR e_aid_Symmetric THEN
                     sc, val <-- read_AddressSpace_Symmetric_value(p_node)
                 OR e_aid_UserAccessLevel THEN
@@ -661,13 +668,13 @@ OPERATIONS
                     l_user_executable_auth <-- get_user_authorization(e_operation_type_executable, p_nid, e_aid_Executable, p_user);
                     sc, val <-- read_AddressSpace_UserExecutable_value(p_node, l_user_executable_auth)
                 OR e_aid_DataTypeDefinition THEN
-                    sc, val <-- read_AddressSpace_DataTypeDefinition_value(p_node)
+                    sc, val <-- read_AddressSpace_DataTypeDefinition_value(p_node, l_local_treatment)
                 OR e_aid_Value THEN
-                    sc, val, val_sc, val_ts_src <-- read_AddressSpace_Value_value(p_locales, p_node, p_index_range)
+                    sc, val, val_sc, val_ts_src <-- read_AddressSpace_Value_value(p_locales, p_node, p_index_range, l_local_treatment)
                 OR e_aid_ValueRank THEN
                     sc, val <-- read_AddressSpace_ValueRank_value(p_node)
                 OR e_aid_ArrayDimensions THEN
-                    sc, val <-- read_AddressSpace_ArrayDimensions_value(p_node)
+                    sc, val <-- read_AddressSpace_ArrayDimensions_value(p_node, l_local_treatment)
                 END
             END
         END

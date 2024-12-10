@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 16/07/2024 14:13:13
+ Date                 : 10/12/2024 15:52:45
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -147,10 +147,12 @@ extern void address_space_bs__read_AddressSpace_AccessLevel_value(
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_ArrayDimensions_value(
    const constants__t_Node_i address_space_bs__p_node,
+   const t_bool address_space_bs__p_deepCopy,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_BrowseName_value(
    const constants__t_Node_i address_space_bs__p_node,
+   const t_bool address_space_bs__p_deepCopy,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
@@ -159,15 +161,18 @@ extern void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_DataTypeDefinition_value(
    const constants__t_Node_i address_space_bs__p_node,
+   const t_bool address_space_bs__p_deepCopy,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_DataType_value(
    const constants__t_Node_i address_space_bs__p_node,
+   const t_bool address_space_bs__p_deepCopy,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_DisplayName_value(
    const constants__t_LocaleIds_i address_space_bs__p_locales,
    const constants__t_Node_i address_space_bs__p_node,
+   const t_bool address_space_bs__p_deepCopy,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_EventNotifier_value(
@@ -192,6 +197,7 @@ extern void address_space_bs__read_AddressSpace_NodeClass_value(
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_NodeId_value(
    const constants__t_Node_i address_space_bs__p_node,
+   const t_bool address_space_bs__p_deepCopy,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_Raw_Node_Value_value(
@@ -225,6 +231,7 @@ extern void address_space_bs__read_AddressSpace_Value_value(
    const constants__t_LocaleIds_i address_space_bs__p_locales,
    const constants__t_Node_i address_space_bs__p_node,
    const constants__t_IndexRange_i address_space_bs__index_range,
+   const t_bool address_space_bs__p_deepCopy,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant,
    constants__t_RawStatusCode * const address_space_bs__val_sc,

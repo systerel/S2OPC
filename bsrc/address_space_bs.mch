@@ -260,13 +260,15 @@ OPERATIONS
     END
     ;
 
-    sc, variant <-- read_AddressSpace_BrowseName_value(p_node) =
+    // Note: p_deepCopy = FALSE => variant is a shallow copy and usage shall be limited to the current S2OPC event treatment execution.
+    sc, variant <-- read_AddressSpace_BrowseName_value(p_node, p_deepCopy) =
     PRE
         p_node : t_Node_i         &
         p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(a_BrowseName)
+        p_node : dom(a_BrowseName) &
+        p_deepCopy : BOOL
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -300,13 +302,15 @@ OPERATIONS
     END
     ;
 
-    sc, variant <-- read_AddressSpace_DataType_value(p_node) =
+    // Note: p_deepCopy = FALSE => variant is a shallow copy and usage shall be limited to the current S2OPC event treatment execution.
+    sc, variant <-- read_AddressSpace_DataType_value(p_node, p_deepCopy) =
     PRE
         p_node : t_Node_i         &
         p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(a_DataType)
+        p_node : dom(a_DataType)  &
+        p_deepCopy : BOOL
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -320,7 +324,8 @@ OPERATIONS
     END
     ;
 
-    sc, variant <-- read_AddressSpace_DisplayName_value(p_locales, p_node) =
+    // Note: p_deepCopy = FALSE => variant is a shallow copy and usage shall be limited to the current S2OPC event treatment execution.
+    sc, variant <-- read_AddressSpace_DisplayName_value(p_locales, p_node, p_deepCopy) =
     PRE
         p_locales : t_LocaleIds_i &
         p_locales : t_LocaleIds   &
@@ -328,7 +333,8 @@ OPERATIONS
         p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(a_DisplayName)
+        p_node : dom(a_DisplayName) &
+        p_deepCopy : BOOL
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -441,11 +447,13 @@ OPERATIONS
     END
     ;
 
-    sc, variant <-- read_AddressSpace_NodeId_value(p_node) =
+    // Note: p_deepCopy = FALSE => variant is a shallow copy and usage shall be limited to the current S2OPC event treatment execution.
+    sc, variant <-- read_AddressSpace_NodeId_value(p_node, p_deepCopy) =
     PRE
         p_node : t_Node_i         &
         p_node : s_Node           &
-        p_node : dom(a_NodeId)
+        p_node : dom(a_NodeId)    &
+        p_deepCopy : BOOL
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -523,13 +531,15 @@ OPERATIONS
     END
     ;
 
-    sc, variant <-- read_AddressSpace_DataTypeDefinition_value(p_node) =
+    // Note: p_deepCopy = FALSE => variant is a shallow copy and usage shall be limited to the current S2OPC event treatment execution.
+    sc, variant <-- read_AddressSpace_DataTypeDefinition_value(p_node, p_deepCopy) =
     PRE
         p_node : t_Node_i         &
         p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(a_DataTypeDefinition)
+        p_node : dom(a_DataTypeDefinition) &
+        p_deepCopy : BOOL
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -546,7 +556,8 @@ OPERATIONS
     END
     ;
 
-    sc, variant, val_sc, val_ts_src <-- read_AddressSpace_Value_value(p_locales, p_node, index_range) =
+    // Note: p_deepCopy = FALSE => variant is a shallow copy and usage shall be limited to the current S2OPC event treatment execution.
+    sc, variant, val_sc, val_ts_src <-- read_AddressSpace_Value_value(p_locales, p_node, index_range, p_deepCopy) =
     PRE
         p_locales : t_LocaleIds_i &
         p_locales : t_LocaleIds   &
@@ -555,7 +566,8 @@ OPERATIONS
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
         p_node : dom(a_Value) &
-        index_range : t_IndexRange_i
+        index_range : t_IndexRange_i &
+        p_deepCopy : BOOL
     THEN
         CHOICE
             variant := c_Variant_indet ||
@@ -592,7 +604,9 @@ OPERATIONS
     END
     ;
 
-    /* Raw node value access without locale nor index range: to be used for DataChange evaluation in subscription */
+    /* Raw node value access without locale nor index range: to be used for DataChange evaluation in subscription
+     * Important note: variant is a shallow copy and its usage scope shall be limited to the current S2OPC event treatment execution.
+     */
     sc, variant, val_sc, val_ts_src <-- read_AddressSpace_Raw_Node_Value_value(p_node, p_nid, p_aid) =
     PRE
         p_node : t_Node_i &
@@ -646,13 +660,15 @@ OPERATIONS
     END
     ;
 
-    sc, variant <-- read_AddressSpace_ArrayDimensions_value(p_node) =
+    // Note: p_deepCopy = FALSE => variant is a shallow copy and usage shall be limited to the current S2OPC event treatment execution.
+    sc, variant <-- read_AddressSpace_ArrayDimensions_value(p_node, p_deepCopy) =
     PRE
         p_node : t_Node_i          &
         p_node : s_Node           &
         p_node : dom(a_NodeId)    &
         p_node : dom(a_NodeClass) &
-        p_node : dom(a_ArrayDimensions)
+        p_node : dom(a_ArrayDimensions) &
+        p_deepCopy : BOOL
     THEN
         CHOICE
             variant := c_Variant_indet ||

@@ -378,9 +378,11 @@ void address_space_bs__read_AddressSpace_AccessLevel_value(
 
 void address_space_bs__read_AddressSpace_ArrayDimensions_value(
     const constants__t_Node_i address_space_bs__p_node,
+    const t_bool address_space_bs__p_deepCopy,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
+    SOPC_UNUSED_ARG(address_space_bs__p_deepCopy); // for now we create a new array with values to 0
     SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
                 address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
@@ -416,12 +418,14 @@ void address_space_bs__read_AddressSpace_ArrayDimensions_value(
 
 void address_space_bs__read_AddressSpace_BrowseName_value(
     const constants__t_Node_i address_space_bs__p_node,
+    const t_bool address_space_bs__p_deepCopy,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_QualifiedName(
-        SOPC_AddressSpace_Get_BrowseName(address_space_bs__nodes, address_space_bs__p_node));
+        SOPC_AddressSpace_Get_BrowseName(address_space_bs__nodes, address_space_bs__p_node),
+        address_space_bs__p_deepCopy);
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -445,42 +449,36 @@ void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
 
 void address_space_bs__read_AddressSpace_DataTypeDefinition_value(
     const constants__t_Node_i address_space_bs__p_node,
+    const t_bool address_space_bs__p_deepCopy,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
     SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_DataType);
-    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     SOPC_ExtensionObject* extObj =
         SOPC_AddressSpace_Get_DataTypeDefinition(address_space_bs__nodes, address_space_bs__p_node);
-    SOPC_Variant* variant = SOPC_Variant_Create();
+    SOPC_Variant* variant = NULL;
 
-    if (variant == NULL)
+    if (SOPC_ExtObjBodyEncoding_Object == extObj->Encoding &&
+        (&OpcUa_StructureDefinition_EncodeableType == extObj->Body.Object.ObjType ||
+         &OpcUa_EnumDefinition_EncodeableType == extObj->Body.Object.ObjType))
     {
-        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+        variant = util_variant__new_Variant_from_ExtensionObject(extObj, address_space_bs__p_deepCopy);
+        if (NULL != variant)
+        {
+            *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+        }
     }
     else
     {
-        if (SOPC_ExtObjBodyEncoding_Object == extObj->Encoding &&
-            (&OpcUa_StructureDefinition_EncodeableType == extObj->Body.Object.ObjType ||
-             &OpcUa_EnumDefinition_EncodeableType == extObj->Body.Object.ObjType))
-        {
-            variant->BuiltInTypeId = SOPC_ExtensionObject_Id;
-            variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-            variant->Value.ExtObject = extObj;
-            variant->DoNotClear = true; // It is shallow copy of provided node
-        }
-        else
-        {
-            SOPC_Free(variant);
-            variant = NULL;
-            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
-        }
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
     }
     *address_space_bs__variant = variant;
 }
 
 void address_space_bs__read_AddressSpace_DataType_value(
     const constants__t_Node_i address_space_bs__p_node,
+    const t_bool address_space_bs__p_deepCopy,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
@@ -488,7 +486,8 @@ void address_space_bs__read_AddressSpace_DataType_value(
                 address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_NodeId(
-        SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, address_space_bs__p_node));
+        SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, address_space_bs__p_node),
+        address_space_bs__p_deepCopy);
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -498,12 +497,14 @@ void address_space_bs__read_AddressSpace_DataType_value(
 void address_space_bs__read_AddressSpace_DisplayName_value(
     const constants__t_LocaleIds_i address_space_bs__p_locales,
     const constants__t_Node_i address_space_bs__p_node,
+    const t_bool address_space_bs__p_deepCopy,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_LocalizedText(
-        SOPC_AddressSpace_Get_DisplayName(address_space_bs__nodes, address_space_bs__p_node));
+        SOPC_AddressSpace_Get_DisplayName(address_space_bs__nodes, address_space_bs__p_node),
+        address_space_bs__p_deepCopy);
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -611,11 +612,12 @@ void address_space_bs__read_AddressSpace_NodeClass_value(
 
 void address_space_bs__read_AddressSpace_NodeId_value(
     const constants__t_Node_i address_space_bs__p_node,
+    const t_bool address_space_bs__p_deepCopy,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
     *address_space_bs__variant = util_variant__new_Variant_from_NodeId(
-        SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, address_space_bs__p_node));
+        SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, address_space_bs__p_node), address_space_bs__p_deepCopy);
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -643,7 +645,7 @@ void address_space_bs__read_AddressSpace_Raw_Node_Value_value(
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
 
     *address_space_bs__variant = util_variant__new_Variant_from_Variant(
-        SOPC_AddressSpace_Get_Value(address_space_bs__nodes, address_space_bs__p_node));
+        SOPC_AddressSpace_Get_Value(address_space_bs__nodes, address_space_bs__p_node), false);
     if (NULL == *address_space_bs__variant)
     {
         return;
@@ -745,6 +747,7 @@ void address_space_bs__read_AddressSpace_Value_value(
     const constants__t_LocaleIds_i address_space_bs__p_locales,
     const constants__t_Node_i address_space_bs__p_node,
     const constants__t_IndexRange_i address_space_bs__index_range,
+    const t_bool address_space_bs__p_deepCopy,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant,
     constants__t_RawStatusCode* const address_space_bs__val_sc,
@@ -756,7 +759,7 @@ void address_space_bs__read_AddressSpace_Value_value(
     *address_space_bs__val_ts_src = constants_bs__c_Timestamp_null;
 
     SOPC_Variant* value = util_variant__new_Variant_from_Variant(
-        SOPC_AddressSpace_Get_Value(address_space_bs__nodes, address_space_bs__p_node));
+        SOPC_AddressSpace_Get_Value(address_space_bs__nodes, address_space_bs__p_node), address_space_bs__p_deepCopy);
 
     if (value == NULL)
     {

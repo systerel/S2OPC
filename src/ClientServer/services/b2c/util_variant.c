@@ -31,19 +31,40 @@
 
 #include "sopc_missing_c99.h"
 
-SOPC_Variant* util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid)
+SOPC_Variant* util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid, bool deepCopy)
 {
-    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Variant_Create();
 
     if (NULL == pvar)
+    {
         return NULL;
+    }
 
-    SOPC_Variant_Initialize(pvar);
     pvar->BuiltInTypeId = SOPC_NodeId_Id;
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
-    pvar->Value.NodeId = pnid;
-    pvar->DoNotClear = true; // It is shallow copy of provided node
-
+    if (deepCopy)
+    {
+        pvar->Value.NodeId = SOPC_Calloc(sizeof(*pvar->Value.NodeId), 1);
+        SOPC_ReturnStatus status = (NULL != pvar->Value.NodeId ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_NodeId_Copy(pvar->Value.NodeId, pnid);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(pvar->Value.NodeId);
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(pvar);
+            pvar = NULL;
+        }
+    }
+    else
+    {
+        pvar->Value.NodeId = pnid;
+        pvar->DoNotClear = true; // It is shallow copy of provided node
+    }
     return pvar;
 }
 
@@ -62,34 +83,77 @@ SOPC_Variant* util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl)
     return pvar;
 }
 
-SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn)
+SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn, bool deepCopy)
 {
-    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
-
+    SOPC_Variant* pvar = SOPC_Variant_Create();
     if (NULL == pvar)
+    {
         return NULL;
+    }
 
-    SOPC_Variant_Initialize(pvar);
     pvar->BuiltInTypeId = SOPC_QualifiedName_Id;
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
-    pvar->Value.Qname = qn;
-    pvar->DoNotClear = true; // It is shallow copy of provided node
+    if (deepCopy)
+    {
+        pvar->Value.Qname = SOPC_Calloc(sizeof(*pvar->Value.Qname), 1);
+        SOPC_ReturnStatus status = (NULL != pvar->Value.Qname ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_QualifiedName_Copy(pvar->Value.Qname, qn);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(pvar->Value.Qname);
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(pvar);
+            pvar = NULL;
+        }
+    }
+    else
+    {
+        pvar->Value.Qname = qn;
+        pvar->DoNotClear = true; // It is shallow copy of provided node
+    }
 
     return pvar;
 }
 
-SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt)
+SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt, bool deepCopy)
 {
-    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
+    SOPC_Variant* pvar = SOPC_Variant_Create();
 
     if (NULL == pvar)
+    {
         return NULL;
+    }
 
-    SOPC_Variant_Initialize(pvar);
     pvar->BuiltInTypeId = SOPC_LocalizedText_Id;
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
-    pvar->Value.LocalizedText = lt;
-    pvar->DoNotClear = true; // It is shallow copy of provided node
+    if (deepCopy)
+    {
+        pvar->Value.LocalizedText = SOPC_Calloc(sizeof(*pvar->Value.LocalizedText), 1);
+        SOPC_ReturnStatus status = (NULL != pvar->Value.LocalizedText ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_LocalizedText_Copy(pvar->Value.LocalizedText, lt);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(pvar->Value.LocalizedText);
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(pvar);
+            pvar = NULL;
+        }
+    }
+    else
+    {
+        pvar->Value.LocalizedText = lt;
+        pvar->DoNotClear = true; // It is shallow copy of provided node
+    }
 
     return pvar;
 }
@@ -214,19 +278,26 @@ SOPC_Variant* util_variant__new_Variant_from_Indet(void)
     return pvar;
 }
 
-SOPC_Variant* util_variant__new_Variant_from_Variant(const SOPC_Variant* pvara)
+SOPC_Variant* util_variant__new_Variant_from_Variant(const SOPC_Variant* pvara, bool deepCopy)
 {
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     SOPC_Variant* pvar;
     if (NULL == pvara)
         return util_variant__new_Variant_from_Indet();
 
-    pvar = SOPC_Malloc(sizeof(SOPC_Variant));
+    pvar = SOPC_Variant_Create();
 
     if (NULL == pvar)
         return NULL;
 
-    retStatus = SOPC_Variant_ShallowCopy(pvar, pvara);
+    if (deepCopy)
+    {
+        retStatus = SOPC_Variant_Copy(pvar, pvara);
+    }
+    else
+    {
+        retStatus = SOPC_Variant_ShallowCopy(pvar, pvara);
+    }
 
     if (retStatus != SOPC_STATUS_OK)
     {
@@ -330,18 +401,68 @@ SOPC_Variant* util_variant__new_Variant_from_double(double f)
     return pvar;
 }
 
-SOPC_Variant* util_variant__new_Variant_from_ByteString(SOPC_ByteString buf)
+SOPC_Variant* util_variant__new_Variant_from_ByteString(SOPC_ByteString* bs, bool deepCopy)
 {
-    SOPC_Variant* pvar = SOPC_Malloc(sizeof(SOPC_Variant));
+    SOPC_ASSERT(NULL != bs);
+    SOPC_Variant* pvar = SOPC_Variant_Create();
+    if (NULL == pvar)
+    {
+        return NULL;
+    }
+
+    pvar->BuiltInTypeId = SOPC_ByteString_Id;
+    pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+    if (deepCopy)
+    {
+        SOPC_ByteString_Initialize(&pvar->Value.Bstring);
+        SOPC_ReturnStatus status = SOPC_ByteString_Copy(&pvar->Value.Bstring, bs);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(pvar);
+            pvar = NULL;
+        }
+    }
+    else
+    {
+        pvar->Value.Bstring = *bs;
+        pvar->DoNotClear = true; // It is shallow copy of provided node
+    }
+
+    return pvar;
+}
+
+SOPC_Variant* util_variant__new_Variant_from_ExtensionObject(SOPC_ExtensionObject* extObj, bool deepCopy)
+{
+    SOPC_Variant* pvar = SOPC_Variant_Create();
 
     if (NULL == pvar)
         return NULL;
 
-    SOPC_Variant_Initialize(pvar);
-    pvar->BuiltInTypeId = SOPC_ByteString_Id;
+    pvar->BuiltInTypeId = SOPC_ExtensionObject_Id;
     pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
-    pvar->Value.Bstring = buf;
-    pvar->DoNotClear = true; // It is shallow copy of provided node
+    if (deepCopy)
+    {
+        pvar->Value.ExtObject = SOPC_Calloc(sizeof(*pvar->Value.ExtObject), 1);
+        SOPC_ReturnStatus status = (NULL != pvar->Value.ExtObject ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ExtensionObject_Copy(pvar->Value.ExtObject, extObj);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(pvar->Value.ExtObject);
+            }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(pvar);
+            pvar = NULL;
+        }
+    }
+    else
+    {
+        pvar->Value.ExtObject = extObj;
+        pvar->DoNotClear = true; // It is shallow copy of provided node
+    }
 
     return pvar;
 }
