@@ -59,6 +59,8 @@
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 
 static int32_t endpointClosed = false;
+static int32_t nonRegReadWriteTest = false;
+static int32_t nonRegWriteResponses = 0;
 
 static uint32_t cptReadResps = 0;
 
@@ -70,32 +72,115 @@ static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
 
 static void SOPC_LocalServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* response, uintptr_t appContext)
 {
-    if (encType == &OpcUa_ReadResponse_EncodeableType)
+    if (true != SOPC_Atomic_Int_Get(&nonRegReadWriteTest))
     {
-        printf("<Test_Server_Local_Service: received local service ReadResponse \n");
-        OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
-        cptReadResps++;
-        // Check context value is same as those provided with request
-        SOPC_ASSERT(cptReadResps == appContext);
-        if (cptReadResps <= 1)
+        if (encType == &OpcUa_ReadResponse_EncodeableType)
         {
-            test_results_set_service_result(
-                test_read_request_response(readResp, readResp->ResponseHeader.ServiceResult, 0) ? true : false);
+            printf("<Test_Server_Local_Service: received local service ReadResponse \n");
+            OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
+            cptReadResps++;
+            // Check context value is same as those provided with request
+            SOPC_ASSERT(cptReadResps == appContext);
+            if (cptReadResps <= 1)
+            {
+                test_results_set_service_result(
+                    test_read_request_response(readResp, readResp->ResponseHeader.ServiceResult, 0) ? true : false);
+            }
+            else
+            {
+                // Second read response is to test write effect (through read result)
+                test_results_set_service_result(
+                    tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
+            }
         }
-        else
+        else if (encType == &OpcUa_WriteResponse_EncodeableType)
         {
-            // Second read response is to test write effect (through read result)
-            test_results_set_service_result(tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
+            // Check context value is same as one provided with request
+            SOPC_ASSERT(1 == appContext);
+            printf("<Test_Server_Local_Service: received local service  WriteResponse \n");
+            OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
+            test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
         }
     }
-    else if (encType == &OpcUa_WriteResponse_EncodeableType)
+    else
     {
-        // Check context value is same as one provided with request
-        SOPC_ASSERT(1 == appContext);
-        printf("<Test_Server_Local_Service: received local service  WriteResponse \n");
-        OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
-        test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+        printf("<Test_Server_Local_Service: received local service ReadResponse (with concurrent write) \n");
+        if (encType == &OpcUa_ReadResponse_EncodeableType)
+        {
+            OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
+            for (int32_t i = 0; i < readResp->NoOfResults; i++)
+            {
+                // Access the read value, absence of errors with ASAN activated shows issue #1544 is fixed
+                char* stringContent = SOPC_String_GetCString(&readResp->Results[i].Value.Value.String);
+                printf("Read string value: '%s'\n", stringContent);
+                SOPC_Free(stringContent);
+            }
+        }
+        else if (encType == &OpcUa_WriteResponse_EncodeableType)
+        {
+            // count number of write responses
+            (void) SOPC_Atomic_Int_Add(&nonRegWriteResponses, 1);
+        }
     }
+}
+
+// Non regression test for issue #1544 leading to access freed memory
+// when using local read service on variable concurrently written
+static void test_concurrent_write_read_non_reg(void)
+{
+    SOPC_Atomic_Int_Set(&nonRegReadWriteTest, true);
+    const uint32_t sleepTimeout = 50;
+    // Loop timeout in milliseconds
+    uint32_t loopTimeout = 5000;
+    // Counter to stop waiting on timeout
+    uint32_t loopCpt = 0;
+
+    const size_t nbReadWrites = 5;
+    const size_t nbReads = 1;
+    // Note: we need a non-native type which has allocated memory that might be freed by server
+    const SOPC_NodeId stringVar = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1004};
+
+    OpcUa_ReadRequest* readReq = NULL;
+    OpcUa_WriteRequest* writeReq = NULL;
+    SOPC_DataValue stringVarDv;
+    SOPC_DataValue_Initialize(&stringVarDv);
+    stringVarDv.Value.BuiltInTypeId = SOPC_String_Id;
+    SOPC_String_Initialize(&stringVarDv.Value.Value.String);
+    SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&stringVarDv.Value.Value.String, "Draw me a sheep");
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    for (size_t i = 0; i < nbReadWrites; i++)
+    {
+        // Prepare read <nbReads> times the string variable value
+        readReq = SOPC_ReadRequest_Create(nbReads, OpcUa_TimestampsToReturn_Neither);
+        SOPC_ASSERT(NULL != readReq);
+        for (size_t j = 0; j < nbReads; j++)
+        {
+            status = SOPC_ReadRequest_SetReadValue(readReq, j, &stringVar, SOPC_AttributeId_Value, NULL);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+        }
+        // Prepare to write the string variable value
+        writeReq = SOPC_WriteRequest_Create(1);
+        SOPC_ASSERT(NULL != writeReq);
+        status = SOPC_WriteRequest_SetWriteValue(writeReq, 0, &stringVar, SOPC_AttributeId_Value, NULL, &stringVarDv);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        // Call local services read and then write,
+        // read is returning freed memory from address space on write prior fix
+        status = SOPC_ServerHelper_LocalServiceAsync(readReq, 12);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        status = SOPC_ServerHelper_LocalServiceAsync(writeReq, 42);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
+
+    /* Wait until all write responses are received */
+    loopCpt = 0;
+    while ((int32_t) nbReadWrites != SOPC_Atomic_Int_Get(&nonRegWriteResponses) &&
+           loopCpt * sleepTimeout <= loopTimeout)
+    {
+        loopCpt++;
+        SOPC_Sleep(sleepTimeout);
+    }
+    SOPC_ASSERT(loopCpt * sleepTimeout <= loopTimeout);
+    SOPC_Atomic_Int_Set(&nonRegReadWriteTest, false);
 }
 
 static bool checkGetEndpointsResponse(OpcUa_GetEndpointsResponse* getEndpointsResp)
@@ -929,6 +1014,9 @@ int main(int argc, char* argv[])
     {
         status = check_readDataTypeDefinition(address_space);
     }
+
+    // Non regression test on concurrent read / write
+    test_concurrent_write_read_non_reg();
 
     // Asynchronous request to stop the server
     SOPC_ReturnStatus stopStatus = SOPC_ServerHelper_StopServer();
