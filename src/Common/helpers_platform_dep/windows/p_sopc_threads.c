@@ -100,6 +100,7 @@ SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
         SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
         DeleteCriticalSection(&mutI->mutex);
         status = SOPC_STATUS_OK;
+        SOPC_Free(mutI);
     }
     return status;
 }
