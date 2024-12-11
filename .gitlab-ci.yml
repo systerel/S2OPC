@@ -725,8 +725,6 @@ windows-appveyor:
   needs: []
   script:
     - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
-  tags:
-    - linux
   rules:
     - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null && $WINDOWS_ARTIFACTS == null || $CI_COMMIT_TAG || \
            $CI_COMMIT_BRANCH == 'master' && $ALL_TESTS == null && \
@@ -743,8 +741,6 @@ windows-appveyor-artifacts:
     - wget https://ci.appveyor.com/api/projects/Systerel/S2OPC/artifacts/build/Binaries.zip?branch=${CI_COMMIT_BRANCH} -O Binaries.zip
     - wget https://ci.appveyor.com/api/projects/Systerel/S2OPC/artifacts/build/Libraries.zip?branch=${CI_COMMIT_BRANCH} -O Libraries.zip
     - wget https://ci.appveyor.com/api/projects/Systerel/S2OPC/artifacts/DLL_build.zip?branch=${CI_COMMIT_BRANCH} -O DLL_build.zip
-  tags:
-    - linux
   rules:
     - if: "$WINDOWS_TEST != null && $WINDOWS_ARTIFACTS != null"
   artifacts:
