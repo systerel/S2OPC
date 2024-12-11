@@ -596,8 +596,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_PubSubGetLength_MessageRandom(const SOPC_C
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider* pProvider,
                                                        const uint8_t* pInput,
                                                        uint32_t lenPlainText,
-                                                       SOPC_SecretBuffer* pKey,
-                                                       SOPC_SecretBuffer* pIV,
+                                                       const SOPC_SecretBuffer* pKey,
+                                                       const SOPC_SecretBuffer* pIV,
                                                        uint8_t* pOutput,
                                                        uint32_t lenOutput)
 {
@@ -653,8 +653,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider* pProvider,
                                                        const uint8_t* pInput,
                                                        uint32_t lenCipherText,
-                                                       SOPC_SecretBuffer* pKey,
-                                                       SOPC_SecretBuffer* pIV,
+                                                       const SOPC_SecretBuffer* pKey,
+                                                       const SOPC_SecretBuffer* pIV,
                                                        uint8_t* pOutput,
                                                        uint32_t lenOutput)
 {
@@ -711,8 +711,8 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
 SOPC_ReturnStatus SOPC_CryptoProvider_PubSubCrypt(const SOPC_CryptoProvider* pProvider,
                                                   const uint8_t* pInput,
                                                   uint32_t lenInput,
-                                                  SOPC_SecretBuffer* pKey,
-                                                  SOPC_SecretBuffer* pKeyNonce,
+                                                  const SOPC_SecretBuffer* pKey,
+                                                  const SOPC_SecretBuffer* pKeyNonce,
                                                   const SOPC_ExposedBuffer* pRandom,
                                                   uint32_t lenRandom,
                                                   uint32_t uSequenceNumber,
@@ -768,7 +768,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_PubSubCrypt(const SOPC_CryptoProvider* pPr
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* pProvider,
                                                     const uint8_t* pInput,
                                                     uint32_t lenInput,
-                                                    SOPC_SecretBuffer* pKey,
+                                                    const SOPC_SecretBuffer* pKey,
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
@@ -833,7 +833,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricSign(const SOPC_CryptoProvider* p
 SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricVerify(const SOPC_CryptoProvider* pProvider,
                                                       const uint8_t* pInput,
                                                       uint32_t lenInput,
-                                                      SOPC_SecretBuffer* pKey,
+                                                      const SOPC_SecretBuffer* pKey,
                                                       const uint8_t* pSignature,
                                                       uint32_t lenOutput)
 {
@@ -1140,7 +1140,7 @@ static inline SOPC_ReturnStatus DeriveKS(const SOPC_CryptoProvider* pProvider,
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySetsClient(const SOPC_CryptoProvider* pProvider,
-                                                          SOPC_SecretBuffer* pClientNonce,
+                                                          const SOPC_SecretBuffer* pClientNonce,
                                                           const SOPC_ExposedBuffer* pServerNonce,
                                                           uint32_t lenServerNonce,
                                                           SOPC_SC_SecurityKeySet* pClientKeySet,
