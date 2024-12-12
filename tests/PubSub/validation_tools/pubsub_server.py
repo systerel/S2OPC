@@ -39,7 +39,7 @@ class PubSubState(Enum):
 class PubSubServer:
     """Wraps a client that connects to the sample pubsub_server"""
 
-    def __init__(self, uri, nid_configuration, nid_start_stop, nid_status, nid_publisherObject, nid_methodAcyclicSend, nid_acyclicSendStatus):
+    def __init__(self, uri, nid_configuration, nid_start_stop, nid_status, nid_publisherObject, nid_methodAcyclicSend, nid_acyclicSendStatus, nid_methodDSMFiltering, nid_DSMFilteringStatus):
         self.uri = uri
         self.client = Client(self.uri)
         self.client.application_uri = "urn:S2OPC:localhost"
@@ -49,6 +49,8 @@ class PubSubServer:
         self.nid_publisherObject = nid_publisherObject
         self.nid_methodAcyclicSend = nid_methodAcyclicSend
         self.nid_acyclicSendStatus = nid_acyclicSendStatus
+        self.nid_methodDSMFiltering = nid_methodDSMFiltering
+        self.nid_DSMFilteringStatus = nid_DSMFilteringStatus
 
     # Connect to the Pub/Sub server. Shall be called before other methods
     def connect(self):
@@ -60,6 +62,8 @@ class PubSubServer:
         self.nodePublisherObject = self.client.get_node(self.nid_publisherObject)
         self.nodeMethodAcyclicSend = self.client.get_node(self.nid_methodAcyclicSend)
         self.nodeAcyclicSendStatus = self.client.get_node(self.nid_acyclicSendStatus)
+        self.nodeMethodDSMFiltering = self.client.get_node(self.nid_methodDSMFiltering)
+        self.nodeDSMFilteringStatus = self.client.get_node(self.nid_DSMFilteringStatus)
 
     # Is connected to Pub/Sub server
     def isConnected(self):
@@ -148,6 +152,24 @@ class PubSubServer:
         except: #TODO exception too broad
             print('Client probably not connected to PubSubServer')
             return None
+
+    # Call method filtering DataSetMessage with parameters (Publisher Id, Writer Group Id, DataSetMessage Id) and enableDsm
+    # If (Publisher Id, Writer Group Id, DataSetMessage Id) tuple match a DSM configuration enable it if enableDsm is True disable it otherwise
+    def callFilteringDSM(self, dataSetMessageIdentifier, enableDsm) :
+        publisherId, writerGroupId, dataSetMessageId = dataSetMessageIdentifier
+        try:
+            self.nodePublisherObject.call_method(self.nodeMethodDSMFiltering, ua.Variant(publisherId, ua.VariantType.UInt64),
+                                                 ua.Variant(writerGroupId, ua.VariantType.UInt16),
+                                                 ua.Variant(dataSetMessageId, ua.VariantType.UInt16),
+                                                 ua.Variant(enableDsm, ua.VariantType.Boolean))
+        except:
+            print('Client probably not connected to PubSubServer')
+
+    def getFilteringDSMStatus(self):
+        try:
+            return self.nodeDSMFilteringStatus.get_value()
+        except: #TODO exception too broad
+            print('Client probably not connected to PubSubServer')
 
     # Get value. Nid is a string
     def getValue(self, nid):

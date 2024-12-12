@@ -34,6 +34,8 @@ NID_STATUS = u"ns=1;s=PubSubStatus"
 NID_PUBLISHER= u"ns=1;s=Publisher"
 NID_ACYCLIC_SEND = u"ns=1;s=AcyclicSend"
 NID_ACYCLIC_SEND_STATUS= u"ns=1;s=AcyclicPubSendStatus"
+NID_DSM_FILTERING = u"ns=1;s=DataSetMessageFiltering"
+NID_DSM_FILTERING_STATUS = u"ns=1;s=DataSetMessageFilteringStatus"
 NID_SUB_STRING = u"ns=1;s=SubString"
 NID_SUB_BOOL = u"ns=1;s=SubBool"
 NID_SUB_UINT16 = u"ns=1;s=SubUInt16"
@@ -57,10 +59,10 @@ DYN_CONF_PUB_INTERVAL = 1.0
 # Time to sleep in order to receive Keys and pubsub message
 DYNAMIC_CONF_SKS_INTERVAL = 0.8
 
-PUBLISHER_ACYCLIC_NOT_TRIGGERED = 0
-PUBLISHER_ACYCLIC_IN_PROGRESS = 1
-PUBLISHER_ACYCLIC_SENT = 2
-PUBLISHER_ACYCLIC_ERROR = 3
+PUBLISHER_METHOD_NOT_TRIGGERED = 0
+PUBLISHER_METHOD_IN_PROGRESS = 1
+PUBLISHER_METHOD_SUCCESS = 2
+PUBLISHER_METHOD_ERROR = 3
 
 NODE_VARIANT_TYPE = { NID_SUB_BOOL : ua.VariantType.Boolean,
                       NID_SUB_UINT16 : ua.VariantType.UInt16,
@@ -809,6 +811,83 @@ XML_PUBSUB_GROUP_ID_FILTER="""<PubSub>
     </connection>
 </PubSub>"""
 
+XML_PUBSUB_DATASET_DYNAMIC_EMISSION="""<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="none">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            </dataset>
+            <dataset writerId="51" enableEmission="false">
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="none">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            </dataset>
+            <dataset writerId="51">
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
+
+XML_PUBSUB_DATASET_DYNAMIC_EMISSION_DISABLE_ALL="""<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="none">
+            <dataset writerId="50" enableEmission="false">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            </dataset>
+            <dataset writerId="51" enableEmission="false">
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="none">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            </dataset>
+            <dataset writerId="51">
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
+
+XML_PUBSUB_DATASET_DYNAMIC_EMISSION_PREENCODE="""<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="none" publisherFixedSize="true">
+            <dataset writerId="50" enableEmission="true">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            </dataset>
+            <dataset writerId="51" enableEmission="false">
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="none">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            </dataset>
+            <dataset writerId="51">
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
 def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
     """
         @param res_fcn a callable function (no parameters). Must return a boolean.
@@ -891,15 +970,20 @@ def helpTestSetValue(pPubsubserver, nodeId, value, pLogger):
 
 def helpTestWaitAcyclicSendStatusChange(pPubsubServer,pLogger):
     state = pPubsubServer.getAcyclicSendStatus()
-    while(PUBLISHER_ACYCLIC_NOT_TRIGGERED == state or PUBLISHER_ACYCLIC_IN_PROGRESS == state):
+    while(PUBLISHER_METHOD_NOT_TRIGGERED == state or PUBLISHER_METHOD_IN_PROGRESS == state):
         sleep(0.1)
         state = pPubsubServer.getAcyclicSendStatus()
-    pLogger.add_test('send request succeed', PUBLISHER_ACYCLIC_SENT == state)
+    pLogger.add_test('send request succeed', PUBLISHER_METHOD_SUCCESS == state)
 
 def helpTestTriggerSendValue(pPubsubServer,value,pLogger):
     pPubsubServer.triggerAcyclicSend(value)
     acyclicSendStatus = waitForEvent(lambda: PUBLISHER_METHOD_SUCCESS == pPubsubServer.getAcyclicSendStatus())
     pLogger.add_test(f'Call to Method acyclic send succeed with state {pPubsubServer.getAcyclicSendStatus()} and expect {PUBLISHER_METHOD_SUCCESS}', acyclicSendStatus)
+
+def helpTestDsmFilter(pPubsubServer,dataSetMessageIdentifier,enableEmission,pLogger):
+    pPubsubServer.callFilteringDSM(dataSetMessageIdentifier, enableEmission)
+    filteringDsmSuccess = waitForEvent(lambda: PUBLISHER_METHOD_SUCCESS == pPubsubServer.getFilteringDSMStatus())
+    logger.add_test(f'Dsm filtering method call succeed with state {pPubsubServer.getFilteringDSMStatus()}', filteringDsmSuccess)
 
 def helpAssertState(psserver, expected, pLogger):
     waitForEvent(lambda:psserver.getPubSubState() == expected)
@@ -964,7 +1048,7 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
 
 def testPubSubDynamicConf(logger):
 
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND,NID_ACYCLIC_SEND_STATUS)
+    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND,NID_ACYCLIC_SEND_STATUS, NID_DSM_FILTERING, NID_DSM_FILTERING_STATUS)
 
     def lSubBoolIsFalse():return False == pubsubserver.getValue(NID_SUB_BOOL)
     def lSubBoolIsTrue():return True == pubsubserver.getValue(NID_SUB_BOOL)
@@ -1416,6 +1500,155 @@ def testPubSubDynamicConf(logger):
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
 
+        # TC 33 : Test filtering DatasetMessage emission at configuration
+        logger.begin_section("TC 33 : Test filtering dataSetMessage at configuration")
+
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION, logger, possibleFail=False)
+        boolIsFalse = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
+
+        logger.add_test('Subscriber bool is changed', boolIsFalse)
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
+
+        # TC 34 : Test filtering DatasetMessage emission dynamically
+        # Stop server if already running
+        logger.begin_section("TC 34 : Test enabling dataSetMessage at runtime")
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION, logger, possibleFail=False)
+        boolIsTrue = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
+
+        logger.add_test('Subscriber bool is changed', boolIsTrue)
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
+
+        # Enable datasetMessage
+
+        publisherId = 1
+        writerGroupId = 1
+        dataSetMessageId = 51
+        # DSM to enable
+        dataSetMessageIdentifier = (publisherId, writerGroupId, dataSetMessageId)
+        helpTestDsmFilter(pubsubserver, dataSetMessageIdentifier, True, logger)
+
+        subIntChange = waitForEvent(lambda:-300 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber int is changed', subIntChange)
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
+
+        # TC 35 : Test no packet is emmit when all DSM are disabled
+        logger.begin_section("TC 35 : Test no packet emission when all DSM disabled")
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION_DISABLE_ALL, logger, possibleFail=False)
+        boolIsTrue = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event shall not be reached
+
+        logger.add_test('Subscriber bool is not changed',not boolIsTrue)
+        logger.add_test('Subscriber uint16 is not changed', 500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
+
+        # TC 36 : Test disabling dsm emission dynamicaly
+        logger.begin_section("TC 36 : Test disabling dataSetMessage at runtime")
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION, logger, possibleFail=False)
+        boolIsTrue = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
+
+        logger.add_test('Subscriber bool is changed', boolIsTrue)
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
+
+        # Disable dataSetMessage
+        publisherId = 1
+        writerGroupId = 1
+        dataSetMessageId = 50
+        dataSetMessageIdentifier = (publisherId, writerGroupId, dataSetMessageId)
+        helpTestDsmFilter(pubsubserver, dataSetMessageIdentifier, False, logger)
+
+        # Once disable publisher chnge value and check that it doesn't change in subscriber side
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 600, logger)
+        logger.add_test('Subscriber bool is not changed', not pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is not changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
+
+        # TC 37 : Test filtering DatasetMessage emission dynamically with preencode mechanism
+        logger.begin_section("TC 37 : Test filtering dataSetMessage with preencode optimisation")
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION_PREENCODE, logger, possibleFail=False)
+        boolIsTrue = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
+
+        logger.add_test('Subscriber bool is changed', boolIsTrue)
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
+
+        # Enable dataSetMessage
+        publisherId = 1
+        writerGroupId = 1
+        dataSetMessageId = 51
+        dataSetMessageIdentifier = (publisherId, writerGroupId, dataSetMessageId)
+        helpTestDsmFilter(pubsubserver, dataSetMessageIdentifier, True, logger)
+        subIntChange = waitForEvent(lambda:-300 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber int is changed', subIntChange)
+
+        # Disable dataSetMessage
+        publisherId = 1
+        writerGroupId = 1
+        dataSetMessageId = 50
+        dataSetMessageIdentifier = (publisherId, writerGroupId, dataSetMessageId)
+        helpTestDsmFilter(pubsubserver, dataSetMessageIdentifier, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 600, logger)
+        logger.add_test('Subscriber bool is not changed', not pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is not changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
+
         allTestsDone = True
 
     except Exception as e:
@@ -1437,7 +1670,7 @@ def testPubSubDynamicConf(logger):
 # test with static configuration : data/config_pubsub_server.xml
 def testPubSubStaticConf(logger):
 
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND, NID_ACYCLIC_SEND_STATUS)
+    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND, NID_ACYCLIC_SEND_STATUS, NID_DSM_FILTERING, NID_DSM_FILTERING_STATUS)
 
     defaultXml2Restore = False
 
