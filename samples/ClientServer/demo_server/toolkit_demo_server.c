@@ -57,7 +57,12 @@ static void Demo_WriteNotificationCallback(const SOPC_CallContext* callContextPt
  */
 static bool SOPC_PrivateKeyAskPass_FromTerminal(char** outPassword)
 {
-    return SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
+    bool retAskPass = SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
+    if (!retAskPass)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "> Failed to get password from terminal !");
+    }
+    return retAskPass;
 }
 
 /*-----------------------
