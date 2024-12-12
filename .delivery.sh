@@ -26,7 +26,7 @@ echo "Check master branch name is valid"
 BRANCH_COMMIT=master
 VERSION_HEADER=./src/Common/helpers/sopc_version.h
 PYS2OPC_VERSION_JSON=./src/ClientServer/frontend/pys2opc/pys2opc/version.json
-PYS2OPC_VERSION_WHEEL_FILES="./src/ClientServer/frontend/pys2opc/CMakeLists.txt appveyor.yml"
+PYS2OPC_VERSION_WHEEL_FILES="./src/ClientServer/frontend/pys2opc/CMakeLists.txt appveyor.yml .gitlab-ci.yml .systerel/.gitlab-ci.yml"
 
 git show-ref refs/heads/$BRANCH_COMMIT &> /dev/null
 if [[ $? != 0 ]]; then
