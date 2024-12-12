@@ -608,10 +608,7 @@ SOPC_StatusCode SOPC_Method_Func_GenEvent(const SOPC_CallContext* callContextPtr
                                                 inputArgs[3].Value.Uint32);
     }
 
-    if (NULL != eventInst)
-    {
-        SOPC_Event_Delete(&eventInst);
-    }
+    SOPC_Event_Delete(&eventInst);
 
     SOPC_LocalizedText_Clear(&lt);
     SOPC_String_Clear(&sourceName);
