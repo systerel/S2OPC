@@ -53,7 +53,7 @@ test_script:
     - set CONFIG=RelWithDebInfo
     - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%
     - set AUTOPXD2_DIR_NAME=python-autopxd2-2.3.0
-    - set PYS2OPC_VERSION=pys2opc-1.5.1
+    - set PYS2OPC_VERSION=pys2opc-1.6.0
     - set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp39-cp39-win_amd64.whl
     - set VS_VERSION="Visual Studio 17 2022"
     - set ENABLE_SAMPLES=on

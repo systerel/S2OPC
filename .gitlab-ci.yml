@@ -356,7 +356,7 @@ build-rpi:
     CMAKE_BUILD_TYPE: Debug
     WITH_PYS2OPC: 1
     # Note: it might be renamed to "...-linux_armv7l.whl" if needed for installation
-    PYS2OPC_WHEEL_NAME: 'pys2opc-1.5.1-cp39-cp39-linux_arm.whl'
+    PYS2OPC_WHEEL_NAME: 'pys2opc-1.6.0-cp39-cp39-linux_arm.whl'
   artifacts:
     name: 'bin-rpi-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
