@@ -1199,56 +1199,6 @@ static void SOPC_PubScheduler_CtxEth_Send(SOPC_PubScheduler_TransportCtx* ctx, S
     }
 }
 
-static MessageCtx* MessageCtxArray_GetFromWriterGroupId(uint16_t wgId)
-{
-    MessageCtx_Array* messages = &pubSchedulerCtx.messages;
-    MessageCtx* found = NULL;
-
-    SOPC_ASSERT(messages->length > 0 && messages->current == messages->length);
-    for (size_t i = 0; i < messages->length; ++i)
-    {
-        MessageCtx* cursor = &messages->array[i];
-        if (cursor->transport->isAcyclic)
-        {
-            if (wgId == SOPC_WriterGroup_Get_Id(cursor->group))
-            {
-                if (NULL == found)
-                {
-                    found = cursor;
-                }
-                else
-                {
-                    SOPC_ASSERT(false && "WriterGroupId shall be unique in configuration");
-                }
-            }
-        }
-    }
-
-    return found;
-}
-
-bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
-{
-    if (!pubSchedulerCtx.isStarted)
-    {
-        return false;
-    }
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    MessageCtx* ctx = MessageCtxArray_GetFromWriterGroupId(writerGroupId);
-    if (NULL == ctx)
-    {
-        return false;
-    }
-    status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.sendingLock);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    SOPC_HighRes_TimeReference_GetTime(ctx->next_timeout);
-    SOPC_HighRes_TimeReference_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
-    MessageCtx_send_publish_message(ctx);
-    status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.sendingLock);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    return true;
-}
-
 static MessageCtx* MessageCtx_GetFromPublisherId_WriterGroupId(SOPC_Conf_PublisherId* pubId, uint16_t writerGroupId)
 {
     MessageCtx_Array* messages = &pubSchedulerCtx.messages;
@@ -1331,6 +1281,28 @@ static SOPC_ReturnStatus SOPC_PubScheduler_Set_EnableEmission_DataSetMessage(SOP
         status = SOPC_STATUS_OK;
     }
     return status;
+}
+
+bool SOPC_PubScheduler_AcyclicSend(SOPC_Conf_PublisherId* publisherId, uint16_t writerGroupId)
+{
+    if (!pubSchedulerCtx.isStarted || NULL == publisherId)
+    {
+        return false;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    MessageCtx* ctx = MessageCtx_GetFromPublisherId_WriterGroupId(publisherId, writerGroupId);
+    if (NULL == ctx)
+    {
+        return false;
+    }
+    status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.sendingLock);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_HighRes_TimeReference_GetTime(ctx->next_timeout);
+    SOPC_HighRes_TimeReference_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
+    MessageCtx_send_publish_message(ctx);
+    status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.sendingLock);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    return true;
 }
 
 SOPC_ReturnStatus SOPC_PubScheduler_Enable_DataSetMessage(SOPC_Conf_PublisherId* pubId,
