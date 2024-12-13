@@ -48,7 +48,18 @@
   </Aliases>
 
   <!-- PubSub commands and status -->
-
+  <!-- Publisher Object -->
+  <UAObject NodeId="ns=1;s=PublisherObject" BrowseName="PublisherObject" ParentNodeId="i=85" EventNotifier="1">
+    <DisplayName>PublisherObject</DisplayName>
+    <Description>PublisherObject</Description>
+    <Description Locale="en">PublisherObject</Description>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=1;s=AcyclicSend</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=AcyclicPubSendStatus</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+    </References>
+  </UAObject>
   <UAVariable AccessLevel="99" BrowseName="PubSub Status" DataType="Byte" NodeId="ns=1;s=PubSubStatus" ParentNodeId="i=85">
     <DisplayName>PubSub Status</DisplayName>
     <Description>The status of the PubSub module</Description>
@@ -82,22 +93,46 @@
       <uax:Byte>2</uax:Byte>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send" DataType="UInt16" NodeId="ns=1;s=AcyclicPubSend" ParentNodeId="i=85">
-    <DisplayName>Publisher Acyclic Send</DisplayName>
-    <Description>Write WriterGroupId of the writerGroup you want to send</Description>
+  <UAMethod NodeId="ns=1;s=AcyclicSend" BrowseName="AcyclicSend" ParentNodeId="ns=1;s=PublisherObject">
+    <DisplayName>Trigger publisher acyclic send</DisplayName>
+    <Description>Trigger acyclic send of a networkMessage identified by it's WriterGroupId</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="Organizes">i=85</Reference>
-      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;s=AcyclicSend_Input</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=PublisherObject</Reference>
     </References>
-    <Value>
-      <uax:UInt16>0</uax:UInt16>
+  </UAMethod>
+  <UAVariable NodeId="ns=1;s=AcyclicSend_Input" BrowseName="InputArguments" ParentNodeId="ns=1;s=AcyclicSend" DataType="i=296" ValueRank="1">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=AcyclicSend</Reference>
+    </References>
+   <Value>
+      <ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>Writer Group Id</Name>
+              <DataType>
+                <Identifier>i=5</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+      </ListOfExtensionObject>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="Byte" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="i=85">
+  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="Byte" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="ns=1;s=PublisherObject">
     <DisplayName>Publisher Acyclic Send Status</DisplayName>
     <Description>Status of acyclic pub request : 0 = not_trigger; 1 = in_progress; 2 = sent; 3 = error</Description>
     <References>
-      <Reference IsForward="false" ReferenceType="Organizes">i=85</Reference>
+      <Reference IsForward="false" ReferenceType="Organizes">ns=1;s=PublisherObject</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>

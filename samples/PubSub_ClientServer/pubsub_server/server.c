@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "embedded/sopc_addspace_loader.h"
+#include "opcua_statuscodes.h"
 #include "sopc_address_space.h"
 #include "sopc_askpass.h"
 #include "sopc_assert.h"
@@ -103,6 +104,120 @@ static bool SOPC_TestHelper_AskPass_FromEnv(char** outPassword)
     return true;
 }
 #endif
+
+static SOPC_StatusCode Server_Method_Func_AcyclicSend(const SOPC_CallContext* callContextPtr,
+                                                      const SOPC_NodeId* objectId,
+                                                      uint32_t nbInputArgs,
+                                                      const SOPC_Variant* inputArgs,
+                                                      uint32_t* nbOutputArgs,
+                                                      SOPC_Variant** outputArgs,
+                                                      void* param)
+{
+    SOPC_UNUSED_ARG(param);
+    SOPC_UNUSED_ARG(nbOutputArgs);
+    SOPC_UNUSED_ARG(outputArgs);
+    SOPC_UNUSED_ARG(objectId);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != inputArgs);
+
+    // We expect 1 parameters writer group id
+    if (1 != nbInputArgs || SOPC_UInt16_Id != inputArgs[0].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    static SOPC_NodeId* nidSendStatus = NULL;
+    if (NULL == nidSendStatus)
+    {
+        nidSendStatus = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND_STATUS, strlen(NODEID_ACYCLICPUB_SEND_STATUS));
+    }
+
+    SOPC_ASSERT(NULL != nidSendStatus);
+
+    // Check that acyclic send status is not in progress
+    SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    SOPC_DataValue* dv = NULL;
+    SOPC_StatusCode code = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, nidSendStatus, NULL, &dv);
+    if (!SOPC_IsGoodStatus(code) || SOPC_Byte_Id != dv->Value.BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != dv->Value.ArrayType ||
+        dv->Value.Value.Byte == PUBLISHER_ACYCLIC_IN_PROGRESS)
+    {
+        code = OpcUa_BadInvalidState;
+    }
+    else
+    {
+        // Update acyclic send status
+        dv->Value.Value.Byte = PUBLISHER_ACYCLIC_IN_PROGRESS;
+        SOPC_DateTime ts = 0;
+        code = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, nidSendStatus, NULL, &dv->Value, NULL, &ts, NULL);
+        if (SOPC_IsGoodStatus(code))
+        {
+            /* Command processing */
+            uint16_t command = inputArgs[0].Value.Uint16;
+            SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, (int32_t) true);
+            SOPC_Atomic_Int_Set(&pubAcyclicSendWriterId, (int32_t) command);
+        }
+    }
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+    SOPC_NodeId_Clear(nidSendStatus);
+    SOPC_Free(nidSendStatus);
+    nidSendStatus = NULL;
+    return code;
+}
+
+/**
+ * Add OPC UA demo methods into the given method call manager
+ */
+static SOPC_ReturnStatus Server_AddMethods(SOPC_MethodCallManager* mcm)
+{
+    if (NULL == mcm)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    char* sNodeId;
+    SOPC_NodeId* methodId;
+    SOPC_MethodCallFunc_Ptr* methodFunc;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* Add methods implementation in the method call manager used */
+    sNodeId = "ns=1;s=AcyclicSend";
+    methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+    if (NULL != methodId)
+    {
+        methodFunc = &Server_Method_Func_AcyclicSend;
+        status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, NULL, NULL);
+        SOPC_NodeId_Clear(methodId);
+        SOPC_Free(methodId);
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
+{
+    /* Create and define the method call manager the server will use*/
+    SOPC_MethodCallManager* mcm = SOPC_MethodCallManager_Create();
+    SOPC_ReturnStatus status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    if (SOPC_STATUS_OK == status)
+    {
+        // Note: in case of Nano compliant server this manager will never be used
+        // since CallMethod service is not available
+        status = SOPC_ServerConfigHelper_SetMethodCallManager(mcm);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_AddMethods(mcm);
+    }
+
+    return status;
+}
 
 SOPC_ReturnStatus Server_CreateServerConfig(void)
 {
@@ -232,6 +347,11 @@ SOPC_ReturnStatus Server_CreateServerConfig(void)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(&Server_Treat_Local_Service_Response);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_InitDefaultCallMethodService();
     }
 
     return status;
@@ -667,14 +787,12 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
     /* It's easier to create the NodeIds once and for all than converting the event's NodeId to a string each time */
     static SOPC_NodeId* nidConfig = NULL;
     static SOPC_NodeId* nidCommand = NULL;
-    static SOPC_NodeId* nidSend = NULL;
-    if (NULL == nidConfig || NULL == nidCommand || NULL == nidSend)
+    if (NULL == nidConfig || NULL == nidCommand)
     {
         nidConfig = SOPC_NodeId_FromCString(NODEID_PUBSUB_CONFIG, strlen(NODEID_PUBSUB_CONFIG));
         nidCommand = SOPC_NodeId_FromCString(NODEID_PUBSUB_COMMAND, strlen(NODEID_PUBSUB_COMMAND));
-        nidSend = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND, strlen(NODEID_ACYCLICPUB_SEND));
     }
-    SOPC_ASSERT(NULL != nidConfig && NULL != nidCommand && NULL != nidSend);
+    SOPC_ASSERT(NULL != nidConfig && NULL != nidCommand);
 
     /* If config changes, store the new configuration path in global cache */
     int32_t cmpConfig = -1;
@@ -691,14 +809,6 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
     SOPC_NodeId_Clear(nidCommand);
     SOPC_Free(nidCommand);
     nidCommand = NULL;
-
-    /* If send changes, Send every writer group with new values stored in address space */
-    int32_t cmpSend = -1;
-    status = SOPC_NodeId_Compare(nidSend, &pwv->NodeId, &cmpSend);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    SOPC_NodeId_Clear(nidSend);
-    SOPC_Free(nidSend);
-    nidSend = NULL;
 
     if (0 == cmpConfig)
     {
@@ -773,36 +883,6 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
             SOPC_Atomic_Int_Set(&pubSubStartRequested, true);
         }
         lastPubSubCommand = command;
-    }
-
-    if (0 == cmpSend)
-    {
-        /* Its status code must be good, its type uint16, and be a single value */
-        SOPC_DataValue* dv = &pwv->Value;
-        if ((dv->Status & SOPC_GoodStatusOppositeMask) != 0)
-        {
-            printf("# Warning: Status Code not Good, ignoring Send command.\n");
-            return;
-        }
-
-        SOPC_Variant* variant = &dv->Value;
-        if (variant->BuiltInTypeId != SOPC_UInt16_Id)
-        {
-            printf("# Warning: Send Command value is of invalid type. Expected UInt16 type, actual type id is %d.\n",
-                   variant->BuiltInTypeId);
-            return;
-        }
-        if (variant->ArrayType != SOPC_VariantArrayType_SingleValue)
-        {
-            printf("# Warning: Send Command must be a single value, not an array nor a matrix.\n");
-            return;
-        }
-
-        /* Command processing */
-        uint16_t command = variant->Value.Uint16;
-        SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, (int32_t) true);
-        SOPC_Atomic_Int_Set(&pubAcyclicSendWriterId, (int32_t) command);
-        Server_request_change_sendAcyclicStatus(PUBLISHER_ACYCLIC_IN_PROGRESS);
     }
 }
 
