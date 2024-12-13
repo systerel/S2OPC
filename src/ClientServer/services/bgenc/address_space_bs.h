@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 10/12/2024 15:52:45
+ Date                 : 16/01/2025 17:54:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -50,6 +50,15 @@ extern void address_space_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void address_space_bs__addNode_AddressSpace_Object(
+   const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,
+   const constants__t_NodeId_i address_space_bs__p_refTypeId,
+   const constants__t_NodeId_i address_space_bs__p_newNodeId,
+   const constants__t_QualifiedName_i address_space_bs__p_browseName,
+   const constants__t_NodeClass_i address_space_bs__p_nodeClass,
+   const constants__t_NodeAttributes_i address_space_bs__p_nodeAttributes,
+   const constants__t_ExpandedNodeId_i address_space_bs__p_typeDefId,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc_addnode);
 extern void address_space_bs__addNode_AddressSpace_Variable(
    const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,
    const constants__t_NodeId_i address_space_bs__p_refTypeId,

@@ -26,6 +26,7 @@
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 #include "sopc_node_mgt_helper_internal.h"
@@ -51,7 +52,7 @@ static bool is_type_or_subtype(SOPC_AddressSpace* addSpace,
                                                               expectedType);
 }
 
-static bool check_variable_organizes_reference(OpcUa_NodeClass parentNodeClass, SOPC_StatusCode* scAddNode)
+static bool check_organizes_reference(OpcUa_NodeClass parentNodeClass, SOPC_StatusCode* scAddNode)
 {
     /* §7.11 Part 3 (1.05): The SourceNode of References of this type shall be an Object, ObjectType or a View.
      *                      [...] The TargetNode of this ReferenceType can be of any NodeClass.
@@ -64,7 +65,7 @@ static bool check_variable_organizes_reference(OpcUa_NodeClass parentNodeClass, 
         return true;
     default:
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "check_variable_organizes_reference: cannot add a Variable node with Organizes "
+                               "check_organizes_reference: cannot add a Variable or Object node with Organizes "
                                "reference from parent NodeClass %" PRIi32,
                                (int32_t) parentNodeClass);
         *scAddNode = OpcUa_BadReferenceNotAllowed;
@@ -72,85 +73,119 @@ static bool check_variable_organizes_reference(OpcUa_NodeClass parentNodeClass, 
     }
 }
 
-static bool check_variable_has_component_reference(SOPC_AddressSpace* addSpace,
-                                                   SOPC_AddressSpace_Node* parentNode,
-                                                   OpcUa_NodeClass parentNodeClass,
-                                                   const SOPC_NodeId* typeDefId,
-                                                   SOPC_StatusCode* scAddNode)
+static bool check_node_has_component_reference(OpcUa_NodeClass targetNodeclass,
+                                               SOPC_AddressSpace* addSpace,
+                                               SOPC_AddressSpace_Node* parentNode,
+                                               OpcUa_NodeClass parentNodeClass,
+                                               const SOPC_NodeId* typeDefId,
+                                               SOPC_StatusCode* scAddNode)
 {
-    char* parentNodeIdStr = NULL;
     char* typeNodeIdStr = NULL;
     SOPC_ExpandedNodeId* parentTypeDef = NULL;
     bool isParentNodeDataVariable = false;
+    char* parentNodeIdStr = NULL;
+    bool isDataVariable = false;
 
-    /* §7.7 Part 3 (1.05): If the TargetNode is a Variable, the SourceNode shall be an Object, an ObjectType, a
-     * DataVariable or a VariableType. By using the HasComponent Reference, the Variable is defined
-     * as DataVariable.
-     */
-    // Target Variable is a DataVariable
-    bool isDataVariable = is_type_or_subtype(addSpace, typeDefId, &DataVariable_Type);
-    if (!isDataVariable)
-    {
-        parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
-        typeNodeIdStr = SOPC_NodeId_ToCString(typeDefId);
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "check_variable_has_component_reference: cannot add a Variable node which has not a "
-                               "DataVariable type: %s with HasComponent reference from parent %s",
-                               typeNodeIdStr, parentNodeIdStr);
-        SOPC_Free(parentNodeIdStr);
-        SOPC_Free(typeNodeIdStr);
-
-        *scAddNode = OpcUa_BadTypeDefinitionInvalid;
-        return false;
-    }
-    switch (parentNodeClass)
+    switch (targetNodeclass)
     {
     case OpcUa_NodeClass_Object:
-    case OpcUa_NodeClass_ObjectType:
-    case OpcUa_NodeClass_VariableType:
-        return true;
-    case OpcUa_NodeClass_Variable:
-        // Source Variable is a DataVariable
-        parentTypeDef = SOPC_AddressSpaceUtil_GetTypeDefinition(addSpace, parentNode);
-        if (NULL != parentTypeDef)
+        /* §7.7 Part 3 (1.05): If the TargetNode is an Object or a Method, the SourceNode shall be an Object
+         * or ObjectType.
+         */
+        switch (parentNodeClass)
         {
-            isParentNodeDataVariable = is_type_or_subtype(addSpace, &parentTypeDef->NodeId, &DataVariable_Type);
+        case OpcUa_NodeClass_Object:
+        case OpcUa_NodeClass_ObjectType:
+            return true;
+        default:
+            parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "check_object_has_component_reference: cannot add an Object node with HasComponent "
+                                   "reference from parent %s with NodeClass %" PRIi32,
+                                   parentNodeIdStr, (int32_t) parentNodeClass);
+            SOPC_Free(parentNodeIdStr);
+
+            *scAddNode = OpcUa_BadReferenceNotAllowed;
+            return false;
         }
-        if (!isParentNodeDataVariable)
+        break;
+
+    case OpcUa_NodeClass_Variable:
+        /* §7.7 Part 3 (1.05): If the TargetNode is a Variable, the SourceNode shall be an Object, an ObjectType, a
+         * DataVariable or a VariableType. By using the HasComponent Reference, the Variable is defined
+         * as DataVariable.
+         */
+        // Target Variable is a DataVariable
+        isDataVariable = is_type_or_subtype(addSpace, typeDefId, &DataVariable_Type);
+        if (!isDataVariable)
         {
             parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
-            typeNodeIdStr = SOPC_NodeId_ToCString(&parentTypeDef->NodeId);
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "check_variable_has_component_reference: cannot add a Variable node with HasComponent reference from "
-                "Variable parent node %s which has not a DataVariable type: %s",
-                parentNodeIdStr, typeNodeIdStr);
+            typeNodeIdStr = SOPC_NodeId_ToCString(typeDefId);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "check_variable_has_component_reference: cannot add a Variable node which has not a "
+                                   "DataVariable type: %s with HasComponent reference from parent %s",
+                                   typeNodeIdStr, parentNodeIdStr);
             SOPC_Free(parentNodeIdStr);
             SOPC_Free(typeNodeIdStr);
+
+            *scAddNode = OpcUa_BadTypeDefinitionInvalid;
+            return false;
+        }
+        switch (parentNodeClass)
+        {
+        case OpcUa_NodeClass_Object:
+        case OpcUa_NodeClass_ObjectType:
+        case OpcUa_NodeClass_VariableType:
+            return true;
+        case OpcUa_NodeClass_Variable:
+            // Source Variable is a DataVariable
+            parentTypeDef = SOPC_AddressSpaceUtil_GetTypeDefinition(addSpace, parentNode);
+            if (NULL != parentTypeDef)
+            {
+                isParentNodeDataVariable = is_type_or_subtype(addSpace, &parentTypeDef->NodeId, &DataVariable_Type);
+            }
+            if (!isParentNodeDataVariable)
+            {
+                parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
+                typeNodeIdStr = SOPC_NodeId_ToCString(&parentTypeDef->NodeId);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "check_variable_has_component_reference: cannot add a Variable node with "
+                                       "HasComponent reference from "
+                                       "Variable parent node %s which has not a DataVariable type: %s",
+                                       parentNodeIdStr, typeNodeIdStr);
+                SOPC_Free(parentNodeIdStr);
+                SOPC_Free(typeNodeIdStr);
+
+                *scAddNode = OpcUa_BadReferenceNotAllowed;
+                return false;
+            }
+            break;
+        default:
+            parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "check_variable_has_component_reference: cannot add a Variable node with HasComponent "
+                "reference from parent %s with NodeClass %" PRIi32,
+                parentNodeIdStr, (int32_t) parentNodeClass);
+            SOPC_Free(parentNodeIdStr);
 
             *scAddNode = OpcUa_BadReferenceNotAllowed;
             return false;
         }
         break;
     default:
-        parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "check_variable_has_component_reference: cannot add a Variable node with HasComponent "
-                               "reference from parent %s with NodeClass %" PRIi32,
-                               parentNodeIdStr, (int32_t) parentNodeClass);
-        SOPC_Free(parentNodeIdStr);
-
-        *scAddNode = OpcUa_BadReferenceNotAllowed;
-        return false;
+        break;
     }
+
     return true;
 }
 
-static bool check_variable_has_property_reference(SOPC_AddressSpace* addSpace,
-                                                  SOPC_AddressSpace_Node* parentNode,
-                                                  OpcUa_NodeClass parentNodeClass,
-                                                  const SOPC_NodeId* typeDefId,
-                                                  SOPC_StatusCode* scAddNode)
+static bool check_node_has_property_reference(OpcUa_NodeClass targetNodeclass,
+                                              SOPC_AddressSpace* addSpace,
+                                              SOPC_AddressSpace_Node* parentNode,
+                                              OpcUa_NodeClass parentNodeClass,
+                                              const SOPC_NodeId* typeDefId,
+                                              SOPC_StatusCode* scAddNode)
 {
     SOPC_ExpandedNodeId* parentTypeDef = NULL;
 
@@ -158,6 +193,14 @@ static bool check_variable_has_property_reference(SOPC_AddressSpace* addSpace,
      * Variable. By using the HasProperty Reference, the Variable is defined as Property.
      * Properties shall not have Properties, a Property shall never be the SourceNode of a HasProperty Reference.
      */
+    if (OpcUa_NodeClass_Object == targetNodeclass)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "check_node_has_property_reference: cannot add an Object node with HasProperty "
+                               "reference");
+        *scAddNode = OpcUa_BadReferenceNotAllowed;
+        return false;
+    }
     if (OpcUa_NodeClass_Variable == parentNodeClass)
     {
         // Source Variable is not a Property itself
@@ -171,7 +214,7 @@ static bool check_variable_has_property_reference(SOPC_AddressSpace* addSpace,
         {
             char* parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "check_variable_has_property_reference: cannot add a Variable node with HasProperty "
+                                   "check_node_has_property_reference: cannot add a Variable node with HasProperty "
                                    "reference from parent %s with NodeClass %" PRIi32,
                                    parentNodeIdStr, (int32_t) parentNodeClass);
             SOPC_Free(parentNodeIdStr);
@@ -187,7 +230,7 @@ static bool check_variable_has_property_reference(SOPC_AddressSpace* addSpace,
             char* typeDefIdStr = SOPC_NodeId_ToCString(typeDefId);
             char* parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "check_variable_has_property_reference: cannot add a Variable node with HasProperty "
+                                   "check_node_has_property_reference: cannot add a Variable node with HasProperty "
                                    "reference which has not TypeDefintion=Property (%s) with parent %s ",
                                    typeDefIdStr, parentNodeIdStr);
             SOPC_Free(typeDefIdStr);
@@ -200,50 +243,53 @@ static bool check_variable_has_property_reference(SOPC_AddressSpace* addSpace,
     return true;
 }
 
-static bool check_variable_reference_type_to_parent(SOPC_AddressSpace* addSpace,
-                                                    SOPC_AddressSpace_Node* parentNode,
-                                                    OpcUa_NodeClass parentNodeClass,
-                                                    const SOPC_NodeId* referenceTypeId,
-                                                    const SOPC_NodeId* typeDefId,
-                                                    SOPC_StatusCode* scAddNode)
+static bool check_node_reference_type_to_parent(OpcUa_NodeClass targetNodeclass,
+                                                SOPC_AddressSpace* addSpace,
+                                                SOPC_AddressSpace_Node* parentNode,
+                                                OpcUa_NodeClass parentNodeClass,
+                                                const SOPC_NodeId* referenceTypeId,
+                                                const SOPC_NodeId* typeDefId,
+                                                SOPC_StatusCode* scAddNode)
 {
     bool validRef = false;
     bool identifiedRefType = false;
 
-    // Evaluate Organizes reference type from parent to this variable node
+    // Evaluate Organizes reference type from parent to this node
     bool isOrganizesRef = is_type_or_subtype(addSpace, referenceTypeId, &Organizes_Type);
     if (isOrganizesRef)
     {
         identifiedRefType = true;
-        validRef = check_variable_organizes_reference(parentNodeClass, scAddNode);
+        validRef = check_organizes_reference(parentNodeClass, scAddNode);
     }
 
     if (!identifiedRefType)
     {
-        // Evaluate HasComponent reference type from parent to this variable node
+        // Evaluate HasComponent reference type from parent to this node
         bool isHasComponentRef = is_type_or_subtype(addSpace, referenceTypeId, &HasComponent_Type);
 
         if (isHasComponentRef)
         {
-            validRef =
-                check_variable_has_component_reference(addSpace, parentNode, parentNodeClass, typeDefId, scAddNode);
+            identifiedRefType = true;
+            validRef = check_node_has_component_reference(targetNodeclass, addSpace, parentNode, parentNodeClass,
+                                                          typeDefId, scAddNode);
         }
     }
 
     if (!identifiedRefType)
     {
-        // Evaluate HasProperty reference type from parent to this variable node
+        // Evaluate HasProperty reference type from parent to this node
         bool isHasPropertyRef = is_type_or_subtype(addSpace, referenceTypeId, &HasProperty_Type);
         if (isHasPropertyRef)
         {
-            validRef =
-                check_variable_has_property_reference(addSpace, parentNode, parentNodeClass, typeDefId, scAddNode);
+            identifiedRefType = true;
+            validRef = check_node_has_property_reference(targetNodeclass, addSpace, parentNode, parentNodeClass,
+                                                         typeDefId, scAddNode);
         }
     }
 
     if (!identifiedRefType)
     {
-        // Evaluate (unknown) Aggregates reference type from parent to this variable node
+        // Evaluate (unknown) Aggregates reference type from parent to this node
         bool isAggregatesRef = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(
             addSpace, RECURSION_LIMIT, referenceTypeId, referenceTypeId, &Aggregates_Type);
         /* §7.6 Part 3 (1.05): The Aggregates ReferenceType is an abstract ReferenceType; only subtypes of it can be
@@ -259,7 +305,7 @@ static bool check_variable_reference_type_to_parent(SOPC_AddressSpace* addSpace,
             char* referenceTypeIdStr = SOPC_NodeId_ToCString(referenceTypeId);
             char* parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "check_variable_reference_type_to_parent: cannot add a Variable node with "
+                                   "check_node_reference_type_to_parent: cannot add a Variable or Object node with "
                                    "ReferenceType %s from parent %s with NodeClass=%" PRIi32,
                                    referenceTypeIdStr, parentNodeIdStr, (int32_t) parentNodeClass);
             SOPC_Free(referenceTypeIdStr);
@@ -328,11 +374,12 @@ static bool check_browse_name_unique_from_parent(SOPC_AddressSpace* addSpace,
     return true;
 }
 
-SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable(SOPC_AddressSpace* addSpace,
-                                                                        const SOPC_ExpandedNodeId* parentNid,
-                                                                        const SOPC_NodeId* refTypeId,
-                                                                        const SOPC_QualifiedName* browseName,
-                                                                        const SOPC_ExpandedNodeId* typeDefId)
+SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeClass targetNodeclass,
+                                                                    SOPC_AddressSpace* addSpace,
+                                                                    const SOPC_ExpandedNodeId* parentNid,
+                                                                    const SOPC_NodeId* refTypeId,
+                                                                    const SOPC_QualifiedName* browseName,
+                                                                    const SOPC_ExpandedNodeId* typeDefId)
 {
     SOPC_StatusCode retCode = OpcUa_BadUnexpectedError;
 
@@ -365,8 +412,8 @@ SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable(SOPC_Add
     }
     SOPC_ASSERT(NULL != typeDefNode);
 
-    bool refTypeOk = check_variable_reference_type_to_parent(addSpace, parentNode, *parentNodeClass, refTypeId,
-                                                             &typeDefId->NodeId, &retCode);
+    bool refTypeOk = check_node_reference_type_to_parent(targetNodeclass, addSpace, parentNode, *parentNodeClass,
+                                                         refTypeId, &typeDefId->NodeId, &retCode);
     if (!refTypeOk)
     {
         return retCode;
@@ -375,15 +422,16 @@ SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable(SOPC_Add
     // Check type definition is VariableType node class
     OpcUa_NodeClass* typeDefNodeClass = SOPC_AddressSpace_Get_NodeClass(addSpace, typeDefNode);
     SOPC_ASSERT(NULL != typeDefNodeClass);
-    if (OpcUa_NodeClass_VariableType != *typeDefNodeClass)
+    if ((OpcUa_NodeClass_Variable == targetNodeclass && OpcUa_NodeClass_VariableType != *typeDefNodeClass) ||
+        (OpcUa_NodeClass_Object == targetNodeclass && OpcUa_NodeClass_ObjectType != *typeDefNodeClass))
     {
         char* typeDefIdStr = SOPC_NodeId_ToCString(&typeDefId->NodeId);
         char* parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable: cannot add a Variable node "
-                               "with a TypeDefinition %s which is not of VariableType NodeClass (%" PRIi32
+                               "SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable: cannot add a node "
+                               "with a TypeDefinition %s which is not of %" PRIi32 " NodeClass (%" PRIi32
                                ") from parent %s",
-                               typeDefIdStr, (int32_t) *typeDefNodeClass, parentNodeIdStr);
+                               typeDefIdStr, (int32_t) targetNodeclass, (int32_t) *typeDefNodeClass, parentNodeIdStr);
         SOPC_Free(typeDefIdStr);
         SOPC_Free(parentNodeIdStr);
 
@@ -623,6 +671,90 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(SOPC_Addr
             varNode->ValueRank = -2;
         }
     }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddObjectNodeAttributes(OpcUa_ObjectNode* objNode,
+                                                                     const OpcUa_ObjectAttributes* objAttributes,
+                                                                     SOPC_StatusCode* scAddNode)
+{
+    SOPC_ASSERT(NULL != scAddNode);
+    SOPC_ASSERT(NULL != objNode);
+    SOPC_ASSERT(NULL != objAttributes);
+
+    // Common fields have same offsets in OpcUa_Node and OpcUa_VariableNode
+    // Common attributes have same offsets in OpcUa_NodeAttributes and OpcUa_VariableAttributes
+    SOPC_ReturnStatus status =
+        util_AddCommonNodeAttributes((OpcUa_Node*) objNode, (const OpcUa_NodeAttributes*) objAttributes, scAddNode);
+
+    // Mandatory attributes for Object: EventNotifier
+    if (SOPC_STATUS_OK == status)
+    {
+        if (0 != (objAttributes->SpecifiedAttributes & OpcUa_NodeAttributesMask_EventNotifier))
+        {
+            objNode->EventNotifier = objAttributes->EventNotifier;
+        }
+        else
+        {
+            objNode->EventNotifier = 0; // do not allow Events on the node by default
+        }
+    }
+
+    return status;
+}
+
+SOPC_StatusCode SOPC_NodeMgtHelperInternal_CopyDataInNode(OpcUa_Node* node,
+                                                          const SOPC_ExpandedNodeId* parentNodeId,
+                                                          const SOPC_NodeId* newNodeId,
+                                                          const SOPC_QualifiedName* browseName,
+                                                          const SOPC_ExpandedNodeId* typeDefId)
+{
+    // NodeID
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&node->NodeId, newNodeId);
+    SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
+    // BrowseName
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_QualifiedName_Copy(&node->BrowseName, browseName);
+        SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
+    }
+    // References from new node (backward to parent and forward to type)
+    if (SOPC_STATUS_OK == status)
+    {
+        node->References = SOPC_Calloc(2, sizeof(*node->References));
+        if (NULL == node->References)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            node->NoOfReferences = 2;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Set HasTypeDefinition
+        OpcUa_ReferenceNode* hasTypeDef = &node->References[0];
+        hasTypeDef->IsInverse = false;
+        hasTypeDef->ReferenceTypeId.Namespace = 0;
+        hasTypeDef->ReferenceTypeId.IdentifierType = SOPC_IdentifierType_Numeric;
+        hasTypeDef->ReferenceTypeId.Data.Numeric = OpcUaId_HasTypeDefinition;
+        status = SOPC_ExpandedNodeId_Copy(&hasTypeDef->TargetId, typeDefId);
+        SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Set hierarchical reference to parent
+        OpcUa_ReferenceNode* hierarchicalRef = &node->References[1];
+        hierarchicalRef->IsInverse = true;
+        status = SOPC_NodeId_Copy(&hierarchicalRef->ReferenceTypeId, &typeDefId->NodeId);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ExpandedNodeId_Copy(&hierarchicalRef->TargetId, parentNodeId);
+        }
+        SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
+    }
+
     return status;
 }
 

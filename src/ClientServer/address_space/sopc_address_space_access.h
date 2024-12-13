@@ -137,7 +137,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addS
 /**
  * \brief Add a Variable node into the AddressSpace with given attributes and references to its parent and type.
  *
- * \param addSpaceAccess  The AddressSpace Access used for write operation
+ * \param addSpaceAccess  The AddressSpace Access used for AddNodes operation
  * \param parentNodeId    The ExpandedNodeId of the parent node in AddressSpace for the variable to add.
  *                        Only "local" NodeId are supported for now
  *                        (ServerIndex shall be 0 and NamespaceUri is ignored).
@@ -196,5 +196,64 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
                                                         const SOPC_QualifiedName* browseName,
                                                         const OpcUa_VariableAttributes* varAttributes,
                                                         const SOPC_ExpandedNodeId* typeDefId);
+
+/**
+ * \brief Add an Object node into the AddressSpace with given attributes and references to its parent and type.
+ *
+ * \param addSpaceAccess  The AddressSpace Access used for AddNodes operation
+ * \param parentNodeId    The ExpandedNodeId of the parent node in AddressSpace for the Object to add.
+ *                        Only "local" NodeId are supported for now
+ *                        (ServerIndex shall be 0 and NamespaceUri is ignored).
+ *                        Parent node characteristics shall be compliant to add the new Object node as a child.
+ *                        See OPC UA specifications part 3 for constraints and returned error code for details.
+ * \param refTypeId       The NodeId of the reference type used for reference between parent node and new Object node.
+ *                        E.g. Organizes, HasComponent, etc.
+ *                        ReferenceType shall be compliant with parent node and Object node characteristics.
+ *                        See OPC UA specifications part 3 for constraints and returned error code for details.
+ * \param newNodeId       The fresh NodeId for the new Object to add. It shall not already exist in AddressSpace.
+ * \param browseName      The QualifiedName used when browsing the AddressSpace for the new Object node.
+ *                        It shall be unique in the parent node children.
+ * \param objAttributes   The attributes defined for the new Object node.
+ *                        The following attributes combination are not supported and will make addition fail:
+ *                        WriteMask or UserWriteMask.
+ *
+ * \param typeDefId       The ExpandedNodeId of the type definition node in AddressSpace for the Object to add.
+ *                        E.g. BaseObjectType, FolderType, etc.
+ *                        Only "local" NodeId are supported for now (ServerIndex shall be 0 and NamespaceUri ignored).
+ *                        Type characteristics shall be compliant to add the Object into the parent node indicated.
+ *                        See OPC UA specifications part 3 for constraints and returned error code for details.
+ *
+ * \return SOPC_GoodGenericStatus in case of success, otherwise:
+ *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
+ *         - OpcUa_BadServiceUnsupported: if the AddressSpace does not support to add Object node dynamically.
+ *                                        Note: XML loaded AddressSpace supports this operation.
+ *         - OpcUa_BadNodeIdExists: if \p newNodeId already exists in AddressSpace
+ *         - OpcUa_BadParentNodeIdInvalid: if \p parentNodeId is unknown
+ *         - OpcUa_BadReferenceNotAllowed: the \p refTypeId (Organizes, HasComponent, etc.) is not compliant regarding
+ *                                         the parent node characteristics.
+ *                                         See OPC UA specifications part 3 for constraints
+ *                                         and logs for detail in case of error.
+ *         - OpcUa_BadTypeDefinitionInvalid: the \p typeDefId (BaseObjectType, FolderType, etc.) is unknown
+ *                                           or is not compliant regarding the Object characteristics and
+ *                                           its relation to parent node.
+                                             See OPC UA specifications part 3 for constraints
+ *                                           and logs for detail in case of error.
+ *         - OpcUa_BadBrowseNameDuplicated: if \p browseName is not unique in parent node.
+ *         - OpcUa_BadNodeAttributesInvalid: if \p objAttributes contains unsupported attributes.
+ *                                           See logs for detail in case of error.
+ *         - OpcUa_BadOutOfMemory: if an allocation failed during add node operation
+ *
+ * \note: Add Object node operation includes creation of mutual references with parent / type.
+ *
+ * \warning Children of the Object that might declared as mandatory in the \p typeDefId
+ *          are not generated automatically by this operation for now.
+ */
+SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                      const SOPC_ExpandedNodeId* parentNodeId,
+                                                      const SOPC_NodeId* refTypeId,
+                                                      const SOPC_NodeId* newNodeId,
+                                                      const SOPC_QualifiedName* browseName,
+                                                      const OpcUa_ObjectAttributes* objAttributes,
+                                                      const SOPC_ExpandedNodeId* typeDefId);
 
 #endif /* SOPC_ADDRESS_SPACE_ACCESS_H_ */

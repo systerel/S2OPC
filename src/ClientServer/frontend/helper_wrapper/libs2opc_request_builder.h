@@ -604,7 +604,7 @@ OpcUa_AddNodesRequest* SOPC_AddNodesRequest_Create(size_t nbAddNodes);
  * \param optHistorizing              Historizing flag for the Value of Variable node (optional).
  *
  * \return SOPC_STATUS_OK in case of success,
- *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid read request, index, nodeId or attribute.
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid AddNodes request, index, nodeId or attribute.
  */
 SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesRequest* addNodesRequest,
                                                             size_t index,
@@ -627,6 +627,42 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
                                                             const double* optMinimumSamplingInterval,
                                                             SOPC_Boolean* optHistorizing);
 
+/**
+ * \brief Sets the attributes values requested for the Object node to add.
+ *        Optional parameters are prefixed by "opt" and shall be NULL if not defined.
+ *        If optional parameters are not defined the server will choose values for this attributes.
+ *
+ * \param addNodesRequest             The add nodes request to configure.
+ * \param index                       Index of the add nodes items to configure in the request.
+ *                                    \p index < number of add nodes configured in ::SOPC_AddNodesRequest_Create.
+ * \param parentNodeId                Parent NodeId of the node to add, it should be an Object or Variable node.
+ * \param referenceTypeId             Reference type of the relation between parent node and added node.
+ * \param optRequestedNodeId          Requested NodeId for the node to add (optional).
+ * \param browseName                  BrowseName for the node to add, it should be unique in the parent node context.
+ * \param typeDefinition              TypeDefinition for the Object node to add
+ *                                    (BaseObjectType, FolderType, etc.).
+ * \param optDisplayName              DisplayName for the node to add (optional).
+ * \param optDescription              Description for the node to add (optional).
+ * \param optWriteMask                WriteMask for the node to add (optional).
+ * \param optUserWriteMask            UserWriteMask for the node to add (optional).
+ *                                    It should not be defined since it depends on the user.
+ * \param eventNotifier               EventNotifier of the node.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid AddNodes request, index, nodeId or attribute.
+ */
+SOPC_ReturnStatus SOPC_AddNodeRequest_SetObjectAttributes(OpcUa_AddNodesRequest* addNodesRequest,
+                                                          size_t index,
+                                                          const SOPC_ExpandedNodeId* parentNodeId,
+                                                          const SOPC_NodeId* referenceTypeId,
+                                                          const SOPC_ExpandedNodeId* optRequestedNodeId,
+                                                          const SOPC_QualifiedName* browseName,
+                                                          const SOPC_ExpandedNodeId* typeDefinition,
+                                                          const SOPC_LocalizedText* optDisplayName,
+                                                          const SOPC_LocalizedText* optDescription,
+                                                          const uint32_t* optWriteMask,
+                                                          const uint32_t* optUserWriteMask,
+                                                          const SOPC_Byte* eventNotifier);
 /**
  * \brief Creates a CreateSubscription request with default parameters values
  *        Default parameters are the following:

@@ -961,6 +961,60 @@ OpcUa_AddNodesRequest* SOPC_AddNodesRequest_Create(size_t nbAddNodes)
     return req;
 }
 
+static SOPC_ReturnStatus SOPC_AddNodesRequestInternal_ItemSetCommonAttributes(
+    OpcUa_AddNodesItem* item,
+    OpcUa_NodeAttributes* nodeAttributes,
+    const SOPC_ExpandedNodeId* parentNodeId,
+    const SOPC_NodeId* referenceTypeId,
+    const SOPC_ExpandedNodeId* optRequestedNodeId,
+    const SOPC_QualifiedName* browseName,
+    const SOPC_ExpandedNodeId* typeDefinition,
+    const SOPC_LocalizedText* optDisplayName,
+    const SOPC_LocalizedText* optDescription,
+    const uint32_t* optWriteMask,
+    const uint32_t* optUserWriteMask)
+{
+    SOPC_ReturnStatus status = SOPC_ExpandedNodeId_Copy(&item->ParentNodeId, parentNodeId);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_NodeId_Copy(&item->ReferenceTypeId, referenceTypeId);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optRequestedNodeId)
+    {
+        status = SOPC_ExpandedNodeId_Copy(&item->RequestedNewNodeId, optRequestedNodeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_QualifiedName_Copy(&item->BrowseName, browseName);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ExpandedNodeId_Copy(&item->TypeDefinition, typeDefinition);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optDisplayName)
+    {
+        nodeAttributes->SpecifiedAttributes |= OpcUa_NodeAttributesMask_DisplayName;
+        status = SOPC_LocalizedText_Copy(&nodeAttributes->DisplayName, optDisplayName);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optDescription)
+    {
+        nodeAttributes->SpecifiedAttributes |= OpcUa_NodeAttributesMask_Description;
+        status = SOPC_LocalizedText_Copy(&nodeAttributes->Description, optDescription);
+    }
+    if (SOPC_STATUS_OK == status && NULL != optWriteMask)
+    {
+        nodeAttributes->SpecifiedAttributes |= OpcUa_NodeAttributesMask_WriteMask;
+        nodeAttributes->WriteMask = *optWriteMask;
+    }
+    if (SOPC_STATUS_OK == status && NULL != optUserWriteMask)
+    {
+        nodeAttributes->SpecifiedAttributes |= OpcUa_NodeAttributesMask_UserWriteMask;
+        nodeAttributes->UserWriteMask = *optUserWriteMask;
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesRequest* addNodesRequest,
                                                             size_t index,
                                                             const SOPC_ExpandedNodeId* parentNodeId,
@@ -1000,43 +1054,11 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ExpandedNodeId_Copy(&item->ParentNodeId, parentNodeId);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_NodeId_Copy(&item->ReferenceTypeId, referenceTypeId);
-    }
-    if (SOPC_STATUS_OK == status && NULL != optRequestedNodeId)
-    {
-        status = SOPC_ExpandedNodeId_Copy(&item->RequestedNewNodeId, optRequestedNodeId);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_QualifiedName_Copy(&item->BrowseName, browseName);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ExpandedNodeId_Copy(&item->TypeDefinition, typeDefinition);
-    }
-    if (SOPC_STATUS_OK == status && NULL != optDisplayName)
-    {
-        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_DisplayName;
-        status = SOPC_LocalizedText_Copy(&varAttrs->DisplayName, optDisplayName);
-    }
-    if (SOPC_STATUS_OK == status && NULL != optDescription)
-    {
-        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_Description;
-        status = SOPC_LocalizedText_Copy(&varAttrs->Description, optDescription);
-    }
-    if (SOPC_STATUS_OK == status && NULL != optWriteMask)
-    {
-        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_WriteMask;
-        varAttrs->WriteMask = *optWriteMask;
-    }
-    if (SOPC_STATUS_OK == status && NULL != optUserWriteMask)
-    {
-        varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_UserWriteMask;
-        varAttrs->UserWriteMask = *optUserWriteMask;
+        // Fill common node attributes. Cast the OpcUa_VariableAttributes into OpcUa_NodeAttributes since we will fill
+        // the NodeAttributes part of the structure.
+        status = SOPC_AddNodesRequestInternal_ItemSetCommonAttributes(
+            item, (OpcUa_NodeAttributes*) varAttrs, parentNodeId, referenceTypeId, optRequestedNodeId, browseName,
+            typeDefinition, optDisplayName, optDescription, optWriteMask, optUserWriteMask);
     }
     if (SOPC_STATUS_OK == status && NULL != optValue)
     {
@@ -1088,6 +1110,54 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
     {
         varAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_Historizing;
         varAttrs->Historizing = *optHistorizing;
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_AddNodesItem_Clear(item);
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_AddNodeRequest_SetObjectAttributes(OpcUa_AddNodesRequest* addNodesRequest,
+                                                          size_t index,
+                                                          const SOPC_ExpandedNodeId* parentNodeId,
+                                                          const SOPC_NodeId* referenceTypeId,
+                                                          const SOPC_ExpandedNodeId* optRequestedNodeId,
+                                                          const SOPC_QualifiedName* browseName,
+                                                          const SOPC_ExpandedNodeId* typeDefinition,
+                                                          const SOPC_LocalizedText* optDisplayName,
+                                                          const SOPC_LocalizedText* optDescription,
+                                                          const uint32_t* optWriteMask,
+                                                          const uint32_t* optUserWriteMask,
+                                                          const SOPC_Byte* eventNotifier)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (!CHECK_ELEMENT_EXISTS(addNodesRequest, NoOfNodesToAdd, index) || NULL == parentNodeId ||
+        NULL == referenceTypeId || (NULL != optRequestedNodeId && 0 != optRequestedNodeId->ServerIndex) ||
+        NULL == browseName || NULL == typeDefinition || NULL == eventNotifier)
+    {
+        return status;
+    }
+    OpcUa_AddNodesItem* item = &addNodesRequest->NodesToAdd[index];
+    OpcUa_ObjectAttributes* objAttrs = NULL;
+
+    // item is an Object node
+    item->NodeClass = OpcUa_NodeClass_Object;
+
+    status = SOPC_ExtensionObject_CreateObject(&item->NodeAttributes, &OpcUa_ObjectAttributes_EncodeableType,
+                                               (void**) &objAttrs);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Fill common node attributes. Cast the OpcUa_ObjectAttributes into OpcUa_NodeAttributes since we will fill the
+        // NodeAttributes part of the structure
+        status = SOPC_AddNodesRequestInternal_ItemSetCommonAttributes(
+            item, (OpcUa_NodeAttributes*) objAttrs, parentNodeId, referenceTypeId, optRequestedNodeId, browseName,
+            typeDefinition, optDisplayName, optDescription, optWriteMask, optUserWriteMask);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        objAttrs->EventNotifier = *eventNotifier;
     }
     if (SOPC_STATUS_OK != status)
     {

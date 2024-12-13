@@ -482,16 +482,16 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addS
     return returnCode;
 }
 
-SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
-                                                        const SOPC_ExpandedNodeId* parentNodeId,
-                                                        const SOPC_NodeId* refTypeId,
-                                                        const SOPC_NodeId* newNodeId,
-                                                        const SOPC_QualifiedName* browseName,
-                                                        const OpcUa_VariableAttributes* varAttributes,
-                                                        const SOPC_ExpandedNodeId* typeDefId)
+static SOPC_StatusCode check_valid_params_and_state(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                    const SOPC_ExpandedNodeId* parentNodeId,
+                                                    const SOPC_NodeId* refTypeId,
+                                                    const SOPC_NodeId* newNodeId,
+                                                    const SOPC_QualifiedName* browseName,
+                                                    const OpcUa_NodeAttributes* NodeAttributes,
+                                                    const SOPC_ExpandedNodeId* typeDefId)
 {
     if (NULL == addSpaceAccess || NULL == parentNodeId || NULL == refTypeId || NULL == newNodeId ||
-        NULL == browseName || NULL == varAttributes || NULL == typeDefId)
+        NULL == browseName || NULL == NodeAttributes || NULL == typeDefId)
     {
         return OpcUa_BadInvalidArgument;
     }
@@ -503,14 +503,59 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
     }
 
     bool nodeIdAlreadyExsists = false;
-    SOPC_UNUSED_RESULT(SOPC_AddressSpace_Get_Node(addSpaceAccess->addSpaceRef, newNodeId, &nodeIdAlreadyExsists));
+    SOPC_AddressSpace_Node* maybeNode =
+        SOPC_AddressSpace_Get_Node(addSpaceAccess->addSpaceRef, newNodeId, &nodeIdAlreadyExsists);
+    SOPC_UNUSED_RESULT(maybeNode);
     if (nodeIdAlreadyExsists)
     {
         return OpcUa_BadNodeIdExists;
     }
 
-    SOPC_StatusCode retCode = SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable(
-        addSpaceAccess->addSpaceRef, parentNodeId, refTypeId, browseName, typeDefId);
+    return 0;
+}
+
+// Set reciprocal reference from parent and add node to address space
+static SOPC_ReturnStatus add_node_and_set_reciprocal_reference(SOPC_AddressSpace* addSpace,
+                                                               const SOPC_NodeId* parentNodeId,
+                                                               const SOPC_NodeId* childNodeId,
+                                                               SOPC_AddressSpace_Node* newNode,
+                                                               const SOPC_NodeId* refTypeId)
+{
+    SOPC_ReturnStatus status =
+        SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(addSpace, parentNodeId, childNodeId, refTypeId);
+    // Add node to address space
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_AddressSpace_Append(addSpace, newNode);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_ASSERT(SOPC_STATUS_OUT_OF_MEMORY == status);
+            // Rollback reference added in parent
+            SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(addSpace, parentNodeId);
+        }
+    }
+
+    return status;
+}
+
+SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                        const SOPC_ExpandedNodeId* parentNodeId,
+                                                        const SOPC_NodeId* refTypeId,
+                                                        const SOPC_NodeId* newNodeId,
+                                                        const SOPC_QualifiedName* browseName,
+                                                        const OpcUa_VariableAttributes* varAttributes,
+                                                        const SOPC_ExpandedNodeId* typeDefId)
+{
+    SOPC_StatusCode retCode =
+        check_valid_params_and_state(addSpaceAccess, parentNodeId, refTypeId, newNodeId, browseName,
+                                     (const OpcUa_NodeAttributes*) varAttributes, typeDefId);
+    if (!SOPC_IsGoodStatus(retCode))
+    {
+        return retCode;
+    }
+
+    retCode = SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeClass_Variable, addSpaceAccess->addSpaceRef,
+                                                                  parentNodeId, refTypeId, browseName, typeDefId);
     if (!SOPC_IsGoodStatus(retCode))
     {
         return retCode;
@@ -526,52 +571,9 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
 
     // Copy the main parameters not included in NodeAttributes structure
     OpcUa_VariableNode* varNode = &newNode->data.variable;
-    // NodeID
-    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&varNode->NodeId, newNodeId);
-    SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
+    SOPC_ReturnStatus status = SOPC_NodeMgtHelperInternal_CopyDataInNode((OpcUa_Node*) varNode, parentNodeId, newNodeId,
+                                                                         browseName, typeDefId);
 
-    // BrowseName
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_QualifiedName_Copy(&varNode->BrowseName, browseName);
-        SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
-    }
-    // References from new node (backward to parent and forward to type)
-    if (SOPC_STATUS_OK == status)
-    {
-        varNode->References = SOPC_Calloc(2, sizeof(*varNode->References));
-        if (NULL == varNode->References)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        else
-        {
-            varNode->NoOfReferences = 2;
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        // Set HasTypeDefinition
-        OpcUa_ReferenceNode* hasTypeDef = &varNode->References[0];
-        hasTypeDef->IsInverse = false;
-        hasTypeDef->ReferenceTypeId.Namespace = 0;
-        hasTypeDef->ReferenceTypeId.IdentifierType = SOPC_IdentifierType_Numeric;
-        hasTypeDef->ReferenceTypeId.Data.Numeric = OpcUaId_HasTypeDefinition;
-        status = SOPC_ExpandedNodeId_Copy(&hasTypeDef->TargetId, typeDefId);
-        SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        // Set hierarchical reference to parent
-        OpcUa_ReferenceNode* hierarchicalRef = &varNode->References[1];
-        hierarchicalRef->IsInverse = true;
-        status = SOPC_NodeId_Copy(&hierarchicalRef->ReferenceTypeId, &typeDefId->NodeId);
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_ExpandedNodeId_Copy(&hierarchicalRef->TargetId, parentNodeId);
-        }
-        SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
-    }
     // Manage NodeAttributes
     if (SOPC_STATUS_OK == status)
     {
@@ -579,26 +581,83 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
         status = SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(addSpaceAccess->addSpaceRef, newNode, varNode,
                                                                       varAttributes, &retCode);
     }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = add_node_and_set_reciprocal_reference(addSpaceAccess->addSpaceRef, &parentNodeId->NodeId, newNodeId,
+                                                       newNode, refTypeId);
+        // reset retCode to default failure value
+        retCode = OpcUa_BadOutOfMemory;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        retCode = SOPC_GoodGenericStatus;
+    }
+    else
+    {
+        // Clear and dealloc node
+        SOPC_AddressSpace_Node_Clear(addSpaceAccess->addSpaceRef, newNode);
+        SOPC_Free(newNode);
+    }
+    return retCode;
+}
+
+SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                      const SOPC_ExpandedNodeId* parentNodeId,
+                                                      const SOPC_NodeId* refTypeId,
+                                                      const SOPC_NodeId* newNodeId,
+                                                      const SOPC_QualifiedName* browseName,
+                                                      const OpcUa_ObjectAttributes* objAttributes,
+                                                      const SOPC_ExpandedNodeId* typeDefId)
+{
+    SOPC_StatusCode retCode =
+        check_valid_params_and_state(addSpaceAccess, parentNodeId, refTypeId, newNodeId, browseName,
+                                     (const OpcUa_NodeAttributes*) objAttributes, typeDefId);
+    if (!SOPC_IsGoodStatus(retCode))
+    {
+        return retCode;
+    }
+
+    retCode = SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeClass_Object, addSpaceAccess->addSpaceRef,
+                                                                  parentNodeId, refTypeId, browseName, typeDefId);
+    if (!SOPC_IsGoodStatus(retCode))
+    {
+        return retCode;
+    }
+
+    retCode = OpcUa_BadOutOfMemory;
+    SOPC_AddressSpace_Node* newNode = SOPC_Calloc(1, sizeof(*newNode));
+    if (NULL == newNode)
+    {
+        return retCode;
+    }
+
+    // ADD OBJECT
+    SOPC_AddressSpace_Node_Initialize(addSpaceAccess->addSpaceRef, newNode, OpcUa_NodeClass_Object);
+    // Copy the main parameters not included in NodeAttributes structure
+    OpcUa_ObjectNode* objNode = &newNode->data.object;
+    SOPC_ReturnStatus status = SOPC_NodeMgtHelperInternal_CopyDataInNode((OpcUa_Node*) objNode, parentNodeId, newNodeId,
+                                                                         browseName, typeDefId);
+
+    // Manage NodeAttributes
+    if (SOPC_STATUS_OK == status)
+    {
+        // Note: set retCode in case of failure
+        status = SOPC_NodeMgtHelperInternal_AddObjectNodeAttributes(objNode, objAttributes, &retCode);
+    }
+
+    // COMMON PART WITH ADD VARIABLE
+
     // Set reciprocal reference from parent and add node to address space
     if (SOPC_STATUS_OK == status)
     {
         // reset retCode to default failure value
         retCode = OpcUa_BadOutOfMemory;
-        status = SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(addSpaceAccess->addSpaceRef, &parentNodeId->NodeId,
-                                                                    newNodeId, refTypeId);
-        // Add node to address space
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_AddressSpace_Append(addSpaceAccess->addSpaceRef, newNode);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_ASSERT(SOPC_STATUS_OUT_OF_MEMORY == status);
-                // Rollback reference added in parent
-                SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(addSpaceAccess->addSpaceRef,
-                                                                     &parentNodeId->NodeId);
-            }
-        }
+        status = add_node_and_set_reciprocal_reference(addSpaceAccess->addSpaceRef, &parentNodeId->NodeId, newNodeId,
+                                                       newNode, refTypeId);
     }
+
     if (SOPC_STATUS_OK == status)
     {
         retCode = SOPC_GoodGenericStatus;

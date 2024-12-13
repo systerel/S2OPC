@@ -29,17 +29,29 @@
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
 
-SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable(SOPC_AddressSpace* addSpace,
-                                                                        const SOPC_ExpandedNodeId* parentNid,
-                                                                        const SOPC_NodeId* refTypeId,
-                                                                        const SOPC_QualifiedName* browseName,
-                                                                        const SOPC_ExpandedNodeId* typeDefId);
+/* NodeClass handled by the function: Variable and Object */
+SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeClass nodeclass,
+                                                                    SOPC_AddressSpace* addSpace,
+                                                                    const SOPC_ExpandedNodeId* parentNid,
+                                                                    const SOPC_NodeId* refTypeId,
+                                                                    const SOPC_QualifiedName* browseName,
+                                                                    const SOPC_ExpandedNodeId* typeDefId);
 
 SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(SOPC_AddressSpace* addSpace,
                                                                        SOPC_AddressSpace_Node* node,
                                                                        OpcUa_VariableNode* varNode,
                                                                        const OpcUa_VariableAttributes* varAttributes,
                                                                        SOPC_StatusCode* scAddNode);
+
+SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddObjectNodeAttributes(OpcUa_ObjectNode* objNode,
+                                                                     const OpcUa_ObjectAttributes* objAttributes,
+                                                                     SOPC_StatusCode* scAddNode);
+
+SOPC_StatusCode SOPC_NodeMgtHelperInternal_CopyDataInNode(OpcUa_Node* node,
+                                                          const SOPC_ExpandedNodeId* parentNodeId,
+                                                          const SOPC_NodeId* newNodeId,
+                                                          const SOPC_QualifiedName* browseName,
+                                                          const SOPC_ExpandedNodeId* typeDefId);
 
 SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(SOPC_AddressSpace* addSpace,
                                                                      const SOPC_NodeId* parentNodeId,
