@@ -31,7 +31,8 @@ DEFAULT_URI = 'opc.tcp://localhost:4843'
 NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
 NID_START_STOP = u"ns=1;s=PubSubStartStop"
 NID_STATUS = u"ns=1;s=PubSubStatus"
-NID_ACYCLIC_SEND = u"ns=1;s=AcyclicPubSend"
+NID_PUBLISHER= u"ns=1;s=Publisher"
+NID_ACYCLIC_SEND = u"ns=1;s=AcyclicSend"
 NID_ACYCLIC_SEND_STATUS= u"ns=1;s=AcyclicPubSendStatus"
 NID_SUB_STRING = u"ns=1;s=SubString"
 NID_SUB_BOOL = u"ns=1;s=SubBool"
@@ -895,11 +896,10 @@ def helpTestWaitAcyclicSendStatusChange(pPubsubServer,pLogger):
         state = pPubsubServer.getAcyclicSendStatus()
     pLogger.add_test('send request succeed', PUBLISHER_ACYCLIC_SENT == state)
 
-def helpTestSetSendValue(pPubsubServer,value,pLogger):
-    pPubsubServer.setAcyclicSend(value)
-    expected = pPubsubServer.getAcyclicSend()
-    pLogger.add_test('write in %s succedded' % NID_ACYCLIC_SEND, expected == value)
-    helpTestWaitAcyclicSendStatusChange(pPubsubServer,pLogger)
+def helpTestTriggerSendValue(pPubsubServer,value,pLogger):
+    pPubsubServer.triggerAcyclicSend(value)
+    acyclicSendStatus = waitForEvent(lambda: PUBLISHER_METHOD_SUCCESS == pPubsubServer.getAcyclicSendStatus())
+    pLogger.add_test(f'Call to Method acyclic send succeed with state {pPubsubServer.getAcyclicSendStatus()} and expect {PUBLISHER_METHOD_SUCCESS}', acyclicSendStatus)
 
 def helpAssertState(psserver, expected, pLogger):
     waitForEvent(lambda:psserver.getPubSubState() == expected)
@@ -964,7 +964,7 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
 
 def testPubSubDynamicConf(logger):
 
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND,NID_ACYCLIC_SEND_STATUS)
+    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND,NID_ACYCLIC_SEND_STATUS)
 
     def lSubBoolIsFalse():return False == pubsubserver.getValue(NID_SUB_BOOL)
     def lSubBoolIsTrue():return True == pubsubserver.getValue(NID_SUB_BOOL)
@@ -1314,8 +1314,10 @@ def testPubSubDynamicConf(logger):
         logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
 
         # Send the message
+        PublisherId = 1
         writerGroupId = 1
-        helpTestSetSendValue(pubsubserver,writerGroupId,logger)
+        networkMessageIdentifier = (PublisherId, writerGroupId)
+        helpTestTriggerSendValue(pubsubserver,networkMessageIdentifier,logger)
         subIsFalse = waitForEvent(lSubBoolIsFalse)
 
         logger.add_test('Subscriber bool is not changed', subIsFalse)
@@ -1435,7 +1437,7 @@ def testPubSubDynamicConf(logger):
 # test with static configuration : data/config_pubsub_server.xml
 def testPubSubStaticConf(logger):
 
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND, NID_ACYCLIC_SEND_STATUS)
+    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND, NID_ACYCLIC_SEND_STATUS)
 
     defaultXml2Restore = False
 

@@ -62,8 +62,11 @@ int32_t serverOnline = 0;
 static int32_t pubSubStopRequested = false;
 static int32_t pubSubStartRequested = false;
 static int32_t pubAcyclicSendRequest = false;
-static int32_t pubAcyclicSendWriterId = 0;
 static int32_t pubFilteringDsmEmissionRequest = false;
+
+static struct networkMessageIdentifier pubAcyclicSendNetworkMessageId = {
+    .pubId = {.type = SOPC_UInteger_PublisherId, .data.uint = 0},
+    .writerGroupId = 0};
 
 static struct publisherDsmIdentifier pubFilteringDsmId = {.pubId = {.type = SOPC_UInteger_PublisherId, .data.uint = 0},
                                                           .writerGroupId = 0,
@@ -128,9 +131,10 @@ static SOPC_StatusCode Server_Method_Func_AcyclicSend(const SOPC_CallContext* ca
     SOPC_ASSERT(NULL != callContextPtr);
     SOPC_ASSERT(NULL != inputArgs);
 
-    // We expect 1 parameters writer group id
-    if (1 != nbInputArgs || SOPC_UInt16_Id != inputArgs[0].BuiltInTypeId ||
-        SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType)
+    // We expect 2 parameters publisher Id and writer group id
+    if (2 != nbInputArgs || SOPC_UInt64_Id != inputArgs[0].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType || SOPC_UInt16_Id != inputArgs[1].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[1].ArrayType)
     {
         return OpcUa_BadInvalidArgument;
     }
@@ -159,12 +163,18 @@ static SOPC_StatusCode Server_Method_Func_AcyclicSend(const SOPC_CallContext* ca
         dv->Value.Value.Int32 = PUBLISHER_METHOD_IN_PROGRESS;
         SOPC_DateTime ts = 0;
         code = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, nidSendStatus, NULL, &dv->Value, NULL, &ts, NULL);
-        if (SOPC_IsGoodStatus(code))
+
+        // If Status is different to IN PROGRESS request flags shall false
+        int32_t acyclicSendRequested = SOPC_Atomic_Int_Get(&pubAcyclicSendRequest);
+        // If a request is already in progress don't access shared memory
+        if (SOPC_IsGoodStatus(code) && !acyclicSendRequested)
         {
             /* Command processing */
-            uint16_t command = inputArgs[0].Value.Uint16;
+            uint64_t publisherId = inputArgs[0].Value.Uint64;
+            uint16_t writerGroupId = inputArgs[1].Value.Uint16;
+            pubAcyclicSendNetworkMessageId.pubId.data.uint = publisherId;
+            pubAcyclicSendNetworkMessageId.writerGroupId = writerGroupId;
             SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, (int32_t) true);
-            SOPC_Atomic_Int_Set(&pubAcyclicSendWriterId, (int32_t) command);
         }
     }
     SOPC_DataValue_Clear(dv);
@@ -558,6 +568,7 @@ SOPC_ReturnStatus Server_StartServer(void)
     SOPC_Atomic_Int_Set(&serverOnline, true);
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server started");
 
+    /* TODO: Integrate runtime variables */
     return status;
 }
 
@@ -593,22 +604,22 @@ bool Server_PubSubStart_Requested(void)
     return requested;
 }
 
-int32_t Server_PubAcyclicSend_Requested(void)
+struct networkMessageIdentifier Server_PubAcyclicSend_Requested(void)
 {
     int32_t acyclicSendReq = SOPC_Atomic_Int_Get(&pubAcyclicSendRequest);
-    int32_t writerGroupId = 0;
+    struct networkMessageIdentifier nmIdentifier = {.pubId = {.type = SOPC_Null_PublisherId}, .writerGroupId = 0};
     if (acyclicSendReq)
     {
-        writerGroupId = SOPC_Atomic_Int_Get(&pubAcyclicSendWriterId);
-        if (0 == writerGroupId)
+        nmIdentifier = pubAcyclicSendNetworkMessageId;
+        if (nmIdentifier.pubId.data.uint == 0 && nmIdentifier.writerGroupId == 0)
         {
             Server_request_change_sendAcyclicStatus(PUBLISHER_METHOD_ERROR);
-            printf("# Warning : writerGroupId cannot be equal to 0\n");
+            printf("# Warning : [publisherId, writerGroupId] cannot be equal to [0, 0]\n");
         }
         /* Reset since request is transmitted on return */
         SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, 0);
     }
-    return writerGroupId;
+    return nmIdentifier;
 }
 
 struct publisherDsmIdentifier Server_PubFilteringDataSetMessage_Requested(void)
@@ -772,14 +783,14 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
     return status;
 }
 
-bool Server_Trigger_Publisher(uint16_t writerGroupId)
+bool Server_Trigger_Publisher(struct networkMessageIdentifier networkMessageId)
 {
     if (!Server_IsRunning())
     {
         return false;
     }
 
-    bool res = SOPC_PubScheduler_AcyclicSend(writerGroupId);
+    bool res = SOPC_PubScheduler_AcyclicSend(&networkMessageId.pubId, networkMessageId.writerGroupId);
     if (res)
     {
         Server_request_change_sendAcyclicStatus(PUBLISHER_METHOD_SUCCESS);

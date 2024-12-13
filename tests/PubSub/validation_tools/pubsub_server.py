@@ -39,14 +39,15 @@ class PubSubState(Enum):
 class PubSubServer:
     """Wraps a client that connects to the sample pubsub_server"""
 
-    def __init__(self, uri, nid_configuration, nid_start_stop, nid_status, nid_acyclicSend, nid_acyclicSendStatus):
+    def __init__(self, uri, nid_configuration, nid_start_stop, nid_status, nid_publisherObject, nid_methodAcyclicSend, nid_acyclicSendStatus):
         self.uri = uri
         self.client = Client(self.uri)
         self.client.application_uri = "urn:S2OPC:localhost"
         self.nid_configuration = nid_configuration
         self.nid_start_stop = nid_start_stop
         self.nid_status = nid_status
-        self.nid_acyclicSend = nid_acyclicSend
+        self.nid_publisherObject = nid_publisherObject
+        self.nid_methodAcyclicSend = nid_methodAcyclicSend
         self.nid_acyclicSendStatus = nid_acyclicSendStatus
 
     # Connect to the Pub/Sub server. Shall be called before other methods
@@ -56,7 +57,8 @@ class PubSubServer:
         self.nodeConfiguration = self.client.get_node(self.nid_configuration)
         self.nodeStartStop = self.client.get_node(self.nid_start_stop)
         self.nodeStatus = self.client.get_node(self.nid_status)
-        self.nodeAcyclicSend = self.client.get_node(self.nid_acyclicSend)
+        self.nodePublisherObject = self.client.get_node(self.nid_publisherObject)
+        self.nodeMethodAcyclicSend = self.client.get_node(self.nid_methodAcyclicSend)
         self.nodeAcyclicSendStatus = self.client.get_node(self.nid_acyclicSendStatus)
 
     # Is connected to Pub/Sub server
@@ -127,31 +129,19 @@ class PubSubServer:
             print('getConfiguration: Client probably not connected to PubSubServer')
             return None
 
-    # Set Writer group Id on node Acyclic send
-    # If writer group Id match with one writer group id of acyclic publisher configuration if will send all datasets
-    def setAcyclicSend(self,value):
+    # Call method Acyclic send with parameters Publisher Id and Writer Group Id.
+    # If Publisher Id and Writer Group Id match a configuration of an acyclic Publisher it will send networkMessage identify by it's tuple
+    def triggerAcyclicSend(self, value):
+        publisherId, writerGroupId = value
         try:
-            self.nodeAcyclicSend.set_value(ua.DataValue(variant=ua.Variant(value,ua.VariantType.UInt16)))
+            # method call failure trigger an exception
+            self.nodePublisherObject.call_method(self.nodeMethodAcyclicSend,
+                                                 ua.Variant(publisherId,ua.VariantType.UInt64),
+                                                 ua.Variant(writerGroupId,ua.VariantType.UInt16))
         except: #TODO exception too broad
             print('Client probably not connected to PubSubServer')
 
-    # Get Writer group Id on acyclic publisher send command
-    def getAcyclicSend(self):
-        try:
-            return self.nodeAcyclicSend.get_value()
-        except: #TODO exception too broad
-            print('Client probably not connected to PubSubServer')
-            return None
-
-    # Set Writer group Id on node Acyclic send
-    # If writer group Id match with one writer group id of acyclic publisher configuration if will send all datasets
-    def setAcyclicSendStatus(self,value):
-        try:
-            self.nodeAcyclicSendStatus.set_value(ua.Variant(value,ua.VariantType.Byte))
-        except: #TODO exception too broad
-            print('Client probably not connected to PubSubServer')
-
-    # Get Writer group Id on acyclic publisher send command
+    # Get status on acyclic publisher send command
     def getAcyclicSendStatus(self):
         try:
             return self.nodeAcyclicSendStatus.get_value()

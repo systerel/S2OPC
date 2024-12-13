@@ -249,16 +249,18 @@ int main(int argc, char* const argv[])
         }
         /* Writer Group Id cannot be equal to 0 if Acyclic publisher have been triggered to send something writer group
          * Id should be different than 0 */
-        uint16_t writerGroupId = (uint16_t) Server_PubAcyclicSend_Requested();
-        if (writerGroupId)
+        struct networkMessageIdentifier nmId = Server_PubAcyclicSend_Requested();
+        if (nmId.pubId.type != SOPC_Null_PublisherId)
         {
-            status = Server_Trigger_Publisher(writerGroupId) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            status = Server_Trigger_Publisher(nmId) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
             if (SOPC_STATUS_NOK == status)
             {
-                printf("# Warning: Acyclic send request failed with writer group id %" PRIu16
+                printf("# Warning: Acyclic send request failed with [publisherId : %" PRIu64
+                       ", writerGroupId : %" PRIu16
+                       "] "
                        ". \n Check that PubSub is started and if publisher is set "
                        "as acyclic publisher and writer group id correspond to configuration. \n",
-                       writerGroupId);
+                       nmId.pubId.data.uint, nmId.writerGroupId);
             }
             status = SOPC_STATUS_OK;
         }

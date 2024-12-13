@@ -57,14 +57,20 @@ struct publisherDsmIdentifier
     bool enableEmission;
 };
 
+struct networkMessageIdentifier
+{
+    SOPC_Conf_PublisherId pubId;
+    uint16_t writerGroupId;
+};
+
 SOPC_ReturnStatus Server_WritePubSubNodes(void);
-bool Server_Trigger_Publisher(uint16_t writerGroupId);
+bool Server_Trigger_Publisher(struct networkMessageIdentifier networkMessageId);
 void Server_StopAndClear(void);
 
 void Server_PubSubStop_RequestRestart(void);
 bool Server_PubSubStop_Requested(void);
 bool Server_PubSubStart_Requested(void);
-int32_t Server_PubAcyclicSend_Requested(void);
+struct networkMessageIdentifier Server_PubAcyclicSend_Requested(void);
 
 struct publisherDsmIdentifier Server_PubFilteringDataSetMessage_Requested(void);
 
