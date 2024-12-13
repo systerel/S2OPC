@@ -130,7 +130,7 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="Byte" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="ns=1;s=Publisher">
+  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="ns=1;s=PublisherMethodStatusType" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="ns=1;s=Publisher">
     <DisplayName>Publisher Acyclic Send Status</DisplayName>
     <Description>Status of acyclic pub request : 0 = not_trigger; 1 = in_progress; 2 = sent; 3 = error</Description>
     <References>
@@ -138,7 +138,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:Byte>0</uax:Byte>
+      <uax:Int32>0</uax:Int32>
     </Value>
   </UAVariable>
   <UAMethod NodeId="ns=1;s=DataSetMessageFiltering" BrowseName="DataSetMessageFiltering" ParentNodeId="ns=1;s=Publisher">

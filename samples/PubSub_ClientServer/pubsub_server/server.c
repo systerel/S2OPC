@@ -74,21 +74,13 @@ static SOPC_AddressSpace* address_space = NULL;
 static uint8_t lastPubSubCommand = 0;
 static char* lastPubSubConfigPath = NULL;
 
-typedef enum PublisherSendStatus
+typedef enum PublisherMethodStatus
 {
-    PUBLISHER_ACYCLIC_NOT_TRIGGERED = 0,
-    PUBLISHER_ACYCLIC_IN_PROGRESS = 1,
-    PUBLISHER_ACYCLIC_SENT = 2,
-    PUBLISHER_ACYCLIC_ERROR = 3,
-} PublisherSendStatus;
-
-typedef enum PublisherFlagDsmEmissionStatus
-{
-    PUBLISHER_FLAG_DSM_EMISSION_NOT_TRIGGERED = 0,
-    PUBLISHER_FLAG_DSM_EMISSION_IN_PROGRESS = 1,
-    PUBLISHER_FLAG_DSM_EMISSION_SUCCESS = 2,
-    PUBLISHER_FLAG_DSM_EMISSION_ERROR = 3,
-} PublisherFlagDsmEmissionStatus;
+    PUBLISHER_METHOD_NOT_TRIGGERED = 0,
+    PUBLISHER_METHOD_IN_PROGRESS = 1,
+    PUBLISHER_METHOD_SUCCESS = 2,
+    PUBLISHER_METHOD_ERROR = 3,
+} PublisherMethodStatus;
 
 static SOPC_ReturnStatus Server_SetAddressSpace(void);
 
@@ -96,8 +88,8 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
                                       OpcUa_WriteValue* writeValue,
                                       SOPC_StatusCode opStatus);
 static void Server_Event_Write(OpcUa_WriteValue* pwv);
-static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state);
-static void Server_request_change_DsmFilteringStatus(PublisherFlagDsmEmissionStatus state);
+static void Server_request_change_sendAcyclicStatus(PublisherMethodStatus state);
+static void Server_request_change_DsmFilteringStatus(PublisherMethodStatus state);
 
 /* SOPC_ReturnStatus Server_SetRuntimeVariables(void); */
 
@@ -155,16 +147,16 @@ static SOPC_StatusCode Server_Method_Func_AcyclicSend(const SOPC_CallContext* ca
     SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
     SOPC_DataValue* dv = NULL;
     SOPC_StatusCode code = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, nidSendStatus, NULL, &dv);
-    if (!SOPC_IsGoodStatus(code) || SOPC_Byte_Id != dv->Value.BuiltInTypeId ||
+    if (!SOPC_IsGoodStatus(code) || SOPC_Int32_Id != dv->Value.BuiltInTypeId ||
         SOPC_VariantArrayType_SingleValue != dv->Value.ArrayType ||
-        dv->Value.Value.Byte == PUBLISHER_ACYCLIC_IN_PROGRESS)
+        dv->Value.Value.Int32 == PUBLISHER_METHOD_IN_PROGRESS)
     {
         code = OpcUa_BadInvalidState;
     }
     else
     {
         // Update acyclic send status
-        dv->Value.Value.Byte = PUBLISHER_ACYCLIC_IN_PROGRESS;
+        dv->Value.Value.Int32 = PUBLISHER_METHOD_IN_PROGRESS;
         SOPC_DateTime ts = 0;
         code = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, nidSendStatus, NULL, &dv->Value, NULL, &ts, NULL);
         if (SOPC_IsGoodStatus(code))
@@ -224,14 +216,14 @@ static SOPC_StatusCode Server_Method_Func_DataSetMessageFiltering(const SOPC_Cal
     SOPC_StatusCode code = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, nidDataSetMessageFilteringStatus, NULL, &dv);
     if (!SOPC_IsGoodStatus(code) || SOPC_Int32_Id != dv->Value.BuiltInTypeId ||
         SOPC_VariantArrayType_SingleValue != dv->Value.ArrayType ||
-        dv->Value.Value.Int32 == PUBLISHER_FLAG_DSM_EMISSION_IN_PROGRESS)
+        dv->Value.Value.Int32 == PUBLISHER_METHOD_IN_PROGRESS)
     {
         code = OpcUa_BadInvalidState;
     }
     else
     {
         // Update acyclic send status
-        dv->Value.Value.Int32 = PUBLISHER_FLAG_DSM_EMISSION_IN_PROGRESS;
+        dv->Value.Value.Int32 = PUBLISHER_METHOD_IN_PROGRESS;
         SOPC_DateTime ts = 0;
         code = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, nidDataSetMessageFilteringStatus, NULL, &dv->Value, NULL,
                                                   &ts, NULL);
@@ -610,7 +602,7 @@ int32_t Server_PubAcyclicSend_Requested(void)
         writerGroupId = SOPC_Atomic_Int_Get(&pubAcyclicSendWriterId);
         if (0 == writerGroupId)
         {
-            Server_request_change_sendAcyclicStatus(PUBLISHER_ACYCLIC_ERROR);
+            Server_request_change_sendAcyclicStatus(PUBLISHER_METHOD_ERROR);
             printf("# Warning : writerGroupId cannot be equal to 0\n");
         }
         /* Reset since request is transmitted on return */
@@ -630,7 +622,7 @@ struct publisherDsmIdentifier Server_PubFilteringDataSetMessage_Requested(void)
         pubDsmId = pubFilteringDsmId;
         if (pubDsmId.pubId.data.uint == 0 && pubDsmId.writerGroupId == 0 && pubDsmId.dataSetWriterId == 0)
         {
-            Server_request_change_DsmFilteringStatus(PUBLISHER_FLAG_DSM_EMISSION_ERROR);
+            Server_request_change_DsmFilteringStatus(PUBLISHER_METHOD_ERROR);
             printf("# Warning : [publisherId, writerGroupId, dataSetWriterId] can't be equal to [0, 0, 0]\n");
         }
         /* Reset since reqest is transmitted on return */
@@ -790,11 +782,11 @@ bool Server_Trigger_Publisher(uint16_t writerGroupId)
     bool res = SOPC_PubScheduler_AcyclicSend(writerGroupId);
     if (res)
     {
-        Server_request_change_sendAcyclicStatus(PUBLISHER_ACYCLIC_SENT);
+        Server_request_change_sendAcyclicStatus(PUBLISHER_METHOD_SUCCESS);
     }
     else
     {
-        Server_request_change_sendAcyclicStatus(PUBLISHER_ACYCLIC_ERROR);
+        Server_request_change_sendAcyclicStatus(PUBLISHER_METHOD_ERROR);
     }
     return res;
 }
@@ -818,11 +810,11 @@ bool Server_Trigger_FilteringDsmEmission(struct publisherDsmIdentifier pubDsmId)
     }
     if (res)
     {
-        Server_request_change_DsmFilteringStatus(PUBLISHER_FLAG_DSM_EMISSION_SUCCESS);
+        Server_request_change_DsmFilteringStatus(PUBLISHER_METHOD_SUCCESS);
     }
     else
     {
-        Server_request_change_DsmFilteringStatus(PUBLISHER_FLAG_DSM_EMISSION_ERROR);
+        Server_request_change_DsmFilteringStatus(PUBLISHER_METHOD_ERROR);
     }
     return res;
 }
@@ -864,7 +856,7 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
     Server_Event_Write((OpcUa_WriteValue*) writeValue);
 }
 
-static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
+static void Server_request_change_sendAcyclicStatus(PublisherMethodStatus state)
 {
     /* Create a WriteRequest with a single WriteValue */
     OpcUa_WriteRequest* request = NULL;
@@ -894,9 +886,9 @@ static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
 
         wv->AttributeId = 13;
         dv->SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
-        val->BuiltInTypeId = SOPC_Byte_Id;
+        val->BuiltInTypeId = SOPC_Int32_Id;
         val->ArrayType = SOPC_VariantArrayType_SingleValue;
-        val->Value.Byte = (SOPC_Byte) state;
+        val->Value.Int32 = (int32_t) state;
 
         status = SOPC_NodeId_Copy(&wv->NodeId, nidSendStatus);
         SOPC_NodeId_Clear(nidSendStatus);
@@ -917,7 +909,7 @@ static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
     }
 }
 
-static void Server_request_change_DsmFilteringStatus(PublisherFlagDsmEmissionStatus state)
+static void Server_request_change_DsmFilteringStatus(PublisherMethodStatus state)
 {
     /* Create a WriteRequest with a single WriteValue */
     OpcUa_WriteRequest* request = NULL;

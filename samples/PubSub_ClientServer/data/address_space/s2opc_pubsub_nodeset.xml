@@ -49378,7 +49378,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
     </References>
   </UAObject>
-  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="Byte" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="ns=1;s=Publisher">
+  <UAVariable AccessLevel="99" BrowseName="Publisher Acyclic Send Status" DataType="ns=1;s=PublisherMethodStatusType" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="ns=1;s=Publisher">
     <DisplayName>Publisher Acyclic Send Status</DisplayName>
     <Description>Status of acyclic pub request : 0 = not_trigger; 1 = in_progress; 2 = sent; 3 = error</Description>
     <References>
@@ -49387,7 +49387,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=Publisher</Reference>
     </References>
     <Value>
-      <uax:Byte>0</uax:Byte>
+      <uax:Int32>0</uax:Int32>
     </Value>
   </UAVariable>
   <UAMethod NodeId="ns=1;s=AcyclicSend" BrowseName="AcyclicSend" ParentNodeId="ns=1;s=Publisher">
