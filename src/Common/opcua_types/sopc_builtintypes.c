@@ -4530,11 +4530,11 @@ void SOPC_Variant_Delete(SOPC_Variant* variant)
     SOPC_Free(variant);
 }
 
-void SOPC_Variant_Print(SOPC_Variant* pvar)
+void SOPC_Variant_Print(const SOPC_Variant* pvar)
 {
     size_t i;
     uint8_t c;
-    SOPC_CONSOLE_PRINTF("Variant @%p", (void*) pvar);
+    SOPC_CONSOLE_PRINTF("Variant @%p", (const void*) pvar);
     char* s = NULL;
 
     if (NULL == pvar)
@@ -4690,6 +4690,172 @@ void SOPC_Variant_Print(SOPC_Variant* pvar)
         SOPC_CONSOLE_PRINTF("<print not implemented>\n");
         break;
     }
+}
+SOPC_ReturnStatus SOPC_Variant_Dump(SOPC_Buffer* buf, const SOPC_Variant* variant)
+{
+    if (NULL == variant || NULL == buf)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    char* s;
+    const char* s_cst;
+    switch (variant->ArrayType)
+    {
+    case SOPC_VariantArrayType_SingleValue:
+    {
+        switch (variant->BuiltInTypeId)
+        {
+        case SOPC_Null_Id:
+            SOPC_Buffer_PrintCString(buf, NULL);
+            break;
+        case SOPC_Boolean_Id:
+        {
+            const char* strBool = (variant->Value.Boolean ? "true" : "false");
+            SOPC_Buffer_PrintCString(buf, strBool);
+            break;
+        }
+        case SOPC_SByte_Id:
+            SOPC_Buffer_PrintI32(buf, (int32_t) variant->Value.Sbyte);
+            break;
+        case SOPC_Byte_Id:
+            SOPC_Buffer_PrintU32(buf, (uint32_t) variant->Value.Byte);
+            break;
+        case SOPC_Int16_Id:
+            SOPC_Buffer_PrintI32(buf, (int32_t) variant->Value.Int16);
+            break;
+        case SOPC_UInt16_Id:
+            SOPC_Buffer_PrintU32(buf, (uint32_t) variant->Value.Uint16);
+            break;
+        case SOPC_Int32_Id:
+            SOPC_Buffer_PrintI32(buf, variant->Value.Int32);
+            break;
+        case SOPC_UInt32_Id:
+            SOPC_Buffer_PrintU32(buf, variant->Value.Uint32);
+            break;
+        case SOPC_Int64_Id:
+            if (variant->Value.Int64 < INT32_MIN)
+            {
+                SOPC_Buffer_PrintCString(buf, "<INT32_MIN");
+            }
+            else if (variant->Value.Int64 > INT32_MAX)
+            {
+                SOPC_Buffer_PrintCString(buf, ">INT32_MAX");
+            }
+            else
+            {
+                SOPC_Buffer_PrintI32(buf, (int32_t) variant->Value.Int64);
+            }
+            break;
+        case SOPC_UInt64_Id:
+            if (variant->Value.Uint64 > UINT32_MAX)
+            {
+                SOPC_Buffer_PrintCString(buf, ">UINT32_MAX");
+            }
+            else
+            {
+                SOPC_Buffer_PrintU32(buf, (uint32_t) variant->Value.Uint64);
+            }
+            break;
+        case SOPC_Float_Id:
+            SOPC_Buffer_PrintFloatDouble(buf, (double) variant->Value.Floatv);
+            break;
+        case SOPC_Double_Id:
+            SOPC_Buffer_PrintFloatDouble(buf, variant->Value.Doublev);
+            break;
+        case SOPC_String_Id:
+            if (variant->Value.String.Length > 0)
+            {
+                SOPC_Buffer_Write(buf, variant->Value.String.Data, (uint32_t) variant->Value.String.Length);
+            }
+            break;
+        case SOPC_ByteString_Id:
+        {
+            char hex2[3];
+            // Display as simple hexadecimal raw data
+            for (size_t i = 0; i < (size_t) variant->Value.Bstring.Length; ++i)
+            {
+                snprintf(hex2, 3, "%02" PRIX8, variant->Value.Bstring.Data[i]);
+                SOPC_Buffer_PrintCString(buf, hex2);
+            }
+            break;
+        }
+        case SOPC_XmlElement_Id:
+            SOPC_Buffer_PrintCString(buf, "<XmlElement>");
+            break;
+        case SOPC_NodeId_Id:
+            s = SOPC_NodeId_ToCString(variant->Value.NodeId);
+            if (NULL != s)
+            {
+                SOPC_Buffer_PrintCString(buf, s);
+                SOPC_Free(s);
+                s = NULL;
+            }
+            break;
+        case SOPC_StatusCode_Id:
+        {
+            char sId[11];
+            snprintf(sId, 11, "0x%08X", (unsigned) variant->Value.Status);
+            SOPC_Buffer_PrintCString(buf, sId);
+            break;
+        }
+        case SOPC_DateTime_Id:
+            s = SOPC_Time_GetString(variant->Value.Date, true, false);
+            SOPC_Buffer_PrintCString(buf, s);
+            SOPC_Free(s);
+            s = NULL;
+            break;
+        case SOPC_Guid_Id:
+            s = SOPC_Guid_ToCString(variant->Value.Guid);
+            SOPC_Buffer_PrintCString(buf, s);
+            SOPC_Free(s);
+            s = NULL;
+            break;
+        case SOPC_ExpandedNodeId_Id:
+            SOPC_Buffer_PrintCString(buf, "<ExpandedNodeId>");
+            break;
+        case SOPC_QualifiedName_Id:
+            SOPC_Buffer_PrintU32(buf, (uint32_t) variant->Value.Qname->NamespaceIndex);
+            SOPC_Buffer_PrintCString(buf, ":");
+            s_cst = SOPC_String_GetRawCString(&variant->Value.Qname->Name);
+            SOPC_Buffer_PrintCString(buf, s_cst);
+            break;
+        case SOPC_LocalizedText_Id:
+            SOPC_Buffer_PrintCString(buf, "LocalizedText (default only) = ");
+            s_cst = SOPC_String_GetRawCString(&variant->Value.LocalizedText->defaultLocale);
+            SOPC_Buffer_PrintCString(buf, s_cst);
+            s_cst = SOPC_String_GetRawCString(&variant->Value.LocalizedText->defaultText);
+            SOPC_Buffer_PrintCString(buf, s_cst);
+            break;
+        case SOPC_ExtensionObject_Id:
+            SOPC_Buffer_PrintCString(buf, "<ExtensionObject>");
+            break;
+        case SOPC_DataValue_Id:
+            SOPC_Buffer_PrintCString(buf, "<DataValue>");
+            break;
+        case SOPC_Variant_Id: /* This one does not have an implementation at all */
+            SOPC_Buffer_PrintCString(buf, "<Variant>");
+            break;
+        case SOPC_DiagnosticInfo_Id:
+            SOPC_Buffer_PrintCString(buf, "<DiagnosticInfo>");
+            break;
+        default:
+            SOPC_Buffer_PrintCString(buf, "<Unknown>\n");
+            break;
+        }
+    }
+    break;
+    case SOPC_VariantArrayType_Array:
+        SOPC_Buffer_PrintCString(buf, "[[...]]");
+        break;
+    case SOPC_VariantArrayType_Matrix:
+        SOPC_Buffer_PrintCString(buf, "[...]");
+        break;
+    default:
+        break;
+    }
+
+    return SOPC_STATUS_OK;
 }
 
 void SOPC_DataValue_InitializeAux(void* value)

@@ -539,3 +539,12 @@ SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(SOPC_Buffer* buf, const double va
 
     return status;
 }
+
+SOPC_ReturnStatus SOPC_Buffer_PrintCString(SOPC_Buffer* buf, const char* value)
+{
+    if (NULL == value)
+    {
+        value = "<null>";
+    }
+    return SOPC_Buffer_Write(buf, (const uint8_t*) value, (uint32_t) strlen(value));
+}

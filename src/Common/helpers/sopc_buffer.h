@@ -260,7 +260,7 @@ SOPC_ReturnStatus SOPC_Buffer_PrintI32(SOPC_Buffer* buf, const int32_t value);
  * The output is equivalent to '%.*g' print format with SOPC_PRECISION_PRINTING_FLOAT_NUMBERS as precision.
  * There is no terminating NULL character added at the end of the printed value.
  *
- * For exemple : '42', '-4.3e+111'
+ * For example : '42', '-4.3e+111'
  *
  * About special values, the syntax is as follows (including double quote) :
  * - Not a Number : '"NaN"'
@@ -276,5 +276,13 @@ SOPC_ReturnStatus SOPC_Buffer_PrintI32(SOPC_Buffer* buf, const int32_t value);
  * content, full buffer avoiding operation)
  */
 SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(SOPC_Buffer* buf, const double value);
+
+/***
+ *  \brief  Print the C string value in the buffer.
+ *  \param value The C-string to print. If value is NULLL "<null>" is printed.
+ *  \return            SOPC_STATUS_OK if succeeded, an error code otherwise (NULL pointer, non allocated buffer
+ * content, full buffer avoiding operation)
+ */
+SOPC_ReturnStatus SOPC_Buffer_PrintCString(SOPC_Buffer* buf, const char* value);
 
 #endif /* SOPC_BUFFER_H_ */

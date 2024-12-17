@@ -1136,7 +1136,23 @@ void SOPC_Variant_ClearAux(void* value);
 void SOPC_Variant_Delete(SOPC_Variant* variant);
 
 // Raw function to print a variant on standard output. Do not display array or matrix.
-void SOPC_Variant_Print(SOPC_Variant* variant);
+void SOPC_Variant_Print(const SOPC_Variant* variant);
+
+/**
+ *  \brief             Print the variant into the buffer data bytes from the buffer position (adapting buffer
+ * position and length if necessary).
+ * This function only provides a "shallow" dump.:
+ * - Arrays (and matrixes) are not expanded,
+ * - Complex types are not expanded.
+ * There is no terminating NULL character added at the end of the printed value.
+ *
+ *  \param variant     variant to print into the buffer
+ *  \param buf         Pointer to the buffer to write into
+ *
+ *  \return            SOPC_STATUS_OK if succeeded, an error code otherwise (NULL pointer, non allocated buffer
+ * content). Note that a full buffer will not return an error in this function.
+ */
+SOPC_ReturnStatus SOPC_Variant_Dump(SOPC_Buffer* buf, const SOPC_Variant* variant);
 
 /**
  * \brief Returns the number of values contained in a Variant with Array or Matrix value type.
