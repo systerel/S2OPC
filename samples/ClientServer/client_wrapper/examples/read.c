@@ -118,7 +118,7 @@ int main(int argc, char* const argv[])
 
         if (NULL == readConnCfg)
         {
-            printf("<Example_wrapper_get_endpoints: failed to load configuration id '" DEFAULT_CONFIG_ID
+            printf("<Example_wrapper_read: failed to load configuration id '" DEFAULT_CONFIG_ID
                    "' from XML config file %s\n",
                    DEFAULT_CLIENT_CONFIG_XML);
 
