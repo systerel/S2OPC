@@ -805,12 +805,12 @@ def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
 def helpTestStopStart(pPubsubserver, pStart, pLogger, possibleFail=False):
     if not possibleFail:
         connected = waitForEvent(lambda:pPubsubserver.isConnected())
-        started = waitForEvent(lambda:pPubsubserver.isStart())
+        expectedPubSubStatus = waitForEvent(lambda: pStart == pPubsubserver.isStart())
         pLogger.add_test('Connected to pubsub_server', connected)
         if pStart:
-            pLogger.add_test('PubSub Module is started' , started)
+            pLogger.add_test('PubSub Module is started' , expectedPubSubStatus)
         else:
-            pLogger.add_test('PubSub Module is stopped', not started)
+            pLogger.add_test('PubSub Module is stopped', expectedPubSubStatus)
 
     # TODO: for now "possibleFail" is in fact "expectedFail"
     if pStart:
