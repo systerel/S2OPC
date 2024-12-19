@@ -64,6 +64,8 @@ static int32_t nonRegWriteResponses = 0;
 
 static uint32_t cptReadResps = 0;
 
+static char* newNodeId = "NewNodeId";
+
 static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
 {
     SOPC_UNUSED_ARG(status);
@@ -100,6 +102,24 @@ static void SOPC_LocalServiceAsyncRespCallback(SOPC_EncodeableType* encType, voi
             printf("<Test_Server_Local_Service: received local service  WriteResponse \n");
             OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
             test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+        }
+        else if (encType == &OpcUa_AddNodesResponse_EncodeableType)
+        {
+            // Check context value is same as one provided with request
+            SOPC_ASSERT(1 == appContext);
+            printf("<Test_Server_Local_Service: received local service AddNodeResponse \n");
+            OpcUa_AddNodesResponse* addNodeResp = (OpcUa_AddNodesResponse*) response;
+            // Check that a node with good NodeId has been added
+            if (1 == addNodeResp->NoOfResults)
+            {
+                const char* nodeIdAdded = SOPC_String_GetRawCString(&addNodeResp->Results->AddedNodeId.Data.String);
+                printf("NodeId of thee added node: '%s'\n", nodeIdAdded);
+                test_results_set_service_result(0 == strcmp(nodeIdAdded, newNodeId));
+            }
+            else
+            {
+                test_results_set_service_result(false);
+            }
         }
     }
     else
@@ -1017,6 +1037,72 @@ int main(int argc, char* argv[])
 
     // Non regression test on concurrent read / write
     test_concurrent_write_read_non_reg();
+
+    /*
+     * LOCAL SERVICE: very basic AddNode
+     */
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Reset expected result
+        test_results_set_service_result(false);
+
+        // Create AddNodeRequest to be sent (deallocated by toolkit) */
+        OpcUa_AddNodesRequest* addNodesReq = SOPC_AddNodesRequest_Create(1);
+        // Create params of the request
+        // 1) parent
+        SOPC_ExpandedNodeId parentNode;
+        SOPC_ExpandedNodeId_Initialize(&parentNode);
+        parentNode.NodeId.Data.Numeric = OpcUaId_ObjectsFolder;
+        // 2) ref type from parent to the node to add
+        SOPC_NodeId referenceTypeId;
+        SOPC_NodeId_Initialize(&referenceTypeId);
+        referenceTypeId.Data.Numeric = OpcUaId_Organizes;
+        // 3) Node to add (nodeId etc)
+        SOPC_ExpandedNodeId nodeToAdd;
+        SOPC_ExpandedNodeId_Initialize(&nodeToAdd);
+        nodeToAdd.NodeId.Namespace = 1;
+        nodeToAdd.NodeId.IdentifierType = SOPC_IdentifierType_String;
+        status = SOPC_String_AttachFromCstring(&nodeToAdd.NodeId.Data.String, newNodeId);
+        // 4) BrowseName of the node to add
+        SOPC_QualifiedName nodeToAddBrowseName;
+        SOPC_QualifiedName_Initialize(&nodeToAddBrowseName);
+        nodeToAddBrowseName.NamespaceIndex = 1;
+        status = SOPC_String_AttachFromCstring(&nodeToAddBrowseName.Name, "NewAddedNode");
+        // 5) Type def of the node to add
+        SOPC_ExpandedNodeId typeDefinition;
+        SOPC_ExpandedNodeId_Initialize(&typeDefinition);
+        typeDefinition.NodeId.Data.Numeric = OpcUaId_FolderType;
+
+        status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, &parentNode, &referenceTypeId, &nodeToAdd,
+                                                         &nodeToAddBrowseName, &typeDefinition, NULL, NULL, NULL, NULL,
+                                                         (const SOPC_Byte*) "1");
+
+        // Use 1 as AddNode request context
+        status = SOPC_ServerHelper_LocalServiceAsync(addNodesReq, 1);
+        if (SOPC_STATUS_OK == status)
+        {
+            printf("<Test_Server_Local_Service: local addNode asynchronous request: OK\n");
+        }
+        else
+        {
+            printf("<Test_Server_Local_Service: local addNode asynchronous request: NOK\n");
+        }
+    }
+
+    /* Wait until service response is received */
+    loopCpt = 0;
+    while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+           loopCpt * sleepTimeout <= loopTimeout)
+    {
+        loopCpt++;
+        SOPC_Sleep(sleepTimeout);
+    }
+
+    if (loopCpt * sleepTimeout > loopTimeout)
+    {
+        status = SOPC_STATUS_TIMEOUT;
+    }
 
     // Asynchronous request to stop the server
     SOPC_ReturnStatus stopStatus = SOPC_ServerHelper_StopServer();
