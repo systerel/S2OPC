@@ -245,6 +245,12 @@ if (expat_FOUND)
     COMMAND ${CMAKE_COMMAND} -E copy ${CLIENT_WRAPPER_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   )
 
+  add_executable(s2opc_wrapper_add_nodes "client_wrapper/examples/add_nodes.c")
+  target_include_directories(s2opc_wrapper_add_nodes PRIVATE s2opc_clientserver)
+  target_link_libraries(s2opc_wrapper_add_nodes PRIVATE s2opc_clientserver)
+  target_compile_options(s2opc_wrapper_add_nodes PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(s2opc_wrapper_add_nodes PRIVATE ${S2OPC_DEFINITIONS})
+
   add_executable(s2opc_wrapper_read "client_wrapper/examples/read.c")
   target_include_directories(s2opc_wrapper_read PRIVATE s2opc_clientserver)
   target_link_libraries(s2opc_wrapper_read PRIVATE s2opc_clientserver)

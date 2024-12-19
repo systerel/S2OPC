@@ -26,6 +26,13 @@
         <SecurityMode mode="Sign"/>
         <!-- anonymous -->
       </Connection>
+      <Connection serverURL="opc.tcp://localhost:4841" id="addNode">
+        <ServerCertificate path="server_public/server_4k_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="Sign"/>
+        <UserPolicy policyId="username_Basic256Sha256" tokenType="username"/>
+        <!-- anonymous -->
+      </Connection>
       <Connection serverURL="opc.tcp://localhost:4841" id="write">
         <ServerCertificate path="server_public/server_4k_cert.der"/>
         <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
