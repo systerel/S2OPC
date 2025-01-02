@@ -152,7 +152,9 @@ typedef struct SOPC_HelperConfigInternal_Ctx
             // sync call management
             bool isSyncCall;
             uint32_t syncId;
-            // internal use of local services (runtime variables)
+            // custom async response callback
+            SOPC_LocalServiceAsyncResp_Fct* customAsyncRespCb;
+            // internal use of local services + local service type callback (e.g runtime variables)
             bool isHelperInternal;
             // message to display in case of internal local service failure (response NOK)
             const char* internalErrorMsg;
@@ -212,5 +214,13 @@ void SOPC_ServerInternal_KeyCertPairUpdateCb(uintptr_t updateParam);
 
 // Callback instance to be used on server PKI update
 void SOPC_ServerInternal_PKIProviderUpdateCb(uintptr_t updateParam);
+
+// Local service asynchronous internal version:
+// it differs from ::SOPC_ServerHelper_LocalServiceAsyncCustom
+// in that the provided context in \p asyncRespCb call is internal ::SOPC_HelperConfigInternal_Ctx instead of \p userCtx
+bool SOPC_ServerInternal_LocalServiceAsync(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
+                                           void* request,
+                                           uintptr_t userCtx,
+                                           const char* errorMsg);
 
 #endif

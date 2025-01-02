@@ -224,7 +224,7 @@ typedef bool SOPC_CreateMI_NodeAvail_Fct(const SOPC_NodeId* nodeId,
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb);
 
 /**
- * \brief Type of callback to provide to receive asynchronous local service response
+ * \brief Type of callback to provide to receive asynchronous local service response.
  *
  * \param type         The ::SOPC_EncodeableType of the provided \p response
  * \param response     An asynchronous response to a local service request sent using
@@ -242,6 +242,9 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(SOPC_Cre
  *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
  *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
+ *
+ *                     The provided response is deallocated by caller after call,
+ *                     it means response or response content shall be moved or copied if necessary.
  *
  * \param userContext  The context that was provided with the corresponding request provided on
  *                     ::SOPC_ServerHelper_LocalServiceAsync call

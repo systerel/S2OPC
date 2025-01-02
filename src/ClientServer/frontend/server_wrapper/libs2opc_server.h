@@ -135,6 +135,15 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
 SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t userContext);
 
 /**
+ * \brief Same as ::SOPC_ServerHelper_LocalServiceAsync but with a custom callback for receiving response.
+ *        The \p asyncRespCb callback is used instead of the one configured with
+ *        ::SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse
+ */
+SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsyncCustom(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
+                                                            void* request,
+                                                            uintptr_t userContext);
+
+/**
  * \brief Executes a local OPC UA service on server (read, write, browse or discovery service) synchronously.
  *
  * \note ::SOPC_ServerHelper_StartServer or ::SOPC_ServerHelper_Serve shall have been called

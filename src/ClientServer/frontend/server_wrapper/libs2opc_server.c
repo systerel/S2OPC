@@ -19,6 +19,7 @@
 
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
@@ -64,6 +65,43 @@ static void SOPC_HelperInternal_StopSignal(int sig)
     else
     {
         stopServer++;
+    }
+}
+
+// Creates an helper context containing user context to associate with a sent request
+static SOPC_HelperConfigInternal_Ctx* SOPC_HelperConfigInternalCtx_Create(uintptr_t userContext,
+                                                                          SOPC_App_Com_Event event)
+{
+    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_Calloc(1, sizeof(SOPC_HelperConfigInternal_Ctx));
+    if (NULL != ctx)
+    {
+        ctx->userContext = userContext;
+        ctx->event = event;
+    }
+    return ctx;
+}
+
+bool SOPC_ServerInternal_LocalServiceAsync(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
+                                           void* request,
+                                           uintptr_t userCtx,
+                                           const char* errorMsg)
+{
+    SOPC_ASSERT(NULL != request);
+    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(userCtx, SE_LOCAL_SERVICE_RESPONSE);
+    if (NULL != ctx)
+    {
+        ctx->eventCtx.localService.customAsyncRespCb = asyncRespCb;
+        ctx->eventCtx.localService.isHelperInternal = true;
+        ctx->eventCtx.localService.internalErrorMsg = errorMsg;
+        SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
+                                                    (uintptr_t) ctx);
+        return true;
+    }
+    else
+    {
+        SOPC_ReturnStatus status = SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) request, &request);
+        SOPC_UNUSED_RESULT(status);
+        return false;
     }
 }
 
@@ -164,14 +202,29 @@ void SOPC_ServerInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
                                              SOPC_HelperConfigInternal_Ctx* helperCtx)
 {
     struct LocalServiceCtx* ls = &helperCtx->eventCtx.localService;
+    SOPC_LocalServiceAsyncResp_Fct* asyncCb = NULL;
+    uintptr_t asyncCbCtx = 0;
     // Helper internal call to internal services are always using asynchronous way
     if (ls->isHelperInternal)
     {
-        SOPC_HelperInternal_RuntimeVariableSetResponseCb(encType, response, (uintptr_t) helperCtx);
+        asyncCbCtx = (uintptr_t) helperCtx;
+        SOPC_ASSERT(NULL != ls->customAsyncRespCb);
+    }
+    else
+    {
+        asyncCbCtx = helperCtx->userContext;
+    }
+    if (NULL != ls->customAsyncRespCb)
+    {
+        asyncCb = ls->customAsyncRespCb;
     }
     else if (NULL != sopc_server_helper_config.asyncRespCb)
     {
-        sopc_server_helper_config.asyncRespCb(encType, response, helperCtx->userContext);
+        asyncCb = sopc_server_helper_config.asyncRespCb;
+    }
+    if (NULL != asyncCb)
+    {
+        asyncCb(encType, response, asyncCbCtx);
     }
     else
     {
@@ -181,19 +234,6 @@ void SOPC_ServerInternal_AsyncLocalServiceCb(SOPC_EncodeableType* encType,
             " Please check you configured an asynchronous local service response callback if you sent request.",
             SOPC_EncodeableType_GetName(encType));
     }
-}
-
-// Creates an helper context containing user context to associate with a sent request
-static SOPC_HelperConfigInternal_Ctx* SOPC_HelperConfigInternalCtx_Create(uintptr_t userContext,
-                                                                          SOPC_App_Com_Event event)
-{
-    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_Calloc(1, sizeof(SOPC_HelperConfigInternal_Ctx));
-    if (NULL != ctx)
-    {
-        ctx->userContext = userContext;
-        ctx->event = event;
-    }
-    return ctx;
 }
 
 // Finalize the toolkit configuration based on helper configuration data.
@@ -258,8 +298,9 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
     return status;
 }
 
-static SOPC_ReturnStatus SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(OpcUa_WriteRequest* writeRequest,
-                                                                           SOPC_HelperConfigInternal_Ctx* ctx)
+static SOPC_ReturnStatus SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
+                                                                           OpcUa_WriteRequest* writeRequest,
+                                                                           const char* errorMsg)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != writeRequest)
@@ -273,9 +314,12 @@ static SOPC_ReturnStatus SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(OpcUa
         }
         if (SOPC_STATUS_OK == status)
         {
-            ctx->userContext = (uintptr_t) writeRequestCopyCtx;
-            SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], writeRequest,
-                                                        (uintptr_t) ctx);
+            bool res = SOPC_ServerInternal_LocalServiceAsync(asyncRespCb, writeRequest, (uintptr_t) writeRequestCopyCtx,
+                                                             errorMsg);
+            if (!res)
+            {
+                SOPC_EncodeableObject_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &writeRequestCopyCtx);
+            }
         }
         else
         {
@@ -299,24 +343,17 @@ static void SOPC_UpdateCurrentTime_EventHandler_Callback(SOPC_EventHandler* hand
     SOPC_UNUSED_ARG(handler);
     SOPC_UNUSED_ARG(params);
     SOPC_UNUSED_ARG(auxParam);
-    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
-    if (NULL != ctx)
+
+    OpcUa_WriteRequest* writeRequest =
+        SOPC_RuntimeVariables_UpdateCurrentTimeWriteRequest(&sopc_server_helper_config.runtimeVariables);
+
+    if (NULL != writeRequest)
     {
-        ctx->eventCtx.localService.isHelperInternal = true;
-        ctx->eventCtx.localService.internalErrorMsg =
+        bool res = SOPC_ServerInternal_LocalServiceAsync(
+            SOPC_HelperInternal_RuntimeVariableSetResponseCb, writeRequest, (uintptr_t) NULL,
             "Updating server status current time runtime variables of server information nodes failed."
-            " Please check address space content includes necessary base information nodes.";
-        OpcUa_WriteRequest* writeRequest =
-            SOPC_RuntimeVariables_UpdateCurrentTimeWriteRequest(&sopc_server_helper_config.runtimeVariables);
-        if (NULL != writeRequest)
-        {
-            SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], writeRequest,
-                                                        (uintptr_t) ctx);
-        }
-        else
-        {
-            SOPC_Free(ctx);
-        }
+            " Please check address space content includes necessary base information nodes.");
+        SOPC_UNUSED_RESULT(res);
     }
 }
 
@@ -340,17 +377,16 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
     {
         SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &pConfig->serverConfig);
     }
-    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
-    if (NULL != ctx)
-    {
-        ctx->eventCtx.localService.isHelperInternal = true;
-        ctx->eventCtx.localService.internalErrorMsg =
-            "Setting runtime variables of server build information nodes failed."
-            " Please check address space content includes necessary base information nodes.";
-        OpcUa_WriteRequest* writeRequest =
-            SOPC_RuntimeVariables_BuildWriteRequest(&sopc_server_helper_config.runtimeVariables);
 
-        status = SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(writeRequest, ctx);
+    OpcUa_WriteRequest* writeRequest =
+        SOPC_RuntimeVariables_BuildWriteRequest(&sopc_server_helper_config.runtimeVariables);
+
+    if (NULL != writeRequest)
+    {
+        status = SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(
+            &SOPC_HelperInternal_RuntimeVariableSetResponseCb, writeRequest,
+            "Setting runtime variables of server build information nodes failed."
+            " Please check address space content includes necessary base information nodes.");
 
         if (SOPC_STATUS_OK == status && 0 != sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs)
         {
@@ -418,32 +454,22 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
     {
         // Update the seconds till shutdown value
         runtime_vars->secondsTillShutdown = remainingSecondsTillShutdown;
-        SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
-        if (NULL == ctx)
+        OpcUa_WriteRequest* writeRequest = SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(runtime_vars);
+
+        status = SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(
+            &SOPC_HelperInternal_RuntimeVariableSetResponseCb, writeRequest,
+            "Updating runtime variables of server build information nodes failed");
+
+        // Evaluation of seconds till shutdown
+        SOPC_TimeReference currentTime = SOPC_TimeReference_GetCurrent();
+        if (currentTime < targetTime)
         {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
+            SOPC_Sleep(UPDATE_TIMEOUT_MS);
+            remainingSecondsTillShutdown = (uint32_t)((targetTime - currentTime) / 1000);
         }
-
-        if (SOPC_STATUS_OK == status)
+        else
         {
-            ctx->eventCtx.localService.isHelperInternal = true;
-            ctx->eventCtx.localService.internalErrorMsg =
-                "Updating runtime variables of server build information nodes failed";
-            OpcUa_WriteRequest* writeRequest = SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(runtime_vars);
-
-            status = SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(writeRequest, ctx);
-
-            // Evaluation of seconds till shutdown
-            SOPC_TimeReference currentTime = SOPC_TimeReference_GetCurrent();
-            if (currentTime < targetTime)
-            {
-                SOPC_Sleep(UPDATE_TIMEOUT_MS);
-                remainingSecondsTillShutdown = (uint32_t)((targetTime - currentTime) / 1000);
-            }
-            else
-            {
-                targetTimeReached = true;
-            }
+            targetTimeReached = true;
         }
     } while (SOPC_STATUS_OK == status && !targetTimeReached);
 }
@@ -562,6 +588,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
 
         // then the stopped callback will be called when server actually stopped
     }
+
     return status;
 }
 
@@ -673,6 +700,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
         // Set helper local service context
         ctx->eventCtx.localService.isSyncCall = true;
         ctx->eventCtx.localService.syncId = sopc_server_helper_config.syncLocalServiceId;
+        ctx->eventCtx.localService.customAsyncRespCb = NULL;
 
         // Send request
         SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
@@ -715,7 +743,9 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t userContext)
+SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsyncCustom(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
+                                                            void* request,
+                                                            uintptr_t userContext)
 {
     if (!SOPC_ServerInternal_IsStarted())
     {
@@ -726,9 +756,15 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
+    ctx->eventCtx.localService.customAsyncRespCb = asyncRespCb;
     SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request, (uintptr_t) ctx);
 
     return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t userContext)
+{
+    return SOPC_ServerHelper_LocalServiceAsyncCustom(NULL, request, userContext);
 }
 
 SOPC_ReturnStatus SOPC_ServerHelper_CreateEvent(const SOPC_NodeId* eventTypeId, SOPC_Event** event)
