@@ -31,6 +31,6 @@ FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09
 # Private images
 GEN_DIGEST=docker.aix.systerel.fr/c838/gen@sha256:e7c7f0427d49d162c66410e05eb04a5859ec5e87a04d2ee82bbf25772acf7adf # docker.aix.systerel.fr/c838/gen:1.4
 UACTT_WIN_DIGEST=com.systerel.fr:5000/c838/uactt-win@sha256:98b4488aa85310d1e668af8f42be4973e2e7494fe9f44adbaf81896f794db794 # com.systerel.fr:5000/c838/uactt-win:2.3
-UACTT_LINUX_DIGEST=com.systerel.fr:5000/c838/uactt-linux@sha256:e63916a03bf824d9d9f1f5b16479605c663507ab829b2fbc131f2b6b4666935f # com.systerel.fr:5000/c838/uactt-linux:1.4
+UACTT_LINUX_DIGEST=com.systerel.fr:5000/c838/uactt-linux@sha256:0760854af527106b81a7ec53b6538edc5d41d076395339cf8650919e285a9560 # com.systerel.fr:5000/c838/uactt-linux:1.5
 NETWORK_FUZZING_DIGEST=com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:b02f7125092b23d2b2adec3fe2a4c68257470ba1978e55a9f1a1930a6dea4d94 #com.systerel.fr:5000/c838/opcua-network-fuzzer:3.1
 PIKEOS_DIGEST=docker.aix.systerel.fr/c838/pikeos@sha256:3d5dcbab75b0c98a8d27d1cfa239bfa43b5b87bc1bbaca2a7c8a5bfe2adc5aeb # docker.aix.systerel.fr/c838/pikeos:1.2.1
