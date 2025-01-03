@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_config.xsd">
+  <ServerConfiguration>
+    <Namespaces>
+      <Namespace uri="urn:S2OPC:localhost"/>
+    </Namespaces>
+    <Locales>
+      <Locale id="en-US"/>
+      <Locale id="fr-FR"/>
+    </Locales>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:localhost"/>
+      <ProductURI uri="urn:S2OPC:localhost"/>
+      <ApplicationName text="S2OPC toolkit server example" locale="en-US"/>
+      <ApplicationName text="S2OPC toolkit: exemple de serveur" locale="fr-FR"/>
+      <!-- No discovery URL: use of endpoint URL as discovery URL -->
+    </ApplicationDescription>
+    <Endpoints>
+      <!-- Available token types are only anonymous. Security URI is None -->
+      <Endpoint url="opc.tcp://localhost:4841">
+        <SecurityPolicies>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
+            <SecurityModes>
+              <SecurityMode mode="None"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+        </SecurityPolicies>
+      </Endpoint>
+    </Endpoints>
+  </ServerConfiguration>
+</S2OPC>

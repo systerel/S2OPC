@@ -390,20 +390,19 @@ build-pikeos:
       when: always
 
 build-fuzz:
-  stage: build
-  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:b02f7125092b23d2b2adec3fe2a4c68257470ba1978e55a9f1a1930a6dea4d94 #3.1 digest
+  <<: *build_linux
+  stage: build-others
   needs: []
   variables:
-    TEST_PASSWORD_PRIVATE_KEY : password
-  script:
-    - apt-get update -y && apt-get install -y openssl
-    - ./.network_fuzzing.sh
+    <<: [*build_linux_variables,*nominal_build_variables]
+    BUILD_DIR: build_fuzz
+    CMAKE_C_FLAGS: "-DSOPC_MAX_SOCKETS=1500 -DSOPC_MAX_SOCKETS_CONNECTIONS=1500 -DSOPC_MAX_SECURE_CONNECTIONS=1100 -DSOPC_MAX_SESSIONS=1000 -DSOPC_MAX_TIMERS=UINT16_MAX"
   artifacts:
-    name: 'fuzzing-results_job${CI_JOB_ID}'
+    name: 'bin_${CI_COMMIT_SHA}_job${CI_JOB_ID}_fuzz'
     paths:
-      - "./boofuzz-results"
-      - "./build/bin/toolkit_demo_server_logs"
-    when: on_failure
+      - "*.log"
+      - "build_fuzz/bin"
+      - "tests/ClientServer/scripts/*"
     expire_in: "30 days"
   timeout: 24 hours
   tags:
@@ -600,6 +599,28 @@ test-faulty-packets :
   rules :
     - if: "$ALL_BUILDS != null"
       when: on_success
+
+test-fuzz:
+  stage: test-others
+  image: docker.aix.systerel.fr/c838/opcua-network-fuzzer@sha256:55247404073c22b8bc3312406adc7fa30ecb47b441b75281eb629e7e1fd5e33f #digest version 3.2
+  needs: [build-fuzz]
+  script:
+    - ./.network_fuzzing.sh
+  artifacts:
+    name: 'fuzzing_results_job${CI_JOB_ID}'
+    paths:
+      - "./boofuzz-results"
+      - "./build_fuzz/bin/toolkit_demo_server_logs"
+    when: on_failure
+    expire_in: "30 days"
+  timeout: 24 hours
+  tags:
+    - fuzzing
+  rules:
+    - if: "$TEST_NETWORK_FUZZ != null"
+      when: on_success
+  dependencies:
+    - build-fuzz
 
 # Generate the Software Bill Of Materials according to the conan.lock file.
 generate_sbom:

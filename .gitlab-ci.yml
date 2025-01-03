@@ -430,29 +430,6 @@ build-freertos:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
 
-build-fuzz:
-  stage: build
-  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #3.0 digest
-  needs: []
-  variables:
-    TEST_PASSWORD_PRIVATE_KEY : password
-  script:
-    - apt-get update -y && apt-get install -y openssl
-    - ./.network_fuzzing.sh
-  artifacts:
-    name: 'fuzzing-results_job${CI_JOB_ID}'
-    paths:
-      - "./boofuzz-results"
-      - "./build/bin/toolkit_demo_server_logs"
-    when: on_failure
-    expire_in: "30 days"
-  timeout: 24 hours
-  tags:
-    - fuzzing
-  rules:
-    - if: "$TEST_NETWORK_FUZZ != null"
-      when: always
-
 ###
 # Test jobs
 ###
