@@ -70,6 +70,7 @@ variables:
   TEST_PASSWORD_PRIVATE_KEY : password
   TEST_PASSWORD_CACERT : S2OPC
   TEST_PASSWORD_USER_ME : 1234
+  TEST_PASSWORD_USER_SECUADMIN : 1234
   TEST_USERNAME : user1
   TEST_PASSWORD_USER : password
 
@@ -547,6 +548,7 @@ test-unit-all-tests:
     TEST_PASSWORD_USER : password
     TEST_PASSWORD_CACERT : S2OPC
     TEST_PASSWORD_USER_ME : 1234
+    TEST_PASSWORD_USER_SECUADMIN : 1234
   rules:
     - if: "$ALL_TESTS != null"
       when: on_success

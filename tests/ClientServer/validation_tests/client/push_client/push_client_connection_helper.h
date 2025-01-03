@@ -41,8 +41,8 @@
  *
  * @remark The serverCertPath needs to be precised and the server endpoint is
  * "opc.tcp://localhost:4841", userPolicy is fixed and connection mode is username/password
- * with username="me". The password of the username needs to be defined as global variable
- * under TEST_PASSWORD_USER_ME.
+ * with username="secuAdmin". The password of the username needs to be defined as global variable
+ * under TEST_PASSWORD_USER_SECUADMIN.
  */
 SOPC_ReturnStatus SOPC_Create_Custom_Secure_Connection(const char* clientCertPath,
                                                        const char* clientKeyPath,

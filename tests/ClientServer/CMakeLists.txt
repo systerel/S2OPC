@@ -815,7 +815,7 @@ if(NOT S2OPC_CRYPTO_CYCLONE AND UNIX AND expat_FOUND AND NOT S2OPC_NANO_PROFILE)
 
   # Success scenarios: do only one test? But without losing discriminatory nature.
   # These two tests need to set up the env variable TEST_PASSWORD_CACERT which is the password of the private key of cacert
-  # and TEST_PASSWORD_USER_ME which is the password of the user "me" (because the client user uses a connection by username/password)
+  # and TEST_PASSWORD_USER_SECUADMIN which is the password of the user "secuAdmin" (because the client user uses a connection by username/password)
   add_push_test_scenario(push_server_csr_valid_noNewKey test_csr_valid.py 6 noNewKey)
   add_push_test_scenario(push_server_csr_valid_newKey test_csr_valid.py 6 newKey)
 endif()

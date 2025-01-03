@@ -75,12 +75,13 @@ SOPC_ReturnStatus SOPC_Create_Custom_Secure_Connection(const char* clientCertPat
     }
     if (SOPC_STATUS_OK == status)
     {
-        const char* password = getenv("TEST_PASSWORD_USER_ME");
+        const char* password = getenv("TEST_PASSWORD_USER_SECUADMIN");
         if (NULL == password)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TEST_PASSWORD_USER_ME not set!\n");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TEST_PASSWORD_USER_SECUADMIN not set!\n");
         }
-        status = SOPC_SecureConnectionConfig_SetUserName(scConfigBuilt, "username_Basic256Sha256", "me", password);
+        status =
+            SOPC_SecureConnectionConfig_SetUserName(scConfigBuilt, "username_Basic256Sha256", "secuAdmin", password);
     }
     if (SOPC_STATUS_OK == status)
     {
