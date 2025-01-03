@@ -27,6 +27,7 @@ CHECK_DIGEST=registry.gitlab.com/systerel/s2opc/check@sha256:3c2ff85faf45af287da
 TEST_DIGEST=registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # test:2.16
 ZEPHYR_DIGEST=registry.gitlab.com/systerel/s2opc/zephyr_build:v3.6.0-b@sha256:13069418dd7b0317f93f02986b01f285f0f66956670f2fecded9850ace85d734 # zephyr_build:v3.6.0-b
 FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1 (FreeRTOS for STM32-H723ZG only for CI purpose)
+CYBERWATCH_DIGEST=registry.gitlab.com/systerel/s2opc/cyberwatch@sha256:df8486140065bb3ea2d7394283ef1adfd403d341edc9ffe28582721ceb199499 # registry.gitlab.com/systerel/s2opc/cyberwatch:2.0
 
 # Private images
 GEN_DIGEST=docker.aix.systerel.fr/c838/gen@sha256:e7c7f0427d49d162c66410e05eb04a5859ec5e87a04d2ee82bbf25772acf7adf # docker.aix.systerel.fr/c838/gen:1.4

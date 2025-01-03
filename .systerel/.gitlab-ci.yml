@@ -145,6 +145,7 @@ generation:
            $ALL_BUILDS == null && \
            $ALL_TESTS == null && \
            $WITH_DOC == null && \
+           $SCAN_SBOM == null && \
            $TEST_NETWORK_FUZZ == null"
       when: on_success
 
@@ -212,7 +213,8 @@ build-linux64-ASan:
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null && \
-           $HIL_TESTS == null && $TEST_NETWORK_FUZZ == null" # avoid ASAN build in most of nightly builds
+           $HIL_TESTS == null && $SCAN_SBOM == null && \
+           $TEST_NETWORK_FUZZ == null" # avoid ASAN build in most of nightly builds
       when: on_success
 
 build-linux-faulty-packet:
@@ -443,7 +445,7 @@ test-build-from-export:
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
            $ALL_BUILDS == null && $ALL_TESTS == null && $HIL_TESTS == null && \
-           $TEST_NETWORK_FUZZ == null"
+           $SCAN_SBOM == null && $TEST_NETWORK_FUZZ == null"
       when: on_success
 
 .test-linux: &test_linux
@@ -493,7 +495,7 @@ test-check:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $ALL_TESTS == null && $ALL_BUILDS == null && $HIL_TESTS == null && \
+           $ALL_TESTS == null && $ALL_BUILDS == null && $HIL_TESTS == null && $SCAN_SBOM == null && \
            $TEST_NETWORK_FUZZ == null"
       when: on_success
 
@@ -538,7 +540,7 @@ test-unit:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_DOC == null && \
-           $ALL_TESTS == null && $HIL_TESTS == null && \
+           $ALL_TESTS == null && $HIL_TESTS == null && $SCAN_SBOM == null && \
            $TEST_NETWORK_FUZZ == null" # + excludes ALL_TESTS
       when: on_success
 
@@ -629,15 +631,12 @@ test-fuzz:
 # Generate the Software Bill Of Materials according to the conan.lock file.
 generate_sbom:
   stage: test
-  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
+  image: registry.gitlab.com/systerel/s2opc/cyberwatch@sha256:df8486140065bb3ea2d7394283ef1adfd403d341edc9ffe28582721ceb199499 #registry.gitlab.com/systerel/s2opc/cyberwatch:2.0
   needs: []
   script:
-    - python3 -m pip install conan==1.62.0
-    - apt install sqlite3 -y
     - conan remote add gitlab ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan False
     - conan user ci_user -r gitlab -p ${CI_JOB_TOKEN}
-    - export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:/usr/local/bin
-    - conan lock create conanfile.py -s compiler='gcc' -s compiler.version=12 -s compiler.libcxx=libstdc++
+    - conan lock create conanfile.py 
     - if [ ! -e sbom.json ]; then touch sbom.json; fi
     - trivy fs --format cyclonedx --output sbom.json --insecure .
   artifacts:
@@ -645,6 +644,7 @@ generate_sbom:
     expire_in: "1 week"
     paths:
       - "sbom.json"
+      - conan.lock
   rules:
     - changes:
         compare_to: master
@@ -655,11 +655,11 @@ generate_sbom:
 # Look for vulnerabilities in the dependencies of the SBOM generated in the generate_sbom job.
 scan_sbom:
   stage: test
-  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
+  image: registry.gitlab.com/systerel/s2opc/cyberwatch@sha256:df8486140065bb3ea2d7394283ef1adfd403d341edc9ffe28582721ceb199499 #registry.gitlab.com/systerel/s2opc/cyberwatch:2.0
   needs:
     - job: generate_sbom
   script:
-    - trivy sbom sbom.json --severity HIGH,CRITICAL  --exit-code 1 --insecure --output vulnerabilities_table.txt
+    - trivy sbom sbom.json --severity HIGH,CRITICAL --exit-code 1 --insecure --output vulnerabilities_table.txt
   artifacts:
     when: on_failure
     expire_in: "1 month"
