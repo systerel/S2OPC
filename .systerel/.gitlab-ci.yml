@@ -144,7 +144,8 @@ generation:
            $S2OPC_PUBSUB_ONLY == null &&\
            $ALL_BUILDS == null && \
            $ALL_TESTS == null && \
-           $WITH_DOC == null"
+           $WITH_DOC == null && \
+           $TEST_NETWORK_FUZZ == null"
       when: on_success
 
 ###
@@ -211,7 +212,7 @@ build-linux64-ASan:
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null && \
-           $HIL_TESTS == null" # avoid ASAN build in most of nightly builds
+           $HIL_TESTS == null && $TEST_NETWORK_FUZZ == null" # avoid ASAN build in most of nightly builds
       when: on_success
 
 build-linux-faulty-packet:
@@ -441,7 +442,8 @@ test-build-from-export:
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
-           $ALL_BUILDS == null && $ALL_TESTS == null && $HIL_TESTS == null"
+           $ALL_BUILDS == null && $ALL_TESTS == null && $HIL_TESTS == null && \
+           $TEST_NETWORK_FUZZ == null"
       when: on_success
 
 .test-linux: &test_linux
@@ -491,7 +493,8 @@ test-check:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $ALL_TESTS == null && $ALL_BUILDS == null && $HIL_TESTS == null"
+           $ALL_TESTS == null && $ALL_BUILDS == null && $HIL_TESTS == null && \
+           $TEST_NETWORK_FUZZ == null"
       when: on_success
 
 .test-unit: &test_unit
@@ -535,7 +538,8 @@ test-unit:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_DOC == null && \
-           $ALL_TESTS == null && $HIL_TESTS == null" # + excludes ALL_TESTS
+           $ALL_TESTS == null && $HIL_TESTS == null && \
+           $TEST_NETWORK_FUZZ == null" # + excludes ALL_TESTS
       when: on_success
 
 .test-uactt: &test_uactt
@@ -602,10 +606,10 @@ test-faulty-packets :
 
 test-fuzz:
   stage: test-others
-  image: docker.aix.systerel.fr/c838/opcua-network-fuzzer@sha256:55247404073c22b8bc3312406adc7fa30ecb47b441b75281eb629e7e1fd5e33f #digest version 3.2
+  image: docker.aix.systerel.fr/c838/opcua-network-fuzzer@sha256:35e40ba847bdfe5f3e7112f465adb2c70d1f0694521f6ba8d018c55f651ef205 #digest version 3.3
   needs: [build-fuzz]
   script:
-    - ./.network_fuzzing.sh
+    - ./.network_fuzzing.sh build_fuzz/bin
   artifacts:
     name: 'fuzzing_results_job${CI_JOB_ID}'
     paths:
