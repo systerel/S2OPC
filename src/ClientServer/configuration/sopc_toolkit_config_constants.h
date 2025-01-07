@@ -264,6 +264,16 @@
 #define SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES 10
 #endif
 
+/* ALARM & CONDITION MANAGEMENT */
+
+/** @brief Server Alarm & Condition EventIds recorded for an A&C instance state (Ack / Conf / Global)
+ *  For Acked or Confirmed state, this is the maximum number of EventIds recorded since the last change to False state.
+ *  Another list of EventIds is recorded globally to be able to evaluate Comment() method call.
+ */
+#ifndef S2OPC_SERVER_ALARM_MAX_EVENT_IDS_RECORDED
+#define S2OPC_SERVER_ALARM_MAX_EVENT_IDS_RECORDED 20
+#endif
+
 /* ADDRESS SPACE MANAGEMENT */
 
 /** @brief Node management services activation for clients (AddNodes and DeleteNodes)
