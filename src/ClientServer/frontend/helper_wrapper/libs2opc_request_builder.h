@@ -431,7 +431,7 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPathFromString(
  */
 SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpRequest,
                                                           size_t index,
-                                                          SOPC_NodeId* startingNodeId,
+                                                          const SOPC_NodeId* startingNodeId,
                                                           size_t nbPathElements,
                                                           OpcUa_RelativePathElement* pathElements);
 
