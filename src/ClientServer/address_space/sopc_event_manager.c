@@ -133,6 +133,15 @@ static void SOPC_EventVariable_Initialize(SOPC_Event_Variable* pEventVar)
     pEventVar->valueRank = -1; // SCALAR
 }
 
+size_t SOPC_Event_GetNbVariables(SOPC_Event* event)
+{
+    if (NULL == event || NULL == event->qnPathToEventVar)
+    {
+        return 0;
+    }
+    return SOPC_Dict_Size(event->qnPathToEventVar);
+}
+
 static SOPC_Event_Variable* SOPC_EventVariable_CreateFrom(const SOPC_Variant* data,
                                                           const SOPC_NodeId* dataType,
                                                           int32_t valueRank)

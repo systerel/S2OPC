@@ -280,4 +280,13 @@ typedef void SOPC_Event_ForEachVar_Fct(const char* qnPath,
  */
 void SOPC_Event_ForEachVar(SOPC_Event* event, SOPC_Event_ForEachVar_Fct* func, uintptr_t user_data);
 
+/**
+ * \brief Returns the number of event variables in the given event
+ *
+ * \param event  The event to evaluate
+ *
+ * \return The number of variables of the given event or 0 in case of invalid parameter
+ */
+size_t SOPC_Event_GetNbVariables(SOPC_Event* event);
+
 #endif // SOPC_EVENT_H_
