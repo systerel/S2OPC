@@ -150,8 +150,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckSecurityPolicy(const SOPC_CertificateLis
     // Verifies md of the signing algorithm
     const X509SignatureAlgoId* signAlgoId = &pToValidate->crt.signatureAlgo;
     // Point to the object identifier
-    const uint8_t* oid = signAlgoId->oid;
-    size_t oidLen = signAlgoId->oidLen;
+    const uint8_t* oid = signAlgoId->oid.value;
+    size_t oidLen = signAlgoId->oid.length;
     bErr = false;
     switch (pConfig->mdSign)
     {
@@ -359,7 +359,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckCommonName(const SOPC_CertificateList* p
     SOPC_ASSERT(NULL != pToValidate);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (0 == pToValidate->crt.tbsCert.subject.commonNameLen)
+    if (0 == pToValidate->crt.tbsCert.subject.commonName.length)
     {
         char* pThumb = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
         const char* thumb = NULL != pThumb ? pThumb : "NULL";
@@ -681,8 +681,8 @@ static void crt_verify_profile_in_chain(const SOPC_CertificateList* pToValidate,
     SOPC_ASSERT(NULL != failure_reasons);
 
     /* 1) Check the type and size of the key */
-    X509KeyType keyType = x509GetPublicKeyType(pToValidate->crt.tbsCert.subjectPublicKeyInfo.oid,
-                                               pToValidate->crt.tbsCert.subjectPublicKeyInfo.oidLen);
+    X509KeyType keyType = x509GetPublicKeyType(pToValidate->crt.tbsCert.subjectPublicKeyInfo.oid.value,
+                                               pToValidate->crt.tbsCert.subjectPublicKeyInfo.oid.length);
     // If the profile is RSA
     if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
     {
@@ -694,7 +694,7 @@ static void crt_verify_profile_in_chain(const SOPC_CertificateList* pToValidate,
         else
         {
             // If the key type suits to the profile, check its size.
-            size_t keySize = pToValidate->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
+            size_t keySize = pToValidate->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.n.length * 8;
             if (keySize < pProfile->RSAMinimumKeySize)
             {
                 *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_KEY;
@@ -741,11 +741,11 @@ static void crt_check_trusted(SOPC_CheckTrusted* checkTrusted, const SOPC_Certif
     }
     while (!checkTrusted->isTrustedInChain && NULL != crtTrusted)
     {
-        if (crt->crt.tbsCert.subject.rawDataLen == crtTrusted->crt.tbsCert.subject.rawDataLen &&
+        if (crt->crt.tbsCert.subject.raw.length == crtTrusted->crt.tbsCert.subject.raw.length &&
             crt->raw->length == crtTrusted->raw->length &&
-            0 == memcmp(crt->crt.tbsCert.subject.rawData, crtTrusted->crt.tbsCert.subject.rawData,
-                        crt->crt.tbsCert.subject.rawDataLen) &&
-            0 == memcmp(crt->raw->data, crtTrusted->raw->data, crt->crt.tbsCert.subject.rawDataLen))
+            0 == memcmp(crt->crt.tbsCert.subject.raw.value, crtTrusted->crt.tbsCert.subject.raw.value,
+                        crt->crt.tbsCert.subject.raw.length) &&
+            0 == memcmp(crt->raw->data, crtTrusted->raw->data, crt->crt.tbsCert.subject.raw.length))
         {
             checkTrusted->isTrustedInChain = true;
         }
@@ -1038,8 +1038,8 @@ static void sopc_pki_remove_rejected_cert(SOPC_CertificateList** ppRejectedList,
     while (NULL != cur && !bFound)
     {
         /* Compare the subject name */
-        bMatchName = x509CompareName(pCert->crt.tbsCert.subject.rawData, pCert->crt.tbsCert.subject.rawDataLen,
-                                     cur->crt.tbsCert.subject.rawData, cur->crt.tbsCert.subject.rawDataLen);
+        bMatchName = x509CompareName(pCert->crt.tbsCert.subject.raw.value, pCert->crt.tbsCert.subject.raw.length,
+                                     cur->crt.tbsCert.subject.raw.value, cur->crt.tbsCert.subject.raw.length);
         if (bMatchName)
         {
             if (0 == memcmp(pCert->raw->data, cur->raw->data, pCert->raw->length))

@@ -115,8 +115,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
             // If no error, continue...
             if (0 == errLib)
             {
-                privateKeyInfo.oid = RSA_ENCRYPTION_OID;
-                privateKeyInfo.oidLen = sizeof(RSA_ENCRYPTION_OID);
+                privateKeyInfo.oid.value = RSA_ENCRYPTION_OID;
+                privateKeyInfo.oid.length = sizeof(RSA_ENCRYPTION_OID);
                 errLib = pkcs8ImportRsaPrivateKey(&privateKeyInfo, &key->privKey);
             }
 
@@ -960,18 +960,17 @@ static SOPC_ReturnStatus sopc_key_manager_check_crl_ca_match(const SOPC_CRLList*
     *pbMatch = false;
 
     /* Compare the subject name if it exists */
-    if (pCrl->crl.tbsCertList.issuer.rawDataLen == pCa->crt.tbsCert.subject.rawDataLen)
+    if (pCrl->crl.tbsCertList.issuer.raw.length == pCa->crt.tbsCert.subject.raw.length)
     {
-        bMatch = x509CompareName(pCrl->crl.tbsCertList.issuer.rawData, pCrl->crl.tbsCertList.issuer.rawDataLen,
-                                 pCa->crt.tbsCert.subject.rawData, pCa->crt.tbsCert.subject.rawDataLen);
+        bMatch = x509CompareName(pCrl->crl.tbsCertList.issuer.raw.value, pCrl->crl.tbsCertList.issuer.raw.length,
+                                 pCa->crt.tbsCert.subject.raw.value, pCa->crt.tbsCert.subject.raw.length);
     }
 
     /* Check if the CRL is correctly signed by the CA */
     if (bMatch)
     {
-        error_t errLib = x509VerifySignature(pCrl->crl.tbsCertList.rawData, pCrl->crl.tbsCertList.rawDataLen,
-                                             &pCrl->crl.signatureAlgo, &pCa->crt.tbsCert.subjectPublicKeyInfo,
-                                             &pCrl->crl.signatureValue);
+        error_t errLib = x509VerifySignature(&pCrl->crl.tbsCertList.raw, &pCrl->crl.signatureAlgo,
+                                             &pCa->crt.tbsCert.subjectPublicKeyInfo, &pCrl->crl.signatureValue);
 
         if (0 == errLib)
         {
@@ -1347,12 +1346,12 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_Certificat
     *pbIsSelfSigned = false;
     const X509CertificateInfo crt = pCert->crt;
     /* Verify that the CA is self sign */
-    bool_t match = x509CompareName(crt.tbsCert.issuer.rawData, crt.tbsCert.issuer.rawDataLen,
-                                   crt.tbsCert.subject.rawData, crt.tbsCert.subject.rawDataLen);
+    bool_t match = x509CompareName(crt.tbsCert.issuer.raw.value, crt.tbsCert.issuer.raw.length,
+                                   crt.tbsCert.subject.raw.value, crt.tbsCert.subject.raw.length);
     if (match)
     {
-        error_t errLib = x509VerifySignature(crt.tbsCert.rawData, crt.tbsCert.rawDataLen, &crt.signatureAlgo,
-                                             &crt.tbsCert.subjectPublicKeyInfo, &crt.signatureValue);
+        error_t errLib = x509VerifySignature(&crt.tbsCert.raw, &crt.signatureAlgo, &crt.tbsCert.subjectPublicKeyInfo,
+                                             &crt.signatureValue);
         if (0 == errLib)
         {
             /* Finally the certificate is self signed */
