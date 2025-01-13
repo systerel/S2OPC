@@ -466,7 +466,7 @@ test-build-from-export:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/check@sha256:3c2ff85faf45af287da51ccb0a9689329e59b1d100be87d5143a47f97fd65720 # digest of check:1.21
+  image: docker.aix.systerel.fr/c838/check@sha256:8be8c50cd484989c987b6c28ded2e03f30e81ec27bb53e41cecde8cdc3bb86c8 # digest of check:1.22
   needs: []
   script:
     - ./.check-code.sh
@@ -490,7 +490,7 @@ test-check:
     - './.format.sh'
     - './.verify-no-git-changes.sh'
   variables:
-      DOCKER_DIGEST: 'sha256:3c2ff85faf45af287da51ccb0a9689329e59b1d100be87d5143a47f97fd65720'
+      DOCKER_DIGEST: 'sha256:8be8c50cd484989c987b6c28ded2e03f30e81ec27bb53e41cecde8cdc3bb86c8'
   artifacts:
     name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
