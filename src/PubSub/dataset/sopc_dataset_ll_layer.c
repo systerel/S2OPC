@@ -167,7 +167,7 @@ void SOPC_Dataset_LL_NetworkMessage_Delete(SOPC_Dataset_LL_NetworkMessage* nm)
         SOPC_String_Clear(&nm->msgHeader.publisher_id.data.string);
     }
     Dataset_LL_Delete_DataSetMessages_Array(nm);
-    SOPC_PubFixedBuffer_Delete_Preencode_Buffer(nm->preencode);
+    SOPC_PubFixedBuffer_Delete_Preencode_Buffer(&nm->preencode);
     SOPC_Free(nm);
 }
 

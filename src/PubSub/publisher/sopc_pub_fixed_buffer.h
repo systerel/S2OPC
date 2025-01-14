@@ -47,7 +47,7 @@ SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Da
  *
  * @param preencode Pointer to preencode buffer context to be freed
  */
-void SOPC_PubFixedBuffer_Delete_Preencode_Buffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode);
+void SOPC_PubFixedBuffer_Delete_Preencode_Buffer(SOPC_PubFixedBuffer_Buffer_Ctx** preencode);
 
 /**
  * @brief Get pointer to updated preencode buffer stored in \p preencode structure.

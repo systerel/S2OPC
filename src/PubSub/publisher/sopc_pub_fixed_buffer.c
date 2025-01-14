@@ -203,15 +203,17 @@ SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Da
     return status;
 }
 
-void SOPC_PubFixedBuffer_Delete_Preencode_Buffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode)
+void SOPC_PubFixedBuffer_Delete_Preencode_Buffer(SOPC_PubFixedBuffer_Buffer_Ctx** preencode)
 {
-    if (NULL != preencode)
+    SOPC_ASSERT(NULL != preencode);
+    if (NULL != *preencode)
     {
-        SOPC_Free(preencode->dataSetFields);
-        SOPC_Free(preencode->dynamic_dsm_info);
-        SOPC_Buffer_Delete(preencode->buffer);
-        SOPC_Free(preencode);
-        preencode = NULL;
+        SOPC_PubFixedBuffer_Buffer_Ctx* preencodeBuffer = *preencode;
+        SOPC_Free(preencodeBuffer->dataSetFields);
+        SOPC_Free(preencodeBuffer->dynamic_dsm_info);
+        SOPC_Buffer_Delete(preencodeBuffer->buffer);
+        SOPC_Free(*preencode);
+        *preencode = NULL;
     }
 }
 

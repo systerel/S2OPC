@@ -1370,7 +1370,8 @@ void SOPC_UADP_NetworkMessage_Delete_PreencodedBuffer(SOPC_Dataset_LL_NetworkMes
     SOPC_PubFixedBuffer_Buffer_Ctx* preencode = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
     if (NULL != preencode)
     {
-        SOPC_PubFixedBuffer_Delete_Preencode_Buffer(preencode);
+        SOPC_PubFixedBuffer_Delete_Preencode_Buffer(&preencode);
+        SOPC_DataSet_LL_NetworkMessage_Set_Preencode_Buffer(nm, NULL);
     }
 }
 
