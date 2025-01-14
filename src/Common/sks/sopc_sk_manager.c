@@ -308,17 +308,15 @@ static uint32_t SOPC_SKManager_GetAllKeysLifeTime_Default(SOPC_SKManager* skm)
 
     uint32_t nbAvailable = data->FirstTokenId + SOPC_SKManager_Size(skm) - data->CurrentTokenId;
 
-    uint32_t result = data->CurrentTokenRemainingTime + (data->KeyLifetime * (nbAvailable - 1));
+    uint32_t result = UINT32_MAX;
+    if (data->CurrentTokenRemainingTime <= UINT32_MAX - (data->KeyLifetime * (nbAvailable - 1)))
+    {
+        result = data->CurrentTokenRemainingTime + (data->KeyLifetime * (nbAvailable - 1));
+    }
 
     SOPC_Mutex_Unlock(&data->mutex);
-    if (result > UINT32_MAX)
-    {
-        return UINT32_MAX;
-    }
-    else
-    {
-        return (uint32_t) result;
-    }
+
+    return result;
 }
 
 static SOPC_ReturnStatus SOPC_SKManager_SetKeyLifetime_Default(SOPC_SKManager* skm, uint32_t KeyLifetime)
