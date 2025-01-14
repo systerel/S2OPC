@@ -130,23 +130,32 @@ class NSFinder:
 
 class NSIndexReassigner(NSFinder):
 
-    def __init__(self, namespaces):
+    def __init__(self, namespaces, verbose):
         super(NSIndexReassigner, self).__init__(namespaces)
         self.ns_idx_reassign = dict()
+        self.verbose = verbose
 
     def compute_reassignment(self, tree_ns_uris: dict, new_ns_uris: ET.Element):
         """
         Compute the NS index reassignments and store it internally.
         Return the new NS URI nodes that shall be appended in the merged document.
         """
-        # the new namespace URIs from the new address space need to be translated
-        # but some of the namespace might already be in use
+        # New namespace URIs (i.e. namespaces not yet in the merged AddSpace)
+        # from the new AddSpace are added incrementally.
+        # Namespaces URIs already in use are translated,
+        # if they differ from the NS assigned in the merged AddSpace.
         ns_uris = dict()
+        # For each call to this function, the internal NS index reassignements table (dict)
+        # must be reset.
+        self.ns_idx_reassign = dict()
         for idx, ns in enumerate(self._findall(tree_ns_uris, 'uanodeset:Uri')):
             ns_uris[ns.text] = idx + 1
-
+            if self.verbose:
+                print("tree_ns_uris:", idx+1, ns.text)
         new_ns_nodes = list()
         for idx, ns in enumerate(self._findall(new_ns_uris, 'uanodeset:Uri')):
+            if self.verbose:
+                print("new_ns_uris: ", idx+1, ns.text)
             if ns.text in ns_uris:
                 tree_idx = ns_uris[ns.text]
                 if tree_idx != idx + 1:
@@ -157,7 +166,8 @@ class NSIndexReassigner(NSFinder):
                 if new_idx != idx + 1:
                     self.ns_idx_reassign[idx + 1] = new_idx
                 new_ns_nodes.append(ns)
-        # print("Namespace URI reassignments:", self.ns_idx_reassign)
+        if self.verbose:
+            print("Namespace URI reassignments (on new_ns_uris): {} \n".format(self.ns_idx_reassign))
         return new_ns_nodes
 
     def get_ns_index(self, expr: str):
@@ -213,7 +223,7 @@ class NodesetMerger(NSFinder):
         self.verbose = verbose
         self.__source = None
         self.tree = None
-        self.ns_idx_reassigner = NSIndexReassigner(self.namespaces)
+        self.ns_idx_reassigner = NSIndexReassigner(self.namespaces, verbose)
 
     def _find(self, path):
         return self._find_in(self.tree, path)
@@ -882,6 +892,8 @@ def run_merge(args):
     merger = NodesetMerger(args.verbose)
     for fname in args.fns_adds:
         source = fname if fname != '-' else sys.stdin
+        if args.verbose:
+            print(f'\n> Merge source file : {source}')
         res = merger.merge(source)
         if not res:
             print(f'Merge abandoned due to error with {source}')
@@ -933,8 +945,12 @@ def make_argparser():
             Path (or - for stdin) the address spaces to merge. In case of conflicting elements,
             the element from the first address space in the argument order is kept.
             The models must be for the same OPC UA version (e.g. 1.03).
-            The first address space shall contain the OPC UA namespace NS0.
-            The following address spaces, if any, will be the namespaces 1 to N.
+            Namespace ordering:
+            1/ The first address space shall contain the OPC UA namespace NS0.
+            2/ Following NS0, namespace numbers are assigned incrementally (1 to N).
+            As soon as a new namespace is listed in an AddSpace, it is assigned the next available number.
+            If a namespace is listed again, it is reassigned the value of its first citation.
+            Namespaces indexes are assigned in the order of the AddSpaces supplied to the command.
                              ''')
     parser.add_argument('--output', '-o', metavar='XML', dest='fn_out', #required=True,
                         help='Path to the output file')# (default to stdout)')

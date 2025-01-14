@@ -189,9 +189,11 @@ class MergeTests(unittest.TestCase):
 
     def test_reassign_namespace_index(self):
         self.run_test('test_reassign_namespace_index.xml', ['--remove-max-node-management'],
-                      'ns0.xml', 'adresse_space_ns1.xml', 'adresse_space_ns2.xml')
+                      'ns0.xml', 'TestReassign_NS1.xml', 'TestReassign_NS2_NS1.xml')
 
-        
+    def test_reassign_then_no_reassign_namespace_index(self):
+        self.run_test('test_reassign_then_no_reassign_namespace_index.xml', [],
+                      'ns0.xml', 'TestReassign_NS1.xml', 'TestReassign_NS2_NS1.xml', 'TestReassign_NS1_NS2.xml')
 
 if __name__ == '__main__':
     unittest.main()
