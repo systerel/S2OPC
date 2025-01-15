@@ -895,67 +895,63 @@ static bool start_node_definition_field(struct parse_context_t* ctx, const XML_C
             if (SOPC_STATUS_OK != status)
             {
                 LOG_MEMORY_ALLOCATION_FAILURE;
-                return false;
+                res = false;
             }
             // Fill DataType
-            if (NULL != dataType)
+            if (res)
             {
-                res = parseAliasedNodeId(ctx, dataType, &sf.DataType);
-                if (!res)
+                if (NULL != dataType)
                 {
-                    return false;
+                    res = parseAliasedNodeId(ctx, dataType, &sf.DataType);
                 }
-            }
-            else
-            {
-                sf.DataType = (SOPC_NodeId){SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
-                                            .Data.Numeric = 24}; // Default value
+                else
+                {
+                    sf.DataType = (SOPC_NodeId){SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
+                                                .Data.Numeric = 24}; // Default value
+                }
             }
             // Fill ValueRank
-            if (NULL != valueRank)
+            if (res)
             {
-                res = SOPC_strtoint(valueRank, strlen(valueRank), 32, &sf.ValueRank);
+                if (NULL != valueRank)
+                {
+                    res = SOPC_strtoint(valueRank, strlen(valueRank), 32, &sf.ValueRank);
 
-                if (!res)
-                {
-                    LOG_XML_ERROR(ctx->helper_ctx.parser, "Invalid value for ValueRank attribute");
-                    return false;
+                    if (!res)
+                    {
+                        LOG_XML_ERROR(ctx->helper_ctx.parser, "Invalid value for ValueRank attribute");
+                    }
+                    else if (sf.ValueRank != -1 && sf.ValueRank <= 0)
+                    {
+                        LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                                       "Unexpected value for ValueRank attribute: '%" PRId32
+                                       "'. It shall be Scalar (-1) or a fixed rank Array (>=1).",
+                                       sf.ValueRank);
+                        res = false;
+                    }
                 }
-                else if (sf.ValueRank != -1 && sf.ValueRank <= 0)
+                else
                 {
-                    LOG_XML_ERRORF(ctx->helper_ctx.parser,
-                                   "Unexpected value for ValueRank attribute: '%" PRId32
-                                   "'. It shall be Scalar (-1) or a fixed rank Array (>=1).",
-                                   sf.ValueRank);
-                    return false;
+                    sf.ValueRank = -1; // default value
                 }
-            }
-            else
-            {
-                sf.ValueRank = -1; // default value
             }
             // Fill ArrayDimensions
-            if (NULL != arrayDimensions)
+            if (res && NULL != arrayDimensions)
             {
                 res = parseArrayDimensions(ctx, sf.ValueRank, arrayDimensions, &sf.NoOfArrayDimensions,
                                            &sf.ArrayDimensions);
-                if (!res)
-                {
-                    return false;
-                }
             }
             // Fill MaxStringLength
-            if (NULL != maxStringLength)
+            if (res && NULL != maxStringLength)
             {
                 res = SOPC_strtouint(maxStringLength, strlen(maxStringLength), 32, &sf.MaxStringLength);
                 if (!res)
                 {
                     LOG_XML_ERROR(ctx->helper_ctx.parser, "Invalid value for MaxStringLength attribute");
-                    return false;
                 } // note: it should be verified that datatype is ByteString or String in this case
             }
             // Fill AllowSubtypes (IsOptional reuse aka part 3 "Subtyping is allowed when set to TRUE.")
-            if (NULL != allowSubtypes)
+            if (res && NULL != allowSubtypes)
             {
                 if (strcmp(allowSubtypes, "true") == 0)
                 {
@@ -963,51 +959,71 @@ static bool start_node_definition_field(struct parse_context_t* ctx, const XML_C
                 }
             }
 
-            res = SOPC_Array_Append(ctx->definition_fields, sf);
+            if (res)
+            {
+                res = SOPC_Array_Append(ctx->definition_fields, sf);
+                if (!res)
+                {
+                    LOG_MEMORY_ALLOCATION_FAILURE;
+                }
+            }
+
             if (!res)
             {
-                LOG_MEMORY_ALLOCATION_FAILURE;
-                return false;
+                OpcUa_StructureField_Clear(&sf);
+                return res;
             }
         }
         else
         {
             OpcUa_EnumField ef;
             OpcUa_EnumField_Initialize(&ef);
+
             SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&ef.Name, name);
             if (SOPC_STATUS_OK != status)
             {
                 LOG_MEMORY_ALLOCATION_FAILURE;
-                return false;
+                res = false;
             }
             // Note: we do not support empty Value in first Field
             //       since we use it to detect enum but default value = -1 (see XSD).
             //       We support it if no other field is defined that let us now it is a struct.
-            if (value != NULL)
+            if (res)
             {
-                res = SOPC_strtoint(value, strlen(value), 64, &ef.Value);
-                if (!res)
+                if (value != NULL)
                 {
-                    LOG_XML_ERROR(ctx->helper_ctx.parser, "Incorrect value for Value attribute");
-                    return false;
+                    res = SOPC_strtoint(value, strlen(value), 64, &ef.Value);
+                    if (!res)
+                    {
+                        LOG_XML_ERROR(ctx->helper_ctx.parser, "Incorrect value for Value attribute");
+                    }
+                }
+                else if (NULL == dataType && NULL == valueRank && NULL == allowSubtypes)
+                {
+                    ef.Value = -1;
+                }
+                else
+                {
+                    LOG_XML_ERROR(
+                        ctx->helper_ctx.parser,
+                        "Value attribute was expected but found a DataType/ValueRank/AllowSubtypes attribute");
+                    res = false;
                 }
             }
-            else if (NULL == dataType && NULL == valueRank && NULL == allowSubtypes)
+
+            if (res)
             {
-                ef.Value = -1;
-            }
-            else
-            {
-                LOG_XML_ERROR(ctx->helper_ctx.parser,
-                              "Value attribute was expected but found a DataType/ValueRank/AllowSubtypes attribute");
-                return false;
+                res = SOPC_Array_Append(ctx->definition_fields, ef);
+                if (!res)
+                {
+                    LOG_MEMORY_ALLOCATION_FAILURE;
+                }
             }
 
-            res = SOPC_Array_Append(ctx->definition_fields, ef);
             if (!res)
             {
-                LOG_MEMORY_ALLOCATION_FAILURE;
-                return false;
+                OpcUa_EnumField_Clear(&ef);
+                return res;
             }
         }
     }
