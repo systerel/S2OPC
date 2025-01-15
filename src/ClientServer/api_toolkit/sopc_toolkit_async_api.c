@@ -172,6 +172,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectio
     }
     else
     {
+        SOPC_Free(sessionAppContext->sessionName);
         SOPC_Free(sessionAppContext);
     }
     return status;

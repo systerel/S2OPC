@@ -171,6 +171,7 @@ SOPC_Log_Instance* SOPC_Log_CreateUserInstance(const char* category, SOPC_Log_Us
     else
     {
         /* Allocation of callbackBuffer failed */
+        SOPC_Mutex_Clear(&result->mutex);
         SOPC_Free(result);
         result = NULL;
     }
@@ -211,6 +212,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const SOPC_CircularLogFile_Config
     if (!started)
     {
         SOPC_CircularLogFile_Delete(&pFile);
+        SOPC_Mutex_Clear(&result->mutex);
         SOPC_Free(result);
         result = NULL;
     }

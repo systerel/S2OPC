@@ -1295,6 +1295,12 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
             *errorStatus = OpcUa_BadResourceUnavailable;
         }
     }
+    else
+    {
+        // Clear new key set because scConnection does not point at it
+        SOPC_KeySet_Delete(newSecuKeySets.receiverKeySet);
+        SOPC_KeySet_Delete(newSecuKeySets.senderKeySet);
+    }
 
     SOPC_EncodeableObject_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader);
     SOPC_EncodeableObject_Delete(&OpcUa_OpenSecureChannelResponse_EncodeableType, (void**) &opnResp);

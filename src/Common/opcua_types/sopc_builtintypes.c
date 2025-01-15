@@ -833,7 +833,7 @@ SOPC_ReturnStatus SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, const SOP
     if (dest != NULL && bytes != NULL && length > 0 && NULL == dest->Data)
     {
         dest->Length = length;
-        if (length > 0 && (uint64_t) length * sizeof(SOPC_Byte) <= SIZE_MAX)
+        if ((uint64_t) length <= SIZE_MAX / sizeof(SOPC_Byte))
         {
             dest->Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) length);
         }
@@ -1026,7 +1026,7 @@ SOPC_ReturnStatus SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src)
         dest->Length = src->Length;
         if (dest->Length > 0)
         {
-            if ((uint64_t) dest->Length * sizeof(SOPC_Byte) <= SIZE_MAX)
+            if ((uint64_t) dest->Length <= SIZE_MAX / sizeof(SOPC_Byte))
             {
                 status = SOPC_STATUS_OK;
 
@@ -5740,6 +5740,7 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
 
     if (SOPC_STATUS_OK != status)
     {
+        SOPC_Free(truncatedRange.dimensions);
         return status;
     }
 
