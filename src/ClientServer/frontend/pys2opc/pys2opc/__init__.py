@@ -117,7 +117,7 @@ In the `with` statement, the application code can be started alongside the S2OPC
   <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
     <!-- "me" pwd=1234 has all right accesses. -->
     <UserPassword user="me" hash="847d892ffaccb9822d417866f9d491389b29134b3c73c3a429ac95c627f9d40a" salt="17faf802f81c2503d3043042e79004b4">
-      <UserAuthorization write="true" read="true" execute="true" addnode="true"/>
+      <UserAuthorization write="true" read="true" execute="true" addnode="true" receive_events="true"/>
     </UserPassword>
   </UserPasswordConfiguration>
 ```

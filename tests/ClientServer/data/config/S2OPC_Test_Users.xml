@@ -10,28 +10,28 @@
     </UserPassword>
     <!-- user="user1" pwd="12345" -->
     <UserPassword user="user1" hash="79a98299904928eb48145f5f0b1b4488f69f15e654c9593b82830ec56e05fa35" salt="ee506a036b8a8dbbb34b9a1695f0eecb">
-      <UserAuthorization write="true" read="false" execute="true" addnode="true"/>
+      <UserAuthorization write="true" read="false" execute="true" addnode="true" receive_events="true"/>
     </UserPassword>
     <!-- user="user2" pwd="password2" -->
     <UserPassword user="user2" hash="65087a3ccd7bc2ff96ea881e9517b1843da7f7352666085db483c0f25f9034c8" salt="74785320953e51f12ecff4027233a694">
-      <UserAuthorization write="false" read="true" execute="true" addnode="true"/>
+      <UserAuthorization write="false" read="true" execute="true" addnode="true" receive_events="true"/>
     </UserPassword>
     <!-- user="user3" pwd="42" -->
     <UserPassword user="user3" hash="24b30f26f6ea3206ddc4bb945f560f0fcd0242e63a265bcff7805d812840cb23" salt="988ec81df723d4e94be791dec58b321d">
-      <UserAuthorization  write="true" read="true" execute="false" addnode="true"/>
+      <UserAuthorization  write="true" read="true" execute="false" addnode="true" receive_events="true"/>
     </UserPassword>
     <!-- user="user4" pwd="user4" -->
     <UserPassword user="user4" hash="cf5a2d35d437905599c3e22b444ed1f09a172f8c0302692aea40381c4fa27574" salt="56dff71a07e086b2ec5c07b011992614">
-      <UserAuthorization  write="true" read="true" execute="true" addnode="false"/>
+      <UserAuthorization  write="true" read="true" execute="true" addnode="false" receive_events="true"/>
     </UserPassword>
   </UserPasswordConfiguration>
   <UserCertificates>
     <!-- default right is read only (accepted issued, not configured but evaluated as trustworthy according to trust chain)-->
-    <PublicKeyInfrastructure path="./S2OPC_UACTT_Users_PKI" write="false" read="true" execute="false" addnode="false"/>
+    <PublicKeyInfrastructure path="./S2OPC_UACTT_Users_PKI" write="false" read="true" execute="false" addnode="false" receive_events="true"/>
     <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrT.der" write="true"/>  <!-- Read, execute and addnode rights are set to the default value False because rights are partialy defined -->
-    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTE.der" write="false" read="true" execute="true" addnode="true"/>
-    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTSincorrect.der" write="true" read="false" execute="true" addnode="true"/>
-    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTV.der" write="true" read="true" execute="false" addnode="true"/>
-    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_ca1I_usrT.der" write="true" read="true" execute="true" addnode="false"/>
+    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTE.der" write="false" read="true" execute="true" addnode="true" receive_events="true"/>
+    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTSincorrect.der" write="true" read="false" execute="true" addnode="true" receive_events="true"/>
+    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTV.der" write="true" read="true" execute="false" addnode="true" receive_events="true"/>
+    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_ca1I_usrT.der" write="true" read="true" execute="true" addnode="false" receive_events="true"/>
   </UserCertificates>
 </S2OPC_Users>

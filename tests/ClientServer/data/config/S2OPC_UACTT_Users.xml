@@ -1,16 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
 <S2OPC_Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_users_config.xsd">
   <Anonymous>
-    <UserAuthorization write="true" read="true" execute="true" addnode="true" />
+    <UserAuthorization write="true" read="true" execute="true" addnode="true" receive_events="true"/>
   </Anonymous>
   <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
     <!-- user="user1" pwd="password" -->
     <UserPassword user="user1" hash="e8eadf4671739ce8a29a0d458433b6f2617d8cbfb8e87cf69f37e40a0fe980e8" salt="90964214f79c233a3d8d87dd2dfe19b6">
-      <UserAuthorization write="true" read="true" execute="true" addnode="true" />
+      <UserAuthorization write="true" read="true" execute="true" addnode="true" receive_events="true"/>
     </UserPassword>
     <!-- user="user2" pwd="password1" -->
     <UserPassword user="user2" hash="196033013b0257d030f14f53d516ba7c7e5f7347f485edf82d455bb29b57a27f" salt="bf7d2bc1e1e7e330199439c0e58e3a6b">
-      <UserAuthorization write="true" read="true" execute="true" addnode="true" />
+      <UserAuthorization write="true" read="true" execute="true" addnode="true" receive_events="true"/>
     </UserPassword>
     <!-- user="username" pwd="password" -->
     <UserPassword user="username" hash="5e8af97d601661db77267ada40909a7fffdd34db4f45afcf63bf1b07773117d1" salt="df06802c57675f3924e02fa5ab290e7d">
@@ -19,7 +19,7 @@
     </UserPassword>
   </UserPasswordConfiguration>
   <UserCertificates>
-    <PublicKeyInfrastructure path="./S2OPC_UACTT_Users_PKI" write="true" read="true" execute="true" addnode="true"/>
+    <PublicKeyInfrastructure path="./S2OPC_UACTT_Users_PKI" write="true" read="true" execute="true" addnode="true" receive_events="true"/>
   </UserCertificates>
 
 </S2OPC_Users>
