@@ -226,7 +226,7 @@ const SOPC_NodeId* SOPC_Event_GetEventTypeId(const SOPC_Event* pEvent)
     return NULL;
 }
 
-static SOPC_ByteString* SOPC_Event_GetEventId(SOPC_Event* pEvent)
+static SOPC_ByteString* SOPC_InternalEvent_GetEventId(const SOPC_Event* pEvent)
 {
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;
@@ -241,13 +241,18 @@ static SOPC_ByteString* SOPC_Event_GetEventId(SOPC_Event* pEvent)
     return NULL;
 }
 
+const SOPC_ByteString* SOPC_Event_GetEventId(const SOPC_Event* pEvent)
+{
+    return SOPC_InternalEvent_GetEventId(pEvent);
+}
+
 SOPC_ReturnStatus SOPC_Event_SetEventId(SOPC_Event* pEvent, const SOPC_ByteString* pEventId)
 {
     if (NULL == pEvent || NULL == pEvent->qnPathToEventVar || NULL == pEventId || pEventId->Length <= 0)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_ByteString* bs = SOPC_Event_GetEventId(pEvent);
+    SOPC_ByteString* bs = SOPC_InternalEvent_GetEventId(pEvent);
     SOPC_ReturnStatus status = NULL != bs ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
     if (SOPC_STATUS_OK == status)
     {
@@ -880,7 +885,7 @@ SOPC_Event* SOPC_Event_CreateCopy(const SOPC_Event* pEvent, bool genNewId)
     {
         if (genNewId)
         {
-            SOPC_ByteString* eventId = SOPC_Event_GetEventId(eventCopy);
+            SOPC_ByteString* eventId = SOPC_InternalEvent_GetEventId(eventCopy);
             SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
             if (NULL != eventId)
             {
