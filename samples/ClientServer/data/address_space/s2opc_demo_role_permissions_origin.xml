@@ -279,7 +279,7 @@
             <RoleId>
               <Identifier>i=15668</Identifier> <!-- Observer -->
             </RoleId>
-            <Permissions>32</Permissions> <!-- Read -->
+            <Permissions>2080</Permissions> <!-- Read + ReceiveEvents -->
           </Body>
         </ExtensionObject>
         <!-- 2nd RolePermission -->
@@ -291,7 +291,7 @@
             <RoleId>
               <Identifier>i=15680</Identifier> <!-- Operator -->
             </RoleId>
-            <Permissions>32</Permissions> <!-- Read -->
+            <Permissions>2080</Permissions> <!-- Read + ReceiveEvents -->
           </Body>
         </ExtensionObject>
         <!-- 3rd RolePermission -->
@@ -303,7 +303,7 @@
             <RoleId>
               <Identifier>i=15716</Identifier> <!-- ConfigureAdmin -->
             </RoleId>
-            <Permissions>32</Permissions> <!-- Read -->
+            <Permissions>2080</Permissions> <!-- Read + ReceiveEvents -->
           </Body>
         </ExtensionObject>
         <!-- 4th RolePermission -->
@@ -315,7 +315,7 @@
             <RoleId>
               <Identifier>i=15704</Identifier> <!-- SecurityAdmin -->
             </RoleId>
-            <Permissions>4128</Permissions> <!-- Read + Call -->
+            <Permissions>6176</Permissions> <!-- Read + Call + ReceiveEvents -->
           </Body>
         </ExtensionObject>
       </ListOfExtensionObject>

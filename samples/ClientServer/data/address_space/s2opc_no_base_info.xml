@@ -3350,7 +3350,7 @@
             <uax:RoleId>
               <uax:Identifier>i=15668</uax:Identifier>
             </uax:RoleId>
-            <uax:Permissions>32</uax:Permissions>
+            <uax:Permissions>2080</uax:Permissions>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -3361,7 +3361,7 @@
             <uax:RoleId>
               <uax:Identifier>i=15680</uax:Identifier>
             </uax:RoleId>
-            <uax:Permissions>32</uax:Permissions>
+            <uax:Permissions>2080</uax:Permissions>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -3372,7 +3372,7 @@
             <uax:RoleId>
               <uax:Identifier>i=15716</uax:Identifier>
             </uax:RoleId>
-            <uax:Permissions>32</uax:Permissions>
+            <uax:Permissions>2080</uax:Permissions>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -3383,7 +3383,7 @@
             <uax:RoleId>
               <uax:Identifier>i=15704</uax:Identifier>
             </uax:RoleId>
-            <uax:Permissions>4128</uax:Permissions>
+            <uax:Permissions>6176</uax:Permissions>
           </uax:Body>
         </uax:ExtensionObject>
       </uax:ListOfExtensionObject>

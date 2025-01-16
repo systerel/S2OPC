@@ -9779,6 +9779,9 @@
       <Reference ReferenceType="HasSubtype">i=2069</Reference>
       <Reference ReferenceType="HasSubtype">i=2080</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=17615" BrowseName="StatusCodeId" ParentNodeId="i=2058" DataType="StatusCode">
     <DisplayName>StatusCodeId</DisplayName>
@@ -9795,6 +9798,9 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2058</Reference>
       <Reference ReferenceType="HasSubtype">i=2060</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2745" BrowseName="SecureChannelId" ParentNodeId="i=2059" DataType="String">
     <DisplayName>SecureChannelId</DisplayName>
@@ -9816,6 +9822,9 @@
       <Reference ReferenceType="HasProperty">i=24135</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2059</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2061" BrowseName="ClientCertificate" ParentNodeId="i=2060" DataType="ByteString">
     <DisplayName>ClientCertificate</DisplayName>
@@ -9882,6 +9891,9 @@
       <Reference ReferenceType="HasSubtype">i=2075</Reference>
       <Reference ReferenceType="HasSubtype">i=2078</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2070" BrowseName="SessionId" ParentNodeId="i=2069" DataType="NodeId">
     <DisplayName>SessionId</DisplayName>
@@ -9901,6 +9913,9 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2069</Reference>
       <Reference ReferenceType="HasSubtype">i=2748</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2072" BrowseName="SecureChannelId" ParentNodeId="i=2071" DataType="String">
     <DisplayName>SecureChannelId</DisplayName>
@@ -9940,6 +9955,9 @@
       <Reference ReferenceType="HasProperty">i=2749</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2071</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2749" BrowseName="EndpointUrl" ParentNodeId="i=2748" DataType="String">
     <DisplayName>EndpointUrl</DisplayName>
@@ -9957,6 +9975,9 @@
       <Reference ReferenceType="HasProperty">i=11485</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2069</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2076" BrowseName="ClientSoftwareCertificates" ParentNodeId="i=2075" DataType="i=344" ValueRank="1" ArrayDimensions="0">
     <DisplayName>ClientSoftwareCertificates</DisplayName>
@@ -9988,6 +10009,9 @@
       <Reference ReferenceType="HasProperty">i=2079</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2069</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2079" BrowseName="RequestHandle" ParentNodeId="i=2078" DataType="UInt32">
     <DisplayName>RequestHandle</DisplayName>
@@ -10009,6 +10033,9 @@
       <Reference ReferenceType="HasSubtype">i=2088</Reference>
       <Reference ReferenceType="HasSubtype">i=2089</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2081" BrowseName="Certificate" ParentNodeId="i=2080" DataType="ByteString">
     <DisplayName>Certificate</DisplayName>
@@ -10025,6 +10052,9 @@
       <Reference ReferenceType="HasProperty">i=2084</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2080</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2083" BrowseName="InvalidHostname" ParentNodeId="i=2082" DataType="String">
     <DisplayName>InvalidHostname</DisplayName>
@@ -10047,30 +10077,45 @@
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2080</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2086" BrowseName="AuditCertificateInvalidEventType" IsAbstract="true">
     <DisplayName>AuditCertificateInvalidEventType</DisplayName>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2080</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2087" BrowseName="AuditCertificateUntrustedEventType" IsAbstract="true">
     <DisplayName>AuditCertificateUntrustedEventType</DisplayName>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2080</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2088" BrowseName="AuditCertificateRevokedEventType" IsAbstract="true">
     <DisplayName>AuditCertificateRevokedEventType</DisplayName>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2080</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2089" BrowseName="AuditCertificateMismatchEventType" IsAbstract="true">
     <DisplayName>AuditCertificateMismatchEventType</DisplayName>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2080</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2090" BrowseName="AuditNodeManagementEventType" IsAbstract="true">
     <DisplayName>AuditNodeManagementEventType</DisplayName>
@@ -10081,6 +10126,9 @@
       <Reference ReferenceType="HasSubtype">i=2095</Reference>
       <Reference ReferenceType="HasSubtype">i=2097</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2091" BrowseName="AuditAddNodesEventType" IsAbstract="true">
     <DisplayName>AuditAddNodesEventType</DisplayName>
@@ -10088,6 +10136,9 @@
       <Reference ReferenceType="HasProperty">i=2092</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2090</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2092" BrowseName="NodesToAdd" ParentNodeId="i=2091" DataType="i=376" ValueRank="1" ArrayDimensions="0">
     <DisplayName>NodesToAdd</DisplayName>
@@ -10103,6 +10154,9 @@
       <Reference ReferenceType="HasProperty">i=2094</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2090</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2094" BrowseName="NodesToDelete" ParentNodeId="i=2093" DataType="i=382" ValueRank="1" ArrayDimensions="0">
     <DisplayName>NodesToDelete</DisplayName>
@@ -10118,6 +10172,9 @@
       <Reference ReferenceType="HasProperty">i=2096</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2090</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2096" BrowseName="ReferencesToAdd" ParentNodeId="i=2095" DataType="i=379" ValueRank="1" ArrayDimensions="0">
     <DisplayName>ReferencesToAdd</DisplayName>
@@ -10133,6 +10190,9 @@
       <Reference ReferenceType="HasProperty">i=2098</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2090</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2098" BrowseName="ReferencesToDelete" ParentNodeId="i=2097" DataType="i=385" ValueRank="1" ArrayDimensions="0">
     <DisplayName>ReferencesToDelete</DisplayName>
@@ -10149,6 +10209,9 @@
       <Reference ReferenceType="HasSubtype">i=2100</Reference>
       <Reference ReferenceType="HasSubtype">i=2104</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2100" BrowseName="AuditWriteUpdateEventType" IsAbstract="true">
     <DisplayName>AuditWriteUpdateEventType</DisplayName>
@@ -10159,6 +10222,9 @@
       <Reference ReferenceType="HasProperty">i=2103</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2099</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2750" BrowseName="AttributeId" ParentNodeId="i=2100" DataType="UInt32">
     <DisplayName>AttributeId</DisplayName>
@@ -10202,6 +10268,9 @@
       <Reference ReferenceType="HasSubtype">i=19095</Reference>
       <Reference ReferenceType="HasSubtype">i=3012</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2751" BrowseName="ParameterDataTypeId" ParentNodeId="i=2104" DataType="NodeId">
     <DisplayName>ParameterDataTypeId</DisplayName>
@@ -10225,6 +10294,9 @@
       <Reference ReferenceType="HasSubtype">i=18011</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=18666</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2128" BrowseName="MethodId" ParentNodeId="i=2127" DataType="NodeId">
     <DisplayName>MethodId</DisplayName>
@@ -13769,6 +13841,9 @@
       <Reference ReferenceType="HasSubtype">i=11856</Reference>
       <Reference ReferenceType="HasSubtype">i=3806</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=2777" BrowseName="OldStateId" ParentNodeId="i=2315">
     <DisplayName>OldStateId</DisplayName>
@@ -16349,6 +16424,9 @@
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2127</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=17589" BrowseName="DictionaryEntryType" IsAbstract="true">
     <DisplayName>DictionaryEntryType</DisplayName>
@@ -20050,6 +20128,9 @@
       <Reference ReferenceType="HasSubtype">i=15013</Reference>
       <Reference ReferenceType="HasSubtype">i=17259</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2803" BrowseName="AuditConditionEnableEventType">
     <DisplayName>AuditConditionEnableEventType</DisplayName>
@@ -20064,6 +20145,9 @@
       <Reference ReferenceType="i=3065" IsForward="false">i=20176</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=20177</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2829" BrowseName="AuditConditionCommentEventType">
     <DisplayName>AuditConditionCommentEventType</DisplayName>
@@ -20076,6 +20160,9 @@
       <Reference ReferenceType="i=3065" IsForward="false">i=19485</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=20178</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=17222" BrowseName="ConditionEventId" ParentNodeId="i=2829" DataType="ByteString">
     <DisplayName>ConditionEventId</DisplayName>
@@ -20100,6 +20187,9 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2790</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=9069</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=11852" BrowseName="SelectedResponse" ParentNodeId="i=8927" DataType="UInt32">
     <DisplayName>SelectedResponse</DisplayName>
@@ -20120,6 +20210,9 @@
       <Reference ReferenceType="i=3065" IsForward="false">i=19505</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=20198</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=17223" BrowseName="ConditionEventId" ParentNodeId="i=8944" DataType="ByteString">
     <DisplayName>ConditionEventId</DisplayName>
@@ -20145,6 +20238,9 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2790</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=9113</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=17224" BrowseName="ConditionEventId" ParentNodeId="i=8961" DataType="ByteString">
     <DisplayName>ConditionEventId</DisplayName>
@@ -20174,6 +20270,9 @@
       <Reference ReferenceType="i=3065" IsForward="false">i=2947</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=2948</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=11855" BrowseName="ShelvingTime" ParentNodeId="i=11093" DataType="i=290">
     <DisplayName>ShelvingTime</DisplayName>
@@ -20190,6 +20289,9 @@
       <Reference ReferenceType="i=3065" IsForward="false">i=16403</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=17868</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=17242" BrowseName="AuditConditionSilenceEventType">
     <DisplayName>AuditConditionSilenceEventType</DisplayName>
@@ -20197,6 +20299,9 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2790</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=16402</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=15013" BrowseName="AuditConditionResetEventType">
     <DisplayName>AuditConditionResetEventType</DisplayName>
@@ -20204,6 +20309,9 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2790</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=18199</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=17259" BrowseName="AuditConditionOutOfServiceEventType">
     <DisplayName>AuditConditionOutOfServiceEventType</DisplayName>
@@ -20212,6 +20320,9 @@
       <Reference ReferenceType="i=3065" IsForward="false">i=17869</Reference>
       <Reference ReferenceType="i=3065" IsForward="false">i=17870</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=2787" BrowseName="RefreshStartEventType" IsAbstract="true">
     <DisplayName>RefreshStartEventType</DisplayName>
@@ -21045,6 +21156,9 @@
       <Reference ReferenceType="HasProperty">i=11875</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2315</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=11875" BrowseName="TransitionNumber" ParentNodeId="i=11856" DataType="UInt32">
     <DisplayName>TransitionNumber</DisplayName>
@@ -21060,6 +21174,9 @@
       <Reference ReferenceType="HasComponent">i=3825</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2315</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=3825" BrowseName="Transition" ParentNodeId="i=3806" DataType="LocalizedText">
     <DisplayName>Transition</DisplayName>
@@ -21657,6 +21774,9 @@
       <Reference ReferenceType="HasProperty">i=3030</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2104</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=3025" BrowseName="UpdatedNode" ParentNodeId="i=2999" DataType="NodeId">
     <DisplayName>UpdatedNode</DisplayName>
@@ -21707,6 +21827,9 @@
       <Reference ReferenceType="HasProperty">i=3033</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2104</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=3026" BrowseName="UpdatedNode" ParentNodeId="i=3006" DataType="NodeId">
     <DisplayName>UpdatedNode</DisplayName>
@@ -21748,6 +21871,9 @@
       <Reference ReferenceType="HasProperty">i=19295</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2104</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=19293" BrowseName="PerformInsertReplace" ParentNodeId="i=19095" DataType="i=11293">
     <DisplayName>PerformInsertReplace</DisplayName>
@@ -21782,6 +21908,9 @@
       <Reference ReferenceType="HasSubtype">i=3019</Reference>
       <Reference ReferenceType="HasSubtype">i=3022</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=3027" BrowseName="UpdatedNode" ParentNodeId="i=3012" DataType="NodeId">
     <DisplayName>UpdatedNode</DisplayName>
@@ -21800,6 +21929,9 @@
       <Reference ReferenceType="HasProperty">i=3034</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=3012</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=3015" BrowseName="IsDeleteModified" ParentNodeId="i=3014" DataType="Boolean">
     <DisplayName>IsDeleteModified</DisplayName>
@@ -21840,6 +21972,9 @@
       <Reference ReferenceType="HasProperty">i=3021</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=3012</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=3020" BrowseName="ReqTimes" ParentNodeId="i=3019" DataType="i=294" ValueRank="1" ArrayDimensions="0">
     <DisplayName>ReqTimes</DisplayName>
@@ -21864,6 +21999,9 @@
       <Reference ReferenceType="HasProperty">i=3024</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=3012</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=3023" BrowseName="EventIds" ParentNodeId="i=3022" DataType="ByteString" ValueRank="1" ArrayDimensions="0">
     <DisplayName>EventIds</DisplayName>
@@ -25704,6 +25842,9 @@
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2127</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=12581" BrowseName="ServerConfigurationType">
     <DisplayName>ServerConfigurationType</DisplayName>
@@ -26555,6 +26696,9 @@
       <Reference ReferenceType="HasProperty">i=13736</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=2127</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=13735" BrowseName="CertificateGroup" ParentNodeId="i=12620" DataType="NodeId">
     <DisplayName>CertificateGroup</DisplayName>
@@ -26935,6 +27079,9 @@
       <Reference ReferenceType="HasSubtype">i=18029</Reference>
       <Reference ReferenceType="HasSubtype">i=18047</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAVariable NodeId="i=18028" BrowseName="ResourceUri" ParentNodeId="i=18011" DataType="String">
     <DisplayName>ResourceUri</DisplayName>
@@ -26949,6 +27096,9 @@
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=18011</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="2080">i=15704</RolePermission>
+    </RolePermissions>
   </UAObjectType>
   <UAObjectType NodeId="i=18047" BrowseName="KeyCredentialDeletedAuditEventType">
     <DisplayName>KeyCredentialDeletedAuditEventType</DisplayName>
@@ -49448,7 +49598,7 @@
             <uax:RoleId>
               <uax:Identifier>i=15668</uax:Identifier>
             </uax:RoleId>
-            <uax:Permissions>32</uax:Permissions>
+            <uax:Permissions>2080</uax:Permissions>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -49459,7 +49609,7 @@
             <uax:RoleId>
               <uax:Identifier>i=15680</uax:Identifier>
             </uax:RoleId>
-            <uax:Permissions>32</uax:Permissions>
+            <uax:Permissions>2080</uax:Permissions>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -49470,7 +49620,7 @@
             <uax:RoleId>
               <uax:Identifier>i=15716</uax:Identifier>
             </uax:RoleId>
-            <uax:Permissions>32</uax:Permissions>
+            <uax:Permissions>2080</uax:Permissions>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -49481,7 +49631,7 @@
             <uax:RoleId>
               <uax:Identifier>i=15704</uax:Identifier>
             </uax:RoleId>
-            <uax:Permissions>4128</uax:Permissions>
+            <uax:Permissions>6176</uax:Permissions>
           </uax:Body>
         </uax:ExtensionObject>
       </uax:ListOfExtensionObject>
