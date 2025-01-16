@@ -129,7 +129,7 @@ extern void monitored_item_event_filter_treatment_bs__get_where_elt_of_type_id(
     *monitored_item_event_filter_treatment_bs__nodeId = &filterCtx->Filter.Event.whereClauseTypeId;
 }
 
-extern void monitored_item_event_filter_treatment_bs__init_and_check_filter_ctx(
+extern void monitored_item_event_filter_treatment_bs__event_check_filter_ctx(
     const constants__t_monitoringFilterCtx_i monitored_item_event_filter_treatment_bs__p_filterCtx,
     const constants__t_Event_i monitored_item_event_filter_treatment_bs__p_event,
     t_bool* const monitored_item_event_filter_treatment_bs__bres,
@@ -163,6 +163,13 @@ void monitored_item_event_filter_treatment_bs__init_and_check_is_event_filter(
     {
         *monitored_item_event_filter_treatment_bs__scIsEventFilter = constants_statuscodes_bs__e_sc_ok;
     }
+}
+
+void monitored_item_event_filter_treatment_bs__init_event(
+    const constants__t_Event_i monitored_item_event_filter_treatment_bs__p_event)
+{
+    // init B model
+    SOPC_ASSERT(NULL != monitored_item_event_filter_treatment_bs__p_event);
 }
 
 static bool may_value_rank_n_dimensions_be_compatible(size_t n_dimensions, int32_t valueRank)
@@ -463,6 +470,14 @@ void monitored_item_event_filter_treatment_bs__delete_event_filter_result(
                                      (void**) &monitored_item_event_filter_treatment_bs__p_filterResult);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
+}
+
+void monitored_item_event_filter_treatment_bs__get_event_source_node(
+    const constants__t_Event_i monitored_item_event_filter_treatment_bs__p_event,
+    constants__t_NodeId_i* const monitored_item_event_filter_treatment_bs__p_nodeId)
+{
+    *monitored_item_event_filter_treatment_bs__p_nodeId =
+        SOPC_Event_GetSourceNode(monitored_item_event_filter_treatment_bs__p_event);
 }
 
 void monitored_item_event_filter_treatment_bs__init_event_filter_ctx_and_result(

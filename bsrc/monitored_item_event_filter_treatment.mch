@@ -83,5 +83,18 @@ OPERATIONS
     THEN
         skip
     END
+    ;
+
+    p_bres <-- get_event_user_authorization(p_event, p_user, p_roles) =
+    PRE
+        p_event : t_Event_i &
+        p_event : t_Event &
+        p_user  : t_user_i           &
+        p_user  : t_user             &
+        p_roles : t_sessionRoles_i   &
+        p_roles : t_sessionRoles
+    THEN
+        p_bres :: BOOL
+    END
 
 END

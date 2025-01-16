@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_event_filter_treatment.h
 
- Date                 : 12/04/2024 14:39:59
+ Date                 : 04/02/2025 14:21:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -45,6 +45,7 @@
 /*--------------
    SEES Clause
   --------------*/
+#include "address_space_itf.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 #include "monitored_item_pointer_bs.h"
@@ -70,6 +71,11 @@ extern void monitored_item_event_filter_treatment__check_monitored_item_event_fi
    constants_statuscodes_bs__t_StatusCode_i * const monitored_item_event_filter_treatment__statusCode,
    constants__t_monitoringFilterCtx_i * const monitored_item_event_filter_treatment__filterCtx,
    constants__t_filterResult_i * const monitored_item_event_filter_treatment__filterResult);
+extern void monitored_item_event_filter_treatment__get_event_user_authorization(
+   const constants__t_Event_i monitored_item_event_filter_treatment__p_event,
+   const constants__t_user_i monitored_item_event_filter_treatment__p_user,
+   const constants__t_sessionRoles_i monitored_item_event_filter_treatment__p_roles,
+   t_bool * const monitored_item_event_filter_treatment__p_bres);
 extern void monitored_item_event_filter_treatment__server_subscription_get_notification_on_event(
    const constants__t_client_handle_i monitored_item_event_filter_treatment__p_clientHandle,
    const constants__t_LocaleIds_i monitored_item_event_filter_treatment__p_localeIds,

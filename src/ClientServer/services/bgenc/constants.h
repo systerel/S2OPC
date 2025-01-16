@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 09/12/2024 17:07:44
+ Date                 : 06/01/2025 17:03:07
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -320,7 +320,8 @@ typedef enum {
    constants__e_operation_type_read,
    constants__e_operation_type_write,
    constants__e_operation_type_executable,
-   constants__e_operation_type_addnode
+   constants__e_operation_type_addnode,
+   constants__e_operation_type_receive_events
 } constants__t_operation_type_i;
 typedef enum {
    constants__e_session_closed,

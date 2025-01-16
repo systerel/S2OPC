@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_event_filter_treatment.c
 
- Date                 : 10/04/2024 09:43:25
+ Date                 : 04/02/2025 17:23:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -149,7 +149,8 @@ void monitored_item_event_filter_treatment__server_subscription_get_notification
       
       *monitored_item_event_filter_treatment__notifTriggered = false;
       *monitored_item_event_filter_treatment__eventNotif = constants__c_eventFieldList_indet;
-      monitored_item_event_filter_treatment_bs__init_and_check_filter_ctx(monitored_item_event_filter_treatment__p_filterCtx,
+      monitored_item_event_filter_treatment_bs__init_event(monitored_item_event_filter_treatment__p_event);
+      monitored_item_event_filter_treatment_bs__event_check_filter_ctx(monitored_item_event_filter_treatment__p_filterCtx,
          monitored_item_event_filter_treatment__p_event,
          &monitored_item_event_filter_treatment__l_bres,
          &monitored_item_event_filter_treatment__l_nbSelectClauses,
@@ -171,6 +172,39 @@ void monitored_item_event_filter_treatment__server_subscription_get_notification
             monitored_item_event_filter_treatment__notifTriggered,
             monitored_item_event_filter_treatment__eventNotif);
       }
+   }
+}
+
+void monitored_item_event_filter_treatment__get_event_user_authorization(
+   const constants__t_Event_i monitored_item_event_filter_treatment__p_event,
+   const constants__t_user_i monitored_item_event_filter_treatment__p_user,
+   const constants__t_sessionRoles_i monitored_item_event_filter_treatment__p_roles,
+   t_bool * const monitored_item_event_filter_treatment__p_bres) {
+   {
+      constants__t_NodeId_i monitored_item_event_filter_treatment__l_eventTypeId_nodeId;
+      t_bool monitored_item_event_filter_treatment__l_authorized_event_type_id;
+      constants__t_NodeId_i monitored_item_event_filter_treatment__l_sourceNode_nodeId;
+      t_bool monitored_item_event_filter_treatment__l_authorized_source_node;
+      
+      monitored_item_event_filter_treatment_bs__init_event(monitored_item_event_filter_treatment__p_event);
+      monitored_item_event_filter_treatment_bs__get_event_type_id(monitored_item_event_filter_treatment__p_event,
+         &monitored_item_event_filter_treatment__l_eventTypeId_nodeId);
+      address_space_itf__get_user_authorization(constants__e_operation_type_receive_events,
+         monitored_item_event_filter_treatment__l_eventTypeId_nodeId,
+         constants__e_aid_EventNotifier,
+         monitored_item_event_filter_treatment__p_user,
+         monitored_item_event_filter_treatment__p_roles,
+         &monitored_item_event_filter_treatment__l_authorized_event_type_id);
+      monitored_item_event_filter_treatment_bs__get_event_source_node(monitored_item_event_filter_treatment__p_event,
+         &monitored_item_event_filter_treatment__l_sourceNode_nodeId);
+      address_space_itf__get_user_authorization(constants__e_operation_type_receive_events,
+         monitored_item_event_filter_treatment__l_sourceNode_nodeId,
+         constants__e_aid_EventNotifier,
+         monitored_item_event_filter_treatment__p_user,
+         monitored_item_event_filter_treatment__p_roles,
+         &monitored_item_event_filter_treatment__l_authorized_source_node);
+      *monitored_item_event_filter_treatment__p_bres = ((monitored_item_event_filter_treatment__l_authorized_event_type_id == true) &&
+         (monitored_item_event_filter_treatment__l_authorized_source_node == true));
    }
 }
 

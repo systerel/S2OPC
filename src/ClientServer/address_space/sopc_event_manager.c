@@ -307,7 +307,7 @@ SOPC_ReturnStatus SOPC_Event_SetSourceName(SOPC_Event* pEvent, const SOPC_String
     return status;
 }
 
-static SOPC_NodeId* SOPC_Event_GetSourceNode(SOPC_Event* pEvent)
+SOPC_NodeId* SOPC_Event_GetSourceNode(SOPC_Event* pEvent)
 {
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;

@@ -65,7 +65,9 @@ PROMOTES
     set_msg_publish_resp_notificationMsg,
     generate_internal_send_publish_response_event,
     /* notif republish queue */
-    get_republish_notif_from_queue
+    get_republish_notif_from_queue,
+    /* monitored_item_filter_treatment */
+    get_event_user_authorization
 
 DEFINITIONS
 

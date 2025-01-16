@@ -47,7 +47,8 @@ ABSTRACT_VARIABLES
     a_whereClauseElementOfTypeId,
 
     c_event,
-    a_eventTypeId
+    a_eventTypeId,
+    a_sourceNodeId
 
 INVARIANT
     c_eventsSupport : BOOL &
@@ -72,7 +73,8 @@ INVARIANT
     a_whereClauseElementOfTypeId : t_NodeId_i &
 
     c_event : t_Event_i &
-    a_eventTypeId : t_NodeId_i
+    a_eventTypeId : t_NodeId_i &
+    a_sourceNodeId : t_NodeId_i
 
 INITIALISATION
     c_eventsSupport,
@@ -96,7 +98,8 @@ INITIALISATION
     a_whereClauseElementOfTypeId,
 
     c_event,
-    a_eventTypeId
+    a_eventTypeId,
+    a_sourceNodeId
 
     :(c_eventsSupport : BOOL &
       s_isEventNotifier <: t_Variant_i &
@@ -129,7 +132,10 @@ INITIALISATION
       c_event = c_Event_indet &
 
       a_eventTypeId : t_NodeId_i &
-      a_eventTypeId = c_NodeId_indet
+      a_eventTypeId = c_NodeId_indet &
+
+      a_sourceNodeId : t_NodeId_i &
+      a_sourceNodeId = c_NodeId_indet
 
      )
 
@@ -298,33 +304,60 @@ OPERATIONS
     PRE
         p_event : t_Event_i &
         p_event : t_Event &
-        p_event = c_event
+        p_event = c_event &
+        a_eventTypeId : t_NodeId
     THEN
         nodeId := a_eventTypeId
     END
     ;
 
-    bres, nbSelectClauses, nbWhereClauseElements <-- init_and_check_filter_ctx (p_filterCtx, p_event) =
+    p_nodeId <-- get_event_source_node(p_event) =
     PRE
-        p_filterCtx : t_monitoringFilterCtx_i &
+        p_event : t_Event_i &
+        p_event : t_Event &
+        p_event = c_event &
+        a_sourceNodeId : t_NodeId
+    THEN
+        p_nodeId := a_sourceNodeId
+    END
+    ;
+
+    init_event(p_event) =
+    PRE
         p_event : t_Event_i &
         p_event : t_Event
     THEN
+        c_event,
+        a_eventTypeId,
+        a_sourceNodeId
+            :(c_event = p_event &
+              a_eventTypeId : t_NodeId &
+              a_sourceNodeId : t_NodeId)
+    END
+    ;
+
+    bres, nbSelectClauses, nbWhereClauseElements <-- event_check_filter_ctx (p_filterCtx, p_event) =
+    PRE
+        p_filterCtx : t_monitoringFilterCtx_i &
+        p_event : t_Event_i &
+        p_event : t_Event &
+        // Check init has been made
+        p_event = c_event &
+        a_eventTypeId : t_NodeId &
+        a_sourceNodeId : t_NodeId
+    THEN
         c_filterCtx, a_isEventFilterCtx, a_filterCtx_NbSelectClauses,
         a_filterCtx_NbWhereClauseElements, a_selectClauseTypeId, a_whereClauseElementOfTypeId,
-        c_event, a_eventTypeId,
         bres, nbSelectClauses, nbWhereClauseElements
         :(c_filterCtx : t_monitoringFilterCtx_i & a_isEventFilterCtx : BOOL &
           a_filterCtx_NbSelectClauses : NAT & a_filterCtx_NbWhereClauseElements : 0..1 &
           a_selectClauseTypeId : NAT --> t_NodeId &
           a_selectClauseTypeId : 1..a_filterCtx_NbSelectClauses --> t_NodeId &
           a_whereClauseElementOfTypeId : t_NodeId_i &
-          c_event : t_Event_i & a_eventTypeId : t_NodeId_i &
           bres : BOOL & nbSelectClauses : NAT & nbWhereClauseElements : NAT &
 
           (bres = TRUE => p_filterCtx : t_monitoringFilterCtx & a_isEventFilterCtx = TRUE &
                           a_filterCtx_NbSelectClauses > 0 & c_filterCtx = p_filterCtx &
-                          c_event = p_event & a_eventTypeId : t_NodeId &
                           nbSelectClauses = a_filterCtx_NbSelectClauses &
                           nbWhereClauseElements = a_filterCtx_NbWhereClauseElements &
                           (a_filterCtx_NbWhereClauseElements = 1 => a_whereClauseElementOfTypeId : t_NodeId) &
@@ -332,7 +365,6 @@ OPERATIONS
           ) &
           (bres = FALSE => c_filterCtx = c_monitoringFilterCtx_indet & a_isEventFilterCtx = FALSE &
                            a_filterCtx_NbSelectClauses = 0 & a_filterCtx_NbWhereClauseElements = 0 &
-                           c_event = c_Event_indet & a_eventTypeId = c_NodeId_indet &
                            c_filterCtx = p_filterCtx)
         )
     END

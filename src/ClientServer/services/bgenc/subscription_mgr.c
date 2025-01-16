@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 09/12/2024 17:07:57
+ Date                 : 04/02/2025 14:21:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -393,14 +393,12 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_event_sele
                &subscription_mgr__l_user);
             session_mgr__get_session_roles(subscription_mgr__l_session,
                &subscription_mgr__l_roles);
-            address_space_itf__get_user_authorization(constants__e_operation_type_read,
-               subscription_mgr__l_nid,
-               subscription_mgr__l_aid,
+            session_mgr__get_server_session_preferred_locales(subscription_mgr__l_session,
+               &subscription_mgr__l_locales);
+            subscription_core__get_event_user_authorization(subscription_mgr__p_event,
                subscription_mgr__l_user,
                subscription_mgr__l_roles,
                &subscription_mgr__l_valid_user_access);
-            session_mgr__get_server_session_preferred_locales(subscription_mgr__l_session,
-               &subscription_mgr__l_locales);
          }
       }
       if (((subscription_mgr__l_session_valid == true) &&

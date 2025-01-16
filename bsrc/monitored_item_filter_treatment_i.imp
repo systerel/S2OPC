@@ -34,7 +34,8 @@ IMPORTS
 
 PROMOTES
     server_subscription_get_notification_on_event,
-    delete_event_filter_context
+    delete_event_filter_context,
+    get_event_user_authorization
 
 OPERATIONS
 

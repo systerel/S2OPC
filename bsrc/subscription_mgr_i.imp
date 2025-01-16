@@ -998,15 +998,10 @@ OPERATIONS
             IF l_session_valid = TRUE
             THEN
                 l_user <-- get_session_user_server(l_session);
-                /* Note: provide a way to restrict event notification to user here through event notifier attribute of notifier
-                         but the specification seems to only concern the case in which event
-                         is visible in address space (part 4 (v1.05) §7.22.3):
-                         "For example, the Server shall set the event field to Bad_UserAccessDenied
-                          if the value is not accessible to the user associated with the Session."
-                */
                 l_roles <-- get_session_roles(l_session);
-                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user, l_roles);
-                l_locales <-- get_server_session_preferred_locales(l_session)
+                l_locales <-- get_server_session_preferred_locales(l_session);
+                // Check user access
+                l_valid_user_access <-- get_event_user_authorization(p_event, l_user, l_roles)
             END
         END
         ;

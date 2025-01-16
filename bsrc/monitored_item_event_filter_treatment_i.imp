@@ -25,7 +25,8 @@ REFINES
 SEES
    constants ,
    constants_statuscodes_bs,
-   monitored_item_pointer_bs
+   monitored_item_pointer_bs,
+   address_space_itf
 
 IMPORTS
     monitored_item_event_filter_treatment_bs,
@@ -147,7 +148,8 @@ OPERATIONS
         notifTriggered := FALSE;
         eventNotif := c_eventFieldList_indet;
         /* Check filter is not NULL and an EventFilter and init where clause elts counter */
-        l_bres, l_nbSelectClauses, l_nbWhereClauseElements <-- init_and_check_filter_ctx (p_filterCtx, p_event);
+        init_event(p_event);
+        l_bres, l_nbSelectClauses, l_nbWhereClauseElements <-- event_check_filter_ctx (p_filterCtx, p_event);
         IF l_bres = TRUE
         THEN
             /* Evaluate event type to be a subtype of where clause OfType elements if any:
@@ -163,6 +165,24 @@ OPERATIONS
                 p_timestampToReturn, p_userAccessGranted,
                 p_filterCtx, l_nbSelectClauses, p_event)
         END
+    END
+    ;
+
+    p_bres <-- get_event_user_authorization(p_event, p_user, p_roles) =
+    VAR
+        l_eventTypeId_nodeId,
+        l_authorized_event_type_id,
+        l_sourceNode_nodeId,
+        l_authorized_source_node
+    IN
+        init_event(p_event);
+        /* Check if the user is authorized to receive events of that type */
+        l_eventTypeId_nodeId <-- get_event_type_id(p_event);
+        l_authorized_event_type_id <-- get_user_authorization (e_operation_type_receive_events, l_eventTypeId_nodeId, e_aid_EventNotifier, p_user, p_roles);
+        /* Check if the user is authorized to receive events originated from that source node */
+        l_sourceNode_nodeId <-- get_event_source_node(p_event);
+        l_authorized_source_node <-- get_user_authorization (e_operation_type_receive_events, l_sourceNode_nodeId, e_aid_EventNotifier, p_user, p_roles);
+        p_bres := bool(l_authorized_event_type_id = TRUE & l_authorized_source_node = TRUE)
     END
 
 END

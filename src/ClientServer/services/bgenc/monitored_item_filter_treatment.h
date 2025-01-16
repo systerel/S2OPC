@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_filter_treatment.h
 
- Date                 : 12/04/2024 14:40:01
+ Date                 : 04/02/2025 14:21:07
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -57,6 +57,7 @@ extern void monitored_item_filter_treatment__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define monitored_item_filter_treatment__delete_event_filter_context monitored_item_event_filter_treatment__delete_event_filter_context
+#define monitored_item_filter_treatment__get_event_user_authorization monitored_item_event_filter_treatment__get_event_user_authorization
 #define monitored_item_filter_treatment__server_subscription_get_notification_on_event monitored_item_event_filter_treatment__server_subscription_get_notification_on_event
 
 /*--------------------

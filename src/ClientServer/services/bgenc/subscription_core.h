@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 03/04/2024 16:26:34
+ Date                 : 04/02/2025 14:21:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -80,6 +80,7 @@ extern void subscription_core__INITIALISATION(void);
 #define subscription_core__continue_iter_notif_republish notification_republish_queue_it_bs__continue_iter_notif_republish
 #define subscription_core__generate_internal_send_publish_response_event msg_subscription_publish_bs__generate_internal_send_publish_response_event
 #define subscription_core__get_available_republish notification_republish_queue_it_bs__get_available_republish
+#define subscription_core__get_event_user_authorization monitored_item_filter_treatment__get_event_user_authorization
 #define subscription_core__get_nodeToMonitoredItemQueue subscription_core_bs__get_nodeToMonitoredItemQueue
 #define subscription_core__get_republish_notif_from_queue notification_republish_queue_bs__get_republish_notif_from_queue
 #define subscription_core__get_subscription_notifRepublishQueue subscription_core_1__get_subscription_notifRepublishQueue

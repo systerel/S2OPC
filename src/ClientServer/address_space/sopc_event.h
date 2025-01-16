@@ -122,6 +122,15 @@ SOPC_ReturnStatus SOPC_Event_SetSourceName(SOPC_Event* pEvent, const SOPC_String
 SOPC_ReturnStatus SOPC_Event_SetSourceNode(SOPC_Event* pEvent, const SOPC_NodeId* pSourceNode);
 
 /**
+ * \brief Gets the SourceNode for the given event
+ *
+ * \param pEvent pointer to the event for which SourceNode shall be retrieved
+ *
+ * \return the sourceNode NodeId or NULL in case of error
+ */
+SOPC_NodeId* SOPC_Event_GetSourceNode(SOPC_Event* pEvent);
+
+/**
  * \brief Get the Time for the given event
  *
  * \param pEvent pointer to the event from which Time shall be retrieved

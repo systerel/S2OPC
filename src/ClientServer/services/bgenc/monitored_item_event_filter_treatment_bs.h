@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_event_filter_treatment_bs.h
 
- Date                 : 10/04/2024 15:55:55
+ Date                 : 30/01/2025 17:22:05
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -70,6 +70,15 @@ extern void monitored_item_event_filter_treatment_bs__delete_event_filter_contex
    const constants__t_monitoringFilterCtx_i monitored_item_event_filter_treatment_bs__p_filterCtx);
 extern void monitored_item_event_filter_treatment_bs__delete_event_filter_result(
    const constants__t_filterResult_i monitored_item_event_filter_treatment_bs__p_filterResult);
+extern void monitored_item_event_filter_treatment_bs__event_check_filter_ctx(
+   const constants__t_monitoringFilterCtx_i monitored_item_event_filter_treatment_bs__p_filterCtx,
+   const constants__t_Event_i monitored_item_event_filter_treatment_bs__p_event,
+   t_bool * const monitored_item_event_filter_treatment_bs__bres,
+   t_entier4 * const monitored_item_event_filter_treatment_bs__nbSelectClauses,
+   t_entier4 * const monitored_item_event_filter_treatment_bs__nbWhereClauseElements);
+extern void monitored_item_event_filter_treatment_bs__get_event_source_node(
+   const constants__t_Event_i monitored_item_event_filter_treatment_bs__p_event,
+   constants__t_NodeId_i * const monitored_item_event_filter_treatment_bs__p_nodeId);
 extern void monitored_item_event_filter_treatment_bs__get_event_type_id(
    const constants__t_Event_i monitored_item_event_filter_treatment_bs__p_event,
    constants__t_NodeId_i * const monitored_item_event_filter_treatment_bs__nodeId);
@@ -80,16 +89,12 @@ extern void monitored_item_event_filter_treatment_bs__get_select_clause_type_id(
 extern void monitored_item_event_filter_treatment_bs__get_where_elt_of_type_id(
    const constants__t_monitoringFilterCtx_i monitored_item_event_filter_treatment_bs__p_filterCtx,
    constants__t_NodeId_i * const monitored_item_event_filter_treatment_bs__nodeId);
-extern void monitored_item_event_filter_treatment_bs__init_and_check_filter_ctx(
-   const constants__t_monitoringFilterCtx_i monitored_item_event_filter_treatment_bs__p_filterCtx,
-   const constants__t_Event_i monitored_item_event_filter_treatment_bs__p_event,
-   t_bool * const monitored_item_event_filter_treatment_bs__bres,
-   t_entier4 * const monitored_item_event_filter_treatment_bs__nbSelectClauses,
-   t_entier4 * const monitored_item_event_filter_treatment_bs__nbWhereClauseElements);
 extern void monitored_item_event_filter_treatment_bs__init_and_check_is_event_filter(
    const constants__t_monitoringFilter_i monitored_item_event_filter_treatment_bs__p_filter,
    const constants__t_AttributeId_i monitored_item_event_filter_treatment_bs__p_aid,
    constants_statuscodes_bs__t_StatusCode_i * const monitored_item_event_filter_treatment_bs__scIsEventFilter);
+extern void monitored_item_event_filter_treatment_bs__init_event(
+   const constants__t_Event_i monitored_item_event_filter_treatment_bs__p_event);
 extern void monitored_item_event_filter_treatment_bs__init_event_filter_ctx_and_result(
    const constants__t_monitoringFilter_i monitored_item_event_filter_treatment_bs__p_filter,
    constants_statuscodes_bs__t_StatusCode_i * const monitored_item_event_filter_treatment_bs__p_sc,

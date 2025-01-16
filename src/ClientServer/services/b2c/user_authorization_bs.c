@@ -74,6 +74,9 @@ void user_authorization_bs__get_user_authorization_bs(
         case SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE:
             operation = "addNode";
             break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_RECEIVE_EVENTS:
+            operation = "receiveEvents";
+            break;
         default:
             operation = "unknown";
             break;

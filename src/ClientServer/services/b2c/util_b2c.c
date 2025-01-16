@@ -1586,6 +1586,9 @@ void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_Use
     case constants__e_operation_type_addnode:
         *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE;
         break;
+    case constants__e_operation_type_receive_events:
+        *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_RECEIVE_EVENTS;
+        break;
     default:
         SOPC_ASSERT(false); /* Unexpected operation type */
     }
