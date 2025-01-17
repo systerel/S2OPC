@@ -903,7 +903,7 @@ SOPC_ReturnStatus SOPC_String_ReadWithLimitedLength(SOPC_String* str,
         if (length > 0)
         {
             if (length <= SOPC_Internal_Common_GetEncodingConstants()->max_string_length &&
-                (uint64_t) length + 1 <= SIZE_MAX)
+                (uint64_t) length + 1 <= SIZE_MAX) // Prevent size_t overflow
             {
                 if (0 == maxLength || length <= maxLength)
                 {
