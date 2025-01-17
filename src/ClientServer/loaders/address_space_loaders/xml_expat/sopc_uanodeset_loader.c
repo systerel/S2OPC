@@ -790,6 +790,10 @@ static bool start_node_role_permission(struct parse_context_t* ctx, const XML_Ch
                 LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid permission: '%s", val);
                 return false;
             }
+            if (0 == (permission.Permissions & OpcUa_PermissionType_Browse))
+            {
+                LOG("Warning: permission Browse set to 0 will be ignored because this permission is not managed.");
+            }
             // The RoleId is parsed in finalize_rolepermission
         }
     }
@@ -2015,6 +2019,11 @@ static bool set_variant_value_extobj_role_permission_type(OpcUa_RolePermissionTy
     // Fill the rolePermissions object with the parsed elements
     bool result = SOPC_strtouint(permissionsTagCtx->single_value, (size_t) strlen(permissionsTagCtx->single_value), 32,
                                  &rolePermissions->Permissions);
+
+    if (0 == (rolePermissions->Permissions & OpcUa_PermissionType_Browse))
+    {
+        LOG("Warning: DRP permission Browse set to 0 will be ignored because this permission is not managed.");
+    }
 
     if (result)
     {

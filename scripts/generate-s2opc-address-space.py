@@ -188,6 +188,8 @@ c_header = '''
 ACCESSLEVEL_MASK_STATUSWRITE = 0b00100000
 ACCESSLEVEL_MASK_TIMESTAMPWRITE = 0b01000000
 
+PERMISSIONTYPE_MASK_BROWSE = 0b00000001
+
 class ParseError(Exception):
     """
     Errors raised during XML parsing
@@ -636,6 +638,8 @@ def parse_role_permissions(node):
     for n in rolepermissions_node.findall(UA_ROLEPERMISSION_TAG):
         try:
             permissions = n.attrib['Permissions']
+            if 0 == int(permissions) & PERMISSIONTYPE_MASK_BROWSE:
+                print("WARNING: permission Browse set to 0 will be ignored because this permission is not managed.")
         except KeyError:
             raise ParseError('Missing Permissions on RolePermission element for node ' + node.get('NodeId'))
 
@@ -819,6 +823,9 @@ def parse_role_permission_type_body(n):
     if permissions is None:
         raise ParseError('RolePermission without Permissions tag')
     
+    if 0 == int(permissions.text) & PERMISSIONTYPE_MASK_BROWSE:
+        print("WARNING: DRP permission Browse set to 0 will be ignored because this permission is not managed.")
+
     roleid_nodeid = parse_node_id(roleid)
     if roleid_nodeid is None:
         raise ParseError('RolePermission extension object with invalid RoleId nodeId %s' % roleid_nodeid)

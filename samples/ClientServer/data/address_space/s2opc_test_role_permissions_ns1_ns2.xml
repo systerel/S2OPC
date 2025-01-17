@@ -185,7 +185,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <RolePermissions>
-      <RolePermission Permissions="64">i=15668</RolePermission> <!-- Write for Observer (i=15668) : Overides DRP Observer -->
+      <RolePermission Permissions="65">i=15668</RolePermission> <!-- Browe + Write for Observer (i=15668) : Overides DRP Observer -->
     </RolePermissions>
     <Value>
       <uax:Int64>-1000</uax:Int64>
@@ -199,7 +199,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <RolePermissions>
-      <RolePermission Permissions="96">i=15680</RolePermission> <!-- Read + Write for Operator (i=15680) -->
+      <RolePermission Permissions="97">i=15680</RolePermission> <!-- Browse + Read + Write for Operator (i=15680) -->
     </RolePermissions>
     <Value>
       <uax:Int64>-1000</uax:Int64>
@@ -213,9 +213,9 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <RolePermissions>
-      <RolePermission Permissions="0">i=15668</RolePermission> <!-- None for Observer (i=15668) -->
-      <RolePermission Permissions="32">i=15680</RolePermission> <!-- Read for Operator (i=15680) -->
-      <RolePermission Permissions="64">i=15716</RolePermission> <!-- Write for ConfigureAdmin (i=15716) -->
+      <RolePermission Permissions="1">i=15668</RolePermission> <!-- Browse for Observer (i=15668) -->
+      <RolePermission Permissions="33">i=15680</RolePermission> <!-- Browse + Read for Operator (i=15680) -->
+      <RolePermission Permissions="65">i=15716</RolePermission> <!-- Browse + Write for ConfigureAdmin (i=15716) -->
     </RolePermissions>
     <Value>
       <uax:Int64>-1000</uax:Int64>
@@ -241,8 +241,8 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <RolePermissions>
-      <RolePermission Permissions="32">i=15668</RolePermission> <!-- Read for Observer (i=15668) -->
-      <RolePermission Permissions="4192">i=15680</RolePermission> <!-- Read + Write + Call for Operator (i=15680) -->
+      <RolePermission Permissions="33">i=15668</RolePermission> <!-- Browse + Read for Observer (i=15668) -->
+      <RolePermission Permissions="4193">i=15680</RolePermission> <!-- Browse + Read + Write + Call for Operator (i=15680) -->
     </RolePermissions>
     <Value>
       <uax:UInt32>0</uax:UInt32>
@@ -256,8 +256,8 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
     </References>
     <RolePermissions>
-      <RolePermission Permissions="32">i=15668</RolePermission> <!-- Read for Observer (i=15668) -->
-      <RolePermission Permissions="4192">i=15680</RolePermission> <!-- Read + Write + Call for Operator (i=15680) -->
+      <RolePermission Permissions="33">i=15668</RolePermission> <!-- Browse + Read for Observer (i=15668) -->
+      <RolePermission Permissions="4193">i=15680</RolePermission> <!-- Browse + Read + Write + Call for Operator (i=15680) -->
     </RolePermissions>
   </UAMethod>
 
@@ -272,7 +272,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <RolePermissions>
-      <RolePermission Permissions="32">i=15668</RolePermission> <!-- Read (only) for Observer (i=15668) : useless because no DRP for NS=2 -->
+      <RolePermission Permissions="33">i=15668</RolePermission> <!-- Browse + Read (only) for Observer (i=15668) : useless because no DRP for NS=2 -->
     </RolePermissions>
     <Value>
       <uax:Int64>-1000</uax:Int64>
