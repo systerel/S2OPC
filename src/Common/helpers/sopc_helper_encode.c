@@ -201,7 +201,7 @@ static bool base64decode(const char* input, unsigned char** ppOut, size_t* outLe
 
     size_t resIter = (inputLen - paddingLength) % 4;
 
-    if (0 != resIter)
+    if (resIter > 0)
     {
         resIter--;
     }
