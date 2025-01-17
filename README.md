@@ -128,6 +128,9 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
 - Server events notification:
   - Create and trigger event instances for event types of address space on EventNotifier nodes
   - Subscription events monitored items management with limited filtering features (where clause empty or 1 simple OfType element)
+- Server role-based security:
+  - Role mechanism with the following limitations. Permissions managed: Read, Write, Call, AddNodes, ReceiveEvents. Supported role mapping criterias:
+  anonymous, username, authenticated user.
 - Client instantiation: multiple secure channel instances and session instances
 - Client subscription service: automated management of 1 subscription per connection with monitored items
 - Client services requests: any discovery service or service on session request. Some request builders are provided, requests are only forwarded to server (no functional behavior).
