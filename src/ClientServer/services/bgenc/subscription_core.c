@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 12/04/2024 14:40:17
+ Date                 : 17/01/2025 15:23:48
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -858,10 +858,11 @@ void subscription_core__receive_publish_request(
          &subscription_core__l_notifRepublishQueue);
       *subscription_core__moreNotifs = false;
       *subscription_core__subscription = constants__c_subscription_indet;
-      if ((subscription_core__l_subscriptionState == constants__e_subscriptionState_normal) &&
+      if (((subscription_core__l_subscriptionState == constants__e_subscriptionState_normal) &&
          ((subscription_core__l_PublishingEnabled == false) ||
          ((subscription_core__l_PublishingEnabled == true) &&
-         (subscription_core__l_MoreNotifications == false)))) {
+         (subscription_core__l_MoreNotifications == false)))) ||
+         (subscription_core__l_subscriptionState == constants__e_subscriptionState_keepAlive)) {
          publish_request_queue_bs__get_nb_publish_requests(subscription_core__l_PublishingReqQueue,
             &subscription_core__l_nb_pub_reqs);
          if (subscription_core__l_nb_pub_reqs == constants__k_n_publishRequestPerSub_max) {
@@ -1015,37 +1016,6 @@ void subscription_core__receive_publish_request(
          msg_subscription_publish_bs__set_notification_message_sequence_number(subscription_core__l_notifMsg,
             subscription_core__l_seq_num);
          subscription_core_1__set_subscription_MessageSent(subscription_core__l_subscription);
-      }
-      else if (subscription_core__l_subscriptionState == constants__e_subscriptionState_keepAlive) {
-         publish_request_queue_bs__get_nb_publish_requests(subscription_core__l_PublishingReqQueue,
-            &subscription_core__l_nb_pub_reqs);
-         if (subscription_core__l_nb_pub_reqs == constants__k_n_publishRequestPerSub_max) {
-            publish_request_queue_bs__discard_oldest_publish_request(subscription_core__l_PublishingReqQueue,
-               &subscription_core__l_old_session,
-               &subscription_core__l_old_resp_msg,
-               &subscription_core__l_old_req_handle,
-               &subscription_core__l_old_req_ctx);
-            msg_subscription_publish_bs__generate_internal_send_publish_response_event(subscription_core__l_old_session,
-               subscription_core__l_old_resp_msg,
-               subscription_core__l_old_req_handle,
-               subscription_core__l_old_req_ctx,
-               constants_statuscodes_bs__e_sc_bad_too_many_publish_requests);
-         }
-         publish_request_queue_bs__append_publish_request_to_queue(subscription_core__l_PublishingReqQueue,
-            subscription_core__p_session,
-            subscription_core__p_req_exp_time,
-            subscription_core__p_req_handle,
-            subscription_core__p_req_ctx,
-            subscription_core__p_resp_msg,
-            &subscription_core__l_bres);
-         if (subscription_core__l_bres == true) {
-            *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
-            *subscription_core__async_resp_msg = true;
-         }
-         else {
-            *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-            *subscription_core__async_resp_msg = false;
-         }
       }
       else {
          *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_invalid_state;

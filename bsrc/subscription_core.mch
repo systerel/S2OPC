@@ -724,12 +724,14 @@ OPERATIONS
             l_MoreNotifications = bool (l_subscription : a_MoreNotifications) &
             l_NotificationAvailable = bool (a_monitored_item_notification_queue[a_monitoredItemSubs~[{l_subscription}]] /= {})
         IN
-            /* #4 transition */
-            IF a_subscription_state (l_subscription) = e_subscriptionState_normal &
+            /* #4 transition and #13 transition */
+            IF (a_subscription_state (l_subscription) = e_subscriptionState_normal &
                (l_PublishingEnabled = FALSE
                 or
                 (l_PublishingEnabled = TRUE & l_MoreNotifications = FALSE)
-               )
+               ))
+               or
+               a_subscription_state (l_subscription) = e_subscriptionState_keepAlive
             THEN
                 CHOICE
                     /* Enqueue publish request (request data + response): */
@@ -752,7 +754,7 @@ OPERATIONS
                     subscription := c_subscription_indet ||
                     moreNotifs := FALSE
                 OR
-                    StatusCode_service := e_sc_bad_out_of_memory ||
+                    StatusCode_service := e_sc_bad_too_many_publish_requests ||
                     async_resp_msg := FALSE ||
                     subscription := c_subscription_indet ||
                     moreNotifs := FALSE
@@ -797,35 +799,6 @@ OPERATIONS
                 notification_message_seq_num := a_SeqNum (l_subscription) || /* KeepAlive => no seq num update */
                 moreNotifs := FALSE
 
-            /* #13 transition */
-            ELSIF a_subscription_state (l_subscription) = e_subscriptionState_keepAlive
-            THEN
-                CHOICE
-                    /* Enqueue publish request (request data + response): */
-                    IF card(a_publish_responses~[{a_publishRequestQueue (l_subscription)}]) = k_n_publishRequestPerSub_max
-                    THEN
-                        /* + Discard oldest publish request if maximum publish requests reached */
-                        ANY l_old_resp_msg WHERE
-                            l_old_resp_msg : t_msg_i &
-                            (l_old_resp_msg |-> a_publishRequestQueue (l_subscription)) : a_publish_responses
-                        THEN
-                            a_publish_responses := a_publish_responses
-                             - {l_old_resp_msg |-> a_publishRequestQueue (l_subscription)}
-                             \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)}
-                        END
-                    ELSE
-                        a_publish_responses := a_publish_responses \/ {p_resp_msg |-> a_publishRequestQueue (l_subscription)}
-                    END ||
-                    StatusCode_service := e_sc_ok ||
-                    async_resp_msg := TRUE ||
-                    subscription := c_subscription_indet ||
-                    moreNotifs := FALSE
-                OR
-                    StatusCode_service := e_sc_bad_out_of_memory ||
-                    async_resp_msg := FALSE ||
-                    subscription := c_subscription_indet ||
-                    moreNotifs := FALSE
-                END
             ELSE
                 StatusCode_service := e_sc_bad_invalid_state ||
                 async_resp_msg := FALSE ||

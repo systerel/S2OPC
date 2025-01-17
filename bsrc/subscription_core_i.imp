@@ -1225,13 +1225,15 @@ OPERATIONS
         moreNotifs := FALSE;
         subscription := c_subscription_indet;
 
-        /* #4 transition */
+        /* #4 transition and #13 transition */
         IF l_subscriptionState = e_subscriptionState_normal &
            (l_PublishingEnabled = FALSE
             or
             (l_PublishingEnabled = TRUE &
              l_MoreNotifications = FALSE)
            )
+           or
+           l_subscriptionState = e_subscriptionState_keepAlive
         THEN
             l_nb_pub_reqs <-- get_nb_publish_requests (l_PublishingReqQueue);
             IF l_nb_pub_reqs = k_n_publishRequestPerSub_max
@@ -1303,29 +1305,6 @@ OPERATIONS
 
             d_send_keepalive_msg (l_subscription, p_resp_msg, StatusCode_service)
 
-        /* #13 transition */
-        ELSIF l_subscriptionState = e_subscriptionState_keepAlive
-        THEN
-            l_nb_pub_reqs <-- get_nb_publish_requests (l_PublishingReqQueue);
-            IF l_nb_pub_reqs = k_n_publishRequestPerSub_max
-            THEN
-                l_old_session,
-                l_old_resp_msg,
-                l_old_req_handle,
-                l_old_req_ctx <-- discard_oldest_publish_request (l_PublishingReqQueue);
-                generate_internal_send_publish_response_event
-                  (l_old_session, l_old_resp_msg, l_old_req_handle, l_old_req_ctx, e_sc_bad_too_many_publish_requests)
-            END;
-            l_bres <-- append_publish_request_to_queue
-                (l_PublishingReqQueue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
-            IF l_bres = TRUE
-            THEN
-                StatusCode_service := e_sc_ok;
-                async_resp_msg := TRUE
-            ELSE
-                StatusCode_service := e_sc_bad_out_of_memory;
-                async_resp_msg := FALSE
-            END
         ELSE
             StatusCode_service := e_sc_bad_invalid_state;
             async_resp_msg := FALSE
