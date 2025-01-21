@@ -255,5 +255,28 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
                                                       const SOPC_QualifiedName* browseName,
                                                       const OpcUa_ObjectAttributes* objAttributes,
                                                       const SOPC_ExpandedNodeId* typeDefId);
+/**
+ * @brief Translate one browse path to a NodeId.
+ *
+ * @param addSpaceAccess    The AddressSpace Access used for TranslateBrowsePath operation.
+ * @param startingNode      The startingNode is the nodeId of the starting Node for the browse path.
+ *                          It should not be NULL otherwise OpcUa_BadInvalidArgument is returned.
+ * @param relativePath      \p relativePath is the path to follow from the startingNode.
+ *                          The elements in the relativePath shall have a targetName specified.
+ *                          The elements in the relativePath shall have a referenceTypeId specified.
+ *                          Only elements in the address space can be fetch. If one of the target nodes is in a remote
+ *                          server OpcUa_BadNoMatch is returned.
+ *                          It should not be NULL otherwise OpcUa_BadInvalidArgument is returned.
+ * @param[out] targetId     \p targetId is the identifier of the target for the relativePath from the startingNode.
+ *                          The pointed \p targetId SHALL NOT be modified nor deallocated.
+ * @return SOPC_GoodGenericStatus in case of success, otherwise :
+ *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
+ *         - OpcUa_BadNodeIdUnknown \p startingNode is not found.
+ *         - OpcUa_BadNoMatch one of the target in the relative path is not found
+ */
+SOPC_StatusCode SOPC_AddressSpaceAccess_TranslateBrowsePath(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                            const SOPC_NodeId* startingNode,
+                                                            const OpcUa_RelativePath* relativePath,
+                                                            const SOPC_NodeId** targetId);
 
 #endif /* SOPC_ADDRESS_SPACE_ACCESS_H_ */
