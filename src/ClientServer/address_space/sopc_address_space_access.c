@@ -19,6 +19,7 @@
 
 #include "sopc_address_space_access_internal.h"
 
+#include "sopc_address_space_utils_internal.h"
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
@@ -91,6 +92,15 @@ static void SOPC_InternalAddressSpaceAccess_FreeOperation(uint32_t id, uintptr_t
         SOPC_ASSERT(false);
     }
     SOPC_Free(op);
+}
+
+static bool is_type_or_subtype(SOPC_AddressSpace* addSpace,
+                               const SOPC_NodeId* actualType,
+                               const SOPC_NodeId* expectedType)
+{
+    return SOPC_NodeId_Equal(actualType, expectedType) ||
+           SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(addSpace, RECURSION_LIMIT, actualType, actualType,
+                                                              expectedType);
 }
 
 void SOPC_AddressSpaceAccess_Delete(SOPC_AddressSpaceAccess** ppAddSpaceAccess)
@@ -502,11 +512,11 @@ static SOPC_StatusCode check_valid_params_and_state(SOPC_AddressSpaceAccess* add
         return OpcUa_BadServiceUnsupported;
     }
 
-    bool nodeIdAlreadyExsists = false;
+    bool nodeIdAlreadyExists = false;
     SOPC_AddressSpace_Node* maybeNode =
-        SOPC_AddressSpace_Get_Node(addSpaceAccess->addSpaceRef, newNodeId, &nodeIdAlreadyExsists);
+        SOPC_AddressSpace_Get_Node(addSpaceAccess->addSpaceRef, newNodeId, &nodeIdAlreadyExists);
     SOPC_UNUSED_RESULT(maybeNode);
-    if (nodeIdAlreadyExsists)
+    if (nodeIdAlreadyExists)
     {
         return OpcUa_BadNodeIdExists;
     }
@@ -669,4 +679,167 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
         SOPC_Free(newNode);
     }
     return retCode;
+}
+
+/* Browse referenced Nodes from startingNode and return the node of the first targeted node that match with
+ relativePathElement criteria. The relativePathElement criteria are isInverse, referenceTypeId, IncludeSubtypes and
+ targetName which is the browseName of the targeted Node.
+ */
+static SOPC_AddressSpace_Node* findNextStartingNode(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                    const OpcUa_RelativePathElement* relativePathElement,
+                                                    SOPC_AddressSpace_Node* startingNode)
+{
+    if (NULL == addSpaceAccess || NULL == relativePathElement || NULL == startingNode)
+    {
+        return NULL;
+    }
+    SOPC_AddressSpace_Node* nextStartingNode = NULL;
+    SOPC_AddressSpace_Node* nodeBrowsed = NULL;
+    SOPC_QualifiedName* nodeBrowseName = NULL;
+    int32_t comp = 0;
+    OpcUa_ReferenceNode* reference = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    // Check successively each reference and targetNode by this reference until matching with criteria
+    int32_t* noOfReferences = SOPC_AddressSpace_Get_NoOfReferences(addSpaceAccess->addSpaceRef, startingNode);
+    OpcUa_ReferenceNode** references = SOPC_AddressSpace_Get_References(addSpaceAccess->addSpaceRef, startingNode);
+    if (noOfReferences != NULL && 0 < *noOfReferences && NULL != references)
+    {
+        bool found = false;
+        for (int32_t indexReference = 0; indexReference < *noOfReferences && !found; indexReference++)
+        {
+            status = SOPC_STATUS_OK;
+            // Check if the reference have the same direction
+            reference = &(*references)[indexReference];
+
+            if (relativePathElement->IsInverse != reference->IsInverse)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                bool res = false;
+                // Check if the reference have the same referenceType or is a Subtype if activated
+                if (relativePathElement->IncludeSubtypes)
+                {
+                    res = is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId,
+                                             &relativePathElement->ReferenceTypeId);
+                }
+                else
+                {
+                    res = SOPC_NodeId_Equal(&reference->ReferenceTypeId, &relativePathElement->ReferenceTypeId);
+                }
+                if (!res)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                // If the targeted Node is not in the same server don't fetch it
+                if (0 != reference->TargetId.ServerIndex)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                // Get the node of the element referenced
+                nodeBrowsed = SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, &reference->TargetId.NodeId);
+                if (NULL == nodeBrowsed)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                // Get the browse Name of the element referenced
+                nodeBrowseName = SOPC_AddressSpace_Get_BrowseName(addSpaceAccess->addSpaceRef, nodeBrowsed);
+                if (NULL == nodeBrowseName)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                // Check that expected browseName and browseName of the browsed node are the same.
+                // If yes then return
+                status = SOPC_QualifiedName_Compare(nodeBrowseName, &relativePathElement->TargetName, &comp);
+                if (SOPC_STATUS_OK == status && 0 == comp)
+                {
+                    nextStartingNode = nodeBrowsed;
+                    found = true;
+                }
+            }
+        }
+    }
+    return nextStartingNode;
+}
+
+/* Recursive browse on relativePathElement. This function return the node targeted by the last browse element
+ in relativePathElement array and NULL if something went wrong.
+ Note: number of elements is limited to RECURSION_LIMIT and decremented at each step which give guarantee it terminates.
+*/
+static SOPC_AddressSpace_Node* Recursive_BrowseRelativePath(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                            const int32_t remainingElements,
+                                                            const OpcUa_RelativePathElement* elements,
+                                                            SOPC_AddressSpace_Node* startingNode)
+{
+    if (0 >= remainingElements || NULL == elements || RECURSION_LIMIT < remainingElements || NULL == startingNode)
+    {
+        return NULL;
+    }
+    SOPC_AddressSpace_Node* targetNode = NULL;
+
+    // Find the next node referenced by the first relativePathElement
+    SOPC_AddressSpace_Node* nextStartingNode = findNextStartingNode(addSpaceAccess, elements, startingNode);
+    if (remainingElements > 1)
+    {
+        // If fail to get nextStartingNode stop recursion
+        if (NULL != nextStartingNode)
+        {
+            targetNode =
+                Recursive_BrowseRelativePath(addSpaceAccess, remainingElements - 1, elements + 1, nextStartingNode);
+        }
+    }
+    else
+    {
+        // Ending point of the recursion find the targetNode.
+        targetNode = nextStartingNode;
+    }
+
+    return targetNode;
+}
+
+SOPC_StatusCode SOPC_AddressSpaceAccess_TranslateBrowsePath(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                            const SOPC_NodeId* startingNode,
+                                                            const OpcUa_RelativePath* relativePath,
+                                                            const SOPC_NodeId** targetId)
+{
+    if (NULL == addSpaceAccess || NULL == startingNode || NULL == relativePath || NULL == targetId || NULL != *targetId)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+    SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
+    SOPC_AddressSpace_Node* startingNodeAddspace =
+        SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, startingNode);
+    if (NULL == startingNodeAddspace)
+    {
+        stCode = OpcUa_BadNodeIdUnknown;
+    }
+    else
+    {
+        SOPC_AddressSpace_Node* targetIdNode = Recursive_BrowseRelativePath(
+            addSpaceAccess, relativePath->NoOfElements, relativePath->Elements, startingNodeAddspace);
+        if (NULL != targetIdNode)
+        {
+            (*targetId) = SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, targetIdNode);
+        }
+        else
+        {
+            stCode = OpcUa_BadNoMatch;
+        }
+    }
+    return stCode;
 }
