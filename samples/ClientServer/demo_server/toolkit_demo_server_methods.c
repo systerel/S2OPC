@@ -47,13 +47,24 @@ static const SOPC_NodeId TestObject_Counter = {
     .Namespace = 1,
     .Data.String = {sizeof("TestObject_Counter") - 1, 1, (SOPC_Byte*) "TestObject_Counter"}};
 
+static const SOPC_NodeId ObjectNodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ObjectsFolder);
 static const SOPC_NodeId HasComponent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasComponent);
+static const SOPC_NodeId HasChild_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasChild);
 static const SOPC_NodeId DataVariable_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseDataVariableType);
+static const SOPC_NodeId Organizes_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Organizes);
 
 #ifdef S2OPC_EVENT_MANAGEMENT
 static const SOPC_NodeId BaseEvent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
 static const SOPC_NodeId Null_Type = SOPC_NS0_NUMERIC_NODEID(0);
 #endif
+
+static const SOPC_QualifiedName TestObject_Counter_BrowseName = {
+    .NamespaceIndex = 1,
+    .Name = {.Data = (SOPC_Byte*) "Counter", .DoNotClear = true, .Length = sizeof("Counter") - 1}};
+
+static const SOPC_QualifiedName TestObject_BrowseName = {
+    .NamespaceIndex = 0,
+    .Name = {.Data = (SOPC_Byte*) "TestObject", .DoNotClear = true, .Length = sizeof("TestObject") - 1}};
 
 SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextPtr,
                                             const SOPC_NodeId* objectId,
@@ -195,9 +206,35 @@ SOPC_StatusCode SOPC_Method_Func_GetCounterValue(const SOPC_CallContext* callCon
     *nbOutputArgs = 1;
 
     SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    const SOPC_NodeId* counterNode = NULL;
     SOPC_DataValue* dv = NULL;
-    SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, &TestObject_Counter, NULL, &dv);
-    if (SOPC_IsGoodStatus(stCode) && SOPC_UInt32_Id == dv->Value.BuiltInTypeId &&
+
+    // Get NodeId of Counter from Object with path Object->TestObject->Counter
+    OpcUa_RelativePath pathToCounter;
+    OpcUa_RelativePath_Initialize(&pathToCounter);
+
+    pathToCounter.NoOfElements = 2;
+    pathToCounter.Elements = SOPC_Calloc((size_t) pathToCounter.NoOfElements, sizeof(*pathToCounter.Elements));
+    SOPC_ASSERT(NULL != pathToCounter.Elements);
+    OpcUa_RelativePathElement* element = &pathToCounter.Elements[0];
+    element->IncludeSubtypes = false;
+    element->IsInverse = false;
+    element->ReferenceTypeId = Organizes_Type;
+    element->TargetName = TestObject_BrowseName;
+    element = &pathToCounter.Elements[1];
+    element->IncludeSubtypes = true;
+    element->IsInverse = false;
+    element->ReferenceTypeId = HasChild_Type;
+    element->TargetName = TestObject_Counter_BrowseName;
+    SOPC_StatusCode stCode =
+        SOPC_AddressSpaceAccess_TranslateBrowsePath(addSpAccess, &ObjectNodeId, &pathToCounter, &counterNode);
+
+    if (SOPC_IsGoodStatus(stCode) && NULL != counterNode)
+    {
+        // Read the counter value from the Counter node
+        stCode = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, counterNode, NULL, &dv);
+    }
+    if (SOPC_IsGoodStatus(stCode) && NULL != dv && SOPC_UInt32_Id == dv->Value.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == dv->Value.ArrayType)
     {
         SOPC_ReturnStatus status = SOPC_Variant_Copy(*outputArgs, &dv->Value);
@@ -214,6 +251,7 @@ SOPC_StatusCode SOPC_Method_Func_GetCounterValue(const SOPC_CallContext* callCon
     SOPC_DataValue_Clear(dv);
     SOPC_Free(dv);
 
+    OpcUa_RelativePath_Clear(&pathToCounter);
     if (!SOPC_IsGoodStatus(stCode))
     {
         SOPC_Free(*outputArgs);
