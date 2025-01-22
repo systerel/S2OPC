@@ -133,7 +133,6 @@ generation: &gen
            $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && \
            $GEN_PROOF_OBLIGATIONS == null && \
-           $TEST_NETWORK_FUZZ == null && \
            $WITH_COVERITY == null && \
            $S2OPC_PUBSUB_ONLY == null &&\
            $ALL_BUILDS == null && \
@@ -209,7 +208,7 @@ build-linux64-ASan:
   needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $GEN_PROOF_OBLIGATIONS == null && $TEST_NETWORK_FUZZ == null && \
+           $GEN_PROOF_OBLIGATIONS == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
       when: on_success
@@ -459,7 +458,7 @@ test-build-from-export:
   rules:
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
-           $TEST_NETWORK_FUZZ == null && $WITH_COVERITY == null && \
+           $WITH_COVERITY == null && \
            $WITH_COVERAGE == null && $WITH_DOC == null && \
            $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
            $ALL_BUILDS == null && $ALL_TESTS == null"
@@ -507,7 +506,7 @@ test-check:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
-           $TEST_NETWORK_FUZZ == null && $WITH_COVERITY == null && \
+           $WITH_COVERITY == null && \
            $WITH_COVERAGE == null && $WITH_DOC == null && \
            $ALL_TESTS == null && $ALL_BUILDS == null"
       when: on_success
@@ -553,7 +552,7 @@ test-unit:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
-           $TEST_NETWORK_FUZZ == null && $WITH_COVERITY == null && $WITH_DOC == null && \
+           $WITH_COVERITY == null && $WITH_DOC == null && \
            $ALL_TESTS == null" # + excludes ALL_TESTS
       when: on_success
 
@@ -611,7 +610,7 @@ test-uactt:
   rules:
     - if: "$NO_TESTS != null || $WINDOWS_TEST != null || \
            $CROSS_COMPILE != null || $GEN_PROOF_OBLIGATIONS != null || \
-           $TEST_NETWORK_FUZZ != null || $WITH_COVERITY != null || \
+           $WITH_COVERITY != null || \
            $WITH_COVERAGE != null || $WITH_DOC != null || \
            $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null"
       when: never
@@ -648,7 +647,7 @@ windows-appveyor:
   rules:
     - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null && $WINDOWS_ARTIFACTS == null || $CI_COMMIT_TAG || \
            $CI_COMMIT_BRANCH == 'master' && $ALL_TESTS == null && \
-           $GEN_PROOF_OBLIGATIONS == null && $TEST_NETWORK_FUZZ == null && \
+           $GEN_PROOF_OBLIGATIONS == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && \
            $NO_ASAN == null && $NO_GEN == null && \
            $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null" # Avoid to run job on master for all nightly build except ALL_BUILDS
