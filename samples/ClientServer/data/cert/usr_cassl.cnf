@@ -17,8 +17,8 @@ base_dir        = .
 certificate     = user_cacert.pem    # The CA certifcate
 private_key     = user_cakey.pem     # The CA private key
 new_certs_dir   = $base_dir     # Location for new certs after signing
-database        = $base_dir/index.txt   # Database index file
-serial          = $base_dir/serial.txt  # The current serial number
+database        = $base_dir/indexUsrCA.txt   # Database index file
+serial          = $base_dir/serialUsrCA.txt  # The current serial number
 
 unique_subject  = no            # Set to 'no' to allow creation of several certificates with same subject.
 
