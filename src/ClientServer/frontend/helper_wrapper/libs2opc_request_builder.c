@@ -1039,7 +1039,7 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (!CHECK_ELEMENT_EXISTS(addNodesRequest, NoOfNodesToAdd, index) || NULL == parentNodeId ||
         NULL == referenceTypeId || (NULL != optRequestedNodeId && 0 != optRequestedNodeId->ServerIndex) ||
-        NULL == browseName || NULL == typeDefinition || (noOfArrayDimensions > 0 && NULL != optArrayDimensions))
+        NULL == browseName || NULL == typeDefinition || (noOfArrayDimensions <= 0 && NULL != optArrayDimensions))
     {
         return status;
     }
