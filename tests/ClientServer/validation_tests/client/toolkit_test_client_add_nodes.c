@@ -46,6 +46,10 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
 
+#ifndef WITH_STATIC_SECURITY_DATA
+#ifdef WITH_EXPAT
+#if 0 != S2OPC_NODE_MANAGEMENT
+
 // Asynchronous service response callback
 static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* response, uintptr_t appContext)
 {
@@ -149,10 +153,6 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
 
     return status;
 }
-
-#ifndef WITH_STATIC_SECURITY_DATA
-#ifdef WITH_EXPAT
-#if 0 != S2OPC_NODE_MANAGEMENT
 
 static OpcUa_AddNodesResponse* add_node_invalid_BrowseName(SOPC_ClientConnection* secureConnection,
                                                            SOPC_ExpandedNodeId* parentNodeId,
@@ -553,12 +553,20 @@ static SOPC_ReturnStatus add_node_variable_in_added_node_object(SOPC_ClientConne
 
 int main(void)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* TESTS */
+#ifndef WITH_STATIC_SECURITY_DATA
+// do not allow WITH_STATIC_SECURITY_DATA since expat is mandatory for the test we will load everything by XML.
+#ifdef WITH_EXPAT
+#if 0 != S2OPC_NODE_MANAGEMENT
+
+    SOPC_ClientConnection* secureConnection = NULL;
     SOPC_SecureConnection_Config** secureConnConfigArray = NULL;
     size_t nbSecConnCfgs = 0;
-    SOPC_ClientConnection* secureConnection = NULL;
 
-    SOPC_ReturnStatus status = Client_Initialize();
-
+    status = Client_Initialize();
+    
     if (SOPC_STATUS_OK == status)
     {
         status = Client_LoadClientConfiguration(&nbSecConnCfgs, &secureConnConfigArray);
@@ -575,12 +583,6 @@ int main(void)
         // Use user_2k_cert, he is allowed to make AddNodes.
         status = SOPC_ClientHelper_Connect(secureConnConfigArray[2], SOPC_Client_ConnEventCb, &secureConnection);
     }
-
-/* TESTS */
-#ifndef WITH_STATIC_SECURITY_DATA
-// do not allow WITH_STATIC_SECURITY_DATA since expat is mandatory for the test we will load everything by XML.
-#ifdef WITH_EXPAT
-#if 0 != S2OPC_NODE_MANAGEMENT
 
     // Declare variables that will be filled during requests
     OpcUa_AddNodesResponse* addNodesResp = NULL;
@@ -643,10 +645,6 @@ int main(void)
         printf(">>Client: Test AddNodes Failed\n");
     }
 
-#endif
-#endif
-#endif
-
     /* Close the connection */
     if (NULL != secureConnection)
     {
@@ -660,6 +658,10 @@ int main(void)
     /* Close the toolkit */
     SOPC_ClientConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
+
+#endif
+#endif
+#endif
 
     if (SOPC_STATUS_OK == status)
     {
