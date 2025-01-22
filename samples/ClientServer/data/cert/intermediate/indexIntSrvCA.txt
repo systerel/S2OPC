@@ -1,1 +1,2 @@
 V	251002092935Z		4000	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OPC Demo Int Certificate for Server Tests
+V	350120172011Z		4001	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OPC Demo Int Certificate for Server Tests
