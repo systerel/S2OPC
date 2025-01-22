@@ -1714,7 +1714,10 @@ static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str
     unsigned char* str = NULL;
 
     status = SOPC_HelperDecode_Base64(bstring_str, &str, &length);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    if (SOPC_STATUS_OK != status)
+    {
+        return false;
+    }
     SOPC_ASSERT(NULL != str);
     SOPC_ASSERT(0 != length);
 
@@ -2330,7 +2333,12 @@ static bool set_variant_value(struct parse_context_t* ctx, SOPC_Variant* var, co
     case SOPC_String_Id:
         SET_STR_ELEMENT_VALUE_CASE(String)
     case SOPC_ByteString_Id:
-        return set_variant_value_bstring(var, val);
+        if (!set_variant_value_bstring(var, val))
+        {
+            LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid Base64 value: '%s'", val);
+            return false;
+        }
+        return true;
     case SOPC_XmlElement_Id: // TODO: should be a not simple type
         SET_STR_ELEMENT_VALUE_CASE(XmlElt)
     default:
