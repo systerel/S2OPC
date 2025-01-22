@@ -492,7 +492,7 @@ START_TEST(functional_test_from_list)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_uint_eq(1, rejectedLen);
     cStrThumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pRejectedList);
-    int cmp = memcmp(cStrThumbprint, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", 40);
+    int cmp = memcmp(cStrThumbprint, "7666658D6D8D827DE053E0A7B01F8B00FDC9D7E6", 40);
     ck_assert_int_eq(0, cmp);
     /* Update the PKI with cacert.der and  cacrl.der */
     SOPC_CertificateList* pTrustedCertToUpdate = NULL;
@@ -768,7 +768,7 @@ START_TEST(functional_test_verify_every_cert)
     char* crtThumb = pThumbprints[0];
     uint32_t crtErr = pErrors[0];
     ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, crtErr);
-    int cmp = memcmp(crtThumb, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", 40);
+    int cmp = memcmp(crtThumb, "7666658D6D8D827DE053E0A7B01F8B00FDC9D7E6", 40);
     ck_assert_int_eq(0, cmp);
 
     for (uint32_t i = 0; i < nbError; i++)
@@ -871,7 +871,7 @@ START_TEST(functional_test_remove_cert)
     check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
 
     /* Remove client_2k_cert.der */
-    status = SOPC_PKIProvider_RemoveCertificate(pPKI, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", true, &bIsRemove,
+    status = SOPC_PKIProvider_RemoveCertificate(pPKI, "7666658D6D8D827DE053E0A7B01F8B00FDC9D7E6", true, &bIsRemove,
                                                 &bIsIssuer);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(bIsRemove);
@@ -893,7 +893,7 @@ START_TEST(functional_test_remove_cert)
     check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
 
     /* Remove user_cacert.der */
-    status = SOPC_PKIProvider_RemoveCertificate(pPKI, "C1D7F2035F7E5CF84A0A9CFB37BACB9289D02898", true, &bIsRemove,
+    status = SOPC_PKIProvider_RemoveCertificate(pPKI, "BA01F1C2AA243FAC8F20F9885697CBE47424962B", true, &bIsRemove,
                                                 &bIsIssuer);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(bIsRemove);

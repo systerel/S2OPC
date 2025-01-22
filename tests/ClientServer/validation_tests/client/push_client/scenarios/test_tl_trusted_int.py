@@ -33,10 +33,10 @@ if __name__ == '__main__':
     f = open(logFile, "w")
     f.write("Starting test.\n")
 
-    # 0. Put PKI into the initial state of test: "int_cli_cacert.pem" and its CRL not present in trusted.
+    # 0. Put PKI into the initial state of test: "int_cli_cacert.der" and its CRL not present in trusted.
     step = "0"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
-           "remove", "348669740F8379910BCBBD69D071C42B2E789838", "trusted"]
+           "remove", "F9BC1EC02D083879F11638286C9894288DA2D26D", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
     # 1. Connection impossible with client issued from CA intermediate.
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     step = "4.b"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
-           "remove", "348669740F8379910BCBBD69D071C42B2E789838", "trusted"]
+           "remove", "F9BC1EC02D083879F11638286C9894288DA2D26D", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
     step = "4.c"

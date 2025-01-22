@@ -51,7 +51,7 @@ const char* SRV_CRT =
     "59214f5972410d6b91168774f90e9f290739b359632c9afd3960aca9f48ab323a7a40ae8a4a38b346ea2964d4ff4351aff2ace3c71cfd2b0"
     "40f7772461fd6e6153ea3b2c23e18a136b968f660788b0588bd3e1677f0701c5e0828745";
 
-const char* SRV_CRT_THUMB = "04FA0E8580DFAC1BB606199E8EE5D6E9823C5FF8";
+const char* SRV_CRT_THUMB = "04fa0e8580dfac1bb606199e8ee5d6e9823c5ff8";
 
 // cacert.der
 #define CA_CRT_DEFINE                                                                                                  \

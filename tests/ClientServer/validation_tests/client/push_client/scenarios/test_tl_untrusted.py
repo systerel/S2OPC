@@ -32,10 +32,10 @@ if __name__ == '__main__':
     f = open(logFile, "w")
     f.write("Starting test.\n")
 
-    # 0. Put the PKI into the initial state for the test: "trusted_client_cert.pem" not present in trusted.
+    # 0. Put the PKI into the initial state for the test: "trusted_client_cert.der" not present in trusted.
     step = "0"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
-           "remove", "34EC8A8CA7735401B6F93BB3C93B0D1D311802E6", "trusted"]
+           "remove", "3A57B1EF80F4316AD03CE803E36C4E1A4B7C86D8", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
     # 1. Connection impossible with CA untrusted issued certificate. Add this certificate to server TL.
@@ -53,10 +53,10 @@ if __name__ == '__main__':
     cmd = ["./push_client", "client_public/trusted_client_cert.pem", "client_private/encrypted_trusted_client_key.pem", "sleep"]
     client_process = clientProcessManager.cmdWaitForConnection(cmd, f, step)
 
-    # 3. Admin removes untrusted_cacert, check the disconnection of the client.
+    # 3. Admin removes untrusted_cacert.der, check the disconnection of the client.
     step = "3.a"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
-           "remove", "50A96600D8C3ADA0A4EC4737A5163D067122BC44", "untrusted"]
+           "remove", "7DF45F3C8B546F15D8822FD036E5EDD5DB50A072", "untrusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
     step = "3.b"
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     # 8. Admin removes the client certificate (not its issuer this time), check the disconnection.
     step = "8.a"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
-           "remove", "34EC8A8CA7735401B6F93BB3C93B0D1D311802E6", "trusted"]
+           "remove", "3A57B1EF80F4316AD03CE803E36C4E1A4B7C86D8", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
     step = "8.b"

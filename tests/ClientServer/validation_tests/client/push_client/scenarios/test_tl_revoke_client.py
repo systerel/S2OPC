@@ -58,7 +58,7 @@ if __name__ == '__main__':
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", "getRejectedList"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
     # If the rejected file certificate does not exist
-    if False == os.path.isfile("S2OPC_Demo_PKI/rejected/28FAAEECC876023AAB919D89EE6B580E69AA269C.der"):
+    if False == os.path.isfile("S2OPC_Demo_PKI/rejected/0C6F69BA5AA13213692FBC0F2BE5BADDCA70A312.der"):
         f.write("Rejected certificate not present.\n")
         sys.exit(1)
 

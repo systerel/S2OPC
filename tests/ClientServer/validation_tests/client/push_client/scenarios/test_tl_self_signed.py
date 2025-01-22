@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # 0. Get to the server PKI initial state: self_signed certificate not present in trusted.
     step = "0"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
-           "remove", "2D0A4B44350A3822496E3545D8389AFFEF90D202", "trusted"]
+           "remove", "7925B4747C337AE9A1D382C2007B005E15B7A107", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
     # 1. Self-signed tries to connect. Must fail.
