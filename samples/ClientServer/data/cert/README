@@ -15,11 +15,17 @@ Demo certificates organization is the following:
     - (User certificate issued) S2OPC Demo Certificate for X509IdentityToken Tests: user_2k/4k*
 
 Folders and scripts:
-- generate_certs.sh: generate root CA and root signed client/server certificates
+- generate_certs.sh: generate root CA and root signed client/server certificates, with or without
+                     generation of new keys.
 - revoke_certs.sh: revoke root signed client/server certificates
-- renew_certs.sh: renew root signed client/server certificates
-- generate_user_certs.sh: generate root CA and root signed user certificates
+- generate_user_certs.sh: generate root user CA and root signed user certificates, with or without
+                          generation of new keys.
 - intermediate:
-  - generate_int_certs.sh: generate intermediate CA and intermediate signed client/server certificates
+  - generate_int_certs.sh: generate intermediate CA and intermediate signed client/server certificates,
+                           with or without generation of new keys.
 - untrusted: 
-  - generate_trusted_certs.sh: generate trusted client/server certificates signed by untrusted CA
+  - generate_trusted_certs.sh: generate trusted client/server certificates signed by untrusted CA,
+                               with or without generation of new keys.
+- selfsigned:
+  - generate_selfsigned_cert.sh: generate self-signed root CA certificate, with or without generation 
+                                 of new key.
