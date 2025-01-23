@@ -231,7 +231,14 @@ build-linux-faulty-packet:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty'
     paths:
       - '*.log'
-      - 'build_faulty/bin'
+      - 'build_faulty/bin/toolkit_test_server'
+      - 'build_faulty/bin/*.xml'
+      - 'build_faulty/bin/S2OPC_Demo_PKI'
+      - 'build_faulty/bin/S2OPC_Users_PKI'
+      - 'build_faulty/bin/server_public'
+      - 'build_faulty/bin/server_private'
+      - 'build_faulty/bin/user_public'
+    expire_in: '1 week'
   rules :
     - if: "$ALL_BUILDS != null"
       when : on_success
@@ -596,12 +603,13 @@ test-faulty-packets :
   script:
     - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin/toolkit_test_server
   artifacts:
-    name: 'bug4_packets.txt'
+    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_test_faulty'
     paths:
-      - "/tmp/browse_packets.txt"
-      - "tests/ClientServer/scripts/*.tap"
+      - 'build_faulty/bin/**/*.log'
+      - '/tmp/browse_packets.txt'
+      - 'tests/ClientServer/scripts/*.tap'
     when: on_failure
-    expire_in: "30 days"
+    expire_in: "1 week"
   rules :
     - if: "$ALL_BUILDS != null"
       when: on_success

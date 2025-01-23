@@ -227,7 +227,14 @@ build-linux-faulty-packet:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty'
     paths:
       - '*.log'
-      - 'build_faulty/bin'
+      - 'build_faulty/bin/toolkit_test_server'
+      - 'build_faulty/bin/*.xml'
+      - 'build_faulty/bin/S2OPC_Demo_PKI'
+      - 'build_faulty/bin/S2OPC_Users_PKI'
+      - 'build_faulty/bin/server_public'
+      - 'build_faulty/bin/server_private'
+      - 'build_faulty/bin/user_public'
+    expire_in: '30 days'
   rules :
     - if: "$ALL_BUILDS != null"
       when : on_success
@@ -573,23 +580,6 @@ test-unit:
     when: always
     expire_in: '1 week'
 
-test-faulty-packets :
-  stage: test-others
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
-  needs : [build-linux-faulty-packet]
-  script:
-    - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin/toolkit_test_server
-  artifacts:
-    name: 'bug4_packets.txt'
-    paths:
-      - "/tmp/browse_packets.txt"
-      - "tests/ClientServer/scripts/*.tap"
-    when: on_failure
-    expire_in: "30 days"
-  rules :
-    - if: "$ALL_BUILDS != null"
-      when: on_success
-
 # Test uactt for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
   <<: *test_uactt
@@ -615,6 +605,24 @@ test-uactt:
            $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null"
       when: never
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG"
+      when: on_success
+
+test-faulty-packets :
+  stage: test-others
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
+  needs : [build-linux-faulty-packet]
+  script:
+    - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin/toolkit_test_server
+  artifacts:
+    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_test_faulty'
+    paths:
+      - 'build_faulty/bin/**/*.log'
+      - '/tmp/browse_packets.txt'
+      - 'tests/ClientServer/scripts/*.tap'
+    when: on_failure
+    expire_in: "30 days"
+  rules :
+    - if: "$ALL_BUILDS != null"
       when: on_success
 
 
