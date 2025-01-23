@@ -314,7 +314,8 @@ END_TEST
 
 START_TEST(cert_invalid_extendedKeyUsage)
 {
-    /* When the PKI type is defined as server then the extendedKeyUsage is expected to be set with ClientAuth */
+    /* When the PKI type is defined as server and key is RSA (Part 6 v1.05) then the extendedKeyUsage
+     * is expected to be set with ClientAuth */
     uint32_t err = 0;
     SOPC_CertificateList* pCertToValidate = NULL;
     SOPC_ReturnStatus status =
@@ -334,6 +335,7 @@ START_TEST(cert_invalid_extendedKeyUsage)
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
     ck_assert_int_eq(SOPC_PKI_EKU_CLIENT_AUTH, pLeafProfile->extendedKeyUsage);
     pLeafProfile->keyUsage = SOPC_PKI_KU_NONE;
+    pLeafProfile->pkAlgo = SOPC_PKI_PK_RSA;
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_UseNotAllowed, err);
@@ -344,7 +346,8 @@ END_TEST
 
 START_TEST(cert_valid_extendedKeyUsage)
 {
-    /* When the PKI type is defined as client then the extendedKeyUsage is expected to be set with ServerAuth */
+    /* When the PKI type is defined as client and key is RSA (Part 6 v1.05) then the extendedKeyUsage
+     * is expected to be set with ServerAuth */
     uint32_t err = 0;
     SOPC_CertificateList* pCertToValidate = NULL;
     SOPC_ReturnStatus status =
@@ -364,6 +367,7 @@ START_TEST(cert_valid_extendedKeyUsage)
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
     ck_assert_int_eq(SOPC_PKI_EKU_SERVER_AUTH, pLeafProfile->extendedKeyUsage);
     pLeafProfile->keyUsage = SOPC_PKI_KU_NONE;
+    pLeafProfile->pkAlgo = SOPC_PKI_PK_RSA;
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
