@@ -546,17 +546,34 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckCertificateUsage(const SOPC_CertificateL
             thumbprint);
         bErrorFound = true;
     }
-    /* Check extended key usages for client or server cert */
+    /* Check extended key usages for Application Instance certificates (client or server cert)
+     * Part 6 v1.05 table 46: For RSA profiles, the extendedKeyUsage shall specify serverAuth and/or clientAuth. */
     err = 0;
     if (SOPC_PKI_EKU_SERVER_AUTH & pProfile->extendedKeyUsage)
     {
         err |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_SERVER_AUTH,
                                                          MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
+
+        /* Manually check that the certificates has a non-empty ExtendedKeyUsage extension because
+         * the previous function did not check it. */
+        if (SOPC_PKI_PK_RSA == pProfile->pkAlgo &&
+            0 == (pToValidate->crt.ext_types & MBEDTLS_X509_EXT_EXTENDED_KEY_USAGE))
+        {
+            err |= MBEDTLS_ERR_X509_BAD_INPUT_DATA;
+        }
     }
     if (SOPC_PKI_EKU_CLIENT_AUTH & pProfile->extendedKeyUsage)
     {
         err |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_CLIENT_AUTH,
                                                          MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
+
+        /* Manually check that the certificates has a non-empty ExtendedKeyUsage extension because
+         * the previous function did not check it. */
+        if (SOPC_PKI_PK_RSA == pProfile->pkAlgo &&
+            0 == (pToValidate->crt.ext_types & MBEDTLS_X509_EXT_EXTENDED_KEY_USAGE))
+        {
+            err |= MBEDTLS_ERR_X509_BAD_INPUT_DATA;
+        }
     }
     if (0 != err)
     {
