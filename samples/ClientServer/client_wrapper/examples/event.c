@@ -106,7 +106,7 @@ static bool askUserPass_FromEnv(const SOPC_SecureConnection_Config* secConnConfi
     }
 
     char* _outPassword = getenv(TEST_PASSWORD_USER);
-    if (NULL == _outUser)
+    if (NULL == _outPassword)
     {
         printf("<" APP_NAME ": The following environment variable is missing: %s\n", TEST_PASSWORD_USER);
         return false;
@@ -177,8 +177,17 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                 SOPC_Buffer_Reset(buf);
                 SOPC_Variant_Dump(buf, var);
                 // Ensure that there is a ZERO char at the end.
-                uint32_t pos = (buf->position < buf->maximum_size ? buf->position : buf->length - 1);
-                buf->data[pos] = 0;
+                if (buf->length < buf->maximum_size)
+                {
+                    // Nominal case
+                    buf->data[buf->length] = 0;
+                }
+                else
+                {
+                    SOPC_ASSERT(buf->maximum_size > 0);
+                    // Robustness: replace last char by a NULL char
+                    buf->data[buf->maximum_size - 1] = 0;
+                }
 
                 const char* clauseStr = monitoredItemCtxt.selectClauses[iField].path;
                 SOPC_CONSOLE_PRINTF("  {\"%s\", \"%s\"},\n", (clauseStr ? clauseStr : "<null>"),
