@@ -133,6 +133,10 @@ SOPC_Looper* SOPC_Looper_Create(const char* threadName);
  *
  * The queues of the attached handlers will be processed before the thread of
  * the looper is stopped.
+ *
+ * \warning All event handlers are deallocated by this function.
+ *          Thus each pointer returned by ::SOPC_EventHandler_Create
+ *          should be set to NULL prior to this call to avoid any possible invalid memory access.
  */
 void SOPC_Looper_Delete(SOPC_Looper* looper);
 
