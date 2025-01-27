@@ -17,9 +17,12 @@
  * under the License.
  */
 
+#include <string.h>
+
 #include "sopc_address_space_access_internal.h"
 
 #include "sopc_address_space_utils_internal.h"
+#include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
@@ -38,6 +41,9 @@ struct _SOPC_AddressSpaceAccess
     bool recordOperations;
     SOPC_SLinkedList* operations; // SOPC_AddressSpaceAccessOperation* prepended operations since creation
 };
+
+// Constant to define initial capacity of array of reference description.
+#define BROWSE_REFERENCE_DESCRIPTION_RESULT_LEN_ARRAY 10
 
 SOPC_AddressSpaceAccess* SOPC_AddressSpaceAccess_Create(SOPC_AddressSpace* addSpaceRef, bool recordOperations)
 {
@@ -840,6 +846,139 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_TranslateBrowsePath(const SOPC_AddressSp
         {
             stCode = OpcUa_BadNoMatch;
         }
+    }
+    return stCode;
+}
+
+SOPC_StatusCode SOPC_AddressSpaceAccess_BrowseNode(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                   const SOPC_NodeId* nodeId,
+                                                   const OpcUa_BrowseDirection browseDirection,
+                                                   const SOPC_NodeId* referenceTypeId,
+                                                   const bool includeSubtypes,
+                                                   const OpcUa_NodeClass nodeClassMask,
+                                                   const OpcUa_BrowseResultMask resultMask,
+                                                   OpcUa_ReferenceDescription** references,
+                                                   int32_t* noOfReferences)
+{
+    SOPC_UNUSED_ARG(nodeClassMask);
+    SOPC_UNUSED_ARG(resultMask);
+
+    if (NULL == addSpaceAccess || NULL == nodeId || NULL == referenceTypeId || NULL == references ||
+        NULL != *references || NULL == noOfReferences)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    // Check that referenceTypeId refer to a valid referenceType
+    SOPC_AddressSpace_Node* referenceNode = SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, referenceTypeId);
+    if (NULL == referenceNode || OpcUa_NodeClass_ReferenceType != referenceNode->node_class)
+    {
+        return OpcUa_BadReferenceTypeIdInvalid;
+    }
+
+    // Get node and check if this one exist
+    SOPC_AddressSpace_Node* node = NULL;
+    node = SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, nodeId);
+    if (NULL == node)
+    {
+        return OpcUa_BadNodeIdUnknown;
+    }
+
+    // Create the array which will store all the references matching given criteria
+    SOPC_Array* refsArr =
+        SOPC_Array_Create(sizeof(OpcUa_ReferenceDescription), BROWSE_REFERENCE_DESCRIPTION_RESULT_LEN_ARRAY,
+                          OpcUa_ReferenceDescription_Clear);
+    if (NULL == refsArr)
+    {
+        return OpcUa_BadOutOfMemory;
+    }
+
+    SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
+    OpcUa_ReferenceDescription refDescription;
+    OpcUa_ReferenceDescription_Initialize(&refDescription);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_ReferenceNode* ref = NULL;
+    // Get all references attached to the node
+    int32_t* addSpaceNbRef = SOPC_AddressSpace_Get_NoOfReferences(addSpaceAccess->addSpaceRef, node);
+    OpcUa_ReferenceNode** addSpaceRefs = SOPC_AddressSpace_Get_References(addSpaceAccess->addSpaceRef, node);
+    SOPC_ASSERT(NULL != addSpaceNbRef);
+    SOPC_ASSERT(NULL != addSpaceRefs);
+    for (int32_t i = 0; i < *addSpaceNbRef && SOPC_IsGoodStatus(stCode); i++)
+    {
+        status = SOPC_STATUS_OK;
+        // Check references criteria
+        ref = &(*addSpaceRefs)[i];
+
+        // Check if referenceTypeId is equal or a subtype if allow
+        bool res = false;
+        if (includeSubtypes)
+        {
+            res = is_type_or_subtype(addSpaceAccess->addSpaceRef, &ref->ReferenceTypeId, referenceTypeId);
+        }
+        else
+        {
+            res = SOPC_NodeId_Equal(&ref->ReferenceTypeId, referenceTypeId);
+        }
+        if (!res)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+
+        // Check the direction if needed
+        if (SOPC_STATUS_OK == status)
+        {
+            switch (browseDirection)
+            {
+            case OpcUa_BrowseDirection_Forward:
+                status = (!ref->IsInverse) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                break;
+            case OpcUa_BrowseDirection_Inverse:
+                status = (ref->IsInverse) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                break;
+            case OpcUa_BrowseDirection_Both:
+                break;
+            default:
+                status = SOPC_STATUS_NOK;
+                stCode = OpcUa_BadBrowseDirectionInvalid;
+                break;
+            }
+        }
+
+        // The reference match all criteria add the reference to result
+        if (SOPC_STATUS_OK == status)
+        {
+            OpcUa_ReferenceDescription_Initialize(&refDescription);
+
+            // Fill the referenceDescription
+            refDescription.IsForward = !ref->IsInverse;
+            status = SOPC_ExpandedNodeId_Copy(&refDescription.NodeId, &ref->TargetId);
+            if (SOPC_STATUS_OK != status)
+            {
+                stCode = OpcUa_BadOutOfMemory;
+            }
+            else
+            {
+                res = SOPC_Array_Append(refsArr, refDescription);
+                if (!res)
+                {
+                    // Array append fail so we must free memory allocated
+                    OpcUa_ReferenceDescription_Clear(&refDescription);
+                    stCode = OpcUa_BadOutOfMemory;
+                }
+            }
+        }
+    }
+
+    if (SOPC_IsGoodStatus(stCode))
+    {
+        *noOfReferences = (int32_t) SOPC_Array_Size(refsArr);
+        // Array content is transferred to references, and memory responsibility too.
+        *references = (OpcUa_ReferenceDescription*) SOPC_Array_Into_Raw(refsArr);
+    }
+    else
+    {
+        // Deallocate array in case of failure.
+        SOPC_Array_Delete(refsArr);
     }
     return stCode;
 }

@@ -278,5 +278,41 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_TranslateBrowsePath(const SOPC_AddressSp
                                                             const SOPC_NodeId* startingNode,
                                                             const OpcUa_RelativePath* relativePath,
                                                             const SOPC_NodeId** targetId);
+/**
+ * @brief Browse a node and retrieve an array of reference descriptions.
+ *
+ * @param addSpaceAccess        The addressSpace access used to browse
+ * @param nodeId                The nodeId of the node to browse.
+ * @param browseDirection       The browse direction to use \p browseDirection shall be in range of
+ * ::OpcUa_BrowseDirection.
+ * @param referenceTypeId       The nodeId of the reference type to follow.
+ * @param includeSubtypes       Indicates whether subtypes of the referenceType should be included in the browse.
+ * @param nodeClassMask         Specifies the expected nodeClasses for the targetNodes.
+ *                              THIS IS NOT SUPPORTED IN THIS VERSION.
+ * @param resultMask            Specifies the field in the referenceDescription structure that should be returned.
+ *                              THIS IS NOT SUPPORTED IN THIS VERSION.
+ *                              referenceType and isForward are always returned.
+ *                              nodeClass, browseName, displayName and typeDefinition are never returned.
+ * @param[out] references       The array of references that meet the criteria specified above.
+ *                              The pointer shall not be NULL.
+ *                              Returned values are allocated and it is responsibility of the caller to free this
+ *                              memory with ::SOPC_Clear_Array
+ * @param[out] noOfReferences   Number Of referenceDescription returned.
+ *                              The pointer shall not be NULL.
+ * @return SOPC_GoodGenericStatus in case of success, otherwise:
+ *          - OpcUa_BadInvalidArgument : if provided parameters are invalid (NULL)
+ *          - OpcUa_BadNodeIdUnknown : \p nodeId is not found
+ *          - OpcUa_BadReferenceTypeIdInvalid : \p referenceTypeId does not refer to a valid reference type node.
+ *          - OpcUa_BadBrowseDirectionInvalid : if \p browseDirection is invalid.
+ */
+SOPC_StatusCode SOPC_AddressSpaceAccess_BrowseNode(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                   const SOPC_NodeId* nodeId,
+                                                   const OpcUa_BrowseDirection browseDirection,
+                                                   const SOPC_NodeId* referenceTypeId,
+                                                   const bool includeSubtypes,
+                                                   const OpcUa_NodeClass nodeClassMask,
+                                                   const OpcUa_BrowseResultMask resultMask,
+                                                   OpcUa_ReferenceDescription** references,
+                                                   int32_t* noOfReferences);
 
 #endif /* SOPC_ADDRESS_SPACE_ACCESS_H_ */
