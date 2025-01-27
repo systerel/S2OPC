@@ -3614,6 +3614,9 @@ static SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInType
     }
 
     size_t size = 0;
+    // Note union fields content are aligned: provide pointer to data
+    // (i.e. content of the first field)
+    array->BooleanArr = NULL;
     if (length > 0)
     {
         size = (size_t) length;
@@ -3647,8 +3650,7 @@ static SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInType
         case SOPC_DataValue_Id:
         case SOPC_Variant_Id:
         case SOPC_DiagnosticInfo_Id:
-            // Note union fields content are aligned: provide pointer to data
-            // (i.e. content of the first field)
+
             array->BooleanArr = SOPC_Calloc(size, SOPC_BuiltInType_HandlingTable[builtInTypeId].size);
             if (NULL != array->BooleanArr)
                 return SOPC_STATUS_OK;
