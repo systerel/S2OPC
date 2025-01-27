@@ -79,8 +79,35 @@ SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextP
     }
 
     SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+
+    OpcUa_ReferenceDescription* references = NULL;
+    int32_t nbOfReferences = 0;
+
+    // Browse TestObject to illustrate browse usage
+    SOPC_StatusCode stCode =
+        SOPC_AddressSpaceAccess_BrowseNode(addSpAccess, objectId, OpcUa_BrowseDirection_Forward, &HasComponent_Type,
+                                           false, 0, 0, &references, &nbOfReferences);
+
+    if (SOPC_IsGoodStatus(stCode))
+    {
+        bool found = false;
+        for (int i = 0; i < nbOfReferences && !found; i++)
+        {
+            if (0 == references[i].NodeId.ServerIndex)
+            {
+                found = SOPC_NodeId_Equal(&TestObject_Counter, &references[i].NodeId.NodeId);
+            }
+        }
+        SOPC_ASSERT(found);
+    }
+    else
+    {
+        printf("Browse service failed with status code : %0x\n", stCode);
+    }
+
+    // Read, increment and write the counter
     SOPC_DataValue* dv = NULL;
-    SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, &TestObject_Counter, NULL, &dv);
+    stCode = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, &TestObject_Counter, NULL, &dv);
     if (!SOPC_IsGoodStatus(stCode) || SOPC_UInt32_Id != dv->Value.BuiltInTypeId ||
         SOPC_VariantArrayType_SingleValue != dv->Value.ArrayType)
     {
@@ -102,6 +129,7 @@ SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextP
 
     SOPC_DataValue_Clear(dv);
     SOPC_Free(dv);
+    SOPC_Clear_Array(&nbOfReferences, (void**) &references, sizeof(*references), OpcUa_ReferenceDescription_Clear);
 
     *nbOutputArgs = 0;
     *outputArgs = NULL;
