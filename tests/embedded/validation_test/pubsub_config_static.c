@@ -74,7 +74,7 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
     }
     SOPC_DataSetWriter_Set_DataSet(writer, dataset);
     SOPC_DataSetWriter_Set_Id(writer, dataSetId);
-    const SOPC_DataSetWriter_Options dsmOptions = {.noUseSeqNum = !useSeqNum, .notTimestamp = !useTimestamp};
+    const SOPC_DataSetWriter_Options dsmOptions = {.noUseSeqNum = !useSeqNum, .noTimestamp = !useTimestamp};
     SOPC_DataSetWriter_Set_Options(writer, &dsmOptions);
 
     return dataset;
