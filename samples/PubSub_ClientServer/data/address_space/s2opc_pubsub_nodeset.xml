@@ -49716,7 +49716,7 @@
       <Field Name="Error" Value="3" />
     </Definition>
   </UADataType>
-  <UAVariable AccessLevel="99" BrowseName="1:SubArrayInt" DataType="Int64" NodeId="ns=1;s=SubArrayInt" ParentNodeId="ns=1;s=SubVars">
+  <UAVariable AccessLevel="99" BrowseName="1:SubArrayInt" DataType="Int64" ValueRank="1" NodeId="ns=1;s=SubArrayInt" ParentNodeId="ns=1;s=SubVars">
     <DisplayName>SubArrayInt</DisplayName>
     <Description>SubArrayIntDesc</Description>
     <References>
