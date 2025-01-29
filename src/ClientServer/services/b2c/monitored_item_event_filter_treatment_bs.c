@@ -219,12 +219,18 @@ void monitored_item_event_filter_treatment_bs__check_select_clause_and_fill_ctx(
     SOPC_ASSERT(clauseArrayIdx < eventFilter->NoOfSelectClauses);
 
     OpcUa_SimpleAttributeOperand* selectClause = &eventFilter->SelectClauses[clauseArrayIdx];
+    // Accepts Value attribute
     if (selectClause->AttributeId != SOPC_AttributeId_Value)
     {
-        *monitored_item_event_filter_treatment_bs__clauseRawSc = OpcUa_BadAttributeIdInvalid;
-        *monitored_item_event_filter_treatment_bs__selectStatusCode =
-            constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
-        return;
+        // Note: make an exception to manage the mechanism to obtain the event (node) NodeId (see ConditionId in part9).
+        // When the attributeId is NodeId with an empty path, we will return the NodeId defined in Event if defined.
+        if (selectClause->AttributeId != SOPC_AttributeId_NodeId || selectClause->NoOfBrowsePath > 0)
+        {
+            *monitored_item_event_filter_treatment_bs__clauseRawSc = OpcUa_BadAttributeIdInvalid;
+            *monitored_item_event_filter_treatment_bs__selectStatusCode =
+                constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
+            return;
+        }
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;

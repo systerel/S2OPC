@@ -37,6 +37,11 @@ static const SOPC_NodeId TestObject = {.IdentifierType = SOPC_IdentifierType_Str
                                        .Namespace = 1,
                                        .Data.String = {sizeof("TestObject") - 1, 1, (SOPC_Byte*) "TestObject"}};
 
+static const SOPC_NodeId EventInstNodeId = {
+    .IdentifierType = SOPC_IdentifierType_String,
+    .Namespace = 1,
+    .Data.String = {sizeof("EventInstance_NodeId_Example") - 1, 1, (SOPC_Byte*) "EventInstance_NodeId_Example"}};
+
 static const SOPC_NodeId TestObject_HelloNextArg = {
     .IdentifierType = SOPC_IdentifierType_String,
     .Namespace = 1,
@@ -605,7 +610,12 @@ SOPC_StatusCode SOPC_Method_Func_GenEvent(const SOPC_CallContext* callContextPtr
         return OpcUa_BadInvalidArgument;
     }
 
-    SOPC_Event_ForEachVar(eventInst, forEachEventVar, 0);
+    status = SOPC_Event_SetNodeId(eventInst, &EventInstNodeId);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Event_ForEachVar(eventInst, forEachEventVar, 0);
+    }
 
     SOPC_LocalizedText lt;
     SOPC_LocalizedText_Initialize(&lt);

@@ -36,8 +36,10 @@
 #include "sopc_time_reference.h"
 #include "sopc_types.h"
 
-#define QN_PATH_SEPARATOR_CHAR '~'
-#define QN_PATH_SEPARATOR_STR "~"
+/* A reserved entry for empty path is defined to store the event NodeId
+ * which shall be the event/node instance
+ * NodeId if it exists in address space (see ConditionId in part 9) */
+#define QN_EMPTY_PATH_NODEID "OwnNodeId"
 
 typedef struct SOPC_Event_Variable
 {
@@ -54,7 +56,8 @@ struct _SOPC_Event
 /* Reserved index for variants for any event */
 typedef enum SOPC_BaseEventVariantIndexes
 {
-    SOPC_BaseEventVariantIdx_EventId = 0,
+    SOPC_BaseEventVariantIdx_NodeId = 0,
+    SOPC_BaseEventVariantIdx_EventId,
     SOPC_BaseEventVariantIdx_EventType,
     SOPC_BaseEventVariantIdx_SourceNode,
     SOPC_BaseEventVariantIdx_SourceName,
@@ -68,11 +71,14 @@ typedef enum SOPC_BaseEventVariantIndexes
 
 /* Statically defined variants for any event */
 static const char* sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_ReservedLength] = {
-    "0:EventId",     "0:EventType", "0:SourceNode", "0:SourceName", "0:Time",
-    "0:ReceiveTime", "0:LocalTime", "0:Message",    "0:Severity"};
+    QN_EMPTY_PATH_NODEID, "0:EventId",   "0:EventType", "0:SourceNode", "0:SourceName", "0:Time",
+    "0:ReceiveTime",      "0:LocalTime", "0:Message",   "0:Severity"};
 
 // Note: cannot be const because MS build does not support &OpcUa_*_EncodeableType reference in definition for library
 static SOPC_Event_Variable sopc_baseEventVariants[SOPC_BaseEventVariantIdx_ReservedLength] = {
+    {{true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId = (SOPC_NodeId[]){{0}}}},
+     SOPC_NS0_NUMERIC_NODEID(OpcUaId_NodeId),
+     -1}, // "OwnNodeId": placeholder to store the actual event/node instance NodeId (see ConditionId in part 9)
     {{true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring = {0}}},
      SOPC_NS0_NUMERIC_NODEID(OpcUaId_ByteString),
      -1}, // EventId
@@ -113,6 +119,27 @@ static SOPC_Event_Variable sopc_baseEventVariants[SOPC_BaseEventVariantIdx_Reser
 static SOPC_NodeId baseEventNodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
 
 static uint64_t eventIdCounter = 0;
+
+static SOPC_ReturnStatus SOPC_InternalEventManagerUtil_QnPathToCString(uint16_t nbQnPath,
+                                                                       const SOPC_QualifiedName* qualifiedNamePathArray,
+                                                                       char** qnPathStr)
+{
+    if (NULL == qnPathStr || (NULL == qualifiedNamePathArray && 0 != nbQnPath))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    // Specific management of internal empty path which always represents event/node instance NodeId
+    if (0 == nbQnPath)
+    {
+        *qnPathStr = SOPC_strdup(QN_EMPTY_PATH_NODEID);
+        if (NULL != *qnPathStr)
+        {
+            return SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        return SOPC_STATUS_OK;
+    }
+    return SOPC_EventManagerUtil_QnPathToCString(nbQnPath, qualifiedNamePathArray, qnPathStr);
+}
 
 static void SOPC_EventVariable_Delete(SOPC_Event_Variable** ppEventVar)
 {
@@ -513,7 +540,8 @@ const SOPC_Variant* SOPC_Event_GetVariableAndType(const SOPC_Event* pEvent,
     }
     const SOPC_Variant* result = NULL;
     char* qnPathStr = NULL;
-    SOPC_ReturnStatus status = SOPC_EventManagerUtil_QnPathToCString(nbQnPath, qualifiedNamePathArray, &qnPathStr);
+    SOPC_ReturnStatus status =
+        SOPC_InternalEventManagerUtil_QnPathToCString(nbQnPath, qualifiedNamePathArray, &qnPathStr);
     if (SOPC_STATUS_OK == status)
     {
         result = SOPC_Event_GetVariableAndTypeFromStrPath(pEvent, qnPathStr, outDataType, outValueRank);
@@ -524,7 +552,51 @@ const SOPC_Variant* SOPC_Event_GetVariableAndType(const SOPC_Event* pEvent,
 
 const SOPC_Variant* SOPC_Event_GetVariableFromStrPath(const SOPC_Event* pEvent, const char* qnPath)
 {
-    return SOPC_Event_GetVariableAndTypeFromStrPath(pEvent, qnPath, NULL, NULL);
+    if (NULL == qnPath)
+    {
+        return NULL;
+    }
+    const char* qnPathWithEmpty = NULL;
+    if ('\0' == *qnPath)
+    {
+        qnPathWithEmpty = QN_EMPTY_PATH_NODEID;
+    }
+    else
+    {
+        qnPathWithEmpty = qnPath;
+    }
+    return SOPC_Event_GetVariableAndTypeFromStrPath(pEvent, qnPathWithEmpty, NULL, NULL);
+}
+
+static SOPC_NodeId* SOPC_Event_GetNodeId(SOPC_Event* pEvent)
+{
+    SOPC_ASSERT(NULL != pEvent);
+    bool found = false;
+    SOPC_Event_Variable* nodeIdVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
+        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_NodeId], &found);
+
+    if (found && SOPC_NodeId_Id == nodeIdVarInfo->data.BuiltInTypeId &&
+        SOPC_VariantArrayType_SingleValue == nodeIdVarInfo->data.ArrayType)
+    {
+        return nodeIdVarInfo->data.Value.NodeId;
+    }
+    return NULL;
+}
+
+SOPC_ReturnStatus SOPC_Event_SetNodeId(SOPC_Event* pEvent, const SOPC_NodeId* pNodeId)
+{
+    if (NULL == pEvent || NULL == pEvent->qnPathToEventVar || NULL == pNodeId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_NodeId* nId = SOPC_Event_GetNodeId(pEvent);
+    SOPC_ReturnStatus status = NULL != nId ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_NodeId_Clear(nId);
+        status = SOPC_NodeId_Copy(nId, pNodeId);
+    }
+    return status;
 }
 
 typedef struct SOPC_Dict_ForEachEventVar_LocalData
@@ -537,7 +609,12 @@ static void SOPC_Dict_ForEachEventVar_Fct(const uintptr_t key, uintptr_t value, 
 {
     SOPC_Dict_ForEachEventVar_LocalData* localData = (SOPC_Dict_ForEachEventVar_LocalData*) user_data;
     SOPC_Event_Variable* eventVar = (SOPC_Event_Variable*) value;
-    localData->func((const char*) key, &eventVar->data, &eventVar->dataType, eventVar->valueRank, localData->user_data);
+    // Avoid specific case of internal empty path which is the event/node instance NodeId
+    if (0 != SOPC_strcmp_ignore_case(QN_EMPTY_PATH_NODEID, (const char*) key))
+    {
+        localData->func((const char*) key, &eventVar->data, &eventVar->dataType, eventVar->valueRank,
+                        localData->user_data);
+    }
 }
 
 void SOPC_Event_ForEachVar(SOPC_Event* event, SOPC_Event_ForEachVar_Fct* func, uintptr_t user_data)
@@ -550,7 +627,7 @@ SOPC_ReturnStatus SOPC_EventManagerUtil_QnPathToCString(uint16_t nbQnPath,
                                                         const SOPC_QualifiedName* qualifiedNamePathArray,
                                                         char** qnPathStr)
 {
-    if (NULL == qnPathStr || NULL == qualifiedNamePathArray || 0 == nbQnPath)
+    if (NULL == qnPathStr || (NULL == qualifiedNamePathArray && 0 != nbQnPath))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -560,6 +637,12 @@ SOPC_ReturnStatus SOPC_EventManagerUtil_QnPathToCString(uint16_t nbQnPath,
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
     char* newStr = NULL;
+    // Manage empty path case
+    if (0 == nbQnPath)
+    {
+        newStr = prevStr;
+        prevStr = NULL;
+    }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     for (uint16_t i = 0; i < nbQnPath && SOPC_STATUS_OK == status; i++)
     {
@@ -734,7 +817,8 @@ SOPC_ReturnStatus SOPC_Event_SetVariable(SOPC_Event* pEvent,
                                          const SOPC_Variant* var)
 {
     char* strQnPath = NULL;
-    SOPC_ReturnStatus status = SOPC_EventManagerUtil_QnPathToCString(nbQnPath, qualifiedNamePathArray, &strQnPath);
+    SOPC_ReturnStatus status =
+        SOPC_InternalEventManagerUtil_QnPathToCString(nbQnPath, qualifiedNamePathArray, &strQnPath);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Event_SetVariableFromStrPath(pEvent, strQnPath, var);
@@ -1284,9 +1368,13 @@ SOPC_ReturnStatus SOPC_EventManager_HasEventTypeAndBrowsePath(const SOPC_Server_
                                                               int32_t nbQNamePath,
                                                               const SOPC_QualifiedName* qNamePath)
 {
-    if (nbQNamePath <= 0 || nbQNamePath > UINT16_MAX)
+    if (nbQNamePath > UINT16_MAX)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else if (nbQNamePath < 0)
+    {
+        nbQNamePath = 0;
     }
     SOPC_Event* eventInstDecl = getEventType(eventTypes, eventTypeId);
     if (NULL == eventInstDecl)
@@ -1294,7 +1382,8 @@ SOPC_ReturnStatus SOPC_EventManager_HasEventTypeAndBrowsePath(const SOPC_Server_
         return SOPC_STATUS_NOK;
     }
     char* qnPathStr = NULL;
-    SOPC_ReturnStatus status = SOPC_EventManagerUtil_QnPathToCString((uint16_t) nbQNamePath, qNamePath, &qnPathStr);
+    SOPC_ReturnStatus status =
+        SOPC_InternalEventManagerUtil_QnPathToCString((uint16_t) nbQNamePath, qNamePath, &qnPathStr);
     if (SOPC_STATUS_OK == status)
     {
         bool found = false;

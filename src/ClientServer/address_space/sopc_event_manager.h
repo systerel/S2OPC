@@ -29,6 +29,19 @@
 #include "sopc_address_space.h"
 #include "sopc_event.h"
 
+#ifndef QN_PATH_SEPARATOR_CHAR
+/**
+ * \brief The default QualifiedName path separator used for events fields identification
+ */
+#define QN_PATH_SEPARATOR_CHAR '~'
+#define QN_PATH_SEPARATOR_STR "~"
+#else
+#ifndef QN_PATH_SEPARATOR_STR
+#error \
+    "Both QN_PATH_SEPARATOR_CHAR and QN_PATH_SEPARATOR_STR shall be defined with same chracter if default value not used"
+#endif
+#endif
+
 /**
  * \brief OPC UA server events types configuration
  */

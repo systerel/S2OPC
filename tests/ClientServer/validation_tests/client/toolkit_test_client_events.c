@@ -33,11 +33,11 @@
 
 #include "sopc_assert.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_helper_askpass.h"
+#include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
-
-#include "sopc_helper_askpass.h"
 
 // Sleep timeout in milliseconds
 static const uint32_t sleepTimeout = 200;
@@ -58,30 +58,28 @@ static const SOPC_NodeId baseModelChangeEventTypeId = SOPC_NS0_NUMERIC_NODEID(Op
 static const char* monitoredItemNames[NB_MONITORED_ITEMS] = {"TestObject", "Server"};
 static uint32_t nbMIs = 0;
 
-#define NB_SELECT_CLAUSES_IN_ARRAY 6
+#define NB_SELECT_CLAUSES_IN_ARRAY 7
 #define NB_SELECT_CLAUSES 4 + NB_SELECT_CLAUSES_IN_ARRAY
 // selectClause[0]
 static const SOPC_QualifiedName qnEventId = {0, {sizeof("EventId") - 1, 1, (SOPC_Byte*) "EventId"}};
 // selectClause[1]
 #define CONDITION_TYPE_FIELD_IDX 1
 static const SOPC_QualifiedName qnConditionName = {0, {sizeof("ConditionName") - 1, 1, (SOPC_Byte*) "ConditionName"}};
-// selectClause[2] is invalid path for EventType and selectClause[3] is invalid attribute NodeId
+// selectClause[2] is invalid path for EventType and selectClause[3] is invalid attribute BrowseName
 // selectClause[4..9] are valid paths (unchecked due to base event type selected)
 #define EVENT_TYPE_FIELD_IDX 4
 #define ALARM_CONDITION_TYPE_FIELD_IDX 9
 static const char* selectClauses_4[NB_SELECT_CLAUSES - NB_SELECT_CLAUSES_IN_ARRAY] = {
     "0:EventId", "0:ConditionName", "invalid 0:ConditionName", "invalid NodeId attribute"}; // For traces only
-static const char* selectClauses_6[NB_SELECT_CLAUSES_IN_ARRAY] = {
-    "0:EventType", "0:Message", "0:Severity", "0:SourceName", "0:Time", "0:ShelvingState~0:CurrentState"};
+static const char* selectClauses_7[NB_SELECT_CLAUSES_IN_ARRAY] = {
+    "0:EventType", "0:Message", "0:Severity", "0:SourceName", "0:Time", "0:ShelvingState~0:CurrentState", ""};
 static const SOPC_StatusCode selectClausesResult[NB_SELECT_CLAUSES] = {
     SOPC_GoodGenericStatus, SOPC_GoodGenericStatus, OpcUa_BadNodeIdUnknown, OpcUa_BadAttributeIdInvalid,
     SOPC_GoodGenericStatus, SOPC_GoodGenericStatus, SOPC_GoodGenericStatus, SOPC_GoodGenericStatus,
-    SOPC_GoodGenericStatus, SOPC_GoodGenericStatus,
-};
+    SOPC_GoodGenericStatus, SOPC_GoodGenericStatus, SOPC_GoodGenericStatus};
 
-static bool notifEventFieldSetResult[NB_SELECT_CLAUSES] = {
-    true, false, false, false, true, true, true, true, true, false,
-};
+static bool notifEventFieldSetResult[NB_SELECT_CLAUSES] = {true, false, false, false, true, true,
+                                                           true, true,  true,  false, true};
 
 #define NB_SELECT_CLAUSES_INDEX_RANGE 3
 /*
@@ -146,7 +144,7 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                     {
                         currentSelectClause =
                             (j < 4 ? selectClauses_4[j]
-                                   : selectClauses_6[j - (NB_SELECT_CLAUSES - NB_SELECT_CLAUSES_IN_ARRAY)]);
+                                   : selectClauses_7[j - (NB_SELECT_CLAUSES - NB_SELECT_CLAUSES_IN_ARRAY)]);
                         SOPC_CONSOLE_PRINTF("\nEventField[%" PRIi32 "]('%s'):\n", j, currentSelectClause);
                         SOPC_Variant_Print(&event->EventFields[j]);
                         // Check if event field is NULL only when expected not to be set
@@ -178,7 +176,7 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                             SOPC_CONSOLE_PRINTF(
                                 "ERROR: unexpected event field [idx=%" PRIi32 "] state (set/unset): %s instead of %s\n",
                                 j, (event->EventFields[j].BuiltInTypeId != SOPC_Null_Id ? "SET" : "UNSET"),
-                                (notifEventFieldSetResult[j] ? "SET" : "UNSET"));
+                                (notifEventFieldSetIndexRangeResult[j] ? "SET" : "UNSET"));
                         }
                     }
                 }
@@ -374,19 +372,29 @@ static OpcUa_CreateMonitoredItemsResponse* create_monitored_item_event(SOPC_Clie
                 status = SOPC_EventFilter_SetSelectClause(eventFilter, 2, &baseModelChangeEventTypeId, 1,
                                                           &qnConditionName, SOPC_AttributeId_Value, NULL);
             }
-            /* select clause 3: node id attribute */
+            /* select clause 3: browse name attribute */
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_EventFilter_SetSelectClauseFromStringPath(eventFilter, 3, NULL, '~', "",
-                                                                        SOPC_AttributeId_NodeId, NULL);
+                                                                        SOPC_AttributeId_BrowseName, NULL);
             }
         }
         /* 3-N select clauses: browses path as a string + NULL type id (base event type) */
         for (size_t i = initSelectArray; !invalidSelectClausesOnly && SOPC_STATUS_OK == status && i < nbSelectClauses;
              i++)
         {
-            status = SOPC_EventFilter_SetSelectClauseFromStringPath(
-                eventFilter, i, NULL, '~', selectClauses_6[i - initSelectArray], SOPC_AttributeId_Value, NULL);
+            if (0 != strlen(selectClauses_7[i - initSelectArray]))
+            {
+                status = SOPC_EventFilter_SetSelectClauseFromStringPath(
+                    eventFilter, i, NULL, '~', selectClauses_7[i - initSelectArray], SOPC_AttributeId_Value, NULL);
+            }
+            else
+            {
+                // Specific test of the self-instance NodeId attribute case (necessary for "ConditionId" in part 9)
+                // It should return NodeId of the instance, matching the representing Node in address space if it exists
+                status = SOPC_EventFilter_SetSelectClauseFromStringPath(
+                    eventFilter, i, NULL, '~', selectClauses_7[i - initSelectArray], SOPC_AttributeId_NodeId, NULL);
+            }
         }
 
         if (invalidSelectClausesOnly)

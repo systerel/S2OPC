@@ -268,6 +268,22 @@ const SOPC_Variant* SOPC_Event_GetVariableAndTypeFromStrPath(const SOPC_Event* p
                                                              int32_t* outValueRank);
 
 /**
+ * \brief Sets the event/node instance NodeId.
+ *
+ *        This function associates a NodeId to the event instance
+ *        that shall be the NodeId of the corresponding node if it exists in address space.
+ *
+ *        It is required to define it for ConditionType event instances to could be returned as "ConditionId"
+ *        using subscription EventFilter with specific parameters as defined in part 9.
+ *
+ * \param pEvent  pointer to the event for which variable value shall be set
+ * \param nodeId  the NodeId to associated to the given event instance
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ */
+SOPC_ReturnStatus SOPC_Event_SetNodeId(SOPC_Event* pEvent, const SOPC_NodeId* nodeId);
+
+/**
  * \brief Type of callback functions for \ref SOPC_Event.
  * The value of \p user_data is set when calling \ref SOPC_Event_ForEachVar.
  */

@@ -123,6 +123,13 @@ void util_event__set_event_field_list_elt(char** preferredLocalesIds,
     char* qnPath = pFilterCtx->Filter.Event.qnPathStrSelectClauses[selectClauseIdx];
     SOPC_NumericRange* indexRange = pFilterCtx->Filter.Event.indexRangeSelectClauses[selectClauseIdx];
     const SOPC_Variant* eventVar = SOPC_Event_GetVariableFromStrPath(pEvent, qnPath);
+    // Restricts empty browse path for NodeId attribute
+    // (other browse paths are for Value attribute only which is already checked on creation)
+    if (NULL != eventVar && '\0' == *qnPath &&
+        SOPC_AttributeId_NodeId != pFilterCtx->Filter.Event.eventFilter->SelectClauses[selectClauseIdx].AttributeId)
+    {
+        eventVar = NULL;
+    }
 
     if (NULL != eventVar)
     {

@@ -4944,15 +4944,15 @@ START_TEST(test_parse_event_qn_path)
         const char sep;
         const char* input;
         const int32_t nbElts;
-    } test_data[] = {{'~', "0:EnabledState~0:Id", 2},
-                     {'~', "0:EnabledState~Id", 2},
-                     {'~', "0:EnabledState\\~~0:Id", 2},
+    } test_data[] = {{QN_PATH_SEPARATOR_CHAR, "0:EnabledState" QN_PATH_SEPARATOR_STR "0:Id", 2},
+                     {QN_PATH_SEPARATOR_CHAR, "0:EnabledState" QN_PATH_SEPARATOR_STR "Id", 2},
+                     {QN_PATH_SEPARATOR_CHAR, "0:EnabledState\\~~0:Id", 2},
                      {'?', "0:EnabledState?0:Id", 2},
                      {'\0', NULL, 0}};
 
     static const char* results[4][2] = {{"0:EnabledState", "0:Id"},
                                         {"0:EnabledState", "0:Id"},
-                                        {"0:EnabledState~", "0:Id"},
+                                        {"0:EnabledState" QN_PATH_SEPARATOR_STR, "0:Id"},
                                         {"0:EnabledState", "0:Id"}};
 
     int32_t nbElts = 0;
@@ -4984,7 +4984,9 @@ START_TEST(test_parse_event_qn_path)
     SOPC_ReturnStatus status = SOPC_EventManagerUtil_cStringPathToQnPath('\0', test_data[0].input, &nbElts, &qnPaths);
     ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     ck_assert_ptr_null(qnPaths);
-    status = SOPC_EventManagerUtil_cStringPathToQnPath('\0', "~0:EnabledState~0:Id~", &nbElts, &qnPaths);
+    status = SOPC_EventManagerUtil_cStringPathToQnPath(
+        '\0', QN_PATH_SEPARATOR_STR "0:EnabledState" QN_PATH_SEPARATOR_STR "0:Id" QN_PATH_SEPARATOR_STR, &nbElts,
+        &qnPaths);
     ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     ck_assert_ptr_null(qnPaths);
     status = SOPC_EventManagerUtil_cStringPathToQnPath('\0', test_data[0].input, &nbElts, &qnPaths);
