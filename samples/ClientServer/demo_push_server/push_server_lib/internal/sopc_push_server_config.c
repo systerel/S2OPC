@@ -41,43 +41,24 @@
  *---------------------------------------------------------------------------*/
 
 /* NodeIds of the ServerConfiguration instance  */
-static const SOPC_NodeId gServerConfigurationId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                   .Namespace = 0,
-                                                   .Data.Numeric = OpcUaId_ServerConfiguration};
-static const SOPC_NodeId gUpdateCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                 .Namespace = 0,
-                                                 .Data.Numeric = OpcUaId_ServerConfiguration_UpdateCertificate};
-static const SOPC_NodeId gApplyChangesId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                            .Namespace = 0,
-                                            .Data.Numeric = OpcUaId_ServerConfiguration_ApplyChanges};
-static const SOPC_NodeId gCreateSigningRequestId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                    .Namespace = 0,
-                                                    .Data.Numeric = OpcUaId_ServerConfiguration_CreateSigningRequest};
-static const SOPC_NodeId gGetRejectedListId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                               .Namespace = 0,
-                                               .Data.Numeric = OpcUaId_ServerConfiguration_GetRejectedList};
-static const SOPC_NodeId gAppGroupId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup};
-static const SOPC_NodeId gUsrGroupId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup};
+static const SOPC_NodeId gServerConfigurationId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration);
+static const SOPC_NodeId gUpdateCertificateId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_UpdateCertificate);
+static const SOPC_NodeId gApplyChangesId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_ApplyChanges);
+static const SOPC_NodeId gCreateSigningRequestId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CreateSigningRequest);
+static const SOPC_NodeId gGetRejectedListId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_GetRejectedList);
+static const SOPC_NodeId gAppGroupId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup);
+static const SOPC_NodeId gUsrGroupId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup);
 /* Methods NodeId of the ServerConfigurationType*/
-static const SOPC_NodeId gTypeUpdateCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                     .Namespace = 0,
-                                                     .Data.Numeric = OpcUaId_ServerConfigurationType_UpdateCertificate};
-static const SOPC_NodeId gTypeApplyChangesId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                .Namespace = 0,
-                                                .Data.Numeric = OpcUaId_ServerConfigurationType_ApplyChanges};
-static const SOPC_NodeId gTypeCreateSigningRequestId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfigurationType_CreateSigningRequest};
-static const SOPC_NodeId gTypeGetRejectedListId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                   .Namespace = 0,
-                                                   .Data.Numeric = OpcUaId_ServerConfigurationType_GetRejectedList};
+static const SOPC_NodeId gTypeUpdateCertificateId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfigurationType_UpdateCertificate);
+static const SOPC_NodeId gTypeApplyChangesId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfigurationType_ApplyChanges);
+static const SOPC_NodeId gTypeCreateSigningRequestId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfigurationType_CreateSigningRequest);
+static const SOPC_NodeId gTypeGetRejectedListId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfigurationType_GetRejectedList);
 
 static PushServerConfig_NodeIds gNodeIds = {
     .pServerConfigurationId = &gServerConfigurationId,

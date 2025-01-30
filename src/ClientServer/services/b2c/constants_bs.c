@@ -33,12 +33,12 @@
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 
-static SOPC_NodeId ByteString_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ByteString);
-static SOPC_NodeId Byte_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Byte);
-static SOPC_NodeId Null_Type = SOPC_NS0_NUMERIC_NODEID(0);
-static SOPC_NodeId HierarchicalReferences_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HierarchicalReferences);
-static SOPC_NodeId Server_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server);
-static SOPC_NodeId BaseEventType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
+static SOPC_NodeId ByteString_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ByteString);
+static SOPC_NodeId Byte_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Byte);
+static SOPC_NodeId Null_Type = SOPC_NODEID_NS0_NUMERIC(0);
+static SOPC_NodeId HierarchicalReferences_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HierarchicalReferences);
+static SOPC_NodeId Server_NodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server);
+static SOPC_NodeId BaseEventType_NodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 
 const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId = &ByteString_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId = &Byte_Type;

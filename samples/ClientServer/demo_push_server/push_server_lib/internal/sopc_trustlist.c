@@ -51,168 +51,84 @@ static bool gbGroupUsrIsSet = false;
 static int32_t gTombstoneKey = -1;
 
 /* NodeIds of the TrustList instance of the DefaultApplicationGroup */
-static const SOPC_NodeId gAppTrustListId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList};
-static const SOPC_NodeId gAppOpenId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Open};
-static const SOPC_NodeId gAppCloseId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Close};
-static const SOPC_NodeId gAppReadId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Read};
-static const SOPC_NodeId gAppWriteId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Write};
-static const SOPC_NodeId gAppGetPositionId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition};
-static const SOPC_NodeId gAppSetPositionId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition};
-static const SOPC_NodeId gAppOpenWithMasksId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks};
-static const SOPC_NodeId gAppCloseAndUpdateId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate};
-static const SOPC_NodeId gAppAddCertificateId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate};
-static const SOPC_NodeId gAppRemoveCertificateId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate};
-static const SOPC_NodeId gAppOpenCountId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenCount};
-static const SOPC_NodeId gAppSizeId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Size};
-static const SOPC_NodeId gAppWritableId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Writable};
-static const SOPC_NodeId gAppUserWritableId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_UserWritable};
-static const SOPC_NodeId gAppLastUpdateTimeId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_LastUpdateTime};
+static const SOPC_NodeId gAppTrustListId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList);
+static const SOPC_NodeId gAppOpenId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Open);
+static const SOPC_NodeId gAppCloseId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Close);
+static const SOPC_NodeId gAppReadId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Read);
+static const SOPC_NodeId gAppWriteId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Write);
+static const SOPC_NodeId gAppGetPositionId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition);
+static const SOPC_NodeId gAppSetPositionId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition);
+static const SOPC_NodeId gAppOpenWithMasksId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks);
+static const SOPC_NodeId gAppCloseAndUpdateId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate);
+static const SOPC_NodeId gAppAddCertificateId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate);
+static const SOPC_NodeId gAppRemoveCertificateId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate);
+static const SOPC_NodeId gAppOpenCountId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenCount);
+static const SOPC_NodeId gAppSizeId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Size);
+static const SOPC_NodeId gAppWritableId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Writable);
+static const SOPC_NodeId gAppUserWritableId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_UserWritable);
+static const SOPC_NodeId gAppLastUpdateTimeId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_LastUpdateTime);
 
 /* NodeIds of the TrustList instance of the DefaultUserTokenGroup */
-static const SOPC_NodeId gUsrTrustListId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList};
-static const SOPC_NodeId gUsrOpenId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Open};
-static const SOPC_NodeId gUsrCloseId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Close};
-static const SOPC_NodeId gUsrReadId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Read};
-static const SOPC_NodeId gUsrWriteId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Write};
-static const SOPC_NodeId gUsrGetPositionId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition};
-static const SOPC_NodeId gUsrSetPositionId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition};
-static const SOPC_NodeId gUsrOpenWithMasksId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks};
-static const SOPC_NodeId gUsrCloseAndUpdateId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate};
-static const SOPC_NodeId gUsrAddCertificateId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate};
-static const SOPC_NodeId gUsrRemoveCertificateId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate};
-static const SOPC_NodeId gUsrOpenCountId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenCount};
-static const SOPC_NodeId gUsrSizeId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Size};
-static const SOPC_NodeId gUsrWritableId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Writable};
-static const SOPC_NodeId gUsrUserWritableId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_UserWritable};
-static const SOPC_NodeId gUsrLastUpdateTimeId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_LastUpdateTime};
+static const SOPC_NodeId gUsrTrustListId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList);
+static const SOPC_NodeId gUsrOpenId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Open);
+static const SOPC_NodeId gUsrCloseId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Close);
+static const SOPC_NodeId gUsrReadId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Read);
+static const SOPC_NodeId gUsrWriteId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Write);
+static const SOPC_NodeId gUsrGetPositionId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition);
+static const SOPC_NodeId gUsrSetPositionId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition);
+static const SOPC_NodeId gUsrOpenWithMasksId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks);
+static const SOPC_NodeId gUsrCloseAndUpdateId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate);
+static const SOPC_NodeId gUsrAddCertificateId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate);
+static const SOPC_NodeId gUsrRemoveCertificateId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate);
+static const SOPC_NodeId gUsrOpenCountId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenCount);
+static const SOPC_NodeId gUsrSizeId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Size);
+static const SOPC_NodeId gUsrWritableId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Writable);
+static const SOPC_NodeId gUsrUserWritableId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_UserWritable);
+static const SOPC_NodeId gUsrLastUpdateTimeId = SOPC_NODEID_NS0_NUMERIC(
+    OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_LastUpdateTime);
 
 /* NodeIds of the TrustListType */
-static const SOPC_NodeId gTypeOpenId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                        .Namespace = 0,
-                                        .Data.Numeric = OpcUaId_FileType_Open};
-static const SOPC_NodeId gTypeCloseId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                         .Namespace = 0,
-                                         .Data.Numeric = OpcUaId_FileType_Close};
-static const SOPC_NodeId gTypeReadId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                        .Namespace = 0,
-                                        .Data.Numeric = OpcUaId_FileType_Read};
-static const SOPC_NodeId gTypeWriteId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                         .Namespace = 0,
-                                         .Data.Numeric = OpcUaId_FileType_Write};
-static const SOPC_NodeId gTypeGetPositionId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                               .Namespace = 0,
-                                               .Data.Numeric = OpcUaId_FileType_GetPosition};
-static const SOPC_NodeId gTypeSetPositionId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                               .Namespace = 0,
-                                               .Data.Numeric = OpcUaId_FileType_SetPosition};
-static const SOPC_NodeId gTypeOpenWithMasksId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                 .Namespace = 0,
-                                                 .Data.Numeric = OpcUaId_TrustListType_OpenWithMasks};
-static const SOPC_NodeId gTypeCloseAndUpdateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                  .Namespace = 0,
-                                                  .Data.Numeric = OpcUaId_TrustListType_CloseAndUpdate};
-static const SOPC_NodeId gTypeAddCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                  .Namespace = 0,
-                                                  .Data.Numeric = OpcUaId_TrustListType_AddCertificate};
-static const SOPC_NodeId gTypeRemoveCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                     .Namespace = 0,
-                                                     .Data.Numeric = OpcUaId_TrustListType_RemoveCertificate};
+static const SOPC_NodeId gTypeOpenId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_Open);
+static const SOPC_NodeId gTypeCloseId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_Close);
+static const SOPC_NodeId gTypeReadId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_Read);
+static const SOPC_NodeId gTypeWriteId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_Write);
+static const SOPC_NodeId gTypeGetPositionId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_GetPosition);
+static const SOPC_NodeId gTypeSetPositionId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_SetPosition);
+static const SOPC_NodeId gTypeOpenWithMasksId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_TrustListType_OpenWithMasks);
+static const SOPC_NodeId gTypeCloseAndUpdateId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_TrustListType_CloseAndUpdate);
+static const SOPC_NodeId gTypeAddCertificateId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_TrustListType_AddCertificate);
+static const SOPC_NodeId gTypeRemoveCertificateId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_TrustListType_RemoveCertificate);
 
 static TrustList_NodeIds gAppNodeIds = {
     .pTrustListId = &gAppTrustListId,

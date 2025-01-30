@@ -27,7 +27,7 @@
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 
-static const SOPC_NodeId Number_DataType = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Number);
+static const SOPC_NodeId Number_DataType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Number);
 
 /*------------------------
    INITIALISATION Clause

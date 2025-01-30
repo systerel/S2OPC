@@ -46,12 +46,9 @@
 
 #define NB_VARS 5
 
-static SOPC_Variant varArr[NB_VARS] = {
-    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 12071982}},
-    {true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte = 239}},
-    {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 64852}},
-    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 0.12}},
-    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 369852}}};
+static SOPC_Variant varArr[NB_VARS] = {SOPC_VARIANT_UINT32(12071982), SOPC_VARIANT_BYTE(239),
+                                       SOPC_VARIANT_UINT16(64852), SOPC_VARIANT_FLOAT((float) 0.12),
+                                       SOPC_VARIANT_UINT32(369852)};
 
 /* Test network message layer JSON encoded */
 
@@ -59,19 +56,15 @@ static SOPC_Variant varArr[NB_VARS] = {
 #define NB_VARS_JSON 9
 
 static SOPC_Byte gSampleText[] = "This is a text !";
-static SOPC_Variant varArrJSON[NB_VARS_JSON] = {
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
-    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 64839}},
-    {true, SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32 = -65133}},
-    {true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev = (double) 5462.16515561}}, // ~ 5462.165156
-    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 546216515561}},     // ~ 5.462165094e+11
-    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 1.0 / 0.0}},
-    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) -1.0 / 0.0}},
-    {true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev = NAN}},
-    {true,
-     SOPC_String_Id,
-     SOPC_VariantArrayType_SingleValue,
-     {.String = {.Length = sizeof(gSampleText) - 1, .DoNotClear = true, .Data = gSampleText}}}};
+static SOPC_Variant varArrJSON[NB_VARS_JSON] = {SOPC_VARIANT_BOOL(true),
+                                                SOPC_VARIANT_UINT32(64839),
+                                                SOPC_VARIANT_INT32(-65133),
+                                                SOPC_VARIANT_DOUBLE((double) 5462.16515561), // ~ 5462.165156
+                                                SOPC_VARIANT_FLOAT((float) 546216515561),    // ~ 5.462165094e+11
+                                                SOPC_VARIANT_FLOAT((float) 1.0 / 0.0),
+                                                SOPC_VARIANT_FLOAT((float) -1.0 / 0.0),
+                                                SOPC_VARIANT_DOUBLE(NAN),
+                                                SOPC_VARIANT_STRING(gSampleText)};
 
 static const uint8_t encoded_network_msg_json[ENCODED_DATA_SIZE_JSON] =
     "{"

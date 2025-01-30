@@ -857,7 +857,7 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
         SOPC_UserWithAuthorization_CreateFromIdentityToken(x509_readWriteExecToken, authorizationManager);
     ck_assert_ptr_nonnull(x509_readWriteExec);
 
-    const SOPC_NodeId node = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29};
+    const SOPC_NodeId node = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Enumeration);
     uint32_t attr = 13;
     bool authorized = false;
     // invalidNoAccesses

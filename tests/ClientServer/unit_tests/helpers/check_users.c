@@ -52,32 +52,26 @@ static const SOPC_ExtensionObject anonymousIdentityToken = {
     .TypeId.NodeId.Data.Numeric = OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
     .Body.Object.ObjType = &OpcUa_AnonymousIdentityToken_EncodeableType,
     .Body.Object.Value = NULL};
-static OpcUa_UserNameIdentityToken opcuaUsernameToken = {
-    .PolicyId = {.Length = sizeof(POLICY_USERNAME) - 1, .DoNotClear = true, .Data = (SOPC_Byte*) POLICY_USERNAME},
-    .UserName = {.Length = sizeof(USERNAME) - 1, .DoNotClear = true, .Data = (SOPC_Byte*) USERNAME},
-    .Password = {.Length = sizeof(PASSWORD) - 1, .DoNotClear = true, .Data = (SOPC_Byte*) PASSWORD}};
+static OpcUa_UserNameIdentityToken opcuaUsernameToken = {.PolicyId = SOPC_STRING(POLICY_USERNAME),
+                                                         .UserName = SOPC_STRING(USERNAME),
+                                                         .Password = SOPC_STRING(PASSWORD)};
 static const SOPC_ExtensionObject usernameIdentityToken = {
     .Encoding = SOPC_ExtObjBodyEncoding_Object,
     .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
     .TypeId.NodeId.Data.Numeric = OpcUaId_UserNameIdentityToken_Encoding_DefaultBinary,
     .Body.Object.ObjType = &OpcUa_UserNameIdentityToken_EncodeableType,
     .Body.Object.Value = &opcuaUsernameToken};
-static OpcUa_UserNameIdentityToken opcuaUsernameToken_invalid = {
-    .PolicyId = {.Length = sizeof(POLICY_USERNAME) - 1, .DoNotClear = true, .Data = (SOPC_Byte*) POLICY_USERNAME},
-    .UserName = {.Length = sizeof(USERNAME) - 1, .DoNotClear = true, .Data = (SOPC_Byte*) USERNAME},
-    .Password = {.Length = sizeof(PASSWORD) - 1, .DoNotClear = true, .Data = (SOPC_Byte*) PASSWORD_INVALID}};
+static OpcUa_UserNameIdentityToken opcuaUsernameToken_invalid = {.PolicyId = SOPC_STRING(POLICY_USERNAME),
+                                                                 .UserName = SOPC_STRING(USERNAME),
+                                                                 .Password = SOPC_STRING(PASSWORD_INVALID)};
 static const SOPC_ExtensionObject usernameIdentityToken_invalid = {
     .Encoding = SOPC_ExtObjBodyEncoding_Object,
     .TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric,
     .TypeId.NodeId.Data.Numeric = OpcUaId_UserNameIdentityToken_Encoding_DefaultBinary,
     .Body.Object.ObjType = &OpcUa_UserNameIdentityToken_EncodeableType,
     .Body.Object.Value = &opcuaUsernameToken_invalid};
-static const SOPC_NodeId authorizedNodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                             .Namespace = 42,
-                                             .Data.Numeric = 36263};
-static const SOPC_NodeId unauthorizedNodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                               .Namespace = 42,
-                                               .Data.Numeric = 36264};
+static const SOPC_NodeId authorizedNodeId = SOPC_NODEID_NUMERIC(42, 36263);
+static const SOPC_NodeId unauthorizedNodeId = SOPC_NODEID_NUMERIC(42, 36264);
 
 /* Custom authentication and authorization functions */
 static SOPC_ReturnStatus selectiveAuthenticationValidate(SOPC_UserAuthentication_Manager* authn,

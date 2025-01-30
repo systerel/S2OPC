@@ -37,19 +37,19 @@ const SOPC_String tcpUaTransportProfileURI = {
 };
 
 const OpcUa_UserTokenPolicy anonymousUserTokenPolicy = {
-    .PolicyId = {9, true, (SOPC_Byte*) "anonymous"},
+    .PolicyId = SOPC_STRING("anonymous"),
     .TokenType = OpcUa_UserTokenType_Anonymous,
-    .IssuedTokenType = {0, true, NULL},
-    .IssuerEndpointUrl = {0, true, NULL},
-    .SecurityPolicyUri = {0, true, NULL},
+    .IssuedTokenType = SOPC_STRING_NULL,
+    .IssuerEndpointUrl = SOPC_STRING_NULL,
+    .SecurityPolicyUri = SOPC_STRING_NULL,
 };
 
 const OpcUa_UserTokenPolicy userNameUserTokenPolicy = {
-    .PolicyId = {9, true, (SOPC_Byte*) "username"},
+    .PolicyId = SOPC_STRING("username"),
     .TokenType = OpcUa_UserTokenType_UserName,
-    .IssuedTokenType = {0, true, NULL},
-    .IssuerEndpointUrl = {0, true, NULL},
-    .SecurityPolicyUri = {0, true, NULL},
+    .IssuedTokenType = SOPC_STRING_NULL,
+    .IssuerEndpointUrl = SOPC_STRING_NULL,
+    .SecurityPolicyUri = SOPC_STRING_NULL,
 };
 SOPC_GCC_DIAGNOSTIC_RESTORE
 

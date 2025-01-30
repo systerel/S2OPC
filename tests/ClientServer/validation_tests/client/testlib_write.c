@@ -67,8 +67,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
         /* with N_VARS = N_GROUPS, the only i value is 0 */
-        SOPC_NodeId nodeId = {
-            .IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = (uint32_t) i + 1000 + 1, .Namespace = 1};
+        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 1000 + 1);
         SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
                                               .ArrayType = SOPC_VariantArrayType_SingleValue,
                                               .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) 1)},
@@ -82,9 +81,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
     /* uint32 */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
-        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                              .Data.Numeric = (uint32_t) i + (N_VARS / N_GROUPS) + 1000 + 1,
-                              .Namespace = 1};
+        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + (N_VARS / N_GROUPS) + 1000 + 1);
         SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_UInt32_Id,
                                               .ArrayType = SOPC_VariantArrayType_SingleValue,
                                               .Value.Uint32 = 1000 + (uint32_t) i},
@@ -99,9 +96,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
     /* double */
     for (i = 0; i < N_VARS / N_GROUPS; ++i)
     {
-        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                              .Data.Numeric = (uint32_t) i + 2 * (N_VARS / N_GROUPS) + 1000 + 1,
-                              .Namespace = 1};
+        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 2 * (N_VARS / N_GROUPS) + 1000 + 1);
         SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Double_Id,
                                               .ArrayType = SOPC_VariantArrayType_SingleValue,
                                               .Value.Doublev = pow(2, (double) (i + 1))},
@@ -124,9 +119,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
         memcpy((void*) (buf.Data), "FOO ", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
-        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                              .Data.Numeric = (uint32_t) i + 3 * (N_VARS / N_GROUPS) + 1000 + 1,
-                              .Namespace = 1};
+        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 3 * (N_VARS / N_GROUPS) + 1000 + 1);
         SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_String_Id,
                                               .ArrayType = SOPC_VariantArrayType_SingleValue,
                                               .Value.String = buf},
@@ -151,9 +144,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
         memcpy((void*) (buf.Data), "BySt", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
-        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                              .Data.Numeric = (uint32_t) i + 4 * (N_VARS / N_GROUPS) + 1000 + 1,
-                              .Namespace = 1};
+        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 4 * (N_VARS / N_GROUPS) + 1000 + 1);
         SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
                                               .ArrayType = SOPC_VariantArrayType_SingleValue,
                                               .Value.Bstring = buf},
@@ -178,9 +169,7 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
         memcpy((void*) (buf.Data), "XML ", 4);
         memcpy((void*) (buf.Data + 4), (void*) &j, 4);
 
-        SOPC_NodeId nodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                              .Data.Numeric = (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1,
-                              .Namespace = 1};
+        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1);
         SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
                                               .ArrayType = SOPC_VariantArrayType_SingleValue,
                                               .Value.XmlElt = buf},

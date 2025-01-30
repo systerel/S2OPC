@@ -71,7 +71,7 @@
 #define CHECK_ELEMENT_EXISTS(msgPtr, fieldNoOf, index) \
     (NULL != (msgPtr) && ((msgPtr)->fieldNoOf) > 0 && (index) < (size_t)((msgPtr)->fieldNoOf))
 
-static const SOPC_NodeId baseEventType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
+static const SOPC_NodeId baseEventType_NodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 
 static inline SOPC_AttributeId SOPC_TypeHelperInternal_CheckAttributeId(SOPC_AttributeId attrId)
 {

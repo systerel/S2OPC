@@ -53,7 +53,7 @@ void address_space_typing_bs__is_transitive_subtype(const constants__t_NodeId_i 
         address_space_typing_bs__p_subtype, address_space_typing_bs__p_parent_type);
 }
 
-static SOPC_NodeId Enumeration_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29};
+static SOPC_NodeId Enumeration_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Enumeration);
 
 void address_space_typing_bs__is_compatible_simple_type_or_enumeration(
     const constants__t_NodeId_i address_space_typing_bs__p_value_type,

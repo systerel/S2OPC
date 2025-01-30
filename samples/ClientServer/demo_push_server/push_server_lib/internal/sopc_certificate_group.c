@@ -48,18 +48,12 @@ static SOPC_Dict* gObjIdToCertGroup = NULL;
 static int32_t gTombstoneKey = -1;
 
 /* NodeIds of the CertificateGroup instance of the DefaultApplicationGroup */
-static const SOPC_NodeId appCertificateGroupId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup};
-static const SOPC_NodeId appCertificateTypesId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateTypes};
-static const SOPC_NodeId appTrustListId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList};
+static const SOPC_NodeId appCertificateGroupId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup);
+static const SOPC_NodeId appCertificateTypesId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateTypes);
+static const SOPC_NodeId appTrustListId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList);
 
 static const CertificateGroup_NodeIds appNodeIds = {
     .pCertificateGroupId = &appCertificateGroupId,
@@ -68,18 +62,12 @@ static const CertificateGroup_NodeIds appNodeIds = {
 };
 
 /* NodeIds of the CertificateGroup instance of the DefaultUserTokenGroup */
-static const SOPC_NodeId usrCertificateGroupId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup};
-static const SOPC_NodeId usrCertificateTypesId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateTypes};
-static const SOPC_NodeId usrTrustListId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList};
+static const SOPC_NodeId usrCertificateGroupId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup);
+static const SOPC_NodeId usrCertificateTypesId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateTypes);
+static const SOPC_NodeId usrTrustListId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList);
 
 static const CertificateGroup_NodeIds usrNodeIds = {
     .pCertificateGroupId = &usrCertificateGroupId,
@@ -88,12 +76,8 @@ static const CertificateGroup_NodeIds usrNodeIds = {
 };
 
 /* NodeIds for CertificateTypeValue */
-static const SOPC_NodeId certTypeRsaSha256Id = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                .Namespace = 0,
-                                                .Data.Numeric = OpcUaId_RsaSha256ApplicationCertificateType};
-static const SOPC_NodeId certTypeRsaMinId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                             .Namespace = 0,
-                                             .Data.Numeric = OpcUaId_RsaMinApplicationCertificateType};
+static const SOPC_NodeId certTypeRsaSha256Id = SOPC_NODEID_NS0_NUMERIC(OpcUaId_RsaSha256ApplicationCertificateType);
+static const SOPC_NodeId certTypeRsaMinId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_RsaMinApplicationCertificateType);
 
 /*---------------------------------------------------------------------------
  *                      Prototype of static functions

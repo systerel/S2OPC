@@ -65,8 +65,8 @@
 
 static int32_t gQuit = 0;
 
-static const SOPC_NodeId serverObjectId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server);
-static const SOPC_NodeId hasProperty = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasProperty);
+static const SOPC_NodeId serverObjectId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server);
+static const SOPC_NodeId hasProperty = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasProperty);
 
 typedef struct
 {

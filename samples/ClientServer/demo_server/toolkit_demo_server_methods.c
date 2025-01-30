@@ -33,43 +33,27 @@
  *                    Demo Methods for Call service definition
  *---------------------------------------------------------------------------*/
 
-static const SOPC_NodeId TestObject = {.IdentifierType = SOPC_IdentifierType_String,
-                                       .Namespace = 1,
-                                       .Data.String = {sizeof("TestObject") - 1, 1, (SOPC_Byte*) "TestObject"}};
+static const SOPC_NodeId TestObject = SOPC_NODEID_STRING(1, "TestObject");
 
-static const SOPC_NodeId EventInstNodeId = {
-    .IdentifierType = SOPC_IdentifierType_String,
-    .Namespace = 1,
-    .Data.String = {sizeof("EventInstance_NodeId_Example") - 1, 1, (SOPC_Byte*) "EventInstance_NodeId_Example"}};
+static const SOPC_NodeId EventInstNodeId = SOPC_NODEID_STRING(1, "EventInstance_NodeId_Example");
+static const SOPC_NodeId TestObject_HelloNextArg = SOPC_NODEID_STRING(1, "TestObject_HelloNextArg");
 
-static const SOPC_NodeId TestObject_HelloNextArg = {
-    .IdentifierType = SOPC_IdentifierType_String,
-    .Namespace = 1,
-    .Data.String = {sizeof("TestObject_HelloNextArg") - 1, 1, (SOPC_Byte*) "TestObject_HelloNextArg"}};
+static const SOPC_NodeId TestObject_Counter = SOPC_NODEID_STRING(1, "TestObject_Counter");
 
-static const SOPC_NodeId TestObject_Counter = {
-    .IdentifierType = SOPC_IdentifierType_String,
-    .Namespace = 1,
-    .Data.String = {sizeof("TestObject_Counter") - 1, 1, (SOPC_Byte*) "TestObject_Counter"}};
-
-static const SOPC_NodeId ObjectNodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ObjectsFolder);
-static const SOPC_NodeId HasComponent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasComponent);
-static const SOPC_NodeId HasChild_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasChild);
-static const SOPC_NodeId DataVariable_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseDataVariableType);
-static const SOPC_NodeId Organizes_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Organizes);
+static const SOPC_NodeId ObjectNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ObjectsFolder);
+static const SOPC_NodeId HasComponent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
+static const SOPC_NodeId HasChild_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasChild);
+static const SOPC_NodeId DataVariable_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseDataVariableType);
+static const SOPC_NodeId Organizes_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
 
 #ifdef S2OPC_EVENT_MANAGEMENT
-static const SOPC_NodeId BaseEvent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
-static const SOPC_NodeId Null_Type = SOPC_NS0_NUMERIC_NODEID(0);
+static const SOPC_NodeId BaseEvent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
+static const SOPC_NodeId Null_Type = SOPC_NODEID_NS0_NUMERIC(0);
 #endif
 
-static const SOPC_QualifiedName TestObject_Counter_BrowseName = {
-    .NamespaceIndex = 1,
-    .Name = {.Data = (SOPC_Byte*) "Counter", .DoNotClear = true, .Length = sizeof("Counter") - 1}};
+static const SOPC_QualifiedName TestObject_Counter_BrowseName = SOPC_QUALIFIED_NAME(1, "Counter");
 
-static const SOPC_QualifiedName TestObject_BrowseName = {
-    .NamespaceIndex = 0,
-    .Name = {.Data = (SOPC_Byte*) "TestObject", .DoNotClear = true, .Length = sizeof("TestObject") - 1}};
+static const SOPC_QualifiedName TestObject_BrowseName = SOPC_QUALIFIED_NAME(1, "TestObject");
 
 SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextPtr,
                                             const SOPC_NodeId* objectId,

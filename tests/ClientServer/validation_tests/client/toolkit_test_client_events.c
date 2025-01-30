@@ -48,11 +48,11 @@ static const uint32_t failureLoopTimeout = 3000;
 static const char* testObjectNodeIdStr = "ns=1;s=TestObject";
 static const char* genEventMethodIdStr = "ns=1;s=GenEventMethod";
 
-static const SOPC_NodeId serverObjectId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server);
-static const SOPC_NodeId baseEventTypeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
-static const SOPC_NodeId conditionTypeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ConditionType);
-static const SOPC_NodeId alarmConditionTypeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_AlarmConditionType);
-static const SOPC_NodeId baseModelChangeEventTypeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseModelChangeEventType);
+static const SOPC_NodeId serverObjectId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server);
+static const SOPC_NodeId baseEventTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
+static const SOPC_NodeId conditionTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ConditionType);
+static const SOPC_NodeId alarmConditionTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_AlarmConditionType);
+static const SOPC_NodeId baseModelChangeEventTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseModelChangeEventType);
 
 #define NB_MONITORED_ITEMS 2
 static const char* monitoredItemNames[NB_MONITORED_ITEMS] = {"TestObject", "Server"};
@@ -61,10 +61,10 @@ static uint32_t nbMIs = 0;
 #define NB_SELECT_CLAUSES_IN_ARRAY 7
 #define NB_SELECT_CLAUSES 4 + NB_SELECT_CLAUSES_IN_ARRAY
 // selectClause[0]
-static const SOPC_QualifiedName qnEventId = {0, {sizeof("EventId") - 1, 1, (SOPC_Byte*) "EventId"}};
+static const SOPC_QualifiedName qnEventId = SOPC_QUALIFIED_NAME(0, "EventId");
 // selectClause[1]
 #define CONDITION_TYPE_FIELD_IDX 1
-static const SOPC_QualifiedName qnConditionName = {0, {sizeof("ConditionName") - 1, 1, (SOPC_Byte*) "ConditionName"}};
+static const SOPC_QualifiedName qnConditionName = SOPC_QUALIFIED_NAME(0, "ConditionName");
 // selectClause[2] is invalid path for EventType and selectClause[3] is invalid attribute BrowseName
 // selectClause[4..9] are valid paths (unchecked due to base event type selected)
 #define EVENT_TYPE_FIELD_IDX 4

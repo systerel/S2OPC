@@ -346,8 +346,8 @@ static OpcUa_CallRequest* newCallRequest_client(const char* securityGroupId,
 
     call->encodeableType = &OpcUa_CallMethodRequest_EncodeableType;
 
-    call->ObjectId = (SOPC_NodeId) SOPC_NS0_NUMERIC_NODEID(OpcUaId_PublishSubscribe);
-    call->MethodId = (SOPC_NodeId) SOPC_NS0_NUMERIC_NODEID(OpcUaId_PublishSubscribe_GetSecurityKeys);
+    call->ObjectId = (SOPC_NodeId) SOPC_NODEID_NS0_NUMERIC(OpcUaId_PublishSubscribe);
+    call->MethodId = (SOPC_NodeId) SOPC_NODEID_NS0_NUMERIC(OpcUaId_PublishSubscribe_GetSecurityKeys);
 
     call->NoOfInputArguments = (int32_t) 3;
     call->InputArguments = arguments;

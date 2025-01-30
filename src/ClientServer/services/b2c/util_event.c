@@ -31,9 +31,9 @@
 
 const SOPC_Server_Event_Types* initEventTypes = NULL;
 
-static const SOPC_NodeId EventQueueOverflowTypeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_EventQueueOverflowEventType);
-static const SOPC_NodeId ServerId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server);
-static const SOPC_NodeId BaseEventTypeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
+static const SOPC_NodeId EventQueueOverflowTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_EventQueueOverflowEventType);
+static const SOPC_NodeId ServerId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server);
+static const SOPC_NodeId BaseEventTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 
 static const SOPC_Event* queueOverflowEvent = NULL;
 

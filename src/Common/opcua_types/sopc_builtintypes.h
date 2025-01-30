@@ -910,7 +910,7 @@ const char** SOPC_String_GetRawCStringArray(int32_t nbOfStrings, SOPC_String* st
  */
 char** SOPC_String_GetCStringArray(int32_t nbOfStrings, SOPC_String* stringArray);
 
-/** \brief Build a constant SOPC_String from a C string */
+/** \brief Build a constant SOPC_String from a (non-NULL) C string */
 #define SOPC_STRING(cString)                         \
     {                                                \
         sizeof(cString) - 1, 1, (SOPC_Byte*) cString \
@@ -1061,6 +1061,7 @@ void SOPC_QualifiedName_ClearAux(void* value);
 SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, const char* str);
 char* SOPC_QualifiedName_ToCString(const SOPC_QualifiedName* qname);
 
+/** \brief Build a constant SOPC_QualifiedName value from namespace index and a (non-NULL) C string */
 #define SOPC_QUALIFIED_NAME(nsIndex, name) \
     {                                      \
         nsIndex, SOPC_STRING(name)         \
@@ -1153,7 +1154,7 @@ SOPC_ReturnStatus SOPC_LocalizedTextArray_GetPreferredLocale(SOPC_LocalizedText*
                                                              int32_t nbLocalizedText,
                                                              const SOPC_LocalizedText* srcArray);
 
-/** \brief Build a constant SOPC_LocalizedText value from locale and text */
+/** \brief Build a constant SOPC_LocalizedText value from (non-NULL) locale and (non-NULL) text as C strings */
 #define SOPC_LOCALIZED_TEXT(locale, text)            \
     {                                                \
         SOPC_STRING(locale), SOPC_STRING(text), NULL \

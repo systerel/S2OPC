@@ -76,47 +76,27 @@ static const char* sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Reserved
 
 // Note: cannot be const because MS build does not support &OpcUa_*_EncodeableType reference in definition for library
 static SOPC_Event_Variable sopc_baseEventVariants[SOPC_BaseEventVariantIdx_ReservedLength] = {
-    {{true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId = (SOPC_NodeId[]){{0}}}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_NodeId),
+    {SOPC_VARIANT_NODEID(SOPC_NODEID_NS0_NUMERIC(0)), SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId),
      -1}, // "OwnNodeId": placeholder to store the actual event/node instance NodeId (see ConditionId in part 9)
-    {{true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring = {0}}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_ByteString),
-     -1}, // EventId
-    {{true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId = (SOPC_NodeId[]){{0}}}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_NodeId),
-     -1}, // EventType
-    {{true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId = (SOPC_NodeId[]){{0}}}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_NodeId),
-     -1}, // SourceNode
-    {{true, SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {.String = {0}}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_String),
-     -1}, // SourceName
-    {{true, SOPC_DateTime_Id, SOPC_VariantArrayType_SingleValue, {.Date = 0}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_UtcTime),
-     -1}, // Time
-    {{true, SOPC_DateTime_Id, SOPC_VariantArrayType_SingleValue, {.Date = 0}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_UtcTime),
-     -1}, // ReceiveTime
+    {SOPC_VARIANT_BYTESTRING({0}), SOPC_NODEID_NS0_NUMERIC(OpcUaId_ByteString), -1},                // EventId
+    {SOPC_VARIANT_NODEID(SOPC_NODEID_NS0_NUMERIC(0)), SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId), -1}, // EventType
+    {SOPC_VARIANT_NODEID(SOPC_NODEID_NS0_NUMERIC(0)), SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId), -1}, // SourceNode
+    {SOPC_VARIANT_STRING(""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_String), -1},                         // SourceName
+    {SOPC_VARIANT_DATE(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_UtcTime), -1},                           // Time
+    {SOPC_VARIANT_DATE(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_UtcTime), -1},                           // ReceiveTime
     {{true,
       SOPC_ExtensionObject_Id,
       SOPC_VariantArrayType_SingleValue,
-      {.ExtObject = (SOPC_ExtensionObject[]){{{SOPC_NS0_NUMERIC_NODEID(OpcUaId_TimeZoneDataType), {0, 0, NULL}, 0},
+      {.ExtObject = (SOPC_ExtensionObject[]){{{SOPC_NODEID_NS0_NUMERIC(OpcUaId_TimeZoneDataType), {0, 0, NULL}, 0},
                                               SOPC_ExtObjBodyEncoding_Object,
                                               .Body.Object = {(OpcUa_TimeZoneDataType[]){{NULL, 0, 0}}, NULL}}}}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_TimeZoneDataType),
-     -1}, // LocalTime
-    {{true,
-      SOPC_LocalizedText_Id,
-      SOPC_VariantArrayType_SingleValue,
-      {.LocalizedText = (SOPC_LocalizedText[]){{{0}, {0}, NULL}}}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_LocalizedText),
-     -1}, // Message
-    {{true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 0}},
-     SOPC_NS0_NUMERIC_NODEID(OpcUaId_UInt16),
-     -1}, // Severity
+     SOPC_NODEID_NS0_NUMERIC(OpcUaId_TimeZoneDataType),
+     -1},                                                                                 // LocalTime
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // Message
+    {SOPC_VARIANT_UINT16(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_UInt16), -1},                // Severity
 };
 
-static SOPC_NodeId baseEventNodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
+static SOPC_NodeId baseEventNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 
 static uint64_t eventIdCounter = 0;
 

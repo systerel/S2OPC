@@ -51,19 +51,17 @@ OpcUa_ReadRequest* read_new_read_request(void)
     for (i = 0; i < N_READ_NODES; ++i)
     {
         /* Request for the NodeId (...) */
-        lrv[2 * i + 0] = (OpcUa_ReadValueId){
-            .encodeableType = &OpcUa_ReadValueId_EncodeableType,
-            .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = i + 1000, .Namespace = 1},
-            .AttributeId = 1, // NodeId attribute
-            .IndexRange = {.Length = 0},
-            .DataEncoding = {.Name.Length = 0}};
+        lrv[2 * i + 0] = (OpcUa_ReadValueId){.encodeableType = &OpcUa_ReadValueId_EncodeableType,
+                                             .NodeId = SOPC_NODEID_NUMERIC(1, i + 1000),
+                                             .AttributeId = 1, // NodeId attribute
+                                             .IndexRange = SOPC_STRING_NULL,
+                                             .DataEncoding = {0}};
         /* Request for the NodeClass */
-        lrv[2 * i + 1] = (OpcUa_ReadValueId){
-            .encodeableType = &OpcUa_ReadValueId_EncodeableType,
-            .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = i + 1000, .Namespace = 1},
-            .AttributeId = 2, // NodeClass attribute
-            .IndexRange = {.Length = 0},
-            .DataEncoding = {.Name.Length = 0}};
+        lrv[2 * i + 1] = (OpcUa_ReadValueId){.encodeableType = &OpcUa_ReadValueId_EncodeableType,
+                                             .NodeId = SOPC_NODEID_NUMERIC(1, i + 1000),
+                                             .AttributeId = 2, // NodeClass attribute
+                                             .IndexRange = SOPC_STRING_NULL,
+                                             .DataEncoding = {0}};
     }
 
     /* Note: variables have the last numeric node ids in the @space used for this test*/
@@ -72,12 +70,10 @@ OpcUa_ReadRequest* read_new_read_request(void)
     {
         /* Request for the Value */
         lrv[2 * N_READ_NODES + i] = (OpcUa_ReadValueId){.encodeableType = &OpcUa_ReadValueId_EncodeableType,
-                                                        .NodeId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                                   .Data.Numeric = (N_READ_NODES - 1 - i) + 1000,
-                                                                   .Namespace = 1},
+                                                        .NodeId = SOPC_NODEID_NUMERIC(1, (N_READ_NODES - 1 - i) + 1000),
                                                         .AttributeId = 13, // Value attribute
-                                                        .IndexRange = {.Length = 0},
-                                                        .DataEncoding = {.Name.Length = 0}};
+                                                        .IndexRange = SOPC_STRING_NULL,
+                                                        .DataEncoding = {0}};
     }
 
     OpcUa_ReadRequest* pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest, .encodeableType = &OpcUa_ReadRequest_EncodeableType,

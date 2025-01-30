@@ -158,7 +158,7 @@ static void test_concurrent_write_read_non_reg(void)
     const size_t nbReadWrites = 5;
     const size_t nbReads = 1;
     // Note: we need a non-native type which has allocated memory that might be freed by server
-    const SOPC_NodeId stringVar = {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 1004};
+    const SOPC_NodeId stringVar = SOPC_NODEID_NUMERIC(1, 1004);
 
     OpcUa_ReadRequest* readReq = NULL;
     OpcUa_WriteRequest* writeReq = NULL;
@@ -520,9 +520,9 @@ static SOPC_ReturnStatus check_readDataTypeDefinition(const SOPC_AddressSpace* a
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(3, OpcUa_TimestampsToReturn_Neither);
-    const SOPC_NodeId structureDTid = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ComplexNumberType);
-    const SOPC_NodeId enumDTid = SOPC_NS0_NUMERIC_NODEID(OpcUaId_SecurityTokenRequestType);
-    const SOPC_NodeId abstractStructureDTid = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Structure);
+    const SOPC_NodeId structureDTid = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ComplexNumberType);
+    const SOPC_NodeId enumDTid = SOPC_NODEID_NS0_NUMERIC(OpcUaId_SecurityTokenRequestType);
+    const SOPC_NodeId abstractStructureDTid = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Structure);
 
     status = SOPC_STATUS_OUT_OF_MEMORY;
     if (NULL != readReq)
@@ -591,8 +591,7 @@ static SOPC_ReturnStatus check_readDataTypeDefinition(const SOPC_AddressSpace* a
         const SOPC_NodeId complexNumberDTdefaultBinaryId = {
             SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
             .Data.Numeric = OpcUaId_ComplexNumberType_Encoding_DefaultBinary};
-        const SOPC_NodeId floatDTid = {SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
-                                       .Data.Numeric = OpcUaId_Float};
+        const SOPC_NodeId floatDTid = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Float);
 
         if (!SOPC_NodeId_Equal(&structureDT->DefaultEncodingId, &complexNumberDTdefaultBinaryId))
         {

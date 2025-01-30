@@ -35,13 +35,9 @@
  *                                  Node ids
  *---------------------------------------------------------------------------*/
 
-static const SOPC_NodeId gGroupIdInvalid = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                            .Namespace = 0,
-                                            .Data.Numeric = 0};
+static const SOPC_NodeId gGroupIdInvalid = {0};
 static const SOPC_NodeId gGroupIdEmpty = {0};
-static const SOPC_NodeId gCertificateTypeIdInvalid = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                      .Namespace = 0,
-                                                      .Data.Numeric = 0};
+static const SOPC_NodeId gCertificateTypeIdInvalid = {0};
 
 /*---------------------------------------------------------------------------
  *                    Handle disconnection of the client

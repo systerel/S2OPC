@@ -29,120 +29,68 @@
 #include "sopc_trustlist_internal_helper.h" // common helper to the demo push server lib
 
 /* Definition of the NodeIds and the variants related to the push server */
-const SOPC_NodeId gServerDefaultApplicationGroupId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup};
+const SOPC_NodeId gServerDefaultApplicationGroupId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup);
 
-const SOPC_NodeId gRsaSha256ApplicationCertificateTypeId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_RsaSha256ApplicationCertificateType};
+const SOPC_NodeId gRsaSha256ApplicationCertificateTypeId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_RsaSha256ApplicationCertificateType);
 
-static const SOPC_NodeId gServerConfiguration = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                 .Namespace = 0,
-                                                 .Data.Numeric = OpcUaId_ServerConfiguration};
+static const SOPC_NodeId gServerConfiguration = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration);
 
-static const SOPC_NodeId gServerConfiguration_CreateSigningRequestId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfigurationType_CreateSigningRequest};
+static const SOPC_NodeId gServerConfiguration_CreateSigningRequestId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfigurationType_CreateSigningRequest);
 
-static const SOPC_NodeId gServerConfiguration_UpdateCertificateId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfigurationType_UpdateCertificate};
+static const SOPC_NodeId gServerConfiguration_UpdateCertificateId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfigurationType_UpdateCertificate);
 
-static const SOPC_NodeId gServerConfiguration_GetRejectedListId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfigurationType_GetRejectedList};
+static const SOPC_NodeId gServerConfiguration_GetRejectedListId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfigurationType_GetRejectedList);
 
-static const SOPC_NodeId gServerTrustList = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList};
+static const SOPC_NodeId gServerTrustList =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList);
 
-static const SOPC_NodeId gServerTrustList_OpenWithMasksId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                             .Namespace = 0,
-                                                             .Data.Numeric = OpcUaId_TrustListType_OpenWithMasks};
+static const SOPC_NodeId gServerTrustList_OpenWithMasksId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_TrustListType_OpenWithMasks);
 
-static const SOPC_NodeId gServerTrustList_CloseAndUpdateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                              .Namespace = 0,
-                                                              .Data.Numeric = OpcUaId_TrustListType_CloseAndUpdate};
+static const SOPC_NodeId gServerTrustList_CloseAndUpdateId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_TrustListType_CloseAndUpdate);
 
-static const SOPC_NodeId gServerTrustList_AddCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                              .Namespace = 0,
-                                                              .Data.Numeric = OpcUaId_TrustListType_AddCertificate};
+static const SOPC_NodeId gServerTrustList_AddCertificateId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_TrustListType_AddCertificate);
 
-static const SOPC_NodeId gServerTrustList_RemoveCertificateId = {
-    .IdentifierType = SOPC_IdentifierType_Numeric,
-    .Namespace = 0,
-    .Data.Numeric = OpcUaId_TrustListType_RemoveCertificate};
+static const SOPC_NodeId gServerTrustList_RemoveCertificateId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_TrustListType_RemoveCertificate);
 
-static const SOPC_NodeId gServerFileType_OpenId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                                   .Namespace = 0,
-                                                   .Data.Numeric = OpcUaId_FileType_Open};
+static const SOPC_NodeId gServerFileType_OpenId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_Open);
 
-static const SOPC_NodeId gFileType_ReadId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                             .Namespace = 0,
-                                             .Data.Numeric = OpcUaId_FileType_Read};
+static const SOPC_NodeId gFileType_ReadId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_Read);
 
-static const SOPC_NodeId gFileType_WriteId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                              .Namespace = 0,
-                                              .Data.Numeric = OpcUaId_FileType_Write};
+static const SOPC_NodeId gFileType_WriteId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_Write);
 
-static const SOPC_NodeId gFileType_CloseId = {.IdentifierType = SOPC_IdentifierType_Numeric,
-                                              .Namespace = 0,
-                                              .Data.Numeric = OpcUaId_FileType_Close};
+static const SOPC_NodeId gFileType_CloseId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_FileType_Close);
 
-static const SOPC_Variant CSRinputDefaultArguments[5] = {
-    {true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {0}}};
+static const SOPC_Variant CSRinputDefaultArguments[5] = {SOPC_VARIANT_NODEID({0}), SOPC_VARIANT_NODEID({0}),
+                                                         SOPC_VARIANT_STRING(""), SOPC_VARIANT_BOOL(false),
+                                                         SOPC_VARIANT_BYTESTRING({0})};
 
 static const SOPC_Variant UpdateCertificateDefaultArguments[6] = {
-    {true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId = NULL}},
-    {true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId = NULL}},
-    {true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_ByteString_Id, SOPC_VariantArrayType_Array, {.Array = {0}}},
-    {true, SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {0}}};
+    SOPC_VARIANT_NODEID({0}),     SOPC_VARIANT_NODEID({0}),
+    SOPC_VARIANT_BYTESTRING({0}), {true, SOPC_ByteString_Id, SOPC_VariantArrayType_Array, {.Array = {0}}},
+    SOPC_VARIANT_STRING(""),      SOPC_VARIANT_BYTESTRING({0})};
 
-static const SOPC_Variant OpenWithMasksDefaultArguments = {true,
-                                                           SOPC_UInt32_Id,
-                                                           SOPC_VariantArrayType_SingleValue,
-                                                           {.Uint32 = OpcUa_TrustListMasks_All}};
+static const SOPC_Variant OpenWithMasksDefaultArguments = SOPC_VARIANT_UINT32(OpcUa_TrustListMasks_All);
 
-static const SOPC_Variant RemoveCertificateDefaultArguments[2] = {
-    {true, SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {0}}};
+static const SOPC_Variant RemoveCertificateDefaultArguments[2] = {SOPC_VARIANT_STRING(""), SOPC_VARIANT_BOOL(false)};
 
-static const SOPC_Variant AddCertificateDefaultArguments[2] = {
-    {true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {0}},
-    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {0}}};
+static const SOPC_Variant AddCertificateDefaultArguments[2] = {SOPC_VARIANT_BYTESTRING({0}), SOPC_VARIANT_BOOL(false)};
 
-static const SOPC_Variant OpenDefaultArguments = {true,
-                                                  SOPC_Byte_Id,
-                                                  SOPC_VariantArrayType_SingleValue,
-                                                  {.Byte = OpcUa_OpenFileMode_Read}};
+static const SOPC_Variant OpenDefaultArguments = SOPC_VARIANT_BYTE(OpcUa_OpenFileMode_Read);
 
 static const SOPC_Variant ReadDefaultArguments[2] = {
-    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 0}},
-    {true,
-     SOPC_Int32_Id,
-     SOPC_VariantArrayType_SingleValue,
-     {.Int32 = SOPC_DEFAULT_MAX_STRING_LENGTH}}}; // Max length to read
-static const SOPC_Variant WriteDefaultArguments[2] = {
-    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 0}},
-    {true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {0}}};
+    SOPC_VARIANT_UINT32(0), SOPC_VARIANT_INT32(SOPC_DEFAULT_MAX_STRING_LENGTH)}; // Max length to read
+static const SOPC_Variant WriteDefaultArguments[2] = {SOPC_VARIANT_UINT32(0), SOPC_VARIANT_BYTESTRING({0})};
 
-static const SOPC_Variant CloseDefaultArguments = {true,
-                                                   SOPC_UInt32_Id,
-                                                   SOPC_VariantArrayType_SingleValue,
-                                                   {.Uint32 = 0}};
+static const SOPC_Variant CloseDefaultArguments = SOPC_VARIANT_UINT32(0);
 
 /* Definition of the methods */
 SOPC_ReturnStatus SOPC_TEST_TrustList_Read(SOPC_ClientConnection* secureConnection,
