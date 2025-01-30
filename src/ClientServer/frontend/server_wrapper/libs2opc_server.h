@@ -161,6 +161,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment.
  *
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
+ *                     \li ::OpcUa_AddNodesResponse
  *                     \li ::OpcUa_ReadResponse
  *                     \li ::OpcUa_WriteResponse
  *                     \li ::OpcUa_BrowseResponse

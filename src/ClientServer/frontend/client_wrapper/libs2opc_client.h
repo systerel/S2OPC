@@ -217,6 +217,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
  *
  * \param secureConnection The client connection instance to use to execute the service
  * \param request   An instance of one of the following OPC UA request:
+ *                  - ::OpcUa_AddNodesRequest
  *                  - ::OpcUa_ReadRequest
  *                  - ::OpcUa_WriteRequest
  *                  - ::OpcUa_BrowseRequest
@@ -458,7 +459,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_GetSubscriptionId(const SOPC_ClientHelper_Su
  *                              (might be freed by caller after call only content is recorded in subscription)
  * \param[out] monitoredItemsResp    (optional) Pointer to the empty response that will be filled
  *                                   with the response received from the server and containing the status result
- *                                   and server monitored items ids.
+ *                                   and server monitored items ids. If set, the pointed object shall be cleared using
+ *                                   OpcUa_CreateMonitoredItemsResponse_Clear.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if creation failed.

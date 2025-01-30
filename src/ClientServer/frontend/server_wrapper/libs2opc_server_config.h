@@ -230,6 +230,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(SOPC_Cre
  * \param response     An asynchronous response to a local service request sent using
  *                     ::SOPC_ServerHelper_LocalServiceAsync (see authorized requests).
  *                     Response will be a pointer to one of the following types:
+ *                     \li ::OpcUa_AddNodesResponse
  *                     \li ::OpcUa_ReadResponse
  *                     \li ::OpcUa_WriteResponse
  *                     \li ::OpcUa_BrowseResponse
