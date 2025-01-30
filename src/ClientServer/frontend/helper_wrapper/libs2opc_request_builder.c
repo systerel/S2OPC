@@ -1511,7 +1511,7 @@ SOPC_ReturnStatus SOPC_EventFilter_SetSelectClause(OpcUa_EventFilter* eventFilte
                                                    const SOPC_String* indexRange)
 {
     if (NULL == eventFilter || !CHECK_ELEMENT_EXISTS(eventFilter, NoOfSelectClauses, selectClauseIdx) ||
-        0 == noOfBrowsePath || NULL == browsePaths ||
+        (noOfBrowsePath > 0 && NULL == browsePaths) ||
         SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attributeId))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1528,7 +1528,7 @@ SOPC_ReturnStatus SOPC_EventFilter_SetSelectClause(OpcUa_EventFilter* eventFilte
     {
         status = SOPC_NodeId_Copy(&selectClause->TypeDefinitionId, &baseEventType_NodeId);
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && noOfBrowsePath > 0)
     {
         selectClause->BrowsePath = SOPC_Calloc(noOfBrowsePath, sizeof(*selectClause->BrowsePath));
         status = (NULL == selectClause->BrowsePath ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
