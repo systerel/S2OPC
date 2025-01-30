@@ -53,7 +53,7 @@ static const SOPC_NodeId Null_Type = SOPC_NODEID_NS0_NUMERIC(0);
 
 static const SOPC_QualifiedName TestObject_Counter_BrowseName = SOPC_QUALIFIED_NAME(1, "Counter");
 
-static const SOPC_QualifiedName TestObject_BrowseName = SOPC_QUALIFIED_NAME(1, "TestObject");
+static const SOPC_QualifiedName TestObject_BrowseName = SOPC_QUALIFIED_NAME(0, "TestObject");
 
 SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextPtr,
                                             const SOPC_NodeId* objectId,
