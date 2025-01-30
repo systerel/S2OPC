@@ -54,9 +54,12 @@ typedef uint32_t SOPC_StatusCode;
 bool SOPC_IsGoodStatus(SOPC_StatusCode status);
 
 /**
- * \brief Masks to check status for Uncertain/Bad/Reserved status code: X status <=> (status & SOPC_<X>StatusMask) != 0
+ * \brief Mask to check status for Uncertain status code: X status <=> (status & SOPC_<X>StatusMask) != 0
  */
 #define SOPC_UncertainStatusMask 0x40000000
+/**
+ * \brief Mask to check status for Bad status code: X status <=> (status & SOPC_<X>StatusMask) != 0
+ */
 #define SOPC_BadStatusMask 0x80000000
 
 /**
@@ -377,6 +380,123 @@ typedef struct SOPC_Variant
     SOPC_VariantArrayType ArrayType;
     SOPC_VariantValue Value;
 } SOPC_Variant;
+
+/** \brief Build a constant SOPC_Variant NULL value */
+#define SOPC_VARIANT_NULL                                            \
+    {                                                                \
+        true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, { 0 } \
+    }
+
+/** \brief Build a constant SOPC_Variant boolean value */
+#define SOPC_VARIANT_BOOL(val)                                                       \
+    {                                                                                \
+        true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, { .Boolean = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant signed byte value */
+#define SOPC_VARIANT_SBYTE(val)                                                  \
+    {                                                                            \
+        true, SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, { .Sbyte = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant byte value */
+#define SOPC_VARIANT_BYTE(val)                                                 \
+    {                                                                          \
+        true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, { .Byte = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant uint16 value */
+#define SOPC_VARIANT_UINT16(val)                                                   \
+    {                                                                              \
+        true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, { .Uint16 = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant int16 value */
+#define SOPC_VARIANT_INT16(val)                                                  \
+    {                                                                            \
+        true, SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, { .Int16 = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant uint32 value */
+#define SOPC_VARIANT_UINT32(val)                                                   \
+    {                                                                              \
+        true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, { .Uint32 = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant int32 value */
+#define SOPC_VARIANT_INT32(val)                                                  \
+    {                                                                            \
+        true, SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, { .Int32 = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant uint64 value */
+#define SOPC_VARIANT_UINT64(val)                                                   \
+    {                                                                              \
+        true, SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, { .Uint64 = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant int64 value */
+#define SOPC_VARIANT_INT64(val)                                                  \
+    {                                                                            \
+        true, SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, { .Int64 = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant float value */
+#define SOPC_VARIANT_FLOAT(val)                                                   \
+    {                                                                             \
+        true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, { .Floatv = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant double value */
+#define SOPC_VARIANT_DOUBLE(val)                                                    \
+    {                                                                               \
+        true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, { .Doublev = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant string value from (non-NULL) C string */
+#define SOPC_VARIANT_STRING(val)                                                                \
+    {                                                                                           \
+        true, SOPC_String_Id, SOPC_VariantArrayType_SingleValue, { .String = SOPC_STRING(val) } \
+    }
+
+/** \brief Build a constant SOPC_Variant date time value */
+#define SOPC_VARIANT_DATE(val)                                                     \
+    {                                                                              \
+        true, SOPC_DateTime_Id, SOPC_VariantArrayType_SingleValue, { .Date = val } \
+    }
+
+/** \brief Build a constant SOPC_Variant string value from (non-NULL) C string */
+#define SOPC_VARIANT_BYTESTRING(constBstring)                                                    \
+    {                                                                                            \
+        true, SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, { .Bstring = constBstring } \
+    }
+
+/** \brief Build a constant SOPC_Variant NodeId value from a SOPC_NODEID* generated value */
+#define SOPC_VARIANT_NODEID(constNodeId)                         \
+    {                                                            \
+        true, SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, \
+        {                                                        \
+            .NodeId = (SOPC_NodeId[]) { constNodeId }            \
+        }                                                        \
+    }
+
+/** \brief Build a constant SOPC_Variant qualified name value from a namespace index and a (non-NULL) C string */
+#define SOPC_VARIANT_QNAME(nsIndex, name)                                          \
+    {                                                                              \
+        true, SOPC_QualifiedName_Id, SOPC_VariantArrayType_SingleValue,            \
+        {                                                                          \
+            .Qname = (SOPC_QualifiedName[]) { SOPC_QUALIFIED_NAME(nsIndex, name) } \
+        }                                                                          \
+    }
+
+/** \brief Build a constant SOPC_Variant qualified name value from (non-NULL) C strings */
+#define SOPC_VARIANT_LOCALTEXT(locale, text)                                              \
+    {                                                                                     \
+        true, SOPC_LocalizedText_Id, SOPC_VariantArrayType_SingleValue,                   \
+        {                                                                                 \
+            .LocalizedText = (SOPC_LocalizedText[]) { SOPC_LOCALIZED_TEXT(locale, text) } \
+        }                                                                                 \
+    }
 
 /**
  *  \brief Each attribute in OPC UA has a DataValue caracterized by the following structure
@@ -790,6 +910,18 @@ const char** SOPC_String_GetRawCStringArray(int32_t nbOfStrings, SOPC_String* st
  */
 char** SOPC_String_GetCStringArray(int32_t nbOfStrings, SOPC_String* stringArray);
 
+/** \brief Build a constant SOPC_String from a C string */
+#define SOPC_STRING(cString)                         \
+    {                                                \
+        sizeof(cString) - 1, 1, (SOPC_Byte*) cString \
+    }
+
+/** \brief Build a constant SOPC_String with NULL content */
+#define SOPC_STRING_NULL \
+    {                    \
+        0, 1, NULL       \
+    }
+
 /**** XmlElement ****/
 /** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_XmlElement_Initialize(SOPC_XmlElement* xmlElt);
@@ -855,9 +987,28 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len);
  */
 SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free);
 
+/**
+ * \brief Deprecated: use SOPC_NODEID_NS0_NUMERIC instead
+ * \deprecated use SOPC_NODEID_NS0_NUMERIC instead
+ */
 #define SOPC_NS0_NUMERIC_NODEID(opcUaId)                        \
     {                                                           \
         SOPC_IdentifierType_Numeric, 0, .Data.Numeric = opcUaId \
+    }
+
+/** \brief Build a constant SOPC_NodeId value from NS0 numeric Id */
+#define SOPC_NODEID_NS0_NUMERIC(opcUaId) SOPC_NS0_NUMERIC_NODEID(opcUaId)
+
+/** \brief Build a constant SOPC_NodeId value from numeric Id */
+#define SOPC_NODEID_NUMERIC(nsIndex, opcUaId)                         \
+    {                                                                 \
+        SOPC_IdentifierType_Numeric, nsIndex, .Data.Numeric = opcUaId \
+    }
+
+/** \brief Build a constant SOPC_NodeId value from string Id */
+#define SOPC_NODEID_STRING(nsIndex, cString)                                     \
+    {                                                                            \
+        SOPC_IdentifierType_String, nsIndex, .Data.String = SOPC_STRING(cString) \
     }
 
 /**** ExpandedNodeId ****/
@@ -909,6 +1060,11 @@ void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname);
 void SOPC_QualifiedName_ClearAux(void* value);
 SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, const char* str);
 char* SOPC_QualifiedName_ToCString(const SOPC_QualifiedName* qname);
+
+#define SOPC_QUALIFIED_NAME(nsIndex, name) \
+    {                                      \
+        nsIndex, SOPC_STRING(name)         \
+    }
 
 /**** LocalizedText ****/
 /** \see description in similar function SOPC_Boolean_xxxx */
@@ -996,6 +1152,12 @@ SOPC_ReturnStatus SOPC_LocalizedTextArray_GetPreferredLocale(SOPC_LocalizedText*
                                                              char** preferredLocaleIds,
                                                              int32_t nbLocalizedText,
                                                              const SOPC_LocalizedText* srcArray);
+
+/** \brief Build a constant SOPC_LocalizedText value from locale and text */
+#define SOPC_LOCALIZED_TEXT(locale, text)            \
+    {                                                \
+        SOPC_STRING(locale), SOPC_STRING(text), NULL \
+    }
 
 /**** ExtensionObject ****/
 /** \see description in similar function SOPC_Boolean_xxxx */

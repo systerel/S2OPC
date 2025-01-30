@@ -84,32 +84,32 @@ SOPC_StatusCode SOPC_StatusCode_ToTcpErrorCode(SOPC_StatusCode status)
     }
 }
 
-const SOPC_NodeId SOPC_Null_Type = SOPC_NS0_NUMERIC_NODEID(0);
-const SOPC_NodeId SOPC_Boolean_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Boolean);
-const SOPC_NodeId SOPC_SByte_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_SByte);
-const SOPC_NodeId SOPC_Byte_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Byte);
-const SOPC_NodeId SOPC_Int16_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Int16);
-const SOPC_NodeId SOPC_UInt16_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_UInt16);
-const SOPC_NodeId SOPC_Int32_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Int32);
-const SOPC_NodeId SOPC_UInt32_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_UInt32);
-const SOPC_NodeId SOPC_Int64_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Int64);
-const SOPC_NodeId SOPC_UInt64_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_UInt64);
-const SOPC_NodeId SOPC_Float_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Float);
-const SOPC_NodeId SOPC_Double_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Double);
-const SOPC_NodeId SOPC_String_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_String);
-const SOPC_NodeId SOPC_DateTime_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_DateTime);
-const SOPC_NodeId SOPC_Guid_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Guid);
-const SOPC_NodeId SOPC_ByteString_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ByteString);
-const SOPC_NodeId SOPC_XmlElement_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_XmlElement);
-const SOPC_NodeId SOPC_NodeId_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_NodeId);
-const SOPC_NodeId SOPC_ExpandedNodeId_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ExpandedNodeId);
-const SOPC_NodeId SOPC_StatusCode_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_StatusCode);
-const SOPC_NodeId SOPC_QualifiedName_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_QualifiedName);
-const SOPC_NodeId SOPC_LocalizedText_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_LocalizedText);
-const SOPC_NodeId SOPC_Structure_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Structure);
-const SOPC_NodeId SOPC_DataValue_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_DataValue);
-const SOPC_NodeId SOPC_BaseData_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseDataType);
-const SOPC_NodeId SOPC_DiagnosticInfo_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_DiagnosticInfo);
+const SOPC_NodeId SOPC_Null_Type = SOPC_NODEID_NS0_NUMERIC(0);
+const SOPC_NodeId SOPC_Boolean_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean);
+const SOPC_NodeId SOPC_SByte_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_SByte);
+const SOPC_NodeId SOPC_Byte_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Byte);
+const SOPC_NodeId SOPC_Int16_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Int16);
+const SOPC_NodeId SOPC_UInt16_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_UInt16);
+const SOPC_NodeId SOPC_Int32_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Int32);
+const SOPC_NodeId SOPC_UInt32_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_UInt32);
+const SOPC_NodeId SOPC_Int64_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Int64);
+const SOPC_NodeId SOPC_UInt64_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_UInt64);
+const SOPC_NodeId SOPC_Float_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Float);
+const SOPC_NodeId SOPC_Double_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Double);
+const SOPC_NodeId SOPC_String_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_String);
+const SOPC_NodeId SOPC_DateTime_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_DateTime);
+const SOPC_NodeId SOPC_Guid_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Guid);
+const SOPC_NodeId SOPC_ByteString_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ByteString);
+const SOPC_NodeId SOPC_XmlElement_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_XmlElement);
+const SOPC_NodeId SOPC_NodeId_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId);
+const SOPC_NodeId SOPC_ExpandedNodeId_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ExpandedNodeId);
+const SOPC_NodeId SOPC_StatusCode_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_StatusCode);
+const SOPC_NodeId SOPC_QualifiedName_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_QualifiedName);
+const SOPC_NodeId SOPC_LocalizedText_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText);
+const SOPC_NodeId SOPC_Structure_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Structure);
+const SOPC_NodeId SOPC_DataValue_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_DataValue);
+const SOPC_NodeId SOPC_BaseData_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseDataType);
+const SOPC_NodeId SOPC_DiagnosticInfo_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_DiagnosticInfo);
 
 const SOPC_NodeId* SOPC_BuiltInTypeId_To_DataTypeNodeId[26] = {
     &SOPC_Null_Type,          &SOPC_Boolean_Type,       &SOPC_SByte_Type,          &SOPC_Byte_Type,
