@@ -942,9 +942,9 @@ def generate_string(data):
     if data is not None:
         # remove linebreaks
         data = data.replace('\n', '').replace('\r', '')
-        return '{sizeof("%s")-1, 1, (SOPC_Byte*) "%s"}' % (data.replace('"', '\\"'), data.replace('"', '\\"'))
+        return 'SOPC_STRING("%s")' % data.replace('"', '\\"')
 
-    return '{0, 0, NULL}'
+    return 'SOPC_STRING_NULL'
 
 
 def generate_guid(data):
@@ -962,7 +962,7 @@ def generate_byte_string(data):
 
 def generate_qname(qname):
     assert isinstance(qname, QName)
-    return '{%d, %s}' % (qname.ns or 0, generate_string(qname.name))
+    return 'SOPC_QUALIFIED_NAME(%d, "%s")' % (qname.ns or 0, qname.name or "")
 
 def generate_qname_pointer(qname):
     return '(SOPC_QualifiedName[]) {%s}' % generate_qname(qname)
@@ -975,9 +975,12 @@ def generate_nodeid(nodeid):
     data_struct_field = '.Data.' + id_type[len('SOPC_IdentifierType_'):]
 
     if nodeid.ty == ID_TYPE_NUMERIC:
-        data_struct_val = str(nodeid.data)
+        if nodeid.ns:
+            return 'SOPC_NODEID_NUMERIC(%d, %d)' % (nodeid.ns, nodeid.data)
+        else:
+            return 'SOPC_NODEID_NS0_NUMERIC(%d)' % nodeid.data
     elif nodeid.ty == ID_TYPE_STRING:
-        data_struct_val = generate_string(nodeid.data)
+        return 'SOPC_NODEID_STRING(%d, "%s")' % (nodeid.ns or 0, nodeid.data)
     elif nodeid.ty == ID_TYPE_GUID:
         data_struct_val = generate_guid(nodeid.data)
     elif nodeid.ty == ID_TYPE_BYTESTRING:
@@ -998,7 +1001,7 @@ def generate_localized_text(text):
         # remove linebreaks and whitespaces (should not exist in locale)
         text.locale = text.locale.replace('\n', '').replace('\r', '').replace(' ','')
 
-    return '{%s, %s}' % (generate_string(text.locale), generate_string(text.text))
+    return 'SOPC_LOCALIZED_TEXT("%s", "%s")' % (text.locale or "", text.text or "")
 
 def generate_localized_text_pointer(ltext):
     return '(SOPC_LocalizedText[]) {%s}' % generate_localized_text(ltext)
@@ -1293,7 +1296,7 @@ def generate_datetime_str(val):
 
 def generate_value_variant(val):
     if val is None:
-        return '{true, SOPC_Null_Id, SOPC_VariantArrayType_SingleValue, {0}}'
+        return 'SOPC_VARIANT_NULL'
 
     if val.ty == VALUE_TYPE_BOOL:
         return generate_variant('SOPC_Boolean_Id', 'SOPC_Boolean', 'Boolean', val.val, val.is_array, boolean_to_string)
@@ -1672,7 +1675,7 @@ def generate_address_space(is_const_addspace, no_dt_definition, source, out):
             access_level= no_metadata_write_in_accesslevel(ua_node, number_coalesce(ua_node.accesslevel, 1))
             out.write(generate_item(is_const_addspace, ua_node, 'Variable', 'variable', '0x00',
                                     # Set Variant index as Variant value in constant item
-                                    Value=generate_variant('SOPC_UInt32_Id', 'uint32_t', 'Uint32', len(variables), False, str),
+                                    Value='SOPC_VARIANT_UINT32(%d)' % len(variables),
                                     DataType=generate_nodeid(ua_node.data_type),
                                     ValueRank="(%d)" % ua_node.value_rank,
                                     AccessLevel=str(access_level)))
