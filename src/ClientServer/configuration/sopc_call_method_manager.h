@@ -19,16 +19,20 @@
 
 /** \file
  *
- * \brief Contains the types to be used by the method call manager to configure the Call service
+ * \brief Contains the types to be used by the method call manager to configure the Call service.
+ *        ::SOPC_MethodCallManager is thread-safe for adding methods at runtime.
  *
  * \warning Methods call are blocking for server services treatment,
  *          methods implementation should be lightweight functions (see Part 3 §4.7).
+ *
+ * \note Metho
  */
 
 #ifndef SOPC_CALL_METHOD_MANAGER_H_
 #define SOPC_CALL_METHOD_MANAGER_H_
 
 #include "sopc_builtintypes.h"
+#include "sopc_mutexes.h"
 #include "sopc_service_call_context.h"
 
 typedef struct SOPC_MethodCallManager SOPC_MethodCallManager;
@@ -112,6 +116,11 @@ typedef SOPC_MethodCallFunc* SOPC_MethodCallManager_Get_Func(SOPC_MethodCallMana
  */
 struct SOPC_MethodCallManager
 {
+    /**
+     * \brief the mutex used to make the ::SOPC_MethodCallManager instance thread-safe
+     */
+    SOPC_Mutex mut;
+
     /**
      * \brief The free function, called upon generic ::SOPC_MethodCallManager destruction.
      * \param mcm     a valid pointer to the ::SOPC_MethodCallManager.

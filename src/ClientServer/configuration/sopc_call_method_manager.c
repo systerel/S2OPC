@@ -80,6 +80,8 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void)
     }
     else
     {
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Initialization(&mcm->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
         *((SOPC_MethodCallManager_Free_Func**) (&mcm->pFnFree)) = &SOPC_MethodCallManager_InternalData_Free;
         *((SOPC_MethodCallManager_Get_Func**) (&mcm->pFnGetMethod)) = &SOPC_MethodCallManager_Get;
@@ -95,6 +97,9 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
     {
         return;
     }
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&mcm->mut);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
     if (NULL != mcm->pFnFree && NULL != mcm->pUserData)
     {
         mcm->pFnFree(mcm->pUserData);
@@ -105,6 +110,10 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
     *((SOPC_MethodCallManager_Get_Func**) (&mcm->pFnGetMethod)) = NULL;
     SOPC_GCC_DIAGNOSTIC_RESTORE
     mcm->pUserData = NULL;
+    mutStatus = SOPC_Mutex_Unlock(&mcm->mut);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = SOPC_Mutex_Clear(&mcm->mut);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     SOPC_Free(mcm);
 }
 
@@ -114,6 +123,12 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
                                                    void* param,
                                                    SOPC_MethodCallFunc_Free_Func* fnFree)
 {
+    if (NULL == mcm || NULL == methodId || NULL == methodFunc)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&mcm->mut);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Dict* dict = (SOPC_Dict*) mcm->pUserData;
     SOPC_ASSERT(NULL != dict);
@@ -143,6 +158,9 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
         SOPC_Free(methodIdCopy);
         SOPC_Free(wrapper);
     }
+    mutStatus = SOPC_Mutex_Unlock(&mcm->mut);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
     return status;
 }
 
@@ -159,10 +177,14 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethodWithType(SOPC_MethodCallManage
         return status;
     }
     status = SOPC_MethodCallManager_AddMethod(mcm, methodInstanceId, methodFunc, param, fnFree);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK != status && NULL != mcm)
     {
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&mcm->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         // remove already inserted method
         SOPC_Dict_Remove((SOPC_Dict*) mcm->pUserData, (uintptr_t) methodTypeId);
+        mutStatus = SOPC_Mutex_Unlock(&mcm->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
     return status;
 }
