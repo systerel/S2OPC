@@ -132,7 +132,7 @@ static SOPC_ReturnStatus SOPC_InternalEventManagerUtil_QnPathToCString(uint16_t 
     if (0 == nbQnPath)
     {
         *qnPathStr = SOPC_strdup(QN_EMPTY_PATH_NODEID);
-        if (NULL != *qnPathStr)
+        if (NULL == *qnPathStr)
         {
             return SOPC_STATUS_OUT_OF_MEMORY;
         }
