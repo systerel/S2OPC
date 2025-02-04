@@ -612,8 +612,8 @@ void address_space_bs__read_AddressSpace_IsAbstract_value(
                 address_space_bs__p_node->node_class == OpcUa_NodeClass_ReferenceType ||
                 address_space_bs__p_node->node_class == OpcUa_NodeClass_DataType);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
-    *address_space_bs__variant = util_variant__new_Variant_from_Bool(
-        SOPC_AddressSpace_Get_IsAbstract(address_space_bs__nodes, address_space_bs__p_node));
+    SOPC_Boolean* isAbstract = SOPC_AddressSpace_Get_IsAbstract(address_space_bs__nodes, address_space_bs__p_node);
+    *address_space_bs__variant = util_variant__new_Variant_from_Bool(*isAbstract);
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;

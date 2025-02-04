@@ -322,7 +322,7 @@ class VariableValue(object):
 
 class Node(object):
     __slots__ = 'tag', 'nodeid', 'browse_name', 'description', 'display_name', 'references',\
-                'idonly', 'value', 'data_type', 'value_rank', 'accesslevel', 'executable', 'definition',\
+                'idonly', 'value', 'data_type', 'value_rank', 'accesslevel', 'executable', 'is_abstract', 'definition',\
                 'event_notifier'
 
     def __init__(self, tag, nodeid, browse_name, description, display_name, references):
@@ -338,6 +338,7 @@ class Node(object):
         self.value_rank = None
         self.accesslevel = None
         self.executable = None # For Method node class only
+        self.is_abstract = False # For VariableType, ObjectType, ReferenceType and DataType
         self.definition = None # For DataType node class only
         self.event_notifier = None # For Object or View node class only
 
@@ -1484,6 +1485,10 @@ def parse_uanode(no_dt_definition, xml_node, source, aliases):
             except ValueError:
                 raise ParseError('Non integer EventNotifier for node %s' % xml_node['NodeId'])
 
+    if (xml_node.tag == UA_VARIABLE_TYPE_TAG or xml_node.tag == UA_OBJECT_TYPE_TAG or 
+        xml_node.tag == UA_REFERENCE_TYPE_TAG or xml_node.tag == UA_DATA_TYPE_TAG):
+        node.is_abstract = (parse_boolean_value(xml_node.get('IsAbstract', 'false')))
+
     return node
 
 
@@ -1571,14 +1576,17 @@ def generate_item_variable_type(is_const_addspace, nodes, ua_node):
     return generate_item(is_const_addspace, ua_node, 'VariableType', 'variable_type', value_status,
                          Value=generate_value_variant(ua_node.value),
                          DataType=generate_nodeid(ua_node.data_type),
-                         ValueRank="(%d)" % ua_node.value_rank)
+                         ValueRank="(%d)" % ua_node.value_rank,
+                         IsAbstract= 'true' if ua_node.is_abstract else 'false')
 
 def generate_item_object_type(is_const_addspace, nodes, ua_node):
-    return generate_item(is_const_addspace, ua_node, 'ObjectType', 'object_type')
+    return generate_item(is_const_addspace, ua_node, 'ObjectType', 'object_type', 
+                         IsAbstract= 'true' if ua_node.is_abstract else 'false')
 
 
 def generate_item_reference_type(is_const_addspace, nodes, ua_node):
-    return generate_item(is_const_addspace, ua_node, 'ReferenceType', 'reference_type')
+    return generate_item(is_const_addspace, ua_node, 'ReferenceType', 'reference_type', 
+                         IsAbstract= 'true' if ua_node.is_abstract else 'false')
 
 def generate_item_data_type(is_const_addspace, nodes, ua_node):
     dt_definition = None
@@ -1587,9 +1595,11 @@ def generate_item_data_type(is_const_addspace, nodes, ua_node):
         is_not_pointer = True
         dt_definition = generate_extension_object(ua_node.definition, generate_definition_ext_obj, is_array=is_not_pointer)
     if dt_definition is None:
-        return generate_item(is_const_addspace, ua_node, 'DataType', 'data_type')
+        return generate_item(is_const_addspace, ua_node, 'DataType', 'data_type',
+                             IsAbstract= 'true' if ua_node.is_abstract else 'false')
     else:
         return generate_item(is_const_addspace, ua_node, 'DataType', 'data_type',
+                             IsAbstract= 'true' if ua_node.is_abstract else 'false',
                              DataTypeDefinition = dt_definition)
 
 

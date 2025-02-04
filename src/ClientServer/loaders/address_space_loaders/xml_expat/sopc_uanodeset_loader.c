@@ -142,9 +142,9 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 
             if (parser_error != XML_ERROR_NONE)
             {
-                fprintf(stderr, "XML parsing failed at line %lu, column %lu. Error code is %d.\n",
+                fprintf(stderr, "XML parsing failed at line %lu, column %lu. Error: %s.\n",
                         XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser),
-                        (int) XML_GetErrorCode(parser));
+                        XML_ErrorString(parser_error));
             }
 
             // else, the error comes from one of the callbacks, that log an error
@@ -651,6 +651,21 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
             const char* attr_val = attrs[++i];
 
             ctx->node.data.method.Executable = (strcmp(attr_val, "true") == 0);
+        }
+        else if (strcmp("IsAbstract", attr) == 0)
+        {
+            if (OpcUa_NodeClass_VariableType != element_type && OpcUa_NodeClass_ObjectType != element_type &&
+                OpcUa_NodeClass_ReferenceType != element_type && OpcUa_NodeClass_DataType != element_type)
+            {
+                LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                               "Unexpected IsAbstract attribute (value '%s') on node of class = %s", attrs[++i],
+                               tag_from_element_id(element_type));
+                return false;
+            }
+            const char* attr_val = attrs[++i];
+
+            SOPC_Boolean* isAbstract = SOPC_AddressSpace_Get_IsAbstract(ctx->space, &ctx->node);
+            *isAbstract = (strcmp(attr_val, "true") == 0);
         }
         else if (strcmp("EventNotifier", attr) == 0)
         {
