@@ -6020,7 +6020,7 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst,
         return set_range_matrix_on_string_array(dst, src, numRanges);
     }
 
-    if (src->ArrayType != SOPC_VariantArrayType_Matrix)
+    if (src->ArrayType != SOPC_VariantArrayType_Matrix || dst->ArrayType != SOPC_VariantArrayType_Matrix)
     {
         return SOPC_STATUS_NOK;
     }
@@ -6050,6 +6050,7 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst,
             return status;
         }
         *dst = tmp;
+        SOPC_ASSERT(NULL != dst->Value.Matrix.ArrayDimensions);
     }
 
     /* Check constraints */
