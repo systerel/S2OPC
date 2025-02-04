@@ -133,7 +133,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
         return;
     }
     SOPC_MethodCallManager* mcm = endpoint_config->serverConfigPtr->mcm;
-    if (NULL == mcm || NULL == mcm->pFnGetMethod)
+    if (NULL == mcm)
     {
         *address_space_bs__p_rawStatusCode = OpcUa_BadNotImplemented;
         return;
@@ -141,7 +141,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
 
     /* Get the C function corresponding to the method */
     SOPC_NodeId* methodId = &methodToCall->MethodId;
-    SOPC_MethodCallFunc* method_c = mcm->pFnGetMethod(mcm, methodId);
+    SOPC_MethodCallFunc* method_c = SOPC_MethodCallManager_GetMethod(mcm, methodId);
     if (NULL == method_c)
     {
         *address_space_bs__p_rawStatusCode = OpcUa_BadNotImplemented;

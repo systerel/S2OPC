@@ -16,6 +16,7 @@ cdef struct SOPC_PKI_Profile
 cdef struct SOPC_PKI_ChainProfile
 cdef struct SOPC_PKI_LeafProfile
 cdef struct SOPC_UserWithAuthorization
+cdef struct SOPC_MethodCallManager
 cdef struct timespec
 cdef struct time_t
 ctypedef struct tm
