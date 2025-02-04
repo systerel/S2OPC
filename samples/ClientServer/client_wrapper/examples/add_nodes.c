@@ -161,16 +161,19 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(SOPC_ClientConnection* s
             printf("Bad status return code. Status:%d\n", addNodesResp->ResponseHeader.ServiceResult);
             status = SOPC_STATUS_NOK;
         }
-        if (addNodesResp->NoOfResults != 1)
+        else
         {
-            printf("Bad number of result in response. Expected one, got:%d\n", addNodesResp->NoOfResults);
-            status = SOPC_STATUS_NOK;
-        }
-        if (!SOPC_NodeId_Equal(&nodeToAdd->NodeId, &addNodesResp->Results[0].AddedNodeId))
-        {
-            printf("NodeId added is not equal to the one you wanted to add!\nData string:%s\n",
-                   SOPC_String_GetRawCString(&addNodesResp->Results[0].AddedNodeId.Data.String));
-            status = SOPC_STATUS_NOK;
+            if (addNodesResp->NoOfResults != 1)
+            {
+                printf("Bad number of result in response. Expected one, got:%d\n", addNodesResp->NoOfResults);
+                status = SOPC_STATUS_NOK;
+            }
+            if (!SOPC_NodeId_Equal(&nodeToAdd->NodeId, &addNodesResp->Results[0].AddedNodeId))
+            {
+                printf("NodeId added is not equal to the one requested to add!\nData string:%s\n",
+                       SOPC_String_GetRawCString(&addNodesResp->Results[0].AddedNodeId.Data.String));
+                status = SOPC_STATUS_NOK;
+            }
         }
 
         SOPC_ReturnStatus delStatus =
