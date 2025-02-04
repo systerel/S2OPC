@@ -31,13 +31,7 @@ typedef SOPC_MethodCallFunc* SOPC_MethodCallManager_Get_Func(SOPC_MethodCallMana
 typedef void SOPC_MethodCallManager_Free_Func(void* data);
 
 /**
- * \brief The ::SOPC_MethodCallManager object defines the common interface for the method manager.
- *
- * The ownership of the output data of functions moved to S2OPC toolkit
- *
- * User can use the SOPC toolkit basic implementation of this interface by calling
- * ::SOPC_MethodCallManager_Create and ::SOPC_MethodCallManager_AddMethod functions.
- * User can implement its own ::SOPC_MethodCallManager_Get_Func and pUserData for specific uses.
+ * \brief The ::SOPC_MethodCallManager structure contains the data necessary for a MCM instance.
  */
 struct SOPC_MethodCallManager
 {
@@ -47,28 +41,12 @@ struct SOPC_MethodCallManager
     SOPC_Mutex mut;
 
     /**
-     * \brief The free function, called upon generic ::SOPC_MethodCallManager destruction.
-     * \param mcm     a valid pointer to the ::SOPC_MethodCallManager.
+     * \brief dictionary containing NodeId to ::SOPC_MethodCallFunc
      */
-    SOPC_MethodCallManager_Free_Func* const pFnFree;
-
-    /**
-     * \brief Function to get a function pointer corresponding to an object Method of the Address Space.
-     *
-     * \param mcm        a valid pointer to a ::SOPC_MethodCallManager.
-     * \param methodId   a valid pointer to the ::SOPC_NodeId of a method.
-     * \return           a valid function pointer (::SOPC_MethodCallManager_Free_Func) or NULL if there is no
-     *                   implementation for the given methodId.
-     */
-    SOPC_MethodCallManager_Get_Func* const pFnGetMethod;
-
-    /**
-     * \brief internal data of the manager.
-     */
-    void* pUserData;
+    SOPC_Dict* nodeIdToMethod;
 };
 
-// Use when clear internal Dict
+// Used when clear nodeIdToMethod entry
 static void SOPC_MethodCallManager_Free_MF(uintptr_t data)
 {
     if (NULL == (void*) data)
@@ -88,27 +66,6 @@ static void SOPC_MethodCallManager_Free_MF(uintptr_t data)
     SOPC_Free(mf);
 }
 
-static void SOPC_MethodCallManager_InternalData_Free(void* data)
-{
-    if (NULL == data)
-    {
-        return;
-    }
-    SOPC_Dict_Delete((SOPC_Dict*) data);
-}
-
-static SOPC_MethodCallFunc* SOPC_MethodCallManager_Get(SOPC_MethodCallManager* mcm, const SOPC_NodeId* methodId)
-{
-    if (NULL == mcm || NULL == methodId)
-    {
-        return NULL;
-    }
-    SOPC_Dict* dict = (SOPC_Dict*) mcm->pUserData;
-    SOPC_ASSERT(NULL != dict);
-    SOPC_MethodCallFunc* methodFunc = (SOPC_MethodCallFunc*) SOPC_Dict_Get(dict, (const uintptr_t) methodId, NULL);
-    return methodFunc;
-}
-
 SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void)
 {
     SOPC_MethodCallManager* mcm = SOPC_Calloc(1, sizeof(SOPC_MethodCallManager));
@@ -117,8 +74,8 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void)
         return NULL;
     }
 
-    mcm->pUserData = SOPC_NodeId_Dict_Create(true, &SOPC_MethodCallManager_Free_MF);
-    if (NULL == mcm->pUserData)
+    mcm->nodeIdToMethod = SOPC_NodeId_Dict_Create(true, &SOPC_MethodCallManager_Free_MF);
+    if (NULL == mcm->nodeIdToMethod)
     {
         SOPC_Free(mcm);
         mcm = NULL;
@@ -127,10 +84,6 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void)
     {
         SOPC_ReturnStatus mutStatus = SOPC_Mutex_Initialization(&mcm->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        *((SOPC_MethodCallManager_Free_Func**) (&mcm->pFnFree)) = &SOPC_MethodCallManager_InternalData_Free;
-        *((SOPC_MethodCallManager_Get_Func**) (&mcm->pFnGetMethod)) = &SOPC_MethodCallManager_Get;
-        SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 
     return mcm;
@@ -144,17 +97,8 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
     }
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&mcm->mut);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    if (NULL != mcm->pFnFree && NULL != mcm->pUserData)
-    {
-        mcm->pFnFree(mcm->pUserData);
-    }
-
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *((SOPC_MethodCallManager_Free_Func**) (&mcm->pFnFree)) = NULL;
-    *((SOPC_MethodCallManager_Get_Func**) (&mcm->pFnGetMethod)) = NULL;
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-    mcm->pUserData = NULL;
+    SOPC_Dict_Delete(mcm->nodeIdToMethod);
+    mcm->nodeIdToMethod = NULL;
     mutStatus = SOPC_Mutex_Unlock(&mcm->mut);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     mutStatus = SOPC_Mutex_Clear(&mcm->mut);
@@ -175,7 +119,7 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&mcm->mut);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Dict* dict = (SOPC_Dict*) mcm->pUserData;
+    SOPC_Dict* dict = (SOPC_Dict*) mcm->nodeIdToMethod;
     SOPC_ASSERT(NULL != dict);
 
     SOPC_MethodCallFunc* wrapper = SOPC_Calloc(1, sizeof(SOPC_MethodCallFunc));
@@ -227,7 +171,7 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethodWithType(SOPC_MethodCallManage
         SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&mcm->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         // remove already inserted method
-        SOPC_Dict_Remove((SOPC_Dict*) mcm->pUserData, (uintptr_t) methodTypeId);
+        SOPC_Dict_Remove((SOPC_Dict*) mcm->nodeIdToMethod, (uintptr_t) methodTypeId);
         mutStatus = SOPC_Mutex_Unlock(&mcm->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
@@ -240,13 +184,14 @@ SOPC_MethodCallFunc* SOPC_MethodCallManager_GetMethod(SOPC_MethodCallManager* mc
     {
         return NULL;
     }
+    SOPC_ASSERT(NULL != mcm->nodeIdToMethod);
+
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&mcm->mut);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    SOPC_MethodCallFunc* method_c = mcm->pFnGetMethod(mcm, methodId);
-
+    SOPC_MethodCallFunc* methodFunc =
+        (SOPC_MethodCallFunc*) SOPC_Dict_Get(mcm->nodeIdToMethod, (const uintptr_t) methodId, NULL);
     mutStatus = SOPC_Mutex_Unlock(&mcm->mut);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    return method_c;
+    return methodFunc;
 }

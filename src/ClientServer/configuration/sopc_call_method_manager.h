@@ -24,8 +24,6 @@
  *
  * \warning Methods call are blocking for server services treatment,
  *          methods implementation should be lightweight functions (see Part 3 §4.7).
- *
- * \note Metho
  */
 
 #ifndef SOPC_CALL_METHOD_MANAGER_H_
@@ -40,11 +38,11 @@ typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
 /**
  * \brief  Type of the function to call associated to a method
  *
- * \warning The method callback call is blocking for server services treatment
- *          and thus local services cannot be called synchronously.
+ * \warning The method callback call is blocking for server services treatment.
+ *          Thus local services shall not be called synchronously.
  *          Method should be lightweight functions (see Part 3 §4.7)
  *          and only operations provided by \p callContextPtr
- *          shall be used to interact with server address space.
+ *          shall be used to interact with server address space synchronously.
  *
  * \note Method call service verifies the input arguments before calling a ::SOPC_MethodCallFunc_Ptr function.
  *
@@ -99,9 +97,9 @@ struct SOPC_MethodCallFunc
 };
 
 /**
- * \brief Provide a basic implementation of MethodCallManager.
+ * \brief Provide an instance of MethodCallManager.
  *        This implementation can be used with ::SOPC_MethodCallManager_AddMethod
- *        or ::SOPC_MethodCallManager_AddMethodWithType to add method.
+ *        or ::SOPC_MethodCallManager_AddMethodWithType to add methods.
  *
  * \return a valid ::SOPC_MethodCallManager pointer or NULL on memory allocation failure.
  */
@@ -115,7 +113,6 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
 
 /**
  * \brief Associates a C function to a NodeId of a Method.
- * This function should be used only with the basic implementation of ::SOPC_MethodCallManager provided by the toolkit.
  *
  * \param mcm             a valid pointer on a ::SOPC_MethodCallManager returned by ::SOPC_MethodCallManager_Create.
  * \param methodId        a valid pointer on a ::SOPC_NodeId of the method, content will be copied.
@@ -134,7 +131,6 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
 
 /**
  * \brief Associates a C function to two NodeId of a Method (one for method instance and one for method in object type)
- * This function should only be used with the basic implementation of ::SOPC_MethodCallManager provided by the toolkit.
  *
  * \note It is a common pattern to use the well known NodeId of the method instance declaration of the object type
  *       instead of using the method instance NodeId. This function provides an easy way to register both at same time.
