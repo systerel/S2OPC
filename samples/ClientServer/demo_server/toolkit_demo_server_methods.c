@@ -632,7 +632,7 @@ SOPC_StatusCode SOPC_Method_Func_GenEvent(const SOPC_CallContext* callContextPtr
         nbEvents = inputArgs[0].Value.Uint32;
     }
 
-    for (uint32_t i = 0; i < nbEvents; i++)
+    for (uint32_t i = 0; SOPC_STATUS_OK == status && i < nbEvents; i++)
     {
         SOPC_Event* eventInstCopy = SOPC_Event_CreateCopy(eventInst, true);
         SOPC_ASSERT(NULL != eventInstCopy);

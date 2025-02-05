@@ -1008,6 +1008,11 @@ static SOPC_ReturnStatus call_gen_events_method(SOPC_ClientConnection* secureCon
         {
             SOPC_ASSERT(1 == callMethodResp->NoOfResults);
             status = SOPC_IsGoodStatus(callMethodResp->Results[0].StatusCode) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            if (SOPC_STATUS_OK != status)
+            {
+                printf("\n ERROR: Method call failed with status 0x%08" PRIX32 "\n",
+                       callMethodResp->Results[0].StatusCode);
+            }
         }
         else
         {
