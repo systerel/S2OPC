@@ -163,6 +163,7 @@ SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Da
                                                                          SOPC_PubSub_SecurityType* security)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Buffer* buffer_payload = NULL;
     SOPC_PubFixedBuffer_Buffer_Ctx* preencode = PubFixedBuffer_Create_Preencode_Buffer(nm);
     SOPC_DataSet_LL_NetworkMessage_Set_Preencode_Buffer(nm, preencode);
     if (NULL == preencode)
@@ -172,7 +173,6 @@ SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Da
     else
     {
         PubFixedBuffer_Initialize_Preencode_Buffer(nm);
-        SOPC_Buffer* buffer_payload = NULL;
         SOPC_NetworkMessage_Error_Code code =
             SOPC_UADP_NetworkMessage_Encode_Buffers(nm, security, &preencode->buffer, &buffer_payload);
         if (SOPC_NetworkMessage_Error_Code_None != code || NULL == preencode->buffer || NULL == buffer_payload)
@@ -198,6 +198,14 @@ SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Da
                 // Signature is set at the end of the networkMessage
                 SOPC_PubFixedBuffer_Set_Sign_Position(preencode, preencode->buffer->length);
             }
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_PubFixedBuffer_Delete_Preencode_Buffer(&preencode);
+        if (NULL != buffer_payload)
+        {
+            SOPC_Buffer_Delete(buffer_payload);
         }
     }
     return status;
