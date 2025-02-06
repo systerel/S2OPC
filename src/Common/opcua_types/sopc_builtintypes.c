@@ -2172,7 +2172,7 @@ static void nodeid_free(uintptr_t id)
 
 SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free)
 {
-    return SOPC_Dict_Create(0, nodeid_hash, nodeid_equal, free_keys ? nodeid_free : NULL, value_free);
+    return SOPC_Dict_Create(0, nodeid_hash, nodeid_equal, free_keys ? &nodeid_free : NULL, value_free);
 }
 
 void SOPC_ExpandedNodeId_InitializeAux(void* value)

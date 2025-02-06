@@ -505,7 +505,7 @@ static SOPC_EncodeableObject_PfnComp* getPfnCompare(const SOPC_EncodeableType_Fi
     }
     else
     {
-        return SOPC_EncodeableType_PfnCompare;
+        return &SOPC_EncodeableType_PfnCompare;
     }
 }
 

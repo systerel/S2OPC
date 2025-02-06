@@ -550,7 +550,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
         return SOPC_STATUS_INVALID_STATE;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (SOPC_HelperInternal_SyncServerStoppedCb == sopc_server_helper_config.stoppedCb)
+    if (&SOPC_HelperInternal_SyncServerStoppedCb == sopc_server_helper_config.stoppedCb)
     {
         // Since server is running synchronously with ::SOPC_ServerHelper_Serve, stop request is asynchronous
         SOPC_HelperInternal_SyncServerAsyncStop(false);

@@ -562,7 +562,7 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes)
     result->readOnlyNodes = false;
     result->free_nodes = free_nodes;
     result->dict_nodes =
-        SOPC_NodeId_Dict_Create(false, free_nodes ? free_description_node : clear_description_node_value);
+        SOPC_NodeId_Dict_Create(false, free_nodes ? &free_description_node : &clear_description_node_value);
     if (NULL == result->dict_nodes)
     {
         SOPC_Free(result);
