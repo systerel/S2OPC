@@ -70,4 +70,7 @@
         } while ((result == -1) && (errno == EINTR)); \
     } while (false);
 
+// This macro is used to avoid error "format string argument not a string type" printf like funtctions.
+#define SOPC_STRING_FORMAT(paramIndex) __attribute__((__format__(__printf__, paramIndex, 0)))
+
 #endif // SOPC_MACROS_H_
