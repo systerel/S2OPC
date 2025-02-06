@@ -74,7 +74,10 @@ static const char* sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Reserved
     QN_EMPTY_PATH_NODEID, "0:EventId",   "0:EventType", "0:SourceNode", "0:SourceName", "0:Time",
     "0:ReceiveTime",      "0:LocalTime", "0:Message",   "0:Severity"};
 
-// Note: cannot be const because MS build does not support &OpcUa_*_EncodeableType reference in definition for library
+// Notes:
+// - On Windows: can't be const because MS build does not support &OpcUa_*_EncodeableType ref in definition for library
+// - On PikeOS: ignore cast const necessary due to macros with empty strings
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 static SOPC_Event_Variable sopc_baseEventVariants[SOPC_BaseEventVariantIdx_ReservedLength] = {
     {SOPC_VARIANT_NODEID(SOPC_NODEID_NS0_NUMERIC(0)), SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId),
      -1}, // "OwnNodeId": placeholder to store the actual event/node instance NodeId (see ConditionId in part 9)
@@ -95,6 +98,7 @@ static SOPC_Event_Variable sopc_baseEventVariants[SOPC_BaseEventVariantIdx_Reser
     {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // Message
     {SOPC_VARIANT_UINT16(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_UInt16), -1},                // Severity
 };
+SOPC_GCC_DIAGNOSTIC_RESTORE
 
 static SOPC_NodeId baseEventNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 
@@ -223,7 +227,8 @@ const SOPC_NodeId* SOPC_Event_GetEventTypeId(const SOPC_Event* pEvent)
     }
     bool found = false;
     SOPC_Event_Variable* eventIdVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_EventType], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_EventType],
+        &found);
 
     if (found && SOPC_NodeId_Id == eventIdVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == eventIdVarInfo->data.ArrayType)
@@ -238,7 +243,8 @@ static SOPC_ByteString* SOPC_InternalEvent_GetEventId(const SOPC_Event* pEvent)
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;
     SOPC_Event_Variable* eventIdVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_EventId], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_EventId],
+        &found);
 
     if (found && SOPC_ByteString_Id == eventIdVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == eventIdVarInfo->data.ArrayType)
@@ -274,7 +280,8 @@ static SOPC_String* SOPC_Event_GetSourceName(SOPC_Event* pEvent)
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;
     SOPC_Event_Variable* sourceNameVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_SourceName], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_SourceName],
+        &found);
 
     if (found && SOPC_String_Id == sourceNameVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == sourceNameVarInfo->data.ArrayType)
@@ -305,7 +312,8 @@ static SOPC_NodeId* SOPC_Event_GetSourceNode(SOPC_Event* pEvent)
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;
     SOPC_Event_Variable* sourceNodeVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_SourceNode], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_SourceNode],
+        &found);
 
     if (found && SOPC_NodeId_Id == sourceNodeVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == sourceNodeVarInfo->data.ArrayType)
@@ -336,7 +344,7 @@ SOPC_DateTime SOPC_Event_GetTime(const SOPC_Event* pEvent)
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;
     SOPC_Event_Variable* timeVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Time], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Time], &found);
 
     if (found && SOPC_DateTime_Id == timeVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == timeVarInfo->data.ArrayType)
@@ -354,7 +362,7 @@ static SOPC_ReturnStatus event_set_date(SOPC_Event* pEvent, SOPC_BaseEventVarian
     }
     bool found = false;
     SOPC_Event_Variable* dateVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[dateIdx], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[dateIdx], &found);
 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (found && SOPC_DateTime_Id == dateVarInfo->data.BuiltInTypeId &&
@@ -381,7 +389,8 @@ static OpcUa_TimeZoneDataType* SOPC_Event_GetLocalTime(SOPC_Event* pEvent)
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;
     SOPC_Event_Variable* localTimeVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_LocalTime], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_LocalTime],
+        &found);
 
     if (found && SOPC_ExtensionObject_Id == localTimeVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == localTimeVarInfo->data.ArrayType &&
@@ -415,7 +424,8 @@ static SOPC_LocalizedText* SOPC_Event_GetMessage(SOPC_Event* pEvent)
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;
     SOPC_Event_Variable* messageVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Message], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Message],
+        &found);
 
     if (found && SOPC_LocalizedText_Id == messageVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == messageVarInfo->data.ArrayType)
@@ -449,7 +459,8 @@ SOPC_ReturnStatus SOPC_Event_SetSeverity(SOPC_Event* pEvent, uint16_t severity)
     }
     bool found = false;
     SOPC_Event_Variable* severityVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Severity], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Severity],
+        &found);
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
     if (found && SOPC_UInt16_Id == severityVarInfo->data.BuiltInTypeId &&
@@ -553,7 +564,8 @@ static SOPC_NodeId* SOPC_Event_GetNodeId(SOPC_Event* pEvent)
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;
     SOPC_Event_Variable* nodeIdVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
-        pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_NodeId], &found);
+        pEvent->qnPathToEventVar, (const uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_NodeId],
+        &found);
 
     if (found && SOPC_NodeId_Id == nodeIdVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == nodeIdVarInfo->data.ArrayType)
