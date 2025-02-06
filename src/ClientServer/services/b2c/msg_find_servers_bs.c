@@ -28,7 +28,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void msg_find_servers_bs__INITIALISATION(void) {}
+void msg_find_servers_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

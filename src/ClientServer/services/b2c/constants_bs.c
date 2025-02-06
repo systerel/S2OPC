@@ -83,7 +83,9 @@ const constants_bs__t_QualifiedName_i constants_bs__c_NamespaceUri_QualifiedName
 static char* EmptyLocaleIds[] = {NULL};
 constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty = EmptyLocaleIds;
 
-void constants_bs__INITIALISATION(void) {}
+void constants_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

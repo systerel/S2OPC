@@ -27,7 +27,9 @@
 
 #include "util_b2c.h"
 
-void service_response_cb_bs__INITIALISATION(void) {}
+void service_response_cb_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

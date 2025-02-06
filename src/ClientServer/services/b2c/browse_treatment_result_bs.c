@@ -37,7 +37,9 @@ static int32_t nbMaxReferences = 0;
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void browse_treatment_result_bs__INITIALISATION(void) {}
+void browse_treatment_result_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

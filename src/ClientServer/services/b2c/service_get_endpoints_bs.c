@@ -34,7 +34,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void service_get_endpoints_bs__INITIALISATION(void) {}
+void service_get_endpoints_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

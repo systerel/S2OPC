@@ -27,7 +27,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void notification_republish_queue_bs__INITIALISATION(void) {}
+void notification_republish_queue_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

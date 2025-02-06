@@ -32,7 +32,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void publish_request_queue_bs__INITIALISATION(void) {}
+void publish_request_queue_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

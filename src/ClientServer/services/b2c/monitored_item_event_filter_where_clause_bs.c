@@ -24,7 +24,9 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
-void monitored_item_event_filter_where_clause_bs__INITIALISATION(void) {}
+void monitored_item_event_filter_where_clause_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

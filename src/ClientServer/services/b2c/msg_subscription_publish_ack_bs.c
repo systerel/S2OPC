@@ -28,7 +28,9 @@ static const uint64_t SOPC_YEAR_TO_MILLISECONDS = 31536000000; // 365 * 24 * 60 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void msg_subscription_publish_ack_bs__INITIALISATION(void) {}
+void msg_subscription_publish_ack_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

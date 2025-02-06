@@ -23,7 +23,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void namespace_default_role_permissions_value_bs__INITIALISATION(void) {}
+void namespace_default_role_permissions_value_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

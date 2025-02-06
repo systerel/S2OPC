@@ -339,11 +339,11 @@ static void trace_Internal(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, bo
     va_end(args);
 }
 
-static void vTrace_Internal(SOPC_Log_Instance* pLogInst,
-                            SOPC_Log_Level level,
-                            bool always,
-                            const char* format,
-                            va_list args)
+__attribute__((__format__(__printf__, 4, 0))) static void vTrace_Internal(SOPC_Log_Instance* pLogInst,
+                                                                          SOPC_Log_Level level,
+                                                                          bool always,
+                                                                          const char* format,
+                                                                          va_list args)
 {
     if (NULL != pLogInst && ((pLogInst->started && level <= pLogInst->level) || always))
     {

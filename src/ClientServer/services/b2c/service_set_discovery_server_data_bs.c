@@ -27,7 +27,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void service_set_discovery_server_data_bs__INITIALISATION(void) {}
+void service_set_discovery_server_data_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

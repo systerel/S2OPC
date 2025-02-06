@@ -27,7 +27,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void monitored_item_event_filter_select_clauses_bs__INITIALISATION(void) {}
+void monitored_item_event_filter_select_clauses_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 /*--------------------
    OPERATIONS Clause
   --------------------*/

@@ -21,7 +21,9 @@
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 
-void msg_register_nodes_bs__INITIALISATION(void) {}
+void msg_register_nodes_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 void msg_register_nodes_bs__alloc_msg_register_nodes_resp_results(
     const constants__t_msg_i msg_register_nodes_bs__p_resp_msg,

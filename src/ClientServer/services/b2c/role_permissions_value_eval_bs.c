@@ -25,7 +25,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void role_permissions_value_eval_bs__INITIALISATION(void) {}
+void role_permissions_value_eval_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

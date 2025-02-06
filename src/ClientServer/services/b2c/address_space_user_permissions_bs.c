@@ -24,7 +24,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void address_space_user_permissions_bs__INITIALISATION(void) {}
+extern void address_space_user_permissions_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

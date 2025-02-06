@@ -32,7 +32,9 @@ static const SOPC_NodeId Number_DataType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Numbe
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void monitored_item_data_filter_treatment_bs__INITIALISATION(void) {}
+void monitored_item_data_filter_treatment_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

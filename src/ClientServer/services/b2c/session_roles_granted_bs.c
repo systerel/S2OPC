@@ -34,7 +34,9 @@
 
 static SOPC_SLinkedList* sessionRoles = NULL;
 
-void session_roles_granted_bs__INITIALISATION(void) {}
+void session_roles_granted_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

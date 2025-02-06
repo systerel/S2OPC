@@ -25,7 +25,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void subscription_absent_node_bs__INITIALISATION(void) {}
+void subscription_absent_node_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

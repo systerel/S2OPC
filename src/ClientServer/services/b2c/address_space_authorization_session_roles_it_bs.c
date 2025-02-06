@@ -29,7 +29,9 @@ static SOPC_SLinkedListIterator sessionRolesIt = NULL;
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void address_space_authorization_session_roles_it_bs__INITIALISATION(void) {}
+void address_space_authorization_session_roles_it_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

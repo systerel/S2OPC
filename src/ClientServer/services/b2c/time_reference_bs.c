@@ -29,7 +29,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void time_reference_bs__INITIALISATION(void) {}
+void time_reference_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

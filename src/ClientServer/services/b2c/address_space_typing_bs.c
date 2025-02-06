@@ -35,7 +35,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void address_space_typing_bs__INITIALISATION(void) {}
+void address_space_typing_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

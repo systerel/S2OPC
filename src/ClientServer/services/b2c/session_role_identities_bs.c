@@ -32,7 +32,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void session_role_identities_bs__INITIALISATION(void) {}
+void session_role_identities_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

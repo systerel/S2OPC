@@ -31,7 +31,9 @@ static bool isInit = false;
 static SOPC_Variant* a_defaultRolePermissions = NULL; // SOPC_Variant[]
 static t_entier4 nbr_of_namespaces = 0;
 static SOPC_Variant variantNull = {0}; // For handling the case no DRP has been found
-void default_role_permissions_array_bs__INITIALISATION(void) {}
+void default_role_permissions_array_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

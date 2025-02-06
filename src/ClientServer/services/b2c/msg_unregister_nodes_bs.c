@@ -21,7 +21,9 @@
 
 #include "sopc_assert.h"
 
-void msg_unregister_nodes_bs__INITIALISATION(void) {}
+void msg_unregister_nodes_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 void msg_unregister_nodes_bs__get_msg_unregister_nodes_req_nb_nodes(
     const constants__t_msg_i msg_unregister_nodes_bs__p_req_msg,

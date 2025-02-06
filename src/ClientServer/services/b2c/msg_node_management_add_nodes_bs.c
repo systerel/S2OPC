@@ -27,7 +27,9 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void msg_node_management_add_nodes_bs__INITIALISATION(void) {}
+void msg_node_management_add_nodes_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause

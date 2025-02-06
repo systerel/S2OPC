@@ -46,7 +46,9 @@ static SOPC_UserWithAuthorization user_local = {.user = NULL, .authorizationMana
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void user_authentication_bs__INITIALISATION(void) {}
+void user_authentication_bs__INITIALISATION(void)
+{ /*Translated from B but an intialisation is not needed from this module.*/
+}
 
 /*--------------------
    OPERATIONS Clause
