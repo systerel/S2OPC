@@ -2941,7 +2941,12 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
     SOPC_ASSERT(NULL != destSetOfLt);
     SOPC_ASSERT(NULL != src);
     SOPC_ASSERT(src->defaultText.Length > 0);
-    // Set a new localized text we know to be supported locale
+    // Set a new localized text we know to be supported locale (or invariant locale)
+
+    SOPC_LocalizedText ltAddToList;
+    SOPC_LocalizedText_Initialize(&ltAddToList);
+    ltAddToList = *src;
+    bool clearLtToAdd = false;
 
     // Compare the default locale to the one to add/set
     bool addToList = true;
@@ -2952,12 +2957,35 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
         return status;
     }
 
-    if (0 == comparison)
+    if (0 == comparison || src->defaultLocale.Length <= 0)
     {
+        if (src->defaultLocale.Length <= 0 && destSetOfLt->defaultLocale.Length > 0)
+        {
+            // Setting the invariant locale when there was not previously,
+            // move previous non-invariant value in list of defined locales
+            SOPC_LocalizedText_Initialize(&ltAddToList);
+            status = SOPC_String_Copy(&ltAddToList.defaultLocale, &destSetOfLt->defaultLocale);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_String_Copy(&ltAddToList.defaultText, &destSetOfLt->defaultText);
+                clearLtToAdd = (SOPC_STATUS_OK == status);
+            }
+            if (SOPC_STATUS_OK != status)
+            {
+                // Ignore error and keep only invariant value
+                addToList = false;
+                status = SOPC_STATUS_OK;
+            }
+            // Clear the default locale to set an invariant locale
+            SOPC_String_Clear(&destSetOfLt->defaultLocale);
+        }
+        else
+        {
+            addToList = false;
+        }
         // Default localized text is the one to set
         SOPC_String_Clear(&destSetOfLt->defaultText);
         status = SOPC_String_Copy(&destSetOfLt->defaultText, &src->defaultText);
-        addToList = false;
     }
     else if (NULL != destSetOfLt->localizedTextList)
     {
@@ -2981,7 +3009,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
             }
         }
     }
-    else
+    if (addToList && NULL == destSetOfLt->localizedTextList)
     {
         destSetOfLt->localizedTextList = SOPC_SLinkedList_Create(INT32_MAX);
         if (NULL == destSetOfLt->localizedTextList)
@@ -2989,7 +3017,6 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-
     // There is no localized text existent for this locale, create a new one
     if (SOPC_STATUS_OK == status && addToList)
     {
@@ -3001,7 +3028,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
         }
         else
         {
-            status = SOPC_LocalizedText_Copy(newLT, src);
+            status = SOPC_LocalizedText_Copy(newLT, &ltAddToList);
         }
 
         if (SOPC_STATUS_OK == status)
@@ -3016,7 +3043,10 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-
+    if (clearLtToAdd)
+    {
+        SOPC_LocalizedText_Clear(&ltAddToList);
+    }
     return status;
 }
 
@@ -3119,11 +3149,17 @@ SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale(SOPC_LocalizedText* destSetO
     {
         /*
          * Check if the locale to set is supported or not including invariant locale case:
-         * Part 4 §5.10.4.1 (v1.03): "Writing a null String for the locale and
-         *                            a non-null String for the text is setting the text for an invariant locale."
-         * Erase all locales except this one since it is an invariant LocalizedText.
+         * Part 4 §5.10.4.1 (v1.05.03):
+         * 1. Writing a null String for the text for a locale shall delete the String for that locale.
+         * 2. Writing a null String for the locale and a non-null String for the text is setting the text for an
+         * invariant locale.
+         * 3. Writing a null String for the text and a null String for the locale shall delete the entries for all
+         * locales.
          */
-        bool supportedLocale = src->defaultLocale.Length <= 0;
+        bool supportedLocale =
+            src->defaultLocale.Length <= 0 || // null Locale always suported => replace by the invariant locale
+            SOPC_String_Equal(&destSetOfLt->defaultLocale,
+                              &src->defaultLocale); // equal Locale always supported
         int index = 0;
         const char* locale = supportedLocaleIds[index];
         const char* setLocale = SOPC_String_GetRawCString(&src->defaultLocale);
