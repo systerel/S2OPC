@@ -2897,7 +2897,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_CopyToArray(SOPC_LocalizedText** dstArray,
         // And there might be a set of LT in addition to the default LT
         *nbElts += (int32_t) SOPC_SLinkedList_GetLength(srcSetOfLt->localizedTextList);
     }
-    *dstArray = SOPC_Calloc(sizeof(*nbElts), sizeof(SOPC_LocalizedText));
+    *dstArray = SOPC_Calloc((size_t) *nbElts, sizeof(SOPC_LocalizedText));
 
     SOPC_ReturnStatus status = (NULL == *dstArray ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
     if (SOPC_STATUS_OK == status)
