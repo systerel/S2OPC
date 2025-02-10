@@ -58,7 +58,8 @@ set(HELPERWRAPPER_PATH "frontend/helper_wrapper")
 set(CLIENTWRAPPER_PATH "frontend/client_wrapper")
 set(SERVERWRAPPER_PATH "frontend/server_wrapper")
 
-set(ALARMCOND_PATH "frontend/server_wrapper/alarm_conditions")
+set(SERVER_ALARMCOND_PATH "frontend/server_wrapper/alarm_conditions")
+Set(CLIENT_ALARMCOND_PATH "frontend/client_wrapper/alarm_conditions")
 
 set(WRAPPERS_XML_CONFIG "")
 set(LOADER_XML_PRIVATE_DEP "")
@@ -95,10 +96,11 @@ set(S2OPC_WRAPPERS_SRC
     )
 
 set(S2OPC_ALARMCOND_SRC
-    "${ALARMCOND_PATH}/libs2opc_server_alarm_conditions.c"
-    "${ALARMCOND_PATH}/internal/libs2opc_internal_alarm_conditions.c"
-    "${ALARMCOND_PATH}/internal/libs2opc_methods_alarm_conditions.c"
-    "${ALARMCOND_PATH}/internal/libs2opc_internal_eventid_list.c"
+    "${SERVER_ALARMCOND_PATH}/libs2opc_server_alarm_conditions.c"
+    "${SERVER_ALARMCOND_PATH}/internal/libs2opc_internal_alarm_conditions.c"
+    "${SERVER_ALARMCOND_PATH}/internal/libs2opc_methods_alarm_conditions.c"
+    "${SERVER_ALARMCOND_PATH}/internal/libs2opc_internal_eventid_list.c"
+    "${CLIENT_ALARMCOND_PATH}/libs2opc_client_alarm_conditions.c"
     )
 
 list(APPEND WRAPPERS_INCLUDE_FILES
@@ -111,7 +113,8 @@ list(APPEND WRAPPERS_INCLUDE_FILES
     "${SERVERWRAPPER_PATH}/libs2opc_server_config.h"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.h"
     "${SERVERWRAPPER_PATH}/file_transfer/libs2opc_file_transfer.h"
-    "${ALARMCOND_PATH}/libs2opc_server_alarm_conditions.h"
+    "${SERVER_ALARMCOND_PATH}/libs2opc_server_alarm_conditions.h"
+    "${CLIENT_ALARMCOND_PATH}/libs2opc_client_alarm_conditions.h"
     )
 
 set(S2OPC_XML_LOADERS_PUBLIC_INCLUDES "")
@@ -147,7 +150,8 @@ target_include_directories(s2opc_clientserver
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}/file_transfer>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${ALARMCOND_PATH}>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVER_ALARMCOND_PATH}>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENT_ALARMCOND_PATH}>"
   "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PUBLIC_INCLUDES}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver> # when installed
   PRIVATE
@@ -155,7 +159,7 @@ target_include_directories(s2opc_clientserver
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${COMMONWRAPPER_PATH}/internal>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/internal>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}/internal>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${ALARMCOND_PATH}/internal>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVER_ALARMCOND_PATH}/internal>"
   "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PRIVATE_INCLUDES}>")
 
 ### Installation and export of S2OPC client/server toolkit library ###
