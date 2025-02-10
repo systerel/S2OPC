@@ -3227,7 +3227,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_GetPreferredLocale(SOPC_LocalizedText* dest
     }
 
     int comparisonCounter = 0; // 2 types of comparison shall be done
-    // First: attempt to find exact language+coutry/region locale match
+    // First: attempt to find exact language+country/region locale match
     // Second: attempt to find language match only
     bool cmpWithCountryRegion = true;
     bool localeMatch = false;
@@ -3242,7 +3242,8 @@ SOPC_ReturnStatus SOPC_LocalizedText_GetPreferredLocale(SOPC_LocalizedText* dest
             // Check all available locales in source localized text
 
             // Check default localized text content
-            int res = SOPC_strcmp_ignore_case(localeId, SOPC_String_GetRawCString(&srcSetOfLt->defaultLocale));
+            int res = SOPC_LocalizedText_CompareLocales(localeId, SOPC_String_GetRawCString(&srcSetOfLt->defaultLocale),
+                                                        cmpWithCountryRegion);
             localeMatch = (0 == res);
 
             if (localeMatch)
