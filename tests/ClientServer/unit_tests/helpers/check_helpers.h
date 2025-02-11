@@ -74,4 +74,6 @@ Suite* tests_make_suite_XML_parsers(void);
 
 Suite* tests_make_suite_base64(void);
 
+Suite* tests_make_suite_address_space_access(void);
+
 #endif // CHECK_HELPERS_H
