@@ -17,13 +17,15 @@
  * under the License.
  */
 
-#ifndef SOPC_Custom_Types_H_
-#define SOPC_Custom_Types_H_ 1
+#ifndef SOPC_CUSTOM_Types_H_
+#define SOPC_CUSTOM_Types_H_ 1
 
 #include "custom_enum_types.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
+
+#define SOPC_CUSTOM_NS_INDEX 1
 
 #include "sopc_types.h"
 

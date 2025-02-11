@@ -32,6 +32,8 @@ H_FILE_PATH = 'src/Common/opcua_types/sopc_types.h'
 H_ENUM_FILE_PATH = 'src/Common/opcua_types/sopc_enum_types.h'
 C_FILE_PATH = 'src/Common/opcua_types/sopc_types.c'
 
+OPCUA_ORIGIN_NS_INDEX_NAME='SOPC_OPCUA_NS_INDEX'
+
 # Namespaces are very hard to handle in XPath and the ET API does not help much
 # {*} notations for namespace in XPath searches only appear in Py3.8
 # Moreover, the original namespaces are not parsed by default
@@ -66,11 +68,11 @@ def main():
     elif ns.types_prefix is not None:
         configure_custom_files_path_from_prefix(ns)
     schema = BinarySchema(ns.bsd, ns.types_prefix, ns.ns_index, ns.imported_ns_prefixes)
-    gen_header_file(H_FILE_PATH, H_ENUM_FILE_PATH, schema)
+    gen_header_file(H_FILE_PATH, H_ENUM_FILE_PATH, schema, ns.ns_index)
     ns_URI = None
     if ns.types_prefix is not None and ns.ns_index == 0:
         print("Warning: using NS URI field for EncodeableType instances since no NS index is defined for non-NS0: %s" % schema.targetNS)
-    gen_implem_file(ns_URI, ns.ns_index, H_FILE_PATH, C_FILE_PATH, schema)
+    gen_implem_file(ns_URI, H_FILE_PATH, C_FILE_PATH, schema)
 
 def parse_args():
     """
@@ -105,7 +107,7 @@ def parse_args():
                         ''')
     return parser.parse_args()
 
-def gen_header_file(h_types_path, h_enum_types_path, schema):
+def gen_header_file(h_types_path, h_enum_types_path, schema, ns_index):
     """
     Generates the sopc_types.h file from the given schema.
     """
@@ -114,7 +116,7 @@ def gen_header_file(h_types_path, h_enum_types_path, schema):
             out.write(H_FILE_START)
             out_enum.write(H_ENUM_FILE_START)
         else:
-            out.write(H_FILE_CUSTOM_START.format(enum_h_file=os.path.basename(h_enum_types_path), prefix=schema.types_prefix))
+            out.write(H_FILE_CUSTOM_START.format(enum_h_file=os.path.basename(h_enum_types_path), prefix=schema.types_prefix.upper(), ns_index=ns_index))
             # add includes for possible use of imported types in the current NS types
             for imported_include in schema.imported_includes:
                 out.write(H_FILE_CUSTOM_INCLUDE.format(included_h_file=imported_include))
@@ -129,30 +131,27 @@ def gen_header_file(h_types_path, h_enum_types_path, schema):
         out.write(H_FILE_END.format(prefix=schema.types_prefix))
         out_enum.write(H_ENUM_FILE_END)
 
-def gen_implem_file(ns_uri, ns_index, h_types_path, c_types_path, schema):
+def gen_implem_file(ns_uri, h_types_path, c_types_path, schema):
     """
     Generates the sopc_types.c file from the given schema.
     """
     if ns_uri is None:
         ns_uri = 'NULL'
-    else:
-        # index will be ignored by code
-        ns_index = 0
 
     with open(c_types_path, "w") as out:
         if schema.is_ns0_types():
             out.write(C_FILE_START)
         else:
             out.write(C_FILE_CUSTOM_START.format(prefix=schema.types_prefix, types_h_file=os.path.basename(h_types_path)))
-        gen_implem_types(ns_uri, ns_index, out, schema)
+        gen_implem_types(ns_uri, out, schema)
         out.write(C_FILE_KNOWN_ENC_TYPES.format(prefix=schema.types_prefix))
         if schema.is_ns0_types():
             out.write(C_FILE_ENUM_FUN_DEFS)
         out.write(C_FILE_END)
 
-def gen_implem_types(ns_uri, ns_index, out, schema):
+def gen_implem_types(ns_uri, out, schema):
     schema.gen_encodeable_type_table(out)
-    schema.gen_encodeable_type_descs(ns_uri, ns_index, out)
+    schema.gen_encodeable_type_descs(ns_uri, out)
     if schema.is_ns0_types():
         # Generates only for NS0 types
         schema.gen_user_token_policies_constants(out)
@@ -257,12 +256,14 @@ class BinarySchema:
             for nsURI in nsImported:
                 ns = xmlns_rev[nsURI]
                 self.xmlns_indexes[ns] = nsImportedIndex
+                self.xmlns_indexes_name[ns] = 'SOPC_' + imported_ns_prefixes[nsImportedCounter].upper() + '_NS_INDEX'
                 self.xmlns_types_prefixes[ns] = imported_ns_prefixes[nsImportedCounter] + '_'
                 self.imported_includes.append(imported_ns_prefixes[nsImportedCounter].lower() + '_types.h')
                 nsImportedIndex = nsImportedIndex + 1
                 nsImportedCounter = nsImportedCounter + 1
             # NS 0 has no prefix in type name
             self.xmlns_indexes['ua'] = 0
+            self.xmlns_indexes_name['ua'] = OPCUA_ORIGIN_NS_INDEX_NAME
             self.xmlns_types_prefixes['ua'] = ''
             self.imported_includes.insert(0, 'sopc_types.h')
 
@@ -274,6 +275,7 @@ class BinarySchema:
         self.targetNS = root.get('TargetNamespace') # the target NS of types
         self.xmlns = parse_xmlns(filename)
         self.xmlns_indexes = dict() # NS indexes for the imported OPC UA NS
+        self.xmlns_indexes_name = dict() # definition variable name containing index for the imported OPC UA NS
         self.xmlns_types_prefixes = dict() # the types prefixes for the imported OPC UA NS when generated
         self.imported_includes = [] # the includes necessary for the imported OPC UA NS types
         self.check_and_compute_ns_indexes(types_ns_index, imported_ns_prefixes)
@@ -283,8 +285,10 @@ class BinarySchema:
         self.known_writer = KnownEncodeableTypeWriter()
         if types_prefix is None:
             self.types_prefix = ''
+            self.ns_index_name = OPCUA_ORIGIN_NS_INDEX_NAME
         else:
             self.types_prefix = types_prefix + '_'
+            self.ns_index_name = 'SOPC_' + self.types_prefix.upper() + 'NS_INDEX'
 
     def is_ns0_types(self):
         return self.types_prefix == ''
@@ -366,17 +370,17 @@ class BinarySchema:
         self.known_writer.gen_types(out, writer)
         out.write(TYPE_INDEX_DECL_END.format(prefix=self.types_prefix))
 
-    def gen_encodeable_type_descs(self, ns_uri, ns_index, out):
+    def gen_encodeable_type_descs(self, ns_uri, out):
         """
         Generates the descriptors of all encodeable types.
         """
         def writer(typename, barename):
-            self.gen_encodeable_type_desc(ns_uri, ns_index, out, typename, barename)
+            self.gen_encodeable_type_desc(ns_uri, out, typename, barename)
 
         out.write(ENCODEABLE_TYPES_DESC_START)
         self.known_writer.gen_types(out, writer)
 
-    def gen_encodeable_type_desc(self, ns_uri, ns_index,  out, typename, barename):
+    def gen_encodeable_type_desc(self, ns_uri, out, typename, barename):
         """
         Generates the field descriptors of an encodeable type.
         """
@@ -386,13 +390,13 @@ class BinarySchema:
         if fields:
             out.write(ENCODEABLE_TYPE_FIELD_DESC_START.format(name=barename))
         for field in fields:
-            field_ns_index = 0
+            field_ns_index_name = OPCUA_ORIGIN_NS_INDEX_NAME
             is_built_in, type_index = self.get_type_index(field.type_name)
             # When the field type is in another NS, the NS index shall be referenced 
             # and type index in this other NS types array is referenced by type index enum name
             if not is_built_in and not field.is_same_ns:
                 field_barename = field.type_name.split(':')[1]
-                field_ns_index = self.xmlns_indexes[field.type_ns]
+                field_ns_index_name = self.xmlns_indexes_name[field.type_ns]
                 type_index = 'SOPC_TypeInternalIndex_' + self.xmlns_types_prefixes[field.type_ns] + field_barename
             out.write(ENCODEABLE_TYPE_FIELD_DESC.format(
                 name=barename,
@@ -400,7 +404,7 @@ class BinarySchema:
                 is_array_length=c_bool_value(field.is_array_length),
                 is_to_encode=c_bool_value(field.is_to_encode),
                 is_same_ns=c_bool_value(is_built_in or field.is_same_ns),
-                ns_index=field_ns_index,
+                ns_index_name=field_ns_index_name,
                 type_index=type_index,
                 field_name=field.name
             ))
@@ -414,7 +418,7 @@ class BinarySchema:
         out.write(ENCODEABLE_TYPE_DESC_END.format(
             name=barename,
             ns_URI=ns_uri, 
-            ns_index=ns_index,  
+            ns_index_name=self.ns_index_name,  
             ctype=ctype,
             nof_fields=nof_fields,
             field_desc=field_desc,
@@ -724,6 +728,8 @@ H_FILE_START = """
 // "src/Common/helpers_platform_dep/<platform>/s2opc_common_export.h_"
 #include "s2opc_common_export.h"
 
+#define SOPC_OPCUA_NS_INDEX 0
+
 """[1:]
 
 H_FILE_CUSTOM_START = """
@@ -753,6 +759,8 @@ H_FILE_CUSTOM_START = """
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
 #include "{enum_h_file}"
+
+#define SOPC_{prefix}NS_INDEX {ns_index}
 
 """[1:]
 
@@ -1084,7 +1092,7 @@ ENCODEABLE_TYPE_FIELD_DESC = """
         {is_array_length}, // isArrayLength
         {is_to_encode}, // isToEncode
         {is_same_ns}, // isSameNs
-        (uint16_t) {ns_index}, // nsIndex
+        (uint16_t) {ns_index_name}, // nsIndex
         (uint32_t) {type_index}, // typeIndex
         (uint32_t) offsetof(OpcUa_{name}, {field_name}) // offset
     }},
@@ -1109,7 +1117,7 @@ SOPC_EncodeableType OpcUa_{name}_EncodeableType =
     OpcUaId_{name}_Encoding_DefaultBinary,
     OpcUaId_{name}_Encoding_DefaultXml,
     {ns_URI},
-    {ns_index},
+    {ns_index_name},
     sizeof({ctype}),
     OpcUa_{name}_Initialize,
     OpcUa_{name}_Clear,

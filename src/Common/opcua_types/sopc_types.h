@@ -41,6 +41,8 @@
 // "src/Common/helpers_platform_dep/<platform>/s2opc_common_export.h_"
 #include "s2opc_common_export.h"
 
+#define SOPC_OPCUA_NS_INDEX 0
+
 #ifndef OPCUA_EXCLUDE_KeyValuePair
 /*============================================================================
  * The KeyValuePair structure.
