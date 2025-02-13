@@ -480,6 +480,12 @@ typedef struct SOPC_Variant
         }                                                        \
     }
 
+/** \brief Build a constant SOPC_Variant status code value from a status code */
+#define SOPC_VARIANT_STATUSCODE(stCode)                                                   \
+    {                                                                                     \
+        true, SOPC_StatusCode_Id, SOPC_VariantArrayType_SingleValue, { .Status = stCode } \
+    }
+
 /** \brief Build a constant SOPC_Variant qualified name value from a namespace index and a (non-NULL) C string */
 #define SOPC_VARIANT_QNAME(nsIndex, name)                                          \
     {                                                                              \
