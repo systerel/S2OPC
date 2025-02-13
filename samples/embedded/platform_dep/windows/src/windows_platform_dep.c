@@ -25,6 +25,7 @@
 #include "samples_platform_dep.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "sopc_assert.h"
 #include "sopc_macros.h"
