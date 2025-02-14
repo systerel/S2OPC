@@ -41,3 +41,4 @@ the legal rights to contribute.
 * Darrys Abdelkrim <darrys.abdelkrim-stg@systerel.fr>
 * Thomas Bouston <thomas.bouston-stg@systerel.fr>
 * Florent Macaire <florent.macaire@systerel.fr>
+* Mathieu Clabaut <mathieu.clabaut@systerel.fr>
