@@ -88,6 +88,7 @@ set(S2OPC_WRAPPERS_SRC
     "${SERVERWRAPPER_PATH}/libs2opc_server_config.c"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.c"
     "${SERVERWRAPPER_PATH}/internal/libs2opc_server_runtime_variables.c"
+    "${SERVERWRAPPER_PATH}/file_transfer/libs2opc_file_transfer.c"
     ${WRAPPERS_XML_CONFIG}
     )
 
@@ -99,7 +100,8 @@ list(APPEND WRAPPERS_INCLUDE_FILES
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.h"
     "${SERVERWRAPPER_PATH}/libs2opc_server.h"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config.h"
-    "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.h")
+    "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.h"
+    "${SERVERWRAPPER_PATH}/file_transfer/libs2opc_file_transfer.h")
 
 set(S2OPC_XML_LOADERS_PUBLIC_INCLUDES "")
 set(S2OPC_XML_LOADERS_PRIVATE_INCLUDES "")
@@ -132,6 +134,7 @@ target_include_directories(s2opc_clientserver
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${COMMONWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${HELPERWRAPPER_PATH}>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}/file_transfer>"
   "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PUBLIC_INCLUDES}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver> # when installed
   PRIVATE
