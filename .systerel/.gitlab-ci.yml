@@ -742,13 +742,12 @@ coverage-analysis:
 
 get-sonar-binaries:
   stage: .pre
-  cache:
-    policy: pull-push
-    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
+  artifacts:
     paths:
-      - "${SONAR_USER_HOME}/cache"
-      - sonar-scanner/
       - build-wrapper/
+      - sonar-scanner/
+    expire_in: '1 day'
+    when: on_success
   image: docker.aix.systerel.fr/c838/build@sha256:80ccf80c716d33371b3f6bb7c4027346f74a07d8259ff56090beb787ace28e80 # digest of build:1.47
   script:
     # Download sonar-scanner
