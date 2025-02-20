@@ -109,10 +109,15 @@ static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead
 static bool set_target_compute_rtt(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues);
 
 /* RTT calculations */
-SOPC_HighRes_TimeReference** g_ts_emissions = NULL;
-long* g_rtt = NULL; // array of durations in us
-uint32_t g_n_samples = 0;
-SOPC_HighRes_TimeReference* t0 = NULL;
+struct RTT_MeasurementType
+{
+    SOPC_HighRes_TimeReference** tsEmissions;
+    long* rtt; // array of durations in us
+    uint32_t nSamples;
+    SOPC_HighRes_TimeReference* t0;
+    SOPC_Mutex lock;
+} gRttMeasurement = {.tsEmissions = NULL, .rtt = NULL, .nSamples = 0, .t0 = NULL};
+
 static void save_rtt_to_csv(void);
 
 int main(int argc, char* const argv[])
@@ -132,25 +137,26 @@ int main(int argc, char* const argv[])
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = log_path;
     logConfiguration.logLevel = SOPC_LOG_LEVEL_INFO;
     SOPC_ReturnStatus status = SOPC_Common_Initialize(&logConfiguration, NULL);
-    t0 = SOPC_HighRes_TimeReference_Create();
-
+    gRttMeasurement.t0 = SOPC_HighRes_TimeReference_Create();
+    SOPC_Mutex_Initialization(&gRttMeasurement.lock);
     if (SOPC_STATUS_OK != status)
     {
         printf("Error while initializing logs\n");
     }
 
-    status = SOPC_strtouint32_t(getenv_default("RTT_SAMPLES", RTT_SAMPLES), &g_n_samples, 10, '\0');
+    status = SOPC_strtouint32_t(getenv_default("RTT_SAMPLES", RTT_SAMPLES), &gRttMeasurement.nSamples, 10, '\0');
     if (SOPC_STATUS_OK != status)
     {
         printf("Error while parsing RTT_SAMPLES value\n");
         exit((int) status);
     }
-    printf("RTT_SAMPLES: %" PRIu32 "\n", g_n_samples);
-    g_ts_emissions = (SOPC_HighRes_TimeReference**) SOPC_Calloc(g_n_samples, sizeof(*g_ts_emissions));
-    g_rtt = SOPC_Calloc(g_n_samples, sizeof(long));
-    if (NULL == g_ts_emissions || NULL == g_rtt)
+    printf("RTT_SAMPLES: %" PRIu32 "\n", gRttMeasurement.nSamples);
+    gRttMeasurement.tsEmissions =
+        (SOPC_HighRes_TimeReference**) SOPC_Calloc(gRttMeasurement.nSamples, sizeof(*gRttMeasurement.tsEmissions));
+    gRttMeasurement.rtt = SOPC_Calloc(gRttMeasurement.nSamples, sizeof(long));
+    if (NULL == gRttMeasurement.tsEmissions || NULL == gRttMeasurement.rtt)
     {
-        printf("Error while allocating %" PRIu32 " round-trip time measurements\n", g_n_samples);
+        printf("Error while allocating %" PRIu32 " round-trip time measurements\n", gRttMeasurement.nSamples);
         status = SOPC_STATUS_NOK;
     }
 
@@ -219,7 +225,7 @@ int main(int argc, char* const argv[])
     /* Initialize the Cache with the PubSub configuration */
     if (SOPC_STATUS_OK == status)
     {
-        bool res = Cache_Initialize(config);
+        bool res = Cache_Initialize(config, false);
         if (!res)
         {
             printf("Error while initializing the cache, refer to log files\n");
@@ -293,11 +299,11 @@ int main(int argc, char* const argv[])
     /* Print or save the non-empty RTT */
     if (SOPC_STATUS_OK == status && getenv_default("CSV_PREFIX", CSV_PREFIX)[0] == 0)
     {
-        for (size_t idx = 0; idx < g_n_samples; ++idx)
+        for (size_t idx = 0; idx < gRttMeasurement.nSamples; ++idx)
         {
-            if (0 != g_rtt[idx])
+            if (0 != gRttMeasurement.rtt[idx])
             {
-                printf("% 9zd: round-trip time: % 12ld us\n", idx, g_rtt[idx]);
+                printf("% 9zd: round-trip time: % 12ld us\n", idx, gRttMeasurement.rtt[idx]);
             }
         }
     }
@@ -306,13 +312,14 @@ int main(int argc, char* const argv[])
         save_rtt_to_csv();
     }
 
-    for (size_t idx = 0; idx < g_n_samples; ++idx)
+    for (size_t idx = 0; idx < gRttMeasurement.nSamples; ++idx)
     {
-        SOPC_HighRes_TimeReference_Delete(&g_ts_emissions[idx]);
+        SOPC_HighRes_TimeReference_Delete(&gRttMeasurement.tsEmissions[idx]);
     }
-    SOPC_HighRes_TimeReference_Delete(&t0);
-    SOPC_Free(g_ts_emissions);
-    SOPC_Free(g_rtt);
+    SOPC_HighRes_TimeReference_Delete(&gRttMeasurement.t0);
+    SOPC_Free(gRttMeasurement.tsEmissions);
+    SOPC_Free(gRttMeasurement.rtt);
+    SOPC_Mutex_Clear(&gRttMeasurement.lock);
 }
 
 static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues)
@@ -321,7 +328,6 @@ static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead
      * increments its value */
     static SOPC_NodeId nid_counter = NODEID_COUNTER_SEND;
 
-    Cache_Lock();
     for (int32_t i = 0; i < nbValues; ++i)
     {
         int32_t cmp = 0;
@@ -329,7 +335,7 @@ static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead
         if (SOPC_STATUS_OK == status && 0 == cmp)
         {
             /* Get the value and modify it in place */
-            SOPC_DataValue* dv_counter = Cache_Get(&nid_counter);
+            SOPC_DataValue* dv_counter = Cache_GetAndLock(&nid_counter);
             SOPC_ASSERT(NULL != dv_counter);
             SOPC_Variant* var = &dv_counter->Value;
             SOPC_ASSERT(SOPC_VariantArrayType_SingleValue == var->ArrayType);
@@ -338,17 +344,19 @@ static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead
 
             /* Record the current time */
             size_t idx = var->Value.Uint32;
-            if (idx < g_n_samples)
+            Cache_Unlock();
+            SOPC_Mutex_Lock(&gRttMeasurement.lock);
+            if (idx < gRttMeasurement.nSamples)
             {
-                SOPC_ASSERT(g_ts_emissions[idx] == NULL);
-                g_ts_emissions[idx] = SOPC_HighRes_TimeReference_Create();
+                SOPC_ASSERT(gRttMeasurement.tsEmissions[idx] == NULL);
+                gRttMeasurement.tsEmissions[idx] = SOPC_HighRes_TimeReference_Create();
             }
+            SOPC_Mutex_Unlock(&gRttMeasurement.lock);
         }
     }
 
     /* Let the cache handle the memory and treatment of this request */
     SOPC_DataValue* dvs = Cache_GetSourceVariables(nodesToRead, nbValues);
-    Cache_Unlock();
     return dvs;
 }
 
@@ -358,7 +366,6 @@ static bool set_target_compute_rtt(const OpcUa_WriteValue* nodesToWrite, const i
      * use the new counter value to compute the round trip time */
     static SOPC_NodeId nid_counter = NODEID_COUNTER_RECV;
 
-    Cache_Lock();
     for (int32_t i = 0; i < nbValues; ++i)
     {
         int32_t cmp = 0;
@@ -367,20 +374,22 @@ static bool set_target_compute_rtt(const OpcUa_WriteValue* nodesToWrite, const i
         {
             const SOPC_Variant* var = &nodesToWrite[i].Value.Value;
             size_t idx = var->Value.Uint32;
-            if (idx < g_n_samples)
+            SOPC_Mutex_Lock(&gRttMeasurement.lock);
+            if (idx < gRttMeasurement.nSamples)
             {
                 bool ok = SOPC_VariantArrayType_SingleValue == var->ArrayType;
                 ok &= SOPC_UInt32_Id == var->BuiltInTypeId;
                 if (ok)
                 {
-                    if (g_ts_emissions[idx] == NULL)
+                    if (gRttMeasurement.tsEmissions[idx] == NULL)
                     {
-                        g_rtt[idx] = -3;
+                        gRttMeasurement.rtt[idx] = -3;
                     }
                     else
                     {
-                        const long d_us = (long) SOPC_HighRes_TimeReference_DeltaUs(g_ts_emissions[idx], NULL);
-                        g_rtt[idx] = (d_us > 0 ? d_us : -2);
+                        const long d_us =
+                            (long) SOPC_HighRes_TimeReference_DeltaUs(gRttMeasurement.tsEmissions[idx], NULL);
+                        gRttMeasurement.rtt[idx] = (d_us > 0 ? d_us : -2);
                     }
                 }
             }
@@ -388,12 +397,12 @@ static bool set_target_compute_rtt(const OpcUa_WriteValue* nodesToWrite, const i
             {
                 stopSignal = 1;
             }
+            SOPC_Mutex_Unlock(&gRttMeasurement.lock);
         }
     }
 
     /* Let the cache handle the memory and treatment of this request */
     bool processed = Cache_SetTargetVariables(nodesToWrite, nbValues);
-    Cache_Unlock();
     return processed;
 }
 
@@ -439,11 +448,11 @@ static void save_rtt_to_csv(void)
     {
         res = fprintf(csv, "\nGetSourceTime (ns since app start);Round-trip time (us)\n");
     }
-    for (size_t idx = 0; res > 0 && idx < g_n_samples; ++idx)
+    for (size_t idx = 0; res > 0 && idx < gRttMeasurement.nSamples; ++idx)
     {
-        long ts = (long) SOPC_HighRes_TimeReference_DeltaUs(t0, g_ts_emissions[idx]);
+        long ts = (long) SOPC_HighRes_TimeReference_DeltaUs(gRttMeasurement.t0, gRttMeasurement.tsEmissions[idx]);
         // Note that PRIu64 is not portable to all embedded OS.
-        res = fprintf(csv, "%ld;%ld\n", ts, g_rtt[idx]);
+        res = fprintf(csv, "%ld;%ld\n", ts, gRttMeasurement.rtt[idx]);
     }
 
     fclose(csv);

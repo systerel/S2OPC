@@ -37,8 +37,7 @@
  * when an item is removed.
  * Of course, keys and elements MUST be MALLOCed.
  */
-SOPC_Dict* g_cache = NULL;
-SOPC_Mutex g_lock;
+SOPC_TSafe_Dict* g_cache = NULL;
 
 static void free_datavalue(uintptr_t value)
 {
@@ -202,7 +201,7 @@ static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type, const SOPC_VariantArra
     return dv;
 }
 
-bool Cache_Initialize(SOPC_PubSubConfiguration* config)
+bool Cache_Initialize(SOPC_PubSubConfiguration* config, bool noSubCache)
 {
     if (NULL == config)
     {
@@ -216,9 +215,10 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
         return false;
     }
 
-    SOPC_ReturnStatus status = SOPC_Mutex_Initialization(&g_lock);
-    g_cache = SOPC_NodeId_Dict_Create(true, free_datavalue);
-    bool res = SOPC_STATUS_OK == status && NULL != g_cache;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    g_cache = SOPC_NodeId_TSafe_Dict_Create(true, NULL, free_datavalue);
+    bool res = NULL != g_cache;
 
     /* Parse configuration and fill the cache with default values */
     /* NodeId is in the field metadata (target variable for subscriber and published variable for publisher)
@@ -283,7 +283,7 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
     }
 
     const uint32_t nbSubConnection = SOPC_PubSubConfiguration_Nb_SubConnection(config);
-    for (uint32_t i = 0; res && i < nbSubConnection; ++i)
+    for (uint32_t i = 0; res && i < nbSubConnection && !noSubCache; ++i)
     {
         const SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, i);
         const uint16_t nbReaderGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
@@ -341,16 +341,22 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
     return res;
 }
 
-SOPC_DataValue* Cache_Get(const SOPC_NodeId* nid)
+SOPC_DataValue* Cache_GetAndLock(const SOPC_NodeId* nid)
 {
     SOPC_ASSERT(NULL != g_cache);
-    return (SOPC_DataValue*) SOPC_Dict_Get(g_cache, (uintptr_t) nid, NULL);
+    return (SOPC_DataValue*) SOPC_TSafe_Dict_GetAndLock(g_cache, (uintptr_t) nid, NULL);
+}
+
+void Cache_Unlock(void)
+{
+    SOPC_ASSERT(NULL != g_cache);
+    SOPC_TSafe_Dict_Unlock(g_cache);
 }
 
 bool Cache_Set(SOPC_NodeId* nid, SOPC_DataValue* dv)
 {
     SOPC_ASSERT(NULL != g_cache);
-    return SOPC_Dict_Insert(g_cache, (uintptr_t) nid, (uintptr_t) dv);
+    return SOPC_TSafe_Dict_Insert(g_cache, (uintptr_t) nid, (uintptr_t) dv);
 }
 
 /* Returned DataValues will be freed by the caller */
@@ -366,7 +372,6 @@ SOPC_DataValue* Cache_GetSourceVariables(const OpcUa_ReadValueId* nodesToRead, c
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    Cache_Lock();
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < nbValues; ++i)
     {
         const OpcUa_ReadValueId* rv = &nodesToRead[i];
@@ -377,13 +382,10 @@ SOPC_DataValue* Cache_GetSourceVariables(const OpcUa_ReadValueId* nodesToRead, c
         SOPC_ASSERT(rv->DataEncoding.NamespaceIndex == 0 && rv->DataEncoding.Name.Length <= 0 &&
                     "DataEncoding not supported");
 
-        /* As ownership is given to the caller, we have to copy all values */
-        SOPC_DataValue* src = (SOPC_DataValue*) SOPC_Dict_Get(g_cache, (uintptr_t) &rv->NodeId, NULL);
+        SOPC_DataValue* src = (SOPC_DataValue*) SOPC_TSafe_Dict_GetAndLock(g_cache, (uintptr_t) &rv->NodeId, NULL);
         status = SOPC_DataValue_Copy(dv, src);
-
-        /* As we have ownership of the rv, clear it */
+        SOPC_TSafe_Dict_Unlock(g_cache);
     }
-    Cache_Unlock();
 
     if (SOPC_STATUS_OK != status)
     {
@@ -405,7 +407,6 @@ bool Cache_SetTargetVariables(const OpcUa_WriteValue* nodesToWrite, const int32_
     SOPC_ASSERT(INT32_MAX < SIZE_MAX || nbValues <= SIZE_MAX);
 
     bool ok = true;
-    Cache_Lock();
     for (int32_t i = 0; ok && i < nbValues; ++i)
     {
         /* Note: the cache frees both the key and the value, so we have to give it new ones */
@@ -435,7 +436,6 @@ bool Cache_SetTargetVariables(const OpcUa_WriteValue* nodesToWrite, const int32_
             SOPC_Free(item);
         }
     }
-    Cache_Unlock();
 
     return ok;
 }
@@ -570,40 +570,25 @@ static void Cache_ForEach_Dump(const uintptr_t key, uintptr_t value, uintptr_t u
 void Cache_Dump_NodeId(const SOPC_NodeId* pNid)
 {
     SOPC_ASSERT(NULL != g_cache);
-    Cache_Lock();
-    Cache_Dump_VarValue(pNid, Cache_Get(pNid));
+    SOPC_DataValue* dv = Cache_GetAndLock(pNid);
+    Cache_Dump_VarValue(pNid, dv);
     Cache_Unlock();
 }
 
 void Cache_ForEach(Cache_ForEach_Exec* exec)
 {
-    Cache_Lock();
-    SOPC_Dict_ForEach(g_cache, &forEach_DoExec, (uintptr_t) exec);
-    Cache_Unlock();
+    SOPC_TSafe_Dict_ForEach(g_cache, &forEach_DoExec, (uintptr_t) exec);
 }
 
 void Cache_Dump(void)
 {
     SOPC_ASSERT(NULL != g_cache);
-    Cache_Lock();
-    SOPC_Dict_ForEach(g_cache, &Cache_ForEach_Dump, (uintptr_t) NULL);
-    Cache_Unlock();
-}
-
-void Cache_Lock(void)
-{
-    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&g_lock);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-}
-
-void Cache_Unlock(void)
-{
-    SOPC_ReturnStatus status = SOPC_Mutex_Unlock(&g_lock);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    printf("Warning: Dumping the cache may break real-time operations!\n");
+    SOPC_TSafe_Dict_ForEach(g_cache, &Cache_ForEach_Dump, (uintptr_t) NULL);
 }
 
 void Cache_Clear(void)
 {
-    SOPC_Dict_Delete(g_cache);
+    SOPC_TSafe_Dict_Delete(g_cache);
     g_cache = NULL;
 }

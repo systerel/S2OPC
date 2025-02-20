@@ -38,7 +38,6 @@
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_date_time.h"
-#include "sopc_dict.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"

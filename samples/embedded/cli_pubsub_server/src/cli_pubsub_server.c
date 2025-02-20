@@ -308,8 +308,7 @@ static SOPC_ReturnStatus authentication_check(SOPC_UserAuthentication_Manager* a
 /***************************************************/
 static void cacheSync_WriteToCache(const SOPC_NodeId* pNid, const SOPC_DataValue* pDv)
 {
-    Cache_Lock();
-    SOPC_DataValue* pDvCache = Cache_Get(pNid);
+    SOPC_DataValue* pDvCache = Cache_GetAndLock(pNid);
 
     // Only write values of cache that are already defined
     if (pDvCache != NULL)
@@ -474,9 +473,7 @@ static void forEach_CacheInit(const SOPC_NodeId* nid, SOPC_DataValue* dv)
 static void initializeCacheFromAddrSpace(void)
 {
     Cache_ForEach_Exec exec = {.pExec = &forEach_CacheInit};
-    Cache_Lock();
     Cache_ForEach(&exec);
-    Cache_Unlock();
 }
 
 /***

@@ -210,7 +210,7 @@ static bool subscriber_bench(int priority)
         if (SOPC_STATUS_OK == status)
         {
             /* Initialize Cache */
-            res = Cache_Initialize(config);
+            res = Cache_Initialize(config, false);
             if (!res)
             {
                 printf("ERROR: initializing cache failed\n");

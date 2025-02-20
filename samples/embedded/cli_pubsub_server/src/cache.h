@@ -46,13 +46,18 @@
 bool Cache_Initialize(SOPC_PubSubConfiguration* config, bool noSubCache);
 
 /**
- * \brief Get a value in the cache
+ * \brief Get a value in the cache and lock it.
  *
  * \warning The returned pointer is a direct access to the cached value and should not be freed
  *
  * \return A pointer to the value in cache, or NULL if not found
  */
-SOPC_DataValue* Cache_Get(const SOPC_NodeId* nid);
+SOPC_DataValue* Cache_GetAndLock(const SOPC_NodeId* nid);
+
+/**
+ * @brief Unlock the cache.
+ */
+void Cache_Unlock(void);
 
 /**
  * \brief Set a value in the cache
@@ -75,8 +80,6 @@ bool Cache_SetTargetVariables(const OpcUa_WriteValue* nodesToWrite, const int32_
 void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv);
 
 /** Prints on console a human-readable representation of the whole cache
- * Note:  this call locks the cache during all operation, which will prevent
- * other tasks to respond in time.
  * This is only a debug function
  */
 void Cache_Dump(void);
@@ -90,10 +93,6 @@ typedef struct
  */
 void Cache_ForEach(Cache_ForEach_Exec* exec);
 
-/** The Cache shall be locked before accessing data (and its content, to prevent it from being freed) */
-void Cache_Lock(void);
-/** Unlock the cache previously locked by ::Cache_Lock */
-void Cache_Unlock(void);
 /** Deletes the cache */
 void Cache_Clear(void);
 /** Prints the content of a given NodeId */
