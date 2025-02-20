@@ -2233,6 +2233,13 @@ SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct* value_fre
     return SOPC_Dict_Create(0, &nodeid_hash, &nodeid_equal, free_keys ? &nodeid_free : NULL, value_free);
 }
 
+SOPC_TSafe_Dict* SOPC_NodeId_TSafe_Dict_Create(bool free_keys,
+                                               SOPC_TSafe_Dict_KeyCopy_Fct value_copy,
+                                               SOPC_Dict_Free_Fct* value_free)
+{
+    return SOPC_TSafe_Dict_Create(0, nodeid_hash, nodeid_equal, value_copy, free_keys ? nodeid_free : NULL, value_free);
+}
+
 void SOPC_ExpandedNodeId_InitializeAux(void* value)
 {
     SOPC_ExpandedNodeId_Initialize((SOPC_ExpandedNodeId*) value);

@@ -25,6 +25,7 @@ cdef struct _SOPC_EventHandler
 cdef struct _SOPC_AddressSpaceAccess
 cdef struct SOPC_SLinkedList_Elt
 cdef struct _SOPC_Dict
+cdef struct _SOPC_TSafe_Dict
 cdef struct _SOPC_Event
 ctypedef struct SOPC_CircularLogFile
 ctypedef struct SOPC_Log_Instance
