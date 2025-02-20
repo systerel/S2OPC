@@ -121,7 +121,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
 {
     *address_space_bs__p_nb_out = 0;
     *address_space_bs__p_out_arguments = NULL;
-    OpcUa_CallMethodRequest* methodToCall = address_space_bs__p_call_method_pointer;
+    const OpcUa_CallMethodRequest* methodToCall = address_space_bs__p_call_method_pointer;
     SOPC_ASSERT(NULL != methodToCall);
 
     /* Get the Method Call Manager from server configuration */
@@ -140,7 +140,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
     }
 
     /* Get the C function corresponding to the method */
-    SOPC_NodeId* methodId = &methodToCall->MethodId;
+    const SOPC_NodeId* methodId = &methodToCall->MethodId;
     SOPC_MethodCallFunc* method_c = SOPC_MethodCallManager_GetMethod(mcm, methodId);
     if (NULL == method_c)
     {
@@ -148,7 +148,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
         return;
     }
 
-    SOPC_NodeId* objectId = &methodToCall->ObjectId;
+    const SOPC_NodeId* objectId = &methodToCall->ObjectId;
     uint32_t nbInputArgs = (0 < methodToCall->NoOfInputArguments) ? (uint32_t) methodToCall->NoOfInputArguments
                                                                   : 0; /* convert to avoid compilator error */
     SOPC_Variant* inputArgs = methodToCall->InputArguments;

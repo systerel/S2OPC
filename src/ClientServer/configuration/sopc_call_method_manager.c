@@ -119,7 +119,7 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&mcm->mut);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Dict* dict = (SOPC_Dict*) mcm->nodeIdToMethod;
+    SOPC_Dict* dict = mcm->nodeIdToMethod;
     SOPC_ASSERT(NULL != dict);
 
     SOPC_MethodCallFunc* wrapper = SOPC_Calloc(1, sizeof(SOPC_MethodCallFunc));
@@ -171,7 +171,7 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethodWithType(SOPC_MethodCallManage
         SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&mcm->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         // remove already inserted method
-        SOPC_Dict_Remove((SOPC_Dict*) mcm->nodeIdToMethod, (uintptr_t) methodTypeId);
+        SOPC_Dict_Remove(mcm->nodeIdToMethod, (uintptr_t) methodTypeId);
         mutStatus = SOPC_Mutex_Unlock(&mcm->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
