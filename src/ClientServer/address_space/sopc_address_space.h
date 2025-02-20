@@ -195,5 +195,7 @@ void SOPC_AddressSpace_Node_Initialize(SOPC_AddressSpace* space,
                                        SOPC_AddressSpace_Node* node,
                                        OpcUa_NodeClass element_type);
 void SOPC_AddressSpace_Node_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+/* Copy operator used to copy nodes from embedded address space to make them releasable */
+SOPC_AddressSpace_Node* SOPC_AddressSpace_Node_Copy(const SOPC_AddressSpace_Node* src);
 
 #endif /* SOPC_ADDRESS_SPACE_H_ */

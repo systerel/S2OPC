@@ -512,6 +512,27 @@ void SOPC_AddressSpace_Node_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_No
     SOPC_AddressSpace_Node_Clear_Local(node);
 }
 
+SOPC_AddressSpace_Node* SOPC_AddressSpace_Node_Copy(const SOPC_AddressSpace_Node* src)
+{
+    SOPC_AddressSpace_Node* result = SOPC_Calloc(1, sizeof(*result));
+    if (NULL == result)
+    {
+        return NULL;
+    }
+    result->node_class = src->node_class;
+    result->value_status = src->value_status;
+    result->value_source_ts = src->value_source_ts;
+    SOPC_EncodeableType* nodeEncType = (*(SOPC_EncodeableType* const*) &src->data);
+    nodeEncType->Initialize(&result->data);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Copy(nodeEncType, &result->data, &src->data);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(result);
+        result = NULL;
+    }
+    return result;
+}
+
 static void clear_description_node_value(uintptr_t data)
 {
     SOPC_AddressSpace_Node* node = (SOPC_AddressSpace_Node*) data;

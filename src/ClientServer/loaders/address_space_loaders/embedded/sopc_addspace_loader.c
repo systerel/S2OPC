@@ -19,6 +19,8 @@
 
 #include "sopc_addspace_loader.h"
 
+#include "sopc_logger.h"
+
 extern const bool sopc_embedded_is_const_addspace;
 
 extern SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[];
@@ -46,7 +48,7 @@ static bool checkAccessLevelsForbidsStatusAndTs(void)
     return result;
 }
 
-SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void)
+SOPC_AddressSpace* SOPC_Embedded_AddressSpace_LoadWithAlloc(bool allocNodes)
 {
     SOPC_AddressSpace* space = NULL;
 
@@ -58,27 +60,49 @@ SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void)
                 SOPC_Embedded_AddressSpace_nNodes, SOPC_Embedded_AddressSpace_Nodes, SOPC_Embedded_VariableVariant_nb,
                 SOPC_Embedded_VariableVariant);
         }
+        if (allocNodes)
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "SOPC_Embedded_AddressSpace_LoadWithAlloc: const address space does not support "
+                                     "parameter allocNodes to be set. It will be considered unset.");
+        }
     }
     else
     {
-        space = SOPC_AddressSpace_Create(false);
+        space = SOPC_AddressSpace_Create(allocNodes);
 
         if (space == NULL)
         {
             return NULL;
         }
 
-        for (uint32_t i = 0; i < SOPC_Embedded_AddressSpace_nNodes; ++i)
+        bool res = true;
+        for (uint32_t i = 0; res && i < SOPC_Embedded_AddressSpace_nNodes; ++i)
         {
-            SOPC_AddressSpace_Node* node = &SOPC_Embedded_AddressSpace_Nodes[i];
-
-            if (SOPC_AddressSpace_Append(space, node) != SOPC_STATUS_OK)
+            SOPC_AddressSpace_Node* nodeSrc = &SOPC_Embedded_AddressSpace_Nodes[i];
+            SOPC_AddressSpace_Node* nodeToAppend = nodeSrc;
+            if (allocNodes)
             {
-                SOPC_AddressSpace_Delete(space);
-                return NULL;
+                nodeToAppend = SOPC_AddressSpace_Node_Copy(nodeSrc);
+                res = (nodeToAppend != NULL);
+            }
+            if (res)
+            {
+                SOPC_ReturnStatus appStatus = SOPC_AddressSpace_Append(space, nodeToAppend);
+                res = (appStatus == SOPC_STATUS_OK);
             }
         }
-    }
+        if (!res)
+        {
+            SOPC_AddressSpace_Delete(space);
+            space = NULL;
+        }
+    } // if const and allocNodes => returns NULL
 
     return space;
+}
+
+SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void)
+{
+    return SOPC_Embedded_AddressSpace_LoadWithAlloc(false);
 }
