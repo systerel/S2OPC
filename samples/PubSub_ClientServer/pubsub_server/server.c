@@ -475,7 +475,7 @@ SOPC_ReturnStatus Server_CreateServerConfig(void)
 static SOPC_ReturnStatus Server_SetAddressSpace(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    address_space = SOPC_Embedded_AddressSpace_Load();
+    address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
     if (NULL == address_space)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cannot load static address space");

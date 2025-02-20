@@ -271,7 +271,7 @@ START_TEST(test_same_address_space_results)
     printf("Test test_same_address_space_results ignored since WITH_CONST_ADDSPACE is set\n");
 #else
     /* Embedded address space (parsed prior to compilation) */
-    SOPC_AddressSpace* spaceEmbedded = SOPC_Embedded_AddressSpace_Load();
+    SOPC_AddressSpace* spaceEmbedded = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
 
     /* Dynamic parsing of address space */
     FILE* fd = fopen(XML_UA_NODESET_NAME, "r");

@@ -806,7 +806,7 @@ int main(int argc, char* argv[])
 #else
     if (SOPC_STATUS_OK == status)
     {
-        address_space = SOPC_Embedded_AddressSpace_Load();
+        address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
         status = (NULL != address_space) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
 

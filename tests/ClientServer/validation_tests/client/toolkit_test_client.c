@@ -817,7 +817,7 @@ int main(void)
     }
 
     // Set an address space for test purpose only to check test result valid (not expected in a client)
-    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
+    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(false);
     if (SOPC_STATUS_OK == status)
     {
         // NECESSARY ONLY FOR TEST PURPOSES: a client should not define an @ space in a nominal case

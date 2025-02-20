@@ -558,7 +558,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
         }
         else
         {
-            address_space = SOPC_Embedded_AddressSpace_Load();
+            address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
             status = (NULL != address_space) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         }
     }

@@ -341,7 +341,7 @@ static SOPC_ReturnStatus Server_SetDefaultAddressSpace(void)
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    SOPC_AddressSpace* addSpace = SOPC_Embedded_AddressSpace_Load();
+    SOPC_AddressSpace* addSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
     status = (NULL != addSpace) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
     if (SOPC_STATUS_OK == status)
