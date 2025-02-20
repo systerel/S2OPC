@@ -158,7 +158,7 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(SOPC_ClientConnection* s
         SOPC_ASSERT(NULL != addNodesResp);
         if (!SOPC_IsGoodStatus(addNodesResp->ResponseHeader.ServiceResult))
         {
-            printf("Bad status return code. Status:%d\n", addNodesResp->ResponseHeader.ServiceResult);
+            printf("Bad status code returned. Status: 0x%08" PRIX32 "\n", addNodesResp->ResponseHeader.ServiceResult);
             status = SOPC_STATUS_NOK;
         }
         else
