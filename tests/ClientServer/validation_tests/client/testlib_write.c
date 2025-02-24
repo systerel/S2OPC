@@ -40,177 +40,218 @@ extern SOPC_AddressSpace* address_space_bs__nodes;
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
 #define DESIGNATE_NEW(T, ...) memcpy(SOPC_Malloc(sizeof(T)), &(T const){__VA_ARGS__}, sizeof(T))
 
-const uint32_t N_GROUPS = 6; // Each group is a different type of variable
-const uint32_t N_VARS = 6;   // Test on variables with Node Id 1001 to 1001 + N_VARS only
-// Note: There is N_VARS/N_GROUPS variables of each type (variables shall be sorted by type in predefined order below)
+const uint32_t N_VARS = 11; // Test on variables with Node Id 1001 to 1006, plus 5 other variables
+
+static const SOPC_NodeId nodeId_int64 = SOPC_NODEID_NUMERIC(1, 1001);
+static const SOPC_NodeId nodeId_uint32 = SOPC_NODEID_NUMERIC(1, 1002);
+static const SOPC_NodeId nodeId_double = SOPC_NODEID_NUMERIC(1, 1003);
+static const SOPC_NodeId nodeId_string = SOPC_NODEID_NUMERIC(1, 1004);
+static const SOPC_NodeId nodeId_byteString = SOPC_NODEID_NUMERIC(1, 1005);
+static const SOPC_NodeId nodeId_xmlElt = SOPC_NODEID_NUMERIC(1, 1006);
+static const SOPC_NodeId nodeId_Boolean = SOPC_NODEID_NUMERIC(1, 1029);
+static const SOPC_NodeId nodeId_DateTime = SOPC_NODEID_STRING(1, "DateTimeVar");
+static const SOPC_NodeId nodeId_Guid = SOPC_NODEID_STRING(1, "GuidVar");
+static const SOPC_NodeId nodeId_LocalizedText = SOPC_NODEID_NUMERIC(1, 1033);
+static const SOPC_NodeId nodeId_Qname = SOPC_NODEID_NUMERIC(1, 1034);
 
 OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_space)
 {
-    // Multiple of number of groups
-    assert(N_VARS % N_GROUPS == 0);
     assert(N_VARS <= INT32_MAX);
 
     OpcUa_WriteRequest* pReq = SOPC_WriteRequest_Create(N_VARS);
     if (NULL == pReq)
         exit(1);
 
-    size_t i;
     SOPC_ByteString buf;
     SOPC_ByteString_Initialize(&buf);
-    uint32_t j;
+    uint32_t j = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    /* First batch: variables are divided in n groups,
-     * where n is the current number of supported types in the Address Space */
-
     /* int64 */
-    for (i = 0; i < N_VARS / N_GROUPS; ++i)
-    {
-        /* with N_VARS = N_GROUPS, the only i value is 0 */
-        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 1000 + 1);
-        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Int64_Id,
-                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                              .Value.Int64 = (10000 + (int64_t) i) * ((int64_t) 1)},
-                                    .Status = SOPC_GoodGenericStatus};
+    SOPC_DataValue dataValue_int64 = {
+        .Value = {.BuiltInTypeId = SOPC_Int64_Id, .ArrayType = SOPC_VariantArrayType_SingleValue, .Value.Int64 = 10001},
+        .Status = SOPC_GoodGenericStatus};
 
-        status = SOPC_WriteRequest_SetWriteValue(pReq, i, &nodeId, SOPC_AttributeId_Value, NULL, &dataValue);
-        if (SOPC_STATUS_OK != status)
-            exit(1);
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 0, &nodeId_int64, SOPC_AttributeId_Value, NULL, &dataValue_int64);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
     }
 
     /* uint32 */
-    for (i = 0; i < N_VARS / N_GROUPS; ++i)
+    SOPC_DataValue dataValue_uint32 = {.Value = {.BuiltInTypeId = SOPC_UInt32_Id,
+                                                 .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                 .Value.Uint32 = 1000},
+                                       .Status = SOPC_GoodGenericStatus};
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 1, &nodeId_uint32, SOPC_AttributeId_Value, NULL, &dataValue_uint32);
+    if (SOPC_STATUS_OK != status)
     {
-        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + (N_VARS / N_GROUPS) + 1000 + 1);
-        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_UInt32_Id,
-                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                              .Value.Uint32 = 1000 + (uint32_t) i},
-                                    .Status = SOPC_GoodGenericStatus};
-
-        status = SOPC_WriteRequest_SetWriteValue(pReq, i + (N_VARS / N_GROUPS), &nodeId, SOPC_AttributeId_Value, NULL,
-                                                 &dataValue);
-        if (SOPC_STATUS_OK != status)
-            exit(1);
+        exit(1);
     }
 
     /* double */
-    for (i = 0; i < N_VARS / N_GROUPS; ++i)
+    SOPC_DataValue dataValue_double = {.Value = {.BuiltInTypeId = SOPC_Double_Id,
+                                                 .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                 .Value.Doublev = pow(2, 1)},
+                                       .Status = SOPC_GoodGenericStatus};
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 2, &nodeId_double, SOPC_AttributeId_Value, NULL, &dataValue_double);
+    if (SOPC_STATUS_OK != status)
     {
-        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 2 * (N_VARS / N_GROUPS) + 1000 + 1);
-        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_Double_Id,
-                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                              .Value.Doublev = pow(2, (double) (i + 1))},
-                                    .Status = SOPC_GoodGenericStatus};
-
-        status = SOPC_WriteRequest_SetWriteValue(pReq, i + (N_VARS / N_GROUPS) * 2, &nodeId, SOPC_AttributeId_Value,
-                                                 NULL, &dataValue);
-        if (SOPC_STATUS_OK != status)
-            exit(1);
+        exit(1);
     }
 
     /* String */
-    for (i = 0; i < N_VARS / N_GROUPS; ++i)
+    buf.Length = 8;
+    buf.Data = SOPC_Malloc(8);
+    if (NULL == buf.Data)
     {
-        buf.Length = 8;
-        buf.Data = SOPC_Malloc(8);
-        if (NULL == buf.Data)
-            exit(1);
-        j = (uint32_t) i;
-        memcpy((void*) (buf.Data), "FOO ", 4);
-        memcpy((void*) (buf.Data + 4), (void*) &j, 4);
-
-        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 3 * (N_VARS / N_GROUPS) + 1000 + 1);
-        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_String_Id,
-                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                              .Value.String = buf},
-                                    .Status = SOPC_GoodGenericStatus};
-
-        status = SOPC_WriteRequest_SetWriteValue(pReq, i + 3 * (N_VARS / N_GROUPS), &nodeId, SOPC_AttributeId_Value,
-                                                 NULL, &dataValue);
-        SOPC_ByteString_Clear(&buf);
-
-        if (SOPC_STATUS_OK != status)
-            exit(1);
+        exit(1);
     }
 
+    memcpy((void*) (buf.Data), "FOO ", 4);
+    memcpy((void*) (buf.Data + 4), &j, 4);
+    SOPC_DataValue dataValue_string = {
+        .Value = {.BuiltInTypeId = SOPC_String_Id, .ArrayType = SOPC_VariantArrayType_SingleValue, .Value.String = buf},
+        .Status = SOPC_GoodGenericStatus};
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 3, &nodeId_string, SOPC_AttributeId_Value, NULL, &dataValue_string);
+    SOPC_ByteString_Clear(&buf);
+    if (SOPC_STATUS_OK != status)
+        exit(1);
+
     /* ByteString */
-    for (i = 0; i < N_VARS / N_GROUPS; ++i)
+    buf.Length = 8;
+    buf.Data = SOPC_Malloc(8);
+    if (NULL == buf.Data)
     {
-        buf.Length = 8;
-        buf.Data = SOPC_Malloc(8);
-        if (NULL == buf.Data)
-            exit(1);
-        j = (uint32_t) i;
-        memcpy((void*) (buf.Data), "BySt", 4);
-        memcpy((void*) (buf.Data + 4), (void*) &j, 4);
-
-        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 4 * (N_VARS / N_GROUPS) + 1000 + 1);
-        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
-                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                              .Value.Bstring = buf},
-                                    .Status = SOPC_GoodGenericStatus};
-
-        status = SOPC_WriteRequest_SetWriteValue(pReq, i + 4 * (N_VARS / N_GROUPS), &nodeId, SOPC_AttributeId_Value,
-                                                 NULL, &dataValue);
-        SOPC_ByteString_Clear(&buf);
-
-        if (SOPC_STATUS_OK != status)
-            exit(1);
+        exit(1);
+    }
+    memcpy((void*) (buf.Data), "BySt", 4);
+    memcpy((void*) (buf.Data + 4), &j, 4);
+    SOPC_DataValue dataValue_byteString = {.Value = {.BuiltInTypeId = SOPC_ByteString_Id,
+                                                     .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                     .Value.Bstring = buf},
+                                           .Status = SOPC_GoodGenericStatus};
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 4, &nodeId_byteString, SOPC_AttributeId_Value, NULL,
+                                             &dataValue_byteString);
+    SOPC_ByteString_Clear(&buf);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
     }
 
     /* XmlElt */
-    for (i = 0; i < N_VARS / N_GROUPS; ++i)
+    buf.Length = 8;
+    buf.Data = SOPC_Malloc(8);
+    if (NULL == buf.Data)
     {
-        buf.Length = 8;
-        buf.Data = SOPC_Malloc(8);
-        if (NULL == buf.Data)
-            exit(1);
-        j = (uint32_t) i;
-        memcpy((void*) (buf.Data), "XML ", 4);
-        memcpy((void*) (buf.Data + 4), (void*) &j, 4);
-
-        SOPC_NodeId nodeId = SOPC_NODEID_NUMERIC(1, (uint32_t) i + 5 * (N_VARS / N_GROUPS) + 1000 + 1);
-        SOPC_DataValue dataValue = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
-                                              .ArrayType = SOPC_VariantArrayType_SingleValue,
-                                              .Value.XmlElt = buf},
-                                    .Status = SOPC_AddressSpace_AreReadOnlyNodes(address_space)
-                                                  ? SOPC_GoodGenericStatus
-                                                  : OpcUa_BadDataUnavailable};
-
-        status = SOPC_WriteRequest_SetWriteValue(pReq, i + 5 * (N_VARS / N_GROUPS), &nodeId, SOPC_AttributeId_Value,
-                                                 NULL, &dataValue);
-        SOPC_ByteString_Clear(&buf);
-
-        if (SOPC_STATUS_OK != status)
-            exit(1);
+        exit(1);
     }
+    memcpy((void*) (buf.Data), "XML", 4);
+    memcpy((void*) (buf.Data + 4), &j, 4);
+    SOPC_DataValue dataValue_xmlElt = {.Value = {.BuiltInTypeId = SOPC_XmlElement_Id,
+                                                 .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                 .Value.XmlElt = buf},
+                                       .Status = SOPC_AddressSpace_AreReadOnlyNodes(address_space)
+                                                     ? SOPC_GoodGenericStatus
+                                                     : OpcUa_BadDataUnavailable};
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 5, &nodeId_xmlElt, SOPC_AttributeId_Value, NULL, &dataValue_xmlElt);
+    SOPC_ByteString_Clear(&buf);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
+    // Boolean
+    SOPC_DataValue dataValue_Boolean = {.Value = {.BuiltInTypeId = SOPC_Boolean_Id,
+                                                  .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                  .Value.Boolean = false},
+                                        .Status = SOPC_AddressSpace_AreReadOnlyNodes(address_space)
+                                                      ? SOPC_GoodGenericStatus
+                                                      : OpcUa_BadDataUnavailable};
+    status =
+        SOPC_WriteRequest_SetWriteValue(pReq, 6, &nodeId_Boolean, SOPC_AttributeId_Value, NULL, &dataValue_Boolean);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
+    // DateTime
+    SOPC_DataValue dataValue_DateTime = {.Value = {.BuiltInTypeId = SOPC_DateTime_Id,
+                                                   .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                   .Value.Date = 10367},
+                                         .Status = SOPC_AddressSpace_AreReadOnlyNodes(address_space)
+                                                       ? SOPC_GoodGenericStatus
+                                                       : OpcUa_BadDataUnavailable};
+    status =
+        SOPC_WriteRequest_SetWriteValue(pReq, 7, &nodeId_DateTime, SOPC_AttributeId_Value, NULL, &dataValue_DateTime);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
+    // Guid
+    SOPC_Guid* guid = SOPC_Malloc(sizeof(SOPC_Guid));
+    const char* strGuid = "53f484c1-c9bd-4b5d-803a-767c3a45e4e0";
+    status = SOPC_Guid_FromCString(guid, strGuid, strlen(strGuid));
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+    SOPC_DataValue dataValue_Guid = {
+        .Value = {.BuiltInTypeId = SOPC_Guid_Id, .ArrayType = SOPC_VariantArrayType_SingleValue, .Value.Guid = guid},
+        .Status =
+            SOPC_AddressSpace_AreReadOnlyNodes(address_space) ? SOPC_GoodGenericStatus : OpcUa_BadDataUnavailable};
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 8, &nodeId_Guid, SOPC_AttributeId_Value, NULL, &dataValue_Guid);
+    SOPC_Guid_Clear(guid);
+    SOPC_Free(guid);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
+    // LocalizedText
+    SOPC_LocalizedText lt;
+    SOPC_LocalizedText_Initialize(&lt);
+    status = SOPC_String_AttachFromCstring(&lt.defaultLocale, "en-US");
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+    status = SOPC_String_AttachFromCstring(&lt.defaultText, "English american localized text");
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+    SOPC_DataValue dataValue_LocalizedText = {.Value = {.BuiltInTypeId = SOPC_LocalizedText_Id,
+                                                        .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                        .Value.LocalizedText = &lt},
+                                              .Status = SOPC_AddressSpace_AreReadOnlyNodes(address_space)
+                                                            ? SOPC_GoodGenericStatus
+                                                            : OpcUa_BadDataUnavailable};
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 9, &nodeId_LocalizedText, SOPC_AttributeId_Value, NULL,
+                                             &dataValue_LocalizedText);
+    SOPC_LocalizedText_Clear(&lt);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
+    // QualifiedName
+    SOPC_QualifiedName qn = SOPC_QUALIFIED_NAME(19, "TestQName");
+    SOPC_DataValue dataValue_Qname = {.Value = {.BuiltInTypeId = SOPC_QualifiedName_Id,
+                                                .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                                .Value.Qname = &qn},
+                                      .Status = SOPC_AddressSpace_AreReadOnlyNodes(address_space)
+                                                    ? SOPC_GoodGenericStatus
+                                                    : OpcUa_BadDataUnavailable};
+    status = SOPC_WriteRequest_SetWriteValue(pReq, 10, &nodeId_Qname, SOPC_AttributeId_Value, NULL, &dataValue_Qname);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+    SOPC_QualifiedName_Clear(&qn);
 
     return pReq;
-}
-
-void tlibw_free_WriteRequest(OpcUa_WriteRequest** ppWriteReq)
-{
-    size_t i;
-    OpcUa_WriteRequest* pReq;
-
-    if (NULL == ppWriteReq || NULL == *ppWriteReq)
-        return;
-
-    pReq = *ppWriteReq;
-
-    /* Free the ByteStrings */
-    for (i = 0; i < N_VARS / N_GROUPS; ++i)
-    {
-        SOPC_Free(pReq->NodesToWrite[i + 3 * (N_VARS / N_GROUPS)].Value.Value.Value.String.Data);
-        SOPC_Free(pReq->NodesToWrite[i + 4 * (N_VARS / N_GROUPS)].Value.Value.Value.Bstring.Data);
-        SOPC_Free(pReq->NodesToWrite[i + 5 * (N_VARS / N_GROUPS)].Value.Value.Value.XmlElt.Data);
-    }
-    /* Free the lwv */
-    SOPC_Free(pReq->NodesToWrite);
-    /* Free the request */
-    SOPC_Free(pReq);
-    /* Reset the pointer */
-    *ppWriteReq = NULL;
 }
 
 bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, const OpcUa_WriteResponse* pWriteResp)
@@ -259,17 +300,57 @@ OpcUa_ReadRequest* tlibw_new_ReadRequest_check(void)
     if (NULL == pReadReq)
         exit(1);
 
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
     /* We only check that the values of the variables that were modified.
      * For the duplicate WriteRequest, there is a single request.
      * It should match (in the current implementation) the first of the two WriteValue. */
-    for (size_t i = 0; i < N_VARS; ++i)
+    // First NodeIds are numeric ns=1;i=1001...1006
+    for (size_t i = 0; i < 6; ++i)
     {
         SOPC_NodeId nodeId = {
             .IdentifierType = SOPC_IdentifierType_Numeric, .Data.Numeric = (uint32_t) i + 1000 + 1, .Namespace = 1};
-        SOPC_ReturnStatus status = SOPC_ReadRequest_SetReadValue(pReadReq, i, &nodeId, SOPC_AttributeId_Value, NULL);
+        status = SOPC_ReadRequest_SetReadValue(pReadReq, i, &nodeId, SOPC_AttributeId_Value, NULL);
         if (SOPC_STATUS_OK != status)
             exit(1);
     }
+    // Other NodeIds are string or numeric and there is no continuity between them,
+    // they must be managed individually.
+    // Boolean
+    status = SOPC_ReadRequest_SetReadValue(pReadReq, 6, &nodeId_Boolean, SOPC_AttributeId_Value, NULL);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
+    // DateTime
+    status = SOPC_ReadRequest_SetReadValue(pReadReq, 7, &nodeId_DateTime, SOPC_AttributeId_Value, NULL);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
+    // Guid
+    status = SOPC_ReadRequest_SetReadValue(pReadReq, 8, &nodeId_Guid, SOPC_AttributeId_Value, NULL);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
+    // LocalizedText
+    status = SOPC_ReadRequest_SetReadValue(pReadReq, 9, &nodeId_LocalizedText, SOPC_AttributeId_Value, NULL);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
+    // QualifiedName
+    status = SOPC_ReadRequest_SetReadValue(pReadReq, 10, &nodeId_Qname, SOPC_AttributeId_Value, NULL);
+    if (SOPC_STATUS_OK != status)
+    {
+        exit(1);
+    }
+
     return pReadReq;
 }
 

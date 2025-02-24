@@ -33,9 +33,6 @@
  * Note: address_space is necessary to know if the status code is modifiable or not (const address space case)
  */
 OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_space);
-/** One does not simply free a request, it must also free its content (NodesToWrite) and the content of its content
- * (ByteString) */
-void tlibw_free_WriteRequest(OpcUa_WriteRequest** ppWriteReq);
 
 /** Verifies that the response is ok and the response of each request is ok too */
 bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, const OpcUa_WriteResponse* pWriteResp);

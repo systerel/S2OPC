@@ -90,7 +90,7 @@ static void SOPC_LocalServiceAsyncRespCallback(SOPC_EncodeableType* encType, voi
             }
             else
             {
-                // Second read response is to test write effect (through read result)
+                // Second read response is to test write effect (through read result) + including some new nodes
                 test_results_set_service_result(
                     tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
             }
@@ -1020,7 +1020,7 @@ int main(int argc, char* argv[])
 
     /* Now the request can be freed */
     test_results_set_WriteRequest(NULL);
-    tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReqCopy);
+    SOPC_EncodeableObject_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &pWriteReqCopy);
 
     // Test write of value with known DataType NodeId but unknown encoder
     if (SOPC_STATUS_OK == status)

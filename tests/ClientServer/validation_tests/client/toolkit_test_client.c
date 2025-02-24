@@ -139,7 +139,7 @@ static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* re
         }
         else
         {
-            // Second read response is to test write effect (through read result)
+            // Second read response is to test write effect (through read result) + including some new nodes
             test_results_set_service_result(tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
         }
     }
@@ -939,7 +939,7 @@ int main(void)
 
     /* Now the request can be freed */
     test_results_set_WriteRequest(NULL);
-    tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReqCopy);
+    SOPC_EncodeableObject_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &pWriteReqCopy);
 
     if (SOPC_STATUS_OK == status)
     {
