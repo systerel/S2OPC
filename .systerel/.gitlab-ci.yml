@@ -740,80 +740,6 @@ coverage-analysis:
   rules:
     - if: "$WITH_COVERAGE != null"
 
-get-sonar-binaries:
-  stage: .pre
-  artifacts:
-    paths:
-      - build-wrapper/
-      - sonar-scanner/
-    expire_in: '1 day'
-    when: on_success
-  image: docker.aix.systerel.fr/c838/build@sha256:80ccf80c716d33371b3f6bb7c4027346f74a07d8259ff56090beb787ace28e80 # digest of build:1.47
-  script:
-    # Download sonar-scanner
-    # TODO : put this in a specific docker if we go with sonarqube
-    - apt-get update && apt-get install ca-certificates -y
-    - if [ ! -d sonar-scanner ]; then
-        curl -sSLo ./sonar-scanner.zip 'https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-linux-x64.zip' &&
-        unzip -o sonar-scanner.zip &&
-        mv sonar-scanner-6.2.1.4610-linux-x64 sonar-scanner;
-      fi
-    # Download build-wrapper
-    - if [ ! -d build-wrapper ]; then
-        curl -sSLo ./build-wrapper-linux-x86.zip "${SONAR_HOST_URL}/static/cpp/build-wrapper-linux-x86.zip" &&
-        unzip -oj build-wrapper-linux-x86.zip -d ./build-wrapper;
-      fi
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == 'master'
-    - if: $CI_COMMIT_BRANCH == 'main'
-    - if: $CI_COMMIT_BRANCH == 'develop'
-    
-build-sonar:
-  stage: analyses
-  image: docker.aix.systerel.fr/c838/build@sha256:80ccf80c716d33371b3f6bb7c4027346f74a07d8259ff56090beb787ace28e80 # digest of build:1.47
-  dependencies: [get-sonar-binaries]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
-  cache:
-    policy: pull-push
-    key: "sonar-cache-$CI_COMMIT_REF_SLUG"
-    paths:
-      - "${SONAR_USER_HOME}/cache"
-      - sonar-scanner/
-      - build-wrapper/
-  script:
-    # Run the build inside the build wrapper
-    - build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output ./build.sh
-    # Run the sonar-scanner in the same stage as the build
-    - sonar-scanner/bin/sonar-scanner -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}" -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == 'master'
-    - if: $CI_COMMIT_BRANCH == 'main'
-    - if: $CI_COMMIT_BRANCH == 'develop'
-
-sonarqube-vulnerability-report:
-  stage: analyses
-  image: curlimages/curl:latest
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
-  script:
-    - 'curl -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/issues/gitlab_sast_export?projectKey=produit_s2opc_S2OPC_24139d68-4921-48ee-9bd0-73a286ab7325&branch=${CI_COMMIT_BRANCH}&pullRequest=${CI_MERGE_REQUEST_IID}" -o gl-sast-sonar-report.json'
-  needs: [build-sonar]
-  allow_failure: true
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
-    - if: $CI_COMMIT_BRANCH == 'master'
-    - if: $CI_COMMIT_BRANCH == 'main'
-    - if: $CI_COMMIT_BRANCH == 'develop'
-  artifacts:
-    expire_in: 1 day
-    reports:
-      sast: gl-sast-sonar-report.json
-
 ###
 # Documentation generation and publication
 ###
@@ -858,5 +784,4 @@ check_doc:
   rules:
    - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
      when: on_success
-
 
