@@ -1025,7 +1025,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
             else
             {
                 status = SOPC_PubSub_Security_Write_Nonce(security, *buffer_header, (uint8_t) nonceRandomLength);
-                checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
+                res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed);
             }
         }
 
