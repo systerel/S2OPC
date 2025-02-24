@@ -2967,8 +2967,8 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
             status = SOPC_String_Copy(&ltAddToList.defaultLocale, &destSetOfLt->defaultLocale);
             if (SOPC_STATUS_OK == status)
             {
+                clearLtToAdd = true;
                 status = SOPC_String_Copy(&ltAddToList.defaultText, &destSetOfLt->defaultText);
-                clearLtToAdd = (SOPC_STATUS_OK == status);
             }
             if (SOPC_STATUS_OK != status)
             {
@@ -2984,8 +2984,11 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
             addToList = false;
         }
         // Default localized text is the one to set
-        SOPC_String_Clear(&destSetOfLt->defaultText);
-        status = SOPC_String_Copy(&destSetOfLt->defaultText, &src->defaultText);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_String_Clear(&destSetOfLt->defaultText);
+            status = SOPC_String_Copy(&destSetOfLt->defaultText, &src->defaultText);
+        }
     }
     else if (NULL != destSetOfLt->localizedTextList)
     {
