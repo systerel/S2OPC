@@ -535,7 +535,7 @@ void address_space_bs__read_AddressSpace_DisplayName_value(
     else
     {
         *address_space_bs__variant = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(
-            address_space_bs__variant, address_space_bs__p_locales);
+            address_space_bs__variant, address_space_bs__p_locales, NULL);
     }
 }
 
@@ -795,8 +795,8 @@ void address_space_bs__read_AddressSpace_Value_value(
         if (SOPC_LocalizedText_Id == value->BuiltInTypeId)
         {
             // Get preferred localized text(s) (single value, array or matrix)
-            value = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&value,
-                                                                                        address_space_bs__p_locales);
+            value = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(
+                &value, address_space_bs__p_locales, NULL);
         }
     }
 

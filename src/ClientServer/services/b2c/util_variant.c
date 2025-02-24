@@ -168,8 +168,6 @@ bool util_variant__copy_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_V
 
     SOPC_ASSERT(SOPC_LocalizedText_Id == src->BuiltInTypeId);
 
-    // Note: we need a copy of src because it might be deallocated by
-    // util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant
     SOPC_Variant* srcCopy = SOPC_Variant_Create();
     if (NULL == srcCopy)
     {
@@ -179,9 +177,10 @@ bool util_variant__copy_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_V
 
     if (SOPC_STATUS_OK == status)
     {
-        srcCopy = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&srcCopy, preferredLocales);
-        // If the destination is still a shallow copy, the operation failed
-        status = (srcCopy->DoNotClear ? SOPC_STATUS_NOK : SOPC_STATUS_OK);
+        bool success = false;
+        srcCopy =
+            util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&srcCopy, preferredLocales, &success);
+        status = (success ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -192,15 +191,26 @@ bool util_variant__copy_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_V
 }
 
 SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant** v,
-                                                                                  char** preferredLocales)
+                                                                                  char** preferredLocales,
+                                                                                  bool* success)
 {
     SOPC_ASSERT(NULL != v);
     SOPC_Variant* value = *v;
-
     SOPC_ASSERT(SOPC_LocalizedText_Id == value->BuiltInTypeId);
-    SOPC_ASSERT(value->DoNotClear); // it was a shallow copy
 
-    SOPC_Variant* result = NULL;
+    bool res = false;
+    // If the caller wants to know the final result.
+    if (NULL != success)
+    {
+        *success = res;
+    }
+
+    // Create a variant that will be a deep copy of *v
+    SOPC_Variant* result = SOPC_Variant_Create();
+    if (NULL == result)
+    {
+        return value;
+    }
 
     if (SOPC_VariantArrayType_SingleValue == value->ArrayType)
     {
@@ -211,18 +221,23 @@ SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Varian
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Free(newLt);
+            SOPC_Variant_Clear(result);
+            SOPC_Free(result);
+            result = value;
         }
         else
         {
-            value->Value.LocalizedText = newLt;
-            value->DoNotClear = false; // it is not anymore a shallow copy
-            result = value;
+            result->ArrayType = SOPC_VariantArrayType_SingleValue;
+            result->BuiltInTypeId = SOPC_LocalizedText_Id;
+            result->Value.LocalizedText = newLt;
+            res = true;
+            SOPC_Variant_Clear(value);
+            SOPC_Free(value);
+            *v = NULL;
         }
     }
     else if (SOPC_VariantArrayType_Array == value->ArrayType || SOPC_VariantArrayType_Matrix == value->ArrayType)
     {
-        // Create a deep copy that will allocate the same
-        result = SOPC_Variant_Create();
         SOPC_ReturnStatus status = SOPC_Variant_Copy(result, value);
 
         if (SOPC_STATUS_OK == status)
@@ -245,6 +260,7 @@ SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Varian
         if (SOPC_STATUS_OK == status)
         {
             // Preferred localized text array created, remove source one
+            res = true;
             SOPC_Variant_Clear(value);
             SOPC_Free(value);
             *v = NULL;
@@ -261,6 +277,13 @@ SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Varian
     {
         SOPC_ASSERT(false);
     }
+
+    // Update final result status
+    if (NULL != success)
+    {
+        *success = res;
+    }
+
     return result;
 }
 

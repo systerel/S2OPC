@@ -42,10 +42,13 @@ SOPC_Variant* util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* q
 SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt, bool deepCopy);
 
 /**
- * The input variant is returned as result or is freed if the output variant is a new structure
+ * On success, returns a deep copy of the input variant with new locales, and free the input variant.
+ * On fail, returns the input variant.
+ * If the caller is not interested in the result, he can provide NULL for the *success* parameter.
  */
 SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant** v,
-                                                                                  char** preferredLocales);
+                                                                                  char** preferredLocales,
+                                                                                  bool* success);
 
 // Same function as previous one but source variant is not modified and destination already allocated
 bool util_variant__copy_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant* dest,

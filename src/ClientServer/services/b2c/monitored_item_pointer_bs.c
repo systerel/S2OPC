@@ -494,7 +494,8 @@ static SOPC_ReturnStatus compare_monitored_item_LT_values(char** localeIds,
     if (NULL != tmpOldValue)
     {
         // Get preferred localized text(s) for old value
-        tmpOldValue = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&tmpOldValue, localeIds);
+        tmpOldValue =
+            util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&tmpOldValue, localeIds, NULL);
     }
     if (NULL != tmpOldValue)
     {
@@ -503,7 +504,8 @@ static SOPC_ReturnStatus compare_monitored_item_LT_values(char** localeIds,
     if (NULL != tmpNewValue)
     {
         // Get preferred localized text(s) for new value
-        tmpNewValue = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&tmpNewValue, localeIds);
+        tmpNewValue =
+            util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&tmpNewValue, localeIds, NULL);
     }
     if (NULL != tmpNewValue)
     {
