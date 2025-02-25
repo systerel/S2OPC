@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h> /* getenv, exit */
 #include <string.h>
@@ -24,22 +25,28 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
 #include "sopc_audit.h"
 #include "sopc_common_constants.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
+#include "sopc_threads.h"
 
 #include "libs2opc_common_config.h"
+#include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
+#include "libs2opc_server_alarm_conditions.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
 
 #include "embedded/sopc_addspace_loader.h"
 
 #include "toolkit_demo_server_methods.h"
+#include "toolkit_test_server_alarms.h"
 
 #ifdef WITH_STATIC_SECURITY_DATA
 #include "common_static_security_data.h"
@@ -65,6 +72,46 @@ static const bool secuActive = true;
 SOPC_NodeId uactt_nodeId1 = SOPC_NODEID_STRING(1, "Boolean_001");
 SOPC_NodeId uactt_nodeId2 = SOPC_NODEID_STRING(1, "Array_Boolean_001");
 SOPC_NodeId uactt_nodeId3 = SOPC_NODEID_NS0_NUMERIC(3187);
+
+/* ---------------------------------------------------------------------------
+ *                          Manage server stop phase
+ * ---------------------------------------------------------------------------*/
+
+// Periodic timeout used to check if server should stop or has been stopped
+#define UPDATE_STOP_TIMEOUT_MS 500
+
+static int32_t stopRequested = 0;
+
+/*
+ * Management of Ctrl-C to stop the server (callback on stop signal)
+ */
+static void SOPC_Internal_StopSignal(int sig)
+{
+    /* avoid unused parameter compiler warning */
+    SOPC_UNUSED_ARG(sig);
+
+    /*
+     * Signal steps:
+     * - 1st signal: activate server shutdown phase of OPC UA server
+     * - 2rd signal: abrupt exit with error code '1'
+     */
+    if (stopRequested > 0)
+    {
+        exit(1);
+    }
+    else
+    {
+        stopRequested++;
+    }
+}
+
+static int32_t atomicStopped = false;
+
+static void SOPC_ServerStopped_Cb(SOPC_ReturnStatus status)
+{
+    SOPC_UNUSED_ARG(status);
+    SOPC_Atomic_Int_Set(&atomicStopped, true);
+}
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -791,7 +838,7 @@ static SOPC_ReturnStatus Server_SetDefaultAddressSpace(void)
  * Method call management :
  *-------------------------*/
 
-static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
+static SOPC_MethodCallManager* Server_InitDefaultCallMethodService(void)
 {
     /* Create and define the method call manager the server will use*/
     SOPC_MethodCallManager* mcm = SOPC_MethodCallManager_Create();
@@ -807,7 +854,13 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
         status = SOPC_DemoServerConfig_AddMethods(mcm);
     }
 
-    return status;
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_MethodCallManager_Free(mcm);
+        mcm = NULL;
+    }
+
+    return mcm;
 }
 
 /*---------------------------------------------------------------------------
@@ -1032,6 +1085,25 @@ static SOPC_StatusCode Test_OverwriteClientRequestCallback(const SOPC_CallContex
 
 int main(int argc, char* argv[])
 {
+    // Flag for alarms simulation and management
+    bool activateAlarms;
+    // Note: event management is necessary for alarms
+#if S2OPC_EVENT_MANAGEMENT
+    activateAlarms = true;
+#else
+    activateAlarms = false;
+#endif
+
+    // Note: a unitary test for events is implemented and needs alarms to be deactivated to pass
+    if (argc > 1 && strcmp(argv[1], "events") == 0)
+    {
+        activateAlarms = false;
+    }
+
+    // Install signal handler to close the server gracefully when server needs to stop
+    signal(SIGINT, SOPC_Internal_StopSignal);
+    signal(SIGTERM, SOPC_Internal_StopSignal);
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     /* Get the toolkit build information and print it */
@@ -1066,9 +1138,11 @@ int main(int argc, char* argv[])
     }
 
     // Define demo implementation of functions called for method call service
+    SOPC_MethodCallManager* mcm = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_InitDefaultCallMethodService();
+        mcm = Server_InitDefaultCallMethodService();
+        status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
 
 #ifdef S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
@@ -1106,13 +1180,47 @@ int main(int argc, char* argv[])
         }
     }
 
+    /* Initialize the Alarm and Condition module */
+    if (SOPC_STATUS_OK == status && activateAlarms)
+    {
+        status = SOPC_ServerAlarmConditionMgr_Initialize(mcm);
+    }
+
     /* Start the server */
     if (SOPC_STATUS_OK == status)
     {
         printf("<Demo_Server: Server started\n");
 
-        /* Run the server until error  or stop server signal detected (Ctrl-C) */
-        status = SOPC_ServerHelper_Serve(true);
+        /* Run the server until error or stop server signal detected (Ctrl-C) */
+        status = SOPC_ServerHelper_StartServer(&SOPC_ServerStopped_Cb);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            if (activateAlarms)
+            {
+                status = Test_Server_InitializeAlarms();
+            }
+            while (SOPC_STATUS_OK == status && 0 == stopRequested && false == SOPC_Atomic_Int_Get(&atomicStopped))
+            {
+                SOPC_Sleep(UPDATE_STOP_TIMEOUT_MS);
+            }
+
+            if (activateAlarms)
+            {
+                Test_Server_PreStopAlarms();
+            }
+            status = SOPC_ServerHelper_StopServer();
+
+            while (SOPC_STATUS_OK == status && false == SOPC_Atomic_Int_Get(&atomicStopped))
+            {
+                SOPC_Sleep(UPDATE_STOP_TIMEOUT_MS);
+            }
+
+            if (activateAlarms)
+            {
+                Test_Server_ClearAlarms();
+            }
+        }
 
         if (SOPC_STATUS_OK != status)
         {
@@ -1130,6 +1238,10 @@ int main(int argc, char* argv[])
     }
 
     /* Clear the server library (stop all library threads) and server configuration */
+    if (activateAlarms)
+    {
+        SOPC_ServerAlarmConditionMgr_Clear();
+    }
     SOPC_ServerConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 

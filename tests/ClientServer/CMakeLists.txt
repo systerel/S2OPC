@@ -481,6 +481,7 @@ endif()
 
 add_executable(${TOOLKIT_TEST_SERVER}
   "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/toolkit_test_server.c"
+  "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/toolkit_test_server_alarms.c"
   ${TEST_SERVER_ADDRESS_SPACE_C}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
   "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/toolkit_demo_server_methods.c")
@@ -629,7 +630,7 @@ function(s2opc_validation_test target_name bin_name)
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
-  "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
+  "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${ARGN}"
   $<TARGET_FILE:${bin_name}>)
   set_tests_properties("validation::${target_name}" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${target_name}.tap")
 endfunction()
@@ -640,13 +641,12 @@ s2opc_validation_test(client_server_test_delete_nodes toolkit_test_client_delete
 s2opc_validation_test(client_service_faults_test toolkit_test_client_service_faults)
 s2opc_validation_test(client_RHE_faults_test toolkit_test_client_rhe_faults)
 
-
 if(expat_FOUND AND S2OPC_EVENT_MANAGEMENT)
-  s2opc_validation_test(client_server_events_test toolkit_test_client_events)
+  s2opc_validation_test(client_server_events_test toolkit_test_client_events events)
 endif()
 
 if(expat_FOUND AND S2OPC_HAS_AUDITING)
-  s2opc_validation_test(client_server_audit_test toolkit_test_client_audit)
+  s2opc_validation_test(client_server_audit_test toolkit_test_client_audit events)
 endif()
 
 if (NOT WIN32 AND expat_FOUND)
