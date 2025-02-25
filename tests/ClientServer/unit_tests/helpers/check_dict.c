@@ -22,10 +22,10 @@
 
 #include "check_helpers.h"
 
-#include "sopc_dict.h"
 #include "sopc_hash.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_tsafe_dict.h"
 
 static uint64_t str_hash(const uintptr_t str)
 {
@@ -43,6 +43,17 @@ static uint64_t str_hash(const uintptr_t str)
 static bool str_equal(const uintptr_t a, const uintptr_t b)
 {
     return strcmp((const char*) a, (const char*) b) == 0;
+}
+
+static uintptr_t str_copy(const uintptr_t a)
+{
+    size_t len = strlen((const char*) a) + 1;
+    char* value = SOPC_Calloc(len, sizeof(char));
+    if (NULL != value)
+    {
+        strncpy(value, (const char*) a, len);
+    }
+    return (uintptr_t) value;
 }
 
 static void uintptr_t_free(uintptr_t data)
@@ -64,86 +75,131 @@ static bool direct_equal(const uintptr_t a, const uintptr_t b)
 START_TEST(test_dict_insert_get)
 {
     bool found;
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL, NULL);
 
-    ck_assert_uint_eq(0, SOPC_Dict_Size(d));
-    ck_assert_ptr_null((void*) SOPC_Dict_Get(d, (uintptr_t) "Hello", &found));
+    ck_assert_uint_eq(0, SOPC_TSafe_Dict_Size(d));
+    ck_assert_ptr_null((void*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(!found);
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
-    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
-    ck_assert_str_eq("World", (char*) SOPC_Dict_Get(d, (uintptr_t) "Hello", &found));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    ck_assert_str_eq("World", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(found);
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) "Bonjour", (uintptr_t) "Monde"));
-    ck_assert_uint_eq(2, SOPC_Dict_Size(d));
-    ck_assert_str_eq("Monde", (char*) SOPC_Dict_Get(d, (uintptr_t) "Bonjour", &found));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Bonjour", (uintptr_t) "Monde"));
+    ck_assert_uint_eq(2, SOPC_TSafe_Dict_Size(d));
+    ck_assert_str_eq("Monde", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Bonjour", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(found);
-    ck_assert_str_eq("World", (char*) SOPC_Dict_Get(d, (uintptr_t) "Hello", &found));
+    ck_assert_str_eq("World", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(found);
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_insert_overwrite)
 {
     bool found;
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL, NULL);
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
-    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
-    ck_assert_str_eq("World", (char*) SOPC_Dict_Get(d, (uintptr_t) "Hello", &found));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    ck_assert_str_eq("World", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(found);
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "What ?"));
-    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
-    ck_assert_str_eq("What ?", (char*) SOPC_Dict_Get(d, (uintptr_t) "Hello", &found));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "What ?"));
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    ck_assert_str_eq("What ?", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(found);
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
+}
+END_TEST
+
+START_TEST(test_dict_insert_copy)
+{
+    bool found;
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, str_copy, NULL, NULL);
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    char* value = (char*) SOPC_TSafe_Dict_GetCopy(d, (uintptr_t) "Hello", &found);
+    ck_assert(found);
+    ck_assert_str_eq("World", value);
+    SOPC_Free(value);
+
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Bonjour", (uintptr_t) "Monde"));
+    ck_assert_uint_eq(2, SOPC_TSafe_Dict_Size(d));
+    ck_assert(found);
+    value = (char*) SOPC_TSafe_Dict_GetCopy(d, (uintptr_t) "Bonjour", &found);
+    ck_assert(found);
+    ck_assert_str_eq("Monde", value);
+    SOPC_Free(value);
+
+    SOPC_TSafe_Dict_Delete(d);
+}
+
+START_TEST(test_dict_copy_without_fn)
+{
+    bool found;
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL, NULL);
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    char* value = (char*) SOPC_TSafe_Dict_GetCopy(d, (uintptr_t) "Hello", &found);
+    ck_assert_ptr_null(value);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_bucket_conflict)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL, NULL);
 
     static char* k1 = "Hello";
     static char* k2 = "Helllllicopter";
 
     ck_assert(str_hash((uintptr_t) k1) == str_hash((uintptr_t) k2));
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) k1, (uintptr_t) "World"));
-    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
-    ck_assert_str_eq("World", (char*) SOPC_Dict_Get(d, (uintptr_t) k1, NULL));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) k1, (uintptr_t) "World"));
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    ck_assert_str_eq("World", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) k1, NULL));
+    SOPC_TSafe_Dict_Unlock(d);
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) k2, (uintptr_t) "Flap flap"));
-    ck_assert_uint_eq(2, SOPC_Dict_Size(d));
-    ck_assert_str_eq("Flap flap", (char*) SOPC_Dict_Get(d, (uintptr_t) k2, NULL));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) k2, (uintptr_t) "Flap flap"));
+    ck_assert_uint_eq(2, SOPC_TSafe_Dict_Size(d));
+    ck_assert_str_eq("Flap flap", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) k2, NULL));
+    SOPC_TSafe_Dict_Unlock(d);
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_non_null_empty_key)
 {
-    SOPC_Dict* d = SOPC_Dict_Create(UINTPTR_MAX, uintptr_hash, direct_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create(UINTPTR_MAX, uintptr_hash, direct_equal, NULL, NULL, NULL);
 
-    ck_assert(SOPC_Dict_Insert(d, 0, (uintptr_t) "Zero"));
-    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
-    ck_assert(SOPC_Dict_Insert(d, 1, (uintptr_t) "One"));
-    ck_assert_uint_eq(2, SOPC_Dict_Size(d));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, 0, (uintptr_t) "Zero"));
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, 1, (uintptr_t) "One"));
+    ck_assert_uint_eq(2, SOPC_TSafe_Dict_Size(d));
 
-    ck_assert_str_eq("Zero", (char*) SOPC_Dict_Get(d, 0, NULL));
-    ck_assert_str_eq("One", (char*) SOPC_Dict_Get(d, 1, NULL));
+    ck_assert_str_eq("Zero", (char*) SOPC_TSafe_Dict_GetAndLock(d, 0, NULL));
+    SOPC_TSafe_Dict_Unlock(d);
+    ck_assert_str_eq("One", (char*) SOPC_TSafe_Dict_GetAndLock(d, 1, NULL));
+    SOPC_TSafe_Dict_Unlock(d);
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_free)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, uintptr_t_free, uintptr_t_free);
+    SOPC_TSafe_Dict* d =
+        SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, uintptr_t_free, uintptr_t_free);
 
     static const char key[] = "Hello";
     static const char value[] = "World";
@@ -154,158 +210,164 @@ START_TEST(test_dict_free)
     char* v = SOPC_Calloc(1 + sizeof(value), sizeof(char));
     memcpy(v, value, sizeof(value));
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) k, (uintptr_t) v));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) k, (uintptr_t) v));
 
     // We can't really test that the memory is freed here, but our tests should
     // run with ASAN enabled, and it should catch memory leaks.
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_resize)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, uintptr_hash, direct_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, uintptr_hash, direct_equal, NULL, NULL, NULL);
 
     // Check that many inserts cause a resize by inserting more values than
-    // DICT_INITIAL_SIZE in sopc_dict.c
+    // DICT_INITIAL_SIZE in SOPC_TSafe_Dict.c
 
-    size_t initial_cap = SOPC_Dict_Capacity(d);
+    size_t initial_cap = SOPC_TSafe_Dict_Capacity(d);
 
     for (uint32_t i = 1; i < 1024; ++i)
     {
-        ck_assert(SOPC_Dict_Insert(d, i, i));
+        ck_assert(SOPC_TSafe_Dict_Insert(d, i, i));
     }
 
-    ck_assert_uint_gt(SOPC_Dict_Capacity(d), initial_cap);
+    ck_assert_uint_gt(SOPC_TSafe_Dict_Capacity(d), initial_cap);
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_get_key)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL, NULL);
     ck_assert_ptr_nonnull(d);
 
     static char* s = "Hello";
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) s, (uintptr_t) NULL));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) s, (uintptr_t) NULL));
     bool found;
-    char* key = (char*) SOPC_Dict_GetKey(d, (uintptr_t) "Hello", &found);
+    char* key = (char*) SOPC_TSafe_Dict_GetKeyAndLock(d, (uintptr_t) "Hello", &found);
     ck_assert(found);
     ck_assert_ptr_eq(s, key);
+    SOPC_TSafe_Dict_Unlock(d);
 
-    key = (char*) SOPC_Dict_GetKey(d, (uintptr_t) "World", &found);
+    key = (char*) SOPC_TSafe_Dict_GetKeyAndLock(d, (uintptr_t) "World", &found);
     ck_assert(!found);
     ck_assert_ptr_null(key);
+    SOPC_TSafe_Dict_Unlock(d);
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_remove_no_tombstone)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL, NULL);
     ck_assert_ptr_nonnull(d);
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
-    SOPC_Dict_Remove(d, (uintptr_t) "Hello"); // Should assert
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
+    SOPC_TSafe_Dict_Remove(d, (uintptr_t) "Hello"); // Should assert
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_set_tombstone_late)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL, NULL);
     ck_assert_ptr_nonnull(d);
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
-    SOPC_Dict_SetTombstoneKey(d, 0x01); // Should assert
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
+    SOPC_TSafe_Dict_SetTombstoneKey(d, 0x01); // Should assert
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_remove)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL, NULL);
     ck_assert_ptr_nonnull(d);
 
-    SOPC_Dict_SetTombstoneKey(d, 0x01);
+    SOPC_TSafe_Dict_SetTombstoneKey(d, 0x01);
 
     bool found;
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
-    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
-    ck_assert_str_eq("World", (char*) SOPC_Dict_Get(d, (uintptr_t) "Hello", &found));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    ck_assert_str_eq("World", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(found);
 
-    SOPC_Dict_Remove(d, (uintptr_t) "Other");
-    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
-    ck_assert_str_eq("World", (char*) SOPC_Dict_Get(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Remove(d, (uintptr_t) "Other");
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    ck_assert_str_eq("World", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(found);
 
-    SOPC_Dict_Remove(d, (uintptr_t) "Hello");
-    ck_assert_uint_eq(0, SOPC_Dict_Size(d));
-    ck_assert_ptr_null((void*) SOPC_Dict_Get(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Remove(d, (uintptr_t) "Hello");
+    ck_assert_uint_eq(0, SOPC_TSafe_Dict_Size(d));
+    ck_assert_ptr_null((void*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(!found);
 
-    ck_assert(SOPC_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
-    ck_assert_uint_eq(1, SOPC_Dict_Size(d));
-    ck_assert_str_eq("World", (char*) SOPC_Dict_Get(d, (uintptr_t) "Hello", &found));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
+    ck_assert_uint_eq(1, SOPC_TSafe_Dict_Size(d));
+    ck_assert_str_eq("World", (char*) SOPC_TSafe_Dict_GetAndLock(d, (uintptr_t) "Hello", &found));
+    SOPC_TSafe_Dict_Unlock(d);
     ck_assert(found);
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_tombstone_reuse)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, str_hash, str_equal, NULL, NULL, NULL);
     ck_assert_ptr_nonnull(d);
 
-    SOPC_Dict_SetTombstoneKey(d, 0x01);
+    SOPC_TSafe_Dict_SetTombstoneKey(d, 0x01);
 
-    size_t initial_cap = SOPC_Dict_Capacity(d);
+    size_t initial_cap = SOPC_TSafe_Dict_Capacity(d);
 
     for (int i = 0; i < 1024; ++i)
     {
-        ck_assert(SOPC_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
-        SOPC_Dict_Remove(d, (uintptr_t) "Hello");
+        ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t) "Hello", (uintptr_t) "World"));
+        SOPC_TSafe_Dict_Remove(d, (uintptr_t) "Hello");
     }
 
-    ck_assert_uint_eq(0, SOPC_Dict_Size(d));
-    ck_assert_uint_eq(initial_cap, SOPC_Dict_Capacity(d));
+    ck_assert_uint_eq(0, SOPC_TSafe_Dict_Size(d));
+    ck_assert_uint_eq(initial_cap, SOPC_TSafe_Dict_Capacity(d));
 
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
 START_TEST(test_dict_compact)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, uintptr_hash, direct_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, uintptr_hash, direct_equal, NULL, NULL, NULL);
     ck_assert_ptr_nonnull(d);
 
-    SOPC_Dict_SetTombstoneKey(d, 0x01);
+    SOPC_TSafe_Dict_SetTombstoneKey(d, 0x01);
 
-    size_t initial_cap = SOPC_Dict_Capacity(d);
-
-    for (int i = 0; i < 1024; ++i)
-    {
-        ck_assert(SOPC_Dict_Insert(d, (uintptr_t)(i + 2), (uintptr_t) NULL));
-    }
-
-    ck_assert_uint_gt(SOPC_Dict_Capacity(d), initial_cap);
+    size_t initial_cap = SOPC_TSafe_Dict_Capacity(d);
 
     for (int i = 0; i < 1024; ++i)
     {
-        SOPC_Dict_Remove(d, (uintptr_t)(i + 2));
+        ck_assert(SOPC_TSafe_Dict_Insert(d, (uintptr_t)(i + 2), (uintptr_t) NULL));
     }
 
-    ck_assert_uint_eq(0, SOPC_Dict_Size(d));
-    ck_assert_uint_eq(initial_cap, SOPC_Dict_Capacity(d));
+    ck_assert_uint_gt(SOPC_TSafe_Dict_Capacity(d), initial_cap);
 
-    SOPC_Dict_Delete(d);
+    for (int i = 0; i < 1024; ++i)
+    {
+        SOPC_TSafe_Dict_Remove(d, (uintptr_t)(i + 2));
+    }
+
+    ck_assert_uint_eq(0, SOPC_TSafe_Dict_Size(d));
+    ck_assert_uint_eq(initial_cap, SOPC_TSafe_Dict_Capacity(d));
+
+    SOPC_TSafe_Dict_Delete(d);
 }
 END_TEST
 
@@ -320,12 +382,12 @@ static void dict_callback_increment_u32(const uintptr_t key, uintptr_t value, ui
 
 START_TEST(test_dict_foreach_empty)
 {
-    SOPC_Dict* d = SOPC_Dict_Create((uintptr_t) NULL, uintptr_hash, direct_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create((uintptr_t) NULL, uintptr_hash, direct_equal, NULL, NULL, NULL);
     ck_assert_ptr_nonnull(d);
 
     uint32_t iteration_counter = 0;
-    SOPC_Dict_ForEach(d, dict_callback_increment_u32, (uintptr_t) &iteration_counter);
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_ForEach(d, dict_callback_increment_u32, (uintptr_t) &iteration_counter);
+    SOPC_TSafe_Dict_Delete(d);
     ck_assert_uint_eq(0, iteration_counter);
 }
 END_TEST
@@ -351,12 +413,12 @@ static void dict_callback_mark(const uintptr_t key, uintptr_t value, uintptr_t u
 
 START_TEST(test_dict_foreach)
 {
-    SOPC_Dict* d = SOPC_Dict_Create(UINTPTR_MAX, uintptr_hash, direct_equal, NULL, NULL);
+    SOPC_TSafe_Dict* d = SOPC_TSafe_Dict_Create(UINTPTR_MAX, uintptr_hash, direct_equal, NULL, NULL, NULL);
     ck_assert_ptr_nonnull(d);
 
-    ck_assert(SOPC_Dict_Insert(d, 0, 2));
-    ck_assert(SOPC_Dict_Insert(d, 1, 1));
-    ck_assert(SOPC_Dict_Insert(d, 2, 0));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, 0, 2));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, 1, 1));
+    ck_assert(SOPC_TSafe_Dict_Insert(d, 2, 0));
 
     bool keys_iterated[3];
     bool values_iterated[3];
@@ -367,8 +429,8 @@ START_TEST(test_dict_foreach)
         .values_iterated = values_iterated,
     };
 
-    SOPC_Dict_ForEach(d, dict_callback_mark, (uintptr_t) &cb_data);
-    SOPC_Dict_Delete(d);
+    SOPC_TSafe_Dict_ForEach(d, dict_callback_mark, (uintptr_t) &cb_data);
+    SOPC_TSafe_Dict_Delete(d);
 
     for (size_t i = 0; i < 3; ++i)
     {
@@ -388,6 +450,8 @@ Suite* tests_make_suite_dict(SRunner* sr)
 
     tcase_add_test(tc_dict, test_dict_insert_get);
     tcase_add_test(tc_dict, test_dict_insert_overwrite);
+    tcase_add_test(tc_dict, test_dict_insert_copy);
+    tcase_add_test(tc_dict, test_dict_copy_without_fn);
     tcase_add_test(tc_dict, test_dict_bucket_conflict);
     tcase_add_test(tc_dict, test_dict_non_null_empty_key);
     tcase_add_test(tc_dict, test_dict_free);
