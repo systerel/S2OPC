@@ -45,16 +45,14 @@ NODE_MGT_SELECTION_FILE=Acceptation_S2OPC.node_mgt.selection.xml
 
 if [[ -z "$S2OPC_NANO_PROFILE" ]] || [[ $S2OPC_NANO_PROFILE -eq  0 ]]
 then
-
-if [[ -z "$S2OPC_NODE_MANAGEMENT" ]] || [[ $S2OPC_NODE_MANAGEMENT -eq 0 ]]
-then
-    TOOLKIT_TEST_SERVER=./toolkit_test_server
-    SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.selection.xml    
-else
-    TOOLKIT_TEST_SERVER=./toolkit_test_server
-    SELECTION=$UACTT_PROJECT_PATH/$NODE_MGT_SELECTION_FILE
-fi
-
+    if [[ -z "$S2OPC_NODE_MANAGEMENT" ]] || [[ $S2OPC_NODE_MANAGEMENT -eq 0 ]]
+    then
+        TOOLKIT_TEST_SERVER=./toolkit_test_server
+        SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.selection.xml    
+    else
+        TOOLKIT_TEST_SERVER=./toolkit_test_server
+        SELECTION=$UACTT_PROJECT_PATH/$NODE_MGT_SELECTION_FILE
+    fi
 else
     TOOLKIT_TEST_SERVER=./toolkit_test_nano_server
     SELECTION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.nano.selection.xml

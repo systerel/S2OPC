@@ -1,0 +1,98 @@
+  <ConformanceGroup name="Alarms and Conditions">
+   <ConformanceUnit name="A and C Basic">
+    <TestCases>
+     <TestCase name="Test_001.js"/>
+     <TestCase name="Test_002.js"/>
+     <TestCase name="Test_005.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="A and C Enable">
+    <TestCases>
+     <TestCase name="Test_001.js"/>
+     <TestCase name="Test_002.js"/>
+     <TestCase name="Test_003.js"/>
+     <TestCase name="Test_008.js"/>
+     <TestCase name="Err_004.js"/>
+     <TestCase name="Err_005.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="A and C Acknowledge">
+    <TestCases>
+     <TestCase name="Test_001.js"/>
+     <TestCase name="Test_002.js"/>
+     <TestCase name="Test_003.js"/>
+     <TestCase name="Err_004.js"/>
+     <TestCase name="Err_005.js"/>
+     <TestCase name="Err_006.js"/>
+     <TestCase name="Err_007.js"/>
+     <TestCase name="Err_008.js"/>
+     <TestCase name="Err_009.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="A and C Confirm">
+    <TestCases>
+     <TestCase name="Test_001.js"/>
+     <TestCase name="Test_002.js"/>
+     <TestCase name="Test_003.js"/>
+     <TestCase name="Err_004.js"/>
+     <TestCase name="Err_005.js"/>
+     <TestCase name="Err_006.js"/>
+     <TestCase name="Err_007.js"/>
+     <TestCase name="Err_008.js"/>
+     <TestCase name="Err_009.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="A and C Alarm">
+    <TestCases>
+     <TestCase name="Test_000.js"/>
+     <TestCase name="Test_002.js"/>
+     <TestCase name="Test_003.js"/>
+     <TestCase name="Test_004.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="A and C Refresh">
+    <TestCases>
+     <TestCase name="Test_000.js"/>
+     <TestCase name="Test_001.js"/>
+     <TestCase name="Test_002.js"/>
+     <TestCase name="Test_004.js"/>
+     <TestCase name="Test_005.js"/>
+     <TestCase name="Test_006.js"/>
+     <TestCase name="Test_007.js"/>
+     <TestCase name="Test_008.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="A and C Refresh2">
+    <TestCases>
+     <TestCase name="Test_000.js"/>
+     <TestCase name="Test_001.js"/>
+     <TestCase name="Test_003.js"/>
+     <TestCase name="Test_004.js"/>
+     <TestCase name="Test_005.js"/>
+     <TestCase name="Test_006.js"/>
+     <TestCase name="Test_007.js"/>
+     <TestCase name="Test_008.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="A and C Comment">
+    <TestCases>
+     <TestCase name="Test_000.js"/>
+     <TestCase name="Test_001.js"/>
+     <TestCase name="Test_002.js"/>
+     <TestCase name="Test_003.js"/>
+     <TestCase name="Test_004.js"/>
+     <TestCase name="Err_002.js"/>
+     <TestCase name="Err_003.js"/>
+     <TestCase name="Err_004.js"/>
+     <TestCase name="Err_005.js"/>
+     <TestCase name="Err_007.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="A and C Discrete">
+    <TestCases>
+     <TestCase name="Test_000.js"/>
+     <TestCase name="Test_001.js"/>
+     <TestCase name="Test_002.js"/>
+    </TestCases>
+   </ConformanceUnit>
+  </ConformanceGroup>

@@ -4,7 +4,7 @@
 
 #########################################################
 # Default CI pipeline configuration:
-# - preset variables: 'S2OPC_NODE_MANAGEMENT = 1' set
+# - preset variables: 'S2OPC_NODE_MANAGEMENT = 1' and 'S2OPC_EVENT_MANAGEMENT=1' set
 # - jobs run in stages:
 #   - gen: generation job
 #   - build: build-linux64-ASan

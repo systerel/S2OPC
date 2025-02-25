@@ -25,13 +25,15 @@ NODE_MGT_SELECTION_FILE_PART=Acceptation_S2OPC.selection.node_mgt_group.xml.part
 NODE_MGT_SELECTION_FILE=Acceptation_S2OPC.node_mgt.selection.xml
 HISTORY_SELECTION_FILE_PART=Acceptation_S2OPC.selection.history.xml.part
 AUDITING_SELECTION_FILE_PART=Acceptation_S2OPC.selection.auditing_group.xml.part
+ALARM_SELECTION_FILE_PART=Acceptation_S2OPC.selection.alarm_groups.xml.part
 
 # remove methods from configuration
 sed -r 's/\"ns=1;s=Method[^\"]+\"/\"\"/g' $SRC_CFG_FILE > $NANO_CFG_FILE
 
-# add node management group selection to the dedicated selection file
+# add node management group selection to the dedicated selection file (and other extensions)
 head -n -2 $SRC_SELECTION_FILE > $NODE_MGT_SELECTION_FILE
 cat $NODE_MGT_SELECTION_FILE_PART >> $NODE_MGT_SELECTION_FILE
+cat $ALARM_SELECTION_FILE_PART >> $NODE_MGT_SELECTION_FILE
 cat $HISTORY_SELECTION_FILE_PART >> $NODE_MGT_SELECTION_FILE
 cat $AUDITING_SELECTION_FILE_PART >> $NODE_MGT_SELECTION_FILE
 tail -n -2 $SRC_SELECTION_FILE >> $NODE_MGT_SELECTION_FILE

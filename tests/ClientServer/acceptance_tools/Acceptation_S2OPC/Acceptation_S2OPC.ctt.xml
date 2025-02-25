@@ -13493,7 +13493,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data=""/>
+              <Value typename="QString" type="10" data="ns=1;i=16009"/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13607,7 +13607,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.ExclusiveLimit.AnalogSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13645,7 +13645,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.ExclusiveLevel.AnalogSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13683,7 +13683,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.ExclusiveDeviation.DeviationSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13721,7 +13721,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.ExclusiveDeviation.DeviationSetpoint"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13759,7 +13759,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.ExclusiveRateOfChange.RateOfChangeSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13797,7 +13797,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.NonExclusiveLimit.AnalogSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13835,7 +13835,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.NonExclusiveLevel.AnalogSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13873,7 +13873,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.NonExclusiveDeviation.DeviationSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13911,7 +13911,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.NonExclusiveDeviation.DeviationSetpoint"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13949,7 +13949,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.NonExclusiveRateOfChange.RateOfChangeSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -13987,7 +13987,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.Discrete.BooleanSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -14025,7 +14025,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.OffNormal.BooleanSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -14063,7 +14063,7 @@
             </Column>
             <Column column="1">
              <ItemData role="0" rolename="DisplayRole">
-              <Value typename="QString" type="10" data="ns=2;s=Alarms.SystemOffNormal.BooleanSource"/>
+              <Value typename="QString" type="10" data=""/>
              </ItemData>
              <ChildRows size="0"/>
             </Column>
@@ -14134,7 +14134,7 @@
          </Column>
          <Column column="1">
           <ItemData role="0" rolename="DisplayRole">
-           <Value typename="QString" type="10" data="60"/>
+           <Value typename="QString" type="10" data="40"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
