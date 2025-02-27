@@ -339,11 +339,12 @@ static void trace_Internal(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, bo
     va_end(args);
 }
 
-SOPC_STRING_FORMAT(4) static void vTrace_Internal(SOPC_Log_Instance* pLogInst,
-                                                                          SOPC_Log_Level level,
-                                                                          bool always,
-                                                                          const char* format,
-                                                                          va_list args)
+SOPC_STRING_FORMAT(4)
+static void vTrace_Internal(SOPC_Log_Instance* pLogInst,
+                            SOPC_Log_Level level,
+                            bool always,
+                            const char* format,
+                            va_list args)
 {
     if (NULL != pLogInst && ((pLogInst->started && level <= pLogInst->level) || always))
     {
@@ -401,19 +402,14 @@ SOPC_STRING_FORMAT(4) static void vTrace_Internal(SOPC_Log_Instance* pLogInst,
     }
 }
 
-SOPC_STRING_FORMAT(3) void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst,
-                                                                   SOPC_Log_Level level,
-                                                                   const char* format,
-                                                                   va_list args)
+SOPC_STRING_FORMAT(3)
+void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const char* format, va_list args)
 {
     vTrace_Internal(pLogInst, level, false, format, args);
 }
 
 // Print new trace in log file (and console if applicable)
-SOPC_STRING_FORMAT(3) void SOPC_Log_Trace(SOPC_Log_Instance* pLogInst,
-                                                                  SOPC_Log_Level level,
-                                                                  const char* format,
-                                                                  ...)
+SOPC_STRING_FORMAT(3) void SOPC_Log_Trace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const char* format, ...)
 {
     va_list args;
     va_start(args, format);

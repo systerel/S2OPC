@@ -806,6 +806,7 @@ static bool parse_dataset_attributes(const char* attr_name,
     SOPC_UNUSED_ARG(ctx);
     bool result = false;
     SOPC_ASSERT(NULL != user_param);
+    SOPC_ASSERT(NULL != attr_val);
     struct sopc_xml_pubsub_dataset_t* ds = (struct sopc_xml_pubsub_dataset_t*) user_param;
 
     if (TEXT_EQUALS(ATTR_DATASET_WRITER_ID, attr_name))
