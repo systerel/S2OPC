@@ -59,7 +59,6 @@
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 
 static int32_t endpointClosed = false;
-static int32_t nonRegReadWriteTest = false;
 static int32_t nonRegWriteResponses = 0;
 
 static uint32_t cptReadResps = 0;
@@ -76,83 +75,111 @@ static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
     SOPC_Atomic_Int_Set(&endpointClosed, true);
 }
 
-static void SOPC_LocalServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* response, uintptr_t appContext)
+static void SOPC_LocalServiceDefaultWriteAddRespCallback(SOPC_EncodeableType* encType,
+                                                         void* response,
+                                                         uintptr_t appContext)
 {
-    if (true != SOPC_Atomic_Int_Get(&nonRegReadWriteTest))
+    SOPC_ASSERT(appContext == 1);
+    if (encType == &OpcUa_WriteResponse_EncodeableType)
     {
-        if (encType == &OpcUa_ReadResponse_EncodeableType)
+        // Check context value is same as one provided with request
+        SOPC_ASSERT(1 == appContext);
+        printf("<Test_Server_Local_Service: received local service  WriteResponse \n");
+        OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
+        test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+    }
+    else if (encType == &OpcUa_AddNodesResponse_EncodeableType)
+    {
+        // Check context value is same as one provided with request
+        SOPC_ASSERT(1 == appContext);
+        printf("<Test_Server_Local_Service: received local service AddNodeResponse \n");
+        OpcUa_AddNodesResponse* addNodeResp = (OpcUa_AddNodesResponse*) response;
+        // Check that a node with good NodeId has been added
+        if (2 == addNodeResp->NoOfResults)
         {
-            printf("<Test_Server_Local_Service: received local service ReadResponse \n");
-            OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
-            cptReadResps++;
-            // Check context value is same as those provided with request
-            SOPC_ASSERT(cptReadResps == appContext);
-            if (cptReadResps <= 1)
-            {
-                test_results_set_service_result(
-                    test_read_request_response(readResp, readResp->ResponseHeader.ServiceResult, 0) ? true : false);
-            }
-            else
-            {
-                // Second read response is to test write effect (through read result) + including some new nodes
-                test_results_set_service_result(
-                    tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
-            }
+            char* nodeIdAddedStr1 = SOPC_NodeId_ToCString(&addNodeResp->Results[0].AddedNodeId);
+            char* nodeIdAddedStr2 = SOPC_NodeId_ToCString(&addNodeResp->Results[1].AddedNodeId);
+            printf("NodeId of added nodes: '%s', '%s'\n", nodeIdAddedStr1, nodeIdAddedStr2);
+            SOPC_Free(nodeIdAddedStr1);
+            SOPC_Free(nodeIdAddedStr2);
+            int32_t comparison1, comparison2 = -2;
+            SOPC_ASSERT(SOPC_STATUS_OK ==
+                        SOPC_NodeId_Compare(&addNodeResp->Results[0].AddedNodeId, &newObjNodeId, &comparison1));
+            SOPC_ASSERT(SOPC_STATUS_OK ==
+                        SOPC_NodeId_Compare(&addNodeResp->Results[1].AddedNodeId, &newMetNodeId, &comparison2));
+            test_results_set_service_result(0 == comparison1 && 0 == comparison2);
         }
-        else if (encType == &OpcUa_WriteResponse_EncodeableType)
+        else
         {
-            // Check context value is same as one provided with request
-            SOPC_ASSERT(1 == appContext);
-            printf("<Test_Server_Local_Service: received local service  WriteResponse \n");
-            OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
-            test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+            test_results_set_service_result(false);
         }
-        else if (encType == &OpcUa_AddNodesResponse_EncodeableType)
-        {
-            // Check context value is same as one provided with request
-            SOPC_ASSERT(1 == appContext);
-            printf("<Test_Server_Local_Service: received local service AddNodeResponse \n");
-            OpcUa_AddNodesResponse* addNodeResp = (OpcUa_AddNodesResponse*) response;
-            // Check that a node with good NodeId has been added
-            if (2 == addNodeResp->NoOfResults)
-            {
-                char* nodeIdAddedStr1 = SOPC_NodeId_ToCString(&addNodeResp->Results[0].AddedNodeId);
-                char* nodeIdAddedStr2 = SOPC_NodeId_ToCString(&addNodeResp->Results[1].AddedNodeId);
-                printf("NodeId of added nodes: '%s', '%s'\n", nodeIdAddedStr1, nodeIdAddedStr2);
-                SOPC_Free(nodeIdAddedStr1);
-                SOPC_Free(nodeIdAddedStr2);
-                int32_t comparison1, comparison2 = -2;
-                SOPC_ASSERT(SOPC_STATUS_OK ==
-                            SOPC_NodeId_Compare(&addNodeResp->Results[0].AddedNodeId, &newObjNodeId, &comparison1));
-                SOPC_ASSERT(SOPC_STATUS_OK ==
-                            SOPC_NodeId_Compare(&addNodeResp->Results[1].AddedNodeId, &newMetNodeId, &comparison2));
-                test_results_set_service_result(0 == comparison1 && 0 == comparison2);
-            }
-            else
-            {
-                test_results_set_service_result(false);
-            }
-        }
+    }
+    else if (encType == &OpcUa_ServiceFault_EncodeableType)
+    {
+        printf("<Test_Server_Local_Service ERROR: unexpected ServiceFault with status 0x%08" PRIX32 "\n ",
+               ((OpcUa_ServiceFault*) response)->ResponseHeader.ServiceResult);
+        test_results_set_service_result(false);
     }
     else
     {
+        SOPC_ASSERT(false && "Unexpected response type");
+    }
+}
+
+static void SOPC_LocalServiceReadRespCallback(SOPC_EncodeableType* encType, void* response, uintptr_t appContext)
+{
+    if (encType == &OpcUa_ReadResponse_EncodeableType)
+    {
+        printf("<Test_Server_Local_Service: received local service ReadResponse \n");
+        OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
+        cptReadResps++;
+        // Check context value is same as those provided with request
+        SOPC_ASSERT(cptReadResps == appContext);
+        if (cptReadResps <= 1)
+        {
+            SOPC_ASSERT(appContext == 1);
+            test_results_set_service_result(
+                test_read_request_response(readResp, readResp->ResponseHeader.ServiceResult, 0) ? true : false);
+        }
+        else
+        {
+            SOPC_ASSERT(appContext == 2);
+            // Second read response is to test write effect (through read result) + including some new nodes
+            test_results_set_service_result(tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
+        }
+    }
+    else if (encType == &OpcUa_ServiceFault_EncodeableType)
+    {
+        printf("<Test_Server_Local_Service ERROR: unexpected ServiceFault with status 0x%08" PRIX32 "\n ",
+               ((OpcUa_ServiceFault*) response)->ResponseHeader.ServiceResult);
+        test_results_set_service_result(false);
+    }
+    else
+    {
+        SOPC_ASSERT(false && "Unexpected response type");
+    }
+}
+
+static void SOPC_LocalServiceNonRegRespCallback(SOPC_EncodeableType* encType, void* response, uintptr_t appContext)
+{
+    if (encType == &OpcUa_ReadResponse_EncodeableType)
+    {
+        SOPC_ASSERT(appContext == 12);
         printf("<Test_Server_Local_Service: received local service ReadResponse (with concurrent write) \n");
-        if (encType == &OpcUa_ReadResponse_EncodeableType)
+        OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
+        for (int32_t i = 0; i < readResp->NoOfResults; i++)
         {
-            OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
-            for (int32_t i = 0; i < readResp->NoOfResults; i++)
-            {
-                // Access the read value, absence of errors with ASAN activated shows issue #1544 is fixed
-                char* stringContent = SOPC_String_GetCString(&readResp->Results[i].Value.Value.String);
-                printf("Read string value: '%s'\n", stringContent);
-                SOPC_Free(stringContent);
-            }
+            // Access the read value, absence of errors with ASAN activated shows issue #1544 is fixed
+            char* stringContent = SOPC_String_GetCString(&readResp->Results[i].Value.Value.String);
+            printf("Read string value: '%s'\n", stringContent);
+            SOPC_Free(stringContent);
         }
-        else if (encType == &OpcUa_WriteResponse_EncodeableType)
-        {
-            // count number of write responses
-            (void) SOPC_Atomic_Int_Add(&nonRegWriteResponses, 1);
-        }
+    }
+    else if (encType == &OpcUa_WriteResponse_EncodeableType)
+    {
+        SOPC_ASSERT(appContext == 42);
+        // count number of write responses
+        (void) SOPC_Atomic_Int_Add(&nonRegWriteResponses, 1);
     }
 }
 
@@ -160,7 +187,6 @@ static void SOPC_LocalServiceAsyncRespCallback(SOPC_EncodeableType* encType, voi
 // when using local read service on variable concurrently written
 static void test_concurrent_write_read_non_reg(void)
 {
-    SOPC_Atomic_Int_Set(&nonRegReadWriteTest, true);
     const uint32_t sleepTimeout = 50;
     // Loop timeout in milliseconds
     uint32_t loopTimeout = 5000;
@@ -197,9 +223,9 @@ static void test_concurrent_write_read_non_reg(void)
         SOPC_ASSERT(SOPC_STATUS_OK == status);
         // Call local services read and then write,
         // read is returning freed memory from address space on write prior fix
-        status = SOPC_ServerHelper_LocalServiceAsync(readReq, 12);
+        status = SOPC_ServerHelper_LocalServiceAsyncCustom(&SOPC_LocalServiceNonRegRespCallback, readReq, 12);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
-        status = SOPC_ServerHelper_LocalServiceAsync(writeReq, 42);
+        status = SOPC_ServerHelper_LocalServiceAsyncCustom(&SOPC_LocalServiceNonRegRespCallback, writeReq, 42);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 
@@ -212,7 +238,6 @@ static void test_concurrent_write_read_non_reg(void)
         SOPC_Sleep(sleepTimeout);
     }
     SOPC_ASSERT(loopCpt * sleepTimeout <= loopTimeout);
-    SOPC_Atomic_Int_Set(&nonRegReadWriteTest, false);
 }
 
 static bool checkGetEndpointsResponse(OpcUa_GetEndpointsResponse* getEndpointsResp)
@@ -967,10 +992,10 @@ int main(int argc, char* argv[])
         SOPC_Free(varNodeStructureDT);
     }
 
-    // Configure the local service asynchronous response callback
+    // Configure the default local service asynchronous response callback
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncRespCallback);
+        status = SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(SOPC_LocalServiceDefaultWriteAddRespCallback);
     }
 
     // Asynchronous request to start server
@@ -1054,7 +1079,8 @@ int main(int argc, char* argv[])
         /* Create a service request message and send it through session (read service)*/
         // msg freed when sent
         // Use 1 as read request context
-        status = SOPC_ServerHelper_LocalServiceAsync(getReadRequest_message(), 1);
+        status =
+            SOPC_ServerHelper_LocalServiceAsyncCustom(&SOPC_LocalServiceReadRespCallback, getReadRequest_message(), 1);
         if (SOPC_STATUS_OK == status)
         {
             printf("<Test_Server_Local_Service: local read asynchronous request: OK\n");
@@ -1128,7 +1154,8 @@ int main(int argc, char* argv[])
         /* The callback will call the verification */
         // msg freed when sent
         // Use 2 as read request context
-        status = SOPC_ServerHelper_LocalServiceAsync(getReadRequest_verif_message(), 2);
+        status = SOPC_ServerHelper_LocalServiceAsyncCustom(&SOPC_LocalServiceReadRespCallback,
+                                                           getReadRequest_verif_message(), 2);
         if (SOPC_STATUS_OK == status)
         {
             printf("<Test_Server_Local_Service: local read asynchronous request: OK\n");
