@@ -215,27 +215,56 @@ void SOPC_S2OPC_Config_Clear(SOPC_S2OPC_Config* config)
     SOPC_ClientConfig_Clear(&config->clientConfig);
 }
 
+SOPC_SessionId SOPC_CallContext_GetSessionId(const SOPC_CallContext* callContextPtr)
+{
+    if (NULL == callContextPtr)
+    {
+        return 0;
+    }
+    return callContextPtr->sessionId;
+}
+
 const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr)
 {
+    if (NULL == callContextPtr)
+    {
+        return NULL;
+    }
     return callContextPtr->user;
 }
 
 OpcUa_MessageSecurityMode SOPC_CallContext_GetSecurityMode(const SOPC_CallContext* callContextPtr)
 {
+    if (NULL == callContextPtr)
+    {
+        return OpcUa_MessageSecurityMode_Invalid;
+    }
     return callContextPtr->msgSecurityMode;
 }
 
 const char* SOPC_CallContext_GetSecurityPolicy(const SOPC_CallContext* callContextPtr)
 {
+    if (NULL == callContextPtr)
+    {
+        return NULL;
+    }
     return callContextPtr->secuPolicyUri;
 }
 
 uint32_t SOPC_CallContext_GetEndpointConfigIdx(const SOPC_CallContext* callContextPtr)
 {
+    if (NULL == callContextPtr)
+    {
+        return 0;
+    }
     return callContextPtr->endpointConfigIdx;
 }
 
 SOPC_AddressSpaceAccess* SOPC_CallContext_GetAddressSpaceAccess(const SOPC_CallContext* callContextPtr)
 {
+    if (NULL == callContextPtr)
+    {
+        return NULL;
+    }
     return callContextPtr->addressSpaceForMethodCall;
 }

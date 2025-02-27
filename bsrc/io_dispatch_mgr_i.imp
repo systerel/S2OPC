@@ -729,9 +729,9 @@ OPERATIONS
     END
     ;
 
-    bres <-- internal_server_event_triggered (p_notifierId, p_event, p_sub_id, p_mi_id) =
+    bres <-- internal_server_event_triggered (p_notifierId, p_event, p_session, p_sub_id, p_mi_id) =
     BEGIN
-        bres <-- server_subscription_event_triggered(p_notifierId, p_event, p_sub_id, p_mi_id)
+        bres <-- server_subscription_event_triggered(p_notifierId, p_event, p_session, p_sub_id, p_mi_id)
     END
     ;
 

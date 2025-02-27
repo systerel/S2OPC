@@ -50,6 +50,7 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
 
 void SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
                                      SOPC_Event* event,
+                                     SOPC_SessionId optSessionId,
                                      uint32_t optSubscriptionId,
                                      uint32_t optMonitoredItemId)
 {
@@ -59,6 +60,7 @@ void SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
     SOPC_ReturnStatus status = SOPC_NodeId_Copy(&eventCtx->notifierNodeId, notifierNodeId);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     eventCtx->event = event;
+    eventCtx->optSessionId = optSessionId;
     eventCtx->optSubscriptionId = optSubscriptionId;
     eventCtx->optMonitoredItemId = optMonitoredItemId;
     SOPC_Services_EnqueueEvent(APP_TO_SE_TRIGGER_EVENT, 0, (uintptr_t) eventCtx, 0);

@@ -492,7 +492,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         }
 
         io_dispatch_mgr__internal_server_event_triggered(&eventContext->notifierNodeId, eventContext->event,
-                                                         eventContext->optSubscriptionId,
+                                                         eventContext->optSessionId, eventContext->optSubscriptionId,
                                                          eventContext->optMonitoredItemId, &bres);
         if (!bres)
         {

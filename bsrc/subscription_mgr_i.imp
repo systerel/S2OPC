@@ -290,26 +290,30 @@ LOCAL_OPERATIONS
     END
     ;
 
-    bres <-- local_check_filtered_subscription_and_monitored_item (p_opt_sub_to_filter, p_opt_mi_to_fitler, p_sub, p_mi) =
+    bres <-- local_check_filtered_subscription_and_monitored_item (p_opt_session_to_filter, p_opt_sub_to_filter, p_opt_mi_to_fitler, p_session, p_sub, p_mi) =
     PRE
+        p_opt_session_to_filter : t_session_i &
         p_opt_sub_to_filter : t_subscription_i &
         p_opt_mi_to_fitler : t_monitoredItemId_i &
+        p_session : t_session_i &
         p_sub : t_subscription_i &
         p_mi : t_monitoredItemId_i &
         p_mi : t_monitoredItemId
     THEN
-        bres := bool((p_opt_sub_to_filter = c_subscription_indet or p_opt_sub_to_filter = p_sub) &
-                    (p_opt_mi_to_fitler = c_monitoredItemId_indet or p_opt_mi_to_fitler = p_mi))
+        bres := bool((p_opt_session_to_filter = c_session_indet or p_opt_session_to_filter = p_session) &
+                     (p_opt_sub_to_filter = c_subscription_indet or p_opt_sub_to_filter = p_sub) &
+                     (p_opt_mi_to_fitler = c_monitoredItemId_indet or p_opt_mi_to_fitler = p_mi))
     END
     ;
 
-    local_create_notification_on_monitored_item_if_event_selected (p_monitoredItemPointer, p_event, p_sub_id, p_mi_id) =
+    local_create_notification_on_monitored_item_if_event_selected (p_monitoredItemPointer, p_event, p_session, p_sub_id, p_mi_id) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : s_monitoredItemPointer &
         p_monitoredItemPointer : dom(a_monitored_item_notification_queue) &
         p_event : t_Event_i &
         p_event : t_Event &
+        p_session : t_session_i &
         p_sub_id : t_subscription_i &
         p_mi_id : t_monitoredItemId_i
     THEN
@@ -325,12 +329,13 @@ LOCAL_OPERATIONS
     END
     ;
 
-    local_create_notification_on_monitored_items_if_event_selected (p_monitoredItemQueue, p_event, p_sub_id, p_mi_id) =
+    local_create_notification_on_monitored_items_if_event_selected (p_monitoredItemQueue, p_event, p_session, p_sub_id, p_mi_id) =
     PRE
         p_monitoredItemQueue : t_monitoredItemQueue_i &
         p_monitoredItemQueue : s_monitoredItemQueue &
         p_event : t_Event_i &
         p_event : t_Event &
+        p_session : t_session_i &
         p_sub_id : t_subscription_i &
         p_mi_id : t_monitoredItemId_i
     THEN
@@ -951,14 +956,15 @@ OPERATIONS
     END
     ;
 
-    bres <-- local_check_filtered_subscription_and_monitored_item (p_opt_sub_to_filter, p_opt_mi_to_fitler, p_sub, p_mi) =
+    bres <-- local_check_filtered_subscription_and_monitored_item (p_opt_session_to_filter, p_opt_sub_to_filter, p_opt_mi_to_fitler, p_session, p_sub, p_mi) =
     BEGIN
-        bres := bool((p_opt_sub_to_filter = c_subscription_indet or p_opt_sub_to_filter = p_sub) &
-                    (p_opt_mi_to_fitler = c_monitoredItemId_indet or p_opt_mi_to_fitler = p_mi))
+        bres := bool((p_opt_session_to_filter = c_session_indet or p_opt_session_to_filter = p_session) &
+                     (p_opt_sub_to_filter = c_subscription_indet or p_opt_sub_to_filter = p_sub) &
+                     (p_opt_mi_to_fitler = c_monitoredItemId_indet or p_opt_mi_to_fitler = p_mi))
     END
     ;
 
-    local_create_notification_on_monitored_item_if_event_selected (p_monitoredItemPointer, p_event, p_sub_id, p_mi_id) =
+    local_create_notification_on_monitored_item_if_event_selected (p_monitoredItemPointer, p_event, p_session, p_sub_id, p_mi_id) =
     VAR
         l_monitoredItemId,
         l_subscription,
@@ -986,26 +992,27 @@ OPERATIONS
         l_monitoringMode,
         l_clientHandle <--getall_monitoredItemPointer (p_monitoredItemPointer);
         l_valid_subscription <-- is_valid_subscription (l_subscription);
-        l_filter_sub_and_mi <-- local_check_filtered_subscription_and_monitored_item (p_sub_id, p_mi_id, l_subscription, l_monitoredItemId);
-        l_session_valid := FALSE;
+        l_session := c_session_indet;
+        IF l_valid_subscription = TRUE
+        THEN
+            l_session <-- getall_session (l_subscription)
+        END
+        ;
+        l_filter_sub_and_mi <-- local_check_filtered_subscription_and_monitored_item (p_session, p_sub_id, p_mi_id, l_session, l_subscription, l_monitoredItemId);
+        l_session_valid <-- is_valid_session (l_session);
         l_valid_user_access := FALSE;
         l_locales := c_LocaleIds_empty;
-        IF l_valid_subscription = TRUE & l_filter_sub_and_mi = TRUE & l_aid = e_aid_EventNotifier
+        IF l_session_valid = TRUE & l_filter_sub_and_mi = TRUE & l_aid = e_aid_EventNotifier
         THEN
             /* Note: AccessLevel not checked here, it is a condition to generate a DataChange event (inhibition if read forbidden)*/
-            l_session <-- getall_session (l_subscription);
-            l_session_valid <-- is_valid_session (l_session);
-            IF l_session_valid = TRUE
-            THEN
                 l_user <-- get_session_user_server(l_session);
                 l_roles <-- get_session_roles(l_session);
                 l_locales <-- get_server_session_preferred_locales(l_session);
                 // Check user access
                 l_valid_user_access <-- get_event_user_authorization(p_event, l_user, l_roles)
-            END
         END
         ;
-        IF l_session_valid = TRUE & l_monitoringMode = e_monitoringMode_reporting & l_aid = e_aid_EventNotifier
+        IF l_session_valid = TRUE & l_filter_sub_and_mi = TRUE & l_monitoringMode = e_monitoringMode_reporting & l_aid = e_aid_EventNotifier
         THEN
             server_subscription_add_notification_on_event_if_triggered
               (l_valid_user_access, l_locales, p_monitoredItemPointer, l_clientHandle, l_timestampToReturn, p_event)
@@ -1013,7 +1020,7 @@ OPERATIONS
     END
     ;
 
-    local_create_notification_on_monitored_items_if_event_selected (p_monitoredItemQueue, p_event, p_sub_id, p_mi_id) =
+    local_create_notification_on_monitored_items_if_event_selected (p_monitoredItemQueue, p_event, p_session, p_sub_id, p_mi_id) =
     VAR
         l_continue,
         l_iterator,
@@ -1022,7 +1029,7 @@ OPERATIONS
         l_continue, l_iterator <-- init_iter_monitored_item (p_monitoredItemQueue);
         WHILE l_continue = TRUE DO
             l_continue, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, p_monitoredItemQueue);
-            local_create_notification_on_monitored_item_if_event_selected (l_monitoredItemPointer, p_event, p_sub_id, p_mi_id)
+            local_create_notification_on_monitored_item_if_event_selected (l_monitoredItemPointer, p_event, p_session, p_sub_id, p_mi_id)
         INVARIANT
             s_mi_to_iterate_it <: t_monitoredItemPointer &
             s_mi_iterated_it   <: t_monitoredItemPointer &
@@ -1816,7 +1823,7 @@ OPERATIONS
     END
     ;
 
-    bres <-- server_subscription_event_triggered (p_notifierId, p_event, p_sub_id, p_mi_id) =
+    bres <-- server_subscription_event_triggered (p_notifierId, p_event, p_session, p_sub_id, p_mi_id) =
     VAR
         l_nid_valid,
         l_node,
@@ -1848,7 +1855,7 @@ OPERATIONS
                 l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_notifierId);
                 IF l_bres = TRUE
                 THEN
-                    local_create_notification_on_monitored_items_if_event_selected (l_monitoredItemQueue, p_event, p_sub_id, p_mi_id)
+                    local_create_notification_on_monitored_items_if_event_selected (l_monitoredItemQueue, p_event, p_session, p_sub_id, p_mi_id)
                 END
             END  // ELSE: no MI queue (none created)
         END
@@ -1864,7 +1871,7 @@ OPERATIONS
                 l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (c_Server_NodeId);
                 IF l_bres = TRUE
                 THEN
-                    local_create_notification_on_monitored_items_if_event_selected (l_monitoredItemQueue, p_event, p_sub_id, p_mi_id)
+                    local_create_notification_on_monitored_items_if_event_selected (l_monitoredItemQueue, p_event, p_session, p_sub_id, p_mi_id)
                 END
             END
             ;

@@ -69,8 +69,11 @@ void app_cb_call_context_bs__set_app_call_context_channel_config(
     }
 }
 
-void app_cb_call_context_bs__set_app_call_context_session(const constants__t_user_i app_cb_call_context_bs__p_user)
+void app_cb_call_context_bs__set_app_call_context_session(
+    const constants__t_session_i app_cb_call_context_bs__p_session_id,
+    const constants__t_user_i app_cb_call_context_bs__p_user)
 {
+    currentCtx.sessionId = app_cb_call_context_bs__p_session_id;
     currentCtx.user = SOPC_UserWithAuthorization_GetUser(app_cb_call_context_bs__p_user);
 }
 
@@ -93,6 +96,7 @@ SOPC_CallContext* SOPC_CallContext_Copy(const SOPC_CallContext* cc)
         copy->endpointConfigIdx = cc->endpointConfigIdx;
         copy->msgSecurityMode = cc->msgSecurityMode;
         copy->secuPolicyUri = SOPC_strdup(cc->secuPolicyUri);
+        copy->sessionId = cc->sessionId;
         copy->user = SOPC_User_Copy(cc->user);
         copy->auxParam = cc->auxParam;
     }

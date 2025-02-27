@@ -325,12 +325,13 @@ OPERATIONS
 
     /* SUBSCRIPTIONS */
 
-    bres <-- internal_server_event_triggered (p_notifierId, p_event, p_sub_id, p_mi_id) =
+    bres <-- internal_server_event_triggered (p_notifierId, p_event, p_session, p_sub_id, p_mi_id) =
     PRE
         p_notifierId : t_NodeId_i &
         p_notifierId : t_NodeId &
         p_event : t_Event_i &
         p_event : t_Event &
+        p_session : t_session_i &
         p_sub_id : t_subscription_i &
         p_mi_id : t_monitoredItemId_i
     THEN

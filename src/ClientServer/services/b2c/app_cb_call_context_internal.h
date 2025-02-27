@@ -32,6 +32,7 @@ struct SOPC_CallContext
     uint32_t endpointConfigIdx;      // Only valid for server side
     OpcUa_MessageSecurityMode msgSecurityMode;
     const char* secuPolicyUri;
+    SOPC_SessionId sessionId;
     const SOPC_User* user;
 
     SOPC_AddressSpaceAccess* addressSpaceForMethodCall;

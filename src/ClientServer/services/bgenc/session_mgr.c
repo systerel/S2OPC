@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 09/12/2024 17:07:54
+ Date                 : 03/03/2025 09:32:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -608,7 +608,8 @@ void session_mgr__server_validate_session_service_req(
             if (*session_mgr__is_valid_res == true) {
                session_core__get_session_user_server(session_mgr__l_session,
                   &session_mgr__l_user);
-               app_cb_call_context_bs__set_app_call_context_session(session_mgr__l_user);
+               app_cb_call_context_bs__set_app_call_context_session(session_mgr__l_session,
+                  session_mgr__l_user);
                session_core__server_session_timeout_msg_received(session_mgr__l_session);
             }
          }

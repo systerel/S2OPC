@@ -29,6 +29,7 @@
 #include "sopc_event.h"
 #include "sopc_key_manager.h"
 #include "sopc_services_api.h"
+#include "sopc_user_app_itf.h"
 
 typedef struct SOPC_Internal_AsyncSendMsgData
 {
@@ -55,6 +56,7 @@ typedef struct SOPC_Internal_EventContext
 {
     SOPC_NodeId notifierNodeId;
     SOPC_Event* event;
+    SOPC_SessionId optSessionId;
     uint32_t optSubscriptionId;
     uint32_t optMonitoredItemId;
 } SOPC_Internal_EventContext;

@@ -38,8 +38,10 @@ OPERATIONS
     ;
 
     /* For now only set on server service request on activated session treatment */
-    set_app_call_context_session(p_user) =
+    set_app_call_context_session(p_session, p_user) =
     PRE
+        p_session : t_session_i &
+        p_session : t_session   &
         p_user    : t_user_i    &
         p_user    : t_user
     THEN

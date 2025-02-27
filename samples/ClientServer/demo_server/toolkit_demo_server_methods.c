@@ -664,8 +664,9 @@ SOPC_StatusCode SOPC_Method_Func_GenEvent(const SOPC_CallContext* callContextPtr
     {
         SOPC_Event* eventInstCopy = SOPC_Event_CreateCopy(eventInst, true);
         SOPC_ASSERT(NULL != eventInstCopy);
-        status = SOPC_ServerHelper_TriggerEvent(&TestObject, eventInstCopy, inputArgs[2].Value.Uint32,
-                                                inputArgs[3].Value.Uint32);
+        status =
+            SOPC_ServerHelper_TriggerEvent(&TestObject, eventInstCopy, SOPC_CallContext_GetSessionId(callContextPtr),
+                                           inputArgs[2].Value.Uint32, inputArgs[3].Value.Uint32);
     }
 
     SOPC_Event_Delete(&eventInst);

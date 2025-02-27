@@ -760,6 +760,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_CreateEvent(const SOPC_NodeId* eventTypeId, 
 
 SOPC_ReturnStatus SOPC_ServerHelper_TriggerEvent(const SOPC_NodeId* notifierNodeId,
                                                  SOPC_Event* event,
+                                                 SOPC_SessionId optSessionId,
                                                  uint32_t optSubscriptionId,
                                                  uint32_t optMonitoredItemId)
 {
@@ -774,7 +775,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_TriggerEvent(const SOPC_NodeId* notifierNode
     }
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitServer_TriggerEvent(notifierNodeId, event, optSubscriptionId, optMonitoredItemId);
+        SOPC_ToolkitServer_TriggerEvent(notifierNodeId, event, optSessionId, optSubscriptionId, optMonitoredItemId);
     }
     else
     {

@@ -84,13 +84,18 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
  *
  * \param notifierNodeId      NodeId of the node notifier for the triggered event
  * \param event               The event to be triggered
+ * \param optSessionId        (optional) The sessionId for which the event is triggered or 0.
  * \param optSubscriptionId   (optional) The subscriptionId for which the event is triggered or 0.
+ *                            When both \p optSessionId and \p optSubscriptionId are set,
+ *                            the event is triggered only if the subscription is part of the given session
+ *                            otherwise the event is not triggered.
  * \param optMonitoredItemId  (optional) The monitored item Id for which the event is triggered or 0.
  *
  * Note: the provided event and its content is automatically deallocated by the toolkit
  */
 void SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
                                      SOPC_Event* event,
+                                     SOPC_SessionId optSessionId,
                                      uint32_t optSubscriptionId,
                                      uint32_t optMonitoredItemId);
 

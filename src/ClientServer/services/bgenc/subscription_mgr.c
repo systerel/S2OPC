@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 04/02/2025 14:21:19
+ Date                 : 03/03/2025 09:32:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -328,13 +328,17 @@ void subscription_mgr__local_treat_create_monitored_items(
 }
 
 void subscription_mgr__local_check_filtered_subscription_and_monitored_item(
+   const constants__t_session_i subscription_mgr__p_opt_session_to_filter,
    const constants__t_subscription_i subscription_mgr__p_opt_sub_to_filter,
    const constants__t_monitoredItemId_i subscription_mgr__p_opt_mi_to_fitler,
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_sub,
    const constants__t_monitoredItemId_i subscription_mgr__p_mi,
    t_bool * const subscription_mgr__bres) {
-   *subscription_mgr__bres = (((subscription_mgr__p_opt_sub_to_filter == constants__c_subscription_indet) ||
-      (subscription_mgr__p_opt_sub_to_filter == subscription_mgr__p_sub)) &&
+   *subscription_mgr__bres = ((((subscription_mgr__p_opt_session_to_filter == constants__c_session_indet) ||
+      (subscription_mgr__p_opt_session_to_filter == subscription_mgr__p_session)) &&
+      ((subscription_mgr__p_opt_sub_to_filter == constants__c_subscription_indet) ||
+      (subscription_mgr__p_opt_sub_to_filter == subscription_mgr__p_sub))) &&
       ((subscription_mgr__p_opt_mi_to_fitler == constants__c_monitoredItemId_indet) ||
       (subscription_mgr__p_opt_mi_to_fitler == subscription_mgr__p_mi)));
 }
@@ -342,6 +346,7 @@ void subscription_mgr__local_check_filtered_subscription_and_monitored_item(
 void subscription_mgr__local_create_notification_on_monitored_item_if_event_selected(
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
    const constants__t_Event_i subscription_mgr__p_event,
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_sub_id,
    const constants__t_monitoredItemId_i subscription_mgr__p_mi_id) {
    {
@@ -373,35 +378,38 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_event_sele
          &subscription_mgr__l_clientHandle);
       subscription_core__is_valid_subscription(subscription_mgr__l_subscription,
          &subscription_mgr__l_valid_subscription);
-      subscription_mgr__local_check_filtered_subscription_and_monitored_item(subscription_mgr__p_sub_id,
+      subscription_mgr__l_session = constants__c_session_indet;
+      if (subscription_mgr__l_valid_subscription == true) {
+         subscription_core__getall_session(subscription_mgr__l_subscription,
+            &subscription_mgr__l_session);
+      }
+      subscription_mgr__local_check_filtered_subscription_and_monitored_item(subscription_mgr__p_session,
+         subscription_mgr__p_sub_id,
          subscription_mgr__p_mi_id,
+         subscription_mgr__l_session,
          subscription_mgr__l_subscription,
          subscription_mgr__l_monitoredItemId,
          &subscription_mgr__l_filter_sub_and_mi);
-      subscription_mgr__l_session_valid = false;
+      session_mgr__is_valid_session(subscription_mgr__l_session,
+         &subscription_mgr__l_session_valid);
       subscription_mgr__l_valid_user_access = false;
       subscription_mgr__l_locales = constants__c_LocaleIds_empty;
-      if (((subscription_mgr__l_valid_subscription == true) &&
+      if (((subscription_mgr__l_session_valid == true) &&
          (subscription_mgr__l_filter_sub_and_mi == true)) &&
          (subscription_mgr__l_aid == constants__e_aid_EventNotifier)) {
-         subscription_core__getall_session(subscription_mgr__l_subscription,
-            &subscription_mgr__l_session);
-         session_mgr__is_valid_session(subscription_mgr__l_session,
-            &subscription_mgr__l_session_valid);
-         if (subscription_mgr__l_session_valid == true) {
-            session_mgr__get_session_user_server(subscription_mgr__l_session,
-               &subscription_mgr__l_user);
-            session_mgr__get_session_roles(subscription_mgr__l_session,
-               &subscription_mgr__l_roles);
-            session_mgr__get_server_session_preferred_locales(subscription_mgr__l_session,
-               &subscription_mgr__l_locales);
-            subscription_core__get_event_user_authorization(subscription_mgr__p_event,
-               subscription_mgr__l_user,
-               subscription_mgr__l_roles,
-               &subscription_mgr__l_valid_user_access);
-         }
+         session_mgr__get_session_user_server(subscription_mgr__l_session,
+            &subscription_mgr__l_user);
+         session_mgr__get_session_roles(subscription_mgr__l_session,
+            &subscription_mgr__l_roles);
+         session_mgr__get_server_session_preferred_locales(subscription_mgr__l_session,
+            &subscription_mgr__l_locales);
+         subscription_core__get_event_user_authorization(subscription_mgr__p_event,
+            subscription_mgr__l_user,
+            subscription_mgr__l_roles,
+            &subscription_mgr__l_valid_user_access);
       }
-      if (((subscription_mgr__l_session_valid == true) &&
+      if ((((subscription_mgr__l_session_valid == true) &&
+         (subscription_mgr__l_filter_sub_and_mi == true)) &&
          (subscription_mgr__l_monitoringMode == constants__e_monitoringMode_reporting)) &&
          (subscription_mgr__l_aid == constants__e_aid_EventNotifier)) {
          subscription_core__server_subscription_add_notification_on_event_if_triggered(subscription_mgr__l_valid_user_access,
@@ -417,6 +425,7 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_event_sele
 void subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(
    const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
    const constants__t_Event_i subscription_mgr__p_event,
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_sub_id,
    const constants__t_monitoredItemId_i subscription_mgr__p_mi_id) {
    {
@@ -434,6 +443,7 @@ void subscription_mgr__local_create_notification_on_monitored_items_if_event_sel
             &subscription_mgr__l_monitoredItemPointer);
          subscription_mgr__local_create_notification_on_monitored_item_if_event_selected(subscription_mgr__l_monitoredItemPointer,
             subscription_mgr__p_event,
+            subscription_mgr__p_session,
             subscription_mgr__p_sub_id,
             subscription_mgr__p_mi_id);
       }
@@ -1413,6 +1423,7 @@ void subscription_mgr__treat_subscription_set_monit_mode_monitored_items_req(
 void subscription_mgr__server_subscription_event_triggered(
    const constants__t_NodeId_i subscription_mgr__p_notifierId,
    const constants__t_Event_i subscription_mgr__p_event,
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_sub_id,
    const constants__t_monitoredItemId_i subscription_mgr__p_mi_id,
    t_bool * const subscription_mgr__bres) {
@@ -1445,6 +1456,7 @@ void subscription_mgr__server_subscription_event_triggered(
             if (subscription_mgr__l_bres == true) {
                subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(subscription_mgr__l_monitoredItemQueue,
                   subscription_mgr__p_event,
+                  subscription_mgr__p_session,
                   subscription_mgr__p_sub_id,
                   subscription_mgr__p_mi_id);
             }
@@ -1465,6 +1477,7 @@ void subscription_mgr__server_subscription_event_triggered(
             if (subscription_mgr__l_bres == true) {
                subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(subscription_mgr__l_monitoredItemQueue,
                   subscription_mgr__p_event,
+                  subscription_mgr__p_session,
                   subscription_mgr__p_sub_id,
                   subscription_mgr__p_mi_id);
             }

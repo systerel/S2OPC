@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 12/11/2024 17:42:34
+ Date                 : 27/02/2025 16:13:05
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -128,6 +128,7 @@ extern void io_dispatch_mgr__internal_server_evaluate_session_timeout(
 extern void io_dispatch_mgr__internal_server_event_triggered(
    const constants__t_NodeId_i io_dispatch_mgr__p_notifierId,
    const constants__t_Event_i io_dispatch_mgr__p_event,
+   const constants__t_session_i io_dispatch_mgr__p_session,
    const constants__t_subscription_i io_dispatch_mgr__p_sub_id,
    const constants__t_monitoredItemId_i io_dispatch_mgr__p_mi_id,
    t_bool * const io_dispatch_mgr__bres);

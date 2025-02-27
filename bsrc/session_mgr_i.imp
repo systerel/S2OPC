@@ -660,7 +660,7 @@ OPERATIONS
                 IF is_valid_res = TRUE
                 THEN
                     l_user <-- get_session_user_server (l_session);
-                    set_app_call_context_session (l_user);
+                    set_app_call_context_session (l_session, l_user);
                     server_session_timeout_msg_received (l_session)
                 END
             ELSE

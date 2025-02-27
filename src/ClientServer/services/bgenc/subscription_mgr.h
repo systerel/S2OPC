@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 14/01/2025 13:40:39
+ Date                 : 03/03/2025 09:32:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -123,8 +123,10 @@ extern void subscription_mgr__fill_set_publishing_mode_response(
    const t_bool subscription_mgr__p_pub_enabled,
    const t_entier4 subscription_mgr__p_nb_reqs);
 extern void subscription_mgr__local_check_filtered_subscription_and_monitored_item(
+   const constants__t_session_i subscription_mgr__p_opt_session_to_filter,
    const constants__t_subscription_i subscription_mgr__p_opt_sub_to_filter,
    const constants__t_monitoredItemId_i subscription_mgr__p_opt_mi_to_fitler,
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_sub,
    const constants__t_monitoredItemId_i subscription_mgr__p_mi,
    t_bool * const subscription_mgr__bres);
@@ -139,6 +141,7 @@ extern void subscription_mgr__local_create_notification_if_node_changed_or_monit
 extern void subscription_mgr__local_create_notification_on_monitored_item_if_event_selected(
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
    const constants__t_Event_i subscription_mgr__p_event,
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_sub_id,
    const constants__t_monitoredItemId_i subscription_mgr__p_mi_id);
 extern void subscription_mgr__local_create_notification_on_monitored_items_if_data_changed(
@@ -148,6 +151,7 @@ extern void subscription_mgr__local_create_notification_on_monitored_items_if_da
 extern void subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(
    const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
    const constants__t_Event_i subscription_mgr__p_event,
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_sub_id,
    const constants__t_monitoredItemId_i subscription_mgr__p_mi_id);
 extern void subscription_mgr__local_treat_create_monitored_item_index(
@@ -178,6 +182,7 @@ extern void subscription_mgr__server_subscription_data_changed(
 extern void subscription_mgr__server_subscription_event_triggered(
    const constants__t_NodeId_i subscription_mgr__p_notifierId,
    const constants__t_Event_i subscription_mgr__p_event,
+   const constants__t_session_i subscription_mgr__p_session,
    const constants__t_subscription_i subscription_mgr__p_sub_id,
    const constants__t_monitoredItemId_i subscription_mgr__p_mi_id,
    t_bool * const subscription_mgr__bres);

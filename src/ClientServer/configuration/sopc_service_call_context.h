@@ -37,6 +37,11 @@
  */
 typedef struct SOPC_CallContext SOPC_CallContext;
 
+/** \brief Returns the session id that called the service
+ * \note ::SOPC_SessionId is returned as an unint32_t to break recursive inclusion of sopc_user_app_itf.h
+ */
+uint32_t SOPC_CallContext_GetSessionId(const SOPC_CallContext* callContextPtr);
+
 /** \brief Returns the user that called the service */
 const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr);
 
