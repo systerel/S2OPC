@@ -409,7 +409,8 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
 }
 
 // Print new trace in log file (and console if applicable)
-SOPC_STRING_FORMAT(3) void SOPC_Log_Trace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const char* format, ...)
+SOPC_STRING_FORMAT(3)
+void SOPC_Log_Trace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const char* format, ...)
 {
     va_list args;
     va_start(args, format);

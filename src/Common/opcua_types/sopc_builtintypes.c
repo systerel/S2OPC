@@ -2170,9 +2170,9 @@ static void nodeid_free(uintptr_t id)
     }
 }
 
-SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free)
+SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct* value_free)
 {
-    return SOPC_Dict_Create(0, nodeid_hash, nodeid_equal, free_keys ? &nodeid_free : NULL, value_free);
+    return SOPC_Dict_Create(0, &nodeid_hash, &nodeid_equal, free_keys ? &nodeid_free : NULL, value_free);
 }
 
 void SOPC_ExpandedNodeId_InitializeAux(void* value)
@@ -6025,6 +6025,11 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst,
         return SOPC_STATUS_NOK;
     }
 
+    if (NULL == dst->Value.Matrix.ArrayDimensions)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
     SOPC_EncodeableObject_PfnCopy* copyFunction = GetBuiltInTypeCopyFunction(src->BuiltInTypeId);
     SOPC_EncodeableObject_PfnClear* clearFunction = GetBuiltInTypeClearFunction(src->BuiltInTypeId);
 
@@ -6050,7 +6055,6 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst,
             return status;
         }
         *dst = tmp;
-        SOPC_ASSERT(NULL != dst->Value.Matrix.ArrayDimensions);
     }
 
     /* Check constraints */

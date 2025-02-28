@@ -836,6 +836,6 @@ bool SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(SOPC_AddressSpace* add
     }
     OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(addSpace, parentNode);
     *nbRefs -= 1;
-    OpcUa_ReferenceNode_Clear(refs[*nbRefs]);
+    OpcUa_ReferenceNode_Clear(&((*refs)[*nbRefs]));
     return true;
 }
