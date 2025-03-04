@@ -61,6 +61,8 @@
         0xC496578A, 0x0DFE, 0x4B8F, { 0x87, 0x0A, 0x74, 0x52, 0x38, 0xC6, 0xAE, 0xAE } \
     }
 #define NODEID_GS "C496578A-0DFE-4b8f-870A-745238C6AEAE"
+#define NODEID_NULL_S "NULL"
+#define NODEID_NULL NULL
 
 START_TEST(test_hexlify)
 {
@@ -1799,6 +1801,10 @@ START_TEST(test_string_nodeid)
     SOPC_Free(sNid);
     SOPC_NodeId_Clear(pNid);
     SOPC_Free(pNid);
+
+    /* NULL nid */
+    pNid = SOPC_NodeId_FromCString(NODEID_NULL);
+    ck_assert_ptr_null(pNid);
 }
 END_TEST
 
