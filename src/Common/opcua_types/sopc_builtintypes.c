@@ -4877,6 +4877,7 @@ SOPC_ReturnStatus SOPC_Variant_Dump(SOPC_Buffer* buf, const SOPC_Variant* varian
             SOPC_Buffer_PrintCString(buf, "LocalizedText (default only) = ");
             s_cst = SOPC_String_GetRawCString(&variant->Value.LocalizedText->defaultLocale);
             SOPC_Buffer_PrintCString(buf, s_cst);
+            SOPC_Buffer_PrintCString(buf, ": ");
             s_cst = SOPC_String_GetRawCString(&variant->Value.LocalizedText->defaultText);
             SOPC_Buffer_PrintCString(buf, s_cst);
             break;
