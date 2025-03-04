@@ -986,7 +986,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId);
 /** \brief Initializes a NodeId from a normalized C string. See SOPC_String_InitializeFromCString */
 SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const char* cString, int32_t len);
 /** \brief Alloacates and initializes a NodeId from a normalized C string. See SOPC_String_InitializeFromCString */
-SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len);
+SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString);
 /** \brief Creates a dictionary which keys are \a NodeId.
  * \param free_keys True if the dictionary is responsible for deleting keys on element removal
  * \param value_free The Free function for deleted elements. (Can be null if no deletion is required)

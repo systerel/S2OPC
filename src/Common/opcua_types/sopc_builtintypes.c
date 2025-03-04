@@ -2113,8 +2113,9 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
     return status;
 }
 
-SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
+SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString)
 {
+    int32_t len = (int32_t) strlen(cString);
     SOPC_NodeId* pNid = SOPC_Malloc(sizeof(SOPC_NodeId));
     if (NULL == pNid)
     {
