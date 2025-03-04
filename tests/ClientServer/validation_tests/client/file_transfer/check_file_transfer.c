@@ -198,9 +198,9 @@ START_TEST(browse_file_type)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(browseResponse->NoOfResults, nbBrowsedItems);
 
-    fileTypeNodeId[0] = SOPC_NodeId_FromCString(NODEID_FILE_TYPE_ITEM1, strlen(NODEID_FILE_TYPE_ITEM1));
+    fileTypeNodeId[0] = SOPC_NodeId_FromCString(NODEID_FILE_TYPE_ITEM1);
     ck_assert_ptr_nonnull(fileTypeNodeId[0]);
-    fileTypeNodeId[1] = SOPC_NodeId_FromCString(NODEID_FILE_TYPE_ITEM2, strlen(NODEID_FILE_TYPE_ITEM2));
+    fileTypeNodeId[1] = SOPC_NodeId_FromCString(NODEID_FILE_TYPE_ITEM2);
     ck_assert_ptr_nonnull(fileTypeNodeId[1]);
 
     int comparisonRes = 0;

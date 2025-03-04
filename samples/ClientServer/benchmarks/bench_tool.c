@@ -116,7 +116,7 @@ static void* bench_read_requests(size_t request_size, size_t bench_offset, size_
 
         r->AttributeId = 1; // NodeId
         make_nodeid(buf, sizeof(buf) / sizeof(char), (i + bench_offset) % addspace_size);
-        SOPC_NodeId* id = SOPC_NodeId_FromCString(buf, (int32_t) strlen(buf));
+        SOPC_NodeId* id = SOPC_NodeId_FromCString(buf);
         SOPC_ASSERT(id != NULL);
 
         SOPC_ReturnStatus status = SOPC_NodeId_Copy(&r->NodeId, id);
@@ -152,7 +152,7 @@ static void* bench_write_requests(size_t request_size, size_t bench_offset, size
         OpcUa_WriteValue_Initialize(r);
 
         make_nodeid(buf, sizeof(buf) / sizeof(char), (i + bench_offset) % addspace_size);
-        SOPC_NodeId* id = SOPC_NodeId_FromCString(buf, (int32_t) strlen(buf));
+        SOPC_NodeId* id = SOPC_NodeId_FromCString(buf);
         SOPC_ASSERT(id != NULL);
 
         SOPC_ReturnStatus status = SOPC_NodeId_Copy(&r->NodeId, id);

@@ -42,7 +42,7 @@ START_TEST(test_read_attribute)
     SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
     const char* nodeIdString = "i=85";
-    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString, (int32_t) strlen(nodeIdString));
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
     ck_assert_ptr_nonnull(nodeId);
     SOPC_Variant* outValue = NULL;
     SOPC_StatusCode status =
@@ -73,7 +73,7 @@ START_TEST(test_read_value)
     SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
     const char* nodeIdString = "i=11511";
-    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString, (int32_t)(strlen(nodeIdString)));
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
     ck_assert_ptr_nonnull(nodeId);
     SOPC_DataValue* outValue = NULL;
     SOPC_StatusCode status = SOPC_AddressSpaceAccess_ReadValue(addSpaceAccess, nodeId, NULL, &outValue);
@@ -97,7 +97,7 @@ START_TEST(test_write_value)
     SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
     const char* nodeIdString = "i=2735";
-    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString, (int32_t) strlen(nodeIdString));
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
     ck_assert_ptr_nonnull(nodeId);
     SOPC_Variant* writeValue = SOPC_Variant_Create();
     ck_assert_ptr_nonnull(writeValue);
@@ -146,11 +146,11 @@ START_TEST(test_add_variable_node)
     SOPC_ExpandedNodeId parentNodeId;
     SOPC_ExpandedNodeId_Initialize(&parentNodeId);
     const char* nodeIdString = "i=2996";
-    SOPC_NodeId* tmpNodeId = SOPC_NodeId_FromCString(nodeIdString, (int32_t) strlen(nodeIdString));
+    SOPC_NodeId* tmpNodeId = SOPC_NodeId_FromCString(nodeIdString);
     parentNodeId.NodeId = *tmpNodeId;
 
     nodeIdString = "i=1111";
-    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString, (int32_t) strlen(nodeIdString));
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
     ck_assert_ptr_nonnull(nodeId);
     SOPC_ExpandedNodeId typeDefId;
     SOPC_ExpandedNodeId_Initialize(&typeDefId);
@@ -209,11 +209,11 @@ START_TEST(test_add_object_node)
     SOPC_ExpandedNodeId_Initialize(&parentNodeId);
 
     const char* nodeIdString = "i=2268";
-    SOPC_NodeId* tmpNodeId = SOPC_NodeId_FromCString(nodeIdString, (int32_t) strlen(nodeIdString));
+    SOPC_NodeId* tmpNodeId = SOPC_NodeId_FromCString(nodeIdString);
     parentNodeId.NodeId = *tmpNodeId;
 
     nodeIdString = "i=7000";
-    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString, (int32_t) strlen(nodeIdString));
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
     ck_assert_ptr_nonnull(nodeId);
 
     SOPC_QualifiedName browseName;
@@ -276,7 +276,7 @@ START_TEST(test_translate_browse_path)
     ck_assert_ptr_nonnull(addSpaceAccess);
 
     const char* nodeIdString = "i=86";
-    SOPC_NodeId* startNodeId = SOPC_NodeId_FromCString(nodeIdString, (int32_t) strlen(nodeIdString));
+    SOPC_NodeId* startNodeId = SOPC_NodeId_FromCString(nodeIdString);
     ck_assert_ptr_nonnull(startNodeId);
     const SOPC_NodeId* targetNodeId = NULL;
 
@@ -318,7 +318,7 @@ START_TEST(test_browse_node)
     ck_assert_ptr_nonnull(addSpaceAccess);
 
     const char* nodeIdString = "i=86";
-    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString, (int32_t) strlen(nodeIdString));
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
     ck_assert_ptr_nonnull(nodeId);
     const SOPC_NodeId OrganizesType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
     OpcUa_ReferenceDescription* references = NULL;

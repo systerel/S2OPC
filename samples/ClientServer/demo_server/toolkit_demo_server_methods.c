@@ -523,8 +523,7 @@ static void forEachEventVar(const char* qnPath,
             res = (SOPC_STATUS_OK == status);
             break;
         case SOPC_NodeId_Id:
-            var->Value.NodeId =
-                SOPC_NodeId_FromCString("ns=42;s=Example of NodeId", (int32_t) strlen("ns=42;s=Example of NodeId"));
+            var->Value.NodeId = SOPC_NodeId_FromCString("ns=42;s=Example of NodeId");
             res = (NULL != var->Value.Guid);
             break;
         case SOPC_ExpandedNodeId_Id:
@@ -742,7 +741,7 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     /* Add methods implementation in the method call manager used */
     /* No input, no output */
     sNodeId = "ns=1;s=MethodNoArg";
-    methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+    methodId = SOPC_NodeId_FromCString(sNodeId);
     if (NULL != methodId)
     {
         methodFunc = &SOPC_Method_Func_IncCounter;
@@ -758,7 +757,7 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     {
         /* Only input, no output */
         sNodeId = "ns=1;s=MethodI";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId);
         if (NULL != methodId)
         {
             methodFunc = &SOPC_Method_Func_AddToCounter;
@@ -776,7 +775,7 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     {
         /* No input, only output */
         sNodeId = "ns=1;s=MethodO";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId);
         if (NULL != methodId)
         {
             methodFunc = &SOPC_Method_Func_GetCounterValue;
@@ -794,7 +793,7 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     {
         /* Input, output */
         sNodeId = "ns=1;s=MethodIO";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId);
         if (NULL != methodId)
         {
             methodFunc = &SOPC_Method_Func_UpdateAndGetPreviousHello;
@@ -811,7 +810,7 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     if (SOPC_STATUS_OK == status)
     {
         sNodeId = "ns=1;s=AddVariableMethod";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId);
         if (NULL != methodId)
         {
             methodFunc = &SOPC_Method_Func_AddVariable;
@@ -829,7 +828,7 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     if (SOPC_STATUS_OK == status)
     {
         sNodeId = "ns=1;s=GenEventMethod";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId);
         if (NULL != methodId)
         {
             methodFunc = &SOPC_Method_Func_GenEvent;
@@ -847,7 +846,7 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     if (SOPC_STATUS_OK == status)
     {
         sNodeId = "i=16301";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId);
         if (NULL != methodId)
         {
             methodFunc = &SOPC_Method_Func_AddRole;
@@ -864,7 +863,7 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     if (SOPC_STATUS_OK == status)
     {
         sNodeId = "i=16304";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId);
         if (NULL != methodId)
         {
             methodFunc = &SOPC_Method_Func_RemoveRole;

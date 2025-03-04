@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 
     if (NULL != nid)
     {
-        g_pNid = SOPC_NodeId_FromCString(nid, (int32_t) strlen(nid));
+        g_pNid = SOPC_NodeId_FromCString(nid);
     }
     if (NULL == g_pNid)
     {

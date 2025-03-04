@@ -870,7 +870,7 @@ static bool parse_variable_attributes(const char* attr_name,
     if (TEXT_EQUALS(ATTR_VARIABLE_NODE_ID, attr_name))
     {
         SOPC_ASSERT(strlen(attr_val) <= INT32_MAX);
-        var->nodeId = SOPC_NodeId_FromCString(attr_val, (int32_t) strlen(attr_val));
+        var->nodeId = SOPC_NodeId_FromCString(attr_val);
         result = (NULL != var->nodeId);
     }
     else if (TEXT_EQUALS(ATTR_VARIABLE_DISPLAY_NAME, attr_name))

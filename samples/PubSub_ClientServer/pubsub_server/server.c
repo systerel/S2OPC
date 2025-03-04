@@ -142,7 +142,7 @@ static SOPC_StatusCode Server_Method_Func_AcyclicSend(const SOPC_CallContext* ca
     static SOPC_NodeId* nidSendStatus = NULL;
     if (NULL == nidSendStatus)
     {
-        nidSendStatus = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND_STATUS, strlen(NODEID_ACYCLICPUB_SEND_STATUS));
+        nidSendStatus = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND_STATUS);
     }
 
     SOPC_ASSERT(NULL != nidSendStatus);
@@ -214,8 +214,7 @@ static SOPC_StatusCode Server_Method_Func_DataSetMessageFiltering(const SOPC_Cal
     static SOPC_NodeId* nidDataSetMessageFilteringStatus = NULL;
     if (NULL == nidDataSetMessageFilteringStatus)
     {
-        nidDataSetMessageFilteringStatus =
-            SOPC_NodeId_FromCString(NODEID_DSM_FILTERING_STATUS, strlen(NODEID_DSM_FILTERING_STATUS));
+        nidDataSetMessageFilteringStatus = SOPC_NodeId_FromCString(NODEID_DSM_FILTERING_STATUS);
     }
 
     SOPC_ASSERT(NULL != nidDataSetMessageFilteringStatus);
@@ -279,7 +278,7 @@ static SOPC_ReturnStatus Server_AddMethods(SOPC_MethodCallManager* mcm)
 
     /* Add methods implementation in the method call manager used */
     sNodeId = "ns=1;s=AcyclicSend";
-    methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+    methodId = SOPC_NodeId_FromCString(sNodeId);
     if (NULL != methodId)
     {
         methodFunc = &Server_Method_Func_AcyclicSend;
@@ -295,7 +294,7 @@ static SOPC_ReturnStatus Server_AddMethods(SOPC_MethodCallManager* mcm)
     if (SOPC_STATUS_OK == status)
     {
         sNodeId = "ns=1;s=DataSetMessageFiltering";
-        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        methodId = SOPC_NodeId_FromCString(sNodeId);
         if (NULL != methodId)
         {
             methodFunc = &Server_Method_Func_DataSetMessageFiltering;
@@ -644,8 +643,8 @@ struct publisherDsmIdentifier Server_PubFilteringDataSetMessage_Requested(void)
 
 SOPC_ReturnStatus Server_WritePubSubNodes(void)
 {
-    SOPC_NodeId* nidConfig = SOPC_NodeId_FromCString(NODEID_PUBSUB_CONFIG, strlen(NODEID_PUBSUB_CONFIG));
-    SOPC_NodeId* nidCommand = SOPC_NodeId_FromCString(NODEID_PUBSUB_COMMAND, strlen(NODEID_PUBSUB_COMMAND));
+    SOPC_NodeId* nidConfig = SOPC_NodeId_FromCString(NODEID_PUBSUB_CONFIG);
+    SOPC_NodeId* nidCommand = SOPC_NodeId_FromCString(NODEID_PUBSUB_COMMAND);
     SOPC_DataValue* dvConfig = SOPC_Calloc(1, sizeof(SOPC_DataValue));
     SOPC_DataValue* dvCommand = SOPC_Calloc(1, sizeof(SOPC_DataValue));
     if (NULL == nidConfig || NULL == nidCommand || NULL == dvConfig || NULL == dvCommand)
@@ -879,7 +878,7 @@ static void Server_request_change_sendAcyclicStatus(PublisherMethodStatus state)
     static SOPC_NodeId* nidSendStatus = NULL;
     if (NULL == nidSendStatus)
     {
-        nidSendStatus = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND_STATUS, strlen(NODEID_ACYCLICPUB_SEND_STATUS));
+        nidSendStatus = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND_STATUS);
     }
 
     if (NULL == request || NULL == wv || NULL == nidSendStatus)
@@ -932,8 +931,7 @@ static void Server_request_change_DsmFilteringStatus(PublisherMethodStatus state
     static SOPC_NodeId* nidDsmFilteringStatus = NULL;
     if (NULL == nidDsmFilteringStatus)
     {
-        nidDsmFilteringStatus =
-            SOPC_NodeId_FromCString(NODEID_DSM_FILTERING_STATUS, strlen(NODEID_DSM_FILTERING_STATUS));
+        nidDsmFilteringStatus = SOPC_NodeId_FromCString(NODEID_DSM_FILTERING_STATUS);
     }
 
     if (NULL == request || NULL == wv || NULL == nidDsmFilteringStatus)
@@ -1002,8 +1000,8 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
     static SOPC_NodeId* nidCommand = NULL;
     if (NULL == nidConfig || NULL == nidCommand)
     {
-        nidConfig = SOPC_NodeId_FromCString(NODEID_PUBSUB_CONFIG, strlen(NODEID_PUBSUB_CONFIG));
-        nidCommand = SOPC_NodeId_FromCString(NODEID_PUBSUB_COMMAND, strlen(NODEID_PUBSUB_COMMAND));
+        nidConfig = SOPC_NodeId_FromCString(NODEID_PUBSUB_CONFIG);
+        nidCommand = SOPC_NodeId_FromCString(NODEID_PUBSUB_COMMAND);
     }
 
     /* If config changes, store the new configuration path in global cache */
@@ -1134,7 +1132,7 @@ static void Server_SetSubStatus(bool sync, SOPC_PubSubState state)
     static SOPC_NodeId* nidStatus = NULL;
     if (NULL == nidStatus)
     {
-        nidStatus = SOPC_NodeId_FromCString(NODEID_PUBSUB_STATUS, strlen(NODEID_PUBSUB_STATUS));
+        nidStatus = SOPC_NodeId_FromCString(NODEID_PUBSUB_STATUS);
     }
 
     if (NULL == request || NULL == wv || NULL == nidStatus)

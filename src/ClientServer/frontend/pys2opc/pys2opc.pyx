@@ -1390,7 +1390,7 @@ cdef str nodeid_to_str(const SOPC_NodeId* node):
 cdef SOPC_NodeId* str_to_nodeid(str nid):
     """ Python str to SOPC_NodeId* """
     cdef SOPC_NodeId* node = NULL
-    node = SOPC_NodeId_FromCString(nid, len(nid))
+    node = SOPC_NodeId_FromCString(nid)
     assert node != NULL, 'SOPC_NodeId_FromCString failed on string "{}"'.format(nid)
     return node
 

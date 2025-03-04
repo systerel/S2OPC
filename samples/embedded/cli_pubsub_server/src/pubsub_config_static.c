@@ -96,7 +96,7 @@ static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
     SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldmetadata);
     SOPC_ASSERT(NULL != publishedVar);
-    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(strNodeId, (int32_t) strlen(strNodeId));
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(strNodeId);
     SOPC_ASSERT(NULL != nodeId);
     SOPC_PublishedVariable_Set_NodeId(publishedVar, nodeId);
     SOPC_PublishedVariable_Set_AttributeId(publishedVar,
@@ -150,7 +150,7 @@ static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
     /* FieldTarget: link to the source/target data */
     SOPC_FieldTarget* fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldmetadata);
     SOPC_ASSERT(fieldTarget != NULL);
-    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(strNodeId, (int32_t) strlen(strNodeId));
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(strNodeId);
     SOPC_FieldTarget_Set_NodeId(fieldTarget, nodeId);
     SOPC_FieldTarget_Set_AttributeId(fieldTarget, 13); // Value => AttributeId=13
 }

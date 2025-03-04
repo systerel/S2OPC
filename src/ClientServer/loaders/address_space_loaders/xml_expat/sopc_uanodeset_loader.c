@@ -451,7 +451,7 @@ static bool parseAliasedNodeId(struct parse_context_t* ctx, const XML_Char* attr
     }
 
     // Attempt to parse a NodeId as a string
-    SOPC_NodeId* id = SOPC_NodeId_FromCString(attr_val, (int32_t) strlen(attr_val));
+    SOPC_NodeId* id = SOPC_NodeId_FromCString(attr_val);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
     if (NULL != id)
@@ -552,7 +552,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
 
-            SOPC_NodeId* id = SOPC_NodeId_FromCString(attr_val, (int32_t) strlen(attr_val));
+            SOPC_NodeId* id = SOPC_NodeId_FromCString(attr_val);
 
             if (id == NULL)
             {
@@ -1672,7 +1672,7 @@ static bool finalize_reference(struct parse_context_t* ctx)
 
     OpcUa_ReferenceNode* ref = SOPC_Array_Get_Ptr(ctx->references, n_refs - 1);
     const char* text = SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx);
-    SOPC_NodeId* target_id = SOPC_NodeId_FromCString(text, (int32_t) strlen(text));
+    SOPC_NodeId* target_id = SOPC_NodeId_FromCString(text);
 
     if (target_id == NULL)
     {
@@ -1697,7 +1697,7 @@ static bool finalize_rolepermission(struct parse_context_t* ctx)
 
     OpcUa_RolePermissionType* rolepermission = SOPC_Array_Get_Ptr(ctx->rolepermissions, n_rolepermissions - 1);
     const char* text = SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx);
-    SOPC_NodeId* target_id = SOPC_NodeId_FromCString(text, (int32_t) strlen(text));
+    SOPC_NodeId* target_id = SOPC_NodeId_FromCString(text);
 
     if (target_id == NULL)
     {
@@ -1954,10 +1954,7 @@ static bool set_variant_value_nodeid(SOPC_NodeId** nodeId, parse_complex_value_t
         id = "i=0";
     }
 
-    size_t len = strlen(id);
-    SOPC_ASSERT(len <= INT32_MAX);
-
-    *nodeId = SOPC_NodeId_FromCString(id, (int32_t) len);
+    *nodeId = SOPC_NodeId_FromCString(id);
 
     if (*nodeId == NULL)
     {
@@ -2842,8 +2839,7 @@ static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_v
             complex_value_tag_from_tag_name_no_namespace("Identifier", currentTagCtx->childs, &identifierTagCtx);
         SOPC_ASSERT(id_tag_ok);
 
-        SOPC_NodeId* nodeId =
-            SOPC_NodeId_FromCString(identifierTagCtx->single_value, (int32_t) strlen(identifierTagCtx->single_value));
+        SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(identifierTagCtx->single_value);
         typeIdChar = identifierTagCtx->single_value;
         // Check nodeId is in NS0
         if (NULL != nodeId && SOPC_IdentifierType_Numeric == nodeId->IdentifierType && 0 == nodeId->Namespace)

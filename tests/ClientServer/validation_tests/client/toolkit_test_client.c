@@ -554,7 +554,7 @@ static SOPC_ReturnStatus test_non_reg_issue_1428_create_MI(SOPC_ClientHelper_Sub
     // 1st MI (with NodeId + some params with deadband filter)
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(monitoredNodeIds[0], (int32_t) strlen(monitoredNodeIds[0]));
+        SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(monitoredNodeIds[0]);
         status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(createMonItReq, 0, nodeId, SOPC_AttributeId_Value,
                                                                      NULL);
         SOPC_NodeId_Clear(nodeId);
@@ -632,7 +632,7 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
         // 1st MI (with NodeId + some params with deadband filter)
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(monitoredNodeIds[0], (int32_t) strlen(monitoredNodeIds[0]));
+            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(monitoredNodeIds[0]);
             status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(createMonItReq, 0, nodeId,
                                                                          SOPC_AttributeId_Value, NULL);
             SOPC_NodeId_Clear(nodeId);

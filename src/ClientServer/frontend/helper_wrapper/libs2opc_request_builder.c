@@ -1843,8 +1843,8 @@ SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCallFromStrings(OpcUa_CallRequest*
                                                               int32_t nbOfInputArguments,
                                                               const SOPC_Variant* inputArguments)
 {
-    SOPC_NodeId* objNodeId = SOPC_NodeId_FromCString(objectId, (int32_t) strlen(objectId));
-    SOPC_NodeId* methodNodeId = SOPC_NodeId_FromCString(methodId, (int32_t) strlen(methodId));
+    SOPC_NodeId* objNodeId = SOPC_NodeId_FromCString(objectId);
+    SOPC_NodeId* methodNodeId = SOPC_NodeId_FromCString(methodId);
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != objNodeId && NULL != methodNodeId)
     {

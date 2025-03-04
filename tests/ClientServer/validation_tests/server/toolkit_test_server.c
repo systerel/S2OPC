@@ -726,7 +726,7 @@ static SOPC_ReturnStatus Server_SetMatrixVariablesProperties(void)
     }
     bool found = false;
     const char* boolMatrixStr = "ns=1;s=Bool_Matrix";
-    SOPC_NodeId* boolMatrixId = SOPC_NodeId_FromCString(boolMatrixStr, (int32_t) strlen(boolMatrixStr));
+    SOPC_NodeId* boolMatrixId = SOPC_NodeId_FromCString(boolMatrixStr);
     SOPC_AddressSpace_Node* boolMatrix = SOPC_AddressSpace_Get_Node(addSpace, boolMatrixId, &found);
     SOPC_NodeId_Clear(boolMatrixId);
     SOPC_Free(boolMatrixId);
@@ -773,7 +773,7 @@ static SOPC_ReturnStatus Server_SetMatrixVariablesProperties(void)
     }
 
     const char* byteMatrixIdStr = "ns=1;s=Byte_Matrix3D";
-    SOPC_NodeId* byteMatrixId = SOPC_NodeId_FromCString(byteMatrixIdStr, (int32_t) strlen(byteMatrixIdStr));
+    SOPC_NodeId* byteMatrixId = SOPC_NodeId_FromCString(byteMatrixIdStr);
     SOPC_AddressSpace_Node* byteMatrix = SOPC_AddressSpace_Get_Node(addSpace, byteMatrixId, &found);
     SOPC_NodeId_Clear(byteMatrixId);
     SOPC_Free(byteMatrixId);

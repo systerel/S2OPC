@@ -277,7 +277,7 @@ int main(int argc, char* const argv[])
         status = SOPC_String_AttachFromCstring(&nodeToAddBrowseName.Name, argv[1]);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
         // Parent node is given by NodeId
-        parentNodeId = SOPC_NodeId_FromCString(argv[3], (int32_t) strlen(argv[3]));
+        parentNodeId = SOPC_NodeId_FromCString(argv[3]);
         if (NULL == parentNodeId)
         {
             printf(">> Invalid format for parent NodeId.\n\n");

@@ -1234,7 +1234,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        node_id = SOPC_NodeId_FromCString(config->fileType_nodeId, (int32_t) strlen(config->fileType_nodeId));
+        node_id = SOPC_NodeId_FromCString(config->fileType_nodeId);
         if (NULL == node_id)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1276,8 +1276,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->methodIds[OPEN_METHOD_IDX] =
-            SOPC_NodeId_FromCString(config->met_openId, (int32_t) strlen(config->met_openId));
+        file->methodIds[OPEN_METHOD_IDX] = SOPC_NodeId_FromCString(config->met_openId);
         if (NULL != file->methodIds[OPEN_METHOD_IDX])
         {
             status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[OPEN_METHOD_IDX],
@@ -1296,8 +1295,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->methodIds[CLOSE_METHOD_IDX] =
-            SOPC_NodeId_FromCString(config->met_closeId, (int32_t) strlen(config->met_closeId));
+        file->methodIds[CLOSE_METHOD_IDX] = SOPC_NodeId_FromCString(config->met_closeId);
         if (NULL != file->methodIds[CLOSE_METHOD_IDX])
         {
             status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[CLOSE_METHOD_IDX],
@@ -1317,8 +1315,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->methodIds[READ_METHOD_IDX] =
-            SOPC_NodeId_FromCString(config->met_readId, (int32_t) strlen(config->met_readId));
+        file->methodIds[READ_METHOD_IDX] = SOPC_NodeId_FromCString(config->met_readId);
         if (NULL != file->methodIds[READ_METHOD_IDX])
         {
             status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[READ_METHOD_IDX],
@@ -1337,8 +1334,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->methodIds[WRITE_METHOD_IDX] =
-            SOPC_NodeId_FromCString(config->met_writeId, (int32_t) strlen(config->met_writeId));
+        file->methodIds[WRITE_METHOD_IDX] = SOPC_NodeId_FromCString(config->met_writeId);
         if (NULL != file->methodIds[WRITE_METHOD_IDX])
         {
             status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[WRITE_METHOD_IDX],
@@ -1358,8 +1354,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->methodIds[GETPOS_METHOD_IDX] =
-            SOPC_NodeId_FromCString(config->met_getposId, (int32_t) strlen(config->met_getposId));
+        file->methodIds[GETPOS_METHOD_IDX] = SOPC_NodeId_FromCString(config->met_getposId);
         if (NULL != file->methodIds[GETPOS_METHOD_IDX])
         {
             status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[GETPOS_METHOD_IDX],
@@ -1380,8 +1375,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->methodIds[SETPOS_METHOD_IDX] =
-            SOPC_NodeId_FromCString(config->met_setposId, (int32_t) strlen(config->met_setposId));
+        file->methodIds[SETPOS_METHOD_IDX] = SOPC_NodeId_FromCString(config->met_setposId);
         if (NULL != file->methodIds[SETPOS_METHOD_IDX])
         {
             status = SOPC_MethodCallManager_AddMethod(g_method_call_manager, file->methodIds[SETPOS_METHOD_IDX],
@@ -1402,8 +1396,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->variableIds[SIZE_VAR_IDX] =
-            SOPC_NodeId_FromCString(config->var_sizeId, (int32_t) strlen(config->var_sizeId));
+        file->variableIds[SIZE_VAR_IDX] = SOPC_NodeId_FromCString(config->var_sizeId);
         if (NULL == file->variableIds[SIZE_VAR_IDX])
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1413,8 +1406,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->variableIds[OPEN_COUNT_VAR_IDX] =
-            SOPC_NodeId_FromCString(config->var_openCountId, (int32_t) strlen(config->var_openCountId));
+        file->variableIds[OPEN_COUNT_VAR_IDX] = SOPC_NodeId_FromCString(config->var_openCountId);
         if (NULL == file->variableIds[OPEN_COUNT_VAR_IDX])
         {
             SOPC_Logger_TraceError(
@@ -1425,8 +1417,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->variableIds[WRITABLE_VAR_IDX] =
-            SOPC_NodeId_FromCString(config->var_writableId, (int32_t) strlen(config->var_writableId));
+        file->variableIds[WRITABLE_VAR_IDX] = SOPC_NodeId_FromCString(config->var_writableId);
         if (NULL == file->variableIds[WRITABLE_VAR_IDX])
         {
             SOPC_Logger_TraceError(
@@ -1437,8 +1428,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
     }
     if (SOPC_STATUS_OK == status)
     {
-        file->variableIds[USER_WRITABLE_VAR_IDX] =
-            SOPC_NodeId_FromCString(config->var_userWritableId, (int32_t) strlen(config->var_userWritableId));
+        file->variableIds[USER_WRITABLE_VAR_IDX] = SOPC_NodeId_FromCString(config->var_userWritableId);
         if (NULL == file->variableIds[USER_WRITABLE_VAR_IDX])
         {
             SOPC_Logger_TraceError(
@@ -1491,7 +1481,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    node_id = SOPC_NodeId_FromCString(CnodeId, (int32_t) strlen(CnodeId));
+    node_id = SOPC_NodeId_FromCString(CnodeId);
     if (NULL == node_id)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
