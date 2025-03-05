@@ -111,8 +111,10 @@ void default_role_permissions_array_bs__has_DefaultRolePermissions_at_idx(
     *default_role_permissions_array_bs__bres = false;
     if (default_role_permissions_array_bs__p_idx < nbr_of_namespaces)
     {
-        int cmp = memcmp(&variantNull, &a_defaultRolePermissions[default_role_permissions_array_bs__p_idx],
-                         sizeof(SOPC_Variant));
+        int32_t cmp = -1;
+        SOPC_Variant variant = a_defaultRolePermissions[default_role_permissions_array_bs__p_idx];
+        SOPC_ReturnStatus status = SOPC_Variant_Compare(&variantNull, &variant, &cmp);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         *default_role_permissions_array_bs__bres = 0 != cmp;
     }
 }
