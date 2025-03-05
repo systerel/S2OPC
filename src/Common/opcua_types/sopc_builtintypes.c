@@ -4826,7 +4826,7 @@ SOPC_ReturnStatus SOPC_Variant_Dump(SOPC_Buffer* buf, const SOPC_Variant* varian
         {
             char hex2[3];
             // Display as simple hexadecimal raw data
-            for (size_t i = 0; i < (size_t) variant->Value.Bstring.Length; ++i)
+            for (int32_t i = 0; i < variant->Value.Bstring.Length; ++i)
             {
                 snprintf(hex2, 3, "%02" PRIX8, variant->Value.Bstring.Data[i]);
                 SOPC_Buffer_PrintCString(buf, hex2);
