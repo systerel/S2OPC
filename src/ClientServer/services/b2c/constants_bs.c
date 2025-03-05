@@ -69,12 +69,15 @@ const constants_bs__t_NodeId_i constants_bs__c_RolePermissionType_NodeId = &Role
     {                                                                        \
         OPCUA_NAMESPACE_INDEX, { sizeof(name) - 1, true, (SOPC_Byte*) name } \
     }
-static SOPC_QualifiedName Identities_QualifiedName = SOPC_NS0_QUALIFIED_NAME("Identities");
-const constants_bs__t_QualifiedName_i constants_bs__c_Identities_QualifiedName = &Identities_QualifiedName;
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST // Build pikeos: "name" instances are const and cannot cast into (SOPC_Byte*)
+                                      // which is not const
+    static SOPC_QualifiedName Identities_QualifiedName = SOPC_NS0_QUALIFIED_NAME("Identities");
 static SOPC_QualifiedName DefaultRolePermissions_QualifiedName = SOPC_NS0_QUALIFIED_NAME("DefaultRolePermissions");
+static SOPC_QualifiedName NamespaceUri_QualifiedName = SOPC_NS0_QUALIFIED_NAME("NamespaceUri");
+SOPC_GCC_DIAGNOSTIC_RESTORE
+const constants_bs__t_QualifiedName_i constants_bs__c_Identities_QualifiedName = &Identities_QualifiedName;
 const constants_bs__t_QualifiedName_i constants_bs__c_DefaultRolePermissions_QualifiedName =
     &DefaultRolePermissions_QualifiedName;
-static SOPC_QualifiedName NamespaceUri_QualifiedName = SOPC_NS0_QUALIFIED_NAME("NamespaceUri");
 const constants_bs__t_QualifiedName_i constants_bs__c_NamespaceUri_QualifiedName = &NamespaceUri_QualifiedName;
 
 static char* EmptyLocaleIds[] = {NULL};
