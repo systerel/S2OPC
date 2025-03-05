@@ -44,6 +44,7 @@ set(S2OPC_CLIENTSERVER_INTERNAL_INCLUDES
   "${S2OPC_ROOT_PATH}/src/ClientServer/services/b2c"
   "${S2OPC_ROOT_PATH}/src/ClientServer/services/bgenc"
   "${S2OPC_ROOT_PATH}/src/ClientServer/sockets"
+  "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/server_wrapper/alarm_conditions/internal"
   )
 
 # Get the helpers for unit and validation tests
@@ -105,7 +106,8 @@ file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/check_*.c")
 add_executable(check_helpers ${INTERNAL_TESTS_SRCS}
                              unit_tests/helpers/custom_types.c
                              unit_tests/helpers/custom2_types.c
-                             ${TEST_SERVER_ADDRESS_SPACE_C})
+                             ${TEST_SERVER_ADDRESS_SPACE_C}
+                             )
 add_dependencies(check_helpers make-server-address-space)
 target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
                                                  "validation_tests/server"

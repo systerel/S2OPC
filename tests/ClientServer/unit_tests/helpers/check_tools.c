@@ -33,6 +33,7 @@
 
 #include "opcua_statuscodes.h"
 
+#include "libs2opc_internal_eventid_list.h"
 #include "opcua_identifiers.h"
 #include "sopc_async_queue.h"
 #include "sopc_atomic.h"
@@ -1045,6 +1046,79 @@ START_TEST(test_sorted_linked_list)
     ck_assert(0 == SOPC_SLinkedList_GetLength(list));
 
     SOPC_SLinkedList_Delete(list);
+}
+END_TEST
+
+START_TEST(test_eventid_list)
+{
+    // Test creation with invalid size
+    SOPC_EventIdList* list = SOPC_EventIdList_Create(0);
+    ck_assert_ptr_nonnull(list);
+    SOPC_EventIdList_Delete(&list);
+    ck_assert_ptr_null(list);
+
+    // Test creation with valid size
+    list = SOPC_EventIdList_Create(2);
+    ck_assert_ptr_nonnull(list);
+
+    // Test add with NULL parameters
+    SOPC_ByteString eventId;
+    SOPC_ByteString_Initialize(&eventId);
+    ck_assert(SOPC_STATUS_INVALID_PARAMETERS == SOPC_EventIdList_Add(NULL, &eventId));
+    ck_assert(SOPC_STATUS_INVALID_PARAMETERS == SOPC_EventIdList_Add(list, NULL));
+
+    // Test contains with NULL parameters
+    ck_assert(!SOPC_EventIdList_Contains(NULL, &eventId));
+    ck_assert(!SOPC_EventIdList_Contains(list, NULL));
+
+    // Test add and contains with empty list
+    uint8_t data1[] = {1, 2, 3};
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&eventId, data1, 3));
+    ck_assert(!SOPC_EventIdList_Contains(list, &eventId));
+    ck_assert(SOPC_STATUS_OK == SOPC_EventIdList_Add(list, &eventId));
+    ck_assert(SOPC_EventIdList_Contains(list, &eventId));
+
+    // Test add second element
+    uint8_t data2[] = {4, 5, 6};
+    SOPC_ByteString eventId2;
+    SOPC_ByteString_Initialize(&eventId2);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&eventId2, data2, 3));
+    ck_assert(!SOPC_EventIdList_Contains(list, &eventId2));
+    ck_assert(SOPC_STATUS_OK == SOPC_EventIdList_Add(list, &eventId2));
+    ck_assert(SOPC_EventIdList_Contains(list, &eventId2));
+    ck_assert(SOPC_EventIdList_Contains(list, &eventId));
+
+    // Test FIFO behavior when adding third element (list capacity is 2)
+    uint8_t data3[] = {7, 8, 9};
+    SOPC_ByteString eventId3;
+    SOPC_ByteString_Initialize(&eventId3);
+    ck_assert(SOPC_STATUS_OK == SOPC_ByteString_CopyFromBytes(&eventId3, data3, 3));
+    ck_assert(!SOPC_EventIdList_Contains(list, &eventId3));
+    ck_assert(SOPC_STATUS_OK == SOPC_EventIdList_Add(list, &eventId3));
+    ck_assert(SOPC_EventIdList_Contains(list, &eventId3));
+    ck_assert(SOPC_EventIdList_Contains(list, &eventId2));
+    ck_assert(!SOPC_EventIdList_Contains(list, &eventId)); // First element should be removed
+
+    // Test clear
+    SOPC_EventIdList_Clear(list);
+    ck_assert(!SOPC_EventIdList_Contains(list, &eventId3));
+    ck_assert(!SOPC_EventIdList_Contains(list, &eventId2));
+    ck_assert(!SOPC_EventIdList_Contains(list, &eventId));
+
+    // Test clear with NULL
+    SOPC_EventIdList_Clear(NULL); // Should not crash
+
+    // Test delete with NULL
+    SOPC_EventIdList_Delete(NULL); // Should not crash
+    SOPC_EventIdList* nullList = NULL;
+    SOPC_EventIdList_Delete(&nullList); // Should not crash
+
+    // Cleanup
+    SOPC_ByteString_Clear(&eventId);
+    SOPC_ByteString_Clear(&eventId2);
+    SOPC_ByteString_Clear(&eventId3);
+    SOPC_EventIdList_Delete(&list);
+    ck_assert_ptr_null(list);
 }
 END_TEST
 
@@ -5088,6 +5162,7 @@ Suite* tests_make_suite_tools(void)
     tc_linkedlist = tcase_create("Linked List");
     tcase_add_test(tc_linkedlist, test_linked_list);
     tcase_add_test(tc_linkedlist, test_sorted_linked_list);
+    tcase_add_test(tc_linkedlist, test_eventid_list);
     suite_add_tcase(s, tc_linkedlist);
 
     tc_hexlify = tcase_create("SOPC_HelperEncode_Hex (tests only)");
