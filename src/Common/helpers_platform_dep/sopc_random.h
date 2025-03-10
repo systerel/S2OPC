@@ -34,11 +34,13 @@
  * \brief Retrieve random data and put it in a buffer.
  *
  * \param buffer The buffer which will receive the data.
- *               Needs to be allocated (with SOPC_Buffer_Create()) before calling the function.
+ *               It shall be allocated (with SOPC_Buffer_Create()) before calling the function.
  *
- * \param length Length of the random data wanted.
+ * \param length Length of the random data wanted. It shall be greater than 0.
  *
- * \return \ref SOPC_STATUS_OK in case of success, \ref SOPC_STATUS_NOK in case of error.
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ * SOPC_STATUS_OUT_OF_MEMORY in case of memory allocation failure, SOPC_STATUS_WOULD_BLOCK in case of unavailability of
+ * random data source, SOPC_STATUS_NOK in case of error.
  */
 SOPC_ReturnStatus SOPC_GetRandom(SOPC_Buffer* buffer, uint32_t length);
 

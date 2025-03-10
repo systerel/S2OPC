@@ -38,20 +38,20 @@ SOPC_ReturnStatus SOPC_GetRandom(SOPC_Buffer* buffer, uint32_t length)
     }
 
     FILE* file = fopen("/dev/urandom", "rb");
-    if (NULL == file)
+    SOPC_ReturnStatus status = (NULL == file) ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_OK;
+
+    if (SOPC_STATUS_OK == status)
     {
-        return SOPC_STATUS_NOK;
+        size_t read_len = fread(random_data, 1, length, file);
+        fclose(file);
+        status = (read_len != length) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }
 
-    size_t read_len = fread(random_data, 1, length, file);
-    fclose(file);
-    if (read_len != length)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Free(random_data);
-        return SOPC_STATUS_NOK;
+        status = SOPC_Buffer_Write(buffer, random_data, length);
     }
 
-    SOPC_ReturnStatus status = SOPC_Buffer_Write(buffer, random_data, length);
     SOPC_Free(random_data);
     return status;
 }
