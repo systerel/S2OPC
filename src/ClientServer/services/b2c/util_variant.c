@@ -601,3 +601,56 @@ SOPC_ReturnStatus util_variant__copy_and_apply_locales_and_index_range(SOPC_Vari
     }
     return status;
 }
+
+SOPC_ReturnStatus util_variant__update_applying_supported_locales(SOPC_Variant* valToUpdate,
+                                                                  const SOPC_Variant* newVal,
+                                                                  char** supportedLocales)
+{
+    SOPC_ASSERT(NULL != valToUpdate);
+    SOPC_ASSERT(NULL != newVal);
+    SOPC_ASSERT(NULL != supportedLocales);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (valToUpdate->ArrayType != newVal->ArrayType || SOPC_LocalizedText_Id != valToUpdate->BuiltInTypeId ||
+        valToUpdate->BuiltInTypeId != newVal->BuiltInTypeId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_VariantArrayType_SingleValue == valToUpdate->ArrayType)
+    {
+        status = SOPC_LocalizedText_AddOrSetLocale(valToUpdate->Value.LocalizedText, supportedLocales,
+                                                   newVal->Value.LocalizedText);
+    }
+    else if (SOPC_VariantArrayType_Array == valToUpdate->ArrayType)
+    {
+        SOPC_ASSERT(valToUpdate->Value.Array.Length == newVal->Value.Array.Length);
+        for (int32_t i = 0; SOPC_STATUS_OK == status && i < newVal->Value.Array.Length; i++)
+        {
+            status =
+                SOPC_LocalizedText_AddOrSetLocale(&valToUpdate->Value.Array.Content.LocalizedTextArr[i],
+                                                  supportedLocales, &newVal->Value.Array.Content.LocalizedTextArr[i]);
+        }
+    }
+    else if (SOPC_VariantArrayType_Matrix == valToUpdate->ArrayType)
+    {
+        SOPC_ASSERT(valToUpdate->Value.Matrix.Dimensions == newVal->Value.Matrix.Dimensions);
+        int32_t matrixLength = 1;
+        for (int32_t i = 0; i < newVal->Value.Matrix.Dimensions; i++)
+        {
+            SOPC_ASSERT(valToUpdate->Value.Matrix.ArrayDimensions[i] == newVal->Value.Matrix.ArrayDimensions[i]);
+            matrixLength *= valToUpdate->Value.Matrix.ArrayDimensions[i];
+        }
+        for (int32_t i = 0; SOPC_STATUS_OK == status && i < matrixLength; i++)
+        {
+            status =
+                SOPC_LocalizedText_AddOrSetLocale(&valToUpdate->Value.Matrix.Content.LocalizedTextArr[i],
+                                                  supportedLocales, &newVal->Value.Matrix.Content.LocalizedTextArr[i]);
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    return status;
+}

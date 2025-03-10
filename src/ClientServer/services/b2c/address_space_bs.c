@@ -901,41 +901,7 @@ static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
     }
 
     // 3. Modify node value with new content
-    if (SOPC_VariantArrayType_SingleValue == node_value->ArrayType)
-    {
-        status = SOPC_LocalizedText_AddOrSetLocale(node_value->Value.LocalizedText, supportedLocales,
-                                                   new_value->Value.LocalizedText);
-    }
-    else if (SOPC_VariantArrayType_Array == node_value->ArrayType)
-    {
-        SOPC_ASSERT(node_value->Value.Array.Length == new_value->Value.Array.Length);
-        for (int32_t i = 0; SOPC_STATUS_OK == status && i < new_value->Value.Array.Length; i++)
-        {
-            status = SOPC_LocalizedText_AddOrSetLocale(&node_value->Value.Array.Content.LocalizedTextArr[i],
-                                                       supportedLocales,
-                                                       &new_value->Value.Array.Content.LocalizedTextArr[i]);
-        }
-    }
-    else if (SOPC_VariantArrayType_Matrix == node_value->ArrayType)
-    {
-        SOPC_ASSERT(node_value->Value.Matrix.Dimensions == new_value->Value.Matrix.Dimensions);
-        int32_t matrixLength = 1;
-        for (int32_t i = 0; i < new_value->Value.Matrix.Dimensions; i++)
-        {
-            SOPC_ASSERT(node_value->Value.Matrix.ArrayDimensions[i] == new_value->Value.Matrix.ArrayDimensions[i]);
-            matrixLength *= node_value->Value.Matrix.ArrayDimensions[i];
-        }
-        for (int32_t i = 0; SOPC_STATUS_OK == status && i < matrixLength; i++)
-        {
-            status = SOPC_LocalizedText_AddOrSetLocale(&node_value->Value.Matrix.Content.LocalizedTextArr[i],
-                                                       supportedLocales,
-                                                       &new_value->Value.Matrix.Content.LocalizedTextArr[i]);
-        }
-    }
-    else
-    {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    status = util_variant__update_applying_supported_locales(node_value, new_value, supportedLocales);
 
     if (SOPC_STATUS_OK != status)
     {

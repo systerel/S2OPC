@@ -122,5 +122,24 @@ SOPC_ReturnStatus util_variant__copy_and_apply_locales_and_index_range(SOPC_Vari
                                                                        const SOPC_Variant* source,
                                                                        char** preferredLocalesIds,
                                                                        const SOPC_NumericRange* indexRange);
+/**
+ * Updates a variant containing localized text(s) by adding or modifying text values for supported locales.
+ * This function handles single values, arrays, and matrices of LocalizedText.
+ *
+ * \param[in,out] valToUpdate      The original variant to update,
+ *                                 it shall contain LocalizedText(s) and will be modified
+ * \param newVal                   The variant containing new LocalizedText(s) used for updating (Add or Set)
+ * \param supportedLocales         Array of supported locale identifiers, NULL terminated
+ *
+ * \return SOPC_STATUS_OK if the update was successful, otherwise
+ *         SOPC_STATUS_NOT_SUPPORTED if the locale is not supported,
+ *         SOPC_STATUS_INVALID_PARAMETERS if input parameters are invalid
+ *
+ * \warning \p valToUpdate and \p newVal shall have the same array type and built-in type LocalizedText
+ * \warning For arrays and matrices, the dimensions shall match between valToUpdate and newVal
+ */
+SOPC_ReturnStatus util_variant__update_applying_supported_locales(SOPC_Variant* valToUpdate,
+                                                                  const SOPC_Variant* newVal,
+                                                                  char** supportedLocales);
 
 #endif /* UTIL_VARIANT_H_ */
