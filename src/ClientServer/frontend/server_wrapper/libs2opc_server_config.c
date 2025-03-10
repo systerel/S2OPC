@@ -725,3 +725,14 @@ void SOPC_ServerInternal_PKIProviderUpdateCb(uintptr_t updateParam)
     SOPC_UNUSED_ARG(updateParam);
     SOPC_ToolkitServer_AsyncReEvalSecureChannels(false);
 }
+
+char** SOPC_ServerConfigHelper_GetLocaleIds(void)
+{
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ASSERT(NULL != pConfig);
+    if (SOPC_ServerInternal_IsConfiguring())
+    {
+        return NULL;
+    }
+    return pConfig->serverConfig.localeIds;
+}

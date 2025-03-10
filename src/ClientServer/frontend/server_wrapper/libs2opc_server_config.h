@@ -299,4 +299,15 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetShutdownCountdown(uint16_t secondsT
  */
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetCurrentTimeRefreshInterval(uint16_t intervalMs);
 
+/**
+ * \brief Gets the list of server supported locales
+ *
+ * \return The list of supported locales configured in the server (NULL terminated).
+ *         Content filled is provided as a read-only content and shall not be modified by caller.
+ *         In case of error, NULL is returned.
+ *
+ * \warning result is provided as a read-only content and shall not be modified by caller.
+ */
+char** SOPC_ServerConfigHelper_GetLocaleIds(void);
+
 #endif
