@@ -172,7 +172,6 @@ START_TEST(test_add_variable_node)
     varAttributes.Value.BuiltInTypeId = SOPC_Boolean_Id;
     varAttributes.Value.Value.Boolean = true;
     varAttributes.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-    varAttributes.Value.Value.Boolean = true;
 
     const SOPC_NodeId HasComponentType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
     SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_AddVariableNode(
