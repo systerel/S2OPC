@@ -103,7 +103,7 @@ test_script:
         cd %ROOT_DIR%
         .\build_s2opc.bat
     - cd %ROOT_DIR%\build\tests\ClientServer
-    - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V -E pys2opc*"
+    - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V -E pys2opc_test_role_permissions.py"
     - cd %ROOT_DIR%\build\samples\ClientServer
     - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
 
