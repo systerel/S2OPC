@@ -2058,7 +2058,7 @@ static uint32_t SC_Server_GenerateFreshTokenId(SOPC_SecureConnection* scConnecti
 
     if (scListener->state == SECURE_LISTENER_STATE_OPENED || scListener->state == SECURE_LISTENER_STATE_INACTIVE)
     {
-        // Randomize secure channel ids (table 26 part 6)
+        // Randomize secure channel ids (table 50 part 6 revision 1.05.01)
         uint32_t newTokenId = 0;
         uint32_t idx = 0;
         uint32_t connectionIdx = 0;
