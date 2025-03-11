@@ -142,14 +142,17 @@ static SOPC_ReturnStatus pseudoRandom(const SOPC_CryptoProvider* pProvider, SOPC
     uint32_t a = 1664525;
     uint32_t c = 1013904223;
 
-    uint64_t x = (uint64_t) SOPC_TimeReference_GetCurrent();
+    uint32_t x = (uint32_t) SOPC_TimeReference_GetCurrent();
 
     x += pProvider->pCryptolibContext->randomCtx;
 
     for (uint32_t i = 0; i < lenData; i++)
     {
         x = (a * x + c);
-        pData[i] = (uint8_t)(x & 0xFF);
+        /* Keep the most significant bits to maximize entropy
+           Source: The Art of Computer Programming Vol 2
+            from Donald Knuth P14 */
+        pData[i] = (uint8_t)(x >> 24);
     }
 
     // Memorize last value to avoid repetitions
