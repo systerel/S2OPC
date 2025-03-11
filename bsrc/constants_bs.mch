@@ -619,7 +619,7 @@ PROPERTIES
 
     t_IndexRange <: t_IndexRange_i &
     c_IndexRange_indet : t_IndexRange_i &
-    c_IndexRange_indet /: t_IndexRange_i &
+    c_IndexRange_indet /: t_IndexRange &
 
     t_ContinuationPoint <: t_ContinuationPoint_i &
     c_ContinuationPoint_indet : t_ContinuationPoint_i &
