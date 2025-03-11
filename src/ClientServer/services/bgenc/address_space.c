@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 16/01/2025 17:54:25
+ Date                 : 19/03/2025 10:33:25
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -390,14 +390,14 @@ void address_space__is_variable_compat_type(
                address_space_authorization__is_NodeId_equal(address_space__p_var_typ_nid,
                   constants__c_Byte_Type_NodeId,
                   &address_space__l_var_is_byte_type);
-               address_space_typing__is_included_ValueRank(-1,
+               address_space_typing__is_included_ValueRank(constants__c_ValueRank_Scalar,
                   address_space__p_var_vr,
                   &address_space__l_var_is_scalar_vr);
-               address_space_typing__is_included_ValueRank(1,
+               address_space_typing__is_included_ValueRank(constants__c_ValueRank_OneDimension,
                   address_space__p_var_vr,
                   &address_space__l_var_is_one_dim_vr);
                if ((((address_space__l_dv_is_bytestring_type == true) &&
-                  (address_space__p_dv_vr == -1)) &&
+                  (address_space__p_dv_vr == constants__c_ValueRank_Scalar)) &&
                   (address_space__l_var_is_byte_type == true)) &&
                   (address_space__l_var_is_one_dim_vr == true)) {
                   address_space__l_typ_is_ok = true;
@@ -405,7 +405,7 @@ void address_space__is_variable_compat_type(
                   address_space__l_value_rank_is_ok = true;
                }
                else if ((((address_space__l_dv_is_byte_type == true) &&
-                  (address_space__p_dv_vr == 1)) &&
+                  (address_space__p_dv_vr == constants__c_ValueRank_OneDimension)) &&
                   (address_space__l_var_is_bytestring_type == true)) &&
                   (address_space__l_var_is_scalar_vr == true)) {
                   address_space__l_typ_is_ok = true;

@@ -77,11 +77,11 @@ DEFINITIONS
 
     d_Type_IsVariableSubtype_NeedConv(dvNodeId, dvConcValueRank, varNodeId, varValueRank) ==
     /* A scalar ByteString is compatible with a 1 dimension Byte array */
-    (dvNodeId = c_ByteString_Type_NodeId & dvConcValueRank = -1 &
-     varNodeId = c_Byte_Type_NodeId & 1 |-> varValueRank : Type_IsIncludedValueRank)
+    (dvNodeId = c_ByteString_Type_NodeId & dvConcValueRank = c_ValueRank_Scalar &
+     varNodeId = c_Byte_Type_NodeId & c_ValueRank_OneDimension |-> varValueRank : Type_IsIncludedValueRank)
     or /* A 1 dimension Byte array is compatible with a scalar ByteString */
-    (dvNodeId = c_Byte_Type_NodeId & dvConcValueRank = 1 &
-     varNodeId = c_ByteString_Type_NodeId & -1 |-> varValueRank : Type_IsIncludedValueRank);
+    (dvNodeId = c_Byte_Type_NodeId & dvConcValueRank = c_ValueRank_OneDimension &
+     varNodeId = c_ByteString_Type_NodeId & c_ValueRank_Scalar |-> varValueRank : Type_IsIncludedValueRank);
 
     d_Type_IsVariableSubtype(dvNodeId, dvConcValueRank, varNodeId, varValueRank) ==
     ((dvNodeId = c_Null_Type_NodeId or dvNodeId = varNodeId or dvNodeId |-> varNodeId : Type_IsTransitiveSubtype) &
@@ -588,16 +588,16 @@ OPERATIONS
                     l_dv_is_byte_type <-- is_NodeId_equal(p_dv_typ_nid, c_Byte_Type_NodeId);
                     l_var_is_bytestring_type <-- is_NodeId_equal(p_var_typ_nid, c_ByteString_Type_NodeId);
                     l_var_is_byte_type <-- is_NodeId_equal(p_var_typ_nid, c_Byte_Type_NodeId);
-                    l_var_is_scalar_vr <-- is_included_ValueRank(-1, p_var_vr);
-                    l_var_is_one_dim_vr <-- is_included_ValueRank(1, p_var_vr);
-                    IF l_dv_is_bytestring_type = TRUE & p_dv_vr = -1 &
+                    l_var_is_scalar_vr <-- is_included_ValueRank(c_ValueRank_Scalar, p_var_vr);
+                    l_var_is_one_dim_vr <-- is_included_ValueRank(c_ValueRank_OneDimension, p_var_vr);
+                    IF l_dv_is_bytestring_type = TRUE & p_dv_vr = c_ValueRank_Scalar &
                         l_var_is_byte_type = TRUE & l_var_is_one_dim_vr = TRUE
                     THEN
                         /* New DataValue is ByteString and Variable accepts Byte[]: compatiblity with conversion */
                         l_typ_is_ok := TRUE;
                         l_typ_need_conv := TRUE;
                         l_value_rank_is_ok := TRUE
-                    ELSIF l_dv_is_byte_type = TRUE & p_dv_vr = 1 &
+                    ELSIF l_dv_is_byte_type = TRUE & p_dv_vr = c_ValueRank_OneDimension &
                         l_var_is_bytestring_type = TRUE & l_var_is_scalar_vr = TRUE
                     THEN
                         /* New DataValue is Byte[] and Variable accepts ByteString: compatiblity with conversion */
