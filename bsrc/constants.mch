@@ -366,7 +366,6 @@ CONCRETE_CONSTANTS
     k_n_publishRequestPerSub_max,
     k_n_republishNotifPerSub_max,
     k_n_genericOperationPerReq_max,
-    k_n_IndexRange_max,
     k_n_registerNodes_max,
     k_n_unregisterNodes_max,
 
@@ -830,7 +829,6 @@ PROPERTIES
     k_n_republishNotifPerSub_max : NAT &
     k_n_republishNotifPerSub_max > 0 &
     k_n_genericOperationPerReq_max : NAT &
-    k_n_IndexRange_max : NAT &
     k_n_registerNodes_max : NAT &
     k_n_unregisterNodes_max : NAT &
     k_n_noRemainingPathIndex : NAT &

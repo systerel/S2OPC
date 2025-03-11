@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 06/01/2025 17:03:07
+ Date                 : 19/03/2025 10:43:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -549,7 +549,6 @@ typedef enum {
 #define constants__k_n_BrowsePathResPerPath_max constants_bs__k_n_BrowsePathResPerPath_max
 #define constants__k_n_BrowseResponse_max constants_bs__k_n_BrowseResponse_max
 #define constants__k_n_BrowseTarget_max constants_bs__k_n_BrowseTarget_max
-#define constants__k_n_IndexRange_max constants_bs__k_n_IndexRange_max
 #define constants__k_n_NamespaceIndex_max constants_bs__k_n_NamespaceIndex_max
 #define constants__k_n_UserAuthAttempts_max constants_bs__k_n_UserAuthAttempts_max
 #define constants__k_n_WriteResponse_max constants_bs__k_n_WriteResponse_max
