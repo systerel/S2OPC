@@ -34,7 +34,7 @@
 
 #include "sopc_protocol_constants.h"
 
-/** @brief Configuration structure of message and types encoding limits **/
+/** \brief Configuration structure of message and types encoding limits **/
 typedef struct SOPC_Common_EncodingConstants
 {
     /* TCP UA configuration */
@@ -78,67 +78,74 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
  */
 bool SOPC_Common_EncodingConstantsGetInitialized(void);
 
-/** @brief Maximum chunk buffer size used (must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE) */
+/** \brief Maximum chunk buffer size used (must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE) */
 #ifndef SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE
 #define SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE UINT16_MAX
 #endif /* SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE */
 
-/** @brief Maximum number of chunks received accepted for 1 message, 0 means no limit.
+/** \brief Maximum number of chunks received accepted for 1 message, 0 means no limit.
  *  Note: if 0 is chosen SOPC_RECEIVE_MAX_MESSAGE_LENGTH definition shall be changed not to use it and shall not be 0.
  */
 #ifndef SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS
 #define SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS 5
 #endif /* SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS */
 
-/** @brief Maximum message length accepted in reception (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
+/** \brief Maximum message length accepted in reception (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
  *  Note: if 0 is chosen SOPC_RECEIVE_MAX_NB_CHUNKS shall not be 0.
  * */
 #ifndef SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH
 #define SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE* SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS
 #endif /* SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH */
 
-/** @brief Maximum number of chunks sent for 1 message, 0 means no limit.
+/** \brief Maximum number of chunks sent for 1 message, 0 means no limit.
  *  Note: if 0 is chosen SOPC_SEND_MAX_MESSAGE_LENGTH definition shall be changed not to use it and shall not be 0.
  */
 #ifndef SOPC_DEFAULT_SEND_MAX_NB_CHUNKS
 #define SOPC_DEFAULT_SEND_MAX_NB_CHUNKS 12
 #endif /* SOPC_DEFAULT_SEND_MAX_NB_CHUNKS */
 
-/** @brief Maximum message length sent (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
+/** \brief Maximum message length sent (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
  *  Note: if 0 is chosen SOPC_SEND_MAX_NB_CHUNKS shall not be 0.
  * */
 #ifndef SOPC_DEFAULT_SEND_MAX_MESSAGE_LENGTH
 #define SOPC_DEFAULT_SEND_MAX_MESSAGE_LENGTH SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE* SOPC_DEFAULT_SEND_MAX_NB_CHUNKS
 #endif /* SOPC_DEFAULT_SEND_MAX_MESSAGE_LENGTH */
 
-/** @brief Maximum ByteString/String/XmlElement length in bytes used */
+/** \brief Maximum ByteString/String/XmlElement length in bytes used */
 #ifndef SOPC_DEFAULT_MAX_STRING_LENGTH
 #define SOPC_DEFAULT_MAX_STRING_LENGTH UINT16_MAX
 #endif /* SOPC_DEFAULT_MAX_STRING_LENGTH */
 
-/** @brief Maximum array length that could be stored in a variant */
+/** \brief Maximum array length that could be stored in a variant */
 #ifndef SOPC_DEFAULT_MAX_ARRAY_LENGTH
 #define SOPC_DEFAULT_MAX_ARRAY_LENGTH 1000000
 #endif /* SOPC_DEFAULT_MAX_ARRAY_LENGTH */
 
-/** @brief Maximum levels of nested diagnostic information structure
+/** \brief Maximum levels of nested diagnostic information structure
  *  Note: OPC UA specification v1.03 part 6 §5.2.2.12 indicates
  *  "Decoders shall support at least 100 nesting levels ..."*/
 #ifndef SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL
 #define SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL 100
 #endif /* SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL */
 
-/** @brief Maximum levels of nested structs, excluding Diagnostic Information which is
+/** \brief Maximum levels of nested structs, excluding Diagnostic Information which is
  * handled by SOPC_DEFAULT_MAX_DIAG_INFO_NESTED_LEVEL */
 #ifndef SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL
 #define SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL 50
 #endif /* SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL */
 
-/* @brief Maximum number of elements in Async Queue */
+/** \brief Maximum number of elements in Async Queue */
 #ifndef SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE
 #define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE 5000
 #endif /* SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE */
 
+/** \brief Action triggered when the Maximum number of elements in Async Queue exceeds
+ *  ::SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE .
+ *  - true : a warning is logged but events are still stored (no actual limit).
+ *  - false: the events are lost. The behavior is undefined in case of overflow.
+ *  The application should consider using ::SOPC_CommonMonitoring_GetQueueSize to avoid reaching
+ *  such a condition and avoid queues congestion.
+ **/
 #ifndef SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY
 #define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY true
 #endif /* SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY */
@@ -148,17 +155,17 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #define SOPC_LOG_MAX_USER_LINE_LENGTH 512
 #endif /* SOPC_LOG_MAX_USER_LINE_LENGTH */
 
-/** @brief Indicates whether the host has a file system */
+/** \brief Indicates whether the host has a file system */
 #ifndef SOPC_HAS_FILESYSTEM
 #define SOPC_HAS_FILESYSTEM true
 #endif /* SOPC_HAS_FILESYSTEM */
 
-/** @brief Maximum number of timers. */
+/** \brief Maximum number of timers. */
 #ifndef SOPC_MAX_TIMERS
 #define SOPC_MAX_TIMERS UINT8_MAX /* TODO: avoid static maximum (see monitoredItems Id creation) */
 #endif
 
-/** @brief define host-specific console print function
+/** \brief define host-specific console print function
  * If no console is provided or log wants to be omitted, the following can be used:
  * \code{.c}
  * #define SOPC_CONSOLE_PRINTF(...) do{} while (0)
@@ -168,12 +175,12 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #define SOPC_CONSOLE_PRINTF printf
 #endif /* SOPC_CONSOLE_PRINTF */
 
-/** @brief Define Endianness */
+/** \brief Define Endianness */
 #ifndef SOPC_IS_LITTLE_ENDIAN
 #define SOPC_IS_LITTLE_ENDIAN 1
 #endif /* SOPC_IS_LITTLE_ENDIAN */
 
-/** @brief Define Double Middle-endian option (Used on some old ARM CPUs)
+/** \brief Define Double Middle-endian option (Used on some old ARM CPUs)
  * In that case, the double are little-endian but with 4-bytes words reversed.
  * If Set to 1, it overrides ::SOPC_IS_LITTLE_ENDIAN for double encoding, whatever its value*/
 #ifndef SOPC_IS_DOUBLE_MIDDLE_ENDIAN
@@ -228,10 +235,10 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
     "It is forbidden to define both SOPC_DEFAULT_SEND_MAX_MESSAGE_LENGTH and SOPC_DEFAULT_SEND_MAX_NB_CHUNKS to value 0 (no limit)"
 #endif
 
-/* \brief Internal use only */
+/** \brief Internal use only */
 const SOPC_Common_EncodingConstants* SOPC_Internal_Common_GetEncodingConstants(void);
 
-/* \brief Internal use to check properties at runtime */
+/** \brief Internal use to check properties at runtime */
 bool SOPC_Internal_Common_Constants_RuntimeCheck(void);
 
 #endif /* SOPC_COMMON_CONSTANTS_H_ */

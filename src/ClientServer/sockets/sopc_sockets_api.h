@@ -116,10 +116,10 @@ typedef enum
                        */
 } SOPC_Sockets_OutputEvent;
 
-/* Sockets event enqueue function */
+/** Sockets event enqueue function */
 void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id, uintptr_t params, uintptr_t auxParam);
 
-/** \brief Return the current pending number of events in Socket queue */
+/** \brief Returns the current pending number of events in Sockets queue */
 uint32_t SOPC_Sockets_Get_QueueSize(void);
 
 void SOPC_Sockets_Initialize(void);

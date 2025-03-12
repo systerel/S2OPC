@@ -30,7 +30,6 @@
 
 SOPC_InternalSocket socketsArray[SOPC_MAX_SOCKETS];
 SOPC_Mutex socketsMutex;
-SOPC_Looper* socketsLooper = NULL;
 SOPC_AsyncQueue* socketsInputEventQueue = NULL;
 SOPC_EventHandler* socketsEventHandler = NULL;
 uint32_t maxBufferSize = SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE;
@@ -192,4 +191,9 @@ SOPC_ReturnStatus SOPC_Sockets_DequeueAndDispatchInputEvent(void)
         SOPC_Free(ev);
     }
     return status;
+}
+
+uint32_t SOPC_SocketsInternal_Get_QueueSize(void)
+{
+    return SOPC_AsyncQueue_GetSize(socketsInputEventQueue);
 }

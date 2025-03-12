@@ -107,4 +107,7 @@ SOPC_ReturnStatus SOPC_Sockets_EnqueueInputEvent(SOPC_Sockets_InputEvent socketE
  */
 SOPC_ReturnStatus SOPC_Sockets_DequeueAndDispatchInputEvent(void);
 
+/** \brief Returns the current pending number of events in Sockets queue */
+uint32_t SOPC_SocketsInternal_Get_QueueSize(void);
+
 #endif /* SOPC_SOCKETS_INTERNAL_CTX_H_ */

@@ -147,7 +147,7 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
                                                    uintptr_t params,
                                                    uintptr_t auxParam);
 
-/** \brief Return the current pending number of events in Secure Channel queue */
+/** \brief Returns the current pending number of events in Secure Channel queue */
 uint32_t SOPC_SecureChannels_Get_QueueSize(void);
 
 void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc* setSocketsListener);

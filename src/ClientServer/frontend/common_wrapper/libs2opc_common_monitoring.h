@@ -27,16 +27,14 @@
 #define LIBS2OPC_COMMON_MONITORING_H_
 
 #include <stdbool.h>
-
-#include "sopc_common.h"
-#include "sopc_types.h"
+#include <stdint.h>
 
 /**
  * \brief List of internal S2OPC queues that can be monitored
  */
 typedef enum
 {
-    SOPC_CommonMonitoring_QueueType_Services,        /**< The "Service" processing Queue*/
+    SOPC_CommonMonitoring_QueueType_Services,        /**< The "Services" processing Queue*/
     SOPC_CommonMonitoring_QueueType_SecuredChannels, /**< The "SecuredChannels" processing Queue*/
     SOPC_CommonMonitoring_QueueType_Sockets          /**< The "Sockets" processing Queue*/
 } SOPC_CommonMonitoring_QueueType;
@@ -47,9 +45,10 @@ typedef uint32_t SOPC_CommonMonitoring_QueueSize;
 /**
  * \brief Requests the current queue pending size. This allows the user application to monitor the pending events in
  * different queues. This is an estimation of the size queue. The actual value may have changed when the function
- * returns, since the queues a processed in independent threads.
+ * returns, since the queues are processed in independent threads.
+ * Shall be called between ::SOPC_CommonHelper_Initialize and ::SOPC_CommonHelper_Clear.
  *
- * \note See also \p SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE and \p SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY.
+ * \note See also ::SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE and ::SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY.
  *
  * \param queueType the queue to fetch.
  *

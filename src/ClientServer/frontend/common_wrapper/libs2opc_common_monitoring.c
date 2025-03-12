@@ -22,11 +22,6 @@
 #include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"
 #include "sopc_sockets_api.h"
-#include "sopc_user_app_itf.h"
-
-#include <stdio.h>
-
-#include "sopc_assert.h"
 
 SOPC_CommonMonitoring_QueueSize SOPC_CommonMonitoring_GetQueueSize(SOPC_CommonMonitoring_QueueType queueType)
 {

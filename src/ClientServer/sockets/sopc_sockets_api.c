@@ -36,8 +36,9 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent socketEvent, uint32_t id,
 
 uint32_t SOPC_Sockets_Get_QueueSize(void)
 {
-    return SOPC_EventHandler_Get_QueueSize(socketsEventHandler);
+    return SOPC_SocketsInternal_Get_QueueSize();
 }
+
 void SOPC_Sockets_Initialize(void)
 {
     bool init = SOPC_Socket_Network_Initialize();

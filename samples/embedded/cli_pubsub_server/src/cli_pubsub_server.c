@@ -1314,7 +1314,7 @@ static int cmd_demo_queue(WordList* pList)
 
     PRINT("Pending elements in queues:\n");
     res = SOPC_CommonMonitoring_GetQueueSize(SOPC_CommonMonitoring_QueueType_Services);
-    PRINT(" - 'Service'         : %5" PRIu32 "\n", res);
+    PRINT(" - 'Services'        : %5" PRIu32 "\n", res);
     res = SOPC_CommonMonitoring_GetQueueSize(SOPC_CommonMonitoring_QueueType_SecuredChannels);
     PRINT(" - 'SecuredChannels' : %5" PRIu32 "\n", res);
     res = SOPC_CommonMonitoring_GetQueueSize(SOPC_CommonMonitoring_QueueType_Sockets);

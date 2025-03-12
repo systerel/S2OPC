@@ -225,15 +225,10 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_Internal
 
 uint32_t SOPC_SecureChannels_Get_QueueSize(void)
 {
-    return SOPC_EventHandler_Get_QueueSize(secureChannelsEventHandler) +
-           SOPC_EventHandler_Get_QueueSize(secureChannelsInternalEventHandler);
-
-    /*
-        return SOPC_EventHandler_Get_QueueSize(secureChannelsInputEventHandler) +
-                SOPC_EventHandler_Get_QueueSize(secureChannelsInternalEventHandler) +
-                SOPC_EventHandler_Get_QueueSize(secureChannelsSocketsEventHandler) +
-                SOPC_EventHandler_Get_QueueSize(secureChannelsTimerEventHandler) +
-                SOPC_EventHandler_Get_QueueSize(secureChannelsEventHandler);*/
+    // The different internal "Handlers" (secureChannelsInputEventHandler, secureChannelsInternalEventHandler, ...)
+    // actually refer to the same looper, and as consequence to the same queue. Using any handler is thus equivalent.
+    // Note that secureChannelsEventHandler actually points to the service looper and is therefore not relevant here.
+    return SOPC_EventHandler_Get_QueueSize(secureChannelsInternalEventHandler);
 }
 
 void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc* setSocketsListener)
