@@ -314,6 +314,11 @@ ABSTRACT_CONSTANTS
     t_RegisteredServer2Info,
     t_DataTypeDefinition,
 
+    conv_AccessLevel_CurrentRead,
+    conv_AccessLevel_CurrentWrite,
+    conv_AccessLevel_StatusWrite,
+    conv_AccessLevel_TimestampWrite,
+
     conv_ExpandedNodeId_NodeId,
     conv_NodeId_NamespaceIdx
 
@@ -753,6 +758,11 @@ PROPERTIES
 
     c_NamespaceUri_empty : t_NamespaceUri &
 
+    conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &
+    conv_AccessLevel_CurrentRead : t_access_level --> BOOL &
+    conv_AccessLevel_StatusWrite : t_access_level --> BOOL &
+    conv_AccessLevel_TimestampWrite : t_access_level --> BOOL &
+
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
     conv_NodeId_NamespaceIdx : t_NodeId --> t_NamespaceIdx &
 
@@ -925,7 +935,7 @@ OPERATIONS
     PRE
         p_access_lvl : t_access_level
     THEN
-        bres :: BOOL
+        bres := conv_AccessLevel_CurrentWrite(p_access_lvl)
     END
     ;
 
@@ -933,7 +943,7 @@ OPERATIONS
     PRE
         p_access_lvl : t_access_level
     THEN
-        bres :: BOOL
+        bres := conv_AccessLevel_CurrentRead(p_access_lvl)
     END
     ;
 
@@ -941,7 +951,7 @@ OPERATIONS
     PRE
         p_access_lvl : t_access_level
     THEN
-        bres :: BOOL
+        bres := conv_AccessLevel_StatusWrite(p_access_lvl)
     END
     ;
 
@@ -949,7 +959,7 @@ OPERATIONS
     PRE
         p_access_lvl : t_access_level
     THEN
-        bres :: BOOL
+        bres := conv_AccessLevel_TimestampWrite(p_access_lvl)
     END
     ;
 
