@@ -256,7 +256,10 @@ static size_t minimum_dict_size(size_t start_size, size_t n_items)
 
 bool SOPC_Dict_Reserve(SOPC_Dict* d, size_t n_items)
 {
-    SOPC_ASSERT(d != NULL);
+    if (NULL == d)
+    {
+        return false;
+    }
     return dict_resize(d, minimum_dict_size(d->size, n_items));
 }
 
@@ -292,8 +295,7 @@ static bool maybe_resize(SOPC_Dict* d, uint8_t delta)
 
 bool SOPC_Dict_Insert(SOPC_Dict* d, uintptr_t key, uintptr_t value)
 {
-    SOPC_ASSERT(d != NULL);
-    if (key == d->empty_key || key == d->tombstone_key)
+    if (NULL == d || key == d->empty_key || key == d->tombstone_key)
     {
         return false;
     }
@@ -345,7 +347,10 @@ static SOPC_DictBucket* get_internal(const SOPC_Dict* d, const uintptr_t key)
 
 uintptr_t SOPC_Dict_Get(const SOPC_Dict* d, const uintptr_t key, bool* found)
 {
-    SOPC_ASSERT(d != NULL);
+    if (NULL == d)
+    {
+        return (uintptr_t) NULL;
+    }
     SOPC_DictBucket* bucket = get_internal(d, key);
 
     if (found != NULL)
@@ -358,7 +363,10 @@ uintptr_t SOPC_Dict_Get(const SOPC_Dict* d, const uintptr_t key, bool* found)
 
 uintptr_t SOPC_Dict_GetKey(const SOPC_Dict* d, const uintptr_t key, bool* found)
 {
-    SOPC_ASSERT(d != NULL);
+    if (NULL == d)
+    {
+        return (uintptr_t) NULL;
+    }
     SOPC_DictBucket* bucket = get_internal(d, key);
 
     if (found != NULL)
@@ -371,8 +379,6 @@ uintptr_t SOPC_Dict_GetKey(const SOPC_Dict* d, const uintptr_t key, bool* found)
 
 void SOPC_Dict_Remove(SOPC_Dict* d, const uintptr_t key)
 {
-    SOPC_ASSERT(d != NULL);
-
     // Check that a tombstone key has been defined
     SOPC_ASSERT(d->empty_key != d->tombstone_key);
 
@@ -395,7 +401,10 @@ void SOPC_Dict_Remove(SOPC_Dict* d, const uintptr_t key)
 
 SOPC_Dict_Free_Fct* SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d)
 {
-    SOPC_ASSERT(d != NULL);
+    if (NULL == d)
+    {
+        return NULL;
+    }
     return d->key_free;
 }
 
@@ -407,7 +416,10 @@ void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct* func)
 
 SOPC_Dict_Free_Fct* SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d)
 {
-    SOPC_ASSERT(d != NULL);
+    if (NULL == d)
+    {
+        return NULL;
+    }
     return d->value_free;
 }
 

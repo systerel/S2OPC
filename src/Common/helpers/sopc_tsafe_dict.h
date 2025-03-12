@@ -74,7 +74,7 @@ void SOPC_TSafe_Dict_Delete(SOPC_TSafe_Dict* d);
 
 /**
  * \brief Reserve space for a given number of items in a thread safe dictionary.
- * \param d        The dictionary.
+ * \param d        The dictionary. Should not be NULL.
  * \param n_items  The minimum capacity to ensure.
  * \return \c TRUE in case of success, or \c FALSE in case of memory allocation
  *         failure.
@@ -83,7 +83,7 @@ bool SOPC_TSafe_Dict_Reserve(SOPC_TSafe_Dict* d, size_t n_items);
 
 /**
  * \brief Set the key used to mark removed values.
- * \param d              The dictionary.
+ * \param d              The dictionary. It shall not be NULL, raise assertion otherwise.
  * \param tombstone_key  The key used to mark removed values.
  *
  * When removing values from the dictionary, this key will be used to indicate
@@ -161,13 +161,13 @@ uintptr_t SOPC_TSafe_Dict_GetKeyAndLock(SOPC_TSafe_Dict* d, const uintptr_t key,
  * @brief Unlock access to dictionary. This function must be call after using \p SOPC_TSafe_Dict_GetAndLock
  *        and \p SOPC_TSafe_Dict_GetKeyAndLock to release access to \p d
  *
- * @param d  Dictionary to unlock.
+ * @param d  Dictionary to unlock. It shall not be NULL, raise assertion otherwise.
  */
 void SOPC_TSafe_Dict_Unlock(SOPC_TSafe_Dict* d);
 
 /**
  * \brief Removes a values from the thread safe dictionary.
- * \param d    The dictionary.
+ * \param d    The dictionary. It shall not be NULL, raise assertion otherwise.
  * \param key  The key to remove.
  *
  * For removals to be supported, a tombstone key MUST have been set before using
@@ -185,7 +185,7 @@ SOPC_Dict_Free_Fct* SOPC_TSafe_Dict_GetKeyFreeFunc(SOPC_TSafe_Dict* d);
 
 /**
  * \brief Sets the free function for this dictionary's keys.
- * \param d     The dictionary.
+ * \param d     The dictionary. It shall not be NULL raise assertion otherwise.
  * \param func  The function to use when freeing keys.
  */
 void SOPC_TSafe_Dict_SetKeyFreeFunc(SOPC_TSafe_Dict* d, SOPC_Dict_Free_Fct* func);
@@ -200,7 +200,7 @@ SOPC_Dict_Free_Fct* SOPC_TSafe_Dict_GetValueFreeFunc(SOPC_TSafe_Dict* d);
 
 /**
  * \brief Sets the free function for this dictionary's values.
- * \param d     The dictionary.
+ * \param d     The dictionary. It shall not be NULL raise assertion otherwise.
  * \param func  The function to use when freeing values.
  */
 void SOPC_TSafe_Dict_SetValueFreeFunc(SOPC_TSafe_Dict* d, SOPC_Dict_Free_Fct* func);
@@ -226,7 +226,7 @@ size_t SOPC_TSafe_Dict_Capacity(SOPC_TSafe_Dict* d);
  * \brief Iterates over the dictionary, calling the given function for each
  *        (key, value) pair.
  *
- * \param d         The dictionary.
+ * \param d         The dictionary. It shall not be NULL raise assertion otherwise.
  * \param func      The function to call on each (key, value) pair.
  * \param user_data A user chose pointer to pass as last parameter to the
  *                  callback function.
