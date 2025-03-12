@@ -49,6 +49,11 @@
 #error "Max number of sessions cannot be more than INT32_MAX"
 #endif
 
+/* Maximum number of session per secure connection */
+#if SOPC_MAX_SESSIONS_PER_SECURE_CONNECTION < 0
+#error "Maximum number of session per secure connection cannot be < 0"
+#endif
+
 /* Maximum session timeout accepted */
 #if SOPC_MAX_SESSION_TIMEOUT > UINT32_MAX
 #error "Maximum requested session timeout is > UINT32_MAX"
@@ -63,6 +68,21 @@
 #endif
 #if SOPC_MIN_SESSION_TIMEOUT > SOPC_MAX_SESSION_TIMEOUT
 #error "Minimum requested session timeout is > MAX"
+#endif
+
+/* Maximum number of session authentification attempts */
+#if SOPC_MAX_SESSION_AUTH_ATTEMPTS < 0
+#error "Maximum number of session authentification attempts cannot be < 0"
+#endif
+
+/* Create session lock delay secs */
+#if SOPC_CREATE_SESSION_LOCK_DELAY_SECS < 0
+#error "Number of create session lock delay secs cannot be < 0"
+#endif
+
+/* Number of session activation min delay secs */
+#if SOPC_SESSION_ACTIVATION_MIN_DELAY_SECS < 0
+#error "Number of session activation min delay secs cannot be < 0"
 #endif
 
 /** Minimum number of publish requests per subscription shall be > 0 for B model */
@@ -109,6 +129,36 @@
 /* Maximum number of operations representable */
 #if SOPC_MAX_OPERATIONS_PER_MSG > INT32_MAX
 #error "Maximum number of operations per message cannot be > INT32_MAX"
+#endif
+
+/* Minimum number of operations representable */
+#if SOPC_MAX_OPERATIONS_PER_MSG < 0
+#error "Minimum number of operations per message cannot be < 0"
+#endif
+
+/* Maximum number of heavy operations per messages*/
+#if SOPC_MAX_HEAVY_OPERATIONS_PER_MSG < 0
+#error "Maximum number of heavy operations per messages cannot be < 0"
+#endif
+
+/* Maximum number of event notification queue size */
+#if SOPC_MAX_NOTIFICATION_QUEUE_SIZE <= 0
+#error "Maximum number of event notification queue size cannot be <= 0"
+#endif
+
+/* Minimum number of event notification queue size */
+#if SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE <= 0
+#error "Minimum number of event notification queue size cannot be <= 0"
+#endif
+
+/* Default number of event notification queue size */
+#if SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE <= 0
+#error "Default number of event notification queue size cannot be <= 0"
+#endif
+
+/* Maximum number of tranlate browse path matches */
+#if SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES < 0
+#error "Maximum number of tranlate browse path matches cannot be < 0"
 #endif
 
 /** Check Node management services activation for clients is set only in case of nano extended services */
