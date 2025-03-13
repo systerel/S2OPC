@@ -320,6 +320,7 @@ ABSTRACT_CONSTANTS
     conv_AccessLevel_TimestampWrite,
 
     conv_ExpandedNodeId_NodeId,
+    conv_NodeId_ExpandedNodeId,
     conv_NodeId_NamespaceIdx
 
 PROPERTIES
@@ -353,6 +354,7 @@ PROPERTIES
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
     c_Variant_indet /: t_Variant &
+    t_Variant /= {} &
 
     t_DataValue <: t_DataValue_i &
     c_DataValue_indet : t_DataValue_i &
@@ -662,6 +664,7 @@ PROPERTIES
     cast_t_channel_config_idx : perm(t_channel_config_idx) &
 
     cast_t_NamespaceIdx : NAT +-> t_NamespaceIdx &
+    1..k_n_NamespaceIndex_max = dom(cast_t_NamespaceIdx) &
     cast_t_NamespaceIdx : perm(t_NamespaceIdx) &
 
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
@@ -764,6 +767,7 @@ PROPERTIES
     conv_AccessLevel_TimestampWrite : t_access_level --> BOOL &
 
     conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
+    conv_NodeId_ExpandedNodeId : t_NodeId >-> t_ExpandedNodeId &
     conv_NodeId_NamespaceIdx : t_NodeId --> t_NamespaceIdx &
 
     t_BrowsePath <: t_BrowsePath_i &
