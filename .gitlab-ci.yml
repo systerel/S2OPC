@@ -702,38 +702,19 @@ coverage-analysis:
   rules:
     - if: "$WITH_COVERAGE != null"
     
-get-sonar-binaries:
-  stage: .pre
-  artifacts:
-    paths:
-      - build-wrapper/
-      - sonar-scanner/
-    expire_in: '1 week'
-    when: on_success
-  image: registry.gitlab.com/systerel/s2opc/build-deps@sha256:991ae0bf5395688400efad504fd26741386d767b0ab961262df5b34fde761466 # digest of build-deps:1.0
-  script:
-    - apt-get update && apt-get install ca-certificates -y
-    # Download sonar-scanner
-    - curl -sSLo ./sonar-scanner.zip 'https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-6.2.1.4610-linux-x64.zip'
-    - unzip -o sonar-scanner.zip
-    - mv sonar-scanner-6.2.1.4610-linux-x64 sonar-scanner
-    # Download build-wrapper
-    - curl -sSLo ./build-wrapper-linux-x86.zip "${SONAR_HOST_URL}/static/cpp/build-wrapper-linux-x86.zip"
-    - unzip -oj build-wrapper-linux-x86.zip -d ./build-wrapper
-  rules:
-    - if: "$WITH_SONAR != null"
     
 build-sonar:
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:9ae17c9abdb644bcafe99ce1d0fbac0e1c4c256e17265a5bfd0b0e3d7315322e # digest of build:1.45
-  dependencies: [get-sonar-binaries]
+  image: registry.gitlab.com/systerel/s2opc/sonarqube@sha256:b2c966f4891f0cd2541cf0659480977916b228aeb1ae7b7890eabc74a59a8941 # digest of sonarqube:1.0
+  needs: []
   script:
     # Run the build inside the build wrapper
-    - build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output ./build.sh
+    - /work/build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output ./build.sh
     # Run the sonar-scanner in the same stage as the build
-    - sonar-scanner/bin/sonar-scanner -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}" -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
+    - /work/sonar-scanner/bin/sonar-scanner -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}" -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
   rules:
     - if: "$WITH_SONAR != null"
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 ###
 # Documentation generation and publication
