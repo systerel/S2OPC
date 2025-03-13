@@ -21,7 +21,7 @@
 
  File Name            : namespace_default_role_permissions_value.c
 
- Date                 : 07/10/2024 09:52:04
+ Date                 : 13/03/2025 16:26:55
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -108,6 +108,9 @@ void namespace_default_role_permissions_value__ref_maybe_get_DefaultRolePermissi
                &namespace_default_role_permissions_value__l_val_ts_src);
             namespace_default_role_permissions_value_bs__get_conv_Variant_RolePermissionTypes(namespace_default_role_permissions_value__l_val_DefaultRolePermissions,
                &namespace_default_role_permissions_value__l_DefaultRolePermissions);
+            if (namespace_default_role_permissions_value__l_DefaultRolePermissions == constants__c_RolePermissionTypes_indet) {
+               address_space_bs__read_AddressSpace_free_variant(namespace_default_role_permissions_value__l_val_DefaultRolePermissions);
+            }
             *namespace_default_role_permissions_value__p_maybe_val_DefaultRolePermissions = namespace_default_role_permissions_value__l_DefaultRolePermissions;
          }
       }

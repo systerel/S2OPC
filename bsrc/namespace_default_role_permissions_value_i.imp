@@ -95,6 +95,10 @@ OPERATIONS
                 l_sc, l_val_DefaultRolePermissions, l_val_sc, l_val_ts_src
                     <-- read_AddressSpace_Raw_Node_Value_value(l_ref_target_Node, l_ref_target_NodeId, e_aid_Value);
                 l_DefaultRolePermissions <-- get_conv_Variant_RolePermissionTypes(l_val_DefaultRolePermissions);
+                // In case where a DRP is found but contains no attribute Value, need to free the variant previously read
+                IF l_DefaultRolePermissions = c_RolePermissionTypes_indet THEN
+                    read_AddressSpace_free_variant(l_val_DefaultRolePermissions)
+                END;
                 p_maybe_val_DefaultRolePermissions := l_DefaultRolePermissions
             END
         END
