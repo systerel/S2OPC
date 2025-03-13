@@ -35,7 +35,7 @@
 
 struct SOPC_CryptolibContext
 {
-    uint64_t randomCtx;
+    uint32_t randomCtx;
 };
 EMPTY_STRUCT(SOPC_AsymmetricKey);
 EMPTY_STRUCT(SOPC_CertificateList);
