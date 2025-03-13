@@ -2014,6 +2014,7 @@ static bool set_variant_value_extobj_role_permission_type(OpcUa_RolePermissionTy
     SOPC_ASSERT(permissions_tag_ok);
 
     // Fill the rolePermissions object with the parsed elements
+    SOPC_ASSERT(!permissionsTagCtx->is_array);
     bool result = SOPC_strtouint(permissionsTagCtx->single_value, (size_t) strlen(permissionsTagCtx->single_value), 32,
                                  &rolePermissions->Permissions);
 
@@ -2056,6 +2057,7 @@ static bool set_variant_value_extobj_identity_mapping_rule_type(OpcUa_IdentityMa
         complex_value_tag_from_tag_name_no_namespace("Criteria", bodyChildsTagContext, &criteriaTagCtx);
     SOPC_ASSERT(criteria_tag_ok);
 
+    SOPC_ASSERT(!criteriaTypeTagCtx->is_array);
     // Fill the OpcUa_IdentityMappingRuleType object with the parsed elements
     bool result = SOPC_strtoint(criteriaTypeTagCtx->single_value, (size_t) strlen(criteriaTypeTagCtx->single_value), 32,
                                 &identityMappingRule->CriteriaType);
