@@ -48,7 +48,6 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider)
         return SOPC_STATUS_NOK;
 
     pCryptoProvider->pCryptolibContext = pctx;
-    pctx->randomCtx = 0;
     return SOPC_STATUS_OK;
 }
 

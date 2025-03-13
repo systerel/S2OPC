@@ -27,7 +27,7 @@
 
 struct SOPC_CryptolibContext
 {
-    uint64_t randomCtx;
+    bool placeHolder; // structure cannot be empty but no context needed
 };
 
 #endif /* SOPC_CRYPTO_PROVIDER_LIB_H_ */
