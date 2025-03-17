@@ -624,7 +624,9 @@ ABSTRACT_CONSTANTS
 
     Is_Dir_Forward_Compatible,
 
-    k_n_noRemainingPathIndex
+    k_n_noRemainingPathIndex,
+
+    IsIncludedValueRank
 
 PROPERTIES
     c_Server_Nano_Extended : BOOL &
@@ -1336,7 +1338,9 @@ PROPERTIES
     1..k_n_registerNodes_max <: t_registerNodesReqIndex &
     1..k_n_unregisterNodes_max <: t_unregisterNodesReqIndex &
 
-    1..k_n_nodesToAdd_max <: t_nodeToAddReqIndex
+    1..k_n_nodesToAdd_max <: t_nodeToAddReqIndex &
+
+    IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank
 
 OPERATIONS
 
@@ -1641,6 +1645,15 @@ OPERATIONS
     bres <-- is_ClientNodeManagementActive =
     BEGIN
         bres :: BOOL
+    END
+    ;
+
+    bres <-- is_included_ValueRank(p_concValueRank, p_expValueRank) =
+    PRE
+        p_concValueRank : t_ConcreteValueRank &
+        p_expValueRank : t_ValueRank
+    THEN
+        bres := bool((p_concValueRank |-> p_expValueRank) : IsIncludedValueRank)
     END
 
 END

@@ -29,7 +29,6 @@ DEFINITIONS
         /* Typing */
         Type_IsTransitiveSubtype,
         Type_IsCompatSimpleTypeOrEnumeration,
-        Type_IsIncludedValueRank,
         Type_IsReferenceTypeIdValid,
         Object_HasMethod
     ;
@@ -39,7 +38,6 @@ DEFINITIONS
         /* Typing */
         Type_IsTransitiveSubtype : t_NodeId <-> t_NodeId &
         Type_IsCompatSimpleTypeOrEnumeration : t_NodeId <-> t_NodeId &
-        Type_IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank &
         Type_IsReferenceTypeIdValid <: t_NodeId &
         Object_HasMethod : t_NodeId <-> t_NodeId &
 
@@ -86,26 +84,6 @@ OPERATIONS
           (p_res_is_transitive_type = TRUE => bres = TRUE) &
           (p_res_is_transitive_type = FALSE =>
             bres = bool(p_actual_value_type |-> p_exp_data_type : Type_IsCompatSimpleTypeOrEnumeration)))
-    END
-    ;
-
-    bres <-- is_included_ValueRank(p_concValueRank, p_expValueRank) =
-    PRE
-        p_concValueRank : t_ConcreteValueRank &
-        p_expValueRank : t_ValueRank
-    THEN
-        bres :(bres : BOOL &
-               bres = bool((p_expValueRank = c_ValueRank_ScalarOrOneDimension & p_concValueRank : {c_ValueRank_Scalar,c_ValueRank_OneDimension})
-                           or
-                           (p_expValueRank = c_ValueRank_Any)
-                           or
-                           (p_expValueRank = c_ValueRank_Scalar & p_concValueRank = c_ValueRank_Scalar)
-                           or
-                           (p_expValueRank = c_ValueRank_OneOrMoreDimensions  & p_concValueRank >= c_ValueRank_OneDimension)
-                           or
-                           (p_expValueRank >= c_ValueRank_OneDimension & p_expValueRank = p_concValueRank)) &
-               (bres = TRUE <=> ((p_concValueRank |-> p_expValueRank) : Type_IsIncludedValueRank))
-              )
     END
     ;
 

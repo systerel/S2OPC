@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 19/03/2025 10:43:51
+ Date                 : 18/03/2025 08:06:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -626,6 +626,10 @@ extern void constants__get_cast_t_BrowseValue(
 extern void constants__get_cast_t_WriteValue(
    const t_entier4 constants__ii,
    constants__t_WriteValue_i * const constants__wvi);
+extern void constants__is_included_ValueRank(
+   const t_entier4 constants__p_concValueRank,
+   const t_entier4 constants__p_expValueRank,
+   t_bool * const constants__bres);
 extern void constants__read_cast_t_ReadValue(
    const t_entier4 constants__ii,
    constants__t_ReadValue_i * const constants__rvi);

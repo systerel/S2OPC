@@ -78,14 +78,14 @@ DEFINITIONS
     d_Type_IsVariableSubtype_NeedConv(dvNodeId, dvConcValueRank, varNodeId, varValueRank) ==
     /* A scalar ByteString is compatible with a 1 dimension Byte array */
     (dvNodeId = c_ByteString_Type_NodeId & dvConcValueRank = c_ValueRank_Scalar &
-     varNodeId = c_Byte_Type_NodeId & c_ValueRank_OneDimension |-> varValueRank : Type_IsIncludedValueRank)
+     varNodeId = c_Byte_Type_NodeId & c_ValueRank_OneDimension |-> varValueRank : IsIncludedValueRank)
     or /* A 1 dimension Byte array is compatible with a scalar ByteString */
     (dvNodeId = c_Byte_Type_NodeId & dvConcValueRank = c_ValueRank_OneDimension &
-     varNodeId = c_ByteString_Type_NodeId & c_ValueRank_Scalar |-> varValueRank : Type_IsIncludedValueRank);
+     varNodeId = c_ByteString_Type_NodeId & c_ValueRank_Scalar |-> varValueRank : IsIncludedValueRank);
 
     d_Type_IsVariableSubtype(dvNodeId, dvConcValueRank, varNodeId, varValueRank) ==
     ((dvNodeId = c_Null_Type_NodeId or dvNodeId = varNodeId or dvNodeId |-> varNodeId : Type_IsTransitiveSubtype) &
-        dvConcValueRank |-> varValueRank : Type_IsIncludedValueRank)
+        dvConcValueRank |-> varValueRank : IsIncludedValueRank)
     /* + Management of exceptional cases when typing a variable */
     or d_Type_IsVariableSubtype_NeedConv(dvNodeId, dvConcValueRank, varNodeId, varValueRank);
 

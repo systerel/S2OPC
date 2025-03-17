@@ -21,7 +21,7 @@
 
  File Name            : constants.c
 
- Date                 : 04/08/2022 14:53:06
+ Date                 : 18/03/2025 08:06:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -73,6 +73,28 @@ void constants__get_Is_Dir_Forward_Compatible(
    default:
       *constants__p_dir_compat = true;
       break;
+   }
+}
+
+void constants__is_included_ValueRank(
+   const t_entier4 constants__p_concValueRank,
+   const t_entier4 constants__p_expValueRank,
+   t_bool * const constants__bres) {
+   if (constants__p_expValueRank == constants__c_ValueRank_ScalarOrOneDimension) {
+      *constants__bres = ((constants__p_concValueRank == constants__c_ValueRank_Scalar) ||
+         (constants__p_concValueRank == constants__c_ValueRank_OneDimension));
+   }
+   else if (constants__p_expValueRank == constants__c_ValueRank_Any) {
+      *constants__bres = true;
+   }
+   else if (constants__p_expValueRank == constants__c_ValueRank_Scalar) {
+      *constants__bres = (constants__p_concValueRank == constants__c_ValueRank_Scalar);
+   }
+   else if (constants__p_expValueRank == constants__c_ValueRank_OneOrMoreDimensions) {
+      *constants__bres = (constants__p_concValueRank >= constants__c_ValueRank_OneDimension);
+   }
+   else {
+      *constants__bres = (constants__p_expValueRank == constants__p_concValueRank);
    }
 }
 

@@ -36,22 +36,6 @@ PROMOTES
 
 OPERATIONS
 
-    bres <-- is_included_ValueRank(p_concValueRank, p_expValueRank) =
-    BEGIN
-        IF p_expValueRank = c_ValueRank_ScalarOrOneDimension THEN
-            bres := bool(p_concValueRank = c_ValueRank_Scalar or p_concValueRank = c_ValueRank_OneDimension)
-        ELSIF p_expValueRank = c_ValueRank_Any THEN
-            bres := TRUE
-        ELSIF p_expValueRank = c_ValueRank_Scalar THEN
-            bres := bool(p_concValueRank = c_ValueRank_Scalar)
-        ELSIF p_expValueRank = c_ValueRank_OneOrMoreDimensions THEN
-            bres := bool(p_concValueRank >= c_ValueRank_OneDimension)
-        ELSE /* > 0 (or < -3 => not a valid rank, it will fail ..) */
-            bres := bool(p_expValueRank = p_concValueRank)
-        END
-    END
-    ;
-
     bres <-- is_transitive_subtype_or_compatible_simple_type_or_enumeration(p_res_is_transitive_type, p_actual_value_type, p_exp_data_type) =
     BEGIN
         bres := p_res_is_transitive_type;
