@@ -28,7 +28,7 @@ TEST_DIGEST=registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780
 ZEPHYR_DIGEST=registry.gitlab.com/systerel/s2opc/zephyr_build:v3.6.0-b@sha256:13069418dd7b0317f93f02986b01f285f0f66956670f2fecded9850ace85d734 # zephyr_build:v3.6.0-b
 FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1 (FreeRTOS for STM32-H723ZG only for CI purpose)
 CYBERWATCH_DIGEST=registry.gitlab.com/systerel/s2opc/cyberwatch@sha256:df8486140065bb3ea2d7394283ef1adfd403d341edc9ffe28582721ceb199499 # registry.gitlab.com/systerel/s2opc/cyberwatch:2.0
-SONARQUBE_DIGEST=registry.gitlab.com/systerel/s2opc/sonarqube@sha256:b2c966f4891f0cd2541cf0659480977916b228aeb1ae7b7890eabc74a59a8941 #registry.gitlab.com/systerel/s2opc/sonarqube:1.0
+SONARQUBE_DIGEST=registry.gitlab.com/systerel/s2opc/sonarqube@sha256:4baaa859d74163e40467c5fa630ad205a83a4190b7fe472d32f071619a31ca5e #registry.gitlab.com/systerel/s2opc/sonarqube:1.0
 
 # Private images
 GEN_DIGEST=docker.aix.systerel.fr/c838/gen@sha256:e7c7f0427d49d162c66410e05eb04a5859ec5e87a04d2ee82bbf25772acf7adf # docker.aix.systerel.fr/c838/gen:1.4

@@ -703,7 +703,7 @@ coverage-analysis:
     
 build-sonar:
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/sonarqube@sha256:b2c966f4891f0cd2541cf0659480977916b228aeb1ae7b7890eabc74a59a8941 # digest of sonarqube:1.0
+  image: registry.gitlab.com/systerel/s2opc/sonarqube@sha256:4baaa859d74163e40467c5fa630ad205a83a4190b7fe472d32f071619a31ca5e # digest of sonarqube:1.0
   needs: []
   variables:
       SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
