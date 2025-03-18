@@ -95,6 +95,11 @@ def _check_declared_nid(nid, ns_count, matcher):
             raise Exception(f"Missing namespace declaration for ns={ns} in {nid}, " +
                             f"whereas {ns_count} namespace{' is' if ns_count <2 else 's are'} declared")
 
+def _normalize_nodeid(nid : str):
+    return nid[5:] if nid.startswith("ns=0;") else nid
+
+def _get_node_id(node):
+    return _normalize_nodeid(node.get('NodeId'))
 
 def _is_hierarchical_ref(ref: ET.Element):
     ref_type = ref.get('ReferenceType')
@@ -181,10 +186,12 @@ class NSIndexReassigner(NSFinder):
         #   DataType/Identifier/text
         for attr in ['NodeId', 'ParentNodeId', 'DataType']:
             self.__reassign_elem_attr(node, attr, self.__reassigned_ns_index)
+            self.__reassign_elem_attr(node, attr, self.__remove_ns0_index)
         self.__reassign_elem_attr(node, 'BrowseName', self.__reassigned_prefix_index)
 
         for ref in self._iterfind(node, 'uanodeset:References/uanodeset:Reference'):
             self.__reassign_elem_attr(ref, 'ReferenceType', self.__reassigned_ns_index)
+            self.__reassign_elem_attr(ref, 'ReferenceType', self.__remove_ns0_index)
             ref.text = self.__reassigned_ns_index(ref.text)
 
         for typeId in self._iterfind(node, f'.//{{{UA_TYPES_URI}}}TypeId/{{{UA_TYPES_URI}}}Identifier'):
@@ -202,6 +209,9 @@ class NSIndexReassigner(NSFinder):
                 return formatter.format(new_idx, m.group(2))
         return expr
 
+    def __remove_ns0_index(self, expr: str):
+        return _normalize_nodeid(expr)
+    
     def __reassigned_ns_index(self, expr: str):
         return self.__get_reassigned_expr(expr, NS_IDX_MATCHER, NS_IDX_FORMATTER)
 
@@ -233,7 +243,7 @@ class NodesetMerger(NSFinder):
 
     def _iter_nid_nodes_in(self, any_tree: ET.ElementTree):
         for node in self._iterfind(any_tree, '*[@NodeId]'):
-            yield node, node.get('NodeId')
+            yield node, _get_node_id(node)
 
     def _iter_nid_nodes(self):
         yield from self._iter_nid_nodes_in(self.tree)
@@ -244,7 +254,7 @@ class NodesetMerger(NSFinder):
 
     def _add_ref(self, node, ref_type, tgt, is_forward=True):
         # Add a reference from a node to the other NodeId nid in the given direction
-        attribs = {'ReferenceType': ref_type}
+        attribs = {'ReferenceType': _normalize_nodeid(ref_type)}
         if not is_forward:
             attribs['IsForward'] = 'false'
 
@@ -282,7 +292,7 @@ class NodesetMerger(NSFinder):
             for ref in list(refs):  # Make a list so that we can remove elements while iterating
                 if ref.text.strip() in nids:  # The destination node of this reference
                     if self.verbose:
-                        print('RemoveRef: {} -> {}'.format(node.get('NodeId'), ref.text.strip()), file=sys.stderr)
+                        print('RemoveRef: {} -> {}'.format(_get_node_id(node), ref.text.strip()), file=sys.stderr)
                     refs.remove(ref)
 
     def _remove_nids_and_refs(self, nids):
@@ -396,6 +406,7 @@ class NodesetMerger(NSFinder):
         tree_nodes = dict()
         duplicates_source = set()
         for node, node_id in self._iter_nid_nodes():
+            node_id = _normalize_nodeid(node_id)
             if node_id in tree_nodes:
                 duplicates_source.add(node_id)
             else:
@@ -409,7 +420,7 @@ class NodesetMerger(NSFinder):
         for node, _ in self._iter_nid_nodes_in(new):
             # Reassign namespace index for node attributes and subelements
             self.ns_idx_reassigner.reassign_node_ns_index(node)
-            node_id = node.get('NodeId')
+            node_id = _get_node_id(node)
             if node_id in new_nodes:
                 duplicates_target.add(node_id)
                 continue
@@ -434,12 +445,14 @@ class NodesetMerger(NSFinder):
         # New unique nids
         new_nids = set(new_nodes)
         for nid in sorted(new_nids):
+            nid = _normalize_nodeid(nid)
             if self.verbose:
                 print('Merge: add node {}'.format(nid), file=sys.stderr)
             tree_root.append(new_nodes[nid])
 
         # References of common nodes are merged
         for nid in sorted(ns0_duplicate_nids):
+            nid = _normalize_nodeid(nid)
             nodeb = new_nodes.get(nid)
             assert nodeb is not None
             refsb = self._find_in(nodeb, './uanodeset:References')
@@ -513,7 +526,7 @@ class NodesetMerger(NSFinder):
         methods = []
         methods_properties = []
         for method_node in self._iterfind(self.tree, '*[@MethodDeclarationId]'):
-            methods.append(method_node.get('NodeId'))
+            methods.append(_get_node_id(method_node))
             refs = self._find_in(method_node, 'uanodeset:References')
             if refs is None:
                 continue
@@ -544,7 +557,7 @@ class NodesetMerger(NSFinder):
             if is_forward(ref) != downwards:
                 continue
             if _is_hierarchical_ref(ref):
-                child_nid = ref.text.strip()
+                child_nid = _normalize_nodeid(ref.text.strip())
                 yield child_nid
 
     def _rec_compute_subtree(self, root_nid: str, subtree: dict):
@@ -552,8 +565,10 @@ class NodesetMerger(NSFinder):
         if n is None:
             return
         if root_nid not in subtree:
+            root_nid = _normalize_nodeid(root_nid)
             subtree[root_nid] = set()
         for child_nid in self._iter_hierarchical(n):
+            child_nid = _normalize_nodeid(child_nid)
             subtree[root_nid].add(child_nid)
             if child_nid not in subtree:
                 subtree[child_nid] = set()
@@ -600,7 +615,7 @@ class NodesetMerger(NSFinder):
                     if _is_hierarchical_ref(ref) and not is_forward(ref):
                         break
                 else:
-                    nid = n.get('NodeId')
+                    nid = _get_node_id(n)
                     orphans.append(nid)
         for nid in orphans:
             if nid.replace(' ', '') in ['i=84', 'i=78', 'i=11510', 'i=80', 'i=11508']:
@@ -626,9 +641,9 @@ class NodesetMerger(NSFinder):
         # search in the text for nid or alias
         # (text value belonging to a list cannot be expressed in the reduced XPath language of Python 3.10)
         for node in self._iterfind(self.tree, search):
-            nid = node.get('NodeId')
+            nid = _get_node_id(node)
             for type_ref in self._iterfind(node, "uanodeset:References/uanodeset:Reference[@ReferenceType='HasTypeDefinition']"):
-                if type_ref.text.strip() in nids_or_aliases:
+                if _normalize_nodeid(type_ref.text.strip()) in nids_or_aliases:
                     # this is a reference
                     if nid in inst_decl_nids:
                         # but an instance declaration to be removed if the type is removed
@@ -654,10 +669,10 @@ class NodesetMerger(NSFinder):
                     # these instance declaration nodes are intended to be removed in case the corresponding type is removed
                     for node in self._iterfind(self.tree, search):
                         if self._find_in(node, "uanodeset:References/uanodeset:Reference[@ReferenceType='HasModellingRule']") is not None:
-                            inst_decl_nids.add(node.get('NodeId'))
+                            inst_decl_nids.add(_get_node_id(node))
 
                 for ty_node in self._iterfind(self.tree, f"uanodeset:{ty}"):
-                    nid = ty_node.get('NodeId')
+                    nid = _get_node_id(ty_node)
                     if (retain_ns0 and _is_ns0(nid)) or nid in retain_types:
                         # retain this type
                         continue
@@ -703,6 +718,7 @@ class NodesetMerger(NSFinder):
         nodes = {}
         error = False
         for node, nid in self._iter_nid_nodes():
+            nid = _normalize_nodeid(nid)
             if nid in nodes:
                 print('Sanitize Error: NodeId {} found twice'.format(nid), file=sys.stderr)
                 error = True
@@ -731,11 +747,11 @@ class NodesetMerger(NSFinder):
         # List of backward reference (keep refs order)
         refs_inv_list = [] # [(a, type, b), ...], already existing inverse references b <- a
         for node in self._iterfind(self.tree, './*[uanodeset:References]'):
-            nids = node.get('NodeId')  # The starting node of the references below
+            nids = _get_node_id(node)  # The starting node of the references below
             refs, = self._iterfind(node, 'uanodeset:References')
             for ref in list(refs):  # Make a list so that we can remove elements while iterating
                 type_ref = ref.get('ReferenceType')
-                nidt = ref.text.strip()  # The destination node of this reference
+                nidt = _normalize_nodeid(ref.text.strip())  # The destination node of this reference
                 if is_forward(ref):
                     # We are in the case a -> b,
                     #  so a = nids, and b = nidt
@@ -792,7 +808,7 @@ class NodesetMerger(NSFinder):
             refs_nodes = self._findall(node, 'uanodeset:References')
             if len(refs_nodes) < 1:
                 print('Sanitize: child Node without references (Node {} has an attribute ParentNodeId but no reference)'
-                      .format(node.get('NodeId')), file=sys.stderr)
+                      .format(_get_node_id(node)), file=sys.stderr)
                 # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
                 del node.attrib['ParentNodeId']
                 continue
@@ -801,7 +817,7 @@ class NodesetMerger(NSFinder):
             parent_refs = refs.findall('*[@IsForward="false"]')
             if not any(parent.text.strip() == pnid for parent in parent_refs):
                 print('Sanitize: child Node without reference to its parent (Node {}, which parent is {})'
-                      .format(node.get('NodeId'), pnid), file=sys.stderr)
+                      .format(_get_node_id(node), pnid), file=sys.stderr)
                 # Type is unknown in fact
                 #refs.append(self._create_elem('Reference', {'ReferenceType': 'HasComponent', 'IsForward': 'false'}, text=pnid))
                 # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
