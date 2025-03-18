@@ -332,15 +332,19 @@ class NodesetMerger(NSFinder):
         return True
 
     def __merge_models(self, new: ET.ElementTree):
+        source : str = self.__source
         tree_models = self._find('uanodeset:Models')
         if tree_models is None:
-            print("Error: missing the <Models>")
-            return False
+            print(f"Error: missing Node <Models> in file '{source}'")
+            return False    # Mandatory on first file
         ns0_version = get_ns0_version(tree_models)
         if ns0_version is None:
-            print("Error: Missing a NS0 <Model>")
+            print(f"Error: Missing a NS0 <Model> in file '{source}'")
             return False
         new_models = self._find_in(new, 'uanodeset:Models')
+        if new_models is None:
+            print(f"Info: No <Models> defined in file '{source}'. Consistency not checked for this file.")
+            return True  # If Absent in merged files, the consistency is ignored
         for model in new_models:
             new_model_uri = model.get('ModelUri')
             already_model = self._find_in(tree_models, f'uanodeset:Model[@ModelUri="{new_model_uri}"]')
@@ -351,12 +355,12 @@ class NodesetMerger(NSFinder):
                     # just skip the duplicate model
                     continue
                 else:
-                    raise Exception(f'Incompatible model version: {new_model_uri} provided with versions {already_model_version} and {new_model_version}')
+                    raise Exception(f"Incompatible model version in file '{source}': {new_model_uri} provided with versions {already_model_version} and {new_model_version}")
             req_ns0 = self._find_in(model, f'uanodeset:RequiredModel[@ModelUri="{UA_URI}"]')
             if req_ns0 is not None:
                 req_ns0_version = req_ns0.get('Version')
                 if req_ns0_version != ns0_version:
-                    raise Exception(f'Incompatible NS0 version: provided {ns0_version} but require {req_ns0_version}')
+                    raise Exception(f"Incompatible NS0 version in file '{source}': provided {ns0_version} but require {req_ns0_version}")
             tree_models.append(model)
         return True
 
@@ -944,7 +948,7 @@ def make_argparser():
                         help='''
             Path (or - for stdin) the address spaces to merge. In case of conflicting elements,
             the element from the first address space in the argument order is kept.
-            The models must be for the same OPC UA version (e.g. 1.03).
+            The models, if present, must be for the same OPC UA version (e.g. 1.03).
             Namespace ordering:
             1/ The first address space shall contain the OPC UA namespace NS0.
             2/ Following NS0, namespace numbers are assigned incrementally (1 to N).
