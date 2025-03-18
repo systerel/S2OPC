@@ -26,5 +26,3 @@ pre-build/
 pre-build-interactive/
 # File manually updated and committed in b2c/constants_bs.h
 src/ClientServer/services/bgenc/constants_bs.h_
-.scannerwork/
-bw-output/

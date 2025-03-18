@@ -55,8 +55,6 @@
 # (see gitlab issues #25394 and #383355)
 variables:
   FF_ENABLE_BASH_EXIT_CODE_CHECK: "true"
-  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
 
 .nominal_build_variables: &nominal_build_variables
   S2OPC_NODE_MANAGEMENT: 1
@@ -568,7 +566,7 @@ test-unit:
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
-           $TEST_NETWORK_FUZZ == null && $WITH_COVERITY == null && $WITH_DOC == null && \
+           $WITH_COVERITY == null && $WITH_DOC == null && \
            $ALL_TESTS == null && $WITH_SONAR == null" # + excludes ALL_TESTS
       when: on_success
 
@@ -707,6 +705,9 @@ build-sonar:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/sonarqube@sha256:b2c966f4891f0cd2541cf0659480977916b228aeb1ae7b7890eabc74a59a8941 # digest of sonarqube:1.0
   needs: []
+  variables:
+      SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+      GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
   script:
     # Run the build inside the build wrapper
     - /work/build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output ./build.sh
