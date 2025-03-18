@@ -231,6 +231,7 @@ class NodesetMerger(NSFinder):
     def __init__(self, verbose):
         super(NodesetMerger, self).__init__(dict())
         self.verbose = verbose
+        self.__aliases = {}  # dict ( str = alias =>  str = aliased value ) 
         self.__source = None
         self.tree = None
         self.ns_idx_reassigner = NSIndexReassigner(self.namespaces, verbose)
@@ -327,7 +328,7 @@ class NodesetMerger(NSFinder):
         self._check_all_namespaces_declared(new)
         new_ns_uris = self._find_in(new, 'uanodeset:NamespaceUris')
         if new_ns_uris is None:
-            print(f"NamespaceUris is missing in {self.__source}, considering it as a NS0 address space extension")
+            print(f"Info: NamespaceUris is missing in {self.__source}, considering it as a NS0 address space extension")
             # TODO: check that the file does not contain any reference to ns=1 or more
             return True
 
@@ -373,33 +374,39 @@ class NodesetMerger(NSFinder):
                     raise Exception(f"Incompatible NS0 version in file '{source}': provided {ns0_version} but require {req_ns0_version}")
             tree_models.append(model)
         return True
-
-    def __merge_aliases(self, new: ET.ElementTree):
-        tree_aliases = self._find('uanodeset:Aliases')
-        if tree_aliases is None:
+    
+    def __init_aliases(self):
+        self.__tree_aliases = self._find('uanodeset:Aliases')
+        if self.__tree_aliases is None:
             print('Merge: Aliases expected to be present in first address space')
             return False
-        tree_alias_dict = {alias.get('Alias'):alias.text for alias in tree_aliases}
+        self.__aliases = {alias.get('Alias'):_normalize_nodeid(alias.text) for alias in self.__tree_aliases}
+        
+    def __merge_aliases(self, new: ET.ElementTree):
+        source : str = self.__source
         new_aliases = self._find_in(new, 'uanodeset:Aliases')
         new_alias_dict = {}
         if new_aliases is not None:
-            new_alias_dict = {alias.get('Alias'):self.ns_idx_reassigner.get_ns_index(alias.text) for alias in new_aliases}
+            new_alias_dict = {alias.get('Alias'):self.ns_idx_reassigner.get_ns_index(_normalize_nodeid(alias.text)) for alias in new_aliases}
+                
         # Assert existing aliases are the same
         res = True
-        for alias in sorted(set(tree_alias_dict) & set(new_alias_dict)):
-            if tree_alias_dict[alias] != new_alias_dict[alias]:
+        for alias in sorted(set(self.__aliases) & set(new_alias_dict)):
+            if self.__aliases[alias] != new_alias_dict[alias]:
                 print('Merge: Alias used for different NodeId ({} is {} or {})'
-                      .format(alias, tree_alias_dict[alias], new_alias_dict[alias]), file=sys.stderr)
+                      .format(alias, self.__aliases[alias], new_alias_dict[alias]), file=sys.stderr)
                 res = False
         if not res:
             return False
 
         # Add new aliases
-        for alias in sorted(set(new_alias_dict) - set(tree_alias_dict)):
+        current_aliases = set(self.__aliases)
+        new_alias_set = set(new_alias_dict)
+        for alias in sorted(new_alias_set - current_aliases):
             elem = self._create_elem('Alias', {'Alias': alias})
             elem.text = new_alias_dict[alias]
-            tree_aliases.append(elem)
-    
+            self.__tree_aliases.append(elem)
+            self.__aliases[alias] = new_alias_dict[alias]
         return True
 
     def __split_merged_nodes(self, new: ET.ElementTree):
@@ -486,6 +493,7 @@ class NodesetMerger(NSFinder):
                 self.namespaces[UA_TYPES_PREFIX] = UA_TYPES_URI
             self.__fill_namespace_array()
             self._check_all_namespaces_declared(self.tree)
+            self.__init_aliases()
             return True
 
         # Merge NamespaceURIs
@@ -623,12 +631,36 @@ class NodesetMerger(NSFinder):
                 continue
             self.remove_subtree(nid)
 
+    def __get_unaliased_node_id(self, nid : str) -> str:
+        try: return _normalize_nodeid(self.__aliases[nid])
+        except: return _normalize_nodeid(nid)
+        
+    def __get_reference_type(self, ref : ET.Element) -> str:
+        # explicitly do not UNALIAS the ReferenceType
+        return ref.get('ReferenceType')
+        
     def __get_aliases(self):
-        tree_aliases = self._find('uanodeset:Aliases')
-        if tree_aliases is None:
+        if self.__tree_aliases is None:
             return {}
-        return {alias.text: alias.get('Alias') for alias in tree_aliases}
+        return {alias.text: alias.get('Alias') for alias in self.__tree_aliases}
 
+    def __try_unalias_and_get_nodeid(self, ref : ET.Element) -> str:
+        ''' Read text as NodeId. If it is an alias, resolve it and replace original node 
+            @return the unaliased NodeId
+            '''
+        nid = _normalize_nodeid(ref.text.strip())
+        try:
+            nid = self.__aliases[nid]
+        except:
+            pass
+        
+        ref.text = nid
+        # Replace current text
+        return nid
+          
+    def __get_unaliased_nodeid_from_text(self, ref : ET.Element) -> str:
+        return self.__get_unaliased_node_id(ref.text.strip())
+        
     def __exists_ref(self, search: str, nids_or_aliases: set):
         for ref_node in self._iterfind(self.tree, search):
             ref_nid = ref_node.text.strip()
@@ -643,7 +675,7 @@ class NodesetMerger(NSFinder):
         for node in self._iterfind(self.tree, search):
             nid = _get_node_id(node)
             for type_ref in self._iterfind(node, "uanodeset:References/uanodeset:Reference[@ReferenceType='HasTypeDefinition']"):
-                if _normalize_nodeid(type_ref.text.strip()) in nids_or_aliases:
+                if self.__get_unaliased_nodeid_from_text(type_ref) in nids_or_aliases:
                     # this is a reference
                     if nid in inst_decl_nids:
                         # but an instance declaration to be removed if the type is removed
@@ -747,11 +779,11 @@ class NodesetMerger(NSFinder):
         # List of backward reference (keep refs order)
         refs_inv_list = [] # [(a, type, b), ...], already existing inverse references b <- a
         for node in self._iterfind(self.tree, './*[uanodeset:References]'):
-            nids = _get_node_id(node)  # The starting node of the references below
+            nids = self.__get_unaliased_node_id(_get_node_id(node))  # The starting node of the references below
             refs, = self._iterfind(node, 'uanodeset:References')
             for ref in list(refs):  # Make a list so that we can remove elements while iterating
-                type_ref = ref.get('ReferenceType')
-                nidt = _normalize_nodeid(ref.text.strip())  # The destination node of this reference
+                type_ref = self.__get_reference_type(ref)
+                nidt = self.__try_unalias_and_get_nodeid(ref)  # The destination node of this reference
                 if is_forward(ref):
                     # We are in the case a -> b,
                     #  so a = nids, and b = nidt
@@ -813,9 +845,9 @@ class NodesetMerger(NSFinder):
                 del node.attrib['ParentNodeId']
                 continue
             refs, = refs_nodes
-            pnid = node.get('ParentNodeId')
+            pnid = self.__get_unaliased_node_id(node.get('ParentNodeId'))
             parent_refs = refs.findall('*[@IsForward="false"]')
-            if not any(parent.text.strip() == pnid for parent in parent_refs):
+            if not any(self.__get_unaliased_nodeid_from_text(parent) == pnid for parent in parent_refs):
                 print('Sanitize: child Node without reference to its parent (Node {}, which parent is {})'
                       .format(_get_node_id(node), pnid), file=sys.stderr)
                 # Type is unknown in fact

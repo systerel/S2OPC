@@ -195,5 +195,9 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_reassign_then_no_reassign_namespace_index.xml', [],
                       'ns0.xml', 'TestReassign_NS1.xml', 'TestReassign_NS2_NS1.xml', 'TestReassign_NS1_NS2.xml')
 
+    def test_single_file(self):
+        self.run_test('test_ns0_single.xml', [],
+                      'ns0.xml')
+
 if __name__ == '__main__':
     unittest.main()
