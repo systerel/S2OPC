@@ -208,6 +208,7 @@ LOCAL_OPERATIONS
     btyp_ok, btyp_need_conv <-- is_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr) =
     PRE
         p_dv_typ_nid : t_NodeId_i &
+        p_dv_vr : t_ValueRank &
         p_dv_vr : t_ConcreteValueRank &
         p_var_typ_nid : t_NodeId_i &
         p_var_typ_nid : t_NodeId &

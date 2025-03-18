@@ -489,7 +489,6 @@ CONCRETE_CONSTANTS
 
     t_counter,
     t_ValueRank,
-    t_ConcreteValueRank,
     t_BrowsePathResPerElt_i
 
 ABSTRACT_CONSTANTS
@@ -534,6 +533,7 @@ ABSTRACT_CONSTANTS
     t_LocalizedText,
     t_QualifiedName,
     t_Event,
+    t_ConcreteValueRank,
 
     cast_t_session,
     cast_t_BrowsePath,
@@ -1650,6 +1650,7 @@ OPERATIONS
 
     bres <-- is_included_ValueRank(p_concValueRank, p_expValueRank) =
     PRE
+        p_concValueRank : t_ValueRank &
         p_concValueRank : t_ConcreteValueRank &
         p_expValueRank : t_ValueRank
     THEN

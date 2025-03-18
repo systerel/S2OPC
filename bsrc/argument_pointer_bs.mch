@@ -36,6 +36,7 @@ DEFINITIONS
         Variant_Arguments : t_Variant +-> seq(t_Argument) &
         Argument_DataType : t_Argument --> t_NodeId & /* ExpandedNodeId from different server returns Structure <=> NodeId(i=22)
         / Null value return NodeId(i=0) */
+        Argument_ValueRank : t_Argument --> t_ValueRank &
         Argument_ValueRank : t_Argument --> t_ConcreteValueRank
     );
 

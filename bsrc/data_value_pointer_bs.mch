@@ -45,6 +45,7 @@ DEFINITIONS
 
         DataValue_LocalDataType : t_DataValue --> t_NodeId & /* ExpandedNodeId from different server returns Structure <=> NodeId(i=22)
                                                                 / Null value return NodeId(i=0) */
+        DataValue_ValueRank : t_DataValue --> t_ValueRank &
         DataValue_ValueRank : t_DataValue --> t_ConcreteValueRank
     );
 

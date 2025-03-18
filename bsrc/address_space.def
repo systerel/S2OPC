@@ -190,6 +190,7 @@ DEFINITIONS
         a_NodeClass_Attribute : t_NodeClass * t_AttributeId --> BOOL &
 
         Variant_LocalDataType : t_Variant --> t_NodeId &
+        Variant_ValueRank : t_Variant --> t_ValueRank &
         Variant_ValueRank : t_Variant --> t_ConcreteValueRank &
 
         /* Special reference (see def) */
@@ -1065,6 +1066,7 @@ DEFINITIONS
     btyp_ok, btyp_need_conv <-- read_variable_compat_type(p_dv_typ_nid, p_dv_vr, p_var_typ_nid, p_var_vr) =
     PRE
         p_dv_typ_nid : t_NodeId_i &
+        p_dv_vr : t_ValueRank &
         p_dv_vr : t_ConcreteValueRank &
         p_var_typ_nid : t_NodeId_i &
         p_var_typ_nid : t_NodeId &

@@ -969,7 +969,7 @@ OPERATIONS
         p_variant : t_Variant_i &
         p_variant : t_Variant
     THEN
-        p_valueRank :: t_ConcreteValueRank
+        p_valueRank :( p_valueRank : t_ValueRank & p_valueRank : t_ConcreteValueRank )
     END
     ;
 

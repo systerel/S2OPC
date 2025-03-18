@@ -70,8 +70,7 @@ VALUES
     c_ValueRank_ScalarOrOneDimension = -3;
 
     t_counter = NAT;
-    t_ValueRank = INT;
-    t_ConcreteValueRank = INT
+    t_ValueRank = INT
 
 OPERATIONS
 
