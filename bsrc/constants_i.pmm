@@ -1,0 +1,54 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+THEORY User_Pass IS
+
+    Operation(ValuesLemmas) & Pattern(not(0 : 1..c))
+    & ff(0) & pp(rt.0);
+
+    Operation(ValuesLemmas) & Pattern(not(0..b = {}))
+    & ff(0) & pp(rt.1);
+
+    Operation(ValuesLemmas) & Pattern(a : d*BOOL +-> BOOL)
+    & ff(0) & pp(rt.0);
+
+    Operation(ValuesLemmas) & Pattern(dom(a) = (b*BOOL))
+    & ff(0) & pp(rt.0);
+
+    Operation(ValuesLemmas) & Pattern(a: NAT-{0}\/{-1} <-> INT)
+    & ff(0) & mp & pp(rt.0) & pp(rt.1) & pp(rt.1) & pp(rt.1) & pp(rt.0) & pp(rt.1) & pp(rt.1);
+
+    Operation(get_Is_Dir_Forward_Compatible)
+    & ff(0) & dd & dc(p_IsForward,{TRUE,FALSE}) & pr & pr & pr;
+
+    Operation(is_included_ValueRank) & Pattern(bool(a) = bool(c : d))
+    & ff(0) & dd(1) & ss & eh(IsIncludedValueRank,_h,Goal) & ss & pp(rp.0);
+
+    Operation(is_included_ValueRank) & Pattern(bool(a<=b) = bool(c : d))
+    & ff(0) & dd(1) & dc(c_ValueRank_OneDimension<=p_concValueRank)
+      & dd(1) & mp & ah(p_concValueRank|->0 : (t_ConcreteValueRank-{ -1})*{0}) & pr & pp(rt.1) & pp(rt.1) & pr
+      & pr & ah(p_concValueRank = -1) & pp(rt.1) & eh(IsIncludedValueRank,_h,Goal) & pr;
+
+    Operation(is_included_ValueRank) & Pattern(bool(p_expValueRank = p_concValueRank) = bool(c : d))
+    & ff(0) & dd(1) & dc(p_expValueRank = p_concValueRank)
+      & eh(p_concValueRank,_h,Goal) & eh(IsIncludedValueRank,_h,Goal)
+        & ah(p_expValueRank|->p_expValueRank : id(NAT-{0})) & pr & pr
+      & dd(1) & eh(IsIncludedValueRank,_h,Goal) & eh(t_ConcreteValueRank,_h,Goal) & pp(rt.1)
+
+END
