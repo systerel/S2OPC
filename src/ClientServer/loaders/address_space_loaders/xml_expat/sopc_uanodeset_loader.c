@@ -1228,6 +1228,7 @@ static bool complex_value_tag_from_tag_name_no_namespace(const char* tag_name,
 {
     SOPC_ASSERT(NULL != inCurrentCtx);
     SOPC_ASSERT(NULL != outTagCtx);
+    SOPC_ASSERT(NULL != tag_name);
 
     *outTagCtx = NULL;
     int index = 0;
@@ -1242,6 +1243,7 @@ static bool complex_value_tag_from_tag_name_no_namespace(const char* tag_name,
         index++;
         current = &inCurrentCtx[index];
     }
+    LOGF("Unexpected tag <%s>", tag_name);
     return false;
 }
 
@@ -1252,6 +1254,7 @@ static bool complex_value_tag_from_tag(const char* tag,
     // tag should have the correct namespace
     if (strncmp(tag, UA_TYPES_NS NS_SEPARATOR, strlen(UA_TYPES_NS NS_SEPARATOR)) != 0)
     {
+        LOGF("Unexpected namespace for '%s' (expected '%s')", tag, UA_TYPES_NS NS_SEPARATOR);
         return false;
     }
 
@@ -2033,10 +2036,19 @@ static bool set_variant_value_extobj_role_permission_type(OpcUa_RolePermissionTy
             rolePermissions->RoleId = *nodeId;
             SOPC_Free(nodeId);
         }
+        else
+        {
+            LOG("Failed to set 'RoleId' for 'RolePermission'");
+        }
+    }
+    else
+    {
+        LOG("Failed to set 'RoleId' for 'RolePermission'");
     }
 
     if (!result)
     {
+        LOG("Failed to set 'Permissions' for Extended object");
         OpcUa_RolePermissionType_Clear(rolePermissions);
     }
 
@@ -2070,11 +2082,13 @@ static bool set_variant_value_extobj_identity_mapping_rule_type(OpcUa_IdentityMa
         if (status != SOPC_STATUS_OK)
         {
             result = false;
+            LOG("Invalid 'Criteria' for 'IdentityMappingRule'");
         }
     }
 
     if (!result)
     {
+        LOG("Failed to set 'IdentityMappingRule' for Extended object");
         OpcUa_IdentityMappingRuleType_Clear(identityMappingRule);
     }
 
@@ -2197,10 +2211,15 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
             argument->Description = *lt;
             SOPC_Free(lt);
         }
+        else
+        {
+            LOG("Failed to set 'Description' for 'Argument'");
+        }
     }
 
     if (!result)
     {
+        LOG("Failed to set 'Argument' for Extended object");
         OpcUa_Argument_Clear(argument);
     }
 
@@ -2237,6 +2256,10 @@ static bool set_variant_value_extobj_enum_value_type(OpcUa_EnumValueType* enumVa
     {
         result = SOPC_strtoint(valueTagCtx->single_value, (size_t) strlen(valueTagCtx->single_value), 64,
                                &enumValueType->Value);
+        if (!result)
+        {
+            LOG("Invalid 'Value' for 'EnumValue'");
+        }
     }
 
     if (result)
@@ -2248,6 +2271,10 @@ static bool set_variant_value_extobj_enum_value_type(OpcUa_EnumValueType* enumVa
         {
             enumValueType->DisplayName = *lt;
             SOPC_Free(lt);
+        }
+        else
+        {
+            LOG("Failed to set 'DisplayName' for 'EnumValue'");
         }
     }
 
@@ -2261,10 +2288,15 @@ static bool set_variant_value_extobj_enum_value_type(OpcUa_EnumValueType* enumVa
             enumValueType->Description = *lt;
             SOPC_Free(lt);
         }
+        else
+        {
+            LOG("Failed to set 'Description' for 'EnumValue'");
+        }
     }
 
     if (!result)
     {
+        LOG("Failed to set 'EnumValueType' for Extended object");
         OpcUa_EnumValueType_Clear(enumValueType);
     }
 
@@ -2316,6 +2348,10 @@ static bool set_variant_value_extobj_eu_information(OpcUa_EUInformation* euInfor
     {
         result = SOPC_strtoint(unitIdTagCtx->single_value, (size_t) strlen(unitIdTagCtx->single_value), 32,
                                &euInformation->UnitId);
+        if (!result)
+        {
+            LOG("Invalid value for 'EUInformation.UnitId'");
+        }
     }
 
     if (result)
@@ -2327,6 +2363,10 @@ static bool set_variant_value_extobj_eu_information(OpcUa_EUInformation* euInfor
         {
             euInformation->DisplayName = *lt;
             SOPC_Free(lt);
+        }
+        else
+        {
+            LOG("Failed to set 'DisplayName' for 'EUInformation'");
         }
     }
 
@@ -2340,10 +2380,15 @@ static bool set_variant_value_extobj_eu_information(OpcUa_EUInformation* euInfor
             euInformation->Description = *lt;
             SOPC_Free(lt);
         }
+        else
+        {
+            LOG("Failed to set 'Description' for 'EUInformation'");
+        }
     }
 
     if (!result)
     {
+        LOG("Failed to set 'EUInformation' for Extended object");
         SOPC_EncodeableObject_Clear(euInformation->encodeableType, euInformation);
     }
 
@@ -2370,15 +2415,24 @@ static bool set_variant_value_extobj_range(OpcUa_Range* range, parse_complex_val
     if (lowTagCtx->set && (*lowTagCtx->single_value) != 0)
     {
         result = SOPC_strtodouble(lowTagCtx->single_value, strlen(lowTagCtx->single_value), 64, &range->Low);
+        if (!result)
+        {
+            LOG("Invalid value for 'OpcUa_Range.Low'");
+        }
     }
 
     if (result && highTagCtx->set && (*highTagCtx->single_value) != 0)
     {
         result = SOPC_strtodouble(highTagCtx->single_value, strlen(highTagCtx->single_value), 64, &range->High);
+        if (!result)
+        {
+            LOG("Invalid value for 'OpcUa_Range.High'");
+        }
     }
 
     if (!result)
     {
+        LOG("Failed to set 'OpcUa_Range' for Extended object");
         SOPC_EncodeableObject_Clear(range->encodeableType, range);
     }
 
@@ -2395,6 +2449,7 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
     SOPC_ASSERT(typeid_tag_ok);
     if (!typeIdTagCtx->set)
     {
+        LOGF("Missing initial value for Extension object: '%s'", typeIdTagCtx->name);
         return false;
     }
     SOPC_ASSERT(NULL != typeIdTagCtx->user_data);
@@ -2405,6 +2460,7 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
     SOPC_ASSERT(body_tag_ok);
     if (!bodyTagCtx->set)
     {
+        LOGF("Missing initial value for Extension object Body: '%s'", bodyTagCtx->name);
         return false;
     }
     SOPC_ASSERT(NULL != bodyTagCtx->childs);
@@ -2456,6 +2512,7 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
 
     if (!result)
     {
+        LOGF("Failed to initialize Extension object: '%s'", (encType->TypeName ? encType->TypeName : "NULL"));
         SOPC_ExtensionObject_Clear(newExtObj);
         SOPC_Free(newExtObj);
         newExtObj = NULL;
