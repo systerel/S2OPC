@@ -232,6 +232,7 @@ class NodesetMerger(NSFinder):
         super(NodesetMerger, self).__init__(dict())
         self.verbose = verbose
         self.__aliases = {}  # dict ( str = alias =>  str = aliased value ) 
+        self.__namespaces_uri = []  # filled in 'merge()
         self.__source = None
         self.tree = None
         self.ns_idx_reassigner = NSIndexReassigner(self.namespaces, verbose)
@@ -248,6 +249,15 @@ class NodesetMerger(NSFinder):
 
     def _iter_nid_nodes(self):
         yield from self._iter_nid_nodes_in(self.tree)
+    
+    def _get_namespace_uri(self, nsi : int) -> str | None:
+        try: return self.__namespaces_uri[nsi]
+        except:return None
+        
+    def _get_namespace_index(self, nid : str) -> int:
+        m = NS_IDX_MATCHER.match(self.__get_unaliased_node_id(nid))
+        if not m :return 0
+        return int(m.group(1))
 
     def _create_elem(self, tag, attrib={}, xmlns='uanodeset'):
         ns_tag = '{' + self.namespaces[xmlns] + '}' + tag
@@ -778,6 +788,9 @@ class NodesetMerger(NSFinder):
         refs_inv = set()  # {(a, type, b), ...}, already existing inverse references b <- a are stored in the forward direction (source to target)
         # List of backward reference (keep refs order)
         refs_inv_list = [] # [(a, type, b), ...], already existing inverse references b <- a
+        # List of NSI in which issues were found (for log purpose)
+        ns_to_show = set()
+        
         for node in self._iterfind(self.tree, './*[uanodeset:References]'):
             nids = self.__get_unaliased_node_id(_get_node_id(node))  # The starting node of the references below
             refs, = self._iterfind(node, 'uanodeset:References')
@@ -789,6 +802,7 @@ class NodesetMerger(NSFinder):
                     #  so a = nids, and b = nidt
                     if (nids, type_ref, nidt) in refs_fwd:
                         print('Sanitize: duplicate forward Reference {} -> {} (type {})'.format(nids, nidt, type_ref), file=sys.stderr)
+                        ns_to_show.update([self._get_namespace_index(x) for x in [nids, nidt]])
                     else:
                         refs_fwd.add((nids, type_ref, nidt))
                         refs_fwd_list.append((nids, type_ref, nidt))
@@ -799,9 +813,11 @@ class NodesetMerger(NSFinder):
                     if nidt not in nodes:
                         print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'
                               .format(nids, nidt, type_ref), file=sys.stderr)
+                        ns_to_show.update([self._get_namespace_index(x) for x in [nids, nidt]])
                         continue
                     if (nidt, type_ref, nids) in refs_inv:
                         print('Sanitize: duplicate inverse Reference {} <- {} (type {})'.format(nidt, nids, type_ref), file=sys.stderr)
+                        ns_to_show.update([self._get_namespace_index(x) for x in [nids, nidt]])
                     else:
                         refs_inv.add((nidt, type_ref, nids))
                         refs_inv_list.append((nidt, type_ref, nids))
@@ -813,9 +829,11 @@ class NodesetMerger(NSFinder):
                 continue
             if a not in nodes:
                 print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
+                ns_to_show.update([self._get_namespace_index(x) for x in [a, b]])
             else:
                 if self.verbose:
                     print('Sanitize: add forward reciprocal Reference {} -> {} (type {})'.format(a, b, t), file=sys.stderr)
+                    ns_to_show.update([self._get_namespace_index(x) for x in [a, b]])
                 node = nodes[a]
                 self._add_ref(node, t, b, is_forward=True)
     
@@ -826,9 +844,11 @@ class NodesetMerger(NSFinder):
                 continue
             if b not in nodes:
                 print('Sanitize: Reference to unknown node, cannot add inverse reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
+                ns_to_show.update([self._get_namespace_index(x) for x in [a, b]])
             else:
                 if self.verbose:
                     print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
+                    ns_to_show.update([self._get_namespace_index(x) for x in [a, b]])
                 node = nodes[b]
                 self._add_ref(node, t, a, is_forward=False)
     
@@ -841,6 +861,7 @@ class NodesetMerger(NSFinder):
             if len(refs_nodes) < 1:
                 print('Sanitize: child Node without references (Node {} has an attribute ParentNodeId but no reference)'
                       .format(_get_node_id(node)), file=sys.stderr)
+                ns_to_show.add(self._get_namespace_index(node))
                 # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
                 del node.attrib['ParentNodeId']
                 continue
@@ -850,6 +871,7 @@ class NodesetMerger(NSFinder):
             if not any(self.__get_unaliased_nodeid_from_text(parent) == pnid for parent in parent_refs):
                 print('Sanitize: child Node without reference to its parent (Node {}, which parent is {})'
                       .format(_get_node_id(node), pnid), file=sys.stderr)
+                ns_to_show.add(self._get_namespace_index(node))
                 # Type is unknown in fact
                 #refs.append(self._create_elem('Reference', {'ReferenceType': 'HasComponent', 'IsForward': 'false'}, text=pnid))
                 # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
@@ -859,6 +881,10 @@ class NodesetMerger(NSFinder):
     
         # TODO: Remove empty <References />
     
+        # Help : remind the NS URI of defects found
+        if ns_to_show:
+            print ("Note:\n- " + "\n- ".join([f" NSI={nsi} <=> '{self._get_namespace_uri(nsi)}'" for nsi in ns_to_show]))
+               
         return True
 
     def __fetch_subelement(self, elem, subtag) -> ET.Element:
@@ -901,7 +927,8 @@ class NodesetMerger(NSFinder):
         l_str = self.__fetch_subelement(value, f'{{{UA_TYPES_URI}}}ListOfString')
         l_str.clear()
         ns_uris = self._findall(self.tree, 'uanodeset:NamespaceUris/uanodeset:Uri')
-        append_strings(l_str, [UA_URI] + [uri.text for uri in ns_uris])
+        self.__namespaces_uri = [UA_URI] + [uri.text for uri in ns_uris]
+        append_strings(l_str, self.__namespaces_uri)
 
     def __get_all_retain_values(self, retain: set):
         nid_alias = self.__get_aliases()
