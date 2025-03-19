@@ -459,11 +459,11 @@ static bool parseAliasedNodeId(struct parse_context_t* ctx, const XML_Char* attr
         status = SOPC_NodeId_Copy(destId, id);
         SOPC_NodeId_Clear(id);
         SOPC_Free(id);
-    }
-    if (SOPC_STATUS_OUT_OF_MEMORY == status)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
+        if (SOPC_STATUS_OUT_OF_MEMORY == status)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
     }
     else if (SOPC_STATUS_OK != status)
     {
