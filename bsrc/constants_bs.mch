@@ -277,7 +277,6 @@ ABSTRACT_CONSTANTS
     t_reverse_endpoint_config_idx,
     t_client_request_handle,
     t_ExpandedNodeId,
-    t_RefIndex,
     t_Reference,
     t_LocalizedText,
     t_QualifiedName,
@@ -568,8 +567,6 @@ PROPERTIES
     t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet /: t_ExpandedNodeId &
-
-    t_RefIndex <: NAT &
 
     t_Reference <: t_Reference_i &
     c_Reference_indet : t_Reference_i &
