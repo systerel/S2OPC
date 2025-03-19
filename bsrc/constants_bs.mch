@@ -888,6 +888,7 @@ OPERATIONS
         p_expnid /= c_ExpandedNodeId_indet
     THEN
         p_local_server, p_nid :(p_local_server : BOOL &
+                                p_local_server = bool(p_expnid : dom(conv_ExpandedNodeId_NodeId)) &
                                 p_nid : t_NodeId_i &
                                 (p_local_server = TRUE =>
                                     p_nid = conv_ExpandedNodeId_NodeId(p_expnid)) &
