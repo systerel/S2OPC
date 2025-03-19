@@ -42,3 +42,4 @@ the legal rights to contribute.
 * Thomas Bouston <thomas.bouston-stg@systerel.fr>
 * Florent Macaire <florent.macaire@systerel.fr>
 * Mathieu Clabaut <mathieu.clabaut@systerel.fr>
+* Florian Antheunis <florian.antheunis-stg@systerel.fr>
