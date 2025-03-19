@@ -2144,7 +2144,8 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
         }
     }
 
-    if (result && valueRankTagCtx->set)
+    // Note : consider empty tags as default value.
+    if (result && valueRankTagCtx->set && (*valueRankTagCtx->single_value) != 0)
     {
         result = SOPC_strtoint(valueRankTagCtx->single_value, (size_t) strlen(valueRankTagCtx->single_value), 32,
                                &argument->ValueRank);
@@ -2231,7 +2232,8 @@ static bool set_variant_value_extobj_enum_value_type(OpcUa_EnumValueType* enumVa
         complex_value_tag_from_tag_name_no_namespace("Description", enumValueTypeTagCtx->childs, &descriptionTagCtx);
     SOPC_ASSERT(description_tag_ok);
 
-    if (valueTagCtx->set)
+    // Note : consider empty tags as default value.
+    if (valueTagCtx->set && (*valueTagCtx->single_value) != 0)
     {
         result = SOPC_strtoint(valueTagCtx->single_value, (size_t) strlen(valueTagCtx->single_value), 64,
                                &enumValueType->Value);
@@ -2309,7 +2311,8 @@ static bool set_variant_value_extobj_eu_information(OpcUa_EUInformation* euInfor
         }
     }
 
-    if (result && unitIdTagCtx->set)
+    // Note : consider empty tags as default value.
+    if (result && unitIdTagCtx->set && (*unitIdTagCtx->single_value) != 0)
     {
         result = SOPC_strtoint(unitIdTagCtx->single_value, (size_t) strlen(unitIdTagCtx->single_value), 32,
                                &euInformation->UnitId);
@@ -2363,12 +2366,13 @@ static bool set_variant_value_extobj_range(OpcUa_Range* range, parse_complex_val
     bool high_tag_ok = complex_value_tag_from_tag_name_no_namespace("High", rangeTagCtx->childs, &highTagCtx);
     SOPC_ASSERT(high_tag_ok);
 
-    if (lowTagCtx->set)
+    // Note : if Low or High is empty, then consider as if the Tags were not provided and keep default value (0.0)
+    if (lowTagCtx->set && (*lowTagCtx->single_value) != 0)
     {
         result = SOPC_strtodouble(lowTagCtx->single_value, strlen(lowTagCtx->single_value), 64, &range->Low);
     }
 
-    if (result && highTagCtx->set)
+    if (result && highTagCtx->set && (*highTagCtx->single_value) != 0)
     {
         result = SOPC_strtodouble(highTagCtx->single_value, strlen(highTagCtx->single_value), 64, &range->High);
     }
