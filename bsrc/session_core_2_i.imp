@@ -48,7 +48,9 @@ CONCRETE_VARIABLES
 INVARIANT
     a_session_roles_i      : t_session_i --> t_sessionRoles_i                        &
     a_client_session_i   : t_session_i --> BOOL                                      &
+    s_client_session     = a_client_session_i~[{TRUE}] /\ dom(a_state)               &
     card_s_session_i     : NAT                                                       &
+    card_s_session_i     = card(a_state)                                             &
     a_state_i            : t_session_i --> t_sessionState_i                          &
     a_session_init_time_i : t_session_i --> t_timeref_i                              &
     a_channel_i          : t_session_i --> t_channel_i                               &
@@ -61,8 +63,10 @@ INVARIANT
     a_server_client_cert_tb_i  : t_session_i --> t_CertThumbprint_i                  &
     a_state             <: a_state_i                                                 &
     a_state              = a_state_i |>> {e_session_closed}                          &
+    a_session_roles      = t_session <| a_session_roles_i |> t_sessionRoles          &
     a_session_init_time  = t_session <| a_session_init_time_i |> t_timeref           &
     a_channel            = t_session <| a_channel_i |> t_channel                     &
+    a_channel_nb_sessions = t_channel <| a_channel_nb_sessions_i                     &
     a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
     a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx  &
     a_server_user_auth_attempts = t_session <| a_server_user_auth_attempts_i         &

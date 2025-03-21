@@ -46,12 +46,14 @@ INVARIANT
     s_client_session  <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
     a_session_init_time : t_session +-> t_timeref             &
+    dom(a_session_init_time) = dom(a_state)                   &
     a_channel          : t_session +-> t_channel              &
     a_channel_nb_sessions : t_channel --> NAT                 &
+    !(channel).(channel : t_channel => a_channel_nb_sessions(channel) = card(a_channel~[{channel}])) &
     a_client_to_create : t_session +-> t_channel_config_idx_i &
     a_client_orphaned  : t_session +-> t_channel_config_idx_i &
-    a_server_user_auth_attempts : t_session --> NAT &
-    a_server_client_locales : t_session --> t_LocaleIds &
+    a_server_user_auth_attempts : t_session +-> NAT           &
+    a_server_client_locales : t_session --> t_LocaleIds       &
     a_server_client_app_desc : t_session +-> t_ApplicationDescription &
     a_server_client_cert_tb : t_session +-> t_CertThumbprint
 
