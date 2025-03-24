@@ -42,7 +42,23 @@
 
 bool SOPC_IsGoodStatus(SOPC_StatusCode status)
 {
-    return ((status & SOPC_GoodStatusOppositeMask) == 0);
+    return ((status & SOPC_StatusCodeMask) == SOPC_GoodGenericStatus);
+}
+
+bool SOPC_IsUncertainStatus(SOPC_StatusCode status)
+{
+    return ((status & SOPC_StatusCodeMask) == SOPC_UncertainStatusMask);
+}
+
+bool SOPC_IsBadStatus(SOPC_StatusCode status)
+{
+    return ((status & SOPC_StatusCodeMask) == SOPC_BadStatusMask);
+}
+
+bool SOPC_IsGoodOrUncertainStatus(SOPC_StatusCode status)
+{
+    return ((status & SOPC_StatusCodeMask) == SOPC_UncertainStatusMask ||
+            (status & SOPC_StatusCodeMask) == SOPC_GoodGenericStatus);
 }
 
 // Converts if necessary the given status code to one of the tcp error code of spec part 6 (1.03) table 55

@@ -42,8 +42,27 @@ typedef uint32_t SOPC_StatusCode;
 
 /**
  * \brief An opposite mask for Good status code: Good status <=> (status & SOPC_GoodStatusOppositeMask) == 0
+ *
+ * \note Prefer use of ::SOPC_IsGoodStatus
  */
 #define SOPC_GoodStatusOppositeMask 0xC0000000
+
+/**
+ * @brief A mask to select status code bits
+ */
+#define SOPC_StatusCodeMask 0xC0000000
+
+/**
+ * \brief Mask to check status for Uncertain status code:
+ *  <=> (status & SOPC_StatusCodeMask) == SOPC_UncertainStatusMask
+ */
+#define SOPC_UncertainStatusMask 0x40000000
+
+/**
+ * \brief Mask to check status for Bad status code:
+ * <=> (status & SOPC_StatusCodeMask) == SOPC_BadStatusMask
+ */
+#define SOPC_BadStatusMask 0x80000000
 
 /**
  * \brief Evaluates if the provided status is Good.
@@ -54,13 +73,28 @@ typedef uint32_t SOPC_StatusCode;
 bool SOPC_IsGoodStatus(SOPC_StatusCode status);
 
 /**
- * \brief Mask to check status for Uncertain status code: X status <=> (status & SOPC_<X>StatusMask) != 0
+ * @brief Evaluates if the provided status is Uncertain.
+ *
+ * @param status the status to evaluate
+ * @return True if the provided status is Uncertain, false otherwise
  */
-#define SOPC_UncertainStatusMask 0x40000000
+bool SOPC_IsUncertainStatus(SOPC_StatusCode status);
+
 /**
- * \brief Mask to check status for Bad status code: X status <=> (status & SOPC_<X>StatusMask) != 0
+ * @brief Evaluates if the provided status is Bad
+ *
+ * @param status the status to evaluate
+ * @return True if the provided status is Bad, false otherwise
  */
-#define SOPC_BadStatusMask 0x80000000
+bool SOPC_IsBadStatus(SOPC_StatusCode status);
+
+/**
+ * @brief Evaluates if the provided status is Good or Uncertain.
+ *
+ * @param status the status to evaluate
+ * @return True if the provided status is Good or Uncertain, false otherwise
+ */
+bool SOPC_IsGoodOrUncertainStatus(SOPC_StatusCode status);
 
 /**
  * \brief Mask to check status contains the DataValue overflow bit set (InfoType DataValue bit + Overflow bit)
