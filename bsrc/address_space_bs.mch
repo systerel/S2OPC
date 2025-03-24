@@ -1028,7 +1028,8 @@ OPERATIONS
                 p_nb_out = 0 &
                 p_out_arguments = c_ArgumentsPointer_indet
             ) &
-            (p_rawStatusCode = c_RawStatusCode_Good =>
+            ((p_rawStatusCode = c_RawStatusCode_Good or
+              p_rawStatusCode = c_RawStatusCode_Uncertain) =>
                 (p_nb_out > 0 =>
                  p_out_arguments : t_ArgumentsPointer)
             )

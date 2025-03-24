@@ -122,6 +122,7 @@ SETS
 ABSTRACT_CONSTANTS
     c_RawStatusCode_BadInvalidState,
     c_RawStatusCode_Good,
+    c_RawStatusCode_Uncertain,
 
     conv_StatusCode_To_RawStatusCode,
     conv_RawStatusCode_To_StatusCode,
@@ -132,13 +133,15 @@ PROPERTIES
 
     c_RawStatusCode_BadInvalidState : t_RawStatusCode &
     c_RawStatusCode_Good : t_RawStatusCode &
+    c_RawStatusCode_Uncertain : t_RawStatusCode &
 
     t_StatusCode = t_StatusCode_i - {c_StatusCode_indet} &
 
     conv_StatusCode_To_RawStatusCode : t_StatusCode --> t_RawStatusCode &
     conv_RawStatusCode_To_StatusCode : t_RawStatusCode --> t_StatusCode & /* Possible precision loss */
 
-    conv_StatusCode_To_RawStatusCode(e_sc_ok)                = c_RawStatusCode_Good
+    conv_StatusCode_To_RawStatusCode(e_sc_ok)                = c_RawStatusCode_Good &
+    conv_StatusCode_To_RawStatusCode(e_sc_uncertain_generic) = c_RawStatusCode_Uncertain
 
 OPERATIONS
 

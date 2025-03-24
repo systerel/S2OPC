@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 09/12/2024 17:07:43
+ Date                 : 24/03/2025 16:18:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -125,7 +125,8 @@ void call_method_mgr__treat_one_method_call(
             &call_method_mgr__l_arguments_out);
          constants_statuscodes_bs__getall_conv_RawStatusCode_To_StatusCode(call_method_mgr__l_rawStatusCode,
             call_method_mgr__StatusCode);
-         if ((*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) &&
+         if (((*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) ||
+            (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_uncertain_generic)) &&
             (call_method_mgr__l_nb_out > 0)) {
             msg_call_method_bs__set_CallMethod_Res_OutputArgument(call_method_mgr__p_res_msg,
                call_method_mgr__p_callMethod,

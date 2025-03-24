@@ -186,7 +186,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
         // Note: normally used for input arguments but it is the better match and should not occur
         *address_space_bs__p_rawStatusCode = OpcUa_BadTooManyArguments;
     }
-    if (SOPC_IsGoodStatus(*address_space_bs__p_rawStatusCode))
+    if (SOPC_IsGoodOrUncertainStatus(*address_space_bs__p_rawStatusCode))
     {
         *address_space_bs__p_nb_out = (int32_t) noOfOutput;
         *address_space_bs__p_out_arguments = outputArgs;

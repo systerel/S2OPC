@@ -139,7 +139,7 @@ LOCAL_OPERATIONS
                 CallMethodRes_AllocatedInputArgumentResult(p_callMethod) = size(CallMethod_InputArguments(p_callMethod)) &
                 size(CallMethodRes_InputArgumentResult(p_callMethod)) = size(CallMethod_InputArguments(p_callMethod))
             ) &
-            ( StatusCode /= e_sc_ok
+            ( (StatusCode /= e_sc_ok & StatusCode /= e_sc_uncertain_generic)
                 =>
                 CallMethodRes_NbOutputArguments(p_callMethod) = 0 &
                 CallMethodRes_OutputArguments(p_callMethod) = {}
@@ -337,7 +337,7 @@ OPERATIONS
             l_method_call_pointer <-- read_CallMethod_Pointer (p_req_msg, p_callMethod);
             l_rawStatusCode, l_nb_out, l_arguments_out <-- exec_callMethod(p_endpoint_config_idx, l_method_call_pointer);
             StatusCode <-- getall_conv_RawStatusCode_To_StatusCode(l_rawStatusCode);
-            IF StatusCode  = e_sc_ok & l_nb_out > 0 THEN
+            IF (StatusCode  = e_sc_ok or StatusCode = e_sc_uncertain_generic) & l_nb_out > 0 THEN
                 set_CallMethod_Res_OutputArgument (p_res_msg, p_callMethod, l_nb_out, l_arguments_out)
             END
         END

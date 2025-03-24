@@ -1023,6 +1023,12 @@ constants_statuscodes_bs__t_StatusCode_i util_return_status__C_to_status_code_B(
 
 void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__t_StatusCode_i* bstatus)
 {
+    /*
+     * Important note: Good* and Uncertain* statuses shall always be translated
+     *                 to normalized enum value (e_sc_ok / e_sc_uncertain_generic)
+     *                 to ensure expected behavior with current B model.
+     *                 Otherwise model shall be updated (e.g. see treat_one_method_call)
+     */
     switch (status)
     {
     case OpcUa_BadInternalError:
