@@ -95,10 +95,11 @@ OPERATIONS
 
     add_session(p_session, p_is_client, p_timeref) =
     PRE
-        p_session : t_session_i &
-        p_session : t_session   &
-        p_is_client : BOOL      &
-        p_timeref : t_timeref_i &
+        p_session : t_session_i    &
+        p_session : t_session      &
+        p_session /: dom(a_state)  &
+        p_is_client : BOOL         &
+        p_timeref : t_timeref_i    &
         p_timeref : t_timeref
     THEN
         a_state(p_session) := e_session_init ||
@@ -112,7 +113,8 @@ OPERATIONS
     remove_session(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : t_session
+        p_session : t_session   &
+        p_session : dom(a_state)
     THEN
         a_state   := {p_session} <<| a_state ||
         s_client_session := s_client_session - {p_session} ||
