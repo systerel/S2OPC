@@ -28,7 +28,6 @@ SEES
     channel_mgr
 
 ABSTRACT_VARIABLES
-    s_session,
     a_session_roles,
     s_client_session,
     a_state,
@@ -43,7 +42,6 @@ ABSTRACT_VARIABLES
     a_server_client_cert_tb
 
 INVARIANT
-    s_session         <: t_session                            &
     a_session_roles    : t_session +-> t_sessionRoles         &
     s_client_session  <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
@@ -58,7 +56,6 @@ INVARIANT
     a_server_client_cert_tb : t_session +-> t_CertThumbprint
 
 INITIALISATION
-    s_session          := {} ||
     a_session_roles    := {} ||
     s_client_session   := {} ||
     a_state            := {} ||
@@ -104,7 +101,6 @@ OPERATIONS
         p_timeref : t_timeref_i &
         p_timeref : t_timeref
     THEN
-        s_session := s_session \/ {p_session} ||
         a_state(p_session) := e_session_init ||
         IF p_is_client = TRUE THEN
             s_client_session := s_client_session \/ {p_session}
@@ -118,7 +114,6 @@ OPERATIONS
         p_session : t_session_i &
         p_session : t_session
     THEN
-        s_session := s_session - {p_session} ||
         a_state   := {p_session} <<| a_state ||
         s_client_session := s_client_session - {p_session} ||
         a_session_init_time := {p_session} <<| a_session_init_time
@@ -167,7 +162,7 @@ OPERATIONS
     PRE
         session : t_session_i
     THEN
-        ret :=  bool(session : s_session)
+        ret :=  bool(session : dom(a_state))
     END
     ;
 
@@ -191,8 +186,8 @@ OPERATIONS
 
     set_session_state_1(p_session, p_state) =
     PRE
-        p_session : t_session_i  &
-        p_session : dom(a_state) &
+        p_session : t_session_i      &
+        p_session : dom(a_state)     &
         p_state   : t_sessionState_i &
         p_state   : t_sessionState
     THEN
@@ -251,8 +246,8 @@ OPERATIONS
 
     channel <-- get_session_channel (session) =
     PRE
-        session : t_session_i &
-        session : s_session &
+        session : t_session_i  &
+        session : dom(a_state) &
         session : dom(a_channel)
     THEN
         channel :(channel : t_channel_i &
@@ -309,7 +304,7 @@ OPERATIONS
     set_session_to_create(p_session, p_channel_config_idx) =
     PRE
         p_session            : t_session_i            &
-        p_session            : s_session              &
+        p_session            : dom(a_state)           &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx
     THEN
@@ -488,7 +483,7 @@ OPERATIONS
 
     p_nb_sessions <-- get_card_s_session =
     BEGIN
-        p_nb_sessions := card(s_session)
+        p_nb_sessions := card(a_state)
     END
 
 END

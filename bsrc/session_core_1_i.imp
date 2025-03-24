@@ -96,6 +96,9 @@ PROMOTES
     sign_user_token,
     get_session_roles
 
+INVARIANT
+    s_session = dom(a_state)
+
 LOCAL_OPERATIONS
 
     l_set_session_state(p_session, p_state, is_client) =
