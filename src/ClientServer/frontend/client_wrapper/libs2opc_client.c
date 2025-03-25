@@ -595,13 +595,18 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
                                                                     SOPC_SecureConnection_Config* secConnConfig,
                                                                     void* request,
                                                                     void** response,
-                                                                    uintptr_t userContext)
+                                                                    uintptr_t userContext,
+                                                                    SOPC_ServiceAsyncResp_Fct* asyncRespCb)
 {
     bool requestSentToServices = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
     SOPC_StaMac_ReqCtx* smReqCtx = NULL;
-
+    SOPC_ServiceAsyncResp_Fct* customAsyncRespCb = asyncRespCb;
+    if (NULL == customAsyncRespCb)
+    {
+        customAsyncRespCb = sopc_client_helper_config.asyncRespCb;
+    }
     if (NULL == secConnConfig || NULL == request || (isSynchronous && NULL == response))
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -619,7 +624,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
 
         // Check connection is valid and is not already created
         if (!SOPC_ClientHelperInternal_CheckConnectionValid(pConfig, secConnConfig) ||
-            (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
+            (!isSynchronous && NULL == customAsyncRespCb))
         {
             status = SOPC_STATUS_INVALID_STATE;
         }
@@ -654,8 +659,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             }
             else
             {
-                reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(
-                    res->secureConnectionIdx, true, sopc_client_helper_config.asyncRespCb, userContext);
+                reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(res->secureConnectionIdx, true,
+                                                                         customAsyncRespCb, userContext);
             }
             if (NULL == smReqCtx || NULL == reqCtx)
             {
@@ -730,14 +735,22 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_
                                                           void* request,
                                                           uintptr_t userContext)
 {
-    return SOPC_ClientHelperInternal_DiscoveryService(false, secConnConfig, request, NULL, userContext);
+    return SOPC_ClientHelperInternal_DiscoveryService(false, secConnConfig, request, NULL, userContext, NULL);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsyncCustom(SOPC_SecureConnection_Config* secConnConfig,
+                                                                void* request,
+                                                                uintptr_t userContext,
+                                                                SOPC_ServiceAsyncResp_Fct* asyncRespCb)
+{
+    return SOPC_ClientHelperInternal_DiscoveryService(false, secConnConfig, request, NULL, userContext, asyncRespCb);
 }
 
 SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
                                                          void* request,
                                                          void** response)
 {
-    return SOPC_ClientHelperInternal_DiscoveryService(true, secConnConfig, request, response, 0);
+    return SOPC_ClientHelperInternal_DiscoveryService(true, secConnConfig, request, response, 0, NULL);
 }
 
 SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secConnConfig,
@@ -1045,19 +1058,25 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
                                                            SOPC_ClientConnection* secureConnection,
                                                            void* request,
                                                            void** response,
-                                                           uintptr_t userContext)
+                                                           uintptr_t userContext,
+                                                           SOPC_ServiceAsyncResp_Fct* asyncRespCb)
 {
     SOPC_StaMac_Machine* pSM = NULL;
     SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
 
     bool requestSentToServices = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ServiceAsyncResp_Fct* customAsyncRespCb = asyncRespCb;
+    if (NULL == customAsyncRespCb)
+    {
+        customAsyncRespCb = sopc_client_helper_config.asyncRespCb;
+    }
     if (NULL == secureConnection || NULL == request)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (isSynchronous && NULL == response)
+    if (isSynchronous && (NULL == response || NULL != asyncRespCb))
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1075,7 +1094,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
         status = SOPC_ClientHelperInternal_FilterService(secureConnection, request);
 
         if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx] ||
-            (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
+            (!isSynchronous && NULL == customAsyncRespCb))
         {
             status = SOPC_STATUS_INVALID_STATE;
         }
@@ -1092,8 +1111,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
             }
             else
             {
-                reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(
-                    secureConnection->secureConnectionIdx, false, sopc_client_helper_config.asyncRespCb, userContext);
+                reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(secureConnection->secureConnectionIdx, false,
+                                                                         customAsyncRespCb, userContext);
             }
             if (NULL == reqCtx)
             {
@@ -1151,12 +1170,20 @@ SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureCo
                                                  void* request,
                                                  uintptr_t userContext)
 {
-    return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext);
+    return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext, NULL);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsyncCustom(SOPC_ClientConnection* secureConnection,
+                                                       void* request,
+                                                       uintptr_t userContext,
+                                                       SOPC_ServiceAsyncResp_Fct* asyncRespCb)
+{
+    return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext, asyncRespCb);
 }
 
 SOPC_ReturnStatus SOPC_ClientHelper_ServiceSync(SOPC_ClientConnection* secureConnection, void* request, void** response)
 {
-    return SOPC_ClientHelperInternal_Service(true, secureConnection, request, response, 0);
+    return SOPC_ClientHelperInternal_Service(true, secureConnection, request, response, 0, NULL);
 }
 
 struct SOPC_ClientHelper_Subscription

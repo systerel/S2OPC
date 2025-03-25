@@ -124,6 +124,16 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_
                                                           uintptr_t userContext);
 
 /**
+ * \brief Same as ::SOPC_ClientHelper_DiscoveryServiceAsync but with a custom callback for receiving response.
+ *        The \p asyncRespCb callback is used instead of the one configured with
+ *        ::SOPC_ClientConfigHelper_SetServiceAsyncResponse
+ */
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsyncCustom(SOPC_SecureConnection_Config* secConnConfig,
+                                                                void* request,
+                                                                uintptr_t userContext,
+                                                                SOPC_ServiceAsyncResp_Fct* asyncRespCb);
+
+/**
  * \brief Sends a discovery request without user session creation and activation and retrieve response synchronously.
  *
  * \param secConnConfig  The secure connection configuration.
@@ -251,6 +261,16 @@ SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureCo
                                                  uintptr_t userContext);
 
 /**
+ * \brief Same as ::SOPC_ClientHelper_ServiceAsync but with a custom callback for receiving response.
+ *        The \p asyncRespCb callback is used instead of the one configured with
+ *        ::SOPC_ClientConfigHelper_SetServiceAsyncResponse
+ */
+SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsyncCustom(SOPC_ClientConnection* secureConnection,
+                                                       void* request,
+                                                       uintptr_t userContext,
+                                                       SOPC_ServiceAsyncResp_Fct* asyncRespCb);
+
+/**
  * \brief Executes an OPC UA service on server (read, write, browse, discovery service, etc.) synchronously.
  *
  * \note ::SOPC_ClientHelper_Connect shall have been called
@@ -294,7 +314,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureCo
  *
  * \note The provided \p request memory is managed by the function after this call (even in case of error)
  *       and shall not be accessed nor freed after call.
- * \note Caller is responsible of output response memory after successful call. E.g. use ::SOPC_EncodeableObject_Delete.
+ * \note Caller is responsible of output response memory after successful call. E.g. use
+ * ::SOPC_EncodeableObject_Delete.
  *
  * \warning service synchronous call shall only be called from the application thread and shall not be called from
  * client callbacks used for asynchronous response, connections event, etc. (::SOPC_ServiceAsyncResp_Fct,
