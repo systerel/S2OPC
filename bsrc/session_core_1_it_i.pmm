@@ -1,0 +1,31 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+THEORY User_Pass IS
+/* 1 lemmes */  Operation(continue_iter_session) & Pattern( bool(1<=a-1) = bool(not(b = {c(a)})) ) & ff(0) & dd & ar(th_eh_ident) & ar(th_iter) & mp & pr(Tac(th_iter));
+/* 1 lemmes */  Operation(continue_iter_session) & Pattern( a(b): c ) & ff(0) & pr(Tac(th_iter));
+/* 1 lemmes */  Operation(continue_iter_session) & Pattern( a[1..b-1] = c-{a(b)} ) & ff(0) & ar(th_eh_hyp_loc;SUB) & pr(Tac(th_iter));
+/* 1 lemmes */  Operation(continue_iter_session) & Pattern( a(b): c ) & ff(0) & pp(rt.1);
+/* 1 lemmes */  Operation(init_iter_session) & Pattern( bool(1<=a) = bool(not(b = {})) ) & ff(0) & ar(th_eh_hyp_loc;SUB) & pr(Tac(th_iter));
+/* 1 lemmes */  Operation(init_iter_session) & Pattern( a[1..b] = c ) & ff(0) & ar(th_eh_hyp_loc;SUB) & pr(Tac(th_iter));
+/* 1 lemmes */  Operation(init_iter_session) & Pattern( a: 0..size(b) ) & ff(0) & ar(th_eh_hyp_loc;SUB) & pr(Tac(th_iter));
+/* 1 lemmes */  Operation(init_iter_session) & Pattern( card(a) <= b ) & ff(0) & dd & ar(th_iter);
+/* pp */
+qu
+END
