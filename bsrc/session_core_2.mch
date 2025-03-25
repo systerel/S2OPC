@@ -413,17 +413,17 @@ OPERATIONS
     p_localeIds <-- reset_server_session_preferred_locales(p_session) =
     PRE
         p_session            : t_session_i &
-        p_session            : t_session
+        p_session            : t_session &
+        p_session            : dom(a_server_client_locales)
     THEN
         /* Retrieve recorded localeIds if not the empty one (constant value) and reset to empty one */
         p_localeIds,
         a_server_client_locales
         :(p_localeIds : t_LocaleIds_i &
-          a_server_client_locales : t_session --> t_LocaleIds &
+          a_server_client_locales : t_session +-> t_LocaleIds &
           (a_server_client_locales$0(p_session) = c_LocaleIds_empty => p_localeIds = c_LocaleIds_indet) &
           (a_server_client_locales$0(p_session) /= c_LocaleIds_empty => p_localeIds = a_server_client_locales$0(p_session)) &
-          {p_session} <<| a_server_client_locales = {p_session} <<| a_server_client_locales$0 &
-          {p_session} <| a_server_client_locales = {p_session |-> c_LocaleIds_empty})
+          a_server_client_locales = a_server_client_locales$0 <+ {p_session |-> c_LocaleIds_empty})
     END
     ;
 
