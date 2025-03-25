@@ -123,7 +123,7 @@ static SOPC_ReturnStatus wait_service_response(void)
 }
 
 // Asynchronous service response callback
-static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* response, uintptr_t appContext)
+static void SOPC_Client_GenAsyncRespCb(SOPC_EncodeableType* encType, const void* response, uintptr_t appContext)
 {
     if (encType == &OpcUa_ReadResponse_EncodeableType)
     {
@@ -145,11 +145,36 @@ static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* re
     }
     else if (encType == &OpcUa_WriteResponse_EncodeableType)
     {
-        // Check context value is same as one provided with request
-        SOPC_ASSERT(1 == appContext);
-        printf(">>Test_Client_Toolkit: received WriteResponse \n");
-        const OpcUa_WriteResponse* writeResp = (const OpcUa_WriteResponse*) response;
-        test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+        // Unexpected: managed by custom write callback
+        SOPC_ASSERT(false);
+    }
+    else if (encType == &OpcUa_GetEndpointsResponse_EncodeableType)
+    {
+        // Unexpected: managed by custom discovery callback
+        SOPC_ASSERT(false);
+    }
+    else if (encType == &OpcUa_ServiceFault_EncodeableType)
+    {
+        printf(">>Test_Client_Toolkit: received ServiceFault \n");
+        const OpcUa_ServiceFault* serviceFaultResp = (const OpcUa_ServiceFault*) response;
+        test_results_set_service_result(OpcUa_BadServiceUnsupported == appContext &&
+                                        OpcUa_BadServiceUnsupported == serviceFaultResp->ResponseHeader.ServiceResult);
+    }
+}
+
+static void SOPC_Client_AsyncRespDiscoveryCustomCb(SOPC_EncodeableType* encType,
+                                                   const void* response,
+                                                   uintptr_t appContext)
+{
+    if (encType == &OpcUa_ReadResponse_EncodeableType)
+    {
+        // Unexpected: managed by generic callback
+        SOPC_ASSERT(false);
+    }
+    else if (encType == &OpcUa_WriteResponse_EncodeableType)
+    {
+        // Unexpected: managed by custom write callback
+        SOPC_ASSERT(false);
     }
     else if (encType == &OpcUa_GetEndpointsResponse_EncodeableType)
     {
@@ -175,6 +200,34 @@ static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* re
         }
 
         SOPC_Atomic_Int_Add(&getEndpointsReceived, validEndpoints ? 1 : 0);
+    }
+    else if (encType == &OpcUa_ServiceFault_EncodeableType)
+    {
+        printf(">>Test_Client_Toolkit: received ServiceFault \n");
+        const OpcUa_ServiceFault* serviceFaultResp = (const OpcUa_ServiceFault*) response;
+        test_results_set_service_result(OpcUa_BadServiceUnsupported == appContext &&
+                                        OpcUa_BadServiceUnsupported == serviceFaultResp->ResponseHeader.ServiceResult);
+    }
+}
+
+// Asynchronous service response callback
+static void SOPC_Client_AsyncRespWriteCustomCb(SOPC_EncodeableType* encType, const void* response, uintptr_t appContext)
+{
+    if (encType == &OpcUa_ReadResponse_EncodeableType)
+    {
+        SOPC_ASSERT(false); // managed by generic callback
+    }
+    else if (encType == &OpcUa_WriteResponse_EncodeableType)
+    {
+        // Check context value is same as one provided with request
+        SOPC_ASSERT(1 == appContext);
+        printf(">>Test_Client_Toolkit: received WriteResponse \n");
+        const OpcUa_WriteResponse* writeResp = (const OpcUa_WriteResponse*) response;
+        test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+    }
+    else if (encType == &OpcUa_GetEndpointsResponse_EncodeableType)
+    {
+        SOPC_ASSERT(false); // managed by discovery custom callback
     }
     else if (encType == &OpcUa_ServiceFault_EncodeableType)
     {
@@ -813,7 +866,7 @@ int main(void)
     // Set asynchronous response callback
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_Client_AsyncRespCb);
+        status = SOPC_ClientConfigHelper_SetServiceAsyncResponse(&SOPC_Client_GenAsyncRespCb);
     }
 
     // Set an address space for test purpose only to check test result valid (not expected in a client)
@@ -842,7 +895,8 @@ int main(void)
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_ClientHelper_DiscoveryServiceAsync(reverseSecureConnConfig, getGetEndpoints_message(), 1);
+            status = SOPC_ClientHelper_DiscoveryServiceAsyncCustom(reverseSecureConnConfig, getGetEndpoints_message(),
+                                                                   1, &SOPC_Client_AsyncRespDiscoveryCustomCb);
         }
         printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
     }
@@ -908,7 +962,8 @@ int main(void)
         test_results_set_WriteRequest(pWriteReqCopy);
 
         // Use 1 as write request context
-        status = SOPC_ClientHelper_ServiceAsync(secureConnections[1], pWriteReqSent, 1);
+        status = SOPC_ClientHelper_ServiceAsyncCustom(secureConnections[1], pWriteReqSent, 1,
+                                                      &SOPC_Client_AsyncRespWriteCustomCb);
         printf(">>Test_Client_Toolkit: write request sending\n");
     }
 
