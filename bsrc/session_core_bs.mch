@@ -281,8 +281,7 @@ OPERATIONS
             (p_bres = TRUE
              =>
              a_NonceServer(p_session) : t_Nonce &
-             {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
-             p_nonce = a_NonceServer(p_session)) &
+             a_NonceServer = a_NonceServer$0 <+ {p_session |-> p_nonce}) &
             (p_bres = FALSE
              =>
              a_NonceServer = a_NonceServer$0 &
