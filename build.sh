@@ -66,6 +66,9 @@ else
     append_cmake_option S2OPC_NODE_MANAGEMENT
     append_cmake_option S2OPC_EVENT_MANAGEMENT
     append_cmake_option CMAKE_TOOLCHAIN_FILE
+    append_cmake_option CMAKE_PREFIX_PATH
+    append_cmake_option expat_DIR
+    append_cmake_option MbedTLS_DIR
     append_cmake_option BUILD_SHARED_LIBS
     append_cmake_option CMAKE_INSTALL_PREFIX
     append_cmake_option WITH_ASAN
