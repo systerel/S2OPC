@@ -25,6 +25,13 @@ if(@expat_FOUND@)
   find_dependency(expat)
 endif()
 
+# Trigger find_package(MbedTLS ...) when using find_package(s2opc CONFIG)
+# Note: MbedTLS_FOUND is never defined here for unknown reason, use our internal which is
+if(@S2OPC_CRYPTO_MBEDTLS@)
+  include(CMakeFindDependencyMacro)
+  find_dependency(MbedTLS)
+endif()
+
 if(@eclipse-paho-mqtt-c_FOUND@)
   include(CMakeFindDependencyMacro)
   find_dependency(eclipse-paho-mqtt-c)

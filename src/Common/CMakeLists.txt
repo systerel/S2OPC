@@ -15,7 +15,11 @@ include (CheckTypeSize)
 if (S2OPC_CRYPTO_CYCLONE)
   find_package(CYCLONE_CRYPTO REQUIRED)
 elseif(S2OPC_CRYPTO_MBEDTLS)
-  find_package(MBEDTLS REQUIRED)
+  find_package(MbedTLS)
+  if(NOT MbedTLS_FOUND)
+    # When MODULE mode failed, try CONFIG mode
+    find_package(MbedTLS REQUIRED CONFIG)
+  endif()
 endif()
 
 ### Compilation of S2OPC common library source files ###
@@ -44,7 +48,7 @@ endif()
 if (S2OPC_CRYPTO_CYCLONE)
   list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES cyclone_crypto cyclone_common)
 elseif(S2OPC_CRYPTO_MBEDTLS)
-  list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES mbedtls mbedx509 mbedcrypto)
+  list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES MbedTLS::mbedtls MbedTLS::mbedx509 MbedTLS::mbedcrypto)
   # Fix static linking not working on windows with bcrypt
   if(WIN32)
     list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES bcrypt)
