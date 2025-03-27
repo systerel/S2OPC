@@ -29,6 +29,7 @@
 #include "sopc_certificate_group_itf.h"
 #include "sopc_key_cert_pair.h"
 #include "sopc_key_manager.h"
+#include "sopc_toolkit_config.h"
 #include "sopc_trustlist.h"
 
 #define SOPC_CERT_GRP_MIN_KEY_SIZE 2048
@@ -167,7 +168,7 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
                                                         const SOPC_String* pSubjectName,
                                                         const bool bRegeneratePrivateKey,
                                                         SOPC_ByteString* pCertificateRequest,
-                                                        const uint32_t endpointConfigIdx);
+                                                        SOPC_EndpointConfigIdx endpointConfigIdx);
 
 /**
  * \brief Update the new key-cert pair (TrustList is used to validate the new certificate instead
@@ -186,7 +187,7 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
  */
 SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroupCtx,
                                                    const SOPC_ByteString* pCertificate,
-                                                   const uint32_t endpointConfigIdx);
+                                                   SOPC_EndpointConfigIdx endpointConfigIdx);
 
 /**
  * \brief Export the new key-cert pair to the file system.

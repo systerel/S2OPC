@@ -55,7 +55,6 @@
 #include "sopc_push_server_config_itf.h"
 #include "sopc_threads.h"
 #include "sopc_toolkit_async_api.h"
-#include "sopc_user_app_itf.h"
 
 #define DEMO_PUSH_M_TO_MS 60000
 #define SLEEP_LENGTH_MS 50

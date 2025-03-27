@@ -33,6 +33,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_toolkit_config.h"
 
 SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* callContextPtr,
                                                     const SOPC_NodeId* objectId,
@@ -121,7 +122,7 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
                                "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: unable to create a variant", cStrId);
         return OpcUa_BadUnexpectedError;
     }
-    const uint32_t endpointConfigIdx = SOPC_CallContext_GetEndpointConfigIdx(callContextPtr);
+    SOPC_EndpointConfigIdx endpointConfigIdx = SOPC_CallContext_GetEndpointConfigIdx(callContextPtr);
     /* Update the new key-cert pair (TrustList is used to validate the new certificate instead of using the given
      * issuers, see mantis #0009247 - https://mantis.opcfoundation.org/view.php?id=9247)*/
     statusCode = CertificateGroup_UpdateCertificate(pGroupCtx, &inputArgs[2].Value.Bstring, endpointConfigIdx);
@@ -279,7 +280,7 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
                                cStrId);
         return OpcUa_BadUnexpectedError;
     }
-    const uint32_t endpointConfigIdx = SOPC_CallContext_GetEndpointConfigIdx(callContextPtr);
+    SOPC_EndpointConfigIdx endpointConfigIdx = SOPC_CallContext_GetEndpointConfigIdx(callContextPtr);
     pVariant->ArrayType = SOPC_VariantArrayType_SingleValue;
     pVariant->BuiltInTypeId = SOPC_ByteString_Id;
     SOPC_ByteString_Initialize(&pVariant->Value.Bstring);

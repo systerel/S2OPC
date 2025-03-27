@@ -40,6 +40,8 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config_internal.h"
 
+#include "libs2opc_common_config.h"
+
 /*---------------------------------------------------------------------------
  *                             Global variables
  *---------------------------------------------------------------------------*/
@@ -589,7 +591,7 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
                                                         const SOPC_String* pSubjectName,
                                                         const bool bRegeneratePrivateKey,
                                                         SOPC_ByteString* pCertificateRequest,
-                                                        const uint32_t endpointConfigIdx)
+                                                        SOPC_EndpointConfigIdx endpointConfigIdx)
 {
     SOPC_ASSERT(NULL != pGroupCtx);
     SOPC_ASSERT(NULL != pGroupCtx->pCertificateTypeValueId);
@@ -954,7 +956,7 @@ SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext*
 
 SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroupCtx,
                                                    const SOPC_ByteString* pCertificate,
-                                                   const uint32_t endpointConfigIdx)
+                                                   SOPC_EndpointConfigIdx endpointConfigIdx)
 {
     SOPC_ASSERT(NULL != pGroupCtx);
     SOPC_ASSERT(NULL != pGroupCtx->pCertificateTypeValueId);
