@@ -42,11 +42,12 @@ set(S2OPC_CLIENTSERVER_PUBLIC_INCLUDES
 )
 
 set(S2OPC_CLIENTSERVER_PRIVATE_INCLUDES
-    "sockets"
-    "secure_channels"
-    "services"
-    "services/bgenc"
-    "services/b2c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/address_space/internal"
+    "${CMAKE_CURRENT_SOURCE_DIR}/sockets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/secure_channels"
+    "${CMAKE_CURRENT_SOURCE_DIR}/services"
+    "${CMAKE_CURRENT_SOURCE_DIR}/services/bgenc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/services/b2c"
 )
 
 # define S2OPC wrappers source files
@@ -136,7 +137,7 @@ target_include_directories(s2opc_clientserver
   $<INSTALL_INTERFACE:include/s2opc/clientserver> # when installed
   PRIVATE
   ${S2OPC_CLIENTSERVER_PRIVATE_INCLUDES}
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/internal;${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}/internal>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${COMMONWRAPPER_PATH}/internal;${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/internal;${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}/internal>"
   "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PRIVATE_INCLUDES}>")
 
 ### Installation and export of S2OPC client/server toolkit library ###
