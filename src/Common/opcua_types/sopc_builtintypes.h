@@ -1025,7 +1025,7 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString);
  * \param free_keys True if the dictionary is responsible for deleting keys on element removal
  * \param value_free The Free function for deleted elements. (Can be null if no deletion is required)
  */
-SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free);
+SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct* value_free);
 
 /**
  * \brief Deprecated: use SOPC_NODEID_NS0_NUMERIC instead

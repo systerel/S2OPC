@@ -726,7 +726,7 @@ OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_Create(double re
  *
  * \return a new allocated CreateMonitoredItems request in case of success, NULL otherwise.
  */
-OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefault(const uint32_t subscriptionId,
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefault(uint32_t subscriptionId,
                                                                                   size_t nbMonitoredItems,
                                                                                   const SOPC_NodeId* nodeIdsToMonitor,
                                                                                   OpcUa_TimestampsToReturn ts);
