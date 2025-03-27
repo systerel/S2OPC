@@ -145,8 +145,6 @@ foreach(dir ${S2OPC_CLIENTSERVER_PUBLIC_INCLUDES})
     file(GLOB temp_files "${dir}/*.h")
     list(APPEND S2OPC_CLIENTSERVER_INCLUDE_FILES ${temp_files})
 endforeach()
-# Exclude internal headers
-list(FILTER S2OPC_CLIENTSERVER_INCLUDE_FILES EXCLUDE REGEX ".*internal.*\.h")
 list(APPEND S2OPC_CLIENTSERVER_INCLUDE_FILES "${WRAPPERS_INCLUDE_FILES}")
 
 # set public header property
