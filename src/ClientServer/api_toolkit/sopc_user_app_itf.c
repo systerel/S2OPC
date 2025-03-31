@@ -95,7 +95,7 @@ void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
         SOPC_Free(config->serverKeyPath);
         SOPC_Free(config->serverPkiPath);
     }
-    for (int i = 0; i < config->nbEndpoints; i++)
+    for (int i = 0; !config->doNotClear && i < config->nbEndpoints; i++)
     {
         SOPC_EndpointConfig_Clear(&config->endpoints[i], config->freeCstringsFlag);
     }

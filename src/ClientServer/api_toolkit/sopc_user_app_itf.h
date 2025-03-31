@@ -340,6 +340,8 @@ struct SOPC_Server_Config
                              code) */
     bool serverKeyEncrypted;         /**< Boolean to indicate if the private key is encrypted */
     char* serverPkiPath;             /**< Temporary path to the server public key infrastructure */
+    bool doNotClear;                 /**< Flag to indicate endpoints shall not be cleared at this level
+                                          (in case of high-level API management) */
     uint8_t nbEndpoints;             /**< Number of endpoints defined by the server */
     SOPC_Endpoint_Config* endpoints; /**< Endpoint configuration array */
 

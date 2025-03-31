@@ -216,7 +216,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_ConfigureFromXML(const char* serverCon
     if (NULL != serverConfigPath)
     {
         res &= SOPC_HelperInternal_LoadServerConfigFromFile(serverConfigPath);
-        // "Transfer" endpoints from low level S2OPC server config to high level one
+        // Copy endpoints from low level S2OPC server config to high level one
         // Note: in the future we should modify low level representation instead
         for (uint8_t i = 0; i < pConfig->serverConfig.nbEndpoints; i++)
         {
@@ -234,9 +234,8 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_ConfigureFromXML(const char* serverCon
                 res = false;
             }
         }
-        SOPC_Free(pConfig->serverConfig.endpoints);
-        pConfig->serverConfig.endpoints = NULL;
-        pConfig->serverConfig.nbEndpoints = 0;
+        // Forbid low level to clear those endpoints (managed in high level config)
+        pConfig->serverConfig.doNotClear = true;
     }
     /* AddressSpace XML config */
     if (NULL != addressSpaceConfigPath)

@@ -54,7 +54,7 @@ static SOPC_ReturnStatus check_security_combination(char* securityPolicy,
                                                     OpcUa_UserTokenType TokenType)
 {
     // Initialize Server configuration variable
-    SOPC_Server_Config sConfig;
+    SOPC_Server_Config sConfig = {0};
     sConfig.nbEndpoints = 1;
     SOPC_Endpoint_Config epConfig;
     epConfig.serverConfigPtr = &sConfig;
