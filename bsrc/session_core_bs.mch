@@ -720,9 +720,7 @@ OPERATIONS
     server_session_timeout_stop_timer (session) =
     PRE
         session : t_session_i &
-        session : t_session &
-        c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_create_resp
+        session : t_session
     THEN
         /* To be called when session closed */
         skip
