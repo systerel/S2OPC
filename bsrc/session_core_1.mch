@@ -107,6 +107,7 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : t_session &
+        p_session : dom(a_state) &
         a_state(p_session) = e_session_userActivated &
         p_roles : t_sessionRoles_i &
         p_roles : t_sessionRoles
