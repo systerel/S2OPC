@@ -210,7 +210,7 @@ OPERATIONS
                 s_session := s_session \/ {l_nsession} ||
                 a_state (l_nsession) := e_session_init ||
                 IF is_client = TRUE THEN
-                    s_client_session := s_client_session \/ {p_session}
+                    s_client_session := s_client_session \/ {l_nsession}
                 END ||
                 p_session := l_nsession
             END
