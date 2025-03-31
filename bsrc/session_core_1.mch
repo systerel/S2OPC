@@ -233,8 +233,7 @@ OPERATIONS
         a_server_user_auth_attempts :(
             a_server_user_auth_attempts : t_session +-> NAT &
             (is_client = FALSE =>
-                {session} <<| a_server_user_auth_attempts = {session} <<| a_server_user_auth_attempts$0 &
-                a_server_user_auth_attempts(session) = 0) &
+                a_server_user_auth_attempts = a_server_user_auth_attempts$0 <+ {session |-> 0}) &
             (is_client = TRUE =>
                 a_server_user_auth_attempts = a_server_user_auth_attempts$0))
     END
