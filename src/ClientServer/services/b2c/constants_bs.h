@@ -195,7 +195,6 @@ extern constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty;
 #define constants_bs__c_MdnsDiscoveryConfig_indet NULL
 extern const constants_bs__t_NodeId_i constants_bs__c_NamespaceMetadataType_NodeId;
 extern const constants_bs__t_QualifiedName_i constants_bs__c_NamespaceUri_QualifiedName;
-#define constants_bs__c_NamespaceUri_empty 0
 #define constants_bs__c_NodeAttributes_indet NULL
 #define constants_bs__c_NodeId_indet NULL
 #define constants_bs__c_Node_indet 0

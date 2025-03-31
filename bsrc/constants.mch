@@ -498,7 +498,6 @@ CONCRETE_CONSTANTS
     c_RegisteredServer2Info_indet,
     c_DataTypeDefinition_indet,
     c_ServerUri_empty,
-    c_NamespaceUri_empty,
     c_registerServer2_expiration_time,
 
     t_counter,
@@ -1221,8 +1220,6 @@ PROPERTIES
     t_DataTypeDefinition = t_DataTypeDefinition_i - {c_DataTypeDefinition_indet} &
 
     c_ServerUri_empty : t_ServerUri &
-
-    c_NamespaceUri_empty : t_NamespaceUri &
 
     c_registerServer2_expiration_time : NAT &
 
