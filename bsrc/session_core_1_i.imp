@@ -117,16 +117,16 @@ LOCAL_OPERATIONS
     l_delete_session_roles(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : dom(a_state)
+        p_session : t_session
     THEN
-        a_session_roles(p_session) := c_sessionRoles_indet
+        a_session_roles := {p_session} <<| a_session_roles
     END
     ;
 
     l_reset_server_session_preferred_locales(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : dom(a_state)
+        p_session : dom(a_server_client_locales)
     THEN
         a_server_client_locales(p_session) := c_LocaleIds_empty
     END
