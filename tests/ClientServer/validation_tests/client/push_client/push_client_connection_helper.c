@@ -78,6 +78,7 @@ SOPC_ReturnStatus SOPC_Create_Custom_Secure_Connection(const char* clientCertPat
         const char* password = getenv("TEST_PASSWORD_USER_SECUADMIN");
         if (NULL == password)
         {
+            printf("Error: TEST_PASSWORD_USER_SECUADMIN environment variable is not defined !\n");
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TEST_PASSWORD_USER_SECUADMIN not set!\n");
         }
         status =
