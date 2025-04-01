@@ -51,7 +51,8 @@ OpcUa_MessageSecurityMode SOPC_CallContext_GetSecurityMode(const SOPC_CallContex
 /** \brief Returns the security policy of the connection used to call the service */
 const char* SOPC_CallContext_GetSecurityPolicy(const SOPC_CallContext* callContextPtr);
 
-/** \brief Returns the server endpoint of the connection used to call the service */
+/** \brief Returns the server endpoint index (::SOPC_EndpointConfigIdx type)
+ *         of the connection used to call the service */
 uint32_t SOPC_CallContext_GetEndpointConfigIdx(const SOPC_CallContext* callContextPtr);
 
 /** \brief Get direct access to the address space.

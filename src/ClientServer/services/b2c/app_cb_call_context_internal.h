@@ -28,8 +28,8 @@ struct SOPC_CallContext
 {
     bool isCopy;
 
-    uint32_t secureChannelConfigIdx; // Only valid for client side
-    uint32_t endpointConfigIdx;      // Only valid for server side
+    uint32_t secureChannelConfigIdx; // Only valid for client side (type ::SOPC_SecureChannelConfigIdx)
+    uint32_t endpointConfigIdx;      // Only valid for server side (type ::SOPC_EndpointConfigIdx)
     OpcUa_MessageSecurityMode msgSecurityMode;
     const char* secuPolicyUri;
     SOPC_SessionId sessionId;

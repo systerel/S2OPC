@@ -37,7 +37,6 @@
 #include "sopc_threads.h"
 #include "sopc_time_reference.h"
 #include "sopc_toolkit_async_api.h"
-#include "sopc_toolkit_config.h"
 
 // Periodic timeout used to check for catch signal or for updating seconds shutdown counter
 #define UPDATE_TIMEOUT_MS 500

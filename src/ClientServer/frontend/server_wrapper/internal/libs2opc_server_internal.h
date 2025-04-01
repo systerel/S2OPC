@@ -35,6 +35,7 @@
 #include "sopc_address_space.h"
 #include "sopc_event_manager.h"
 #include "sopc_mutexes.h"
+#include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_user_app_itf.h"
 
@@ -128,8 +129,8 @@ typedef struct SOPC_ServerHelper_Config
     uint8_t nbEndpoints;
     SOPC_Endpoint_Config* endpoints[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS]; // we do not use config.endpoints to
                                                                                    // avoid pre-allocating structure
-    uint32_t* endpointIndexes; // array of endpoint indexes provided by toolkit
-    bool* endpointClosed;      // array of closed endpoint to keep track of endpoints notified closed by toolkit
+    SOPC_EndpointConfigIdx* endpointIndexes; // array of endpoint indexes provided by toolkit
+    bool* endpointClosed; // array of closed endpoint to keep track of endpoints notified closed by toolkit
 
     // Runtime variables
     SOPC_Server_RuntimeVariables runtimeVariables;

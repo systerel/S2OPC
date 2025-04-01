@@ -48,7 +48,7 @@
  *  \return Endpoint configuration at given index or NULL if
  *  index invalid or toolkit is not configured yet
  */
-SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx);
+SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(SOPC_EndpointConfigIdx epConfigIdx);
 
 /**
  *  \brief (SERVER SIDE ONLY) Record the given secure channel configuration in returned index
