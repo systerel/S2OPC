@@ -1,5 +1,5 @@
 @REM Uncomment or set variables to build without build_s2opc script
-@REM set EXPAT_DIR=%~dp0..\expat-2.7.0
+@REM set EXPAT_DIR=%~dp0..\expat-2.7.1
 @REM set EXPAT_INSTALL_DIR="%EXPAT_DIR%\install"
 @REM set VS_VERSION="Visual Studio 15 2017 Win64"
 @REM set CONFIG="Release"

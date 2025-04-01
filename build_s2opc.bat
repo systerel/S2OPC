@@ -9,11 +9,11 @@
 @IF not %ERRORLEVEL% == 0 exit /B
 @
 @REM Adapt path to extracted expat library CMakeLists.txt directory path
-@IF NOT DEFINED EXPAT_DIR (set EXPAT_DIR=%CURRENT_DIR%..\expat-2.7.0)
+@IF NOT DEFINED EXPAT_DIR (set EXPAT_DIR=%CURRENT_DIR%..\expat-2.7.1)
 @set EXPAT_INSTALL_DIR="%EXPAT_DIR%\install"
 @
 @REM Adapt path to extracted mbedtls library CMakeLists.txt directory path
-@IF NOT DEFINED MBEDTLS_DIR (set MBEDTLS_DIR=%CURRENT_DIR%..\mbedtls-3.6.2)
+@IF NOT DEFINED MBEDTLS_DIR (set MBEDTLS_DIR=%CURRENT_DIR%..\mbedtls-3.6.3)
 @set MBEDTLS_INSTALL_DIR="%MBEDTLS_DIR%\install"
 @IF not %ERRORLEVEL% == 0 exit /B
 @
