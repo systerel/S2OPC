@@ -31,7 +31,7 @@ set(USERS_DEMO_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Users_
 
 # Define a demo XML address space configuration
 if (NOT S2OPC_NANO_PROFILE)
-  if(NOT S2OPC_NODE_MANAGEMENT)
+  if(NOT S2OPC_NODE_MANAGEMENT AND NOT S2OPC_EVENT_MANAGEMENT)
     set(DEMO_ADDRESS_SPACE_XML_ORIGIN "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc.xml")
   else()
     set(DEMO_ADDRESS_SPACE_XML_ORIGIN "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_node_mgt.xml")
@@ -144,6 +144,23 @@ if (expat_FOUND AND NOT S2OPC_NANO_PROFILE)
     COMMAND ${CMAKE_COMMAND} -E copy ${SKS_DEMO_ADDRESS_SPACE_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 else()
   message(WARNING "Demo SKS server sks_demo_server executable will not be compiled since Expat library not available or Nano profile activated.")
+endif()
+
+if(expat_FOUND AND S2OPC_EVENT_MANAGEMENT)
+  add_executable(toolkit_demo_server_alarms
+    "demo_server_alarms/demo_server_alarms_mgr.c"
+    "demo_server_alarms/toolkit_demo_server_alarms.c")
+  target_include_directories(toolkit_demo_server_alarms PRIVATE demo_server)
+  target_link_libraries(toolkit_demo_server_alarms PRIVATE s2opc_clientserver)
+  target_compile_options(toolkit_demo_server_alarms PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(toolkit_demo_server_alarms PRIVATE ${S2OPC_DEFINITIONS})
+
+  add_custom_command(
+  TARGET toolkit_demo_server_alarms POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_demo_alarms.xml" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_Alarms_NodeSet.xml")
+  # note: rest of the necessary configuration files are provided by generic demo server target
+else()
+  message(WARNING "Demo server for ALARMS executable will not be compiled since Expat library not available or event management is not active.")
 endif()
 
 if (expat_FOUND)
