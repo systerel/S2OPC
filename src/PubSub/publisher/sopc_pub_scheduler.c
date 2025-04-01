@@ -1080,7 +1080,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
 {
     const char* address = SOPC_PubSubConnection_Get_Address(connection);
     SOPC_PubSubProtocol_Type protocol = SOPC_PubSub_Protocol_From_URI(address);
-    SOPC_Socket outSock;
+    SOPC_Socket outSock = NULL;
     SOPC_Socket_AddressInfo* outUDPaddr = NULL;
     bool allocSuccess = false;
     size_t hostnameLength = 0;

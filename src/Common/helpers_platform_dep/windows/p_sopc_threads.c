@@ -20,12 +20,12 @@
 #include <stdlib.h>
 #include <winerror.h>
 
+#include "p_sopc_threads.h"
+
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
-
-#include "p_sopc_threads.h"
 
 typedef HRESULT(WINAPI* pSetThreadDescription)(HANDLE, PCWSTR);
 
@@ -270,6 +270,17 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
     }
 
     return status;
+}
+
+SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
+                                                void* (*startFct)(void*),
+                                                void* startArgs,
+                                                int priority,
+                                                const char* taskName)
+{
+    // Windows doesn't support SCHED_FIFO or real time priority in a simple manner
+    (void) priority; // remove warning
+    return SOPC_Thread_Create(thread, startFct, startArgs, taskName);
 }
 
 SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread)
