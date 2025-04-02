@@ -1697,8 +1697,7 @@ OPERATIONS
 
     free_roles(p_in) =
     PRE
-        p_in : t_sessionRoles_i &
-        p_in : t_sessionRoles
+        p_in : t_sessionRoles_i
     THEN
         skip
     END
