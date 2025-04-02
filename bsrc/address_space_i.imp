@@ -782,6 +782,10 @@ OPERATIONS
             THEN
                 sc_addnode <-- addNode_AddressSpace_Object
                     (p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId)
+            ELSIF p_nodeClass = e_ncl_Method
+            THEN
+                sc_addnode <-- addNode_AddressSpace_Method
+                    (p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes)
             ELSE
                 // Unsupported for now => returns invalid node class
                 sc_addnode := e_sc_bad_node_class_invalid

@@ -244,6 +244,18 @@ void address_space_bs__addNode_AddressSpace_Object(
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 }
 
+void address_space_bs__addNode_AddressSpace_Method(
+    const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,
+    const constants__t_NodeId_i address_space_bs__p_refTypeId,
+    const constants__t_NodeId_i address_space_bs__p_newNodeId,
+    const constants__t_QualifiedName_i address_space_bs__p_browseName,
+    const constants__t_NodeClass_i address_space_bs__p_nodeClass,
+    const constants__t_NodeAttributes_i address_space_bs__p_nodeAttributes,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc_addnode)
+{
+    // TODO
+}
+
 void address_space_bs__addNode_check_valid_node_attributes_type(
     const constants__t_NodeClass_i address_space_bs__p_nodeClass,
     const constants__t_NodeAttributes_i address_space_bs__p_nodeAttributes,

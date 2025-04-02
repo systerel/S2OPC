@@ -21,7 +21,7 @@
 
  File Name            : address_space_authorization.h
 
- Date                 : 16/01/2025 17:54:25
+ Date                 : 02/04/2025 07:55:14
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -68,6 +68,7 @@ extern void address_space_authorization__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define address_space_authorization__addNode_AddressSpace_Method address_space_bs__addNode_AddressSpace_Method
 #define address_space_authorization__addNode_AddressSpace_Object address_space_bs__addNode_AddressSpace_Object
 #define address_space_authorization__addNode_AddressSpace_Variable address_space_bs__addNode_AddressSpace_Variable
 #define address_space_authorization__addNode_check_valid_node_attributes_type address_space_bs__addNode_check_valid_node_attributes_type

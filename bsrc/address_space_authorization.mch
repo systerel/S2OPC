@@ -1320,6 +1320,136 @@ OPERATIONS
     END
     ;
 
+    sc_addnode <-- addNode_AddressSpace_Method(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes) =
+    PRE
+        p_parentNid : t_ExpandedNodeId_i &
+        p_parentNid : dom(conv_ExpandedNodeId_NodeId) &
+        conv_ExpandedNodeId_NodeId(p_parentNid) : ran(a_NodeId) &
+        p_refTypeId : t_NodeId_i &
+        p_refTypeId : t_NodeId &
+        p_newNodeId : t_NodeId_i &
+        p_newNodeId : t_NodeId &
+        p_newNodeId /: ran(a_NodeId) &
+        p_browseName : t_QualifiedName_i &
+        p_browseName : t_QualifiedName &
+        p_nodeClass : t_NodeClass_i &
+        p_nodeClass = e_ncl_Method &
+        p_nodeAttributes : t_NodeAttributes_i &
+        p_nodeAttributes : t_NodeAttributes &
+        NodeAttributesType(p_nodeAttributes) = e_ncl_Method
+    THEN
+        sc_addnode,
+
+        s_Node,
+        a_NodeId,
+        a_NodeClass,
+        a_BrowseName,
+        a_DisplayName,
+        a_Executable,
+        a_UserExecutable,
+        Ref_HasTypeDefinition,
+        Reference_SourceNode,
+        Reference_ReferenceType,
+        Reference_TargetNode,
+        Reference_IsForward,
+        Node_RefIndexEnd,
+        RefIndex_Reference,
+        ParentNode
+        :(
+            sc_addnode : t_StatusCode_i &
+            sc_addnode : {e_sc_ok, e_sc_bad_node_attributes_invalid, e_sc_bad_out_of_memory, e_sc_bad_browse_name_duplicated,
+                          e_sc_bad_reference_not_allowed, e_sc_bad_type_definition_invalid} &
+            s_Node <: t_Node &
+
+            /* Attributes */
+            a_NodeId         : s_Node >-> t_NodeId        &
+            a_NodeClass      : s_Node --> t_NodeClass     &
+            a_BrowseName     : s_Node --> t_QualifiedName &
+            a_DisplayName    : s_Node --> t_LocalizedText &
+            a_Executable     : s_Node +-> BOOL &
+            a_UserExecutable : s_Node +-> BOOL &
+
+            Ref_HasTypeDefinition : s_Node +-> t_ExpandedNodeId &
+
+            Reference_SourceNode    : t_Reference +-> t_NodeId         &
+            Reference_ReferenceType : t_Reference +-> t_NodeId         &
+            Reference_TargetNode    : t_Reference +-> t_ExpandedNodeId &
+            Reference_IsForward     : t_Reference +-> BOOL             &
+
+            Node_RefIndexEnd        : s_Node     +-> t_RefIndex  &
+            RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
+
+            (sc_addnode = e_sc_ok =>
+                /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */
+
+                Node_RefIndexEnd$0        <: Node_RefIndexEnd &
+                RefIndex_Reference$0      <: RefIndex_Reference &
+                ParentNode$0 <: ParentNode &
+                /* Minimal added references is 2 references for parent / child relationship */
+                #(l_node, l_refIndex, l_ref, l_parentNode, l_refParentIndex, l_refParent).(
+                    (l_node : s_Node & l_node /: s_Node$0 &
+                        s_Node = s_Node$0 \/ {l_node}  &
+                        l_refIndex : t_RefIndex &
+                        l_ref = RefIndex_Reference(l_node |-> l_refIndex) & l_ref /: ran(RefIndex_Reference$0) &
+                        l_ref /: dom(Reference_SourceNode$0)    & l_ref : dom(Reference_SourceNode) &
+                        l_ref /: dom(Reference_ReferenceType$0) & l_ref : dom(Reference_ReferenceType) &
+                        l_ref /: dom(Reference_TargetNode$0)    & l_ref : dom(Reference_TargetNode) &
+                        l_ref /: dom(Reference_IsForward$0)     & l_ref : dom(Reference_IsForward)) &
+                    (
+                        a_NodeId = a_NodeId$0 \/ {(l_node |-> p_newNodeId)} &
+                        a_NodeClass = a_NodeClass$0 \/ {(l_node |-> p_nodeClass)}  &
+                        a_BrowseName = a_BrowseName$0 \/ {(l_node |-> p_browseName)} &
+                        dom(a_DisplayName) = dom(a_DisplayName$0) \/ {l_node} &
+                        dom(a_Executable) = dom(a_Executable$0) \/ {l_node} &
+                        dom(a_UserExecutable) = dom(a_UserExecutable$0) \/ {l_node} &
+
+                        (l_ref |-> p_newNodeId) : Reference_SourceNode &
+                        (l_ref |-> p_refTypeId) : Reference_ReferenceType &
+                        (l_ref |-> p_parentNid) : Reference_TargetNode &
+                        (l_ref |-> FALSE) : Reference_IsForward
+                    ) &
+                    (l_parentNode : s_Node$0 & a_NodeId(l_parentNode) = conv_ExpandedNodeId_NodeId(p_parentNid) &
+                        l_refParentIndex : t_RefIndex &
+                        l_refParent = RefIndex_Reference$0(l_parentNode |-> l_refParentIndex) &
+                        l_refParent /: ran(RefIndex_Reference$0) &
+                        l_refParent /: dom(Reference_SourceNode$0)    & l_refParent : dom(Reference_SourceNode) &
+                        l_refParent /: dom(Reference_ReferenceType$0) & l_refParent : dom(Reference_ReferenceType) &
+                        l_refParent /: dom(Reference_TargetNode$0)    & l_refParent : dom(Reference_TargetNode) &
+                        l_refParent /: dom(Reference_IsForward$0)     & l_refParent : dom(Reference_IsForward)) &
+                    (
+                        (l_refParent |-> conv_ExpandedNodeId_NodeId(p_parentNid)) : Reference_SourceNode &
+                        (l_refParent |-> p_refTypeId) : Reference_ReferenceType &
+                        (l_refParent |-> conv_NodeId_ExpandedNodeId(p_newNodeId)) : Reference_TargetNode &
+                        (l_refParent |-> TRUE) : Reference_IsForward
+                    ) &
+                    ParentNode = {(l_node |-> l_parentNode)} \/ ParentNode$0
+                )
+            ) &
+            (not (sc_addnode = e_sc_ok) =>
+                s_Node = s_Node$0 &
+
+                /* Attributes */
+                a_NodeId = a_NodeId$0 &
+                a_NodeClass = a_NodeClass$0 &
+                a_BrowseName = a_BrowseName$0 &
+                a_DisplayName = a_DisplayName$0 &
+                a_Executable = a_Executable$0 &
+                a_UserExecutable = a_UserExecutable$0 &
+
+                Ref_HasTypeDefinition = Ref_HasTypeDefinition$0 &
+
+                Reference_SourceNode    = Reference_SourceNode$0 &
+                Reference_ReferenceType = Reference_ReferenceType$0 &
+                Reference_TargetNode    = Reference_TargetNode$0 &
+                Reference_IsForward     = Reference_IsForward$0 &
+
+                Node_RefIndexEnd        = Node_RefIndexEnd$0 &
+                RefIndex_Reference      = RefIndex_Reference$0
+            )
+        )
+    END
+    ;
+
     /* Generates an internal event for subscriptions */
     gen_addNode_event(p_newNodeId) =
     PRE
