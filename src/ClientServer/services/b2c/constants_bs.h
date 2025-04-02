@@ -260,7 +260,6 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_
 #define constants_bs__c_request_context_indet 0
 #define constants_bs__c_reverse_endpoint_config_idx_indet 0
 #define constants_bs__c_server_request_handle_any 0
-#define constants_bs__c_sessionRoles_empty NULL
 #define constants_bs__c_sessionRoles_indet NULL
 #define constants_bs__c_session_activation_min_delay SOPC_SESSION_ACTIVATION_MIN_DELAY_SECS
 #define constants_bs__c_session_indet 0

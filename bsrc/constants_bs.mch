@@ -201,7 +201,6 @@ CONCRETE_CONSTANTS
     c_opcua_duration_zero,
     c_notificationQueue_indet,
     c_sessionRoles_indet,
-    c_sessionRoles_empty,
     c_RolePermissionTypes_indet,
     c_PermissionType_none,
     c_publishReqQueue_indet,
@@ -610,8 +609,6 @@ PROPERTIES
     t_sessionRoles <: t_sessionRoles_i &
     c_sessionRoles_indet : t_sessionRoles_i &
     c_sessionRoles_indet /: t_sessionRoles &
-    c_sessionRoles_empty : t_sessionRoles_i &
-    c_sessionRoles_empty /: t_sessionRoles &
 
     t_RolePermissionTypes <: t_RolePermissionTypes_i &
     c_RolePermissionTypes_indet : t_RolePermissionTypes_i &

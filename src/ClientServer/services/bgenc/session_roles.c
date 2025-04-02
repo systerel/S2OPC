@@ -21,7 +21,7 @@
 
  File Name            : session_roles.c
 
- Date                 : 30/09/2024 13:04:32
+ Date                 : 07/04/2025 12:12:16
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -54,7 +54,7 @@ void session_roles__compute_user_roles(
       constants__t_NodeId_i session_roles__l_maybe_role_nodeId;
       t_bool session_roles__l_bres;
       
-      *session_roles__p_roles = constants__c_sessionRoles_empty;
+      *session_roles__p_roles = constants__c_sessionRoles_indet;
       address_space_itf__readall_AddressSpace_Node(constants__c_Server_ServerCapabilities_RoleSet_NodeId,
          &session_roles__l_nid_valid,
          &session_roles__l_roleSet_node);

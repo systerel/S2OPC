@@ -55,7 +55,7 @@ OPERATIONS
         l_maybe_role_nodeId,
         l_bres
     IN
-        p_roles := c_sessionRoles_empty;
+        p_roles := c_sessionRoles_indet;
         /* Get the server RoleSet node */
         l_nid_valid, l_roleSet_node <-- readall_AddressSpace_Node(c_Server_ServerCapabilities_RoleSet_NodeId);
         IF l_nid_valid = TRUE THEN
