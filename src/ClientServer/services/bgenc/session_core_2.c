@@ -172,6 +172,9 @@ void session_core_2__reset_session_channel(
          session_core_2__a_channel_nb_sessions_i[session_core_2__l_channel] = session_core_2__a_channel_nb_sessions_i[session_core_2__l_channel] -
             1;
       }
+      else {
+         ;
+      }
       session_core_2__a_channel_i[session_core_2__p_session] = constants__c_channel_indet;
    }
 }
@@ -229,6 +232,12 @@ void session_core_2__set_session_channel(
             session_core_2__a_channel_nb_sessions_i[session_core_2__l_prev_channel] = session_core_2__a_channel_nb_sessions_i[session_core_2__l_prev_channel] -
                1;
          }
+         else {
+            ;
+         }
+      }
+      else {
+         ;
       }
       session_core_2__a_channel_i[session_core_2__session] = session_core_2__channel;
    }

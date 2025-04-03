@@ -127,7 +127,13 @@ OPERATIONS
         l_channel := a_channel_i(p_session);
         IF l_channel /= c_channel_indet
         THEN
-            a_channel_nb_sessions_i(l_channel) := a_channel_nb_sessions_i(l_channel) - 1
+            ASSERT p_session : dom(a_channel) THEN
+                a_channel_nb_sessions_i(l_channel) := a_channel_nb_sessions_i(l_channel) - 1
+            END
+        ELSE
+            ASSERT p_session /: dom(a_channel) THEN
+                skip
+            END
         END
         ;
         a_channel_i(p_session) := c_channel_indet
@@ -183,7 +189,17 @@ OPERATIONS
             a_channel_nb_sessions_i(channel) := a_channel_nb_sessions_i(channel) + 1;
             IF l_prev_channel /= c_channel_indet
             THEN
-                a_channel_nb_sessions_i(l_prev_channel) := a_channel_nb_sessions_i(l_prev_channel) - 1
+                ASSERT session : dom(a_channel) & a_channel (session) /= channel THEN
+                    a_channel_nb_sessions_i(l_prev_channel) := a_channel_nb_sessions_i(l_prev_channel) - 1
+                END
+            ELSE
+                ASSERT session /: dom(a_channel) THEN
+                    skip
+                END
+            END
+        ELSE
+            ASSERT session : dom(a_channel) & a_channel(session) = channel THEN
+                skip
             END
         END
         ;
