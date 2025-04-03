@@ -588,7 +588,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
     // Copy the main parameters not included in NodeAttributes structure
     OpcUa_VariableNode* varNode = &newNode->data.variable;
     SOPC_ReturnStatus status = SOPC_NodeMgtHelperInternal_CopyDataInNode((OpcUa_Node*) varNode, parentNodeId, newNodeId,
-                                                                         browseName, typeDefId);
+                                                                         refTypeId, browseName, typeDefId);
 
     // Manage NodeAttributes
     if (SOPC_STATUS_OK == status)
@@ -654,7 +654,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
     // Copy the main parameters not included in NodeAttributes structure
     OpcUa_ObjectNode* objNode = &newNode->data.object;
     SOPC_ReturnStatus status = SOPC_NodeMgtHelperInternal_CopyDataInNode((OpcUa_Node*) objNode, parentNodeId, newNodeId,
-                                                                         browseName, typeDefId);
+                                                                         refTypeId, browseName, typeDefId);
 
     // Manage NodeAttributes
     if (SOPC_STATUS_OK == status)

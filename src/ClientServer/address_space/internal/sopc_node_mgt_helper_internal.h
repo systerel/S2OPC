@@ -50,6 +50,7 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddObjectNodeAttributes(OpcUa_Objec
 SOPC_StatusCode SOPC_NodeMgtHelperInternal_CopyDataInNode(OpcUa_Node* node,
                                                           const SOPC_ExpandedNodeId* parentNodeId,
                                                           const SOPC_NodeId* newNodeId,
+                                                          const SOPC_NodeId* refTypeId,
                                                           const SOPC_QualifiedName* browseName,
                                                           const SOPC_ExpandedNodeId* typeDefId);
 
