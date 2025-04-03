@@ -348,7 +348,7 @@ OPERATIONS
     channel <-- get_session_channel (session) =
     PRE
         session : t_session_i &
-        session : t_session &
+        session : s_session &
         session : dom(a_channel)
     THEN
         channel :(channel : t_channel_i & channel = a_channel(session))
@@ -405,7 +405,7 @@ OPERATIONS
     set_session_to_create(p_session, p_channel_config_idx) =
     PRE
         p_session            : t_session_i            &
-        p_session            : t_session              &
+        p_session            : s_session              &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx
     THEN
