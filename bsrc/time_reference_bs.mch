@@ -23,16 +23,20 @@ MACHINE
 SEES
     constants
 
+ABSTRACT_CONSTANTS
+    TimeReference_IsLessThan
+
+PROPERTIES
+    TimeReference_IsLessThan : t_timeref <-> t_timeref &
+    TimeReference_IsLessThan /\ TimeReference_IsLessThan~ = {}
+
 ABSTRACT_VARIABLES
-    TimeReference_IsLessThan,
     current_time
 
 INVARIANT
-    TimeReference_IsLessThan : t_timeref <-> t_timeref &
     current_time : t_timeref
 
 INITIALISATION
-    TimeReference_IsLessThan :(TimeReference_IsLessThan : t_timeref <-> t_timeref) ||
     current_time :: t_timeref
 
 OPERATIONS
