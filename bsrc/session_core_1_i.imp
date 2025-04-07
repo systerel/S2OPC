@@ -411,25 +411,21 @@ OPERATIONS
                 END
             END
         INVARIANT
+            l_oldest_session : t_session_i          &
+            l_oldest_session_timeref : t_timeref_i  &
+
             l_continue = bool(sessions_to_iterate /= {}) &
             sessions_to_iterate /\ sessions_iterated = {} &
             sessions_to_iterate \/ sessions_iterated = t_session &
 
-            !(p_session).(p_session : dom(sessions_iterated <| a_state |> {e_session_created}) =>
-                /* Oldest timeref is less than any other timeref */
-                (l_oldest_session_timeref /= a_session_init_time(p_session) =>
-                    l_oldest_session_timeref |-> a_session_init_time(p_session) : TimeReference_IsLessThan) &
-                    l_oldest_session : a_session_init_time~[{l_oldest_session_timeref}]
+            (l_oldest_session = c_session_indet or
+                (l_oldest_session : dom(a_state) & a_state(l_oldest_session) = e_session_created)
             )
-            &
-            (sessions_iterated <| a_state |> {e_session_created} = {} =>
-                l_oldest_session_timeref = c_timeref_indet &
-                l_oldest_session = c_session_indet
-            )
+
         VARIANT
             card(sessions_to_iterate)
         END;
-        IF l_oldest_session_timeref = c_timeref_indet
+        IF l_oldest_session = c_session_indet
         THEN
             p_has_session_to_close := FALSE;
             p_session_to_close := c_session_indet

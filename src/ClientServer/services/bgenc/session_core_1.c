@@ -328,7 +328,7 @@ void session_core_1__find_session_to_close(
             }
          }
       }
-      if (session_core_1__l_oldest_session_timeref == constants__c_timeref_indet) {
+      if (session_core_1__l_oldest_session == constants__c_session_indet) {
          *session_core_1__p_has_session_to_close = false;
          *session_core_1__p_session_to_close = constants__c_session_indet;
       }
