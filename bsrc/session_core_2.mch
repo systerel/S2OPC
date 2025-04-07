@@ -209,22 +209,17 @@ OPERATIONS
           {session} <<| a_channel = {session} <<| a_channel$0 &
           a_channel (session) = channel &
           a_channel_nb_sessions : t_channel --> NAT &
-           /* Same channel as previous associated to session: do not change channel sessions counter */
-          (a_channel$0 (session) = channel => a_channel_nb_sessions = a_channel_nb_sessions$0) &
-          (a_channel$0 (session) /= channel =>
-                /* No previous channel associated to session: only increment the channel sessions counter */
-                (a_channel$0 (session) = c_channel_indet =>
-                    a_channel_nb_sessions (channel) = a_channel_nb_sessions (channel) + 1 &
-                    {channel} <<| a_channel_nb_sessions = {channel} <<| a_channel_nb_sessions$0)
-                ) &
-                /* Previous channel associated to session: decrement previous channel and increment new channel sessions counters */
-                (a_channel$0 (session) /= c_channel_indet =>
-                    a_channel_nb_sessions (a_channel$0 (session)) = a_channel_nb_sessions (a_channel$0 (session)) - 1 &
-                    a_channel_nb_sessions (channel) = a_channel_nb_sessions (channel) + 1 &
-                    /* No change for other channels */
-                    {channel, a_channel$0 (session)} <<| a_channel_nb_sessions = {channel, a_channel$0 (session)} <<| a_channel_nb_sessions$0
-                )
+          /* No previous channel associated to session: only increment the channel sessions counter */
+          (session /: dom(a_channel$0) =>
+              a_channel_nb_sessions = a_channel_nb_sessions$0 <+ {channel |-> a_channel_nb_sessions$0 (channel) + 1}
+          ) &
+          (session : dom(a_channel$0) =>
+              /* Same channel as previous associated to session: do not change channel sessions counter */
+              (a_channel$0 (session) = channel => a_channel_nb_sessions = a_channel_nb_sessions$0) &
+              /* Previous channel associated to session: decrement previous channel and increment new channel sessions counters */
+              (a_channel$0 (session) /= channel => a_channel_nb_sessions = a_channel_nb_sessions$0 <+ {a_channel$0 (session) |-> a_channel_nb_sessions$0 (a_channel$0 (session)) - 1, channel |-> a_channel_nb_sessions$0 (channel) + 1})
           )
+        )
     END
     ;
 
