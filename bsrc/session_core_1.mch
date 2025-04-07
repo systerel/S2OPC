@@ -1049,11 +1049,12 @@ OPERATIONS
     PRE
         p_session    : t_session_i &
         p_session    : dom(a_server_user_auth_attempts) &
-        p_success    : BOOL
+        p_success    : BOOL &
+        a_server_user_auth_attempts(p_session) < k_n_UserAuthAttempts_max
     THEN
         p_max_reached, a_server_user_auth_attempts :(
             p_max_reached : BOOL &
-            a_server_user_auth_attempts  : t_session --> NAT &
+            a_server_user_auth_attempts  : t_session +-> NAT &
             {p_session} <<| a_server_user_auth_attempts = {p_session} <<| a_server_user_auth_attempts$0 &
             (p_success = TRUE => p_max_reached = FALSE) &
             (p_success = FALSE =>
