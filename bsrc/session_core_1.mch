@@ -299,6 +299,7 @@ OPERATIONS
     THEN
         s_session                    := s_session - {session}                      ||
         a_session_roles              := {session} <<| a_session_roles              ||
+        s_client_session             := s_client_session - {session}               ||
         a_state                      := {session} <<| a_state                      ||
         a_channel                    := {session} <<| a_channel                    || /* If session had a channel, remove this relation */
         a_client_to_create           := {session} <<| a_client_to_create           ||
@@ -309,6 +310,8 @@ OPERATIONS
         a_user_client                := {session} <<| a_user_client                ||
         a_server_token               := a_server_token |>> {session}               || /* If session had token, remove this relation */
         a_client_token               := {session} <<| a_client_token               ||
+        a_user_secu_client           := {session} <<| a_user_secu_client           ||
+        a_user_server_cert           := {session} <<| a_user_server_cert           ||
         a_NonceServer                := {session} <<| a_NonceServer                ||
         a_NonceClient                := {session} <<| a_NonceClient                ||
         a_server_client_locales(session) := c_LocaleIds_empty                      ||
