@@ -197,6 +197,7 @@ void session_core_1__set_session_state_closed(
       if (session_core_1__is_client == false) {
          session_core_bs__server_session_timeout_stop_timer(session_core_1__session);
          session_core_bs__drop_user_server(session_core_1__session);
+         session_core_2__reset_server_session_user_auth_attempts(session_core_1__session);
       }
       else {
          session_core_bs__drop_NonceClient(session_core_1__session);

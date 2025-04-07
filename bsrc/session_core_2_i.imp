@@ -334,6 +334,12 @@ OPERATIONS
     END
     ;
 
+    reset_server_session_user_auth_attempts(p_session) =
+    BEGIN
+        a_server_user_auth_attempts_i(p_session) := 0
+    END
+    ;
+
     p_timeref <-- get_init_time(p_session) =
     BEGIN
         p_timeref := a_session_init_time_i(p_session)

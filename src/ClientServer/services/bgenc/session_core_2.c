@@ -381,6 +381,11 @@ void session_core_2__get_server_session_user_auth_attempts(
    *session_core_2__p_attempts = session_core_2__a_server_user_auth_attempts_i[session_core_2__p_session];
 }
 
+void session_core_2__reset_server_session_user_auth_attempts(
+   const constants__t_session_i session_core_2__p_session) {
+   session_core_2__a_server_user_auth_attempts_i[session_core_2__p_session] = 0;
+}
+
 void session_core_2__get_init_time(
    const constants__t_session_i session_core_2__p_session,
    constants__t_timeref_i * const session_core_2__p_timeref) {

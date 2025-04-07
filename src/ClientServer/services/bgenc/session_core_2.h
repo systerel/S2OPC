@@ -132,6 +132,8 @@ extern void session_core_2__reset_server_session_preferred_locales(
 extern void session_core_2__reset_server_session_roles(
    const constants__t_session_i session_core_2__p_session,
    constants__t_sessionRoles_i * const session_core_2__p_roles);
+extern void session_core_2__reset_server_session_user_auth_attempts(
+   const constants__t_session_i session_core_2__p_session);
 extern void session_core_2__reset_session_channel(
    const constants__t_session_i session_core_2__p_session);
 extern void session_core_2__reset_session_orphaned(

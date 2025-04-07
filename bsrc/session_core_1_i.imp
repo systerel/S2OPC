@@ -291,7 +291,9 @@ OPERATIONS
         IF is_client = FALSE
         THEN
             server_session_timeout_stop_timer(session);
-            drop_user_server(session)
+            drop_user_server(session);
+            reset_server_session_user_auth_attempts(session)
+            // a_server_user_auth_attempts
         ELSE
             drop_NonceClient(session)
             // a_NonceClient
