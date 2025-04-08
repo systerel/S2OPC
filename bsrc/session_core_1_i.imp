@@ -38,12 +38,6 @@ IMPORTS
     session_core_bs
 
 PROMOTES
-    server_get_session_from_token,
-    client_get_token_from_session,
-    server_get_fresh_session_token,
-    server_is_valid_session_token,
-    client_set_session_token,
-    reset_session_to_create,
     is_valid_session,
     is_client_session,
     get_session_state,
@@ -51,50 +45,56 @@ PROMOTES
     getall_session_channel,
     get_session_channel,
     get_channel_nb_sessions,
-    getall_to_create,
+    server_set_fresh_nonce,
+    client_set_NonceServer,
+    get_NonceServer,
     getall_orphaned,
-    set_session_to_create,
+    client_create_session_check_crypto,
     drop_user_server,
     set_session_user_server,
-    set_session_user_client,
     session_has_user_server,
     get_session_user_server,
-    get_session_user_client,
     is_same_user_server,
-    server_set_fresh_nonce,
-    server_create_session_req_do_crypto,
-    server_may_need_user_token_encryption,
-    may_validate_server_certificate,
+    get_session_user_server_certificate,
+    client_create_session_set_user_token_secu_properties,
+    server_get_session_from_token,
+    server_get_fresh_session_token,
+    server_is_valid_session_token,
+    get_server_session_preferred_locales,
+    get_session_roles,
+    server_activate_session_check_crypto,
+    set_session_user_client,
+    get_session_user_client,
+    get_session_user_secu_client,
+    client_get_token_from_session,
+    client_set_session_token,
     client_activate_session_req_do_crypto,
-    clear_Signature,
-    get_NonceServer,
     client_create_session_req_do_crypto,
     get_NonceClient,
     drop_NonceClient,
-    client_create_session_check_crypto,
-    server_activate_session_check_crypto,
-    client_activate_session_resp_check,
-    client_close_session_req_msg,
-    client_close_session_resp_msg,
-    server_close_session_check_req,
-    session_do_nothing,
+    getall_to_create,
+    reset_session_to_create,
+    set_session_to_create,
     set_session_app_context,
     get_session_app_context,
-    client_gen_create_session_internal_event,
-    client_gen_activate_orphaned_session_internal_event,
-    client_gen_activate_user_session_internal_event,
+    may_validate_server_certificate,
+    sign_user_token,
+    clear_Signature,
+    session_do_nothing,
+    server_create_session_req_do_crypto,
+    server_may_need_user_token_encryption,
+    server_close_session_check_req,
     server_session_timeout_start_timer,
     server_session_timeout_evaluation,
     server_session_timeout_msg_received,
-    get_server_session_preferred_locales,
+    client_activate_session_resp_check,
+    client_close_session_req_msg,
+    client_close_session_resp_msg,
+    client_gen_create_session_internal_event,
+    client_gen_activate_orphaned_session_internal_event,
+    client_gen_activate_user_session_internal_event,
     get_server_session_client_app_desc,
-    get_server_session_client_cert_tb,
-    get_session_user_secu_client,
-    client_create_session_set_user_token_secu_properties,
-    get_session_user_server_certificate,
-    client_set_NonceServer,
-    sign_user_token,
-    get_session_roles
+    get_server_session_client_cert_tb
 
 INVARIANT
     s_session = dom(a_state)
@@ -189,13 +189,6 @@ OPERATIONS
 
     /* Global operations */
 
-    set_session_roles(p_session, p_roles) =
-    BEGIN
-        l_delete_session_roles(p_session);
-        set_session_roles_2(p_session, p_roles)
-    END
-    ;
-
     p_session <-- init_new_session (is_client) =
     VAR
         l_is_session,
@@ -238,6 +231,12 @@ OPERATIONS
     END
     ;
 
+    set_session_state (session, state, is_client) =
+    BEGIN
+        l_set_session_state (session, state, is_client)
+    END
+    ;
+
     create_session (session, channel, state, is_client) =
     BEGIN
         set_session_channel(session, channel);
@@ -249,9 +248,56 @@ OPERATIONS
     END
     ;
 
-    set_session_state (session, state, is_client) =
+    set_session_orphaned (session, channel_config_idx) =
+    VAR
+        l_bool
+    IN
+        reset_session_channel(session);
+        l_bool <-- is_t_channel_config_idx(channel_config_idx);
+        IF  l_bool = TRUE THEN
+            set_session_orphaned_1(session, channel_config_idx)
+        END
+    END
+    ;
+
+    p_max_reached <-- check_server_session_user_auth_attempts(p_session, p_success) =
+    VAR
+        l_attempts
+    IN
+        IF p_success = TRUE
+        THEN
+            p_max_reached := FALSE
+        ELSE
+            l_attempts <-- get_server_session_user_auth_attempts(p_session);
+            l_attempts := l_attempts + 1;
+            set_server_session_user_auth_attempts(p_session, l_attempts);
+            p_max_reached := bool(l_attempts >= k_n_UserAuthAttempts_max)
+        END
+
+    END
+    ;
+
+    set_server_session_preferred_locales_or_indet(p_session, p_localesIds) =
+    VAR
+        l_old_localeIds
+    IN
+        IF p_localesIds /= c_LocaleIds_indet
+        THEN
+            l_old_localeIds <-- reset_server_session_preferred_locales(p_session);
+            IF l_old_localeIds /= c_LocaleIds_indet
+            THEN
+                free_LocaleIds(l_old_localeIds)
+            END
+            ;
+            set_server_session_preferred_locales(p_session, p_localesIds)
+        END
+    END
+    ;
+
+    set_session_roles(p_session, p_roles) =
     BEGIN
-        l_set_session_state (session, state, is_client)
+        l_delete_session_roles(p_session);
+        set_session_roles_2(p_session, p_roles)
     END
     ;
 
@@ -301,35 +347,6 @@ OPERATIONS
     END
     ;
 
-    set_session_orphaned (session, channel_config_idx) =
-    VAR
-        l_bool
-    IN
-        reset_session_channel(session);
-        l_bool <-- is_t_channel_config_idx(channel_config_idx);
-        IF  l_bool = TRUE THEN
-            set_session_orphaned_1(session, channel_config_idx)
-        END
-    END
-    ;
-
-    set_server_session_preferred_locales_or_indet(p_session, p_localesIds) =
-    VAR
-        l_old_localeIds
-    IN
-        IF p_localesIds /= c_LocaleIds_indet
-        THEN
-            l_old_localeIds <-- reset_server_session_preferred_locales(p_session);
-            IF l_old_localeIds /= c_LocaleIds_indet
-            THEN
-                free_LocaleIds(l_old_localeIds)
-            END
-            ;
-            set_server_session_preferred_locales(p_session, p_localesIds)
-        END
-    END
-    ;
-
     set_server_client_create_session_info (p_session, p_cliAppDesc, p_cliCertTb) =
     BEGIN
         IF p_cliAppDesc /= c_ApplicationDescription_indet
@@ -341,23 +358,6 @@ OPERATIONS
         THEN
             set_server_session_client_cert_tb (p_session, p_cliCertTb)
         END
-    END
-    ;
-
-    p_max_reached <-- check_server_session_user_auth_attempts(p_session, p_success) =
-    VAR
-        l_attempts
-    IN
-        IF p_success = TRUE
-        THEN
-            p_max_reached := FALSE
-        ELSE
-            l_attempts <-- get_server_session_user_auth_attempts(p_session);
-            l_attempts := l_attempts + 1;
-            set_server_session_user_auth_attempts(p_session, l_attempts);
-            p_max_reached := bool(l_attempts >= k_n_UserAuthAttempts_max)
-        END
-
     END
     ;
 

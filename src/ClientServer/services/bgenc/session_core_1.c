@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 28/10/2025 14:35:45
+ Date                 : 01/12/2025 10:31:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -98,14 +98,6 @@ void session_core_1__l_reset_server_client_create_session_info(
    }
 }
 
-void session_core_1__set_session_roles(
-   const constants__t_session_i session_core_1__p_session,
-   const constants__t_sessionRoles_i session_core_1__p_roles) {
-   session_core_1__l_delete_session_roles(session_core_1__p_session);
-   session_core_2__set_session_roles_2(session_core_1__p_session,
-      session_core_1__p_roles);
-}
-
 void session_core_1__init_new_session(
    const t_bool session_core_1__is_client,
    constants__t_session_i * const session_core_1__p_session) {
@@ -143,6 +135,15 @@ void session_core_1__init_new_session(
    }
 }
 
+void session_core_1__set_session_state(
+   const constants__t_session_i session_core_1__session,
+   const constants__t_sessionState_i session_core_1__state,
+   const t_bool session_core_1__is_client) {
+   session_core_1__l_set_session_state(session_core_1__session,
+      session_core_1__state,
+      session_core_1__is_client);
+}
+
 void session_core_1__create_session(
    const constants__t_session_i session_core_1__session,
    const constants__t_channel_i session_core_1__channel,
@@ -159,13 +160,68 @@ void session_core_1__create_session(
    }
 }
 
-void session_core_1__set_session_state(
+void session_core_1__set_session_orphaned(
    const constants__t_session_i session_core_1__session,
-   const constants__t_sessionState_i session_core_1__state,
-   const t_bool session_core_1__is_client) {
-   session_core_1__l_set_session_state(session_core_1__session,
-      session_core_1__state,
-      session_core_1__is_client);
+   const constants__t_channel_config_idx_i session_core_1__channel_config_idx) {
+   {
+      t_bool session_core_1__l_bool;
+      
+      session_core_2__reset_session_channel(session_core_1__session);
+      constants__is_t_channel_config_idx(session_core_1__channel_config_idx,
+         &session_core_1__l_bool);
+      if (session_core_1__l_bool == true) {
+         session_core_2__set_session_orphaned_1(session_core_1__session,
+            session_core_1__channel_config_idx);
+      }
+   }
+}
+
+void session_core_1__check_server_session_user_auth_attempts(
+   const constants__t_session_i session_core_1__p_session,
+   const t_bool session_core_1__p_success,
+   t_bool * const session_core_1__p_max_reached) {
+   {
+      t_entier4 session_core_1__l_attempts;
+      
+      if (session_core_1__p_success == true) {
+         *session_core_1__p_max_reached = false;
+      }
+      else {
+         session_core_2__get_server_session_user_auth_attempts(session_core_1__p_session,
+            &session_core_1__l_attempts);
+         session_core_1__l_attempts = session_core_1__l_attempts +
+            1;
+         session_core_2__set_server_session_user_auth_attempts(session_core_1__p_session,
+            session_core_1__l_attempts);
+         *session_core_1__p_max_reached = (session_core_1__l_attempts >= constants__k_n_UserAuthAttempts_max);
+      }
+   }
+}
+
+void session_core_1__set_server_session_preferred_locales_or_indet(
+   const constants__t_session_i session_core_1__p_session,
+   const constants__t_LocaleIds_i session_core_1__p_localesIds) {
+   {
+      constants__t_LocaleIds_i session_core_1__l_old_localeIds;
+      
+      if (session_core_1__p_localesIds != constants__c_LocaleIds_indet) {
+         session_core_2__reset_server_session_preferred_locales(session_core_1__p_session,
+            &session_core_1__l_old_localeIds);
+         if (session_core_1__l_old_localeIds != constants__c_LocaleIds_indet) {
+            constants__free_LocaleIds(session_core_1__l_old_localeIds);
+         }
+         session_core_2__set_server_session_preferred_locales(session_core_1__p_session,
+            session_core_1__p_localesIds);
+      }
+   }
+}
+
+void session_core_1__set_session_roles(
+   const constants__t_session_i session_core_1__p_session,
+   const constants__t_sessionRoles_i session_core_1__p_roles) {
+   session_core_1__l_delete_session_roles(session_core_1__p_session);
+   session_core_2__set_session_roles_2(session_core_1__p_session,
+      session_core_1__p_roles);
 }
 
 void session_core_1__set_session_state_closed(
@@ -205,40 +261,6 @@ void session_core_1__set_session_state_closed(
    }
 }
 
-void session_core_1__set_session_orphaned(
-   const constants__t_session_i session_core_1__session,
-   const constants__t_channel_config_idx_i session_core_1__channel_config_idx) {
-   {
-      t_bool session_core_1__l_bool;
-      
-      session_core_2__reset_session_channel(session_core_1__session);
-      constants__is_t_channel_config_idx(session_core_1__channel_config_idx,
-         &session_core_1__l_bool);
-      if (session_core_1__l_bool == true) {
-         session_core_2__set_session_orphaned_1(session_core_1__session,
-            session_core_1__channel_config_idx);
-      }
-   }
-}
-
-void session_core_1__set_server_session_preferred_locales_or_indet(
-   const constants__t_session_i session_core_1__p_session,
-   const constants__t_LocaleIds_i session_core_1__p_localesIds) {
-   {
-      constants__t_LocaleIds_i session_core_1__l_old_localeIds;
-      
-      if (session_core_1__p_localesIds != constants__c_LocaleIds_indet) {
-         session_core_2__reset_server_session_preferred_locales(session_core_1__p_session,
-            &session_core_1__l_old_localeIds);
-         if (session_core_1__l_old_localeIds != constants__c_LocaleIds_indet) {
-            constants__free_LocaleIds(session_core_1__l_old_localeIds);
-         }
-         session_core_2__set_server_session_preferred_locales(session_core_1__p_session,
-            session_core_1__p_localesIds);
-      }
-   }
-}
-
 void session_core_1__set_server_client_create_session_info(
    const constants__t_session_i session_core_1__p_session,
    const constants__t_ApplicationDescription_i session_core_1__p_cliAppDesc,
@@ -250,28 +272,6 @@ void session_core_1__set_server_client_create_session_info(
    if (session_core_1__p_cliCertTb != constants__c_CertThumbprint_indet) {
       session_core_2__set_server_session_client_cert_tb(session_core_1__p_session,
          session_core_1__p_cliCertTb);
-   }
-}
-
-void session_core_1__check_server_session_user_auth_attempts(
-   const constants__t_session_i session_core_1__p_session,
-   const t_bool session_core_1__p_success,
-   t_bool * const session_core_1__p_max_reached) {
-   {
-      t_entier4 session_core_1__l_attempts;
-      
-      if (session_core_1__p_success == true) {
-         *session_core_1__p_max_reached = false;
-      }
-      else {
-         session_core_2__get_server_session_user_auth_attempts(session_core_1__p_session,
-            &session_core_1__l_attempts);
-         session_core_1__l_attempts = session_core_1__l_attempts +
-            1;
-         session_core_2__set_server_session_user_auth_attempts(session_core_1__p_session,
-            session_core_1__l_attempts);
-         *session_core_1__p_max_reached = (session_core_1__l_attempts >= constants__k_n_UserAuthAttempts_max);
-      }
    }
 }
 
