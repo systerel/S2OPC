@@ -74,7 +74,8 @@ void msg_node_management_add_nodes_bs__get_msg_create_add_nodes_req_nb_add_nodes
 }
 
 static bool check_node_class_type_definition_constraint(constants__t_NodeClass_i p_nodeClass,
-                                                        const SOPC_ExpandedNodeId* typeDefinition)
+                                                        SOPC_ExpandedNodeId* typeDefinition,
+                                                        SOPC_ExpandedNodeId** outTypeDefinition)
 {
     bool typeDefPresent = false;
     bool typeDefExpected = false;
@@ -93,10 +94,12 @@ static bool check_node_class_type_definition_constraint(constants__t_NodeClass_i
         SOPC_NodeId_IsNull(&typeDefinition->NodeId))
     {
         typeDefPresent = false;
+        *outTypeDefinition = constants_bs__c_ExpandedNodeId_indet;
     }
     else
     {
         typeDefPresent = true;
+        *outTypeDefinition = typeDefinition;
     }
     return (typeDefExpected == typeDefPresent);
 }
@@ -117,7 +120,7 @@ void msg_node_management_add_nodes_bs__getall_add_node_item_req_params(
     // index is ensured to be valid by B model and NodesToAdd array to be valid due to decoding message success
     OpcUa_AddNodesRequest* addNodesReq = (OpcUa_AddNodesRequest*) msg_node_management_add_nodes_bs__p_req_msg;
     OpcUa_AddNodesItem* addNodesItem = &addNodesReq->NodesToAdd[msg_node_management_add_nodes_bs__p_index - 1];
-    const SOPC_ExpandedNodeId* typeDefinition = &addNodesItem->TypeDefinition;
+    SOPC_ExpandedNodeId* typeDefinition = constants_bs__c_ExpandedNodeId_indet;
 
     // TODO: replace by call to constants_bs__getall_conv_ExpandedNodeId_NodeId (make it an util in b2c ?)
     // Check local constraint on requested NodeId: "the serverIndex in the expanded NodeId shall be 0."
@@ -152,12 +155,15 @@ void msg_node_management_add_nodes_bs__getall_add_node_item_req_params(
         result = false;
     }
 
-    // Check TypeDefinition validity depending on NodeClass
-    if (result && !check_node_class_type_definition_constraint(*msg_node_management_add_nodes_bs__p_nodeClass,
-                                                               &addNodesItem->TypeDefinition))
+    // Check TypeDefinition validity depending on NodeClass (typeDefinition set if not NULL ExpNodeId)
+    if (result)
     {
-        *msg_node_management_add_nodes_bs__p_sc = constants_statuscodes_bs__e_sc_bad_type_definition_invalid;
-        result = false;
+        result = check_node_class_type_definition_constraint(*msg_node_management_add_nodes_bs__p_nodeClass,
+                                                             &addNodesItem->TypeDefinition, &typeDefinition);
+        if (!result)
+        {
+            *msg_node_management_add_nodes_bs__p_sc = constants_statuscodes_bs__e_sc_bad_type_definition_invalid;
+        }
     }
 
     if (result)
@@ -177,14 +183,7 @@ void msg_node_management_add_nodes_bs__getall_add_node_item_req_params(
         }
         *msg_node_management_add_nodes_bs__p_browseName = &addNodesItem->BrowseName;
         *msg_node_management_add_nodes_bs__p_nodeAttributes = &addNodesItem->NodeAttributes;
-        if (typeDefinition)
-        {
-            *msg_node_management_add_nodes_bs__p_typeDefId = &addNodesItem->TypeDefinition;
-        }
-        else
-        {
-            *msg_node_management_add_nodes_bs__p_typeDefId = constants_bs__c_ExpandedNodeId_indet;
-        }
+        *msg_node_management_add_nodes_bs__p_typeDefId = typeDefinition;
     }
 }
 
