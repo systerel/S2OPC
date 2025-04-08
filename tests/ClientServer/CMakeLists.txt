@@ -393,6 +393,18 @@ if (expat_FOUND)
   TARGET toolkit_test_client_events POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy ${TEST_CLIENT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   )
+
+  add_executable(toolkit_test_client_alarms "validation_tests/client/toolkit_test_client_alarms.c"
+                 ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+  target_link_libraries(toolkit_test_client_alarms PRIVATE s2opc_clientserver)
+  target_include_directories(toolkit_test_client_alarms PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
+  target_compile_options(toolkit_test_client_alarms PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(toolkit_test_client_alarms PRIVATE ${S2OPC_DEFINITIONS})
+
+  add_custom_command(
+  TARGET toolkit_test_client_alarms POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${TEST_CLIENT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  )
 endif()
 
 # Test multi sub client
@@ -630,9 +642,22 @@ function(s2opc_validation_test target_name bin_name)
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
-  "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${ARGN}"
-  $<TARGET_FILE:${bin_name}>)
+  "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${ARGV2}"
+  $<TARGET_FILE:${bin_name}> ${TOOLKIT_TEST_SERVER} ${ARGV3})
   set_tests_properties("validation::${target_name}" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${target_name}.tap")
+endfunction()
+
+function(s2opc_validation_test_demo_alarms target_name)
+  add_test(NAME "validation::${target_name}"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 1
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_server_alarms>
+  "--server-cmd" $<TARGET_FILE:toolkit_demo_server_alarms>
+  $<TARGET_FILE:toolkit_test_client_alarms> toolkit_demo_server_alarms ${ARGN})
+  set_tests_properties("validation::${target_name}" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${target_name}.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Alarms_NodeSet.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
 endfunction()
 
 s2opc_validation_test(client_server_test toolkit_test_client)
@@ -643,6 +668,8 @@ s2opc_validation_test(client_RHE_faults_test toolkit_test_client_rhe_faults)
 
 if(expat_FOUND AND S2OPC_EVENT_MANAGEMENT)
   s2opc_validation_test(client_server_events_test toolkit_test_client_events events)
+  s2opc_validation_test_demo_alarms(client_demo_server_alarms_test 2)
+  s2opc_validation_test(client_server_alarms_test toolkit_test_client_alarms alarms 4)
 endif()
 
 if(expat_FOUND AND S2OPC_HAS_AUDITING)

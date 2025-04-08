@@ -126,6 +126,9 @@ AUDIT_TAP_FILES=$'\nclient_server_audit_test.tap'
 
 EVENT_TAP_FILES=$'\nclient_server_events_test.tap'
 
+ALARMS_TAP_FILES=$'\nclient_server_alarms_test.tap
+client_demo_server_alarms_test.tap'
+
 rm -f "${TAP_DIR}"/*.tap
 
 if [ -z $S2OPC_PUBSUB_ONLY ]; then
@@ -148,6 +151,9 @@ if [ -z $S2OPC_PUBSUB_ONLY ]; then
        EXPECTED_TAP_FILES=$CLIENTSERVER_TAP_FILES
    else
        EXPECTED_TAP_FILES=$CLIENTSERVER_TAP_FILES$EVENT_TAP_FILES
+       if [ -n $S2OPC_NODE_MANAGEMENT ]; then
+          EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$ALARMS_TAP_FILES
+       fi
    fi
    if [ -n "$S2OPC_HAS_AUDITING" ]; then
        EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$AUDIT_TAP_FILES
