@@ -287,6 +287,15 @@ const SOPC_Variant* SOPC_Event_GetVariableAndTypeFromStrPath(const SOPC_Event* p
                                                              int32_t* outValueRank);
 
 /**
+ * \brief Gets the event/node instance NodeId.
+ *
+ * \param pEvent  pointer to the event
+ *
+ * \return the nodeId in case of success, NULL otherwise.
+ */
+const SOPC_NodeId* SOPC_Event_GetNodeId(const SOPC_Event* pEvent);
+
+/**
  * \brief Sets the event/node instance NodeId.
  *
  *        This function associates a NodeId to the event instance
@@ -332,5 +341,13 @@ void SOPC_Event_ForEachVar(SOPC_Event* event, SOPC_Event_ForEachVar_Fct* func, u
  * \return The number of variables of the given event or 0 in case of invalid parameter
  */
 size_t SOPC_Event_GetNbVariables(SOPC_Event* event);
+
+/**
+ * \brief Returns an example instance of an AlarmConditionType event
+ *        (as described in OPC UA Part 9 v1.04/v1.05).
+ *
+ * \return The AlarmConditionType event instance or NULL in case of OOM.
+ */
+SOPC_Event* SOPC_Event_GetInstanceAlarmConditionType(void);
 
 #endif // SOPC_EVENT_H_

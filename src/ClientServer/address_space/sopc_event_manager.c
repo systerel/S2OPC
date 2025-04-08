@@ -69,15 +69,108 @@ typedef enum SOPC_BaseEventVariantIndexes
     SOPC_BaseEventVariantIdx_ReservedLength // first free index
 } SOPC_BaseEventVariantIndexes;
 
+typedef enum SOPC_ConditionEventVariantIndexes
+{
+    SOPC_ConditionEventVariantIdx_BranchId = 0,
+    SOPC_ConditionEventVariantIdx_ClientUserId,
+    SOPC_ConditionEventVariantIdx_Comment,
+    SOPC_ConditionEventVariantIdx_ConditionClassId,
+    SOPC_ConditionEventVariantIdx_ConditionClassName,
+    SOPC_ConditionEventVariantIdx_ConditionName,
+    SOPC_ConditionEventVariantIdx_ConditionSubClassId,
+    SOPC_ConditionEventVariantIdx_ConditionSubClassName,
+    SOPC_ConditionEventVariantIdx_EnabledState,
+    SOPC_ConditionEventVariantIdx_EnabledState_Id,
+    SOPC_ConditionEventVariantIdx_LastSeverity,
+    SOPC_ConditionEventVariantIdx_Quality,
+    SOPC_ConditionEventVariantIdx_Retain,
+    SOPC_ConditionEventVariantIdx_ReservedLength
+} SOPC_ConditionEventVariantIndexes;
+
+typedef enum SOPC_AcknowledgeableEventVariantIndexes
+{
+    SOPC_AcknowledgeableEventVariantIdx_AckedState = 0,
+    SOPC_AcknowledgeableEventVariantIdx_AckedState_Id,
+    SOPC_AcknowledgeableEventVariantIdx_ConfirmedState,
+    SOPC_AcknowledgeableEventVariantIdx_ConfirmedState_Id,
+    SOPC_AcknowledgeableEventVariantIdx_ReservedLength
+} SOPC_AcknowledgeableEventVariantIndexes;
+
+typedef enum SOPC_AlarmEventVariantIndexes
+{
+    SOPC_AlarmEventVariantIdx_ActiveState = 0,
+    SOPC_AlarmEventVariantIdx_ActiveState_Id,
+    SOPC_AlarmEventVariantIdx_AudibleSound,
+    SOPC_AlarmEventVariantIdx_AudibleEnabled,
+    SOPC_AlarmEventVariantIdx_FirstInGroupFlag,
+    SOPC_AlarmEventVariantIdx_LatchedState,
+    SOPC_AlarmEventVariantIdx_LatchedState_Id,
+    SOPC_AlarmEventVariantIdx_MaxTimeShelved,
+    SOPC_AlarmEventVariantIdx_OffDelay,
+    SOPC_AlarmEventVariantIdx_OnDelay,
+    SOPC_AlarmEventVariantIdx_OutOfServiceState,
+    SOPC_AlarmEventVariantIdx_OutOfServiceState_Id,
+    SOPC_AlarmEventVariantIdx_ReAlarmRepeatCount,
+    SOPC_AlarmEventVariantIdx_ReAlarmTime,
+    SOPC_AlarmEventVariantIdx_ShelvingState_CurrentState_Id,
+    SOPC_AlarmEventVariantIdx_SilenceState,
+    SOPC_AlarmEventVariantIdx_SilenceState_Id,
+    SOPC_AlarmEventVariantIdx_SuppressedOrShelved,
+    SOPC_AlarmEventVariantIdx_SuppressedState,
+    SOPC_AlarmEventVariantIdx_SuppressedState_Id,
+    SOPC_AlarmEventVariantIdx_ReservedLength
+} SOPC_AlarmEventVariantIndexes;
+
 /* Statically defined variants for any event */
 static const char* sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_ReservedLength] = {
     QN_EMPTY_PATH_NODEID, "0:EventId",   "0:EventType", "0:SourceNode", "0:SourceName", "0:Time",
     "0:ReceiveTime",      "0:LocalTime", "0:Message",   "0:Severity"};
 
+static const char* sopc_conditionEventVariantsPaths[SOPC_ConditionEventVariantIdx_ReservedLength] = {
+    "0:BranchId",
+    "0:ClientUserId",
+    "0:Comment",
+    "0:ConditionClassId",
+    "0:ConditionClassName",
+    "0:ConditionName",
+    "0:ConditionSubClassId",
+    "0:ConditionSubClassName",
+    "0:EnabledState",
+    "0:EnabledState~0:Id",
+    "0:LastSeverity",
+    "0:Quality",
+    "0:Retain"};
+
+static const char* sopc_acknowledgeableEventVariantsPaths[SOPC_AcknowledgeableEventVariantIdx_ReservedLength] = {
+    "0:AckedState", "0:AckedState~0:Id", "0:ConfirmedState", "0:ConfirmedState~0:Id"};
+
+static const char* sopc_alarmEventVariantsPaths[SOPC_AlarmEventVariantIdx_ReservedLength] = {
+    "0:ActiveState",
+    "0:ActiveState~0:Id",
+    "0:AudibleSound",
+    "0:AudibleEnabled",
+    "0:FirstInGroupFlag",
+    "0:LatchedState",
+    "0:LatchedState~0:Id",
+    "0:MaxTimeShelved",
+    "0:OffDelay",
+    "0:OnDelay",
+    "0:OutOfServiceState",
+    "0:OutOfServiceState~0:Id",
+    "0:ReAlarmRepeatCount",
+    "0:ReAlarmTime",
+    "0:ShelvingState~0:CurrentState~0:Id",
+    "0:SilenceState",
+    "0:SilenceState~0:Id",
+    "0:SuppressedOrShelved",
+    "0:SuppressedState",
+    "0:SuppressedState~0:Id"};
+
 // Notes:
 // - On Windows: can't be const because MS build does not support &OpcUa_*_EncodeableType ref in definition for library
 // - On PikeOS: ignore cast const necessary due to macros with empty strings
 SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+// BaseEventType
 static SOPC_Event_Variable sopc_baseEventVariants[SOPC_BaseEventVariantIdx_ReservedLength] = {
     {SOPC_VARIANT_NODEID(SOPC_NODEID_NS0_NUMERIC(0)), SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId),
      -1}, // "OwnNodeId": placeholder to store the actual event/node instance NodeId (see ConditionId in part 9)
@@ -98,9 +191,60 @@ static SOPC_Event_Variable sopc_baseEventVariants[SOPC_BaseEventVariantIdx_Reser
     {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // Message
     {SOPC_VARIANT_UINT16(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_UInt16), -1},                // Severity
 };
+
+// ConditionType
+static SOPC_Event_Variable sopc_conditionEventVariants[SOPC_ConditionEventVariantIdx_ReservedLength] = {
+    {SOPC_VARIANT_NODEID(SOPC_NODEID_NS0_NUMERIC(0)), SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId), -1}, // BranchId
+    {SOPC_VARIANT_STRING(""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_String), -1},                         // ClientUserId
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1},           // Comment
+    {SOPC_VARIANT_NODEID(SOPC_NODEID_NS0_NUMERIC(0)), SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId), -1}, // ConditionClassId
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // ConditionClassName
+    {SOPC_VARIANT_STRING(""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_String), -1},               // ConditionName
+    {SOPC_VARIANT_NODEID(SOPC_NODEID_NS0_NUMERIC(0)), SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId),
+     1},                                                                                  // ConditionSubClassId
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), 1},  // ConditionSubClassName
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // EnabledState
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // EnabledState~Id
+    {SOPC_VARIANT_UINT16(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_UInt16), -1},                // LastSeverity
+    {SOPC_VARIANT_STATUSCODE(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_StatusCode), -1},        // Quality
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // Retain
+};
+
+// AcknowledgeableConditionType
+static SOPC_Event_Variable sopc_acknowledgeableEventVariants[SOPC_AcknowledgeableEventVariantIdx_ReservedLength] = {
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // AckedState
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // AckedState~Id
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // ConfirmedState
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // ConfirmedState~Id
+};
+
+// AlarmConditionType
+static SOPC_Event_Variable sopc_alarmEventVariants[SOPC_AlarmEventVariantIdx_ReservedLength] = {
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // ActiveState
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // ActiveState~Id
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // AudibleEnabled
+    {SOPC_VARIANT_BYTESTRING({0}), SOPC_NODEID_NS0_NUMERIC(OpcUaId_AudioDataType), -1},   // AudibleSound
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // FirstInGroupFlag
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // LatchedState
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // LatchedState~Id
+    {SOPC_VARIANT_DOUBLE(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Duration), -1},              // MaxTimeShelved
+    {SOPC_VARIANT_DOUBLE(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Duration), -1},              // OffDelay
+    {SOPC_VARIANT_DOUBLE(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Duration), -1},              // OnDelay
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // OutOfServiceState
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // OutOfServiceState~Id
+    {SOPC_VARIANT_INT16(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Int16), -1},                  // ReAlarmRepeatCount
+    {SOPC_VARIANT_DOUBLE(0), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Duration), -1},              // ReAlarmTime
+    {SOPC_VARIANT_NODEID(SOPC_NODEID_NS0_NUMERIC(0)), SOPC_NODEID_NS0_NUMERIC(OpcUaId_NodeId),
+     -1}, // ShelvingState~CurrentState~Id
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // SilenceState
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // SilenceState~Id
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // SuppressedOrShelved
+    {SOPC_VARIANT_LOCALTEXT("", ""), SOPC_NODEID_NS0_NUMERIC(OpcUaId_LocalizedText), -1}, // SuppressedState
+    {SOPC_VARIANT_BOOL(false), SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean), -1},             // SuppressedState~Id
+};
 SOPC_GCC_DIAGNOSTIC_RESTORE
 
-static SOPC_NodeId baseEventNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
+static const SOPC_NodeId baseEventNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 
 static uint64_t eventIdCounter = 0;
 
@@ -599,7 +743,7 @@ const SOPC_Variant* SOPC_Event_GetVariableFromStrPath(const SOPC_Event* pEvent, 
     return SOPC_Event_GetVariableAndTypeFromStrPath(pEvent, qnPathWithEmpty, NULL, NULL);
 }
 
-static SOPC_NodeId* SOPC_Event_GetNodeId(SOPC_Event* pEvent)
+static SOPC_NodeId* SOPC_Event_InternalGetNodeId(const SOPC_Event* pEvent)
 {
     SOPC_ASSERT(NULL != pEvent);
     bool found = false;
@@ -615,13 +759,18 @@ static SOPC_NodeId* SOPC_Event_GetNodeId(SOPC_Event* pEvent)
     return NULL;
 }
 
+const SOPC_NodeId* SOPC_Event_GetNodeId(const SOPC_Event* pEvent)
+{
+    return SOPC_Event_InternalGetNodeId(pEvent);
+}
+
 SOPC_ReturnStatus SOPC_Event_SetNodeId(SOPC_Event* pEvent, const SOPC_NodeId* pNodeId)
 {
     if (NULL == pEvent || NULL == pEvent->qnPathToEventVar || NULL == pNodeId)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_NodeId* nId = SOPC_Event_GetNodeId(pEvent);
+    SOPC_NodeId* nId = SOPC_Event_InternalGetNodeId(pEvent);
     SOPC_ReturnStatus status = NULL != nId ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
     if (SOPC_STATUS_OK == status)
     {
@@ -1215,7 +1364,7 @@ static SOPC_ReturnStatus SOPC_EventBuilder_PopulateEventTypeVariables(SOPC_Addre
 
 // Create all event types references starting from the given type
 static SOPC_ReturnStatus SOPC_EventBuilder_RecPopulateAllEventTypes(SOPC_AddressSpace* addSpace,
-                                                                    SOPC_NodeId* eventTypeNodeId,
+                                                                    const SOPC_NodeId* eventTypeNodeId,
                                                                     SOPC_Event* eventCtx,
                                                                     SOPC_Server_Event_Types* eventTypesDict,
                                                                     uint16_t depth)
@@ -1452,4 +1601,108 @@ void SOPC_EventManager_Delete(SOPC_Server_Event_Types** eventTypes)
         }
         *eventTypes = NULL;
     }
+}
+
+/*---------------------------------------------------------------------------
+ *                         AlarmConditionType event
+ *---------------------------------------------------------------------------*/
+
+static const SOPC_NodeId alarmConditionTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_AlarmConditionType);
+
+typedef struct
+{
+    const char** paths;
+    SOPC_Event_Variable* variants;
+    size_t length;
+} SOPC_EventDefinition;
+
+static const SOPC_EventDefinition sopc_alarmConditionType_eventDefinition[] = {
+    {sopc_conditionEventVariantsPaths, sopc_conditionEventVariants, SOPC_ConditionEventVariantIdx_ReservedLength},
+    {sopc_acknowledgeableEventVariantsPaths, sopc_acknowledgeableEventVariants,
+     SOPC_AcknowledgeableEventVariantIdx_ReservedLength},
+    {sopc_alarmEventVariantsPaths, sopc_alarmEventVariants, SOPC_AlarmEventVariantIdx_ReservedLength}};
+
+static SOPC_ReturnStatus SOPC_EventBuilder_AddFields_Generic(SOPC_Event* eventCtx, const SOPC_EventDefinition* eventDef)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    for (size_t i = 0; i < eventDef->length; i++)
+    {
+        SOPC_Event_Variable* eventVarCopy = NULL;
+        char* qnPathCopy = SOPC_strdup(eventDef->paths[i]);
+        bool failed = (NULL == qnPathCopy);
+        if (!failed)
+        {
+            eventVarCopy = SOPC_EventVariable_CreateCopy(&eventDef->variants[i]);
+            failed = (NULL == eventVarCopy);
+        }
+        if (!failed)
+        {
+            failed = !(SOPC_Dict_Insert(eventCtx->qnPathToEventVar, (uintptr_t) qnPathCopy, (uintptr_t) eventVarCopy));
+        }
+        if (failed)
+        {
+            SOPC_Free(qnPathCopy);
+            SOPC_EventVariable_Delete(&eventVarCopy);
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    return status;
+}
+
+static SOPC_Server_Event_Types* SOPC_EventManager_CreateAlarmConditionTypeEvent(void)
+{
+    SOPC_Server_Event_Types* DictAlarmConditionTypeOnly = NULL;
+
+    // Initialize the LocalTime ExtensionObject object value since it was not done statically
+    SOPC_Variant* localTime = &sopc_baseEventVariants[SOPC_BaseEventVariantIdx_LocalTime].data;
+    OpcUa_TimeZoneDataType_Initialize(localTime->Value.ExtObject->Body.Object.Value);
+    localTime->Value.ExtObject->Body.Object.ObjType = &OpcUa_TimeZoneDataType_EncodeableType;
+
+    // Create default eventCtx
+    SOPC_Event* eventDefaultCtx = SOPC_EventBuilder_CreateCtx();
+    SOPC_ReturnStatus status = (NULL == eventDefaultCtx ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+
+    // Add fields of AlarmConditionType to the eventCtx
+    if (SOPC_STATUS_OK == status)
+    {
+        for (size_t i = 0; SOPC_STATUS_OK == status &&
+                           i < sizeof(sopc_alarmConditionType_eventDefinition) / sizeof(SOPC_EventDefinition);
+             i++)
+        {
+            status = SOPC_EventBuilder_AddFields_Generic(eventDefaultCtx, &sopc_alarmConditionType_eventDefinition[i]);
+        }
+    }
+
+    bool inserted = false;
+    if (SOPC_STATUS_OK == status)
+    {
+        // Create dictionnary and add final type AlarmConditionType to the created dictionnary
+        DictAlarmConditionTypeOnly = SOPC_NodeId_Dict_Create(false, SOPC_Event_Free_Fct);
+        if (NULL != DictAlarmConditionTypeOnly)
+        {
+            inserted = SOPC_Dict_Insert(DictAlarmConditionTypeOnly, (uintptr_t) &alarmConditionTypeId,
+                                        (uintptr_t) eventDefaultCtx);
+        }
+    }
+
+    if (!inserted)
+    {
+        SOPC_Event_Delete(&eventDefaultCtx);
+        SOPC_Dict_Delete(DictAlarmConditionTypeOnly);
+    }
+
+    return DictAlarmConditionTypeOnly;
+}
+
+SOPC_Event* SOPC_Event_GetInstanceAlarmConditionType(void)
+{
+    SOPC_Server_Event_Types* DictAlarmConditionTypeOnly = SOPC_EventManager_CreateAlarmConditionTypeEvent();
+    SOPC_Event* alarmInstance = NULL;
+    if (NULL != DictAlarmConditionTypeOnly)
+    {
+        alarmInstance = SOPC_EventManager_CreateEventInstance(DictAlarmConditionTypeOnly, &alarmConditionTypeId);
+        SOPC_EventManager_Delete(&DictAlarmConditionTypeOnly);
+    }
+    return alarmInstance;
 }
