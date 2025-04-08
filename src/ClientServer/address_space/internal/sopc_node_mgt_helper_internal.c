@@ -89,6 +89,7 @@ static bool check_node_has_component_reference(OpcUa_NodeClass targetNodeclass,
     switch (targetNodeclass)
     {
     case OpcUa_NodeClass_Object:
+    case OpcUa_NodeClass_Method:
         /* §7.7 Part 3 (1.05): If the TargetNode is an Object or a Method, the SourceNode shall be an Object
          * or ObjectType.
          */
@@ -193,11 +194,11 @@ static bool check_node_has_property_reference(OpcUa_NodeClass targetNodeclass,
      * Variable. By using the HasProperty Reference, the Variable is defined as Property.
      * Properties shall not have Properties, a Property shall never be the SourceNode of a HasProperty Reference.
      */
-    if (OpcUa_NodeClass_Object == targetNodeclass)
+    if (OpcUa_NodeClass_Variable != targetNodeclass)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "check_node_has_property_reference: cannot add an Object node with HasProperty "
-                               "reference");
+                               "check_node_has_property_reference: cannot add anything other than Variable as "
+                               "TargetNode with HasProperty reference");
         *scAddNode = OpcUa_BadReferenceNotAllowed;
         return false;
     }
@@ -377,7 +378,7 @@ static bool check_browse_name_unique_from_parent(SOPC_AddressSpace* addSpace,
 SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeClass targetNodeclass,
                                                                     SOPC_AddressSpace* addSpace,
                                                                     const SOPC_ExpandedNodeId* parentNid,
-                                                                    const SOPC_NodeId* refTypeId,
+                                                                    const SOPC_NodeId* refToParentTypeId,
                                                                     const SOPC_QualifiedName* browseName,
                                                                     const SOPC_ExpandedNodeId* typeDefId)
 {
@@ -399,44 +400,50 @@ SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeCl
     OpcUa_NodeClass* parentNodeClass = SOPC_AddressSpace_Get_NodeClass(addSpace, parentNode);
     SOPC_ASSERT(NULL != parentNodeClass);
 
-    if (typeDefId->ServerIndex != 0)
-    {
-        // We do not manage out of server type
-        return OpcUa_BadTypeDefinitionInvalid;
-    }
-    SOPC_AddressSpace_Node* typeDefNode = SOPC_AddressSpace_Get_Node(addSpace, &typeDefId->NodeId, &found);
-    if (!found)
-    {
-        // We do not manage out of server type
-        return OpcUa_BadTypeDefinitionInvalid;
-    }
-    SOPC_ASSERT(NULL != typeDefNode);
-
+    // Check reference type to parent
+    const SOPC_NodeId* typeDefNodeId = (OpcUa_NodeClass_Method == targetNodeclass) ? NULL : &typeDefId->NodeId;
     bool refTypeOk = check_node_reference_type_to_parent(targetNodeclass, addSpace, parentNode, *parentNodeClass,
-                                                         refTypeId, &typeDefId->NodeId, &retCode);
+                                                         refToParentTypeId, typeDefNodeId, &retCode);
     if (!refTypeOk)
     {
         return retCode;
     }
 
-    // Check type definition is VariableType node class
-    OpcUa_NodeClass* typeDefNodeClass = SOPC_AddressSpace_Get_NodeClass(addSpace, typeDefNode);
-    SOPC_ASSERT(NULL != typeDefNodeClass);
-    if ((OpcUa_NodeClass_Variable == targetNodeclass && OpcUa_NodeClass_VariableType != *typeDefNodeClass) ||
-        (OpcUa_NodeClass_Object == targetNodeclass && OpcUa_NodeClass_ObjectType != *typeDefNodeClass))
+    // Check typeDefintion references for Object and Variable node classes.
+    if (OpcUa_NodeClass_Object == targetNodeclass || OpcUa_NodeClass_Variable == targetNodeclass)
     {
-        char* typeDefIdStr = SOPC_NodeId_ToCString(&typeDefId->NodeId);
-        char* parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable: cannot add a node "
-                               "with a TypeDefinition %s which is not of %" PRIi32 " NodeClass (%" PRIi32
-                               ") from parent %s",
-                               typeDefIdStr, (int32_t) targetNodeclass, (int32_t) *typeDefNodeClass, parentNodeIdStr);
-        SOPC_Free(typeDefIdStr);
-        SOPC_Free(parentNodeIdStr);
+        if (typeDefId->ServerIndex != 0)
+        {
+            // We do not manage out of server type
+            return OpcUa_BadTypeDefinitionInvalid;
+        }
+        SOPC_AddressSpace_Node* typeDefNode = SOPC_AddressSpace_Get_Node(addSpace, &typeDefId->NodeId, &found);
+        if (!found)
+        {
+            // We do not manage out of server type
+            return OpcUa_BadTypeDefinitionInvalid;
+        }
+        SOPC_ASSERT(NULL != typeDefNode);
 
-        retCode = OpcUa_BadTypeDefinitionInvalid;
-        return retCode;
+        // Check type definition is VariableType/ObjectType node class
+        OpcUa_NodeClass* typeDefNodeClass = SOPC_AddressSpace_Get_NodeClass(addSpace, typeDefNode);
+        SOPC_ASSERT(NULL != typeDefNodeClass);
+        if ((OpcUa_NodeClass_Variable == targetNodeclass && OpcUa_NodeClass_VariableType != *typeDefNodeClass) ||
+            (OpcUa_NodeClass_Object == targetNodeclass && OpcUa_NodeClass_ObjectType != *typeDefNodeClass))
+        {
+            char* typeDefIdStr = SOPC_NodeId_ToCString(&typeDefId->NodeId);
+            char* parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable: cannot add a node "
+                "with a TypeDefinition %s which is not of %" PRIi32 " NodeClass (%" PRIi32 ") from parent %s",
+                typeDefIdStr, (int32_t) targetNodeclass, (int32_t) *typeDefNodeClass, parentNodeIdStr);
+            SOPC_Free(typeDefIdStr);
+            SOPC_Free(parentNodeIdStr);
+
+            retCode = OpcUa_BadTypeDefinitionInvalid;
+            return retCode;
+        }
     }
 
     bool browseNameOk = check_browse_name_unique_from_parent(addSpace, parentNode, browseName, &retCode);
@@ -687,7 +694,7 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddObjectNodeAttributes(OpcUa_Objec
     SOPC_ReturnStatus status =
         util_AddCommonNodeAttributes((OpcUa_Node*) objNode, (const OpcUa_NodeAttributes*) objAttributes, scAddNode);
 
-    // Mandatory attributes for Object: EventNotifier
+    // Mandatory attribute for Object: EventNotifier
     if (SOPC_STATUS_OK == status)
     {
         if (0 != (objAttributes->SpecifiedAttributes & OpcUa_NodeAttributesMask_EventNotifier))
@@ -703,10 +710,53 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddObjectNodeAttributes(OpcUa_Objec
     return status;
 }
 
+SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddMethodNodeAttributes(OpcUa_MethodNode* metNode,
+                                                                     const OpcUa_MethodAttributes* metAttributes,
+                                                                     SOPC_StatusCode* scAddNode)
+{
+    SOPC_ASSERT(NULL != metNode);
+    SOPC_ASSERT(NULL != metAttributes);
+    SOPC_ASSERT(NULL != scAddNode);
+
+    // Common fields have same offsets in OpcUa_Node and OpcUa_VariableNode
+    // Common attributes have same offsets in OpcUa_NodeAttributes and OpcUa_VariableAttributes
+    SOPC_ReturnStatus status =
+        util_AddCommonNodeAttributes((OpcUa_Node*) metNode, (const OpcUa_NodeAttributes*) metAttributes, scAddNode);
+
+    // Mandatory attributes for Method: Executable, UserExecutable
+    if (SOPC_STATUS_OK == status)
+    {
+        // Executable
+        if (0 != (metAttributes->SpecifiedAttributes & OpcUa_NodeAttributesMask_Executable))
+        {
+            metNode->Executable = metAttributes->Executable;
+        }
+        else
+        {
+            metNode->Executable = false; // do not allow Executable on the node by default
+        }
+        // UserExecutable
+        if (0 != (metAttributes->SpecifiedAttributes & OpcUa_NodeAttributesMask_UserExecutable) ||
+            (metAttributes->UserExecutable != false && metAttributes->UserExecutable != metAttributes->Executable))
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes: cannot add Method node"
+                "with UserExecutable attribute value since it is specific to each user (managed by application)");
+
+            // Note: server does not manage to set user access level this way
+            *scAddNode = OpcUa_BadNodeAttributesInvalid;
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    return status;
+}
+
 SOPC_StatusCode SOPC_NodeMgtHelperInternal_CopyDataInNode(OpcUa_Node* node,
                                                           const SOPC_ExpandedNodeId* parentNodeId,
                                                           const SOPC_NodeId* newNodeId,
-                                                          const SOPC_NodeId* refTypeId,
+                                                          const SOPC_NodeId* refToParentTypeId,
                                                           const SOPC_QualifiedName* browseName,
                                                           const SOPC_ExpandedNodeId* typeDefId)
 {
@@ -719,40 +769,46 @@ SOPC_StatusCode SOPC_NodeMgtHelperInternal_CopyDataInNode(OpcUa_Node* node,
         status = SOPC_QualifiedName_Copy(&node->BrowseName, browseName);
         SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
     }
+
     // References from new node (backward to parent and forward to type)
     if (SOPC_STATUS_OK == status)
     {
-        node->References = SOPC_Calloc(2, sizeof(*node->References));
+        int32_t nbOfRef = 1; // if OpcUa_NodeClass_Method, only 1 reference (backward to parent).
+        if (OpcUa_NodeClass_Object == node->NodeClass || OpcUa_NodeClass_Variable == node->NodeClass)
+        {
+            nbOfRef = 2;
+        }
+        node->References = SOPC_Calloc((size_t) nbOfRef, sizeof(*node->References));
         if (NULL == node->References)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            node->NoOfReferences = 2;
+            node->NoOfReferences = nbOfRef;
         }
     }
     if (SOPC_STATUS_OK == status)
     {
-        // Set HasTypeDefinition
-        OpcUa_ReferenceNode* hasTypeDef = &node->References[0];
+        // Set hierarchical reference to parent
+        OpcUa_ReferenceNode* hierarchicalRef = &node->References[0];
+        hierarchicalRef->IsInverse = true;
+        status = SOPC_NodeId_Copy(&hierarchicalRef->ReferenceTypeId, refToParentTypeId);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ExpandedNodeId_Copy(&hierarchicalRef->TargetId, parentNodeId);
+        }
+        SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
+    }
+    if (SOPC_STATUS_OK == status && node->NoOfReferences == 2)
+    {
+        // Set HasTypeDefinition reference
+        OpcUa_ReferenceNode* hasTypeDef = &node->References[1];
         hasTypeDef->IsInverse = false;
         hasTypeDef->ReferenceTypeId.Namespace = 0;
         hasTypeDef->ReferenceTypeId.IdentifierType = SOPC_IdentifierType_Numeric;
         hasTypeDef->ReferenceTypeId.Data.Numeric = OpcUaId_HasTypeDefinition;
         status = SOPC_ExpandedNodeId_Copy(&hasTypeDef->TargetId, typeDefId);
-        SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        // Set hierarchical reference to parent
-        OpcUa_ReferenceNode* hierarchicalRef = &node->References[1];
-        hierarchicalRef->IsInverse = true;
-        status = SOPC_NodeId_Copy(&hierarchicalRef->ReferenceTypeId, refTypeId);
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_ExpandedNodeId_Copy(&hierarchicalRef->TargetId, parentNodeId);
-        }
         SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
     }
 

@@ -988,7 +988,7 @@ static SOPC_ReturnStatus SOPC_AddNodesRequestInternal_ItemSetCommonAttributes(
     {
         status = SOPC_QualifiedName_Copy(&item->BrowseName, browseName);
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && OpcUa_NodeClass_Method != item->NodeClass)
     {
         status = SOPC_ExpandedNodeId_Copy(&item->TypeDefinition, typeDefinition);
     }
@@ -1159,6 +1159,63 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetObjectAttributes(OpcUa_AddNodesRequest*
     {
         objAttrs->EventNotifier = *eventNotifier;
     }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_AddNodesItem_Clear(item);
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_AddNodeRequest_SetMethodAttributes(OpcUa_AddNodesRequest* addNodesRequest,
+                                                          size_t index,
+                                                          const SOPC_ExpandedNodeId* parentNodeId,
+                                                          const SOPC_NodeId* referenceTypeId,
+                                                          const SOPC_ExpandedNodeId* optRequestedNodeId,
+                                                          const SOPC_QualifiedName* browseName,
+                                                          const SOPC_LocalizedText* optDisplayName,
+                                                          const SOPC_LocalizedText* optDescription,
+                                                          const uint32_t* optWriteMask,
+                                                          const uint32_t* optUserWriteMask,
+                                                          const SOPC_Boolean* optExecutable,
+                                                          const SOPC_Boolean* optUserExecutable)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (!CHECK_ELEMENT_EXISTS(addNodesRequest, NoOfNodesToAdd, index) || NULL == parentNodeId ||
+        NULL == referenceTypeId || (NULL != optRequestedNodeId && 0 != optRequestedNodeId->ServerIndex) ||
+        NULL == browseName)
+    {
+        return status;
+    }
+    OpcUa_AddNodesItem* item = &addNodesRequest->NodesToAdd[index];
+    OpcUa_MethodAttributes* metAttrs = NULL;
+
+    // item is an Method node
+    item->NodeClass = OpcUa_NodeClass_Method;
+
+    status = SOPC_ExtensionObject_CreateObject(&item->NodeAttributes, &OpcUa_MethodAttributes_EncodeableType,
+                                               (void**) &metAttrs);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Fill common node attributes. Cast the OpcUa_MethodAttributes into OpcUa_NodeAttributes since we will fill the
+        // NodeAttributes part of the structure
+        // Method has no TypeDefinition
+        status = SOPC_AddNodesRequestInternal_ItemSetCommonAttributes(
+            item, (OpcUa_NodeAttributes*) metAttrs, parentNodeId, referenceTypeId, optRequestedNodeId, browseName, NULL,
+            optDisplayName, optDescription, optWriteMask, optUserWriteMask);
+    }
+
+    if (SOPC_STATUS_OK == status && NULL != optExecutable)
+    {
+        metAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_Executable;
+        metAttrs->Executable = *optExecutable;
+    }
+    if (SOPC_STATUS_OK == status && NULL != optUserExecutable)
+    {
+        metAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_UserExecutable;
+        metAttrs->UserExecutable = *optUserExecutable;
+    }
+
     if (SOPC_STATUS_OK != status)
     {
         OpcUa_AddNodesItem_Clear(item);

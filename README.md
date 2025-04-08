@@ -120,7 +120,7 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
 - Server Micro profile and additional services (only if not compiled with S2OPC_NANO_PROFILE set to 1):
   - subscription (no subscription transfer)
   - method call
-  - add nodes (variable and object node only) if library compiled with S2OPC_NODE_MANAGEMENT set to 1
+  - add nodes (variable, object and method nodes) if library compiled with S2OPC_NODE_MANAGEMENT set to 1
 - Server local services: read, write, browse and discovery services
 - Server address space modification:
   - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control

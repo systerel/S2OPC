@@ -663,6 +663,45 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetObjectAttributes(OpcUa_AddNodesRequest*
                                                           const uint32_t* optWriteMask,
                                                           const uint32_t* optUserWriteMask,
                                                           const SOPC_Byte* eventNotifier);
+
+/**
+ * \brief Sets the attributes values requested for the Method node to add.
+ *        Optional parameters are prefixed by "opt" and shall be NULL if not defined.
+ *        If optional parameters are not defined the server will choose values for this attributes.
+ *
+ * \param addNodesRequest             The add nodes request to configure.
+ * \param index                       Index of the add nodes items to configure in the request.
+ *                                    \p index < number of add nodes configured in ::SOPC_AddNodesRequest_Create.
+ * \param parentNodeId                Parent NodeId of the node to add, it should be an Object.
+ * \param referenceTypeId             Reference type of the relation between parent node and added node.
+ *                                    It should be HasComponent reference.
+ * \param optRequestedNodeId          Requested NodeId for the node to add (optional).
+ * \param browseName                  BrowseName for the node to add, it should be unique in the parent node context.
+ * \param optDisplayName              DisplayName for the node to add (optional).
+ * \param optDescription              Description for the node to add (optional).
+ * \param optWriteMask                WriteMask for the node to add (optional).
+ * \param optUserWriteMask            UserWriteMask for the node to add (optional).
+ *                                    It should not be defined since it depends on the user.
+ * \param optExecutable               Executable method attribute (optional).
+ * \param optUserExecutable           UserExecutable method attribute (optional).
+ *                                    It should not be defined since it depends on the user.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid AddNodes request, index, nodeId or attribute.
+ */
+SOPC_ReturnStatus SOPC_AddNodeRequest_SetMethodAttributes(OpcUa_AddNodesRequest* addNodesRequest,
+                                                          size_t index,
+                                                          const SOPC_ExpandedNodeId* parentNodeId,
+                                                          const SOPC_NodeId* referenceTypeId,
+                                                          const SOPC_ExpandedNodeId* optRequestedNodeId,
+                                                          const SOPC_QualifiedName* browseName,
+                                                          const SOPC_LocalizedText* optDisplayName,
+                                                          const SOPC_LocalizedText* optDescription,
+                                                          const uint32_t* optWriteMask,
+                                                          const uint32_t* optUserWriteMask,
+                                                          const SOPC_Boolean* optExecutable,
+                                                          const SOPC_Boolean* optUserExecutable);
+
 /**
  * \brief Creates a CreateSubscription request with default parameters values
  *        Default parameters are the following:

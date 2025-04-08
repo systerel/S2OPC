@@ -50,17 +50,6 @@
 #ifdef WITH_EXPAT
 #if 0 != S2OPC_NODE_MANAGEMENT
 
-// Asynchronous service response callback
-static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* response, uintptr_t appContext)
-{
-    if (encType == &OpcUa_AddNodesResponse_EncodeableType)
-    {
-        // nothing for the moment
-        SOPC_UNUSED_ARG(response);
-        SOPC_UNUSED_ARG(appContext);
-    }
-}
-
 // Connection event callback (only for unexpected events)
 static void SOPC_Client_ConnEventCb(SOPC_ClientConnection* config,
                                     SOPC_ClientConnectionEvent event,
@@ -127,7 +116,8 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     {
         printf(
             "Error. Client config is loaded by XML: variable TEST_CLIENT_XML_CONFIG needs "
-            "to be set.\n");
+            "to be set, e.g.: TEST_CLIENT_XML_CONFIG=./S2OPC_Client_Test_Config.xml "
+            "TEST_PASSWORD_PRIVATE_KEY=password ./toolkit_test_client_add_nodes\n");
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -324,9 +314,61 @@ static OpcUa_AddNodesResponse* add_node_invalid_ref_type(SOPC_ClientConnection* 
         return NULL;
     }
 
-    status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, parentNodeId, referenceTypeId, reqNodeId,
-                                                     browseName, typeDefinition, NULL, NULL, NULL, NULL,
-                                                     (const SOPC_Byte*) "1");
+    status =
+        SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, parentNodeId, referenceTypeId, reqNodeId, browseName,
+                                                typeDefinition, NULL, NULL, NULL, NULL, (const SOPC_Byte*) "1");
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) addNodesReq, (void**) &addNodesResp);
+    }
+    else
+    {
+        SOPC_ReturnStatus delStatus =
+            SOPC_EncodeableObject_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+    }
+
+    // Clear data set
+    SOPC_ExpandedNodeId_Clear(reqNodeId);
+    SOPC_QualifiedName_Clear(browseName);
+
+    return addNodesResp;
+}
+
+static OpcUa_AddNodesResponse* add_node_method_no_hasComponent_ref_type(SOPC_ClientConnection* secureConnection,
+                                                                        SOPC_ExpandedNodeId* parentNodeId,
+                                                                        SOPC_NodeId* referenceTypeId,
+                                                                        SOPC_ExpandedNodeId* reqNodeId,
+                                                                        SOPC_QualifiedName* browseName)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    OpcUa_AddNodesResponse* addNodesResp = NULL;
+    OpcUa_AddNodesRequest* addNodesReq = NULL;
+
+    // Use "Objects" node for parent node
+    parentNodeId->NodeId.Data.Numeric = OpcUaId_ObjectsFolder;
+    // Method node must have a "hasComponent" Reference. "Organizes" will lead to an error.
+    referenceTypeId->Data.Numeric = OpcUaId_Organizes;
+    // NodeId requested
+    const SOPC_NodeId newNodeId = SOPC_NODEID_STRING(1, "NewNodeId");
+    reqNodeId->NodeId = newNodeId;
+    // BrowseName
+    browseName->NamespaceIndex = 1;
+    status = SOPC_String_AttachFromCstring(&browseName->Name, "BrowseName_NewNode");
+    if (SOPC_STATUS_OK != status)
+    {
+        return NULL;
+    }
+
+    addNodesReq = SOPC_AddNodesRequest_Create(1);
+    if (NULL == addNodesReq)
+    {
+        return NULL;
+    }
+
+    status = SOPC_AddNodeRequest_SetMethodAttributes(addNodesReq, 0, parentNodeId, referenceTypeId, reqNodeId,
+                                                     browseName, NULL, NULL, NULL, NULL, NULL, NULL);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -352,7 +394,7 @@ static OpcUa_AddNodesResponse* add_node_invalid_ref_type_to_parent(SOPC_ClientCo
                                                                    SOPC_ExpandedNodeId* reqNodeId,
                                                                    SOPC_QualifiedName* browseName,
                                                                    SOPC_ExpandedNodeId* typeDefinition)
-{                
+{
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_AddNodesResponse* addNodesResp = NULL;
     OpcUa_AddNodesRequest* addNodesReq = NULL;
@@ -408,12 +450,12 @@ static OpcUa_AddNodesResponse* add_node_invalid_ref_type_to_parent(SOPC_ClientCo
     return addNodesResp;
 }
 
-static SOPC_ReturnStatus add_node_variable_in_added_node_object(SOPC_ClientConnection* secureConnection,
-                                                                SOPC_ExpandedNodeId* parentNodeId,
-                                                                SOPC_NodeId* referenceTypeId,
-                                                                SOPC_ExpandedNodeId* reqNodeId,
-                                                                SOPC_QualifiedName* browseName,
-                                                                SOPC_ExpandedNodeId* typeDefinition)
+static SOPC_ReturnStatus add_node_variable_and_method_in_added_node_object(SOPC_ClientConnection* secureConnection,
+                                                                           SOPC_ExpandedNodeId* parentNodeId,
+                                                                           SOPC_NodeId* referenceTypeId,
+                                                                           SOPC_ExpandedNodeId* reqNodeId,
+                                                                           SOPC_QualifiedName* browseName,
+                                                                           SOPC_ExpandedNodeId* typeDefinition)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_AddNodesResponse* addNodesResp = NULL;
@@ -548,6 +590,60 @@ static SOPC_ReturnStatus add_node_variable_in_added_node_object(SOPC_ClientConne
         SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
     }
 
+    // 3) Add node Method in the new Object
+
+    // Clear string data set and keep other data set.
+    SOPC_String_Clear(&reqNodeId->NodeId.Data.String);
+    SOPC_String_Clear(&browseName->Name);
+
+    // NodeId requested
+    status = SOPC_String_AttachFromCstring(&reqNodeId->NodeId.Data.String, "NewMethod");
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    // BrowseName
+    status = SOPC_String_AttachFromCstring(&browseName->Name, "BrowseName_NewMethodInObject");
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    // Reference type "HasComponent"
+    referenceTypeId->Data.Numeric = OpcUaId_HasComponent;
+
+    addNodesReq = SOPC_AddNodesRequest_Create(1);
+    if (NULL == addNodesReq)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    status = SOPC_AddNodeRequest_SetMethodAttributes(addNodesReq, 0, parentNodeId, referenceTypeId, reqNodeId,
+                                                     browseName, NULL, NULL, NULL, NULL, NULL, NULL);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) addNodesReq, (void**) &addNodesResp);
+    }
+    else
+    {
+        SOPC_ReturnStatus delStatus =
+            SOPC_EncodeableObject_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ASSERT(NULL != addNodesResp);
+        if (!SOPC_IsGoodStatus(addNodesResp->ResponseHeader.ServiceResult) || addNodesResp->NoOfResults != 1 ||
+            addNodesResp->Results[0].StatusCode ||
+            !SOPC_NodeId_Equal(&reqNodeId->NodeId, &addNodesResp->Results[0].AddedNodeId))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+
+        SOPC_ReturnStatus delStatus =
+            SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+    }
+
     // Clear data set
     SOPC_ExpandedNodeId_Clear(parentNodeId);
     SOPC_ExpandedNodeId_Clear(reqNodeId);
@@ -579,12 +675,6 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         status = Client_LoadClientConfiguration(&nbSecConnCfgs, &secureConnConfigArray);
-    }
-
-    // Set asynchronous response callback
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_Client_AsyncRespCb);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -635,7 +725,15 @@ int main(void)
         del_status = SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
         SOPC_ASSERT(SOPC_STATUS_OK == del_status);
 
-        /* 4. Ref type is not valid for the node to add to this parent */
+        /* 4. Method node need an hasComponent reference */
+        addNodesResp = add_node_method_no_hasComponent_ref_type(secureConnection, &parentNodeId, &referenceTypeId, &reqNodeId,
+            &browseName);
+        /* Check status code of response is OpcUa_BadReferenceNotAllowed and delete. */
+        SOPC_ASSERT(NULL != addNodesResp && OpcUa_BadReferenceNotAllowed == addNodesResp->Results[0].StatusCode);
+        del_status = SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
+        SOPC_ASSERT(SOPC_STATUS_OK == del_status);
+
+        /* 5. Ref type is not valid for the node to add to this parent */
         addNodesResp = add_node_invalid_ref_type_to_parent(secureConnection, &parentNodeId, &referenceTypeId, &reqNodeId,
                                                            &browseName, &typeDefinition);
         /* Check status code of response is OpcUa_BadReferenceNotAllowed and delete. */
@@ -643,8 +741,8 @@ int main(void)
         del_status = SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
         SOPC_ASSERT(SOPC_STATUS_OK == del_status);
 
-        /* 5. Good case. Add a Variable in the new Object node added */
-        status = add_node_variable_in_added_node_object(secureConnection, &parentNodeId, &referenceTypeId, &reqNodeId,
+        /* 6. Good case. Add a Variable and a Method in the new Object node added */
+        status = add_node_variable_and_method_in_added_node_object(secureConnection, &parentNodeId, &referenceTypeId, &reqNodeId,
                                                         &browseName, &typeDefinition);
     }
 

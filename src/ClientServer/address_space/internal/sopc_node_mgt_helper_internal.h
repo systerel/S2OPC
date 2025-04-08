@@ -29,11 +29,11 @@
 #include "sopc_builtintypes.h"
 #include "sopc_types.h"
 
-/* NodeClass handled by the function: Variable and Object */
+/* NodeClass handled by the function: Variable, Object, Method */
 SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeClass nodeclass,
                                                                     SOPC_AddressSpace* addSpace,
                                                                     const SOPC_ExpandedNodeId* parentNid,
-                                                                    const SOPC_NodeId* refTypeId,
+                                                                    const SOPC_NodeId* refToParentTypeId,
                                                                     const SOPC_QualifiedName* browseName,
                                                                     const SOPC_ExpandedNodeId* typeDefId);
 
@@ -47,10 +47,14 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddObjectNodeAttributes(OpcUa_Objec
                                                                      const OpcUa_ObjectAttributes* objAttributes,
                                                                      SOPC_StatusCode* scAddNode);
 
+SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddMethodNodeAttributes(OpcUa_MethodNode* metNode,
+                                                                     const OpcUa_MethodAttributes* metAttributes,
+                                                                     SOPC_StatusCode* scAddNode);
+
 SOPC_StatusCode SOPC_NodeMgtHelperInternal_CopyDataInNode(OpcUa_Node* node,
                                                           const SOPC_ExpandedNodeId* parentNodeId,
                                                           const SOPC_NodeId* newNodeId,
-                                                          const SOPC_NodeId* refTypeId,
+                                                          const SOPC_NodeId* refToParentTypeId,
                                                           const SOPC_QualifiedName* browseName,
                                                           const SOPC_ExpandedNodeId* typeDefId);
 

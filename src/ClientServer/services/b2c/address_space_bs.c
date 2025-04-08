@@ -253,7 +253,16 @@ void address_space_bs__addNode_AddressSpace_Method(
     const constants__t_NodeAttributes_i address_space_bs__p_nodeAttributes,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc_addnode)
 {
-    // TODO
+    SOPC_UNUSED_ARG(address_space_bs__p_nodeClass); // For B precondition
+    SOPC_ASSERT(NULL != address_space_bs__p_nodeAttributes);
+    SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
+    SOPC_ASSERT(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
+                &OpcUa_MethodAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
+    SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddMethodNode(
+        addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
+        address_space_bs__p_browseName,
+        (const OpcUa_MethodAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value);
+    util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 }
 
 void address_space_bs__addNode_check_valid_node_attributes_type(

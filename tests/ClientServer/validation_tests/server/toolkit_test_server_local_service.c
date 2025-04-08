@@ -64,8 +64,10 @@ static int32_t nonRegWriteResponses = 0;
 
 static uint32_t cptReadResps = 0;
 
-static const SOPC_NodeId newNodeId = SOPC_NODEID_STRING(1, "NewNodeId");
+static const SOPC_NodeId newObjNodeId = SOPC_NODEID_STRING(1, "NewObjNodeId");
+static const SOPC_NodeId newMetNodeId = SOPC_NODEID_STRING(1, "NewMetNodeId");
 static const SOPC_NodeId refOrganizeTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
+static const SOPC_NodeId refHasComponentTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
 static const SOPC_NodeId HasTypeDefinition = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasTypeDefinition);
 
 static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
@@ -112,15 +114,19 @@ static void SOPC_LocalServiceAsyncRespCallback(SOPC_EncodeableType* encType, voi
             printf("<Test_Server_Local_Service: received local service AddNodeResponse \n");
             OpcUa_AddNodesResponse* addNodeResp = (OpcUa_AddNodesResponse*) response;
             // Check that a node with good NodeId has been added
-            if (1 == addNodeResp->NoOfResults)
+            if (2 == addNodeResp->NoOfResults)
             {
-                char* nodeIdAddedStr = SOPC_NodeId_ToCString(&addNodeResp->Results->AddedNodeId);
-                printf("NodeId of the added node: '%s'\n", nodeIdAddedStr);
-                SOPC_Free(nodeIdAddedStr);
-                int32_t comparison = -2;
+                char* nodeIdAddedStr1 = SOPC_NodeId_ToCString(&addNodeResp->Results[0].AddedNodeId);
+                char* nodeIdAddedStr2 = SOPC_NodeId_ToCString(&addNodeResp->Results[1].AddedNodeId);
+                printf("NodeId of added nodes: '%s', '%s'\n", nodeIdAddedStr1, nodeIdAddedStr2);
+                SOPC_Free(nodeIdAddedStr1);
+                SOPC_Free(nodeIdAddedStr2);
+                int32_t comparison1, comparison2 = -2;
                 SOPC_ASSERT(SOPC_STATUS_OK ==
-                            SOPC_NodeId_Compare(&addNodeResp->Results->AddedNodeId, &newNodeId, &comparison));
-                test_results_set_service_result(0 == comparison);
+                            SOPC_NodeId_Compare(&addNodeResp->Results[0].AddedNodeId, &newObjNodeId, &comparison1));
+                SOPC_ASSERT(SOPC_STATUS_OK ==
+                            SOPC_NodeId_Compare(&addNodeResp->Results[1].AddedNodeId, &newMetNodeId, &comparison2));
+                test_results_set_service_result(0 == comparison1 && 0 == comparison2);
             }
             else
             {
@@ -680,7 +686,8 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     browseRequest = SOPC_BrowseRequest_Create(1, 0, NULL);
 
     char* nodeIdStr = SOPC_NodeId_ToCString(nodeId);
-    printf("<Test_Server_Local_Service: (Add Node Object) Browsing references for node'%s' ...\n", nodeIdStr);
+    printf("<Test_Server_Local_Service: check_references_added_node: Browsing references for node'%s' ...\n",
+           nodeIdStr);
     SOPC_Free(nodeIdStr);
     nodeIdStr = NULL;
 
@@ -692,7 +699,8 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     }
     else
     {
-        printf("<Test_Server_Local_Service: (Add Node Object) Failed to create browseRequest (outOfMemory)\n");
+        printf(
+            "<Test_Server_Local_Service: check_references_added_node: Failed to create browseRequest (outOfMemory)\n");
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
@@ -702,8 +710,10 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     }
     else
     {
-        printf("<Test_Server_Local_Service: (Add Node Object) Failed to configure browseRequest, with status = %d\n",
-               status);
+        printf(
+            "<Test_Server_Local_Service: check_references_added_node: Failed to configure browseRequest, with status = "
+            "%d\n",
+            status);
     }
 
     // Extract references
@@ -714,7 +724,21 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
             OpcUa_BrowseResult* result = &browseResponse->Results[0];
             if (SOPC_IsGoodStatus(result->StatusCode))
             {
-                if (result->NoOfReferences == 2)
+                if (result->NoOfReferences == 1) // Method (no TypeDef reference)
+                {
+                    OpcUa_ReferenceDescription* ref = &result->References[0];
+                    bool res = SOPC_NodeId_Equal(refToParentTypeId, &ref->ReferenceTypeId);
+                    status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                    if (SOPC_STATUS_OK != status)
+                    {
+                        printf(
+                            "<Test_Server_Local_Service: check_references_added_node: Unexpected references. Expected "
+                            ": i=%d "
+                            "Results : i=%d\n",
+                            refToParentTypeId->Data.Numeric, ref->ReferenceTypeId.Data.Numeric);
+                    }
+                }
+                else if (result->NoOfReferences == 2) // Object
                 {
                     OpcUa_ReferenceDescription* ref1 = &result->References[0];
                     OpcUa_ReferenceDescription* ref2 = &result->References[1];
@@ -733,7 +757,8 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
                     if (SOPC_STATUS_OK != status)
                     {
                         printf(
-                            "<Test_Server_Local_Service: (Add Node Object) Unexpected references. Expected : i=%d, "
+                            "<Test_Server_Local_Service: check_references_added_node: Unexpected references. Expected "
+                            ": i=%d, "
                             "i=%d. Results : i=%d, i=%d\n",
                             HasTypeDefinition.Data.Numeric, refToParentTypeId->Data.Numeric,
                             ref1->ReferenceTypeId.Data.Numeric, ref2->ReferenceTypeId.Data.Numeric);
@@ -741,26 +766,32 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
                 }
                 else
                 {
-                    printf("<Test_Server_Local_Service: (Add Node Object) Unexpected number of references\n");
+                    printf(
+                        "<Test_Server_Local_Service: check_references_added_node: Unexpected number of references\n");
                     status = SOPC_STATUS_NOK;
                 }
             }
             else
             {
-                printf("<Test_Server_Local_Service: (Add Node Object) Unexpected BROWSE result\n");
+                printf("<Test_Server_Local_Service: check_references_added_node: Unexpected BROWSE result : 0x%08x\n",
+                       result->StatusCode);
                 status = SOPC_STATUS_NOK;
             }
         }
         else
         {
-            printf("<Test_Server_Local_Service: (Add Node Object) Unexpected BROWSE service result");
+            printf(
+                "<Test_Server_Local_Service: check_references_added_node: Unexpected BROWSE service result :  0x%08x",
+                browseResponse->ResponseHeader.ServiceResult);
             status = SOPC_STATUS_NOK;
         }
     }
     else
     {
-        printf("<Test_Server_Local_Service: (Add Node Object) Failed to execute local BROWSE, with status = %d\n",
-               status);
+        printf(
+            "<Test_Server_Local_Service: check_references_added_node: Failed to execute local BROWSE, with status = "
+            "%d\n",
+            status);
     }
     // Free memory
     if (NULL != browseResponse)
@@ -1142,16 +1173,17 @@ int main(int argc, char* argv[])
     test_concurrent_write_read_non_reg();
 
     /*
-     * LOCAL SERVICE: very basic AddNodeObject
+     * LOCAL SERVICE: very basic AddNodeObject & AddNodeMethod
      */
     if (SOPC_STATUS_OK == status)
     {
         // Reset expected result
         test_results_set_service_result(false);
 
-        // Create AddNodeRequest to be sent (deallocated by toolkit) */
-        OpcUa_AddNodesRequest* addNodesReq = SOPC_AddNodesRequest_Create(1);
-        // Create params of the request
+        /* Create AddNodeRequest to be sent (deallocated by toolkit) */
+        OpcUa_AddNodesRequest* addNodesReq = SOPC_AddNodesRequest_Create(2);
+
+        /* Create params for Object to add */
         // 1) parent
         SOPC_ExpandedNodeId parentNode;
         SOPC_ExpandedNodeId_Initialize(&parentNode);
@@ -1160,7 +1192,7 @@ int main(int argc, char* argv[])
         // 3) Node to add (nodeId etc)
         SOPC_ExpandedNodeId nodeToAdd;
         SOPC_ExpandedNodeId_Initialize(&nodeToAdd);
-        nodeToAdd.NodeId = newNodeId;
+        nodeToAdd.NodeId = newObjNodeId;
         // 4) BrowseName of the node to add
         SOPC_QualifiedName nodeToAddBrowseName;
         SOPC_QualifiedName_Initialize(&nodeToAddBrowseName);
@@ -1175,6 +1207,20 @@ int main(int argc, char* argv[])
                                                          &nodeToAddBrowseName, &typeDefinition, NULL, NULL, NULL, NULL,
                                                          (const SOPC_Byte*) "1");
 
+        /* Adapt params for Method to add */
+        // 2) ref type from parent to the node to add : refHasComponentTypeId
+        // 3) Node to add (nodeId etc)
+        SOPC_ExpandedNodeId_Initialize(&nodeToAdd);
+        nodeToAdd.NodeId = newMetNodeId;
+        // 4) BrowseName of the node to add
+        SOPC_QualifiedName_Initialize(&nodeToAddBrowseName);
+        nodeToAddBrowseName.NamespaceIndex = 1;
+        status = SOPC_String_AttachFromCstring(&nodeToAddBrowseName.Name, "NewMetAddedNode");
+
+        status =
+            SOPC_AddNodeRequest_SetMethodAttributes(addNodesReq, 1, &parentNode, &refHasComponentTypeId, &nodeToAdd,
+                                                    &nodeToAddBrowseName, NULL, NULL, NULL, NULL, NULL, NULL);
+
         // Use 1 as AddNode request context
         status = SOPC_ServerHelper_LocalServiceAsync(addNodesReq, 1);
         if (SOPC_STATUS_OK == status)
@@ -1185,28 +1231,35 @@ int main(int argc, char* argv[])
         {
             printf("<Test_Server_Local_Service: local addNode asynchronous request: NOK\n");
         }
-    }
 
-    /* Wait until service response is received */
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-    }
+        /* Wait until service response is received */
+        loopCpt = 0;
+        while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+               loopCpt * sleepTimeout <= loopTimeout)
+        {
+            loopCpt++;
+            SOPC_Sleep(sleepTimeout);
+        }
 
-    if (loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
-    }
+        if (loopCpt * sleepTimeout > loopTimeout)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+        }
 
-    /* Check the references of the added node*/
-    if (SOPC_STATUS_OK == status)
-    {
-        status = check_references_added_node(&newNodeId, &refOrganizeTypeId);
-        printf("<Test_Server_Local_Service: check_references_added_node: %s\n",
-               SOPC_STATUS_OK == status ? "OK" : "NOK");
+        /* Check the references of the Object node added*/
+        if (SOPC_STATUS_OK == status)
+        {
+            status = check_references_added_node(&newObjNodeId, &refOrganizeTypeId);
+            printf("<Test_Server_Local_Service: check_references_added_node (Object): %s\n",
+                   SOPC_STATUS_OK == status ? "OK" : "NOK");
+        }
+        /* Check the references of the Method node added */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = check_references_added_node(&newMetNodeId, &refHasComponentTypeId);
+            printf("<Test_Server_Local_Service: check_references_added_node (Method): %s\n",
+                   SOPC_STATUS_OK == status ? "OK" : "NOK");
+        }
     }
 
     // Asynchronous request to stop the server
