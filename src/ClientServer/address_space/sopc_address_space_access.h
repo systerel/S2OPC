@@ -135,34 +135,54 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addS
                                                    const uint16_t* optSourcePicoSeconds);
 
 /**
+ * \brief Get a fresh numeric node Id from the namespace \p nsIndex in \p addSpaceAccess,
+ *        and copy it to the out parameter \p nodeToAdd
+ *
+ * \param addSpaceAccess   The AddressSpace Access used for write operation
+ * \param nsIndex          The Namespace index of the fresh nodeId requested
+ * \param[out] freshNodeId A valid pointer to the nodeId which will receive the fresh nodeId.
+ *
+ * \return SOPC_GoodGenericStatus in case of success, otherwise:
+ *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL, incoherent parameters)
+ *         - OpcUa_BadNodeIdInvalid: if obtaining a fresh nodeId failed.
+ */
+SOPC_StatusCode SOPC_AddressSpaceAccess_GetFreshNodeId(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                       uint16_t nsIndex,
+                                                       SOPC_NodeId* freshNodeId);
+
+/**
  * \brief Add a Variable node into the AddressSpace with given attributes and references to its parent and type.
  *
- * \param addSpaceAccess    The AddressSpace Access used for AddNodes operation
- * \param parentNodeId      The ExpandedNodeId of the parent node in AddressSpace for the variable to add.
- *                          Only "local" NodeId are supported for now
- *                          (ServerIndex shall be 0 and NamespaceUri is ignored).
- *                          Parent node characteristics shall be compliant to add the new Variable node as a child.
- *                          See OPC UA specifications part 3 for constraints and returned error code for details.
- * \param refToParentTypeId The NodeId of the reference type used for reference between parent node and new variable
- *                          node.
- *                          E.g. Organizes, HasComponent, etc.
- *                          ReferenceType shall be compliant with parent node and variable node characteristics.
- *                          See OPC UA specifications part 3 for constraints and returned error code for details.
- * \param newNodeId         The fresh NodeId for the new variable to add. It shall not already exist in AddressSpace.
- * \param browseName        The QualifiedName used when browsing the AddressSpace for the new variable node.
- *                          It shall be unique in the parent node children.
- * \param varAttributes     The attributes defined for the new variable node.
- *                          The following attributes combination are not supported and will make addition fail:
- *                          WriteMask or UserWriteMask,
- *                          UserAccessLevel,
- *                          NoOfArrayDimensions without ArrayDimensions,
- *                          Historizing = true,
- *                          MinimumSamplingInterval != 0,
- * \param typeDefId         The ExpandedNodeId of the type definition node in AddressSpace for the variable to add.
- *                          E.g. BaseDataVariable, PropertyType, etc.
- *                          Only "local" NodeId are supported for now (ServerIndex shall be 0 and NamespaceUri ignored).
- *                          Type characteristics shall be compliant to add the Variable into the parent node indicated.
- *                          See OPC UA specifications part 3 for constraints and returned error code for details.
+ * \param addSpaceAccess        The AddressSpace Access used for AddNodes operation
+ * \param parentNodeId          The ExpandedNodeId of the parent node in AddressSpace for the variable to add.
+ *                              Only "local" NodeId are supported for now
+ *                              (ServerIndex shall be 0 and NamespaceUri is ignored).
+ *                              Parent node characteristics shall be compliant to add the new Variable node as a child.
+ *                              See OPC UA specifications part 3 for constraints and returned error code for details.
+ * \param refToParentTypeId     The NodeId of the reference type used for reference between parent node and
+ *                              new variable node. E.g. Organizes, HasComponent, etc.
+ *                              ReferenceType shall be compliant with parent node and variable node characteristics.
+ *                              See OPC UA specifications part 3 for constraints and returned error code for details.
+ * \param newNodeId             The fresh NodeId for the new variable to add.
+ *                              It shall not already exist in AddressSpace.
+ * \param browseName            The QualifiedName used when browsing the AddressSpace for the new variable node.
+ *                              It shall be unique in the parent node children.
+ * \param varAttributes         The attributes defined for the new variable node.
+ *                              The following attributes combination are not supported and will make addition fail:
+ *                              WriteMask or UserWriteMask,
+ *                              UserAccessLevel,
+ *                              NoOfArrayDimensions without ArrayDimensions,
+ *                              Historizing = true,
+ *                              MinimumSamplingInterval != 0,
+ * \param typeDefId             The ExpandedNodeId of the type definition node in AddressSpace for the variable to add.
+ *                              E.g. BaseDataVariable, PropertyType, etc.
+ *                              Only "local" NodeId are supported for now (ServerIndex shall be 0 and NamespaceUri
+ *                              ignored).
+ *                              Type characteristics shall be compliant to add the Variable into the parent node
+ *                              indicated.
+ *                              See OPC UA specifications part 3 for constraints and returned error code for details.
+ * \param addChildNodesFromType A flag to activate automatic generation of child nodes based on the variable type
+ *                              definition (only mandatory nodes by default, see note).
  *
  * \return SOPC_GoodGenericStatus in case of success, otherwise:
  *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
@@ -185,9 +205,14 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addS
  *         - OpcUa_BadOutOfMemory: if an allocation failed during add node operation
  *
  * \note: Add variable node operation includes creation of mutual references with parent / type.
+ *        Inverse reference from type to new node is added by default. This reference creation
+ *        can be avoided by setting S2OPC_NODE_ADD_INVERSE_TYPEDEF=0 at compile time.
  *
- * \warning Children of the variable that might declared as mandatory in the \p typeDefId
- *          are not generated automatically by this operation for now.
+ * \note: Children of the Variable that might declared as mandatory in the \p typeDefId
+ *        are generated automatically by this operation.
+ *        Optional nodes can also be added by setting S2OPC_NODE_ADD_OPTIONAL=1 at compile time.
+ *        Only children with an 'Aggregates' reference type or sub-type are added.
+ *        Children with 'Organizes' and 'HasEventSource' reference types are ignored.
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
                                                         const SOPC_ExpandedNodeId* parentNodeId,
@@ -195,33 +220,38 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
                                                         const SOPC_NodeId* newNodeId,
                                                         const SOPC_QualifiedName* browseName,
                                                         const OpcUa_VariableAttributes* varAttributes,
-                                                        const SOPC_ExpandedNodeId* typeDefId);
+                                                        const SOPC_ExpandedNodeId* typeDefId,
+                                                        const bool addChildNodesFromType);
 
 /**
  * \brief Add an Object node into the AddressSpace with given attributes and references to its parent and type.
  *
- * \param addSpaceAccess    The AddressSpace Access used for AddNodes operation
- * \param parentNodeId      The ExpandedNodeId of the parent node in AddressSpace for the Object to add.
- *                          Only "local" NodeId are supported for now
- *                          (ServerIndex shall be 0 and NamespaceUri is ignored).
- *                          Parent node characteristics shall be compliant to add the new Object node as a child.
- *                          See OPC UA specifications part 3 for constraints and returned error code for details.
- * \param refToParentTypeId The NodeId of the reference type used for reference between parent node and new Object
- *                          node.
- *                          E.g. Organizes, HasComponent, etc.
- *                          ReferenceType shall be compliant with parent node and Object node characteristics.
- *                          See OPC UA specifications part 3 for constraints and returned error code for details.
- * \param newNodeId         The fresh NodeId for the new Object to add. It shall not already exist in AddressSpace.
- * \param browseName        The QualifiedName used when browsing the AddressSpace for the new Object node.
- *                          It shall be unique in the parent node children.
- * \param objAttributes     The attributes defined for the new Object node.
- *                          The following attributes combination are not supported and will make addition fail:
- *                          WriteMask or UserWriteMask.
- * \param typeDefId         The ExpandedNodeId of the type definition node in AddressSpace for the Object to add.
- *                          E.g. BaseObjectType, FolderType, etc.
- *                          Only "local" NodeId are supported for now (ServerIndex shall be 0 and NamespaceUri ignored).
- *                          Type characteristics shall be compliant to add the Object into the parent node indicated.
- *                          See OPC UA specifications part 3 for constraints and returned error code for details.
+ * \param addSpaceAccess        The AddressSpace Access used for AddNodes operation
+ * \param parentNodeId          The ExpandedNodeId of the parent node in AddressSpace for the Object to add.
+ *                              Only "local" NodeId are supported for now
+ *                              (ServerIndex shall be 0 and NamespaceUri is ignored).
+ *                              Parent node characteristics shall be compliant to add the new Object node as a child.
+ *                              See OPC UA specifications part 3 for constraints and returned error code for details.
+ * \param refToParentTypeId     The NodeId of the reference type used for reference between parent node and new Object
+ *                              node.
+ *                              E.g. Organizes, HasComponent, etc.
+ *                              ReferenceType shall be compliant with parent node and Object node characteristics.
+ *                              See OPC UA specifications part 3 for constraints and returned error code for details.
+ * \param newNodeId             The fresh NodeId for the new Object to add. It shall not already exist in AddressSpace.
+ * \param browseName            The QualifiedName used when browsing the AddressSpace for the new Object node.
+ *                              It shall be unique in the parent node children.
+ * \param objAttributes         The attributes defined for the new Object node.
+ *                              The following attributes combination are not supported and will make addition fail:
+ *                              WriteMask or UserWriteMask.
+ * \param typeDefId             The ExpandedNodeId of the type definition node in AddressSpace for the variable to add.
+ *                              E.g. BaseDataVariable, PropertyType, etc.
+ *                              Only "local" NodeId are supported for now (ServerIndex shall be 0 and NamespaceUri
+ *                              ignored).
+ *                              Type characteristics shall be compliant to add the Variable into the parent node
+ *                              indicated. See OPC UA specifications part 3 for constraints and returned error code
+ *                              for details.
+ * \param addChildNodesFromType A flag to activate automatic generation of child nodes based on the object type
+ *                              definition (only mandatory nodes by default, see note)
  *
  * \return SOPC_GoodGenericStatus in case of success, otherwise:
  *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
@@ -244,9 +274,14 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
  *         - OpcUa_BadOutOfMemory: if an allocation failed during add node operation
  *
  * \note: Add Object node operation includes creation of mutual references with parent / type.
+ *        Inverse reference from type to new node is added by default. This reference creation
+ *        can be avoided by setting S2OPC_NODE_ADD_INVERSE_TYPEDEF=0 at compile time.
  *
- * \warning Children of the Object that might declared as mandatory in the \p typeDefId
- *          are not generated automatically by this operation for now.
+ * \note: Children of the Object that might declared as mandatory in the \p typeDefId
+ *        are generated automatically by this operation.
+ *        Optional nodes can also be added by setting S2OPC_NODE_ADD_OPTIONAL=1 at compile time.
+ *        Only children with an 'Aggregates' reference type or sub-type are added.
+ *        Children with 'Organizes' and 'HasEventSource' reference types are ignored.
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* addSpaceAccess,
                                                       const SOPC_ExpandedNodeId* parentNodeId,
@@ -254,7 +289,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
                                                       const SOPC_NodeId* newNodeId,
                                                       const SOPC_QualifiedName* browseName,
                                                       const OpcUa_ObjectAttributes* objAttributes,
-                                                      const SOPC_ExpandedNodeId* typeDefId);
+                                                      const SOPC_ExpandedNodeId* typeDefId,
+                                                      const bool addChildNodesFromType);
 
 /**
  * \brief Add an Method node into the AddressSpace with given attributes and reference to its parent.
@@ -293,6 +329,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
  *         - OpcUa_BadOutOfMemory: if an allocation failed during add node operation
  *
  * \note: Add Method node operation includes creation of mutual references with parent / type.
+ *        Inverse reference from type to new node is added by default. This reference creation
+ *        can be avoided by setting S2OPC_NODE_ADD_INVERSE_TYPEDEF=0 at compile time.
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* addSpaceAccess,
                                                       const SOPC_ExpandedNodeId* parentNodeId,
@@ -310,8 +348,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* a
  * @param relativePath      \p relativePath is the path to follow from the startingNode.
  *                          The elements in the relativePath shall have a targetName specified.
  *                          The elements in the relativePath shall have a referenceTypeId specified.
- *                          Only elements in the address space can be fetch. If one of the target nodes is in a remote
- *                          server OpcUa_BadNoMatch is returned.
+ *                          Only elements in the address space can be fetch.
+ *                          If one of the target nodes is in a remote server OpcUa_BadNoMatch is returned.
  *                          It should not be NULL otherwise OpcUa_BadInvalidArgument is returned.
  * @param[out] targetId     \p targetId is the identifier of the target for the relativePath from the startingNode.
  *                          The pointed \p targetId SHALL NOT be modified nor deallocated.
@@ -330,7 +368,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_TranslateBrowsePath(const SOPC_AddressSp
  * @param addSpaceAccess        The addressSpace access used to browse
  * @param nodeId                The nodeId of the node to browse.
  * @param browseDirection       The browse direction to use \p browseDirection shall be in range of
- * ::OpcUa_BrowseDirection.
+ *                              ::OpcUa_BrowseDirection.
  * @param referenceTypeId       The nodeId of the reference type to follow.
  * @param includeSubtypes       Indicates whether subtypes of the referenceType should be included in the browse.
  * @param nodeClassMask         Specifies the expected nodeClasses for the targetNodes.

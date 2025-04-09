@@ -69,6 +69,7 @@ PROMOTES
     check_object_has_method,
     is_IndexRangeDefined,
 
+    gen_fresh_NodeId,
     exec_callMethod,
     deleteNode_AddressSpace
 
@@ -771,22 +772,23 @@ OPERATIONS
 
     sc_addnode <-- addNode_AddressSpace(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     VAR
-        l_bres
+        l_bres,
+        l_is_local_treatment
     IN
         l_bres <-- addNode_check_valid_node_attributes_type(p_nodeClass, p_nodeAttributes);
+        l_is_local_treatment <-- is_local_service_treatment;
         IF l_bres = TRUE THEN
             IF p_nodeClass = e_ncl_Variable
             THEN
                 sc_addnode <-- addNode_AddressSpace_Variable
-                    (p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId)
+                    (l_is_local_treatment, p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId)
             ELSIF p_nodeClass = e_ncl_Object
             THEN
                 sc_addnode <-- addNode_AddressSpace_Object
-                    (p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId)
+                    (l_is_local_treatment, p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId)
             ELSIF p_nodeClass = e_ncl_Method
             THEN
-                sc_addnode <-- addNode_AddressSpace_Method
-                    (p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes)
+                sc_addnode <-- addNode_AddressSpace_Method (p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes)
             ELSE
                 // Unsupported for now => returns invalid node class
                 sc_addnode := e_sc_bad_node_class_invalid

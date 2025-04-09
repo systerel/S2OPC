@@ -107,8 +107,11 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - Only if NOT compiled with S2OPC_NANO_PROFILE set to 1:
     - Subscription and MonitoredItem services (except TransferSubscriptions and SetTriggering)
   - Only if compiled with S2OPC_NODE_MANAGEMENT set to 1:
-    - AddNodes service (simplified: instance node only, no NodeId generation, simplified checks on ReferenceType/Type definition, single node added only without automated generation based on type),
-    - DeleteNodes service. 
+    - AddNodes service
+      If compiled with S2OPC_NODE_ADD_OPTIONAL optional child nodes from type will be added when adding a node (only mandatory ones otherwise).
+      If compiled with S2OPC_NODE_INTERNAL_ADD_CHILD_NODES adding child nodes from type is active when using local services (set by default).
+      If compiled with S2OPC_NODE_ADD_INVERSE_TYPEDEF adds 'HasTypeDefinition' inverse reference from type node to child node (set by default).
+    - DeleteNodes service
       If compiled with S2OPC_NODE_DELETE_CHILD_NODES (option set by default), the child nodes of the deleted node will be recursively deleted. The DeleteNodes permission on child nodes will not be considered: only the permission on root node will be considered.
       If compiled with S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES (option set by default), Organizes reference will be considered when regarding for child nodes.
   - Python wrapper PyS2OPC for a server: see  `src/ClientServer/frontend/pys2opc/README.md`
@@ -123,7 +126,7 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
 - Server Micro profile and additional services (only if not compiled with S2OPC_NANO_PROFILE set to 1):
   - subscription (no subscription transfer)
   - method call
-  - add nodes (variable, object and method nodes) if library compiled with S2OPC_NODE_MANAGEMENT set to 1
+  - add nodes (variable, object and method nodes) if library compiled with S2OPC_NODE_MANAGEMENT set to 1. 
 - Server local services: read, write, browse and discovery services
 - Server address space modification:
   - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control
@@ -284,7 +287,7 @@ To build S2OPC libraries and tests with default configuration on current stable 
 
 By setting environment variables S2OPC_NANO_PROFILE, S2OPC_NODE_MANAGEMENT, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
 - S2OPC_NANO_PROFILE (OFF by default): if set to ON, it excludes the features out of the OPC UA server nano scope (excluded services: subscription, monitored items and method calls services)
-- S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service (variable node only without child nodes generation, no NodeId generation, simplified checks on types) and DeleteNodes services
+- S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service and DeleteNodes services
 - BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
 - ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
 - ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,

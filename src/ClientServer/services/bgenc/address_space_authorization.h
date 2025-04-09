@@ -21,7 +21,7 @@
 
  File Name            : address_space_authorization.h
 
- Date                 : 21/07/2025 16:06:22
+ Date                 : 24/07/2025 13:38:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -76,6 +76,7 @@ extern void address_space_authorization__INITIALISATION(void);
 #define address_space_authorization__address_space_default_role_permissions_array_bs_UNINITIALISATION address_space_user_permissions__address_space_default_role_permissions_array_bs_UNINITIALISATION
 #define address_space_authorization__deleteNode_AddressSpace address_space_bs__deleteNode_AddressSpace
 #define address_space_authorization__exec_callMethod address_space_bs__exec_callMethod
+#define address_space_authorization__gen_fresh_NodeId address_space_bs__gen_fresh_NodeId
 #define address_space_authorization__get_AccessLevel address_space_bs__get_AccessLevel
 #define address_space_authorization__get_BrowseName address_space_bs__get_BrowseName
 #define address_space_authorization__get_DataType address_space_bs__get_DataType

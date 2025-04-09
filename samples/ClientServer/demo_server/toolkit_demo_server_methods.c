@@ -42,7 +42,7 @@ static const SOPC_NodeId TestObject_Counter = SOPC_NODEID_STRING(1, "TestObject_
 
 static const SOPC_NodeId ObjectNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ObjectsFolder);
 static const SOPC_NodeId HasComponent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
-static const SOPC_NodeId HasChild_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasChild);
+static const SOPC_NodeId hasChildType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasChild);
 static const SOPC_NodeId DataVariable_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseDataVariableType);
 static const SOPC_NodeId Organizes_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
 
@@ -241,7 +241,7 @@ SOPC_StatusCode SOPC_Method_Func_GetCounterValue(const SOPC_CallContext* callCon
     element = &pathToCounter.Elements[1];
     element->IncludeSubtypes = true;
     element->IsInverse = false;
-    element->ReferenceTypeId = HasChild_Type;
+    element->ReferenceTypeId = hasChildType;
     element->TargetName = TestObject_Counter_BrowseName;
     SOPC_StatusCode stCode =
         SOPC_AddressSpaceAccess_TranslateBrowsePath(addSpAccess, &ObjectNodeId, &pathToCounter, &counterNode);

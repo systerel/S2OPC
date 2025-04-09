@@ -34,6 +34,11 @@
  *        (e.g. method call implementation).
  */
 
+// Constant to define the maximum of retries to find a free node id in the addSpace.
+#ifndef SOPC_FRESH_NODEID_MAX_RETRIES
+#define SOPC_FRESH_NODEID_MAX_RETRIES 100000
+#endif
+
 #define FOR_EACH_ELEMENT_TYPE(x, extra)                                                                               \
     x(DataType, data_type, extra) x(Method, method, extra) x(Object, object, extra) x(ObjectType, object_type, extra) \
         x(ReferenceType, reference_type, extra) x(Variable, variable, extra) x(VariableType, variable_type, extra)    \
@@ -184,6 +189,10 @@ int32_t* SOPC_AddressSpace_Get_ValueRank(SOPC_AddressSpace* space, SOPC_AddressS
 int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 SOPC_ExtensionObject* SOPC_AddressSpace_Get_DataTypeDefinition(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+
+/* Object common attributes */
+SOPC_Boolean SOPC_AddressSpace_Get_EventNotifier(const SOPC_AddressSpace* space, const SOPC_AddressSpace_Node* node);
+
 /* Types common attribute */
 SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 
@@ -200,5 +209,26 @@ void SOPC_AddressSpace_Node_Initialize(SOPC_AddressSpace* space,
 void SOPC_AddressSpace_Node_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 /* Copy operator used to copy nodes from embedded address space to make them releasable */
 SOPC_AddressSpace_Node* SOPC_AddressSpace_Node_Copy(const SOPC_AddressSpace_Node* src);
+
+/* Store max numeric id for each namespace */
+/**
+ * \brief Initialize the array of maximum numeric id for namespaces in \p addSpace
+ * \note  Allocate this array in addSpace.
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_STATE if NS index of a nodeId in AddSpace is greater than the number of NS (nbNs).
+ */
+SOPC_ReturnStatus SOPC_AddressSpace_MaxNsNumId_Initialize(SOPC_AddressSpace* addSpace, uint16_t nbNs);
+
+/**
+ * \brief Get fresh numerical nodeId of \p ns (namespace) in \p addSpace
+ *        Retrieve the maxNumId for selected \p ns
+ *        Increment this Id and check that it is not used.
+ *        If not, try again in limit of ::SOPC_FRESH_NODEID_MAX_RETRIES.
+ *        Finally, set the new maxNumId for selected \p ns
+ *
+ * \return The fresh nodeId allocated, if successful.
+ *         NULL if obtaining a fresh nodeId failed.
+ */
+SOPC_NodeId* SOPC_AddressSpace_GetFreshNodeId(SOPC_AddressSpace* addSpace, uint16_t ns);
 
 #endif /* SOPC_ADDRESS_SPACE_H_ */

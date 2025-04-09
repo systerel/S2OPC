@@ -81,6 +81,7 @@ PROMOTES
     is_IndexRangeDefined,
 
     addNode_AddressSpace,
+    gen_fresh_NodeId,
     deleteNode_AddressSpace,
     treat_write_request
 

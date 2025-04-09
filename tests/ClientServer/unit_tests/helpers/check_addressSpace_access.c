@@ -188,7 +188,7 @@ START_TEST(test_add_variable_node)
 
     const SOPC_NodeId HasComponentType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
     SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_AddVariableNode(
-        addSpaceAccess, &parentNodeId, &HasComponentType, nodeId, &browseName, &varAttributes, &typeDefId);
+        addSpaceAccess, &parentNodeId, &HasComponentType, nodeId, &browseName, &varAttributes, &typeDefId, false);
     ck_assert_uint_eq(SOPC_GoodGenericStatus, statusCode);
 
     SOPC_DataValue* outValue = NULL;
@@ -270,7 +270,7 @@ START_TEST(test_add_object_node)
     objAttributes.DisplayName = displayName;
 
     SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_AddObjectNode(addSpaceAccess, &parentNodeId, &OrganizesType,
-                                                                       nodeId, &browseName, &objAttributes, &typeDefId);
+                                                                       nodeId, &browseName, &objAttributes, &typeDefId, false);
     ck_assert_uint_eq(SOPC_GoodGenericStatus, statusCode);
 
     SOPC_Variant* outValue = NULL;

@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes.h
 
- Date                 : 11/02/2025 09:51:29
+ Date                 : 28/07/2025 09:08:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,6 +49,7 @@
 #include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
+#include "node_id_pointer_bs.h"
 
 /*------------------------
    INITIALISATION Clause

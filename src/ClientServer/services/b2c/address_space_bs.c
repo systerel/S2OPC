@@ -51,6 +51,8 @@
 bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
+#define GENERATED_NODE_NAMESPACE_INDEX 1
+
 #define InputArguments_BrowseName "InputArguments"
 
 static bool is_inputArgument(const OpcUa_VariableNode* node);
@@ -219,6 +221,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
 }
 
 void address_space_bs__addNode_AddressSpace_Variable(
+    const t_bool address_space_bs__p_local,
     const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,
     const constants__t_NodeId_i address_space_bs__p_refTypeId,
     const constants__t_NodeId_i address_space_bs__p_newNodeId,
@@ -234,11 +237,12 @@ void address_space_bs__addNode_AddressSpace_Variable(
     SOPC_ASSERT(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
                 &OpcUa_VariableAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
     SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
+    bool recursive = S2OPC_NODE_INTERNAL_ADD_CHILD_NODES || !address_space_bs__p_local;
     SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddVariableNode(
         addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
         address_space_bs__p_browseName,
         (const OpcUa_VariableAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value,
-        address_space_bs__p_typeDefId);
+        address_space_bs__p_typeDefId, recursive);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 
     if (SOPC_IsGoodStatus(retCode))
@@ -250,6 +254,7 @@ void address_space_bs__addNode_AddressSpace_Variable(
 }
 
 void address_space_bs__addNode_AddressSpace_Object(
+    const t_bool address_space_bs__p_local,
     const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,
     const constants__t_NodeId_i address_space_bs__p_refTypeId,
     const constants__t_NodeId_i address_space_bs__p_newNodeId,
@@ -264,12 +269,14 @@ void address_space_bs__addNode_AddressSpace_Object(
     SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
     SOPC_ASSERT(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
                 &OpcUa_ObjectAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
+
     SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
+    bool recursive = S2OPC_NODE_INTERNAL_ADD_CHILD_NODES || !address_space_bs__p_local;
     SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddObjectNode(
         addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
         address_space_bs__p_browseName,
         (const OpcUa_ObjectAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value,
-        address_space_bs__p_typeDefId);
+        address_space_bs__p_typeDefId, recursive);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 
     if (SOPC_IsGoodStatus(retCode))
@@ -1302,6 +1309,22 @@ void address_space_bs__write_AddressSpace_free_dataValue(const constants__t_Data
 {
     SOPC_DataValue_Clear(address_space_bs__data);
     SOPC_Free(address_space_bs__data);
+}
+
+void address_space_bs__gen_fresh_NodeId(t_bool* const address_space_bs__bres,
+                                        constants__t_NodeId_i* const address_space_bs__newNid)
+{
+    SOPC_NodeId* newNid = SOPC_AddressSpace_GetFreshNodeId(address_space_bs__nodes, GENERATED_NODE_NAMESPACE_INDEX);
+    if (NULL != newNid)
+    {
+        *address_space_bs__newNid = newNid;
+        *address_space_bs__bres = true;
+    }
+    else
+    {
+        *address_space_bs__newNid = constants__c_NodeId_indet;
+        *address_space_bs__bres = false;
+    }
 }
 
 void address_space_bs__get_AccessLevel(const constants__t_Node_i address_space_bs__p_node,

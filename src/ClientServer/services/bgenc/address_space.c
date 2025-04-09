@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 21/07/2025 16:06:22
+ Date                 : 24/07/2025 15:05:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -748,13 +748,16 @@ void address_space__addNode_AddressSpace(
    constants_statuscodes_bs__t_StatusCode_i * const address_space__sc_addnode) {
    {
       t_bool address_space__l_bres;
+      t_bool address_space__l_is_local_treatment;
       
       address_space_authorization__addNode_check_valid_node_attributes_type(address_space__p_nodeClass,
          address_space__p_nodeAttributes,
          &address_space__l_bres);
+      address_space_authorization__is_local_service_treatment(&address_space__l_is_local_treatment);
       if (address_space__l_bres == true) {
          if (address_space__p_nodeClass == constants__e_ncl_Variable) {
-            address_space_authorization__addNode_AddressSpace_Variable(address_space__p_parentNid,
+            address_space_authorization__addNode_AddressSpace_Variable(address_space__l_is_local_treatment,
+               address_space__p_parentNid,
                address_space__p_refTypeId,
                address_space__p_newNodeId,
                address_space__p_browseName,
@@ -764,7 +767,8 @@ void address_space__addNode_AddressSpace(
                address_space__sc_addnode);
          }
          else if (address_space__p_nodeClass == constants__e_ncl_Object) {
-            address_space_authorization__addNode_AddressSpace_Object(address_space__p_parentNid,
+            address_space_authorization__addNode_AddressSpace_Object(address_space__l_is_local_treatment,
+               address_space__p_parentNid,
                address_space__p_refTypeId,
                address_space__p_newNodeId,
                address_space__p_browseName,

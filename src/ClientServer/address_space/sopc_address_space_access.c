@@ -26,6 +26,7 @@
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_node_mgt_helper_internal.h"
@@ -36,14 +37,34 @@
 
 #include "util_variant.h"
 
-#include "sopc_logger.h"
-
 // NodeIds used for DeleteNodes
 #if 0 != S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
 static const SOPC_NodeId organizesType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
 #endif
 static const SOPC_NodeId hasComponentType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
 static const SOPC_NodeId hasChildType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasChild);
+static const SOPC_NodeId aggregatesType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Aggregates);
+static const SOPC_NodeId hasSubtypeType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasSubtype);
+static const SOPC_NodeId hasTypeDefinitionType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasTypeDefinition);
+static const SOPC_NodeId hasModellingRuleType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasModellingRule);
+static const SOPC_NodeId modellingRuleMandatoryType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ModellingRule_Mandatory);
+static const SOPC_NodeId modellingRuleOptionalType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ModellingRule_Optional);
+
+static SOPC_StatusCode AddSingleVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                             const SOPC_ExpandedNodeId* parentNodeId,
+                                             const SOPC_NodeId* refToParentTypeId,
+                                             const SOPC_NodeId* newNodeId,
+                                             const SOPC_QualifiedName* browseName,
+                                             const OpcUa_VariableAttributes* varAttributes,
+                                             const SOPC_ExpandedNodeId* typeDefId);
+
+static SOPC_StatusCode AddSingleObjectNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                           const SOPC_ExpandedNodeId* parentNodeId,
+                                           const SOPC_NodeId* refToParentTypeId,
+                                           const SOPC_NodeId* newNodeId,
+                                           const SOPC_QualifiedName* browseName,
+                                           const OpcUa_ObjectAttributes* objAttributes,
+                                           const SOPC_ExpandedNodeId* typeDefId);
 
 /* Log macros used for references between two SOPC_AddressSpace_Node */
 #define LOG_NODE_REF(level, addSpace, msg, sourceNode, targetNode)                                         \
@@ -576,46 +597,69 @@ static SOPC_ReturnStatus add_node_and_set_reciprocal_reference(SOPC_AddressSpace
                                                                const SOPC_NodeId* parentNodeId,
                                                                const SOPC_NodeId* childNodeId,
                                                                SOPC_AddressSpace_Node* newNode,
-                                                               const SOPC_NodeId* refTypeId)
+                                                               const SOPC_NodeId* refToParentTypeId,
+                                                               const SOPC_NodeId* refTypeDefId)
 {
-    SOPC_ReturnStatus status = SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(addSpaceAccess->addSpaceRef,
-                                                                                  parentNodeId, childNodeId, refTypeId);
+    SOPC_ReturnStatus status = SOPC_NodeMgtHelperInternal_AddRefToNode(addSpaceAccess->addSpaceRef, parentNodeId,
+                                                                       childNodeId, refToParentTypeId, false);
+    uint8_t nbRefAdded = SOPC_STATUS_OK == status ? 1 : 0;
+
+#if 0 != S2OPC_NODE_ADD_INVERSE_TYPEDEF
+    if (SOPC_STATUS_OK == status && refTypeDefId != NULL)
+    {
+        status = SOPC_NodeMgtHelperInternal_AddRefToNode(addSpaceAccess->addSpaceRef, refTypeDefId, childNodeId,
+                                                         &hasTypeDefinitionType, true);
+        nbRefAdded = SOPC_STATUS_OK == status ? (uint8_t)(nbRefAdded + 1) : nbRefAdded;
+    }
+#else
+    SOPC_UNUSED_ARG(refTypeDefId);
+#endif // S2OPC_NODE_ADD_INVERSE_TYPEDEF
+
     // Add node to address space
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_AddressSpace_Append(addSpaceAccess->addSpaceRef, newNode);
-        if (SOPC_STATUS_OK != status)
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_ASSERT(SOPC_STATUS_OUT_OF_MEMORY == status);
+        if (nbRefAdded >= 1)
         {
-            SOPC_ASSERT(SOPC_STATUS_OUT_OF_MEMORY == status);
             // Rollback reference added in parent
-            SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(addSpaceAccess->addSpaceRef, parentNodeId);
+            SOPC_NodeMgtHelperInternal_RemoveLastRefInTargetNode(addSpaceAccess->addSpaceRef, parentNodeId);
         }
-        else
+        if (nbRefAdded == 2)
         {
-            // Record operation if required (node added)
-            if (addSpaceAccess->recordOperations)
+            // Rollback reference added in type
+            SOPC_NodeMgtHelperInternal_RemoveLastRefInTargetNode(addSpaceAccess->addSpaceRef, refTypeDefId);
+        }
+    }
+    else
+    {
+        // Record operation if required (node added)
+        if (addSpaceAccess->recordOperations)
+        {
+            SOPC_ASSERT(NULL != addSpaceAccess->operations);
+            SOPC_AddressSpaceAccessOperation* op = SOPC_Calloc(1, sizeof(*op));
+            SOPC_NodeId* nodeIdCopy = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+            status = SOPC_NodeId_Copy(nodeIdCopy, childNodeId);
+            const void* addedOp = NULL;
+            if (NULL != op && SOPC_STATUS_OK == status && NULL != nodeIdCopy)
             {
-                SOPC_ASSERT(NULL != addSpaceAccess->operations);
-                SOPC_AddressSpaceAccessOperation* op = SOPC_Calloc(1, sizeof(*op));
-                SOPC_NodeId* nodeIdCopy = SOPC_Calloc(1, sizeof(SOPC_NodeId));
-                status = SOPC_NodeId_Copy(nodeIdCopy, childNodeId);
-                const void* addedOp = NULL;
-                if (NULL != op && SOPC_STATUS_OK == status && NULL != nodeIdCopy)
-                {
-                    addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, (uintptr_t) op);
-                }
-                if (NULL != addedOp)
-                {
-                    op->operation = SOPC_ADDSPACE_CHANGE_NODE;
-                    op->param1 = true; // true for add
-                    op->param2 = (uintptr_t) nodeIdCopy;
-                }
-                else
-                {
-                    SOPC_Free(op);
-                    SOPC_NodeId_Clear(nodeIdCopy);
-                    SOPC_Free(nodeIdCopy);
-                }
+                addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, (uintptr_t) op);
+            }
+            if (NULL != addedOp)
+            {
+                op->operation = SOPC_ADDSPACE_CHANGE_NODE;
+                op->param1 = true; // true for add
+                op->param2 = (uintptr_t) nodeIdCopy;
+            }
+            else
+            {
+                SOPC_Free(op);
+                SOPC_NodeId_Clear(nodeIdCopy);
+                SOPC_Free(nodeIdCopy);
             }
         }
     }
@@ -623,34 +667,487 @@ static SOPC_ReturnStatus add_node_and_set_reciprocal_reference(SOPC_AddressSpace
     return status;
 }
 
-SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
-                                                        const SOPC_ExpandedNodeId* parentNodeId,
-                                                        const SOPC_NodeId* refToParentTypeId,
-                                                        const SOPC_NodeId* newNodeId,
-                                                        const SOPC_QualifiedName* browseName,
-                                                        const OpcUa_VariableAttributes* varAttributes,
-                                                        const SOPC_ExpandedNodeId* typeDefId)
+/**
+ * \brief Searchs 1st \p expectedRefType reference of the \p nodeAddspace node. Returns NULL if not found.
+ */
+static SOPC_ExpandedNodeId* GetExpectedReference(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                 SOPC_AddressSpace_Node* nodeAddspace,
+                                                 const SOPC_NodeId* expectedRefType,
+                                                 const bool isInverse)
 {
-    SOPC_StatusCode retCode =
+    SOPC_ExpandedNodeId* refTargetExpId = NULL;
+    bool isExpectedRef = false;
+    int32_t indexRefChild = 0;
+    OpcUa_ReferenceNode* reference = NULL;
+    const int32_t* n_refsChild = SOPC_AddressSpace_Get_NoOfReferences(addSpaceAccess->addSpaceRef, nodeAddspace);
+    OpcUa_ReferenceNode** refsChild = SOPC_AddressSpace_Get_References(addSpaceAccess->addSpaceRef, nodeAddspace);
+    SOPC_ASSERT(NULL != refsChild && NULL != n_refsChild);
+
+    while (!isExpectedRef && indexRefChild < *n_refsChild)
+    {
+        reference = &(*refsChild)[indexRefChild];
+        isExpectedRef = is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, expectedRefType);
+        indexRefChild++;
+    }
+    if (isExpectedRef && reference->IsInverse == isInverse)
+    {
+        refTargetExpId = &reference->TargetId;
+    }
+    return refTargetExpId;
+}
+
+/**
+ * \brief Searches among all references of a target node whether it has a reference to modeling rules.
+ *        If it is found, it checks whether it is mandatory or optional and returns the result of this search
+ *        in function of the compilation variable ::S2OPC_NODE_ADD_OPTIONAL.
+ *
+ * \param addSpaceAccess  The AddressSpace Access used for AddNodes operation
+ * \param targetNodeId    The pointer of target nodeId on which the search is performed.
+ *
+ * \return True if reference is found, false otherwise
+ */
+static bool IsModellingRuleToAdd(SOPC_AddressSpaceAccess* addSpaceAccess, const SOPC_NodeId* targetNodeId)
+{
+    bool resMandatory = false;
+    bool resOptional = false;
+    bool res = false;
+    SOPC_AddressSpace_Node* targetNodeAddspace = SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, targetNodeId);
+    const SOPC_ExpandedNodeId* modellingRuleTargetRefId =
+        GetExpectedReference(addSpaceAccess, targetNodeAddspace, &hasModellingRuleType, false);
+    if (modellingRuleTargetRefId != NULL)
+    {
+        resMandatory = SOPC_NodeId_Equal(&modellingRuleTargetRefId->NodeId, &modellingRuleMandatoryType);
+        resOptional = !resMandatory && SOPC_NodeId_Equal(&modellingRuleTargetRefId->NodeId, &modellingRuleOptionalType);
+    }
+    res = resMandatory;
+#if 0 != S2OPC_NODE_ADD_OPTIONAL
+    res = res || resOptional;
+#else
+    SOPC_UNUSED_ARG(resOptional); // To avoid compilation error when S2OPC_NODE_ADD_OPTIONAL selected
+#endif // S2OPC_NODE_ADD_OPTIONAL
+    return res;
+}
+
+static SOPC_StatusCode AddSingleObjectNodeFromInstanceDeclaration(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                                  const SOPC_ExpandedNodeId* parentNodeId,
+                                                                  const SOPC_NodeId* refToParentTypeId,
+                                                                  const SOPC_NodeId* newNodeId,
+                                                                  SOPC_AddressSpace_Node* nodeInstDecl)
+{
+    // Setup attributes
+    // Attribute WriteMask is not supported
+    OpcUa_ObjectAttributes objAttributes;
+    OpcUa_ObjectAttributes_Initialize(&objAttributes);
+    objAttributes.SpecifiedAttributes = OpcUa_NodeAttributesMask_DisplayName | OpcUa_NodeAttributesMask_Description |
+                                        OpcUa_NodeAttributesMask_EventNotifier;
+    const SOPC_LocalizedText* displayName =
+        SOPC_AddressSpace_Get_DisplayName(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    SOPC_LocalizedText_Copy(&objAttributes.DisplayName, displayName);
+    const SOPC_LocalizedText* description =
+        SOPC_AddressSpace_Get_Description(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    SOPC_LocalizedText_Copy(&objAttributes.Description, description);
+#if 0 != S2OPC_EVENT_MANAGEMENT
+    const SOPC_Byte eventNotifier = SOPC_AddressSpace_Get_EventNotifier(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    objAttributes.EventNotifier = eventNotifier;
+#endif // S2OPC_EVENT_MANAGEMENT
+
+    const SOPC_QualifiedName* browseName = SOPC_AddressSpace_Get_BrowseName(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_ExpandedNodeId* typeDefId =
+        GetExpectedReference(addSpaceAccess, nodeInstDecl, &hasTypeDefinitionType, false);
+
+    // Add Node
+    SOPC_StatusCode stCode = AddSingleObjectNode(addSpaceAccess, parentNodeId, refToParentTypeId, newNodeId, browseName,
+                                                 &objAttributes, typeDefId);
+    OpcUa_ObjectAttributes_Clear(&objAttributes);
+    return stCode;
+}
+
+static SOPC_StatusCode AddSingleVariableNodeFromInstanceDeclaration(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                                    const SOPC_ExpandedNodeId* parentNodeId,
+                                                                    const SOPC_NodeId* refToParentTypeId,
+                                                                    const SOPC_NodeId* newNodeId,
+                                                                    SOPC_AddressSpace_Node* nodeInstDecl)
+{
+    // Get instance declaration attribute values
+    const SOPC_LocalizedText* displayName =
+        SOPC_AddressSpace_Get_DisplayName(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_LocalizedText* description =
+        SOPC_AddressSpace_Get_Description(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_Variant* value = SOPC_AddressSpace_Get_Value(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_NodeId* dataType = SOPC_AddressSpace_Get_DataType(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const int32_t* valueRank = SOPC_AddressSpace_Get_ValueRank(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const int32_t noOfArrayDimensions =
+        SOPC_AddressSpace_Get_NoOfArrayDimensions(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_Byte accessLevel = SOPC_AddressSpace_Get_AccessLevel(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_QualifiedName* browseName = SOPC_AddressSpace_Get_BrowseName(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_ExpandedNodeId* typeDefId =
+        GetExpectedReference(addSpaceAccess, nodeInstDecl, &hasTypeDefinitionType, false);
+
+    // Setup attributes for new variable node
+    // Note: attribute WriteMask is not supported in add operation
+    OpcUa_VariableAttributes varAttributes;
+    OpcUa_VariableAttributes_Initialize(&varAttributes);
+    varAttributes.SpecifiedAttributes = OpcUa_NodeAttributesMask_DisplayName | OpcUa_NodeAttributesMask_Description |
+                                        OpcUa_NodeAttributesMask_Value | OpcUa_NodeAttributesMask_DataType |
+                                        OpcUa_NodeAttributesMask_ValueRank | OpcUa_NodeAttributesMask_ArrayDimensions |
+                                        OpcUa_NodeAttributesMask_AccessLevel;
+
+    SOPC_ReturnStatus status = SOPC_LocalizedText_Copy(&varAttributes.DisplayName, displayName);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_LocalizedText_Copy(&varAttributes.Description, description);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Variant_Initialize(&varAttributes.Value);
+        status = SOPC_Variant_ShallowCopy(&varAttributes.Value, value);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_NodeId_Copy(&varAttributes.DataType, dataType);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Array dimensions copy
+        if (noOfArrayDimensions > 0)
+        {
+            const uint32_t* arrayDimensions =
+                SOPC_AddressSpace_Get_ArrayDimensions(addSpaceAccess->addSpaceRef, nodeInstDecl);
+            varAttributes.ArrayDimensions = SOPC_Calloc((size_t) noOfArrayDimensions, sizeof(uint32_t));
+            status = SOPC_Copy_Array(noOfArrayDimensions, (void*) varAttributes.ArrayDimensions,
+                                     (const void*) arrayDimensions, sizeof(uint32_t), &SOPC_UInt32_CopyAux);
+            if (SOPC_STATUS_OK == status)
+            {
+                varAttributes.NoOfArrayDimensions = noOfArrayDimensions;
+            }
+            else
+            {
+                SOPC_Free(varAttributes.ArrayDimensions);
+                varAttributes.ArrayDimensions = NULL;
+                varAttributes.NoOfArrayDimensions = 0;
+            }
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        varAttributes.ValueRank = *valueRank;
+        varAttributes.AccessLevel = accessLevel;
+    }
+
+    SOPC_StatusCode stCode = OpcUa_BadOutOfMemory;
+    if (SOPC_STATUS_OK == status)
+    {
+        // Add Node
+        stCode = AddSingleVariableNode(addSpaceAccess, parentNodeId, refToParentTypeId, newNodeId, browseName,
+                                       &varAttributes, typeDefId);
+    }
+    OpcUa_VariableAttributes_Clear(&varAttributes);
+    return stCode;
+}
+
+static SOPC_StatusCode AddSingleMethodNodeFromInstanceDeclaration(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                                  const SOPC_ExpandedNodeId* parentNodeId,
+                                                                  const SOPC_NodeId* refToParentTypeId,
+                                                                  const SOPC_NodeId* newNodeId,
+                                                                  SOPC_AddressSpace_Node* nodeInstDecl)
+{
+    // Get instance declaration attribute values
+    const SOPC_LocalizedText* displayName =
+        SOPC_AddressSpace_Get_DisplayName(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_LocalizedText* description =
+        SOPC_AddressSpace_Get_Description(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_Boolean executable = SOPC_AddressSpace_Get_Executable(addSpaceAccess->addSpaceRef, nodeInstDecl);
+    const SOPC_QualifiedName* browseName = SOPC_AddressSpace_Get_BrowseName(addSpaceAccess->addSpaceRef, nodeInstDecl);
+
+    // Setup attributes for new variable node
+    // Attribute WriteMask is not supported
+    OpcUa_MethodAttributes metAttributes;
+    OpcUa_MethodAttributes_Initialize(&metAttributes);
+    metAttributes.SpecifiedAttributes = OpcUa_NodeAttributesMask_DisplayName | OpcUa_NodeAttributesMask_Description |
+                                        OpcUa_NodeAttributesMask_Executable;
+    SOPC_ReturnStatus status = SOPC_LocalizedText_Copy(&metAttributes.DisplayName, displayName);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_LocalizedText_Copy(&metAttributes.Description, description);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        metAttributes.Executable = executable;
+    }
+    // Add Node
+    SOPC_StatusCode stCode = OpcUa_BadOutOfMemory;
+    if (SOPC_STATUS_OK == status)
+    {
+        stCode = SOPC_AddressSpaceAccess_AddMethodNode(addSpaceAccess, parentNodeId, refToParentTypeId, newNodeId,
+                                                       browseName, &metAttributes);
+    }
+    OpcUa_MethodAttributes_Clear(&metAttributes);
+    return stCode;
+}
+
+static SOPC_StatusCode AddChildNodesRecursive(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                              const SOPC_ExpandedNodeId* rootNode,
+                                              const SOPC_NodeId* typeNodeId,
+                                              int32_t recursionLimit)
+{
+    // Check recursion limit
+    recursionLimit--;
+    if (recursionLimit < 0)
+    {
+        return OpcUa_BadWouldBlock;
+    }
+    int recursionLevel = RECURSION_LIMIT - recursionLimit;
+    SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
+
+    // Get parent type references
+    // Note: typeNodeId is either a type node or its instance declaration children
+    SOPC_AddressSpace_Node* parentType_NodeAddspace =
+        SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, typeNodeId);
+    const int32_t* parentType_noOfRefs =
+        SOPC_AddressSpace_Get_NoOfReferences(addSpaceAccess->addSpaceRef, parentType_NodeAddspace);
+    OpcUa_ReferenceNode** parentType_refs =
+        SOPC_AddressSpace_Get_References(addSpaceAccess->addSpaceRef, parentType_NodeAddspace);
+    SOPC_ASSERT(NULL != parentType_refs && NULL != parentType_noOfRefs);
+    // For each references
+    SOPC_StatusCode firstChildErrorCode = SOPC_GoodGenericStatus;
+    for (int parentType_indexRef = 0; parentType_indexRef < *parentType_noOfRefs && SOPC_IsGoodStatus(stCode);
+         parentType_indexRef++)
+    {
+        const OpcUa_ReferenceNode* parentType_ref = &((*parentType_refs)[parentType_indexRef]);
+        bool isAggregatesRef =
+            is_type_or_subtype(addSpaceAccess->addSpaceRef, &parentType_ref->ReferenceTypeId, &aggregatesType);
+        // For a forward 'Aggregates' type or sub-type reference
+        if (isAggregatesRef && !parentType_ref->IsInverse)
+        {
+            // Get Child Node
+            SOPC_ExpandedNodeId childType_ExpNode = parentType_ref->TargetId;
+            char* childTypeNodeStr = SOPC_NodeId_ToCString(&childType_ExpNode.NodeId);
+
+            // Check whether a child node should be added according to the modeling rule.
+            bool hasModellingRuleToAdd = IsModellingRuleToAdd(addSpaceAccess, &childType_ExpNode.NodeId);
+            bool ignoreChildAddedForLog = false;
+            if (hasModellingRuleToAdd)
+            {
+                SOPC_StatusCode resCodeAddChildNode = SOPC_GoodGenericStatus;
+                // Child node needs to be added. Create it
+                SOPC_NodeId* newChildNodeId =
+                    SOPC_AddressSpace_GetFreshNodeId(addSpaceAccess->addSpaceRef, rootNode->NodeId.Namespace);
+                if (NULL != newChildNodeId)
+                {
+                    SOPC_AddressSpace_Node* childTypeNode =
+                        SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, &childType_ExpNode.NodeId);
+                    const SOPC_QualifiedName* browseName =
+                        SOPC_AddressSpace_Get_BrowseName(addSpaceAccess->addSpaceRef, childTypeNode);
+                    const OpcUa_NodeClass* childType_NodeNodeClass =
+                        SOPC_AddressSpace_Get_NodeClass(addSpaceAccess->addSpaceRef, childTypeNode);
+                    // Add new child node
+                    switch (*childType_NodeNodeClass)
+                    {
+                    case OpcUa_NodeClass_Object:
+                        resCodeAddChildNode = AddSingleObjectNodeFromInstanceDeclaration(
+                            addSpaceAccess, rootNode, &parentType_ref->ReferenceTypeId, newChildNodeId, childTypeNode);
+                        break;
+                    case OpcUa_NodeClass_Variable:
+                        resCodeAddChildNode = AddSingleVariableNodeFromInstanceDeclaration(
+                            addSpaceAccess, rootNode, &parentType_ref->ReferenceTypeId, newChildNodeId, childTypeNode);
+                        break;
+                    case OpcUa_NodeClass_Method:
+                        resCodeAddChildNode = AddSingleMethodNodeFromInstanceDeclaration(
+                            addSpaceAccess, rootNode, &parentType_ref->ReferenceTypeId, newChildNodeId, childTypeNode);
+                        break;
+                    default:
+                        ignoreChildAddedForLog = true;
+                        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                                 "AddNodes children (level=%d): Unexpected node class for child node: "
+                                                 "%s ! Ignoring node ...",
+                                                 recursionLevel, childTypeNodeStr);
+                        break;
+                    }
+                    // Recursion : Add Child child node
+                    if (SOPC_IsGoodStatus(resCodeAddChildNode))
+                    {
+                        if (!ignoreChildAddedForLog)
+                        {
+                            char* newChildNodeIdStr = SOPC_NodeId_ToCString(newChildNodeId);
+                            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                                  "AddNodes children (level=%d): child node id=%s based on instance "
+                                                  "declaration node id=%s successfully added",
+                                                  recursionLevel,
+                                                  NULL != newChildNodeIdStr ? newChildNodeIdStr : "null",
+                                                  childTypeNodeStr);
+                            SOPC_Free(newChildNodeIdStr);
+                        }
+                        SOPC_ExpandedNodeId newChildExpNode;
+                        SOPC_ExpandedNodeId_Initialize(&newChildExpNode);
+                        newChildExpNode.NodeId = *newChildNodeId;
+                        stCode = AddChildNodesRecursive(addSpaceAccess, &newChildExpNode, &childType_ExpNode.NodeId,
+                                                        recursionLimit);
+                    }
+                    else if (OpcUa_BadBrowseNameDuplicated == resCodeAddChildNode)
+                    {
+                        SOPC_Logger_TraceDebug(
+                            SOPC_LOG_MODULE_CLIENTSERVER,
+                            "AddNodes children (level=%d): ignored node id=%s due to identical browseName=%s",
+                            recursionLevel, childTypeNodeStr, SOPC_String_GetRawCString(&browseName->Name));
+                    }
+                    else
+                    {
+                        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                                 "AddNodes children (level=%d): child node based on instance "
+                                                 "declaration node id=%s addition failed with status 0x%08" PRIX32
+                                                 ". Ignoring node.",
+                                                 recursionLevel, childTypeNodeStr, stCode);
+                        firstChildErrorCode =
+                            SOPC_IsGoodStatus(firstChildErrorCode) ? resCodeAddChildNode : firstChildErrorCode;
+                        stCode = SOPC_GoodGenericStatus; // reset status
+                    }
+                    SOPC_NodeId_Clear(newChildNodeId);
+                    SOPC_Free(newChildNodeId);
+                    newChildNodeId = NULL;
+                }
+                else
+                {
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "AddNodes children (level=%d): Failed to get a fresh nodeId to add child node based on "
+                        "instance declaration id=%s. "
+                        "SOPC_FRESH_NODEID_MAX_RETRIES might be increased to find a fresh one (currently = %d)",
+                        recursionLevel, childTypeNodeStr, SOPC_FRESH_NODEID_MAX_RETRIES);
+                    stCode = OpcUa_BadNodeIdInvalid;
+                }
+            }
+            else
+            {
+                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "AddNodes children (level=%d): %s, not added as not mandatory", recursionLevel,
+                                       childTypeNodeStr);
+            }
+            SOPC_Free(childTypeNodeStr);
+        }
+    }
+    if (SOPC_IsGoodStatus(stCode) && !SOPC_IsGoodStatus(firstChildErrorCode))
+    {
+        stCode = firstChildErrorCode;
+    }
+    return stCode;
+}
+
+static SOPC_StatusCode AddChildNodesRecursiveFromType(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                      const SOPC_NodeId* rootNode,
+                                                      const SOPC_NodeId* typeNode,
+                                                      int32_t recursionLimit)
+{
+    if (addSpaceAccess == NULL || rootNode == NULL || typeNode == NULL)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+    // Check recursion limit
+    recursionLimit--;
+    if (recursionLimit < 0)
+    {
+        return OpcUa_BadWouldBlock;
+    }
+
+    // Set the new expanded node id.
+    SOPC_ExpandedNodeId rootNodeExpId;
+    SOPC_ExpandedNodeId_Initialize(&rootNodeExpId);
+    rootNodeExpId.NodeId = *rootNode;
+
+    // Debug log trace to indicate the type recursion level
+    if (SOPC_LOG_LEVEL_DEBUG == SOPC_Logger_GetTraceLogLevel())
+    {
+        // Get string representation of node ids
+        int recursionLevel = RECURSION_LIMIT - recursionLimit;
+        char* rootNodeIdStr = SOPC_NodeId_ToCString(rootNode);
+        char* typeNodeIdStr = SOPC_NodeId_ToCString(typeNode);
+        SOPC_Logger_TraceDebug(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "AddChildNodesRecursiveFromType (type level=%d): Automatically adding children to node %s based "
+            "on its (super)type id=%s",
+            recursionLevel, rootNodeIdStr, typeNodeIdStr);
+        SOPC_Free(rootNodeIdStr);
+        SOPC_Free(typeNodeIdStr);
+    }
+
+    // add nodes from direct type
+    SOPC_StatusCode stCode = AddChildNodesRecursive(addSpaceAccess, &rootNodeExpId, typeNode, RECURSION_LIMIT);
+
+    // add nodes from parent type recursively (overloaded nodes will be ignored as they have same browse name)
+    SOPC_AddressSpace_Node* parentType_NodeAddspace = SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, typeNode);
+    const SOPC_ExpandedNodeId* superType_ExpNode =
+        GetExpectedReference(addSpaceAccess, parentType_NodeAddspace, &hasSubtypeType, true);
+    if (SOPC_IsGoodStatus(stCode) && superType_ExpNode != NULL)
+    {
+        stCode = AddChildNodesRecursiveFromType(addSpaceAccess, rootNode, &superType_ExpNode->NodeId, recursionLimit);
+    }
+    return stCode;
+}
+
+SOPC_StatusCode SOPC_AddressSpaceAccess_GetFreshNodeId(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                       uint16_t nsIndex,
+                                                       SOPC_NodeId* freshNodeId)
+{
+    if (NULL == addSpaceAccess || NULL == freshNodeId)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
+    SOPC_NodeId* freshNid = SOPC_AddressSpace_GetFreshNodeId(addSpaceAccess->addSpaceRef, nsIndex);
+    if (freshNid != NULL)
+    {
+        // Avoid check-code error: freshNodeId is not a NULL pointer already checked in stCode.
+        SOPC_ASSERT(freshNodeId != NULL);
+        *freshNodeId = *freshNid;
+        SOPC_NodeId_Initialize(freshNid);
+        SOPC_Free(freshNid);
+        freshNid = NULL;
+    }
+    else
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "AddNodes: Fail to get a fresh nodeId. You can increase the number of tries by modifying "
+            "SOPC_FRESH_NODEID_MAX_RETRIES (currently = %d)",
+            SOPC_FRESH_NODEID_MAX_RETRIES);
+        stCode = OpcUa_BadNodeIdInvalid;
+    }
+
+    return stCode;
+}
+
+static SOPC_StatusCode AddSingleVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                             const SOPC_ExpandedNodeId* parentNodeId,
+                                             const SOPC_NodeId* refToParentTypeId,
+                                             const SOPC_NodeId* newNodeId,
+                                             const SOPC_QualifiedName* browseName,
+                                             const OpcUa_VariableAttributes* varAttributes,
+                                             const SOPC_ExpandedNodeId* typeDefId)
+{
+    SOPC_StatusCode stCode =
         check_valid_params_and_state(addSpaceAccess, parentNodeId, refToParentTypeId, newNodeId, browseName,
                                      (const OpcUa_NodeAttributes*) varAttributes, typeDefId, OpcUa_NodeClass_Variable);
-    if (!SOPC_IsGoodStatus(retCode))
+    if (!SOPC_IsGoodStatus(stCode))
     {
-        return retCode;
+        return stCode;
     }
 
-    retCode = SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(
+    stCode = SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(
         OpcUa_NodeClass_Variable, addSpaceAccess->addSpaceRef, parentNodeId, refToParentTypeId, browseName, typeDefId);
-    if (!SOPC_IsGoodStatus(retCode))
+    if (!SOPC_IsGoodStatus(stCode))
     {
-        return retCode;
+        return stCode;
     }
 
-    retCode = OpcUa_BadOutOfMemory;
+    stCode = OpcUa_BadOutOfMemory;
     SOPC_AddressSpace_Node* newNode = SOPC_Calloc(1, sizeof(*newNode));
     if (NULL == newNode)
     {
-        return retCode;
+        return stCode;
     }
     SOPC_AddressSpace_Node_Initialize(addSpaceAccess->addSpaceRef, newNode, OpcUa_NodeClass_Variable);
 
@@ -662,22 +1159,22 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
     // Manage NodeAttributes
     if (SOPC_STATUS_OK == status)
     {
-        // Note: set retCode in case of failure
+        // Note: set stCode in case of failure
         status = SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(addSpaceAccess->addSpaceRef, newNode, varNode,
-                                                                      varAttributes, &retCode);
+                                                                      varAttributes, &stCode);
     }
 
     if (SOPC_STATUS_OK == status)
     {
         status = add_node_and_set_reciprocal_reference(addSpaceAccess, &parentNodeId->NodeId, newNodeId, newNode,
-                                                       refToParentTypeId);
-        // reset retCode to default failure value
-        retCode = OpcUa_BadOutOfMemory;
+                                                       refToParentTypeId, &typeDefId->NodeId);
+        // reset stCode to default failure value
+        stCode = OpcUa_BadOutOfMemory;
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        retCode = SOPC_GoodGenericStatus;
+        stCode = SOPC_GoodGenericStatus;
     }
     else
     {
@@ -685,37 +1182,92 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
         SOPC_AddressSpace_Node_Clear(addSpaceAccess->addSpaceRef, newNode);
         SOPC_Free(newNode);
     }
-    return retCode;
+    return stCode;
 }
 
-SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* addSpaceAccess,
-                                                      const SOPC_ExpandedNodeId* parentNodeId,
-                                                      const SOPC_NodeId* refToParentTypeId,
-                                                      const SOPC_NodeId* newNodeId,
-                                                      const SOPC_QualifiedName* browseName,
-                                                      const OpcUa_ObjectAttributes* objAttributes,
-                                                      const SOPC_ExpandedNodeId* typeDefId)
+SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                        const SOPC_ExpandedNodeId* parentNodeId,
+                                                        const SOPC_NodeId* refToParentTypeId,
+                                                        const SOPC_NodeId* newNodeId,
+                                                        const SOPC_QualifiedName* browseName,
+                                                        const OpcUa_VariableAttributes* varAttributes,
+                                                        const SOPC_ExpandedNodeId* typeDefId,
+                                                        const bool addChildNodesFromType)
 {
-    SOPC_StatusCode retCode =
+    // All parameters are verified in AddSingleVariableNode. Here, only those used before are checked.
+    if (NULL == addSpaceAccess || NULL == newNodeId || NULL == typeDefId)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    char* newNodeIdStr = SOPC_NodeId_ToCString(newNodeId);
+    char* typeDefIdStr = SOPC_NodeId_ToCString(&typeDefId->NodeId);
+
+    // Add new node
+    SOPC_StatusCode stCode = AddSingleVariableNode(addSpaceAccess, parentNodeId, refToParentTypeId, newNodeId,
+                                                   browseName, varAttributes, typeDefId);
+
+    if (SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                              "AddNode: Variable id=%s of type: %s successfully added. %s", newNodeIdStr, typeDefIdStr,
+                              addChildNodesFromType ? " Next step will automatically add child nodes from node type."
+                                                    : " End of treatment.");
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "AddNode: Variable id=%s of type: %s failed with status: 0x%08" PRIX32 ".", newNodeIdStr,
+                               typeDefIdStr, stCode);
+    }
+    // Add child nodes if required
+    if (SOPC_IsGoodStatus(stCode) && addChildNodesFromType)
+    {
+        SOPC_StatusCode stCodeLog =
+            AddChildNodesRecursiveFromType(addSpaceAccess, newNodeId, &typeDefId->NodeId, RECURSION_LIMIT);
+        if (!SOPC_IsGoodStatus(stCodeLog))
+        {
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "AddNode: Variable id=%s: Failure occurred adding child nodes based on type. The root node "
+                "was created successfully but uncertain number of children was created (see previous log details).",
+                newNodeIdStr);
+        }
+    }
+    SOPC_Free(typeDefIdStr);
+    SOPC_Free(newNodeIdStr);
+
+    return stCode;
+}
+
+static SOPC_StatusCode AddSingleObjectNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                           const SOPC_ExpandedNodeId* parentNodeId,
+                                           const SOPC_NodeId* refToParentTypeId,
+                                           const SOPC_NodeId* newNodeId,
+                                           const SOPC_QualifiedName* browseName,
+                                           const OpcUa_ObjectAttributes* objAttributes,
+                                           const SOPC_ExpandedNodeId* typeDefId)
+{
+    SOPC_StatusCode stCode =
         check_valid_params_and_state(addSpaceAccess, parentNodeId, refToParentTypeId, newNodeId, browseName,
                                      (const OpcUa_NodeAttributes*) objAttributes, typeDefId, OpcUa_NodeClass_Object);
-    if (!SOPC_IsGoodStatus(retCode))
+    if (!SOPC_IsGoodStatus(stCode))
     {
-        return retCode;
+        return stCode;
     }
 
-    retCode = SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(
+    stCode = SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(
         OpcUa_NodeClass_Object, addSpaceAccess->addSpaceRef, parentNodeId, refToParentTypeId, browseName, typeDefId);
-    if (!SOPC_IsGoodStatus(retCode))
+    if (!SOPC_IsGoodStatus(stCode))
     {
-        return retCode;
+        return stCode;
     }
 
-    retCode = OpcUa_BadOutOfMemory;
+    stCode = OpcUa_BadOutOfMemory;
     SOPC_AddressSpace_Node* newNode = SOPC_Calloc(1, sizeof(*newNode));
     if (NULL == newNode)
     {
-        return retCode;
+        return stCode;
     }
 
     // ADD OBJECT
@@ -728,8 +1280,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
     // Manage NodeAttributes
     if (SOPC_STATUS_OK == status)
     {
-        // Note: set retCode in case of failure
-        status = SOPC_NodeMgtHelperInternal_AddObjectNodeAttributes(objNode, objAttributes, &retCode);
+        // Note: set stCode in case of failure
+        status = SOPC_NodeMgtHelperInternal_AddObjectNodeAttributes(objNode, objAttributes, &stCode);
     }
 
     // COMMON PART WITH ADD VARIABLE
@@ -737,15 +1289,15 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
     // Set reciprocal reference from parent and add node to address space
     if (SOPC_STATUS_OK == status)
     {
-        // reset retCode to default failure value
-        retCode = OpcUa_BadOutOfMemory;
+        // reset stCode to default failure value
+        stCode = OpcUa_BadOutOfMemory;
         status = add_node_and_set_reciprocal_reference(addSpaceAccess, &parentNodeId->NodeId, newNodeId, newNode,
-                                                       refToParentTypeId);
+                                                       refToParentTypeId, &typeDefId->NodeId);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        retCode = SOPC_GoodGenericStatus;
+        stCode = SOPC_GoodGenericStatus;
     }
     else
     {
@@ -753,7 +1305,65 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
         SOPC_AddressSpace_Node_Clear(addSpaceAccess->addSpaceRef, newNode);
         SOPC_Free(newNode);
     }
-    return retCode;
+
+    return stCode;
+}
+
+SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                      const SOPC_ExpandedNodeId* parentNodeId,
+                                                      const SOPC_NodeId* refToParentTypeId,
+                                                      const SOPC_NodeId* newNodeId,
+                                                      const SOPC_QualifiedName* browseName,
+                                                      const OpcUa_ObjectAttributes* objAttributes,
+                                                      const SOPC_ExpandedNodeId* typeDefId,
+                                                      const bool addChildNodesFromType)
+{
+    // All parameters are verified in AddSingleVariableNode. Here, only those used before are checked.
+    if (NULL == addSpaceAccess || NULL == newNodeId || NULL == typeDefId)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    char* newNodeIdStr = SOPC_NodeId_ToCString(newNodeId);
+    char* typeDefIdStr = SOPC_NodeId_ToCString(&typeDefId->NodeId);
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "AddNodes: > Request to add object node: %s of type: %s%s",
+                          newNodeIdStr, typeDefIdStr, addChildNodesFromType ? " (recursively)." : ".");
+    // Add new node
+    SOPC_StatusCode stCode = AddSingleObjectNode(addSpaceAccess, parentNodeId, refToParentTypeId, newNodeId, browseName,
+                                                 objAttributes, typeDefId);
+
+    if (SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "AddNode: Object id=%s of type: %s successfully added. %s",
+                              newNodeIdStr, typeDefIdStr,
+                              addChildNodesFromType ? " Next step will automatically add child nodes from node type."
+                                                    : " End of treatment.");
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "AddNode: Object id=%s of type: %s failed (recursively=%s) with status: 0x%08" PRIX32
+                               ".",
+                               newNodeIdStr, typeDefIdStr, addChildNodesFromType ? "true" : "false", stCode);
+    }
+    // Add child nodes if required
+    if (SOPC_IsGoodStatus(stCode) && addChildNodesFromType)
+    {
+        SOPC_StatusCode stCodeLog =
+            AddChildNodesRecursiveFromType(addSpaceAccess, newNodeId, &typeDefId->NodeId, RECURSION_LIMIT);
+        if (!SOPC_IsGoodStatus(stCodeLog))
+        {
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "AddNode: Object id=%s: Failure occurred adding child nodes based on type. The root node "
+                "was created successfully but uncertain number of children was created (see previous log details).",
+                newNodeIdStr);
+        }
+    }
+    SOPC_Free(newNodeIdStr);
+    SOPC_Free(typeDefIdStr);
+
+    return stCode;
 }
 
 SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* addSpaceAccess,
@@ -763,35 +1373,43 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* a
                                                       const SOPC_QualifiedName* browseName,
                                                       const OpcUa_MethodAttributes* metAttributes)
 {
-    SOPC_StatusCode retCode =
+    if (NULL == addSpaceAccess || NULL == newNodeId)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    SOPC_StatusCode stCode =
         check_valid_params_and_state(addSpaceAccess, parentNodeId, refToParentTypeId, newNodeId, browseName,
                                      (const OpcUa_NodeAttributes*) metAttributes, NULL, OpcUa_NodeClass_Method);
-    if (!SOPC_IsGoodStatus(retCode))
-    {
-        return retCode;
-    }
 
     /* §5.7.1 Part 3 (1.05): A Method shall always be the TargetNode of at least one HasComponent Reference.
      */
-    bool isHasComponentRef = is_type_or_subtype(addSpaceAccess->addSpaceRef, refToParentTypeId, &hasComponentType);
-    if (!isHasComponentRef)
+    if (SOPC_IsGoodStatus(stCode))
     {
-        // Added Method node has no HasComponent Reference
-        return OpcUa_BadReferenceNotAllowed;
+        bool isHasComponentRef = is_type_or_subtype(addSpaceAccess->addSpaceRef, refToParentTypeId, &hasComponentType);
+        if (!isHasComponentRef)
+        {
+            // Added Method node has no HasComponent Reference
+            stCode = OpcUa_BadReferenceNotAllowed;
+        }
     }
 
-    retCode = SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeClass_Method, addSpaceAccess->addSpaceRef,
-                                                                  parentNodeId, refToParentTypeId, browseName, NULL);
-    if (!SOPC_IsGoodStatus(retCode))
+    if (SOPC_IsGoodStatus(stCode))
     {
-        return retCode;
+        stCode = SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(
+            OpcUa_NodeClass_Method, addSpaceAccess->addSpaceRef, parentNodeId, refToParentTypeId, browseName, NULL);
+    }
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        return stCode;
     }
 
-    retCode = OpcUa_BadOutOfMemory;
+    // If all check are good, Add node.
+    stCode = OpcUa_BadOutOfMemory;
     SOPC_AddressSpace_Node* newNode = SOPC_Calloc(1, sizeof(*newNode));
     if (NULL == newNode)
     {
-        return retCode;
+        return stCode;
     }
 
     // ADD METHOD, init its NodeClass
@@ -804,8 +1422,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* a
     // Manage NodeAttributes
     if (SOPC_STATUS_OK == status)
     {
-        // Note: set retCode in case of failure
-        status = SOPC_NodeMgtHelperInternal_AddMethodNodeAttributes(metNode, metAttributes, &retCode);
+        // Note: set stCode in case of failure
+        status = SOPC_NodeMgtHelperInternal_AddMethodNodeAttributes(metNode, metAttributes, &stCode);
     }
 
     // COMMON PART WITH ADD VARIABLE
@@ -813,15 +1431,15 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* a
     // Set reciprocal reference from parent and add node to address space
     if (SOPC_STATUS_OK == status)
     {
-        // reset retCode to default failure value
-        retCode = OpcUa_BadOutOfMemory;
+        // reset stCode to default failure value
+        stCode = OpcUa_BadOutOfMemory;
         status = add_node_and_set_reciprocal_reference(addSpaceAccess, &parentNodeId->NodeId, newNodeId, newNode,
-                                                       refToParentTypeId);
+                                                       refToParentTypeId, NULL);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        retCode = SOPC_GoodGenericStatus;
+        stCode = SOPC_GoodGenericStatus;
     }
     else
     {
@@ -829,7 +1447,21 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* a
         SOPC_AddressSpace_Node_Clear(addSpaceAccess->addSpaceRef, newNode);
         SOPC_Free(newNode);
     }
-    return retCode;
+    char* newNodeIdStr = SOPC_NodeId_ToCString(newNodeId);
+    if (SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                              "AddNode: Method id=%s with browseName=%s successfully added.", newNodeIdStr,
+                              SOPC_String_GetRawCString(&browseName->Name));
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "AddNode: Method id=%s with browseName=%s failed with status: 0x%08" PRIX32 ".",
+                               newNodeIdStr, SOPC_String_GetRawCString(&browseName->Name), stCode);
+    }
+    SOPC_Free(newNodeIdStr);
+    return stCode;
 }
 
 /* Browse referenced Nodes from startingNode and return the node of the first targeted node that match with
@@ -930,7 +1562,8 @@ static SOPC_AddressSpace_Node* findNextStartingNode(const SOPC_AddressSpaceAcces
 
 /* Recursive browse on relativePathElement. This function return the node targeted by the last browse element
  in relativePathElement array and NULL if something went wrong.
- Note: number of elements is limited to RECURSION_LIMIT and decremented at each step which give guarantee it terminates.
+ Note: number of elements is limited to RECURSION_LIMIT and decremented at each step which give guarantee it
+ terminates.
 */
 static SOPC_AddressSpace_Node* Recursive_BrowseRelativePath(const SOPC_AddressSpaceAccess* addSpaceAccess,
                                                             const int32_t remainingElements,
@@ -1364,7 +1997,8 @@ static SOPC_StatusCode SOPC_AddressSpaceAccess_DeleteNodeRec(const SOPC_AddressS
         char* nodeIdStr = SOPC_NodeId_ToCString(nodeId);
         SOPC_ASSERT(NULL != nodeIdStr);
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "Fail in deleting child nodes of %s, only node %s was deleted.", nodeIdStr, nodeIdStr);
+                                 "AddNodes: Fail in deleting child nodes of %s, only node %s was deleted.", nodeIdStr,
+                                 nodeIdStr);
         SOPC_Free(nodeIdStr);
     }
 

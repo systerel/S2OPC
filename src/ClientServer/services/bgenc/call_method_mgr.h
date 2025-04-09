@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 11/02/2025 09:51:22
+ Date                 : 24/07/2025 13:38:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -69,6 +69,7 @@ extern void call_method_mgr__INITIALISATION(void);
 #define call_method_mgr__check_object_has_method service_write__check_object_has_method
 #define call_method_mgr__clear_user_roles service_write__clear_user_roles
 #define call_method_mgr__deleteNode_AddressSpace service_write__deleteNode_AddressSpace
+#define call_method_mgr__gen_fresh_NodeId service_write__gen_fresh_NodeId
 #define call_method_mgr__get_BrowseName service_write__get_BrowseName
 #define call_method_mgr__get_DisplayName service_write__get_DisplayName
 #define call_method_mgr__get_EventNotifier service_write__get_EventNotifier

@@ -253,6 +253,23 @@
 #define S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES true
 #endif
 
+/** @brief Selects whether the AddNodes service adds only mandatory child nodes of the added node type (if false) or
+ * also optional nodes (if true). */
+#ifndef S2OPC_NODE_ADD_OPTIONAL
+#define S2OPC_NODE_ADD_OPTIONAL false
+#endif
+
+/** @brief Selects whether the AddNodes internal operation adds child nodes (true) or only added node (false) */
+#ifndef S2OPC_NODE_INTERNAL_ADD_CHILD_NODES
+#define S2OPC_NODE_INTERNAL_ADD_CHILD_NODES true
+#endif
+
+/** @brief Selects whether the AddNodes operation adds 'HasTypeDefinition' inverse reference from type node to child
+ * node. */
+#ifndef S2OPC_NODE_ADD_INVERSE_TYPEDEF
+#define S2OPC_NODE_ADD_INVERSE_TYPEDEF true
+#endif
+
 /** @brief Event management services activation for servers */
 #ifndef S2OPC_EVENT_MANAGEMENT
 #define S2OPC_EVENT_MANAGEMENT false

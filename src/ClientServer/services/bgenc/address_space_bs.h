@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 21/07/2025 16:06:41
+ Date                 : 24/07/2025 15:06:12
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -59,6 +59,7 @@ extern void address_space_bs__addNode_AddressSpace_Method(
    const constants__t_NodeAttributes_i address_space_bs__p_nodeAttributes,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc_addnode);
 extern void address_space_bs__addNode_AddressSpace_Object(
+   const t_bool address_space_bs__p_local,
    const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,
    const constants__t_NodeId_i address_space_bs__p_refTypeId,
    const constants__t_NodeId_i address_space_bs__p_newNodeId,
@@ -68,6 +69,7 @@ extern void address_space_bs__addNode_AddressSpace_Object(
    const constants__t_ExpandedNodeId_i address_space_bs__p_typeDefId,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc_addnode);
 extern void address_space_bs__addNode_AddressSpace_Variable(
+   const t_bool address_space_bs__p_local,
    const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,
    const constants__t_NodeId_i address_space_bs__p_refTypeId,
    const constants__t_NodeId_i address_space_bs__p_newNodeId,
@@ -91,6 +93,9 @@ extern void address_space_bs__exec_callMethod(
    constants__t_RawStatusCode * const address_space_bs__p_rawStatusCode,
    t_entier4 * const address_space_bs__p_nb_out,
    constants__t_ArgumentsPointer_i * const address_space_bs__p_out_arguments);
+extern void address_space_bs__gen_fresh_NodeId(
+   t_bool * const address_space_bs__bres,
+   constants__t_NodeId_i * const address_space_bs__newNid);
 extern void address_space_bs__get_AccessLevel(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_access_level * const address_space_bs__p_access_level);

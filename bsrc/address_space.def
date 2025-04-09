@@ -349,6 +349,22 @@ DEFINITIONS
     END
     ;
 
+    d_adsp_add_node_internal_operation_bs ==
+    bres, newNid <-- gen_fresh_NodeId =
+    BEGIN
+        bres, newNid :(
+            bres : BOOL &
+            newNid : t_NodeId_i &
+            (bres = TRUE =>
+             newNid : t_NodeId &
+             newNid /: ran(a_NodeId) &
+             (1 = cast_t_NamespaceIdx~(conv_NodeId_NamespaceIdx(newNid)))
+            ) &
+            (bres = FALSE =>
+                newNid = c_NodeId_indet))
+    END
+    ;
+
     d_adsp_write_operation ==
     StatusCode_service <-- treat_write_request(p_user, p_locales, write_msg, resp_msg) =
     PRE

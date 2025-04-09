@@ -49,6 +49,7 @@ OPERATIONS
 
     d_adsp_UNINIT;
     d_adsp_operations;
+    d_adsp_add_node_internal_operation_bs;
 
     p_status <-- treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
     PRE
@@ -226,7 +227,7 @@ OPERATIONS
             RefIndex_Reference      : s_Node * t_RefIndex >+> t_Reference &
 
             (sc_addnode = e_sc_ok =>
-                /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */
+                /* We use inclusion since adding 1 node might lead to add several nodes */
                 s_Node$0 <: s_Node &
                 a_NodeId$0 <: a_NodeId &
                 a_NodeClass$0 <: a_NodeClass &

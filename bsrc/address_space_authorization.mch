@@ -61,6 +61,8 @@ INITIALISATION
 
 OPERATIONS
 
+    d_adsp_add_node_internal_operation_bs;
+
     /* Operations implemented by the module */
     // It is the responsibility of the caller function to ensure p_roles are the roles of p_user
     p_authorized <-- get_user_authorization(p_operation_type, p_node_id, p_attribute_id, p_user, p_roles) =
@@ -1023,8 +1025,9 @@ OPERATIONS
     END
     ;
 
-    sc_addnode <-- addNode_AddressSpace_Variable(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
+    sc_addnode <-- addNode_AddressSpace_Variable(p_local, p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     PRE
+        p_local : BOOL &
         p_parentNid : t_ExpandedNodeId_i &
         p_parentNid : dom(conv_ExpandedNodeId_NodeId) &
         conv_ExpandedNodeId_NodeId(p_parentNid) : ran(a_NodeId) &
@@ -1101,7 +1104,7 @@ OPERATIONS
             RefIndex_Reference      : s_Node * t_RefIndex >+> t_Reference &
 
             (sc_addnode = e_sc_ok =>
-                /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */
+                /* We use inclusion since adding 1 node might lead to add several nodes */
                 Ref_HasTypeDefinition$0 <: Ref_HasTypeDefinition &
 
                 Node_RefIndexEnd$0        <: Node_RefIndexEnd &
@@ -1187,8 +1190,9 @@ OPERATIONS
     END
     ;
 
-    sc_addnode <-- addNode_AddressSpace_Object(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
+    sc_addnode <-- addNode_AddressSpace_Object(p_local, p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     PRE
+        p_local : BOOL &
         p_parentNid : t_ExpandedNodeId_i &
         p_parentNid : dom(conv_ExpandedNodeId_NodeId) &
         conv_ExpandedNodeId_NodeId(p_parentNid) : ran(a_NodeId) &
@@ -1251,7 +1255,7 @@ OPERATIONS
             RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
 
             (sc_addnode = e_sc_ok =>
-                /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */
+                /* We use inclusion since adding 1 node might lead to add several nodes */
                 Ref_HasTypeDefinition$0 <: Ref_HasTypeDefinition &
 
                 Node_RefIndexEnd$0        <: Node_RefIndexEnd &
@@ -1380,7 +1384,7 @@ OPERATIONS
             RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
 
             (sc_addnode = e_sc_ok =>
-                /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */
+                /* We use inclusion since adding 1 node might lead to add several nodes */
 
                 Node_RefIndexEnd$0        <: Node_RefIndexEnd &
                 RefIndex_Reference$0      <: RefIndex_Reference &

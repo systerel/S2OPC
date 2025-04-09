@@ -50,6 +50,7 @@ OPERATIONS
 
     d_adsp_UNINIT;
     d_adsp_operations;
+    d_adsp_add_node_internal_operation_bs;
 
     /* write service operation */
     d_adsp_write_operation;

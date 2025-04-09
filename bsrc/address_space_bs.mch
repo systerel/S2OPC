@@ -211,6 +211,21 @@ OPERATIONS
     END
     ;
 
+    bres, newNid <-- gen_fresh_NodeId =
+    BEGIN
+        bres, newNid :(
+            bres : BOOL &
+            newNid : t_NodeId_i &
+            (bres = TRUE =>
+                 newNid : t_NodeId &
+                 newNid /: ran(a_NodeId) &
+                 (1 = cast_t_NamespaceIdx~(conv_NodeId_NamespaceIdx(newNid)))
+            ) &
+            (bres = FALSE =>
+                newNid = c_NodeId_indet))
+    END
+    ;
+
     /* a_NodeId~ */
     nid_valid, node <-- readall_AddressSpace_Node(nid) =
     PRE
@@ -1049,8 +1064,9 @@ OPERATIONS
     END
     ;
 
-    sc_addnode <-- addNode_AddressSpace_Variable(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
+    sc_addnode <-- addNode_AddressSpace_Variable(p_local, p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     PRE
+        p_local : BOOL &
         p_parentNid : t_ExpandedNodeId_i &
         p_parentNid : dom(conv_ExpandedNodeId_NodeId) &
         conv_ExpandedNodeId_NodeId(p_parentNid) : ran(a_NodeId) &
@@ -1127,7 +1143,7 @@ OPERATIONS
             RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
 
             (sc_addnode = e_sc_ok =>
-                /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */
+                /* We use inclusion since adding 1 node might lead to add several nodes */
                 Ref_HasTypeDefinition$0 <: Ref_HasTypeDefinition &
 
                 Node_RefIndexEnd$0        <: Node_RefIndexEnd &
@@ -1213,8 +1229,9 @@ OPERATIONS
     END
     ;
 
-    sc_addnode <-- addNode_AddressSpace_Object(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
+    sc_addnode <-- addNode_AddressSpace_Object(p_local, p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     PRE
+        p_local : BOOL &
         p_parentNid : t_ExpandedNodeId_i &
         p_parentNid : dom(conv_ExpandedNodeId_NodeId) &
         conv_ExpandedNodeId_NodeId(p_parentNid) : ran(a_NodeId) &
@@ -1277,7 +1294,7 @@ OPERATIONS
             RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
 
             (sc_addnode = e_sc_ok =>
-                /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */
+                /* We use inclusion since adding 1 node might lead to add several nodes */
                 Ref_HasTypeDefinition$0 <: Ref_HasTypeDefinition &
 
                 Node_RefIndexEnd$0        <: Node_RefIndexEnd &
@@ -1406,7 +1423,7 @@ OPERATIONS
             RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
 
             (sc_addnode = e_sc_ok =>
-                /* We use inclusion since adding 1 node might lead to add several nodes (if implemented) */
+                /* We use inclusion since adding 1 node might lead to add several nodes */
 
                 Node_RefIndexEnd$0        <: Node_RefIndexEnd &
                 RefIndex_Reference$0      <: RefIndex_Reference &

@@ -26,6 +26,7 @@ REFINES
 SEES
     constants,
     constants_statuscodes_bs,
+    node_id_pointer_bs,
     message_in_bs,
     message_out_bs
 
@@ -193,7 +194,8 @@ OPERATIONS
             l_sc, l_new_nid <-- treat_add_nodes_item(l_parentExpNid, l_refTypeId, l_reqExpNodeId, l_browseName, l_nodeClass, l_nodeAttributes, l_typeDefId)
         END
         ;
-        setall_msg_add_nodes_item_resp_params (p_resp_msg, p_index, l_sc, l_new_nid)
+        setall_msg_add_nodes_item_resp_params (p_resp_msg, p_index, l_sc, l_new_nid);
+        free_node_id_pointer (l_new_nid)
     END
     ;
 

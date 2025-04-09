@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes.c
 
- Date                 : 10/10/2024 09:37:47
+ Date                 : 28/07/2025 09:08:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -110,6 +110,7 @@ void service_add_nodes__local_treat_add_nodes_index(
          service_add_nodes__p_index,
          service_add_nodes__l_sc,
          service_add_nodes__l_new_nid);
+      node_id_pointer_bs__free_node_id_pointer(service_add_nodes__l_new_nid);
    }
 }
 

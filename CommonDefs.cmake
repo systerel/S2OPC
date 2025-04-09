@@ -252,6 +252,9 @@ option(WITH_PYS2OPC "Also builds PyS2OPC" OFF)
 
 option(S2OPC_NANO_PROFILE "Use Nano profile only (limited scope of OPC UA services)" OFF)
 option(S2OPC_NODE_MANAGEMENT "Make NodeManagement service set available to clients" OFF)
+option(S2OPC_NODE_ADD_OPTIONAL "Enables optional child nodes to be added when adding a node (only mandatory otherwise)." OFF)
+option(S2OPC_NODE_INTERNAL_ADD_CHILD_NODES "Enables recursive add of child nodes internally." ON)
+option(S2OPC_NODE_ADD_INVERSE_TYPEDEF "Enables addition of 'HasTypeDefinition' inverse reference from type node to child node" ON)
 option(S2OPC_NODE_DELETE_CHILD_NODES "Make DeleteNodes service recursively delete new orphans child nodes" ON)
 option(S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES "Make DeleteNodes service delete child nodes with Organizes hierarchical references" ON)
 option(S2OPC_EVENT_MANAGEMENT "Make OPC UA Events available" OFF)
@@ -345,6 +348,7 @@ check_debug_build_type("WITH_UBSAN" "to set compilation flag '-fno-omit-frame-po
 # print options with no incompatibility
 print_if_activated("S2OPC_NANO_PROFILE")
 print_if_activated("S2OPC_NODE_MANAGEMENT")
+print_if_activated("S2OPC_NODE_ADD_OPTIONAL")
 print_if_activated("S2OPC_EVENT_MANAGEMENT")
 print_if_activated("WITH_CONST_ADDSPACE")
 print_if_activated("WITH_STATIC_SECURITY_DATA")
@@ -444,6 +448,12 @@ endif()
 list(APPEND S2OPC_DEFINITIONS  $<$<BOOL:${S2OPC_NANO_PROFILE}>:S2OPC_NANO_PROFILE>)
 # Add S2OPC_NODE_MANAGEMENT to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_MANAGEMENT}>:S2OPC_NODE_MANAGEMENT>)
+# Add S2OPC_NODE_ADD_OPTIONAL to compilation definition if option activated
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_ADD_OPTIONAL}>:S2OPC_NODE_ADD_OPTIONAL>)
+# Add S2OPC_NODE_INTERNAL_ADD_CHILD_NODES=0 to compilation definition if option desactivated
+list(APPEND S2OPC_DEFINITIONS $<$<NOT:$<BOOL:${S2OPC_NODE_INTERNAL_ADD_CHILD_NODES}>>:S2OPC_NODE_INTERNAL_ADD_CHILD_NODES=0>)
+# Add S2OPC_NODE_ADD_INVERSE_TYPEDEF=0 to compilation definition if option desactivated
+list(APPEND S2OPC_DEFINITIONS $<$<NOT:$<BOOL:${S2OPC_NODE_ADD_INVERSE_TYPEDEF}>>:S2OPC_NODE_ADD_INVERSE_TYPEDEF=0>)
 # Add S2OPC_NODE_DELETE_CHILD_NODES to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_DELETE_CHILD_NODES}>:S2OPC_NODE_DELETE_CHILD_NODES>)
 # Add S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES to compilation definition if option activated

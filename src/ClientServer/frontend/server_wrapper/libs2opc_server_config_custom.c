@@ -465,10 +465,28 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* add
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 #if S2OPC_EVENT_MANAGEMENT
-    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    SOPC_ASSERT(NULL != pConfig);
-    SOPC_EventManager_CreateEventTypes(addressSpaceConfig, &pConfig->serverConfig.eventTypes);
+    SOPC_S2OPC_Config* pEventConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ASSERT(NULL != pEventConfig);
+    SOPC_EventManager_CreateEventTypes(addressSpaceConfig, &pEventConfig->serverConfig.eventTypes);
 #endif
+    // Find number of namespaces
+    SOPC_S2OPC_Config* config = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ASSERT(NULL != config);
+    uint16_t indexNs = 0;
+    while (config->serverConfig.namespaces[indexNs] != NULL)
+    {
+        indexNs++;
+    }
+    uint16_t nbNs = (uint16_t)(indexNs + 1); // cast necessary for RPI cross-compilation
+    // Initialize Max numeric id for each namespace
+    status = SOPC_AddressSpace_MaxNsNumId_Initialize(addressSpaceConfig, nbNs);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Inconsistency in the number of NS between: server configuration (nb NS = %d) and "
+                               "address space (nodes NS index).",
+                               nbNs);
+    }
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ToolkitServer_SetAddressSpaceConfig(addressSpaceConfig);

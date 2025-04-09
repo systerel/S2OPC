@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.c
 
- Date                 : 16/02/2023 08:33:35
+ Date                 : 28/07/2025 15:01:46
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -151,7 +151,9 @@ void service_add_nodes_1__check_add_nodes_item_params_req_node_id(
       constants__t_NodeId_i service_add_nodes_1__l_node_id;
       t_bool service_add_nodes_1__l_node_exists;
       constants__t_Node_i service_add_nodes_1__l_node;
+      t_bool service_add_nodes_1__l_bres;
       
+      service_add_nodes_1__l_bres = false;
       *service_add_nodes_1__new_nid = constants__c_NodeId_indet;
       *service_add_nodes_1__sc_operation = service_add_nodes_1__p_sc_operation;
       if (*service_add_nodes_1__sc_operation == constants_statuscodes_bs__e_sc_ok) {
@@ -164,7 +166,12 @@ void service_add_nodes_1__check_add_nodes_item_params_req_node_id(
                   &service_add_nodes_1__l_node_exists,
                   &service_add_nodes_1__l_node);
                if (service_add_nodes_1__l_node_exists == false) {
-                  *service_add_nodes_1__new_nid = service_add_nodes_1__l_node_id;
+                  node_id_pointer_bs__copy_node_id_pointer_content(service_add_nodes_1__l_node_id,
+                     &service_add_nodes_1__l_bres,
+                     service_add_nodes_1__new_nid);
+                  if (service_add_nodes_1__l_bres == false) {
+                     *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+                  }
                }
                else {
                   *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_node_id_exists;
@@ -175,7 +182,11 @@ void service_add_nodes_1__check_add_nodes_item_params_req_node_id(
             }
          }
          else {
-            *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_node_id_rejected;
+            call_method_mgr__gen_fresh_NodeId(&service_add_nodes_1__l_bres,
+               service_add_nodes_1__new_nid);
+            if (service_add_nodes_1__l_bres == false) {
+               *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+            }
          }
       }
    }
@@ -244,6 +255,7 @@ void service_add_nodes_1__treat_add_nodes_item(
          *service_add_nodes_1__new_nodeId = service_add_nodes_1__l_new_nid;
       }
       else {
+         node_id_pointer_bs__free_node_id_pointer(service_add_nodes_1__l_new_nid);
          *service_add_nodes_1__new_nodeId = constants__c_NodeId_indet;
       }
    }

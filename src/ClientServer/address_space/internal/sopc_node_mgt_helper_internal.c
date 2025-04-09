@@ -815,15 +815,16 @@ SOPC_StatusCode SOPC_NodeMgtHelperInternal_CopyDataInNode(OpcUa_Node* node,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(SOPC_AddressSpace* addSpace,
-                                                                     const SOPC_NodeId* parentNodeId,
-                                                                     const SOPC_NodeId* childNodeId,
-                                                                     const SOPC_NodeId* refTypeId)
+SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefToNode(SOPC_AddressSpace* addSpace,
+                                                          const SOPC_NodeId* nodeId,
+                                                          const SOPC_NodeId* refTargetNodeId,
+                                                          const SOPC_NodeId* refTypeId,
+                                                          const bool refIsInverse)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     bool found = false;
-    SOPC_AddressSpace_Node* parentNode = SOPC_AddressSpace_Get_Node(addSpace, parentNodeId, &found);
+    SOPC_AddressSpace_Node* parentNode = SOPC_AddressSpace_Get_Node(addSpace, nodeId, &found);
     SOPC_ASSERT(found && NULL != parentNode);
     int32_t* nbRefs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, parentNode);
     SOPC_ASSERT(NULL != nbRefs);
@@ -849,11 +850,11 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(SOPC_Addres
             // Add hierarchical reference to new child
             OpcUa_ReferenceNode* hierarchicalRef = &newRefs[*nbRefs];
             OpcUa_ReferenceNode_Initialize(hierarchicalRef);
-            hierarchicalRef->IsInverse = false;
+            hierarchicalRef->IsInverse = refIsInverse;
             status = SOPC_NodeId_Copy(&hierarchicalRef->ReferenceTypeId, refTypeId);
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_NodeId_Copy(&hierarchicalRef->TargetId.NodeId, childNodeId);
+                status = SOPC_NodeId_Copy(&hierarchicalRef->TargetId.NodeId, refTargetNodeId);
             }
             else
             {
@@ -879,11 +880,11 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(SOPC_Addres
     return status;
 }
 
-bool SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(SOPC_AddressSpace* addSpace, const SOPC_NodeId* parentNodeId)
+bool SOPC_NodeMgtHelperInternal_RemoveLastRefInTargetNode(SOPC_AddressSpace* addSpace, const SOPC_NodeId* targetNodeId)
 {
     // Rollback reference added in parent
     bool found = false;
-    SOPC_AddressSpace_Node* parentNode = SOPC_AddressSpace_Get_Node(addSpace, parentNodeId, &found);
+    SOPC_AddressSpace_Node* parentNode = SOPC_AddressSpace_Get_Node(addSpace, targetNodeId, &found);
     SOPC_ASSERT(found && NULL != parentNode);
     int32_t* nbRefs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, parentNode);
     SOPC_ASSERT(NULL != nbRefs);

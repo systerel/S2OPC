@@ -58,12 +58,13 @@ SOPC_StatusCode SOPC_NodeMgtHelperInternal_CopyDataInNode(OpcUa_Node* node,
                                                           const SOPC_QualifiedName* browseName,
                                                           const SOPC_ExpandedNodeId* typeDefId);
 
-SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(SOPC_AddressSpace* addSpace,
-                                                                     const SOPC_NodeId* parentNodeId,
-                                                                     const SOPC_NodeId* childNodeId,
-                                                                     const SOPC_NodeId* refTypeId);
+SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefToNode(SOPC_AddressSpace* addSpace,
+                                                          const SOPC_NodeId* nodeId,
+                                                          const SOPC_NodeId* refTargetNodeId,
+                                                          const SOPC_NodeId* refTypeId,
+                                                          const bool refIsInverse);
 
-bool SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(SOPC_AddressSpace* addSpace, const SOPC_NodeId* parentNodeId);
+bool SOPC_NodeMgtHelperInternal_RemoveLastRefInTargetNode(SOPC_AddressSpace* addSpace, const SOPC_NodeId* targetNodeId);
 
 bool SOPC_NodeMgtHelperInternal_RemoveRefAtIndex(SOPC_AddressSpace* addSpace,
                                                  SOPC_AddressSpace_Node* node,

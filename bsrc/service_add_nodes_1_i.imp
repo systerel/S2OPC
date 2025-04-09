@@ -26,6 +26,7 @@ REFINES
 SEES
     constants,
     constants_statuscodes_bs,
+    node_id_pointer_bs,
     message_in_bs,
     message_out_bs,
     msg_node_management_add_nodes
@@ -171,14 +172,11 @@ LOCAL_OPERATIONS
                     ((p_reqNodeId : dom(conv_ExpandedNodeId_NodeId) & not(conv_ExpandedNodeId_NodeId(p_reqNodeId) /: ran(a_NodeId))) =>
                         sc_operation = e_sc_bad_node_id_exists)
                 ) &
-                /* TODO: implement generation and put it in a separated step prior to treat_add_nodes_item step
                 (not (p_reqNodeId : t_ExpandedNodeId) =>
-                    (s_Node = t_Node => sc_operation = e_sc_bad_out_of_memory) &
-                    (not(s_Node = t_Node) =>
-                new_nid : t_NodeId & new_nid /: ran(a_NodeId) & sc_operation = e_sc_ok)
+                    (new_nid = c_NodeId_indet => sc_operation = e_sc_bad_out_of_memory) &
+                    (new_nid /= c_NodeId_indet =>
+                        new_nid : t_NodeId & new_nid /: ran(a_NodeId) & sc_operation = e_sc_ok)
                 )
-                */
-                (not (p_reqNodeId : t_ExpandedNodeId) => sc_operation = e_sc_bad_node_id_rejected)
             ) &
             (not (p_sc_operation = e_sc_ok) => sc_operation = p_sc_operation)
         )
@@ -333,8 +331,10 @@ OPERATIONS
         l_local_server_exp_node_id,
         l_node_id,
         l_node_exists,
-        l_node
+        l_node,
+        l_bres
     IN
+        l_bres := FALSE;
         new_nid := c_NodeId_indet;
         sc_operation := p_sc_operation;
         /* Validates requested NodeId (or Generates a fresh one if not defined) */
@@ -348,7 +348,11 @@ OPERATIONS
                     l_node_exists, l_node <-- readall_AddressSpace_Node(l_node_id);
                     IF l_node_exists = FALSE
                     THEN
-                        new_nid := l_node_id
+                        l_bres, new_nid <-- copy_node_id_pointer_content(l_node_id);
+                        IF l_bres = FALSE
+                        THEN
+                            sc_operation := e_sc_bad_out_of_memory
+                        END
                     ELSE
                         sc_operation := e_sc_bad_node_id_exists
                     END
@@ -356,9 +360,11 @@ OPERATIONS
                     sc_operation := e_sc_bad_node_id_rejected
                 END
             ELSE
-                /* TODO: generate a fresh node id */
-                /* Note: set the generated NodeId in request requested NodeId for deallocation management */
-                sc_operation := e_sc_bad_node_id_rejected
+                l_bres, new_nid <-- gen_fresh_NodeId;
+                IF l_bres = FALSE
+                THEN
+                    sc_operation := e_sc_bad_out_of_memory
+                END
             END
         END
     END
@@ -398,6 +404,7 @@ OPERATIONS
         THEN
             new_nodeId := l_new_nid
         ELSE
+            free_node_id_pointer (l_new_nid);
             new_nodeId := c_NodeId_indet
         END
     END
