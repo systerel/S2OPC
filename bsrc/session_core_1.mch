@@ -173,7 +173,8 @@ OPERATIONS
         state   : t_sessionState_i &
         state   : t_sessionState &
         state /= e_session_init  &
-        is_client : BOOL
+        is_client : BOOL         &
+        is_client = bool(session : s_client_session)
     THEN
         a_state (session) := state
         /* + notify  user app when session activated */
@@ -188,7 +189,8 @@ OPERATIONS
         channel : t_channel    &
         state   : t_sessionState_i &
         state   : {e_session_created, e_session_creating} &
-        is_client : BOOL
+        is_client : BOOL       &
+        is_client = bool(session : s_client_session)
     THEN
         a_channel (session) := channel ||
         a_state   (session) := state   ||
@@ -801,7 +803,8 @@ OPERATIONS
         session   : dom(a_state)   &
         sc_reason : t_StatusCode_i &
         sc_reason : t_StatusCode   &
-        is_client : BOOL
+        is_client : BOOL           &
+        is_client = bool(session : s_client_session)
     THEN
         s_session                    := s_session - {session}                      ||
         s_client_session             := s_client_session - {session}               ||
