@@ -743,6 +743,7 @@ OPERATIONS
     PRE
         p_session            : t_session_i            &
         p_session            : s_session              &
+        a_state(p_session)   = e_session_init         &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx
     THEN
@@ -752,9 +753,10 @@ OPERATIONS
 
     set_session_app_context(p_session, p_app_context) =
     PRE
-        p_session     : t_session_i    &
-        p_session     : s_session      &
-        p_app_context : t_session_application_context_i
+        p_session          : t_session_i    &
+        p_session          : s_session      &
+        a_state(p_session) = e_session_init &
+        p_app_context      : t_session_application_context_i
     THEN
         a_client_app_context(p_session) := p_app_context
     END
@@ -770,10 +772,11 @@ OPERATIONS
 
     set_session_user_client (session, p_user_token) =
     PRE
-        session      : t_session_i    &
-        session      : t_session      &
-        session      : s_client_session &
-        p_user_token : t_user_token_i &
+        session      : t_session_i        &
+        session      : t_session          &
+        session      : s_client_session   &
+        a_state(session) = e_session_init &
+        p_user_token : t_user_token_i     &
         p_user_token : t_user_token
     THEN
         a_user_client (session) := p_user_token
