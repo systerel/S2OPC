@@ -76,16 +76,19 @@ DEFINITIONS
     a_NonceClient                := {};
 
     d_close_session (session) ==
-    s_session := s_session - {session}                   || // If session was valid session, remove it
-    a_channel := {session} <<| a_channel                 || // If session had a channel, remove this relation
-    a_client_orphaned := {session} <<| a_client_orphaned || // If session was orphaned, remove this relation
-    a_user_server := {session} <<| a_user_server         || // If session had a user, remove this relation
-    a_user_client := {session} <<| a_user_client         || // If session had a user, remove this relation
-    a_client_token := {session} <<| a_client_token       || // If session had a token, remove this relation
-    a_server_token := a_server_token |>> {session}       || // If session had a token, remove this relation
-    a_state := {session} <<| a_state                     ||
-    a_NonceServer := {session} <<| a_NonceServer         || /* If session had a server nonce, remove it */
-    a_NonceClient := {session} <<| a_NonceClient            /* If session had a client nonce, remove it */
+    s_session            := s_session - {session}              || // If session was valid session, remove it
+    a_session_roles      := {session} <<| a_session_roles      || // If session had a role, remove this relation
+    a_state              := {session} <<| a_state              || // If session had a state, remove this relation
+    a_channel            := {session} <<| a_channel            || // If session had a channel, remove this relation
+    a_client_to_create   := {session} <<| a_client_to_create   || // If session was waiting to be created, remove this relation
+    a_client_app_context := {session} <<| a_client_app_context || // If session had an app context, remove this relation
+    a_client_orphaned    := {session} <<| a_client_orphaned    || // If session was orphaned, remove this relation
+    a_client_token       := {session} <<| a_client_token       || // If session had a token, remove this relation
+    a_server_token       := a_server_token |>> {session}       || // If session had a token, remove this relation
+    a_user_server        := {session} <<| a_user_server        || // If session had a user, remove this relation
+    a_user_client        := {session} <<| a_user_client        || // If session had a user, remove this relation
+    a_NonceServer        := {session} <<| a_NonceServer        || // If session had a server nonce, remove it
+    a_NonceClient        := {session} <<| a_NonceClient           // If session had a client nonce, remove it
 
 ABSTRACT_VARIABLES
     d_variables
