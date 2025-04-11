@@ -550,7 +550,6 @@ OPERATIONS
         session : s_session &
         a_channel(session) = channel &
         a_state(session) : {e_session_created,
-            e_session_userActivating,
             e_session_userActivated} &
         close_req_msg : t_msg_i &
         close_req_msg = c_msg_in &
