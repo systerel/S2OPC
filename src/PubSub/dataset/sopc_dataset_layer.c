@@ -75,7 +75,9 @@ SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_Wr
             SOPC_PublishedDataSet_Get_DataSet_SourceType(SOPC_DataSetWriter_Get_DataSet(conf_dsw));
         if (SOPC_PublishedDataItemsDataType == sourceType)
         {
-            SOPC_ASSERT(!isKeepAlive);
+            SOPC_ASSERT(!isKeepAlive &&
+                        "Source type for acyclic messages shall be SOPC_PublishedDataSetCustomSourceDataType or "
+                        "SOPC_PublishedEventsDataType");
         }
         else
         {
