@@ -467,7 +467,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         if (SOPC_SecurityMode_SignAndEncrypt == smode)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                   "Cannot use SignAndEncrypt security policy with fixed size buffer optimisation");
+                                   "Cannot use SignAndEncrypt security with fixed size buffer optimisation");
             result = false;
         }
         else
@@ -548,7 +548,6 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
     SOPC_ASSERT(NULL != context);
     SOPC_Dataset_NetworkMessage* message = context->message;
-    SOPC_PubSub_SecurityType* security = context->security;
 
     SOPC_WriterGroup* group = context->group;
     SOPC_ASSERT(NULL != message && NULL != group);
@@ -561,7 +560,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     size_t nbDsmCtx = SOPC_Array_Size(context->dataSetMessageCtx);
     SOPC_ASSERT(nDsm == nbDsmCtx);
 
-    const bool isPreencode = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enabled(message);
+    const bool isPreencoded = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enabled(message);
 
     for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
     {
@@ -575,16 +574,16 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         bool oldFlagEnableEmission = SOPC_Dataset_LL_DataSetMsg_Get_EnableEmission(dsm);
         SOPC_Dataset_LL_DataSetMsg_Set_EnableEmission(dsm, dsmCtx->enableEmission);
 
-        // If the dsm state of emission change, we have to preencode the networkMessage and recapture positions in
-        // buffer
-        if (isPreencode && dsmCtx->enableEmission != oldFlagEnableEmission)
+        // If the dsm state of emission change, we have to reencode the networkMessage and recapture positions in buffer
+        if (isPreencoded && dsmCtx->enableEmission != oldFlagEnableEmission)
         {
             SOPC_UADP_NetworkMessage_Delete_PreencodedBuffer(message);
-            SOPC_ReturnStatus status = SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(message, security);
+            SOPC_ReturnStatus status =
+                SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(message, context->security);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                         "Failed to re build the preencode network message after changing dsm state");
+                                         "Failed to re build the preencoded network message after changing dsm state");
             }
         }
 
@@ -615,7 +614,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
                 bool isCompatible = false;
                 bool isBad = false;
-                if (isPreencode)
+                if (isPreencoded)
                 {
                     isCompatible = SOPC_PubSubHelpers_IsPreencodeCompatibleVariant(fieldData, &dv->Value);
                 }
@@ -667,6 +666,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     /* Finally send it */
     if (typeCheckingSuccess)
     {
+        SOPC_PubSub_SecurityType* security = context->security;
         if (NULL != security)
         {
             // Update keys
@@ -712,7 +712,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         else
         {
             errorCode = SOPC_NetworkMessage_Error_Code_None;
-            if (isPreencode)
+            if (isPreencoded)
             {
                 buffer = SOPC_UADP_NetworkMessage_Get_PreencodedBuffer(message, security);
                 if (NULL == buffer)
@@ -755,7 +755,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         if (NULL != buffer)
         {
             context->transport->pFctSend(context->transport, buffer);
-            if (!isPreencode)
+            if (!isPreencoded)
             {
                 SOPC_Buffer_Delete(buffer);
                 buffer = NULL;
@@ -852,15 +852,18 @@ static void* thread_start_publish(void* arg)
             int32_t offset = context->publishingOffsetUs;
 
             /* If a message needs to be sent, send it */
-            if (context->nbOfDsmActive)
+            if (context->transport->isAcyclic)
             {
-                if (context->transport->isAcyclic)
+                duration = context->keepAliveTimeUs;
+                offset = -1;
+                if (context->nbOfDsmActive)
                 {
                     send_keepAlive_message(context);
-                    duration = context->keepAliveTimeUs;
-                    offset = -1;
                 }
-                else
+            }
+            else
+            {
+                if (context->nbOfDsmActive)
                 {
                     MessageCtx_send_publish_message(context);
                 }
@@ -1225,7 +1228,7 @@ static MessageCtx* MessageCtx_GetFromPublisherId_WriterGroupId(SOPC_Conf_Publish
     return mes;
 }
 
-static SOPC_DataSetMessageCtx_t* DataSetMessage_GetFrom_DataSetWriterId(MessageCtx* context, uint16_t dataSetWriterId)
+static SOPC_DataSetMessageCtx_t* DataSetMessage_GetFrom_DataSetWirterId(MessageCtx* context, uint16_t dataSetWriterId)
 {
     SOPC_DataSetMessageCtx_t* dsmCtxFound = NULL;
     if (NULL != context)
@@ -1260,7 +1263,7 @@ static SOPC_ReturnStatus SOPC_PubScheduler_Set_EnableEmission_DataSetMessage(SOP
     SOPC_DataSetMessageCtx_t* dsmCtx = NULL;
     if (NULL != context)
     {
-        dsmCtx = DataSetMessage_GetFrom_DataSetWriterId(context, dataSetWriterId);
+        dsmCtx = DataSetMessage_GetFrom_DataSetWirterId(context, dataSetWriterId);
     }
     if (NULL != dsmCtx)
     {
