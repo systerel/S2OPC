@@ -1228,7 +1228,8 @@ static MessageCtx* MessageCtx_GetFromPublisherId_WriterGroupId(SOPC_Conf_Publish
     return mes;
 }
 
-static SOPC_DataSetMessageCtx_t* DataSetMessage_GetFrom_DataSetWirterId(MessageCtx* context, uint16_t dataSetWriterId)
+static SOPC_DataSetMessageCtx_t* DataSetMessage_GetFrom_DataSetWirterId(const MessageCtx* context,
+                                                                        uint16_t dataSetWriterId)
 {
     SOPC_DataSetMessageCtx_t* dsmCtxFound = NULL;
     if (NULL != context)
