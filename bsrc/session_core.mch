@@ -31,6 +31,7 @@ DEFINITIONS
     d_variables ==
     s_session,
     a_session_roles,
+    s_client_session,
     a_state,
     a_channel,
     a_client_to_create,
@@ -46,6 +47,7 @@ DEFINITIONS
     d_typing ==
     s_session <: t_session &
     a_session_roles : s_session +-> t_sessionRoles & // a session may be associated to roles
+    s_client_session <: s_session &
     a_state : s_session --> t_sessionState & // a session shall be associated to a state
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
     a_client_to_create : s_session +-> t_channel_config_idx_i & // a client session may be waiting to be created on a channel (not yet established)
@@ -63,6 +65,7 @@ DEFINITIONS
     d_init ==
     s_session                    := {} ||
     a_session_roles              := {} ||
+    s_client_session             := {} ||
     a_state                      := {} ||
     a_channel                    := {} ||
     a_client_to_create           := {} ||
@@ -78,6 +81,7 @@ DEFINITIONS
     d_close_session (session) ==
     s_session            := s_session - {session}              || // If session was valid session, remove it
     a_session_roles      := {session} <<| a_session_roles      || // If session had a role, remove this relation
+    s_client_session     := s_client_session - {session}       || // If session was client session, remove it
     a_state              := {session} <<| a_state              || // If session had a state, remove this relation
     a_channel            := {session} <<| a_channel            || // If session had a channel, remove this relation
     a_client_to_create   := {session} <<| a_client_to_create   || // If session was waiting to be created, remove this relation
@@ -170,6 +174,7 @@ OPERATIONS
                 l_nsession : t_session - s_session
             THEN
                 s_session := s_session \/ {l_nsession} ||
+                s_client_session := s_client_session \/ {l_nsession} ||
                 a_state(l_nsession) := e_session_init  ||
                 nsession := l_nsession
             END
@@ -183,6 +188,7 @@ OPERATIONS
         session : t_session_i &
         session : t_session &
         session : s_session &
+        session : s_client_session &
         a_state(session) = e_session_init &
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -264,6 +270,7 @@ OPERATIONS
         channel       : s_channel_connected   &
         session       : t_session_i &
         session       : s_session &
+        session       : s_client_session &
         a_channel(session) = channel &
         a_state(session) = e_session_creating &
         session_token : t_session_token_i &
@@ -298,6 +305,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : s_session &
+        session : s_client_session &
         a_state(session) : {e_session_created, e_session_userActivated} &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token &
@@ -328,6 +336,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : s_session &
+        session : s_client_session &
         a_state(session) : {e_session_scOrphaned, e_session_userActivated} & // last state never used in toolkit (no app API provided)
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -349,6 +358,7 @@ OPERATIONS
         p_channel : s_channel_connected &
         p_session : t_session_i &
         p_session : s_session &
+        p_session /: s_client_session &
         a_state(p_session) : {e_session_created, e_session_userActivated,
                               e_session_scOrphaned} &
         p_user_token : t_user_token_i &
@@ -375,6 +385,7 @@ OPERATIONS
         channel : s_channel_connected   &
         session : t_session_i &
         session : s_session &
+        session /: s_client_session &
         a_state(session) : {e_session_created, e_session_userActivated,
                             e_session_scOrphaned} &
         user : t_user_i &
@@ -429,6 +440,7 @@ OPERATIONS
         channel : s_channel_connected   &
         session : t_session_i &
         session : s_session &
+        session : s_client_session &
         a_channel(session) = channel &
         a_state(session) : {e_session_userActivating, e_session_scActivating} &
         activate_resp_msg : t_msg_i &
@@ -510,6 +522,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : s_session &
+        session : s_client_session &
         a_state(session) : {e_session_created,
             e_session_userActivating,
             e_session_userActivated} &
@@ -539,6 +552,7 @@ OPERATIONS
         channel : s_channel_connected   &
         session : t_session_i &
         session : s_session &
+        session /: s_client_session &
         a_channel(session) = channel &
         a_state(session) : {e_session_created,
             e_session_userActivated} &
@@ -564,6 +578,7 @@ OPERATIONS
         channel : s_channel_connected   &
         session : t_session_i &
         session : s_session &
+        session : s_client_session &
         a_channel(session) = channel &
         a_state(session) = e_session_closing &
         close_resp_msg : t_msg_i &
@@ -581,6 +596,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : s_session &
+        session : s_client_session &
         sc_reason : t_StatusCode_i &
         sc_reason : t_StatusCode
     THEN
@@ -593,6 +609,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : s_session &
+        session /: s_client_session &
         sc_reason : t_StatusCode_i &
         sc_reason : t_StatusCode
     THEN
@@ -648,6 +665,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : t_session &
+        session : s_client_session &
         session : dom(a_client_token)
     THEN
         // Guarantee only 1 session token by session provided by set_session_token PRE
@@ -754,6 +772,7 @@ OPERATIONS
     PRE
         session      : t_session_i    &
         session      : t_session      &
+        session      : s_client_session &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token
     THEN
