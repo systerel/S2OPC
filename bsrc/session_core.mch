@@ -30,7 +30,6 @@ SEES
 DEFINITIONS
     d_variables ==
     s_session,
-    a_session_roles,
     s_client_session,
     a_state,
     a_channel,
@@ -42,11 +41,11 @@ DEFINITIONS
     a_user_server,
     a_user_client,
     a_NonceServer,
-    a_NonceClient;
+    a_NonceClient,
+    a_session_roles;
 
     d_typing ==
     s_session <: t_session &
-    a_session_roles : s_session +-> t_sessionRoles & // a session may be associated to roles
     s_client_session <: s_session &
     a_state : s_session --> t_sessionState & // a session shall be associated to a state
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
@@ -60,11 +59,11 @@ DEFINITIONS
     /* The NonceServer negotiated for a session in CreateSession or ActivateSession */
     a_NonceServer : s_session +-> t_Nonce &
     /* The NonceClient is remembered by the client in Sess_Creating */
-    a_NonceClient : s_session +-> t_Nonce;
+    a_NonceClient : s_session +-> t_Nonce &
+     a_session_roles : s_session +-> t_sessionRoles; // a session may be associated to roles
 
     d_init ==
     s_session                    := {} ||
-    a_session_roles              := {} ||
     s_client_session             := {} ||
     a_state                      := {} ||
     a_channel                    := {} ||
@@ -76,11 +75,11 @@ DEFINITIONS
     a_user_server                := {} ||
     a_user_client                := {} ||
     a_NonceServer                := {} ||
-    a_NonceClient                := {};
+    a_NonceClient                := {} ||
+    a_session_roles              := {};
 
     d_close_session (session) ==
     s_session            := s_session - {session}              || // If session was valid session, remove it
-    a_session_roles      := {session} <<| a_session_roles      || // If session had a role, remove this relation
     s_client_session     := s_client_session - {session}       || // If session was client session, remove it
     a_state              := {session} <<| a_state              || // If session had a state, remove this relation
     a_channel            := {session} <<| a_channel            || // If session had a channel, remove this relation
@@ -92,7 +91,8 @@ DEFINITIONS
     a_user_server        := {session} <<| a_user_server        || // If session had a user, remove this relation
     a_user_client        := {session} <<| a_user_client        || // If session had a user, remove this relation
     a_NonceServer        := {session} <<| a_NonceServer        || // If session had a server nonce, remove it
-    a_NonceClient        := {session} <<| a_NonceClient           // If session had a client nonce, remove it
+    a_NonceClient        := {session} <<| a_NonceClient        || // If session had a client nonce, remove it
+    a_session_roles      := {session} <<| a_session_roles         // If session had a role, remove this relation
 
 ABSTRACT_VARIABLES
     d_variables
