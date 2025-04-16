@@ -144,18 +144,6 @@ OPERATIONS
     END
     ;
 
-    /* Store the roles in the session */
-    set_session_roles(p_session, p_roles) =
-    PRE
-        p_session : t_session_i &
-        p_session : s_session &
-        a_state(p_session) = e_session_userActivated &
-        p_roles : t_sessionRoles_i
-    THEN
-        a_session_roles(p_session) := p_roles
-    END
-    ;
-
     /* Get the roles of the session */
     p_session_roles <-- get_session_roles(p_session) =
     PRE
@@ -667,23 +655,6 @@ OPERATIONS
     END
     ;
 
-    p_dom, p_channel <-- getall_session_channel (p_session) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session
-    THEN
-        p_dom := bool(p_session : dom(a_channel)) ||
-        IF  p_session : dom(a_channel) THEN
-            p_channel
-            :(  p_channel : t_channel_i &
-                p_channel = a_channel(p_session)
-            )
-        ELSE
-            p_channel :: t_channel_i
-        END
-    END
-    ;
-
     channel <-- get_session_channel (session) =
     PRE
         session : t_session_i &
@@ -776,16 +747,6 @@ OPERATIONS
         session : t_session_i
     THEN
         ret :=  bool(session : s_session)
-    END
-    ;
-
-    drop_user_server (p_session) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session
-    THEN
-        a_user_server := {p_session} <<| a_user_server
-        /* Also deallocate user */
     END
     ;
 
