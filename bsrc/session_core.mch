@@ -272,6 +272,7 @@ OPERATIONS
         session       : t_session_i &
         session       : s_session &
         session       : s_client_session &
+        session       : dom(a_channel) &
         a_channel(session) = channel &
         a_state(session) = e_session_creating &
         session_token : t_session_token_i &
