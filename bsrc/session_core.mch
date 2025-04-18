@@ -545,7 +545,6 @@ OPERATIONS
     END
     ;
 
-
     ret <-- server_close_session_req_and_resp_sm (channel, session, close_req_msg, close_resp_msg) =
     PRE
         channel : t_channel_i &
