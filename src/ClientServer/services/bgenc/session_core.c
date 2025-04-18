@@ -186,8 +186,7 @@ void session_core__l_server_activate_session_req_and_resp_sm(
          session_core_1__is_same_user_server(session_core__l_user,
             session_core__user,
             &session_core__l_is_same_user);
-         if ((session_core__l_channel != session_core__channel) &&
-            (session_core__l_is_same_user == true)) {
+         if (session_core__l_is_same_user == true) {
             session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
                session_core__user,

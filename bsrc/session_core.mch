@@ -418,39 +418,102 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_activate_resp
     THEN
-        // TODO: split in 2 operations sc/user activation determined by session_mgr ?
-
-        IF session : dom(a_channel) &
-            a_channel(session) = channel // current channel is the channel associated to the current session
+        IF a_state(session) = e_session_created
         THEN
-            /* UserActivateReq */
-            CHOICE
-                a_state(session) := e_session_userActivated ||
-                a_session_roles :(session : dom(a_session_roles)) ||
-                a_user_server(session) := user ||
-                ret := e_sc_ok
-                // modify credential if user was already associated, sends response
-            OR
-                ret :: {e_sc_bad_invalid_state, e_sc_bad_application_signature_invalid}
-                // sends response with error
+            IF session : dom(a_channel) &
+               a_channel(session) = channel // current channel is the channel associated to the current session
+            THEN
+                CHOICE
+                    a_state(session) := e_session_userActivated ||
+                    a_user_server(session) := user ||
+                    a_session_roles :(
+                        a_session_roles : t_session +-> t_sessionRoles &
+                        {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
+                    a_NonceServer :(
+                        a_NonceServer : t_session +-> t_Nonce &
+                        {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                        session : dom(a_NonceServer)) ||
+                    ret := e_sc_ok
+                OR
+                    ret := e_sc_bad_application_signature_invalid
+                END
+            ELSE
+                ret := e_sc_bad_invalid_argument
             END
-        ELSIF a_state(session) : {e_session_scOrphaned, e_session_userActivated} &
-              session : dom(a_user_server) &
-              a_user_server(session) = user // user provided in activate request is the user associated to the current session
+        ELSIF a_state(session) = e_session_userActivated
         THEN
-            /* ScActivateReq */
-            CHOICE
-                a_client_orphaned := {session} <<| a_client_orphaned ||
-                a_channel(session) := channel         ||
-                a_state(session) := e_session_userActivated ||
-                ret := e_sc_ok
-            OR
-                ret := e_sc_bad_application_signature_invalid
-                // sends response with error
+            IF session : dom(a_channel) &
+               a_channel(session) = channel // current channel is the channel associated to the current session
+            THEN
+                CHOICE
+                    a_state(session) := e_session_userActivated ||
+                    a_user_server(session) := user ||
+                    a_session_roles :(
+                        a_session_roles : t_session +-> t_sessionRoles &
+                        {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
+                    a_NonceServer :(
+                        a_NonceServer : t_session +-> t_Nonce &
+                        {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                        session : dom(a_NonceServer)) ||
+                    ret := e_sc_ok
+                OR
+                    ret := e_sc_bad_application_signature_invalid
+                END
+            ELSIF session : dom(a_user_server) &
+                  a_user_server(session) = user // user provided in activate request is the user associated to the current session
+            THEN
+                    CHOICE
+                        a_channel(session) := channel         ||
+                        a_state(session) := e_session_userActivated ||
+                        a_user_server :(
+                            a_user_server : t_session +-> t_user &
+                            {session} <<| a_user_server = {session} <<| a_user_server$0 &
+                            session : dom(a_user_server))||
+                        a_session_roles :(
+                            a_session_roles : t_session +-> t_sessionRoles &
+                            {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
+                        a_NonceServer :(
+                            a_NonceServer : t_session +-> t_Nonce &
+                            {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                            session : dom(a_NonceServer)) ||
+                        ret := e_sc_ok
+                    OR
+                        ret := e_sc_bad_application_signature_invalid
+                        // sends response with error
+                    END
+            ELSE
+                ret := e_sc_bad_invalid_state
+            END
+        ELSIF a_state(session) = e_session_scOrphaned
+        THEN
+            IF session : dom(a_user_server) &
+               a_user_server(session) = user
+            THEN
+                /* ScActivateReq */
+                CHOICE
+                    a_channel(session) := channel         ||
+                    a_state(session) := e_session_userActivated ||
+                    a_user_server :(
+                        a_user_server : t_session +-> t_user &
+                        {session} <<| a_user_server = {session} <<| a_user_server$0 &
+                        session : dom(a_user_server))||
+                    a_session_roles :(
+                        a_session_roles : t_session +-> t_sessionRoles &
+                        {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
+                    a_NonceServer :(
+                        a_NonceServer : t_session +-> t_Nonce &
+                        {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                        session : dom(a_NonceServer)) ||
+                    ret := e_sc_ok
+                OR
+                    ret := e_sc_bad_application_signature_invalid
+                    // sends response with error
+                END
+            ELSE
+                ret := e_sc_bad_invalid_state
             END
         ELSE
-            ret :: {e_sc_bad_invalid_argument,
-                    e_sc_bad_invalid_state}
+            ret := e_sc_bad_invalid_state
         END
     END
     ;
