@@ -746,6 +746,7 @@ OPERATIONS
     PRE
         p_session            : t_session_i            &
         p_session            : s_session              &
+        p_session            : s_client_session       &
         a_state(p_session)   = e_session_init         &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx
@@ -756,9 +757,10 @@ OPERATIONS
 
     set_session_app_context(p_session, p_app_context) =
     PRE
-        p_session          : t_session_i    &
-        p_session          : s_session      &
-        a_state(p_session) = e_session_init &
+        p_session          : t_session_i      &
+        p_session          : s_session        &
+        p_session          : s_client_session &
+        a_state(p_session) = e_session_init   &
         p_app_context      : t_session_application_context_i
     THEN
         a_client_app_context(p_session) := p_app_context
