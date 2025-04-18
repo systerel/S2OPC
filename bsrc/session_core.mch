@@ -153,6 +153,7 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : s_session &
+        p_session : dom(a_session_roles) &
         a_state(p_session) = e_session_userActivated
     THEN
         p_session_roles :(p_session_roles : t_sessionRoles_i & p_session_roles = a_session_roles(p_session))
