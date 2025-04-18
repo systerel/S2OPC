@@ -403,7 +403,8 @@ OPERATIONS
     THEN
         // TODO: split in 2 operations sc/user activation determined by session_mgr ?
 
-        IF a_channel(session) = channel // current channel is the channel associated to the current session
+        IF session : dom(a_channel) &
+            a_channel(session) = channel // current channel is the channel associated to the current session
         THEN
             /* UserActivateReq */
             CHOICE
@@ -417,7 +418,8 @@ OPERATIONS
                 // sends response with error
             END
         ELSIF a_state(session) : {e_session_scOrphaned, e_session_userActivated} &
-            a_user_server(session) = user // user provided in activate request is the user associated to the current session
+              session : dom(a_user_server) &
+              a_user_server(session) = user // user provided in activate request is the user associated to the current session
         THEN
             /* ScActivateReq */
             CHOICE
