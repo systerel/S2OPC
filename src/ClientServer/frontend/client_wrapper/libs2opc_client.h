@@ -32,7 +32,7 @@
  * (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
  *
  * Dedicated functions are provided to handle subscriptions:
- * ::SOPC_ClientHelper_CreateSubscription (::SOPC_ClientHelper_DeleteSubscription) to create (delete) a unique
+ * ::SOPC_ClientHelper_CreateSubscription (::SOPC_ClientHelper_DeleteSubscription) to create (delete) a
  * subscription instance for the connection.
  * ::SOPC_ClientHelper_Subscription_CreateMonitoredItems (::SOPC_ClientHelper_Subscription_DeleteMonitoredItems)
  * to create (delete) monitored items in a subscription instance.
@@ -359,8 +359,6 @@ typedef void SOPC_ClientSubscriptionNotification_Fct(const SOPC_ClientHelper_Sub
 /**
  * \brief Creates a subscription on the server
  *
- * \warning The current implementation is limited to 1 subscription per connection
- *
  * \param secureConnection The client connection instance to use to execute the service
  * \param subParams        The subscription creation request containing subscription parameters
  *                         (created using ::SOPC_CreateSubscriptionRequest_CreateDefault or
@@ -371,7 +369,7 @@ typedef void SOPC_ClientSubscriptionNotification_Fct(const SOPC_ClientHelper_Sub
  * \param userParam        The user parameter associated to the subscription that can be accessed using
  *                         ::SOPC_ClientHelper_Subscription_GetUserParam
  *
- * \return The subscription instance or NULL in case of error (invalid parameters, subscription already created, etc.)
+ * \return The subscription instance or NULL in case of error (invalid parameters, etc.)
  *
  * \note The provided \p subParams memory is managed by the function after this call (even in case of error)
  *       and shall not be accessed nor freed after call.
@@ -394,7 +392,7 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
 SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscription** subscription);
 
 /**
- * \brief  Sets the number of publish tokens to be used for the subscription.
+ * \brief  Sets the number of publish tokens to be used for the secureConnection.
  *         This number shall be greater than 0 and indicates the number of publish request
  *         sent to the server that might be used to send back notifications.
  *
@@ -402,13 +400,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
  * \note A new publish request token is sent back to the server each time a publish response is received
  *       (i.e. token consumed)
  *
- * \param subscription     The subscription instance
+ * \param secureConnection     The secureConnection instance
  * \param nbPublishTokens  The number of publish tokens to be used by the client
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
- *         SOPC_STATUS_INVALID_STATE if the client or subscription is not running.
+ *         SOPC_STATUS_INVALID_STATE if the client or secureConnection is not running.
  */
-SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SetAvailableTokens(SOPC_ClientHelper_Subscription* subscription,
+SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SetAvailableTokens(SOPC_ClientConnection* secureConnection,
                                                                     uint32_t nbPublishTokens);
 
 /**
@@ -530,7 +528,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
  * \param subscription The subscription instance for which the service shall be executed
  * \param subOrMIrequest   An instance of one of the following OPC UA request:
  *                         - ::OpcUa_ModifySubscriptionRequest
- *                         - ::OpcUa_SetPublishingModeRequest (expecting 1 subscription id to fill in allocated array)
+ *                         - ::OpcUa_SetPublishingModeRequest
  *                         - ::OpcUa_ModifyMonitoredItemsRequest
  *                         - ::OpcUa_SetMonitoringModeRequest
  *                         - ::OpcUa_SetTriggeringRequest
@@ -577,7 +575,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SyncService(const SOPC_ClientHe
  * \param subscription The subscription instance for which the service shall be executed
  * \param subOrMIrequest   An instance of one of the following OPC UA request:
  *                         - ::OpcUa_ModifySubscriptionRequest
- *                         - ::OpcUa_SetPublishingModeRequest (expecting 1 subscription id to fill in allocated array)
+ *                         - ::OpcUa_SetPublishingModeRequest
  *                         - ::OpcUa_ModifyMonitoredItemsRequest
  *                         - ::OpcUa_SetMonitoringModeRequest
  *                         - ::OpcUa_SetTriggeringRequest

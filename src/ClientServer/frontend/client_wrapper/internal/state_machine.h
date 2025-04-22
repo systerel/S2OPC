@@ -209,7 +209,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
                                           SOPC_StaMac_RequestScope requestScope,
                                           SOPC_StaMac_RequestType requestType);
 
-/*
+/**
  * \brief Create subscription associated to the given state machine using the subscription request (new API)
  */
 SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
@@ -219,12 +219,13 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
 /**
  * \brief return the context provided in ::SOPC_StaMac_NewCreateSubscription
  */
-uintptr_t SOPC_StaMac_GetSubscriptionCtx(SOPC_StaMac_Machine* pSM);
+uintptr_t SOPC_StaMac_GetSubscriptionCtx(SOPC_StaMac_Machine* pSM, uint32_t subscriptionId);
 
-/*
+/**
  * \brief Retrieve the subscription parameters revised by the server (for non-NULL params only)
  */
 SOPC_ReturnStatus SOPC_StaMac_GetSubscriptionRevisedParams(SOPC_StaMac_Machine* pSM,
+                                                           uint32_t subscriptionId,
                                                            double* revisedPublishingInterval,
                                                            uint32_t* revisedLifetimeCount,
                                                            uint32_t* revisedMaxKeepAliveCount);
@@ -237,7 +238,7 @@ SOPC_ReturnStatus SOPC_StaMac_SetSubscriptionNbTokens(SOPC_StaMac_Machine* pSM, 
 /**
  * \brief Delete subscription associated to the given state machine
  */
-SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM);
+SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM, uint32_t subscriptionId);
 
 /**
  * \brief Context structure to be provided when using ::SOPC_StaMac_NewCreateMonitoredItems
@@ -294,6 +295,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machi
  * ::SOPC_StaMac_PopMonItByAppCtx.
  *
  * \param pSM              The state machine with a subscription used to create monitored items
+ * \param subscriptionId   The subscriptionId of the subscription related to the monitored items that are to be created
  * \param req              The create monitored items request
  * \param userAppCtxArray  An array of user context defined with the same indexes as the monitored items in \p req.
  *                         The context will be provided in the callback defined by
@@ -302,6 +304,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machi
  *                         could be used to call ::SOPC_StaMac_PopMonItByAppCtx
  */
 SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
+                                                      uint32_t subscriptionId,
                                                       OpcUa_CreateMonitoredItemsRequest* req,
                                                       const uintptr_t* userAppCtxArray,
                                                       SOPC_CreateMonitoredItems_Ctx* pAppCtx);
@@ -325,11 +328,13 @@ typedef struct SOPC_DeleteMonitoredItems_Ctx
  * ::SOPC_StaMac_PopDeleteMonItByAppCtx.
  *
  * \param pSM              The state machine with a subscription for which monitored items shall be deleted
+ * \param subscriptionId   The subscriptionId of the subscription related to the monitored items that are to be deleted
  * \param req              The delete monitored items request
  * \param[out] outAppCtx   The delete monitored item application context is stored in the pointed structure and
  *                         could be used to call ::SOPC_StaMac_PopDeleteMonItByAppCtx
  */
 SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
+                                                      uint32_t subscriptionId,
                                                       OpcUa_DeleteMonitoredItemsRequest* req,
                                                       SOPC_DeleteMonitoredItems_Ctx* outAppCtx);
 
@@ -357,15 +362,24 @@ bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM);
  */
 void SOPC_StaMac_SetError(SOPC_StaMac_Machine* pSM);
 
-/**
- * \brief Returns a bool whether the machine has an active subscription or not.
- */
-bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM);
+// Returns true if a subscription creation is in progress
+bool SOPC_StaMac_IsSubscriptionInProgress(SOPC_StaMac_Machine* pSM);
+
+// Returns true if the subscription has been successfully created
+bool SOPC_StaMac_IsSubscriptionInProgressCreated(SOPC_StaMac_Machine* pSM);
+
+// Get Subscriptionid of the last created subscription
+uint32_t SOPC_StaMac_GetLatestSubscriptionId(SOPC_StaMac_Machine* pSM);
 
 /**
- * \brief Returns subscription Id whether the machine has an active subscription or not (id = 0).
+ * \brief Returns true if the machine has an active subscription with id subscriptionId, false otherwise.
  */
-uint32_t SOPC_StaMac_HasSubscriptionId(SOPC_StaMac_Machine* pSM);
+bool SOPC_StaMac_HasSubscriptionId(SOPC_StaMac_Machine* pSM, uint32_t subscriptionId);
+
+/**
+ * \brief Returns true if the machine has at least one active subscription, false otherwise.
+ */
+bool SOPC_StaMac_HasAnySubscription(SOPC_StaMac_Machine* pSM);
 
 /**
  * \brief Returns whether the machine has created the MonitoredItems with the given \p appCtx or not.

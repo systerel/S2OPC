@@ -61,8 +61,8 @@ struct SOPC_ClientConnection
     bool isDiscovery;
     SOPC_StaMac_Machine* stateMachine; // only if !isDiscovery
 
-    // Reference on unique subscription (in case of Disconnect call)
-    SOPC_ClientHelper_Subscription* createdSub;
+    // Reference on client's subscriptions (used in case of Disconnect call)
+    SOPC_SLinkedList* subscriptions; // list of SOPC_ClientHelper_Subscription*
 };
 
 /* The request context is used to manage
@@ -565,12 +565,22 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
         res->secureConnectionIdx = secConnConfig->secureConnectionIdx;
         res->isDiscovery = isDiscovery;
         res->stateMachine = stateMachine;
+        res->subscriptions = SOPC_SLinkedList_Create(0);
+        if (NULL == res->subscriptions)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
         *outClientConnection = res;
     }
     else
     {
         SOPC_Free(res);
     }
+
     return status;
 }
 
@@ -590,6 +600,11 @@ static void SOPC_ClientHelperInternal_ClearClientConnection(SOPC_ClientConnectio
         {
             mutStatus = SOPC_Mutex_Clear(&connection->syncConnMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        }
+        if (NULL != connection->subscriptions)
+        {
+            SOPC_SLinkedList_Delete(connection->subscriptions);
+            connection->subscriptions = NULL;
         }
         sopc_client_helper_config.secureConnections[connection->secureConnectionIdx] = NULL;
         SOPC_Free(connection);
@@ -896,13 +911,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     SOPC_StaMac_Machine* pSM = NULL;
 
-    SOPC_ClientHelper_Subscription* createdSub = NULL;
+    SOPC_SLinkedList* subscriptions = NULL;
 
     if (pSc == sopc_client_helper_config.secureConnections[pSc->secureConnectionIdx])
     {
         status = SOPC_STATUS_OK;
         pSM = pSc->stateMachine;
-        createdSub = pSc->createdSub;
+        subscriptions = pSc->subscriptions;
     } // else: SOPC_STATUS_INVALID_STATE;
 
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -914,11 +929,30 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
         return status;
     }
 
-    // Delete the subscription if there is still one created
-    if (createdSub != NULL)
+    // Delete the subscriptions if there is still at least one created
+    if (subscriptions != NULL)
     {
-        SOPC_ReturnStatus localStatus = SOPC_ClientHelper_DeleteSubscription(&createdSub);
-        SOPC_UNUSED_RESULT(localStatus); // We still want to disconnect the client connection anyway
+        // Store the subs in an array
+        uint32_t nbrOfSubs = SOPC_SLinkedList_GetLength(subscriptions);
+        uint32_t nbrOfSubsIndex = 0;
+        SOPC_ClientHelper_Subscription** subsToDelete = SOPC_Calloc(nbrOfSubs, sizeof(SOPC_ClientHelper_Subscription*));
+        SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(subscriptions);
+        SOPC_ClientHelper_Subscription* sub = (SOPC_ClientHelper_Subscription*) SOPC_SLinkedList_Next(&it);
+        while (NULL != sub)
+        {
+            SOPC_ASSERT(nbrOfSubsIndex < nbrOfSubs);
+            subsToDelete[nbrOfSubsIndex] = sub;
+            nbrOfSubsIndex++;
+            sub = (SOPC_ClientHelper_Subscription*) SOPC_SLinkedList_Next(&it);
+        }
+
+        // Delete them
+        for (uint32_t i = 0; i < nbrOfSubs; i++)
+        {
+            SOPC_ReturnStatus localStatus = SOPC_ClientHelper_DeleteSubscription(&subsToDelete[i]);
+            SOPC_UNUSED_RESULT(localStatus); // We still want to disconnect the client connection anyway
+        }
+        SOPC_Free(subsToDelete);
     }
 
     if (SOPC_StaMac_IsConnected(pSM))
@@ -976,16 +1010,11 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
 // for now forbids acting on the SM subscription managed internally
 static SOPC_ReturnStatus SOPC_ClientHelperInternal_FilterService(SOPC_ClientConnection* secureConnection, void* request)
 {
-    if (!SOPC_StaMac_HasSubscription(secureConnection->stateMachine))
-    {
-        // No subscription id to filter
-        return SOPC_STATUS_OK;
-    }
-    const uint32_t forbiddenSubscriptionId = SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine);
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) request;
     if (&OpcUa_ModifySubscriptionRequest_EncodeableType == encType)
     {
-        if (forbiddenSubscriptionId == ((OpcUa_ModifySubscriptionRequest*) request)->SubscriptionId)
+        if (SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine,
+                                          ((OpcUa_ModifySubscriptionRequest*) request)->SubscriptionId))
         {
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
@@ -994,7 +1023,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_FilterService(SOPC_ClientConn
     {
         for (int32_t i = 0; i < ((OpcUa_SetPublishingModeRequest*) request)->NoOfSubscriptionIds; i++)
         {
-            if (forbiddenSubscriptionId == ((OpcUa_SetPublishingModeRequest*) request)->SubscriptionIds[i])
+            if (SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine,
+                                              ((OpcUa_SetPublishingModeRequest*) request)->SubscriptionIds[i]))
             {
                 return SOPC_STATUS_INVALID_PARAMETERS;
             }
@@ -1005,7 +1035,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_FilterService(SOPC_ClientConn
     {
         for (int32_t i = 0; i < ((OpcUa_TransferSubscriptionsRequest*) request)->NoOfSubscriptionIds; i++)
         {
-            if (forbiddenSubscriptionId == ((OpcUa_TransferSubscriptionsRequest*) request)->SubscriptionIds[i])
+            if (SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine,
+                                              ((OpcUa_TransferSubscriptionsRequest*) request)->SubscriptionIds[i]))
             {
                 return SOPC_STATUS_INVALID_PARAMETERS;
             }
@@ -1015,7 +1046,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_FilterService(SOPC_ClientConn
     {
         for (int32_t i = 0; i < ((OpcUa_DeleteSubscriptionsRequest*) request)->NoOfSubscriptionIds; i++)
         {
-            if (forbiddenSubscriptionId == ((OpcUa_DeleteSubscriptionsRequest*) request)->SubscriptionIds[i])
+            if (SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine,
+                                              ((OpcUa_DeleteSubscriptionsRequest*) request)->SubscriptionIds[i]))
             {
                 return SOPC_STATUS_INVALID_PARAMETERS;
             }
@@ -1023,35 +1055,40 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_FilterService(SOPC_ClientConn
     }
     else if (&OpcUa_CreateMonitoredItemsRequest_EncodeableType == encType)
     {
-        if (forbiddenSubscriptionId == ((OpcUa_CreateMonitoredItemsRequest*) request)->SubscriptionId)
+        if (SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine,
+                                          ((OpcUa_CreateMonitoredItemsRequest*) request)->SubscriptionId))
         {
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
     else if (&OpcUa_ModifyMonitoredItemsRequest_EncodeableType == encType)
     {
-        if (forbiddenSubscriptionId == ((OpcUa_ModifyMonitoredItemsRequest*) request)->SubscriptionId)
+        if (SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine,
+                                          ((OpcUa_ModifyMonitoredItemsRequest*) request)->SubscriptionId))
         {
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
     else if (&OpcUa_SetMonitoringModeRequest_EncodeableType == encType)
     {
-        if (forbiddenSubscriptionId == ((OpcUa_SetMonitoringModeRequest*) request)->SubscriptionId)
+        if (SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine,
+                                          ((OpcUa_SetMonitoringModeRequest*) request)->SubscriptionId))
         {
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
     else if (&OpcUa_SetTriggeringRequest_EncodeableType == encType)
     {
-        if (forbiddenSubscriptionId == ((OpcUa_SetTriggeringRequest*) request)->SubscriptionId)
+        if (SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine,
+                                          ((OpcUa_SetTriggeringRequest*) request)->SubscriptionId))
         {
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
     else if (&OpcUa_DeleteMonitoredItemsRequest_EncodeableType == encType)
     {
-        if (forbiddenSubscriptionId == ((OpcUa_DeleteMonitoredItemsRequest*) request)->SubscriptionId)
+        if (SOPC_StaMac_HasSubscriptionId(secureConnection->stateMachine,
+                                          ((OpcUa_DeleteMonitoredItemsRequest*) request)->SubscriptionId))
         {
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
@@ -1263,16 +1300,15 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
         {
             subInstance->subNotifCb = subNotifCb;
         }
-
-        /* Get SM and configure notification CB */
+        /* Get SM and configure notification CB if not configured yet */
         if (SOPC_STATUS_OK == status)
         {
             pSM = secureConnection->stateMachine;
-            status = SOPC_StaMac_HasSubscription(pSM) ? SOPC_STATUS_INVALID_STATE : SOPC_STATUS_OK;
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_StaMac_NewConfigureNotificationCallback(pSM, SOPC_StaMacNotification_Cbk);
+            // Define the state machine notif callback only if it has no active sub
+            if (!SOPC_StaMac_HasAnySubscription(pSM))
+            {
+                status = SOPC_StaMac_NewConfigureNotificationCallback(pSM, SOPC_StaMacNotification_Cbk);
+            }
         }
         /* Create the unified context for client helper layer */
         SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
@@ -1291,11 +1327,12 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
 
         /* Release the lock so that the event handler can work properly while waiting */
 
-        /* Wait for the monitored item to be created */
+        /* Wait for the subscription to be created */
         if (SOPC_STATUS_OK == status)
         {
             int count = 0;
-            while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
+            while (!SOPC_StaMac_IsError(pSM) &&
+                   SOPC_StaMac_IsSubscriptionInProgress(pSM) && // Wait for the new sub to be created
                    count * CONNECTION_TIMEOUT_MS_STEP < SOPC_REQUEST_TIMEOUT_MS)
             {
                 mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -1306,32 +1343,37 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
                 SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
                 ++count;
             }
-            if (SOPC_StaMac_HasSubscription(pSM))
+            if (SOPC_StaMac_IsSubscriptionInProgressCreated(pSM))
             {
                 subInstance->secureConnection = secureConnection;
-                subInstance->subscriptionId = SOPC_StaMac_HasSubscriptionId(pSM);
+                subInstance->subscriptionId = SOPC_StaMac_GetLatestSubscriptionId(pSM);
                 subInstance->userParam = userParam;
-            }
-            else if (SOPC_StaMac_IsError(pSM))
-            {
-                status = SOPC_STATUS_NOK;
             }
             else if (count * CONNECTION_TIMEOUT_MS_STEP >= SOPC_REQUEST_TIMEOUT_MS)
             {
                 status = SOPC_STATUS_TIMEOUT;
                 SOPC_StaMac_SetError(pSM);
             }
+            else
+            {
+                // Creation of the sub failed: there's no more sub in progress && sub in progress created = false
+                status = SOPC_STATUS_NOK;
+            }
         }
 
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_UNUSED_RESULT(SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL));
+            // If state machine has no subscription, reset state machine callback
+            if (!SOPC_StaMac_HasAnySubscription(pSM))
+            {
+                SOPC_UNUSED_RESULT(SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL));
+            }
             SOPC_Free(subInstance);
         }
         else
         {
-            // Keep track of the create subscription instance in case it is not deleted on disconnect call
-            secureConnection->createdSub = subInstance;
+            // Keep track of the created subscription instance in case it is not deleted on disconnect call
+            SOPC_SLinkedList_Append(secureConnection->subscriptions, 0, (uintptr_t) subInstance);
         }
 
         mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -1359,10 +1401,10 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
     }
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SetAvailableTokens(SOPC_ClientHelper_Subscription* subscription,
+SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SetAvailableTokens(SOPC_ClientConnection* secureConnection,
                                                                     uint32_t nbPublishTokens)
 {
-    if (nbPublishTokens == 0 || NULL == subscription || NULL == subscription->secureConnection)
+    if (nbPublishTokens == 0 || NULL == secureConnection)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1374,14 +1416,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SetAvailableTokens(SOPC_ClientH
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (subscription->secureConnection !=
-        sopc_client_helper_config.secureConnections[subscription->secureConnection->secureConnectionIdx])
+    if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx])
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
     else
     {
-        SOPC_StaMac_Machine* pSM = subscription->secureConnection->stateMachine;
+        SOPC_StaMac_Machine* pSM = secureConnection->stateMachine;
         status = SOPC_StaMac_SetSubscriptionNbTokens(pSM, nbPublishTokens);
     }
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -1407,8 +1448,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_GetRevisedParameters(SOPC_Clien
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_StaMac_Machine* pSM = subscription->secureConnection->stateMachine;
-    SOPC_ReturnStatus status = SOPC_StaMac_GetSubscriptionRevisedParams(pSM, revisedPublishingInterval,
-                                                                        revisedLifetimeCount, revisedMaxKeepAliveCount);
+    SOPC_ReturnStatus status = SOPC_StaMac_GetSubscriptionRevisedParams(
+        pSM, subscription->subscriptionId, revisedPublishingInterval, revisedLifetimeCount, revisedMaxKeepAliveCount);
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
@@ -1530,7 +1571,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
         /* Create the monitored items and wait for its creation */
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_StaMac_NewCreateMonitoredItems(pSM, monitoredItemsReq, monitoredItemCtxArray, appCtx);
+            status = SOPC_StaMac_NewCreateMonitoredItems(pSM, subscription->subscriptionId, monitoredItemsReq,
+                                                         monitoredItemCtxArray, appCtx);
             requestInStaMac = true;
         }
 
@@ -1626,7 +1668,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
         /* Delete the monitored items and wait for its deletion */
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_StaMac_NewDeleteMonitoredItems(pSM, delMonitoredItemsReq, appCtx);
+            status =
+                SOPC_StaMac_NewDeleteMonitoredItems(pSM, subscription->subscriptionId, delMonitoredItemsReq, appCtx);
             requestInStaMac = true;
         }
 
@@ -1701,10 +1744,10 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
     SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        if (SOPC_StaMac_HasSubscription(pSM))
+        if (SOPC_StaMac_HasSubscriptionId(pSM, subscription->subscriptionId))
         {
-            reqCtx = (SOPC_ClientHelper_ReqCtx*) SOPC_StaMac_GetSubscriptionCtx(pSM);
-            status = SOPC_StaMac_DeleteSubscription(pSM);
+            reqCtx = (SOPC_ClientHelper_ReqCtx*) SOPC_StaMac_GetSubscriptionCtx(pSM, subscription->subscriptionId);
+            status = SOPC_StaMac_DeleteSubscription(pSM, subscription->subscriptionId);
         }
         else
         {
@@ -1716,7 +1759,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
     if (SOPC_STATUS_OK == status)
     {
         int count = 0;
-        while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_HasSubscription(pSM) &&
+        while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_HasSubscriptionId(pSM, subscription->subscriptionId) &&
                count * CONNECTION_TIMEOUT_MS_STEP < SOPC_REQUEST_TIMEOUT_MS)
         {
             mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -1738,14 +1781,12 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
             status = SOPC_STATUS_TIMEOUT;
             SOPC_StaMac_SetError(pSM);
         }
-        else if (SOPC_StaMac_HasSubscription(pSM))
+        else if (SOPC_StaMac_HasSubscriptionId(pSM, subscription->subscriptionId))
         {
             status = SOPC_STATUS_NOK;
         }
     }
 
-    // Unregister the notification context if the subscription was deleted
-    SOPC_UNUSED_RESULT(SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL));
     // Remove the subscription context if the subscription was deleted
     if (NULL != reqCtx)
     {
@@ -1753,7 +1794,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
     }
 
     // Reset reference from secure connection to the created subscription
-    subscription->secureConnection->createdSub = NULL;
+    SOPC_SLinkedList_RemoveFromValuePtr(subscription->secureConnection->subscriptions, (uintptr_t) subscription);
+
+    // Unregister the notification context if there's no active subscription
+    if (SOPC_STATUS_OK == status && !SOPC_StaMac_HasAnySubscription(pSM))
+    {
+        status = SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL);
+    }
 
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -1769,11 +1816,10 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
 static void* SOPC_ClientHelperInternal_ConfigAndFilterService(const SOPC_ClientHelper_Subscription* subscription,
                                                               void* request)
 {
-    const uint32_t subscriptionId = SOPC_StaMac_HasSubscriptionId(subscription->secureConnection->stateMachine);
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) request;
     if (&OpcUa_ModifySubscriptionRequest_EncodeableType == encType)
     {
-        ((OpcUa_ModifySubscriptionRequest*) request)->SubscriptionId = subscriptionId;
+        ((OpcUa_ModifySubscriptionRequest*) request)->SubscriptionId = subscription->subscriptionId;
     }
     else if (&OpcUa_SetPublishingModeRequest_EncodeableType == encType)
     {
@@ -1782,19 +1828,19 @@ static void* SOPC_ClientHelperInternal_ConfigAndFilterService(const SOPC_ClientH
         {
             return NULL;
         }
-        setPubModeReq->SubscriptionIds[0] = subscriptionId;
+        setPubModeReq->SubscriptionIds[0] = subscription->subscriptionId;
     }
     else if (&OpcUa_ModifyMonitoredItemsRequest_EncodeableType == encType)
     {
-        ((OpcUa_ModifyMonitoredItemsRequest*) request)->SubscriptionId = subscriptionId;
+        ((OpcUa_ModifyMonitoredItemsRequest*) request)->SubscriptionId = subscription->subscriptionId;
     }
     else if (&OpcUa_SetMonitoringModeRequest_EncodeableType == encType)
     {
-        ((OpcUa_SetMonitoringModeRequest*) request)->SubscriptionId = subscriptionId;
+        ((OpcUa_SetMonitoringModeRequest*) request)->SubscriptionId = subscription->subscriptionId;
     }
     else if (&OpcUa_SetTriggeringRequest_EncodeableType == encType)
     {
-        ((OpcUa_SetTriggeringRequest*) request)->SubscriptionId = subscriptionId;
+        ((OpcUa_SetTriggeringRequest*) request)->SubscriptionId = subscription->subscriptionId;
     }
     else
     {
@@ -1941,10 +1987,10 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subs
     return SOPC_ClientHelper_DeleteSubscription(subscription);
 }
 
-SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_ClientHelper_Subscription* subscription,
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_ClientConnection* secureConnection,
                                                                        uint32_t nbPublishTokens)
 {
-    return SOPC_ClientHelper_Subscription_SetAvailableTokens(subscription, nbPublishTokens);
+    return SOPC_ClientHelper_Subscription_SetAvailableTokens(secureConnection, nbPublishTokens);
 }
 
 SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_GetRevisedParameters(SOPC_ClientHelper_Subscription* subscription,

@@ -2520,7 +2520,7 @@ class BaseClientConnectionHandler:
                             c_cliConHandler._callback_subscriptionNotification, <uintptr_t> NULL)
             if subscription == NULL:
                 raise MemoryError
-            status = SOPC_ClientHelper_Subscription_SetAvailableTokens(subscription, c_nbPublishTokens)
+            status = SOPC_ClientHelper_Subscription_SetAvailableTokens(c_cliConHandler._secureConnection, c_nbPublishTokens)
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('Failed to create the subscription', status)
         c_cliConHandler._subscription = subscription

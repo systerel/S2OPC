@@ -94,7 +94,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subs
  *  \deprecated This function has been renamed ::SOPC_ClientHelper_Subscription_SetAvailableTokens.
  *              It is deprecated since version 1.6.0 and will be removed in version 1.7.0.
  */
-SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_ClientHelper_Subscription* subscription,
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_ClientConnection* secureConnection,
                                                                        uint32_t nbPublishTokens);
 
 /**
