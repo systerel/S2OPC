@@ -179,7 +179,7 @@ static OpcUa_AddNodesResponse* add_node_invalid_BrowseName(SOPC_ClientConnection
     // Do no set the BrowseName so it is invalid
     status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, parentNodeId, referenceTypeId, reqNodeId,
                                                      browseName, typeDefinition, NULL, NULL, NULL, NULL,
-                                                     (const SOPC_Byte*) "1");
+                                                     NULL);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -247,13 +247,13 @@ static OpcUa_AddNodesResponse* add_two_nodes_same_BrowseName(SOPC_ClientConnecti
 
     status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, parentNodeId, referenceTypeId, reqNodeId,
                                                      browseName, typeDefinition, NULL, NULL, NULL, NULL,
-                                                     (const SOPC_Byte*) "1");
+                                                     NULL);
 
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 1, parentNodeId, referenceTypeId, reqNodeId2,
                                                          browseName, typeDefinition, NULL, NULL, NULL, NULL,
-                                                         (const SOPC_Byte*) "1");
+                                                         NULL);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -316,7 +316,7 @@ static OpcUa_AddNodesResponse* add_node_invalid_ref_type(SOPC_ClientConnection* 
 
     status =
         SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, parentNodeId, referenceTypeId, reqNodeId, browseName,
-                                                typeDefinition, NULL, NULL, NULL, NULL, (const SOPC_Byte*) "1");
+                                                typeDefinition, NULL, NULL, NULL, NULL, NULL);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -492,8 +492,7 @@ static SOPC_ReturnStatus add_node_variable_and_method_in_added_node_object(SOPC_
     }
 
     status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, parentNodeId, referenceTypeId, reqNodeId,
-                                                     browseName, typeDefinition, NULL, NULL, NULL, NULL,
-                                                     (const SOPC_Byte*) "1");
+                                                     browseName, typeDefinition, NULL, NULL, NULL, NULL, NULL);
 
     if (SOPC_STATUS_OK == status)
     {

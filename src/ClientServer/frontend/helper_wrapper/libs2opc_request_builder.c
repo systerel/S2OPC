@@ -1129,12 +1129,12 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetObjectAttributes(OpcUa_AddNodesRequest*
                                                           const SOPC_LocalizedText* optDescription,
                                                           const uint32_t* optWriteMask,
                                                           const uint32_t* optUserWriteMask,
-                                                          const SOPC_Byte* eventNotifier)
+                                                          const SOPC_Byte* optEventNotifier)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (!CHECK_ELEMENT_EXISTS(addNodesRequest, NoOfNodesToAdd, index) || NULL == parentNodeId ||
         NULL == referenceTypeId || (NULL != optRequestedNodeId && 0 != optRequestedNodeId->ServerIndex) ||
-        NULL == browseName || NULL == typeDefinition || NULL == eventNotifier)
+        NULL == browseName || NULL == typeDefinition)
     {
         return status;
     }
@@ -1155,9 +1155,10 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetObjectAttributes(OpcUa_AddNodesRequest*
             item, (OpcUa_NodeAttributes*) objAttrs, parentNodeId, referenceTypeId, optRequestedNodeId, browseName,
             typeDefinition, optDisplayName, optDescription, optWriteMask, optUserWriteMask);
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != optEventNotifier)
     {
-        objAttrs->EventNotifier = *eventNotifier;
+        objAttrs->SpecifiedAttributes |= OpcUa_NodeAttributesMask_EventNotifier;
+        objAttrs->EventNotifier = *optEventNotifier;
     }
     if (SOPC_STATUS_OK != status)
     {

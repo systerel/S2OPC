@@ -1205,7 +1205,7 @@ int main(int argc, char* argv[])
 
         status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, &parentNode, &refOrganizeTypeId, &nodeToAdd,
                                                          &nodeToAddBrowseName, &typeDefinition, NULL, NULL, NULL, NULL,
-                                                         (const SOPC_Byte*) "1");
+                                                         NULL);
 
         /* Adapt params for Method to add */
         // 2) ref type from parent to the node to add : refHasComponentTypeId

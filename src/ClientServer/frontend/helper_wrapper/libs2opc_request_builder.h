@@ -646,7 +646,8 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
  * \param optWriteMask                WriteMask for the node to add (optional).
  * \param optUserWriteMask            UserWriteMask for the node to add (optional).
  *                                    It should not be defined since it depends on the user.
- * \param eventNotifier               EventNotifier of the node.
+ * \param optEventNotifier            EventNotifier of the node (see definition of EventNotifier in OPC UA Part 3)
+ *                                    e.g. 1 : SubscribeToEvents, ... (optional)
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid AddNodes request, index, nodeId or attribute.
@@ -662,7 +663,7 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetObjectAttributes(OpcUa_AddNodesRequest*
                                                           const SOPC_LocalizedText* optDescription,
                                                           const uint32_t* optWriteMask,
                                                           const uint32_t* optUserWriteMask,
-                                                          const SOPC_Byte* eventNotifier);
+                                                          const SOPC_Byte* optEventNotifier);
 
 /**
  * \brief Sets the attributes values requested for the Method node to add.

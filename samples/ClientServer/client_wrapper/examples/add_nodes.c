@@ -124,9 +124,10 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(SOPC_ClientConnection* s
         // Type definition can be any NodeId which NodeClass is ObjectType (ServerType, FolderType, ...)
         // Use NodeId BaseObjectType for this example
         typeDefinition.NodeId.Data.Numeric = OpcUaId_BaseObjectType;
+        static const SOPC_Byte byte_one = 1;
         status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, parentNodeId, &referenceTypeId, nodeToAdd,
                                                          nodeToAddBrowseName, &typeDefinition, NULL, NULL, NULL, NULL,
-                                                         (const SOPC_Byte*) "1");
+                                                         &byte_one);
     }
     else if (0 == strcmp(VariableOrObject, "Variable"))
     {
