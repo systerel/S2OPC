@@ -405,18 +405,20 @@ START_TEST(test_wrapper_create_subscription)
 
     /* Call the subscription a second time */
     subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
-    SOPC_ClientHelper_Subscription* invalid_subscription = SOPC_ClientHelper_CreateSubscription(
+    SOPC_ClientHelper_Subscription* second_subscription = SOPC_ClientHelper_CreateSubscription(
         valid_scConnection, subscriptionRequest, handle_subscriptionNotification, (uintptr_t) NULL);
-    ck_assert_ptr_null(invalid_subscription);
+    ck_assert_ptr_nonnull(second_subscription);
 
     /* Unsubscribe and delete the subscription */
+    status = SOPC_ClientHelper_DeleteSubscription(&second_subscription);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_ClientHelper_DeleteSubscription(&subscription);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
     /* Invalid parameters */
-    invalid_subscription = SOPC_ClientHelper_CreateSubscription(NULL, subscriptionRequest,
-                                                                handle_subscriptionNotification, (uintptr_t) NULL);
+    SOPC_ClientHelper_Subscription* invalid_subscription = SOPC_ClientHelper_CreateSubscription(
+        NULL, subscriptionRequest, handle_subscriptionNotification, (uintptr_t) NULL);
     ck_assert_ptr_null(invalid_subscription);
 
     invalid_subscription = SOPC_ClientHelper_CreateSubscription(valid_scConnection, NULL,
