@@ -392,6 +392,14 @@ if (expat_FOUND)
   )
 endif()
 
+# Test multi sub client
+add_executable(toolkit_test_client_multi_sub "validation_tests/client/toolkit_test_client_multi_sub.c"
+               ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+target_link_libraries(toolkit_test_client_multi_sub PRIVATE s2opc_clientserver)
+target_include_directories(toolkit_test_client_multi_sub PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
+target_compile_options(toolkit_test_client_multi_sub PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_client_multi_sub PRIVATE ${S2OPC_DEFINITIONS})
+
 # Client scenario with service faults
 add_executable(toolkit_test_client_service_faults "validation_tests/client/toolkit_test_client_service_faults.c")
 target_compile_options(toolkit_test_client_service_faults PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -669,6 +677,7 @@ s2opc_server_validation_test("client_sc_renew.py")
 s2opc_server_validation_test("client_session_timeout.py")
 s2opc_server_validation_test("client_sc_establish_timeout.py")
 s2opc_client_validation_test("toolkit_test_suite_client")
+s2opc_client_validation_test("toolkit_test_client_multi_sub")
 
 # Function to run the secure channels (+ sockets) layer validation test with different key sizes / secu modes
 function(s2opc_sc_level_test name server_key_size)
