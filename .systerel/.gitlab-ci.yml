@@ -341,7 +341,7 @@ build-rpi:
 build-zephyr:
   stage: build-others
   image: # digest of zephyr_build :v3.6.0-b
-    name: docker.aix.systerel.fr/c838/zephyr_build:v3.6.0-b@sha256:13069418dd7b0317f93f02986b01f285f0f66956670f2fecded9850ace85d734
+    name: docker.io/zephyrprojectrtos/zephyr-build:v0.26-branch
     entrypoint: [''] # Needs cause of issue with `sh` https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3622
   needs: []
   script:
