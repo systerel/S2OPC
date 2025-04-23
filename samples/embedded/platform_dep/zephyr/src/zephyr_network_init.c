@@ -116,7 +116,7 @@ static bool configure_interface(const NetItf* itf, const char* ipAddr, const cha
             return false;
         }
         printk("Added IP = <%s> to <%s> !\n", ipAddr, ptrNetIf->if_dev->dev->name);
-        if(!net_if_ipv4_set_netmask_by_addr(ptrNetIf, &address, &addressMask))
+        if (!net_if_ipv4_set_netmask_by_addr(ptrNetIf, &address, &addressMask))
         {
             printk("Could not set netmask to network interface %s!\n", itf->name);
             return false;

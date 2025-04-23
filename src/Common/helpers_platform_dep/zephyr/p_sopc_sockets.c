@@ -18,13 +18,13 @@
  */
 
 #include <errno.h>
-#include <zephyr/posix/fcntl.h>
 #include <stdlib.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/net/ethernet.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/socket.h>
+#include <zephyr/posix/fcntl.h>
 
 /* s2opc includes */
 
@@ -266,7 +266,7 @@ SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_Address* addr
     if (SOPC_STATUS_OK == status)
     {
         int res = zsock_getnameinfo(addr->address.ai_addr, addr->address.ai_addrlen, hostRes, NI_MAXHOST, serviceRes,
-                              NI_MAXSERV, flags);
+                                    NI_MAXSERV, flags);
         if (0 != res)
         {
             status = SOPC_STATUS_NOK;

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-#include <zephyr/posix/fcntl.h>
 #include <stdlib.h>
+#include <zephyr/posix/fcntl.h>
 
 #include <zephyr/kernel.h>
 #include <zephyr/net/ethernet.h>
@@ -66,7 +66,8 @@ static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo
     if (SOPC_STATUS_OK == status && setReuseAddr)
     {
         const int trueInt = true;
-        setOptStatus = zsock_setsockopt(socketImpl->sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+        setOptStatus =
+            zsock_setsockopt(socketImpl->sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
         if (setOptStatus < 0)
         {
             status = SOPC_STATUS_NOK;
@@ -89,7 +90,8 @@ static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo
         size_t ifr_name_len = sizeof(ifr.ifr_name);
         strncpy(ifr.ifr_name, interfaceName, ifr_name_len);
         ifr.ifr_name[ifr_name_len - 1] = '\0';
-        setOptStatus = zsock_setsockopt(socketImpl->sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &ifr, sizeof(struct ifreq));
+        setOptStatus =
+            zsock_setsockopt(socketImpl->sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &ifr, sizeof(struct ifreq));
         if (setOptStatus < 0)
         {
             status = SOPC_STATUS_NOK;
