@@ -88,7 +88,7 @@ function build_app()
     ! ${BUILD_TESTS} && echo "Don't compile tests" && sed -i -e '/S2OPC_TEST_ENABLE = true/s/true/false/' makefile.defs
     make -j`nproc` install 2>&1 |tee ${BUILD_LOG} || exit $?
 
-    cp ${SHARED_POOL}/pikeos-native/object/*.elf ${OUT_DIR}/bin
+    (${BUILD_SAMPLES} || ${BUILD_TESTS}) && cp ${SHARED_POOL}/pikeos-native/object/*.elf ${OUT_DIR}/bin
     cp ${SHARED_POOL}/pikeos-native/object/*.a  ${OUT_DIR}/lib
 }
 

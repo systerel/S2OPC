@@ -60,7 +60,7 @@
 # (see gitlab issues #25394 and #383355)
 variables:
   FF_ENABLE_BASH_EXIT_CODE_CHECK: "true"
-
+  
 .nominal_build_variables: &nominal_build_variables
   S2OPC_NODE_MANAGEMENT: 1
   S2OPC_EVENT_MANAGEMENT: 1
@@ -387,8 +387,11 @@ build-pikeos:
   stage: build-others
   image: docker.aix.systerel.fr/c838/pikeos@sha256:3d5dcbab75b0c98a8d27d1cfa239bfa43b5b87bc1bbaca2a7c8a5bfe2adc5aeb # pikeos:1.2.1
   needs: []
+  variables:
+    # default value to change when PikeOS licence is back
+    BUILD_PIKEOS_OPTIONS : '--no-tests --no-samples'
   script:
-    - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh'
+    - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh $BUILD_PIKEOS_OPTIONS'
   artifacts:
     name: 'bin-pikeos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
@@ -721,6 +724,8 @@ test-pikeos:
     expire_in: '1 week'
     when: on_failure
   rules:
+    - if: "$PIKEOS_TEST == null"
+      when: never
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: on_success
 
