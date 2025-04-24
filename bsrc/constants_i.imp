@@ -71,7 +71,15 @@ VALUES
     c_ValueRank_ScalarOrOneDimension = -3;
 
     t_counter = NAT;
-    t_ValueRank = INT
+    t_ValueRank = INT;
+
+    c_priority_max   = 255;
+    c_priority_indet = 256;
+    t_priority   = 0..c_priority_max;
+    t_priority_i = 0..c_priority_indet;
+
+    t_sub_idx_i = 0..k_n_subscriptionPerSession_max;
+    t_prio_idx_i = 0..k_n_subscriptionPerSession_max
 
 OPERATIONS
 

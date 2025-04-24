@@ -21,7 +21,7 @@
 
  File Name            : publish_request_queue_bs.h
 
- Date                 : 04/08/2022 14:53:43
+ Date                 : 11/08/2025 16:04:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -68,7 +68,6 @@ extern void publish_request_queue_bs__clear_publish_queue(
 extern void publish_request_queue_bs__continue_pop_head_iter_publish_request(
    const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
    t_bool * const publish_request_queue_bs__p_continue,
-   constants__t_session_i * const publish_request_queue_bs__p_session,
    constants__t_timeref_i * const publish_request_queue_bs__p_req_exp_time,
    constants__t_server_request_handle_i * const publish_request_queue_bs__p_req_handle,
    constants__t_request_context_i * const publish_request_queue_bs__p_req_ctx,
@@ -90,7 +89,6 @@ extern void publish_request_queue_bs__is_request_expired(
    t_bool * const publish_request_queue_bs__bres);
 extern void publish_request_queue_bs__pop_valid_publish_request_queue(
    const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
-   constants__t_session_i * const publish_request_queue_bs__p_session,
    constants__t_timeref_i * const publish_request_queue_bs__p_req_exp_time,
    constants__t_server_request_handle_i * const publish_request_queue_bs__p_req_handle,
    constants__t_request_context_i * const publish_request_queue_bs__p_req_ctx,

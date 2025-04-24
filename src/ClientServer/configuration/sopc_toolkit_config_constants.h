@@ -125,7 +125,7 @@
 
 /* SESSION CONFIGURATION */
 
-/** @brief Maximum number of sessions (and subscriptions: 1 per session) established */
+/** @brief Maximum number of sessions established */
 #ifndef SOPC_MAX_SESSIONS
 #define SOPC_MAX_SESSIONS 20
 #endif /* SOPC_MAX_SESSIONS */
@@ -148,6 +148,11 @@
 /** @brief Maximum session timeout accepted by server */
 #ifndef SOPC_MAX_SESSION_TIMEOUT
 #define SOPC_MAX_SESSION_TIMEOUT 600000 /* 10 minutes */
+#endif
+
+/** @brief Maximum number of subscriptions per session */
+#ifndef SOPC_MAX_SESSION_SUBSCRIPTIONS
+#define SOPC_MAX_SESSION_SUBSCRIPTIONS 10
 #endif
 
 /** @brief Maximum number of session user authentication failure attempts
@@ -174,9 +179,35 @@
 
 /* SUBSCRIPTION CONFIGURATION */
 
-/** @brief Maximum publish requests stored by server for a subscription */
+/** @brief Maximum total number of subscriptions */
+#ifndef SOPC_MAX_SUBSCRIPTIONS
+#define SOPC_MAX_SUBSCRIPTIONS SOPC_MAX_SESSIONS
+#endif
+
+/**
+ * @brief Maximum publish requests stored by server for a session.
+ *        Default value is 3 times the maximum number of subscriptions.
+ */
+#ifndef SOPC_MAX_SESSION_PUBLISH_REQUESTS
+#define SOPC_MAX_SESSION_PUBLISH_REQUESTS 3 * SOPC_MAX_SESSION_SUBSCRIPTIONS
+#endif
+
+#if SOPC_MAX_SESSION_PUBLISH_REQUESTS < SOPC_MAX_SESSION_SUBSCRIPTIONS
+#error "SOPC_MAX_SESSION_PUBLISH_REQUESTS must be >= SOPC_MAX_SESSION_SUBSCRIPTIONS"
+#endif
+
+/**
+ * @deprecated Use SOPC_MAX_SESSION_PUBLISH_REQUESTS instead
+ */
 #ifndef SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS
-#define SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS 10
+#define SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS SOPC_MAX_SESSION_PUBLISH_REQUESTS
+#endif
+
+/** @brief Maximum number of notification messages stored for republish service in a subscription.
+ *         Default value is 2 times the number of publish requests stored per session.
+ */
+#ifndef SOPC_MAX_SUBSCRIPTION_REPUBLISH_MESSAGES
+#define SOPC_MAX_SUBSCRIPTION_REPUBLISH_MESSAGES (2 * SOPC_MAX_SESSION_PUBLISH_REQUESTS)
 #endif
 
 /** @brief Minimum publish interval of a subscription in milliseconds */

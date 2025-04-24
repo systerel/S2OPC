@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_create_bs.h
 
- Date                 : 04/08/2022 14:53:39
+ Date                 : 12/08/2025 16:04:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,14 +56,16 @@ extern void msg_subscription_create_bs__get_msg_create_subscription_req_params(
    t_entier4 * const msg_subscription_create_bs__reqLifetimeCount,
    t_entier4 * const msg_subscription_create_bs__reqMaxKeepAlive,
    t_entier4 * const msg_subscription_create_bs__maxNotificationsPerPublish,
-   t_bool * const msg_subscription_create_bs__publishEnabled);
+   t_bool * const msg_subscription_create_bs__publishEnabled,
+   t_entier4 * const msg_subscription_create_bs__priority);
 extern void msg_subscription_create_bs__get_msg_modify_subscription_req_params(
    const constants__t_msg_i msg_subscription_create_bs__p_req_msg,
    constants__t_subscription_i * const msg_subscription_create_bs__subscription,
    constants__t_opcua_duration_i * const msg_subscription_create_bs__reqPublishInterval,
    t_entier4 * const msg_subscription_create_bs__reqLifetimeCount,
    t_entier4 * const msg_subscription_create_bs__reqMaxKeepAlive,
-   t_entier4 * const msg_subscription_create_bs__maxNotificationsPerPublish);
+   t_entier4 * const msg_subscription_create_bs__maxNotificationsPerPublish,
+   t_entier4 * const msg_subscription_create_bs__priority);
 extern void msg_subscription_create_bs__set_msg_create_subscription_resp_params(
    const constants__t_msg_i msg_subscription_create_bs__p_resp_msg,
    const constants__t_subscription_i msg_subscription_create_bs__p_subscription,

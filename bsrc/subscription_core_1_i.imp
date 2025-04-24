@@ -28,17 +28,27 @@ SEES
     request_handle_bs,
     message_out_bs,
     message_in_bs,
-    channel_mgr
+    channel_mgr,
+    constants_statuscodes_bs
 
 CONCRETE_VARIABLES
     s_subscription_i,
     a_subscription_state_i,
     a_subscription_session_i,
-    a_session_subscription_i,
     a_publishInterval_i,
     a_lifetimeExpCount_i,
     a_keepAliveExpCount_i,
     a_maxNotifsPerPublish_i,
+    a_subscription_priority_i,
+    a_session_nb_priorities_i,
+    a_session_seq_priority_i,
+    a_session_priority_idx_i,
+    a_session_nb_subscriptions_i,
+    a_session_seq_subscription_i,
+    a_session_subscription_idx_i,
+    a_session_priority_nb_subs_i,
+    a_session_priority_min_sub_idx_i,
+    a_session_priority_next_sub_idx_i,
     a_PublishingEnabled_i,
     a_MoreNotifications_i,
     a_LifetimeCounter_i,
@@ -58,10 +68,64 @@ INVARIANT
 
     a_subscription_state      = s_subscription <| a_subscription_state_i |> t_subscriptionState_i &
     a_subscription_session_i  : t_subscription_i --> t_session_i                               &
-    a_session_subscription_i  : t_session_i --> t_subscription_i                               &
     dom(a_subscription_session) = s_subscription                                               &
     a_subscription_session    = s_subscription <| a_subscription_session_i |> t_session        &
-    a_subscription_session~   = t_session <| a_session_subscription_i |> s_subscription        &
+
+    /* Priority for a given subscription */
+    a_subscription_priority_i : t_subscription_i --> t_priority_i                              &
+    a_subscription_priority   = t_subscription <| a_subscription_priority_i |> t_priority      &
+
+    /* Number of pro indexes for a given session */
+    a_session_nb_priorities_i : t_session_i --> t_prio_idx_i                                   &
+    !session.(session : t_session
+              =>
+              card(a_session_seq_priority(session)) = a_session_nb_priorities_i(session))      &
+
+    /* Priority for a given prio index */
+    a_session_seq_priority_i : t_session_i --> (t_prio_idx_i --> t_priority_i)                 &
+
+    /* Prio index for a given priority */
+    a_session_priority_idx_i : t_session_i --> (t_priority_i --> t_prio_idx_i)                 &
+    !session.(session : t_session
+              =>
+              a_session_seq_priority(session) = a_session_seq_priority_i(session) |> t_prio_idx) &
+    !session.(session : t_session
+              =>
+              a_session_seq_priority(session)~ = a_session_priority_idx_i(session) |> t_prio_idx) &
+
+    /* Number of subscriptions indexes => Note: this is not an index but a NAT */
+    a_session_nb_subscriptions_i : t_session_i --> t_sub_idx_i &
+    !session.(session : t_session
+              =>
+              card(a_session_seq_subscription(session)) = a_session_nb_subscriptions_i(session))      &
+
+    /* Subscription for a given index */
+    a_session_seq_subscription_i : t_session_i --> (t_sub_idx_i --> t_subscription_i) &
+    !session.(session : t_session
+              =>
+              a_session_seq_subscription(session) = 1..a_session_nb_subscriptions_i(session) <| a_session_seq_subscription_i(session)) &
+
+    /* Index for a given subscription */
+    a_session_subscription_idx_i : t_session_i --> (t_subscription_i --> t_sub_idx_i) &
+    !session.(session : t_session
+              =>
+              a_session_seq_subscription(session)~ = t_subscription <| a_session_subscription_idx_i(session)) &
+
+    /* Nb sub (indexes) for a given priority => NOTE: this is not an index but a NAT ! */
+    a_session_priority_nb_subs_i : t_session_i --> (t_prio_idx_i --> t_sub_idx_i) &
+    a_session_priority_nb_subs = t_session <| a_session_priority_nb_subs_i &
+
+    /* First index of subscription for the given priority */
+    a_session_priority_min_sub_idx_i : t_session_i --> (t_prio_idx_i --> t_sub_idx_i) &
+    !session.(session : t_session
+              =>
+              a_session_priority_min_sub_idx(session) = a_session_priority_min_sub_idx_i(session) |> t_sub_idx) &
+
+    /* Record of the next index of subscription in the given priority to try => used for round robin policy */
+    a_session_priority_next_sub_idx_i : t_session_i --> (t_prio_idx_i --> t_sub_idx_i) &
+    !session.(session : t_session
+              =>
+              a_session_priority_next_sub_idx(session) = a_session_priority_next_sub_idx_i(session) |> t_sub_idx) &
 
     a_publishInterval_i       : t_subscription_i --> t_opcua_duration_i                        &
     dom(a_publishInterval)    = s_subscription                                                 &
@@ -100,9 +164,9 @@ INVARIANT
     dom(a_SeqNum)             = s_subscription                                                 &
     a_SeqNum                  = s_subscription <| a_SeqNum_i |> t_sub_seq_num                  &
 
-    a_publishRequestQueue_i      : t_subscription_i --> t_publishReqQueue_i                    &
-    dom(a_publishRequestQueue)   = s_subscription                                              &
-    a_publishRequestQueue        = s_subscription <| a_publishRequestQueue_i |> t_publishReqQueue &
+    a_publishRequestQueue_i      : t_session_i --> t_publishReqQueue_i                    &
+    dom(a_publishRequestQueue)   = ran(a_subscription_session)                            &
+    a_publishRequestQueue        = ran(a_subscription_session) <| a_publishRequestQueue_i |> t_publishReqQueue &
 
     a_notifRepublishQueue_i      : t_subscription_i --> t_notifRepublishQueue_i                &
     dom(a_notifRepublishQueue)   = s_subscription                                              &
@@ -120,34 +184,80 @@ INITIALISATION
     s_subscription_i             := t_subscription_i * {FALSE};
     a_subscription_state_i       := t_subscription_i * {c_subscriptionState_indet};
     a_subscription_session_i     := t_subscription_i * {c_session_indet};
-    a_session_subscription_i     := t_session_i * {c_subscription_indet};
     a_publishInterval_i          := t_subscription_i * {c_opcua_duration_indet};
     a_lifetimeExpCount_i         := t_subscription_i * {0};
     a_keepAliveExpCount_i        := t_subscription_i * {0};
     a_maxNotifsPerPublish_i      := t_subscription_i * {0};
+
+    a_subscription_priority_i    := t_subscription_i * {c_priority_indet};
+    a_session_nb_priorities_i    := t_session_i * {0};
+    a_session_seq_priority_i     := t_session_i * {t_prio_idx_i * {c_priority_indet}};
+    a_session_priority_idx_i     := t_session_i * {t_priority_i * {0}};
+    a_session_nb_subscriptions_i := t_session_i * {0};
+    a_session_seq_subscription_i := t_session_i * {t_sub_idx_i * {c_subscription_indet}};
+    a_session_subscription_idx_i := t_session_i * {t_subscription_i * {0}};
+    a_session_priority_nb_subs_i := t_session_i * {t_prio_idx_i * {0}};
+    a_session_priority_min_sub_idx_i  := t_session_i * {t_prio_idx_i * {0}};
+    a_session_priority_next_sub_idx_i := t_session_i * {t_prio_idx_i * {0}};
+
     a_PublishingEnabled_i        := t_subscription_i * {FALSE};
     a_MoreNotifications_i        := t_subscription_i * {FALSE};
     a_LifetimeCounter_i          := t_subscription_i * {0};
     a_KeepAliveCounter_i         := t_subscription_i * {0};
     a_MessageSent_i              := t_subscription_i * {FALSE};
     a_SeqNum_i                   := t_subscription_i * {c_sub_seq_num_indet};
-    a_publishRequestQueue_i      := t_subscription_i * {c_publishReqQueue_indet};
+    a_publishRequestQueue_i      := t_session_i * {c_publishReqQueue_indet};
     a_notifRepublishQueue_i      := t_subscription_i * {c_notifRepublishQueue_indet};
     a_monitoredItemQueue_i       := t_subscription_i * {c_monitoredItemQueue_indet};
     a_publishTimer_i             := t_subscription_i * {c_timer_id_indet}
 
+LOCAL_OPERATIONS
+
+    is_valid <-- local_is_valid_subscription (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i
+    THEN
+        is_valid := s_subscription_i(p_subscription)
+    END
+
+
 OPERATIONS
 
-    is_valid <-- is_valid_subscription (p_subscription) =
-    BEGIN
-        is_valid := s_subscription_i(p_subscription)
+    is_valid <-- local_is_valid_subscription (p_subscription) =
+    VAR
+        l_subscription_card,
+        l_subscription_int
+    IN
+        is_valid := FALSE;
+        l_subscription_card <-- get_card_t_subscription;
+        l_subscription_int <-- get_reverse_cast_t_subscription (p_subscription);
+        IF l_subscription_int /= 0 & l_subscription_int <= l_subscription_card
+        THEN
+            is_valid := s_subscription_i(p_subscription)
+        END
     END
     ;
 
-    p_dom, p_subscription <-- getall_subscription (p_session) =
+    is_valid <-- is_valid_subscription_on_session (p_session, p_subscription) =
+    VAR
+        l_is_valid_sub,
+        l_session
+    IN
+        l_session := c_session_indet;
+        l_is_valid_sub <-- local_is_valid_subscription(p_subscription);
+        IF l_is_valid_sub = TRUE
+        THEN
+            l_session := a_subscription_session_i(p_subscription)
+        END
+        ;
+        is_valid := bool(l_is_valid_sub = TRUE &
+                         l_session = p_session)
+    END
+    ;
+
+    is_valid <-- is_valid_subscription (p_subscription) =
     BEGIN
-        p_subscription := a_session_subscription_i(p_session);
-        p_dom := s_subscription_i(p_subscription)
+        is_valid <-- local_is_valid_subscription(p_subscription)
     END
     ;
 
@@ -157,47 +267,217 @@ OPERATIONS
     END
     ;
 
-    add_subscription (p_subscription,
-                      p_session,
-                      p_revPublishInterval,
-                      p_revLifetimeCount,
-                      p_revMaxKeepAlive,
-                      p_maxNotificationsPerPublish,
-                      p_publishEnabled,
-                      p_publishQueue,
-                      p_republishQueue,
-                      p_monitoredItemQueue,
-                      p_timerId) =
+    p_priority_idx <-- get_card_session_seq_priority (p_session) =
     BEGIN
+        p_priority_idx := a_session_nb_priorities_i(p_session)
+    END
+    ;
 
-        s_subscription_i(p_subscription) := TRUE;
-        a_subscription_state_i(p_subscription) := e_subscriptionState_normal;
+    p_sub_idx <-- get_card_session_seq_subscription (p_session) =
+    BEGIN
+        p_sub_idx := a_session_nb_subscriptions_i(p_session)
+    END
+    ;
 
-        a_subscription_session_i(p_subscription) := p_session;
-        a_session_subscription_i(p_session) := p_subscription;
-        a_publishInterval_i(p_subscription) := p_revPublishInterval;
-        a_lifetimeExpCount_i(p_subscription) := p_revLifetimeCount;
-        a_LifetimeCounter_i(p_subscription) := p_revLifetimeCount;
-        a_keepAliveExpCount_i(p_subscription) := p_revMaxKeepAlive;
-        a_KeepAliveCounter_i(p_subscription) := p_revMaxKeepAlive;
-        a_maxNotifsPerPublish_i(p_subscription) := p_maxNotificationsPerPublish;
-        a_MessageSent_i(p_subscription) := FALSE;
-        a_PublishingEnabled_i(p_subscription) := p_publishEnabled;
-        a_SeqNum_i (p_subscription) := c_sub_seq_num_init;
-        a_publishRequestQueue_i(p_subscription) := p_publishQueue;
-        a_notifRepublishQueue_i(p_subscription) := p_republishQueue;
-        a_monitoredItemQueue_i(p_subscription) := p_monitoredItemQueue;
-        a_publishTimer_i(p_subscription) := p_timerId;
-        a_SeqNum_i (p_subscription) := c_sub_seq_num_init
+    p_subscription <-- get_session_seq_subscription (p_session, p_idx_sub) =
+    BEGIN
+        p_subscription := a_session_seq_subscription_i(p_session)(p_idx_sub)
+    END
+    ;
+
+    p_nb_subs <-- get_session_priority_nb_subs (p_session, p_prio_idx) =
+    BEGIN
+        p_nb_subs := a_session_priority_nb_subs_i(p_session)(p_prio_idx)
+    END
+    ;
+
+    p_min_idx_sub <-- get_session_priority_min_sub_idx (p_session, p_prio_idx) =
+    BEGIN
+        p_min_idx_sub := a_session_priority_min_sub_idx_i(p_session)(p_prio_idx)
+    END
+    ;
+
+    p_next_idx_sub <-- get_session_priority_next_sub_idx (p_session, p_prio_idx) =
+    BEGIN
+        p_next_idx_sub := a_session_priority_next_sub_idx_i(p_session)(p_prio_idx)
+    END
+    ;
+
+    set_session_priority_next_sub_idx (p_session, p_prio_idx, p_next_idx_sub) =
+    BEGIN
+        a_session_priority_next_sub_idx_i(p_session)(p_prio_idx) := p_next_idx_sub
+    END
+    ;
+
+    StatusCode_service <-- add_subscription
+       (p_subscription,
+        p_session,
+        p_state,
+        p_firstMsgSent,
+        p_priority,
+        p_revPublishInterval,
+        p_revLifetimeCount,
+        p_revMaxKeepAlive,
+        p_maxNotificationsPerPublish,
+        p_publishEnabled,
+        p_seqNumInit,
+        p_republishQueue,
+        p_monitoredItemQueue,
+        p_timerId) =
+    VAR
+        l_prio_idx,
+        l_prio_nb_subs,
+        l_nb_prio,
+        l_idx,
+        l_int_continue,
+        l_sub_idx_it,
+        l_prio,
+        l_sub_idx_max,
+        l_reset_next_sub_idx,
+        l_sub_idx,
+        l_sub
+    IN
+        l_reset_next_sub_idx := FALSE;
+        l_sub_idx_max := a_session_nb_subscriptions_i(p_session) + 1;
+        IF l_sub_idx_max > k_n_subscriptionPerSession_max
+        THEN
+            StatusCode_service := e_sc_bad_too_many_subscriptions
+        ELSE
+            StatusCode_service := e_sc_ok;
+
+            s_subscription_i(p_subscription) := TRUE;
+            a_subscription_state_i(p_subscription) := p_state;
+
+            a_subscription_session_i(p_subscription) := p_session;
+            a_subscription_priority_i(p_subscription) := p_priority;
+            a_publishInterval_i(p_subscription) := p_revPublishInterval;
+            a_lifetimeExpCount_i(p_subscription) := p_revLifetimeCount;
+            a_LifetimeCounter_i(p_subscription) := p_revLifetimeCount;
+            a_keepAliveExpCount_i(p_subscription) := p_revMaxKeepAlive;
+            a_KeepAliveCounter_i(p_subscription) := p_revMaxKeepAlive;
+            a_maxNotifsPerPublish_i(p_subscription) := p_maxNotificationsPerPublish;
+            a_MessageSent_i(p_subscription) := p_firstMsgSent;
+            a_PublishingEnabled_i(p_subscription) := p_publishEnabled;
+            a_SeqNum_i (p_subscription) := p_seqNumInit;
+            a_notifRepublishQueue_i(p_subscription) := p_republishQueue;
+            a_monitoredItemQueue_i(p_subscription) := p_monitoredItemQueue;
+            a_publishTimer_i(p_subscription) := p_timerId;
+
+            l_prio_idx := a_session_priority_idx_i(p_session)(p_priority);
+            IF l_prio_idx = 0 THEN
+                // the added subscription has a priority that does not exist,
+                // so it shall be inserted in the sequence of priorities
+                // let's search for the new priority index (l_prio_idx)
+                l_nb_prio  := a_session_nb_priorities_i(p_session);
+                l_prio_idx := l_nb_prio + 1;
+                l_int_continue := 1;
+                WHILE 0 < l_prio_idx & l_int_continue = 1
+                DO
+                    l_prio := a_session_seq_priority_i(p_session)(l_prio_idx - 1);
+                    IF l_prio /= c_priority_indet & p_priority < l_prio
+                    THEN
+                        // priorities higher than the subscription priority are shifted of +1 index
+                        a_session_seq_priority_i(p_session)(l_prio_idx) := l_prio;
+                        a_session_priority_idx_i(p_session)(l_prio) := l_prio_idx;
+                        a_session_priority_nb_subs_i (p_session)(l_prio_idx) := a_session_priority_nb_subs_i (p_session)(l_prio_idx-1);
+                        l_prio_idx := l_prio_idx - 1
+                    ELSE
+                        // insertion of the subscription priority
+                        a_session_seq_priority_i(p_session)(l_prio_idx) := p_priority;
+                        a_session_priority_idx_i(p_session)(p_priority) := l_prio_idx;
+                        a_session_priority_nb_subs_i (p_session)(l_prio_idx) := 0;
+                        IF (l_prio_idx > l_nb_prio) // <=> l_prio_idx = l_nb_prio + 1
+                        THEN
+                            // Last priority and subscription idx added, initialize the min and next sub idx to max
+                            // (in other cases the index values for this new priority are set in the following loop)
+                            a_session_priority_min_sub_idx_i (p_session)(l_prio_idx) := l_sub_idx_max;
+                            a_session_priority_next_sub_idx_i (p_session)(l_prio_idx) := l_sub_idx_max
+                        ELSE
+                            // Next sub index is not valid anymore for l_prio_idx and shall be reset after being shifted
+                            l_reset_next_sub_idx := TRUE
+                        END
+                        ;
+                        l_int_continue := 0
+                    END
+                INVARIANT
+                    0=0
+                VARIANT
+                    l_prio_idx + l_int_continue
+                END;
+                a_session_nb_priorities_i(p_session) := l_nb_prio + 1
+            END;
+
+            // index data on subscriptions with a priority higher than the current priority are shifted of +1 index
+            // to leave 1 space for the new subscription
+            l_idx         := a_session_nb_priorities_i(p_session);
+            l_sub_idx := l_sub_idx_max; /* If subscription is already the higher priority, its index will be the last one */
+            WHILE l_prio_idx < l_idx
+            DO
+                l_prio := a_session_seq_priority_i(p_session)(l_idx);
+                l_sub_idx := a_session_priority_min_sub_idx_i(p_session)(l_idx - 1);
+                a_session_priority_min_sub_idx_i (p_session)(l_idx) := l_sub_idx + 1;
+                a_session_priority_next_sub_idx_i(p_session)(l_idx) := a_session_priority_next_sub_idx_i(p_session)(l_idx-1) + 1;
+
+                l_idx := l_idx - 1
+            INVARIANT
+                0=0
+            VARIANT
+                l_idx
+            END;
+            // Update nb subs in priority
+            a_session_priority_nb_subs_i(p_session)(l_prio_idx) := a_session_priority_nb_subs_i(p_session)(l_prio_idx) + 1;
+            // We never change min sub idx: either priority existed => same or we created one but we reuse the min sub idx
+            // The next sub idx need to be fixed if we created a new priority
+            IF l_reset_next_sub_idx = TRUE
+            THEN
+                a_session_priority_next_sub_idx_i(p_session)(l_prio_idx) := a_session_priority_min_sub_idx_i(p_session)(l_prio_idx)
+            END
+            ;
+
+            // in the subscription sequence, shift every subscription after the current subscription
+            // (starting from the end)
+            l_sub_idx_it := l_sub_idx_max;
+            WHILE l_sub_idx < l_sub_idx_it
+            DO
+                l_sub := a_session_seq_subscription_i(p_session)(l_sub_idx_it - 1);
+                a_session_seq_subscription_i(p_session)(l_sub_idx_it) := l_sub;
+                a_session_subscription_idx_i(p_session)(l_sub) := l_sub_idx_it;
+                l_sub_idx_it := l_sub_idx_it - 1
+            INVARIANT
+                0=0
+            VARIANT
+                l_sub_idx_it
+            END;
+
+            // set the current subscription in the subscription sequence and
+            // increment the number of substitutions for its priority
+            a_session_nb_subscriptions_i(p_session) := l_sub_idx_max; // set new max value
+
+            a_session_seq_subscription_i(p_session)(l_sub_idx)  := p_subscription;
+            a_session_subscription_idx_i(p_session)(p_subscription) := l_sub_idx
+        END
     END
     ;
 
     delete_subscription (p_subscription) =
-    BEGIN
+    VAR
+        l_prio,
+        l_session,
+        l_priority,
+        l_nb_subs,
+        l_sub_prio_idx,
+        l_prio_idx_it,
+        l_nb_prio,
+        l_nb_sub_prio,
+        l_sub_idx_next,
+        l_sub_idx_del,
+        l_sub_idx,
+        l_sub
+    IN
         s_subscription_i(p_subscription) := FALSE;
         a_subscription_state_i(p_subscription) := c_subscriptionState_indet;
 
-        a_session_subscription_i(a_subscription_session_i(p_subscription)) := c_subscription_indet;
+        l_session := a_subscription_session_i(p_subscription);
         a_subscription_session_i(p_subscription) := c_session_indet;
 
         a_publishInterval_i(p_subscription) := c_opcua_duration_indet;
@@ -210,10 +490,86 @@ OPERATIONS
         a_KeepAliveCounter_i(p_subscription) := 0;
         a_MessageSent_i(p_subscription) := FALSE;
         a_SeqNum_i (p_subscription) := c_sub_seq_num_indet;
-        a_publishRequestQueue_i(p_subscription) := c_publishReqQueue_indet;
         a_notifRepublishQueue_i(p_subscription) := c_notifRepublishQueue_indet;
         a_monitoredItemQueue_i(p_subscription) := c_monitoredItemQueue_indet;
-        a_publishTimer_i(p_subscription) := c_timer_id_indet
+        a_publishTimer_i(p_subscription) := c_timer_id_indet;
+
+        l_priority     := a_subscription_priority_i(p_subscription);
+        l_nb_subs  := a_session_nb_subscriptions_i(l_session);
+        l_sub_prio_idx     := a_session_priority_idx_i(l_session)(l_priority);
+        l_nb_prio      := a_session_nb_priorities_i(l_session);
+        l_nb_sub_prio  := a_session_priority_nb_subs_i(l_session)(l_sub_prio_idx);
+        l_sub_idx_next := a_session_priority_next_sub_idx_i(l_session)(l_sub_prio_idx);
+        l_sub_idx_del  := a_session_subscription_idx_i(l_session)(p_subscription);
+
+        l_prio_idx_it := l_sub_prio_idx;
+        WHILE l_prio_idx_it < l_nb_prio
+        DO
+            l_prio := a_session_seq_priority_i(l_session)(l_prio_idx_it + 1);
+            // sub index data on subscriptions with a priority higher than the current priority are shifted of -1 index
+            a_session_priority_min_sub_idx_i (l_session)(l_prio_idx_it + 1) := a_session_priority_min_sub_idx_i (l_session)(l_prio_idx_it + 1) - 1;
+            a_session_priority_next_sub_idx_i(l_session)(l_prio_idx_it + 1) := a_session_priority_next_sub_idx_i(l_session)(l_prio_idx_it + 1) - 1;
+            IF l_nb_sub_prio = 1
+            THEN
+                // prio index on higher priority than the one removed are shifted of -1 index
+                a_session_seq_priority_i(l_session)(l_prio_idx_it) := l_prio;
+                a_session_priority_idx_i(l_session)(l_prio) := l_prio_idx_it;
+                a_session_priority_min_sub_idx_i (l_session)(l_prio_idx_it) := a_session_priority_min_sub_idx_i (l_session)(l_prio_idx_it + 1);
+                a_session_priority_next_sub_idx_i(l_session)(l_prio_idx_it) := a_session_priority_next_sub_idx_i(l_session)(l_prio_idx_it + 1);
+                a_session_priority_nb_subs_i(l_session)(l_prio_idx_it) := a_session_priority_nb_subs_i(l_session)(l_prio_idx_it + 1)
+            END;
+            l_prio_idx_it := l_prio_idx_it + 1
+        INVARIANT
+            0=0
+        VARIANT
+            l_nb_prio - l_prio_idx_it
+        END;
+
+        IF l_nb_sub_prio = 1
+        THEN
+            // the subscription priority shall be removed
+            // => previous last prio index data is invalidated (prio indexes were shifted in previous loop)
+            a_session_priority_idx_i         (l_session)(l_priority) := 0;
+            a_session_priority_min_sub_idx_i (l_session)(l_nb_prio) := 0;
+            a_session_priority_next_sub_idx_i (l_session)(l_nb_prio) := 0;
+            a_session_priority_nb_subs_i (l_session)(l_nb_prio) := 0;
+            a_session_seq_priority_i (l_session)(l_nb_prio) := c_priority_indet;
+            a_session_nb_priorities_i        (l_session) := l_nb_prio - 1
+        ELSE
+            // subscription priority remains for other subscription(s)
+            a_session_priority_nb_subs_i(l_session)(l_sub_prio_idx) := l_nb_sub_prio - 1;
+            // sub next index in prio shall be shifted if deleted sub index preceded the next index or the next index was the last one
+            IF l_sub_idx_del < l_sub_idx_next or l_sub_idx_next = l_nb_sub_prio
+            THEN
+                a_session_priority_next_sub_idx_i(l_session)(l_sub_prio_idx) := l_sub_idx_next - 1
+            END
+        END
+        ;
+
+        // in the subscription sequence, shift every subscription after the current subscription of -1 index
+        l_sub_idx := l_sub_idx_del;
+        WHILE l_sub_idx < l_nb_subs
+        DO
+            l_sub := a_session_seq_subscription_i(l_session)(l_sub_idx + 1);
+            a_session_seq_subscription_i(l_session)(l_sub_idx) := l_sub;
+            a_session_subscription_idx_i(l_session)(l_sub) := l_sub_idx;
+            l_sub_idx := l_sub_idx + 1
+        INVARIANT
+            0=0
+        VARIANT
+            l_nb_subs - l_sub_idx
+        END;
+        // clear deleted subscription index
+        a_session_subscription_idx_i(l_session)(p_subscription) := 0;
+        // clear previous last subscription index and decrease nb of subs
+        a_session_seq_subscription_i(l_session)(l_nb_subs) := c_subscription_indet;
+        a_session_nb_subscriptions_i(l_session) := l_nb_subs - 1
+    END
+    ;
+
+    p_priority <-- get_subscription_priority(p_subscription) =
+    BEGIN
+        p_priority := a_subscription_priority_i(p_subscription)
     END
     ;
 
@@ -358,9 +714,21 @@ OPERATIONS
     END
     ;
 
-    p_publishReqQueue <-- get_subscription_publishRequestQueue (p_subscription) =
+    reset_session_publishRequestQueue (p_session) =
     BEGIN
-        p_publishReqQueue := a_publishRequestQueue_i(p_subscription)
+        a_publishRequestQueue_i(p_session) := c_publishReqQueue_indet
+    END
+    ;
+
+    set_session_publishRequestQueue (p_session, p_publishReqQueue) =
+    BEGIN
+        a_publishRequestQueue_i(p_session) := p_publishReqQueue
+    END
+    ;
+
+    p_publishReqQueue <-- get_session_publishRequestQueue (p_session) =
+    BEGIN
+        p_publishReqQueue := a_publishRequestQueue_i(p_session)
     END
     ;
 

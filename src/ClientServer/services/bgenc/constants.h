@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 20/11/2025 14:48:53
+ Date                 : 26/11/2025 15:42:28
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -450,6 +450,10 @@ typedef enum {
 #define constants__t_WriteValue_i_max constants_bs__k_n_WriteResponse_max
 #define constants__t_BrowseValue_i_max constants_bs__k_n_BrowseResponse_max
 #define constants__t_BrowsePathResPerElt_i_max constants_bs__k_n_BrowsePathResPerElt_max
+#define constants__t_priority_max constants__c_priority_max
+#define constants__t_priority_i_max constants__c_priority_indet
+#define constants__t_sub_idx_i_max constants_bs__k_n_subscriptionPerSession_max
+#define constants__t_prio_idx_i_max constants_bs__k_n_subscriptionPerSession_max
 
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
@@ -576,10 +580,11 @@ typedef enum {
 #define constants__k_n_notifEventQueueSize_default constants_bs__k_n_notifEventQueueSize_default
 #define constants__k_n_notifEventQueueSize_min constants_bs__k_n_notifEventQueueSize_min
 #define constants__k_n_notifQueueSize_max constants_bs__k_n_notifQueueSize_max
-#define constants__k_n_publishRequestPerSub_max constants_bs__k_n_publishRequestPerSub_max
+#define constants__k_n_publishRequestPerSession_max constants_bs__k_n_publishRequestPerSession_max
 #define constants__k_n_read_resp_max constants_bs__k_n_read_resp_max
 #define constants__k_n_registerNodes_max constants_bs__k_n_registerNodes_max
 #define constants__k_n_republishNotifPerSub_max constants_bs__k_n_republishNotifPerSub_max
+#define constants__k_n_subscriptionPerSession_max constants_bs__k_n_subscriptionPerSession_max
 #define constants__k_n_unregisterNodes_max constants_bs__k_n_unregisterNodes_max
 #define constants__c_ReadValue_indet (0)
 #define constants__c_WriteValue_indet (0)
@@ -589,6 +594,8 @@ typedef enum {
 #define constants__c_ValueRank_Scalar (-1)
 #define constants__c_ValueRank_Any (-2)
 #define constants__c_ValueRank_ScalarOrOneDimension (-3)
+#define constants__c_priority_max (255)
+#define constants__c_priority_indet (256)
 
 /*------------------------
    INITIALISATION Clause
@@ -619,6 +626,7 @@ extern void constants__INITIALISATION(void);
 #define constants__get_cast_t_subscription constants_bs__get_cast_t_subscription
 #define constants__get_copy_ExpandedNodeId constants_bs__get_copy_ExpandedNodeId
 #define constants__get_reverse_cast_t_NamespaceIdx constants_bs__get_reverse_cast_t_NamespaceIdx
+#define constants__get_reverse_cast_t_subscription constants_bs__get_reverse_cast_t_subscription
 #define constants__getall_conv_ExpandedNodeId_NodeId constants_bs__getall_conv_ExpandedNodeId_NodeId
 #define constants__is_ClientNodeManagementActive constants_bs__is_ClientNodeManagementActive
 #define constants__is_EventNotifier_SubscribeToEvents constants_bs__is_EventNotifier_SubscribeToEvents

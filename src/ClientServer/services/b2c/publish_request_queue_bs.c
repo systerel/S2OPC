@@ -43,7 +43,7 @@ void publish_request_queue_bs__allocate_new_publish_queue(
     t_bool* const publish_request_queue_bs__bres,
     constants__t_publishReqQueue_i* const publish_request_queue_bs__queue)
 {
-    *publish_request_queue_bs__queue = SOPC_SLinkedList_Create(SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS);
+    *publish_request_queue_bs__queue = SOPC_SLinkedList_Create(SOPC_MAX_SESSION_PUBLISH_REQUESTS);
     if (*publish_request_queue_bs__queue == NULL)
     {
         *publish_request_queue_bs__bres = false;
@@ -135,7 +135,6 @@ void publish_request_queue_bs__get_nb_publish_requests(
 void publish_request_queue_bs__continue_pop_head_iter_publish_request(
     const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
     t_bool* const publish_request_queue_bs__p_continue,
-    constants__t_session_i* const publish_request_queue_bs__p_session,
     constants__t_timeref_i* const publish_request_queue_bs__p_req_exp_time,
     constants__t_server_request_handle_i* const publish_request_queue_bs__p_req_handle,
     constants__t_request_context_i* const publish_request_queue_bs__p_req_ctx,
@@ -143,7 +142,6 @@ void publish_request_queue_bs__continue_pop_head_iter_publish_request(
 {
     SOPC_InternalPublishRequestQueueElement* elt =
         (SOPC_InternalPublishRequestQueueElement*) SOPC_SLinkedList_PopHead(publish_request_queue_bs__p_queue);
-    *publish_request_queue_bs__p_session = elt->session;
     *publish_request_queue_bs__p_req_exp_time = elt->req_exp_time;
     *publish_request_queue_bs__p_req_handle = elt->req_handle;
     *publish_request_queue_bs__p_req_ctx = elt->req_ctx;
@@ -168,7 +166,6 @@ void publish_request_queue_bs__is_request_expired(const constants__t_timeref_i p
 
 void publish_request_queue_bs__pop_valid_publish_request_queue(
     const constants__t_publishReqQueue_i publish_request_queue_bs__p_queue,
-    constants__t_session_i* const publish_request_queue_bs__p_session,
     constants__t_timeref_i* const publish_request_queue_bs__p_req_exp_time,
     constants__t_server_request_handle_i* const publish_request_queue_bs__p_req_handle,
     constants__t_request_context_i* const publish_request_queue_bs__p_req_ctx,
@@ -176,7 +173,6 @@ void publish_request_queue_bs__pop_valid_publish_request_queue(
 {
     SOPC_InternalPublishRequestQueueElement* elt =
         (SOPC_InternalPublishRequestQueueElement*) SOPC_SLinkedList_PopHead(publish_request_queue_bs__p_queue);
-    *publish_request_queue_bs__p_session = elt->session;
     *publish_request_queue_bs__p_req_exp_time = elt->req_exp_time;
     *publish_request_queue_bs__p_req_handle = elt->req_handle;
     *publish_request_queue_bs__p_req_ctx = elt->req_ctx;

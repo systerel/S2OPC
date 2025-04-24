@@ -85,10 +85,12 @@ void msg_subscription_create_bs__get_msg_create_subscription_req_params(
     t_entier4* const msg_subscription_create_bs__reqLifetimeCount,
     t_entier4* const msg_subscription_create_bs__reqMaxKeepAlive,
     t_entier4* const msg_subscription_create_bs__maxNotificationsPerPublish,
-    t_bool* const msg_subscription_create_bs__publishEnabled)
+    t_bool* const msg_subscription_create_bs__publishEnabled,
+    t_entier4* const msg_subscription_create_bs__priority)
 {
     OpcUa_CreateSubscriptionRequest* req = (OpcUa_CreateSubscriptionRequest*) msg_subscription_create_bs__p_req_msg;
     *msg_subscription_create_bs__publishEnabled = util_SOPC_Boolean_to_B(req->PublishingEnabled);
+    *msg_subscription_create_bs__priority = (t_entier4) req->Priority;
 
     SOPC_InternalCommonCreateModifySubscription(
         req->RequestedPublishingInterval, req->RequestedLifetimeCount, req->RequestedMaxKeepAliveCount,
@@ -103,10 +105,12 @@ void msg_subscription_create_bs__get_msg_modify_subscription_req_params(
     constants__t_opcua_duration_i* const msg_subscription_create_bs__reqPublishInterval,
     t_entier4* const msg_subscription_create_bs__reqLifetimeCount,
     t_entier4* const msg_subscription_create_bs__reqMaxKeepAlive,
-    t_entier4* const msg_subscription_create_bs__maxNotificationsPerPublish)
+    t_entier4* const msg_subscription_create_bs__maxNotificationsPerPublish,
+    t_entier4* const msg_subscription_create_bs__priority)
 {
     OpcUa_ModifySubscriptionRequest* req = (OpcUa_ModifySubscriptionRequest*) msg_subscription_create_bs__p_req_msg;
     *msg_subscription_create_bs__subscription = req->SubscriptionId;
+    *msg_subscription_create_bs__priority = (t_entier4) req->Priority;
 
     SOPC_InternalCommonCreateModifySubscription(
         req->RequestedPublishingInterval, req->RequestedLifetimeCount, req->RequestedMaxKeepAliveCount,

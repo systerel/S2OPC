@@ -369,7 +369,7 @@ CONCRETE_CONSTANTS
     k_n_notifEventQueueSize_min,
     k_n_notifEventQueueSize_default,
     k_n_notifQueueSize_max,
-    k_n_publishRequestPerSub_max,
+    k_n_publishRequestPerSession_max,
     k_n_republishNotifPerSub_max,
     k_n_genericOperationPerReq_max,
     k_n_registerNodes_max,
@@ -382,6 +382,8 @@ CONCRETE_CONSTANTS
     k_n_UserAuthAttempts_max,
 
     k_n_NamespaceIndex_max,
+
+    k_n_subscriptionPerSession_max,
 
     c_Null_Type_NodeId,
     c_ByteString_Type_NodeId,
@@ -502,7 +504,13 @@ CONCRETE_CONSTANTS
 
     t_counter,
     t_ValueRank,
-    t_BrowsePathResPerElt_i
+    t_BrowsePathResPerElt_i,
+    c_priority_max,
+    c_priority_indet,
+    t_priority,
+    t_priority_i,
+    t_sub_idx_i,
+    t_prio_idx_i
 
 ABSTRACT_CONSTANTS
     conv_AccessLevel_Variant,
@@ -632,6 +640,8 @@ ABSTRACT_CONSTANTS
     t_MdnsDiscoveryConfig,
     t_RegisteredServer2Info,
     t_DataTypeDefinition,
+    t_sub_idx,
+    t_prio_idx,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -850,8 +860,8 @@ PROPERTIES
     k_n_notifEventQueueSize_default > 0 &
     k_n_notifQueueSize_max : NAT &
     k_n_notifQueueSize_max > 0 &
-    k_n_publishRequestPerSub_max : NAT &
-    k_n_publishRequestPerSub_max > 0 &
+    k_n_publishRequestPerSession_max : NAT &
+    k_n_publishRequestPerSession_max > 0 &
     k_n_republishNotifPerSub_max : NAT &
     k_n_republishNotifPerSub_max > 0 &
     k_n_genericOperationPerReq_max : NAT &
@@ -867,6 +877,8 @@ PROPERTIES
     k_n_UserAuthAttempts_max : NAT &
 
     k_n_NamespaceIndex_max : NAT &
+
+    k_n_subscriptionPerSession_max : NAT1 &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -1042,6 +1054,7 @@ PROPERTIES
     c_subscription_indet : t_subscription_i &
     c_subscription_indet /: t_subscription &
     cast_t_subscription : NAT +-> t_subscription_i &
+    1..card(t_subscription_i) = dom(cast_t_subscription) &
     cast_t_subscription : perm(t_subscription) &
 
     t_subscriptionState = t_subscriptionState_i - {c_subscriptionState_indet} &
@@ -1387,7 +1400,18 @@ PROPERTIES
     1..k_n_nodesToAdd_max <: t_nodeToAddReqIndex &
     1..k_n_nodesToDelete_max <: t_nodeToDeleteReqIndex &
 
-    IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank
+    IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank &
+
+    c_priority_max   = 255 &
+    c_priority_indet = 256 &
+    t_priority   = 0..c_priority_max   &
+    t_priority_i = 0..c_priority_indet &
+
+    t_sub_idx   = 1..k_n_subscriptionPerSession_max &
+    t_sub_idx_i = 0..k_n_subscriptionPerSession_max &
+
+    t_prio_idx = 1..k_n_subscriptionPerSession_max &
+    t_prio_idx_i = 0..k_n_subscriptionPerSession_max
 
 OPERATIONS
 
@@ -1590,6 +1614,19 @@ OPERATIONS
         p_ind : dom(cast_t_subscription)
     THEN
         p_subscription := cast_t_subscription(p_ind)
+    END
+    ;
+
+    p_ind <-- get_reverse_cast_t_subscription(p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : ran(cast_t_subscription)
+    THEN
+        p_ind :(p_ind : NAT &
+        (p_subscription : ran(cast_t_subscription) =>
+            p_ind = cast_t_subscription~(p_subscription)) &
+        (p_subscription /: ran(cast_t_subscription) =>
+            p_ind = 0))
     END
     ;
 

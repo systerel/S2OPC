@@ -21,7 +21,7 @@
 
  File Name            : notification_republish_queue_bs.h
 
- Date                 : 04/08/2022 14:53:43
+ Date                 : 11/08/2025 16:04:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -57,8 +57,6 @@ extern void notification_republish_queue_bs__allocate_new_republish_queue(
    t_bool * const notification_republish_queue_bs__bres,
    constants__t_notifRepublishQueue_i * const notification_republish_queue_bs__queue);
 extern void notification_republish_queue_bs__clear_and_deallocate_republish_queue(
-   const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue);
-extern void notification_republish_queue_bs__clear_republish_queue(
    const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue);
 extern void notification_republish_queue_bs__discard_oldest_republish_notif(
    const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue);

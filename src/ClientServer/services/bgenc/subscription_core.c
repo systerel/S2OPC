@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 18/08/2025 08:26:07
+ Date                 : 04/11/2025 11:30:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -32,10 +32,30 @@
   ------------------------*/
 #include "subscription_core.h"
 
+/*----------------------------
+   CONCRETE_VARIABLES Clause
+  ----------------------------*/
+t_bool subscription_core__continue_iter_prio;
+t_entier4 subscription_core__idx_iter_sub;
+t_entier4 subscription_core__min_idx_iter_sub;
+t_entier4 subscription_core__nb_subs_iter_sub;
+t_entier4 subscription_core__next_idx_iter_prio;
+t_entier4 subscription_core__next_idx_iter_sub;
+t_entier4 subscription_core__prio_idx_iter_prio;
+constants__t_session_i subscription_core__session_iter_prio;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void subscription_core__INITIALISATION(void) {
+   subscription_core__next_idx_iter_prio = 0;
+   subscription_core__continue_iter_prio = false;
+   subscription_core__session_iter_prio = constants__c_session_indet;
+   subscription_core__prio_idx_iter_prio = 0;
+   subscription_core__nb_subs_iter_sub = 1;
+   subscription_core__min_idx_iter_sub = 1;
+   subscription_core__next_idx_iter_sub = 1;
+   subscription_core__idx_iter_sub = 1;
 }
 
 /*--------------------
@@ -178,12 +198,11 @@ void subscription_core__get_fresh_subscription(
 }
 
 void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
-   const constants__t_subscription_i subscription_core__p_subscription,
+   const constants__t_session_i subscription_core__p_session,
    t_bool * const subscription_core__p_validPubReqQueued) {
    {
       constants__t_publishReqQueue_i subscription_core__l_pubReqQueue;
       t_bool subscription_core__l_continue;
-      constants__t_session_i subscription_core__l_session;
       constants__t_timeref_i subscription_core__l_req_exp_time;
       constants__t_server_request_handle_i subscription_core__l_req_handle;
       constants__t_request_context_i subscription_core__l_req_ctx;
@@ -191,7 +210,7 @@ void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
       t_bool subscription_core__l_is_expired;
       
       *subscription_core__p_validPubReqQueued = false;
-      subscription_core_1__get_subscription_publishRequestQueue(subscription_core__p_subscription,
+      subscription_core_1__get_session_publishRequestQueue(subscription_core__p_session,
          &subscription_core__l_pubReqQueue);
       publish_request_queue_bs__init_iter_publish_request(subscription_core__l_pubReqQueue,
          &subscription_core__l_continue);
@@ -200,7 +219,6 @@ void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
          (subscription_core__l_is_expired == true)) {
          publish_request_queue_bs__continue_pop_head_iter_publish_request(subscription_core__l_pubReqQueue,
             &subscription_core__l_continue,
-            &subscription_core__l_session,
             &subscription_core__l_req_exp_time,
             &subscription_core__l_req_handle,
             &subscription_core__l_req_ctx,
@@ -208,7 +226,7 @@ void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
          publish_request_queue_bs__is_request_expired(subscription_core__l_req_exp_time,
             &subscription_core__l_is_expired);
          if (subscription_core__l_is_expired == true) {
-            msg_subscription_publish_bs__generate_internal_send_publish_response_event(subscription_core__l_session,
+            msg_subscription_publish_bs__generate_internal_send_publish_response_event(subscription_core__p_session,
                subscription_core__l_resp_msg,
                subscription_core__l_req_handle,
                subscription_core__l_req_ctx,
@@ -216,7 +234,7 @@ void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
          }
          else {
             publish_request_queue_bs__prepend_publish_request_to_queue(subscription_core__l_pubReqQueue,
-               subscription_core__l_session,
+               subscription_core__p_session,
                subscription_core__l_req_exp_time,
                subscription_core__l_req_handle,
                subscription_core__l_req_ctx,
@@ -462,14 +480,7 @@ void subscription_core__local_close_subscription(
    const constants__t_subscription_i subscription_core__p_subscription) {
    {
       constants__t_timer_id_i subscription_core__l_timer_id;
-      constants__t_publishReqQueue_i subscription_core__l_publish_queue;
       constants__t_notifRepublishQueue_i subscription_core__l_republish_queue;
-      t_bool subscription_core__l_continue_pub;
-      constants__t_session_i subscription_core__l_session;
-      constants__t_timeref_i subscription_core__l_req_exp_time;
-      constants__t_server_request_handle_i subscription_core__l_req_handle;
-      constants__t_request_context_i subscription_core__l_req_ctx;
-      constants__t_msg_i subscription_core__l_resp_msg;
       constants__t_monitoredItemQueue_i subscription_core__l_monitored_item_queue;
       constants__t_notificationQueue_i subscription_core__l_notification_queue;
       t_bool subscription_core__l_continue_mi;
@@ -489,27 +500,8 @@ void subscription_core__local_close_subscription(
       subscription_core_1__get_subscription_timer_id(subscription_core__p_subscription,
          &subscription_core__l_timer_id);
       subscription_core_bs__delete_publish_timer(subscription_core__l_timer_id);
-      subscription_core_1__get_subscription_publishRequestQueue(subscription_core__p_subscription,
-         &subscription_core__l_publish_queue);
       subscription_core_1__get_subscription_notifRepublishQueue(subscription_core__p_subscription,
          &subscription_core__l_republish_queue);
-      publish_request_queue_bs__init_iter_publish_request(subscription_core__l_publish_queue,
-         &subscription_core__l_continue_pub);
-      while (subscription_core__l_continue_pub == true) {
-         publish_request_queue_bs__continue_pop_head_iter_publish_request(subscription_core__l_publish_queue,
-            &subscription_core__l_continue_pub,
-            &subscription_core__l_session,
-            &subscription_core__l_req_exp_time,
-            &subscription_core__l_req_handle,
-            &subscription_core__l_req_ctx,
-            &subscription_core__l_resp_msg);
-         msg_subscription_publish_bs__generate_internal_send_publish_response_event(subscription_core__l_session,
-            subscription_core__l_resp_msg,
-            subscription_core__l_req_handle,
-            subscription_core__l_req_ctx,
-            constants_statuscodes_bs__e_sc_bad_no_subscription);
-      }
-      publish_request_queue_bs__clear_and_deallocate_publish_queue(subscription_core__l_publish_queue);
       notification_republish_queue_bs__clear_and_deallocate_republish_queue(subscription_core__l_republish_queue);
       subscription_core_1__get_subscription_monitoredItemQueue(subscription_core__p_subscription,
          &subscription_core__l_monitored_item_queue);
@@ -650,34 +642,59 @@ void subscription_core__local_monitored_item_nb_available_notifications(
    }
 }
 
-void subscription_core__is_valid_subscription_on_session(
+void subscription_core__local_init_iter_session_seq_priority(
    const constants__t_session_i subscription_core__p_session,
-   const constants__t_subscription_i subscription_core__p_subscription,
-   t_bool * const subscription_core__is_valid) {
-   {
-      t_bool subscription_core__l_dom;
-      constants__t_subscription_i subscription_core__l_sub;
-      
-      subscription_core_1__getall_subscription(subscription_core__p_session,
-         &subscription_core__l_dom,
-         &subscription_core__l_sub);
-      *subscription_core__is_valid = ((subscription_core__l_dom == true) &&
-         (subscription_core__p_subscription == subscription_core__l_sub));
-   }
+   t_bool * const subscription_core__p_continue) {
+   subscription_core__session_iter_prio = subscription_core__p_session;
+   subscription_core_1__get_card_session_seq_priority(subscription_core__p_session,
+      &subscription_core__next_idx_iter_prio);
+   *subscription_core__p_continue = (subscription_core__next_idx_iter_prio != 0);
 }
 
-void subscription_core__empty_session_publish_requests(
-   const constants__t_subscription_i subscription_core__p_subscription) {
-   {
-      constants__t_publishReqQueue_i subscription_core__l_PublishRequestQueue;
-      constants__t_notifRepublishQueue_i subscription_core__l_RepublishQueue;
-      
-      subscription_core_1__get_subscription_publishRequestQueue(subscription_core__p_subscription,
-         &subscription_core__l_PublishRequestQueue);
-      publish_request_queue_bs__clear_publish_queue(subscription_core__l_PublishRequestQueue);
-      subscription_core_1__get_subscription_notifRepublishQueue(subscription_core__p_subscription,
-         &subscription_core__l_RepublishQueue);
-      notification_republish_queue_bs__clear_republish_queue(subscription_core__l_RepublishQueue);
+void subscription_core__local_continue_iter_session_seq_priority(
+   t_bool * const subscription_core__p_continue,
+   t_entier4 * const subscription_core__p_prio_idx) {
+   *subscription_core__p_prio_idx = subscription_core__next_idx_iter_prio;
+   subscription_core__next_idx_iter_prio = subscription_core__next_idx_iter_prio -
+      1;
+   *subscription_core__p_continue = (subscription_core__next_idx_iter_prio != 0);
+}
+
+void subscription_core__local_init_iter_subscription_priority(
+   const t_entier4 subscription_core__p_prio_idx) {
+   subscription_core__prio_idx_iter_prio = subscription_core__p_prio_idx;
+   subscription_core_1__get_session_priority_nb_subs(subscription_core__session_iter_prio,
+      subscription_core__p_prio_idx,
+      &subscription_core__nb_subs_iter_sub);
+   subscription_core_1__get_session_priority_min_sub_idx(subscription_core__session_iter_prio,
+      subscription_core__p_prio_idx,
+      &subscription_core__min_idx_iter_sub);
+   subscription_core_1__get_session_priority_next_sub_idx(subscription_core__session_iter_prio,
+      subscription_core__p_prio_idx,
+      &subscription_core__next_idx_iter_sub);
+   subscription_core__idx_iter_sub = subscription_core__next_idx_iter_sub;
+}
+
+void subscription_core__local_continue_iter_subscription_priority(
+   t_bool * const subscription_core__p_continue,
+   constants__t_subscription_i * const subscription_core__p_subscription) {
+   subscription_core_1__get_session_seq_subscription(subscription_core__session_iter_prio,
+      subscription_core__idx_iter_sub,
+      subscription_core__p_subscription);
+   subscription_core__idx_iter_sub = subscription_core__min_idx_iter_sub +
+      (((subscription_core__idx_iter_sub -
+      subscription_core__min_idx_iter_sub) +
+      1) %
+      subscription_core__nb_subs_iter_sub);
+   *subscription_core__p_continue = (subscription_core__idx_iter_sub != subscription_core__next_idx_iter_sub);
+   if (*subscription_core__p_continue == false) {
+      subscription_core_1__set_session_priority_next_sub_idx(subscription_core__session_iter_prio,
+         subscription_core__prio_idx_iter_prio,
+         subscription_core__min_idx_iter_sub +
+         (((subscription_core__next_idx_iter_sub -
+         subscription_core__min_idx_iter_sub) +
+         1) %
+         subscription_core__nb_subs_iter_sub));
    }
 }
 
@@ -688,13 +705,11 @@ void subscription_core__create_subscription(
    const t_entier4 subscription_core__p_revMaxKeepAlive,
    const t_entier4 subscription_core__p_maxNotificationsPerPublish,
    const t_bool subscription_core__p_publishEnabled,
+   const t_entier4 subscription_core__p_priority,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
    constants__t_subscription_i * const subscription_core__subscription) {
    {
       t_bool subscription_core__l_bres;
-      constants__t_subscription_i subscription_core__l_subscription;
-      t_bool subscription_core__l_bres_pub;
-      constants__t_publishReqQueue_i subscription_core__l_newPublishQueue;
       t_bool subscription_core__l_bres_repub;
       constants__t_notifRepublishQueue_i subscription_core__l_newRepublishQueue;
       t_bool subscription_core__l_bres_monitored;
@@ -703,43 +718,38 @@ void subscription_core__create_subscription(
       constants__t_timer_id_i subscription_core__l_timerId;
       
       *subscription_core__StatusCode_service = constants_statuscodes_bs__c_StatusCode_indet;
-      *subscription_core__subscription = constants__c_subscription_indet;
       subscription_core__get_fresh_subscription(&subscription_core__l_bres,
-         &subscription_core__l_subscription);
+         subscription_core__subscription);
       if (subscription_core__l_bres == true) {
-         publish_request_queue_bs__allocate_new_publish_queue(&subscription_core__l_bres_pub,
-            &subscription_core__l_newPublishQueue);
          notification_republish_queue_bs__allocate_new_republish_queue(&subscription_core__l_bres_repub,
             &subscription_core__l_newRepublishQueue);
          monitored_item_queue_bs__allocate_new_monitored_item_queue(&subscription_core__l_bres_monitored,
             &subscription_core__l_newMonitoredItemQueue);
-         subscription_core_bs__create_periodic_publish_timer(subscription_core__l_subscription,
+         subscription_core_bs__create_periodic_publish_timer(*subscription_core__subscription,
             subscription_core__p_revPublishInterval,
             &subscription_core__l_bres_timer,
             &subscription_core__l_timerId);
-         if ((((subscription_core__l_bres_pub == true) &&
-            (subscription_core__l_bres_repub == true)) &&
+         if (((subscription_core__l_bres_repub == true) &&
             (subscription_core__l_bres_monitored == true)) &&
             (subscription_core__l_bres_timer == true)) {
-            *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
-            subscription_core_1__add_subscription(subscription_core__l_subscription,
+            subscription_core_1__add_subscription(*subscription_core__subscription,
                subscription_core__p_session,
+               constants__e_subscriptionState_normal,
+               false,
+               subscription_core__p_priority,
                subscription_core__p_revPublishInterval,
                subscription_core__p_revLifetimeCount,
                subscription_core__p_revMaxKeepAlive,
                subscription_core__p_maxNotificationsPerPublish,
                subscription_core__p_publishEnabled,
-               subscription_core__l_newPublishQueue,
+               constants__c_sub_seq_num_init,
                subscription_core__l_newRepublishQueue,
                subscription_core__l_newMonitoredItemQueue,
-               subscription_core__l_timerId);
-            *subscription_core__subscription = subscription_core__l_subscription;
+               subscription_core__l_timerId,
+               subscription_core__StatusCode_service);
          }
          else {
             *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-            if (subscription_core__l_bres_pub == true) {
-               publish_request_queue_bs__clear_and_deallocate_publish_queue(subscription_core__l_newPublishQueue);
-            }
             if (subscription_core__l_bres_repub == true) {
                notification_republish_queue_bs__clear_and_deallocate_republish_queue(subscription_core__l_newRepublishQueue);
             }
@@ -762,22 +772,69 @@ void subscription_core__modify_subscription(
    const constants__t_opcua_duration_i subscription_core__p_revPublishInterval,
    const t_entier4 subscription_core__p_revLifetimeCount,
    const t_entier4 subscription_core__p_revMaxKeepAlive,
-   const t_entier4 subscription_core__p_revMaxNotifPerPublish) {
+   const t_entier4 subscription_core__p_revMaxNotifPerPublish,
+   const t_entier4 subscription_core__p_priority) {
    {
+      t_entier4 subscription_core__l_old_priority;
       constants__t_timer_id_i subscription_core__l_timerId;
+      constants__t_session_i subscription_core__l_session;
+      t_bool subscription_core__l_publishEnabled;
+      constants__t_notifRepublishQueue_i subscription_core__l_republishQueue;
+      constants__t_monitoredItemQueue_i subscription_core__l_monitoredItemQueue;
+      constants__t_sub_seq_num_i subscription_core__l_seqNum;
+      constants__t_subscriptionState_i subscription_core__l_state;
+      t_bool subscription_core__l_firstMsgSent;
+      constants_statuscodes_bs__t_StatusCode_i subscription_core__l_statusCode;
       
-      subscription_core_1__set_subscription_publishInterval(subscription_core__p_subscription,
-         subscription_core__p_revPublishInterval);
-      subscription_core_1__set_subscription_MaxLifetimeAndKeepAliveCount(subscription_core__p_subscription,
-         subscription_core__p_revLifetimeCount,
-         subscription_core__p_revMaxKeepAlive);
-      subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
-      subscription_core_1__set_subscription_MaxNotifsPerPublish(subscription_core__p_subscription,
-         subscription_core__p_revMaxNotifPerPublish);
+      subscription_core__l_state = constants__c_subscriptionState_indet;
+      subscription_core_1__get_subscription_priority(subscription_core__p_subscription,
+         &subscription_core__l_old_priority);
       subscription_core_1__get_subscription_timer_id(subscription_core__p_subscription,
          &subscription_core__l_timerId);
-      subscription_core_bs__modify_publish_timer_period(subscription_core__l_timerId,
-         subscription_core__p_revPublishInterval);
+      if (subscription_core__l_old_priority == subscription_core__p_priority) {
+         subscription_core_1__set_subscription_publishInterval(subscription_core__p_subscription,
+            subscription_core__p_revPublishInterval);
+         subscription_core_1__set_subscription_MaxLifetimeAndKeepAliveCount(subscription_core__p_subscription,
+            subscription_core__p_revLifetimeCount,
+            subscription_core__p_revMaxKeepAlive);
+         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
+         subscription_core_1__set_subscription_MaxNotifsPerPublish(subscription_core__p_subscription,
+            subscription_core__p_revMaxNotifPerPublish);
+         subscription_core_bs__modify_publish_timer_period(subscription_core__l_timerId,
+            subscription_core__p_revPublishInterval);
+      }
+      else {
+         subscription_core_1__getall_session(subscription_core__p_subscription,
+            &subscription_core__l_session);
+         subscription_core_1__get_subscription_PublishingEnabled(subscription_core__p_subscription,
+            &subscription_core__l_publishEnabled);
+         subscription_core_1__get_subscription_notifRepublishQueue(subscription_core__p_subscription,
+            &subscription_core__l_republishQueue);
+         subscription_core_1__get_subscription_monitoredItemQueue(subscription_core__p_subscription,
+            &subscription_core__l_monitoredItemQueue);
+         subscription_core_1__get_subscription_SeqNum(subscription_core__p_subscription,
+            &subscription_core__l_seqNum);
+         subscription_core_1__get_subscription_state(subscription_core__p_subscription,
+            &subscription_core__l_state);
+         subscription_core_1__get_subscription_MessageSent(subscription_core__p_subscription,
+            &subscription_core__l_firstMsgSent);
+         subscription_core_1__delete_subscription(subscription_core__p_subscription);
+         subscription_core_1__add_subscription(subscription_core__p_subscription,
+            subscription_core__l_session,
+            subscription_core__l_state,
+            subscription_core__l_firstMsgSent,
+            subscription_core__p_priority,
+            subscription_core__p_revPublishInterval,
+            subscription_core__p_revLifetimeCount,
+            subscription_core__p_revMaxKeepAlive,
+            subscription_core__p_revMaxNotifPerPublish,
+            subscription_core__l_publishEnabled,
+            subscription_core__l_seqNum,
+            subscription_core__l_republishQueue,
+            subscription_core__l_monitoredItemQueue,
+            subscription_core__l_timerId,
+            &subscription_core__l_statusCode);
+      }
    }
 }
 
@@ -802,20 +859,13 @@ void subscription_core__subscription_ack_notif_msg(
 }
 
 void subscription_core__receive_publish_request(
-   const constants__t_session_i subscription_core__p_session,
-   const constants__t_timeref_i subscription_core__p_req_exp_time,
-   const constants__t_server_request_handle_i subscription_core__p_req_handle,
-   const constants__t_request_context_i subscription_core__p_req_ctx,
+   const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_msg_i subscription_core__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
    t_bool * const subscription_core__async_resp_msg,
-   constants__t_subscription_i * const subscription_core__subscription,
    t_bool * const subscription_core__moreNotifs) {
    {
-      t_bool subscription_core__l_dom;
-      constants__t_subscription_i subscription_core__l_subscription;
       constants__t_subscriptionState_i subscription_core__l_subscriptionState;
-      constants__t_publishReqQueue_i subscription_core__l_PublishingReqQueue;
       t_bool subscription_core__l_PublishingEnabled;
       t_entier4 subscription_core__l_nb_avail_data_notifs;
       t_entier4 subscription_core__l_nb_avail_event_notifs;
@@ -826,79 +876,40 @@ void subscription_core__receive_publish_request(
       t_bool subscription_core__l_MoreNotifications;
       constants__t_notifRepublishQueue_i subscription_core__l_notifRepublishQueue;
       t_bool subscription_core__l_bres;
-      t_entier4 subscription_core__l_nb_pub_reqs;
       t_entier4 subscription_core__l_nb_repub_notifs;
-      constants__t_session_i subscription_core__l_old_session;
-      constants__t_server_request_handle_i subscription_core__l_old_req_handle;
-      constants__t_request_context_i subscription_core__l_old_req_ctx;
-      constants__t_msg_i subscription_core__l_old_resp_msg;
       constants__t_notif_msg_i subscription_core__l_notifMsg;
       constants__t_sub_seq_num_i subscription_core__l_seq_num;
       constants__t_sub_seq_num_i subscription_core__l_next_seq_num;
       
-      subscription_core_1__getall_subscription(subscription_core__p_session,
-         &subscription_core__l_dom,
-         &subscription_core__l_subscription);
-      subscription_core_1__get_subscription_state(subscription_core__l_subscription,
+      subscription_core_1__get_subscription_state(subscription_core__p_subscription,
          &subscription_core__l_subscriptionState);
-      subscription_core_1__get_subscription_publishRequestQueue(subscription_core__l_subscription,
-         &subscription_core__l_PublishingReqQueue);
-      subscription_core_1__get_subscription_PublishingEnabled(subscription_core__l_subscription,
+      subscription_core_1__get_subscription_PublishingEnabled(subscription_core__p_subscription,
          &subscription_core__l_PublishingEnabled);
-      subscription_core_1__get_subscription_MoreNotifications(subscription_core__l_subscription,
+      subscription_core_1__get_subscription_MoreNotifications(subscription_core__p_subscription,
          &subscription_core__l_MoreNotifications);
-      subscription_core__local_subscription_nb_available_notifications(subscription_core__l_subscription,
+      subscription_core__local_subscription_nb_available_notifications(subscription_core__p_subscription,
          &subscription_core__l_nb_avail_data_notifs,
          &subscription_core__l_nb_avail_event_notifs);
-      subscription_core_1__get_subscription_MaxNotifsPerPublish(subscription_core__l_subscription,
+      subscription_core_1__get_subscription_MaxNotifsPerPublish(subscription_core__p_subscription,
          &subscription_core__l_max_configured_notifications);
       subscription_core__l_NotificationAvailable = ((subscription_core__l_nb_avail_data_notifs > 0) ||
          (subscription_core__l_nb_avail_event_notifs > 0));
-      subscription_core_1__get_subscription_notifRepublishQueue(subscription_core__l_subscription,
+      subscription_core_1__get_subscription_notifRepublishQueue(subscription_core__p_subscription,
          &subscription_core__l_notifRepublishQueue);
+      *subscription_core__async_resp_msg = false;
       *subscription_core__moreNotifs = false;
-      *subscription_core__subscription = constants__c_subscription_indet;
       if (((subscription_core__l_subscriptionState == constants__e_subscriptionState_normal) &&
          ((subscription_core__l_PublishingEnabled == false) ||
          ((subscription_core__l_PublishingEnabled == true) &&
          (subscription_core__l_MoreNotifications == false)))) ||
          (subscription_core__l_subscriptionState == constants__e_subscriptionState_keepAlive)) {
-         publish_request_queue_bs__get_nb_publish_requests(subscription_core__l_PublishingReqQueue,
-            &subscription_core__l_nb_pub_reqs);
-         if (subscription_core__l_nb_pub_reqs == constants__k_n_publishRequestPerSub_max) {
-            publish_request_queue_bs__discard_oldest_publish_request(subscription_core__l_PublishingReqQueue,
-               &subscription_core__l_old_session,
-               &subscription_core__l_old_resp_msg,
-               &subscription_core__l_old_req_handle,
-               &subscription_core__l_old_req_ctx);
-            msg_subscription_publish_bs__generate_internal_send_publish_response_event(subscription_core__l_old_session,
-               subscription_core__l_old_resp_msg,
-               subscription_core__l_old_req_handle,
-               subscription_core__l_old_req_ctx,
-               constants_statuscodes_bs__e_sc_bad_too_many_publish_requests);
-         }
-         publish_request_queue_bs__append_publish_request_to_queue(subscription_core__l_PublishingReqQueue,
-            subscription_core__p_session,
-            subscription_core__p_req_exp_time,
-            subscription_core__p_req_handle,
-            subscription_core__p_req_ctx,
-            subscription_core__p_resp_msg,
-            &subscription_core__l_bres);
-         if (subscription_core__l_bres == true) {
-            *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
-            *subscription_core__async_resp_msg = true;
-         }
-         else {
-            *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_publish_requests;
-            *subscription_core__async_resp_msg = false;
-         }
+         *subscription_core__async_resp_msg = true;
+         *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
       }
       else if (((subscription_core__l_subscriptionState == constants__e_subscriptionState_normal) &&
          (subscription_core__l_PublishingEnabled == true)) &&
          (subscription_core__l_MoreNotifications == true)) {
-         *subscription_core__subscription = subscription_core__l_subscription;
-         *subscription_core__async_resp_msg = false;
-         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__l_subscription);
+         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          subscription_core__local_compute_msg_nb_notifs(subscription_core__l_max_configured_notifications,
             subscription_core__l_nb_avail_data_notifs,
             subscription_core__l_nb_avail_event_notifs,
@@ -911,18 +922,18 @@ void subscription_core__receive_publish_request(
             &subscription_core__l_bres,
             &subscription_core__l_notifMsg);
          if (subscription_core__l_bres == true) {
-            subscription_core_1__get_subscription_SeqNum(subscription_core__l_subscription,
+            subscription_core_1__get_subscription_SeqNum(subscription_core__p_subscription,
                &subscription_core__l_seq_num);
             msg_subscription_publish_bs__set_notification_message_sequence_number(subscription_core__l_notifMsg,
                subscription_core__l_seq_num);
             subscription_core_bs__get_next_subscription_sequence_number(subscription_core__l_seq_num,
                &subscription_core__l_next_seq_num);
-            subscription_core_1__set_subscription_SeqNum(subscription_core__l_subscription,
+            subscription_core_1__set_subscription_SeqNum(subscription_core__p_subscription,
                subscription_core__l_next_seq_num);
-            subscription_core__local_fill_data_notification_message(subscription_core__l_subscription,
+            subscription_core__local_fill_data_notification_message(subscription_core__p_subscription,
                subscription_core__l_notifMsg,
                subscription_core__l_nb_data_notifs);
-            subscription_core__local_fill_event_notification_message(subscription_core__l_subscription,
+            subscription_core__local_fill_event_notification_message(subscription_core__p_subscription,
                subscription_core__l_notifMsg,
                subscription_core__l_nb_event_notifs);
             notification_republish_queue_bs__get_nb_republish_notifs(subscription_core__l_notifRepublishQueue,
@@ -940,19 +951,17 @@ void subscription_core__receive_publish_request(
             *subscription_core__moreNotifs = true;
             *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
          }
-         subscription_core_1__set_subscription_MoreNotifications(subscription_core__l_subscription,
+         subscription_core_1__set_subscription_MoreNotifications(subscription_core__p_subscription,
             *subscription_core__moreNotifs);
-         subscription_core_1__set_subscription_MessageSent(subscription_core__l_subscription);
+         subscription_core_1__set_subscription_MessageSent(subscription_core__p_subscription);
       }
       else if (((subscription_core__l_subscriptionState == constants__e_subscriptionState_late) &&
          (subscription_core__l_PublishingEnabled == true)) &&
          ((subscription_core__l_MoreNotifications == true) ||
          (subscription_core__l_NotificationAvailable == true))) {
-         subscription_core_1__set_subscription_state(subscription_core__l_subscription,
+         subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_normal);
-         *subscription_core__subscription = subscription_core__l_subscription;
-         *subscription_core__async_resp_msg = false;
-         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__l_subscription);
+         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          subscription_core__local_compute_msg_nb_notifs(subscription_core__l_max_configured_notifications,
             subscription_core__l_nb_avail_data_notifs,
             subscription_core__l_nb_avail_event_notifs,
@@ -965,18 +974,18 @@ void subscription_core__receive_publish_request(
             &subscription_core__l_bres,
             &subscription_core__l_notifMsg);
          if (subscription_core__l_bres == true) {
-            subscription_core_1__get_subscription_SeqNum(subscription_core__l_subscription,
+            subscription_core_1__get_subscription_SeqNum(subscription_core__p_subscription,
                &subscription_core__l_seq_num);
             msg_subscription_publish_bs__set_notification_message_sequence_number(subscription_core__l_notifMsg,
                subscription_core__l_seq_num);
             subscription_core_bs__get_next_subscription_sequence_number(subscription_core__l_seq_num,
                &subscription_core__l_next_seq_num);
-            subscription_core_1__set_subscription_SeqNum(subscription_core__l_subscription,
+            subscription_core_1__set_subscription_SeqNum(subscription_core__p_subscription,
                subscription_core__l_next_seq_num);
-            subscription_core__local_fill_data_notification_message(subscription_core__l_subscription,
+            subscription_core__local_fill_data_notification_message(subscription_core__p_subscription,
                subscription_core__l_notifMsg,
                subscription_core__l_nb_data_notifs);
-            subscription_core__local_fill_event_notification_message(subscription_core__l_subscription,
+            subscription_core__local_fill_event_notification_message(subscription_core__p_subscription,
                subscription_core__l_notifMsg,
                subscription_core__l_nb_event_notifs);
             notification_republish_queue_bs__get_nb_republish_notifs(subscription_core__l_notifRepublishQueue,
@@ -994,31 +1003,77 @@ void subscription_core__receive_publish_request(
             *subscription_core__moreNotifs = true;
             *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
          }
-         subscription_core_1__set_subscription_MoreNotifications(subscription_core__l_subscription,
+         subscription_core_1__set_subscription_MoreNotifications(subscription_core__p_subscription,
             *subscription_core__moreNotifs);
-         subscription_core_1__set_subscription_MessageSent(subscription_core__l_subscription);
+         subscription_core_1__set_subscription_MessageSent(subscription_core__p_subscription);
       }
       else if ((subscription_core__l_subscriptionState == constants__e_subscriptionState_late) &&
          ((subscription_core__l_PublishingEnabled == false) ||
          (((subscription_core__l_PublishingEnabled == true) &&
          (subscription_core__l_NotificationAvailable == false)) &&
          (subscription_core__l_MoreNotifications == false)))) {
-         subscription_core_1__set_subscription_state(subscription_core__l_subscription,
+         subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_keepAlive);
-         *subscription_core__subscription = subscription_core__l_subscription;
-         *subscription_core__async_resp_msg = false;
-         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__l_subscription);
+         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
          msg_subscription_publish_bs__get_notification_message_no_items(subscription_core__p_resp_msg,
             &subscription_core__l_notifMsg);
-         subscription_core_1__get_subscription_SeqNum(subscription_core__l_subscription,
+         subscription_core_1__get_subscription_SeqNum(subscription_core__p_subscription,
             &subscription_core__l_seq_num);
          msg_subscription_publish_bs__set_notification_message_sequence_number(subscription_core__l_notifMsg,
             subscription_core__l_seq_num);
-         subscription_core_1__set_subscription_MessageSent(subscription_core__l_subscription);
+         subscription_core_1__set_subscription_MessageSent(subscription_core__p_subscription);
       }
       else {
          *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_invalid_state;
+      }
+   }
+}
+
+void subscription_core__enqueue_publish_request(
+   const constants__t_session_i subscription_core__p_session,
+   const constants__t_timeref_i subscription_core__p_req_exp_time,
+   const constants__t_server_request_handle_i subscription_core__p_req_handle,
+   const constants__t_request_context_i subscription_core__p_req_ctx,
+   const constants__t_msg_i subscription_core__p_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
+   t_bool * const subscription_core__async_resp_msg) {
+   {
+      constants__t_publishReqQueue_i subscription_core__l_PublishingReqQueue;
+      t_bool subscription_core__l_bres;
+      t_entier4 subscription_core__l_nb_pub_reqs;
+      constants__t_session_i subscription_core__l_old_session;
+      constants__t_server_request_handle_i subscription_core__l_old_req_handle;
+      constants__t_request_context_i subscription_core__l_old_req_ctx;
+      constants__t_msg_i subscription_core__l_old_resp_msg;
+      
+      *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
+      *subscription_core__async_resp_msg = true;
+      subscription_core_1__get_session_publishRequestQueue(subscription_core__p_session,
+         &subscription_core__l_PublishingReqQueue);
+      publish_request_queue_bs__get_nb_publish_requests(subscription_core__l_PublishingReqQueue,
+         &subscription_core__l_nb_pub_reqs);
+      if (subscription_core__l_nb_pub_reqs == constants__k_n_publishRequestPerSession_max) {
+         publish_request_queue_bs__discard_oldest_publish_request(subscription_core__l_PublishingReqQueue,
+            &subscription_core__l_old_session,
+            &subscription_core__l_old_resp_msg,
+            &subscription_core__l_old_req_handle,
+            &subscription_core__l_old_req_ctx);
+         msg_subscription_publish_bs__generate_internal_send_publish_response_event(subscription_core__l_old_session,
+            subscription_core__l_old_resp_msg,
+            subscription_core__l_old_req_handle,
+            subscription_core__l_old_req_ctx,
+            constants_statuscodes_bs__e_sc_bad_too_many_publish_requests);
+      }
+      publish_request_queue_bs__append_publish_request_to_queue(subscription_core__l_PublishingReqQueue,
+         subscription_core__p_session,
+         subscription_core__p_req_exp_time,
+         subscription_core__p_req_handle,
+         subscription_core__p_req_ctx,
+         subscription_core__p_resp_msg,
+         &subscription_core__l_bres);
+      if (subscription_core__l_bres == false) {
+         *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_publish_requests;
          *subscription_core__async_resp_msg = false;
       }
    }
@@ -1382,17 +1437,17 @@ void subscription_core__clear_monitored_item_notifications(
 }
 
 void subscription_core__server_subscription_core_check_valid_publish_req_queue(
-   const constants__t_subscription_i subscription_core__p_subscription,
+   const constants__t_session_i subscription_core__p_session,
    t_bool * const subscription_core__p_validPublishingReqQueued) {
-   subscription_core__pop_invalid_and_check_valid_publishReqQueued(subscription_core__p_subscription,
+   subscription_core__pop_invalid_and_check_valid_publishReqQueued(subscription_core__p_session,
       subscription_core__p_validPublishingReqQueued);
 }
 
 void subscription_core__server_subscription_core_publish_timeout_check_lifetime(
+   const constants__t_session_i subscription_core__p_session,
    const constants__t_subscription_i subscription_core__p_subscription,
    t_bool * const subscription_core__p_close_sub,
    t_bool * const subscription_core__p_msg_to_send,
-   constants__t_session_i * const subscription_core__p_session,
    constants__t_msg_i * const subscription_core__p_publish_resp_msg,
    constants__t_server_request_handle_i * const subscription_core__p_req_handle,
    constants__t_request_context_i * const subscription_core__p_req_context,
@@ -1402,11 +1457,10 @@ void subscription_core__server_subscription_core_publish_timeout_check_lifetime(
       
       *subscription_core__p_close_sub = false;
       *subscription_core__p_msg_to_send = false;
-      *subscription_core__p_session = constants__c_session_indet;
       *subscription_core__p_publish_resp_msg = constants__c_msg_indet;
       *subscription_core__p_req_handle = constants__c_server_request_handle_any;
       *subscription_core__p_req_context = constants__c_request_context_indet;
-      subscription_core__pop_invalid_and_check_valid_publishReqQueued(subscription_core__p_subscription,
+      subscription_core__pop_invalid_and_check_valid_publishReqQueued(subscription_core__p_session,
          subscription_core__p_validPubReqQueued);
       if (*subscription_core__p_validPubReqQueued == false) {
          subscription_core_1__get_subscription_LifetimeCounter(subscription_core__p_subscription,
@@ -1422,11 +1476,11 @@ void subscription_core__server_subscription_core_publish_timeout_check_lifetime(
 }
 
 void subscription_core__server_subscription_core_publish_timeout(
+   const constants__t_session_i subscription_core__p_session,
    const constants__t_subscription_i subscription_core__p_subscription,
    const t_bool subscription_core__p_validPublishReqQueued,
    t_bool * const subscription_core__p_msg_to_send,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_msg_sc,
-   constants__t_session_i * const subscription_core__p_session,
    constants__t_msg_i * const subscription_core__p_publish_resp_msg,
    constants__t_server_request_handle_i * const subscription_core__p_req_handle,
    constants__t_request_context_i * const subscription_core__p_req_context,
@@ -1452,7 +1506,6 @@ void subscription_core__server_subscription_core_publish_timeout(
       constants__t_sub_seq_num_i subscription_core__l_next_seq_num;
       
       *subscription_core__p_msg_to_send = false;
-      *subscription_core__p_session = constants__c_session_indet;
       *subscription_core__p_publish_resp_msg = constants__c_msg_indet;
       *subscription_core__p_req_handle = constants__c_server_request_handle_any;
       *subscription_core__p_req_context = constants__c_request_context_indet;
@@ -1460,7 +1513,7 @@ void subscription_core__server_subscription_core_publish_timeout(
       *subscription_core__p_msg_sc = constants_statuscodes_bs__c_StatusCode_indet;
       subscription_core_1__get_subscription_state(subscription_core__p_subscription,
          &subscription_core__l_State);
-      subscription_core_1__get_subscription_publishRequestQueue(subscription_core__p_subscription,
+      subscription_core_1__get_session_publishRequestQueue(subscription_core__p_session,
          &subscription_core__l_PublishingReqQueue);
       subscription_core_1__get_subscription_PublishingEnabled(subscription_core__p_subscription,
          &subscription_core__l_PublishingEnabled);
@@ -1483,7 +1536,6 @@ void subscription_core__server_subscription_core_publish_timeout(
          (subscription_core__l_NotificationAvailable == true)) {
          subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          publish_request_queue_bs__pop_valid_publish_request_queue(subscription_core__l_PublishingReqQueue,
-            subscription_core__p_session,
             &subscription_core__l_req_exp_time,
             subscription_core__p_req_handle,
             subscription_core__p_req_context,
@@ -1542,7 +1594,6 @@ void subscription_core__server_subscription_core_publish_timeout(
          (subscription_core__l_NotificationAvailable == false)))) {
          subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          publish_request_queue_bs__pop_valid_publish_request_queue(subscription_core__l_PublishingReqQueue,
-            subscription_core__p_session,
             &subscription_core__l_req_exp_time,
             subscription_core__p_req_handle,
             subscription_core__p_req_context,
@@ -1587,7 +1638,6 @@ void subscription_core__server_subscription_core_publish_timeout(
             constants__e_subscriptionState_normal);
          subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          publish_request_queue_bs__pop_valid_publish_request_queue(subscription_core__l_PublishingReqQueue,
-            subscription_core__p_session,
             &subscription_core__l_req_exp_time,
             subscription_core__p_req_handle,
             subscription_core__p_req_context,
@@ -1646,7 +1696,6 @@ void subscription_core__server_subscription_core_publish_timeout(
          (subscription_core__l_NotificationAvailable == false)))) {
          subscription_core_1__reset_subscription_KeepAliveCounter(subscription_core__p_subscription);
          publish_request_queue_bs__pop_valid_publish_request_queue(subscription_core__l_PublishingReqQueue,
-            subscription_core__p_session,
             &subscription_core__l_req_exp_time,
             subscription_core__p_req_handle,
             subscription_core__p_req_context,
@@ -1685,10 +1734,10 @@ void subscription_core__server_subscription_core_publish_timeout(
 }
 
 void subscription_core__server_subscription_core_publish_timeout_return_moreNotifs(
+   const constants__t_session_i subscription_core__p_session,
    const constants__t_subscription_i subscription_core__p_subscription,
    t_bool * const subscription_core__p_msg_to_send,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_msg_sc,
-   constants__t_session_i * const subscription_core__p_session,
    constants__t_msg_i * const subscription_core__p_publish_resp_msg,
    constants__t_server_request_handle_i * const subscription_core__p_req_handle,
    constants__t_request_context_i * const subscription_core__p_req_context,
@@ -1710,7 +1759,7 @@ void subscription_core__server_subscription_core_publish_timeout_return_moreNoti
       
       *subscription_core__p_moreNotifs = false;
       *subscription_core__p_msg_to_send = true;
-      subscription_core_1__get_subscription_publishRequestQueue(subscription_core__p_subscription,
+      subscription_core_1__get_session_publishRequestQueue(subscription_core__p_session,
          &subscription_core__l_PublishingReqQueue);
       subscription_core__local_subscription_nb_available_notifications(subscription_core__p_subscription,
          &subscription_core__l_nb_avail_data_notifs,
@@ -1720,7 +1769,6 @@ void subscription_core__server_subscription_core_publish_timeout_return_moreNoti
       subscription_core_1__get_subscription_notifRepublishQueue(subscription_core__p_subscription,
          &subscription_core__l_notifRepublishQueue);
       publish_request_queue_bs__pop_valid_publish_request_queue(subscription_core__l_PublishingReqQueue,
-         subscription_core__p_session,
          &subscription_core__l_req_exp_time,
          subscription_core__p_req_handle,
          subscription_core__p_req_context,
@@ -1885,6 +1933,92 @@ void subscription_core__subscription_core_UNINITIALISATION(void) {
       }
       subscription_core_bs__subscription_core_bs_UNINITIALISATION();
       monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION();
+   }
+}
+
+void subscription_core__allocate_new_session_publish_queue(
+   const constants__t_session_i subscription_core__p_session,
+   t_bool * const subscription_core__bres) {
+   {
+      constants__t_publishReqQueue_i subscription_core__l_publishReqQueue;
+      
+      publish_request_queue_bs__allocate_new_publish_queue(subscription_core__bres,
+         &subscription_core__l_publishReqQueue);
+      if (*subscription_core__bres == true) {
+         subscription_core_1__set_session_publishRequestQueue(subscription_core__p_session,
+            subscription_core__l_publishReqQueue);
+      }
+   }
+}
+
+void subscription_core__deallocate_publish_queue_and_gen_no_sub_responses(
+   const constants__t_session_i subscription_core__p_session,
+   const t_bool subscription_core__p_send_no_sub_resp) {
+   {
+      constants__t_publishReqQueue_i subscription_core__l_publish_queue;
+      constants__t_timeref_i subscription_core__l_req_exp_time;
+      constants__t_server_request_handle_i subscription_core__l_req_handle;
+      constants__t_request_context_i subscription_core__l_req_ctx;
+      constants__t_msg_i subscription_core__l_resp_msg;
+      t_bool subscription_core__l_continue_pub;
+      
+      subscription_core_1__get_session_publishRequestQueue(subscription_core__p_session,
+         &subscription_core__l_publish_queue);
+      if (subscription_core__p_send_no_sub_resp == true) {
+         publish_request_queue_bs__init_iter_publish_request(subscription_core__l_publish_queue,
+            &subscription_core__l_continue_pub);
+         while (subscription_core__l_continue_pub == true) {
+            publish_request_queue_bs__continue_pop_head_iter_publish_request(subscription_core__l_publish_queue,
+               &subscription_core__l_continue_pub,
+               &subscription_core__l_req_exp_time,
+               &subscription_core__l_req_handle,
+               &subscription_core__l_req_ctx,
+               &subscription_core__l_resp_msg);
+            msg_subscription_publish_bs__generate_internal_send_publish_response_event(subscription_core__p_session,
+               subscription_core__l_resp_msg,
+               subscription_core__l_req_handle,
+               subscription_core__l_req_ctx,
+               constants_statuscodes_bs__e_sc_bad_no_subscription);
+         }
+      }
+      publish_request_queue_bs__clear_and_deallocate_publish_queue(subscription_core__l_publish_queue);
+      subscription_core_1__reset_session_publishRequestQueue(subscription_core__p_session);
+   }
+}
+
+void subscription_core__init_iter_subscription_session(
+   const constants__t_session_i subscription_core__p_session,
+   t_bool * const subscription_core__p_continue) {
+   {
+      t_entier4 subscription_core__l_prio_idx;
+      
+      subscription_core__local_init_iter_session_seq_priority(subscription_core__p_session,
+         subscription_core__p_continue);
+      if (*subscription_core__p_continue == true) {
+         subscription_core__local_continue_iter_session_seq_priority(&subscription_core__continue_iter_prio,
+            &subscription_core__l_prio_idx);
+         subscription_core__local_init_iter_subscription_priority(subscription_core__l_prio_idx);
+      }
+   }
+}
+
+void subscription_core__continue_iter_subscription_session(
+   t_bool * const subscription_core__p_continue,
+   constants__t_subscription_i * const subscription_core__p_subscription) {
+   {
+      t_entier4 subscription_core__l_prio_idx;
+      
+      subscription_core__l_prio_idx = 0;
+      subscription_core__local_continue_iter_subscription_priority(subscription_core__p_continue,
+         subscription_core__p_subscription);
+      if (*subscription_core__p_continue == false) {
+         *subscription_core__p_continue = subscription_core__continue_iter_prio;
+         if (*subscription_core__p_continue == true) {
+            subscription_core__local_continue_iter_session_seq_priority(&subscription_core__continue_iter_prio,
+               &subscription_core__l_prio_idx);
+            subscription_core__local_init_iter_subscription_priority(subscription_core__l_prio_idx);
+         }
+      }
    }
 }
 

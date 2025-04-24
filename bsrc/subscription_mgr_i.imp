@@ -606,7 +606,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
+    fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_session, p_nb_reqs) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -616,8 +616,8 @@ LOCAL_OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_subscription_delete_subscriptions_resp &
-        p_has_sub : BOOL &
-        p_session_sub : t_subscription_i &
+        p_session : t_session_i &
+        p_session : t_session &
         p_nb_reqs : NAT &
         p_nb_reqs > 0 &
         p_nb_reqs <= k_n_genericOperationPerReq_max &
@@ -629,11 +629,7 @@ LOCAL_OPERATIONS
               %p_index.(p_index : 1..p_nb_reqs |
                         {FALSE |-> e_sc_bad_subscription_id_invalid,
                          TRUE  |-> e_sc_ok
-                        }(bool(p_has_sub = TRUE &
-                               delete_subscriptions_req_sub_id(p_index) = p_session_sub &
-                               delete_subscriptions_req_sub_id(p_index) : s_subscription
-                              )
-                         )
+                        }(bool(delete_subscriptions_req_sub_id(p_index) |-> p_session : a_subscription_session))
                        )
         IN
             delete_subscriptions_resp_StatusCode := l_delete_subscriptions_resp_StatusCode ||
@@ -661,14 +657,6 @@ LOCAL_OPERATIONS
                 a_MessageSent := a_MessageSent - l_deleted_subs               ||
                 a_PublishingEnabled := a_PublishingEnabled - l_deleted_subs   ||
                 a_SeqNum := l_deleted_subs <<| a_SeqNum ||
-
-                /* Queues emptied : publish responses should be sent if remaining */
-                a_publish_responses := a_publish_responses |>> a_publishRequestQueue[l_deleted_subs] ||
-
-                /* Queues deleted */
-                s_publishReqQueue := s_publishReqQueue - a_publishRequestQueue[l_deleted_subs] ||
-                a_publishRequestQueue := l_deleted_subs <<| a_publishRequestQueue ||
-
 
                 /* Remove monitoredItems */
                 LET s_removedMonitoredItemPointer BE
@@ -700,7 +688,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_pub_enabled, p_nb_reqs) =
+    fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_session, p_pub_enabled, p_nb_reqs) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &
@@ -710,8 +698,8 @@ LOCAL_OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_subscription_set_publishing_mode_resp &
-        p_has_sub : BOOL &
-        p_session_sub : t_subscription_i &
+        p_session : t_session_i &
+        p_session : t_session &
         p_pub_enabled : BOOL &
         p_nb_reqs : NAT &
         p_nb_reqs > 0 &
@@ -724,7 +712,7 @@ LOCAL_OPERATIONS
               %p_index.(p_index : 1..p_nb_reqs |
                         {FALSE |-> e_sc_bad_subscription_id_invalid,
                          TRUE  |-> e_sc_ok
-                        }(bool(p_has_sub = TRUE & set_publishing_mode_req_sub_id(p_index) = p_session_sub))
+                        }(bool(set_publishing_mode_req_sub_id(p_index) |-> p_session : a_subscription_session))
                        )
         IN
             set_publishing_mode_resp_StatusCode := l_set_publishing_mode_resp_StatusCode ||
@@ -773,20 +761,19 @@ OPERATIONS
 
     fill_publish_response_msg_ack_results (p_session, p_req_msg, p_resp_msg, p_nb_acks) =
     VAR
-        l_has_sub,
-        l_session_sub,
+        l_is_valid,
         l_index,
         l_sub,
         l_seq_num,
         l_valid_seq_num
     IN
-        l_has_sub, l_session_sub <-- getall_subscription (p_session);
         l_index := 1;
         WHILE l_index <= p_nb_acks DO
             l_sub, l_seq_num <-- getall_msg_publish_request_ack (p_req_msg, l_index);
-            IF l_has_sub = TRUE & l_sub = l_session_sub
+            l_is_valid <-- is_valid_subscription_on_session (p_session, l_sub);
+            IF l_is_valid = TRUE
             THEN
-                l_valid_seq_num <-- subscription_ack_notif_msg (l_session_sub, l_seq_num);
+                l_valid_seq_num <-- subscription_ack_notif_msg (l_sub, l_seq_num);
                 IF l_valid_seq_num = TRUE
                 THEN
                     setall_msg_publish_resp_ack_result (p_resp_msg, l_index, e_sc_ok)
@@ -1400,22 +1387,19 @@ OPERATIONS
     END
     ;
 
-    fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_nb_reqs) =
+    fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_session, p_nb_reqs) =
     VAR
         l_index,
         l_sub,
-        l_sub_still_valid
+        l_is_valid
     IN
         l_index := 1;
         WHILE l_index <= p_nb_reqs DO
             l_sub <-- getall_msg_delete_subscriptions_at_index (p_req_msg, l_index);
-            IF p_has_sub = TRUE & l_sub = p_session_sub
+            l_is_valid <-- is_valid_subscription_on_session (p_session, l_sub);
+            IF l_is_valid = TRUE
             THEN
-                l_sub_still_valid <-- is_valid_subscription (l_sub); /* Avoid to close 2 times same subscription */
-                IF l_sub_still_valid = TRUE
-                THEN
-                    close_subscription (l_sub)
-                END;
+                close_subscription (l_sub);
                 setall_msg_subscription_delete_subscriptions_resp_at_index (p_resp_msg, l_index, TRUE)
             ELSE
                 setall_msg_subscription_delete_subscriptions_resp_at_index (p_resp_msg, l_index, FALSE)
@@ -1430,15 +1414,17 @@ OPERATIONS
     END
     ;
 
-    fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_has_sub, p_session_sub, p_pub_enabled, p_nb_reqs) =
+    fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_session, p_pub_enabled, p_nb_reqs) =
     VAR
         l_index,
-        l_sub
+        l_sub,
+        l_is_valid
     IN
         l_index := 1;
         WHILE l_index <= p_nb_reqs DO
             l_sub <-- getall_msg_set_publishing_mode_at_index (p_req_msg, l_index);
-            IF p_has_sub = TRUE & l_sub = p_session_sub
+            l_is_valid <-- is_valid_subscription_on_session (p_session, l_sub);
+            IF l_is_valid = TRUE
             THEN
                 set_subscription_PublishingEnabled (l_sub, p_pub_enabled);
                 setall_msg_subscription_set_publishing_mode_resp_at_index (p_resp_msg, l_index, TRUE)
@@ -1459,24 +1445,27 @@ OPERATIONS
 
     StatusCode_service <-- treat_create_subscription_request (p_session, p_req_msg, p_resp_msg) =
     VAR
-        l_session_has_subscription,
-        l_sub,
+        l_bres_pub_alloc,
         l_reqPublishInterval,
         l_reqLifetimeCount,
         l_reqMaxKeepAlive,
         l_maxNotificationsPerPublish,
         l_publishEnabled,
+        l_priority,
         l_subscription,
         l_revisedPublishInterval,
         l_revisedLifetimeCount,
         l_revisedMaxKeepAlive,
-        l_revisedMaxNotificationsPerPublish
+        l_revisedMaxNotificationsPerPublish,
+        l_old_nb_sub,
+        l_new_nb_sub
     IN
-        l_session_has_subscription, l_sub <-- getall_subscription (p_session);
-        IF l_session_has_subscription = FALSE
+        l_subscription := c_subscription_indet;
+        l_old_nb_sub <-- get_card_session_seq_subscription (p_session);
+        IF l_old_nb_sub < k_n_subscriptionPerSession_max
         THEN
             /* Extract create subscription parameters */
-            l_reqPublishInterval, l_reqLifetimeCount, l_reqMaxKeepAlive, l_maxNotificationsPerPublish, l_publishEnabled
+            l_reqPublishInterval, l_reqLifetimeCount, l_reqMaxKeepAlive, l_maxNotificationsPerPublish, l_publishEnabled, l_priority
               <-- get_msg_create_subscription_req_params (p_req_msg);
 
             /* Compute revised parameters */
@@ -1485,14 +1474,15 @@ OPERATIONS
                                                               l_reqLifetimeCount,
                                                               l_reqMaxKeepAlive,
                                                               l_maxNotificationsPerPublish);
-
             /* Create subscription */
             StatusCode_service, l_subscription <-- create_subscription (p_session,
                 l_revisedPublishInterval,
                 l_revisedLifetimeCount,
                 l_revisedMaxKeepAlive,
                 l_revisedMaxNotificationsPerPublish,
-                l_publishEnabled);
+                l_publishEnabled,
+                l_priority);
+
             IF StatusCode_service = e_sc_ok
             THEN
                 /* Fill values to response message */
@@ -1501,17 +1491,29 @@ OPERATIONS
                     l_revisedPublishInterval,
                     l_revisedLifetimeCount,
                     l_revisedMaxKeepAlive)
+
             END
         ELSE
             StatusCode_service := e_sc_bad_too_many_subscriptions
+        END
+        ;
+        /* May create publish request queue */
+        l_new_nb_sub <-- get_card_session_seq_subscription (p_session);
+        IF l_old_nb_sub = 0 & l_new_nb_sub /= 0
+        THEN
+            l_bres_pub_alloc <-- allocate_new_session_publish_queue (p_session);
+            IF l_bres_pub_alloc = FALSE
+            THEN
+                /* Degraded case: subscription will be deleted on timeout */
+                StatusCode_service := e_sc_bad_out_of_memory
+            END
         END
     END
     ;
 
     StatusCode_service <-- treat_modify_subscription_request (p_session, p_req_msg, p_resp_msg) =
     VAR
-        l_session_has_subscription,
-        l_session_sub,
+        l_is_valid,
         l_sub,
         l_reqPublishInterval,
         l_reqLifetimeCount,
@@ -1520,13 +1522,14 @@ OPERATIONS
         l_revisedPublishInterval,
         l_revisedLifetimeCount,
         l_revisedMaxKeepAlive,
-        l_revisedMaxNotificationsPerPublish
+        l_revisedMaxNotificationsPerPublish,
+        l_priority
     IN
-        l_session_has_subscription, l_session_sub <-- getall_subscription (p_session);
         /* Extract create subscription parameters */
-        l_sub, l_reqPublishInterval, l_reqLifetimeCount, l_reqMaxKeepAlive, l_maxNotifPerPublish
+        l_sub, l_reqPublishInterval, l_reqLifetimeCount, l_reqMaxKeepAlive, l_maxNotifPerPublish, l_priority
           <-- get_msg_modify_subscription_req_params (p_req_msg);
-        IF l_session_has_subscription = TRUE & l_sub = l_session_sub
+        l_is_valid <-- is_valid_subscription_on_session (p_session, l_sub);
+        IF l_is_valid = TRUE
         THEN
 
             /* Compute revised parameters */
@@ -1537,12 +1540,13 @@ OPERATIONS
                                                               l_maxNotifPerPublish);
 
             /* Modify subscription */
-            /* Guaranteed by getall_subscription: a_subscription_session (p_subscription) = p_session */
-            modify_subscription (l_session_sub,
+            /* Guaranteed by is_valid_subscription_on_session: a_subscription_session(l_sub) = p_session */
+            modify_subscription (l_sub,
                                  l_revisedPublishInterval,
                                  l_revisedLifetimeCount,
                                  l_revisedMaxKeepAlive,
-                                 l_revisedMaxNotificationsPerPublish);
+                                 l_revisedMaxNotificationsPerPublish,
+                                 l_priority);
 
             /* Fill values to response message */
             set_msg_modify_subscription_resp_params (p_resp_msg,
@@ -1559,20 +1563,19 @@ OPERATIONS
 
     StatusCode_service <-- treat_delete_subscriptions_request (p_session, p_req_msg, p_resp_msg) =
     VAR
-        l_session_has_subscription,
-        l_session_sub,
         l_nb_reqs,
-        l_bres
+        l_bres,
+        l_old_nb_sub,
+        l_new_nb_sub
     IN
+        l_old_nb_sub <-- get_card_session_seq_subscription (p_session);
         l_nb_reqs <-- getall_msg_delete_subscriptions_req_params (p_req_msg);
         IF l_nb_reqs > 0 & l_nb_reqs <= k_n_genericOperationPerReq_max
         THEN
-            l_session_has_subscription, l_session_sub <-- getall_subscription (p_session);
             l_bres <-- allocate_msg_delete_subscriptions_resp_results_array (p_resp_msg, l_nb_reqs);
             IF l_bres = TRUE
             THEN
-                fill_delete_subscriptions_response
-                  (p_req_msg, p_resp_msg, l_session_has_subscription, l_session_sub, l_nb_reqs);
+                fill_delete_subscriptions_response (p_req_msg, p_resp_msg, p_session, l_nb_reqs);
                 StatusCode_service := e_sc_ok
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory
@@ -1583,13 +1586,18 @@ OPERATIONS
         ELSE
             StatusCode_service := e_sc_bad_too_many_ops
         END
+        ;
+        /* May delete publish request queue and send BadNoSubscription responses */
+        l_new_nb_sub <-- get_card_session_seq_subscription (p_session);
+        IF l_old_nb_sub /= 0 & l_new_nb_sub = 0
+        THEN
+            deallocate_publish_queue_and_gen_no_sub_responses (p_session, TRUE)
+        END
     END
     ;
 
     StatusCode_service <-- treat_publishing_mode_request (p_session, p_req_msg, p_resp_msg) =
     VAR
-        l_session_has_subscription,
-        l_session_sub,
         l_nb_reqs,
         l_pub_enabled,
         l_bres
@@ -1597,12 +1605,10 @@ OPERATIONS
         l_nb_reqs, l_pub_enabled <-- getall_msg_subscription_set_publishing_mode_params (p_req_msg);
         IF l_nb_reqs > 0 & l_nb_reqs <= k_n_genericOperationPerReq_max
         THEN
-            l_session_has_subscription, l_session_sub <-- getall_subscription (p_session);
             l_bres <-- allocate_msg_subscription_set_publishing_mode_resp_results_array (p_resp_msg, l_nb_reqs);
             IF l_bres = TRUE
             THEN
-                fill_set_publishing_mode_response
-                  (p_req_msg, p_resp_msg, l_session_has_subscription, l_session_sub, l_pub_enabled, l_nb_reqs);
+                fill_set_publishing_mode_response (p_req_msg, p_resp_msg, p_session, l_pub_enabled, l_nb_reqs);
                 StatusCode_service := e_sc_ok
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory
@@ -1619,20 +1625,20 @@ OPERATIONS
     StatusCode_service, async_resp_msg
       <-- treat_subscription_publish_request (p_session, p_req_header, p_req_msg, p_req_handle, p_req_ctx, p_resp_msg) =
     VAR
-        l_session_has_subscription,
-        l_sub,
+        l_continue,
         l_req_exp_time,
         l_nb_subscriptionAcks,
-        /* l_nb_avail_seq_nums, */
         l_subscription,
         l_moreNotifs,
-        l_bres
+        l_bres,
+        l_async_resp_msg
     IN
         l_subscription := c_subscription_indet;
         l_moreNotifs := FALSE;
         async_resp_msg := FALSE;
-        l_session_has_subscription, l_sub <-- getall_subscription (p_session);
-        IF l_session_has_subscription = TRUE
+        l_async_resp_msg := TRUE;
+        l_continue <-- init_iter_subscription_session (p_session);
+        IF l_continue = TRUE
         THEN
             /* Extract values from header: expiration time for Publish Request */
             l_req_exp_time <-- get_msg_header_expiration_time (p_req_header);
@@ -1656,18 +1662,33 @@ OPERATIONS
                 StatusCode_service := e_sc_ok
             END
             ;
-
-            IF StatusCode_service = e_sc_ok
-            THEN
-
-                StatusCode_service, async_resp_msg, l_subscription, l_moreNotifs
-                  <-- receive_publish_request (p_session, l_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg)
+            // Initialize resp message as unused by any subscription
+            async_resp_msg := TRUE;
+            WHILE StatusCode_service = e_sc_ok &
+                l_continue = TRUE &
+                async_resp_msg = TRUE
+            DO
+                l_continue, l_subscription <-- continue_iter_subscription_session;
+                StatusCode_service, l_async_resp_msg, l_moreNotifs
+                <-- receive_publish_request (l_subscription, p_resp_msg);
+                async_resp_msg := bool(async_resp_msg = TRUE & l_async_resp_msg = TRUE)
+            INVARIANT
+                0=0
+            VARIANT
+                0
             END
             ;
             IF StatusCode_service = e_sc_ok &
                 async_resp_msg = FALSE
             THEN
+                // Publish request has been used by a subscription, fill publish response
                 fill_publish_response_msg (p_resp_msg, l_subscription, l_moreNotifs)
+            ELSIF StatusCode_service = e_sc_ok &
+                async_resp_msg = TRUE
+            THEN
+                // Publish request was not used by any subscription, keep it in session publish queue
+                StatusCode_service, async_resp_msg
+                <-- enqueue_publish_request(p_session, l_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg)
             END
         ELSE
             StatusCode_service := e_sc_bad_no_subscription
@@ -1677,8 +1698,7 @@ OPERATIONS
 
     StatusCode_service <-- treat_subscription_republish_request (p_session, p_req_msg, p_resp_msg) =
     VAR
-        l_session_has_subscription,
-        l_session_sub,
+        l_is_valid,
         l_sub,
         l_seq_num,
         l_republishQueue,
@@ -1686,12 +1706,12 @@ OPERATIONS
         l_notifMsg
     IN
         l_sub, l_seq_num <-- getall_msg_republish_request (p_req_msg);
-        l_session_has_subscription, l_session_sub <-- getall_subscription (p_session);
-        IF l_session_has_subscription = TRUE & l_session_sub = l_sub
+        l_is_valid <-- is_valid_subscription_on_session (p_session, l_sub);
+        IF l_is_valid = TRUE
         THEN
-            l_republishQueue <-- get_subscription_notifRepublishQueue (l_session_sub);
+            l_republishQueue <-- get_subscription_notifRepublishQueue (l_sub);
             l_bres, l_notifMsg <-- get_republish_notif_from_queue (l_republishQueue, l_seq_num);
-            reset_subscription_LifetimeCounter (l_session_sub);
+            reset_subscription_LifetimeCounter (l_sub);
             IF l_bres = TRUE
             THEN
                 StatusCode_service <-- setall_msg_republish_response (p_resp_msg, l_notifMsg)
@@ -1948,17 +1968,19 @@ OPERATIONS
         l_req_handle,
         l_req_context,
         l_moreNotifs,
-        l_validPublishingReqQueued
+        l_validPublishingReqQueued,
+        l_new_nb_sub
     IN
-        l_closeSubscription, l_msg_to_send, l_session, l_publish_resp_msg,
+        l_session <-- getall_session (p_subscription);
+        l_closeSubscription, l_msg_to_send, l_publish_resp_msg,
         l_req_handle, l_req_context, l_validPublishingReqQueued
-          <-- server_subscription_core_publish_timeout_check_lifetime (p_subscription);
+          <-- server_subscription_core_publish_timeout_check_lifetime (l_session, p_subscription);
 
         IF l_closeSubscription = FALSE
         THEN
-            l_msg_to_send, l_msg_sc, l_session, l_publish_resp_msg,
+            l_msg_to_send, l_msg_sc, l_publish_resp_msg,
             l_req_handle, l_req_context, l_moreNotifs
-              <-- server_subscription_core_publish_timeout (p_subscription, l_validPublishingReqQueued);
+              <-- server_subscription_core_publish_timeout (l_session, p_subscription, l_validPublishingReqQueued);
 
             IF l_msg_to_send = TRUE
             THEN
@@ -1971,10 +1993,10 @@ OPERATIONS
                 IF l_moreNotifs = TRUE
                 THEN
                     /* TODO: move in a LOCAL operation and specify variables changes */
-                    l_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (p_subscription);
+                    l_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (l_session);
                     WHILE l_moreNotifs = TRUE & l_validPublishingReqQueued = TRUE DO
-                        l_msg_to_send, l_msg_sc, l_session, l_publish_resp_msg,
-                        l_req_handle, l_req_context, l_moreNotifs <-- server_subscription_core_publish_timeout_return_moreNotifs (p_subscription);
+                        l_msg_to_send, l_msg_sc, l_publish_resp_msg,
+                        l_req_handle, l_req_context, l_moreNotifs <-- server_subscription_core_publish_timeout_return_moreNotifs (l_session, p_subscription);
                         fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_moreNotifs);
                         generate_internal_send_publish_response_event (l_session,
                             l_publish_resp_msg,
@@ -1983,7 +2005,7 @@ OPERATIONS
                             l_msg_sc);
                         IF l_moreNotifs = TRUE
                         THEN
-                            l_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (p_subscription)
+                            l_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (l_session)
                         END
                     INVARIANT
                         l_validPublishingReqQueued = validPublishReqQueued &
@@ -1996,7 +2018,7 @@ OPERATIONS
                                 a_monitored_item_notification_queue[
                                     a_defined_monitored_items[a_monitoredItemQueue[{p_subscription}]]]]) +
                         /* necessary in case allocation failed: notification queue will not decrease */
-                        card(a_publish_responses~[{a_publishRequestQueue (p_subscription)}])
+                        card(a_publish_responses~[{a_publishRequestQueue (l_session)}])
                     END
                 END
             END
@@ -2012,25 +2034,41 @@ OPERATIONS
                                                                l_req_context,
                                                                e_sc_ok)
             END
+            ;
+            /* May delete publish request queue and send BadNoSubscription responses */
+            l_new_nb_sub <-- get_card_session_seq_subscription (l_session);
+            IF l_new_nb_sub = 0
+            THEN
+                deallocate_publish_queue_and_gen_no_sub_responses (l_session, TRUE)
+            END
         END
     END
     ;
 
     server_subscription_session_inactive (p_session, p_newSessionState) =
     VAR
-        l_has_sub,
+        l_nb_sub,
+        l_continue,
         l_sub
     IN
-        l_has_sub, l_sub <-- getall_subscription (p_session);
-        IF l_has_sub = TRUE
+        IF p_newSessionState = e_session_scOrphaned or
+            p_newSessionState = e_session_scActivating or
+            p_newSessionState = e_session_closed
         THEN
-            IF p_newSessionState = e_session_scOrphaned or
-               p_newSessionState = e_session_scActivating or
-               p_newSessionState = e_session_closed
+
+            /* Delete publish request queue except if no subscription exists anymore */
+            l_nb_sub <-- get_card_session_seq_subscription (p_session);
+            IF l_nb_sub /= 0
             THEN
                 /* SC is not valid anymore for the session
-                   => publish requests are not valid anymore on another SC */
-                empty_session_publish_requests (l_sub);
+                => clear PublishRequests: requests are not valid anymore on another SC */
+                deallocate_publish_queue_and_gen_no_sub_responses (p_session, FALSE)
+            END
+            ;
+            l_continue <-- init_iter_subscription_session (p_session);
+            WHILE l_continue = TRUE
+            DO
+                l_continue, l_sub <-- continue_iter_subscription_session;
                 IF p_newSessionState = e_session_closed
                 THEN
                     /* A session transfer is only possible with same user,
@@ -2040,6 +2078,10 @@ OPERATIONS
                      */
                     close_subscription (l_sub)
                 END
+            INVARIANT
+                0=0
+            VARIANT
+                0
             END
         END
     END

@@ -155,7 +155,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__t_channel_i_max SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED
 #define constants_bs__t_endpoint_config_idx_i_max SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
 #define constants_bs__t_session_i_max SOPC_MAX_SESSIONS
-#define constants_bs__t_subscription_i_max SOPC_MAX_SESSIONS // 1 sub / session
+#define constants_bs__t_subscription_i_max SOPC_MAX_SUBSCRIPTIONS
 
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
@@ -277,6 +277,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_
 #define constants_bs__k_n_BrowseResponse_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_BrowseTarget_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_NamespaceIndex_max UINT16_MAX
+#define constants_bs__k_n_subscriptionPerSession_max SOPC_MAX_SESSION_SUBSCRIPTIONS
 #define constants_bs__k_n_UserAuthAttempts_max SOPC_MAX_SESSION_AUTH_ATTEMPTS
 #define constants_bs__k_n_WriteResponse_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_genericOperationPerReq_max SOPC_MAX_OPERATIONS_PER_MSG
@@ -288,10 +289,10 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_
 #define constants_bs__k_n_notifEventQueueSize_default SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE
 #define constants_bs__k_n_notifEventQueueSize_min SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE
 #define constants_bs__k_n_notifQueueSize_max SOPC_MAX_NOTIFICATION_QUEUE_SIZE
-#define constants_bs__k_n_publishRequestPerSub_max SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS
+#define constants_bs__k_n_publishRequestPerSession_max SOPC_MAX_SESSION_PUBLISH_REQUESTS
 #define constants_bs__k_n_read_resp_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_registerNodes_max SOPC_MAX_OPERATIONS_PER_MSG
-#define constants_bs__k_n_republishNotifPerSub_max (2 * SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS)
+#define constants_bs__k_n_republishNotifPerSub_max SOPC_MAX_SUBSCRIPTION_REPUBLISH_MESSAGES
 #define constants_bs__k_n_unregisterNodes_max SOPC_MAX_OPERATIONS_PER_MSG
 
 /*------------------------
@@ -337,6 +338,9 @@ extern void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_Expanded
                                                   constants_bs__t_ExpandedNodeId_i* const constants_bs__p_out);
 extern void constants_bs__get_reverse_cast_t_NamespaceIdx(const constants_bs__t_NamespaceIdx constants_bs__p_nsIndex,
                                                           t_entier4* const constants_bs__p_nsIndexNat);
+extern void constants_bs__get_reverse_cast_t_subscription(
+    const constants_bs__t_subscription_i constants_bs__p_subscription,
+    t_entier4* const constants_bs__p_ind);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
     t_bool* const constants_bs__p_local_server,

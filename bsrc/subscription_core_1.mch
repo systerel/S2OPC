@@ -23,7 +23,8 @@ MACHINE
 SEES
     constants,
     message_out_bs,
-    request_handle_bs
+    request_handle_bs,
+    constants_statuscodes_bs
 
 DEFINITIONS
     d_variables ==
@@ -33,6 +34,14 @@ DEFINITIONS
     a_lifetimeExpCount,
     a_keepAliveExpCount,
     a_maxNotifsPerPublish,
+
+    a_subscription_priority,
+    a_session_seq_priority,
+    a_session_seq_subscription,
+    a_session_priority_nb_subs,
+    a_session_priority_min_sub_idx,
+    a_session_priority_next_sub_idx,
+
     a_subscription_state,
     a_MoreNotifications,
     a_LifetimeCounter,
@@ -55,6 +64,17 @@ DEFINITIONS
     a_lifetimeExpCount : s_subscription --> t_counter &       // a subscription shall have a lifetime expiration count value
     a_keepAliveExpCount : s_subscription --> t_counter &      // a subscription shall have a keepAlive expiration count value
     a_maxNotifsPerPublish : s_subscription --> t_counter &    // a subscription shall have a maximum notifications per publish response
+
+    a_subscription_priority : s_subscription --> t_priority &
+    a_session_seq_priority : t_session --> iseq(t_priority) &
+    a_session_seq_subscription : t_session --> iseq(s_subscription) &
+    a_session_priority_nb_subs : t_session --> (t_prio_idx +-> t_sub_idx) &
+    a_session_priority_min_sub_idx : t_session --> (t_prio_idx +-> t_sub_idx) &
+    a_session_priority_next_sub_idx : t_session --> (t_prio_idx +-> t_sub_idx) &
+
+    /* Subscription State Machine : state shall be defined (part 4 table 82) */
+    a_subscription_state : s_subscription --> t_subscriptionState &
+
 
     /* Subscription State Machine : state shall be defined (part 4 table 82) */
     a_subscription_state : s_subscription --> t_subscriptionState &
@@ -80,7 +100,7 @@ DEFINITIONS
     /* (Session) Implementation variables */
 
     /* Note: kept on subscription for now since 1 subs / session + no transfer. Otherwise could be cleared on session close ! */
-    a_publishRequestQueue :  s_subscription --> t_publishReqQueue &
+    a_publishRequestQueue :  t_session_i --> t_publishReqQueue &
     a_notifRepublishQueue : s_subscription --> t_notifRepublishQueue
 
 ABSTRACT_VARIABLES
@@ -96,6 +116,13 @@ INITIALISATION
     a_lifetimeExpCount := {}         ||
     a_keepAliveExpCount := {}        ||
     a_maxNotifsPerPublish := {}      ||
+
+    a_subscription_priority := {} ||
+    a_session_seq_priority := t_session * {{}} ||
+    a_session_seq_subscription := t_session * {{}} ||
+    a_session_priority_nb_subs := t_session * {{}} ||
+    a_session_priority_min_sub_idx := t_session * {{}} ||
+    a_session_priority_next_sub_idx := t_session * {{}} ||
 
     a_subscription_state := {}       ||
 
@@ -113,27 +140,21 @@ INITIALISATION
 
 OPERATIONS
 
+    is_valid <-- is_valid_subscription_on_session (p_session, p_subscription) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_subscription : t_subscription_i
+    THEN
+        is_valid := bool(p_subscription : s_subscription & a_subscription_session(p_subscription) = p_session)
+    END
+    ;
+
     is_valid <-- is_valid_subscription (p_subscription) =
     PRE
         p_subscription : t_subscription_i
     THEN
         is_valid := bool(p_subscription : s_subscription)
-    END
-    ;
-
-    p_dom, p_subscription <-- getall_subscription (p_session) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session &
-        p_session : ran(a_subscription_session)
-    THEN
-        p_dom := bool(p_session : ran(a_subscription_session)) ||
-        IF p_session /: ran(a_subscription_session)
-        THEN
-            p_subscription := c_subscription_indet
-        ELSE
-            p_subscription := a_subscription_session~(p_session)
-        END
     END
     ;
 
@@ -146,24 +167,119 @@ OPERATIONS
     END
     ;
 
-    add_subscription (p_subscription,
-                      p_session,
-                      p_revPublishInterval,
-                      p_revLifetimeCount,
-                      p_revMaxKeepAlive,
-                      p_maxNotificationsPerPublish,
-                      p_publishEnabled,
-                      p_publishQueue,
-                      p_republishQueue,
-                      p_monitoredItemQueue,
-                      p_timerId) =
+    p_priority_idx <-- get_card_session_seq_priority (p_session) =
+    PRE
+        p_session : t_session_i  &
+        p_session : t_session
+    THEN
+        p_priority_idx
+        :(p_priority_idx : t_priority &
+          p_priority_idx = card(a_session_seq_priority(p_session))
+         )
+    END
+    ;
+
+    p_sub_idx <-- get_card_session_seq_subscription (p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        p_sub_idx
+        :(p_sub_idx : t_sub_idx_i &
+          p_sub_idx = card(a_session_seq_subscription(p_session))
+         )
+    END
+    ;
+
+    p_subscription <-- get_session_seq_subscription (p_session, p_idx_sub) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session   &
+        p_idx_sub : t_sub_idx_i &
+        p_idx_sub : t_sub_idx   &
+        p_idx_sub : dom(a_session_seq_subscription(p_session))
+    THEN
+        p_subscription
+        :(p_subscription : t_subscription_i &
+          p_subscription = a_session_seq_subscription(p_session)(p_idx_sub))
+    END
+    ;
+
+    p_nb_subs <-- get_session_priority_nb_subs (p_session, p_prio_idx) =
+    PRE
+        p_session  : t_session_i &
+        p_session  : t_session   &
+        p_prio_idx : t_prio_idx_i &
+        p_prio_idx : t_prio_idx
+    THEN
+        p_nb_subs :(p_nb_subs : t_sub_idx_i &
+                    p_nb_subs = a_session_priority_nb_subs(p_session)(p_prio_idx))
+    END
+    ;
+
+    p_min_idx_sub <-- get_session_priority_min_sub_idx (p_session, p_prio_idx) =
+    PRE
+        p_session  : t_session_i &
+        p_session  : t_session   &
+        p_prio_idx : t_prio_idx_i &
+        p_prio_idx : t_prio_idx
+    THEN
+        p_min_idx_sub :(p_min_idx_sub : t_sub_idx_i &
+                        p_min_idx_sub = a_session_priority_min_sub_idx(p_session)(p_prio_idx))
+    END
+    ;
+
+    p_next_idx_sub <-- get_session_priority_next_sub_idx (p_session, p_prio_idx) =
+    PRE
+        p_session  : t_session_i &
+        p_session  : t_session   &
+        p_prio_idx : t_prio_idx_i &
+        p_prio_idx : t_prio_idx
+    THEN
+        p_next_idx_sub :(p_next_idx_sub : t_sub_idx_i &
+                         p_next_idx_sub = a_session_priority_next_sub_idx(p_session)(p_prio_idx))
+    END
+    ;
+
+    set_session_priority_next_sub_idx (p_session, p_prio_idx, p_next_idx_sub) =
+    PRE
+        p_session      : t_session_i &
+        p_session      : t_session   &
+        p_prio_idx     : t_prio_idx_i &
+        p_prio_idx     : t_prio_idx  &
+        p_next_idx_sub : t_sub_idx_i &
+        p_next_idx_sub : t_sub_idx
+    THEN
+        a_session_priority_next_sub_idx(p_session)(p_prio_idx) := p_next_idx_sub
+    END
+    ;
+
+    StatusCode_service <-- add_subscription
+       (p_subscription,
+        p_session,
+        p_state,
+        p_firstMsgSent,
+        p_priority,
+        p_revPublishInterval,
+        p_revLifetimeCount,
+        p_revMaxKeepAlive,
+        p_maxNotificationsPerPublish,
+        p_publishEnabled,
+        p_seqNumInit,
+        p_republishQueue,
+        p_monitoredItemQueue,
+        p_timerId) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : t_subscription &
         p_subscription /: s_subscription &
         p_session : t_session_i &
         p_session : t_session &
-        p_session /: ran(a_subscription_session) & /* (=> 1 subscription / session) */
+        p_session /: ran(a_subscription_session) &
+        p_state : t_subscriptionState_i &
+        p_state : t_subscriptionState & /* e_subscriptionState_normal on creation */
+        p_firstMsgSent : BOOL & /* FALSE on creation */
+        p_priority : t_priority &
         p_revPublishInterval : t_opcua_duration_i &
         p_revLifetimeCount : t_counter &
         p_revLifetimeCount > 0 &
@@ -172,8 +288,8 @@ OPERATIONS
         p_revLifetimeCount >= 3 * p_revMaxKeepAlive & /* part 4 table 86 */
         p_maxNotificationsPerPublish : t_counter &
         p_publishEnabled = TRUE & /* => no subscription modification for now => refuse publishDisabled */
-        p_publishQueue : t_publishReqQueue_i &
-        p_publishQueue : t_publishReqQueue &
+        p_seqNumInit : t_sub_seq_num_i &
+        p_seqNumInit : t_sub_seq_num &
         p_republishQueue : t_notifRepublishQueue_i &
         p_republishQueue : t_notifRepublishQueue &
         p_monitoredItemQueue : t_monitoredItemQueue_i &
@@ -181,24 +297,32 @@ OPERATIONS
         p_timerId : t_timer_id_i &
         p_timerId : t_timer_id
     THEN
-        s_subscription := s_subscription \/ {p_subscription} ||
-        a_subscription_state (p_subscription) := e_subscriptionState_normal   ||
 
-        a_subscription_session (p_subscription) := p_session ||
-        a_publishInterval (p_subscription) := p_revPublishInterval ||
-        a_lifetimeExpCount (p_subscription) := p_revLifetimeCount  ||
-        a_LifetimeCounter (p_subscription) := p_revLifetimeCount   ||
-        a_keepAliveExpCount (p_subscription) := p_revMaxKeepAlive  ||
-        a_KeepAliveCounter (p_subscription) := p_revMaxKeepAlive   ||
-        a_maxNotifsPerPublish (p_subscription) := p_maxNotificationsPerPublish ||
-        a_MessageSent := a_MessageSent - {p_subscription}                      ||
-        a_PublishingEnabled := a_PublishingEnabled \/ {p_subscription}         ||
-        a_SeqNum (p_subscription) := c_sub_seq_num_init                        || /* => next SeqNum == 1 */
-
-        a_publishRequestQueue (p_subscription) := p_publishQueue ||
-        a_notifRepublishQueue (p_subscription) := p_republishQueue ||
-        a_monitoredItemQueue (p_subscription) := p_monitoredItemQueue ||
-        a_publishTimer (p_subscription) := p_timerId
+        IF s_subscription /= t_subscription
+        THEN
+            StatusCode_service := e_sc_ok ||
+            s_subscription := s_subscription \/ {p_subscription} ||
+            a_subscription_state (p_subscription) := p_state     ||
+            a_subscription_session (p_subscription) := p_session ||
+            a_subscription_priority (p_subscription) := p_priority ||
+            a_publishInterval (p_subscription) := p_revPublishInterval ||
+            a_lifetimeExpCount (p_subscription) := p_revLifetimeCount  ||
+            a_LifetimeCounter (p_subscription) := p_revLifetimeCount   ||
+            a_keepAliveExpCount (p_subscription) := p_revMaxKeepAlive  ||
+            a_KeepAliveCounter (p_subscription) := p_revMaxKeepAlive   ||
+            a_maxNotifsPerPublish (p_subscription) := p_maxNotificationsPerPublish ||
+            a_MessageSent
+            :(a_MessageSent <: s_subscription &
+              (p_firstMsgSent = FALSE => a_MessageSent = a_MessageSent$0 - {p_subscription}) &
+              (p_firstMsgSent = FALSE => a_MessageSent = a_MessageSent$0 \/ {p_subscription})) ||
+            a_PublishingEnabled := a_PublishingEnabled \/ {p_subscription}         ||
+            a_SeqNum (p_subscription) := p_seqNumInit                              ||
+            a_notifRepublishQueue (p_subscription) := p_republishQueue    ||
+            a_monitoredItemQueue (p_subscription) := p_monitoredItemQueue ||
+            a_publishTimer (p_subscription) := p_timerId
+        ELSE
+            StatusCode_service := e_sc_bad_too_many_subscriptions
+        END
     END
     ;
 
@@ -223,13 +347,21 @@ OPERATIONS
         a_PublishingEnabled := a_PublishingEnabled - {p_subscription}   ||
         a_SeqNum := {p_subscription} <<| a_SeqNum ||
 
-        a_publishRequestQueue := {p_subscription} <<| a_publishRequestQueue ||
         a_notifRepublishQueue := {p_subscription} <<| a_notifRepublishQueue ||
 
         a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue ||
 
         a_publishTimer := {p_subscription} <<| a_publishTimer
 
+    END
+    ;
+
+    p_priority <-- get_subscription_priority(p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription
+    THEN
+        p_priority := a_subscription_priority (p_subscription)
     END
     ;
 
@@ -473,13 +605,33 @@ OPERATIONS
     END
     ;
 
-    p_publishReqQueue <-- get_subscription_publishRequestQueue (p_subscription) =
+    reset_session_publishRequestQueue (p_session) =
     PRE
-        p_subscription : t_subscription_i &
-        p_subscription : dom(a_publishRequestQueue)
+        p_session : t_session_i &
+        p_session : ran(a_subscription_session)
+    THEN
+        a_publishRequestQueue := {p_session} <<| a_publishRequestQueue
+    END
+    ;
+
+    set_session_publishRequestQueue (p_session, p_publishReqQueue) =
+    PRE
+        p_session : t_session_i &
+        p_session : ran(a_subscription_session) &
+        p_publishReqQueue : t_publishReqQueue_i &
+        p_publishReqQueue : t_publishReqQueue
+    THEN
+        a_publishRequestQueue(p_session) := p_publishReqQueue
+    END
+    ;
+
+    p_publishReqQueue <-- get_session_publishRequestQueue (p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : ran(a_subscription_session)
     THEN
         p_publishReqQueue :(p_publishReqQueue : t_publishReqQueue_i &
-                            p_publishReqQueue = a_publishRequestQueue(p_subscription))
+                            p_publishReqQueue = a_publishRequestQueue(p_session))
     END
     ;
 

@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 28/10/2025 16:45:24
+ Date                 : 26/11/2025 15:42:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -84,8 +84,7 @@ extern void subscription_mgr__create_notification_on_monitored_items_if_node_cha
 extern void subscription_mgr__fill_delete_subscriptions_response(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   const t_bool subscription_mgr__p_has_sub,
-   const constants__t_subscription_i subscription_mgr__p_session_sub,
+   const constants__t_session_i subscription_mgr__p_session,
    const t_entier4 subscription_mgr__p_nb_reqs);
 extern void subscription_mgr__fill_publish_response_msg(
    const constants__t_msg_i subscription_mgr__p_resp_msg,
@@ -121,8 +120,7 @@ extern void subscription_mgr__fill_response_subscription_set_monit_mode_monitore
 extern void subscription_mgr__fill_set_publishing_mode_response(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   const t_bool subscription_mgr__p_has_sub,
-   const constants__t_subscription_i subscription_mgr__p_session_sub,
+   const constants__t_session_i subscription_mgr__p_session,
    const t_bool subscription_mgr__p_pub_enabled,
    const t_entier4 subscription_mgr__p_nb_reqs);
 extern void subscription_mgr__local_check_filtered_subscription_and_monitored_item(

@@ -128,7 +128,7 @@ CONCRETE_CONSTANTS
     k_n_notifEventQueueSize_min,
     k_n_notifEventQueueSize_default,
     k_n_notifQueueSize_max,
-    k_n_publishRequestPerSub_max,
+    k_n_publishRequestPerSession_max,
     k_n_republishNotifPerSub_max,
     k_n_genericOperationPerReq_max,
     k_n_registerNodes_max,
@@ -138,6 +138,7 @@ CONCRETE_CONSTANTS
     k_n_nodesToDelete_max,
     k_n_UserAuthAttempts_max,
     k_n_NamespaceIndex_max,
+    k_n_subscriptionPerSession_max,
 
     c_Null_Type_NodeId,
     c_ByteString_Type_NodeId,
@@ -356,8 +357,8 @@ PROPERTIES
     k_n_notifEventQueueSize_default > 0 &
     k_n_notifQueueSize_max : NAT &
     k_n_notifQueueSize_max > 0 &
-    k_n_publishRequestPerSub_max : NAT &
-    k_n_publishRequestPerSub_max > 0 &
+    k_n_publishRequestPerSession_max : NAT &
+    k_n_publishRequestPerSession_max > 0 &
     k_n_republishNotifPerSub_max : NAT &
     k_n_republishNotifPerSub_max > 0 &
     k_n_genericOperationPerReq_max : NAT &
@@ -368,6 +369,7 @@ PROPERTIES
     k_n_nodesToDelete_max : NAT &
     k_n_UserAuthAttempts_max : NAT &
     k_n_NamespaceIndex_max : NAT &
+    k_n_subscriptionPerSession_max : NAT1 &
 
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
@@ -580,6 +582,7 @@ PROPERTIES
     c_subscription_indet : t_subscription_i &
     c_subscription_indet /: t_subscription &
     cast_t_subscription : NAT +-> t_subscription_i &
+    1..card(t_subscription_i) = dom(cast_t_subscription) &
     cast_t_subscription : perm(t_subscription) &
 
     t_notif_msg <: t_notif_msg_i &
@@ -978,6 +981,19 @@ OPERATIONS
     THEN
         p_subscription := cast_t_subscription(p_ind)
     END;
+
+    p_ind <-- get_reverse_cast_t_subscription(p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : ran(cast_t_subscription)
+    THEN
+        p_ind :(p_ind : NAT &
+        (p_subscription : ran(cast_t_subscription) =>
+            p_ind = cast_t_subscription~(p_subscription)) &
+        (p_subscription /: ran(cast_t_subscription) =>
+            p_ind = 0))
+    END
+    ;
 
     bres <-- is_t_access_level_currentWrite(p_access_lvl) =
     PRE

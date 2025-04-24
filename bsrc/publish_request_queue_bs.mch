@@ -99,7 +99,7 @@ OPERATIONS
         p_queue : s_publishReqQueue
     THEN
         nb_pub_reqs
-        :(nb_pub_reqs = card(a_publish_responses~[{p_queue}]) & nb_pub_reqs <= k_n_publishRequestPerSub_max)
+        :(nb_pub_reqs = card(a_publish_responses~[{p_queue}]) & nb_pub_reqs <= k_n_publishRequestPerSession_max)
     END
     ;
 
@@ -108,7 +108,7 @@ OPERATIONS
     PRE
         p_queue : t_publishReqQueue_i &
         p_queue : s_publishReqQueue &
-        card(a_publish_responses~[{p_queue}]) = k_n_publishRequestPerSub_max
+        card(a_publish_responses~[{p_queue}]) = k_n_publishRequestPerSession_max
     THEN
         ANY l_old_resp_msg, l_req_exp_time WHERE
             l_old_resp_msg : t_msg_i &
@@ -145,7 +145,7 @@ OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_subscription_publish_resp &
-        card(a_publish_responses~[{p_queue}]) < k_n_publishRequestPerSub_max
+        card(a_publish_responses~[{p_queue}]) < k_n_publishRequestPerSession_max
     THEN
         CHOICE
             bres := FALSE
@@ -166,7 +166,7 @@ OPERATIONS
     END
     ;
 
-    p_continue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
+    p_continue, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
       <-- continue_pop_head_iter_publish_request (p_queue) =
     PRE
         p_queue : t_publishReqQueue_i &
@@ -181,10 +181,8 @@ OPERATIONS
             p_continue := bool(a_publish_responses~[{p_queue}] /= {l_resp_msg}) ||
             a_publish_responses := a_publish_responses - {l_resp_msg |-> p_queue} ||
             p_resp_msg := l_resp_msg ||
-            a_publish_expiration_time, p_session, p_req_exp_time, p_req_handle, p_req_ctx
-            :(  p_session : t_session_i &
-                p_session : t_session &
-                p_req_exp_time : t_timeref_i &
+            a_publish_expiration_time, p_req_exp_time, p_req_handle, p_req_ctx
+            :(  p_req_exp_time : t_timeref_i &
                 p_req_exp_time : t_timeref &
                 p_req_handle : t_server_request_handle_i &
                 p_req_ctx : t_request_context_i &
@@ -237,7 +235,7 @@ OPERATIONS
     ;
 
     /* Used to dequeue a non expired publish request:  */
-    p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
+    p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg
       <-- pop_valid_publish_request_queue (p_queue) =
     PRE
         p_queue : t_publishReqQueue_i &
@@ -253,10 +251,8 @@ OPERATIONS
             a_publish_responses := a_publish_responses - {l_resp_msg |-> p_queue} ||
             validPublishReqQueued := FALSE ||
             p_resp_msg := l_resp_msg ||
-            a_publish_expiration_time, p_session, p_req_exp_time, p_req_handle, p_req_ctx
+            a_publish_expiration_time, p_req_exp_time, p_req_handle, p_req_ctx
             :(
-                p_session : t_session_i &
-                p_session : t_session &
                 p_req_exp_time : t_timeref_i &
                 p_req_exp_time : t_timeref &
                 p_req_exp_time /: s_expired_time_ref & /* Validated as non expired time reference only */

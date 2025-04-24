@@ -93,13 +93,6 @@ void notification_republish_queue_bs__clear_and_deallocate_republish_queue(
     SOPC_SLinkedList_Delete(notification_republish_queue_bs__p_queue);
 }
 
-void notification_republish_queue_bs__clear_republish_queue(
-    const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue)
-{
-    SOPC_SLinkedList_Apply(notification_republish_queue_bs__p_queue, SOPC_InternalDeallocNotifMsg);
-    SOPC_SLinkedList_Clear(notification_republish_queue_bs__p_queue);
-}
-
 void notification_republish_queue_bs__discard_oldest_republish_notif(
     const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue)
 {

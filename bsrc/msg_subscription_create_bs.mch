@@ -27,7 +27,7 @@ SEES
 
 OPERATIONS
 
-    reqPublishInterval, reqLifetimeCount, reqMaxKeepAlive, maxNotificationsPerPublish, publishEnabled
+    reqPublishInterval, reqLifetimeCount, reqMaxKeepAlive, maxNotificationsPerPublish, publishEnabled, priority
       <-- get_msg_create_subscription_req_params (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -39,12 +39,14 @@ OPERATIONS
         reqLifetimeCount,
         reqMaxKeepAlive,
         maxNotificationsPerPublish,
-        publishEnabled
+        publishEnabled,
+        priority
         :(reqPublishInterval : t_opcua_duration_i &
           reqLifetimeCount : t_counter &
           reqMaxKeepAlive : t_counter &
           maxNotificationsPerPublish : t_counter &
-          publishEnabled : BOOL)
+          publishEnabled : BOOL &
+          priority : t_priority)
     END
     ;
 
@@ -69,7 +71,7 @@ OPERATIONS
     END
     ;
 
-    subscription, reqPublishInterval, reqLifetimeCount, reqMaxKeepAlive, maxNotificationsPerPublish
+    subscription, reqPublishInterval, reqLifetimeCount, reqMaxKeepAlive, maxNotificationsPerPublish, priority
       <-- get_msg_modify_subscription_req_params (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
@@ -81,12 +83,14 @@ OPERATIONS
         reqPublishInterval,
         reqLifetimeCount,
         reqMaxKeepAlive,
-        maxNotificationsPerPublish
+        maxNotificationsPerPublish,
+        priority
         :(subscription : t_subscription_i &
           reqPublishInterval : t_opcua_duration_i &
           reqLifetimeCount : t_counter &
           reqMaxKeepAlive : t_counter &
-          maxNotificationsPerPublish : t_counter)
+          maxNotificationsPerPublish : t_counter &
+          priority : t_priority)
     END
     ;
 

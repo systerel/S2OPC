@@ -60,21 +60,6 @@ OPERATIONS
     END
     ;
 
-    clear_republish_queue (p_queue) =
-    PRE
-        p_queue : t_notifRepublishQueue_i &
-        p_queue : s_republishQueue
-    THEN
-        a_republish_notification :(a_republish_notification : t_notif_msg +-> t_notifRepublishQueue &
-                                   a_republish_notification |> {p_queue} = {} &
-                                   a_republish_notification |>> {p_queue} = a_republish_notification$0 |>> {p_queue}) ||
-        a_notification_seq_num :(a_notification_seq_num : t_notif_msg --> t_sub_seq_num &
-                                  a_republish_notification~[{p_queue}] <| a_notification_seq_num = {} &
-                                  a_republish_notification~[{p_queue}] <<| a_notification_seq_num =
-                                   a_republish_notification~[{p_queue}] <<| a_notification_seq_num$0)
-    END
-    ;
-
     clear_and_deallocate_republish_queue (p_queue) =
     PRE
         p_queue : t_notifRepublishQueue_i &

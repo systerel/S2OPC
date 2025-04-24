@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 27/11/2025 16:05:49
+ Date                 : 27/11/2025 16:24:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -77,25 +77,23 @@ void subscription_mgr__fill_publish_response_msg_ack_results(
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    const t_entier4 subscription_mgr__p_nb_acks) {
    {
-      t_bool subscription_mgr__l_has_sub;
-      constants__t_subscription_i subscription_mgr__l_session_sub;
+      t_bool subscription_mgr__l_is_valid;
       t_entier4 subscription_mgr__l_index;
       constants__t_subscription_i subscription_mgr__l_sub;
       constants__t_sub_seq_num_i subscription_mgr__l_seq_num;
       t_bool subscription_mgr__l_valid_seq_num;
       
-      subscription_core__getall_subscription(subscription_mgr__p_session,
-         &subscription_mgr__l_has_sub,
-         &subscription_mgr__l_session_sub);
       subscription_mgr__l_index = 1;
       while (subscription_mgr__l_index <= subscription_mgr__p_nb_acks) {
          msg_subscription_publish_ack_bs__getall_msg_publish_request_ack(subscription_mgr__p_req_msg,
             subscription_mgr__l_index,
             &subscription_mgr__l_sub,
             &subscription_mgr__l_seq_num);
-         if ((subscription_mgr__l_has_sub == true) &&
-            (subscription_mgr__l_sub == subscription_mgr__l_session_sub)) {
-            subscription_core__subscription_ack_notif_msg(subscription_mgr__l_session_sub,
+         subscription_core__is_valid_subscription_on_session(subscription_mgr__p_session,
+            subscription_mgr__l_sub,
+            &subscription_mgr__l_is_valid);
+         if (subscription_mgr__l_is_valid == true) {
+            subscription_core__subscription_ack_notif_msg(subscription_mgr__l_sub,
                subscription_mgr__l_seq_num,
                &subscription_mgr__l_valid_seq_num);
             if (subscription_mgr__l_valid_seq_num == true) {
@@ -852,26 +850,23 @@ void subscription_mgr__fill_response_subscription_set_monit_mode_monitored_items
 void subscription_mgr__fill_delete_subscriptions_response(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   const t_bool subscription_mgr__p_has_sub,
-   const constants__t_subscription_i subscription_mgr__p_session_sub,
+   const constants__t_session_i subscription_mgr__p_session,
    const t_entier4 subscription_mgr__p_nb_reqs) {
    {
       t_entier4 subscription_mgr__l_index;
       constants__t_subscription_i subscription_mgr__l_sub;
-      t_bool subscription_mgr__l_sub_still_valid;
+      t_bool subscription_mgr__l_is_valid;
       
       subscription_mgr__l_index = 1;
       while (subscription_mgr__l_index <= subscription_mgr__p_nb_reqs) {
          msg_subscription_delete_bs__getall_msg_delete_subscriptions_at_index(subscription_mgr__p_req_msg,
             subscription_mgr__l_index,
             &subscription_mgr__l_sub);
-         if ((subscription_mgr__p_has_sub == true) &&
-            (subscription_mgr__l_sub == subscription_mgr__p_session_sub)) {
-            subscription_core__is_valid_subscription(subscription_mgr__l_sub,
-               &subscription_mgr__l_sub_still_valid);
-            if (subscription_mgr__l_sub_still_valid == true) {
-               subscription_core__close_subscription(subscription_mgr__l_sub);
-            }
+         subscription_core__is_valid_subscription_on_session(subscription_mgr__p_session,
+            subscription_mgr__l_sub,
+            &subscription_mgr__l_is_valid);
+         if (subscription_mgr__l_is_valid == true) {
+            subscription_core__close_subscription(subscription_mgr__l_sub);
             msg_subscription_delete_bs__setall_msg_subscription_delete_subscriptions_resp_at_index(subscription_mgr__p_resp_msg,
                subscription_mgr__l_index,
                true);
@@ -890,21 +885,23 @@ void subscription_mgr__fill_delete_subscriptions_response(
 void subscription_mgr__fill_set_publishing_mode_response(
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
-   const t_bool subscription_mgr__p_has_sub,
-   const constants__t_subscription_i subscription_mgr__p_session_sub,
+   const constants__t_session_i subscription_mgr__p_session,
    const t_bool subscription_mgr__p_pub_enabled,
    const t_entier4 subscription_mgr__p_nb_reqs) {
    {
       t_entier4 subscription_mgr__l_index;
       constants__t_subscription_i subscription_mgr__l_sub;
+      t_bool subscription_mgr__l_is_valid;
       
       subscription_mgr__l_index = 1;
       while (subscription_mgr__l_index <= subscription_mgr__p_nb_reqs) {
          msg_subscription_set_publishing_mode_bs__getall_msg_set_publishing_mode_at_index(subscription_mgr__p_req_msg,
             subscription_mgr__l_index,
             &subscription_mgr__l_sub);
-         if ((subscription_mgr__p_has_sub == true) &&
-            (subscription_mgr__l_sub == subscription_mgr__p_session_sub)) {
+         subscription_core__is_valid_subscription_on_session(subscription_mgr__p_session,
+            subscription_mgr__l_sub,
+            &subscription_mgr__l_is_valid);
+         if (subscription_mgr__l_is_valid == true) {
             subscription_core__set_subscription_PublishingEnabled(subscription_mgr__l_sub,
                subscription_mgr__p_pub_enabled);
             msg_subscription_set_publishing_mode_bs__setall_msg_subscription_set_publishing_mode_resp_at_index(subscription_mgr__p_resp_msg,
@@ -928,29 +925,32 @@ void subscription_mgr__treat_create_subscription_request(
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
-      t_bool subscription_mgr__l_session_has_subscription;
-      constants__t_subscription_i subscription_mgr__l_sub;
+      t_bool subscription_mgr__l_bres_pub_alloc;
       constants__t_opcua_duration_i subscription_mgr__l_reqPublishInterval;
       t_entier4 subscription_mgr__l_reqLifetimeCount;
       t_entier4 subscription_mgr__l_reqMaxKeepAlive;
       t_entier4 subscription_mgr__l_maxNotificationsPerPublish;
       t_bool subscription_mgr__l_publishEnabled;
+      t_entier4 subscription_mgr__l_priority;
       constants__t_subscription_i subscription_mgr__l_subscription;
       constants__t_opcua_duration_i subscription_mgr__l_revisedPublishInterval;
       t_entier4 subscription_mgr__l_revisedLifetimeCount;
       t_entier4 subscription_mgr__l_revisedMaxKeepAlive;
       t_entier4 subscription_mgr__l_revisedMaxNotificationsPerPublish;
+      t_entier4 subscription_mgr__l_old_nb_sub;
+      t_entier4 subscription_mgr__l_new_nb_sub;
       
-      subscription_core__getall_subscription(subscription_mgr__p_session,
-         &subscription_mgr__l_session_has_subscription,
-         &subscription_mgr__l_sub);
-      if (subscription_mgr__l_session_has_subscription == false) {
+      subscription_mgr__l_subscription = constants__c_subscription_indet;
+      subscription_core__get_card_session_seq_subscription(subscription_mgr__p_session,
+         &subscription_mgr__l_old_nb_sub);
+      if (subscription_mgr__l_old_nb_sub < constants__k_n_subscriptionPerSession_max) {
          msg_subscription_create_bs__get_msg_create_subscription_req_params(subscription_mgr__p_req_msg,
             &subscription_mgr__l_reqPublishInterval,
             &subscription_mgr__l_reqLifetimeCount,
             &subscription_mgr__l_reqMaxKeepAlive,
             &subscription_mgr__l_maxNotificationsPerPublish,
-            &subscription_mgr__l_publishEnabled);
+            &subscription_mgr__l_publishEnabled,
+            &subscription_mgr__l_priority);
          subscription_core__compute_create_subscription_revised_params(subscription_mgr__l_reqPublishInterval,
             subscription_mgr__l_reqLifetimeCount,
             subscription_mgr__l_reqMaxKeepAlive,
@@ -965,6 +965,7 @@ void subscription_mgr__treat_create_subscription_request(
             subscription_mgr__l_revisedMaxKeepAlive,
             subscription_mgr__l_revisedMaxNotificationsPerPublish,
             subscription_mgr__l_publishEnabled,
+            subscription_mgr__l_priority,
             subscription_mgr__StatusCode_service,
             &subscription_mgr__l_subscription);
          if (*subscription_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
@@ -978,6 +979,16 @@ void subscription_mgr__treat_create_subscription_request(
       else {
          *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_subscriptions;
       }
+      subscription_core__get_card_session_seq_subscription(subscription_mgr__p_session,
+         &subscription_mgr__l_new_nb_sub);
+      if ((subscription_mgr__l_old_nb_sub == 0) &&
+         (subscription_mgr__l_new_nb_sub != 0)) {
+         subscription_core__allocate_new_session_publish_queue(subscription_mgr__p_session,
+            &subscription_mgr__l_bres_pub_alloc);
+         if (subscription_mgr__l_bres_pub_alloc == false) {
+            *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+         }
+      }
    }
 }
 
@@ -987,8 +998,7 @@ void subscription_mgr__treat_modify_subscription_request(
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
-      t_bool subscription_mgr__l_session_has_subscription;
-      constants__t_subscription_i subscription_mgr__l_session_sub;
+      t_bool subscription_mgr__l_is_valid;
       constants__t_subscription_i subscription_mgr__l_sub;
       constants__t_opcua_duration_i subscription_mgr__l_reqPublishInterval;
       t_entier4 subscription_mgr__l_reqLifetimeCount;
@@ -998,18 +1008,19 @@ void subscription_mgr__treat_modify_subscription_request(
       t_entier4 subscription_mgr__l_revisedLifetimeCount;
       t_entier4 subscription_mgr__l_revisedMaxKeepAlive;
       t_entier4 subscription_mgr__l_revisedMaxNotificationsPerPublish;
+      t_entier4 subscription_mgr__l_priority;
       
-      subscription_core__getall_subscription(subscription_mgr__p_session,
-         &subscription_mgr__l_session_has_subscription,
-         &subscription_mgr__l_session_sub);
       msg_subscription_create_bs__get_msg_modify_subscription_req_params(subscription_mgr__p_req_msg,
          &subscription_mgr__l_sub,
          &subscription_mgr__l_reqPublishInterval,
          &subscription_mgr__l_reqLifetimeCount,
          &subscription_mgr__l_reqMaxKeepAlive,
-         &subscription_mgr__l_maxNotifPerPublish);
-      if ((subscription_mgr__l_session_has_subscription == true) &&
-         (subscription_mgr__l_sub == subscription_mgr__l_session_sub)) {
+         &subscription_mgr__l_maxNotifPerPublish,
+         &subscription_mgr__l_priority);
+      subscription_core__is_valid_subscription_on_session(subscription_mgr__p_session,
+         subscription_mgr__l_sub,
+         &subscription_mgr__l_is_valid);
+      if (subscription_mgr__l_is_valid == true) {
          subscription_core__compute_create_subscription_revised_params(subscription_mgr__l_reqPublishInterval,
             subscription_mgr__l_reqLifetimeCount,
             subscription_mgr__l_reqMaxKeepAlive,
@@ -1018,11 +1029,12 @@ void subscription_mgr__treat_modify_subscription_request(
             &subscription_mgr__l_revisedLifetimeCount,
             &subscription_mgr__l_revisedMaxKeepAlive,
             &subscription_mgr__l_revisedMaxNotificationsPerPublish);
-         subscription_core__modify_subscription(subscription_mgr__l_session_sub,
+         subscription_core__modify_subscription(subscription_mgr__l_sub,
             subscription_mgr__l_revisedPublishInterval,
             subscription_mgr__l_revisedLifetimeCount,
             subscription_mgr__l_revisedMaxKeepAlive,
-            subscription_mgr__l_revisedMaxNotificationsPerPublish);
+            subscription_mgr__l_revisedMaxNotificationsPerPublish,
+            subscription_mgr__l_priority);
          msg_subscription_create_bs__set_msg_modify_subscription_resp_params(subscription_mgr__p_resp_msg,
             subscription_mgr__l_revisedPublishInterval,
             subscription_mgr__l_revisedLifetimeCount,
@@ -1041,26 +1053,24 @@ void subscription_mgr__treat_delete_subscriptions_request(
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
-      t_bool subscription_mgr__l_session_has_subscription;
-      constants__t_subscription_i subscription_mgr__l_session_sub;
       t_entier4 subscription_mgr__l_nb_reqs;
       t_bool subscription_mgr__l_bres;
+      t_entier4 subscription_mgr__l_old_nb_sub;
+      t_entier4 subscription_mgr__l_new_nb_sub;
       
+      subscription_core__get_card_session_seq_subscription(subscription_mgr__p_session,
+         &subscription_mgr__l_old_nb_sub);
       msg_subscription_delete_bs__getall_msg_delete_subscriptions_req_params(subscription_mgr__p_req_msg,
          &subscription_mgr__l_nb_reqs);
       if ((subscription_mgr__l_nb_reqs > 0) &&
          (subscription_mgr__l_nb_reqs <= constants__k_n_genericOperationPerReq_max)) {
-         subscription_core__getall_subscription(subscription_mgr__p_session,
-            &subscription_mgr__l_session_has_subscription,
-            &subscription_mgr__l_session_sub);
          msg_subscription_delete_bs__allocate_msg_delete_subscriptions_resp_results_array(subscription_mgr__p_resp_msg,
             subscription_mgr__l_nb_reqs,
             &subscription_mgr__l_bres);
          if (subscription_mgr__l_bres == true) {
             subscription_mgr__fill_delete_subscriptions_response(subscription_mgr__p_req_msg,
                subscription_mgr__p_resp_msg,
-               subscription_mgr__l_session_has_subscription,
-               subscription_mgr__l_session_sub,
+               subscription_mgr__p_session,
                subscription_mgr__l_nb_reqs);
             *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
          }
@@ -1074,6 +1084,13 @@ void subscription_mgr__treat_delete_subscriptions_request(
       else {
          *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_ops;
       }
+      subscription_core__get_card_session_seq_subscription(subscription_mgr__p_session,
+         &subscription_mgr__l_new_nb_sub);
+      if ((subscription_mgr__l_old_nb_sub != 0) &&
+         (subscription_mgr__l_new_nb_sub == 0)) {
+         subscription_core__deallocate_publish_queue_and_gen_no_sub_responses(subscription_mgr__p_session,
+            true);
+      }
    }
 }
 
@@ -1083,8 +1100,6 @@ void subscription_mgr__treat_publishing_mode_request(
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
-      t_bool subscription_mgr__l_session_has_subscription;
-      constants__t_subscription_i subscription_mgr__l_session_sub;
       t_entier4 subscription_mgr__l_nb_reqs;
       t_bool subscription_mgr__l_pub_enabled;
       t_bool subscription_mgr__l_bres;
@@ -1094,17 +1109,13 @@ void subscription_mgr__treat_publishing_mode_request(
          &subscription_mgr__l_pub_enabled);
       if ((subscription_mgr__l_nb_reqs > 0) &&
          (subscription_mgr__l_nb_reqs <= constants__k_n_genericOperationPerReq_max)) {
-         subscription_core__getall_subscription(subscription_mgr__p_session,
-            &subscription_mgr__l_session_has_subscription,
-            &subscription_mgr__l_session_sub);
          msg_subscription_set_publishing_mode_bs__allocate_msg_subscription_set_publishing_mode_resp_results_array(subscription_mgr__p_resp_msg,
             subscription_mgr__l_nb_reqs,
             &subscription_mgr__l_bres);
          if (subscription_mgr__l_bres == true) {
             subscription_mgr__fill_set_publishing_mode_response(subscription_mgr__p_req_msg,
                subscription_mgr__p_resp_msg,
-               subscription_mgr__l_session_has_subscription,
-               subscription_mgr__l_session_sub,
+               subscription_mgr__p_session,
                subscription_mgr__l_pub_enabled,
                subscription_mgr__l_nb_reqs);
             *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
@@ -1132,21 +1143,21 @@ void subscription_mgr__treat_subscription_publish_request(
    constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service,
    t_bool * const subscription_mgr__async_resp_msg) {
    {
-      t_bool subscription_mgr__l_session_has_subscription;
-      constants__t_subscription_i subscription_mgr__l_sub;
+      t_bool subscription_mgr__l_continue;
       constants__t_timeref_i subscription_mgr__l_req_exp_time;
       t_entier4 subscription_mgr__l_nb_subscriptionAcks;
       constants__t_subscription_i subscription_mgr__l_subscription;
       t_bool subscription_mgr__l_moreNotifs;
       t_bool subscription_mgr__l_bres;
+      t_bool subscription_mgr__l_async_resp_msg;
       
       subscription_mgr__l_subscription = constants__c_subscription_indet;
       subscription_mgr__l_moreNotifs = false;
       *subscription_mgr__async_resp_msg = false;
-      subscription_core__getall_subscription(subscription_mgr__p_session,
-         &subscription_mgr__l_session_has_subscription,
-         &subscription_mgr__l_sub);
-      if (subscription_mgr__l_session_has_subscription == true) {
+      subscription_mgr__l_async_resp_msg = true;
+      subscription_core__init_iter_subscription_session(subscription_mgr__p_session,
+         &subscription_mgr__l_continue);
+      if (subscription_mgr__l_continue == true) {
          msg_subscription_publish_ack_bs__get_msg_header_expiration_time(subscription_mgr__p_req_header,
             &subscription_mgr__l_req_exp_time);
          msg_subscription_publish_ack_bs__get_msg_publish_request_ack_params(subscription_mgr__p_req_msg,
@@ -1173,22 +1184,35 @@ void subscription_mgr__treat_subscription_publish_request(
          else {
             *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
          }
-         if (*subscription_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
-            subscription_core__receive_publish_request(subscription_mgr__p_session,
-               subscription_mgr__l_req_exp_time,
-               subscription_mgr__p_req_handle,
-               subscription_mgr__p_req_ctx,
+         *subscription_mgr__async_resp_msg = true;
+         while (((*subscription_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) &&
+            (subscription_mgr__l_continue == true)) &&
+            (*subscription_mgr__async_resp_msg == true)) {
+            subscription_core__continue_iter_subscription_session(&subscription_mgr__l_continue,
+               &subscription_mgr__l_subscription);
+            subscription_core__receive_publish_request(subscription_mgr__l_subscription,
                subscription_mgr__p_resp_msg,
                subscription_mgr__StatusCode_service,
-               subscription_mgr__async_resp_msg,
-               &subscription_mgr__l_subscription,
+               &subscription_mgr__l_async_resp_msg,
                &subscription_mgr__l_moreNotifs);
+            *subscription_mgr__async_resp_msg = ((*subscription_mgr__async_resp_msg == true) &&
+               (subscription_mgr__l_async_resp_msg == true));
          }
          if ((*subscription_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) &&
             (*subscription_mgr__async_resp_msg == false)) {
             subscription_mgr__fill_publish_response_msg(subscription_mgr__p_resp_msg,
                subscription_mgr__l_subscription,
                subscription_mgr__l_moreNotifs);
+         }
+         else if ((*subscription_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) &&
+            (*subscription_mgr__async_resp_msg == true)) {
+            subscription_core__enqueue_publish_request(subscription_mgr__p_session,
+               subscription_mgr__l_req_exp_time,
+               subscription_mgr__p_req_handle,
+               subscription_mgr__p_req_ctx,
+               subscription_mgr__p_resp_msg,
+               subscription_mgr__StatusCode_service,
+               subscription_mgr__async_resp_msg);
          }
       }
       else {
@@ -1203,8 +1227,7 @@ void subscription_mgr__treat_subscription_republish_request(
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_mgr__StatusCode_service) {
    {
-      t_bool subscription_mgr__l_session_has_subscription;
-      constants__t_subscription_i subscription_mgr__l_session_sub;
+      t_bool subscription_mgr__l_is_valid;
       constants__t_subscription_i subscription_mgr__l_sub;
       constants__t_sub_seq_num_i subscription_mgr__l_seq_num;
       constants__t_notifRepublishQueue_i subscription_mgr__l_republishQueue;
@@ -1214,18 +1237,17 @@ void subscription_mgr__treat_subscription_republish_request(
       msg_subscription_publish_ack_bs__getall_msg_republish_request(subscription_mgr__p_req_msg,
          &subscription_mgr__l_sub,
          &subscription_mgr__l_seq_num);
-      subscription_core__getall_subscription(subscription_mgr__p_session,
-         &subscription_mgr__l_session_has_subscription,
-         &subscription_mgr__l_session_sub);
-      if ((subscription_mgr__l_session_has_subscription == true) &&
-         (subscription_mgr__l_session_sub == subscription_mgr__l_sub)) {
-         subscription_core__get_subscription_notifRepublishQueue(subscription_mgr__l_session_sub,
+      subscription_core__is_valid_subscription_on_session(subscription_mgr__p_session,
+         subscription_mgr__l_sub,
+         &subscription_mgr__l_is_valid);
+      if (subscription_mgr__l_is_valid == true) {
+         subscription_core__get_subscription_notifRepublishQueue(subscription_mgr__l_sub,
             &subscription_mgr__l_republishQueue);
          subscription_core__get_republish_notif_from_queue(subscription_mgr__l_republishQueue,
             subscription_mgr__l_seq_num,
             &subscription_mgr__l_bres,
             &subscription_mgr__l_notifMsg);
-         subscription_core__reset_subscription_LifetimeCounter(subscription_mgr__l_session_sub);
+         subscription_core__reset_subscription_LifetimeCounter(subscription_mgr__l_sub);
          if (subscription_mgr__l_bres == true) {
             msg_subscription_publish_ack_bs__setall_msg_republish_response(subscription_mgr__p_resp_msg,
                subscription_mgr__l_notifMsg,
@@ -1570,21 +1592,24 @@ void subscription_mgr__server_subscription_publish_timeout(
       constants__t_request_context_i subscription_mgr__l_req_context;
       t_bool subscription_mgr__l_moreNotifs;
       t_bool subscription_mgr__l_validPublishingReqQueued;
+      t_entier4 subscription_mgr__l_new_nb_sub;
       
-      subscription_core__server_subscription_core_publish_timeout_check_lifetime(subscription_mgr__p_subscription,
+      subscription_core__getall_session(subscription_mgr__p_subscription,
+         &subscription_mgr__l_session);
+      subscription_core__server_subscription_core_publish_timeout_check_lifetime(subscription_mgr__l_session,
+         subscription_mgr__p_subscription,
          &subscription_mgr__l_closeSubscription,
          &subscription_mgr__l_msg_to_send,
-         &subscription_mgr__l_session,
          &subscription_mgr__l_publish_resp_msg,
          &subscription_mgr__l_req_handle,
          &subscription_mgr__l_req_context,
          &subscription_mgr__l_validPublishingReqQueued);
       if (subscription_mgr__l_closeSubscription == false) {
-         subscription_core__server_subscription_core_publish_timeout(subscription_mgr__p_subscription,
+         subscription_core__server_subscription_core_publish_timeout(subscription_mgr__l_session,
+            subscription_mgr__p_subscription,
             subscription_mgr__l_validPublishingReqQueued,
             &subscription_mgr__l_msg_to_send,
             &subscription_mgr__l_msg_sc,
-            &subscription_mgr__l_session,
             &subscription_mgr__l_publish_resp_msg,
             &subscription_mgr__l_req_handle,
             &subscription_mgr__l_req_context,
@@ -1599,14 +1624,14 @@ void subscription_mgr__server_subscription_publish_timeout(
                subscription_mgr__l_req_context,
                subscription_mgr__l_msg_sc);
             if (subscription_mgr__l_moreNotifs == true) {
-               subscription_core__server_subscription_core_check_valid_publish_req_queue(subscription_mgr__p_subscription,
+               subscription_core__server_subscription_core_check_valid_publish_req_queue(subscription_mgr__l_session,
                   &subscription_mgr__l_validPublishingReqQueued);
                while ((subscription_mgr__l_moreNotifs == true) &&
                   (subscription_mgr__l_validPublishingReqQueued == true)) {
-                  subscription_core__server_subscription_core_publish_timeout_return_moreNotifs(subscription_mgr__p_subscription,
+                  subscription_core__server_subscription_core_publish_timeout_return_moreNotifs(subscription_mgr__l_session,
+                     subscription_mgr__p_subscription,
                      &subscription_mgr__l_msg_to_send,
                      &subscription_mgr__l_msg_sc,
-                     &subscription_mgr__l_session,
                      &subscription_mgr__l_publish_resp_msg,
                      &subscription_mgr__l_req_handle,
                      &subscription_mgr__l_req_context,
@@ -1620,7 +1645,7 @@ void subscription_mgr__server_subscription_publish_timeout(
                      subscription_mgr__l_req_context,
                      subscription_mgr__l_msg_sc);
                   if (subscription_mgr__l_moreNotifs == true) {
-                     subscription_core__server_subscription_core_check_valid_publish_req_queue(subscription_mgr__p_subscription,
+                     subscription_core__server_subscription_core_check_valid_publish_req_queue(subscription_mgr__l_session,
                         &subscription_mgr__l_validPublishingReqQueued);
                   }
                }
@@ -1639,6 +1664,12 @@ void subscription_mgr__server_subscription_publish_timeout(
                subscription_mgr__l_req_context,
                constants_statuscodes_bs__e_sc_ok);
          }
+         subscription_core__get_card_session_seq_subscription(subscription_mgr__l_session,
+            &subscription_mgr__l_new_nb_sub);
+         if (subscription_mgr__l_new_nb_sub == 0) {
+            subscription_core__deallocate_publish_queue_and_gen_no_sub_responses(subscription_mgr__l_session,
+               true);
+         }
       }
    }
 }
@@ -1647,17 +1678,24 @@ void subscription_mgr__server_subscription_session_inactive(
    const constants__t_session_i subscription_mgr__p_session,
    const constants__t_sessionState_i subscription_mgr__p_newSessionState) {
    {
-      t_bool subscription_mgr__l_has_sub;
+      t_entier4 subscription_mgr__l_nb_sub;
+      t_bool subscription_mgr__l_continue;
       constants__t_subscription_i subscription_mgr__l_sub;
       
-      subscription_core__getall_subscription(subscription_mgr__p_session,
-         &subscription_mgr__l_has_sub,
-         &subscription_mgr__l_sub);
-      if (subscription_mgr__l_has_sub == true) {
-         if (((subscription_mgr__p_newSessionState == constants__e_session_scOrphaned) ||
-            (subscription_mgr__p_newSessionState == constants__e_session_scActivating)) ||
-            (subscription_mgr__p_newSessionState == constants__e_session_closed)) {
-            subscription_core__empty_session_publish_requests(subscription_mgr__l_sub);
+      if (((subscription_mgr__p_newSessionState == constants__e_session_scOrphaned) ||
+         (subscription_mgr__p_newSessionState == constants__e_session_scActivating)) ||
+         (subscription_mgr__p_newSessionState == constants__e_session_closed)) {
+         subscription_core__get_card_session_seq_subscription(subscription_mgr__p_session,
+            &subscription_mgr__l_nb_sub);
+         if (subscription_mgr__l_nb_sub != 0) {
+            subscription_core__deallocate_publish_queue_and_gen_no_sub_responses(subscription_mgr__p_session,
+               false);
+         }
+         subscription_core__init_iter_subscription_session(subscription_mgr__p_session,
+            &subscription_mgr__l_continue);
+         while (subscription_mgr__l_continue == true) {
+            subscription_core__continue_iter_subscription_session(&subscription_mgr__l_continue,
+               &subscription_mgr__l_sub);
             if (subscription_mgr__p_newSessionState == constants__e_session_closed) {
                subscription_core__close_subscription(subscription_mgr__l_sub);
             }
