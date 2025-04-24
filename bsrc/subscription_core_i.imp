@@ -125,7 +125,7 @@ LOCAL_OPERATIONS
         p_reqQueueSize : t_counter
     THEN
         revisedSamplingItv :: t_opcua_duration_i ||
-        revisedQueueSize :: t_counter
+        revisedQueueSize :(revisedQueueSize : t_counter & revisedQueueSize > 0)
     END
     ;
 
@@ -1480,7 +1480,7 @@ OPERATIONS
                                                        p_clientHandle,
                                                        l_filterCtx,
                                                        p_discardOldest,
-                                                       p_queueSize);
+                                                       p_revQueueSize);
                 IF p_sc = e_sc_ok
                 THEN
                     resize_monitored_item_notification_queue(l_monitoredItemPointer)

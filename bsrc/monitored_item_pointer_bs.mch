@@ -92,7 +92,8 @@ OPERATIONS
         (p_filterCtx = c_monitoringFilterCtx_indet or p_filterCtx : t_monitoringFilterCtx) &
         (p_filterCtx = c_monitoringFilterCtx_indet => p_aid /= e_aid_EventNotifier) &
         p_discardOldest : BOOL &
-        p_queueSize : t_counter
+        p_queueSize : t_counter &
+        p_queueSize > 0
     THEN
         IF t_monitoredItemPointer = s_monitoredItemPointer or
             t_monitoredItemId = s_monitoredItemId
@@ -141,7 +142,8 @@ OPERATIONS
         p_filterCtx : t_monitoringFilterCtx_i &
         (p_filterCtx = c_monitoringFilterCtx_indet or p_filterCtx : t_monitoringFilterCtx) &
         p_discardOldest : BOOL &
-        p_queueSize : t_counter
+        p_queueSize : t_counter &
+        p_queueSize > 0
     THEN
         CHOICE
             StatusCode := e_sc_bad_out_of_memory

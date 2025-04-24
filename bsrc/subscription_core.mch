@@ -816,7 +816,7 @@ OPERATIONS
         p_reqQueueSize : t_counter
     THEN
         revisedSamplingItv :: t_opcua_duration_i ||
-        revisedQueueSize :: t_counter
+        revisedQueueSize :(revisedQueueSize : t_counter & revisedQueueSize > 0)
     END
     ;
 
@@ -858,7 +858,8 @@ OPERATIONS
         p_filter : t_monitoringFilter_i &
         (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) &
         p_discardOldest : BOOL &
-        p_queueSize : t_counter
+        p_queueSize : t_counter &
+        p_queueSize > 0
     THEN
         IF not (p_nid |-> p_filter : a_monitoredItemNodeFilterValid)
         THEN
