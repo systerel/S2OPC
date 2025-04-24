@@ -712,7 +712,7 @@ build-sonar:
     # Run the build inside the build wrapper
     - /work/build-wrapper/build-wrapper-linux-x86-64 --out-dir bw-output ./build.sh
     # Run the sonar-scanner in the same stage as the build
-    - /work/sonar-scanner/bin/sonar-scanner -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}" -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
+    - /work/sonar-scanner/bin/sonar-scanner -Dsonar.branch.name="${CI_COMMIT_REF_NAME}" -Dsonar.host.url="${SONAR_HOST_URL}" -Dsonar.token="${SONAR_TOKEN}" -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
   rules:
     - if: "$WITH_SONAR != null"
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
