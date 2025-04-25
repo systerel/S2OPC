@@ -352,7 +352,6 @@ OPERATIONS
     THEN
         a_channel(session) := channel ||
         a_state(session) := e_session_scActivating ||
-        a_client_orphaned := {session} <<| a_client_orphaned ||
         session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
     END
     ;
