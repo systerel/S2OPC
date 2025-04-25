@@ -250,12 +250,13 @@ LOCAL_OPERATIONS
             a_channel(session) := channel ||
             a_user_server(session) := p_user ||
             res_activated := TRUE ||
-            a_NonceServer
-            :(
+            a_NonceServer :(
                 a_NonceServer : t_session +-> t_Nonce &
                 {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                session : dom(a_NonceServer)
-            )
+                session : dom(a_NonceServer)) ||
+            a_server_client_locales :(
+                a_server_client_locales : t_session --> t_LocaleIds &
+                {session} <<| a_server_client_locales = {session} <<| a_server_client_locales$0)
         OR
             res_activated := FALSE
         END
