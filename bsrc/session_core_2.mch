@@ -225,8 +225,7 @@ OPERATIONS
 
     p_dom, p_channel <-- getall_session_channel (p_session) =
     PRE
-        p_session : t_session_i &
-        p_session : t_session
+        p_session : t_session_i
     THEN
         p_dom := bool(p_session : dom(a_channel)) ||
         IF  p_session : dom(a_channel) THEN
