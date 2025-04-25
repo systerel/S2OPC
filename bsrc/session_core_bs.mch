@@ -585,7 +585,6 @@ OPERATIONS
         p_endpoint_config_idx : t_endpoint_config_idx &
         p_session : t_session_i &
         p_session : t_session   &
-        p_session : dom(a_NonceClient) &
         p_channel : t_channel_i &
         p_channel : s_channel_connected &
         a_SecurityPolicy(p_channel) /= e_secpol_None &
