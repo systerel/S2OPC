@@ -221,6 +221,7 @@ OPERATIONS
     PRE
         channel : t_channel_i  &
         channel : s_channel_connected &
+        channel : dom(a_endpoint) &
         create_req_msg : t_msg_i &
         create_req_msg = c_msg_in &
         c_msg_in : t_msg &
