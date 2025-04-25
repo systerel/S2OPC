@@ -385,7 +385,10 @@ OPERATIONS
         p_user_secu_policy   /= e_secpol_None       &
         app_context          : t_session_application_context_i
     THEN
-        p_user_token_signature :: t_SignatureData_i
+        p_user_token_signature :(
+            p_user_token_signature : t_SignatureData_i &
+            (p_user_token_signature = c_SignatureData_indet or
+             p_user_token_signature : t_SignatureData))
     END
     ;
 
