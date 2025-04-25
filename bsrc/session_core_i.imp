@@ -187,6 +187,7 @@ LOCAL_OPERATIONS
         p_session            : t_session_i            &
         p_lost_channel       : t_channel_i            &
         p_session            : t_session_i            &
+        p_session            : s_client_session       &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx   &
         (   p_dom = TRUE
@@ -196,6 +197,7 @@ LOCAL_OPERATIONS
             p_channel = a_channel(p_session))
     THEN
         s_session,
+        s_client_session,
         a_state,
         a_channel,
         a_client_to_create,
@@ -206,9 +208,15 @@ LOCAL_OPERATIONS
         a_server_token,
         a_client_token,
         a_NonceServer,
-        a_NonceClient
+        a_NonceClient,
+        a_session_roles,
+        a_user_server_cert,
+        a_server_user_auth_attempts,
+        a_server_client_locales,
+        a_user_secu_client
         :(
             s_session                   <: t_session                             &
+            s_client_session            <: t_session                             &
             a_state                      : t_session +-> t_sessionState          &
             a_channel                    : t_session +-> t_channel               &
             a_client_to_create           : t_session +-> t_channel_config_idx_i  &
@@ -220,6 +228,11 @@ LOCAL_OPERATIONS
             a_user_client                : t_session +-> t_user_token            &
             a_NonceServer                : t_session +-> t_Nonce                 &
             a_NonceClient                : t_session +-> t_Nonce                 &
+            a_session_roles              : t_session +-> t_sessionRoles          &
+            a_user_server_cert           : t_session +-> t_byte_buffer           &
+            a_server_user_auth_attempts  : t_session +-> NAT                     &
+            a_server_client_locales      : t_session --> t_LocaleIds             &
+            a_user_secu_client           : t_session +-> t_SecurityPolicy        &
 
             (   p_dom     = TRUE &
                 p_channel = p_lost_channel
@@ -237,6 +250,7 @@ LOCAL_OPERATIONS
                     a_client_token               = a_client_token$0 &
                     a_NonceServer                = a_NonceServer$0 &
                     a_NonceClient                = a_NonceClient$0 &
+                    a_session_roles              = a_session_roles$0 &
                     a_client_orphaned = a_client_orphaned$0 <+ {p_session |-> p_channel_config_idx}
                 ) &
                 (   a_state$0(p_session) /= e_session_userActivated
@@ -252,7 +266,8 @@ LOCAL_OPERATIONS
                     a_server_token               = a_server_token$0 |>> {p_session} &
                     a_client_token               = {p_session} <<| a_client_token$0 &
                     a_NonceServer                = {p_session} <<| a_NonceServer$0 &
-                    a_NonceClient                = {p_session} <<| a_NonceClient$0
+                    a_NonceClient                = {p_session} <<| a_NonceClient$0 &
+                    a_session_roles              = {p_session} <<| a_session_roles$0
                 )
             ) &
             (   not(p_dom     = TRUE &
@@ -269,7 +284,8 @@ LOCAL_OPERATIONS
                 a_server_token               = a_server_token$0 &
                 a_client_token               = a_client_token$0 &
                 a_NonceServer                = a_NonceServer$0 &
-                a_NonceClient                = a_NonceClient$0
+                a_NonceClient                = a_NonceClient$0 &
+                a_session_roles              = a_session_roles
             )
         )
     END
@@ -277,15 +293,16 @@ LOCAL_OPERATIONS
 
     l_server_secure_channel_lost_session_sm(p_dom, p_channel, p_lost_channel, p_session) =
     PRE
-        p_dom          : BOOL        &
-        p_channel      : t_channel_i &
-        p_session      : t_session_i &
-        p_lost_channel : t_channel_i &
-        p_session      : t_session_i &
+        p_dom          : BOOL             &
+        p_channel      : t_channel_i      &
+        p_session      : t_session_i      &
+        p_session     /: s_client_session &
+        p_lost_channel : t_channel_i      &
+        p_session      : t_session_i      &
         (   p_dom = TRUE
             =>
             p_session : dom(a_channel) &
-            p_session : dom(a_state) &
+            p_session : dom(a_state)   &
             p_channel = a_channel(p_session))
     THEN
         s_session,
@@ -299,7 +316,12 @@ LOCAL_OPERATIONS
         a_server_token,
         a_client_token,
         a_NonceServer,
-        a_NonceClient
+        a_NonceClient,
+        a_session_roles,
+        a_user_server_cert,
+        a_server_user_auth_attempts,
+        a_server_client_locales,
+        a_user_secu_client
         :(
             s_session                   <: t_session                             &
             a_state                      : t_session +-> t_sessionState          &
@@ -313,6 +335,11 @@ LOCAL_OPERATIONS
             a_user_client                : t_session +-> t_user_token            &
             a_NonceServer                : t_session +-> t_Nonce                 &
             a_NonceClient                : t_session +-> t_Nonce                 &
+            a_session_roles              : t_session +-> t_sessionRoles          &
+            a_user_server_cert           : t_session +-> t_byte_buffer           &
+            a_server_user_auth_attempts  : t_session +-> NAT                     &
+            a_server_client_locales      : t_session --> t_LocaleIds             &
+            a_user_secu_client           : t_session +-> t_SecurityPolicy        &
 
             (   p_dom     = TRUE &
                 p_channel = p_lost_channel
@@ -330,7 +357,8 @@ LOCAL_OPERATIONS
                     a_client_token               = a_client_token$0 &
                     a_NonceServer                = a_NonceServer$0 &
                     a_NonceClient                = a_NonceClient$0 &
-                    a_client_orphaned            = a_client_orphaned$0
+                    a_client_orphaned            = a_client_orphaned$0 &
+                    a_session_roles              = a_session_roles$0
                 ) &
                 (   a_state$0(p_session) /= e_session_userActivated
                     =>
@@ -345,7 +373,8 @@ LOCAL_OPERATIONS
                     a_server_token               = a_server_token$0 |>> {p_session} &
                     a_client_token               = {p_session} <<| a_client_token$0 &
                     a_NonceServer                = {p_session} <<| a_NonceServer$0 &
-                    a_NonceClient                = {p_session} <<| a_NonceClient$0
+                    a_NonceClient                = {p_session} <<| a_NonceClient$0 &
+                    a_session_roles              = {p_session} <<| a_session_roles$0
                 )
             ) &
             (   not(p_dom     = TRUE &
@@ -362,7 +391,8 @@ LOCAL_OPERATIONS
                 a_server_token               = a_server_token$0 &
                 a_client_token               = a_client_token$0 &
                 a_NonceServer                = a_NonceServer$0 &
-                a_NonceClient                = a_NonceClient$0
+                a_NonceClient                = a_NonceClient$0 &
+                a_session_roles              = a_session_roles$0
             )
         )
     END
