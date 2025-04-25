@@ -228,8 +228,10 @@ LOCAL_OPERATIONS
     PRE
         channel       : t_channel_i &
         channel       : s_channel_connected &
+        channel       : dom(a_endpoint) &
         session       : t_session_i &
         session       : s_session &
+        session      /: s_client_session &
         transitoryState : t_sessionState_i &
         transitoryState : t_sessionState & /* used to differentiate transitions externally */
         p_user          : t_user_i &
