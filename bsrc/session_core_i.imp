@@ -126,11 +126,15 @@ LOCAL_OPERATIONS
     ret <-- l_server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
     PRE
         channel : t_channel_i &
-        channel : s_channel_connected   &
+        channel : s_channel_connected &
+        channel : dom(a_endpoint) &
         session : t_session_i &
         session : s_session &
+        session /: s_client_session &
+        a_state : s_session --> t_sessionState &
         a_state(session) : {e_session_created, e_session_userActivated,
                             e_session_scOrphaned} &
+        ((a_state(session) :  {e_session_userActivated, e_session_scOrphaned}) => (session : dom(a_user_server))) &
         user : t_user_i &
         user : t_user &
         activate_req_msg : t_msg_i &
