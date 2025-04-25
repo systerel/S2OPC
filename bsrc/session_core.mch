@@ -100,38 +100,40 @@ ABSTRACT_VARIABLES
 INVARIANT
     d_typing &
 
-    // All activated sessions have roles associated
-    dom(a_session_roles) = dom(a_state |> {e_session_userActivated}) &
+    // All sessions (except in init or orphaned state) have a channel associated.
+    dom(a_channel) = dom(a_state |>> {e_session_init, e_session_scOrphaned}) &
 
-    // All sessions not (orphaned or closed or init) have a channel associated and only those sessions
-    dom(a_state |>> {e_session_scOrphaned, e_session_init}) = dom(a_channel) &
+    // All server sessions (except in created state) have a user associated.
+    dom(a_user_server) = dom(s_client_session <<| a_state |>> {e_session_created}) &
 
-    // All sessions not (created or creating or closed or init) have a user associated and only those sessions
-    dom(a_state |>> {e_session_created, e_session_creating, e_session_init}) = dom(a_user_server) \/ dom(a_user_client) &
+    // All client sessions have a user associated.
+    dom(a_user_client) = s_client_session &
 
-    // All sessions to be created are included in session in init state
-    dom(a_client_to_create) <: dom(a_state |> {e_session_init}) &
+    // All sessions to be created are client sessions.
+    dom(a_client_to_create) <: s_client_session &
 
-    // All sessions to be activated keep application context for notifications until session closed (since re-activation can occur)
-    dom(a_client_app_context) <: dom(a_state) &
+    // All client sessions have application context for notifications (since re-activation can occur).
+    dom(a_client_app_context) = s_client_session &
 
-    // All server sessions have a user token (except when in state creating, init or closed (since it creating can be predecessor))
-    dom(a_state |>> {e_session_creating, e_session_init}) = ran(a_server_token) &
+    // All server sessions have a server token.
+    ran(a_server_token) = s_session - s_client_session &
 
-    // All client sessions have a user token
-    dom(a_state) = dom(a_client_token) &
+    // All client sessions (except in init or creating state) have a client token.
+    dom(a_client_token) = dom(s_client_session <|a_state |>> {e_session_init, e_session_creating}) &
 
-    // Client orphaned sessions are included in orphaned sessions
+    // Client orphaned sessions are included in orphaned sessions.
     dom(a_client_orphaned) <: dom(a_state |> {e_session_scOrphaned}) &
 
-    /* Sessions not (init or creating or closed) have a Nonce when their security policy is not None*/
-    /* The security policy part cannot be modeled in this invariant, but is in the operations */
-    /* TODO: decide whether this invariant is useful or not, as it is weak. */
+    // All sessions (except in init or creating state) can have a nonce
+    // (they have a nonce when their security policy is not None).
+    // The security policy part cannot be modeled in this invariant, but is in the operations.
     dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
 
-    /* Sessions in Sess_Creating and which security policy is not None have a Nonce */
-    dom(a_NonceClient) <: dom(a_state |> {e_session_creating})
+    // Client sessions (except in init state) can have a Nonce.
+    dom(a_NonceClient) <: dom(s_client_session <| a_state |>> {e_session_init}) &
 
+    // Server sessions (except in created state) can have associated roles.
+    dom(a_session_roles) <: dom(s_client_session <<| a_state |>> {e_session_created})
 
 INITIALISATION
     d_init
