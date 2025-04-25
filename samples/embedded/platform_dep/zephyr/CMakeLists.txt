@@ -58,7 +58,8 @@ add_definitions (-DBUILD_BUILD_DATE=__DATE__\"\ \"__TIME__)
 SET(mbedtls_config ${CMAKE_CURRENT_LIST_DIR}/../mbedtls_config)
 zephyr_include_directories(${mbedtls_config})
 
-SET(mbedtls ${ZEPHYR_MBEDTLS_MODULE_DIR}/include)
+SET(mbedtls "$ENV{ZEPHYR_BASE}/../modules/crypto/mbedtls/include")
+
 zephyr_include_directories(${mbedtls})
 
 # =====================

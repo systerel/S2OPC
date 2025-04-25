@@ -398,7 +398,7 @@ build-zephyr:
   <<: *zephyr_job
   stage: build-others
   image:
-    name: registry.gitlab.com/systerel/s2opc/zephyr_build:v3.7.0-b
+    name: registry.gitlab.com/systerel/s2opc/zephyr_build:v3.7.0-c
     entrypoint: [''] # Needs cause of issue with `sh` https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3622
   needs: []
   script:
