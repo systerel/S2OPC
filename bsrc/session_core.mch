@@ -678,11 +678,14 @@ OPERATIONS
 
     channel <-- get_session_channel (session) =
     PRE
-        session : t_session_i &
-        session : s_session &
-        session : dom(a_channel)
+        session : t_session_i  &
+        session : s_session
     THEN
-        channel :(channel : t_channel_i & channel = a_channel(session))
+        IF  session : dom(a_channel) THEN
+            channel :(channel : t_channel_i & channel = a_channel(session))
+        ELSE
+            channel := c_channel_indet
+        END
     END
     ;
 
