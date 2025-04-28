@@ -7,7 +7,13 @@ else()
 message(FATAL_ERROR "BOARD must be set (and exported)")
 endif()
 
-set(ENV{CONF_FILE} "${CMAKE_CURRENT_LIST_DIR}/prj.conf;${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.conf")
+set(CONF_FILE_CRYPTO "prj.conf")
+
+if($ENV{NO_CRYTO})
+    set(CONF_FILE_CRYPTO "prj-nocrypto.conf")
+endif()
+
+set(ENV{CONF_FILE} "${CMAKE_CURRENT_LIST_DIR}/${CONF_FILE_CRYPTO};${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.conf")
 
 if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.overlay")
 set(ENV{DTC_OVERLAY_FILE} "${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.overlay")

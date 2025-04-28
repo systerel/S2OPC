@@ -61,20 +61,25 @@ git config --global --add safe.directory ${S2OPCDIR}
 
 OPT_IP_ADDRESS=
 IP_ADDRESS=
+export NO_CRYTO=0
 
 export BOARD=$1
 shift
 export APP=$1
 shift
 [[ $1 == "--ip" ]] && shift && IP_ADDRESS=$1 && shift
+[[ $1 == "--nocrypto" ]] && shift && IP_ADDRESS=1 && shift
+
 export ADD_CONF=$*
+
+
 
 [[ -z $BOARD ]] && export BOARD=mimxrt1064_evk && echo "Using default board ${BOARD}"
 [[ -z $APP ]]   && export APP=cli_pubsub_server && echo "Using default application ${APP}"
 [[ ! -z ${IP_ADDRESS} ]] && OPT_IP_ADDRESS="-DCONFIG_SOPC_ETH_ADDRESS=\"${IP_ADDRESS}\" -DCONFIG_SOPC_ENDPOINT_ADDRESS=\"opc.tcp://${IP_ADDRESS}:4841\"" && echo "Configure new Ip address ${IP_ADDRESS}"
 [[ ! -z ${ADD_CONF} ]] && echo "Using additional extra configuration : '${ADD_CONF}'"
 
-west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
+#west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
 [ -d "${SAMPLESDIR}/${APP}" ] || fail "Invalid application $APP"
 
 echo " ** Building ${APP} ... " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
