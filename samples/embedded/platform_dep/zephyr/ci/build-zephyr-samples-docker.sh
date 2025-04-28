@@ -82,7 +82,7 @@ export ADD_CONF=$*
 #west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
 [ -d "${SAMPLESDIR}/${APP}" ] || fail "Invalid application $APP"
 
-echo " ** Building ${APP} ... " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+echo " ** Building ${APP} ... " | mkdir -p ${OUTDIR} |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 cd ${SAMPLESDIR}/${APP} || return 1
 sudo rm -rf build || return  1
 
@@ -91,11 +91,11 @@ west build -b ${BOARD} -- ${OPT_IP_ADDRESS} ${ADD_CONF} . 2>&1 |tee ${OUTDIR}/${
 chmod --recursive 777 build
 mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
 if ! [ -f build/zephyr/zephyr.bin ] ; then
-  echo " ** Build ${APP} failed " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+  echo " ** Build ${APP} failed " | mkdir -p ${OUTDIR} | tee -a ${OUTDIR}/${APP}_${BOARD}.log
   exit 1
 fi
 cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD}.bin 2>&1 |tee -a ${OUTDIR}/${APP}_${BOARD}.log
-echo " ** Build ${APP} OK " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+echo " ** Build ${APP} OK " | mkdir -p ${OUTDIR} |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 
 ls -l ${OUTDIR}/
 chmod -R 777 build
