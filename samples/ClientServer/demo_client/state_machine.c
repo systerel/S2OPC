@@ -425,11 +425,19 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
     return status;
 }
 
-static SOPC_ReturnStatus fillRegisterServerRequest(OpcUa_RegisteredServer* pServ,
-                                                   SOPC_LocalizedText* serverName,
-                                                   SOPC_String* discoveryURL)
+static SOPC_ReturnStatus fillRegisterServer2Request(OpcUa_RegisterServer2Request* pReq,
+                                                    SOPC_LocalizedText* serverName,
+                                                    SOPC_String* discoveryURL)
 {
     SOPC_ReturnStatus status;
+    OpcUa_RegisteredServer* pServ = &pReq->Server;
+    SOPC_ExtensionObject* mdnsConfig = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    OpcUa_MdnsDiscoveryConfiguration* pConfig = NULL;
+
+    if (NULL == mdnsConfig)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
     SOPC_LocalizedText_Initialize(serverName);
 
@@ -447,12 +455,31 @@ static SOPC_ReturnStatus fillRegisterServerRequest(OpcUa_RegisteredServer* pServ
     pServ->IsOnline = true;
     pServ->ServerType = OpcUa_ApplicationType_Server;
 
+    pReq->NoOfDiscoveryConfiguration = 1;
+
+    status = SOPC_ExtensionObject_CreateObject(mdnsConfig, &OpcUa_MdnsDiscoveryConfiguration_EncodeableType,
+                                               (void**) &pConfig);
+    OpcUa_MdnsDiscoveryConfiguration_Initialize(pConfig);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_String_Initialize(&pConfig->MdnsServerName);
+        status = SOPC_String_InitializeFromCString(&pConfig->MdnsServerName, "Mon MDNS Server");
+
+        // pConfig->NoOfServerCapabilities = 1;
+        // SOPC_String_Initialize(pConfig->ServerCapabilities);
+        // status = SOPC_String_InitializeFromCString(pConfig->ServerCapabilities, "My Server Capabilities");
+    }
+
+    pReq->DiscoveryConfiguration = mdnsConfig;
+
     if (!fillRequest)
     {
         /* clear ressources */
         SOPC_LocalizedText_Clear(serverName);
         SOPC_Free(serverName);
         SOPC_String_Delete(discoveryURL);
+        SOPC_Free(mdnsConfig);
         status = SOPC_STATUS_NOK;
     }
     else
@@ -467,7 +494,7 @@ static SOPC_ReturnStatus fillRegisterServerRequest(OpcUa_RegisteredServer* pServ
 
 SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
 {
-    OpcUa_RegisterServerRequest* pReq = NULL;
+    OpcUa_RegisterServer2Request* pReq = NULL;
     SOPC_LocalizedText* serverName = NULL;
     SOPC_String* discoveryURL = NULL;
 
@@ -488,7 +515,7 @@ SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
     {
         serverName = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
         discoveryURL = SOPC_String_Create();
-        status = SOPC_EncodeableObject_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &pReq);
+        status = SOPC_EncodeableObject_Create(&OpcUa_RegisterServer2Request_EncodeableType, (void**) &pReq);
     }
 
     if ((NULL == serverName) || (NULL == discoveryURL) || (SOPC_STATUS_OK != status))
@@ -499,7 +526,7 @@ SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
     }
     else
     {
-        status = fillRegisterServerRequest(&pReq->Server, serverName, discoveryURL);
+        status = fillRegisterServer2Request(pReq, serverName, discoveryURL);
     }
 
     if (SOPC_STATUS_OK != status)

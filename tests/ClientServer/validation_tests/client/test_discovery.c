@@ -197,11 +197,88 @@ START_TEST(test_registerServer)
 }
 END_TEST
 
+START_TEST(test_registerServer2)
+{
+    // Get default log config and set the custom path
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_registerServer2_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_ClientConfigHelper_Initialize();
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
+        "discovery", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+    ck_assert_ptr_nonnull(secureConnConfig);
+
+    OpcUa_RegisterServer2Request* pReq = NULL;
+    status = SOPC_EncodeableObject_Create(&OpcUa_RegisterServer2Request_EncodeableType, (void**) &pReq);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_LocalizedText* serverName = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
+    ck_assert_ptr_nonnull(serverName);
+    SOPC_String* discoveryURL = SOPC_String_Create();
+    ck_assert_ptr_nonnull(discoveryURL);
+    SOPC_ExtensionObject* mdnsConfig = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    ck_assert_ptr_nonnull(mdnsConfig);
+    OpcUa_MdnsDiscoveryConfiguration* pConfig = NULL;
+
+    OpcUa_RegisteredServer* pServ = &pReq->Server;
+
+    bool fillRequest =
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->ServerUri, DEFAULT_APPLICATION_URI)) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->ProductUri, DEFAULT_PRODUCT_URI)) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->GatewayServerUri, GATEWAY_SERVER_URI)) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->SemaphoreFilePath, "")) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->defaultLocale, "Locale")) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->defaultText, "Text")) &&
+        (SOPC_STATUS_OK == SOPC_String_InitializeFromCString(discoveryURL, "opc.tcp://test"));
+    ck_assert(fillRequest);
+    pServ->NoOfServerNames = 1;
+    pServ->ServerNames = serverName;
+    pServ->NoOfDiscoveryUrls = 1;
+    pServ->DiscoveryUrls = discoveryURL;
+    pServ->IsOnline = true;
+    pServ->ServerType = OpcUa_ApplicationType_Server;
+
+    pReq->NoOfDiscoveryConfiguration = 1;
+
+    status = SOPC_ExtensionObject_CreateObject(mdnsConfig, &OpcUa_MdnsDiscoveryConfiguration_EncodeableType,
+                                               (void**) &pConfig);
+    OpcUa_MdnsDiscoveryConfiguration_Initialize(pConfig);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_String_Initialize(&pConfig->MdnsServerName);
+        status = SOPC_String_InitializeFromCString(&pConfig->MdnsServerName, "Mon MDNS Server");
+
+        // pConfig->NoOfServerCapabilities = 1;
+        // SOPC_String_Initialize(pConfig->ServerCapabilities);
+        // status = SOPC_String_InitializeFromCString(pConfig->ServerCapabilities, "My Server Capabilities");
+    }
+
+    pReq->DiscoveryConfiguration = mdnsConfig;
+
+    OpcUa_RegisterServer2Response* pResp = NULL;
+
+    status = SOPC_ClientHelper_DiscoveryServiceSync(secureConnConfig, (void*) pReq, (void**) &pResp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    ck_assert((pResp->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask) == 0);
+    SOPC_EncodeableObject_Delete(pResp->encodeableType, (void**) &pResp);
+
+    /* Close the toolkit */
+    SOPC_ClientConfigHelper_Clear();
+    SOPC_CommonHelper_Clear();
+}
+END_TEST
+
 Suite* client_suite_make_discovery(void)
 {
     Suite* s = NULL;
     TCase* tc_getEndpoints = NULL;
     TCase* tc_registerServer = NULL;
+    TCase* tc_registerServer2 = NULL;
 
     s = suite_create("Client discovery");
     tc_getEndpoints = tcase_create("GetEndpoints");
@@ -211,6 +288,10 @@ Suite* client_suite_make_discovery(void)
     tc_registerServer = tcase_create("RegisterServer");
     suite_add_tcase(s, tc_registerServer);
     tcase_add_test(tc_registerServer, test_registerServer);
+
+    tc_registerServer2 = tcase_create("RegisterServer2");
+    suite_add_tcase(s, tc_registerServer2);
+    tcase_add_test(tc_registerServer2, test_registerServer2);
 
     return s;
 }
