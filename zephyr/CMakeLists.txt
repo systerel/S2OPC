@@ -55,12 +55,14 @@ zephyr_include_directories(
     ${S2OPC_SRC}/ClientServer/api_toolkit
     ${S2OPC_SRC}/ClientServer/frontend/helper_wrapper
     ${S2OPC_SRC}/ClientServer/frontend/client_wrapper
-    ${S2OPC_SRC}/ClientServer/frontend/client_wrapper/deprecated
     ${S2OPC_SRC}/ClientServer/frontend/client_wrapper/internal
+    ${S2OPC_SRC}/ClientServer/frontend/client_wrapper/alarm_conditions
     ${S2OPC_SRC}/ClientServer/frontend/common_wrapper
     ${S2OPC_SRC}/ClientServer/frontend/common_wrapper/internal
     ${S2OPC_SRC}/ClientServer/frontend/server_wrapper
     ${S2OPC_SRC}/ClientServer/frontend/server_wrapper/internal
+    ${S2OPC_SRC}/ClientServer/frontend/server_wrapper/alarm_conditions
+    ${S2OPC_SRC}/ClientServer/frontend/server_wrapper/alarm_conditions/internal
     ${S2OPC_SRC}/Common/helpers
     ${S2OPC_SRC}/Common/helpers_platform_dep
     ${S2OPC_SRC}/Common/helpers_platform_dep/zephyr
