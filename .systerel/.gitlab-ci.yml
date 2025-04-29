@@ -341,16 +341,18 @@ build-rpi:
 build-zephyr:
   stage: build-others
   image: # digest of zephyr_build :v3.7.0-c
-    name: docker.aix.systerel.fr/c838/zephyr_build:v3.7.0-c
+    name: docker.aix.systerel.fr/c838/zephyr_build:v3.7.0-d
     entrypoint: [''] # Needs cause of issue with `sh` https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3622
   needs: []
   script:
     - 'ln -s $(pwd) /zephyrproject/modules/lib/s2opc'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh "nucleo_h745zi_q/stm32h745xx/m7" cli_client -DCONFIG_NET_GPTP=y'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh nucleo_h745zi_q/stm32h745xx/m7 cli_client -DCONFIG_NET_GPTP=y'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server --nocrypto'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server'
+    - './samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_sim cli_client'
+    - './samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_sim cli_pubsub_server'
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
@@ -701,17 +703,17 @@ scan_repository:
 ###
 # Test others jobs
 ###
-# test-zephyr:
-#   stage: test-others
-#   image: docker.aix.systerel.fr/c838/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
-#   needs : [build-zephyr]
-#   script:
-#     - "./samples/embedded/platform_dep/zephyr/ci/test-embedded.sh"
-#   variables:
-#     <<: *nominal_test_variables
-#   rules: # run the task only if Zephyr samples have been compiled
-#     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
-#       when: on_success
+test-zephyr:
+  stage: test-others
+  image: docker.aix.systerel.fr/c838/zephyr_build:v3.7.0-d # digest of test:2.16
+  needs : [build-zephyr]
+  script:
+    - "./samples/embedded/platform_dep/zephyr/ci/test-in-docker.sh"
+  variables:
+    <<: *nominal_test_variables
+  rules: # run the task only if Zephyr samples have been compiled
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
+      when: on_success
 
 test-pikeos:
   <<: *pikeos_job
