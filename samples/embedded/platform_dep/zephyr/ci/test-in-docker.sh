@@ -46,7 +46,7 @@ function test_cli()
 }
 
 test_cli "${S2OPC_ROOT_DIR}/build_zephyr/cli_client_native_sim.bin"
-test_cli "${S2OPC_ROOT_DIR}/build_zephyr/cli_pubsub_server_native_posix_64.bin"
+test_cli "${S2OPC_ROOT_DIR}/build_zephyr/cli_pubsub_server_native_sim.bin"
 
 # check if there has been an error
 for result in $EXIT_STATUS; do
