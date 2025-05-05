@@ -365,6 +365,7 @@ OPERATIONS
     PRE
         p_channel : t_channel_i &
         p_channel : s_channel_connected &
+        p_channel : dom(a_endpoint) &
         p_session : t_session_i &
         p_session : s_session &
         p_session /: s_client_session &
