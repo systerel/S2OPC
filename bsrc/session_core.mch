@@ -548,6 +548,7 @@ OPERATIONS
         session : t_session_i &
         session : s_session &
         session : s_client_session &
+        session : dom(a_client_token) &
         a_state(session) : {e_session_created,
             e_session_userActivating,
             e_session_userActivated} &
