@@ -710,7 +710,7 @@ OPERATIONS
                 (valid = TRUE
                  =>
                  {p_session} <<| a_NonceClient = {p_session} <<| a_NonceClient$0 &
-                 a_NonceClient(p_session) : t_Nonce) &
+                 p_session : dom(a_NonceClient)) &
                 (valid = FALSE
                  =>
                  a_NonceClient = a_NonceClient$0)
