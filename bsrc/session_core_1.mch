@@ -1092,7 +1092,7 @@ OPERATIONS
           p_session_to_close : t_session_i &
           (p_has_session_to_close = FALSE => p_session_to_close = c_session_indet) &
           /* Returns the oldest session that is not yet activated */
-          (p_has_session_to_close = TRUE => a_state(p_session_to_close) = e_session_created)
+          (p_has_session_to_close = TRUE => p_session_to_close : dom(a_state) & a_state(p_session_to_close) = e_session_created)
          )
     END
     ;
