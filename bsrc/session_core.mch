@@ -200,20 +200,25 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_create_req
     THEN
+        a_state(session)   := e_session_creating ||
+        a_channel(session) := channel            ||
         CHOICE
-            valid := TRUE                           ||
-            a_channel(session) := channel           ||
-            a_state(session) := e_session_creating  ||
-            IF a_SecurityPolicy(channel) /= e_secpol_None THEN
-                a_NonceClient
-                :(
-                    a_NonceClient : s_session +-> t_Nonce &
+            valid := TRUE                       ||
+            a_NonceClient :(
+                a_NonceClient : s_session +-> t_Nonce &
+
+                (a_SecurityPolicy(channel) /= e_secpol_None =>
                     {session} <<| a_NonceClient = {session} <<| a_NonceClient$0 &
-                    session : dom(a_NonceClient)
-                )
-            END
+                    session : dom(a_NonceClient)) &
+
+                (a_SecurityPolicy(channel) = e_secpol_None =>
+                    a_NonceClient = a_NonceClient$0)
+            )
         OR
-            valid := FALSE /* Nonce creation can fail */
+            valid := FALSE || /* Nonce creation can fail */
+            a_NonceClient :(
+                a_NonceClient : s_session +-> t_Nonce &
+                {session} <<| a_NonceClient = {session} <<| a_NonceClient$0)
         END
     END
     ;
