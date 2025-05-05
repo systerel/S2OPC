@@ -735,8 +735,7 @@ OPERATIONS
     drop_NonceClient(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : t_session   &
-        p_session : dom(a_NonceClient)
+        p_session : t_session
     THEN
         a_NonceClient := {p_session} <<| a_NonceClient
     END
