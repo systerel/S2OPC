@@ -39,7 +39,7 @@ OPERATIONS
             channel := c_channel_indet
         OR
             bres := TRUE ||
-            channel :(channel : t_channel_i & channel : t_channel)
+            channel :: t_channel_i
         END
     END
     ;
