@@ -202,24 +202,17 @@ OPERATIONS
     THEN
         a_state(session)   := e_session_creating ||
         a_channel(session) := channel            ||
-        CHOICE
-            valid := TRUE                       ||
-            a_NonceClient :(
-                a_NonceClient : s_session +-> t_Nonce &
+        a_NonceClient, valid :(
+            a_NonceClient : s_session +-> t_Nonce &
+            valid : BOOL &
 
-                (a_SecurityPolicy(channel) /= e_secpol_None =>
-                    {session} <<| a_NonceClient = {session} <<| a_NonceClient$0 &
-                    session : dom(a_NonceClient)) &
+            (a_SecurityPolicy(channel) /= e_secpol_None =>
+                {session} <<| a_NonceClient = {session} <<| a_NonceClient$0 &
+                (valid = TRUE => session : dom(a_NonceClient))) &
 
-                (a_SecurityPolicy(channel) = e_secpol_None =>
-                    a_NonceClient = a_NonceClient$0)
-            )
-        OR
-            valid := FALSE || /* Nonce creation can fail */
-            a_NonceClient :(
-                a_NonceClient : s_session +-> t_Nonce &
-                {session} <<| a_NonceClient = {session} <<| a_NonceClient$0)
-        END
+            (a_SecurityPolicy(channel) = e_secpol_None =>
+                a_NonceClient = a_NonceClient$0)
+        )
     END
     ;
 
