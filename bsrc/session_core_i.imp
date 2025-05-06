@@ -1441,21 +1441,44 @@ OPERATIONS
                 sessions_to_iterate /\ sessions_iterated = {} &
                 sessions_to_iterate \/ sessions_iterated = t_session &
                 l_continue = bool(sessions_to_iterate /= {}) &
-                dom(a_channel) <: dom(a_state) &
-                s_session                    = s_session - sessions_iterated &
-                a_state                      = sessions_iterated <<| a_state        &
-                a_channel                    = sessions_iterated <<| a_channel      &
-                a_client_to_create           = sessions_iterated <<| a_client_to_create &
-                a_client_app_context         = sessions_iterated <<| a_client_app_context &
-                a_client_orphaned            = sessions_iterated <<| a_client_orphaned &
-                a_user_server                = sessions_iterated <<| a_user_server &
+
+                s_session <: t_session &
+                s_session = dom(a_state) &
+                s_session = dom(a_server_client_locales) &
+                s_client_session <: s_session &
+                dom(a_channel) = dom(a_state |>> {e_session_init, e_session_scOrphaned}) &
+                dom(a_user_server) = dom(s_client_session <<| a_state |>> {e_session_created}) &
+                dom(a_user_client) <: s_client_session &
+                dom(a_client_to_create) <: s_client_session &
+                dom(a_client_app_context) <: s_client_session &
+                ran(a_server_token) = s_session - s_client_session &
+                dom(a_client_token) = dom(s_client_session <|a_state |>> {e_session_init, e_session_creating}) &
+                dom(a_client_orphaned) = dom(s_client_session <| a_state |> {e_session_scOrphaned})  &
+                dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
+                dom(a_NonceClient) <: dom(s_client_session <| a_state |>> {e_session_init}) &
+                dom(a_session_roles) <: dom(s_client_session <<| a_state |>> {e_session_created}) &
+                dom(a_user_secu_client) <: dom(a_state) &
+                dom(a_user_server_cert) <: dom(a_state) &
+                dom(a_client_token) <: dom(a_user_secu_client) &
+                dom(a_client_token) <: dom(a_user_server_cert) &
+                dom(a_server_user_auth_attempts) = dom(s_client_session <<| a_state) &
+
+                s_session                    = s_session - sessions_iterated                     &
+                s_client_session             = s_client_session - sessions_iterated              &
+                a_state                      = sessions_iterated <<| a_state                     &
+                a_channel                    = sessions_iterated <<| a_channel                   &
+                a_client_to_create           = sessions_iterated <<| a_client_to_create          &
+                a_client_app_context         = sessions_iterated <<| a_client_app_context        &
+                a_client_orphaned            = sessions_iterated <<| a_client_orphaned           &
+                a_user_server                = sessions_iterated <<| a_user_server               &
                 a_server_user_auth_attempts  = sessions_iterated <<| a_server_user_auth_attempts &
-                a_user_client                = sessions_iterated <<| a_user_client &
-                a_server_token               = a_server_token |>> sessions_iterated &
-                a_client_token               = sessions_iterated <<| a_client_token &
-                a_NonceServer                = sessions_iterated <<| a_NonceServer &
-                a_NonceClient                = sessions_iterated <<| a_NonceClient &
-                sessions_iterated <| a_server_client_locales = sessions_iterated * {c_LocaleIds_empty}
+                a_user_client                = sessions_iterated <<| a_user_client               &
+                a_server_token               = a_server_token |>> sessions_iterated              &
+                a_client_token               = sessions_iterated <<| a_client_token              &
+                a_NonceServer                = sessions_iterated <<| a_NonceServer               &
+                a_NonceClient                = sessions_iterated <<| a_NonceClient               &
+                a_session_roles              = sessions_iterated <<| a_session_roles             &
+                a_server_client_locales      = sessions_iterated <<| a_server_client_locales
             VARIANT
                 card(sessions_to_iterate)
             END
