@@ -1945,6 +1945,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=MethodO</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=MethodI</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=AddVariableMethod</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=AddNodes</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=GenEventMethod</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=TestObject_HelloNextArg</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=TestObject_Counter</Reference>
@@ -2151,6 +2152,105 @@
           <Body>
             <Argument>
               <Name>DataType</Name>
+              <DataType>
+                <Identifier>i=17</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+      </ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod NodeId="ns=1;s=AddNodes" BrowseName="AddNodes" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>AddNodes</DisplayName>
+    <Description>AddNodes</Description>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;s=AddNodes_Input</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="ns=1;s=AddNodes_Input" BrowseName="InputArguments" DataType="i=296" ValueRank="1">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=AddNodes</Reference>
+    </References>
+    <Value>
+      <ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>ParentNodeId</Name>
+              <DataType>
+                <Identifier>i=17</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>ReferenceToParentType</Name>
+              <DataType>
+                <Identifier>i=17</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>NewNodeId</Name>
+              <DataType>
+                <Identifier>i=17</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>BrowseName</Name>
+              <DataType>
+                <Identifier>i=12</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>TypedefNodeId</Name>
               <DataType>
                 <Identifier>i=17</Identifier>
               </DataType>

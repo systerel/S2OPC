@@ -45,6 +45,9 @@ static const SOPC_NodeId HasComponent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Has
 static const SOPC_NodeId hasChildType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasChild);
 static const SOPC_NodeId DataVariable_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseDataVariableType);
 static const SOPC_NodeId Organizes_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
+static const SOPC_NodeId BaseObject_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseObjectType);
+static const SOPC_NodeId BaseVariable_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseVariableType);
+static const SOPC_NodeId HasSubtype = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasSubtype);
 
 #ifdef S2OPC_EVENT_MANAGEMENT
 static const SOPC_NodeId BaseEvent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
@@ -439,9 +442,170 @@ SOPC_StatusCode SOPC_Method_Func_AddVariable(const SOPC_CallContext* callContext
     typeDefId.NodeId = DataVariable_Type;
 
     SOPC_StatusCode sc = SOPC_AddressSpaceAccess_AddVariableNode(
-        addSpAccess, &pNid, &HasComponent_Type, inputArgs[0].Value.NodeId, &browseName, &attrs, &typeDefId);
+        addSpAccess, &pNid, &HasComponent_Type, inputArgs[0].Value.NodeId, &browseName, &attrs, &typeDefId, true);
 
     SOPC_Free(myVarId);
+    return sc;
+}
+
+static bool IsTypeOrSubtype(SOPC_AddressSpaceAccess* addSpAccess,
+                            const SOPC_NodeId* actualType,
+                            const SOPC_NodeId* expectedType)
+{
+    SOPC_StatusCode sc = SOPC_GoodGenericStatus;
+    int32_t recursionLimit = 100;
+    int32_t index = 0;
+    bool isTypeOrSubtype = false;
+    SOPC_NodeId* node = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+    SOPC_ReturnStatus st = SOPC_NodeId_Copy(node, actualType);
+    SOPC_ASSERT(st == SOPC_STATUS_OK);
+    OpcUa_ReferenceDescription* references = NULL;
+    int32_t nbOfReferences = 0;
+    while (SOPC_IsGoodStatus(sc) && !isTypeOrSubtype && index < recursionLimit)
+    {
+        sc = SOPC_AddressSpaceAccess_BrowseNode(addSpAccess, node, OpcUa_BrowseDirection_Inverse, &HasSubtype, true, 0,
+                                                0, &references, &nbOfReferences);
+        if (SOPC_IsGoodStatus(sc))
+        {
+            if (nbOfReferences == 0)
+            {
+                sc = OpcUa_BadInternalError; // Break the loop
+            }
+            else
+            {
+                st = SOPC_NodeId_Copy(node, &references[0].NodeId.NodeId);
+                SOPC_ASSERT(st == SOPC_STATUS_OK);
+                int32_t comparison = -2;
+                st = SOPC_NodeId_Compare(node, expectedType, &comparison);
+                if (SOPC_STATUS_OK == st)
+                {
+                    if (0 == comparison)
+                    {
+                        isTypeOrSubtype = true;
+                    }
+                }
+                else
+                {
+                    sc = OpcUa_BadInternalError; // Break the loop
+                }
+            }
+            SOPC_Clear_Array(&nbOfReferences, (void**) &references, sizeof(*references),
+                             OpcUa_ReferenceDescription_Clear);
+            SOPC_Free(references);
+            references = NULL;
+            nbOfReferences = 0;
+            index++;
+        }
+    }
+    SOPC_NodeId_Clear(node);
+    SOPC_Free(node);
+    node = NULL;
+    return isTypeOrSubtype;
+}
+
+SOPC_StatusCode SOPC_Method_Func_AddNodes(const SOPC_CallContext* callContextPtr,
+                                          const SOPC_NodeId* objectId,
+                                          uint32_t nbInputArgs,
+                                          const SOPC_Variant* inputArgs,
+                                          uint32_t* nbOutputArgs,
+                                          SOPC_Variant** outputArgs,
+                                          void* param)
+{
+    SOPC_StatusCode sc = SOPC_GoodGenericStatus;
+    SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    SOPC_UNUSED_ARG(nbOutputArgs);
+    SOPC_UNUSED_ARG(outputArgs);
+    SOPC_UNUSED_ARG(param);
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
+
+    // Check inputs parameters
+    if (5 != nbInputArgs || SOPC_NodeId_Id != inputArgs[0].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType || SOPC_NodeId_Id != inputArgs[1].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[1].ArrayType || SOPC_NodeId_Id != inputArgs[2].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[2].ArrayType || SOPC_String_Id != inputArgs[3].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[3].ArrayType || SOPC_NodeId_Id != inputArgs[4].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[4].ArrayType)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+    SOPC_NodeId* typedefNid = inputArgs[4].Value.NodeId;
+    if (SOPC_NodeId_IsNull(typedefNid))
+    {
+        // TypeDefIdNid can't be NULL
+        return OpcUa_BadInvalidArgument;
+    }
+    if (!SOPC_NodeId_Equal(&TestObject, objectId))
+    {
+        // Unexpected NodeId to apply method
+        return OpcUa_BadNodeIdInvalid;
+    }
+
+    // Extract inputs parameters
+    // 1. Parent Exp Node Id
+    SOPC_NodeId* parentNid = inputArgs[0].Value.NodeId;
+    SOPC_ExpandedNodeId pNid;
+    SOPC_ExpandedNodeId_Initialize(&pNid);
+    pNid.NodeId = TestObject;
+    if (!SOPC_NodeId_IsNull(parentNid))
+    {
+        pNid.NodeId = *parentNid;
+    }
+
+    // 2. Ref to parent node id
+    SOPC_NodeId refToParentTypeNid = HasComponent_Type;
+    if (!SOPC_NodeId_IsNull(inputArgs[1].Value.NodeId))
+    {
+        refToParentTypeNid = *inputArgs[1].Value.NodeId;
+    }
+
+    // 3. New NodeId
+    SOPC_NodeId* newNid = NULL;
+    if (!SOPC_NodeId_IsNull(inputArgs[2].Value.NodeId))
+    {
+        newNid = inputArgs[2].Value.NodeId;
+    }
+
+    // 4. Browse name
+    SOPC_String browsName = inputArgs[3].Value.String;
+    SOPC_QualifiedName browseNameQ;
+    SOPC_QualifiedName_Initialize(&browseNameQ);
+    browseNameQ.NamespaceIndex = 1;
+    if (browsName.Data == NULL)
+    {
+        SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&browsName, "NewNode");
+        SOPC_ASSERT(status == SOPC_STATUS_OK);
+    }
+    browseNameQ.Name = browsName;
+
+    // 5. Attributes Object
+    OpcUa_ObjectAttributes attrs_obj;
+    OpcUa_ObjectAttributes_Initialize(&attrs_obj);
+    OpcUa_VariableAttributes attrs_var;
+    OpcUa_VariableAttributes_Initialize(&attrs_var);
+
+    // 6. Type definition Id
+    SOPC_ExpandedNodeId typeDefId;
+    SOPC_ExpandedNodeId_Initialize(&typeDefId);
+    typeDefId.NodeId = *typedefNid;
+
+    // Add Nodes recurse: Object or Variable.
+    bool isVariableType = IsTypeOrSubtype(addSpAccess, typedefNid, &BaseVariable_Type);
+    if (isVariableType)
+    {
+        sc = SOPC_AddressSpaceAccess_AddVariableNode(addSpAccess, &pNid, &refToParentTypeNid, newNid, &browseNameQ,
+                                                     &attrs_var, &typeDefId, true);
+    }
+    else if (IsTypeOrSubtype(addSpAccess, typedefNid, &BaseObject_Type))
+    {
+        sc = SOPC_AddressSpaceAccess_AddObjectNode(addSpAccess, &pNid, &refToParentTypeNid, newNid, &browseNameQ,
+                                                   &attrs_obj, &typeDefId, true);
+    }
+    else
+    {
+        // FAIL
+        sc = OpcUa_BadTypeDefinitionInvalid;
+    }
     return sc;
 }
 
@@ -815,6 +979,23 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
         {
             methodFunc = &SOPC_Method_Func_AddVariable;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "AddVariable", NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        sNodeId = "ns=1;s=AddNodes";
+        methodId = SOPC_NodeId_FromCString(sNodeId);
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_AddNodes;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "AddNodes", NULL);
             SOPC_NodeId_Clear(methodId);
             SOPC_Free(methodId);
         }

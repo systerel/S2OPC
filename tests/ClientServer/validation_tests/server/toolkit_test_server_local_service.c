@@ -58,6 +58,10 @@
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 
+#define NB_OF_REFERENCES_DIALOG_CONDITION 31
+#define NB_OF_CHILD_DIALOG_CONDITION NB_OF_REFERENCES_DIALOG_CONDITION - 2
+#define NB_OF_REFERENCE_DIALOG_COND_TYPE_ENABLED_STATE 3
+
 static int32_t endpointClosed = false;
 static int32_t nonRegWriteResponses = 0;
 
@@ -65,9 +69,14 @@ static uint32_t cptReadResps = 0;
 
 static const SOPC_NodeId newObjNodeId = SOPC_NODEID_STRING(1, "NewObjNodeId");
 static const SOPC_NodeId newMetNodeId = SOPC_NODEID_STRING(1, "NewMetNodeId");
-static const SOPC_NodeId refOrganizeTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
-static const SOPC_NodeId refHasComponentTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
-static const SOPC_NodeId HasTypeDefinition = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasTypeDefinition);
+static const SOPC_NodeId OrganizeTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
+static const SOPC_NodeId HasComponentTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
+static const SOPC_NodeId HasTypeDefinitionId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasTypeDefinition);
+static const SOPC_NodeId HasPropertyType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasProperty);
+static const SOPC_NodeId DialogConditionType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_DialogConditionType);
+static const SOPC_NodeId ObjectsFolder = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ObjectsFolder);
+
+static const SOPC_QualifiedName EnabledStateQName = SOPC_QUALIFIED_NAME(0, "EnabledState");
 
 static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
 {
@@ -703,16 +712,41 @@ static SOPC_ReturnStatus check_readDataTypeDefinition(const SOPC_AddressSpace* a
     return status;
 }
 
-static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, const SOPC_NodeId* refToParentTypeId)
+static bool FindAndCheckReference(const OpcUa_BrowseResult* result,
+                                  const SOPC_Boolean isForward,
+                                  const SOPC_NodeId* refType,
+                                  const SOPC_NodeId* refTarget)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool res = false;
+    int32_t i = 0;
+    while (!res && i < result->NoOfReferences)
+    {
+        OpcUa_ReferenceDescription* ref = &result->References[i];
+        if (isForward == ref->IsForward)
+        {
+            bool isRefType = SOPC_NodeId_Equal(refType, &ref->ReferenceTypeId);
+            if (isRefType)
+            {
+                res = SOPC_NodeId_Equal(refTarget, &ref->NodeId.NodeId);
+            }
+        }
+        i++;
+    }
+    return res;
+}
+
+/***
+ * \brief Browse \p nodeId and copy the browse result into \p result
+ */
+static SOPC_ReturnStatus BrowseOneNode(const SOPC_NodeId* nodeId, OpcUa_BrowseResult* result)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
     OpcUa_BrowseRequest* browseRequest = NULL;
     OpcUa_BrowseResponse* browseResponse = NULL;
     browseRequest = SOPC_BrowseRequest_Create(1, 0, NULL);
 
     char* nodeIdStr = SOPC_NodeId_ToCString(nodeId);
-    printf("<Test_Server_Local_Service: check_references_added_node: Browsing references for node'%s' ...\n",
-           nodeIdStr);
+    printf("<Test_Server_Local_Service: BrowseOneNode: Browsing references for node'%s' ...\n", nodeIdStr);
     SOPC_Free(nodeIdStr);
     nodeIdStr = NULL;
 
@@ -720,12 +754,12 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     {
         status = SOPC_BrowseRequest_SetBrowseDescription(
             browseRequest, 0, nodeId, OpcUa_BrowseDirection_Both, NULL, true, 0,
-            OpcUa_BrowseResultMask_ReferenceTypeId | OpcUa_BrowseResultMask_IsForward);
+            OpcUa_BrowseResultMask_ReferenceTypeId | OpcUa_BrowseResultMask_IsForward |
+                OpcUa_BrowseResultMask_TargetInfo);
     }
     else
     {
-        printf(
-            "<Test_Server_Local_Service: check_references_added_node: Failed to create browseRequest (outOfMemory)\n");
+        printf("<Test_Server_Local_Service: BrowseOneNode: Failed to create browseRequest (outOfMemory)\n");
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
 
@@ -736,7 +770,7 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     else
     {
         printf(
-            "<Test_Server_Local_Service: check_references_added_node: Failed to configure browseRequest, with status = "
+            "<Test_Server_Local_Service: BrowseOneNode: Failed to configure browseRequest, with status = "
             "%d\n",
             status);
     }
@@ -746,75 +780,25 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     {
         if (SOPC_IsGoodStatus(browseResponse->ResponseHeader.ServiceResult) && 1 == browseResponse->NoOfResults)
         {
-            OpcUa_BrowseResult* result = &browseResponse->Results[0];
-            if (SOPC_IsGoodStatus(result->StatusCode))
+            status = SOPC_EncodeableObject_Move(result, &browseResponse->Results[0]);
+            if (SOPC_STATUS_OK != status)
             {
-                if (result->NoOfReferences == 1) // Method (no TypeDef reference)
-                {
-                    OpcUa_ReferenceDescription* ref = &result->References[0];
-                    bool res = SOPC_NodeId_Equal(refToParentTypeId, &ref->ReferenceTypeId);
-                    status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-                    if (SOPC_STATUS_OK != status)
-                    {
-                        printf(
-                            "<Test_Server_Local_Service: check_references_added_node: Unexpected references. Expected "
-                            ": i=%d "
-                            "Results : i=%d\n",
-                            refToParentTypeId->Data.Numeric, ref->ReferenceTypeId.Data.Numeric);
-                    }
-                }
-                else if (result->NoOfReferences == 2) // Object
-                {
-                    OpcUa_ReferenceDescription* ref1 = &result->References[0];
-                    OpcUa_ReferenceDescription* ref2 = &result->References[1];
-                    bool res1, res2 = false;
-                    if (ref1->IsForward) // ref1 = reference to type definition, ref2 = reference to parent
-                    {
-                        res1 = SOPC_NodeId_Equal(&HasTypeDefinition, &ref1->ReferenceTypeId);
-                        res2 = SOPC_NodeId_Equal(refToParentTypeId, &ref2->ReferenceTypeId);
-                    }
-                    else // ref1 : reference to parent, ref2 = reference to type definition
-                    {
-                        res1 = SOPC_NodeId_Equal(refToParentTypeId, &ref1->ReferenceTypeId);
-                        res2 = SOPC_NodeId_Equal(&HasTypeDefinition, &ref2->ReferenceTypeId);
-                    }
-                    status = res1 && res2 ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-                    if (SOPC_STATUS_OK != status)
-                    {
-                        printf(
-                            "<Test_Server_Local_Service: check_references_added_node: Unexpected references. Expected "
-                            ": i=%d, "
-                            "i=%d. Results : i=%d, i=%d\n",
-                            HasTypeDefinition.Data.Numeric, refToParentTypeId->Data.Numeric,
-                            ref1->ReferenceTypeId.Data.Numeric, ref2->ReferenceTypeId.Data.Numeric);
-                    }
-                }
-                else
-                {
-                    printf(
-                        "<Test_Server_Local_Service: check_references_added_node: Unexpected number of references\n");
-                    status = SOPC_STATUS_NOK;
-                }
-            }
-            else
-            {
-                printf("<Test_Server_Local_Service: check_references_added_node: Unexpected BROWSE result : 0x%08x\n",
-                       result->StatusCode);
-                status = SOPC_STATUS_NOK;
+                printf(
+                    "<Test_Server_Local_Service: BrowseOneNode: Failed to copy result (encObject) with status = %d\n",
+                    status);
             }
         }
         else
         {
-            printf(
-                "<Test_Server_Local_Service: check_references_added_node: Unexpected BROWSE service result :  0x%08x",
-                browseResponse->ResponseHeader.ServiceResult);
+            printf("<Test_Server_Local_Service: BrowseOneNode: Unexpected BROWSE service result :  0x%08x",
+                   browseResponse->ResponseHeader.ServiceResult);
             status = SOPC_STATUS_NOK;
         }
     }
     else
     {
         printf(
-            "<Test_Server_Local_Service: check_references_added_node: Failed to execute local BROWSE, with status = "
+            "<Test_Server_Local_Service: BrowseOneNode: Failed to execute local BROWSE, with status = "
             "%d\n",
             status);
     }
@@ -822,6 +806,240 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     if (NULL != browseResponse)
     {
         SOPC_EncodeableObject_Delete(browseResponse->encodeableType, (void**) &browseResponse);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, const SOPC_NodeId* refToParentTypeId)
+{
+    // Browse
+    OpcUa_BrowseResult* result = NULL;
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_BrowseResult_EncodeableType, (void**) &result);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = BrowseOneNode(nodeId, result);
+        if (SOPC_STATUS_OK != status)
+        {
+            if (result != NULL)
+            {
+                SOPC_EncodeableObject_Delete(result->encodeableType, (void**) &result);
+            }
+            return status;
+        }
+    }
+    else
+    {
+        printf(
+            "<Test_Server_Local_Service: check_references_added_node: Failed to create BrowseResult encodeableObject. "
+            "status = %d \n",
+            status);
+    }
+    // Check references
+    if (SOPC_IsGoodStatus(result->StatusCode))
+    {
+        if (result->NoOfReferences == 1) // Method (no TypeDef reference)
+        {
+            OpcUa_ReferenceDescription* ref = &result->References[0];
+            bool res = SOPC_NodeId_Equal(refToParentTypeId, &ref->ReferenceTypeId);
+            status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            if (SOPC_STATUS_OK != status)
+            {
+                printf(
+                    "<Test_Server_Local_Service: check_references_added_node (Method): Unexpected references. Expected "
+                    ": i=%d "
+                    "Results : i=%d\n",
+                    refToParentTypeId->Data.Numeric, ref->ReferenceTypeId.Data.Numeric);
+            }
+        }
+        else if (result->NoOfReferences == NB_OF_REFERENCES_DIALOG_CONDITION) // Object: DialogCondition
+        {
+            // Find and check HasTypeDef (forward)
+            bool resHasTypeDef = FindAndCheckReference(result, true, &HasTypeDefinitionId, &DialogConditionType);
+
+            // Find and check RefToParent (inverse)
+            bool resInverseRefToParent = FindAndCheckReference(result, false, refToParentTypeId, &ObjectsFolder);
+
+            // Find and check(number) RefToChild (Aggregates + forward)
+            int32_t nbOfRefToChild = 0;
+            int32_t i = 0;
+            while (i < result->NoOfReferences)
+            {
+                OpcUa_ReferenceDescription* ref = &result->References[i];
+                if (ref->IsForward)
+                {
+                    bool isHasPropertyType = SOPC_NodeId_Equal(&HasPropertyType, &ref->ReferenceTypeId);
+                    bool isHasComponentTypeId = SOPC_NodeId_Equal(&HasComponentTypeId, &ref->ReferenceTypeId);
+                    if (isHasPropertyType || isHasComponentTypeId)
+                    {
+                        nbOfRefToChild++;
+                    }
+                }
+                i++;
+            }
+            bool resRefToChild = (nbOfRefToChild == NB_OF_CHILD_DIALOG_CONDITION) ? true : false;
+
+            // EnabledState is defined into the SubType DialogConditionType, but is also defined into the
+            // overtype ConditionType. Only the EnabledState of DialogConditionType must be instantiated/added.
+            // Check subtype effect on EnabledState:
+            // 1. nbEnabledState unicity (Only one node with *EnabledStateQName* browse name)
+            // 2. Add EnabledState from DialogConditionType (The one with number of references =
+            // NB_OF_REFERENCE_DIALOG_COND_TYPE_ENABLED_STATE). EnabledState from ConditionType has many more references
+            i = 0;
+            bool resEnabledState = false;
+            uint8_t nbEnabledState = 0;
+            while (i < result->NoOfReferences)
+            {
+                OpcUa_ReferenceDescription* ref = &result->References[i];
+                if (ref->IsForward)
+                {
+                    bool isHasComponentTypeId = SOPC_NodeId_Equal(&HasComponentTypeId, &ref->ReferenceTypeId);
+                    if (isHasComponentTypeId)
+                    {
+                        int comparison = -2;
+                        SOPC_QualifiedName_Compare(&ref->BrowseName, &EnabledStateQName, &comparison);
+                        // EnableState reference
+                        if (0 == comparison)
+                        {
+                            // Check unicity of EnableState
+                            nbEnabledState++;
+
+                            // Browse
+                            OpcUa_BrowseResult* resultEnabledState = NULL;
+                            SOPC_ReturnStatus stCode = SOPC_EncodeableObject_Create(&OpcUa_BrowseResult_EncodeableType,
+                                                                                    (void**) &resultEnabledState);
+                            if (SOPC_STATUS_OK == stCode)
+                            {
+                                stCode = BrowseOneNode(&ref->NodeId.NodeId, resultEnabledState);
+                            }
+                            else
+                            {
+                                printf(
+                                    "<Test_Server_Local_Service: check_references_added_node (Object): Failed to "
+                                    "create "
+                                    "EnabledState BrowseResult encodeableObject. "
+                                    "stCode = %d \n",
+                                    stCode);
+                            }
+                            // Check references
+                            if (SOPC_STATUS_OK == stCode)
+                            {
+                                if (SOPC_IsGoodStatus(resultEnabledState->StatusCode))
+                                {
+                                    resEnabledState = (resultEnabledState->NoOfReferences ==
+                                                       NB_OF_REFERENCE_DIALOG_COND_TYPE_ENABLED_STATE)
+                                                          ? true
+                                                          : false;
+                                }
+                            }
+                            else
+                            {
+                                printf(
+                                    "<Test_Server_Local_Service: check_references_added_node (Object): Failed to "
+                                    "browse "
+                                    "EnabledState stCode = % d \n",
+                                    stCode);
+                            }
+                            if (resultEnabledState != NULL)
+                            {
+                                SOPC_EncodeableObject_Delete(resultEnabledState->encodeableType,
+                                                             (void**) &resultEnabledState);
+                            }
+                        }
+                    }
+                }
+                i++;
+            }
+            // Compute all checks
+            status = resHasTypeDef && resInverseRefToParent && resRefToChild && resEnabledState && 1 == nbEnabledState
+                         ? SOPC_STATUS_OK
+                         : SOPC_STATUS_NOK;
+            if (SOPC_STATUS_OK != status)
+            {
+                printf("<Test_Server_Local_Service: check_references_added_node (Object): Unexpected references:");
+                if (!resHasTypeDef)
+                {
+                    printf(" Bad HasTypeDef reference !");
+                }
+                if (!resInverseRefToParent)
+                {
+                    printf(" Bad inverse reference to Parent !");
+                }
+                if (!resRefToChild)
+                {
+                    printf(" Bad number of child references. Expected : %d. Results : %d !",
+                           NB_OF_CHILD_DIALOG_CONDITION, nbOfRefToChild);
+                }
+                if (!resEnabledState)
+                {
+                    printf(
+                        " Failed to check subtype effect on EnabledState (Wrong number of references). Expected : "
+                        "%d !",
+                        NB_OF_REFERENCE_DIALOG_COND_TYPE_ENABLED_STATE);
+                }
+                if (1 != nbEnabledState)
+                {
+                    printf(
+                        " Failed to check subtype effect on EnabledState (Unicity issue). Results (nbEnabledState): "
+                        "%d.",
+                        nbEnabledState);
+                }
+                printf("\n");
+            }
+        }
+        else
+        {
+            printf("<Test_Server_Local_Service: check_references_added_node: Unexpected number of references\n");
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        printf("<Test_Server_Local_Service: check_references_added_node: Unexpected BROWSE result : 0x%08x\n",
+               result->StatusCode);
+        status = SOPC_STATUS_NOK;
+    }
+    // Free memory
+    if (NULL != result)
+    {
+        SOPC_EncodeableObject_Delete(result->encodeableType, (void**) &result);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus check_inverse_reference_type_to_addedNode(const SOPC_NodeId* type,
+                                                                   const SOPC_NodeId* addedNode)
+{
+    // Browse
+    OpcUa_BrowseResult* result = NULL;
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_BrowseResult_EncodeableType, (void**) &result);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = BrowseOneNode(type, result);
+        if (SOPC_STATUS_OK != status)
+        {
+            if (result != NULL)
+            {
+                SOPC_EncodeableObject_Delete(result->encodeableType, (void**) &result);
+            }
+            return status;
+        }
+    }
+    else
+    {
+        printf(
+            "<Test_Server_Local_Service: check_inverse_reference_type_to_addedNode: Failed to create BrowseResult "
+            "encodeableObject. "
+            "status = %d \n",
+            status);
+    }
+    // Check references
+    if (SOPC_IsGoodStatus(result->StatusCode))
+    {
+        // Find and check HasTypeDef (inverse)
+        bool resHasTypeDef = FindAndCheckReference(result, false, &HasTypeDefinitionId, addedNode);
+        status = resHasTypeDef ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        // Free memory
+        SOPC_EncodeableObject_Delete(result->encodeableType, (void**) &result);
     }
     return status;
 }
@@ -1200,8 +1418,9 @@ int main(int argc, char* argv[])
     test_concurrent_write_read_non_reg();
 
     /*
-     * LOCAL SERVICE: very basic AddNodeObject & AddNodeMethod
+     * LOCAL SERVICE: AddNodeObject (recursive) & AddNodeMethod
      */
+
     if (SOPC_STATUS_OK == status)
     {
         // Reset expected result
@@ -1214,8 +1433,8 @@ int main(int argc, char* argv[])
         // 1) parent
         SOPC_ExpandedNodeId parentNode;
         SOPC_ExpandedNodeId_Initialize(&parentNode);
-        parentNode.NodeId.Data.Numeric = OpcUaId_ObjectsFolder;
-        // 2) ref type from parent to the node to add : refOrganizeTypeId
+        parentNode.NodeId = ObjectsFolder;
+        // 2) ref type from parent to the node to add : OrganizeTypeId
         // 3) Node to add (nodeId etc)
         SOPC_ExpandedNodeId nodeToAdd;
         SOPC_ExpandedNodeId_Initialize(&nodeToAdd);
@@ -1228,14 +1447,14 @@ int main(int argc, char* argv[])
         // 5) Type def of the node to add
         SOPC_ExpandedNodeId typeDefinition;
         SOPC_ExpandedNodeId_Initialize(&typeDefinition);
-        typeDefinition.NodeId.Data.Numeric = OpcUaId_FolderType;
+        typeDefinition.NodeId = DialogConditionType;
 
-        status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, &parentNode, &refOrganizeTypeId, &nodeToAdd,
+        status = SOPC_AddNodeRequest_SetObjectAttributes(addNodesReq, 0, &parentNode, &OrganizeTypeId, &nodeToAdd,
                                                          &nodeToAddBrowseName, &typeDefinition, NULL, NULL, NULL, NULL,
                                                          NULL);
 
         /* Adapt params for Method to add */
-        // 2) ref type from parent to the node to add : refHasComponentTypeId
+        // 2) ref type from parent to the node to add : HasComponentTypeId
         // 3) Node to add (nodeId etc)
         SOPC_ExpandedNodeId_Initialize(&nodeToAdd);
         nodeToAdd.NodeId = newMetNodeId;
@@ -1244,9 +1463,8 @@ int main(int argc, char* argv[])
         nodeToAddBrowseName.NamespaceIndex = 1;
         status = SOPC_String_AttachFromCstring(&nodeToAddBrowseName.Name, "NewMetAddedNode");
 
-        status =
-            SOPC_AddNodeRequest_SetMethodAttributes(addNodesReq, 1, &parentNode, &refHasComponentTypeId, &nodeToAdd,
-                                                    &nodeToAddBrowseName, NULL, NULL, NULL, NULL, NULL, NULL);
+        status = SOPC_AddNodeRequest_SetMethodAttributes(addNodesReq, 1, &parentNode, &HasComponentTypeId, &nodeToAdd,
+                                                         &nodeToAddBrowseName, NULL, NULL, NULL, NULL, NULL, NULL);
 
         // Use 1 as AddNode request context
         status = SOPC_ServerHelper_LocalServiceAsync(addNodesReq, 1);
@@ -1276,15 +1494,22 @@ int main(int argc, char* argv[])
         /* Check the references of the Object node added*/
         if (SOPC_STATUS_OK == status)
         {
-            status = check_references_added_node(&newObjNodeId, &refOrganizeTypeId);
+            status = check_references_added_node(&newObjNodeId, &OrganizeTypeId);
             printf("<Test_Server_Local_Service: check_references_added_node (Object): %s\n",
                    SOPC_STATUS_OK == status ? "OK" : "NOK");
         }
         /* Check the references of the Method node added */
         if (SOPC_STATUS_OK == status)
         {
-            status = check_references_added_node(&newMetNodeId, &refHasComponentTypeId);
+            status = check_references_added_node(&newMetNodeId, &HasComponentTypeId);
             printf("<Test_Server_Local_Service: check_references_added_node (Method): %s\n",
+                   SOPC_STATUS_OK == status ? "OK" : "NOK");
+        }
+        /* Check the inverse references of the Object node added (DialogConditionType->newObjNodeId) */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = check_inverse_reference_type_to_addedNode(&DialogConditionType, &newObjNodeId);
+            printf("<Test_Server_Local_Service: check_inverse_reference_type_to_addedNode (Object): %s\n",
                    SOPC_STATUS_OK == status ? "OK" : "NOK");
         }
     }
