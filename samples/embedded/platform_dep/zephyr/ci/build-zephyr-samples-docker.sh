@@ -72,6 +72,7 @@ shift
 
 export ADD_CONF=$*
 
+BOARD_NAME=$(echo "${BOARD}" | tr '/' '_')
 
 
 [[ -z $BOARD ]] && export BOARD=mimxrt1064_evk && echo "Using default board ${BOARD}"
@@ -82,20 +83,20 @@ export ADD_CONF=$*
 #west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
 [ -d "${SAMPLESDIR}/${APP}" ] || fail "Invalid application $APP"
 
-echo " ** Building ${APP} ... " | mkdir -p ${OUTDIR} |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+echo " ** Building ${APP} ... " | mkdir -p ${OUTDIR} |tee -a ${OUTDIR}/${APP}_${BOARD_NAME}.log
 cd ${SAMPLESDIR}/${APP} || return 1
 sudo rm -rf build || return  1
 
 echo "Command : 'west build -b ${BOARD} -- ${OPT_IP_ADDRESS} ${ADD_CONF} . '"
-west build -b ${BOARD} -- ${OPT_IP_ADDRESS} ${ADD_CONF} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
+west build -b ${BOARD} -- ${OPT_IP_ADDRESS} ${ADD_CONF} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD_NAME}.log
 chmod --recursive 777 build
 mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
 if ! [ -f build/zephyr/zephyr.bin ] ; then
-  echo " ** Build ${APP} failed " | mkdir -p ${OUTDIR} | tee -a ${OUTDIR}/${APP}_${BOARD}.log
+  echo " ** Build ${APP} failed " | mkdir -p ${OUTDIR} | tee -a ${OUTDIR}/${APP}_${BOARD_NAME}.log
   exit 1
 fi
-cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD}.bin 2>&1 |tee -a ${OUTDIR}/${APP}_${BOARD}.log
-echo " ** Build ${APP} OK " | mkdir -p ${OUTDIR} |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD_NAME}.bin 2>&1 |tee -a ${OUTDIR}/${APP}_${BOARD_NAME}.log
+echo " ** Build ${APP} OK " | mkdir -p ${OUTDIR} |tee -a ${OUTDIR}/${APP}_${BOARD_NAME}.log
 
 ls -l ${OUTDIR}/
 chmod -R 777 build

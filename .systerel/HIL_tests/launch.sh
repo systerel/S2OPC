@@ -96,6 +96,7 @@ index=0
         [ -d "$EMB_DIR/${APP}" ] || fail "APP '$APP' is not supported on HIL tests"
         # Identify the board involved in the test
         BOARD=$(jq -r ".build.${BUILD_NAME}.board" "$BUILD_CFG_LIST")
+        BOARD_NAME=$(echo "${BOARD}" | tr '/' '_')
         [ -z "${BOARD}" ] && fail "Missing 'BOARD' field in 'builds' ($BUILD)"
         # Identify the extension (.bin, .elf ...) involved in the test
         # !!!!! Not used yet as only .bin are supported for now !!!!!
@@ -106,8 +107,8 @@ index=0
         [ -z "${IP_ADDRESS}" ] && fail "Missing 'IP_ADDRESS' field in 'builds' ($BUILD)"
         #Compile and flash the right application on the right board according to previous parameters
 
-        LOG_FILE=$LOG_PATH/compile_${OS}_${APP}_${BOARD}.log
-        OUT_FILE=$HOST_DIR/build_${OS}/${APP}_${BOARD}.${EXTENSION}
+        LOG_FILE=$LOG_PATH/compile_${OS}_${APP}_${BOARD_NAME}.log
+        OUT_FILE=$HOST_DIR/build_${OS}/${APP}_${BOARD_NAME}.${EXTENSION}
         if ! [ -f $OUT_FILE ] ; then
           echo "Building $(basename ${OUT_FILE}) for board $BOARD"
            ${HIL_DIR}/compile.sh "$OS" "$BOARD" "$APP" "$EXTENSION" "$IP_ADDRESS" > $LOG_FILE 2>&1
@@ -116,9 +117,9 @@ index=0
           echo "Not rebuilding $(basename ${OUT_FILE})"
         fi
 
-        LOG_FILE=$LOG_PATH/flash_${OS}_${APP}_${BOARD}.log
+        LOG_FILE=$LOG_PATH/flash_${OS}_${APP}_${BOARD_NAME}.log
         echo "Flash $APP/$OS on board $BOARD SN=$SERIAL"
-        ${HIL_DIR}/flash_app.sh "$SERIAL" "${APP}_${BOARD}.${EXTENSION}" "${OS}" > $LOG_FILE 2>&1
+        ${HIL_DIR}/flash_app.sh "$SERIAL" "${APP}_${BOARD_NAME}.${EXTENSION}" "${OS}" > $LOG_FILE 2>&1
         [ $? != 0 ]  && cat $LOG_FILE && fail "Flashing failed"
         ((index=index+1))
     done
