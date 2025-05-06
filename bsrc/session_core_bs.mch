@@ -309,6 +309,7 @@ OPERATIONS
         :(
             status        : t_StatusCode_i        &
             signature     : t_SignatureData_i     &
+            status : {e_sc_ok, e_sc_bad_unexpected_error, e_sc_bad_nonce_invalid, e_sc_bad_certificate_uri_invalid} &
 
             (status = e_sc_ok
              =>

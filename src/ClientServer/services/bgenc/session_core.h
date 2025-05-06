@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 26/11/2025 10:52:16
+ Date                 : 01/12/2025 10:47:29
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -118,11 +118,25 @@ extern void session_core__l_server_activate_session_req_and_resp_sm(
    const constants__t_msg_i session_core__activate_req_msg,
    const constants__t_msg_i session_core__activate_resp_msg,
    constants_statuscodes_bs__t_StatusCode_i * const session_core__ret);
+extern void session_core__l_server_create_session_req_and_resp_sm(
+   const constants__t_session_i session_core__p_session,
+   const constants__t_channel_i session_core__p_channel,
+   const constants__t_msg_i session_core__create_req_msg,
+   const constants__t_msg_i session_core__create_resp_msg,
+   constants__t_session_i * const session_core__nsession,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__p_service_ret);
 extern void session_core__l_server_secure_channel_lost_session_sm(
    const t_bool session_core__p_dom,
    const constants__t_channel_i session_core__p_channel,
    const constants__t_channel_i session_core__p_lost_channel,
    const constants__t_session_i session_core__p_session);
+extern void session_core__l_server_write_create_session_resp(
+   const constants__t_session_i session_core__p_session,
+   const constants__t_channel_i session_core__p_channel,
+   const constants__t_session_token_i session_core__p_session_token,
+   const constants__t_msg_i session_core__create_req_msg,
+   const constants__t_msg_i session_core__create_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__p_service_ret);
 extern void session_core__server_internal_activate_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,

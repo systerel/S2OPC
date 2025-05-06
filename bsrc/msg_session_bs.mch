@@ -115,7 +115,8 @@ OPERATIONS
         endpoint_config_idx : t_endpoint_config_idx_i &
         endpoint_config_idx : t_endpoint_config_idx
     THEN
-        ret :(ret : t_StatusCode_i & ret : t_StatusCode)
+        ret :(ret : t_StatusCode_i &
+              ret : {e_sc_bad_invalid_argument, e_sc_ok, e_sc_bad_unexpected_error, e_sc_bad_out_of_memory})
     END
     ;
 

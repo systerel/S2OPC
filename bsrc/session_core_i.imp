@@ -84,6 +84,119 @@ PROMOTES
     server_notify_session_closed
 
 LOCAL_OPERATIONS
+    nsession, p_service_ret <-- l_server_create_session_req_and_resp_sm (p_session, p_channel, create_req_msg, create_resp_msg) =
+    PRE
+        p_session  : t_session_i                   &
+        p_session  : t_session                     &
+        p_session  : s_session                     &
+        p_session /: s_client_session              &
+        s_session  = dom(a_state)                  &
+        a_state(p_session) = e_session_init        &
+        p_session /: ran(a_server_token)           &
+        p_channel  : t_channel_i                   &
+        p_channel  : s_channel_connected           &
+        p_channel  : dom(a_endpoint)               &
+        create_req_msg : t_msg_i                   &
+        create_req_msg = c_msg_in                  &
+        c_msg_in : t_msg                           &
+        a_msg_in_type = e_msg_session_create_req   &
+        create_resp_msg : t_msg_i                  &
+        create_resp_msg = c_msg_out                &
+        c_msg_out : t_msg                          &
+        a_msg_out_type = e_msg_session_create_resp &
+        dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating})
+    THEN
+        CHOICE
+            ANY l_nsession_token WHERE
+                l_nsession_token : t_session_token_i &
+                l_nsession_token : t_session_token - dom(a_server_token)
+            THEN
+                nsession := p_session                                  ||
+                a_server_user_auth_attempts(p_session) := 0            ||
+                a_channel(p_session) := p_channel                      || // associate current channel
+                a_server_token := a_server_token <+ {l_nsession_token |-> p_session} ||
+                p_service_ret, a_state, a_NonceServer :(
+                    p_service_ret : t_StatusCode_i &
+                    a_state = a_state$0 <+ {p_session |-> e_session_created} &
+                    a_NonceServer : t_session +-> t_Nonce &
+                    dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
+
+                    p_service_ret : {e_sc_bad_unexpected_error, e_sc_bad_nonce_invalid, e_sc_bad_certificate_uri_invalid,
+                                     e_sc_bad_invalid_argument, e_sc_ok, e_sc_bad_out_of_memory} &
+                    (p_service_ret = e_sc_ok =>
+                        {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
+                        p_session : dom(a_NonceServer)) &
+                    (p_service_ret /= e_sc_ok =>
+                        a_NonceServer = a_NonceServer$0)
+                )
+            END
+        OR
+            nsession := c_session_indet ||
+            p_service_ret :: {e_sc_bad_too_many_sessions, e_sc_bad_security_checks_failed} ||
+
+            s_session                   := s_session - {p_session}                     ||
+            a_state                     := {p_session} <<| a_state                     ||
+            a_channel                   := {p_session} <<| a_channel                   ||
+            a_NonceServer               := {p_session} <<| a_NonceServer               ||
+            a_client_orphaned           := {p_session} <<| a_client_orphaned           ||
+            a_user_server               := {p_session} <<| a_user_server               ||
+            a_user_server_cert          := {p_session} <<| a_user_server_cert          ||
+            a_server_token              := a_server_token |>> {p_session}              ||
+            a_server_user_auth_attempts := {p_session} <<| a_server_user_auth_attempts ||
+            a_server_client_locales     := a_server_client_locales <+ {p_session|->c_LocaleIds_empty} ||
+            a_session_roles             := {p_session} <<| a_session_roles             ||
+            a_user_client               := {p_session} <<| a_user_client               ||
+            a_user_secu_client          := {p_session} <<| a_user_secu_client          ||
+            a_client_token              := {p_session} <<| a_client_token              ||
+            a_NonceClient               := {p_session} <<| a_NonceClient               ||
+            a_client_to_create          := {p_session} <<| a_client_to_create          ||
+            a_client_app_context        := {p_session} <<| a_client_app_context
+        END
+    END
+    ;
+
+    p_service_ret <-- l_server_write_create_session_resp (p_session, p_channel, p_session_token, create_req_msg, create_resp_msg) =
+    PRE
+        p_session  : t_session_i                    &
+        p_session  : t_session                      &
+        p_session  : s_session                      &
+        p_session /: s_client_session               &
+        p_session  : dom(a_state)                   &
+        a_state(p_session) = e_session_created      &
+        p_session  : ran(a_server_token)            &
+        p_channel  : t_channel_i                    &
+        p_channel  : s_channel_connected            &
+        p_channel  : dom(a_endpoint)                &
+        p_session_token : t_session_token_i         &
+        p_session_token : t_session_token           &
+        p_session_token : dom(a_server_token)       &
+        a_server_token(p_session_token) = p_session &
+        create_req_msg : t_msg_i                    &
+        create_req_msg = c_msg_in                   &
+        c_msg_in : t_msg                            &
+        a_msg_in_type = e_msg_session_create_req    &
+        create_resp_msg : t_msg_i                   &
+        create_resp_msg = c_msg_out                 &
+        c_msg_out : t_msg                           &
+        a_msg_out_type = e_msg_session_create_resp  &
+        dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating})
+    THEN
+        CHOICE
+            p_service_ret := e_sc_ok  ||
+            a_NonceServer :(
+                a_NonceServer : t_session +-> t_Nonce &
+                dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
+                {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
+                p_session : dom(a_NonceServer))
+            // sends response
+        OR
+            // TODO: could return at least all result codes from table 15
+            p_service_ret :(p_service_ret : t_StatusCode_i &
+                            p_service_ret : {e_sc_bad_unexpected_error, e_sc_bad_nonce_invalid, e_sc_bad_certificate_uri_invalid,
+                                             e_sc_bad_invalid_argument, e_sc_bad_out_of_memory})
+        END
+    END
+    ;
 
     res_activated <-- server_internal_activate_req_and_resp (channel, session, transitoryState, p_user, activate_req_msg, activate_resp_msg) =
     PRE
@@ -573,15 +686,10 @@ OPERATIONS
     END
     ;
 
-    nsession, service_ret <-- server_create_session_req_and_resp_sm (channel, create_req_msg, create_resp_msg) =
+    p_service_ret <-- l_server_write_create_session_resp (p_session, p_channel, p_session_token, create_req_msg, create_resp_msg) =
     VAR
-        l_nsession,
-        l_valid_session,
         l_channel_config_idx,
-        l_nsession_token,
-        l_valid_session_token,
         l_endpoint_config_idx,
-        l_valid_server_cert,
         l_crypto_status,
         l_signature,
         l_nonce,
@@ -592,98 +700,119 @@ OPERATIONS
         l_bret
     IN
         l_set_cert := FALSE;
-        l_bret := FALSE;
+        l_channel_config_idx <-- get_channel_info (p_channel);
+        l_endpoint_config_idx <-- server_get_endpoint_config (p_channel);
+
+        write_create_session_msg_session_token (create_resp_msg, p_session, p_session_token);
+        /* Set revised timeout to : MIN <= requested timeout <= MAX */
+        write_create_session_msg_session_revised_timeout (create_req_msg, create_resp_msg);
+        write_create_session_resp_msg_maxRequestMessageSize (create_resp_msg);
+
+        p_service_ret <-- write_create_session_msg_server_endpoints (create_req_msg, create_resp_msg, l_endpoint_config_idx);
+        IF p_service_ret = e_sc_ok THEN
+            l_secpol <-- get_SecurityPolicy(p_channel);
+            IF l_secpol /= e_secpol_None THEN
+                /* If the security policy is not none, the nonce and server certificate are needed */
+                l_set_cert := TRUE;
+                /* Do the cryptographic challenge which may fail because of mallocs */
+                l_crypto_status, l_signature <-- server_create_session_req_do_crypto(create_req_msg, l_endpoint_config_idx, l_channel_config_idx);
+                IF  l_crypto_status = e_sc_ok THEN
+                    /* Write server signature */
+                    l_bret <-- write_create_session_resp_signature(create_resp_msg, l_signature);
+                    clear_Signature(l_signature);
+                    IF l_bret = FALSE THEN
+                        p_service_ret := e_sc_bad_unexpected_error
+                    END
+                ELSE
+                    p_service_ret := l_crypto_status
+                END
+            END
+            ;
+            IF p_service_ret = e_sc_ok THEN
+                IF l_set_cert = FALSE THEN
+                    /* In case the security policy is None we might still need the nonce for password encryption */
+                    l_endpoint_config_idx <-- server_get_endpoint_config (p_channel);
+                    l_set_cert <-- server_may_need_user_token_encryption(l_endpoint_config_idx, l_channel_config_idx)
+                END
+                ;
+                IF l_set_cert = TRUE THEN
+                    /* Write server certificate */
+                    l_bret <-- write_create_session_resp_cert(create_resp_msg, l_endpoint_config_idx)
+                ELSE
+                    l_bret := TRUE
+                END
+                ;
+                IF l_bret = TRUE THEN
+                    l_bret, l_nonce <-- server_set_fresh_nonce(p_session, l_channel_config_idx);
+                    IF l_bret = TRUE THEN
+                        /* Write server nonce */
+                        write_create_session_resp_nonce(create_resp_msg, l_nonce)
+                    END
+                END
+                ;
+                IF l_bret = TRUE THEN
+                    l_cli_app_desc <-- get_create_session_req_client_desc_copy(create_req_msg);
+                    l_cli_cert_tb <-- get_create_session_req_client_certificate_tb(create_req_msg);
+                    set_server_client_create_session_info (p_session, l_cli_app_desc, l_cli_cert_tb)
+                END
+                ;
+                IF l_bret = FALSE THEN
+                    p_service_ret := e_sc_bad_unexpected_error
+                END
+            END
+        END
+        ;
+        IF p_service_ret = e_sc_ok THEN
+            /* Minimize the encoding OPC UA message body maximum size with the maxResponseMessageSize requested by client.
+               Initial value is defined with SC sendMaxMessageSize.*/
+            create_session_req_export_maxResponseMessageSize (l_channel_config_idx, create_req_msg)
+        END
+    END
+    ;
+
+    nsession, p_service_ret <-- l_server_create_session_req_and_resp_sm (p_session, p_channel, create_req_msg, create_resp_msg) =
+    VAR
+        l_channel_config_idx,
+        l_nsession_token,
+        l_valid_session_token,
+        l_valid_server_cert
+    IN
+        create_session(p_session, p_channel, e_session_created, FALSE);
+        l_channel_config_idx <-- get_channel_info (p_channel);
+        l_valid_server_cert <-- create_session_req_check_client_certificate (create_req_msg, l_channel_config_idx);
+        l_nsession_token <-- server_get_fresh_session_token (l_channel_config_idx, p_session);
+        l_valid_session_token <-- server_is_valid_session_token (l_nsession_token);
+        IF  l_valid_session_token = TRUE & l_valid_server_cert = TRUE
+        THEN
+            nsession := p_session;
+            p_service_ret <-- l_server_write_create_session_resp (p_session, p_channel, l_nsession_token, create_req_msg, create_resp_msg)
+        ELSE
+            IF l_valid_server_cert = TRUE
+            THEN
+                p_service_ret := e_sc_bad_too_many_sessions
+            ELSE
+                p_service_ret := e_sc_bad_security_checks_failed
+            END;
+            nsession := c_session_indet;
+            set_session_state_closed (p_session, e_sc_bad_session_id_invalid, FALSE)
+        END
+    END
+    ;
+
+    nsession, service_ret <-- server_create_session_req_and_resp_sm (channel, create_req_msg, create_resp_msg) =
+    VAR
+        l_nsession,
+        l_valid_session
+    IN
         service_ret := e_sc_bad_out_of_memory;
         l_nsession <-- init_new_session (FALSE);
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE THEN
-            create_session(l_nsession, channel, e_session_created, FALSE);
-            l_channel_config_idx <-- get_channel_info (channel);
-            /* Check client certificate is the same than the one used for SC */
-            l_valid_server_cert <-- create_session_req_check_client_certificate (create_req_msg, l_channel_config_idx);
-            l_nsession_token <-- server_get_fresh_session_token (l_channel_config_idx, l_nsession);
-            l_valid_session_token <-- server_is_valid_session_token (l_nsession_token);
-            IF  l_valid_session_token = TRUE & l_valid_server_cert = TRUE
-            THEN
-                l_endpoint_config_idx <-- server_get_endpoint_config (channel);
-                write_create_session_msg_session_token (create_resp_msg, l_nsession, l_nsession_token);
-                /* Set revised timeout to : MIN <= requested timeout <= MAX */
-                write_create_session_msg_session_revised_timeout (create_req_msg, create_resp_msg);
-                write_create_session_resp_msg_maxRequestMessageSize (create_resp_msg);
-
-                service_ret <-- write_create_session_msg_server_endpoints (create_req_msg, create_resp_msg, l_endpoint_config_idx);
-                IF service_ret = e_sc_ok THEN
-                    l_secpol <-- get_SecurityPolicy(channel);
-                    IF l_secpol /= e_secpol_None THEN
-                        /* If the security policy is not none, the nonce and server certificate are needed */
-                        l_set_cert := TRUE;
-                        /* Do the cryptographic challenge which may fail because of mallocs */
-                        l_crypto_status, l_signature <-- server_create_session_req_do_crypto(create_req_msg, l_endpoint_config_idx, l_channel_config_idx);
-                        IF  l_crypto_status = e_sc_ok THEN
-                            /* Write server signature */
-                            l_bret <-- write_create_session_resp_signature(create_resp_msg, l_signature);
-                            clear_Signature(l_signature);
-                            IF l_bret = FALSE THEN
-                                service_ret := e_sc_bad_unexpected_error
-                            END
-                        ELSE
-                            service_ret := l_crypto_status
-                        END
-                    END
-                    ;
-                    IF service_ret = e_sc_ok THEN
-                        IF l_set_cert = FALSE THEN
-                            /* In case the security policy is None we might still need the nonce for password encryption */
-                            l_endpoint_config_idx <-- server_get_endpoint_config (channel);
-                            l_set_cert <-- server_may_need_user_token_encryption(l_endpoint_config_idx, l_channel_config_idx)
-                        END
-                        ;
-                        IF l_set_cert = TRUE THEN
-                            /* Write server certificate */
-                            l_bret <-- write_create_session_resp_cert(create_resp_msg, l_endpoint_config_idx)
-                        ELSE
-                            l_bret := TRUE
-                        END
-                        ;
-                        IF l_bret = TRUE THEN
-                            l_bret, l_nonce <-- server_set_fresh_nonce(l_nsession, l_channel_config_idx);
-                            IF l_bret = TRUE THEN
-                                /* Write server nonce */
-                                write_create_session_resp_nonce(create_resp_msg, l_nonce)
-                            END
-                        END
-                        ;
-                        IF l_bret = TRUE THEN
-                            l_cli_app_desc <-- get_create_session_req_client_desc_copy(create_req_msg);
-                            l_cli_cert_tb <-- get_create_session_req_client_certificate_tb(create_req_msg);
-                            set_server_client_create_session_info (l_nsession, l_cli_app_desc, l_cli_cert_tb)
-                        END
-                        ;
-                        IF l_bret = FALSE THEN
-                            service_ret := e_sc_bad_unexpected_error
-                        END
-                    END
-                END
-                ;
-                IF service_ret = e_sc_ok THEN
-                    /* Minimize the encoding OPC UA message body maximum size with the maxResponseMessageSize requested by client.
-                       Initial value is defined with SC sendMaxMessageSize.*/
-                    create_session_req_export_maxResponseMessageSize (l_channel_config_idx, create_req_msg)
-                END
-            ELSE
-                IF l_valid_server_cert = TRUE
-                THEN
-                    service_ret := e_sc_bad_too_many_sessions
-                ELSE
-                    service_ret := e_sc_bad_security_checks_failed
-                END;
-                set_session_state_closed (l_nsession, e_sc_bad_session_id_invalid, FALSE);
-                l_nsession := c_session_indet
-            END
+            nsession, service_ret <-- l_server_create_session_req_and_resp_sm (l_nsession, channel, create_req_msg, create_resp_msg)
         ELSE
+            nsession := c_session_indet;
             service_ret := e_sc_bad_too_many_sessions
-        END;
-        nsession := l_nsession
+        END
     END
     ;
 

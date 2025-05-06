@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 26/11/2025 10:52:16
+ Date                 : 01/12/2025 10:47:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -273,20 +273,16 @@ void session_core__client_create_session_req_sm(
    }
 }
 
-void session_core__server_create_session_req_and_resp_sm(
-   const constants__t_channel_i session_core__channel,
+void session_core__l_server_write_create_session_resp(
+   const constants__t_session_i session_core__p_session,
+   const constants__t_channel_i session_core__p_channel,
+   const constants__t_session_token_i session_core__p_session_token,
    const constants__t_msg_i session_core__create_req_msg,
    const constants__t_msg_i session_core__create_resp_msg,
-   constants__t_session_i * const session_core__nsession,
-   constants_statuscodes_bs__t_StatusCode_i * const session_core__service_ret) {
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__p_service_ret) {
    {
-      constants__t_session_i session_core__l_nsession;
-      t_bool session_core__l_valid_session;
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
-      constants__t_session_token_i session_core__l_nsession_token;
-      t_bool session_core__l_valid_session_token;
       constants__t_endpoint_config_idx_i session_core__l_endpoint_config_idx;
-      t_bool session_core__l_valid_server_cert;
       constants_statuscodes_bs__t_StatusCode_i session_core__l_crypto_status;
       constants__t_SignatureData_i session_core__l_signature;
       constants__t_Nonce_i session_core__l_nonce;
@@ -297,126 +293,169 @@ void session_core__server_create_session_req_and_resp_sm(
       t_bool session_core__l_bret;
       
       session_core__l_set_cert = false;
-      session_core__l_bret = false;
+      channel_mgr__get_channel_info(session_core__p_channel,
+         &session_core__l_channel_config_idx);
+      channel_mgr__server_get_endpoint_config(session_core__p_channel,
+         &session_core__l_endpoint_config_idx);
+      msg_session_bs__write_create_session_msg_session_token(session_core__create_resp_msg,
+         session_core__p_session,
+         session_core__p_session_token);
+      msg_session_bs__write_create_session_msg_session_revised_timeout(session_core__create_req_msg,
+         session_core__create_resp_msg);
+      msg_session_bs__write_create_session_resp_msg_maxRequestMessageSize(session_core__create_resp_msg);
+      msg_session_bs__write_create_session_msg_server_endpoints(session_core__create_req_msg,
+         session_core__create_resp_msg,
+         session_core__l_endpoint_config_idx,
+         session_core__p_service_ret);
+      if (*session_core__p_service_ret == constants_statuscodes_bs__e_sc_ok) {
+         channel_mgr__get_SecurityPolicy(session_core__p_channel,
+            &session_core__l_secpol);
+         if (session_core__l_secpol != constants__e_secpol_None) {
+            session_core__l_set_cert = true;
+            session_core_1__server_create_session_req_do_crypto(session_core__create_req_msg,
+               session_core__l_endpoint_config_idx,
+               session_core__l_channel_config_idx,
+               &session_core__l_crypto_status,
+               &session_core__l_signature);
+            if (session_core__l_crypto_status == constants_statuscodes_bs__e_sc_ok) {
+               msg_session_bs__write_create_session_resp_signature(session_core__create_resp_msg,
+                  session_core__l_signature,
+                  &session_core__l_bret);
+               session_core_1__clear_Signature(session_core__l_signature);
+               if (session_core__l_bret == false) {
+                  *session_core__p_service_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+               }
+            }
+            else {
+               *session_core__p_service_ret = session_core__l_crypto_status;
+            }
+         }
+         if (*session_core__p_service_ret == constants_statuscodes_bs__e_sc_ok) {
+            if (session_core__l_set_cert == false) {
+               channel_mgr__server_get_endpoint_config(session_core__p_channel,
+                  &session_core__l_endpoint_config_idx);
+               session_core_1__server_may_need_user_token_encryption(session_core__l_endpoint_config_idx,
+                  session_core__l_channel_config_idx,
+                  &session_core__l_set_cert);
+            }
+            if (session_core__l_set_cert == true) {
+               msg_session_bs__write_create_session_resp_cert(session_core__create_resp_msg,
+                  session_core__l_endpoint_config_idx,
+                  &session_core__l_bret);
+            }
+            else {
+               session_core__l_bret = true;
+            }
+            if (session_core__l_bret == true) {
+               session_core_1__server_set_fresh_nonce(session_core__p_session,
+                  session_core__l_channel_config_idx,
+                  &session_core__l_bret,
+                  &session_core__l_nonce);
+               if (session_core__l_bret == true) {
+                  msg_session_bs__write_create_session_resp_nonce(session_core__create_resp_msg,
+                     session_core__l_nonce);
+               }
+            }
+            if (session_core__l_bret == true) {
+               msg_session_bs__get_create_session_req_client_desc_copy(session_core__create_req_msg,
+                  &session_core__l_cli_app_desc);
+               msg_session_bs__get_create_session_req_client_certificate_tb(session_core__create_req_msg,
+                  &session_core__l_cli_cert_tb);
+               session_core_1__set_server_client_create_session_info(session_core__p_session,
+                  session_core__l_cli_app_desc,
+                  session_core__l_cli_cert_tb);
+            }
+            if (session_core__l_bret == false) {
+               *session_core__p_service_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+            }
+         }
+      }
+      if (*session_core__p_service_ret == constants_statuscodes_bs__e_sc_ok) {
+         msg_session_bs__create_session_req_export_maxResponseMessageSize(session_core__l_channel_config_idx,
+            session_core__create_req_msg);
+      }
+   }
+}
+
+void session_core__l_server_create_session_req_and_resp_sm(
+   const constants__t_session_i session_core__p_session,
+   const constants__t_channel_i session_core__p_channel,
+   const constants__t_msg_i session_core__create_req_msg,
+   const constants__t_msg_i session_core__create_resp_msg,
+   constants__t_session_i * const session_core__nsession,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__p_service_ret) {
+   {
+      constants__t_channel_config_idx_i session_core__l_channel_config_idx;
+      constants__t_session_token_i session_core__l_nsession_token;
+      t_bool session_core__l_valid_session_token;
+      t_bool session_core__l_valid_server_cert;
+      
+      session_core_1__create_session(session_core__p_session,
+         session_core__p_channel,
+         constants__e_session_created,
+         false);
+      channel_mgr__get_channel_info(session_core__p_channel,
+         &session_core__l_channel_config_idx);
+      msg_session_bs__create_session_req_check_client_certificate(session_core__create_req_msg,
+         session_core__l_channel_config_idx,
+         &session_core__l_valid_server_cert);
+      session_core_1__server_get_fresh_session_token(session_core__l_channel_config_idx,
+         session_core__p_session,
+         &session_core__l_nsession_token);
+      session_core_1__server_is_valid_session_token(session_core__l_nsession_token,
+         &session_core__l_valid_session_token);
+      if ((session_core__l_valid_session_token == true) &&
+         (session_core__l_valid_server_cert == true)) {
+         *session_core__nsession = session_core__p_session;
+         session_core__l_server_write_create_session_resp(session_core__p_session,
+            session_core__p_channel,
+            session_core__l_nsession_token,
+            session_core__create_req_msg,
+            session_core__create_resp_msg,
+            session_core__p_service_ret);
+      }
+      else {
+         if (session_core__l_valid_server_cert == true) {
+            *session_core__p_service_ret = constants_statuscodes_bs__e_sc_bad_too_many_sessions;
+         }
+         else {
+            *session_core__p_service_ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
+         }
+         *session_core__nsession = constants__c_session_indet;
+         session_core_1__set_session_state_closed(session_core__p_session,
+            constants_statuscodes_bs__e_sc_bad_session_id_invalid,
+            false);
+      }
+   }
+}
+
+void session_core__server_create_session_req_and_resp_sm(
+   const constants__t_channel_i session_core__channel,
+   const constants__t_msg_i session_core__create_req_msg,
+   const constants__t_msg_i session_core__create_resp_msg,
+   constants__t_session_i * const session_core__nsession,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__service_ret) {
+   {
+      constants__t_session_i session_core__l_nsession;
+      t_bool session_core__l_valid_session;
+      
       *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
       session_core_1__init_new_session(false,
          &session_core__l_nsession);
       session_core_1__is_valid_session(session_core__l_nsession,
          &session_core__l_valid_session);
       if (session_core__l_valid_session == true) {
-         session_core_1__create_session(session_core__l_nsession,
+         session_core__l_server_create_session_req_and_resp_sm(session_core__l_nsession,
             session_core__channel,
-            constants__e_session_created,
-            false);
-         channel_mgr__get_channel_info(session_core__channel,
-            &session_core__l_channel_config_idx);
-         msg_session_bs__create_session_req_check_client_certificate(session_core__create_req_msg,
-            session_core__l_channel_config_idx,
-            &session_core__l_valid_server_cert);
-         session_core_1__server_get_fresh_session_token(session_core__l_channel_config_idx,
-            session_core__l_nsession,
-            &session_core__l_nsession_token);
-         session_core_1__server_is_valid_session_token(session_core__l_nsession_token,
-            &session_core__l_valid_session_token);
-         if ((session_core__l_valid_session_token == true) &&
-            (session_core__l_valid_server_cert == true)) {
-            channel_mgr__server_get_endpoint_config(session_core__channel,
-               &session_core__l_endpoint_config_idx);
-            msg_session_bs__write_create_session_msg_session_token(session_core__create_resp_msg,
-               session_core__l_nsession,
-               session_core__l_nsession_token);
-            msg_session_bs__write_create_session_msg_session_revised_timeout(session_core__create_req_msg,
-               session_core__create_resp_msg);
-            msg_session_bs__write_create_session_resp_msg_maxRequestMessageSize(session_core__create_resp_msg);
-            msg_session_bs__write_create_session_msg_server_endpoints(session_core__create_req_msg,
-               session_core__create_resp_msg,
-               session_core__l_endpoint_config_idx,
-               session_core__service_ret);
-            if (*session_core__service_ret == constants_statuscodes_bs__e_sc_ok) {
-               channel_mgr__get_SecurityPolicy(session_core__channel,
-                  &session_core__l_secpol);
-               if (session_core__l_secpol != constants__e_secpol_None) {
-                  session_core__l_set_cert = true;
-                  session_core_1__server_create_session_req_do_crypto(session_core__create_req_msg,
-                     session_core__l_endpoint_config_idx,
-                     session_core__l_channel_config_idx,
-                     &session_core__l_crypto_status,
-                     &session_core__l_signature);
-                  if (session_core__l_crypto_status == constants_statuscodes_bs__e_sc_ok) {
-                     msg_session_bs__write_create_session_resp_signature(session_core__create_resp_msg,
-                        session_core__l_signature,
-                        &session_core__l_bret);
-                     session_core_1__clear_Signature(session_core__l_signature);
-                     if (session_core__l_bret == false) {
-                        *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
-                     }
-                  }
-                  else {
-                     *session_core__service_ret = session_core__l_crypto_status;
-                  }
-               }
-               if (*session_core__service_ret == constants_statuscodes_bs__e_sc_ok) {
-                  if (session_core__l_set_cert == false) {
-                     channel_mgr__server_get_endpoint_config(session_core__channel,
-                        &session_core__l_endpoint_config_idx);
-                     session_core_1__server_may_need_user_token_encryption(session_core__l_endpoint_config_idx,
-                        session_core__l_channel_config_idx,
-                        &session_core__l_set_cert);
-                  }
-                  if (session_core__l_set_cert == true) {
-                     msg_session_bs__write_create_session_resp_cert(session_core__create_resp_msg,
-                        session_core__l_endpoint_config_idx,
-                        &session_core__l_bret);
-                  }
-                  else {
-                     session_core__l_bret = true;
-                  }
-                  if (session_core__l_bret == true) {
-                     session_core_1__server_set_fresh_nonce(session_core__l_nsession,
-                        session_core__l_channel_config_idx,
-                        &session_core__l_bret,
-                        &session_core__l_nonce);
-                     if (session_core__l_bret == true) {
-                        msg_session_bs__write_create_session_resp_nonce(session_core__create_resp_msg,
-                           session_core__l_nonce);
-                     }
-                  }
-                  if (session_core__l_bret == true) {
-                     msg_session_bs__get_create_session_req_client_desc_copy(session_core__create_req_msg,
-                        &session_core__l_cli_app_desc);
-                     msg_session_bs__get_create_session_req_client_certificate_tb(session_core__create_req_msg,
-                        &session_core__l_cli_cert_tb);
-                     session_core_1__set_server_client_create_session_info(session_core__l_nsession,
-                        session_core__l_cli_app_desc,
-                        session_core__l_cli_cert_tb);
-                  }
-                  if (session_core__l_bret == false) {
-                     *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
-                  }
-               }
-            }
-            if (*session_core__service_ret == constants_statuscodes_bs__e_sc_ok) {
-               msg_session_bs__create_session_req_export_maxResponseMessageSize(session_core__l_channel_config_idx,
-                  session_core__create_req_msg);
-            }
-         }
-         else {
-            if (session_core__l_valid_server_cert == true) {
-               *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_too_many_sessions;
-            }
-            else {
-               *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
-            }
-            session_core_1__set_session_state_closed(session_core__l_nsession,
-               constants_statuscodes_bs__e_sc_bad_session_id_invalid,
-               false);
-            session_core__l_nsession = constants__c_session_indet;
-         }
+            session_core__create_req_msg,
+            session_core__create_resp_msg,
+            session_core__nsession,
+            session_core__service_ret);
       }
       else {
+         *session_core__nsession = constants__c_session_indet;
          *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_too_many_sessions;
       }
-      *session_core__nsession = session_core__l_nsession;
    }
 }
 

@@ -238,36 +238,39 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_create_resp
     THEN
-        IF s_session = t_session
-        THEN
-            // Maximum number of sessions already allocated
-            nsession := c_session_indet ||
-            service_ret := e_sc_bad_too_many_sessions
-        ELSE
-            ANY l_nsession, l_nsession_token, l_nonce WHERE
+        CHOICE
+            ANY l_nsession WHERE
                 l_nsession : t_session_i &
-                l_nsession : t_session - s_session &
-                l_nsession_token : t_session_token_i &
-                l_nsession_token : t_session_token - dom(a_server_token) &
-                l_nonce : t_Nonce_i &
-                l_nonce : t_Nonce
+                l_nsession : t_session - s_session
             THEN
-                CHOICE
-                    s_session := s_session \/ {l_nsession}                  || // add new session to created sessions
+                s_session := s_session \/ {l_nsession} || // add new session to active sessions
+                nsession := l_nsession ||
+
+                ANY l_nsession_token WHERE
+                    l_nsession_token : t_session_token_i &
+                    l_nsession_token : t_session_token - dom(a_server_token)
+                THEN
+                    a_state(l_nsession)   := e_session_created            || // add new session to created sessions
+                    a_channel(l_nsession) := channel                      || // associate current channel
                     a_server_token := a_server_token <+ {l_nsession_token |-> l_nsession} ||
-                    a_channel(l_nsession) := channel                        || // associate current channel
-                    a_state(l_nsession) := e_session_created                ||
-                    nsession := l_nsession                                  ||
-                    service_ret := e_sc_ok                                  ||
-                    a_NonceServer(l_nsession) := l_nonce
-                    // sends response
-                OR
-                    // sends error response
-                    nsession := c_session_indet ||
-                    // TODO: could return at least all result codes from table 15
-                    service_ret :: {e_sc_bad_too_many_sessions, e_sc_bad_out_of_memory, e_sc_bad_unexpected_error}
+
+                    service_ret, a_NonceServer :(
+                        service_ret : t_StatusCode_i &
+                        a_NonceServer : t_session +-> t_Nonce &
+
+                        service_ret : {e_sc_bad_unexpected_error, e_sc_bad_nonce_invalid, e_sc_bad_certificate_uri_invalid,
+                                         e_sc_bad_invalid_argument, e_sc_ok, e_sc_bad_out_of_memory} &
+                        (service_ret = e_sc_ok =>
+                            {l_nsession} <<| a_NonceServer = {l_nsession} <<| a_NonceServer$0) &
+                        (service_ret /= e_sc_ok =>
+                            a_NonceServer = a_NonceServer$0)
+                    )
                 END
             END
+        OR
+            nsession := c_session_indet ||
+            // TODO: could return at least all result codes from table 15
+            service_ret :: {e_sc_bad_too_many_sessions, e_sc_bad_security_checks_failed}
         END
     END
     ;
