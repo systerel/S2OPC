@@ -198,6 +198,32 @@ LOCAL_OPERATIONS
     END
     ;
 
+    p_ret, p_session_token <-- l_client_user_activate_session_req_sm (p_session, p_channel, p_user_token, activate_req_msg) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session &
+        p_session : s_client_session &
+        dom(a_state) = s_session &
+        a_state(p_session) : {e_session_created, e_session_userActivated} &
+        p_session : dom(a_client_token) &
+        p_session : dom(a_NonceServer) &
+        p_session: dom(a_user_secu_client) &
+        p_session: dom(a_user_server_cert) &
+        p_channel : t_channel_i &
+        p_channel : t_channel &
+        p_channel : s_channel_connected &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
+        activate_req_msg : t_msg_i &
+        activate_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_req
+    THEN
+        p_ret :: {e_sc_ok, e_sc_bad_security_checks_failed, e_sc_bad_unexpected_error} ||
+        p_session_token :(p_session_token : t_session_token_i & p_session_token = a_client_token(p_session))
+    END
+    ;
+
     res_activated <-- server_internal_activate_req_and_resp (channel, session, transitoryState, p_user, activate_req_msg, activate_resp_msg) =
     PRE
         channel       : t_channel_i &
@@ -858,9 +884,8 @@ OPERATIONS
     END
     ;
 
-    ret, channel, session_token <-- client_user_activate_session_req_sm (session, p_user_token, activate_req_msg) =
+    p_ret, p_session_token <-- l_client_user_activate_session_req_sm (p_session, p_channel, p_user_token, activate_req_msg) =
     VAR
-        l_is_connected_channel,
         l_channel_config_idx,
         l_secpol,
         l_valid_crypto,
@@ -877,74 +902,82 @@ OPERATIONS
         l_user_token_signature,
         l_app_context
     IN
+        p_session_token <-- client_get_token_from_session (p_session);
+        l_channel_config_idx <-- get_channel_info (p_channel);
+        l_server_nonce <-- get_NonceServer(p_session, TRUE);
+        l_user_secu_policy <-- get_session_user_secu_client(p_session);
+        l_user_server_cert <-- get_session_user_server_certificate(p_session);
+        l_user_token_type <-- get_user_token_type_from_token(p_user_token);
+        // Initialize booleans
+        l_valid_cert := FALSE;
+        l_valid_user_token_sign := FALSE;
+        l_user_token_signature := c_SignatureData_indet;
+        IF l_user_token_type = e_userTokenType_userName THEN
+            IF l_user_secu_policy = e_secpol_None THEN
+                // No user encryption
+                l_valid_cert := TRUE
+            ELSE
+                // Note: server certificate is validated in case no certificate used by SC and user token needs it for encryption
+                l_valid_cert <-- may_validate_server_certificate(p_session, l_channel_config_idx, l_user_server_cert, l_user_secu_policy)
+            END
+        ELSIF l_user_token_type = e_userTokenType_x509 THEN
+            IF l_user_secu_policy /= e_secpol_None THEN
+                l_app_context <-- get_session_app_context(p_session);
+                l_user_token_signature <-- sign_user_token(l_user_server_cert, l_server_nonce, l_user_secu_policy, l_app_context)
+            END
+            ;
+            IF l_user_token_signature /= c_SignatureData_indet THEN
+                l_valid_user_token_sign <-- write_activate_msg_user_token_signature(activate_req_msg, l_user_token_signature);
+                clear_Signature(l_user_token_signature)
+            END
+        ELSIF l_user_token_type = e_userTokenType_anonymous THEN
+            l_valid_cert := TRUE
+        END
+        ;
+        IF l_valid_cert = TRUE or l_valid_user_token_sign = TRUE THEN
+            l_valid_encrypt, l_encrypted_user_token <-- may_encrypt_user_token(l_channel_config_idx, l_user_server_cert, l_server_nonce, l_user_secu_policy, p_user_token)
+        ELSE
+            l_encrypted_user_token := c_user_token_indet;
+            l_valid_encrypt := FALSE
+        END
+        ;
+        /* TODO: populate msg with parameters */
+        IF l_valid_encrypt = TRUE THEN
+            write_activate_msg_user(activate_req_msg, l_encrypted_user_token);
+            l_secpol <-- get_SecurityPolicy(p_channel);
+            IF l_secpol /= e_secpol_None THEN
+                // TODO: validate server nonce ? Or guaranteed by session state ?
+                l_valid_crypto, l_signature <-- client_activate_session_req_do_crypto(p_session, l_channel_config_idx, l_server_nonce);
+                IF l_valid_crypto = TRUE THEN
+                    l_bret <-- write_activate_session_req_msg_crypto(activate_req_msg, l_signature);
+                    clear_Signature(l_signature);
+                    IF l_bret = TRUE THEN
+                        write_activate_req_msg_locales(activate_req_msg, l_channel_config_idx);
+                        p_ret := e_sc_ok
+                    ELSE
+                        p_ret := e_sc_bad_unexpected_error
+                    END
+                ELSE
+                    p_ret := e_sc_bad_security_checks_failed
+                END
+            ELSE
+                p_ret := e_sc_ok
+            END
+        ELSE
+            /* The cert is not valid or the user token encryption failed */
+            p_ret := e_sc_bad_security_checks_failed
+        END
+    END
+    ;
+
+    ret, channel, session_token <-- client_user_activate_session_req_sm (session, p_user_token, activate_req_msg) =
+    VAR
+        l_is_connected_channel
+    IN
         channel <-- get_session_channel (session);
         l_is_connected_channel <-- is_connected_channel(channel);
         IF l_is_connected_channel = TRUE THEN
-            session_token <-- client_get_token_from_session (session);
-            l_channel_config_idx <-- get_channel_info (channel);
-            l_server_nonce <-- get_NonceServer(session, TRUE);
-            l_user_secu_policy <-- get_session_user_secu_client(session);
-            l_user_server_cert <-- get_session_user_server_certificate(session);
-            l_user_token_type <-- get_user_token_type_from_token(p_user_token);
-            // Initialize booleans
-            l_valid_cert := FALSE;
-            l_valid_user_token_sign := FALSE;
-            l_user_token_signature := c_SignatureData_indet;
-            IF l_user_token_type = e_userTokenType_userName THEN
-                IF l_user_secu_policy = e_secpol_None THEN
-                    // No user encryption
-                    l_valid_cert := TRUE
-                ELSE
-                    // Note: server certificate is validated in case no certificate used by SC and user token needs it for encryption
-                    l_valid_cert <-- may_validate_server_certificate(session, l_channel_config_idx, l_user_server_cert, l_user_secu_policy)
-                END
-            ELSIF l_user_token_type = e_userTokenType_x509 THEN
-                IF l_user_secu_policy /= e_secpol_None THEN
-                    l_app_context <-- get_session_app_context(session);
-                    l_user_token_signature <-- sign_user_token(l_user_server_cert, l_server_nonce, l_user_secu_policy, l_app_context)
-                END
-                ;
-                IF l_user_token_signature /= c_SignatureData_indet THEN
-                    l_valid_user_token_sign <-- write_activate_msg_user_token_signature(activate_req_msg, l_user_token_signature);
-                    clear_Signature(l_user_token_signature)
-                END
-            ELSIF l_user_token_type = e_userTokenType_anonymous THEN
-                l_valid_cert := TRUE
-            END
-            ;
-            IF l_valid_cert = TRUE or l_valid_user_token_sign = TRUE THEN
-                l_valid_encrypt, l_encrypted_user_token <-- may_encrypt_user_token(l_channel_config_idx, l_user_server_cert, l_server_nonce, l_user_secu_policy, p_user_token)
-            ELSE
-                l_encrypted_user_token := c_user_token_indet;
-                l_valid_encrypt := FALSE
-            END
-            ;
-            /* TODO: populate msg with parameters */
-            IF l_valid_encrypt = TRUE THEN
-                write_activate_msg_user(activate_req_msg, l_encrypted_user_token);
-                l_secpol <-- get_SecurityPolicy(channel);
-                IF l_secpol /= e_secpol_None THEN
-                    // TODO: validate server nonce ? Or guaranteed by session state ?
-                    l_valid_crypto, l_signature <-- client_activate_session_req_do_crypto(session, l_channel_config_idx, l_server_nonce);
-                    IF l_valid_crypto = TRUE THEN
-                        l_bret <-- write_activate_session_req_msg_crypto(activate_req_msg, l_signature);
-                        clear_Signature(l_signature);
-                        IF l_bret = TRUE THEN
-                            write_activate_req_msg_locales(activate_req_msg, l_channel_config_idx);
-                            ret := e_sc_ok
-                        ELSE
-                            ret := e_sc_bad_unexpected_error
-                        END
-                    ELSE
-                        ret := e_sc_bad_security_checks_failed
-                    END
-                ELSE
-                    ret := e_sc_ok
-                END
-            ELSE
-                /* The cert is not valid or the user token encryption failed */
-                ret := e_sc_bad_security_checks_failed
-            END
+            ret, session_token <-- l_client_user_activate_session_req_sm(session, channel, p_user_token, activate_req_msg)
         ELSE
             channel := c_channel_indet;
             session_token := c_session_token_indet;

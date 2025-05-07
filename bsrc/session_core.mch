@@ -316,23 +316,29 @@ OPERATIONS
     // Client sends a user activate request for current session
     ret, channel, session_token <-- client_user_activate_session_req_sm (session, p_user_token, activate_req_msg) =
     PRE
-        session : t_session_i &
-        session : s_session &
+        session : t_session_i      &
+        session : s_session        &
         session : s_client_session &
         a_state(session) : {e_session_created, e_session_userActivated} &
+        session : dom(a_client_token) &
+        session : dom(a_NonceServer)  &
         p_user_token : t_user_token_i &
-        p_user_token : t_user_token &
-        activate_req_msg : t_msg_i &
+        p_user_token : t_user_token   &
+        activate_req_msg : t_msg_i   &
         activate_req_msg = c_msg_out &
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_activate_req
     THEN
         CHOICE
-            a_state(session) := e_session_userActivating ||
-            a_user_client(session) := p_user_token       ||
-            ret := e_sc_ok                               ||
             channel :(channel : t_channel_i & channel : s_channel_connected) ||
-            session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
+            session_token :(session_token : t_session_token_i & session_token = a_client_token(session)) ||
+            ret, a_state :(
+                ret : t_StatusCode_i &
+                a_state : s_session --> t_sessionState &
+                ret : {e_sc_bad_security_checks_failed, e_sc_bad_unexpected_error, e_sc_ok} &
+                (ret = e_sc_ok  => a_state = a_state$0 <+ {session |-> e_session_userActivating}) &
+                (ret /= e_sc_ok => a_state = a_state$0)
+            )
         OR
             // applicative code provided invalid p_user_token: no change
             // ...

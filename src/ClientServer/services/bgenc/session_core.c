@@ -516,15 +516,14 @@ void session_core__client_create_session_resp_sm(
    }
 }
 
-void session_core__client_user_activate_session_req_sm(
-   const constants__t_session_i session_core__session,
+void session_core__l_client_user_activate_session_req_sm(
+   const constants__t_session_i session_core__p_session,
+   const constants__t_channel_i session_core__p_channel,
    const constants__t_user_token_i session_core__p_user_token,
    const constants__t_msg_i session_core__activate_req_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const session_core__ret,
-   constants__t_channel_i * const session_core__channel,
-   constants__t_session_token_i * const session_core__session_token) {
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__p_ret,
+   constants__t_session_token_i * const session_core__p_session_token) {
    {
-      t_bool session_core__l_is_connected_channel;
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
       constants__t_SecurityPolicy session_core__l_secpol;
       t_bool session_core__l_valid_crypto;
@@ -541,109 +540,128 @@ void session_core__client_user_activate_session_req_sm(
       constants__t_SignatureData_i session_core__l_user_token_signature;
       constants__t_session_application_context_i session_core__l_app_context;
       
+      session_core_1__client_get_token_from_session(session_core__p_session,
+         session_core__p_session_token);
+      channel_mgr__get_channel_info(session_core__p_channel,
+         &session_core__l_channel_config_idx);
+      session_core_1__get_NonceServer(session_core__p_session,
+         true,
+         &session_core__l_server_nonce);
+      session_core_1__get_session_user_secu_client(session_core__p_session,
+         &session_core__l_user_secu_policy);
+      session_core_1__get_session_user_server_certificate(session_core__p_session,
+         &session_core__l_user_server_cert);
+      user_authentication__get_user_token_type_from_token(session_core__p_user_token,
+         &session_core__l_user_token_type);
+      session_core__l_valid_cert = false;
+      session_core__l_valid_user_token_sign = false;
+      session_core__l_user_token_signature = constants__c_SignatureData_indet;
+      if (session_core__l_user_token_type == constants__e_userTokenType_userName) {
+         if (session_core__l_user_secu_policy == constants__e_secpol_None) {
+            session_core__l_valid_cert = true;
+         }
+         else {
+            session_core_1__may_validate_server_certificate(session_core__p_session,
+               session_core__l_channel_config_idx,
+               session_core__l_user_server_cert,
+               session_core__l_user_secu_policy,
+               &session_core__l_valid_cert);
+         }
+      }
+      else if (session_core__l_user_token_type == constants__e_userTokenType_x509) {
+         if (session_core__l_user_secu_policy != constants__e_secpol_None) {
+            session_core_1__get_session_app_context(session_core__p_session,
+               &session_core__l_app_context);
+            session_core_1__sign_user_token(session_core__l_user_server_cert,
+               session_core__l_server_nonce,
+               session_core__l_user_secu_policy,
+               session_core__l_app_context,
+               &session_core__l_user_token_signature);
+         }
+         if (session_core__l_user_token_signature != constants__c_SignatureData_indet) {
+            msg_session_bs__write_activate_msg_user_token_signature(session_core__activate_req_msg,
+               session_core__l_user_token_signature,
+               &session_core__l_valid_user_token_sign);
+            session_core_1__clear_Signature(session_core__l_user_token_signature);
+         }
+      }
+      else if (session_core__l_user_token_type == constants__e_userTokenType_anonymous) {
+         session_core__l_valid_cert = true;
+      }
+      if ((session_core__l_valid_cert == true) ||
+         (session_core__l_valid_user_token_sign == true)) {
+         user_authentication__may_encrypt_user_token(session_core__l_channel_config_idx,
+            session_core__l_user_server_cert,
+            session_core__l_server_nonce,
+            session_core__l_user_secu_policy,
+            session_core__p_user_token,
+            &session_core__l_valid_encrypt,
+            &session_core__l_encrypted_user_token);
+      }
+      else {
+         session_core__l_encrypted_user_token = constants__c_user_token_indet;
+         session_core__l_valid_encrypt = false;
+      }
+      if (session_core__l_valid_encrypt == true) {
+         msg_session_bs__write_activate_msg_user(session_core__activate_req_msg,
+            session_core__l_encrypted_user_token);
+         channel_mgr__get_SecurityPolicy(session_core__p_channel,
+            &session_core__l_secpol);
+         if (session_core__l_secpol != constants__e_secpol_None) {
+            session_core_1__client_activate_session_req_do_crypto(session_core__p_session,
+               session_core__l_channel_config_idx,
+               session_core__l_server_nonce,
+               &session_core__l_valid_crypto,
+               &session_core__l_signature);
+            if (session_core__l_valid_crypto == true) {
+               msg_session_bs__write_activate_session_req_msg_crypto(session_core__activate_req_msg,
+                  session_core__l_signature,
+                  &session_core__l_bret);
+               session_core_1__clear_Signature(session_core__l_signature);
+               if (session_core__l_bret == true) {
+                  msg_session_bs__write_activate_req_msg_locales(session_core__activate_req_msg,
+                     session_core__l_channel_config_idx);
+                  *session_core__p_ret = constants_statuscodes_bs__e_sc_ok;
+               }
+               else {
+                  *session_core__p_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+               }
+            }
+            else {
+               *session_core__p_ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
+            }
+         }
+         else {
+            *session_core__p_ret = constants_statuscodes_bs__e_sc_ok;
+         }
+      }
+      else {
+         *session_core__p_ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
+      }
+   }
+}
+
+void session_core__client_user_activate_session_req_sm(
+   const constants__t_session_i session_core__session,
+   const constants__t_user_token_i session_core__p_user_token,
+   const constants__t_msg_i session_core__activate_req_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__ret,
+   constants__t_channel_i * const session_core__channel,
+   constants__t_session_token_i * const session_core__session_token) {
+   {
+      t_bool session_core__l_is_connected_channel;
+      
       session_core_1__get_session_channel(session_core__session,
          session_core__channel);
       channel_mgr__is_connected_channel(*session_core__channel,
          &session_core__l_is_connected_channel);
       if (session_core__l_is_connected_channel == true) {
-         session_core_1__client_get_token_from_session(session_core__session,
+         session_core__l_client_user_activate_session_req_sm(session_core__session,
+            *session_core__channel,
+            session_core__p_user_token,
+            session_core__activate_req_msg,
+            session_core__ret,
             session_core__session_token);
-         channel_mgr__get_channel_info(*session_core__channel,
-            &session_core__l_channel_config_idx);
-         session_core_1__get_NonceServer(session_core__session,
-            true,
-            &session_core__l_server_nonce);
-         session_core_1__get_session_user_secu_client(session_core__session,
-            &session_core__l_user_secu_policy);
-         session_core_1__get_session_user_server_certificate(session_core__session,
-            &session_core__l_user_server_cert);
-         user_authentication__get_user_token_type_from_token(session_core__p_user_token,
-            &session_core__l_user_token_type);
-         session_core__l_valid_cert = false;
-         session_core__l_valid_user_token_sign = false;
-         session_core__l_user_token_signature = constants__c_SignatureData_indet;
-         if (session_core__l_user_token_type == constants__e_userTokenType_userName) {
-            if (session_core__l_user_secu_policy == constants__e_secpol_None) {
-               session_core__l_valid_cert = true;
-            }
-            else {
-               session_core_1__may_validate_server_certificate(session_core__session,
-                  session_core__l_channel_config_idx,
-                  session_core__l_user_server_cert,
-                  session_core__l_user_secu_policy,
-                  &session_core__l_valid_cert);
-            }
-         }
-         else if (session_core__l_user_token_type == constants__e_userTokenType_x509) {
-            if (session_core__l_user_secu_policy != constants__e_secpol_None) {
-               session_core_1__get_session_app_context(session_core__session,
-                  &session_core__l_app_context);
-               session_core_1__sign_user_token(session_core__l_user_server_cert,
-                  session_core__l_server_nonce,
-                  session_core__l_user_secu_policy,
-                  session_core__l_app_context,
-                  &session_core__l_user_token_signature);
-            }
-            if (session_core__l_user_token_signature != constants__c_SignatureData_indet) {
-               msg_session_bs__write_activate_msg_user_token_signature(session_core__activate_req_msg,
-                  session_core__l_user_token_signature,
-                  &session_core__l_valid_user_token_sign);
-               session_core_1__clear_Signature(session_core__l_user_token_signature);
-            }
-         }
-         else if (session_core__l_user_token_type == constants__e_userTokenType_anonymous) {
-            session_core__l_valid_cert = true;
-         }
-         if ((session_core__l_valid_cert == true) ||
-            (session_core__l_valid_user_token_sign == true)) {
-            user_authentication__may_encrypt_user_token(session_core__l_channel_config_idx,
-               session_core__l_user_server_cert,
-               session_core__l_server_nonce,
-               session_core__l_user_secu_policy,
-               session_core__p_user_token,
-               &session_core__l_valid_encrypt,
-               &session_core__l_encrypted_user_token);
-         }
-         else {
-            session_core__l_encrypted_user_token = constants__c_user_token_indet;
-            session_core__l_valid_encrypt = false;
-         }
-         if (session_core__l_valid_encrypt == true) {
-            msg_session_bs__write_activate_msg_user(session_core__activate_req_msg,
-               session_core__l_encrypted_user_token);
-            channel_mgr__get_SecurityPolicy(*session_core__channel,
-               &session_core__l_secpol);
-            if (session_core__l_secpol != constants__e_secpol_None) {
-               session_core_1__client_activate_session_req_do_crypto(session_core__session,
-                  session_core__l_channel_config_idx,
-                  session_core__l_server_nonce,
-                  &session_core__l_valid_crypto,
-                  &session_core__l_signature);
-               if (session_core__l_valid_crypto == true) {
-                  msg_session_bs__write_activate_session_req_msg_crypto(session_core__activate_req_msg,
-                     session_core__l_signature,
-                     &session_core__l_bret);
-                  session_core_1__clear_Signature(session_core__l_signature);
-                  if (session_core__l_bret == true) {
-                     msg_session_bs__write_activate_req_msg_locales(session_core__activate_req_msg,
-                        session_core__l_channel_config_idx);
-                     *session_core__ret = constants_statuscodes_bs__e_sc_ok;
-                  }
-                  else {
-                     *session_core__ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
-                  }
-               }
-               else {
-                  *session_core__ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
-               }
-            }
-            else {
-               *session_core__ret = constants_statuscodes_bs__e_sc_ok;
-            }
-         }
-         else {
-            *session_core__ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
-         }
       }
       else {
          *session_core__channel = constants__c_channel_indet;
