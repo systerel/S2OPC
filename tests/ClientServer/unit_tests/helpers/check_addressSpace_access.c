@@ -345,6 +345,52 @@ START_TEST(test_browse_node)
     SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 END_TEST
+
+START_TEST(test_delete_child_nodes)
+{
+    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(address_space);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
+    ck_assert_ptr_nonnull(addSpaceAccess);
+
+    const char* nodeToDelete = "ns=1;s=AnalogItemArrayInt32";
+    const char* childOfNodeToDelete = "ns=1;s=AnalogItemArrayInt32EURange";
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeToDelete);
+    ck_assert_ptr_nonnull(nodeId);
+
+    SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_DeleteNode(addSpaceAccess, nodeId, true, false);
+    ck_assert_uint_eq(OpcUa_UncertainReferenceNotDeleted, statusCode);
+
+    // Try to browse the node -> invalid
+    const SOPC_NodeId referencesType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_References);
+    OpcUa_ReferenceDescription* references = NULL;
+    int32_t nbOfReferences = 0;
+    statusCode = SOPC_AddressSpaceAccess_BrowseNode(
+        addSpaceAccess, nodeId, OpcUa_BrowseDirection_Both, &referencesType, true, 0, 0, &references, &nbOfReferences);
+    ck_assert_uint_eq(OpcUa_BadNodeIdUnknown, statusCode);
+    ck_assert(NULL == references);
+    ck_assert_int_eq(nbOfReferences, 0);
+
+    // Try to browse the child node -> ok
+    SOPC_NodeId* childNodeId = SOPC_NodeId_FromCString(childOfNodeToDelete);
+    statusCode = SOPC_AddressSpaceAccess_BrowseNode(
+        addSpaceAccess, childNodeId, OpcUa_BrowseDirection_Both, &referencesType, true, 0, 0, &references, &nbOfReferences);
+    ck_assert_uint_eq(SOPC_GoodGenericStatus, statusCode);
+    ck_assert_ptr_nonnull(references);
+    ck_assert_int_eq(nbOfReferences, 1); // We used TargetDeleteReference so we deleted the reference to its parent, it remains 
+                                         // only the reference to its type.
+    SOPC_Clear_Array(&nbOfReferences, (void**) &references, sizeof(*references), OpcUa_ReferenceDescription_Clear);
+    SOPC_Free(references);
+
+    SOPC_NodeId_Clear(nodeId);
+    SOPC_Free(nodeId);
+    SOPC_NodeId_Clear(childNodeId);
+    SOPC_Free(childNodeId);
+
+    SOPC_AddressSpace_Delete(address_space);
+    SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
+}
+END_TEST
 #endif
 
 Suite* tests_make_suite_address_space_access(void)
@@ -363,6 +409,7 @@ Suite* tests_make_suite_address_space_access(void)
     tcase_add_test(tc_nominal_use, test_add_object_node);
     tcase_add_test(tc_nominal_use, test_translate_browse_path);
     tcase_add_test(tc_nominal_use, test_browse_node);
+    tcase_add_test(tc_nominal_use, test_delete_child_nodes);
 #endif
     suite_add_tcase(s, tc_nominal_use);
 

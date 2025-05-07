@@ -14,4 +14,10 @@
      <TestCase name="Err-008.js"/>
     </TestCases>
    </ConformanceUnit>
+   <ConformanceUnit name="Node Management Delete Node">
+    <TestCases>
+     <TestCase name="Err-001.js"/>
+     <TestCase name="Err-002.js"/>
+    </TestCases>
+   </ConformanceUnit>
   </ConformanceGroup>
