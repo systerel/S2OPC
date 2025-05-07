@@ -64,6 +64,8 @@ else
     echo "- Run CMake" | tee -a $CURDIR/build.log
     append_cmake_option S2OPC_NANO_PROFILE
     append_cmake_option S2OPC_NODE_MANAGEMENT
+    append_cmake_option S2OPC_NODE_DELETE_CHILD_NODES
+    append_cmake_option S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
     append_cmake_option S2OPC_EVENT_MANAGEMENT
     append_cmake_option CMAKE_TOOLCHAIN_FILE
     append_cmake_option CMAKE_PREFIX_PATH

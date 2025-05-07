@@ -252,6 +252,8 @@ option(WITH_PYS2OPC "Also builds PyS2OPC" OFF)
 
 option(S2OPC_NANO_PROFILE "Use Nano profile only (limited scope of OPC UA services)" OFF)
 option(S2OPC_NODE_MANAGEMENT "Make NodeManagement service set available to clients" OFF)
+option(S2OPC_NODE_DELETE_CHILD_NODES "Make DeleteNodes service recursively delete new orphans child nodes" ON)
+option(S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES "Make DeleteNodes service delete child nodes with Organizes hierarchical references" ON)
 option(S2OPC_EVENT_MANAGEMENT "Make OPC UA Events available" OFF)
 
 # option to load static security data for embedded systems without filesystems
@@ -442,6 +444,10 @@ endif()
 list(APPEND S2OPC_DEFINITIONS  $<$<BOOL:${S2OPC_NANO_PROFILE}>:S2OPC_NANO_PROFILE>)
 # Add S2OPC_NODE_MANAGEMENT to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_MANAGEMENT}>:S2OPC_NODE_MANAGEMENT>)
+# Add S2OPC_NODE_DELETE_CHILD_NODES to compilation definition if option activated
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_DELETE_CHILD_NODES}>:S2OPC_NODE_DELETE_CHILD_NODES>)
+# Add S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES to compilation definition if option activated
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES}>:S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES>)
 # Add S2OPC_EVENT_MANAGEMENT to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_EVENT_MANAGEMENT}>:S2OPC_EVENT_MANAGEMENT>)
 

@@ -361,4 +361,23 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_BrowseNode(const SOPC_AddressSpaceAccess
                                                    OpcUa_ReferenceDescription** references,
                                                    int32_t* noOfReferences);
 
+/**
+ * @brief Delete a node from the address space.
+ *
+ * @param addSpaceAccess             The AddressSpace Access to use for the operation.
+ * @param nodeIdToDelete             The nodeId of the node to delete.
+ * @param deleteTargetReferences     Flag indicating if the references with TargetNode = nodeToDelete
+ *                                   need to be deleted.
+ * @param deleteChildNodes           Flag indicating if orphans child nodes of nodeToDelete
+ *                                   need to be deleted.
+ * @return  - SOPC_GoodGenericStatus in case of success and b_deleteTargetReferences = FALSE,
+ *          - OpcUa_UncertainReferenceNotDeleted in case of success and b_deleteTargetReferencesotherwise = TRUE,
+ *          - OpcUa_BadInvalidArgument if bad parameter,
+ *          - OpcUa_BadNodeIdUnknown \p nodeToDelete is not found.
+ */
+SOPC_StatusCode SOPC_AddressSpaceAccess_DeleteNode(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                   const SOPC_NodeId* nodeIdToDelete,
+                                                   bool deleteTargetReferences,
+                                                   bool deleteChildNodes);
+
 #endif /* SOPC_ADDRESS_SPACE_ACCESS_H_ */

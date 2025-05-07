@@ -324,9 +324,8 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_ASSERT(NULL != (void*) auxParam);
         nodeId = (SOPC_NodeId*) auxParam;
         nodeIdStr = SOPC_NodeId_ToCString(nodeId);
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ServicesMgr: SE_TO_SE_SERVER_NODE_CHANGED added=%" PRIuPTR " nodeId: %s", params,
-                               nodeIdStr);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: SE_TO_SE_SERVER_NODE_CHANGED %s nodeId: %s",
+                               params ? "added" : "deleted", nodeIdStr);
         SOPC_Free(nodeIdStr);
         io_dispatch_mgr__internal_server_node_changed((bool) params, (SOPC_NodeId*) auxParam);
         SOPC_NodeId_Clear(nodeId);

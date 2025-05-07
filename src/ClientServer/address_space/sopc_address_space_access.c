@@ -35,6 +35,45 @@
 
 #include "util_variant.h"
 
+#include "sopc_logger.h"
+
+#if 0 != S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
+static const SOPC_NodeId Organizes_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
+#endif
+
+/* Log macros used for references between two SOPC_AddressSpace_Node */
+#define LOG_NODE_REF(level, addSpace, msg, sourceNode, targetNode)                                         \
+    {                                                                                                      \
+        SOPC_ASSERT(NULL != sourceNode && NULL != targetNode && NULL != addSpace);                         \
+        const SOPC_NodeId* sourceNodeId = SOPC_AddressSpace_Get_NodeId(addSpace, sourceNode);              \
+        const SOPC_NodeId* targetNodeId = SOPC_AddressSpace_Get_NodeId(addSpace, targetNode);              \
+        SOPC_ASSERT(NULL != sourceNodeId && NULL != targetNodeId);                                         \
+        char* sourceNodeIdStr = SOPC_NodeId_ToCString(sourceNodeId);                                       \
+        char* targetNodeIdStr = SOPC_NodeId_ToCString(targetNodeId);                                       \
+        SOPC_ASSERT(NULL != sourceNodeIdStr && NULL != targetNodeIdStr);                                   \
+        switch (level)                                                                                     \
+        {                                                                                                  \
+        case SOPC_LOG_LEVEL_ERROR:                                                                         \
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, msg, sourceNodeIdStr, targetNodeIdStr);   \
+            break;                                                                                         \
+        case SOPC_LOG_LEVEL_DEBUG:                                                                         \
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, msg, sourceNodeIdStr, targetNodeIdStr);   \
+            break;                                                                                         \
+        case SOPC_LOG_LEVEL_WARNING:                                                                       \
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, msg, sourceNodeIdStr, targetNodeIdStr); \
+            break;                                                                                         \
+        default:                                                                                           \
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, msg, sourceNodeIdStr, targetNodeIdStr);   \
+            break;                                                                                         \
+        }                                                                                                  \
+        SOPC_Free(sourceNodeIdStr);                                                                        \
+        SOPC_Free(targetNodeIdStr);                                                                        \
+    }
+
+// NodeIds used for DeleteNodes
+static const SOPC_NodeId HasComponent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
+static const SOPC_NodeId HasChild_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasChild);
+
 struct _SOPC_AddressSpaceAccess
 {
     SOPC_AddressSpace* addSpaceRef;
@@ -44,8 +83,6 @@ struct _SOPC_AddressSpaceAccess
 
 // Constant to define initial capacity of array of reference description.
 #define BROWSE_REFERENCE_DESCRIPTION_RESULT_LEN_ARRAY 10
-
-static const SOPC_NodeId HasComponent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
 
 SOPC_AddressSpaceAccess* SOPC_AddressSpaceAccess_Create(SOPC_AddressSpace* addSpaceRef, bool recordOperations)
 {
@@ -1059,6 +1096,282 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_BrowseNode(const SOPC_AddressSpaceAccess
     {
         // Deallocate array in case of failure.
         SOPC_Array_Delete(refsArr);
+    }
+
+    return stCode;
+}
+
+static void delete_target_reference_in_source_node(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                   SOPC_AddressSpace_Node* sourceNode,
+                                                   SOPC_AddressSpace_Node* targetNode)
+{
+    SOPC_ASSERT(NULL != sourceNode);
+    SOPC_ASSERT(NULL != targetNode);
+
+    const int32_t* noOfReferences = SOPC_AddressSpace_Get_NoOfReferences(addSpaceAccess->addSpaceRef, sourceNode);
+    OpcUa_ReferenceNode** references = SOPC_AddressSpace_Get_References(addSpaceAccess->addSpaceRef, sourceNode);
+    OpcUa_ReferenceNode* reference = NULL;
+    int32_t nodeId_comparison = -1;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    if (noOfReferences != NULL && 0 < *noOfReferences && NULL != references)
+    {
+        SOPC_SLinkedList* indexOfRefsToDelete = SOPC_SLinkedList_Create((size_t) *noOfReferences);
+        SOPC_ASSERT(NULL != indexOfRefsToDelete);
+        for (int32_t indexReference = 0; indexReference < *noOfReferences; indexReference++)
+        {
+            // For each reference, get the targetNode. If it is equal to target_node,
+            // then delete the reference.
+            reference = &(*references)[indexReference];
+            const SOPC_NodeId* targetNodeId = SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, targetNode);
+            SOPC_ASSERT(NULL != targetNodeId);
+            status = SOPC_NodeId_Compare(targetNodeId, &reference->TargetId.NodeId, &nodeId_comparison);
+            if (0 == nodeId_comparison && SOPC_STATUS_OK == status)
+            {
+                SOPC_SLinkedList_Append(indexOfRefsToDelete, 0,
+                                        (uintptr_t)(indexReference + 1)); // prevent from adding value 0 and fail
+            }
+        }
+        SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(indexOfRefsToDelete);
+        while (SOPC_SLinkedList_HasNext(&it) && SOPC_STATUS_OK == status)
+        {
+            int32_t indexOfRef = (int32_t) SOPC_SLinkedList_Next(&it);
+            // Delete reference
+            bool is_ref_deleted =
+                SOPC_NodeMgtHelperInternal_RemoveRefAtIndex(addSpaceAccess->addSpaceRef, sourceNode, indexOfRef - 1);
+            if (is_ref_deleted)
+            {
+                LOG_NODE_REF(SOPC_LOG_LEVEL_DEBUG, addSpaceAccess->addSpaceRef,
+                             "Success deleting reference from %s to %s", sourceNode, targetNode);
+            }
+            else
+            {
+                LOG_NODE_REF(SOPC_LOG_LEVEL_ERROR, addSpaceAccess->addSpaceRef,
+                             "Failed deleting reference from %s to %s", sourceNode, targetNode);
+            }
+        }
+        SOPC_SLinkedList_Delete(indexOfRefsToDelete);
+        indexOfRefsToDelete = NULL;
+    }
+}
+
+static void SOPC_AddressSpaceAccess_DeleteNodeOnly(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                   SOPC_AddressSpace_Node* node,
+                                                   SOPC_AddressSpaceAccessOperation* op)
+{
+    SOPC_ASSERT(NULL != node);
+    SOPC_ASSERT(NULL != addSpaceAccess);
+
+    // Add operation node deleted while address space access if necessary
+    if (NULL != op)
+    {
+        const void* addedOp = NULL;
+        SOPC_NodeId* nodeIdCopy = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        SOPC_ReturnStatus status =
+            SOPC_NodeId_Copy(nodeIdCopy, SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, node));
+        if (SOPC_STATUS_OK == status && NULL != nodeIdCopy)
+        {
+            addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, (uintptr_t) op);
+            if (NULL != addedOp)
+            {
+                op->operation = SOPC_ADDSPACE_CHANGE_NODE;
+                op->param1 = false;
+                SOPC_NodeId* nodeIdCopy = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+                SOPC_ASSERT(SOPC_STATUS_OK == SOPC_NodeId_Copy(nodeIdCopy, nodeId));
+                op->param2 = nodeIdCopy;
+            }
+            else
+            {
+                SOPC_Free(op);
+            }
+        }
+    }
+
+    // Delete the node
+    SOPC_AddressSpace_Node_Clear(addSpaceAccess->addSpaceRef, node);
+}
+
+static bool is_single_parent(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                             SOPC_AddressSpace_Node* alreadyKnownParentNode,
+                             SOPC_AddressSpace_Node* childNode)
+{
+    SOPC_ASSERT(NULL != childNode);
+    SOPC_ASSERT(NULL != alreadyKnownParentNode);
+
+    const int32_t* noOfReferences = SOPC_AddressSpace_Get_NoOfReferences(addSpaceAccess->addSpaceRef, childNode);
+    OpcUa_ReferenceNode** references = SOPC_AddressSpace_Get_References(addSpaceAccess->addSpaceRef, childNode);
+    const OpcUa_ReferenceNode* reference = NULL;
+    bool b_initial_parent_found = false;
+    bool b_otherParentFound = false;
+    int32_t nodeId_comparison = -1;
+    if (noOfReferences != NULL && 0 < *noOfReferences && NULL != references)
+    {
+        for (int32_t indexReference = 0; indexReference < *noOfReferences && !b_otherParentFound; indexReference++)
+        {
+            reference = &(*references)[indexReference];
+            if (reference->IsInverse)
+            {
+                // Iterate on all inverse references of the child.
+                // If it has one inverse reference with parent / child type (same type when checking childs)
+                // that is different from the identified parent, b_otherParentFound = TRUE.
+                bool b_ref_type_child_or_organizes =
+                    is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &HasChild_Type);
+#if 0 != S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
+                b_ref_type_child_or_organizes |= is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &Organizes_Type);
+#endif
+                if (b_ref_type_child_or_organizes)
+                {
+                    // Check if the TargetNode is in same server.
+                    SOPC_ReturnStatus status =
+                        (reference->TargetId.ServerIndex == 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        const SOPC_NodeId* alreadyKnownParentNodeId =
+                            SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, alreadyKnownParentNode);
+                        SOPC_ASSERT(NULL != alreadyKnownParentNodeId);
+                        status = SOPC_NodeId_Compare(alreadyKnownParentNodeId, &reference->TargetId.NodeId,
+                                                     &nodeId_comparison);
+                    }
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        if (0 == nodeId_comparison)
+                        {
+                            b_initial_parent_found = true;
+                        }
+                        else
+                        {
+                            b_otherParentFound = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (!b_initial_parent_found)
+    {
+        LOG_NODE_REF(SOPC_LOG_LEVEL_WARNING, addSpaceAccess->addSpaceRef,
+                     "DeleteNode: inverse reference from child node %s to parent node %s has not been found.",
+                     childNode, alreadyKnownParentNode);
+    }
+
+    return !b_otherParentFound;
+}
+
+static SOPC_StatusCode SOPC_AddressSpaceAccess_DeleteNodeRec(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                             SOPC_AddressSpace_Node* nodeToDelete,
+                                                             bool deleteTargetReferences,
+                                                             bool deleteChildNodes,
+                                                             int32_t recursionLimit)
+{
+    SOPC_ASSERT(NULL != addSpaceAccess);
+    SOPC_ASSERT(NULL != nodeToDelete);
+    SOPC_ASSERT(0 <= recursionLimit);
+
+    if (0 == recursionLimit)
+    {
+        return OpcUa_BadWouldBlock;
+    }
+
+    // Prepare record operation
+    SOPC_AddressSpaceAccessOperation* op = NULL;
+    if (addSpaceAccess->recordOperations)
+    {
+        SOPC_ASSERT(NULL != addSpaceAccess->operations);
+        op = SOPC_Calloc(1, sizeof(*op));
+        if (NULL == op)
+        {
+            return OpcUa_BadOutOfMemory;
+        }
+    }
+
+    SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
+    // If the nodeId does not exist in the address space, ignore.
+    const int32_t* noOfReferences = SOPC_AddressSpace_Get_NoOfReferences(addSpaceAccess->addSpaceRef, nodeToDelete);
+    OpcUa_ReferenceNode** references = SOPC_AddressSpace_Get_References(addSpaceAccess->addSpaceRef, nodeToDelete);
+    const OpcUa_ReferenceNode* reference = NULL;
+    if (NULL != noOfReferences && 0 < *noOfReferences && NULL != references)
+    {
+        for (int32_t indexReference = 0; indexReference < *noOfReferences && SOPC_IsGoodStatus(stCode);
+             indexReference++)
+        {
+            // Iterate on references.
+            reference = &(*references)[indexReference];
+            const SOPC_NodeId* targetNodeId = &reference->TargetId.NodeId;
+            SOPC_AddressSpace_Node* targetNode = SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, targetNodeId);
+            if (0 == reference->TargetId.ServerIndex && NULL != targetNode)
+            {
+                // Recursively delete the TargetNode if:
+                // - the reference type is HasChild or subtype, or Organizes or subtype if the
+                //   option is set,
+                // - the reference is a forward ref,
+                // - delete target references is set,
+                // - it has a single parent in the address space.
+                bool b_ref_type_child_or_organizes =
+                    is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &HasChild_Type);
+#if 0 != S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
+                b_ref_type_child_or_organizes |= is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &Organizes_Type);
+#endif
+                bool deleteChilds = (deleteChildNodes && b_ref_type_child_or_organizes && !reference->IsInverse &&
+                                     is_single_parent(addSpaceAccess, nodeToDelete, targetNode));
+                if (deleteChilds)
+                {
+                    // Delete the targetNode (and thus all its references including those to nodeIdToDelete)
+                    stCode = SOPC_AddressSpaceAccess_DeleteNodeRec(addSpaceAccess, targetNode, deleteTargetReferences,
+                                                                   deleteChildNodes, recursionLimit - 1);
+                }
+                else if (deleteTargetReferences)
+                {
+                    // The targetNode will not be deleted. But we want to delete the reference to nodeToDelete
+                    // if DeleteTargetReferences is set.
+                    delete_target_reference_in_source_node(addSpaceAccess, targetNode, nodeToDelete);
+                }
+            } // No treament if the TargetNode is not in the same server
+        }
+    }
+    // Log if fail in deleting recursively child
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        const SOPC_NodeId* nodeId = SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, nodeToDelete);
+        SOPC_ASSERT(NULL != nodeId);
+        char* nodeIdStr = SOPC_NodeId_ToCString(nodeId);
+        SOPC_ASSERT(NULL != nodeIdStr);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Fail in deleting child nodes of %s, only node %s was deleted.", nodeIdStr, nodeIdStr);
+        SOPC_Free(nodeIdStr);
+    }
+
+    // Delete the node and its references as a source, and post "node deleted" event
+    SOPC_AddressSpaceAccess_DeleteNodeOnly(addSpaceAccess, nodeToDelete, op);
+
+    return stCode;
+}
+
+SOPC_StatusCode SOPC_AddressSpaceAccess_DeleteNode(const SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                   const SOPC_NodeId* nodeIdToDelete,
+                                                   bool deleteTargetReferences,
+                                                   bool deleteChildNodes)
+{
+    if (NULL == addSpaceAccess || NULL == nodeIdToDelete)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+    SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
+    SOPC_AddressSpace_Node* root_node = SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, nodeIdToDelete);
+    if (NULL == root_node)
+    {
+        // If the source node does not exist, return BadNodeIdUnknow.
+        stCode = OpcUa_BadNodeIdUnknown;
+    }
+    else
+    {
+        // If the source node exists, delete it and maybe recursively delete its childs.
+        stCode = SOPC_AddressSpaceAccess_DeleteNodeRec(addSpaceAccess, root_node, deleteTargetReferences,
+                                                       deleteChildNodes, RECURSION_LIMIT);
+    }
+
+    if (SOPC_IsGoodStatus(stCode) && deleteTargetReferences)
+    {
+        stCode = OpcUa_UncertainReferenceNotDeleted;
     }
     return stCode;
 }

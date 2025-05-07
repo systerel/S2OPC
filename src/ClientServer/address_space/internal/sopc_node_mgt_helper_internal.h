@@ -65,4 +65,8 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(SOPC_Addres
 
 bool SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(SOPC_AddressSpace* addSpace, const SOPC_NodeId* parentNodeId);
 
+bool SOPC_NodeMgtHelperInternal_RemoveRefAtIndex(SOPC_AddressSpace* addSpace,
+                                                 SOPC_AddressSpace_Node* node,
+                                                 int32_t indexReference);
+
 #endif /* SOPC_NODE_MGT_HELPER_INTERNAL_H_ */

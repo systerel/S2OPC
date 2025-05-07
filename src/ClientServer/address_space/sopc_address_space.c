@@ -249,6 +249,7 @@ bool SOPC_AddressSpace_Has_Attribute(SOPC_AddressSpace* space, SOPC_AddressSpace
     ret_type* SOPC_AddressSpace_Get_##name(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node) \
     {                                                                                              \
         SOPC_ASSERT(space != NULL);                                                                \
+        SOPC_ASSERT(node != NULL);                                                                 \
         SOPC_ASSERT(node->node_class > 0);                                                         \
         switch (node->node_class)                                                                  \
         {                                                                                          \

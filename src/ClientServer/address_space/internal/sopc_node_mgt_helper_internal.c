@@ -896,3 +896,28 @@ bool SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(SOPC_AddressSpace* add
     OpcUa_ReferenceNode_Clear(&((*refs)[*nbRefs]));
     return true;
 }
+
+bool SOPC_NodeMgtHelperInternal_RemoveRefAtIndex(SOPC_AddressSpace* addSpace,
+                                                 SOPC_AddressSpace_Node* node,
+                                                 int32_t indexReference)
+{
+    SOPC_ASSERT(NULL != addSpace && NULL != node);
+    int32_t* nbRefs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, node);
+    SOPC_ASSERT(NULL != nbRefs);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(addSpace, node);
+    SOPC_ASSERT(NULL != refs);
+    if (*nbRefs > 0 && (uint64_t) *nbRefs < SIZE_MAX)
+    {
+        SOPC_ASSERT(indexReference < *nbRefs);
+        OpcUa_ReferenceNode* newRefs = SOPC_Calloc(((size_t) *nbRefs) - 1, sizeof(OpcUa_ReferenceNode));
+        memcpy(newRefs, *refs, ((size_t) indexReference) * sizeof(OpcUa_ReferenceNode));
+        memcpy(newRefs + (size_t) indexReference, *refs + (size_t) indexReference + 1,
+               ((size_t)(*nbRefs - indexReference - 1)) * sizeof(OpcUa_ReferenceNode));
+        OpcUa_ReferenceNode_Clear(&((*refs)[indexReference]));
+        SOPC_Free(*refs);
+        *refs = newRefs;
+        (*nbRefs)--;
+        return true;
+    }
+    return false;
+}
