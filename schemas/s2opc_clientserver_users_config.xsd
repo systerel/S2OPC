@@ -7,6 +7,7 @@
     <xs:attribute type="xs:boolean" name="execute" default="false"/>
     <xs:attribute type="xs:boolean" name="addnode" default="false"/>
     <xs:attribute type="xs:boolean" name="receive_events" default="false"/>
+    <xs:attribute type="xs:boolean" name="deletenode" default="false"/>
   </xs:complexType>
   <xs:complexType name="AnonymousType">
     <xs:sequence>
@@ -40,7 +41,8 @@
         <xs:attribute type="xs:boolean" name="write" default="false"/>
         <xs:attribute type="xs:boolean" name="execute" default="false"/>
         <xs:attribute type="xs:boolean" name="addnode" default="false"/>
-        <xs:attribute type="xs:boolean" name="receive_events" default="false">
+        <xs:attribute type="xs:boolean" name="receive_events" default="false"/>
+        <xs:attribute type="xs:boolean" name="deletenode" default="false">
           <xs:annotation>
             <xs:documentation>Default certificate authorization for accepted certificate, evaluated as trustworthy according to the PKI</xs:documentation>
           </xs:annotation>
@@ -56,7 +58,8 @@
         <xs:attribute type="xs:boolean" name="write" default="false"/>
         <xs:attribute type="xs:boolean" name="execute" default="false"/>
         <xs:attribute type="xs:boolean" name="addnode" default="false"/>
-        <xs:attribute type="xs:boolean" name="receive_events" default="false">
+        <xs:attribute type="xs:boolean" name="receive_events" default="false"/>
+        <xs:attribute type="xs:boolean" name="deletenode" default="false">
           <xs:annotation>
               <xs:documentation>Explicitly certificate authorization for accepted certificate, evaluated as trustworthy according to the PKI </xs:documentation>
           </xs:annotation>

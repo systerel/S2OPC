@@ -71,6 +71,7 @@ typedef struct user_rights
     bool exec;
     bool addnode;
     bool receive_events;
+    bool deletenode;
 } user_rights;
 
 typedef struct user_password
@@ -444,6 +445,8 @@ static bool start_authorization(struct parse_context_t* ctx, const XML_Char** at
     attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "receive_events", attrs);
     rights->receive_events = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "deletenode", attrs);
+    rights->deletenode = attr_val != NULL && 0 == strcmp(attr_val, "true");
     return true;
 }
 
@@ -610,9 +613,10 @@ static bool end_user_certificates(struct parse_context_t* ctx)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                  "users loader: No issued certificate section is defined, default rights authorization "
-                                 "are used (r=%d, w=%d, ex=%d, an=%d, re=%d)",
+                                 "are used (r=%d, w=%d, ex=%d, an=%d, re=%d, dn=%d)",
                                  ctx->defaultCertRights.read, ctx->defaultCertRights.write, ctx->defaultCertRights.exec,
-                                 ctx->defaultCertRights.addnode, ctx->defaultCertRights.receive_events);
+                                 ctx->defaultCertRights.addnode, ctx->defaultCertRights.receive_events,
+                                 ctx->defaultCertRights.deletenode);
     }
 
     return true;
@@ -1001,7 +1005,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
                 SOPC_ASSERT(NULL != up);
                 // Check user access
                 if (up->rights.read || up->rights.write || up->rights.exec || up->rights.addnode ||
-                    up->rights.receive_events)
+                    up->rights.receive_events || up->rights.deletenode)
                 {
                     // At least 1 type of access authorized
                     *authenticated = SOPC_USER_AUTHENTICATION_OK;
@@ -1118,6 +1122,9 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
             case SOPC_USER_AUTHORIZATION_OPERATION_RECEIVE_EVENTS:
                 *pbOperationAuthorized = up->rights.receive_events;
                 break;
+            case SOPC_USER_AUTHORIZATION_OPERATION_DELETENODE:
+                *pbOperationAuthorized = up->rights.deletenode;
+                break;
             default:
                 SOPC_ASSERT(false && "Unknown operation type.");
                 break;
@@ -1158,6 +1165,9 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
         case SOPC_USER_AUTHORIZATION_OPERATION_RECEIVE_EVENTS:
             *pbOperationAuthorized = userRights->receive_events;
             break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_DELETENODE:
+            *pbOperationAuthorized = userRights->deletenode;
+            break;
         default:
             SOPC_ASSERT(false && "Unknown operation type.");
             break;
@@ -1181,6 +1191,9 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
             break;
         case SOPC_USER_AUTHORIZATION_OPERATION_RECEIVE_EVENTS:
             *pbOperationAuthorized = config->anonRights.receive_events;
+            break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_DELETENODE:
+            *pbOperationAuthorized = config->anonRights.deletenode;
             break;
         default:
             SOPC_ASSERT(false && "Unknown operation type.");
@@ -1272,12 +1285,12 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     ctx.users = users;
     ctx.currentAnonymous = false;
     ctx.hasAnonymous = false;
-    ctx.anonymousRights = (user_rights){false, false, false, false, false};
+    ctx.anonymousRights = (user_rights){false, false, false, false, false, false};
     ctx.currentUserPassword = NULL;
     ctx.usrPwdCfgSet = false;
 
     ctx.certificates = certificates;
-    ctx.defaultCertRights = (user_rights){false, false, false, false, false};
+    ctx.defaultCertRights = (user_rights){false, false, false, false, false, false};
     ctx.currentCert = NULL;
     ctx.userCertSet = false;
     ctx.userPkiSet = false;

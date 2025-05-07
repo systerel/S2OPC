@@ -5,7 +5,7 @@
         note: still restricted by nodes static access rights in address space.
     -->
     <UserPassword user="adminTOFU" hash="61a28f2f9f204d45bfaf2481a44af9f6fdcccfefef23293dcba5d062fd674408" salt="7aaa8f0e38c972eab26d0ebb25bdd976">
-      <UserAuthorization write="true" read="true" execute="true" addnode="true" receive_events="true"/>
+      <UserAuthorization write="true" read="true" execute="true" addnode="true" receive_events="true" deletenode="true"/>
     </UserPassword>
   </UserPasswordConfiguration>
 </S2OPC_Users>
