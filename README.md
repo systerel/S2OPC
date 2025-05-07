@@ -107,7 +107,10 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - Only if NOT compiled with S2OPC_NANO_PROFILE set to 1:
     - Subscription and MonitoredItem services (except TransferSubscriptions and SetTriggering)
   - Only if compiled with S2OPC_NODE_MANAGEMENT set to 1:
-    - AddNodes service (simplified: variable node only, no NodeId generation, simplified checks on ReferenceType/Type definition, single node added only without automated generation based on type)
+    - AddNodes service (simplified: instance node only, no NodeId generation, simplified checks on ReferenceType/Type definition, single node added only without automated generation based on type),
+    - DeleteNodes service. 
+      If compiled with S2OPC_NODE_DELETE_CHILD_NODES (option set by default), the child nodes of the deleted node will be recursively deleted. The DeleteNodes permission on child nodes will not be considered: only the permission on root node will be considered.
+      If compiled with S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES (option set by default), Organizes reference will be considered when regarding for child nodes.
   - Python wrapper PyS2OPC for a server: see  `src/ClientServer/frontend/pys2opc/README.md`
 
 ### Current status
@@ -129,8 +132,9 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - Create and trigger event instances for event types of address space on EventNotifier nodes
   - Subscription events monitored items management with limited filtering features (where clause empty or 1 simple OfType element)
 - Server role-based security:
-  - Role mechanism with the following limitations. Permissions managed: Read, Write, Call, AddNodes, ReceiveEvents. Supported role mapping criterias:
-  anonymous, username, authenticated user.
+  - Role mechanism with the following limitations. 
+    Permissions managed: Read, Write, Call, AddNodes, DeleteNodes, ReceiveEvents. 
+    Supported role mapping criterias: anonymous, username, authenticated user.
 - Client instantiation: multiple secure channel instances and session instances
 - Client subscription service: automated management of 1 subscription per connection with monitored items
 - Client services requests: any discovery service or service on session request. Some request builders are provided, requests are only forwarded to server (no functional behavior).
@@ -280,7 +284,7 @@ To build S2OPC libraries and tests with default configuration on current stable 
 
 By setting environment variables S2OPC_NANO_PROFILE, S2OPC_NODE_MANAGEMENT, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
 - S2OPC_NANO_PROFILE (OFF by default): if set to ON, it excludes the features out of the OPC UA server nano scope (excluded services: subscription, monitored items and method calls services)
-- S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service (variable node only without child nodes generation, no NodeId generation, simplified checks on types)
+- S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service (variable node only without child nodes generation, no NodeId generation, simplified checks on types) and DeleteNodes services
 - BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
 - ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
 - ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,
