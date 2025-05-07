@@ -69,7 +69,8 @@ PROMOTES
     check_object_has_method,
     is_IndexRangeDefined,
 
-    exec_callMethod
+    exec_callMethod,
+    deleteNode_AddressSpace
 
 DEFINITIONS
     "definitions.def";

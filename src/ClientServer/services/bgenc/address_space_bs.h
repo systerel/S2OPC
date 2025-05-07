@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 02/04/2025 07:55:33
+ Date                 : 29/04/2025 08:30:08
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -81,6 +81,10 @@ extern void address_space_bs__addNode_check_valid_node_attributes_type(
    const constants__t_NodeAttributes_i address_space_bs__p_nodeAttributes,
    t_bool * const address_space_bs__bres);
 extern void address_space_bs__address_space_bs_UNINITIALISATION(void);
+extern void address_space_bs__deleteNode_AddressSpace(
+   const constants__t_NodeId_i address_space_bs__p_nodeId,
+   const t_bool address_space_bs__p_b_deleteTargetReferences,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc_operation);
 extern void address_space_bs__exec_callMethod(
    const constants__t_endpoint_config_idx_i address_space_bs__p_endpoint_config_idx,
    const constants__t_CallMethodPointer_i address_space_bs__p_call_method_pointer,

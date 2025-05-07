@@ -18,13 +18,13 @@
  */
 
 IMPLEMENTATION
-    msg_node_management_add_nodes_i
+    msg_node_management_delete_nodes_i
 
 REFINES
-    msg_node_management_add_nodes
+    msg_node_management_delete_nodes
 
 IMPORTS
-    msg_node_management_add_nodes_bs
+    msg_node_management_delete_nodes_bs
 
 SEES
     constants,
@@ -33,32 +33,32 @@ SEES
     message_out_bs
 
 PROMOTES
-    getall_add_node_item_req_params,
-    alloc_msg_add_nodes_resp_results,
-    setall_msg_add_nodes_item_resp_params
+    getall_delete_node_item_req_params,
+    alloc_msg_delete_nodes_resp_results,
+    setall_msg_delete_nodes_item_resp_params
 
 CONCRETE_VARIABLES
-    nb_nodes_to_add
+    nb_nodes_to_delete
 
 INITIALISATION
-    nb_nodes_to_add := 0
+    nb_nodes_to_delete := 0
 
 OPERATIONS
 
-    p_sc, p_nb_nodes_to_add <-- getall_msg_add_nodes_req_params (p_req_msg) =
+    p_sc, p_nb_nodes_to_delete <-- getall_msg_delete_nodes_req_params(p_req_msg) =
     BEGIN
-        nb_nodes_to_add := 0;
-        p_nb_nodes_to_add <-- get_msg_add_nodes_req_nb_add_nodes (p_req_msg);
-        IF p_nb_nodes_to_add <= 0
+        nb_nodes_to_delete := 0;
+        p_nb_nodes_to_delete <-- get_msg_delete_nodes_req_nb_delete_nodes(p_req_msg);
+        IF p_nb_nodes_to_delete <= 0
         THEN
-            p_nb_nodes_to_add := 0;
+            p_nb_nodes_to_delete := 0;
             p_sc := e_sc_bad_nothing_to_do
-        ELSIF p_nb_nodes_to_add > k_n_nodesToAdd_max
+        ELSIF p_nb_nodes_to_delete > k_n_nodesToDelete_max
         THEN
             p_sc := e_sc_bad_too_many_ops
         ELSE
             p_sc := e_sc_ok;
-            nb_nodes_to_add := p_nb_nodes_to_add
+            nb_nodes_to_delete := p_nb_nodes_to_delete
         END
     END
 

@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 14/01/2025 13:41:00
+ Date                 : 29/04/2025 08:30:22
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -96,6 +96,8 @@
 #include "msg_find_servers_on_network_bs.h"
 #include "msg_node_management_add_nodes.h"
 #include "msg_node_management_add_nodes_bs.h"
+#include "msg_node_management_delete_nodes.h"
+#include "msg_node_management_delete_nodes_bs.h"
 #include "msg_read_request.h"
 #include "msg_read_request_bs.h"
 #include "msg_read_response_bs.h"
@@ -126,6 +128,7 @@
 #include "namespaces_uri_eval_bs.h"
 #include "node_id_pointer_bs.h"
 #include "node_management_add_nodes_items_it.h"
+#include "node_management_delete_nodes_items_it.h"
 #include "notification_republish_queue_bs.h"
 #include "notification_republish_queue_it_bs.h"
 #include "publish_request_queue_bs.h"
@@ -140,6 +143,7 @@
 #include "service_add_nodes.h"
 #include "service_add_nodes_1.h"
 #include "service_browse_it.h"
+#include "service_delete_nodes.h"
 #include "service_get_endpoints_bs.h"
 #include "service_mgr.h"
 #include "service_mgr_bs.h"
@@ -220,6 +224,9 @@ void INITIALISATION(void) {
    time_reference_bs__INITIALISATION();
    channel_mgr__INITIALISATION();
    service_mgr_bs__INITIALISATION();
+   msg_node_management_delete_nodes_bs__INITIALISATION();
+   msg_node_management_delete_nodes__INITIALISATION();
+   node_management_delete_nodes_items_it__INITIALISATION();
    msg_node_management_add_nodes_bs__INITIALISATION();
    msg_node_management_add_nodes__INITIALISATION();
    node_management_add_nodes_items_it__INITIALISATION();
@@ -266,6 +273,7 @@ void INITIALISATION(void) {
    call_method_mgr__INITIALISATION();
    service_add_nodes_1__INITIALISATION();
    service_add_nodes__INITIALISATION();
+   service_delete_nodes__INITIALISATION();
    address_space_itf__INITIALISATION();
    roleset_references_it__INITIALISATION();
    role_references_it__INITIALISATION();

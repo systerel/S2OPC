@@ -321,7 +321,8 @@ typedef enum {
    constants__e_operation_type_write,
    constants__e_operation_type_executable,
    constants__e_operation_type_addnode,
-   constants__e_operation_type_receive_events
+   constants__e_operation_type_receive_events,
+   constants__e_operation_type_deletenode
 } constants__t_operation_type_i;
 typedef enum {
    constants__e_session_closed,
@@ -556,6 +557,7 @@ typedef enum {
 #define constants__k_n_monitoredItemNotif_max constants_bs__k_n_monitoredItemNotif_max
 #define constants__k_n_monitoredItem_max constants_bs__k_n_monitoredItem_max
 #define constants__k_n_nodesToAdd_max constants_bs__k_n_nodesToAdd_max
+#define constants__k_n_nodesToDelete_max constants_bs__k_n_nodesToDelete_max
 #define constants__k_n_notifEventQueueSize_default constants_bs__k_n_notifEventQueueSize_default
 #define constants__k_n_notifEventQueueSize_min constants_bs__k_n_notifEventQueueSize_min
 #define constants__k_n_notifQueueSize_max constants_bs__k_n_notifQueueSize_max

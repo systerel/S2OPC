@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 09/12/2024 17:07:51
+ Date                 : 11/02/2025 09:51:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -314,6 +314,15 @@ void service_mgr__treat_session_local_service_req(
             service_mgr__StatusCode_service);
          service_mgr__l_node_management_done = (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
          break;
+      case constants__e_msg_node_delete_nodes_req:
+         session_mgr__get_local_user(service_mgr__endpoint_config_idx,
+            &service_mgr__l_user);
+         address_space_itf__treat_delete_nodes_request(service_mgr__l_user,
+            service_mgr__req_msg,
+            service_mgr__resp_msg,
+            service_mgr__StatusCode_service);
+         service_mgr__l_node_management_done = (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
+         break;
       default:
          *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
          break;
@@ -506,6 +515,21 @@ void service_mgr__treat_session_nano_extended_service_req(
             session_mgr__get_session_user_server(service_mgr__session,
                &service_mgr__l_user);
             address_space_itf__treat_add_nodes_request(service_mgr__l_user,
+               service_mgr__req_msg,
+               service_mgr__resp_msg,
+               service_mgr__StatusCode_service);
+            service_mgr__l_node_management_done = (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
+         }
+         else {
+            *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
+         }
+         break;
+      case constants__e_msg_node_delete_nodes_req:
+         constants__is_ClientNodeManagementActive(&service_mgr__l_bres);
+         if (service_mgr__l_bres == true) {
+            session_mgr__get_session_user_server(service_mgr__session,
+               &service_mgr__l_user);
+            address_space_itf__treat_delete_nodes_request(service_mgr__l_user,
                service_mgr__req_msg,
                service_mgr__resp_msg,
                service_mgr__StatusCode_service);

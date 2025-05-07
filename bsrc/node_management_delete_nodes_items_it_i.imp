@@ -17,45 +17,40 @@
  * under the License.
  */
 
-MACHINE
-    service_add_nodes
+IMPLEMENTATION
+    node_management_delete_nodes_items_it_i
+
+REFINES
+    node_management_delete_nodes_items_it
 
 SEES
-    constants,
-    constants_statuscodes_bs,
-    message_in_bs,
-    message_out_bs
+    constants
 
-DEFINITIONS
-    "address_space.def"
-
-ABSTRACT_VARIABLES
-    d_adsp_variables,
-    d_adsp_nodes_typing
+CONCRETE_VARIABLES
+    rreqs_i
 
 INVARIANT
-    d_adsp_invariant &
-    d_adsp_nodes_typing_invariant
+    rreqs_i : NAT &
+    rreqs_i : 0 .. k_n_nodesToDelete_max &
+    rreqs_to_iterate = 1..rreqs_i &
+    rreqs_to_iterate <: t_nodeToDeleteReqIndex
 
 INITIALISATION
-    d_adsp_variables,
-    d_adsp_nodes_typing
-    :(
-        d_adsp_invariant &
-        d_adsp_nodes_typing_invariant
-    )
+    rreqs_i := 0
 
 OPERATIONS
+    continue <-- init_iter_delete_nodes_items(nb_req) =
+    BEGIN
+        rreqs_i := nb_req;
+        continue := bool(0 < nb_req)
+    END
+    ;
 
-    d_adsp_UNINIT;
-    d_adsp_operations;
-    d_adsp_write_operation;
-    d_adsp_call_operation;
-
-    /* add nodes service operation */
-    d_adsp_add_operation;
-
-     /* operation used by service_delete_nodes */
-    d_adsp_delete_node_internal_operation
+    continue, index <-- continue_iter_delete_nodes_items =
+    BEGIN
+        index := rreqs_i;
+        rreqs_i := rreqs_i - 1;
+        continue := bool(0 < rreqs_i)
+    END
 
 END

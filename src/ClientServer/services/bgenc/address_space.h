@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 10/10/2024 09:37:38
+ Date                 : 11/02/2025 09:51:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -63,6 +63,7 @@ extern void address_space__INITIALISATION(void);
   -------------------------------*/
 #define address_space__check_object_has_method address_space_typing__check_object_has_method
 #define address_space__clear_user_roles address_space_authorization__clear_user_roles
+#define address_space__deleteNode_AddressSpace address_space_authorization__deleteNode_AddressSpace
 #define address_space__exec_callMethod address_space_authorization__exec_callMethod
 #define address_space__get_BrowseName address_space_authorization__get_BrowseName
 #define address_space__get_DisplayName address_space_authorization__get_DisplayName

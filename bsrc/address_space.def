@@ -242,6 +242,52 @@ DEFINITIONS
         a_set_roles : t_sessionRoles_i
     );
 
+    d_adsp_delete_operation ==
+    StatusCode_service <-- treat_delete_nodes_request(p_user, p_req_msg, p_resp_msg) =
+    PRE
+        p_user : t_user_i &
+        p_user : t_user &
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_node_delete_nodes_req &
+        p_resp_msg : t_msg_i   &
+        p_resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_node_delete_nodes_resp
+    THEN
+        StatusCode_service,
+        d_adsp_nodes_variables
+        :(
+            StatusCode_service : t_StatusCode_i &
+            StatusCode_service : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops,
+                                  e_sc_bad_out_of_memory, e_sc_bad_service_unsupported}  &
+            d_adsp_nodes_invariant
+        )
+    END
+    ;
+
+    d_adsp_delete_node_internal_operation ==
+    sc_operation <-- deleteNode_AddressSpace(p_nodeId, p_b_deleteTargetReferences) =
+    PRE
+        p_nodeId : t_NodeId_i &
+        p_nodeId : t_NodeId &
+        p_b_deleteTargetReferences : BOOL
+    THEN
+        sc_operation,
+        d_adsp_nodes_variables
+        :(
+            sc_operation : t_StatusCode_i &
+            sc_operation : {e_sc_ok,
+                            e_sc_bad_node_id_unknown,
+                            e_sc_bad_out_of_memory,
+                            e_sc_bad_internal_error,
+                            e_sc_uncertain_reference_not_deleted} &
+            d_adsp_nodes_invariant
+        )
+    END
+    ;
+
     d_adsp_add_operation ==
     StatusCode_service <-- treat_add_nodes_request(p_user, p_req_msg, p_resp_msg) =
     PRE

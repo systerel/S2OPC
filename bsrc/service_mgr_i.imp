@@ -650,6 +650,10 @@ OPERATIONS
                 l_user <-- get_local_user (endpoint_config_idx);
                 StatusCode_service <-- treat_add_nodes_request(l_user, req_msg, resp_msg);
                 l_node_management_done := bool(StatusCode_service = e_sc_ok)
+            OR e_msg_node_delete_nodes_req THEN
+                l_user <-- get_local_user (endpoint_config_idx);
+                StatusCode_service <-- treat_delete_nodes_request(l_user, req_msg, resp_msg);
+                l_node_management_done := bool(StatusCode_service = e_sc_ok)
             ELSE
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported
@@ -746,6 +750,17 @@ OPERATIONS
                 THEN
                     l_user <-- get_session_user_server(session);
                     StatusCode_service <-- treat_add_nodes_request (l_user, req_msg, resp_msg);
+                    l_node_management_done := bool(StatusCode_service = e_sc_ok)
+                ELSE
+                    /* service not supported for clients (only as a local service) */
+                    StatusCode_service := e_sc_bad_service_unsupported
+                END
+            OR e_msg_node_delete_nodes_req THEN
+                l_bres <-- is_ClientNodeManagementActive;
+                IF l_bres = TRUE
+                THEN
+                    l_user <-- get_session_user_server(session);
+                    StatusCode_service <-- treat_delete_nodes_request (l_user, req_msg, resp_msg);
                     l_node_management_done := bool(StatusCode_service = e_sc_ok)
                 ELSE
                     /* service not supported for clients (only as a local service) */

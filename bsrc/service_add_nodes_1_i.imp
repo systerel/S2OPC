@@ -75,7 +75,9 @@ PROMOTES
     read_variable_compat_type,
     check_object_has_method,
     check_nodeId_isValid,
-    is_IndexRangeDefined
+    is_IndexRangeDefined,
+
+    deleteNode_AddressSpace
 
 LOCAL_OPERATIONS
 

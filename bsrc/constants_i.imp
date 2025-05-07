@@ -44,6 +44,7 @@ PROPERTIES
     t_unregisterNodesReqIndex = 1..k_n_unregisterNodes_max &
 
     t_nodeToAddReqIndex = 1..k_n_nodesToAdd_max &
+    t_nodeToDeleteReqIndex = 1..k_n_nodesToDelete_max &
 
     IsIncludedValueRank =
       {c_ValueRank_Scalar, c_ValueRank_OneDimension} * {c_ValueRank_ScalarOrOneDimension} \/

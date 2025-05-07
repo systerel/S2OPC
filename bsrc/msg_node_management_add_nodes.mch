@@ -89,12 +89,12 @@ OPERATIONS
         AddNodeItemReq_TypeDefinition
         :(  p_sc                 : t_StatusCode &
             p_nb_nodes_to_add : NAT &
+            nb_nodes_to_add = p_nb_nodes_to_add &
             (p_sc = e_sc_ok
                 =>
                 p_nb_nodes_to_add > 0 &
                 p_nb_nodes_to_add <= k_n_nodesToAdd_max &
                 p_nb_nodes_to_add : t_nodeToAddReqIndex &
-                nb_nodes_to_add = p_nb_nodes_to_add &
                 AddNodeItemReq_ParentNodeId       : 1..nb_nodes_to_add --> t_ExpandedNodeId &
                 AddNodeItemReq_ReferenceTypeId    : 1..nb_nodes_to_add --> t_NodeId &
                 AddNodeItemReq_RequestedNewNodeId : 1..nb_nodes_to_add --> t_ExpandedNodeId_i &
@@ -106,6 +106,7 @@ OPERATIONS
             (p_sc /= e_sc_ok
                 =>
                 p_sc : {e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops} &
+                p_nb_nodes_to_add = 0 &
                 d_inv
             )
         )

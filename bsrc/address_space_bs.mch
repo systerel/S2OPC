@@ -1476,6 +1476,209 @@ OPERATIONS
     END
     ;
 
+    sc_operation <-- deleteNode_AddressSpace(p_nodeId, p_b_deleteTargetReferences) =
+    PRE
+        p_nodeId : t_NodeId_i &
+        p_nodeId : t_NodeId &
+        p_b_deleteTargetReferences : BOOL
+    THEN
+        sc_operation,
+        s_Node,
+        a_NodeId,
+        a_NodeClass,
+        a_BrowseName,
+        a_DisplayName,
+        a_RolePermissions,
+        a_Value,
+        a_Value_StatusCode,
+        a_Value_SourceTimestamp,
+        a_IsAbstract,
+        a_EventNotifier,
+        a_DataType,
+        a_ValueRank,
+        a_ArrayDimensions,
+        a_AccessLevel,
+        a_AccessLevelEx,
+        a_UserAccessLevel,
+        a_Historizing,
+        a_Executable,
+        a_UserExecutable,
+        a_ContainsNoLoops,
+        a_Symmetric,
+        a_DataTypeDefinition,
+        Ref_HasTypeDefinition,
+        Reference_SourceNode,
+        Reference_ReferenceType,
+        Reference_TargetNode,
+        Reference_IsForward,
+        Node_RefIndexEnd,
+        RefIndex_Reference,
+        ParentNode
+        :(
+            sc_operation : t_StatusCode_i &
+            sc_operation : t_StatusCode &
+            sc_operation : {e_sc_ok,
+                            e_sc_bad_node_id_unknown,
+                            e_sc_bad_out_of_memory,
+                            e_sc_bad_internal_error,
+                            e_sc_uncertain_reference_not_deleted} &
+            s_Node                 <: t_Node &
+            a_NodeId                : s_Node >-> t_NodeId        &
+            a_NodeClass             : s_Node --> t_NodeClass     &
+            a_BrowseName            : s_Node --> t_QualifiedName &
+            a_DisplayName           : s_Node --> t_LocalizedText &
+            a_RolePermissions       : s_Node +-> t_RolePermissionTypes &
+            a_Value                 : s_Node +-> t_Variant   &
+            a_Value_StatusCode      : s_Node +-> t_RawStatusCode &
+            a_Value_SourceTimestamp : s_Node +-> t_Timestamp &
+            a_IsAbstract            : s_Node +-> BOOL &
+            a_EventNotifier         : s_Node +-> t_Byte &
+            a_DataType              : s_Node +-> t_NodeId &
+            a_ValueRank             : s_Node +-> t_ValueRank &
+            a_ArrayDimensions       : s_Node +-> t_ArrayDimensions &
+            a_AccessLevel           : s_Node +-> t_access_level &
+            a_AccessLevelEx         : s_Node +-> t_access_level_ex &
+            a_UserAccessLevel       : s_Node +-> t_access_level &
+            a_Historizing           : s_Node +-> BOOL &
+            a_Executable            : s_Node +-> BOOL &
+            a_UserExecutable        : s_Node +-> BOOL &
+            a_ContainsNoLoops       : s_Node +-> BOOL &
+            a_Symmetric             : s_Node +-> BOOL &
+            a_DataTypeDefinition    : s_Node +-> t_DataTypeDefinition_i &
+            Ref_HasTypeDefinition   : s_Node +-> t_ExpandedNodeId &
+            Reference_SourceNode    : t_Reference +-> t_NodeId         &
+            Reference_ReferenceType : t_Reference +-> t_NodeId         &
+            Reference_TargetNode    : t_Reference +-> t_ExpandedNodeId &
+            Reference_IsForward     : t_Reference +-> BOOL             &
+            Node_RefIndexEnd        : s_Node     +-> t_RefIndex  &
+            RefIndex_Reference      : s_Node * t_RefIndex >+> t_Reference &
+            ParentNode              : s_Node +-> s_Node &
+
+            (sc_operation = e_sc_ok or sc_operation = e_sc_uncertain_reference_not_deleted =>
+                // NodeId was existing in the add space: a_NodeId$0~(p_nodeId) exists and is unique.
+                p_nodeId : ran(a_NodeId$0) &
+                // We deleted it (and maybe other nodes).
+                s_Node <: s_Node$0 - {a_NodeId$0~(p_nodeId)} &
+                // Attributes
+                a_NodeId                <: {a_NodeId$0~(p_nodeId)} <<| a_NodeId$0 &
+                a_NodeClass             <: {a_NodeId$0~(p_nodeId)} <<| a_NodeClass$0 &
+                a_BrowseName            <: {a_NodeId$0~(p_nodeId)} <<| a_BrowseName$0 &
+                a_DisplayName           <: {a_NodeId$0~(p_nodeId)} <<| a_DisplayName$0 &
+                a_RolePermissions       <: {a_NodeId$0~(p_nodeId)} <<| a_RolePermissions$0 &
+                a_Value                 <: {a_NodeId$0~(p_nodeId)} <<| a_Value$0 &
+                a_Value_StatusCode      <: {a_NodeId$0~(p_nodeId)} <<| a_Value_StatusCode$0 &
+                a_Value_SourceTimestamp <: {a_NodeId$0~(p_nodeId)} <<| a_Value_SourceTimestamp$0 &
+                a_IsAbstract            <: {a_NodeId$0~(p_nodeId)} <<| a_IsAbstract$0 &
+                a_EventNotifier         <: {a_NodeId$0~(p_nodeId)} <<| a_EventNotifier$0 &
+                a_DataType              <: {a_NodeId$0~(p_nodeId)} <<| a_DataType$0 &
+                a_ValueRank             <: {a_NodeId$0~(p_nodeId)} <<| a_ValueRank$0 &
+                a_ArrayDimensions       <: {a_NodeId$0~(p_nodeId)} <<| a_ArrayDimensions$0 &
+                a_AccessLevel           <: {a_NodeId$0~(p_nodeId)} <<| a_AccessLevel$0 &
+                a_AccessLevelEx         <: {a_NodeId$0~(p_nodeId)} <<| a_AccessLevelEx$0 &
+                a_UserAccessLevel       <: {a_NodeId$0~(p_nodeId)} <<| a_UserAccessLevel$0 &
+                a_Historizing           <: {a_NodeId$0~(p_nodeId)} <<| a_Historizing$0 &
+                a_Executable            <: {a_NodeId$0~(p_nodeId)} <<| a_Executable$0 &
+                a_UserExecutable        <: {a_NodeId$0~(p_nodeId)} <<| a_UserExecutable$0 &
+                a_ContainsNoLoops       <: {a_NodeId$0~(p_nodeId)} <<| a_ContainsNoLoops$0 &
+                a_Symmetric             <: {a_NodeId$0~(p_nodeId)} <<| a_Symmetric$0 &
+                a_DataTypeDefinition    <: {a_NodeId$0~(p_nodeId)} <<| a_DataTypeDefinition$0 &
+                Ref_HasTypeDefinition   <: {a_NodeId$0~(p_nodeId)} <<| Ref_HasTypeDefinition$0 &
+
+                // References
+                // p_nodeId has no references, and therefore no childs. References in the address space remain unchanged.
+                (p_nodeId /: ran(Reference_SourceNode$0) =>
+                    // Reference_SourceNode
+                    Reference_SourceNode = Reference_SourceNode$0 &
+                    // Reference_ReferenceType
+                    Reference_ReferenceType = Reference_ReferenceType$0 &
+                    // Reference_TargetNode
+                    Reference_TargetNode = Reference_TargetNode$0 &
+                    // Reference_IsForward
+                    Reference_IsForward = Reference_IsForward$0 &
+                    // RefIndex_Reference
+                    RefIndex_Reference = RefIndex_Reference$0
+                ) &
+                // Delete references with SourceNode = p_nodeId. Those are Reference_SourceNode$0~[{p_nodeId}].
+                (p_nodeId : ran(Reference_SourceNode$0) =>
+                    // Reference_SourceNode
+                    Reference_SourceNode <: Reference_SourceNode$0~[{p_nodeId}] <<| Reference_SourceNode$0 &
+                    // Reference_ReferenceType
+                    Reference_ReferenceType <: Reference_SourceNode$0~[{p_nodeId}] <<| Reference_ReferenceType$0 &
+                    // Reference_TargetNode
+                    Reference_TargetNode <: Reference_SourceNode$0~[{p_nodeId}] <<| Reference_TargetNode$0 &
+                    // Reference_IsForward
+                    Reference_IsForward <: Reference_SourceNode$0~[{p_nodeId}] <<| Reference_IsForward$0 &
+                    // RefIndex_Reference
+                    RefIndex_Reference <: RefIndex_Reference$0 |>> Reference_SourceNode$0~[{p_nodeId}]
+                ) &
+                // Delete reciprocal references (of deleted nodes references) with TargetNode = p_nodeId if the param is set.
+                // It might also delete references in child nodes recursively.
+                // Those references would be:
+                // Reference_SourceNode~[conv_ExpandedNodeId_NodeId[Reference_TargetNode[RefIndex_Reference[{a_NodeId$0~(p_nodeId)}
+                // * (1..Node_RefIndexEnd(a_NodeId$0~(p_nodeId)))]]]] <| Reference_TargetNode$0 |> {conv_ExpandedNodeId_NodeId~(p_nodeId)})
+                // but we keep a simple inclusion as it is way too complicated and will not be proved as it is implemented in C code.
+                (p_b_deleteTargetReferences = TRUE &
+                 p_nodeId : ran(conv_ExpandedNodeId_NodeId) &
+                 conv_ExpandedNodeId_NodeId~(p_nodeId) : ran(Reference_TargetNode)
+                 =>
+                    // Reference_TargetNode
+                    Reference_TargetNode <: Reference_TargetNode$0 &
+                    // Reference_ReferenceType
+                    Reference_ReferenceType <: Reference_ReferenceType$0 &
+                    // Reference_SourceNode
+                    Reference_SourceNode <: Reference_SourceNode$0 &
+                    // Reference_IsForward
+                    Reference_IsForward <: Reference_IsForward$0 &
+                    // RefIndex_Reference
+                    RefIndex_Reference <: RefIndex_Reference$0
+                  ) &
+
+                  Node_RefIndexEnd <: {a_NodeId$0~(p_nodeId)} <<| Node_RefIndexEnd$0 &
+                  // Delete also the associations of p_nodeId as a parent.
+                  ParentNode <: {a_NodeId$0~(p_nodeId)} <<| ParentNode$0 |>> {a_NodeId$0~(p_nodeId)}
+             ) &
+
+             (sc_operation = e_sc_uncertain_reference_not_deleted =>
+                 p_b_deleteTargetReferences = TRUE
+             ) &
+
+             (not(sc_operation = e_sc_ok or sc_operation = e_sc_uncertain_reference_not_deleted) =>
+                s_Node                  = s_Node$0 &
+                a_NodeId                = a_NodeId$0 &
+                a_NodeClass             = a_NodeClass$0 &
+                a_BrowseName            = a_BrowseName$0 &
+                a_DisplayName           = a_DisplayName$0 &
+                a_RolePermissions       = a_RolePermissions$0 &
+                a_Value                 = a_Value$0 &
+                a_Value_StatusCode      = a_Value_StatusCode$0 &
+                a_Value_SourceTimestamp = a_Value_SourceTimestamp$0 &
+                a_IsAbstract            = a_IsAbstract$0 &
+                a_EventNotifier         = a_EventNotifier$0 &
+                a_DataType              = a_DataType$0 &
+                a_ValueRank             = a_ValueRank$0 &
+                a_ArrayDimensions       = a_ArrayDimensions$0 &
+                a_AccessLevel           = a_AccessLevel$0 &
+                a_AccessLevelEx         = a_AccessLevelEx$0 &
+                a_UserAccessLevel       = a_UserAccessLevel$0 &
+                a_Historizing           = a_Historizing$0 &
+                a_Executable            = a_Executable$0 &
+                a_UserExecutable        = a_UserExecutable$0 &
+                a_ContainsNoLoops       = a_ContainsNoLoops$0 &
+                a_Symmetric             = a_Symmetric$0 &
+                a_DataTypeDefinition    = a_DataTypeDefinition$0 &
+                Ref_HasTypeDefinition   = Ref_HasTypeDefinition$0 &
+                Reference_SourceNode    = Reference_SourceNode$0 &
+                Reference_ReferenceType = Reference_ReferenceType$0 &
+                Reference_TargetNode    = Reference_TargetNode$0 &
+                Reference_IsForward     = Reference_IsForward$0 &
+                Node_RefIndexEnd        = Node_RefIndexEnd$0 &
+                RefIndex_Reference      = RefIndex_Reference$0 &
+                ParentNode              = ParentNode$0
+            )
+        )
+    END
+    ;
+
     /* Generates an internal event for subscriptions */
     gen_addNode_event(p_newNodeId) =
     PRE

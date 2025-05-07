@@ -116,7 +116,8 @@ SETS
                       e_sc_bad_node_class_invalid,
                       e_sc_bad_browse_name_duplicated,
                       e_sc_bad_node_attributes_invalid,
-                      e_sc_bad_type_definition_invalid
+                      e_sc_bad_type_definition_invalid,
+                      e_sc_uncertain_reference_not_deleted
                   }
 
 ABSTRACT_CONSTANTS

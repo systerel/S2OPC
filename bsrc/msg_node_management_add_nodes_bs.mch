@@ -154,7 +154,7 @@ OPERATIONS
     END
     ;
 
-    p_nb_add_nodes <-- get_msg_create_add_nodes_req_nb_add_nodes (p_req_msg) =
+    p_nb_add_nodes <-- get_msg_add_nodes_req_nb_add_nodes (p_req_msg) =
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg &

@@ -130,6 +130,7 @@ CONCRETE_CONSTANTS
     k_n_registerNodes_max,
     k_n_unregisterNodes_max,
     k_n_nodesToAdd_max,
+    k_n_nodesToDelete_max,
     k_n_UserAuthAttempts_max,
     k_n_NamespaceIndex_max,
 
@@ -348,6 +349,7 @@ PROPERTIES
     k_n_registerNodes_max : NAT &
     k_n_unregisterNodes_max : NAT &
     k_n_nodesToAdd_max : NAT &
+    k_n_nodesToDelete_max : NAT &
     k_n_UserAuthAttempts_max : NAT &
     k_n_NamespaceIndex_max : NAT &
 

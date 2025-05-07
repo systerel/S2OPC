@@ -56,6 +56,9 @@ OPERATIONS
     d_adsp_call_operation;
 
     /* operation used by service_add_nodes */
-    d_adsp_add_node_internal_operation
+    d_adsp_add_node_internal_operation;
+
+    /* operation used by service_delete_nodes */
+    d_adsp_delete_node_internal_operation
 
 END

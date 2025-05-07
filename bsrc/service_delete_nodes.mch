@@ -18,7 +18,7 @@
  */
 
 MACHINE
-    service_add_nodes
+    service_delete_nodes
 
 SEES
     constants,
@@ -51,11 +51,9 @@ OPERATIONS
     d_adsp_operations;
     d_adsp_write_operation;
     d_adsp_call_operation;
-
-    /* add nodes service operation */
     d_adsp_add_operation;
 
-     /* operation used by service_delete_nodes */
-    d_adsp_delete_node_internal_operation
+    /* delete nodes service operation */
+    d_adsp_delete_operation
 
 END

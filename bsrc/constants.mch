@@ -323,7 +323,8 @@ SETS
                           e_operation_type_write,
                           e_operation_type_executable,
                           e_operation_type_addnode,
-                          e_operation_type_receive_events};
+                          e_operation_type_receive_events,
+                          e_operation_type_deletenode};
 
     t_ContinuationPoint_i;
     t_ContinuationPointId_i;
@@ -370,6 +371,7 @@ CONCRETE_CONSTANTS
     k_n_unregisterNodes_max,
 
     k_n_nodesToAdd_max,
+    k_n_nodesToDelete_max,
 
     k_n_UserAuthAttempts_max,
 
@@ -603,6 +605,7 @@ ABSTRACT_CONSTANTS
     t_registerNodesReqIndex,
     t_unregisterNodesReqIndex,
     t_nodeToAddReqIndex,
+    t_nodeToDeleteReqIndex,
     t_ContinuationPoint,
     t_ContinuationPointId,
     t_ArrayDimensions,
@@ -837,6 +840,7 @@ PROPERTIES
     k_n_noRemainingPathIndex > k_n_genericOperationPerReq_max &
 
     k_n_nodesToAdd_max : NAT &
+    k_n_nodesToDelete_max : NAT &
 
     k_n_UserAuthAttempts_max : NAT &
 
@@ -884,6 +888,7 @@ PROPERTIES
     t_unregisterNodesReqIndex <: NAT &
 
     t_nodeToAddReqIndex <: NAT &
+    t_nodeToDeleteReqIndex <: NAT &
 
     t_RefIndex <: NAT &
 
@@ -1191,7 +1196,8 @@ PROPERTIES
                         e_operation_type_write,
                         e_operation_type_executable,
                         e_operation_type_addnode,
-                        e_operation_type_receive_events} &
+                        e_operation_type_receive_events,
+                        e_operation_type_deletenode} &
 
     s_session_treatment_reqs = {e_msg_session_create_req,
         e_msg_session_activate_req,
@@ -1339,6 +1345,7 @@ PROPERTIES
     1..k_n_unregisterNodes_max <: t_unregisterNodesReqIndex &
 
     1..k_n_nodesToAdd_max <: t_nodeToAddReqIndex &
+    1..k_n_nodesToDelete_max <: t_nodeToDeleteReqIndex &
 
     IsIncludedValueRank : t_ConcreteValueRank <-> t_ValueRank
 

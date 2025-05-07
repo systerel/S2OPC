@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.h
 
- Date                 : 10/10/2024 09:37:47
+ Date                 : 11/02/2025 09:51:28
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -61,6 +61,7 @@ extern void service_add_nodes_1__INITIALISATION(void);
 #define service_add_nodes_1__check_nodeId_isValid call_method_mgr__check_nodeId_isValid
 #define service_add_nodes_1__check_object_has_method call_method_mgr__check_object_has_method
 #define service_add_nodes_1__clear_user_roles call_method_mgr__clear_user_roles
+#define service_add_nodes_1__deleteNode_AddressSpace call_method_mgr__deleteNode_AddressSpace
 #define service_add_nodes_1__get_BrowseName call_method_mgr__get_BrowseName
 #define service_add_nodes_1__get_DisplayName call_method_mgr__get_DisplayName
 #define service_add_nodes_1__get_EventNotifier call_method_mgr__get_EventNotifier
