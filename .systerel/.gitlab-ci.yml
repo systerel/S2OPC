@@ -346,13 +346,13 @@ build-zephyr:
   needs: []
   script:
     - 'ln -s $(pwd) /zephyrproject/modules/lib/s2opc'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh nucleo_h745zi_q/stm32h745xx/m7 cli_client -DCONFIG_NET_GPTP=y'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server --nocrypto'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server'
-    - './samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_sim cli_client'
-    - './samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_sim cli_pubsub_server'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-west.sh stm32h735g_disco cli_client'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-west.sh nucleo_h745zi_q/stm32h745xx/m7 cli_client -DCONFIG_NET_GPTP=y'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-west.sh mimxrt1064_evk cli_pubsub_server'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-west.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server --nocrypto'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-west.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server'
+    - './samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-west.sh native_sim cli_client'
+    - './samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-west.sh native_sim cli_pubsub_server'
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:

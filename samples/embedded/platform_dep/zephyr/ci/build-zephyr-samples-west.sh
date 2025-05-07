@@ -29,12 +29,13 @@ function fail() {
 
 function usage() {
     echo  "Builds a given Zephyr application"
-    echo "Usage: $0 [BOARD] [APP] [--ip <IP_ADDRESS>] [--nocrypto] [--log <PATH>] [--bin <PATH>]"
+    echo "Usage: $0 [BOARD] [APP] [--ip <IP_ADDRESS>] [--nocrypto] [--log <PATH>] [--bin <PATH>] [--nodocker]"
     echo " <BOARD> <APP> : build the <APP> sample application (default 'cli_pubsub_server') for board <BOARD> (default 'mimxrt1064_evk')"
     echo " --ip <IP_ADDRESS> : Configure IP Adress of ethernet interface"
     echo "--nocrypto : Use nocrypto library instead of MbedTLS"
     echo "--log <PATH> : give a specific path to store the logs"
     echo "--bin <PATH> : give a specific path to store the bin"
+    echo "--nodocker : This script is being run outside of a container" 
     echo " -h : Print this help and return"
     exit 0
 }
@@ -50,23 +51,12 @@ S2OPCDIR=$(pwd)
 SAMPLESDIR=${S2OPCDIR}/samples/embedded
 OUTDIR=${S2OPCDIR}/build_zephyr
 
-mkdir -p ${OUTDIR} || exit 2
-
-[ `whoami` != 'user' ] && echo "Unexpected user `whoami`. Is this script executed within the docker?" && exit 2
-
-# Just check that all folders exist!
-cd ${S2OPCDIR} || exit 3
-cd ${SAMPLESDIR} || exit 4
-
-# Trust user directory in order to get commit signature
-# User in docker and outside docker could have different UID which leads to warnings from git
-git config --global --add safe.directory ${S2OPCDIR}
-
 OPT_IP_ADDRESS=
 IP_ADDRESS=
 LOG_PATH=
 BIN_PATH=
 export NO_CRYTO=0
+DOCKER=true
 
 export BOARD=$1
 shift
@@ -76,11 +66,25 @@ shift
 [[ $1 == "--nocrypto" ]] && shift && export NO_CRYTO=1 && shift
 [[ $1 == "--log" ]] && shift && LOG_PATH=$1 && shift
 [[ $1 == "--bin" ]] && shift && BIN_PATH=$1 && shift
+[[ $1 == "--nodocker" ]] && shift && DOCKER=false
+
+mkdir -p ${OUTDIR} || exit 2
+
+if ["{$DOCKER}" = true]; then
+  [ `whoami` != 'user' ] && echo "Unexpected user `whoami`. Is this script executed within the docker?" && exit 2
+fi
+
+# Just check that all folders exist!
+cd ${S2OPCDIR} || exit 3
+cd ${SAMPLESDIR} || exit 4
+
+# Trust user directory in order to get commit signature
+# User in docker and outside docker could have different UID which leads to warnings from git
+git config --global --add safe.directory ${S2OPCDIR}
 
 export ADD_CONF=$*
 
 BOARD_NAME=$(echo "${BOARD}" | tr '/' '_')
-
 
 [[ -z $BOARD ]] && export BOARD=mimxrt1064_evk && echo "Using default board ${BOARD}"
 [[ -z $APP ]]   && export APP=cli_pubsub_server && echo "Using default application ${APP}"
