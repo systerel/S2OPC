@@ -107,7 +107,8 @@ static void SubscriptionNotification_Cb(const SOPC_ClientHelper_Subscription* su
         {
             printf("Value change notification for node %s:\n", (char*) monitoredItemCtxArray[i]);
             SOPC_Variant_Print(&notifs->MonitoredItems[i].Value.Value);
-            printf("\n");
+            printf("Value statuscode: 0x%08" PRIX32, notifs->MonitoredItems[i].Value.Status);
+            printf("\n\n");
         }
     }
 }
