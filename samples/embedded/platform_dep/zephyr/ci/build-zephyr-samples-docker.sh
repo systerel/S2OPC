@@ -29,7 +29,7 @@ function fail() {
 
 function usage() {
     echo  "Builds a given Zephyr application"
-    echo "Usage: $0 [BOARD] [APP] [--ip <IP_ADDRESS>] [--nocrypto] [--log <PATH>] [--bin <PATH>] [-h]"
+    echo "Usage: $0 [BOARD] [APP] [--ip <IP_ADDRESS>] [--nocrypto] [--log <PATH>] [--bin <PATH>]"
     echo " <BOARD> <APP> : build the <APP> sample application (default 'cli_pubsub_server') for board <BOARD> (default 'mimxrt1064_evk')"
     echo " --ip <IP_ADDRESS> : Configure IP Adress of ethernet interface"
     echo "--nocrypto : Use nocrypto library instead of MbedTLS"

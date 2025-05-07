@@ -111,7 +111,7 @@ index=0
         OUT_FILE=$HOST_DIR/build_${OS}/${APP}_${BOARD_NAME}.${EXTENSION}
         if ! [ -f $OUT_FILE ] ; then
           echo "Building $(basename ${OUT_FILE}) for board $BOARD"
-           ${HIL_DIR}/compile.sh "$OS" "$BOARD" "$APP" "$EXTENSION" "$IP_ADDRESS" > $LOG_FILE 2>&1
+           ${HIL_DIR}/compile.sh "$OS" "$BOARD" "$APP" "$EXTENSION" "$IP_ADDRESS" "$LOG_FILE" "$OUT_FILE" > $LOG_FILE 2>&1
         [ -f $OUT_FILE ] || fail "Missing output file ${OUT_FILE} (see $LOG_FILE)"
         else
           echo "Not rebuilding $(basename ${OUT_FILE})"

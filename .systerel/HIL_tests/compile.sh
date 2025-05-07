@@ -50,7 +50,13 @@ EXTENSION=$4
 IP_ADDRESS=$5
 [ -z "${IP_ADDRESS}" ] && fail "Missing 'IP_ADDRESS' for compilation stage"
 
+LOG_FILE=$6
+[ -z "${LOG_FILE}" ] && fail "Missing 'LOG_FILE' for compilation stage"
+
+OUT_FILE=$7
+[ -z "${OUT_FILE}" ] && fail "Missing 'OUT_FILE' for compilation stage"
+
 cd ${HOST_DIR}/samples/embedded/platform_dep/${OS}/ci || fail "Missing folder '${HOST_DIR}/samples/embedded/platform_dep/${OS}/ci'"
-[ -x ./build-${OS}-samples.sh ] || fail "Missing or invalid build script 'build-${OS}-samples.sh' in '$(pwd)'"
-./build-${OS}-samples.sh -b $BOARD -a $APP --ip $IP_ADDRESS
+[ -x ./build-${OS}-samples.sh  ] || fail "Missing or invalid build script 'build-${OS}-samples.sh' in '$(pwd)'"
+./build-${OS}-samples.sh -b $BOARD -a $APP --ip $IP_ADDRESS --log $LOG_FILE --bin $OUT_FILE
 
