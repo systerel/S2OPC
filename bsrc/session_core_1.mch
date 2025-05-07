@@ -662,6 +662,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : t_session &
+        session : dom(a_NonceServer) &
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         server_nonce : t_Nonce_i &
