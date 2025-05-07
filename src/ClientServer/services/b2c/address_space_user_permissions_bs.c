@@ -89,6 +89,11 @@ extern void address_space_user_permissions_bs__is_operation_authorized(
             (OpcUa_PermissionType_ReceiveEvents ==
              (address_space_user_permissions_bs__p_permissions & OpcUa_PermissionType_ReceiveEvents));
         break;
+    case constants__e_operation_type_deletenode:
+        *address_space_user_permissions_bs__p_bres =
+            (OpcUa_PermissionType_DeleteNode ==
+             (address_space_user_permissions_bs__p_permissions & OpcUa_PermissionType_DeleteNode));
+        break;
     default:
         *address_space_user_permissions_bs__p_bres = false;
         break;

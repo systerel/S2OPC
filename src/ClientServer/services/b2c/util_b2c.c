@@ -924,6 +924,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_user_signature_invalid:
         *status = OpcUa_BadUserSignatureInvalid;
         break;
+    case constants_statuscodes_bs__e_sc_uncertain_reference_not_deleted:
+        *status = OpcUa_UncertainReferenceNotDeleted;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1298,6 +1301,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
     case OpcUa_BadUserSignatureInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_user_signature_invalid;
         break;
+    case OpcUa_UncertainReferenceNotDeleted:
+        *bstatus = constants_statuscodes_bs__e_sc_uncertain_reference_not_deleted;
+        break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)
         {
@@ -1594,6 +1600,9 @@ void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_Use
         break;
     case constants__e_operation_type_receive_events:
         *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_RECEIVE_EVENTS;
+        break;
+    case constants__e_operation_type_deletenode:
+        *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_DELETENODE;
         break;
     default:
         SOPC_ASSERT(false); /* Unexpected operation type */

@@ -65,7 +65,7 @@ void msg_node_management_add_nodes_bs__alloc_msg_add_nodes_resp_results(
     }
 }
 
-void msg_node_management_add_nodes_bs__get_msg_create_add_nodes_req_nb_add_nodes(
+void msg_node_management_add_nodes_bs__get_msg_add_nodes_req_nb_add_nodes(
     const constants__t_msg_i msg_node_management_add_nodes_bs__p_req_msg,
     t_entier4* const msg_node_management_add_nodes_bs__p_nb_add_nodes)
 {

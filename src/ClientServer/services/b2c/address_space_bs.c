@@ -86,7 +86,7 @@ void address_space_bs__address_space_bs_UNINITIALISATION(void)
     }
 }
 
-static void generate_changes_notifs_after_method_call(SOPC_SLinkedList* operations)
+static void generate_notifs_after_address_space_access(SOPC_SLinkedList* operations)
 {
     SOPC_ASSERT(NULL != operations);
     SOPC_AddressSpaceAccessOperation* operation =
@@ -113,6 +113,36 @@ static void generate_changes_notifs_after_method_call(SOPC_SLinkedList* operatio
         operation = (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations);
     }
     SOPC_SLinkedList_Delete(operations);
+}
+
+void address_space_bs__deleteNode_AddressSpace(
+    const constants__t_NodeId_i address_space_bs__p_nodeId,
+    const t_bool address_space_bs__p_b_deleteTargetReferences,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc_deleteNode)
+{
+    SOPC_StatusCode retCode = OpcUa_BadInternalError;
+    SOPC_AddressSpaceAccess* deleteNode_addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
+    if (NULL == deleteNode_addSpaceAccess)
+    {
+        retCode = OpcUa_BadOutOfMemory;
+    }
+    else
+    {
+        bool b_deleteChildNodes = false;
+#if 0 != S2OPC_NODE_DELETE_CHILD_NODES
+        b_deleteChildNodes = true;
+#endif
+        retCode = SOPC_AddressSpaceAccess_DeleteNode(deleteNode_addSpaceAccess, address_space_bs__p_nodeId,
+                                                     address_space_bs__p_b_deleteTargetReferences, b_deleteChildNodes);
+        if (SOPC_IsGoodOrUncertainStatus(retCode))
+        {
+            // Trigger notification on MI on the deleted nodes
+            generate_notifs_after_address_space_access(
+                SOPC_AddressSpaceAccess_GetOperations(deleteNode_addSpaceAccess));
+        }
+        SOPC_AddressSpaceAccess_Delete(&deleteNode_addSpaceAccess);
+    }
+    util_status_code__C_to_B(retCode, address_space_bs__sc_deleteNode);
 }
 
 void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i address_space_bs__p_endpoint_config_idx,
@@ -166,7 +196,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
     }
     *address_space_bs__p_rawStatusCode =
         method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput, &outputArgs, method_c->pParam);
-    generate_changes_notifs_after_method_call(SOPC_AddressSpaceAccess_GetOperations(cc->addressSpaceForMethodCall));
+    generate_notifs_after_address_space_access(SOPC_AddressSpaceAccess_GetOperations(cc->addressSpaceForMethodCall));
     SOPC_AddressSpaceAccess_Delete(&cc->addressSpaceForMethodCall);
     SOPC_CallContext_Free(cc);
     if (0 != noOfOutput && NULL == outputArgs)
