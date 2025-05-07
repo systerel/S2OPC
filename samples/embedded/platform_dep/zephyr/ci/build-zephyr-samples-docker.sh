@@ -29,9 +29,12 @@ function fail() {
 
 function usage() {
     echo  "Builds a given Zephyr application"
-    echo "Usage: $0 [BOARD] [APP] [--ip <IP_ADDRESS>] [-h] "
+    echo "Usage: $0 [BOARD] [APP] [--ip <IP_ADDRESS>] [--nocrypto] [--log <PATH>] [--bin <PATH>] [-h]"
     echo " <BOARD> <APP> : build the <APP> sample application (default 'cli_pubsub_server') for board <BOARD> (default 'mimxrt1064_evk')"
     echo " --ip <IP_ADDRESS> : Configure IP Adress of ethernet interface"
+    echo "--nocrypto : Use nocrypto library instead of MbedTLS"
+    echo "--log <PATH> : give a specific path to store the logs"
+    echo "--bin <PATH> : give a specific path to store the bin"
     echo " -h : Print this help and return"
     exit 0
 }
@@ -61,6 +64,8 @@ git config --global --add safe.directory ${S2OPCDIR}
 
 OPT_IP_ADDRESS=
 IP_ADDRESS=
+LOG_PATH=
+BIN_PATH=
 export NO_CRYTO=0
 
 export BOARD=$1
@@ -68,7 +73,9 @@ shift
 export APP=$1
 shift
 [[ $1 == "--ip" ]] && shift && IP_ADDRESS=$1 && shift
-[[ $1 == "--nocrypto" ]] && shift && IP_ADDRESS=1 && shift
+[[ $1 == "--nocrypto" ]] && shift && export NO_CRYTO=1 && shift
+[[ $1 == "--log" ]] && shift && LOG_PATH=$1 && shift
+[[ $1 == "--bin" ]] && shift && BIN_PATH=$1 && shift
 
 export ADD_CONF=$*
 
@@ -78,26 +85,36 @@ BOARD_NAME=$(echo "${BOARD}" | tr '/' '_')
 [[ -z $BOARD ]] && export BOARD=mimxrt1064_evk && echo "Using default board ${BOARD}"
 [[ -z $APP ]]   && export APP=cli_pubsub_server && echo "Using default application ${APP}"
 [[ ! -z ${IP_ADDRESS} ]] && OPT_IP_ADDRESS="-DCONFIG_SOPC_ETH_ADDRESS=\"${IP_ADDRESS}\" -DCONFIG_SOPC_ENDPOINT_ADDRESS=\"opc.tcp://${IP_ADDRESS}:4841\"" && echo "Configure new Ip address ${IP_ADDRESS}"
+[[ -z $LOG_PATH ]]   && LOG_PATH=${OUTDIR}/${APP}_${BOARD_NAME}.log && echo "Using default log path ${LOG_PATH}"
+[[ -z $BIN_PATH ]]   && BIN_PATH=${OUTDIR}/${APP}_${BOARD_NAME}.bin && echo "Using default bin path ${BIN_PATH}"
 [[ ! -z ${ADD_CONF} ]] && echo "Using additional extra configuration : '${ADD_CONF}'"
+
+directory_path=$(dirname "$LOG_PATH")
+file_name=$(basename "$file_path")
+
 
 #west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
 [ -d "${SAMPLESDIR}/${APP}" ] || fail "Invalid application $APP"
 
-echo " ** Building ${APP} ... " | mkdir -p ${OUTDIR} |tee -a ${OUTDIR}/${APP}_${BOARD_NAME}.log
+echo " ** Building ${APP} ... " | mkdir -p $(dirname "$LOG_PATH") |tee -a ${LOG_PATH}
 cd ${SAMPLESDIR}/${APP} || return 1
 sudo rm -rf build || return  1
 
 echo "Command : 'west build -b ${BOARD} -- ${OPT_IP_ADDRESS} ${ADD_CONF} . '"
-west build -b ${BOARD} -- ${OPT_IP_ADDRESS} ${ADD_CONF} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD_NAME}.log
+west build -b ${BOARD} -- ${OPT_IP_ADDRESS} ${ADD_CONF} . 2>&1 |tee ${LOG_PATH}
 chmod --recursive 777 build
 mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
 if ! [ -f build/zephyr/zephyr.bin ] ; then
-  echo " ** Build ${APP} failed " | mkdir -p ${OUTDIR} | tee -a ${OUTDIR}/${APP}_${BOARD_NAME}.log
+  echo " ** Build ${APP} failed " | mkdir -p $(dirname "$LOG_PATH") | tee -a ${LOG_PATH}
   exit 1
 fi
-cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD_NAME}.bin 2>&1 |tee -a ${OUTDIR}/${APP}_${BOARD_NAME}.log
-echo " ** Build ${APP} OK " | mkdir -p ${OUTDIR} |tee -a ${OUTDIR}/${APP}_${BOARD_NAME}.log
+ mkdir -p $(dirname "$BIN_PATH")
+cp build/zephyr/zephyr.bin ${BIN_PATH} 2>&1 |tee -a ${LOG_PATH}
+echo " ** Build ${APP} OK " | mkdir -p $(dirname "$LOG_PATH") |tee -a ${LOG_PATH}
 
-ls -l ${OUTDIR}/
+ls -l $(dirname "$LOG_PATH")/
 chmod -R 777 build
+ls -l $(dirname "$BIN_PATH")/
+chmod -R 777 build
+
 

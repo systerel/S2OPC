@@ -11,6 +11,7 @@ set(CONF_FILE_CRYPTO "prj.conf")
 
 if($ENV{NO_CRYTO})
     set(CONF_FILE_CRYPTO "prj-nocrypto.conf")
+    set(S2OPC_CRYPTO_LIB "nocrypto")
 endif()
 
 set(ENV{CONF_FILE} "${CMAKE_CURRENT_LIST_DIR}/${CONF_FILE_CRYPTO};${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.conf")
