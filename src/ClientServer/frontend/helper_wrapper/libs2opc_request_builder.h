@@ -704,6 +704,38 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetMethodAttributes(OpcUa_AddNodesRequest*
                                                           const SOPC_Boolean* optUserExecutable);
 
 /**
+ * \brief Creates a delete nodes request
+ *
+ * \param nbDeleteNodes  Number of nodes to delete with this request.
+ *                      \p nbDeleteNodes <= INT32_MAX.
+ *                      ::SOPC_DeleteNodeRequest_SetNodeId shall be called for each add node item index.
+ *                      Otherwise empty delete node item is sent for the index not configured.
+ *
+ * \return allocated DeleteNodes request in case of success, NULL in case of failure (out of memory)
+ */
+OpcUa_DeleteNodesRequest* SOPC_DeleteNodesRequest_Create(size_t nbDeleteNodes);
+
+/**
+ * \brief Sets the parameters of the DeleteNodes request.
+ *        If optional parameters are not defined the server will choose values for this attributes.
+ *
+ * \param deleteNodesRequest        The DeleteNodes request to configure.
+ * \param index                     Index of the DeleteNodes item to configure in the request.
+ *                                  \p index < number of delete nodes configured in ::SOPC_DeleteNodesRequest_Create.
+ * \param nodeId                    NodeId of the node to delete.
+ * \param deleteTargetReferences    - TRUE for deleting all references pointing to NodeId
+ *                                  - FALSE for deleting only references of NodeId and references
+ *                                    to NodeId in its references.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid DeleteNodes request, index or nodeId.
+ */
+SOPC_ReturnStatus SOPC_DeleteNodesRequest_SetParameters(OpcUa_DeleteNodesRequest* deleteNodesRequest,
+                                                        size_t index,
+                                                        const SOPC_NodeId* nodeId,
+                                                        const SOPC_Boolean deleteTargetReferences);
+
+/**
  * \brief Creates a CreateSubscription request with default parameters values
  *        Default parameters are the following:
  *         - RequestedPublishingInterval = 500 ms

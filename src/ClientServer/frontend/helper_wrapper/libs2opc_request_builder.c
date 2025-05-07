@@ -1224,6 +1224,58 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetMethodAttributes(OpcUa_AddNodesRequest*
     return status;
 }
 
+OpcUa_DeleteNodesRequest* SOPC_DeleteNodesRequest_Create(size_t nbDeleteNodes)
+{
+    if (nbDeleteNodes > INT32_MAX)
+    {
+        return NULL;
+    }
+    OpcUa_DeleteNodesRequest* req = NULL;
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_DeleteNodesRequest_EncodeableType, (void**) &req);
+    if (SOPC_STATUS_OK != status)
+    {
+        return NULL;
+    }
+    req->NodesToDelete = SOPC_Calloc(nbDeleteNodes, sizeof(*req->NodesToDelete));
+    if (NULL != req->NodesToDelete)
+    {
+        req->NoOfNodesToDelete = (int32_t) nbDeleteNodes;
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Initialize elements
+        for (int32_t i = 0; i < req->NoOfNodesToDelete; i++)
+        {
+            OpcUa_DeleteNodesItem_Initialize(&req->NodesToDelete[i]);
+        }
+    }
+    else
+    {
+        SOPC_EncodeableObject_Delete(&OpcUa_DeleteNodesRequest_EncodeableType, (void**) &req);
+    }
+    return req;
+}
+
+SOPC_ReturnStatus SOPC_DeleteNodesRequest_SetParameters(OpcUa_DeleteNodesRequest* deleteNodesRequest,
+                                                        size_t index,
+                                                        const SOPC_NodeId* nodeId,
+                                                        const SOPC_Boolean deleteTargetReferences)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (!CHECK_ELEMENT_EXISTS(deleteNodesRequest, NoOfNodesToDelete, index) || NULL == nodeId)
+    {
+        return status;
+    }
+    OpcUa_DeleteNodesItem* item = &deleteNodesRequest->NodesToDelete[index];
+    status = SOPC_NodeId_Copy(&item->NodeId, nodeId);
+    item->DeleteTargetReferences = deleteTargetReferences;
+    return status;
+}
+
 OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_Create(double reqPublishingInterval,
                                                                        uint32_t reqLifetimeCount,
                                                                        uint32_t reqMaxKeepAliveCount,
