@@ -61,8 +61,8 @@ while [[ ! -z $1 ]]; do
     exit 2
 done
 
-[[ ! -z $LOG_PATH ]] && LOG_PATH=--log ${LOG_PATH}
-[[ ! -z $BIN_PATH ]] && BIN_PATH=--bin ${BIN_PATH}
+[[ ! -z $LOG_PATH ]] && LOG_PATH="--log ${LOG_PATH}"
+[[ ! -z $BIN_PATH ]] && BIN_PATH="--bin ${BIN_PATH}"
 
 source .docker-images.sh
 docker inspect ${ZEPHYR_DIGEST} 2>/dev/null >/dev/null  || fail "Docker image not installed: ${ZEPHYR_DIGEST}"
