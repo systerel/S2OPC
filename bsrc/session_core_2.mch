@@ -66,7 +66,7 @@ INITIALISATION
     a_channel_nb_sessions := t_channel * {0} ||
     a_client_to_create := {} ||
     a_client_orphaned  := {} ||
-    a_server_user_auth_attempts := t_session * {0} ||
+    a_server_user_auth_attempts := {} ||
     a_server_client_locales := t_session * {c_LocaleIds_empty} ||
     a_server_client_app_desc := {} ||
     a_server_client_cert_tb := {}

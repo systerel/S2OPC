@@ -100,7 +100,7 @@ INITIALISATION
     a_user_server                := {} ||
     a_user_server_cert           := {} ||
     a_server_token               := {} ||
-    a_server_user_auth_attempts  := t_session * {0} ||
+    a_server_user_auth_attempts  := {} ||
     a_server_client_locales := t_session * {c_LocaleIds_empty} ||
     a_session_roles              := {} ||
 
