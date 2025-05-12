@@ -599,9 +599,9 @@ OPERATIONS
     client_close_session_req_msg (req_msg) =
     PRE
         req_msg : t_msg_i &
-        req_msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_close_req
+        req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_close_req
     THEN
         skip
     END;
@@ -609,9 +609,9 @@ OPERATIONS
     client_close_session_resp_msg (resp_msg) =
     PRE
         resp_msg : t_msg_i &
-        resp_msg = c_msg_out &
-        c_msg_out : t_msg &
-        a_msg_out_type = e_msg_session_close_resp
+        resp_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_close_resp
     THEN
         skip
     END;
