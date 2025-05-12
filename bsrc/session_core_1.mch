@@ -670,12 +670,10 @@ OPERATIONS
         server_nonce = a_NonceServer(session)
     THEN
         valid,
-        signature,
-        a_NonceClient
+        signature
         :(
             valid         : BOOL                  &
             signature     : t_SignatureData_i     &
-            a_NonceClient : t_session +-> t_Nonce &
 
             (valid = TRUE
              =>
