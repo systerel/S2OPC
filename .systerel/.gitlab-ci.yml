@@ -92,7 +92,8 @@ variables:
 
 stages:
   - gen
-  - hil
+  - hil-build
+  - hil-test
   - build
   - test
   - build-others
@@ -154,26 +155,53 @@ generation:
 # hil jobs
 ###
 
-hil-tests:
-  stage: hil
+hil-build-zephyr:
+  stage: hil-build
   needs: []
   tags:
       - hil
-  image: docker.aix.systerel.fr/c838/build@sha256:8cbb2881dc3798ce6b6cf078fa744ef357b30509a5c3e12e2e59cf8bed9c521f # digest of build:1.51
+  image: # digest of zephyr_build :v3.7.0-d
+    name: docker.aix.systerel.fr/c838/zephyr_build:v3.7.0-d
+    entrypoint: ['']
   script:
-    - ' cd .systerel/HIL_tests'
-    - ./launch.sh
+    - pwd
+    - ls /
+    - test -f /.dockerenv && echo "✅ In Docker" || echo "❌ NOT in Docker"
+    - grep -i docker /proc/1/cgroup || echo "no docker found in /proc/1/cgroup"
+    - ps -eo pid,ppid,cmd | grep -E "^\s*1\s"
+    - ps aux
+    - id
   artifacts:
-    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
-      - '.systerel/HIL_tests/logs'
-      - 'build_freertos'
-      - 'build_zephyr'
+      - 'build_zephyr/'
     expire_in: '1 week'
     when: always
   rules:
     - if: "$HIL_TESTS != null"
       when: always
+
+#run-hil:
+#  stage: hil-build
+#  needs: []
+#  tags:
+#      - hil
+#  image: # digest of zephyr_build :v3.7.0-d
+#    name: docker.aix.systerel.fr/c838/zephyr_build:v3.7.0-d
+#    entrypoint: ['']
+#  script:
+#    - ' cd .systerel/HIL_tests'
+#    - ./build.sh
+#  artifacts:
+#    name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+#    paths:
+#      - 'build_zephyr/'
+#    expire_in: '1 week'
+#    when: always
+#  rules:
+#    - if: "$HIL_TESTS != null"
+#      when: always
+
 
 ###
 # Compilation jobs

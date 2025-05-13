@@ -407,7 +407,9 @@ build-zephyr:
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh nucleo_h745zi_q/stm32h745xx/m7 cli_client -DCONFIG_NET_GPTP=y'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server --nocrypto'
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h747i_disco/stm32h747xx/m7'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h747i_disco/stm32h747xx/m7 cli_pubsub_server'
+    - './samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_sim cli_client'
+    - './samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_sim cli_pubsub_server'
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
@@ -642,7 +644,7 @@ test-faulty-packets :
 ###
 test-zephyr:
   stage: test-others
-  image: docker.aix.systerel.fr/c838/zephyr_build:v3.7.0-d # digest of test:2.16
+  image: registry.gitlab.com/systerel/s2opc/zephyr_build:v3.7.0-d # digest of test:2.16
   needs : [build-zephyr]
   script:
     - "./samples/embedded/platform_dep/zephyr/ci/test-in-docker.sh"
@@ -651,7 +653,6 @@ test-zephyr:
   rules: # run the task only if Zephyr samples have been compiled
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: on_success
-
 ##
 # Windows native build and tests (done in "build-others" stage)
 ##

@@ -65,10 +65,10 @@ void SOPC_Platform_Setup(void)
     bool netInit = Network_Initialize(NULL);
     SOPC_ASSERT(netInit == true);
 
-    #if S2OPC_CRYPTO_MBEDTLS
-        /* Initialize MbedTLS */
-        tls_threading_initialize();
-    #endif
+#if S2OPC_CRYPTO_MBEDTLS
+    /* Initialize MbedTLS */
+    tls_threading_initialize();
+#endif
 
     // Create a Thread to receive SHELL readline
     SOPC_Condition_Init(&shell_cond);

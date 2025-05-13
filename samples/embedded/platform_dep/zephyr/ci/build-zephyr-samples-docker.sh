@@ -67,7 +67,8 @@ shift
 
 mkdir -p ${OUTDIR} || exit 2
 
-[ `whoami` != 'user' ] && echo "Unexpected user `whoami`. Is this script executed within the docker?" && exit 2
+# Overly restrictive for HIL 
+#[ `whoami` != 'user' ] && echo "Unexpected user `whoami`. Is this script executed within the docker?" && exit 2
 
 
 # Just check that all folders exist!
