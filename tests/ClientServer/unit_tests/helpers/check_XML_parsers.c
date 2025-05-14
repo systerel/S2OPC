@@ -328,15 +328,6 @@ const char* clientExpectedLocales[3] = {"en-US", "fr-FR", NULL};
 static void check_parsed_s2opc_server_config(SOPC_S2OPC_Config* s2opcConfig)
 {
     SOPC_Server_Config* sConfig = &s2opcConfig->serverConfig;
-    /* Check namespaces */
-    int nsCounter = 0;
-    while (sConfig->namespaces[nsCounter] != NULL && expectedNamespaces[nsCounter] != NULL)
-    {
-        ck_assert_int_eq(0, strcmp(sConfig->namespaces[nsCounter], expectedNamespaces[nsCounter]));
-        nsCounter++;
-    }
-    ck_assert_ptr_null(sConfig->namespaces[nsCounter]);
-    ck_assert_ptr_null(expectedNamespaces[nsCounter]);
 
     /* Check locales */
     int localeCounter = 0;

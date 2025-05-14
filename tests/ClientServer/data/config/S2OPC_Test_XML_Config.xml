@@ -1,10 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_config.xsd">
   <ServerConfiguration>
-    <Namespaces>
-      <Namespace uri="urn:S2OPC:MY_SERVER_HOST"/>
-      <Namespace uri="urn:S2OPC:MY_SERVER_HOST:2"/>
-    </Namespaces>
     <Locales>
       <Locale id="en"/>
       <Locale id="es-ES"/>

@@ -34,28 +34,9 @@
 #include "sopc_pki_stack.h"
 #include "sopc_toolkit_config.h"
 
-SOPC_ReturnStatus SOPC_ServerConfigHelper_SetNamespaces(size_t nbNamespaces, const char** namespaces)
-{
-    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    SOPC_ASSERT(NULL != pConfig);
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.namespaces)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-    if (0 == nbNamespaces || NULL == namespaces)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+#include "opcua_identifiers.h"
 
-    pConfig->serverConfig.namespaces = SOPC_CommonHelper_Copy_Char_Array(nbNamespaces, namespaces);
-
-    if (NULL == pConfig->serverConfig.namespaces)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    return SOPC_STATUS_OK;
-}
+static const SOPC_NodeId namespaceArray_nid = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_NamespaceArray);
 
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
@@ -469,24 +450,44 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* add
     SOPC_ASSERT(NULL != pEventConfig);
     SOPC_EventManager_CreateEventTypes(addressSpaceConfig, &pEventConfig->serverConfig.eventTypes);
 #endif
-    // Find number of namespaces
-    SOPC_S2OPC_Config* config = SOPC_CommonHelper_GetConfiguration();
-    SOPC_ASSERT(NULL != config);
-    uint16_t indexNs = 0;
-    while (NULL != config->serverConfig.namespaces && config->serverConfig.namespaces[indexNs] != NULL)
+    // Find number of namespaces: it is the size of the array value NamespaceArray
+    uint16_t nbOfNS = 0;
+    bool foundNode = false;
+    SOPC_AddressSpace_Node* namespaceArray =
+        SOPC_AddressSpace_Get_Node(addressSpaceConfig, &namespaceArray_nid, &foundNode);
+    if (foundNode)
     {
-        indexNs++;
+        // Initialize Max numeric id for each namespace
+        SOPC_Variant* value = SOPC_AddressSpace_Get_Value(addressSpaceConfig, namespaceArray);
+        if (NULL != value && SOPC_VariantArrayType_Array == value->ArrayType)
+        {
+            nbOfNS = (uint16_t) value->Value.Array.Length;
+            status = SOPC_AddressSpace_MaxNsNumId_Initialize(addressSpaceConfig, nbOfNS);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "Inconsistency in the number of NS between: value of node NamespaceArray (nb NS = %d) and "
+                    "address space (nodes NS index).",
+                    nbOfNS);
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Value of mandatory node 'NamespaceArray' is not well defined. "
+                                   "Server will stop.");
+            status = SOPC_STATUS_NOK;
+        }
     }
-    uint16_t nbNs = (uint16_t)(indexNs + 1); // cast necessary for RPI cross-compilation
-    // Initialize Max numeric id for each namespace
-    status = SOPC_AddressSpace_MaxNsNumId_Initialize(addressSpaceConfig, nbNs);
-    if (SOPC_STATUS_OK != status)
+    else
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Inconsistency in the number of NS between: server configuration (nb NS = %d) and "
-                               "address space (nodes NS index).",
-                               nbNs);
+                               "Mandatory node 'NamespaceArray' missing in the address space. "
+                               "Server will stop.");
+        status = SOPC_STATUS_NOK;
     }
+
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ToolkitServer_SetAddressSpaceConfig(addressSpaceConfig);

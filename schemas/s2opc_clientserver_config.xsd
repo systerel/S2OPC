@@ -32,18 +32,6 @@
       <xs:enumeration value="certificate"/>
     </xs:restriction>
   </xs:simpleType>
-  <xs:complexType name="NamespaceType">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute type="xs:anyURI" name="uri" use="required"/>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
-  <xs:complexType name="NamespacesType">
-    <xs:sequence>
-      <xs:element type="NamespaceType" name="Namespace" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
   <xs:complexType name="LocaleType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
@@ -233,7 +221,6 @@
   </xs:complexType>
   <xs:complexType name="ServerConfigurationType">
     <xs:sequence>
-      <xs:element type="NamespacesType" name="Namespaces" />
       <xs:element type="LocalesType" name="Locales" />
       <xs:element type="ServerApplicationCertificatesType" name="ApplicationCertificates" minOccurs="0" maxOccurs="1">
         <xs:annotation>

@@ -42,10 +42,7 @@
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
-#define DATA_NAMESPACE_URI "https://www.systerel.fr/S2OPC/demo/data/origin"
 
-/* Define application namespaces: ns=1 and ns=2 (NULL terminated array) */
-static const char* default_app_namespace_uris[] = {DEFAULT_APPLICATION_URI, DATA_NAMESPACE_URI};
 static const char* default_locale_ids[] = {"en-US"};
 
 static const bool secuActive = true;
@@ -152,14 +149,9 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
  */
 static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
 {
-    // Set namespaces
-    SOPC_ReturnStatus status = SOPC_ServerConfigHelper_SetNamespaces(sizeof(default_app_namespace_uris) / sizeof(char*),
-                                                                     default_app_namespace_uris);
     // Set locale ids
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ServerConfigHelper_SetLocaleIds(sizeof(default_locale_ids) / sizeof(char*), default_locale_ids);
-    }
+    SOPC_ReturnStatus status =
+        SOPC_ServerConfigHelper_SetLocaleIds(sizeof(default_locale_ids) / sizeof(char*), default_locale_ids);
 
     // Set application description of server to be returned by discovery services (GetEndpoints, FindServers)
     if (SOPC_STATUS_OK == status)

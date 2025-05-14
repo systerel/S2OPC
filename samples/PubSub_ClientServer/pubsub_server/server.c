@@ -434,18 +434,6 @@ SOPC_ReturnStatus Server_CreateServerConfig(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        // Set namespaces
-        const char* namespaces[] = {APPLICATION_URI};
-        status = SOPC_ServerConfigHelper_SetNamespaces(1, namespaces);
-
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed setting namespaces");
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
         status = SOPC_ServerConfigHelper_SetApplicationDescription(APPLICATION_URI, PRODUCT_URI, SERVER_DESCRIPTION,
                                                                    NULL, OpcUa_ApplicationType_Server);
 

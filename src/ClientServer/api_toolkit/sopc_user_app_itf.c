@@ -75,12 +75,6 @@ void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
     SOPC_ASSERT(NULL != config);
     if (config->freeCstringsFlag)
     {
-        for (int i = 0; NULL != config->namespaces && NULL != config->namespaces[i]; i++)
-        {
-            SOPC_Free(config->namespaces[i]);
-        }
-        SOPC_Free(config->namespaces);
-
         for (int i = 0; NULL != config->localeIds && NULL != config->localeIds[i]; i++)
         {
             SOPC_Free(config->localeIds[i]);

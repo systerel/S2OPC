@@ -238,13 +238,6 @@ static bool SOPC_ServerConfigHelper_CheckConfig(void)
         }
     }
 
-    if (NULL == pConfig->serverConfig.namespaces)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "No namespace defined for the server, 1 server namespace shall be defined");
-        res = false;
-    }
-
     if (NULL == pConfig->serverConfig.localeIds)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "No locales defined for the server.");
@@ -296,13 +289,6 @@ static bool SOPC_ServerConfigHelper_FinalizeCheckedConfig(void)
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "No authorization manager configured: fallback to default permissive authorization manager");
         }
-    }
-
-    if (NULL == pConfig->serverConfig.namespaces)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "No namespace defined for the server, 1 server namespace shall be defined");
-        res = false;
     }
 
     if (NULL == pConfig->serverConfig.localeIds)

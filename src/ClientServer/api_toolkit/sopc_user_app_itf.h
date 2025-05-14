@@ -325,8 +325,6 @@ struct SOPC_Server_Config
 {
     bool freeCstringsFlag; /**< A flag to indicate if the C strings contained in the server configuration
                                 (and endpoints) shall be freed */
-    char** namespaces;     /**< An array of namespaces terminated by a NULL pointer.
-                                Index in array is the namespace index. */
 
     char** localeIds; /**< An array of locale ids supported by the server terminated by a NULL pointer.
                            The OpcUa_ApplicationDescription ApplicationName shall contains a definition for each

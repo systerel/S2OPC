@@ -56,7 +56,6 @@
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DATA_ORIGIN_URI "https://www.systerel.fr/S2OPC/demo/data/origin"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 
 #define NB_OF_REFERENCES_DIALOG_CONDITION 31
@@ -1145,18 +1144,6 @@ int main(int argc, char* argv[])
     else
     {
         printf("<Test_Server_Local_Service: Certificates and key loaded\n");
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        // Set namespaces
-        const char* namespaces[] = {DEFAULT_APPLICATION_URI, DATA_ORIGIN_URI};
-        status = SOPC_ServerConfigHelper_SetNamespaces(2, namespaces);
-
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("<Test_Server_Local_Service: Failed setting namespaces\n");
-        }
     }
 
     if (SOPC_STATUS_OK == status)

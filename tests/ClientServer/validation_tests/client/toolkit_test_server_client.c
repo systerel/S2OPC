@@ -57,7 +57,6 @@
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
-#define DATA_NAMESPACE_URI "https://www.systerel.fr/S2OPC/demo/data/origin"
 #define DEFAULT_APPLICATION_NAME "Test_Client_S2OPC"
 
 #define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_SignAndEncrypt
@@ -512,18 +511,6 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     else
     {
         printf("<Test_Server_Client: Certificates and key loaded\n");
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        // Set namespaces
-        const char* namespaces[] = {DEFAULT_APPLICATION_URI, DATA_NAMESPACE_URI};
-        status = SOPC_ServerConfigHelper_SetNamespaces(2, namespaces);
-
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("<Test_Server_Client: Failed setting namespaces\n");
-        }
     }
 
     if (SOPC_STATUS_OK == status)

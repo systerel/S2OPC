@@ -55,8 +55,6 @@
 #define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
 #define DEFAULT_APPLICATION_NAME "Test_Client_S2OPC"
 
-/* Define application namespaces: ns=1 and ns=2 */
-static const char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2};
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
 #define TEST_SERVER_XML_ADDRESS_SPACE "TEST_SERVER_XML_ADDRESS_SPACE"
@@ -322,14 +320,8 @@ static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
  */
 static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
 {
-    // Set namespaces
-    SOPC_ReturnStatus status = SOPC_ServerConfigHelper_SetNamespaces(1, default_app_namespace_uris);
-
     // Set locale ids
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ServerConfigHelper_SetLocaleIds(2, default_locale_ids);
-    }
+    SOPC_ReturnStatus status = SOPC_ServerConfigHelper_SetLocaleIds(2, default_locale_ids);
 
     // Set application description of server to be returned by discovery services (GetEndpoints, FindServers)
     if (SOPC_STATUS_OK == status)

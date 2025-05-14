@@ -409,57 +409,6 @@ static bool set_server_server_array_value(OpcUa_WriteValue* wv, const SOPC_Strin
     return true;
 }
 
-static bool set_server_namespace_array_value(OpcUa_WriteValue* wv, char** app_namespace_uris)
-{
-    set_write_value_id(wv, OpcUaId_Server_NamespaceArray);
-    wv->Value.Value.ArrayType = SOPC_VariantArrayType_Array;
-    wv->Value.Value.BuiltInTypeId = SOPC_String_Id;
-
-    size_t n_app_namespace_uris = 1;
-
-    if (app_namespace_uris != NULL)
-    {
-        for (size_t i = 0; app_namespace_uris[i] != NULL; ++i)
-        {
-            ++n_app_namespace_uris;
-        }
-    }
-
-    SOPC_ASSERT(n_app_namespace_uris <= INT32_MAX);
-
-    SOPC_String* uris = SOPC_Calloc(n_app_namespace_uris, sizeof(SOPC_String));
-
-    if (uris == NULL)
-    {
-        return false;
-    }
-
-    for (size_t i = 0; i < n_app_namespace_uris; ++i)
-    {
-        SOPC_String_Initialize(&uris[i]);
-    }
-
-    wv->Value.Value.Value.Array.Content.StringArr = uris;
-    wv->Value.Value.Value.Array.Length = (int32_t) n_app_namespace_uris;
-
-    if (SOPC_String_CopyFromCString(&uris[0], "http://opcfoundation.org/UA/") != SOPC_STATUS_OK)
-    {
-        return false;
-    }
-
-    for (size_t i = 0; i < n_app_namespace_uris - 1; ++i)
-    {
-        if (SOPC_String_CopyFromCString(&uris[1 + i], app_namespace_uris[i]) != SOPC_STATUS_OK)
-        {
-            wv->Value.Value.Value.Array.Length = (int32_t) i; // limit to previous index for clear operation
-            SOPC_Variant_Clear(&wv->Value.Value);
-            return false;
-        }
-    }
-
-    return true;
-}
-
 static bool set_server_capabilities_locale_ids_array_value(OpcUa_WriteValue* wv, char** app_locale_ids)
 {
     set_write_value_id(wv, OpcUaId_Server_ServerCapabilities_LocaleIdArray);
@@ -630,17 +579,16 @@ static bool set_server_capabilities_server_profile_array(OpcUa_WriteValue* wv)
 
 static bool set_server_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVariables* vars)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 8);
+    OpcUa_WriteValue* values = append_write_values(write_values, 7);
     return values != NULL &&
            set_server_server_array_value(&values[0], &vars->serverConfig->serverDescription.ProductUri) &&
-           set_server_namespace_array_value(&values[1], vars->serverConfig->namespaces) &&
-           set_server_service_level_value(&values[2], vars->service_level) &&
-           set_write_value_bool(&values[3], OpcUaId_Server_Auditing, vars->auditing) &&
-           set_write_value_bool(&values[4], OpcUaId_Server_ServerDiagnostics_EnabledFlag, false) &&
-           set_write_value_int32(&values[5], OpcUaId_Server_ServerRedundancy_RedundancySupport,
+           set_server_service_level_value(&values[1], vars->service_level) &&
+           set_write_value_bool(&values[2], OpcUaId_Server_Auditing, vars->auditing) &&
+           set_write_value_bool(&values[3], OpcUaId_Server_ServerDiagnostics_EnabledFlag, false) &&
+           set_write_value_int32(&values[4], OpcUaId_Server_ServerRedundancy_RedundancySupport,
                                  OpcUa_RedundancySupport_None) &&
-           set_server_capabilities_server_profile_array(&values[6]) &&
-           set_server_capabilities_locale_ids_array_value(&values[7], vars->serverConfig->localeIds) &&
+           set_server_capabilities_server_profile_array(&values[5]) &&
+           set_server_capabilities_locale_ids_array_value(&values[6], vars->serverConfig->localeIds) &&
            set_server_server_status_variables(write_values, vars) &&
            set_server_capabilities_max_variables(write_values) &&
            set_server_capabilities_operation_limits_variables(write_values, vars);

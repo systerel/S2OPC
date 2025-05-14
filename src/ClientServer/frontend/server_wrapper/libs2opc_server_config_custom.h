@@ -37,21 +37,6 @@
 /** \brief Server configuration without XML */
 
 /**
- * \brief Defines server namespaces from an array of strings.
- *        Index in array is the namespace index starting to 1 for first element,
- *        namespace 0 is reserved for OPC UA namespace and is implicitely declared.
- *
- * \param nbNamespaces  The number of namespaces defined in the array
- * \param namespaces    The array of namespaces. Array and its content is copied by function.
- *
- * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
- *         if \p nbNamespaces == 0 or \p namespaces is invalid
- *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, namesapces already defined, server already started).
- */
-SOPC_ReturnStatus SOPC_ServerConfigHelper_SetNamespaces(size_t nbNamespaces, const char** namespaces);
-
-/**
  * \brief Defines server locales ids supported from an array of locale strings.
  *
  * \warning The application name shall be defined for each supported locale defined here

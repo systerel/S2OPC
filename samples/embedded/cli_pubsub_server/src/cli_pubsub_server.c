@@ -91,7 +91,6 @@ static void log_UserCallback(const char* timestampUtc,
 #define PRODUCT_URI "urn:S2OPC:localhost"
 #define SERVER_DESCRIPTION "S2OPC PubSub+Server demo Server"
 #define LOCALE_ID "en-US"
-static const char* g_userNamespaces[2] = {"urn:S2OPC:sopc_demo", NULL};
 static const char* g_localesArray[2] = {LOCALE_ID, NULL};
 
 // generated address space.
@@ -491,11 +490,6 @@ static void setupServer(void)
     SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerConfigHelper_Initialize failed");
 
     PRINT("S2OPC initialization OK\n");
-
-    //////////////////////////////////
-    // Namespaces initialization
-    status = SOPC_ServerConfigHelper_SetNamespaces(1, g_userNamespaces);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerConfigHelper_SetNamespaces failed");
 
     status = SOPC_ServerConfigHelper_SetLocaleIds(1, g_localesArray);
     SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerConfigHelper_SetLocaleIds failed");

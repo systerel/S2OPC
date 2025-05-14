@@ -38,8 +38,6 @@ typedef enum
     PARSE_START,               // Beginning of file
     PARSE_S2OPC,               // In a S2OPC
     PARSE_SRVCONFIG,           // ..In a server config tag
-    PARSE_NAMESPACES,          // ....In namespaces
-    PARSE_NAMESPACE,           // ......In namespace
     PARSE_LOCALES,             // ....In locales
     PARSE_LOCALE,              // ......In locale
     PARSE_APPLICATION_DESC,    // ....In application description
@@ -70,9 +68,6 @@ struct parse_context_t
 
     int32_t cli_skip_depth;
 
-    bool namespacesSet;
-    SOPC_Array* namespaces;
-
     bool localesSet;
     SOPC_Array* localeIds;
 
@@ -94,7 +89,6 @@ struct parse_context_t
 };
 
 #define NS_SEPARATOR "|"
-#define NS(ns, tag) ns NS_SEPARATOR tag
 
 static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 {
@@ -138,12 +132,6 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 
 static bool end_server_config(struct parse_context_t* ctx)
 {
-    if (!ctx->namespacesSet)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no namespaces defined for the server");
-        return false;
-    }
-
     if (!ctx->localesSet)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no locales defined for the server");
@@ -193,50 +181,6 @@ static bool end_app_certs(struct parse_context_t* ctx)
         ctx->serverPki = NULL;
     }
     return res;
-}
-
-static bool end_namespaces(struct parse_context_t* ctx)
-{
-    if (0 == SOPC_Array_Size(ctx->namespaces))
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no namespace defined for the server");
-        return false;
-    }
-    if (!SOPC_Array_Append_Values(ctx->namespaces, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->serverConfigPtr->namespaces = SOPC_Array_Into_Raw(ctx->namespaces);
-    if (NULL == ctx->serverConfigPtr->namespaces)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->namespaces = NULL;
-    return true;
-}
-
-static bool start_namespace(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "uri", attrs);
-
-    char* uri = SOPC_strdup(attr_val);
-
-    if (uri == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    if (!SOPC_Array_Append(ctx->namespaces, uri))
-    {
-        SOPC_Free(uri);
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    return true;
 }
 
 static bool end_endpoints(struct parse_context_t* ctx)
@@ -572,12 +516,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         return;
     case PARSE_SRVCONFIG:
     {
-        if (strcmp(name, "Namespaces") == 0 && !ctx->namespacesSet)
-        {
-            ctx->namespacesSet = true;
-            ctx->state = PARSE_NAMESPACES;
-        }
-        else if (strcmp(name, "Locales") == 0 && !ctx->localesSet)
+        if (strcmp(name, "Locales") == 0 && !ctx->localesSet)
         {
             ctx->localesSet = true;
             ctx->state = PARSE_LOCALES;
@@ -606,24 +545,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
 
         break;
     }
-    case PARSE_NAMESPACES:
-        if (strcmp(name, "Namespace") == 0)
-        {
-            if (!start_namespace(ctx, attrs))
-            {
-                XML_StopParser(helperCtx->parser, 0);
-                return;
-            }
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-
-        ctx->state = PARSE_NAMESPACE;
-        break;
     case PARSE_LOCALES:
         if (strcmp(name, "Locale") == 0)
         {
@@ -945,17 +866,6 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         }
         ctx->state = PARSE_SRVCONFIG;
         break;
-    case PARSE_NAMESPACE:
-        ctx->state = PARSE_NAMESPACES;
-        break;
-    case PARSE_NAMESPACES:
-        if (!end_namespaces(ctx))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
-        ctx->state = PARSE_SRVCONFIG;
-        break;
     case PARSE_LOCALE:
         ctx->state = PARSE_LOCALES;
         break;
@@ -1012,15 +922,13 @@ bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* serverConfig)
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
 
     SOPC_Array* endpoints = SOPC_Array_Create(sizeof(SOPC_Endpoint_Config), 1, NULL);
-    SOPC_Array* ns = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
     SOPC_Array* locales = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
 
-    if ((NULL == parser) || (NULL == endpoints) || (NULL == ns) || (NULL == locales))
+    if ((NULL == parser) || (NULL == endpoints) || (NULL == locales))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         XML_ParserFree(parser);
         SOPC_Array_Delete(endpoints);
-        SOPC_Array_Delete(ns);
         SOPC_Array_Delete(locales);
         return false;
     }
@@ -1033,7 +941,6 @@ bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* serverConfig)
     ctx.helper_ctx.parser = parser;
     ctx.cli_skip_depth = 0;
     ctx.endpoints = endpoints;
-    ctx.namespaces = ns;
     ctx.localeIds = locales;
     ctx.serverConfigPtr = serverConfig;
     ctx.helper_ctx.char_data_buffer = NULL;
@@ -1045,7 +952,6 @@ bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* serverConfig)
 
     SOPC_ReturnStatus res = parse(parser, fd);
     XML_ParserFree(parser);
-    SOPC_Array_Delete(ctx.namespaces);
     SOPC_Array_Delete(ctx.localeIds);
 
     size_t nbEndpoints = SOPC_Array_Size(endpoints);
