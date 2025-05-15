@@ -385,6 +385,7 @@ OPERATIONS
         p_session /: s_client_session &
         a_state(p_session) : {e_session_created, e_session_userActivated,
                               e_session_scOrphaned} &
+        p_session : dom(a_NonceServer) &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token &
         p_user_token_signature : t_SignatureData_i
