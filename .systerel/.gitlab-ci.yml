@@ -158,19 +158,12 @@ generation:
 hil-build-zephyr:
   stage: hil-build
   needs: []
-  tags:
-      - hil
   image: # digest of zephyr_build :v3.7.0-d
     name: docker.aix.systerel.fr/c838/zephyr_build:v3.7.0-d
     entrypoint: ['']
   script:
-    - pwd
-    - ls /
-    - test -f /.dockerenv && echo "✅ In Docker" || echo "❌ NOT in Docker"
-    - grep -i docker /proc/1/cgroup || echo "no docker found in /proc/1/cgroup"
-    - ps -eo pid,ppid,cmd | grep -E "^\s*1\s"
-    - ps aux
-    - id
+    - cd .systerel/HIL_tests
+    - ./build.py --zephyr
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
