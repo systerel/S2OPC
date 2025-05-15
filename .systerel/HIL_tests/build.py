@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 # Licensed to Systerel under one or more contributor license
 # agreements. See the NOTICE file distributed with this work
