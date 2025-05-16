@@ -162,8 +162,9 @@ hil-build-zephyr:
     name: docker.aix.systerel.fr/c838/zephyr_build:v3.7.0-d
     entrypoint: ['']
   script:
+    - ln -s $(pwd) /zephyrproject/modules/lib/s2opc
     - cd .systerel/HIL_tests
-    - ./build.py --zephyr
+    - ./build.py --os zephyr
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
