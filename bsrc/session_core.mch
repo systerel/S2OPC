@@ -296,13 +296,18 @@ OPERATIONS
         IF session_token : t_session_token
         THEN
             CHOICE
-                a_state(session) := e_session_created       ||
-                a_client_token(session) := session_token    ||
-                bret := TRUE                                ||
-                a_NonceClient := {session} <<| a_NonceClient ||
-                a_NonceServer :(
-                {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                session : dom(a_NonceServer))
+                a_state(session) := e_session_created        ||
+                a_client_token(session) := session_token     ||
+                bret := TRUE                                 ||
+                a_NonceServer, a_NonceClient :(
+                    a_NonceServer : s_session +-> t_Nonce &
+                    {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                    session : dom(a_NonceServer) &
+
+                    a_NonceClient : s_session +-> t_Nonce &
+                    (a_SecurityPolicy(channel) /= e_secpol_None => a_NonceClient = {session} <<| a_NonceClient$0) &
+                    (a_SecurityPolicy(channel)  = e_secpol_None => a_NonceClient = a_NonceClient$0)
+                )
             OR
                 // Constraints on message content not verified
                 bret := FALSE
