@@ -19,7 +19,7 @@
 
 # Main script for HIL testing
 # Takes all information needed from build_config.json, test_to_launch.json; hardware_capa.json
-# Launches successively ./compile.sh, ./flash_app.sh and then the tests with executor.py
+# tests with executor.py
 # Returns 0 and OK in case of success
 # Returns 1 and FAIL in case of failures
 
@@ -29,28 +29,7 @@ cd ../../
 HOST_DIR=$(pwd)
 EMB_DIR=${HOST_DIR}/samples/embedded
 
-# Check for necessary commands
-#**********************************
-if ! command -v jq &> /dev/null; then
-    echo "'jq' is not installed"
-    exit 1
-fi
 
-if ! command -v arm-none-eabi-objcopy &> /dev/null; then
-    echo "'binutils-arm-none-eabi' is not installed"
-    exit 1
-fi
-cd $HOST_DIR
-#**********************************
-# Delete the build directories
-#**********************************
-rm -rf build_zephyr/* build_freertos/* 2>/dev/null
-mkdir -p build_zephyr build_freertos
-# local user is different from docker container user
-# therefore, access rights issues can occur.
-chmod a+rw build_zephyr build_freertos
-chmod a+rw samples/embedded/cli_client/
-chmod a+rw samples/embedded/cli_pubsub_server/
 cd $HIL_DIR
 #**********************************
 
@@ -69,66 +48,16 @@ function fail() {
 BUILD_CFG_LIST=$HIL_DIR/config/build_config.json
 TEST_NAME_CFG=$HIL_DIR/config/test_to_launch.json
 HARDWARE_CAPACITY=$HIL_DIR/config/hardware_capa.json
-LOG_PATH=$HIL_DIR/logs
-
-rm -rf -- ${LOG_PATH}
-mkdir -p ${LOG_PATH}
 
 # Identify the tests to run
 TEST_NAME_LIST=$(jq -r ".launch_tests[]" "$TEST_NAME_CFG")
 [ -z "${TEST_NAME_LIST}" ] && fail "Missing 'test_name' in test_to_launch.json ($TEST_NAME_LIST)"
+mkdir $HOST_DIR/tests_log
 
-for TESTS in $TEST_NAME_LIST; do
-index=0
-    for BUILD in $(jq -c ".tests.${TESTS}.builds[]" "$BUILD_CFG_LIST"); do
-    #jq -c : return a compacted line instead of 1 line per item
-        SERIAL=$(jq -r ".tests.${TESTS}.builds[$index].BOARD_SN" "$BUILD_CFG_LIST")
-        [ -z "${SERIAL}" ] && fail "Missing 'BOARD_SN' field in 'builds' ($BUILD)"
-        BUILD_NAME=$(jq -r ".tests.${TESTS}.builds[$index].build_name" "$BUILD_CFG_LIST")
-        [ -z "${BUILD_NAME}" ] && fail "Missing 'BUILD_NAME' field in 'builds' ($BUILD)"
-        # Identify the operating system involved in the test
-        OS=$(jq -r ".build.${BUILD_NAME}.OS" "$BUILD_CFG_LIST")
-        [ -z "${OS}" ] && fail "Missing 'OS' field in 'builds' ($BUILD)"
-        [ -d "$EMB_DIR/platform_dep/${OS}" ] || fail "OS '$OS' is not supported on HIL tests"
-        # Identify the application involved in the test
-        APP=$(jq -r ".build.${BUILD_NAME}.app" "$BUILD_CFG_LIST")
-        [ -z "${APP}" ] && fail "Missing 'APP' field in 'builds' ($BUILD)"
-        [ -d "$EMB_DIR/${APP}" ] || fail "APP '$APP' is not supported on HIL tests"
-        # Identify the board involved in the test
-        BOARD=$(jq -r ".build.${BUILD_NAME}.board" "$BUILD_CFG_LIST")
-        BOARD_NAME=$(echo "${BOARD}" | tr '/' '_')
-        [ -z "${BOARD}" ] && fail "Missing 'BOARD' field in 'builds' ($BUILD)"
-        # Identify the extension (.bin, .elf ...) involved in the test
-        # !!!!! Not used yet as only .bin are supported for now !!!!!
-        EXTENSION=$(jq -r ".build.${BUILD_NAME}.flash_type " "$BUILD_CFG_LIST")
-        [ -z "${EXTENSION}" ] && fail "Missing 'EXTENSION' field in 'builds' ($BUILD)"
-        # Identify the ip address involved in the test
-        IP_ADDRESS=$(jq -r ".build.${BUILD_NAME}.IP_ADDRESS" "$BUILD_CFG_LIST")
-        [ -z "${IP_ADDRESS}" ] && fail "Missing 'IP_ADDRESS' field in 'builds' ($BUILD)"
-        #Compile and flash the right application on the right board according to previous parameters
-
-        LOG_FILE=$LOG_PATH/compile_${OS}_${APP}_${BOARD_NAME}.log
-        OUT_FILE=$HOST_DIR/build_${OS}/${APP}_${BOARD_NAME}.${EXTENSION}
-        if ! [ -f $OUT_FILE ] ; then
-          echo "Building $(basename ${OUT_FILE}) for board $BOARD"
-           ${HIL_DIR}/compile.sh "$OS" "$BOARD" "$APP" "$EXTENSION" "$IP_ADDRESS" "$LOG_FILE" "$OUT_FILE" > $LOG_FILE 2>&1
-        [ -f $OUT_FILE ] || fail "Missing output file ${OUT_FILE} (see $LOG_FILE)"
-        else
-          echo "Not rebuilding $(basename ${OUT_FILE})"
-        fi
-
-        LOG_FILE=$LOG_PATH/flash_${OS}_${APP}_${BOARD_NAME}.log
-        echo "Flash $APP/$OS on board $BOARD SN=$SERIAL"
-        ${HIL_DIR}/flash_app.sh "$SERIAL" "${APP}_${BOARD_NAME}.${EXTENSION}" "${OS}" > $LOG_FILE 2>&1
-        [ $? != 0 ]  && cat $LOG_FILE && fail "Flashing failed"
-        ((index=index+1))
-    done
-done
-
+#Launch the test
 for TEST in $TEST_NAME_LIST; do
-    #Launch the test
     echo "Running test '$TEST'"
-    LOG_FILE=$LOG_PATH/execute_${TEST}.log
+    LOG_FILE=$HOST_DIR/tests_log/execute_${TEST}.log
     python3 ${HIL_DIR}/executor.py "$TEST" "$BUILD_CFG_LIST" "$HARDWARE_CAPACITY" "$LOG_FILE"
     RET=$?
     if [ $RET -ne 0 ]; then

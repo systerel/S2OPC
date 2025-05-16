@@ -1,7 +1,7 @@
 {    
     "capabilities":
         {
-        "nucleo_h745zi_q_m7" :
+        "nucleo_h745zi_q/stm32h745xx/m7" :
             {
             "OS": ["zephyr", "freertos"],
             "compatible_applications": ["cli_pubsub_server", "cli_client"],

@@ -182,13 +182,30 @@ hil-flash:
   tags:
       - hil
   script:
-    - pwd
     - cd .systerel/HIL_tests
     - ./flash_all.py
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
-      - 'build_zephyr/'
+      - 'flash/'
+    expire_in: '1 week'
+    when: always
+  rules:
+    - if: "$HIL_TESTS != null"
+      when: always
+
+hil-test:
+  stage: hil-test
+  needs: [hil-flash]
+  tags:
+      - hil
+  script:
+    - cd .systerel/HIL_tests
+    - ./launch.sh
+  artifacts:
+    name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    paths:
+      - 'tests/'
     expire_in: '1 week'
     when: always
   rules:

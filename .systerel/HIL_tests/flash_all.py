@@ -18,7 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Main script for HIL testing
+# Flash script for HIL testing
 # Takes all information needed from build_config.json, test_to_launch.json; hardware_capa.json
 # Flash the application onto the appropriate board
 
@@ -89,7 +89,8 @@ for test in test_name_list:
         if not ip_address:
             fail(f"Missing 'IP_ADDRESS' field in 'builds' ({build})")
 
-        log_file = build_dir / f"flash_{app}_{board_name}.log"
+        log_file = f"flash/flash_{app}_{board_name}.log"
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
         bin_file = f"{app}_{board_name}.{extension}"
 
         if not (build_dir / bin_file).exists():

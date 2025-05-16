@@ -18,7 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Main script for HIL testing
+# Build script for HIL testing
 # Takes all information needed from build_config.json, test_to_launch.json; hardware_capa.json
 # Compiles the files based on OS
 # Each OS needs different Docker images. see .gitlab-ci
