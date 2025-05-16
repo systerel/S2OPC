@@ -56,6 +56,8 @@ BUILD_FOLDER="${HOST_DIR}/build_${OS}"
 DEV=$( ls /dev/disk/by-id/ | grep "${DEVICE_ID}" )
 if ! [ -z "$DEV" ] ; then
     echo "Found disk as '${DEV}'"
+    DEVICE_PATH="/dev/disk/by-id/${DEV}"
+    echo "Mounting $MOUNT"
     umount "$MOUNT" 2> /dev/null
     mkdir -p "$MOUNT"
     mount "$MOUNT" || fail "failed to mount $MOUNT"
@@ -65,6 +67,7 @@ else
 fi
 
 # Application as .BIN file can be installed by copying it on device mount point.
+
 if [ -f "${BUILD_FOLDER}/${P_FILE}" ] ; then
     cp "$BUILD_FOLDER/$P_FILE" "$MOUNT" || exit 4
     sync
@@ -73,3 +76,6 @@ if [ -f "${BUILD_FOLDER}/${P_FILE}" ] ; then
 else
     fail "The file ${P_FILE} doesn't exist"
 fi
+
+#unmount disk after test
+umount "$MOUNT" 2> /dev/null

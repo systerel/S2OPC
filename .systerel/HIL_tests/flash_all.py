@@ -20,10 +20,7 @@
 
 # Main script for HIL testing
 # Takes all information needed from build_config.json, test_to_launch.json; hardware_capa.json
-# Compiles the files based on OS
-# Each OS needs different Docker images. see .gitlab-ci
-# Returns 0 and OK in case of success
-# Returns 1 and FAIL in case of failures
+# Flash the application onto the appropriate board
 
 import os
 import sys
@@ -31,46 +28,14 @@ import json
 import subprocess
 from pathlib import Path
 
-def usage():
-    print("Builds and flash applications for a given OS using")
-    print("Usage: script.py [--os <OS>]")
-    print(" --os <OS> : which operating system is being targeted, default zephyr")
-    print(" -h : Print this help and return")
-    sys.exit(0)
-
 def fail(message):
     print(f"[EE] {message}", file=sys.stderr)
     sys.exit(1)
-
-# Handle CLI arguments
-args = sys.argv[1:]
-if "-h" in args:
-    usage()
-
-target_os = "zephyr"
-if "--os" in args:
-    os_index = args.index("--os")
-    if os_index + 1 < len(args):
-        target_os = args[os_index + 1]
-    else:
-        fail("Missing argument for --os")
-else:
-    print(f"Using default OS {target_os}")
 
 # Setup directories
 hil_dir = Path(__file__).resolve().parent
 host_dir = hil_dir.parent.parent
 emb_dir = host_dir / "samples" / "embedded"
-
-build_dir = host_dir / f"build_{target_os}"
-if build_dir.exists():
-    for f in build_dir.glob("*"):
-        if f.is_file():
-            f.unlink()
-        elif f.is_dir():
-            subprocess.run(["rm", "-rf", str(f)], check=False)
-else:
-    build_dir.mkdir(parents=True, exist_ok=True)
 
 # Load config files
 build_cfg_list = hil_dir / "config" / "build_config.json"
@@ -100,13 +65,12 @@ for test in test_name_list:
         os_val = build_info.get("OS")
         if not os_val:
             fail(f"Missing 'OS' field in 'builds' ({build})")
-
-        if os_val != target_os:
-            continue
-
         platform_dir = emb_dir / "platform_dep" / os_val
         if not platform_dir.is_dir():
             fail(f"OS '{os_val}' is not supported on HIL tests")
+        build_dir = host_dir / f"build_{os_val}"
+        if not build_dir.is_dir():
+            fail(f"{build_dir} was not found")
 
         app = build_info.get("app")
         if not app or not (emb_dir / app).is_dir():
@@ -125,35 +89,24 @@ for test in test_name_list:
         if not ip_address:
             fail(f"Missing 'IP_ADDRESS' field in 'builds' ({build})")
 
-        log_file = build_dir / f"{app}_{board_name}.log"
-        out_file = build_dir / f"{app}_{board_name}.{extension}"
+        log_file = build_dir / f"flash_{app}_{board_name}.log"
+        bin_file = f"{app}_{board_name}.{extension}"
 
-        if not out_file.exists():
-            print(f"Building {out_file.name} for board {board}")
-            build_script_dir = host_dir / "samples" / "embedded" / "platform_dep" / os_val / "ci"
-            build_script = build_script_dir / f"build-{os_val}-samples-docker.sh"
-            if not build_script_dir.is_dir():
-                fail(f"Missing folder '{build_script_dir}'")
-            if not os.access(build_script, os.X_OK):
-                fail(f"Missing or invalid build script '{build_script}'")
-
-            try:
-                subprocess.run(
-                    [str(build_script), board, app,
-                     "--ip", ip_address,
-                     "--log", str(log_file),
-                     "--bin", str(out_file)],
-                    check=True,
-                    cwd=str(build_script_dir)
-                )
-            except subprocess.CalledProcessError:
-                fail(f"Failed running build script '{build_script}'")
-
-            if not out_file.exists():
-                fail(f"Missing output file {out_file} (see {log_file})")
+        if not (build_dir / bin_file).exists():
+            fail(f"Missing output file {(build_dir / bin_file)}")
         else:
-            print(f"Not rebuilding {out_file.name}")
-
-# Final check
-if not any(build_dir.iterdir()):
-    print(f"Warning: no builds were run for {target_os}")
+            print(f"Flash {app}/{os_val} on board {board} SN={serial}")
+            flash_app = hil_dir / "flash_app.sh"
+            with open(log_file, "w") as log:
+                try:
+                    subprocess.run(
+                        [str(flash_app), serial, bin_file, os_val],
+                        check=True,
+                        cwd=str(hil_dir),
+                        stdout=log,
+                        stderr=subprocess.STDOUT
+                    )
+                except subprocess.CalledProcessError:
+                    with open(log_file, "r") as log_read:
+                        print(log_read.read())
+                    fail(f"Failed running flash script '{flash_app}'")
