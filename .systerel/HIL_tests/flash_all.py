@@ -21,8 +21,9 @@
 # Flash script for HIL testing
 # Takes all information needed from build_config.json, test_to_launch.json; hardware_capa.json
 # Flash the application onto the appropriate board
+# Then run the asociated test and repeat
 
-import os
+import shutil, os
 import sys
 import json
 import subprocess
@@ -36,6 +37,11 @@ def fail(message):
 hil_dir = Path(__file__).resolve().parent
 host_dir = hil_dir.parent.parent
 emb_dir = host_dir / "samples" / "embedded"
+
+log_dir = host_dir / 'log'
+if os.path.isdir(log_dir):
+    shutil.rmtree(log_dir)
+os.makedirs(log_dir)
 
 # Load config files
 build_cfg_list = hil_dir / "config" / "build_config.json"
@@ -89,7 +95,7 @@ for test in test_name_list:
         if not ip_address:
             fail(f"Missing 'IP_ADDRESS' field in 'builds' ({build})")
 
-        log_file = f"flash/flash_{app}_{board_name}.log"
+        log_file = log_dir / f"flash_{app}_{board_name}.log"
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         bin_file = f"{app}_{board_name}.{extension}"
 
@@ -111,3 +117,16 @@ for test in test_name_list:
                     with open(log_file, "r") as log_read:
                         print(log_read.read())
                     fail(f"Failed running flash script '{flash_app}'")
+
+    launch = hil_dir / "launch.sh"
+    print(f"Running test {test}")
+    try:
+        subprocess.run(
+            [str(launch), test, log_dir],
+            check=True,
+            cwd=str(hil_dir),
+        )
+    except subprocess.CalledProcessError:
+        fail(f"Failed running test script '{launch}' for test '{test}'")
+
+print(f"All test OK")

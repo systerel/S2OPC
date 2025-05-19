@@ -93,7 +93,6 @@ variables:
 stages:
   - gen
   - hil-build
-  - hil-flash
   - hil-test
   - build
   - test
@@ -176,8 +175,8 @@ hil-build-zephyr:
     - if: "$HIL_TESTS != null"
       when: always
 
-hil-flash:
-  stage: hil-flash
+hil-test:
+  stage: hil-test
   needs: [hil-build-zephyr]
   tags:
       - hil
@@ -187,25 +186,7 @@ hil-flash:
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
-      - 'flash/'
-    expire_in: '1 week'
-    when: always
-  rules:
-    - if: "$HIL_TESTS != null"
-      when: always
-
-hil-test:
-  stage: hil-test
-  needs: [hil-flash]
-  tags:
-      - hil
-  script:
-    - cd .systerel/HIL_tests
-    - ./launch.sh
-  artifacts:
-    name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
-    paths:
-      - 'tests/'
+      - 'log/'
     expire_in: '1 week'
     when: always
   rules:

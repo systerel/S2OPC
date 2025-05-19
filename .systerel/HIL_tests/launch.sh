@@ -25,48 +25,22 @@
 
 cd $(dirname $0)
 HIL_DIR=$(pwd)
-cd ../../
-HOST_DIR=$(pwd)
-EMB_DIR=${HOST_DIR}/samples/embedded
-
-
-cd $HIL_DIR
-#**********************************
-
-##########################
-# Helper function to exit with an error message
-# @param $* An error message
-function fail() {
-    echo -e "[EE] $*" >&2
-    exit -1
-}
-
-#**********************************
-# Delete the build directories
-#**********************************
 
 BUILD_CFG_LIST=$HIL_DIR/config/build_config.json
-TEST_NAME_CFG=$HIL_DIR/config/test_to_launch.json
 HARDWARE_CAPACITY=$HIL_DIR/config/hardware_capa.json
 
-# Identify the tests to run
-TEST_NAME_LIST=$(jq -r ".launch_tests[]" "$TEST_NAME_CFG")
-[ -z "${TEST_NAME_LIST}" ] && fail "Missing 'test_name' in test_to_launch.json ($TEST_NAME_LIST)"
-mkdir $HOST_DIR/tests_log
+TEST=$1
+[ -z "${TEST}" ] && fail "Missing 'TEST' for Launch.sh"
+LOG_DIR=$2
+[ -z "${LOG_DIR}" ] && fail "Missing 'LOG_DIR' for Launch.sh"
 
-#Launch the test
-for TEST in $TEST_NAME_LIST; do
-    echo "Running test '$TEST'"
-    LOG_FILE=$HOST_DIR/tests_log/execute_${TEST}.log
-    python3 ${HIL_DIR}/executor.py "$TEST" "$BUILD_CFG_LIST" "$HARDWARE_CAPACITY" "$LOG_FILE"
-    RET=$?
-    if [ $RET -ne 0 ]; then
-        tail -n 20 ${LOG_FILE}
-        echo "ERRORS detected, full results available in ${LOG_FILE}"
-        exit 1
-    else
-        echo "Test '$TEST' OK!"
-    fi
-done
-
-echo "All tests OK"
+LOG_FILE=$LOG_DIR/execute_${TEST}.log
+python3 ${HIL_DIR}/executor.py "$TEST" "$BUILD_CFG_LIST" "$HARDWARE_CAPACITY" "$LOG_FILE"
+RET=$?
+if [ $RET -ne 0 ]; then
+    tail -n 20 ${LOG_FILE}
+    echo "ERRORS detected, full results available in ${LOG_FILE}"
+    exit 1
+else
+    echo "Test '$TEST' OK!"
+fi

@@ -56,6 +56,7 @@ BUILD_FOLDER="${HOST_DIR}/build_${OS}"
 DEV=$( ls /dev/disk/by-id/ | grep "${DEVICE_ID}" )
 if ! [ -z "$DEV" ] ; then
     echo "Found disk as '${DEV}'"
+    mount | grep $MOUNT
     DEVICE_PATH="/dev/disk/by-id/${DEV}"
     echo "Mounting $MOUNT"
     umount "$MOUNT" 2> /dev/null
@@ -77,5 +78,5 @@ else
     fail "The file ${P_FILE} doesn't exist"
 fi
 
-#unmount disk after test
+#unmount disk after test to avoid locking other user
 umount "$MOUNT" 2> /dev/null
