@@ -847,6 +847,7 @@ OPERATIONS
         l_valid_user_secu_properties,
         l_endpoints_bres,
         l_valid_server_cert,
+        l_valid_session_token,
         l_channel_config_idx,
         l_secpol
     IN
@@ -860,7 +861,8 @@ OPERATIONS
         l_valid_server_cert <-- create_session_resp_check_server_certificate (create_resp_msg, l_channel_config_idx);
         l_endpoints_bres <-- create_session_resp_check_server_endpoints (create_resp_msg, l_channel_config_idx);
         l_valid_user_secu_properties <-- client_create_session_set_user_token_secu_properties(session, l_channel_config_idx, create_resp_msg);
-        bret := bool(l_valid_server_cert = TRUE & l_endpoints_bres = TRUE & l_valid_user_secu_properties = TRUE);
+        l_valid_session_token <-- client_is_valid_session_token(session_token);
+        bret := bool(l_valid_server_cert = TRUE & l_endpoints_bres = TRUE & l_valid_user_secu_properties = TRUE & l_valid_session_token = TRUE);
         IF bret = TRUE THEN
             IF l_secpol /= e_secpol_None THEN
                 /* Note: receiving a request implies that we sent it, and Nonce, if needed, was valid, hence get_NonceClient cannot fail. */

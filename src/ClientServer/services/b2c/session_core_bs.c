@@ -398,6 +398,13 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
     }
 }
 
+void session_core_bs__client_is_valid_session_token(const constants__t_session_token_i session_core_bs__token,
+                                                    t_bool* const session_core_bs__ret)
+{
+    *session_core_bs__ret = (session_core_bs__token != constants__c_session_token_indet &&
+                             SOPC_IdentifierType_Numeric == session_core_bs__token->IdentifierType);
+}
+
 void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session,
                                            const t_bool session_core_bs__p_is_client)
 {

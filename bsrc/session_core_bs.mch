@@ -154,6 +154,14 @@ OPERATIONS
     END
     ;
 
+    ret <-- client_is_valid_session_token(p_session_token) =
+    PRE
+        p_session_token : t_session_token_i
+    THEN
+        ret := bool(p_session_token : t_session_token)
+    END
+    ;
+
     notify_set_session_state (session, prec_state, state, sc_reason, is_client) =
     PRE
         session    : t_session_i    &
