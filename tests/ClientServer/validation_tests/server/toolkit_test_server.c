@@ -718,11 +718,11 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
 
 static SOPC_ReturnStatus Server_SetMatrixVariablesProperties(void)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_AddressSpace* addSpace = SOPC_ServerConfigHelper_GetAddressSpace();
     if (NULL == addSpace)
     {
-        return status;
+        return SOPC_STATUS_INVALID_STATE;
     }
     bool found = false;
     const char* boolMatrixStr = "ns=1;s=Bool_Matrix";
