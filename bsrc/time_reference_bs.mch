@@ -28,7 +28,9 @@ ABSTRACT_CONSTANTS
 
 PROPERTIES
     TimeReference_IsLessThan : t_timeref <-> t_timeref &
-    TimeReference_IsLessThan /\ TimeReference_IsLessThan~ = {}
+    TimeReference_IsLessThan /\ TimeReference_IsLessThan~ = {} &
+    (TimeReference_IsLessThan;TimeReference_IsLessThan) <: TimeReference_IsLessThan &
+    !(aa,bb).((aa : t_timeref & bb : t_timeref & aa/=bb & not(aa|->bb : TimeReference_IsLessThan)) => bb|->aa : TimeReference_IsLessThan)
 
 ABSTRACT_VARIABLES
     current_time
