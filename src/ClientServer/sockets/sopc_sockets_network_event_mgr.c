@@ -230,6 +230,10 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_Socket sigSocket
                         {
                             SOPC_SocketsInternalEventMgr_Dispatcher(INT_SOCKET_LISTENER_CONNECTION_ATTEMPT, uaSock);
                         }
+                        else if (uaSock->state == SOCKET_STATE_ACCEPTED)
+                        {
+                            // Nothing to do: wait for the next event
+                        }
                         else
                         {
                             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
