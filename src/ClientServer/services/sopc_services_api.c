@@ -659,6 +659,10 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_EVAL_USR_CRT_SESSION");
         io_dispatch_mgr__internal_server_evaluate_all_session_user_cert();
         break;
+    case APP_TO_SE_UNINITIALIZE_SERVICES:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_UNINITIALIZE_SERVICES");
+        io_dispatch_mgr__UNINITIALISATION();
+        break;
     default:
         SOPC_ASSERT(false);
     }
@@ -720,7 +724,7 @@ void SOPC_Services_CloseAllSCs(bool clientOnly)
 
 void SOPC_Services_Clear(void)
 {
-    io_dispatch_mgr__UNINITIALISATION();
+    SOPC_EventHandler_Post(servicesEventHandler, APP_TO_SE_UNINITIALIZE_SERVICES, 0, 0, 0);
 
     // Set to NULL handlers deallocated by SOPC_Looper_Delete call
     servicesEventHandler = NULL;

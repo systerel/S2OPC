@@ -169,7 +169,9 @@ typedef enum SOPC_Services_Event
                                            If an user certificate is not valid or trusted anymore,
                                            the associated session is closed.<BR/>
                                        */
-
+    APP_TO_SE_UNINITIALIZE_SERVICES,  /**< Server and client sides:<BR/>
+                                           Calls io_dispatch_mgr__UNINITIALISATION() function.
+                                      */
 } SOPC_Services_Event;
 
 /* API to enqueue an event for services */
