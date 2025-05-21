@@ -1300,20 +1300,28 @@ OPERATIONS
                 END
             END // ELSE: we cannot close a channel with a session
         INVARIANT
+            l_oldest_channel : t_channel_i &
+            l_oldest_channel_timeref : t_timeref_i &
+
             channels_to_iterate <: t_channel &
             channels_iterated   <: t_channel &
+            l_continue = bool(channels_to_iterate /= {}) &
             channels_to_iterate /\ channels_iterated = {} &
             channels_to_iterate \/ channels_iterated = t_channel &
-            !(p_channel).(p_channel : channels_iterated /\ s_channel_connected - ran(a_channel) =>
-                /* Oldest timeref is less than any other timeref */
-                (l_oldest_channel_timeref /= a_channel_connected_time(p_channel) =>
-                    l_oldest_channel_timeref |-> a_channel_connected_time(p_channel) : TimeReference_IsLessThan) &
-                l_oldest_channel : a_channel_connected_time~[{l_oldest_channel_timeref}]
-            )
-            &
-            (channels_iterated /\ s_channel_connected - ran(a_channel) = {} =>
+
+            (l_oldest_channel = c_channel_indet =>
                 l_oldest_channel_timeref = c_timeref_indet &
-                l_oldest_channel = c_channel_indet
+                channels_iterated /\ s_channel_connected - ran(a_channel) = {}) &
+
+            (l_oldest_channel /= c_channel_indet =>
+                l_oldest_channel : s_channel_connected - ran(a_channel) &
+                l_oldest_channel_timeref : t_timeref &
+                l_oldest_channel : a_channel_connected_time~[{l_oldest_channel_timeref}] &
+                !(p_channel).(p_channel : channels_iterated /\ s_channel_connected - ran(a_channel) =>
+                    /* Oldest timeref is less than any other timeref */
+                    (l_oldest_channel_timeref /= a_channel_connected_time(p_channel) =>
+                        l_oldest_channel_timeref |-> a_channel_connected_time(p_channel) : TimeReference_IsLessThan)
+                )
             )
         VARIANT
             card(channels_to_iterate)
