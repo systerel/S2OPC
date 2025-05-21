@@ -250,7 +250,7 @@ class NodesetMerger(NSFinder):
     def _iter_nid_nodes(self):
         yield from self._iter_nid_nodes_in(self.tree)
     
-    def _get_namespace_uri(self, nsi : int) -> str | None:
+    def _get_namespace_uri(self, nsi : int) -> str: # | None: is unsupported on python 3.9
         try: return self.__namespaces_uri[nsi]
         except:return None
         
