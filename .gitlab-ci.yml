@@ -160,7 +160,7 @@ proof_obligations:
 
 check_commit_signature:
   stage: gen
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:5eba7fd81275c935eebcf15fa069db9750eec1b10c3c99e329e72d90ac01f530 # digest of build:1.49
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:63dd79ef954bc791fcc27c3177fbc43c2e9589f550df4a026f577abb167a1b63 # digest of build:1.50
   needs: []
   script:
     - ./.check_signed_commit.sh
@@ -184,12 +184,12 @@ check_commit_validity:
 
 .build-linux: &build_linux
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:5eba7fd81275c935eebcf15fa069db9750eec1b10c3c99e329e72d90ac01f530 # digest of build:1.49
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:63dd79ef954bc791fcc27c3177fbc43c2e9589f550df4a026f577abb167a1b63 # digest of build:1.50
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_DIGEST: 'sha256:5eba7fd81275c935eebcf15fa069db9750eec1b10c3c99e329e72d90ac01f530'
+    DOCKER_DIGEST: 'sha256:63dd79ef954bc791fcc27c3177fbc43c2e9589f550df4a026f577abb167a1b63'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
@@ -350,7 +350,7 @@ build-win32:
 
 build-rpi:
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:0c5e40993e575bb829cee97e17a4965258fdccd4eef6ee81fca1fc732f417a63 # digest of rpi-build:1.8
+  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:070b1ca58667ee5908902ba3eb03e5fa05993d3a86d2c8ddeb6f7f41ed62609c # digest of rpi-build:1.9
   needs: []
   script:
     - '. /usr/local/cross_venv/bin/activate'
@@ -358,7 +358,7 @@ build-rpi:
   variables:
     CMAKE_INSTALL_PREFIX: '../install_rpi'
     CMAKE_TOOLCHAIN_FILE: '/toolchain-rpi.cmake'
-    DOCKER_DIGEST: 'sha256:0c5e40993e575bb829cee97e17a4965258fdccd4eef6ee81fca1fc732f417a63'
+    DOCKER_DIGEST: 'sha256:070b1ca58667ee5908902ba3eb03e5fa05993d3a86d2c8ddeb6f7f41ed62609c'
     BUILD_DIR: build_toolchain
     # Note: building of PyS2OPC C generated file fails due to "conditional branch out of range" if not compiled with O0.
     # In order to have S2OPC built with optimisations, it is also possible to build PyS2OPC alone in a second step.
