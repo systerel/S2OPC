@@ -224,7 +224,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    res_activated <-- server_internal_activate_req_and_resp (channel, session, transitoryState, p_user, activate_req_msg, activate_resp_msg) =
+    res_activated <-- server_internal_activate_req_and_resp (channel, session, p_user, activate_req_msg, activate_resp_msg) =
     PRE
         channel       : t_channel_i &
         channel       : s_channel_connected &
@@ -232,8 +232,6 @@ LOCAL_OPERATIONS
         session       : t_session_i &
         session       : s_session &
         session      /: s_client_session &
-        transitoryState : t_sessionState_i &
-        transitoryState : t_sessionState & /* used to differentiate transitions externally */
         p_user          : t_user_i &
         p_user          : t_user &
         dom(a_state) = s_session &
@@ -540,7 +538,7 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
-    res_activated <-- server_internal_activate_req_and_resp (channel, session, transitoryState, p_user, activate_req_msg, activate_resp_msg) =
+    res_activated <-- server_internal_activate_req_and_resp (channel, session, p_user, activate_req_msg, activate_resp_msg) =
     VAR
         l_channel_config_idx,
         l_secpol,
@@ -567,7 +565,6 @@ OPERATIONS
         /* Note: results[] and diagnosticInfos[] info fields should not be filled
            since it concerns SoftwareCertificate from request which is reserved for a future use */
         IF res_activated = TRUE THEN
-            set_session_state (session, transitoryState, FALSE);
             drop_user_server (session); // In case a previous user was set, drop it
             set_session_user_server (session, p_user);
             set_session_channel (session, channel);
@@ -596,7 +593,6 @@ OPERATIONS
             THEN
                 l_valid <-- server_internal_activate_req_and_resp (channel,
                                                                    session,
-                                                                   e_session_userActivating,
                                                                    user,
                                                                    activate_req_msg,
                                                                    activate_resp_msg);
@@ -617,7 +613,6 @@ OPERATIONS
             THEN
                 l_valid <-- server_internal_activate_req_and_resp (channel,
                                                                    session,
-                                                                   e_session_userActivating,
                                                                    user,
                                                                    activate_req_msg,
                                                                    activate_resp_msg);
@@ -635,7 +630,6 @@ OPERATIONS
                 THEN
                     l_valid <-- server_internal_activate_req_and_resp (channel,
                         session,
-                        e_session_scActivating,
                         user,
                         activate_req_msg,
                         activate_resp_msg);
@@ -661,7 +655,6 @@ OPERATIONS
             THEN
                 l_valid <-- server_internal_activate_req_and_resp (channel,
                                                                    session,
-                                                                   e_session_scActivating,
                                                                    user,
                                                                    activate_req_msg,
                                                                    activate_resp_msg);

@@ -147,7 +147,6 @@ extern void session_core__l_server_write_create_session_resp(
 extern void session_core__server_internal_activate_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_sessionState_i session_core__transitoryState,
    const constants__t_user_i session_core__p_user,
    const constants__t_msg_i session_core__activate_req_msg,
    const constants__t_msg_i session_core__activate_resp_msg,

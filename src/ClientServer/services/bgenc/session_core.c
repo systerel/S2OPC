@@ -44,7 +44,6 @@ void session_core__INITIALISATION(void) {
 void session_core__server_internal_activate_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_sessionState_i session_core__transitoryState,
    const constants__t_user_i session_core__p_user,
    const constants__t_msg_i session_core__activate_req_msg,
    const constants__t_msg_i session_core__activate_resp_msg,
@@ -84,9 +83,6 @@ void session_core__server_internal_activate_req_and_resp(
          }
       }
       if (*session_core__res_activated == true) {
-         session_core_1__set_session_state(session_core__session,
-            session_core__transitoryState,
-            false);
          session_core_1__drop_user_server(session_core__session);
          session_core_1__set_session_user_server(session_core__session,
             session_core__p_user);
@@ -126,7 +122,6 @@ void session_core__l_server_activate_session_req_and_resp_sm(
          if (session_core__l_channel == session_core__channel) {
             session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
-               constants__e_session_userActivating,
                session_core__user,
                session_core__activate_req_msg,
                session_core__activate_resp_msg,
@@ -148,7 +143,6 @@ void session_core__l_server_activate_session_req_and_resp_sm(
          if (session_core__l_channel == session_core__channel) {
             session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
-               constants__e_session_userActivating,
                session_core__user,
                session_core__activate_req_msg,
                session_core__activate_resp_msg,
@@ -167,7 +161,6 @@ void session_core__l_server_activate_session_req_and_resp_sm(
             if (session_core__l_is_same_user == true) {
                session_core__server_internal_activate_req_and_resp(session_core__channel,
                   session_core__session,
-                  constants__e_session_scActivating,
                   session_core__user,
                   session_core__activate_req_msg,
                   session_core__activate_resp_msg,
@@ -197,7 +190,6 @@ void session_core__l_server_activate_session_req_and_resp_sm(
             (session_core__l_is_same_user == true)) {
             session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
-               constants__e_session_scActivating,
                session_core__user,
                session_core__activate_req_msg,
                session_core__activate_resp_msg,
