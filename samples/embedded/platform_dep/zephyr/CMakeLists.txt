@@ -9,9 +9,13 @@ endif()
 
 set(CONF_FILE_CRYPTO "prj.conf")
 
+message(STATUS "Value of S2OPC_CRYPTO_MBEDTLS: ${S2OPC_CRYPTO_MBEDTLS}")
+
 if($ENV{NO_CRYTO})
     set(CONF_FILE_CRYPTO "prj-nocrypto.conf")
     set(S2OPC_CRYPTO_LIB "nocrypto")
+else()
+    add_compile_definitions(S2OPC_CRYPTO_MBEDTLS=1)
 endif()
 
 set(ENV{CONF_FILE} "${CMAKE_CURRENT_LIST_DIR}/${CONF_FILE_CRYPTO};${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.conf")
