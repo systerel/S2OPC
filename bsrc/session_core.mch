@@ -407,7 +407,8 @@ OPERATIONS
     ret <-- server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
     PRE
         channel : t_channel_i &
-        channel : s_channel_connected   &
+        channel : s_channel_connected &
+        channel : dom(a_endpoint) &
         session : t_session_i &
         session : s_session &
         session /: s_client_session &
