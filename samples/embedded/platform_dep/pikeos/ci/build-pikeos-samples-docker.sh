@@ -88,7 +88,10 @@ function build_app()
     ! ${BUILD_TESTS} && echo "Don't compile tests" && sed -i -e '/S2OPC_TEST_ENABLE = true/s/true/false/' makefile.defs
     make -j`nproc` install 2>&1 |tee ${BUILD_LOG} || exit $?
 
-    (${BUILD_SAMPLES} || ${BUILD_TESTS}) && cp ${SHARED_POOL}/pikeos-native/object/*.elf ${OUT_DIR}/bin
+    if [ "${BUILD_SAMPLES}" = "true" ] || [ "${BUILD_TESTS}" = "true" ]; then
+        cp ${SHARED_POOL}/pikeos-native/object/*.elf ${OUT_DIR}/bin
+    fi
+
     cp ${SHARED_POOL}/pikeos-native/object/*.a  ${OUT_DIR}/lib
 }
 
@@ -107,10 +110,15 @@ function build_pikeos()
     cp ${SHARED_POOL}/images/pikeos-native-devel-qemu-arm-v8hf-qemu  ${OUT_DIR}/bin/pikeos-native-devel-qemu-arm-v8hf-qemu-${EXEC_BIN}
 }
 
-# Launch certificate manager
-/usr/lmx-${LMX_VERSION}/lmx-serv -b || exit $*
+if [ "${BUILD_SAMPLES}" = "true" ] || [ "${BUILD_TESTS}" = "true" ]; then
+    /usr/lmx-${LMX_VERSION}/lmx-serv -b || exit $*
+fi
 
 build_app
 
-${BUILD_SAMPLES} && build_pikeos "cli_pubsub_server" && build_pikeos "cli_client"
-${BUILD_TESTS} && build_pikeos "unit_test"
+if [ "${BUILD_SAMPLES}" = "true" ]; then
+    build_pikeos "cli_pubsub_server" && build_pikeos "cli_client"
+fi
+if [ "${BUILD_TESTS}"  = "true" ]; then
+    build_pikeos "unit_test"
+fi
