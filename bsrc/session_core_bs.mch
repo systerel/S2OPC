@@ -269,7 +269,7 @@ OPERATIONS
         p_user_right : t_user_i &
         p_user_right : t_user
     THEN
-        p_bres :: BOOL
+        p_bres := bool(p_user_left = p_user_right)
     END
     ;
 
