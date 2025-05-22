@@ -433,6 +433,11 @@ test-build-from-export:
   stage: test
   needs: [build-linux64-ASan]
   script:
+    - 'mkdir -p -p ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build'
+    - 'cp ${CI_PROJECT_DIR}/samples/ClientServer/CMakeLists.example.txt ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/CMakeLists.txt'
+    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build'
+    - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
+    - 'cmake --build .'
     - 'mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
     - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
     - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'

@@ -1,0 +1,12 @@
+cmake_minimum_required (VERSION 3.5)
+
+project (S2OPC_Write_Sample_From_Export LANGUAGES C)
+
+### Dependencies ###
+
+find_package(s2opc REQUIRED CONFIG)
+
+#### S2OPC client/server samples using only CMake export ####
+
+add_executable(s2opc_write_from_export "../client_wrapper/examples/write.c")
+target_link_libraries(s2opc_write_from_export PRIVATE s2opc_clientserver)
