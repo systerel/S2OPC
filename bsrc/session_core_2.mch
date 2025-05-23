@@ -77,10 +77,12 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : t_session &
-        p_roles : t_sessionRoles_i &
-        p_roles : t_sessionRoles
+        p_roles : t_sessionRoles_i
     THEN
-        a_session_roles(p_session) := p_roles
+        a_session_roles :(
+            a_session_roles : t_session +-> t_sessionRoles &
+            (p_roles  : t_sessionRoles => a_session_roles = a_session_roles$0 <+ {p_session |-> p_roles}) &
+            (p_roles /: t_sessionRoles => a_session_roles = {p_session} <<| a_session_roles$0))
     END
     ;
 
