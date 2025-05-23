@@ -125,8 +125,13 @@ for test in test_name_list:
         if not ip_address:
             fail(f"Missing 'IP_ADDRESS' field in 'builds' ({build})")
 
-        log_file = build_dir / f"{app}_{board_name}.log"
-        out_file = build_dir / f"{app}_{board_name}.{extension}"
+        crypto = build_info.get("crypto")
+        if not crypto:
+            fail(f"Missing 'IP_ADDRESS' field in 'builds' ({build})")
+        crypto_val = "--nocrypto" if crypto == "nocrypto" else ""
+
+        log_file = build_dir / f"{app}_{board_name}_{crypto}.log"
+        out_file = build_dir / f"{app}_{board_name}_{crypto}.{extension}"
 
         if not out_file.exists():
             print(f"Building {out_file.name} for board {board}")
@@ -137,12 +142,19 @@ for test in test_name_list:
             if not os.access(build_script, os.X_OK):
                 fail(f"Missing or invalid build script '{build_script}'")
 
+            args = [
+                str(build_script), board, app,
+                "--ip", ip_address,
+            ]
+
+            if crypto_val:  #prevents empty vals from shifting the other args
+                args.append(crypto_val)
+
+            args.extend(["--log", str(log_file), "--bin", str(out_file)])
+
             try:
                 subprocess.run(
-                    [str(build_script), board, app,
-                     "--ip", ip_address,
-                     "--log", str(log_file),
-                     "--bin", str(out_file)],
+                    args,
                     check=True,
                     cwd=str(build_script_dir)
                 )

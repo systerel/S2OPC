@@ -95,9 +95,13 @@ for test in test_name_list:
         if not ip_address:
             fail(f"Missing 'IP_ADDRESS' field in 'builds' ({build})")
 
-        log_file = log_dir / f"flash_{app}_{board_name}.log"
+        crypto = build_info.get("crypto")
+        if not crypto:
+            fail(f"Missing 'IP_ADDRESS' field in 'builds' ({build})")
+
+        log_file = log_dir / f"flash_{app}_{board_name}_{crypto}.log"
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
-        bin_file = f"{app}_{board_name}.{extension}"
+        bin_file = f"{app}_{board_name}_{crypto}.{extension}"
 
         if not (build_dir / bin_file).exists():
             fail(f"Missing output file {(build_dir / bin_file)}")

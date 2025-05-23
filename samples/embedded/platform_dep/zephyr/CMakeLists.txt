@@ -9,9 +9,7 @@ endif()
 
 set(CONF_FILE_CRYPTO "prj.conf")
 
-message(STATUS "Value of S2OPC_CRYPTO_MBEDTLS: ${S2OPC_CRYPTO_MBEDTLS}")
-
-if($ENV{NO_CRYTO})
+if($ENV{NOCRYTO})
     set(CONF_FILE_CRYPTO "prj-nocrypto.conf")
     set(S2OPC_CRYPTO_LIB "nocrypto")
 else()

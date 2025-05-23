@@ -1909,6 +1909,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         if (nconfig == NULL || !get_certificate_der(scConnection->serverAsymmSecuInfo.clientCertificate, &cert_buffer))
         {
             result = false;
+
             *errorStatus = OpcUa_BadTcpInternalError;
         }
 

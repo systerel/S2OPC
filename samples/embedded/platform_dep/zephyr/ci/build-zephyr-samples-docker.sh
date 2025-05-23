@@ -54,21 +54,39 @@ OPT_IP_ADDRESS=
 IP_ADDRESS=
 LOG_PATH=
 BIN_PATH=
-export NO_CRYTO=0
+export NOCRYTO=0
 
 export BOARD=$1
 shift
 export APP=$1
 shift
-[[ $1 == "--ip" ]] && shift && IP_ADDRESS=$1 && shift
-[[ $1 == "--nocrypto" ]] && shift && export NO_CRYTO=1 && shift
-[[ $1 == "--log" ]] && shift && LOG_PATH=$1 && shift
-[[ $1 == "--bin" ]] && shift && BIN_PATH=$1 && shift
+if [[ $1 == "--ip" ]]; then
+  shift
+  IP_ADDRESS=$1
+  shift
+fi
+
+if [[ $1 == "--nocrypto" ]]; then
+  shift
+  export NOCRYTO=1
+fi
+
+if [[ $1 == "--log" ]]; then
+  shift
+  LOG_PATH=$1
+  shift
+fi
+
+if [[ $1 == "--bin" ]]; then
+  shift
+  BIN_PATH=$1
+  shift
+fi
 
 mkdir -p ${OUTDIR} || exit 2
 
 # Overly restrictive for HIL 
-#[ `whoami` != 'user' ] && echo "Unexpected user `whoami`. Is this script executed within the docker?" && exit 2
+[ `whoami` != 'user' ] && echo "Unexpected user `whoami`. Is this script executed within the docker?" && exit 2
 
 
 # Just check that all folders exist!

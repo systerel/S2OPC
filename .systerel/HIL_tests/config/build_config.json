@@ -1,7 +1,7 @@
 {
     "build":
         {
-            "config_zephyr_723_server_100": {"OS": "zephyr", "app": "cli_pubsub_server", "board": "nucleo_h723zg", "crypto": "mbedtls", "IP_ADDRESS": "192.168.42.100", "flash_type": "bin"},
+            "config_zephyr_723_server_100": {"OS": "zephyr", "app": "cli_pubsub_server", "board": "nucleo_h723zg", "crypto": "nocrypto", "IP_ADDRESS": "192.168.42.100", "flash_type": "bin"},
             "config_zephyr_745_server_101": {"OS": "zephyr", "app": "cli_pubsub_server", "board": "nucleo_h745zi_q/stm32h745xx/m7", "crypto": "mbedtls", "IP_ADDRESS": "192.168.42.101", "flash_type": "bin"},
             "config_zephyr_723_client_3": {"OS": "zephyr", "app": "cli_client", "board": "nucleo_h723zg", "crypto": "mbedtls", "IP_ADDRESS": "192.168.42.3", "flash_type": "bin"},
             "config_zephyr_745_client_4": {"OS": "zephyr", "app": "cli_client", "board": "nucleo_h745zi_q/stm32h745xx/m7", "crypto": "mbedtls", "IP_ADDRESS": "192.168.42.4", "flash_type": "bin"}
