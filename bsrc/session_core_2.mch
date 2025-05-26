@@ -474,8 +474,7 @@ OPERATIONS
     reset_server_session_user_auth_attempts(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : t_session   &
-        p_session : dom(a_server_user_auth_attempts)
+        p_session : t_session
     THEN
         a_server_user_auth_attempts := {p_session} <<| a_server_user_auth_attempts
     END
