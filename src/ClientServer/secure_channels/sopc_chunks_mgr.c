@@ -3278,7 +3278,6 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
             if (NULL == encryptedData)
             {
                 result = false;
-
                 *errorStatus = OpcUa_BadTcpInternalError;
             }
             else

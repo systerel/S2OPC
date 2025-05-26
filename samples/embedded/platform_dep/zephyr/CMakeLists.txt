@@ -33,7 +33,7 @@ message(FATAL_ERROR "CONFIG_S2OPC is expected to be set in $ENV{CONF_FILE}")
 endif()
 
 # =====================
-# S2OPC CONFIGURATION600820
+# S2OPC CONFIGURATION
 # =====================
 # Note: The constants used within sample code (e.g WITH_STATIC_SECURITY_DATA) have to be
 # redefined here because the values provided in s2opc/zephyr/CMakelist.txt only applies

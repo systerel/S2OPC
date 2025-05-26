@@ -402,7 +402,7 @@ void SOPC_Platform_Main(void)
 
     epURL = SOPC_strdup(CONFIG_SOPC_ENDPOINT_ADDRESS);
     SOPC_Assert_Set_UserCallback(&assert_UserCallback);
-    SOPC_Log_Configuration logCfg = {.logLevel = SOPC_LOG_LEVEL_DEBUG,
+    SOPC_Log_Configuration logCfg = {.logLevel = SOPC_LOG_LEVEL_WARNING,
                                      .logSystem = SOPC_LOG_SYSTEM_USER,
                                      .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
     status = SOPC_CommonHelper_Initialize(&logCfg);

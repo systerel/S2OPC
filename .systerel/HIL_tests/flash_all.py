@@ -28,6 +28,7 @@ import sys
 import json
 import subprocess
 from pathlib import Path
+import executor
 
 def fail(message):
     print(f"[EE] {message}", file=sys.stderr)
@@ -122,15 +123,11 @@ for test in test_name_list:
                         print(log_read.read())
                     fail(f"Failed running flash script '{flash_app}'")
 
-    launch = hil_dir / "launch.sh"
     print(f"Running test {test}")
+    log_file = log_dir / f"execute_{app}_{board_name}_{crypto}.log"
     try:
-        subprocess.run(
-            [str(launch), test, log_dir],
-            check=True,
-            cwd=str(hil_dir),
-        )
+        executor.run_test(test, build_cfg_list, hardware_capacity, log_file)
     except subprocess.CalledProcessError:
-        fail(f"Failed running test script '{launch}' for test '{test}'")
+        fail(f"Failed running test '{test}'")
 
 print(f"All test OK")
