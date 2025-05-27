@@ -136,7 +136,7 @@ SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
 
 SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(SOPC_Socket sock)
 {
-    /* TODO: to be implemented and tested */
+     /* TODO: to be implemented and tested */
     SOPC_UNUSED_ARG(sock);
     return NULL;
 }
@@ -325,6 +325,51 @@ SOPC_ReturnStatus SOPC_Socket_Accept(SOPC_Socket listeningSock, bool setNonBlock
     return status;
 }
 
+static bool check_socket_connection(int socket_fd)
+{
+    if (socket_fd < 0)
+    {
+        return false; // Invalid socket
+    }
+
+    // Use select to check if the socket is ready for writing
+    fd_set writefds;
+    FD_ZERO(&writefds);
+    FD_SET(socket_fd, &writefds);
+
+    struct timeval timeout;
+    timeout.tv_sec = 5; // 5 seconds timeout
+    timeout.tv_usec = 0;
+
+    int result = select(socket_fd + 1, NULL, &writefds, NULL, &timeout);
+
+    if (result > 0 && FD_ISSET(socket_fd, &writefds))
+    {
+        int error = 0;
+        socklen_t error_len = sizeof(error);
+        if (getsockopt(socket_fd, SOL_SOCKET, SO_ERROR, &error, &error_len) < 0 || error != 0)
+        {
+            // Connection failed
+            return false;
+        }
+        else
+        {
+            // Connection established
+            return true;
+        }
+    }
+    else if (result == 0)
+    {
+        // Timeout occurred
+        return false;
+    }
+    else
+    {
+        // Error occurred
+        return false;
+    }
+}
+
 SOPC_ReturnStatus SOPC_Socket_Connect(SOPC_Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     if (NULL == addr || !SOPC_FREERTOS_SOCKET_IS_VALID(sock))
@@ -338,8 +383,15 @@ SOPC_ReturnStatus SOPC_Socket_Connect(SOPC_Socket sock, SOPC_Socket_AddressInfo*
     {
         if (EINPROGRESS == errno)
         {
-            // Non blocking connection started
-            connectStatus = 0;
+            // Non blocking connection started - check if it is established
+            if (check_socket_connection((int) sock->sock))
+            {
+                connectStatus = 0; // Connection established
+            }
+            else
+            {
+                connectStatus = -1; // Connection still in progress
+            }
         }
     }
     if (connectStatus == 0)
