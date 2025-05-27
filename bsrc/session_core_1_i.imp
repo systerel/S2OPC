@@ -128,7 +128,7 @@ LOCAL_OPERATIONS
         p_session : t_session_i &
         p_session : dom(a_server_client_locales)
     THEN
-        a_server_client_locales(p_session) := c_LocaleIds_empty
+        a_server_client_locales := {p_session} <<| a_server_client_locales
     END
     ;
 

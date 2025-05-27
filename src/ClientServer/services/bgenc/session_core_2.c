@@ -152,6 +152,7 @@ void session_core_2__add_session(
    session_core_2__a_state_i[session_core_2__p_session] = constants__e_session_init;
    session_core_2__a_client_session_i[session_core_2__p_session] = session_core_2__p_is_client;
    session_core_2__a_session_init_time_i[session_core_2__p_session] = session_core_2__p_timeref;
+   session_core_2__a_server_client_locales_i[session_core_2__p_session] = constants__c_LocaleIds_empty;
 }
 
 void session_core_2__remove_session(

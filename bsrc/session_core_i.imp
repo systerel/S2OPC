@@ -143,7 +143,7 @@ LOCAL_OPERATIONS
             a_user_server_cert          := {p_session} <<| a_user_server_cert          ||
             a_server_token              := a_server_token |>> {p_session}              ||
             a_server_user_auth_attempts := {p_session} <<| a_server_user_auth_attempts ||
-            a_server_client_locales     := a_server_client_locales <+ {p_session|->c_LocaleIds_empty} ||
+            a_server_client_locales     := {p_session} <<| a_server_client_locales     ||
             a_session_roles             := {p_session} <<| a_session_roles             ||
             a_user_client               := {p_session} <<| a_user_client               ||
             a_user_secu_client          := {p_session} <<| a_user_secu_client          ||
@@ -255,7 +255,7 @@ LOCAL_OPERATIONS
                 {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
                 session : dom(a_NonceServer)) ||
             a_server_client_locales :(
-                a_server_client_locales : t_session --> t_LocaleIds &
+                a_server_client_locales : s_session --> t_LocaleIds &
                 {session} <<| a_server_client_locales = {session} <<| a_server_client_locales$0)
         OR
             res_activated := FALSE
@@ -296,7 +296,7 @@ LOCAL_OPERATIONS
                     a_state(session) := e_session_userActivated ||
                     a_user_server(session) := user ||
                     a_server_client_locales :(
-                        a_server_client_locales : t_session --> t_LocaleIds &
+                        a_server_client_locales : s_session --> t_LocaleIds &
                         {session} <<| a_server_client_locales = {session} <<| a_server_client_locales$0) ||
                     a_NonceServer :(
                         a_NonceServer : t_session +-> t_Nonce &
@@ -318,7 +318,7 @@ LOCAL_OPERATIONS
                     a_state(session) := e_session_userActivated ||
                     a_user_server(session) := user ||
                     a_server_client_locales :(
-                        a_server_client_locales : t_session --> t_LocaleIds &
+                        a_server_client_locales : s_session --> t_LocaleIds &
                         {session} <<| a_server_client_locales = {session} <<| a_server_client_locales$0) ||
                     a_NonceServer :(
                         a_NonceServer : t_session +-> t_Nonce &
@@ -339,7 +339,7 @@ LOCAL_OPERATIONS
                             {session} <<| a_user_server = {session} <<| a_user_server$0 &
                             session : dom(a_user_server))||
                         a_server_client_locales :(
-                            a_server_client_locales : t_session --> t_LocaleIds &
+                            a_server_client_locales : s_session --> t_LocaleIds &
                             {session} <<| a_server_client_locales = {session} <<| a_server_client_locales$0) ||
                         a_NonceServer :(
                             a_NonceServer : t_session +-> t_Nonce &
@@ -367,7 +367,7 @@ LOCAL_OPERATIONS
                         {session} <<| a_user_server = {session} <<| a_user_server$0 &
                         session : dom(a_user_server))||
                     a_server_client_locales :(
-                        a_server_client_locales : t_session --> t_LocaleIds &
+                        a_server_client_locales : s_session --> t_LocaleIds &
                         {session} <<| a_server_client_locales = {session} <<| a_server_client_locales$0) ||
                     a_NonceServer :(
                         a_NonceServer : t_session +-> t_Nonce &
@@ -438,7 +438,7 @@ LOCAL_OPERATIONS
             a_session_roles              : t_session +-> t_sessionRoles          &
             a_user_server_cert           : t_session +-> t_byte_buffer           &
             a_server_user_auth_attempts  : t_session +-> NAT                     &
-            a_server_client_locales      : t_session --> t_LocaleIds             &
+            a_server_client_locales      : s_session --> t_LocaleIds             &
             a_user_secu_client           : t_session +-> t_SecurityPolicy        &
 
             (   p_dom     = TRUE &
@@ -545,7 +545,7 @@ LOCAL_OPERATIONS
             a_session_roles              : t_session +-> t_sessionRoles          &
             a_user_server_cert           : t_session +-> t_byte_buffer           &
             a_server_user_auth_attempts  : t_session +-> NAT                     &
-            a_server_client_locales      : t_session --> t_LocaleIds             &
+            a_server_client_locales      : s_session --> t_LocaleIds             &
             a_user_secu_client           : t_session +-> t_SecurityPolicy        &
 
             (   p_dom     = TRUE &

@@ -70,7 +70,7 @@ DEFINITIONS
     a_user_server_cert           : t_session +-> t_byte_buffer           &
     a_server_token               : t_session_token +-> t_session         &
     a_server_user_auth_attempts  : t_session +-> NAT                     &
-    a_server_client_locales      : t_session --> t_LocaleIds             &
+    a_server_client_locales      : t_session +-> t_LocaleIds             &
     a_session_roles              : t_session +-> t_sessionRoles          &
 
     a_user_client                : t_session +-> t_user_token            &
@@ -86,7 +86,9 @@ ABSTRACT_VARIABLES
     d_variables
 
 INVARIANT
-    d_typing
+    d_typing &
+
+    dom(a_server_client_locales) = s_session
 
 INITIALISATION
     s_session                    := {} ||
@@ -101,7 +103,7 @@ INITIALISATION
     a_user_server_cert           := {} ||
     a_server_token               := {} ||
     a_server_user_auth_attempts  := {} ||
-    a_server_client_locales := t_session * {c_LocaleIds_empty} ||
+    a_server_client_locales      := {} ||
     a_session_roles              := {} ||
 
     a_user_client                := {} ||
@@ -130,6 +132,7 @@ OPERATIONS
             THEN
                 s_session := s_session \/ {l_nsession} ||
                 a_state (l_nsession) := e_session_init ||
+                a_server_client_locales(l_nsession) := c_LocaleIds_empty ||
                 IF is_client = TRUE THEN
                     s_client_session := s_client_session \/ {l_nsession}
                 END ||
@@ -535,12 +538,13 @@ OPERATIONS
     PRE
         p_session    : t_session_i &
         p_session    : t_session   &
+        p_session    : s_session   &
         p_localesIds : t_LocaleIds_i
     THEN
         IF p_localesIds /= c_LocaleIds_indet
         THEN
             a_server_client_locales(p_session) := p_localesIds
-        END /* ELSE keep existent locale (at least empty) */
+        END
     END
     ;
 
@@ -549,7 +553,12 @@ OPERATIONS
         p_session    : t_session_i &
         p_session    : t_session
     THEN
-        p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds = a_server_client_locales(p_session))
+        IF p_session : dom(a_server_client_locales)
+        THEN
+            p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds = a_server_client_locales(p_session))
+        ELSE
+            p_localeIds :: t_LocaleIds_i
+        END
     END
     ;
 
@@ -818,7 +827,7 @@ OPERATIONS
         a_user_server_cert           := {session} <<| a_user_server_cert           ||
         a_server_token               := a_server_token |>> {session}               || /* If session had token, remove this relation */
         a_server_user_auth_attempts  := {session} <<| a_server_user_auth_attempts  || /* If session was on server side, remove this relation */
-        a_server_client_locales(session) := c_LocaleIds_empty                      ||
+        a_server_client_locales      := {session} <<| a_server_client_locales      ||
         a_session_roles              := {session} <<| a_session_roles              ||
         a_user_client                := {session} <<| a_user_client                ||
         a_user_secu_client           := {session} <<| a_user_secu_client           ||

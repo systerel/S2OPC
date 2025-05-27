@@ -480,7 +480,7 @@ OPERATIONS
         p_session    : t_session_i &
         p_session    : t_session
     THEN
-        p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds : t_LocaleIds)
+        p_localeIds :: t_LocaleIds_i
     END
     ;
 

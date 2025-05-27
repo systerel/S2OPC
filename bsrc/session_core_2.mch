@@ -53,7 +53,7 @@ INVARIANT
     a_client_to_create : t_session +-> t_channel_config_idx_i &
     a_client_orphaned  : t_session +-> t_channel_config_idx_i &
     a_server_user_auth_attempts : t_session +-> NAT           &
-    a_server_client_locales : t_session --> t_LocaleIds       &
+    a_server_client_locales : t_session +-> t_LocaleIds       &
     a_server_client_app_desc : t_session +-> t_ApplicationDescription &
     a_server_client_cert_tb : t_session +-> t_CertThumbprint
 
@@ -67,7 +67,7 @@ INITIALISATION
     a_client_to_create := {} ||
     a_client_orphaned  := {} ||
     a_server_user_auth_attempts := {} ||
-    a_server_client_locales := t_session * {c_LocaleIds_empty} ||
+    a_server_client_locales := {} ||
     a_server_client_app_desc := {} ||
     a_server_client_cert_tb := {}
 
@@ -108,7 +108,8 @@ OPERATIONS
         IF p_is_client = TRUE THEN
             s_client_session := s_client_session \/ {p_session}
         END ||
-        a_session_init_time(p_session) := p_timeref
+        a_session_init_time(p_session) := p_timeref ||
+        a_server_client_locales(p_session) := c_LocaleIds_empty
     END
     ;
 
@@ -338,7 +339,12 @@ OPERATIONS
         p_session    : t_session_i &
         p_session    : t_session
     THEN
-        p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds = a_server_client_locales(p_session))
+        IF p_session : dom(a_server_client_locales)
+        THEN
+            p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds = a_server_client_locales(p_session))
+        ELSE
+            p_localeIds :: t_LocaleIds_i
+        END
     END
     ;
 
@@ -421,7 +427,7 @@ OPERATIONS
           a_server_client_locales : t_session +-> t_LocaleIds &
           (a_server_client_locales$0(p_session) = c_LocaleIds_empty => p_localeIds = c_LocaleIds_indet) &
           (a_server_client_locales$0(p_session) /= c_LocaleIds_empty => p_localeIds = a_server_client_locales$0(p_session)) &
-          a_server_client_locales = a_server_client_locales$0 <+ {p_session |-> c_LocaleIds_empty})
+          a_server_client_locales = {p_session} <<| a_server_client_locales$0)
     END
     ;
 

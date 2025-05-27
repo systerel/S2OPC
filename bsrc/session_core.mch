@@ -991,7 +991,12 @@ OPERATIONS
         p_session    : t_session_i &
         p_session    : t_session
     THEN
-        p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds : t_LocaleIds)
+        IF p_session : s_session
+        THEN
+            p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds : t_LocaleIds_i)
+        ELSE
+            p_localeIds :: t_LocaleIds_i
+        END
     END
     ;
 
