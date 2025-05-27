@@ -193,6 +193,8 @@ extern void session_core__client_create_session_resp_sm(
    const constants__t_msg_i session_core__create_resp_msg,
    t_bool * const session_core__bret);
 extern void session_core__client_init_session_sm(
+   const constants__t_user_token_i session_core__p_user_token,
+   const constants__t_session_application_context_i session_core__p_app_context,
    constants__t_session_i * const session_core__nsession);
 extern void session_core__client_sc_activate_session_req_sm(
    const constants__t_session_i session_core__session,

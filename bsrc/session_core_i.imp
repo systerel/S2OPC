@@ -742,9 +742,13 @@ OPERATIONS
     ;
 
     /* END OF LOCAL OPERATIONS */
-    nsession <-- client_init_session_sm =
+    nsession <-- client_init_session_sm(p_user_token, p_app_context) =
     BEGIN
-        nsession <-- init_new_session (TRUE)
+        nsession <-- init_new_session (TRUE);
+        IF nsession /= c_session_indet THEN
+            set_session_user_client(nsession, p_user_token);
+            set_session_app_context(nsession, p_app_context)
+        END
     END;
 
     valid <-- client_create_session_req_sm (session, channel, create_req_msg) =

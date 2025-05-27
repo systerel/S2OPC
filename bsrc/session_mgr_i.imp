@@ -775,15 +775,13 @@ OPERATIONS
         l_session,
         l_session_state
     IN
-        l_session <-- client_init_session_sm;
+        l_session <-- client_init_session_sm(p_user_token, app_context);
         l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
         IF l_session_state = e_session_init
         THEN
             bres := TRUE;
             /* channel did not exist or is not connected anymore: add async session creation on SC connection */
-            set_session_to_create(l_session, channel_config_idx);
-            set_session_app_context(l_session, app_context);
-            set_session_user_client(l_session, p_user_token)
+            set_session_to_create(l_session, channel_config_idx)
         ELSE
             bres := FALSE
         END
@@ -797,15 +795,13 @@ OPERATIONS
     IN
         // PRE guarantee channel is connected
         channel_do_nothing(channel);
-        l_session <-- client_init_session_sm;
+        l_session <-- client_init_session_sm(p_user_token, app_context);
         l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
         IF l_session_state = e_session_init
         THEN
             bres := TRUE;
             /* Generate event to create the session next and then waiting to be activated */
-            client_gen_create_session_internal_event (l_session, channel_config_idx);
-            set_session_user_client(l_session, p_user_token);
-            set_session_app_context(l_session, app_context)
+            client_gen_create_session_internal_event (l_session, channel_config_idx)
         ELSE
             bres := FALSE
         END

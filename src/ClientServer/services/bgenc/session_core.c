@@ -212,9 +212,17 @@ void session_core__l_server_activate_session_req_and_resp_sm(
 }
 
 void session_core__client_init_session_sm(
+   const constants__t_user_token_i session_core__p_user_token,
+   const constants__t_session_application_context_i session_core__p_app_context,
    constants__t_session_i * const session_core__nsession) {
    session_core_1__init_new_session(true,
       session_core__nsession);
+   if (*session_core__nsession != constants__c_session_indet) {
+      session_core_1__set_session_user_client(*session_core__nsession,
+         session_core__p_user_token);
+      session_core_1__set_session_app_context(*session_core__nsession,
+         session_core__p_app_context);
+   }
 }
 
 void session_core__client_create_session_req_sm(

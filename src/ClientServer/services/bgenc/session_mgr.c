@@ -759,17 +759,15 @@ void session_mgr__client_async_activate_new_session_without_channel(
       constants__t_session_i session_mgr__l_session;
       constants__t_sessionState_i session_mgr__l_session_state;
       
-      session_core__client_init_session_sm(&session_mgr__l_session);
+      session_core__client_init_session_sm(session_mgr__p_user_token,
+         session_mgr__app_context,
+         &session_mgr__l_session);
       session_core__get_session_state_or_closed(session_mgr__l_session,
          &session_mgr__l_session_state);
       if (session_mgr__l_session_state == constants__e_session_init) {
          *session_mgr__bres = true;
          session_core__set_session_to_create(session_mgr__l_session,
             session_mgr__channel_config_idx);
-         session_core__set_session_app_context(session_mgr__l_session,
-            session_mgr__app_context);
-         session_core__set_session_user_client(session_mgr__l_session,
-            session_mgr__p_user_token);
       }
       else {
          *session_mgr__bres = false;
@@ -788,17 +786,15 @@ void session_mgr__client_async_activate_new_session_with_channel(
       constants__t_sessionState_i session_mgr__l_session_state;
       
       channel_mgr__channel_do_nothing(session_mgr__channel);
-      session_core__client_init_session_sm(&session_mgr__l_session);
+      session_core__client_init_session_sm(session_mgr__p_user_token,
+         session_mgr__app_context,
+         &session_mgr__l_session);
       session_core__get_session_state_or_closed(session_mgr__l_session,
          &session_mgr__l_session_state);
       if (session_mgr__l_session_state == constants__e_session_init) {
          *session_mgr__bres = true;
          session_core__client_gen_create_session_internal_event(session_mgr__l_session,
             session_mgr__channel_config_idx);
-         session_core__set_session_user_client(session_mgr__l_session,
-            session_mgr__p_user_token);
-         session_core__set_session_app_context(session_mgr__l_session,
-            session_mgr__app_context);
       }
       else {
          *session_mgr__bres = false;

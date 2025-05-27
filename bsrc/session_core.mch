@@ -165,8 +165,12 @@ OPERATIONS
     /* Note: _sm suffix is for (session) State Machine, to indicate a transition */
 
     // Initialize a session to be created
-    nsession <-- client_init_session_sm =
-    BEGIN
+    nsession <-- client_init_session_sm(p_user_token, p_app_context) =
+    PRE
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
+        p_app_context : t_session_application_context_i
+    THEN
         IF s_session = t_session
         THEN
             // Maximum number of sessions already allocated
@@ -179,6 +183,8 @@ OPERATIONS
                 s_session := s_session \/ {l_nsession} ||
                 s_client_session := s_client_session \/ {l_nsession} ||
                 a_state(l_nsession) := e_session_init  ||
+                a_client_app_context(l_nsession) := p_app_context ||
+                a_user_client(l_nsession) := p_user_token ||
                 nsession := l_nsession
             END
         END
