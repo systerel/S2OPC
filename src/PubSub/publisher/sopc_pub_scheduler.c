@@ -385,7 +385,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         context->publishingIntervalUs = (uint64_t)(SOPC_WriterGroup_Get_PublishingInterval(group) * 1000);
         context->publishingOffsetUs = (int32_t)(SOPC_WriterGroup_Get_PublishingOffset(group) * 1000);
         /* Compute next timeout.  */
-        if (context->publishingOffsetUs >= 0)
+        if (context->publishingOffsetUs > 0)
         {
             // If publishing offset is not zero, then the publishing period shall be a divisor of 1s (Otherwise,
             // there will be no way to find a common reference)
