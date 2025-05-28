@@ -229,27 +229,30 @@ void session_core_1__set_session_state_closed(
    const t_bool session_core_1__is_client) {
    {
       constants__t_sessionState_i session_core_1__l_prec_state;
+      t_bool session_core_1__l_is_client;
       
       session_core_2__get_session_state(session_core_1__session,
          &session_core_1__l_prec_state);
+      session_core_2__is_client_session(session_core_1__session,
+         &session_core_1__l_is_client);
       session_core_bs__notify_set_session_state(session_core_1__session,
          session_core_1__l_prec_state,
          constants__e_session_closed,
          session_core_1__sc_reason,
-         session_core_1__is_client);
+         session_core_1__l_is_client);
       session_core_2__reset_session_channel(session_core_1__session);
       session_core_1__l_delete_session_roles(session_core_1__session);
       session_core_bs__delete_session_token(session_core_1__session,
-         session_core_1__is_client);
+         session_core_1__l_is_client);
       session_core_2__reset_session_to_create(session_core_1__session);
       session_core_bs__delete_session_application_context(session_core_1__session);
       session_core_2__reset_session_orphaned(session_core_1__session);
       session_core_1__l_reset_server_session_preferred_locales(session_core_1__session);
       session_core_1__l_reset_server_client_create_session_info(session_core_1__session);
       session_core_bs__remove_NonceServer(session_core_1__session,
-         session_core_1__is_client);
+         session_core_1__l_is_client);
       session_core_2__remove_session(session_core_1__session);
-      if (session_core_1__is_client == false) {
+      if (session_core_1__l_is_client == false) {
          session_core_bs__server_session_timeout_stop_timer(session_core_1__session);
          session_core_bs__drop_user_server(session_core_1__session);
          session_core_2__reset_server_session_user_auth_attempts(session_core_1__session);
