@@ -303,7 +303,7 @@ OPERATIONS
     END
     ;
 
-    set_session_state_closed (session, sc_reason, is_client) =
+    set_session_state_closed (session, sc_reason) =
     VAR
         l_prec_state,
         l_is_client

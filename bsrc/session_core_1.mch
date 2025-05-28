@@ -803,14 +803,12 @@ OPERATIONS
     END
     ;
 
-    set_session_state_closed (session, sc_reason, is_client) =
+    set_session_state_closed (session, sc_reason) =
     PRE
         session   : t_session_i    &
         session   : dom(a_state)   &
         sc_reason : t_StatusCode_i &
-        sc_reason : t_StatusCode   &
-        is_client : BOOL           &
-        is_client = bool(session : s_client_session)
+        sc_reason : t_StatusCode
     THEN
         s_session                    := s_session - {session}                      ||
         s_client_session             := s_client_session - {session}               ||

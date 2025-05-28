@@ -886,7 +886,7 @@ OPERATIONS
                 p_service_ret := e_sc_bad_security_checks_failed
             END;
             nsession := c_session_indet;
-            set_session_state_closed (p_session, e_sc_bad_session_id_invalid, FALSE)
+            set_session_state_closed (p_session, e_sc_bad_session_id_invalid)
         END
     END
     ;
@@ -1134,7 +1134,7 @@ OPERATIONS
                 set_session_state (p_session, e_session_scOrphaned)
             ELSE
                 /* Inactive sessions or all orphaned sessions (if no new channel can be associated) */
-                set_session_state_closed (p_session, e_sc_bad_secure_channel_closed , TRUE)
+                set_session_state_closed (p_session, e_sc_bad_secure_channel_closed)
             END
         END
     END
@@ -1195,7 +1195,7 @@ OPERATIONS
             ELSE
                 /* may generate audit event */
                 server_notify_session_closed(p_session, e_sc_bad_secure_channel_closed);
-                set_session_state_closed (p_session, e_sc_bad_secure_channel_closed , FALSE)
+                set_session_state_closed (p_session, e_sc_bad_secure_channel_closed)
             END
         END
     END
@@ -1279,7 +1279,7 @@ OPERATIONS
         /* may generate audit event */
         server_notify_session_closed(session, e_sc_ok);
         /* No need to store the handle since we will send response in same step */
-        set_session_state_closed (session, e_sc_ok , FALSE);
+        set_session_state_closed (session, e_sc_ok);
         ret := e_sc_ok
     END
     ;
@@ -1290,13 +1290,13 @@ OPERATIONS
         channel_do_nothing (channel); /* Avoid unused variable */
         client_close_session_resp_msg(close_resp_msg); /* Avoid unused variable*/
         /* In any case we close the session: correct channel or not  */
-        set_session_state_closed (session, e_sc_ok, TRUE)
+        set_session_state_closed (session, e_sc_ok)
     END
     ;
 
     client_close_session_sm (session, sc_reason) =
     BEGIN
-        set_session_state_closed (session, sc_reason, TRUE)
+        set_session_state_closed (session, sc_reason)
     END
     ;
 
@@ -1304,7 +1304,7 @@ OPERATIONS
     BEGIN
         /* may generate audit event */
         server_notify_session_closed(session, sc_reason);
-        set_session_state_closed (session, sc_reason, FALSE)
+        set_session_state_closed (session, sc_reason)
     END
     ;
 
@@ -1439,7 +1439,7 @@ OPERATIONS
                     server_notify_session_closed (l_session_to_close, e_sc_bad_session_not_activated)
                 END
                 ;
-                set_session_state_closed (l_session_to_close, e_sc_bad_session_not_activated, l_is_client)
+                set_session_state_closed (l_session_to_close, e_sc_bad_session_not_activated)
             END
         END
     END
@@ -1460,8 +1460,7 @@ OPERATIONS
 
                 IF l_valid_session = TRUE
                 THEN
-                    l_is_client <-- is_client_session (l_session);
-                    set_session_state_closed (l_session, e_sc_ok, l_is_client)
+                    set_session_state_closed (l_session, e_sc_ok)
                     // Note: do not trigger audit event with server_notify_session_closed on UNINIT
                     //       (even if expected on server shutdown by specification, it is not possible)
                 END

@@ -421,8 +421,7 @@ void session_core__l_server_create_session_req_and_resp_sm(
          }
          *session_core__nsession = constants__c_session_indet;
          session_core_1__set_session_state_closed(session_core__p_session,
-            constants_statuscodes_bs__e_sc_bad_session_id_invalid,
-            false);
+            constants_statuscodes_bs__e_sc_bad_session_id_invalid);
       }
    }
 }
@@ -807,8 +806,7 @@ void session_core__l_client_secure_channel_lost_session_sm(
          }
          else {
             session_core_1__set_session_state_closed(session_core__p_session,
-               constants_statuscodes_bs__e_sc_bad_secure_channel_closed,
-               true);
+               constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
          }
       }
    }
@@ -863,8 +861,7 @@ void session_core__l_server_secure_channel_lost_session_sm(
             session_audit_bs__server_notify_session_closed(session_core__p_session,
                constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
             session_core_1__set_session_state_closed(session_core__p_session,
-               constants_statuscodes_bs__e_sc_bad_secure_channel_closed,
-               false);
+               constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
          }
       }
    }
@@ -941,8 +938,7 @@ void session_core__server_close_session_req_and_resp_sm(
    session_audit_bs__server_notify_session_closed(session_core__session,
       constants_statuscodes_bs__e_sc_ok);
    session_core_1__set_session_state_closed(session_core__session,
-      constants_statuscodes_bs__e_sc_ok,
-      false);
+      constants_statuscodes_bs__e_sc_ok);
    *session_core__ret = constants_statuscodes_bs__e_sc_ok;
 }
 
@@ -953,16 +949,14 @@ void session_core__client_close_session_resp_sm(
    channel_mgr__channel_do_nothing(session_core__channel);
    session_core_1__client_close_session_resp_msg(session_core__close_resp_msg);
    session_core_1__set_session_state_closed(session_core__session,
-      constants_statuscodes_bs__e_sc_ok,
-      true);
+      constants_statuscodes_bs__e_sc_ok);
 }
 
 void session_core__client_close_session_sm(
    const constants__t_session_i session_core__session,
    const constants_statuscodes_bs__t_StatusCode_i session_core__sc_reason) {
    session_core_1__set_session_state_closed(session_core__session,
-      session_core__sc_reason,
-      true);
+      session_core__sc_reason);
 }
 
 void session_core__server_close_session_sm(
@@ -971,8 +965,7 @@ void session_core__server_close_session_sm(
    session_audit_bs__server_notify_session_closed(session_core__session,
       session_core__sc_reason);
    session_core_1__set_session_state_closed(session_core__session,
-      session_core__sc_reason,
-      false);
+      session_core__sc_reason);
 }
 
 void session_core__is_session_valid_for_service(
@@ -1077,7 +1070,6 @@ void session_core__may_close_unactivated_session(void) {
       t_bool session_core__l_auto_closed_active;
       t_bool session_core__l_has_session_to_close;
       constants__t_session_i session_core__l_session_to_close;
-      t_bool session_core__l_is_client;
       
       session_core_1__is_auto_close_session_active(&session_core__l_auto_closed_active);
       if (session_core__l_auto_closed_active == true) {
@@ -1091,8 +1083,7 @@ void session_core__may_close_unactivated_session(void) {
                   constants_statuscodes_bs__e_sc_bad_session_not_activated);
             }
             session_core_1__set_session_state_closed(session_core__l_session_to_close,
-               constants_statuscodes_bs__e_sc_bad_session_not_activated,
-               session_core__l_is_client);
+               constants_statuscodes_bs__e_sc_bad_session_not_activated);
          }
       }
    }
@@ -1103,7 +1094,6 @@ void session_core__session_core_UNINITIALISATION(void) {
       t_bool session_core__l_continue;
       constants__t_session_i session_core__l_session;
       t_bool session_core__l_valid_session;
-      t_bool session_core__l_is_client;
       
       session_core_it__init_iter_session(&session_core__l_continue);
       if (session_core__l_continue == true) {
@@ -1113,11 +1103,8 @@ void session_core__session_core_UNINITIALISATION(void) {
             session_core_1__is_valid_session(session_core__l_session,
                &session_core__l_valid_session);
             if (session_core__l_valid_session == true) {
-               session_core_1__is_client_session(session_core__l_session,
-                  &session_core__l_is_client);
                session_core_1__set_session_state_closed(session_core__l_session,
-                  constants_statuscodes_bs__e_sc_ok,
-                  session_core__l_is_client);
+                  constants_statuscodes_bs__e_sc_ok);
             }
          }
       }
