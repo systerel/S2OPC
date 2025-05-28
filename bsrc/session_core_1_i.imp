@@ -148,11 +148,13 @@ OPERATIONS
 
     l_set_session_state(p_session, p_state, is_client) =
     VAR
-        l_prec_state
+        l_prec_state,
+        l_is_client
     IN
         l_prec_state <-- get_session_state(p_session);
         set_session_state_1(p_session, p_state);
-        notify_set_session_state(p_session, l_prec_state, p_state, c_StatusCode_indet, is_client)
+        l_is_client <-- is_client_session(p_session);
+        notify_set_session_state(p_session, l_prec_state, p_state, c_StatusCode_indet, l_is_client)
     END
     ;
 

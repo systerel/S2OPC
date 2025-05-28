@@ -47,16 +47,19 @@ void session_core_1__l_set_session_state(
    const t_bool session_core_1__is_client) {
    {
       constants__t_sessionState_i session_core_1__l_prec_state;
+      t_bool session_core_1__l_is_client;
       
       session_core_2__get_session_state(session_core_1__p_session,
          &session_core_1__l_prec_state);
       session_core_2__set_session_state_1(session_core_1__p_session,
          session_core_1__p_state);
+      session_core_2__is_client_session(session_core_1__p_session,
+         &session_core_1__l_is_client);
       session_core_bs__notify_set_session_state(session_core_1__p_session,
          session_core_1__l_prec_state,
          session_core_1__p_state,
          constants_statuscodes_bs__c_StatusCode_indet,
-         session_core_1__is_client);
+         session_core_1__l_is_client);
    }
 }
 
