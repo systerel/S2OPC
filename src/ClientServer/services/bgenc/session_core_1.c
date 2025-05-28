@@ -43,8 +43,7 @@ void session_core_1__INITIALISATION(void) {
   --------------------*/
 void session_core_1__l_set_session_state(
    const constants__t_session_i session_core_1__p_session,
-   const constants__t_sessionState_i session_core_1__p_state,
-   const t_bool session_core_1__is_client) {
+   const constants__t_sessionState_i session_core_1__p_state) {
    {
       constants__t_sessionState_i session_core_1__l_prec_state;
       t_bool session_core_1__l_is_client;
@@ -143,8 +142,7 @@ void session_core_1__set_session_state(
    const constants__t_sessionState_i session_core_1__state,
    const t_bool session_core_1__is_client) {
    session_core_1__l_set_session_state(session_core_1__session,
-      session_core_1__state,
-      session_core_1__is_client);
+      session_core_1__state);
 }
 
 void session_core_1__create_session(
@@ -155,8 +153,7 @@ void session_core_1__create_session(
    session_core_2__set_session_channel(session_core_1__session,
       session_core_1__channel);
    session_core_1__l_set_session_state(session_core_1__session,
-      session_core_1__state,
-      session_core_1__is_client);
+      session_core_1__state);
    if (session_core_1__is_client == false) {
       session_core_2__set_server_session_user_auth_attempts(session_core_1__session,
          0);

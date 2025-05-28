@@ -131,8 +131,7 @@ extern void session_core_1__l_reset_server_session_preferred_locales(
    const constants__t_session_i session_core_1__p_session);
 extern void session_core_1__l_set_session_state(
    const constants__t_session_i session_core_1__p_session,
-   const constants__t_sessionState_i session_core_1__p_state,
-   const t_bool session_core_1__is_client);
+   const constants__t_sessionState_i session_core_1__p_state);
 
 /*--------------------
    OPERATIONS Clause

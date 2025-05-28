@@ -102,14 +102,13 @@ INVARIANT
 
 LOCAL_OPERATIONS
 
-    l_set_session_state(p_session, p_state, is_client) =
+    l_set_session_state(p_session, p_state) =
     PRE
         p_session : t_session_i    &
         p_session : dom(a_state)   &
         p_state   : t_sessionState_i &
         p_state   : t_sessionState &
-        p_state /= e_session_init &
-        is_client : BOOL
+        p_state /= e_session_init
     THEN
         a_state(p_session) := p_state
     END
@@ -146,7 +145,7 @@ OPERATIONS
 
     /* Local operations */
 
-    l_set_session_state(p_session, p_state, is_client) =
+    l_set_session_state(p_session, p_state) =
     VAR
         l_prec_state,
         l_is_client
@@ -236,14 +235,14 @@ OPERATIONS
 
     set_session_state (session, state, is_client) =
     BEGIN
-        l_set_session_state (session, state, is_client)
+        l_set_session_state (session, state)
     END
     ;
 
     create_session (session, channel, state, is_client) =
     BEGIN
         set_session_channel(session, channel);
-        l_set_session_state(session, state, is_client);
+        l_set_session_state(session, state);
         IF is_client = FALSE
         THEN
             set_server_session_user_auth_attempts(session, 0)
