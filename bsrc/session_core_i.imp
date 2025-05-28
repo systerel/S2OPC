@@ -638,7 +638,7 @@ OPERATIONS
             set_session_channel (session, channel);
             l_localeIds <-- read_activate_req_msg_locales (activate_req_msg);
             set_server_session_preferred_locales_or_indet (session, l_localeIds);
-            set_session_state (session, e_session_userActivated, FALSE)
+            set_session_state (session, e_session_userActivated)
         END
     END
     ;
@@ -943,7 +943,7 @@ OPERATIONS
             END
         END;
         IF bret = TRUE THEN
-            set_session_state (session, e_session_created, TRUE);
+            set_session_state (session, e_session_created);
             client_set_session_token (session, session_token);
             /* Minimize the encoding OPC UA message body maximum size with the maxRequestMessageSize requested by server.
                Initial value is defined with SC sendMaxMessageSize.*/
@@ -1052,7 +1052,7 @@ OPERATIONS
             ret := e_sc_bad_unexpected_error
         END;
         IF ret = e_sc_ok THEN
-            set_session_state(session, e_session_userActivating, TRUE)
+            set_session_state(session, e_session_userActivating)
         END
     END
     ;
@@ -1068,7 +1068,7 @@ OPERATIONS
         write_activate_req_msg_locales(activate_req_msg, l_channel_config_idx);
         write_activate_msg_user(activate_req_msg, l_user_token);
         set_session_channel(session, channel);
-        set_session_state(session, e_session_scActivating, TRUE)
+        set_session_state(session, e_session_scActivating)
     END
     ;
 
@@ -1111,7 +1111,7 @@ OPERATIONS
         l_valid_response <-- client_activate_session_resp_check(session, l_channel_config_idx,  activate_resp_msg);
         IF l_valid_response = TRUE
         THEN
-            set_session_state (session, e_session_userActivated, TRUE);
+            set_session_state (session, e_session_userActivated);
             bret := TRUE
         ELSE
             bret := FALSE
@@ -1131,7 +1131,7 @@ OPERATIONS
             THEN
                 /* Active sessions set to orphaned and channel config idx associated */
                 set_session_orphaned (p_session, p_channel_config_idx);
-                set_session_state (p_session, e_session_scOrphaned, TRUE)
+                set_session_state (p_session, e_session_scOrphaned)
             ELSE
                 /* Inactive sessions or all orphaned sessions (if no new channel can be associated) */
                 set_session_state_closed (p_session, e_sc_bad_secure_channel_closed , TRUE)
@@ -1191,7 +1191,7 @@ OPERATIONS
             IF l_state = e_session_userActivated
             THEN
                 set_session_orphaned (p_session, c_channel_config_idx_indet);
-                set_session_state (p_session, e_session_scOrphaned, FALSE)
+                set_session_state (p_session, e_session_scOrphaned)
             ELSE
                 /* may generate audit event */
                 server_notify_session_closed(p_session, e_sc_bad_secure_channel_closed);
@@ -1259,7 +1259,7 @@ OPERATIONS
         THEN
             session_token <-- client_get_token_from_session (session);
             /* TODO: populate msg with parameters */
-            set_session_state (session, e_session_closing, TRUE);
+            set_session_state (session, e_session_closing);
             ret := e_sc_ok
         ELSE
             channel := c_channel_indet;

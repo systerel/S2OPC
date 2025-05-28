@@ -168,8 +168,7 @@ extern void session_core_1__set_session_roles(
    const constants__t_sessionRoles_i session_core_1__p_roles);
 extern void session_core_1__set_session_state(
    const constants__t_session_i session_core_1__session,
-   const constants__t_sessionState_i session_core_1__state,
-   const t_bool session_core_1__is_client);
+   const constants__t_sessionState_i session_core_1__state);
 extern void session_core_1__set_session_state_closed(
    const constants__t_session_i session_core_1__session,
    const constants_statuscodes_bs__t_StatusCode_i session_core_1__sc_reason,

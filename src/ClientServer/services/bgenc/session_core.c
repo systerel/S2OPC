@@ -93,8 +93,7 @@ void session_core__server_internal_activate_req_and_resp(
          session_core_1__set_server_session_preferred_locales_or_indet(session_core__session,
             session_core__l_localeIds);
          session_core_1__set_session_state(session_core__session,
-            constants__e_session_userActivated,
-            false);
+            constants__e_session_userActivated);
       }
    }
 }
@@ -509,8 +508,7 @@ void session_core__client_create_session_resp_sm(
       }
       if (*session_core__bret == true) {
          session_core_1__set_session_state(session_core__session,
-            constants__e_session_created,
-            true);
+            constants__e_session_created);
          session_core_1__client_set_session_token(session_core__session,
             session_core__session_token);
          msg_session_bs__create_session_resp_export_maxRequestMessageSize(session_core__l_channel_config_idx,
@@ -673,8 +671,7 @@ void session_core__client_user_activate_session_req_sm(
       }
       if (*session_core__ret == constants_statuscodes_bs__e_sc_ok) {
          session_core_1__set_session_state(session_core__session,
-            constants__e_session_userActivating,
-            true);
+            constants__e_session_userActivating);
       }
    }
 }
@@ -701,8 +698,7 @@ void session_core__client_sc_activate_session_req_sm(
       session_core_1__set_session_channel(session_core__session,
          session_core__channel);
       session_core_1__set_session_state(session_core__session,
-         constants__e_session_scActivating,
-         true);
+         constants__e_session_scActivating);
    }
 }
 
@@ -781,8 +777,7 @@ void session_core__client_activate_session_resp_sm(
          &session_core__l_valid_response);
       if (session_core__l_valid_response == true) {
          session_core_1__set_session_state(session_core__session,
-            constants__e_session_userActivated,
-            true);
+            constants__e_session_userActivated);
          *session_core__bret = true;
       }
       else {
@@ -808,8 +803,7 @@ void session_core__l_client_secure_channel_lost_session_sm(
             session_core_1__set_session_orphaned(session_core__p_session,
                session_core__p_channel_config_idx);
             session_core_1__set_session_state(session_core__p_session,
-               constants__e_session_scOrphaned,
-               true);
+               constants__e_session_scOrphaned);
          }
          else {
             session_core_1__set_session_state_closed(session_core__p_session,
@@ -863,8 +857,7 @@ void session_core__l_server_secure_channel_lost_session_sm(
             session_core_1__set_session_orphaned(session_core__p_session,
                constants__c_channel_config_idx_indet);
             session_core_1__set_session_state(session_core__p_session,
-               constants__e_session_scOrphaned,
-               false);
+               constants__e_session_scOrphaned);
          }
          else {
             session_audit_bs__server_notify_session_closed(session_core__p_session,
@@ -925,8 +918,7 @@ void session_core__client_close_session_req_sm(
          session_core_1__client_get_token_from_session(session_core__session,
             session_core__session_token);
          session_core_1__set_session_state(session_core__session,
-            constants__e_session_closing,
-            true);
+            constants__e_session_closing);
          *session_core__ret = constants_statuscodes_bs__e_sc_ok;
       }
       else {

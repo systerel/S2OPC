@@ -166,15 +166,13 @@ OPERATIONS
     END
     ;
 
-    set_session_state (session, state, is_client) =
+    set_session_state (session, state) =
     PRE
         session : t_session_i    &
         session : dom(a_state)   &
         state   : t_sessionState_i &
         state   : t_sessionState &
-        state /= e_session_init  &
-        is_client : BOOL         &
-        is_client = bool(session : s_client_session)
+        state /= e_session_init
     THEN
         a_state (session) := state
         /* + notify  user app when session activated */

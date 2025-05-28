@@ -233,7 +233,7 @@ OPERATIONS
     END
     ;
 
-    set_session_state (session, state, is_client) =
+    set_session_state (session, state) =
     BEGIN
         l_set_session_state (session, state)
     END

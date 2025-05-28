@@ -139,8 +139,7 @@ void session_core_1__init_new_session(
 
 void session_core_1__set_session_state(
    const constants__t_session_i session_core_1__session,
-   const constants__t_sessionState_i session_core_1__state,
-   const t_bool session_core_1__is_client) {
+   const constants__t_sessionState_i session_core_1__state) {
    session_core_1__l_set_session_state(session_core_1__session,
       session_core_1__state);
 }
