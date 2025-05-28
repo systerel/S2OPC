@@ -83,6 +83,13 @@ PROMOTES
     server_notify_session_activate,
     server_notify_session_closed
 
+INVARIANT
+    dom(a_user_secu_client) <: dom(a_state)        &
+    dom(a_user_server_cert) <: dom(a_state)        &
+    dom(a_client_token) <: dom(a_user_secu_client) &
+    dom(a_client_token) <: dom(a_user_server_cert) &
+    dom(a_server_user_auth_attempts) = dom(s_client_session <<| a_state)
+
 LOCAL_OPERATIONS
     nsession, p_service_ret <-- l_server_create_session_req_and_resp_sm (p_session, p_channel, create_req_msg, create_resp_msg) =
     PRE
