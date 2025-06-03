@@ -400,7 +400,7 @@ OPERATIONS
           a_session_roles : t_session +-> t_sessionRoles &
           a_session_roles = {p_session} <<| a_session_roles$0 &
           (p_session : dom(a_session_roles$0) => p_roles = a_session_roles$0(p_session)) &
-          (p_session /: dom(a_session_roles$0) => p_roles = c_sessionRoles_indet))
+          (p_session /: dom(a_session_roles$0) => p_roles : t_sessionRoles_i))
     END
     ;
 
