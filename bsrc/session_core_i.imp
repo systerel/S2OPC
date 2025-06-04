@@ -387,9 +387,8 @@ LOCAL_OPERATIONS
     END
     ;
 
-    l_client_secure_channel_lost_session_sm(p_dom, p_channel, p_lost_channel, p_session, p_channel_config_idx) =
+    l_client_secure_channel_lost_session_sm(p_channel, p_lost_channel, p_session, p_channel_config_idx) =
     PRE
-        p_dom                : BOOL                   &
         p_channel            : t_channel_i            &
         p_session            : t_session_i            &
         p_lost_channel       : t_channel_i            &
@@ -397,11 +396,9 @@ LOCAL_OPERATIONS
         p_session            : s_client_session       &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx   &
-        (   p_dom = TRUE
-            =>
-            p_session : dom(a_channel) &
-            p_session : dom(a_state) &
-            p_channel = a_channel(p_session))
+        p_session            : dom(a_state)           &
+        p_session            : dom(a_channel)         &
+        p_channel            = a_channel(p_session)
     THEN
         s_session,
         s_client_session,
@@ -441,8 +438,7 @@ LOCAL_OPERATIONS
             a_server_client_locales      : s_session --> t_LocaleIds             &
             a_user_secu_client           : t_session +-> t_SecurityPolicy        &
 
-            (   p_dom     = TRUE &
-                p_channel = p_lost_channel
+            (p_channel = p_lost_channel
                 =>
                 (   a_state$0(p_session) = e_session_userActivated
                     =>
@@ -476,41 +472,21 @@ LOCAL_OPERATIONS
                     a_NonceClient                = {p_session} <<| a_NonceClient$0 &
                     a_session_roles              = {p_session} <<| a_session_roles$0
                 )
-            ) &
-            (   not(p_dom     = TRUE &
-                    p_channel = p_lost_channel)
-                =>
-                s_session                    = s_session$0 &
-                a_state                      = a_state$0 &
-                a_channel                    = a_channel$0 &
-                a_client_to_create           = a_client_to_create$0 &
-                a_client_app_context         = a_client_app_context$0 &
-                a_client_orphaned            = a_client_orphaned$0 &
-                a_user_server                = a_user_server$0 &
-                a_user_client                = a_user_client$0 &
-                a_server_token               = a_server_token$0 &
-                a_client_token               = a_client_token$0 &
-                a_NonceServer                = a_NonceServer$0 &
-                a_NonceClient                = a_NonceClient$0 &
-                a_session_roles              = a_session_roles
             )
         )
     END
     ;
 
-    l_server_secure_channel_lost_session_sm(p_dom, p_channel, p_lost_channel, p_session) =
+    l_server_secure_channel_lost_session_sm(p_channel, p_lost_channel, p_session) =
     PRE
-        p_dom          : BOOL             &
         p_channel      : t_channel_i      &
         p_session      : t_session_i      &
-        p_session     /: s_client_session &
         p_lost_channel : t_channel_i      &
         p_session      : t_session_i      &
-        (   p_dom = TRUE
-            =>
-            p_session : dom(a_channel) &
-            p_session : dom(a_state)   &
-            p_channel = a_channel(p_session))
+        p_session     /: s_client_session &
+        p_session      : dom(a_channel)   &
+        p_session      : dom(a_state)     &
+        p_channel      = a_channel(p_session)
     THEN
         s_session,
         a_state,
@@ -548,9 +524,8 @@ LOCAL_OPERATIONS
             a_server_client_locales      : s_session --> t_LocaleIds             &
             a_user_secu_client           : t_session +-> t_SecurityPolicy        &
 
-            (   p_dom     = TRUE &
-                p_channel = p_lost_channel
-                =>
+            (p_channel = p_lost_channel
+            =>
                 (   a_state$0(p_session) = e_session_userActivated
                     =>
                     a_channel                    = {p_session} <<| a_channel$0 &
@@ -583,23 +558,6 @@ LOCAL_OPERATIONS
                     a_NonceClient                = {p_session} <<| a_NonceClient$0 &
                     a_session_roles              = {p_session} <<| a_session_roles$0
                 )
-            ) &
-            (   not(p_dom     = TRUE &
-                    p_channel = p_lost_channel)
-                =>
-                s_session                    = s_session$0 &
-                a_state                      = a_state$0 &
-                a_channel                    = a_channel$0 &
-                a_client_to_create           = a_client_to_create$0 &
-                a_client_app_context         = a_client_app_context$0 &
-                a_client_orphaned            = a_client_orphaned$0 &
-                a_user_server                = a_user_server$0 &
-                a_user_client                = a_user_client$0 &
-                a_server_token               = a_server_token$0 &
-                a_client_token               = a_client_token$0 &
-                a_NonceServer                = a_NonceServer$0 &
-                a_NonceClient                = a_NonceClient$0 &
-                a_session_roles              = a_session_roles$0
             )
         )
     END
@@ -1119,15 +1077,14 @@ OPERATIONS
     END
     ;
 
-    l_client_secure_channel_lost_session_sm(p_dom, p_channel, p_lost_channel, p_session, p_channel_config_idx) =
+    l_client_secure_channel_lost_session_sm(p_channel, p_lost_channel, p_session, p_channel_config_idx) =
     VAR
         l_state
     IN
-        IF  p_dom = TRUE &
-            p_channel = p_lost_channel
+        IF p_channel = p_lost_channel
         THEN
             l_state <-- get_session_state (p_session);
-            IF  l_state = e_session_userActivated
+            IF l_state = e_session_userActivated
             THEN
                 /* Active sessions set to orphaned and channel config idx associated */
                 set_session_orphaned (p_session, p_channel_config_idx);
@@ -1152,7 +1109,9 @@ OPERATIONS
             WHILE l_continue = TRUE DO
                 l_continue, l_session <-- continue_iter_session;
                 l_dom, l_channel <-- getall_session_channel(l_session);
-                l_client_secure_channel_lost_session_sm(l_dom, l_channel, p_lost_channel, l_session, p_channel_config_idx)
+                IF l_dom = TRUE THEN
+                    l_client_secure_channel_lost_session_sm(l_channel, p_lost_channel, l_session, p_channel_config_idx)
+                END
             INVARIANT
                 sessions_to_iterate <: t_session &
                 sessions_iterated   <: t_session &
@@ -1179,13 +1138,11 @@ OPERATIONS
     END
     ;
 
-
-    l_server_secure_channel_lost_session_sm(p_dom, p_channel, p_lost_channel, p_session) =
+    l_server_secure_channel_lost_session_sm(p_channel, p_lost_channel, p_session) =
     VAR
         l_state
     IN
-        IF  p_dom = TRUE &
-            p_channel = p_lost_channel
+        IF p_channel = p_lost_channel
         THEN
             l_state <-- get_session_state (p_session);
             IF l_state = e_session_userActivated
@@ -1216,7 +1173,9 @@ OPERATIONS
             WHILE l_continue = TRUE DO
                 l_continue, l_session <-- continue_iter_session;
                 l_dom, l_channel <-- getall_session_channel(l_session);
-                l_server_secure_channel_lost_session_sm(l_dom, l_channel, p_lost_channel, l_session)
+                IF l_dom = TRUE THEN
+                    l_server_secure_channel_lost_session_sm(l_channel, p_lost_channel, l_session)
+                END
             INVARIANT
                 sessions_to_iterate <: t_session &
                 sessions_iterated   <: t_session &
