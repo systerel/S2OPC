@@ -247,7 +247,7 @@ OPERATIONS
     END
     ;
 
-    set_session_orphaned_1(p_session, p_channel_config_idx) =
+    set_client_orphaned(p_session, p_channel_config_idx) =
     BEGIN
         a_client_orphaned_i(p_session) := p_channel_config_idx
     END;

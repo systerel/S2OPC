@@ -795,7 +795,8 @@ void session_core__l_client_secure_channel_lost_session_sm(
          session_core_1__get_session_state(session_core__p_session,
             &session_core__l_state);
          if (session_core__l_state == constants__e_session_userActivated) {
-            session_core_1__set_session_orphaned(session_core__p_session,
+            session_core_1__reset_session_channel(session_core__p_session);
+            session_core_1__set_client_orphaned(session_core__p_session,
                session_core__p_channel_config_idx);
             session_core_1__set_session_state(session_core__p_session,
                constants__e_session_scOrphaned);
@@ -847,8 +848,7 @@ void session_core__l_server_secure_channel_lost_session_sm(
          session_core_1__get_session_state(session_core__p_session,
             &session_core__l_state);
          if (session_core__l_state == constants__e_session_userActivated) {
-            session_core_1__set_session_orphaned(session_core__p_session,
-               constants__c_channel_config_idx_indet);
+            session_core_1__reset_session_channel(session_core__p_session);
             session_core_1__set_session_state(session_core__p_session,
                constants__e_session_scOrphaned);
          }

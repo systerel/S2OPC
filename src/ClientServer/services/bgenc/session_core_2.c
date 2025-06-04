@@ -289,7 +289,7 @@ void session_core_2__set_session_to_create(
    session_core_2__a_client_to_create_i[session_core_2__p_session] = session_core_2__p_channel_config_idx;
 }
 
-void session_core_2__set_session_orphaned_1(
+void session_core_2__set_client_orphaned(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx) {
    session_core_2__a_client_orphaned_i[session_core_2__p_session] = session_core_2__p_channel_config_idx;

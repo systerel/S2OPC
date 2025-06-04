@@ -1091,7 +1091,8 @@ OPERATIONS
             IF l_state = e_session_userActivated
             THEN
                 /* Active sessions set to orphaned and channel config idx associated */
-                set_session_orphaned (p_session, p_channel_config_idx);
+                reset_session_channel(p_session);
+                set_client_orphaned(p_session, p_channel_config_idx);
                 set_session_state (p_session, e_session_scOrphaned)
             ELSE
                 /* Inactive sessions or all orphaned sessions (if no new channel can be associated) */
@@ -1151,7 +1152,7 @@ OPERATIONS
             l_state <-- get_session_state (p_session);
             IF l_state = e_session_userActivated
             THEN
-                set_session_orphaned (p_session, c_channel_config_idx_indet);
+                reset_session_channel (p_session);
                 set_session_state (p_session, e_session_scOrphaned)
             ELSE
                 /* may generate audit event */

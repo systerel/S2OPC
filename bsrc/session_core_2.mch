@@ -312,7 +312,7 @@ OPERATIONS
     END
     ;
 
-    set_session_orphaned_1(p_session, p_channel_config_idx) =
+    set_client_orphaned(p_session, p_channel_config_idx) =
     PRE
         p_session            : t_session_i            &
         p_session            : t_session              &

@@ -242,6 +242,15 @@ OPERATIONS
     END
     ;
 
+    reset_session_channel(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_channel := {p_session} <<| a_channel
+    END
+    ;
+
     p_nb_sessions <-- get_channel_nb_sessions (p_channel) =
     PRE
         p_channel : t_channel_i &
@@ -329,17 +338,14 @@ OPERATIONS
     END
     ;
 
-    /* new_channel is channel on which connection is awaited to re-associate session */
-    set_session_orphaned (session, channel_config_idx) =
+    set_client_orphaned(p_session, p_channel_config_idx) =
     PRE
-        session : t_session_i &
-        session : t_session   &
-        channel_config_idx : t_channel_config_idx_i
+        p_session            : t_session_i            &
+        p_session            : t_session              &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
     THEN
-        a_channel := {session} <<| a_channel ||
-        IF  channel_config_idx : t_channel_config_idx THEN
-            a_client_orphaned(session) := channel_config_idx
-        END
+        a_client_orphaned(p_session) := p_channel_config_idx
     END
     ;
 

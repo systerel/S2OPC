@@ -146,6 +146,9 @@ extern void session_core_2__set_server_session_client_app_desc(
 extern void session_core_2__set_server_session_client_cert_tb(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_CertThumbprint_i session_core_2__p_cliCertTb);
+extern void session_core_2__set_client_orphaned(
+   const constants__t_session_i session_core_2__p_session,
+   const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx);
 extern void session_core_2__set_server_session_preferred_locales(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_LocaleIds_i session_core_2__p_localesIds);
@@ -155,9 +158,6 @@ extern void session_core_2__set_server_session_user_auth_attempts(
 extern void session_core_2__set_session_channel(
    const constants__t_session_i session_core_2__session,
    const constants__t_channel_i session_core_2__channel);
-extern void session_core_2__set_session_orphaned_1(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx);
 extern void session_core_2__set_session_roles_2(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_sessionRoles_i session_core_2__p_roles);

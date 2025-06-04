@@ -164,22 +164,6 @@ void session_core_1__create_session(
    }
 }
 
-void session_core_1__set_session_orphaned(
-   const constants__t_session_i session_core_1__session,
-   const constants__t_channel_config_idx_i session_core_1__channel_config_idx) {
-   {
-      t_bool session_core_1__l_bool;
-      
-      session_core_2__reset_session_channel(session_core_1__session);
-      constants__is_t_channel_config_idx(session_core_1__channel_config_idx,
-         &session_core_1__l_bool);
-      if (session_core_1__l_bool == true) {
-         session_core_2__set_session_orphaned_1(session_core_1__session,
-            session_core_1__channel_config_idx);
-      }
-   }
-}
-
 void session_core_1__check_server_session_user_auth_attempts(
    const constants__t_session_i session_core_1__p_session,
    const t_bool session_core_1__p_success,
