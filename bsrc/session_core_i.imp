@@ -453,6 +453,9 @@ LOCAL_OPERATIONS
                     a_NonceServer                = a_NonceServer$0 &
                     a_NonceClient                = a_NonceClient$0 &
                     a_session_roles              = a_session_roles$0 &
+                    a_user_secu_client           = a_user_secu_client$0 &
+                    a_user_server_cert           = a_user_server_cert$0 &
+                    a_server_user_auth_attempts  = a_server_user_auth_attempts$0 &
                     a_client_orphaned = a_client_orphaned$0 <+ {p_session |-> p_channel_config_idx}
                 ) &
                 (   a_state$0(p_session) /= e_session_userActivated
@@ -554,7 +557,10 @@ LOCAL_OPERATIONS
                     a_client_token               = {p_session} <<| a_client_token$0 &
                     a_NonceServer                = {p_session} <<| a_NonceServer$0 &
                     a_NonceClient                = {p_session} <<| a_NonceClient$0 &
-                    a_session_roles              = {p_session} <<| a_session_roles$0
+                    a_session_roles              = {p_session} <<| a_session_roles$0 &
+                    a_user_secu_client           = {p_session} <<| a_user_secu_client$0 &
+                    a_user_server_cert           = {p_session} <<| a_user_server_cert$0 &
+                    a_server_user_auth_attempts  = {p_session} <<| a_server_user_auth_attempts$0
                 )
             )
         )
