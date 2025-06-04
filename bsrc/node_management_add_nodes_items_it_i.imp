@@ -32,7 +32,8 @@ CONCRETE_VARIABLES
 INVARIANT
     rreqs_i : NAT &
     rreqs_i : 0 .. k_n_nodesToAdd_max &
-    rreqs_to_iterate = 1..rreqs_i
+    rreqs_to_iterate = 1..rreqs_i &
+    rreqs_to_iterate <: t_nodeToAddReqIndex
 
 INITIALISATION
     rreqs_i := 0

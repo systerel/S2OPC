@@ -109,10 +109,10 @@ LOCAL_OPERATIONS
         AddNodeItemResp_StatusCode
         :(d_adsp_nodes_invariant &
             AddNodeItemResp_AddedNodeId : t_nodeToAddReqIndex +-> t_NodeId_i &
-            AddNodeItemResp_AddedNodeId$0 <: AddNodeItemResp_AddedNodeId &
+            AddNodeItemResp_AddedNodeId$0 = {p_index} <<| AddNodeItemResp_AddedNodeId &
             p_index : dom(AddNodeItemResp_AddedNodeId) &
             AddNodeItemResp_StatusCode : t_nodeToAddReqIndex +-> t_StatusCode &
-            AddNodeItemResp_StatusCode$0 <: AddNodeItemResp_StatusCode &
+            AddNodeItemResp_StatusCode$0 = {p_index} <<| AddNodeItemResp_StatusCode &
             p_index : dom(AddNodeItemResp_StatusCode)
         )
     END
