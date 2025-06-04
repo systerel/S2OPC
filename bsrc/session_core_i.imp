@@ -390,15 +390,14 @@ LOCAL_OPERATIONS
     l_client_secure_channel_lost_session_sm(p_channel, p_lost_channel, p_session, p_channel_config_idx) =
     PRE
         p_channel            : t_channel_i            &
-        p_session            : t_session_i            &
         p_lost_channel       : t_channel_i            &
         p_session            : t_session_i            &
-        p_session            : s_client_session       &
-        p_channel_config_idx : t_channel_config_idx_i &
-        p_channel_config_idx : t_channel_config_idx   &
         p_session            : dom(a_state)           &
         p_session            : dom(a_channel)         &
-        p_channel            = a_channel(p_session)
+        p_channel            = a_channel(p_session)   &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx   &
+        dom(a_client_orphaned) <: dom(a_state |> {e_session_scOrphaned})
     THEN
         s_session,
         s_client_session,
@@ -480,13 +479,12 @@ LOCAL_OPERATIONS
     l_server_secure_channel_lost_session_sm(p_channel, p_lost_channel, p_session) =
     PRE
         p_channel      : t_channel_i      &
-        p_session      : t_session_i      &
         p_lost_channel : t_channel_i      &
         p_session      : t_session_i      &
-        p_session     /: s_client_session &
         p_session      : dom(a_channel)   &
         p_session      : dom(a_state)     &
-        p_channel      = a_channel(p_session)
+        p_channel      = a_channel(p_session) &
+        dom(a_client_orphaned) <: dom(a_state |> {e_session_scOrphaned})
     THEN
         s_session,
         a_state,
