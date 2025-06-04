@@ -21,6 +21,7 @@
 #define SOPC_HELPER_ENCODE_H_
 
 #include <stddef.h>
+#include "sopc_builtintypes.h"
 #include "sopc_enums.h"
 
 /**
@@ -31,11 +32,27 @@
  * \param[out] ppOut       A valid pointer poiting to NULL. It will be set to the buffer containing the newly decoded
  * data. The allocated buffer must be freed by the caller.
  *
- * \param pOutLen    The size of the \p ppOut comptuted during the function execution.
+ * \param pOutLen    The size of the \p ppOut computed during the function execution.
  *
  * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  */
 SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* pInput, unsigned char** ppOut, size_t* pOutLen);
+
+/**
+ * \brief  This function encodes a data into a null-terminated base64 C string.
+ *
+ * \param pInput     A valid pointer to the data.
+ * \param inputLen     The size of data in \p pInput
+ *
+ * \param[out] ppOut       A valid pointer. It will be set to the buffer containing the newly encoded
+ * null-terminated base64 C string. The allocated buffer must be freed by the caller.
+ *
+ * \param[out] pOutLen    A valid pointer. In case of success, the content is set to to the size of
+ *                        \p ppOut computed during the function execution (including NULL terminating char).
+ *
+ * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
+ */
+SOPC_ReturnStatus SOPC_HelperEncode_Base64(const SOPC_Byte* pInput, size_t inputLen, char** ppOut, size_t* pOutLen);
 
 /**
  * \brief  Decodes a hexadecimal ByteString.

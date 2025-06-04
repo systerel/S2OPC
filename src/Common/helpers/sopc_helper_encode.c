@@ -146,6 +146,134 @@ static SOPC_ReturnStatus decode_base64_get_paddinglength(const char* input, size
     }
 }
 
+/* Using https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64#C
+ * to encode base64 */
+static bool base64encode(const SOPC_Byte* pInput, size_t pInputLen, char* ppOut, size_t pOutLen)
+{
+    const char base64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    size_t pOutIndex = 0;
+    uint32_t n = 0;
+    size_t padCount = pInputLen % 3;
+    uint8_t n0;
+    uint8_t n1;
+    uint8_t n2;
+    uint8_t n3;
+
+    /* increment over the length of the string, three characters at a time */
+    for (size_t x = 0; x < pInputLen; x += 3)
+    {
+        /* these three 8-bit (ASCII) characters become one 24-bit number */
+        n = ((uint32_t) pInput[x]) << 16; // parenthesis needed, compiler depending on flags can do the shifting before
+                                          // conversion to uint32_t, resulting to 0
+
+        if ((x + 1) < pInputLen)
+        {
+            n += ((uint32_t) pInput[x + 1]) << 8; // parenthesis needed, compiler depending on flags can do the shifting
+                                                  // before conversion to uint32_t, resulting to 0
+        }
+
+        if ((x + 2) < pInputLen)
+        {
+            n += pInput[x + 2];
+        }
+
+        /* this 24-bit number gets separated into four 6-bit numbers */
+        n0 = (uint8_t)(n >> 18) & 63;
+        n1 = (uint8_t)(n >> 12) & 63;
+        n2 = (uint8_t)(n >> 6) & 63;
+        n3 = (uint8_t) n & 63;
+
+        /*
+         * if we have one byte available, then its encoding is spread
+         * out over two characters
+         */
+        if (pOutIndex >= pOutLen)
+        {
+            return false; /* indicate failure: buffer too small */
+        }
+        ppOut[pOutIndex] = base64chars[n0];
+        pOutIndex++;
+        if (pOutIndex >= pOutLen)
+        {
+            return false; /* indicate failure: buffer too small */
+        }
+        ppOut[pOutIndex] = base64chars[n1];
+        pOutIndex++;
+
+        /*
+         * if we have only two bytes available, then their encoding is
+         * spread out over three chars
+         */
+        if ((x + 1) < pInputLen)
+        {
+            if (pOutIndex >= pOutLen)
+            {
+                return false; /* indicate failure: buffer too small */
+            }
+            ppOut[pOutIndex] = base64chars[n2];
+            pOutIndex++;
+        }
+
+        /*
+         * if we have all three bytes available, then their encoding is spread
+         * out over four characters
+         */
+        if ((x + 2) < pInputLen)
+        {
+            if (pOutIndex >= pOutLen)
+            {
+                return false; /* indicate failure: buffer too small */
+            }
+            ppOut[pOutIndex] = base64chars[n3];
+            pOutIndex++;
+        }
+    }
+
+    /*
+     * create and add padding that is required if we did not have a multiple of 3
+     * number of characters available
+     */
+    if (padCount > 0)
+    {
+        for (; padCount < 3; padCount++)
+        {
+            if (pOutIndex >= pOutLen)
+            {
+                return false; /* indicate failure: buffer too small */
+            }
+            ppOut[pOutIndex] = '=';
+            pOutIndex++;
+        }
+    }
+    if (pOutIndex >= pOutLen)
+    {
+        return false; /* indicate failure: buffer too small */
+    }
+    ppOut[pOutIndex] = 0;
+    return true; /* indicate success */
+}
+
+SOPC_ReturnStatus SOPC_HelperEncode_Base64(const SOPC_Byte* pInput, size_t inputLen, char** ppOut, size_t* pOutLen)
+{
+    if (NULL == pInput || NULL == ppOut || NULL == pOutLen)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    *pOutLen = 1 + 4 * ((inputLen + 2) / 3); // + 1 for '\0'
+    if (INT32_MAX < *pOutLen)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    *ppOut = (char*) SOPC_Calloc(*pOutLen, sizeof(char));
+    if (NULL == *ppOut)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    bool res = base64encode(pInput, inputLen, *ppOut, *pOutLen);
+    return (res ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
+}
+
 /* Using https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64#C_2
  * to decode base64 */
 #define WHITESPACE 64

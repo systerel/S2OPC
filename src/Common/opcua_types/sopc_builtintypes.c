@@ -29,6 +29,7 @@
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
 #include "sopc_hash.h"
+#include "sopc_helper_encode.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -1883,6 +1884,9 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
     char* result = NULL;
     int res = 0;
     size_t maxSize = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    char* bsOut = NULL;
+    size_t bsOutLen = 0;
     if (nodeId != NULL)
     {
         if (nodeId->Namespace != 0)
@@ -1919,15 +1923,10 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
             }
             break;
         case SOPC_IdentifierType_ByteString:
-            // "b=<bstring>\0"
-            if (nodeId->Data.Bstring.Length > 0)
-            {
-                maxSize += (uint32_t) nodeId->Data.Bstring.Length + 3;
-            }
-            else
-            {
-                maxSize += 3;
-            }
+            // Input : A memory buffer with len 'l'
+            // Output: "b=<bstring_as_base64>\0" (len = 4*l/3 + 3)
+            //
+            maxSize += 3 + 4 * ((((uint32_t) nodeId->Data.Bstring.Length) + 2) / 3);
             break;
         default:
             break;
@@ -1974,16 +1973,25 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     break;
                 case SOPC_IdentifierType_ByteString:
                     // "b=<bstring>\0"
+                    bsOut = NULL;
                     if (nodeId->Data.Bstring.Length > 0)
                     {
-                        memcpy(&result[res], "b=", 2 * sizeof(char));
-                        memcpy(&result[res + 2], nodeId->Data.Bstring.Data, (size_t) nodeId->Data.Bstring.Length);
+                        bsOutLen = 0;
+                        status = SOPC_HelperEncode_Base64(nodeId->Data.Bstring.Data,
+                                                          (size_t) nodeId->Data.Bstring.Length, &bsOut, &bsOutLen);
+                    }
+                    if (SOPC_STATUS_OK == status && bsOut != NULL && bsOutLen > 0)
+                    {
+                        SOPC_ASSERT(bsOut[bsOutLen - 1] == '\0' && res >= 0 && maxSize > (size_t) res);
+                        res += snprintf(&result[res], maxSize - (size_t) res, "b=%s", bsOut);
+                        SOPC_ASSERT(res >= 0 && maxSize > (size_t) res);
                     }
                     else
                     {
                         res = sprintf(&result[res], "b=");
                         SOPC_ASSERT(res > 0);
                     }
+                    SOPC_Free(bsOut);
                     break;
                 default:
                     break;
@@ -2008,12 +2016,14 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
 
     /* Creates a new guid/string */
     char* sz = NULL; /* Safe copy of the cString */
-    char* p = NULL;
+    const char* p = NULL;
     SOPC_IdentifierType type = SOPC_IdentifierType_Numeric;
     uint16_t ns = 0;
     uint32_t iid = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Guid* pGuid = NULL;
+    unsigned char* bsOut = NULL;
+    size_t bsOutLen = 0;
 
     /* Copy the string in a safe place and sscanf it */
     if (NULL != cString && len > 0)
@@ -2111,7 +2121,16 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
             break;
         case SOPC_IdentifierType_ByteString:
             SOPC_ByteString_Initialize(&pNid->Data.Bstring);
-            status = SOPC_ByteString_CopyFromBytes(&pNid->Data.Bstring, (SOPC_Byte*) p, len - (int32_t)(p - sz));
+            status = SOPC_HelperDecode_Base64(p, &bsOut, &bsOutLen);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = bsOutLen <= INT32_MAX ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                pNid->Data.Bstring.Data = bsOut;
+                pNid->Data.Bstring.Length = (int32_t) bsOutLen;
+            }
             break;
         default:
             break;

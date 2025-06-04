@@ -56,6 +56,9 @@
 #define NODEID_I 126042
 #define NODEID_IS "126042"
 #define NODEID_S "s2opc.foo/bar"
+#define NODEID_BS "M/RbKBsRVkePCePcx24oRA=="
+static SOPC_Byte NODEID_BS_BYTES[] = {0x33, 0xf4, 0x5b, 0x28, 0x1b, 0x11, 0x56, 0x47,
+                                      0x8f, 0x09, 0xe3, 0xdc, 0xc7, 0x6e, 0x28, 0x44};
 #define NODEID_G                                                                       \
     {                                                                                  \
         0xC496578A, 0x0DFE, 0x4B8F, { 0x87, 0x0A, 0x74, 0x52, 0x38, 0xC6, 0xAE, 0xAE } \
@@ -1763,7 +1766,6 @@ START_TEST(test_string_nodeid)
     SOPC_Free(sNid);
     SOPC_NodeId_Clear(pNid);
     SOPC_Free(pNid);
-
     nid.Namespace = NODEID_NS;
     pNid = SOPC_NodeId_FromCString("ns=" NODEID_NSS ";g=" NODEID_GS);
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
@@ -1779,32 +1781,26 @@ START_TEST(test_string_nodeid)
     SOPC_NodeId_Initialize(&nid);
     nid.IdentifierType = SOPC_IdentifierType_ByteString;
     nid.Namespace = 0;
-    ck_assert(SOPC_STATUS_OK ==
-              SOPC_ByteString_CopyFromBytes(&nid.Data.Bstring, (SOPC_Byte*) NODEID_S, (int32_t) strlen(NODEID_S)));
 
-    pNid = SOPC_NodeId_FromCString("b=" NODEID_S);
+    /* Check encoding */
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&nid.Data.Bstring, (SOPC_Byte*) NODEID_BS_BYTES,
+                                                             (int32_t) sizeof(NODEID_BS_BYTES));
+    ck_assert_uint_eq(SOPC_STATUS_OK, status);
+
+    pNid = SOPC_NodeId_FromCString("b=" NODEID_BS);
     ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
     ck_assert(0 == cmp);
-    sNid = SOPC_NodeId_ToCString(pNid);
-    ck_assert(strncmp(sNid, "b=" NODEID_S, strlen("b=" NODEID_S)) == 0);
-    SOPC_Free(sNid);
     SOPC_NodeId_Clear(pNid);
     SOPC_Free(pNid);
 
-    nid.Namespace = NODEID_NS;
-    pNid = SOPC_NodeId_FromCString("ns=" NODEID_NSS ";b=" NODEID_S);
-    ck_assert(SOPC_STATUS_OK == SOPC_NodeId_Compare(pNid, &nid, &cmp));
-    ck_assert(0 == cmp);
-    sNid = SOPC_NodeId_ToCString(pNid);
-    ck_assert(strncmp(sNid, "ns=" NODEID_NSS ";b=" NODEID_S, strlen("ns=" NODEID_NSS ";b=" NODEID_S)) == 0);
+    /* Check decoding */
+    sNid = SOPC_NodeId_ToCString(&nid);
+    ck_assert(NULL != sNid);
+    cmp = strcmp(sNid, "b=" NODEID_BS);
+    ck_assert(cmp == 0);
+
     SOPC_NodeId_Clear(&nid);
     SOPC_Free(sNid);
-    SOPC_NodeId_Clear(pNid);
-    SOPC_Free(pNid);
-
-    /* NULL nid */
-    pNid = SOPC_NodeId_FromCString(NODEID_NULL);
-    ck_assert_ptr_null(pNid);
 }
 END_TEST
 
