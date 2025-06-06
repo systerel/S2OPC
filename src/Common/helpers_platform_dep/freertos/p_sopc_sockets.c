@@ -129,21 +129,58 @@ void SOPC_SocketAddress_Delete(SOPC_Socket_Address** addr)
 
 SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
 {
-    /* TODO: to be implemented and tested */
-    SOPC_UNUSED_ARG(addr);
-    return NULL;
+    SOPC_Socket_Address* result = SOPC_Calloc(1, sizeof(*result));
+    if (NULL != result)
+    {
+        result->address.ai_addr = SOPC_Calloc(1, addr->addrInfo.ai_addrlen);
+        result->address.ai_addrlen = addr->addrInfo.ai_addrlen;
+        result->address.ai_family = addr->addrInfo.ai_family;
+        if (NULL != result->address.ai_addr)
+        {
+            result->address.ai_addr =
+                memcpy(result->address.ai_addr, addr->addrInfo.ai_addr, addr->addrInfo.ai_addrlen);
+        }
+        else
+        {
+            SOPC_Free(result);
+            result = NULL;
+        }
+    }
+    return result;
 }
 
 SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(SOPC_Socket sock)
 {
-     /* TODO: to be implemented and tested */
-    SOPC_UNUSED_ARG(sock);
-    return NULL;
+    if (sock == SOPC_INVALID_SOCKET)
+    {
+        return NULL;
+    }
+    SOPC_Socket_Address* result = SOPC_Calloc(1, sizeof(*result));
+    struct sockaddr_storage* sockAddrStorage = SOPC_Calloc(1, sizeof(*sockAddrStorage));
+    socklen_t sockAddrStorageLen = sizeof(*sockAddrStorage);
+    int res = -1;
+    if (NULL != result && NULL != sockAddrStorage)
+    {
+        res = getpeername(sock->sock, (struct sockaddr*) sockAddrStorage, &sockAddrStorageLen);
+        if (0 == res)
+        {
+            result->address.ai_family = sockAddrStorage->ss_family;
+            result->address.ai_addrlen = sockAddrStorageLen;
+            result->address.ai_addr = (struct sockaddr*) sockAddrStorage;
+        }
+    }
+    if (res != 0)
+    {
+        SOPC_Free(sockAddrStorage);
+        SOPC_Free(result);
+        result = NULL;
+    }
+    return result;
 }
 
 SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_Address* addr, char** host, char** service)
 {
-    /* TODO: to be implemented and tested */
+    /* TODO: getnameinfo is not available in lwip */
     SOPC_UNUSED_ARG(addr);
     SOPC_UNUSED_ARG(host);
     SOPC_UNUSED_ARG(service);
