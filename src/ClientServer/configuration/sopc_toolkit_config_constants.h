@@ -137,17 +137,17 @@
 
 /** @brief Client requested timeout for which a session shall remain open without activity */
 #ifndef SOPC_REQUESTED_SESSION_TIMEOUT
-#define SOPC_REQUESTED_SESSION_TIMEOUT 60000 // 60 seconds
+#define SOPC_REQUESTED_SESSION_TIMEOUT 60000 /* 60 seconds */
 #endif
 
 /** @brief Minimum session timeout accepted by server */
 #ifndef SOPC_MIN_SESSION_TIMEOUT
-#define SOPC_MIN_SESSION_TIMEOUT 10000 // 10 seconds
+#define SOPC_MIN_SESSION_TIMEOUT 10000 /* 10 seconds */
 #endif
 
 /** @brief Maximum session timeout accepted by server */
 #ifndef SOPC_MAX_SESSION_TIMEOUT
-#define SOPC_MAX_SESSION_TIMEOUT 600000 // 10 minutes
+#define SOPC_MAX_SESSION_TIMEOUT 600000 /* 10 minutes */
 #endif
 
 /** @brief Maximum number of session user authentication failure attempts
@@ -181,12 +181,12 @@
 
 /** @brief Minimum publish interval of a subscription in milliseconds */
 #ifndef SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION
-#define SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION 100 // 100 ms
+#define SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION 100 /* 100 ms */
 #endif
 
 /** @brief Maximum publish interval of a subscription in milliseconds */
 #ifndef SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION
-#define SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION 3600000 // 1 hour
+#define SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION 3600000 /* 1 hour */
 #endif
 
 /** @brief Minimum number of publish intervals before a keep alive is sent (server to client) */
@@ -201,12 +201,12 @@
 
 /** @brief Minimum number of publish intervals before lifetime expired (client to server communication) */
 #ifndef SOPC_MIN_LIFETIME_PUBLISH_INTERVALS
-#define SOPC_MIN_LIFETIME_PUBLISH_INTERVALS 3 // >= 3 KeepAlive
+#define SOPC_MIN_LIFETIME_PUBLISH_INTERVALS 3 /* >= 3 KeepAlive */
 #endif
 
 /** @brief Maximum number of publish intervals before lifetime expired (client to server communication) */
 #ifndef SOPC_MAX_LIFETIME_PUBLISH_INTERVALS
-#define SOPC_MAX_LIFETIME_PUBLISH_INTERVALS 300 // >= 3 KeepAlive
+#define SOPC_MAX_LIFETIME_PUBLISH_INTERVALS 300 /* >= 3 KeepAlive */
 #endif
 
 /** @brief Maximum size of a MonitoredItem notification queue */
