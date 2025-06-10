@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_common_constants.h"
 #include "sopc_helper_encode.h"
 #include "sopc_mem_alloc.h"
 
@@ -99,158 +100,213 @@ static int unhexlify(const char* src, unsigned char* dst, size_t n)
     return (int) n;
 }
 
-/**
- * \brief  Get the number of padding characters for base64 ('=').
- *
- * \param input     A valid pointer to the input.
- *
- * \param outLen    the number of padding characters (0, 1 or 2)
- *
- * \return   SOPC_STATUS_OK when successful otherwise SOPC_STATUS_INVALID_PARAMETERS if
- *           \p input is NULL, if there is one or multiple characters after padding or has not a number of padding
- * characters equal to 0, 1 or 2.
- */
+/* The following functions have been extracted and slighly adapted from MbedTLS library. */
 
-static SOPC_ReturnStatus decode_base64_get_paddinglength(const char* input, size_t* outLen)
+/** Output buffer too small. */
+#define MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL -0x002A
+/** Invalid character in input. */
+#define MBEDTLS_ERR_BASE64_INVALID_CHARACTER -0x002C
+
+static const unsigned char base64_enc_map[64] = {
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+    'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+    's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
+
+static const unsigned char base64_dec_map[128] = {
+    127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127,
+    127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 62,
+    127, 127, 127, 63,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  127, 127, 127, 64,  127, 127, 127, 0,
+    1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,  22,
+    23,  24,  25,  127, 127, 127, 127, 127, 127, 26,  27,  28,  29,  30,  31,  32,  33,  34,  35,  36,  37,  38,
+    39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,  127, 127, 127, 127, 127};
+
+#define BASE64_SIZE_T_MAX ((size_t) -1) /* SIZE_T_MAX is not standard */
+
+/*
+ * Encode a buffer into base64 format
+ */
+static int mbedtls_base64_encode(unsigned char* dst, size_t dlen, size_t* olen, const unsigned char* src, size_t slen)
 {
-    size_t padding_length = 0;
-    if (NULL == input)
+    size_t i, n;
+    int C1, C2, C3;
+    unsigned char* p;
+
+    if (slen == 0)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        *olen = 0;
+        return (0);
     }
 
-    int i = (int) (strlen(input)) - 1;
+    n = slen / 3 + (slen % 3 != 0);
 
-    while ((0 <= i))
+    if (n > (BASE64_SIZE_T_MAX - 1) / 4)
     {
-        if ('=' == input[i])
-        {
-            if (input[i + 1] != '\000' && input[i + 1] != '=') /* verify that there is no character after an equal */
-            {
-                return SOPC_STATUS_INVALID_PARAMETERS;
-            }
+        *olen = BASE64_SIZE_T_MAX;
+        return (MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL);
+    }
 
-            padding_length++;
+    n *= 4;
+
+    if (dlen < n + 1)
+    {
+        *olen = n + 1; // +1 for the null terminator
+        return (MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL);
+    }
+
+    n = (slen / 3) * 3;
+
+    for (i = 0, p = dst; i < n; i += 3)
+    {
+        C1 = *src++;
+        C2 = *src++;
+        C3 = *src++;
+
+        *p++ = base64_enc_map[(C1 >> 2) & 0x3F];
+        *p++ = base64_enc_map[(((C1 & 3) << 4) + (C2 >> 4)) & 0x3F];
+        *p++ = base64_enc_map[(((C2 & 15) << 2) + (C3 >> 6)) & 0x3F];
+        *p++ = base64_enc_map[C3 & 0x3F];
+    }
+
+    if (i < slen)
+    {
+        C1 = *src++;
+        C2 = ((i + 1) < slen) ? *src++ : 0;
+
+        *p++ = base64_enc_map[(C1 >> 2) & 0x3F];
+        *p++ = base64_enc_map[(((C1 & 3) << 4) + (C2 >> 4)) & 0x3F];
+
+        if ((i + 1) < slen)
+            *p++ = base64_enc_map[((C2 & 15) << 2) & 0x3F];
+        else
+            *p++ = '=';
+
+        *p++ = '=';
+    }
+
+    *olen = (size_t)(p - dst + 1); // +1 for the null terminator
+    *p = '\0';
+
+    return (0);
+}
+
+static int mbedtls_base64_decode(unsigned char** dst, size_t* olen, const unsigned char* src, size_t slen)
+{
+    size_t i, n, expected_len = 0;
+    uint32_t j, x;
+    unsigned char* p;
+
+    /* First pass: check for validity and get output length */
+    for (i = n = j = 0; i < slen; i++)
+    {
+        /* Skip spaces before checking for EOL */
+        x = 0;
+        while (i < slen && src[i] == ' ')
+        {
+            ++i;
+            ++x;
         }
 
-        i--;
+        /* Spaces at end of buffer are OK */
+        if (i == slen)
+            break;
+
+        if ((slen - i) >= 2 && src[i] == '\r' && src[i + 1] == '\n')
+            continue;
+
+        if (src[i] == '\n')
+            continue;
+
+        /* Space inside a line is an error */
+        if (x != 0)
+            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
+
+        if (src[i] == '=' && ++j > 2)
+            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
+
+        if (src[i] > 127 || base64_dec_map[src[i]] == 127)
+            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
+
+        if (base64_dec_map[src[i]] < 64 && j != 0)
+            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
+
+        n++;
     }
-    if (0 != padding_length && 1 != padding_length && 2 != padding_length)
+
+    if (n == 0)
+    {
+        *olen = 0;
+        return (0);
+    }
+
+    n = ((n * 6) + 7) >> 3;
+    n -= j;
+    expected_len = n + 1; // +1 for the null terminator
+
+    /* Allocate the necessary buffer */
+    unsigned char* pBuffer = SOPC_Calloc(expected_len, sizeof(char));
+    if (pBuffer == NULL)
+    {
+        *olen = 0;
+        return (SOPC_STATUS_OUT_OF_MEMORY);
+    }
+
+    // if (dst == NULL || dlen < n)
+    // {
+    //     *olen = n;
+    //     return (MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL);
+    // }
+
+    for (j = 3, n = x = 0, p = pBuffer; i > 0; i--, src++)
+    {
+        if (*src == '\r' || *src == '\n' || *src == ' ')
+            continue;
+
+        j -= (base64_dec_map[*src] == 64);
+        x = (x << 6) | (base64_dec_map[*src] & 0x3F);
+
+        if (++n == 4)
+        {
+            n = 0;
+            if (j > 0)
+                *p++ = (unsigned char) (x >> 16);
+            if (j > 1)
+                *p++ = (unsigned char) (x >> 8);
+            if (j > 2)
+                *p++ = (unsigned char) (x);
+        }
+    }
+    *p++ = '\0'; // Null-terminate the output buffer
+
+    *olen = (size_t)(p - pBuffer);
+    /* check that lenght is the expected one */
+    SOPC_ASSERT(*olen == expected_len);
+
+    *dst = pBuffer; // Assign the allocated buffer to the output pointer
+
+    return (0);
+}
+
+SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* pInput, unsigned char** ppOut, size_t* pOutLen)
+{
+    if (NULL == pInput || NULL == ppOut || NULL == pOutLen)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    size_t input_len = strlen(pInput);
+    SOPC_ReturnStatus return_status = SOPC_STATUS_NOK;
+    int ret = mbedtls_base64_decode(ppOut, pOutLen, (const unsigned char*) pInput, input_len);
+    if (ret != 0)
+    {
+        SOPC_Free(*ppOut);
+        *ppOut = NULL;
+        *pOutLen = 0;
+        return_status = SOPC_STATUS_NOK;
     }
     else
     {
-        *outLen = padding_length;
-        return SOPC_STATUS_OK;
+        return_status = SOPC_STATUS_OK;
     }
-}
-
-/* Using https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64#C
- * to encode base64 */
-static bool base64encode(const SOPC_Byte* pInput, size_t pInputLen, char* ppOut, size_t pOutLen)
-{
-    const char base64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    size_t pOutIndex = 0;
-    uint32_t n = 0;
-    size_t padCount = pInputLen % 3;
-    uint8_t n0;
-    uint8_t n1;
-    uint8_t n2;
-    uint8_t n3;
-
-    /* increment over the length of the string, three characters at a time */
-    for (size_t x = 0; x < pInputLen; x += 3)
-    {
-        /* these three 8-bit (ASCII) characters become one 24-bit number */
-        n = ((uint32_t) pInput[x]) << 16; // parenthesis needed, compiler depending on flags can do the shifting before
-                                          // conversion to uint32_t, resulting to 0
-
-        if ((x + 1) < pInputLen)
-        {
-            n += ((uint32_t) pInput[x + 1]) << 8; // parenthesis needed, compiler depending on flags can do the shifting
-                                                  // before conversion to uint32_t, resulting to 0
-        }
-
-        if ((x + 2) < pInputLen)
-        {
-            n += pInput[x + 2];
-        }
-
-        /* this 24-bit number gets separated into four 6-bit numbers */
-        n0 = (uint8_t)(n >> 18) & 63;
-        n1 = (uint8_t)(n >> 12) & 63;
-        n2 = (uint8_t)(n >> 6) & 63;
-        n3 = (uint8_t) n & 63;
-
-        /*
-         * if we have one byte available, then its encoding is spread
-         * out over two characters
-         */
-        if (pOutIndex >= pOutLen)
-        {
-            return false; /* indicate failure: buffer too small */
-        }
-        ppOut[pOutIndex] = base64chars[n0];
-        pOutIndex++;
-        if (pOutIndex >= pOutLen)
-        {
-            return false; /* indicate failure: buffer too small */
-        }
-        ppOut[pOutIndex] = base64chars[n1];
-        pOutIndex++;
-
-        /*
-         * if we have only two bytes available, then their encoding is
-         * spread out over three chars
-         */
-        if ((x + 1) < pInputLen)
-        {
-            if (pOutIndex >= pOutLen)
-            {
-                return false; /* indicate failure: buffer too small */
-            }
-            ppOut[pOutIndex] = base64chars[n2];
-            pOutIndex++;
-        }
-
-        /*
-         * if we have all three bytes available, then their encoding is spread
-         * out over four characters
-         */
-        if ((x + 2) < pInputLen)
-        {
-            if (pOutIndex >= pOutLen)
-            {
-                return false; /* indicate failure: buffer too small */
-            }
-            ppOut[pOutIndex] = base64chars[n3];
-            pOutIndex++;
-        }
-    }
-
-    /*
-     * create and add padding that is required if we did not have a multiple of 3
-     * number of characters available
-     */
-    if (padCount > 0)
-    {
-        for (; padCount < 3; padCount++)
-        {
-            if (pOutIndex >= pOutLen)
-            {
-                return false; /* indicate failure: buffer too small */
-            }
-            ppOut[pOutIndex] = '=';
-            pOutIndex++;
-        }
-    }
-    if (pOutIndex >= pOutLen)
-    {
-        return false; /* indicate failure: buffer too small */
-    }
-    ppOut[pOutIndex] = 0;
-    return true; /* indicate success */
+    return return_status;
 }
 
 SOPC_ReturnStatus SOPC_HelperEncode_Base64(const SOPC_Byte* pInput, size_t inputLen, char** ppOut, size_t* pOutLen)
@@ -259,189 +315,35 @@ SOPC_ReturnStatus SOPC_HelperEncode_Base64(const SOPC_Byte* pInput, size_t input
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    *pOutLen = 1 + 4 * ((inputLen + 2) / 3); // + 1 for '\0'
-    if (INT32_MAX < *pOutLen)
+
+    size_t buffer_len = 0;
+
+    // First call to get required output length
+    int ret = mbedtls_base64_encode(NULL, 0, &buffer_len, (const unsigned char*) pInput, inputLen);
+    if (ret != MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL)
     {
-        return SOPC_STATUS_OUT_OF_MEMORY;
+        return SOPC_STATUS_NOK;
     }
 
-    *ppOut = SOPC_Calloc(*pOutLen, sizeof(char));
+    // Allocate buffer
+    *ppOut = SOPC_Calloc(buffer_len, sizeof(char));
     if (NULL == *ppOut)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    bool res = base64encode(pInput, inputLen, *ppOut, *pOutLen);
-    if (!res)
+
+    // Actual encoding
+    ret = mbedtls_base64_encode((unsigned char*) *ppOut, buffer_len, pOutLen, (const unsigned char*) pInput, inputLen);
+    assert(*pOutLen == buffer_len);
+    if (ret != 0)
     {
         SOPC_Free(*ppOut);
         *ppOut = NULL;
         *pOutLen = 0;
         return SOPC_STATUS_NOK;
     }
+
     return SOPC_STATUS_OK;
-}
-
-/* Using https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64#C_2
- * to decode base64 */
-#define WHITESPACE 64
-#define EQUALS 65
-#define INVALID 66
-
-static const unsigned char d[] = {
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, WHITESPACE, INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, 62,      INVALID, INVALID, INVALID,    63,
-    52,      53,      54,      55,      56,      57,      58,      59,      60,      61,      INVALID,    INVALID,
-    INVALID, EQUALS,  INVALID, INVALID, INVALID, 0,       1,       2,       3,       4,       5,          6,
-    7,       8,       9,       10,      11,      12,      13,      14,      15,      16,      17,         18,
-    19,      20,      21,      22,      23,      24,      25,      INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, 26,      27,      28,      29,      30,      31,      32,      33,      34,      35,         36,
-    37,      38,      39,      40,      41,      42,      43,      44,      45,      46,      47,         48,
-    49,      50,      51,      INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID,    INVALID,
-    INVALID, INVALID, INVALID, INVALID};
-
-/* This function decodes a base64 ByteString. Base64 ByteString shall be null terminated.
- * Otherwise, the result is undefined.*/
-static bool base64decode(const char* input, unsigned char** ppOut, size_t* outLen)
-{
-    if (NULL == input || NULL == outLen)
-    {
-        return false;
-    }
-
-    size_t inputLen = strlen(input);
-    const char* end = input + inputLen;
-    char iter = 0;
-    uint32_t buf = 0;
-    size_t len = 0;
-    size_t paddingLength = 0;
-    bool return_status = true;
-    SOPC_ReturnStatus status = decode_base64_get_paddinglength(input, &paddingLength);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        return false;
-    }
-
-    size_t resIter = (inputLen - paddingLength) % 4;
-
-    if (resIter > 0)
-    {
-        resIter--;
-    }
-
-    size_t expectedLen = 3 * ((inputLen - paddingLength) / 4) + resIter;
-
-    unsigned char* pBuffer = SOPC_Calloc(expectedLen + 1, sizeof(char)); // +1 for \0 end character
-
-    if (NULL == pBuffer)
-    {
-        return false;
-    }
-
-    unsigned char* pHeadBuffer = pBuffer;
-
-    while (return_status && input < end)
-    {
-        unsigned char c = d[(int) *input];
-        input++;
-
-        switch (c)
-        {
-        case WHITESPACE:
-            break; /* skip whitespace */
-        case INVALID:
-            return_status = false; /* invalid input, return error */
-            break;
-        case EQUALS: /* pad character, end of data */
-            input = end;
-            break;
-        default:
-            SOPC_ASSERT(c < 64);
-            buf = buf << 6 | c;
-            iter++; // increment the number of iteration
-            /* If the buffer is full, split it into bytes */
-            if (iter == 4)
-            {
-                len += 3;
-                if (len > expectedLen)
-                {
-                    return_status = false; /* buffer overflow */
-                }
-                else
-                {
-                    *(pBuffer++) = (buf >> 16) & 255;
-                    *(pBuffer++) = (buf >> 8) & 255;
-                    *(pBuffer++) = buf & 255;
-                    buf = 0;
-                    iter = 0;
-                }
-            }
-            break;
-        }
-    }
-
-    if (return_status && iter == 3)
-    {
-        if ((len += 2) > expectedLen)
-        {
-            return_status = false; /* buffer overflow */
-        }
-        else
-        {
-            *(pBuffer++) = (buf >> 10) & 255;
-            *(pBuffer++) = (buf >> 2) & 255;
-        }
-    }
-    else if (return_status && iter == 2)
-    {
-        if (++len > expectedLen)
-        {
-            return_status = false; /* buffer overflow */
-        }
-        else
-        {
-            *(pBuffer++) = (buf >> 4) & 255;
-        }
-    }
-
-    if (expectedLen != len)
-    {
-        return_status = false;
-    }
-
-    if (return_status)
-    {
-        pHeadBuffer[expectedLen] = '\0';
-        *ppOut = pHeadBuffer;
-        *outLen = expectedLen;
-    }
-    else
-    {
-        *ppOut = NULL;
-        *outLen = 0;
-        return_status = false;
-        SOPC_Free(pHeadBuffer);
-    }
-
-    return return_status;
-}
-
-SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* pInput, unsigned char** ppOut, size_t* pOutLen)
-{
-    bool res = base64decode(pInput, ppOut, pOutLen);
-    return (res ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
 }
 
 SOPC_ReturnStatus SOPC_HelperEncode_Hex(const unsigned char* pInput, char* pOut, size_t inputLen)

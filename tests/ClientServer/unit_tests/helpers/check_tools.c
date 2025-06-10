@@ -57,8 +57,8 @@
 #define NODEID_IS "126042"
 #define NODEID_S "s2opc.foo/bar"
 #define NODEID_BS "M/RbKBsRVkePCePcx24oRA=="
-static SOPC_Byte NODEID_BS_BYTES[] = {0x33, 0xf4, 0x5b, 0x28, 0x1b, 0x11, 0x56, 0x47,
-                                      0x8f, 0x09, 0xe3, 0xdc, 0xc7, 0x6e, 0x28, 0x44};
+static SOPC_Byte NODEID_BS_BYTES[] = {0x33, 0xf4, 0x5b, 0x28, 0x1b, 0x11, 0x56, 0x47, 0x8f,
+                                      0x09, 0xe3, 0xdc, 0xc7, 0x6e, 0x28, 0x44, 0x00};
 #define NODEID_G                                                                       \
     {                                                                                  \
         0xC496578A, 0x0DFE, 0x4B8F, { 0x87, 0x0A, 0x74, 0x52, 0x38, 0xC6, 0xAE, 0xAE } \
@@ -1796,7 +1796,7 @@ START_TEST(test_string_nodeid)
     /* Check decoding */
     sNid = SOPC_NodeId_ToCString(&nid);
     ck_assert(NULL != sNid);
-    cmp = strcmp(sNid, "b=" NODEID_BS);
+    cmp = strcmp(sNid, "b=" NODEID_BS "\0");
     ck_assert(cmp == 0);
 
     SOPC_NodeId_Clear(&nid);
