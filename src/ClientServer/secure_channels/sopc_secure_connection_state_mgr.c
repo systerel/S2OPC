@@ -2211,7 +2211,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
             scConnection->clientNonce = NULL;
         }
     }
-    else
+    else if (SOPC_GoodGenericStatus == *errorStatus)
     {
         *errorStatus = OpcUa_BadTcpInternalError;
     }
