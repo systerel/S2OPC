@@ -43,3 +43,4 @@ the legal rights to contribute.
 * Florent Macaire <florent.macaire@systerel.fr>
 * Mathieu Clabaut <mathieu.clabaut@systerel.fr>
 * Florian Antheunis <florian.antheunis-stg@systerel.fr>
+* Max Bernard <max.bernard-stg@systerel.fr>
