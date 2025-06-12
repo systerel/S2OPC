@@ -52,6 +52,7 @@ struct SOPC_SKBuilder
     SOPC_SKBuilder_Update_Func ptrUpdate; /* Function to update keys of a SK Manager  */
     SOPC_SKBuilder_Clear_Func ptrClear;   /* Function to clear data  */
     void* data;                           /* data bytes */
+    uintptr_t referencesCounter;          /* Counter of references on this instance in SK scheduler(s) */
 };
 
 /**
@@ -94,5 +95,13 @@ SOPC_ReturnStatus SOPC_SKBuilder_Update(SOPC_SKBuilder* skb, SOPC_SKProvider* sk
  *  \param skb      Pointer to Security Keys Builder. Should not be NULL
  */
 void SOPC_SKBuilder_Clear(SOPC_SKBuilder* skb);
+
+/**
+ *  \brief          Deletes the Security Keys Builder and its data bytes content
+ *                  if no more references to this instance exist in schedulers.
+ *
+ *  \param skb      Pointer to Security Keys Builder pointer. Should not be NULL
+ */
+void SOPC_SKBuilder_MayDelete(SOPC_SKBuilder** skb);
 
 #endif /* SOPC_SK_BUILDER_H_ */

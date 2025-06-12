@@ -83,8 +83,7 @@ static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 /* SKS Data  */
 SOPC_SKManager* skManager1 = NULL;
 SOPC_SKManager* skManager2 = NULL;
-SOPC_SKscheduler* skScheduler1 = NULL;
-SOPC_SKscheduler* skScheduler2 = NULL;
+SOPC_SKscheduler* skScheduler = NULL;
 
 /*---------------------------------------------------------------------------
  *             PubSub Security Key Service specific configuration
@@ -123,9 +122,8 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
     /* Init SK Scheduler */
     if (SOPC_STATUS_OK == status)
     {
-        skScheduler1 = SOPC_SKscheduler_Create();
-        skScheduler2 = SOPC_SKscheduler_Create();
-        if (NULL == skScheduler1 || NULL == skScheduler2)
+        skScheduler = SOPC_SKscheduler_Create();
+        if (NULL == skScheduler)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -178,19 +176,23 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
     {
         printf("Ok here\n");
         /* Init the tasks with 1s */
-        // TODO: see if need multiple skBuilder and skProvider
-        status = SOPC_SKscheduler_AddTask(skScheduler1, skBuilder, skProvider, skManager1, SKS_SCHEDULER_INIT_MSPERIOD);
+        status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager1, SKS_SCHEDULER_INIT_MSPERIOD);
         printf("Status after first AddTask: %d\n", status);
-        status = SOPC_SKscheduler_AddTask(skScheduler2, skBuilder, skProvider, skManager2, SKS_SCHEDULER_INIT_MSPERIOD);
-        printf("Status after second AddTask: %d\n", status);
+        if (SOPC_STATUS_OK == status)
+        {
+            status =
+                SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager2, SKS_SCHEDULER_INIT_MSPERIOD);
+            printf("Status after second AddTask: %d\n", status);
+            // At least one task added: ownership transferred to scheduler
+            skBuilder = NULL;
+            skProvider = NULL;
+        }
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_SKscheduler_Start(skScheduler1);
-        printf("Status after first scheduler start: %d\n", status);
-        status = SOPC_SKscheduler_Start(skScheduler2);
-        printf("Status after second scheduler start: %d\n", status);
+        status = SOPC_SKscheduler_Start(skScheduler);
+        printf("Status after scheduler start: %d\n", status);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -747,7 +749,7 @@ static SOPC_ReturnStatus Server_InitSKScallMethodService(void)
     SOPC_NodeId_Initialize(&methodId);
     methodTypeId.Data.Numeric = OpcUaId_PubSubKeyServiceType_GetSecurityKeys;
     methodId.Data.Numeric = OpcUaId_PublishSubscribe_GetSecurityKeys;
-    /* Create and define the method call manager the server will use*/
+    /* Create and define the method call manager the server will use */
     SOPC_MethodCallManager* mcm = SOPC_MethodCallManager_Create();
     SOPC_ReturnStatus status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     if (SOPC_STATUS_OK == status)
@@ -923,11 +925,9 @@ int main(int argc, char* argv[])
     }
 
     /* Stop and clear SKS related modules */
-    SOPC_SKscheduler_StopAndClear(skScheduler1);
-    SOPC_Free(skScheduler1);
-    SOPC_SKscheduler_StopAndClear(skScheduler2);
-    SOPC_Free(skScheduler2);                // TODO: Do not double free the SKBuilder ! See what good solution.
-    SOPC_SK_SecurityGroup_Managers_Clear(); // skManagers are cleaned here
+    SOPC_SKscheduler_StopAndClear(skScheduler);
+    SOPC_Free(skScheduler);
+    SOPC_SK_SecurityGroup_Managers_Clear(); // skManagers are cleared here
     skManager1 = NULL;
     skManager2 = NULL;
 

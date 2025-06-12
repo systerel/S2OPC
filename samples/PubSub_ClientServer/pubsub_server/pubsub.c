@@ -77,12 +77,10 @@ static int32_t pubsubOnline = 0;
 static SOPC_PubSubConfiguration* g_pPubSubConfig = NULL;
 static SOPC_SubTargetVariableConfig* g_pTargetConfig = NULL;
 static SOPC_PubSourceVariableConfig* g_pSourceConfig = NULL;
-static SOPC_SKscheduler* g_skScheduler1 = NULL;
-static SOPC_SKscheduler* g_skScheduler2 = NULL;
+static SOPC_SKscheduler* g_skScheduler = NULL;
 static SOPC_SKManager* g_skManager1 = NULL;
 static SOPC_SKManager* g_skManager2 = NULL;
-static SOPC_SKProvider* g_skProvider1 = NULL;
-static SOPC_SKProvider* g_skProvider2 = NULL;
+static SOPC_SKProvider* g_skProvider = NULL;
 static bool g_isSecurity = false;
 static bool g_isSks = false;
 
@@ -257,7 +255,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
         }
 
         // nbSks (or 1 for fallback provider  with local keys)
-        SOPC_SKProvider** providers = SOPC_Calloc(2, sizeof(SOPC_SKProvider*));
+        SOPC_SKProvider** providers = SOPC_Calloc(nbSks, sizeof(SOPC_SKProvider*));
 
         if (NULL == providers)
         {
@@ -267,12 +265,10 @@ SOPC_ReturnStatus PubSub_Configure(void)
         if (g_isSks)
         {
             /* 1. Create one instance of BySKS SKProvider for each Sks description */
-            // It's a problem now. One SKS can handle more than one SecurityGroup.
-            printf("NbSKS:%d\n", nbSks);
-            for (uint32_t i = 1; i < 3 && SOPC_STATUS_OK == status; i++)
+            for (uint32_t i = 0; i < nbSks && SOPC_STATUS_OK == status; i++)
             {
                 SOPC_SecurityKeyServices* sksElt =
-                    SOPC_Array_Get(sksConfigArray->sksArray, SOPC_SecurityKeyServices*, 0);
+                    SOPC_Array_Get(sksConfigArray->sksArray, SOPC_SecurityKeyServices*, i);
                 SOPC_ASSERT(NULL != sksElt);
                 SOPC_SecureConnection_Config* secureConnCfg =
                     Client_AddSecureConnectionConfig(SOPC_SecurityKeyServices_Get_EndpointUrl(sksElt),
@@ -313,17 +309,13 @@ SOPC_ReturnStatus PubSub_Configure(void)
         /* 2. Then wrap these instances in at TryList SKProvider */
         if (SOPC_STATUS_OK == status)
         {
-            if (NULL == g_skProvider1)
+            if (NULL == g_skProvider)
             {
-                g_skProvider1 = SOPC_SKProvider_TryList_Create(providers, nbSks);
-            }
-            else if (NULL == g_skProvider2)
-            {
-                g_skProvider2 = SOPC_SKProvider_TryList_Create(providers, nbSks);
+                g_skProvider = SOPC_SKProvider_TryList_Create(providers, nbSks);
             }
         }
 
-        if ((NULL == g_skProvider1 || NULL == g_skProvider2) && NULL != providers)
+        if (NULL == g_skProvider && NULL != providers)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
             for (uint32_t i = 0; i < nbSks; i++)
@@ -393,7 +385,7 @@ static bool PubSub_SKS_Start(void)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     // Initialise SK Manager
-    bool sksOK = (NULL != g_skProvider1 && NULL != g_skProvider2);
+    bool sksOK = (NULL != g_skProvider);
     if (sksOK)
     {
         printf("Providers set\n");
@@ -404,9 +396,8 @@ static bool PubSub_SKS_Start(void)
     }
     if (sksOK)
     {
-        g_skScheduler1 = SOPC_SKscheduler_Create();
-        g_skScheduler2 = SOPC_SKscheduler_Create();
-        sksOK = (NULL != g_skScheduler1 && NULL != g_skScheduler2);
+        g_skScheduler = SOPC_SKscheduler_Create();
+        sksOK = (NULL != g_skScheduler);
     }
 
     // Create a SK Builder which replace all Keys of a SK Manager
@@ -416,13 +407,16 @@ static bool PubSub_SKS_Start(void)
         sksOK = (NULL != builder);
     }
 
-    // Create a SK Scheduler with a single task : call GetSecurityKeys and replace all keys
+    // Create a SK Scheduler with two tasks : call GetSecurityKeys and replace all keys
     if (sksOK)
     {
-        status = SOPC_SKscheduler_AddTask(g_skScheduler1, builder, g_skProvider1, g_skManager1,
+        status = SOPC_SKscheduler_AddTask(g_skScheduler, builder, g_skProvider, g_skManager1,
                                           PUBSUB_SCHEDULER_FIRST_MSPERIOD); // Start with 3s
         sksOK = (SOPC_STATUS_OK == status);
-        status = SOPC_SKscheduler_AddTask(g_skScheduler2, builder, g_skProvider2, g_skManager2,
+    }
+    if (sksOK)
+    {
+        status = SOPC_SKscheduler_AddTask(g_skScheduler, builder, g_skProvider, g_skManager2,
                                           PUBSUB_SCHEDULER_FIRST_MSPERIOD); // Start with 3s
         sksOK = (SOPC_STATUS_OK == status);
     }
@@ -432,12 +426,9 @@ static bool PubSub_SKS_Start(void)
         // Delete Builder and Provider. Manager and Scheduler are delete in Global Context Clear
         SOPC_SKBuilder_Clear(builder);
         SOPC_Free(builder);
-        SOPC_SKProvider_Clear(g_skProvider1);
-        SOPC_Free(g_skProvider1);
-        g_skProvider1 = NULL;
-        SOPC_SKProvider_Clear(g_skProvider2);
-        SOPC_Free(g_skProvider2);
-        g_skProvider2 = NULL;
+        SOPC_SKProvider_Clear(g_skProvider);
+        SOPC_Free(g_skProvider);
+        g_skProvider = NULL;
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Local SKS cannot be init with Security Keys");
     }
 
@@ -445,9 +436,8 @@ static bool PubSub_SKS_Start(void)
     {
         // If it fails, builder and provider are deleted in Scheduler Clear function.
         Client_Start();
-        status = SOPC_SKscheduler_Start(g_skScheduler1);
+        status = SOPC_SKscheduler_Start(g_skScheduler);
         sksOK = (SOPC_STATUS_OK == status);
-        status = SOPC_SKscheduler_Start(g_skScheduler2);
     }
 
     if (sksOK)
@@ -519,16 +509,12 @@ void PubSub_Stop(void)
     Client_Stop();
 
     SOPC_SK_SecurityGroup_Managers_Clear();
-    SOPC_SKscheduler_StopAndClear(g_skScheduler1);
-    SOPC_Free(g_skScheduler1);
-    g_skScheduler1 = NULL;
-    SOPC_SKscheduler_StopAndClear(g_skScheduler2);
-    SOPC_Free(g_skScheduler2);
-    g_skScheduler2 = NULL;
-    g_skProvider1 = NULL; // cleared by scheduler
-    g_skProvider2 = NULL;
     g_skManager1 = NULL;
     g_skManager2 = NULL;
+    SOPC_SKscheduler_StopAndClear(g_skScheduler);
+    SOPC_Free(g_skScheduler);
+    g_skScheduler = NULL;
+    g_skProvider = NULL; // cleared by scheduler
 
     // Force Disabled after stop in case Sub scheduler was not start (no management of the status)
     Server_SetSubStatusSync(SOPC_PubSubState_Disabled);

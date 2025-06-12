@@ -168,13 +168,14 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Append(SOPC_SKBuilder* sk
 
 SOPC_SKBuilder* SOPC_SKBuilder_Append_Create(void)
 {
-    SOPC_SKBuilder* skb = SOPC_Malloc(sizeof(SOPC_SKBuilder));
+    SOPC_SKBuilder* skb = SOPC_Calloc(1, sizeof(SOPC_SKBuilder));
     if (NULL == skb)
     {
         return NULL;
     }
 
     skb->data = NULL;
+    skb->referencesCounter = 0;
 
     skb->ptrUpdate = SOPC_SKBuilder_Update_Default_Append;
     skb->ptrClear = NULL;
@@ -184,7 +185,7 @@ SOPC_SKBuilder* SOPC_SKBuilder_Append_Create(void)
 
 SOPC_SKBuilder* SOPC_SKBuilder_Truncate_Create(SOPC_SKBuilder* skb, uint32_t sizeMax)
 {
-    SOPC_SKBuilder* result = SOPC_Malloc(sizeof(SOPC_SKBuilder));
+    SOPC_SKBuilder* result = SOPC_Calloc(1, sizeof(SOPC_SKBuilder));
     if (NULL == result)
     {
         return NULL;
@@ -210,13 +211,14 @@ SOPC_SKBuilder* SOPC_SKBuilder_Truncate_Create(SOPC_SKBuilder* skb, uint32_t siz
 
 SOPC_SKBuilder* SOPC_SKBuilder_Setter_Create(void)
 {
-    SOPC_SKBuilder* skb = SOPC_Malloc(sizeof(SOPC_SKBuilder));
+    SOPC_SKBuilder* skb = SOPC_Calloc(1, sizeof(SOPC_SKBuilder));
     if (NULL == skb)
     {
         return NULL;
     }
 
     skb->data = NULL;
+    skb->referencesCounter = 0;
 
     skb->ptrUpdate = SOPC_SKBuilder_Update_Default_Setter;
     skb->ptrClear = NULL;
@@ -243,5 +245,23 @@ void SOPC_SKBuilder_Clear(SOPC_SKBuilder* skb)
         }
         SOPC_Free(skb->data);
         skb->data = NULL;
+        skb->referencesCounter = 0;
+    }
+}
+
+void SOPC_SKBuilder_MayDelete(SOPC_SKBuilder** skb)
+{
+    if (NULL == skb || NULL == *skb)
+    {
+        return;
+    }
+    SOPC_SKBuilder* builder = *skb;
+    // Updates the counter if not already zero
+    builder->referencesCounter = builder->referencesCounter > 0 ? builder->referencesCounter - 1 : 0;
+    if (builder->referencesCounter == 0)
+    {
+        SOPC_SKBuilder_Clear(builder);
+        SOPC_Free(builder);
+        *skb = NULL;
     }
 }

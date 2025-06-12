@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
@@ -30,6 +31,9 @@
 #include "sopc_mutexes.h"
 #include "sopc_sk_scheduler.h"
 
+#ifndef SOPC_SK_SCHEDULER_INITIAL_NB_TASKS
+#define SOPC_SK_SCHEDULER_INITIAL_NB_TASKS 10
+#endif
 typedef struct SOPC_SKscheduler_Task
 {
     SOPC_SKBuilder* builder;
@@ -49,7 +53,7 @@ typedef struct SOPC_SKscheduler_DefaultData
     SOPC_Looper* looper;
     SOPC_EventHandler* handler;
 
-    SOPC_SKscheduler_Task task;
+    SOPC_Array* taskArray; // Array of SOPC_SKscheduler_Task*
 
     SOPC_Mutex mutex;
 
@@ -66,22 +70,17 @@ static void SOPC_SKscheduler_EventHandler_Callback_Default(SOPC_EventHandler* ha
     // unused variables
     SOPC_UNUSED_ARG(handler);
     SOPC_UNUSED_ARG(event);
-    SOPC_UNUSED_ARG(eltId);
     SOPC_UNUSED_ARG(auxParam);
 
     SOPC_SKscheduler_DefaultData* data = (SOPC_SKscheduler_DefaultData*) params;
     SOPC_ReturnStatus status = SOPC_Mutex_Lock(&data->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    SOPC_SKscheduler_Task* task = &data->task;
-
+    SOPC_SKscheduler_Task* task = SOPC_Array_Get(data->taskArray, SOPC_SKscheduler_Task*, eltId);
     SOPC_ASSERT(NULL != task);
-    SOPC_ASSERT(NULL != task->builder || NULL != task->provider || NULL != task->manager);
 
     if (!task->run)
     {
-        status = SOPC_Mutex_Unlock(&data->mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == status);
         return;
     }
 
@@ -101,7 +100,7 @@ static void SOPC_SKscheduler_EventHandler_Callback_Default(SOPC_EventHandler* ha
     // Replace the timer by a new one with expiration time updated ( half the Keys Life Time )
     if (task->run)
     {
-        SOPC_LooperEvent timerEvent = {.event = 0, .eltId = 0, .params = (uintptr_t) data};
+        SOPC_LooperEvent timerEvent = {.event = 0, .eltId = eltId, .params = (uintptr_t) data};
         uint32_t timerId = SOPC_EventTimer_Create(handler, timerEvent, halfAllKeysLifeTime);
         if (0 != timerId)
         {
@@ -182,25 +181,43 @@ static SOPC_ReturnStatus SOPC_SKscheduler_AddTask_Default(SOPC_SKscheduler* sko,
 
     SOPC_SKscheduler_DefaultData* data = (SOPC_SKscheduler_DefaultData*) sko->data;
 
-    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&data->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    if (NULL != data->task.builder || NULL != data->task.provider || NULL != data->task.manager)
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&data->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    SOPC_SKscheduler_Task* newTask = SOPC_Calloc(1, sizeof(SOPC_SKscheduler_Task));
+    SOPC_ReturnStatus status = NULL != newTask ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Mutex_Unlock(&data->mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == status);
-        // only one task accepted by this Scheduler
-        return SOPC_STATUS_INVALID_STATE;
+        newTask->builder = skb;
+        newTask->provider = skp;
+        newTask->manager = skm;
+        newTask->msPeriod = msPeriod;
+        newTask->run = false;
+
+        // Add the new task to the array
+        bool res = SOPC_Array_Append(data->taskArray, newTask);
+        if (!res)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
     }
 
-    data->task.builder = skb;
-    data->task.provider = skp;
-    data->task.manager = skm;
-    data->task.msPeriod = msPeriod;
+    mutStatus = SOPC_Mutex_Unlock(&data->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    status = SOPC_Mutex_Unlock(&data->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    if (SOPC_STATUS_OK != status)
+    {
+        // Delete the task in case of error
+        SOPC_Free(newTask);
+    }
+    else
+    {
+        newTask->builder->referencesCounter++;
+        newTask->provider->referencesCounter++;
+    }
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 static SOPC_ReturnStatus SOPC_SKscheduler_Start_Default(SOPC_SKscheduler* sko)
@@ -214,23 +231,24 @@ static SOPC_ReturnStatus SOPC_SKscheduler_Start_Default(SOPC_SKscheduler* sko)
 
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&data->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    if (NULL == data->task.builder || NULL == data->task.provider || NULL == data->task.manager)
-    {
-        mutStatus = SOPC_Mutex_Unlock(&data->mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        // No task added
-        return SOPC_STATUS_INVALID_STATE;
-    }
 
     SOPC_ReturnStatus status = SOPC_SKscheduler_Initialize_Default(sko);
-    if (SOPC_STATUS_OK == status)
+
+    size_t nbTasks = SOPC_Array_Size(data->taskArray);
+    for (size_t i = 0; SOPC_STATUS_OK == status && i < nbTasks; i++)
     {
-        SOPC_LooperEvent event = {.event = 0, .eltId = 0, .params = (uintptr_t) data};
-        data->task.timerId = SOPC_EventTimer_Create(data->handler, event, data->task.msPeriod);
-        data->task.run = (0 != data->task.timerId);
-        if (!data->task.run)
+        SOPC_SKscheduler_Task* task = SOPC_Array_Get(data->taskArray, SOPC_SKscheduler_Task*, i);
+        status = NULL != task ? status : SOPC_STATUS_NOK;
+        status = i <= UINT32_MAX ? status : SOPC_STATUS_OUT_OF_MEMORY;
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_STATUS_NOK;
+            SOPC_LooperEvent event = {.event = 0, .eltId = (uint32_t) i, .params = (uintptr_t) data};
+            task->timerId = SOPC_EventTimer_Create(data->handler, event, task->msPeriod);
+            task->run = (0 != task->timerId);
+            if (!task->run)
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
     }
     mutStatus = SOPC_Mutex_Unlock(&data->mutex);
@@ -257,19 +275,8 @@ static void SOPC_SKscheduler_StopAndClear_Default(SOPC_SKscheduler* sko)
     SOPC_ReturnStatus status = SOPC_Mutex_Lock(&data->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    // Cancel associated timer
-    SOPC_EventTimer_Cancel(data->task.timerId);
-
-    // Cancel the task
-    data->task.run = false;
-
-    SOPC_SKBuilder_Clear(data->task.builder);
-    SOPC_Free(data->task.builder);
-    data->task.builder = NULL;
-
-    SOPC_SKProvider_Clear(data->task.provider);
-    SOPC_Free(data->task.provider);
-    data->task.provider = NULL;
+    // Clear the task array
+    SOPC_Array_Delete(data->taskArray);
 
     status = SOPC_Mutex_Unlock(&data->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -282,6 +289,23 @@ static void SOPC_SKscheduler_StopAndClear_Default(SOPC_SKscheduler* sko)
 }
 
 /*** API FUNCTIONS ***/
+
+static void free_task(void* vtask)
+{
+    SOPC_ASSERT(NULL != vtask);
+    SOPC_SKscheduler_Task** ppTask = (SOPC_SKscheduler_Task**) vtask;
+    SOPC_ASSERT(NULL != *ppTask);
+    SOPC_SKscheduler_Task* task = *ppTask;
+
+    // Cancel associated timer
+    SOPC_EventTimer_Cancel(task->timerId);
+
+    SOPC_SKBuilder_MayDelete(&task->builder);
+
+    SOPC_SKProvider_MayDelete(&task->provider);
+
+    SOPC_Free(task);
+}
 
 SOPC_SKscheduler* SOPC_SKscheduler_Create(void)
 {
@@ -299,10 +323,13 @@ SOPC_SKscheduler* SOPC_SKscheduler_Create(void)
     }
     SOPC_SKscheduler_DefaultData* data = (SOPC_SKscheduler_DefaultData*) sko->data;
     data->isInitialized = false;
-    data->task.builder = NULL;
-    data->task.provider = NULL;
-    data->task.manager = NULL;
-    data->task.msPeriod = 0;
+    data->taskArray = SOPC_Array_Create(sizeof(SOPC_SKscheduler_Task*), SOPC_SK_SCHEDULER_INITIAL_NB_TASKS, free_task);
+    if (NULL == data->taskArray)
+    {
+        SOPC_Free(sko->data);
+        SOPC_Free(sko);
+        return NULL;
+    }
 
     SOPC_Mutex_Initialization(&data->mutex);
 

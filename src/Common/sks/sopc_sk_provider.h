@@ -58,6 +58,7 @@ struct SOPC_SKProvider
     SOPC_SKProvider_GetKeys_Func ptrGetKeys; /** securityGroup, token */
     SOPC_SKProvider_Clear_Func ptrClear;     /** securityGroup, startingToken, nb of key  */
     uintptr_t data;                          /**< data bytes */
+    uintptr_t referencesCounter;             /**< Counter of references on this instance in SK scheduler(s) */
 };
 
 /**
@@ -112,5 +113,13 @@ SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
  *  \param skp      Pointer to Security Keys Provider. Should not be NULL
  */
 void SOPC_SKProvider_Clear(SOPC_SKProvider* skp);
+
+/**
+ *  \brief          Deletes the Security Keys Provider and its data bytes content
+ *                  if no more references to this instance exist in schedulers.
+ *
+ *  \param skp      Pointer to Security Keys Provider pointer. Should not be NULL
+ */
+void SOPC_SKProvider_MayDelete(SOPC_SKProvider** skp);
 
 #endif /* SOPC_SK_PROVIDER_H_ */

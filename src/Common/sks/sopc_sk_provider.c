@@ -232,6 +232,7 @@ SOPC_SKProvider* SOPC_SKProvider_TryList_Create(SOPC_SKProvider** providers, uin
 
     skp->ptrGetKeys = SOPC_SKProvider_GetKeys_TryList;
     skp->ptrClear = SOPC_SKProvider_Clear_TryList;
+    skp->referencesCounter = 0;
 
     return skp;
 }
@@ -263,6 +264,7 @@ SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create(uint32_t maxKeys)
 
     skp->ptrGetKeys = SOPC_SKProvider_GetKeys_RandomPubSub_Aes256;
     skp->ptrClear = SOPC_SKProvider_Clear_RandomPubSub_Aes256;
+    skp->referencesCounter = 0;
 
     return skp;
 }
@@ -295,5 +297,22 @@ void SOPC_SKProvider_Clear(SOPC_SKProvider* skp)
             skp->ptrClear((void*) skp->data);
         }
         skp->data = (uintptr_t) NULL;
+    }
+}
+
+void SOPC_SKProvider_MayDelete(SOPC_SKProvider** skp)
+{
+    if (NULL == skp || NULL == *skp)
+    {
+        return;
+    }
+    SOPC_SKProvider* provider = *skp;
+    // Updates the counter if not already zero
+    provider->referencesCounter = provider->referencesCounter > 0 ? provider->referencesCounter - 1 : 0;
+    if (provider->referencesCounter == 0)
+    {
+        SOPC_SKProvider_Clear(provider);
+        SOPC_Free(provider);
+        *skp = NULL;
     }
 }
