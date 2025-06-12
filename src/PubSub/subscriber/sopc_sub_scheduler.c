@@ -1206,9 +1206,9 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
                                   pubId.data.uint, tokenId);
         }
     }
-    else if (tokenId < readerCtx->security.groupKeys->tokenId)
+    else if (tokenId < readerCtx->security.groupKeys->tokenId && SOPC_PUBSUB_SKS_CURRENT_TOKENID != tokenId)
     {
-        // this token id is not too old. The message is not managed
+        // this token id is not too old and is not current token id (0 value). The message is not managed
         security = NULL;
     }
     else
