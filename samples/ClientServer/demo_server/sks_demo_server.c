@@ -137,19 +137,22 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-
+    bool schedulerTaskAdded = false;
     if (SOPC_STATUS_OK == status)
     {
         /* Init the task with 1s */
         status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager1, SKS_SCHEDULER_INIT_MSPERIOD);
-        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        schedulerTaskAdded = true;
         status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager2, SKS_SCHEDULER_INIT_MSPERIOD);
-        if (SOPC_STATUS_OK == status)
-        {
-            // Ownership transfered to scheduler
-            skBuilder = NULL;
-            skProvider = NULL;
-        }
+    }
+    if (schedulerTaskAdded)
+    {
+        // At least one task added: ownership transferred to scheduler
+        skBuilder = NULL;
+        skProvider = NULL;
     }
     if (SOPC_STATUS_OK == status)
     {

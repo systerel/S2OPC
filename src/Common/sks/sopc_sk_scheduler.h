@@ -74,23 +74,22 @@ struct SOPC_SKscheduler
 SOPC_SKscheduler* SOPC_SKscheduler_Create(void);
 
 /**
- * \brief           Creates a periodic task to call builder every msPeriod milliseconds.
- *                  Ownership of SOPC_SKBuilder and SOPC_SKProvider is moved to the SOPC_SKscheduler
- *                  Note : If Builder or Provider instance should be shared,
- *                         these could be wrapped in an instance with a specific Clear function.
+ * \brief           Creates a task to call builder after \p firstMsPeriod milliseconds and then at half the keys
+ *                  lifetime (or default \p SOPC_SK_SCHEDULER_UPDATE_TIMER_MIN value if no keys are available).
+ *                  Ownership of SOPC_SKBuilder and SOPC_SKProvider is transferred to the SOPC_SKscheduler
  *
- * \param sko       Pointer to Security Keys Scheduler. Should not be NULL
- * \param skb       Pointer to Security Keys Builder. Should not be NULL
- * \param skp       Pointer to Security Keys Provider. Should not be NULL
- * \param skm       Pointer to Security Keys Manager. Should not be NULL
- * \param msPeriod  The period in milliseconds
- * \return          SOPC_STATUS_OK if keys are set otherwise a bad status
+ * \param sko            Pointer to Security Keys Scheduler. Should not be NULL
+ * \param skb            Pointer to Security Keys Builder (it might be shared by several tasks). Should not be NULL
+ * \param skp            Pointer to Security Keys Provider (it might be shared by several tasks). Should not be NULL
+ * \param skm            Pointer to Security Keys Manager. Should not be NULL
+ * \param firstMsPeriod  The temporary period in milliseconds, it is used until the first successful update occurs.
+ * \return               SOPC_STATUS_OK in case of success, otherwise a bad status (invalid parameters, out of memory).
  */
 SOPC_ReturnStatus SOPC_SKscheduler_AddTask(SOPC_SKscheduler* sko,
                                            SOPC_SKBuilder* skb,
                                            SOPC_SKProvider* skp,
                                            SOPC_SKManager* skm,
-                                           uint32_t msPeriod);
+                                           uint32_t firstMsPeriod);
 
 /**
  *  \brief          Starts a Security Keys Scheduler
@@ -108,7 +107,8 @@ SOPC_ReturnStatus SOPC_SKscheduler_Start(SOPC_SKscheduler* sko);
 SOPC_ReturnStatus SOPC_SKscheduler_Stop(SOPC_SKscheduler* sko);
 
 /**
- *  \brief          Stops a Security Keys Scheduler and deallocate data bytes content.
+ *  \brief          Stops a Security Keys Scheduler and deallocate associated builders and providers,
+ *                  the managers are not cleared.
  *                  This object should not be used after a call to this function
  *
  *  \param sko      Pointer to Security Keys Scheduler. Should not be NULL
