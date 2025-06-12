@@ -1036,6 +1036,7 @@ OPERATIONS
         l_channel_config_idx <-- get_channel_info (channel);
         write_activate_req_msg_locales(activate_req_msg, l_channel_config_idx);
         write_activate_msg_user(activate_req_msg, l_user_token);
+        reset_session_orphaned(session);
         set_session_channel(session, channel);
         set_session_state(session, e_session_scActivating)
     END

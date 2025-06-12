@@ -51,6 +51,7 @@ PROMOTES
     get_NonceServer,
     getall_orphaned,
     set_client_orphaned,
+    reset_session_orphaned,
     client_create_session_check_crypto,
     drop_user_server,
     set_session_user_server,

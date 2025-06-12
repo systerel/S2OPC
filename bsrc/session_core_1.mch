@@ -349,6 +349,15 @@ OPERATIONS
     END
     ;
 
+    reset_session_orphaned(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_client_orphaned := {p_session} <<| a_client_orphaned
+    END
+    ;
+
     /* This function is not called when there is no client nonce (ie SC:Sec_pol is None) */
     p_valid <-- client_create_session_check_crypto(p_session, p_channel_config_idx, p_resp_msg) =
     PRE

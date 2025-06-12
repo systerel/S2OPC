@@ -692,6 +692,7 @@ void session_core__client_sc_activate_session_req_sm(
          session_core__l_channel_config_idx);
       msg_session_bs__write_activate_msg_user(session_core__activate_req_msg,
          session_core__l_user_token);
+      session_core_1__reset_session_orphaned(session_core__session);
       session_core_1__set_session_channel(session_core__session,
          session_core__channel);
       session_core_1__set_session_state(session_core__session,
