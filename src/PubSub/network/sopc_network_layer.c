@@ -2008,11 +2008,11 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
     }
     else
     {
-        // check that subscriber expects security mode is none
+        // SecurityHeader is disable: check that subscriber expected security mode is NONE
         if (NULL != readerConf->pGetSecurity_Func && SOPC_STATUS_OK == status) // if NULL, security mode is None
         {
             SOPC_PubSub_SecurityType* security = readerConf->pGetSecurity_Func(
-                SOPC_PUBSUB_SKS_DEFAULT_TOKENID,
+                SOPC_PUBSUB_SKS_CURRENT_TOKENID,
                 SOPC_Helper_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), group_id);
             // if security is NULL, there is no reader configured with security sign or encrypt/sign
             if (NULL != security && !Network_Check_ReceivedSecurityMode(security->mode, false, false))
