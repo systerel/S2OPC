@@ -58,6 +58,11 @@ struct SOPC_SKBuilder
 /**
  * \brief  Creates an instance of a default SOPC_SKBuilder which append data to the Security Keys Manager.
  *
+ * \warning This builder only appends keys and never limits the number of keys stored.
+ *          Thus it shall be used as inner builder of a builder that manages the maximum number of keys as
+ *          ::SOPC_SKBuilder_Truncate_Create.
+ *
+ *
  * \return a SOPC_SKBuilder object or NULL if not enough memory
  */
 SOPC_SKBuilder* SOPC_SKBuilder_Append_Create(void);
@@ -78,6 +83,22 @@ SOPC_SKBuilder* SOPC_SKBuilder_Truncate_Create(SOPC_SKBuilder* skb, uint32_t siz
  * \return a SOPC_SKBuilder object or NULL if not enough memory
  */
 SOPC_SKBuilder* SOPC_SKBuilder_Setter_Create(void);
+
+/** \brief The type for the callback that shall be provided to create a builder ::SOPC_SKBuilder_Callback_Create */
+typedef void (*SOPC_SKBuilder_Callback_Func)(SOPC_SKBuilder* skb, SOPC_SKManager* skm, uintptr_t userParam);
+
+/**
+ * \brief  Creates an instance of a default SOPC_SKBuilder which trigger a callback after an update.
+ *
+ * \param skb       The builder used to update the keys
+ * \param callback  The function to notify an update of the keys in manager
+ * \param userParam A user parameter that will be passed to the callback function
+ *
+ * \return a SOPC_SKBuilder object or NULL if not enough memory
+ */
+SOPC_SKBuilder* SOPC_SKBuilder_Callback_Create(SOPC_SKBuilder* skb,
+                                               SOPC_SKBuilder_Callback_Func callback,
+                                               uintptr_t userParam);
 
 /**
  *  \brief          Gets Keys from a Security Keys Provider and fill Security Keys Manager

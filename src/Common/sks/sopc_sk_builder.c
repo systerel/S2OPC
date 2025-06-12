@@ -164,6 +164,35 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Append(SOPC_SKBuilder* sk
     return status;
 }
 
+typedef struct SOPC_SKBuilder_CallbackData
+{
+    SOPC_SKBuilder* skb;
+    SOPC_SKBuilder_Callback_Func callback;
+    uintptr_t userParam;
+} SOPC_SKBuilder_CallbackData;
+
+static SOPC_ReturnStatus SOPC_SKBuilder_Update_Callback(SOPC_SKBuilder* skb, SOPC_SKProvider* skp, SOPC_SKManager* skm)
+{
+    SOPC_ASSERT(NULL != skb && NULL != skb->data);
+
+    SOPC_SKBuilder_CallbackData* data = (SOPC_SKBuilder_CallbackData*) skb->data;
+
+    SOPC_ReturnStatus status = SOPC_SKBuilder_Update(data->skb, skp, skm);
+    if (SOPC_STATUS_OK == status && NULL != data->callback)
+    {
+        data->callback(skb, skm, data->userParam);
+    }
+
+    return status;
+}
+
+static void SOPC_SKBuilder_Clear_Callback(void* data)
+{
+    SOPC_SKBuilder_CallbackData* callbackData = (SOPC_SKBuilder_CallbackData*) data;
+    SOPC_SKBuilder_Clear(callbackData->skb);
+    SOPC_Free(callbackData->skb);
+}
+
 /*** API FUNCTIONS ***/
 
 SOPC_SKBuilder* SOPC_SKBuilder_Append_Create(void)
@@ -224,6 +253,35 @@ SOPC_SKBuilder* SOPC_SKBuilder_Setter_Create(void)
     skb->ptrClear = NULL;
 
     return skb;
+}
+
+SOPC_SKBuilder* SOPC_SKBuilder_Callback_Create(SOPC_SKBuilder* skb,
+                                               SOPC_SKBuilder_Callback_Func callback,
+                                               uintptr_t userParam)
+{
+    SOPC_SKBuilder* result = SOPC_Calloc(1, sizeof(SOPC_SKBuilder));
+    if (NULL == result)
+    {
+        return NULL;
+    }
+
+    result->data = SOPC_Calloc(1, sizeof(SOPC_SKBuilder_CallbackData));
+    if (NULL == result->data)
+    {
+        SOPC_Free(result);
+        return NULL;
+    }
+
+    SOPC_SKBuilder_CallbackData* data = (SOPC_SKBuilder_CallbackData*) result->data;
+
+    data->skb = skb;
+    data->callback = callback;
+    data->userParam = userParam;
+
+    result->ptrUpdate = SOPC_SKBuilder_Update_Callback;
+    result->ptrClear = SOPC_SKBuilder_Clear_Callback;
+
+    return result;
 }
 
 SOPC_ReturnStatus SOPC_SKBuilder_Update(SOPC_SKBuilder* skb, SOPC_SKProvider* skp, SOPC_SKManager* skm)
