@@ -121,8 +121,8 @@ INVARIANT
     // All client sessions (except in init or creating state) have a client token.
     dom(a_client_token) = dom(s_client_session <|a_state |>> {e_session_init, e_session_creating}) &
 
-    // Client orphaned sessions are included in orphaned sessions.
-    dom(a_client_orphaned) <: dom(a_state |> {e_session_scOrphaned}) &
+    // Client orphaned sessions are client sessions and are in scOrphaned state.
+    dom(a_client_orphaned) = dom(s_client_session <| a_state |> {e_session_scOrphaned}) &
 
     // All sessions (except in init or creating state) can have a nonce
     // (they have a nonce when their security policy is not None).
