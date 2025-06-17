@@ -258,7 +258,7 @@ void suite_test_publisher_subscriber(int* index)
     SOPC_ASSERT(NULL != skmanager);
 
     SOPC_PubSubSKS_Init();
-    SOPC_PubSubSKS_SetSkManager(skmanager);
+    SOPC_PubSubSKS_SetSkManager("1", skmanager);
 
     const uint32_t nbPublisher = SOPC_PubSubConfiguration_Nb_PubConnection(config);
     SOPC_ASSERT(0 != nbPublisher);

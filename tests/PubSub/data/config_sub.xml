@@ -14,7 +14,7 @@
                 <variable nodeId="ns=2;i=7" displayName="Tutu" dataType="UInt16"/>
             </dataset>
         </message>
-        <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="i=456" securityMode="sign">
+        <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="i=456" securityMode="sign" securityGroupId="1">
           <skserver endpointUrl="opc.tcp://localhost:4851" serverCertPath="./server_public/sks_server_2k_cert.der" />
           <skserver endpointUrl="opc.tcp://localhost:4852" serverCertPath="./server_public/sks_server_2k_cert.der" />
           <dataset writerId="52">

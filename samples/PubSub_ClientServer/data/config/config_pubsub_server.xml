@@ -2,7 +2,7 @@
     <!-- one to many -->
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=42">
         <!-- one to many -->
-        <message groupId="14" groupVersion="1" publishingInterval="100." securityMode="signAndEncrypt">
+        <message groupId="14" groupVersion="1" publishingInterval="100." securityMode="signAndEncrypt" securityGroupId="1">
           <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
           <dataset writerId="1">
           <!-- one to many -->
@@ -22,7 +22,7 @@
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <!-- one to many -->
-        <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="i=42" securityMode="signAndEncrypt">
+        <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="i=42" securityMode="signAndEncrypt" securityGroupId="1">
           <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
           <dataset writerId="1">
             <!-- one to many -->

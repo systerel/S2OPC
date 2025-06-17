@@ -14,7 +14,7 @@
                 <variable nodeId="ns=2;i=7" displayName="Tutu" dataType="UInt16"/>
             </dataset>
         </message>
-        <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="i=456" securityMode="sign">
+        <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="i=456" securityMode="sign" securityGroupId="1">
           <dataset writerId="50">
             <!-- one to many -->
             <variable nodeId="ns=1;s=Tata" displayName="Tata" dataType="Int16"/>
