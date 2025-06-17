@@ -88,6 +88,7 @@
 #define ATTR_MESSAGE_PUBLISHING_ITV "publishingInterval"
 #define ATTR_MESSAGE_PUBLISHING_OFF "publishingOffset"
 #define ATTR_MESSAGE_SECURITY "securityMode"
+#define ATTR_MESSAGE_SECURITY_GROUPID "securityGroupId"
 #define ATTR_MESSAGE_SECURITY_VAL_NONE "none"
 #define ATTR_MESSAGE_SECURITY_VAL_SIGN "sign"
 #define ATTR_MESSAGE_SECURITY_VAL_SIGNANDENCRYPT "signAndEncrypt"
@@ -178,6 +179,8 @@ struct sopc_xml_pubsub_message_t
     struct sopc_xml_pubsub_dataset_t* datasetArr;
     double keepAliveTime;
     bool publisherFixedSize;
+
+    char* securityGroupId;
 
     /* Array of to define Security Key Servers (SKS) that manage the security keys for the SecurityGroup
        assigned to the PubSubGroup. Null if the SecurityMode is None. */
@@ -674,6 +677,10 @@ static bool parse_message_attributes(const char* attr_name,
         {
             result = false;
         }
+    }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_SECURITY_GROUPID, attr_name))
+    {
+        result = copy_any_string_attribute_value(&msg->securityGroupId, attr_val);
     }
     else if (TEXT_EQUALS(ATTR_MESSAGE_PUBLISHER_ID, attr_name))
     {
@@ -1262,6 +1269,12 @@ static void end_element_handler(void* user_data, const XML_Char* name)
             XML_StopParser(ctx->parser, 0);
             return;
         }
+        if (SOPC_SecurityMode_None != msg->security_mode && NULL == msg->securityGroupId)
+        {
+            LOG("Secure message requires a SecurityGroupId");
+            XML_StopParser(ctx->parser, 0);
+            return;
+        }
         ctx->nb_messages++;
         ctx->currentMessage = NULL;
         ctx->state = PARSE_CONNECTION;
@@ -1376,6 +1389,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_WriterGroup_Set_PublishingOffset(writerGroup, msg->publishing_offset);
                 SOPC_WriterGroup_Set_Version(writerGroup, msg->groupVersion);
                 SOPC_WriterGroup_Set_SecurityMode(writerGroup, msg->security_mode);
+                SOPC_WriterGroup_Set_SecurityGroupId(writerGroup, msg->securityGroupId);
                 SOPC_WriterGroup_Set_KeepAlive(writerGroup, msg->keepAliveTime);
                 SOPC_WriterGroup_Set_Encoding(writerGroup, msg->encoding);
 
@@ -1469,6 +1483,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_ReaderGroup_Set_SecurityMode(readerGroup, msg->security_mode);
                 SOPC_ReaderGroup_Set_GroupVersion(readerGroup, msg->groupVersion);
                 SOPC_ReaderGroup_Set_GroupId(readerGroup, msg->groupId);
+                SOPC_ReaderGroup_Set_SecurityGroupId(readerGroup, msg->securityGroupId);
                 SOPC_ReaderGroup_Set_MqttTopic(readerGroup, msg->mqttTopic);
 
                 if (SOPC_String_PublisherId == msg->publisher_id.type)
@@ -1595,6 +1610,8 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
 
             SOPC_Free(msg->datasetArr);
             msg->datasetArr = NULL;
+            SOPC_Free(msg->securityGroupId);
+            msg->securityGroupId = NULL;
             SOPC_Free(msg->mqttTopic);
             msg->mqttTopic = NULL;
             SOPC_String_Clear(&msg->publisher_id.data.string);
