@@ -73,6 +73,8 @@ SOPC_Byte signingKey[SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_Signature] = {0};
 SOPC_Byte encryptingKey[SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey] = {0};
 SOPC_Byte keyNonce[SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce] = {0};
 
+#define SECURITY_GROUP_ID "1"
+
 typedef enum
 {
     SECU_NONE,
@@ -83,9 +85,9 @@ subscriberSecurityMode gSubSecuMode = SECU_NONE;
 
 SOPC_PubSub_SecurityType gSubSecurityType;
 
-static void set_subscriber_security_info(void)
+static void set_subscriber_security_info(const char* securityGroupId)
 {
-    gSubSecurityType.groupKeys = SOPC_PubSubSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, 0);
+    gSubSecurityType.groupKeys = SOPC_PubSubSKS_GetSecurityKeys(securityGroupId, 0);
     gSubSecurityType.mode = SOPC_SecurityMode_SignAndEncrypt;
     gSubSecurityType.provider = SOPC_CryptoProvider_CreatePubSub(SOPC_SecurityPolicy_PubSub_Aes256_URI);
 }
@@ -161,10 +163,17 @@ static void setupConnection(void)
     subReader = SOPC_PubSubConnection_Get_ReaderGroup_At(subConnection, 0);
 
     /* PubSub Security Keys configuration */
+<<<<<<< Updated upstream
     g_skmanager = createSKmanager();
     SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
     SOPC_PubSubSKS_Init();
-    SOPC_PubSubSKS_SetSkManager(g_skmanager);
+    SOPC_PubSubSKS_SetSkManager(securityGroupId, g_skmanager);
+=======
+    SOPC_PubSubSKS_Init();
+    g_skmanager = createSKmanager(SECURITY_GROUP_ID);
+    SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
+    SOPC_PubSubSKS_AddSkManager(g_skmanager->securityGroupId, g_skmanager);
+>>>>>>> Stashed changes
 
     if (SECU_NONE == gSubSecuMode)
     {
@@ -173,7 +182,8 @@ static void setupConnection(void)
     else
     {
         SOPC_ReaderGroup_Set_SecurityMode(subReader, SOPC_SecurityMode_SignAndEncrypt);
-        set_subscriber_security_info();
+        SOPC_ReaderGroup_Set_SecurityGroupId(subReader, SECURITY_GROUP_ID);
+        set_subscriber_security_info(SECURITY_GROUP_ID);
     }
     SOPC_ReaderGroup_Allocate_DataSetReader_Array(subReader, 1);
     dsReader = SOPC_ReaderGroup_Get_DataSetReader_At(subReader, 0);
@@ -232,13 +242,8 @@ static void printVariant(const SOPC_Variant* variant)
 
 static void clear_setupConnection(void)
 {
-    if (NULL != g_skmanager)
-    {
-        SOPC_SKManager_Clear(g_skmanager);
-        SOPC_Free(g_skmanager);
-        g_skmanager = NULL;
-    }
     SOPC_PubSubSKS_Clear();
+    g_skmanager = NULL;
 }
 
 static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)

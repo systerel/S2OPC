@@ -14,7 +14,7 @@
                 <variable nodeId="ns=2;i=7" displayName="Tutu" dataType="UInt16"/>
             </dataset>
         </message>
-        <message publishingInterval="30." groupId="15" keepAliveTime="3000." securityMode="signAndEncrypt">
+        <message publishingInterval="30." groupId="15" keepAliveTime="3000." securityMode="signAndEncrypt" securityGroupId="1">
             <!-- one to many -->
             <dataset writerId="52">
                 <!-- one to many -->

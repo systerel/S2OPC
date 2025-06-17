@@ -6,7 +6,7 @@
             <variable nodeId="ns=1;s=Toto" displayName="Toto" dataType="Boolean"/>
           </dataset>
         </message>
-        <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="i=456" securityMode="sign">
+        <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="i=456" securityMode="sign" securityGroupId="1">
           <dataset writerId="50">
             <variable nodeId="ns=1;s=Tata" displayName="Tata" dataType="Int16"/>
           </dataset>

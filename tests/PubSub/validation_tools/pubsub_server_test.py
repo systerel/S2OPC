@@ -248,7 +248,7 @@ XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
 
 XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -258,7 +258,7 @@ XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -271,7 +271,7 @@ XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
 
 XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -281,7 +281,7 @@ XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -294,7 +294,7 @@ XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub>
 
 XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt" securityGroupId="1">
             <!-- no SK server defined => fallback mechanism use local key files -->
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -304,7 +304,7 @@ XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt" securityGroupId="1">
             <!-- no SK server defined => fallback mechanism use local key files -->
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -317,7 +317,7 @@ XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
 
 XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -339,7 +339,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
 
 XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -349,7 +349,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -362,7 +362,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
 
 XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -372,7 +372,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -385,7 +385,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
 
 XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4 = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
@@ -499,7 +499,7 @@ XML_PUBSUB_BAD_FORMED_CONFIGURATION = """<PubSub>
 
 XML_PUBSUB_MISMATCHING_WRITERID = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign" securityGroupId="1">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="4">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -509,7 +509,7 @@ XML_PUBSUB_MISMATCHING_WRITERID = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign" securityGroupId="1">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="5">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -522,7 +522,7 @@ XML_PUBSUB_MISMATCHING_WRITERID = """<PubSub>
 
 XML_PUBSUB_SUB_WRITER_ID_FILTER = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign" securityGroupId="1">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="4">
                 <variable nodeId="ns=4;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -542,7 +542,7 @@ XML_PUBSUB_SUB_WRITER_ID_FILTER = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign" securityGroupId="1">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="2">
                 <variable nodeId="ns=2;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -563,7 +563,7 @@ XML_PUBSUB_SUB_WRITER_ID_FILTER = """<PubSub>
 
 XML_PUBSUB_NO_GROUP_ID = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message publishingInterval="200" groupVersion="1" securityMode="sign">
+        <message publishingInterval="200" groupVersion="1" securityMode="sign" securityGroupId="1">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -573,7 +573,7 @@ XML_PUBSUB_NO_GROUP_ID = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign" securityGroupId="1">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -586,7 +586,7 @@ XML_PUBSUB_NO_GROUP_ID = """<PubSub>
 
 XML_PUBSUB_DUPLICATE_WRITERID = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message publishingInterval="200" groupId="1" groupVersion="1" securityMode="sign">
+        <message publishingInterval="200" groupId="1" groupVersion="1" securityMode="sign" securityGroupId="1">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="2">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -596,7 +596,7 @@ XML_PUBSUB_DUPLICATE_WRITERID = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign" securityGroupId="1">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="2">
                 <variable nodeId="ns=2;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -731,7 +731,7 @@ XML_PUBSUB_LOOP_FIXED_SIZE_MULTI_DSM = """<PubSub>
 
 XML_PUBSUB_LOOP_FIXED_SIZE_SIGNED = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign" publisherFixedSize="true">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign" securityGroupId="1" publisherFixedSize="true">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -741,7 +741,7 @@ XML_PUBSUB_LOOP_FIXED_SIZE_SIGNED = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign" securityGroupId="1">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -754,7 +754,7 @@ XML_PUBSUB_LOOP_FIXED_SIZE_SIGNED = """<PubSub>
 
 XML_PUBSUB_LOOP_FIXED_SIZE_SECU_FAIL = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt" publisherFixedSize="true">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt" securityGroupId="1" publisherFixedSize="true">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -1456,12 +1456,12 @@ def testPubSubDynamicConf(logger):
         helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_LOOP_FIXED_SIZE_MULTI_DSM, logger)
 
         # TC 30 : Test preencode mechanism with sign security
-        logger.begin_section("TC 30 : Publisher fixed size buffer signing sucurity mode")
+        logger.begin_section("TC 30 : Publisher fixed size buffer signing security mode")
 
         helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_LOOP_FIXED_SIZE_SIGNED, logger)
 
         # TC 31 : Test preencode mechanism with sign and encrypt security
-        logger.begin_section("TC 31 : Publisher fixed size buffer with sign and ecnrypt security fail")
+        logger.begin_section("TC 31 : Publisher fixed size buffer with sign and encrypt security fail")
 
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_FIXED_SIZE_SECU_FAIL, logger, possibleFail=True)
 
@@ -1766,9 +1766,6 @@ def testPubSubStaticConf(logger):
         retcode = -1 if logger.has_failed_tests else 0
         logger.finalize_report()
         sys.exit(retcode)
-
-
-
 
 if __name__=='__main__':
     argparser = argparse.ArgumentParser()
