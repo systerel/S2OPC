@@ -212,7 +212,8 @@ SOPC_ReaderGroup* SOPC_PubSubConnection_Get_ReaderGroup_At(const SOPC_PubSubConn
 SOPC_SecurityMode_Type SOPC_ReaderGroup_Get_SecurityMode(const SOPC_ReaderGroup* group);
 void SOPC_ReaderGroup_Set_SecurityMode(SOPC_ReaderGroup* group, SOPC_SecurityMode_Type mode);
 // make a copy of id
-bool SOPC_ReaderGroup_Set_SecurityGroupId(SOPC_ReaderGroup* group, char* securityGroupId);
+const char* SOPC_ReaderGroup_Get_SecurityGroupId(const SOPC_ReaderGroup* group);
+void SOPC_ReaderGroup_Set_SecurityGroupId(SOPC_ReaderGroup* group, const char* securityGroupId);
 bool SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(SOPC_ReaderGroup* group, uint32_t nb);
 uint32_t SOPC_ReaderGroup_Nb_SecurityKeyServices(const SOPC_ReaderGroup* group);
 SOPC_SecurityKeyServices* SOPC_ReaderGroup_Get_SecurityKeyServices_At(const SOPC_ReaderGroup* group, uint32_t index);
@@ -324,7 +325,8 @@ void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,
 SOPC_SecurityMode_Type SOPC_WriterGroup_Get_SecurityMode(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMode_Type mode);
 // make a copy of id
-bool SOPC_WriterGroup_Set_SecurityGroupId(SOPC_WriterGroup* group, char* securityGroupId);
+const char* SOPC_WriterGroup_Get_SecurityGroupId(const SOPC_WriterGroup* group);
+void SOPC_WriterGroup_Set_SecurityGroupId(SOPC_WriterGroup* group, const char* securityGroupId);
 bool SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(SOPC_WriterGroup* group, uint32_t nb);
 uint32_t SOPC_WriterGroup_Nb_SecurityKeyServices(const SOPC_WriterGroup* group);
 SOPC_SecurityKeyServices* SOPC_WriterGroup_Get_SecurityKeyServices_At(const SOPC_WriterGroup* group, uint32_t index);
