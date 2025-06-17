@@ -252,6 +252,7 @@ static void SOPC_SKManager_UpdateCurrentToken_Default(SOPC_SKManager_DefaultData
 
     SOPC_TimeReference currentTime = SOPC_TimeReference_GetCurrent();
     SOPC_TimeReference timeElapsed = currentTime - data->CurrentTokenTime;
+    SOPC_TimeReference overrunTime = 0;
 
     if (timeElapsed < data->CurrentTokenRemainingTime)
     {
@@ -263,22 +264,21 @@ static void SOPC_SKManager_UpdateCurrentToken_Default(SOPC_SKManager_DefaultData
     {
         // current token is obsolete. Find the next to use
 
-        // remove time of current token
-        timeElapsed = timeElapsed - data->CurrentTokenRemainingTime;
+        // compute overrun time for the current token after its remaining time
+        overrunTime = timeElapsed - data->CurrentTokenRemainingTime;
 
         // Number of Next Token Id obsolete
         SOPC_ASSERT(0 < data->KeyLifetime);
-        SOPC_TimeReference finishedNextToken = timeElapsed / data->KeyLifetime;
+        uint64_t nbRenewedTokenMissed = overrunTime / data->KeyLifetime;
         // Token Id are incremented by 1.
 
-        SOPC_TimeReference newCurrentTokenId = (data->CurrentTokenId + finishedNextToken + 1) % UINT32_MAX;
+        SOPC_TimeReference newCurrentTokenId = (data->CurrentTokenId + nbRenewedTokenMissed + 1) % UINT32_MAX;
         // If the CurrentTokenId increments past the maximum value of UInt32 it restarts a 1.
         newCurrentTokenId = (0 == newCurrentTokenId ? 1 : newCurrentTokenId);
         data->CurrentTokenId = (uint32_t) newCurrentTokenId;
         data->CurrentTokenTime = currentTime;
-        /* Substract Time consumed by finished token to time elapsed */
-        data->CurrentTokenRemainingTime =
-            (uint32_t)(data->KeyLifetime - (timeElapsed - finishedNextToken * data->KeyLifetime));
+        /* Substract overrun time from next remaining time */
+        data->CurrentTokenRemainingTime = (uint32_t)(data->KeyLifetime - (overrunTime % data->KeyLifetime));
         SOPC_ASSERT(data->CurrentTokenRemainingTime <= data->KeyLifetime);
     }
 }
@@ -306,13 +306,15 @@ static uint32_t SOPC_SKManager_GetAllKeysLifeTime_Default(SOPC_SKManager* skm)
         return 0;
     }
 
-    uint32_t nbAvailable = data->FirstTokenId + SOPC_SKManager_Size(skm) - data->CurrentTokenId;
+    // Nb available = Number of stored keys - already used keys
+    uint32_t nbAvailable = SOPC_SKManager_Size(skm) - (data->CurrentTokenId - data->FirstTokenId);
 
     uint32_t result = UINT32_MAX;
     if (data->CurrentTokenRemainingTime <= UINT32_MAX - (data->KeyLifetime * (nbAvailable - 1)))
     {
+        // Current key remaining time + next available keys lifetime
         result = data->CurrentTokenRemainingTime + (data->KeyLifetime * (nbAvailable - 1));
-    }
+    } // else: available lifetime > UINT32_MAX => return UINT32_MAX
 
     SOPC_Mutex_Unlock(&data->mutex);
 
