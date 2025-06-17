@@ -27,6 +27,36 @@
 #include "sopc_pubsub_sks.h"
 #include "sopc_sk_secu_group_managers.h"
 
+void SOPC_PubSubSKS_Init(void)
+{
+    // Initialize the SK Managers for security groups
+    SOPC_SK_SecurityGroup_Managers_Init();
+}
+
+void SOPC_PubSubSKS_Clear(void)
+{
+    // Clear the SK Managers for security groups
+    SOPC_SK_SecurityGroup_Managers_Clear();
+}
+
+bool SOPC_PubSubSKS_AddSkManager(const char* securityGroupId, SOPC_SKManager* skm)
+{
+    if (NULL == securityGroupId)
+    {
+        return false;
+    }
+
+    SOPC_SKManager* prevSkManager = SOPC_SK_SecurityGroup_GetSkManager(securityGroupId);
+    bool result = SOPC_SK_SecurityGroup_SetSkManager(securityGroupId, skm);
+    if (result && NULL != prevSkManager)
+    {
+        // If a previous SK Manager exists, delete it
+        SOPC_SKManager_Clear(prevSkManager);
+        SOPC_Free(prevSkManager);
+    }
+    return result;
+}
+
 SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupid, uint32_t tokenId)
 {
     // result
@@ -100,4 +130,125 @@ void SOPC_PubSubSKS_Keys_Delete(SOPC_PubSubSKS_Keys* keys)
         SOPC_SecretBuffer_DeleteClear(keys->keyNonce);
         keys->keyNonce = NULL;
     }
+}
+
+static bool mayAddSecurityGroupId(const char* securityGroupId)
+{
+    SOPC_ASSERT(NULL != securityGroupId);
+    bool result = true;
+    if (NULL == SOPC_SK_SecurityGroup_GetSkManager(securityGroupId))
+    {
+        SOPC_SKManager* skm = SOPC_SKManager_Create(securityGroupId, 0);
+
+        if (NULL != skm)
+        {
+            result = SOPC_PubSubSKS_AddSkManager(securityGroupId, skm);
+        }
+        else
+        {
+            SOPC_SKManager_Clear(skm);
+            SOPC_Free(skm);
+            result = false;
+        }
+    }
+    return result;
+}
+
+bool SOPC_PubSubSKS_CreateManagersFromConfig(const SOPC_PubSubConfiguration* pubSubConfig)
+{
+    if (NULL == pubSubConfig)
+    {
+        return false;
+    }
+
+    bool result = true;
+
+    // Process publisher connections
+    for (uint32_t i = 0; i < SOPC_PubSubConfiguration_Nb_PubConnection(pubSubConfig); i++)
+    {
+        const SOPC_PubSubConnection* pubConnection = SOPC_PubSubConfiguration_Get_PubConnection_At(pubSubConfig, i);
+
+        // Check writer groups
+        for (uint16_t j = 0; j < SOPC_PubSubConnection_Nb_WriterGroup(pubConnection); j++)
+        {
+            const SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(pubConnection, j);
+            const char* securityGroupId = SOPC_WriterGroup_Get_SecurityGroupId(group);
+
+            if (NULL == securityGroupId && SOPC_SecurityMode_None != SOPC_WriterGroup_Get_SecurityMode(group))
+            {
+                result = false;
+            }
+            else if (NULL != securityGroupId && result)
+            {
+                // Ensure the security group id is added to the SKManager
+                result = mayAddSecurityGroupId(securityGroupId);
+            }
+        }
+    }
+
+    // Process subscriber connections
+    for (uint32_t i = 0; i < SOPC_PubSubConfiguration_Nb_SubConnection(pubSubConfig); i++)
+    {
+        const SOPC_PubSubConnection* subConnection = SOPC_PubSubConfiguration_Get_SubConnection_At(pubSubConfig, i);
+
+        // Check reader groups
+        for (uint16_t j = 0; j < SOPC_PubSubConnection_Nb_ReaderGroup(subConnection); j++)
+        {
+            const SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(subConnection, j);
+            const char* securityGroupId = SOPC_ReaderGroup_Get_SecurityGroupId(group);
+
+            if (NULL == securityGroupId && SOPC_SecurityMode_None != SOPC_ReaderGroup_Get_SecurityMode(group))
+            {
+                result = false;
+            }
+            else if (NULL != securityGroupId && result)
+            {
+                // Ensure the security group id is added to the SKManager
+                result = mayAddSecurityGroupId(securityGroupId);
+            }
+        }
+    }
+
+    return result;
+}
+
+typedef struct
+{
+    SOPC_SKscheduler* scheduler;
+    SOPC_SKBuilder* builder;
+    SOPC_SKProvider* provider;
+    uint32_t msPeriod;
+    bool result;
+} AddTaskContext;
+
+static void addTask(const char* securityGroupId, SOPC_SKManager* manager, void* userData)
+{
+    SOPC_UNUSED_ARG(securityGroupId);
+    AddTaskContext* ctx = (AddTaskContext*) userData;
+    if (!ctx->result)
+    {
+        return; // Stop on first error
+    }
+
+    SOPC_ReturnStatus status =
+        SOPC_SKscheduler_AddTask(ctx->scheduler, ctx->builder, ctx->provider, manager, ctx->msPeriod);
+    ctx->result = (SOPC_STATUS_OK == status);
+}
+
+bool SOPC_PubSubSKS_AddTasks(SOPC_SKscheduler* scheduler,
+                             SOPC_SKBuilder* builder,
+                             SOPC_SKProvider* provider,
+                             uint32_t msFirstUpdate)
+{
+    if (NULL == scheduler || NULL == builder || NULL == provider)
+    {
+        return false;
+    }
+
+    AddTaskContext context = {
+        .scheduler = scheduler, .builder = builder, .provider = provider, .msPeriod = msFirstUpdate, .result = true};
+
+    SOPC_SecurityGroup_ForEach(addTask, &context);
+
+    return context.result;
 }

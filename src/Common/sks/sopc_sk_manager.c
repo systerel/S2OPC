@@ -521,7 +521,7 @@ static void SOPC_SKManager_Clear_Default(SOPC_SKManager* skm)
 
 /*** API FUNCTIONS ***/
 
-SOPC_SKManager* SOPC_SKManager_Create(const char* securityGroupId)
+SOPC_SKManager* SOPC_SKManager_Create(const char* securityGroupId, uintptr_t userData)
 {
     SOPC_SKManager* skm = SOPC_Malloc(sizeof(SOPC_SKManager));
     if (NULL == skm)
@@ -530,6 +530,7 @@ SOPC_SKManager* SOPC_SKManager_Create(const char* securityGroupId)
     }
 
     skm->securityGroupId = SOPC_strdup(securityGroupId);
+    skm->userData = userData;
     skm->data = SOPC_Calloc(1, sizeof(SOPC_SKManager_DefaultData));
     if (NULL == skm->securityGroupId || NULL == skm->data)
     {

@@ -641,7 +641,9 @@ static void clearPubSub(void)
     SOPC_PubScheduler_Stop();
     gSubStarted = false;
 
-    SOPC_SK_SecurityGroup_Managers_Clear();
+    SOPC_PubSubSKS_Clear();
+    SOPC_SKManager_Clear(g_skmanager);
+    SOPC_Free(g_skmanager);
     g_skmanager = NULL;
 
     Cache_Clear();
@@ -684,7 +686,7 @@ static bool Server_SetTargetVariables(const OpcUa_WriteValue* lwv, const int32_t
 static SOPC_SKManager* createSKmanager(void)
 {
     /* Create Service Keys manager and set constant keys */
-    SOPC_SKManager* skm = SOPC_SKManager_Create("");
+    SOPC_SKManager* skm = SOPC_SKManager_Create("", 0);
     SOPC_ASSERT(NULL != skm && "SOPC_SKManager_Create failed");
     uint32_t nbKeys = 0;
     SOPC_Buffer* keysBuffer =
@@ -736,6 +738,30 @@ static SOPC_SKManager* createSKmanager(void)
     return skm;
 }
 
+static void createManagersFromConfig(const SOPC_PubSubConfiguration* pubSubConfig)
+{
+    SOPC_ASSERT(NULL != pubSubConfig);
+
+    // Process publisher connections
+    for (uint32_t i = 0; i < SOPC_PubSubConfiguration_Nb_PubConnection(pubSubConfig); i++)
+    {
+        SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(pubSubConfig, i);
+
+        // Check writer groups
+        for (uint16_t j = 0; j < SOPC_PubSubConnection_Nb_WriterGroup(connection); j++)
+        {
+            SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
+            const char* securityGroupId = SOPC_WriterGroup_Get_SecurityGroupId(group);
+            SOPC_ASSERT(NULL != securityGroupId || SOPC_SecurityMode_None == SOPC_WriterGroup_Get_SecurityMode(group));
+            bool res = SOPC_PubSubSKS_AddSkManager(securityGroupId, createSKmanager());
+            SOPC_ASSERT(res && "SOPC_PubSubSKS_AddSkManager failed");
+        }
+    }
+
+    // We do not add any SKM for the Sub connection since this applicative contains both Pub and Sub
+    // (only one SecurityGroupId)
+}
+
 /*****************************************************
  * @brief Creates and setup the PubSub, using KConfig parameters
  */
@@ -756,9 +782,8 @@ static void setupPubSub(void)
     /* PubSub Security Keys configuration */
     g_skmanager = createSKmanager();
     SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
-    SOPC_SK_SecurityGroup_Managers_Init();
-    SOPC_SK_SecurityGroup_SetSkManager("1", g_skmanager);
-
+    SOPC_PubSubSKS_Init();
+    createManagersFromConfig(pPubSubConfig);
     Cache_Initialize(pPubSubConfig, true);
 }
 

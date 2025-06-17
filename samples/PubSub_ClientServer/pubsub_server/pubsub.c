@@ -60,8 +60,6 @@
 
 typedef struct SOPC_SKS_Local_Configuration
 {
-    char* securityGroupId;
-
     // array of SOPC_SecurityKeyServices. Data should not be cleared.
     SOPC_Array* sksArray;
 
@@ -78,8 +76,6 @@ static SOPC_PubSubConfiguration* g_pPubSubConfig = NULL;
 static SOPC_SubTargetVariableConfig* g_pTargetConfig = NULL;
 static SOPC_PubSourceVariableConfig* g_pSourceConfig = NULL;
 static SOPC_SKscheduler* g_skScheduler = NULL;
-static SOPC_SKManager* g_skManager1 = NULL;
-static SOPC_SKManager* g_skManager2 = NULL;
 static SOPC_SKProvider* g_skProvider = NULL;
 static bool g_isSecurity = false;
 static bool g_isSks = false;
@@ -388,11 +384,8 @@ static bool PubSub_SKS_Start(void)
     bool sksOK = (NULL != g_skProvider);
     if (sksOK)
     {
-        printf("Providers set\n");
-        // TODO: take the securityGroupId from the config xml
-        g_skManager1 = SOPC_SKManager_Create("1");
-        g_skManager2 = SOPC_SKManager_Create("2");
-        sksOK = (NULL != g_skManager1 && NULL != g_skManager2);
+        SOPC_PubSubSKS_Init();
+        sksOK = SOPC_PubSubSKS_CreateManagersFromConfig(g_pPubSubConfig);
     }
     if (sksOK)
     {
@@ -410,15 +403,8 @@ static bool PubSub_SKS_Start(void)
     // Create a SK Scheduler with two tasks : call GetSecurityKeys and replace all keys
     if (sksOK)
     {
-        status = SOPC_SKscheduler_AddTask(g_skScheduler, builder, g_skProvider, g_skManager1,
-                                          PUBSUB_SCHEDULER_FIRST_MSPERIOD); // Start with 3s
-        sksOK = (SOPC_STATUS_OK == status);
-    }
-    if (sksOK)
-    {
-        status = SOPC_SKscheduler_AddTask(g_skScheduler, builder, g_skProvider, g_skManager2,
-                                          PUBSUB_SCHEDULER_FIRST_MSPERIOD); // Start with 3s
-        sksOK = (SOPC_STATUS_OK == status);
+        sksOK = SOPC_PubSubSKS_AddTasks(g_skScheduler, builder, g_skProvider,
+                                        PUBSUB_SCHEDULER_FIRST_MSPERIOD); // Start with 3s
     }
 
     if (!sksOK)
@@ -438,13 +424,6 @@ static bool PubSub_SKS_Start(void)
         Client_Start();
         status = SOPC_SKscheduler_Start(g_skScheduler);
         sksOK = (SOPC_STATUS_OK == status);
-    }
-
-    if (sksOK)
-    {
-        SOPC_SK_SecurityGroup_Managers_Init();
-        SOPC_SK_SecurityGroup_SetSkManager(g_skManager1->securityGroupId, g_skManager1);
-        SOPC_SK_SecurityGroup_SetSkManager(g_skManager2->securityGroupId, g_skManager2);
     }
 
     return sksOK;
@@ -508,13 +487,11 @@ void PubSub_Stop(void)
 
     Client_Stop();
 
-    SOPC_SK_SecurityGroup_Managers_Clear();
-    g_skManager1 = NULL;
-    g_skManager2 = NULL;
     SOPC_SKscheduler_StopAndClear(g_skScheduler);
     SOPC_Free(g_skScheduler);
     g_skScheduler = NULL;
     g_skProvider = NULL; // cleared by scheduler
+    SOPC_PubSubSKS_Clear();
 
     // Force Disabled after stop in case Sub scheduler was not start (no management of the status)
     Server_SetSubStatusSync(SOPC_PubSubState_Disabled);
@@ -682,7 +659,6 @@ static SOPC_SKS_Local_Configuration* SOPC_SKS_Local_Configuration_Create(void)
     allocSuccess = (NULL != result);
     if (allocSuccess)
     {
-        result->securityGroupId = NULL; /* Security group id are not managed */
         result->sksArray = SOPC_Array_Create(sizeof(SOPC_SecurityKeyServices*), 1, NULL);
         allocSuccess = (NULL != result->sksArray);
     }
@@ -714,8 +690,6 @@ static void SOPC_SKS_Local_Configuration_Clear(SOPC_SKS_Local_Configuration* con
         return;
     }
 
-    SOPC_Free(config->securityGroupId);
-    config->securityGroupId = NULL;
     SOPC_Array_Delete(config->sksArray);
     config->sksArray = NULL;
     SOPC_Array_Delete(config->readerGroupArray);

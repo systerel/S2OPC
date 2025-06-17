@@ -389,8 +389,8 @@ int main(int argc, char* argv[])
     /* Init SK Manager */
     if (SOPC_STATUS_OK == status)
     {
-        skManager1 = SOPC_SKManager_Create("1");
-        skManager2 = SOPC_SKManager_Create("2");
+        skManager1 = SOPC_SKManager_Create("1", 0);
+        skManager2 = SOPC_SKManager_Create("2", 0);
         if (NULL == skManager1 || NULL == skManager2)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
