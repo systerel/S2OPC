@@ -41,6 +41,7 @@ bool g_init = false;
 
 static uint64_t str_hash(const uintptr_t data)
 {
+    SOPC_ASSERT((void*) data != NULL); // Ensured by SOPC_Dict_Create since empty key is NULL it is always excluded
     return SOPC_DJBHash((const uint8_t*) data, strlen((const char*) data));
 }
 
@@ -93,22 +94,22 @@ void SOPC_SK_SecurityGroup_Managers_Clear(void)
     g_init = false;
 }
 
-void SOPC_SK_SecurityGroup_SetSkManager(const char* securityGroupid, SOPC_SKManager* skm)
+bool SOPC_SK_SecurityGroup_SetSkManager(const char* securityGroupId, SOPC_SKManager* skm)
 {
-    if (!g_init || NULL == securityGroupid || NULL == skm || (uintptr_t) securityGroupid == DICT_TOMBSTONE)
+    if (!g_init || NULL == securityGroupId || NULL == skm || (uintptr_t) securityGroupId == DICT_TOMBSTONE)
     {
         // Do not set a SKManager if the service is not initialized or if parameters are invalid
-        return;
+        return false;
     }
-    char* secuGroupId = SOPC_strdup(securityGroupid);
+    char* secuGroupId = SOPC_strdup(securityGroupId);
     if (NULL == secuGroupId)
     {
-        return;
+        return false;
     }
     SOPC_Mutex_Lock(&g_mutex);
     bool res = SOPC_Dict_Insert(g_dict_skManagers, (uintptr_t) secuGroupId, (uintptr_t) skm);
-    SOPC_ASSERT(res); // shall not fail as we checked parameters previously
     SOPC_Mutex_Unlock(&g_mutex);
+    return res;
 }
 
 SOPC_SKManager* SOPC_SK_SecurityGroup_GetSkManager(const char* securityGroupid)
@@ -119,4 +120,33 @@ SOPC_SKManager* SOPC_SK_SecurityGroup_GetSkManager(const char* securityGroupid)
         return NULL;
     }
     return (SOPC_SKManager*) SOPC_Dict_Get(g_dict_skManagers, (const uintptr_t) securityGroupid, NULL);
+}
+
+typedef struct
+{
+    SOPC_SecurityGroup_ForEachCb pFunc;
+    void* userData;
+} SOPC_SecurityGroup_ForEachContext;
+
+static void forEach_group(const uintptr_t key, uintptr_t value, uintptr_t context)
+{
+    SOPC_SecurityGroup_ForEachContext* ctx = (SOPC_SecurityGroup_ForEachContext*) context;
+    const char* securityGroupId = (const char*) key;
+    SOPC_SKManager* manager = (SOPC_SKManager*) value;
+
+    ctx->pFunc(securityGroupId, manager, ctx->userData);
+}
+
+void SOPC_SecurityGroup_ForEach(SOPC_SecurityGroup_ForEachCb pFunc, void* userData)
+{
+    if (!g_init || NULL == pFunc)
+    {
+        return;
+    }
+
+    SOPC_SecurityGroup_ForEachContext context = {.pFunc = pFunc, .userData = userData};
+
+    SOPC_Mutex_Lock(&g_mutex);
+    SOPC_Dict_ForEach(g_dict_skManagers, forEach_group, (uintptr_t) &context);
+    SOPC_Mutex_Unlock(&g_mutex);
 }

@@ -55,8 +55,10 @@ void SOPC_SK_SecurityGroup_Managers_Clear(void);
  *
  * \warning if this function is called several times with the same security group identifier,
  *          the previous manager is discarded.
+ *
+ * \return true if the manager was set successfully, false in case of NULL parameter or OOM.
  */
-void SOPC_SK_SecurityGroup_SetSkManager(const char* securityGroupid, SOPC_SKManager* skm);
+bool SOPC_SK_SecurityGroup_SetSkManager(const char* securityGroupId, SOPC_SKManager* skm);
 
 /**
  * \brief Get the Security Keys Manager associated with the given security group identifier
@@ -67,5 +69,21 @@ void SOPC_SK_SecurityGroup_SetSkManager(const char* securityGroupid, SOPC_SKMana
  *         NULL otherwise
  */
 SOPC_SKManager* SOPC_SK_SecurityGroup_GetSkManager(const char* securityGroupid);
+
+/**
+ * \brief Function type to provide for calling ::SOPC_SecurityGroup_ForEach
+ * \param securityGroupId  The security group identifier string
+ * \param manager         Associated SK Manager
+ * \param userData        User data passed to ForEach function
+ */
+typedef void (*SOPC_SecurityGroup_ForEachCb)(const char* securityGroupId, SOPC_SKManager* manager, void* userData);
+
+/**
+ * \brief Execute a function for each security group manager
+ *
+ * \param pFunc     The function to execute for each pair (securityGroupId, manager)
+ * \param userData  User data passed to the function
+ */
+void SOPC_SecurityGroup_ForEach(SOPC_SecurityGroup_ForEachCb pFunc, void* userData);
 
 #endif /* SOPC_SK_SECU_GROUP_MANAGERS_H_ */
