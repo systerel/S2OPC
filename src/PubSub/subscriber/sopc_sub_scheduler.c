@@ -1185,7 +1185,8 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
     /* Keys is not set or new token id used by this publisher */
     if (NULL == readerCtx->security.groupKeys || tokenId > readerCtx->security.groupKeys->tokenId)
     {
-        SOPC_PubSubSKS_Keys* keys = SOPC_PubSubSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, tokenId);
+        // Do we really need this ? Keys must be retrieved from pubCtx. If not, find a way to get the ReaderGroup.
+        SOPC_PubSubSKS_Keys* keys = SOPC_PubSubSKS_GetSecurityKeys("1", tokenId);
         if (NULL != keys && tokenId == keys->tokenId)
         {
             security = &readerCtx->security;

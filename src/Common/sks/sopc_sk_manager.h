@@ -169,7 +169,7 @@ uint32_t SOPC_SKManager_AddKeys(SOPC_SKManager* skm, SOPC_ByteString* Keys, uint
  *  \brief          Gets Keys of a Security Keys Manager for a given security group.
  *                  All returned data are copied by this function. The caller is responsible for deleting these data.
  *
- *  \param skm                Pointer to Security Keys Manager. Should not be NULL
+ *  \param securityGroupId    SecurityGroupId
  *  \param StartingTokenId    The current token is requested by passing 0. It can be a SecurityTokenId from the past to
  * get a key valid for previously sent messages
  *  \param NbRequestedToken   The number of requested keys tokens which should be returned in the response
@@ -195,7 +195,7 @@ SOPC_ReturnStatus SOPC_SKManager_GetKeys(SOPC_SKManager* skm,
  *  \brief          Returns the total remaining lifetime of available keys tokens.
  *
  *  \param skm      Pointer to Security Keys Manager. Should not be NULL
- *  \return         Total remaining lifetime in milliseconds
+ *  \return         Total remaining lifetime in milliseconds or it shall be 0 in case of error or no key available
  */
 uint32_t SOPC_SKManager_GetAllKeysLifeTime(SOPC_SKManager* skm);
 
