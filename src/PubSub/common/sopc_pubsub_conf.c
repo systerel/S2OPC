@@ -642,11 +642,24 @@ void SOPC_ReaderGroup_Set_SecurityMode(SOPC_ReaderGroup* group, SOPC_SecurityMod
     group->securityMode = mode;
 }
 
-bool SOPC_ReaderGroup_Set_SecurityGroupId(SOPC_ReaderGroup* group, char* securityGroupId)
+const char* SOPC_ReaderGroup_Get_SecurityGroupId(const SOPC_ReaderGroup* group)
 {
     SOPC_ASSERT(NULL != group);
-    group->securityGroupId = SOPC_PubSub_String_Copy(securityGroupId);
-    return (NULL != group->securityGroupId);
+    return group->securityGroupId;
+}
+
+void SOPC_ReaderGroup_Set_SecurityGroupId(SOPC_ReaderGroup* group, const char* securityGroupId)
+{
+    SOPC_ASSERT(NULL != group);
+    if (NULL == securityGroupId)
+    {
+        group->securityGroupId = NULL;
+    }
+    else
+    {
+        group->securityGroupId = SOPC_PubSub_String_Copy(securityGroupId);
+        SOPC_ASSERT(NULL != group->securityGroupId);
+    }
 }
 
 bool SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(SOPC_ReaderGroup* group, uint32_t nb)
@@ -1035,11 +1048,24 @@ void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMod
     group->securityMode = mode;
 }
 
-bool SOPC_WriterGroup_Set_SecurityGroupId(SOPC_WriterGroup* group, char* securityGroupId)
+const char* SOPC_WriterGroup_Get_SecurityGroupId(const SOPC_WriterGroup* group)
 {
     SOPC_ASSERT(NULL != group);
-    group->securityGroupId = SOPC_PubSub_String_Copy(securityGroupId);
-    return (NULL != group->securityGroupId);
+    return group->securityGroupId;
+}
+
+void SOPC_WriterGroup_Set_SecurityGroupId(SOPC_WriterGroup* group, const char* securityGroupId)
+{
+    SOPC_ASSERT(NULL != group);
+    if (NULL == securityGroupId)
+    {
+        group->securityGroupId = NULL;
+    }
+    else
+    {
+        group->securityGroupId = SOPC_PubSub_String_Copy(securityGroupId);
+        SOPC_ASSERT(NULL != group->securityGroupId);
+    }
 }
 
 bool SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(SOPC_WriterGroup* group, uint32_t nb)
