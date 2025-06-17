@@ -38,6 +38,7 @@
  */
 typedef struct SOPC_PubSub_SecurityType
 {
+    char* securityGroupId;
     SOPC_SecurityMode_Type mode;
     SOPC_CryptoProvider* provider;
     SOPC_PubSubSKS_Keys* groupKeys;

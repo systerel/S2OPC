@@ -92,10 +92,10 @@ static void set_subscriber_security_info(const char* securityGroupId)
     gSubSecurityType.provider = SOPC_CryptoProvider_CreatePubSub(SOPC_SecurityPolicy_PubSub_Aes256_URI);
 }
 
-static SOPC_SKManager* createSKmanager(void)
+static SOPC_SKManager* createSKmanager(const char* securityGroupId)
 {
     /* Create Service Keys manager and set constant keys */
-    SOPC_SKManager* skm = SOPC_SKManager_Create();
+    SOPC_SKManager* skm = SOPC_SKManager_Create(securityGroupId);
     SOPC_ASSERT(NULL != skm && "SOPC_SKManager_Create failed");
     uint32_t nbKeys = 0;
     SOPC_Buffer* keysBuffer = SOPC_Buffer_Create(sizeof(signingKey) + sizeof(encryptingKey) + sizeof(keyNonce));
@@ -163,17 +163,10 @@ static void setupConnection(void)
     subReader = SOPC_PubSubConnection_Get_ReaderGroup_At(subConnection, 0);
 
     /* PubSub Security Keys configuration */
-<<<<<<< Updated upstream
-    g_skmanager = createSKmanager();
-    SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
-    SOPC_PubSubSKS_Init();
-    SOPC_PubSubSKS_SetSkManager(securityGroupId, g_skmanager);
-=======
     SOPC_PubSubSKS_Init();
     g_skmanager = createSKmanager(SECURITY_GROUP_ID);
     SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
     SOPC_PubSubSKS_AddSkManager(g_skmanager->securityGroupId, g_skmanager);
->>>>>>> Stashed changes
 
     if (SECU_NONE == gSubSecuMode)
     {
@@ -242,7 +235,7 @@ static void printVariant(const SOPC_Variant* variant)
 
 static void clear_setupConnection(void)
 {
-    SOPC_PubSubSKS_Clear();
+    SOPC_SK_SecurityGroup_Managers_Clear();
     g_skmanager = NULL;
 }
 

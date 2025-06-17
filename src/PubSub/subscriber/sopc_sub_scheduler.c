@@ -29,6 +29,7 @@
 #include "sopc_eth_sockets.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -132,6 +133,7 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ct
  */
 static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Reader_Ctx_Create(const SOPC_Conf_PublisherId* pubId,
                                                                                   uint16_t writerGroupId,
+                                                                                  const char* securityGroupId,
                                                                                   SOPC_SecurityMode_Type mode);
 
 /**
@@ -1185,8 +1187,7 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
     /* Keys is not set or new token id used by this publisher */
     if (NULL == readerCtx->security.groupKeys || tokenId > readerCtx->security.groupKeys->tokenId)
     {
-        // Do we really need this ? Keys must be retrieved from pubCtx. If not, find a way to get the ReaderGroup.
-        SOPC_PubSubSKS_Keys* keys = SOPC_PubSubSKS_GetSecurityKeys("1", tokenId);
+        SOPC_PubSubSKS_Keys* keys = SOPC_PubSubSKS_GetSecurityKeys(readerCtx->security.securityGroupId, tokenId);
         if (NULL != keys && tokenId == keys->tokenId)
         {
             security = &readerCtx->security;
@@ -1258,7 +1259,8 @@ static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
         {
             // not found, create a new one
             readerCtx =
-                SOPC_SubScheduler_Reader_Ctx_Create(pubId, writerGroupId, SOPC_ReaderGroup_Get_SecurityMode(group));
+                SOPC_SubScheduler_Reader_Ctx_Create(pubId, writerGroupId, SOPC_ReaderGroup_Get_SecurityGroupId(group),
+                                                    SOPC_ReaderGroup_Get_SecurityMode(group));
             if (NULL != readerCtx)
             {
                 SOPC_UNUSED_RESULT(SOPC_Array_Append(pubCtx->readers, readerCtx));
@@ -1283,6 +1285,7 @@ static void SOPC_SubScheduler_Pub_Ctx_Clear(SOPC_SubScheduler_Security_Pub_Ctx* 
 
 static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Reader_Ctx_Create(const SOPC_Conf_PublisherId* pubId,
                                                                                   uint16_t writerGroupId,
+                                                                                  const char* securityGroupId,
                                                                                   SOPC_SecurityMode_Type mode)
 {
     SOPC_SubScheduler_Security_Reader_Ctx* ctx = SOPC_Calloc(1, sizeof(SOPC_SubScheduler_Security_Reader_Ctx));
@@ -1296,11 +1299,12 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Reader_Ctx_Creat
 
     // Init Security Infos
     SOPC_ASSERT(SOPC_SecurityMode_Invalid != mode && SOPC_SecurityMode_None != mode);
+    ctx->security.securityGroupId = SOPC_strdup(securityGroupId);
     ctx->security.mode = mode;
     ctx->security.sequenceNumber = 0;
     ctx->security.groupKeys = NULL;
     ctx->security.provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
-    if (NULL == ctx->security.provider)
+    if (NULL == ctx->security.provider || NULL == ctx->security.securityGroupId)
     {
         SOPC_PubSub_Security_Clear(&ctx->security);
         SOPC_Free(ctx);

@@ -90,6 +90,7 @@ SOPC_SecureConnection_Config* Client_AddSecureConnectionConfig(const char* endpo
  *  If Client_GetSecurityKeys() is running when Client_Stop() is called, it returns SOPC_STATUS_INVALID_STATE.
  *
  * \param SecureChannel_Id    Endpoint connection configuration index provided by Client_AddSecureConnectionConfig()
+ * \param securityGroupId     SecurityGroupId to use as parameter of the method
  * \param StartingTokenId     Requested Starting Token ID
  * \param RequestedKeys       Number of requested Keys
  * \param response            A valid pointer of a Structure where received data will be copied
@@ -97,6 +98,7 @@ SOPC_SecureConnection_Config* Client_AddSecureConnectionConfig(const char* endpo
  * \return                    SOPC_STATUS_OK in case of success, error status otherwise
  */
 SOPC_ReturnStatus Client_GetSecurityKeys(SOPC_SecureConnection_Config* config,
+                                         const char* securityGroupId,
                                          uint32_t StartingTokenId,
                                          uint32_t requestedKeys,
                                          Client_SKS_GetKeys_Response* response);

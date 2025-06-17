@@ -22,6 +22,7 @@
 
 #include "sopc_array.h"
 #include "sopc_assert.h"
+#include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_sk_manager.h"
@@ -520,7 +521,7 @@ static void SOPC_SKManager_Clear_Default(SOPC_SKManager* skm)
 
 /*** API FUNCTIONS ***/
 
-SOPC_SKManager* SOPC_SKManager_Create(void)
+SOPC_SKManager* SOPC_SKManager_Create(const char* securityGroupId)
 {
     SOPC_SKManager* skm = SOPC_Malloc(sizeof(SOPC_SKManager));
     if (NULL == skm)
@@ -528,9 +529,12 @@ SOPC_SKManager* SOPC_SKManager_Create(void)
         return NULL;
     }
 
+    skm->securityGroupId = SOPC_strdup(securityGroupId);
     skm->data = SOPC_Calloc(1, sizeof(SOPC_SKManager_DefaultData));
-    if (NULL == skm->data)
+    if (NULL == skm->securityGroupId || NULL == skm->data)
     {
+        SOPC_Free(skm->securityGroupId);
+        SOPC_Free(skm->data);
         SOPC_Free(skm);
         return NULL;
     }
@@ -651,5 +655,7 @@ void SOPC_SKManager_Clear(SOPC_SKManager* skm)
     if (NULL != skm && NULL != skm->ptrClear)
     {
         skm->ptrClear(skm);
+        SOPC_Free(skm->securityGroupId);
+        skm->securityGroupId = NULL;
     }
 }

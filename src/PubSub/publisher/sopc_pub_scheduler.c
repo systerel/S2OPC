@@ -674,24 +674,25 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
                 SOPC_PubSubSKS_Keys_Delete(security->groupKeys);
                 SOPC_Free(security->groupKeys);
             }
-            security->groupKeys =
-                SOPC_PubSubSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, SOPC_PUBSUB_SKS_CURRENT_TOKENID);
-            bool allocSuccess = (NULL != security->groupKeys);
-
+            security->groupKeys = SOPC_PubSubSKS_GetSecurityKeys(SOPC_WriterGroup_Get_SecurityGroupId(group),
+                                                                 SOPC_PUBSUB_SKS_CURRENT_TOKENID);
             // Update Nonce Random part
-            if (allocSuccess)
+            if (NULL != security->groupKeys)
             {
                 security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
-                allocSuccess = (NULL != security->msgNonceRandom);
-                if (allocSuccess)
+                if (NULL != security->msgNonceRandom)
                 {
                     security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
                     pubSchedulerCtx.sequenceNumber++;
                 }
+                else
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher failed to generate NONCE");
+                }
             }
             else
             {
-                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "# ERROR: Publisher failed to get security keys \n");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher failed to get security keys");
             }
         }
 

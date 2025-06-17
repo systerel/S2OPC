@@ -257,8 +257,8 @@ void suite_test_publisher_subscriber(int* index)
     SOPC_SKManager* skmanager = createSKmanager();
     SOPC_ASSERT(NULL != skmanager);
 
-    SOPC_PubSubSKS_Init();
-    SOPC_PubSubSKS_SetSkManager("1", skmanager);
+    SOPC_SK_SecurityGroup_Managers_Init();
+    SOPC_SK_SecurityGroup_SetSkManager("1", skmanager);
 
     const uint32_t nbPublisher = SOPC_PubSubConfiguration_Nb_PubConnection(config);
     SOPC_ASSERT(0 != nbPublisher);
@@ -296,10 +296,8 @@ void suite_test_publisher_subscriber(int* index)
 
     SOPC_PubScheduler_Stop();
     SOPC_SubScheduler_Stop();
-    SOPC_SKManager_Clear(skmanager);
-    SOPC_Free(skmanager);
+    SOPC_SK_SecurityGroup_Managers_Clear();
     skmanager = NULL;
-    SOPC_PubSubSKS_Clear();
     SOPC_PubSourceVariableConfig_Delete(sourceConfig);
     sourceConfig = NULL;
     SOPC_SubTargetVariableConfig_Delete(targetConfig);

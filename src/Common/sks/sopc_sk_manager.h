@@ -19,8 +19,8 @@
 
 /**
  * \file
- * \brief Security Keys Manager: manages local storage of the keys retrieved from the Security Keys Provider for the
- * SKS.
+ * \brief Security Keys Manager: manages local storage of the keys retrieved from the Security Keys Provider,
+ *        a manager is associated to only 1 security group.
  *
  *  \note Keys can be set or appended to previous ones
  */
@@ -91,16 +91,19 @@ struct SOPC_SKManager
     SOPC_SKManager_AddKeys_Func ptrAddKeys;                /** add a new keys */
     SOPC_SKManager_GetKeys_Func ptrGetKeys;                /** get  keys */
     SOPC_SKManager_GetAllKeysLifeTime_Func ptrGetAllKeysLifeTime;
-    SOPC_SKManager_Clear_Func ptrClear; /** startingToken, nb of key  */
-    void* data;                         /**< data bytes */
+    SOPC_SKManager_Clear_Func ptrClear; /**< startingToken, nb of key  */
+    char* securityGroupId; /**< Security Group Id, used to identify the group of keys managed by this SKManager */
+    void* data;            /**< data containing keys content and state */
 };
 
 /**
- * \brief  Creates an instance of the default SOPC_SKManager
+ * \brief  Creates an instance of the default SOPC_SKManager for the given security group id.
+ *
+ * \param securityGroupId  The security group id for which the keys are managed
  *
  * \return a SOPC_SKManager object or NULL if not enough memory
  */
-SOPC_SKManager* SOPC_SKManager_Create(void);
+SOPC_SKManager* SOPC_SKManager_Create(const char* securityGroupId);
 
 /**
  *  \brief          Gets number of managed Token for a given security group
@@ -119,6 +122,15 @@ uint32_t SOPC_SKManager_Size(SOPC_SKManager* skm);
  *  \return             SOPC_STATUS_OK if keys tokens lifetime set
  */
 SOPC_ReturnStatus SOPC_SKManager_SetKeyLifetime(SOPC_SKManager* skm, uint32_t KeyLifetime);
+
+/**
+ * \brief                     Sets the security group id managed by this security keys manager
+ *
+ *  \param skm                Pointer to Security Keys Manager. Should not be NULL
+ *  \param securityGroupId    The security group id for which the keys are managed
+ *  \return                   SOPC_STATUS_OK if security group id set
+ */
+SOPC_ReturnStatus SOPC_SKManager_SetSecurityGroupId(SOPC_SKManager* skm, SOPC_String* securityGroupId);
 
 /**
  *  \brief                    Sets the security policy URI for the security keys tokens

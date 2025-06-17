@@ -56,6 +56,7 @@ typedef struct SOPC_SKProvider_TryList
  * Data is SOPC_SKProvider_TryList
  */
 static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_TryList(SOPC_SKProvider* skp,
+                                                         const char* securityGroupId,
                                                          uint32_t StartingTokenId,
                                                          uint32_t NbRequestedToken,
                                                          SOPC_String** SecurityPolicyUri,
@@ -77,8 +78,8 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_TryList(SOPC_SKProvider* skp,
     for (uint32_t i = 0; i < data->nbProviders; i++)
     {
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_COMMON, "Try GetKeys with provider %" PRIu32, i + 1);
-        status = SOPC_SKProvider_GetKeys(data->providers[i], StartingTokenId, NbRequestedToken, SecurityPolicyUri,
-                                         FirstTokenId, Keys, NbToken, TimeToNextKey, KeyLifetime);
+        status = SOPC_SKProvider_GetKeys(data->providers[i], securityGroupId, StartingTokenId, NbRequestedToken,
+                                         SecurityPolicyUri, FirstTokenId, Keys, NbToken, TimeToNextKey, KeyLifetime);
         if (SOPC_STATUS_OK == status && 0 < *NbToken)
         {
             break;
@@ -114,6 +115,7 @@ static void SOPC_SKProvider_Clear_TryList(void* pdata)
  * Data is SOPC_CryptoProvider
  */
 static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProvider* skp,
+                                                                     const char* securityGroupId,
                                                                      uint32_t StartingTokenId,
                                                                      uint32_t NbRequestedToken,
                                                                      SOPC_String** SecurityPolicyUri,
@@ -124,7 +126,7 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProv
                                                                      uint32_t* KeyLifetime)
 {
     /* Not used*/
-
+    SOPC_UNUSED_ARG(securityGroupId); // not necessary as we generate fresh keys anyway
     SOPC_UNUSED_ARG(StartingTokenId);
     SOPC_UNUSED_ARG(SecurityPolicyUri);
     SOPC_UNUSED_ARG(FirstTokenId);
@@ -266,6 +268,7 @@ SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create(uint32_t maxKeys)
 }
 
 SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
+                                          const char* securityGroupId,
                                           uint32_t StartingTokenId,
                                           uint32_t NbRequestedToken,
                                           SOPC_String** SecurityPolicyUri,
@@ -279,8 +282,8 @@ SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return skp->ptrGetKeys(skp, StartingTokenId, NbRequestedToken, SecurityPolicyUri, FirstTokenId, Keys, NbKeys,
-                           TimeToNextKey, KeyLifetime);
+    return skp->ptrGetKeys(skp, securityGroupId, StartingTokenId, NbRequestedToken, SecurityPolicyUri, FirstTokenId,
+                           Keys, NbKeys, TimeToNextKey, KeyLifetime);
 }
 
 void SOPC_SKProvider_Clear(SOPC_SKProvider* skp)

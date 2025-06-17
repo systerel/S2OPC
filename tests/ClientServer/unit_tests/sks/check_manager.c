@@ -29,7 +29,7 @@
 
 START_TEST(test_default_manager_create)
 {
-    SOPC_SKManager* skm = SOPC_SKManager_Create();
+    SOPC_SKManager* skm = SOPC_SKManager_Create("1");
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 
@@ -79,7 +79,7 @@ START_TEST(test_default_manager_add)
     uint32_t TimeToNextKey = 0;
     uint32_t KeyLifetime = 0;
 
-    SOPC_SKManager* skm = SOPC_SKManager_Create();
+    SOPC_SKManager* skm = SOPC_SKManager_Create("");
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 
@@ -186,7 +186,7 @@ START_TEST(test_default_manager_setkeys)
     uint32_t TimeToNextKey = 0;
     uint32_t KeyLifetime = 0;
 
-    SOPC_SKManager* skm = SOPC_SKManager_Create();
+    SOPC_SKManager* skm = SOPC_SKManager_Create("");
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 
@@ -293,7 +293,7 @@ START_TEST(test_default_manager_getkeys)
     uint32_t TimeToNextKey = 0;
     uint32_t KeyLifetime = 0;
 
-    SOPC_SKManager* skm = SOPC_SKManager_Create();
+    SOPC_SKManager* skm = SOPC_SKManager_Create("");
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 
@@ -365,7 +365,7 @@ END_TEST
 
 START_TEST(test_default_manager_getAllKeysLifeTime)
 {
-    SOPC_SKManager* skm = SOPC_SKManager_Create();
+    SOPC_SKManager* skm = SOPC_SKManager_Create("");
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 

@@ -38,6 +38,7 @@
 typedef struct SOPC_SKProvider SOPC_SKProvider;
 
 typedef SOPC_ReturnStatus (*SOPC_SKProvider_GetKeys_Func)(SOPC_SKProvider* skp,
+                                                          const char* securityGroupId,
                                                           uint32_t StartingTokenId,
                                                           uint32_t NbRequestedToken,
                                                           SOPC_String** SecurityPolicyUri,
@@ -63,9 +64,10 @@ struct SOPC_SKProvider
  * \brief  Creates an instance of SOPC_SKProvider which call sequentially all provider of a list until one returns valid
  * Keys
  *
- * \param providers       A valid pointer of SOPC_SKProvider array. Should not be NULL
- * \param nbProviders     The number of element of the the given array. Should not be 0
- * \return a SOPC_SKProvider object or NULL if not enough memory
+ * \param providers        A valid pointer of SOPC_SKProvider array. Should not be NULL
+ * \param nbProviders      The number of element of the the given array. Should not be 0
+ *
+ * \return a SOPC_SKProvider object or NULL if not enough memory or invalid parameters
  */
 SOPC_SKProvider* SOPC_SKProvider_TryList_Create(SOPC_SKProvider** providers, uint32_t nbProviders);
 
@@ -80,21 +82,23 @@ SOPC_SKProvider* SOPC_SKProvider_RandomPubSub_Create(uint32_t maxKeys);
 /**
  *  \brief          Gets Keys of a Security Keys Provider for a given security group.
  *                  All returned data are copied by this function. The caller is responsible for deleting these data.
- *                  Output parameters may be NULL exept Keys and NbKeys
+ *                  Output parameters may be NULL except Keys and NbKeys
  *
- *  \param skp      Pointer to Security Keys Provider. Input parameter. Should not be NULL
+ *  \param skp                Pointer to Security Keys Provider. Input parameter. Should not be NULL
+ *  \param securityGroupId    The Security Group Id for which the keys are requested
  *  \param StartingTokenId    The current token is requested by passing 0. It can be a SecurityTokenId from the past to
  * get a key valid for previously sent messages
- *  \param NbRequestedToken   The number of requested keys tokens which should be returned in the response
- *  \param SecurityPolicyUri  The URI for the set of algorithms and key lengths used to secure the messages
- *  \param FirstTokenId       The SecurityTokenId of the first key in the array of returned keys.
- *  \param Keys               An ordered list of keys that are used when the KeyLifetime elapses
- *  \param NbKeys             The number of keys tokens in \p Keys array
- *  \param TimeToNextKey      The time, in milliseconds, before the CurrentKey is expected to expire
- *  \param KeyLifetime        The lifetime of a key in milliseconds
- *  \return                   SOPC_STATUS_OK if keys are set
+ *  \param NbRequestedToken        The number of requested keys tokens which should be returned in the response
+ *  \param[out] SecurityPolicyUri  The URI for the set of algorithms and key lengths used to secure the messages
+ *  \param[out] FirstTokenId       The SecurityTokenId of the first key in the array of returned keys.
+ *  \param[out] Keys               An ordered list of keys that are used when the KeyLifetime elapses
+ *  \param[out] NbKeys             The number of keys tokens in \p Keys array
+ *  \param[out] TimeToNextKey      The time, in milliseconds, before the CurrentKey is expected to expire
+ *  \param[out] KeyLifetime        The lifetime of a key in milliseconds
+ *  \return                        SOPC_STATUS_OK if keys are set
  */
 SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
+                                          const char* securityGroupId,
                                           uint32_t StartingTokenId,
                                           uint32_t NbRequestedToken,
                                           SOPC_String** SecurityPolicyUri,
