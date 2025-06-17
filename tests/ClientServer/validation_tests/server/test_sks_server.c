@@ -199,8 +199,10 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
     {
         SOPC_SK_SecurityGroup_Managers_Init();
         // TODO: Use the security group ids read in the sks_server_config.xml
-        SOPC_SK_SecurityGroup_SetSkManager("1", skManager1);
-        SOPC_SK_SecurityGroup_SetSkManager("2", skManager2);
+        bool res = SOPC_SK_SecurityGroup_SetSkManager("1", skManager1);
+        SOPC_ASSERT(res);
+        res = SOPC_SK_SecurityGroup_SetSkManager("2", skManager2);
+        SOPC_ASSERT(res);
         printf("<Security Keys Service: Started\n");
     }
     else
