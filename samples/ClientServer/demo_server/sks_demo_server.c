@@ -36,6 +36,7 @@
 #include "opcua_statuscodes.h"
 #include "sopc_address_space_access.h"
 #include "sopc_askpass.h"
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -46,19 +47,21 @@
 #include "sopc_sk_scheduler.h"
 
 #include "sks_demo_server_methods.h"
+#include "sopc_sk_secu_group_managers.h"
 
 /* SKS Constants */
 // Period to init the scheduler is 1s
 #define SKS_SCHEDULER_INIT_MSPERIOD 1000
 // Key Lifetime is 10s
-#define SKS_KEYLIFETIME 100000
+#define SKS_KEYLIFETIME 10000
 // Number of keys generated randomly
 #define SKS_NB_GENERATED_KEYS 5
 // Maximum number of Security Keys managed. When the number of keys exceed this limit, only the valid Keys are kept
 #define SKS_NB_MAX_KEYS 20
 
 /* SKS Data  */
-SOPC_SKManager* skManager = NULL;
+SOPC_SKManager* skManager1 = NULL;
+SOPC_SKManager* skManager2 = NULL;
 SOPC_SKscheduler* skScheduler = NULL;
 
 /*---------------------------------------------------------------------------
@@ -70,15 +73,27 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     // Set KeyLifeTime only if SK Manager didn't get Keys from Slave
-    if (0 == SOPC_SKManager_Size(skManager))
+    if (0 == SOPC_SKManager_Size(skManager1))
     {
-        status = SOPC_SKManager_SetKeyLifetime(skManager, SKS_KEYLIFETIME);
+        status = SOPC_SKManager_SetKeyLifetime(skManager1, SKS_KEYLIFETIME);
         if (SOPC_STATUS_OK == status)
         {
             SOPC_String policy;
             SOPC_String_Initialize(&policy);
             SOPC_String_CopyFromCString(&policy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
-            status = SOPC_SKManager_SetSecurityPolicyUri(skManager, &policy);
+            status = SOPC_SKManager_SetSecurityPolicyUri(skManager1, &policy);
+            SOPC_String_Clear(&policy);
+        }
+    }
+    if (0 == SOPC_SKManager_Size(skManager2))
+    {
+        status = SOPC_SKManager_SetKeyLifetime(skManager2, SKS_KEYLIFETIME);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_String policy;
+            SOPC_String_Initialize(&policy);
+            SOPC_String_CopyFromCString(&policy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+            status = SOPC_SKManager_SetSecurityPolicyUri(skManager2, &policy);
             SOPC_String_Clear(&policy);
         }
     }
@@ -126,7 +141,9 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
     if (SOPC_STATUS_OK == status)
     {
         /* Init the task with 1s */
-        status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager, SKS_SCHEDULER_INIT_MSPERIOD);
+        status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager1, SKS_SCHEDULER_INIT_MSPERIOD);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager2, SKS_SCHEDULER_INIT_MSPERIOD);
         if (SOPC_STATUS_OK == status)
         {
             // Ownership transfered to scheduler
@@ -141,6 +158,10 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        SOPC_SK_SecurityGroup_Managers_Init();
+        // TODO: Use the security group ids read in the sks_server_config.xml
+        SOPC_SK_SecurityGroup_SetSkManager("1", skManager1);
+        SOPC_SK_SecurityGroup_SetSkManager("2", skManager2);
         printf("<Security Keys Service: Started\n");
     }
     else
@@ -185,7 +206,7 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
  * Method call management :
  *-------------------------*/
 
-static SOPC_ReturnStatus Server_InitSKScallMethodService(SOPC_SKManager* skm)
+static SOPC_ReturnStatus Server_InitSKScallMethodService(void)
 {
     SOPC_NodeId methodTypeId;
     SOPC_NodeId methodId;
@@ -205,7 +226,7 @@ static SOPC_ReturnStatus Server_InitSKScallMethodService(SOPC_SKManager* skm)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_MethodCallManager_AddMethodWithType(
-            mcm, &methodId, &methodTypeId, &SOPC_Method_Func_PublishSubscribe_GetSecurityKeys, skm, NULL);
+            mcm, &methodId, &methodTypeId, &SOPC_Method_Func_PublishSubscribe_GetSecurityKeys, NULL, NULL);
     }
 
     return status;
@@ -345,7 +366,7 @@ int main(int argc, char* argv[])
 
     /* Configuration of:
      * - Server endpoints configuration from XML server configuration file (comply with s2opc_clientserver_config.xsd) :
-         - Enpoint URL,
+         - Endpoint URL,
          - Security endpoint properties,
          - Cryptographic parameters,
          - Application description
@@ -363,8 +384,9 @@ int main(int argc, char* argv[])
     /* Init SK Manager */
     if (SOPC_STATUS_OK == status)
     {
-        skManager = SOPC_SKManager_Create();
-        if (NULL == skManager)
+        skManager1 = SOPC_SKManager_Create("1");
+        skManager2 = SOPC_SKManager_Create("2");
+        if (NULL == skManager1 || NULL == skManager2)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -373,7 +395,7 @@ int main(int argc, char* argv[])
     // Define sks implementation of functions called for method call service
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_InitSKScallMethodService(skManager);
+        status = Server_InitSKScallMethodService();
     }
 
     /* Define address space write notification callback */
@@ -427,8 +449,9 @@ int main(int argc, char* argv[])
     /* Stop and clear SKS related modules */
     SOPC_SKscheduler_StopAndClear(skScheduler);
     SOPC_Free(skScheduler);
-    SOPC_SKManager_Clear(skManager);
-    SOPC_Free(skManager);
+    SOPC_SK_SecurityGroup_Managers_Clear(); // skManagers are cleaned here
+    skManager1 = NULL;
+    skManager2 = NULL;
 
     /* Clear the server library (stop all library threads) and server configuration */
     SOPC_ServerConfigHelper_Clear();

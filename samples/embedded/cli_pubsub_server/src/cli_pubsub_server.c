@@ -641,14 +641,9 @@ static void clearPubSub(void)
     SOPC_PubScheduler_Stop();
     gSubStarted = false;
 
-    if (NULL != g_skmanager)
-    {
-        SOPC_SKManager_Clear(g_skmanager);
-        SOPC_Free(g_skmanager);
-        g_skmanager = NULL;
-    }
+    SOPC_SK_SecurityGroup_Managers_Clear();
+    g_skmanager = NULL;
 
-    SOPC_PubSubSKS_Clear();
     Cache_Clear();
 }
 
@@ -689,7 +684,7 @@ static bool Server_SetTargetVariables(const OpcUa_WriteValue* lwv, const int32_t
 static SOPC_SKManager* createSKmanager(void)
 {
     /* Create Service Keys manager and set constant keys */
-    SOPC_SKManager* skm = SOPC_SKManager_Create();
+    SOPC_SKManager* skm = SOPC_SKManager_Create("");
     SOPC_ASSERT(NULL != skm && "SOPC_SKManager_Create failed");
     uint32_t nbKeys = 0;
     SOPC_Buffer* keysBuffer =
@@ -761,8 +756,8 @@ static void setupPubSub(void)
     /* PubSub Security Keys configuration */
     g_skmanager = createSKmanager();
     SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
-    SOPC_PubSubSKS_Init();
-    SOPC_PubSubSKS_SetSkManager(g_skmanager);
+    SOPC_SK_SecurityGroup_Managers_Init();
+    SOPC_SK_SecurityGroup_SetSkManager("1", g_skmanager);
 
     Cache_Initialize(pPubSubConfig, true);
 }

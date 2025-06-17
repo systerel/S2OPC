@@ -27,10 +27,6 @@
  *                 SKS Demo Methods for Call service definition
  *---------------------------------------------------------------------------*/
 
-#ifndef SKS_SECURITY_GROUPID
-#define SKS_SECURITY_GROUPID "sgid_1"
-#endif
-
 SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_GetSecurityKeys(const SOPC_CallContext* callContextPtr,
                                                                   const SOPC_NodeId* objectId,
                                                                   uint32_t nbInputArgs,

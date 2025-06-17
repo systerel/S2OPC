@@ -41,7 +41,6 @@ const char* SESSION_NAME = "S2OPC_SKS_client_session";
 #define CLIENT_SKS_USER_POLICY_ID "username_Basic256Sha256"
 #define CLIENT_SKS_USERNAME "user1"
 
-#define CLIENT_SECURITY_GROUPID "sgid_1"
 #define CLIENT_STARTING_TOKENID 0
 #define CLIENT_REQUESTED_KEY_COUNT 5
 
@@ -326,7 +325,7 @@ static OpcUa_CallRequest* newCallRequest_client(const char* securityGroupId,
     variant->ArrayType = SOPC_VariantArrayType_SingleValue;
     variant->Value.Uint32 = startingTokenId;
 
-    // Starting Token Id
+    // Requested Key Count
     variant = &arguments[2];
     SOPC_Variant_Initialize(variant);
     variant->BuiltInTypeId = SOPC_UInt32_Id;
@@ -563,6 +562,7 @@ static void ClientConnectionEvent(SOPC_ClientConnection* config,
 }
 
 SOPC_ReturnStatus Client_GetSecurityKeys(SOPC_SecureConnection_Config* config,
+                                         const char* securityGroupId,
                                          uint32_t StartingTokenId,
                                          uint32_t requestedKeys,
                                          Client_SKS_GetKeys_Response* response)
@@ -586,7 +586,8 @@ SOPC_ReturnStatus Client_GetSecurityKeys(SOPC_SecureConnection_Config* config,
     {
         OpcUa_CallResponse* callResp = NULL;
         // Create CallRequest to be sent (deallocated by toolkit)
-        OpcUa_CallRequest* callReq = newCallRequest_client(CLIENT_SECURITY_GROUPID, StartingTokenId, requestedKeys);
+        OpcUa_CallRequest* callReq = newCallRequest_client(securityGroupId, StartingTokenId, requestedKeys);
+
         if (NULL != callReq)
         {
             status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) callReq, (void**) &callResp);
@@ -633,6 +634,7 @@ void Client_Stop(void)
 /* SKS part */
 
 static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
+                                                       const char* securityGroupId,
                                                        uint32_t StartingTokenId,
                                                        uint32_t NbRequestedToken,
                                                        SOPC_String** SecurityPolicyUri,
@@ -664,7 +666,8 @@ static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
     {
         /* Retrieve Security Keys from SKS.
            This function wait SKS server response or timeout */
-        status = Client_GetSecurityKeys(secureConnCfg, 0, NbRequestedToken, response);
+
+        status = Client_GetSecurityKeys(secureConnCfg, securityGroupId, 0, NbRequestedToken, response);
         if (0 == response->NbKeys || NULL == response->Keys)
         {
             status = SOPC_STATUS_NOK;
@@ -708,6 +711,7 @@ SOPC_SKProvider* Client_Provider_BySKS_Create(SOPC_SecureConnection_Config* secu
 }
 
 static SOPC_ReturnStatus Fallback_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
+                                                         const char* securityGroupId,
                                                          uint32_t StartingTokenId,
                                                          uint32_t NbRequestedToken,
                                                          SOPC_String** SecurityPolicyUri,
@@ -718,8 +722,9 @@ static SOPC_ReturnStatus Fallback_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
                                                          uint32_t* KeyLifetime)
 {
     /* Not used*/
-    (void) StartingTokenId;
-    (void) NbRequestedToken;
+    SOPC_UNUSED_ARG(securityGroupId); // not managed for fallback provider
+    SOPC_UNUSED_ARG(StartingTokenId);
+    SOPC_UNUSED_ARG(NbRequestedToken);
 
     if (NULL == skp || NULL == SecurityPolicyUri || NULL == FirstTokenId || NULL == Keys || NULL == NbKeys ||
         NULL == TimeToNextKey || NULL == KeyLifetime)

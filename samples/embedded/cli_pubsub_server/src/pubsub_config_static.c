@@ -49,6 +49,8 @@
 #define NB_SUB_VARS 6
 
 #define PUBLISHER_ID 42
+#define WRITER_SECURITY_GROUP_ID "1"
+#define READER_SECURITY_GROUP_ID "1"
 #define MESSAGE_ID 20
 #define MESSAGE_VERSION 1
 
@@ -65,6 +67,7 @@ static SOPC_DataSetWriter* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnecti
     SOPC_WriterGroup_Set_Version(group, version);
     SOPC_WriterGroup_Set_PublishingInterval(group, (double) interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
+    SOPC_WriterGroup_Set_SecurityGroupId(group, WRITER_SECURITY_GROUP_ID);
 
     // Create one DataSet Writer
     SOPC_WriterGroup_Allocate_DataSetWriter_Array(group, 1);
@@ -116,6 +119,7 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
     SOPC_ReaderGroup_Set_SecurityMode(readerGroup, securityMode);
     SOPC_ReaderGroup_Set_GroupVersion(readerGroup, version);
     SOPC_ReaderGroup_Set_GroupId(readerGroup, messageId);
+    SOPC_ReaderGroup_Set_SecurityGroupId(readerGroup, READER_SECURITY_GROUP_ID);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
     SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, publisherId);
     if (allocSuccess)

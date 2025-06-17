@@ -18,69 +18,17 @@
  */
 
 #include <stdbool.h>
-#include <stdio.h>
 
+#include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_mutexes.h"
 #include "sopc_pubsub_constants.h"
 #include "sopc_pubsub_sks.h"
+#include "sopc_sk_secu_group_managers.h"
 
-static SOPC_SKManager* g_skManager = NULL;
-// Mutex to protect access to g_skManager;
-SOPC_Mutex g_mutex;
-
-// indicate this service is initialized
-bool g_init = false;
-
-void SOPC_PubSubSKS_Init(void)
+SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupid, uint32_t tokenId)
 {
-    if (g_init)
-    {
-        return;
-    }
-    SOPC_Mutex_Initialization(&g_mutex);
-    g_init = true;
-}
-
-void SOPC_PubSubSKS_Clear(void)
-{
-    if (!g_init)
-    {
-        return;
-    }
-    g_init = false;
-    g_skManager = NULL;
-    SOPC_Mutex_Clear(&g_mutex);
-}
-
-void SOPC_PubSubSKS_SetSkManager(SOPC_SKManager* skm)
-{
-    if (!g_init)
-    {
-        return;
-    }
-    SOPC_Mutex_Lock(&g_mutex);
-    g_skManager = skm;
-    SOPC_Mutex_Unlock(&g_mutex);
-}
-
-SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(uint32_t groupid, uint32_t tokenId)
-{
-    if (SOPC_PUBSUB_SKS_DEFAULT_GROUPID != groupid || !g_init)
-    {
-        return NULL;
-    }
-
-    /** Get Keys from SK Manager **/
-
-    SOPC_Mutex_Lock(&g_mutex);
-    if (NULL == g_skManager)
-    {
-        SOPC_Mutex_Unlock(&g_mutex);
-        return NULL;
-    }
     // result
     SOPC_PubSubSKS_Keys* returnedKeys = NULL;
 
@@ -91,11 +39,16 @@ SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(uint32_t groupid, uint32_t t
     uint32_t NbKeys = 0;
     uint32_t TimeToNextKey = 0;
     uint32_t KeyLifetime = 0;
-    SOPC_ReturnStatus status =
-        SOPC_SKManager_GetKeys(g_skManager, tokenId, SOPC_PUBSUB_SKS_MAX_TOKEN_PER_CALL, &SecurityPolicyUri,
-                               &FirstTokenId, &Keys, &NbKeys, &TimeToNextKey, &KeyLifetime);
+    SOPC_SKManager* skm = SOPC_SK_SecurityGroup_GetSkManager(securityGroupid);
 
-    SOPC_Mutex_Unlock(&g_mutex);
+    if (NULL == skm)
+    {
+        return NULL;
+    }
+
+    SOPC_ReturnStatus status =
+        SOPC_SKManager_GetKeys(skm, tokenId, SOPC_PUBSUB_SKS_MAX_TOKEN_PER_CALL, &SecurityPolicyUri, &FirstTokenId,
+                               &Keys, &NbKeys, &TimeToNextKey, &KeyLifetime);
 
     /** Fill Outputs **/
 

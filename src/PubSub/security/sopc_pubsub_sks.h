@@ -30,11 +30,7 @@
 #define SOPC_PUBSUB_SKS_H_
 
 #include "sopc_secret_buffer.h"
-#include "sopc_sk_manager.h"
-
-#ifndef SOPC_PUBSUB_SKS_DEFAULT_GROUPID
-#define SOPC_PUBSUB_SKS_DEFAULT_GROUPID 1
-#endif
+#include "sopc_sk_secu_group_managers.h"
 
 #ifndef SOPC_PUBSUB_SKS_DEFAULT_TOKENID
 #define SOPC_PUBSUB_SKS_DEFAULT_TOKENID 1
@@ -55,36 +51,15 @@ typedef struct SOPC_PubSubSKS_Keys
 } SOPC_PubSubSKS_Keys;
 
 /**
- * \brief Initialise the PubSubSKS
- */
-void SOPC_PubSubSKS_Init(void);
-
-/**
- * @brief Clear the PubSubSKS and set SKManager to NULL.
- */
-void SOPC_PubSubSKS_Clear(void);
-
-/**
- * \brief Set the Security Keys Manager to use to retrieve the keys for UADP secure exchanges
- * Only one SK Manager is used. Set to NULL to stop the service.
- *
- * \param skm the Security Keys Manager to use to get keys.
- *
- */
-void SOPC_PubSubSKS_SetSkManager(SOPC_SKManager* skm);
-
-/**
  * \brief Return security key from a security group id.
  *        This function is automatically called by Publisher and Subscriber schedulers.
  *
- * \warning Only ::SOPC_PUBSUB_SKS_DEFAULT_GROUPID is accepted in this version
- *
- * \param groupid a Security Group Id
+ * \param securityGroupId a Group Id with security
  * \param tokenId token id of the requested keys. Current token is requested with ::SOPC_PUBSUB_SKS_CURRENT_TOKENID
  * \return tokenid and group keys
  *
  */
-SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(uint32_t groupid, uint32_t tokenId);
+SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupid, uint32_t tokenId);
 
 /**
  * \brief Clear a SOPC_PubSubSKS_Keys

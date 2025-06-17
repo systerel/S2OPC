@@ -182,6 +182,9 @@ void SOPC_PubSub_Security_Clear(SOPC_PubSub_SecurityType* security)
 {
     if (NULL != security)
     {
+        SOPC_Free(security->securityGroupId);
+        security->securityGroupId = NULL;
+        security->mode = SOPC_SecurityMode_Invalid;
         SOPC_PubSubSKS_Keys_Delete(security->groupKeys);
         SOPC_Free(security->groupKeys);
         security->groupKeys = NULL;

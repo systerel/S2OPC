@@ -29,6 +29,8 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_sk_manager.h"
 
+#include "sopc_sk_secu_group_managers.h"
+
 /*---------------------------------------------------------------------------
  *                 SKS Demo Methods for Call service definition
  *---------------------------------------------------------------------------*/
@@ -47,14 +49,11 @@ SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_GetSecurityKeys(const SOPC_Cal
                                                                   void* param)
 {
     SOPC_UNUSED_ARG(objectId); /* Should be OpcUaId_PublishSubscribe */
-
-    SOPC_SKManager* skManager = (SOPC_SKManager*) param;
-    if (NULL == skManager)
-    {
-        return OpcUa_BadInternalError;
-    }
-
+    SOPC_UNUSED_ARG(param);
     /* Check Call Context */
+
+    printf("Enter method GetSecurityKeys with param SecurityGroupId = %s\n",
+           SOPC_String_GetRawCString(&inputArgs[0].Value.String));
 
     // SecureChannel shall use encryption to keep the provided keys secret
     OpcUa_MessageSecurityMode msm = SOPC_CallContext_GetSecurityMode(callContextPtr);
@@ -89,8 +88,7 @@ SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_GetSecurityKeys(const SOPC_Cal
     }
 
     /* Check Security Group argument */
-    if (SOPC_String_Id != inputArgs[0].BuiltInTypeId || SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType ||
-        0 != strcmp(SKS_SECURITY_GROUPID, SOPC_String_GetRawCString(&inputArgs[0].Value.String)))
+    if (SOPC_String_Id != inputArgs[0].BuiltInTypeId || SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType)
     {
         return OpcUa_BadInvalidArgument;
     }
@@ -130,9 +128,10 @@ SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_GetSecurityKeys(const SOPC_Cal
     uint32_t TimeToNextKey = 0;
     uint32_t KeyLifetime = 0;
 
+    SOPC_SKManager* skm = SOPC_SK_SecurityGroup_GetSkManager(SOPC_String_GetRawCString(&inputArgs[0].Value.String));
     SOPC_ReturnStatus status =
-        SOPC_SKManager_GetKeys(skManager, requestedStartingTokenId, requestedNbKeys, &SecurityPolicyUri, &FirstTokenId,
-                               &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
+        SOPC_SKManager_GetKeys(skm, requestedStartingTokenId, requestedNbKeys, &SecurityPolicyUri, &FirstTokenId, &Keys,
+                               &NbToken, &TimeToNextKey, &KeyLifetime);
     bool keysValid = (NULL != Keys && 0 < NbToken && INT32_MAX >= NbToken);
     if (SOPC_STATUS_OK != status || !keysValid)
     {
