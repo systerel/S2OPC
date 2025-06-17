@@ -95,7 +95,7 @@ static void set_subscriber_security_info(const char* securityGroupId)
 static SOPC_SKManager* createSKmanager(const char* securityGroupId)
 {
     /* Create Service Keys manager and set constant keys */
-    SOPC_SKManager* skm = SOPC_SKManager_Create(securityGroupId);
+    SOPC_SKManager* skm = SOPC_SKManager_Create(securityGroupId, 0);
     SOPC_ASSERT(NULL != skm && "SOPC_SKManager_Create failed");
     uint32_t nbKeys = 0;
     SOPC_Buffer* keysBuffer = SOPC_Buffer_Create(sizeof(signingKey) + sizeof(encryptingKey) + sizeof(keyNonce));

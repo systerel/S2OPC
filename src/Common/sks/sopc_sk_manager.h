@@ -94,16 +94,18 @@ struct SOPC_SKManager
     SOPC_SKManager_Clear_Func ptrClear; /**< startingToken, nb of key  */
     char* securityGroupId; /**< Security Group Id, used to identify the group of keys managed by this SKManager */
     void* data;            /**< data containing keys content and state */
+    uintptr_t userData;    /**< user data, can be used to store additional information */
 };
 
 /**
  * \brief  Creates an instance of the default SOPC_SKManager for the given security group id.
  *
  * \param securityGroupId  The security group id for which the keys are managed
+ * \param userData         User data that can be used to store additional information associated with the SKManager
  *
  * \return a SOPC_SKManager object or NULL if not enough memory
  */
-SOPC_SKManager* SOPC_SKManager_Create(const char* securityGroupId);
+SOPC_SKManager* SOPC_SKManager_Create(const char* securityGroupId, uintptr_t userData);
 
 /**
  *  \brief          Gets number of managed Token for a given security group
@@ -122,15 +124,6 @@ uint32_t SOPC_SKManager_Size(SOPC_SKManager* skm);
  *  \return             SOPC_STATUS_OK if keys tokens lifetime set
  */
 SOPC_ReturnStatus SOPC_SKManager_SetKeyLifetime(SOPC_SKManager* skm, uint32_t KeyLifetime);
-
-/**
- * \brief                     Sets the security group id managed by this security keys manager
- *
- *  \param skm                Pointer to Security Keys Manager. Should not be NULL
- *  \param securityGroupId    The security group id for which the keys are managed
- *  \return                   SOPC_STATUS_OK if security group id set
- */
-SOPC_ReturnStatus SOPC_SKManager_SetSecurityGroupId(SOPC_SKManager* skm, SOPC_String* securityGroupId);
 
 /**
  *  \brief                    Sets the security policy URI for the security keys tokens
