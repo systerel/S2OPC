@@ -60,43 +60,15 @@
 #define SKS_NB_MAX_KEYS 20
 
 /* SKS Data  */
-SOPC_SKManager* skManager1 = NULL;
-SOPC_SKManager* skManager2 = NULL;
 SOPC_SKscheduler* skScheduler = NULL;
 
 /*---------------------------------------------------------------------------
  *             PubSub Security Key Service specific configuration
  *---------------------------------------------------------------------------*/
 
-static SOPC_ReturnStatus Server_SKS_Start(void)
+static SOPC_ReturnStatus Server_SKS_Start(uint32_t nbSkMgr, SOPC_SKManager** skMgrArr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    // Set KeyLifeTime only if SK Manager didn't get Keys from Slave
-    if (0 == SOPC_SKManager_Size(skManager1))
-    {
-        status = SOPC_SKManager_SetKeyLifetime(skManager1, SKS_KEYLIFETIME);
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_String policy;
-            SOPC_String_Initialize(&policy);
-            SOPC_String_CopyFromCString(&policy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
-            status = SOPC_SKManager_SetSecurityPolicyUri(skManager1, &policy);
-            SOPC_String_Clear(&policy);
-        }
-    }
-    if (0 == SOPC_SKManager_Size(skManager2))
-    {
-        status = SOPC_SKManager_SetKeyLifetime(skManager2, SKS_KEYLIFETIME);
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_String policy;
-            SOPC_String_Initialize(&policy);
-            SOPC_String_CopyFromCString(&policy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
-            status = SOPC_SKManager_SetSecurityPolicyUri(skManager2, &policy);
-            SOPC_String_Clear(&policy);
-        }
-    }
 
     /* Init SK Scheduler */
     if (SOPC_STATUS_OK == status)
@@ -134,26 +106,68 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
         skBuilder = SOPC_SKBuilder_Truncate_Create(skbAppend, SKS_NB_MAX_KEYS);
         if (NULL == skBuilder)
         {
+            SOPC_SKBuilder_Clear(skbAppend);
+            SOPC_Free(skbAppend);
+            skbAppend = NULL;
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-    bool schedulerTaskAdded = false;
-    if (SOPC_STATUS_OK == status)
+
+    if (SOPC_STATUS_OK != status)
     {
-        /* Init the task with 1s */
-        status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager1, SKS_SCHEDULER_INIT_MSPERIOD);
+        if (NULL != skProvider)
+        {
+            SOPC_SKProvider_Clear(skProvider);
+            SOPC_Free(skProvider);
+            skProvider = NULL;
+        }
     }
-    if (SOPC_STATUS_OK == status)
+
+    /* Configure and register the SK Managers */
+    SOPC_SK_SecurityGroup_Managers_Init();
+    bool oneTaskAdded = false;
+    for (uint32_t i = 0; SOPC_STATUS_OK == status && i < nbSkMgr; i++)
     {
-        schedulerTaskAdded = true;
-        status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager2, SKS_SCHEDULER_INIT_MSPERIOD);
+        status = SOPC_SKManager_SetKeyLifetime(skMgrArr[i], SKS_KEYLIFETIME);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_String policy;
+            SOPC_String_Initialize(&policy);
+            SOPC_String_CopyFromCString(&policy, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+            status = SOPC_SKManager_SetSecurityPolicyUri(skMgrArr[i], &policy);
+            SOPC_String_Clear(&policy);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            bool res = SOPC_SK_SecurityGroup_SetSkManager(skMgrArr[i]->securityGroupId, skMgrArr[i]);
+
+            if (!res)
+            {
+                printf("<Test_SKS_Server: Failed to set SK Manager for security group %s\n",
+                       skMgrArr[i]->securityGroupId);
+                status = SOPC_STATUS_NOK;
+            }
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            /* Init the tasks with 1s */
+            status =
+                SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skMgrArr[i], SKS_SCHEDULER_INIT_MSPERIOD);
+            if (SOPC_STATUS_OK == status)
+            {
+                oneTaskAdded = true;
+            }
+        }
     }
-    if (schedulerTaskAdded)
+    if (oneTaskAdded)
     {
         // At least one task added: ownership transferred to scheduler
         skBuilder = NULL;
         skProvider = NULL;
     }
+
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_SKscheduler_Start(skScheduler);
@@ -161,12 +175,6 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_SK_SecurityGroup_Managers_Init();
-        // TODO: Use the security group ids read in the sks_server_config.xml
-        bool res = SOPC_SK_SecurityGroup_SetSkManager("1", skManager1);
-        SOPC_ASSERT(res);
-        res = SOPC_SK_SecurityGroup_SetSkManager("2", skManager2);
-        SOPC_ASSERT(res);
         printf("<Security Keys Service: Started\n");
     }
     else
@@ -174,6 +182,7 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
         if (NULL != skScheduler)
         {
             SOPC_SKscheduler_StopAndClear(skScheduler);
+            skScheduler = NULL;
         }
 
         if (NULL != skProvider)
@@ -336,8 +345,50 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(char* argv0)
 
 int main(int argc, char* argv[])
 {
-    // Note: avoid unused parameter warning from compiler
-    SOPC_UNUSED_ARG(argc);
+    if (argc > 1 && (0 == strcmp(argv[1], "help") || 0 == strcmp(argv[1], "-h") || 0 == strcmp(argv[1], "--help")))
+    {
+        printf("Usage: %s [security_group_id_1] [security_group_id_2] ...\n", argv[0]);
+        printf("If no security group id is provided, a single SK Manager with empty security group id is created.\n");
+        return 0;
+    }
+
+    /* Retrieve the security group ids and create the associated SK managers */
+    uint32_t nbSecuGroups = 1;
+    if (argc > 1)
+    {
+        nbSecuGroups = (uint32_t) argc - 1;
+    }
+    SOPC_SKManager** skMgrArr = SOPC_Calloc(nbSecuGroups, sizeof(SOPC_SKManager*));
+    if (NULL == skMgrArr)
+    {
+        printf("<Test_SKS_Server: Failed to allocate SK Managers array\n");
+        return -1;
+    }
+    bool freeSksManagers = true;
+    if (argc > 1)
+    {
+        for (uint32_t i = 0; i < nbSecuGroups; i++)
+        {
+            // Create SK Manager with security group id from command line arguments
+            skMgrArr[i] = SOPC_SKManager_Create(argv[i + 1], 0);
+            if (NULL == skMgrArr[i])
+            {
+                printf("<Test_SKS_Server: Failed to create SK Manager for security group %s\n", argv[i + 1]);
+                SOPC_Free(skMgrArr);
+                return -2;
+            }
+        }
+    }
+    else
+    {
+        // Single SK Manager with empty security group id
+        *skMgrArr = SOPC_SKManager_Create("", 0);
+        if (NULL == *skMgrArr)
+        {
+            printf("<Test_SKS_Server: Failed to create SK Manager for security group empty id\n");
+            return -2;
+        }
+    }
 
     /* Get the toolkit build information and print it */
     SOPC_Toolkit_Build_Info build_info = SOPC_CommonHelper_GetBuildInfo();
@@ -386,17 +437,6 @@ int main(int argc, char* argv[])
         status = Server_LoadServerConfigurationFromFiles(argv[0]);
     }
 
-    /* Init SK Manager */
-    if (SOPC_STATUS_OK == status)
-    {
-        skManager1 = SOPC_SKManager_Create("1", 0);
-        skManager2 = SOPC_SKManager_Create("2", 0);
-        if (NULL == skManager1 || NULL == skManager2)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
     // Define sks implementation of functions called for method call service
     if (SOPC_STATUS_OK == status)
     {
@@ -417,7 +457,11 @@ int main(int argc, char* argv[])
     /* Start SKS Scheduler */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_SKS_Start();
+        status = Server_SKS_Start(nbSecuGroups, skMgrArr);
+        if (SOPC_STATUS_OK == status)
+        {
+            freeSksManagers = false; // Ownership of SK Managers is transferred to the security group managers
+        }
     }
 
     if (SOPC_STATUS_OK == status)
@@ -454,9 +498,13 @@ int main(int argc, char* argv[])
     /* Stop and clear SKS related modules */
     SOPC_SKscheduler_StopAndClear(skScheduler);
     SOPC_Free(skScheduler);
-    SOPC_SK_SecurityGroup_Managers_Clear(); // skManagers are cleaned here
-    skManager1 = NULL;
-    skManager2 = NULL;
+    SOPC_SK_SecurityGroup_Managers_Clear(); // skManagers are cleared here if freeSksManagers is false
+    for (uint32_t i = 0; freeSksManagers && i < nbSecuGroups; i++) // otherwise do it here
+    {
+        SOPC_SKManager_Clear(skMgrArr[i]);
+        SOPC_Free(skMgrArr[i]);
+    }
+    SOPC_Free(skMgrArr);
 
     /* Clear the server library (stop all library threads) and server configuration */
     SOPC_ServerConfigHelper_Clear();
