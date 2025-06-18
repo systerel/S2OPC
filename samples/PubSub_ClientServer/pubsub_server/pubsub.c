@@ -63,12 +63,6 @@ typedef struct SOPC_SKS_Local_Configuration
     // array of SOPC_SecurityKeyServices. Data should not be cleared.
     SOPC_Array* sksArray;
 
-    // array of SOPC_ReaderGroup. Data should not be cleared.
-    SOPC_Array* readerGroupArray;
-
-    // array of SOPC_WriterGroup. Data should not be cleared.
-    SOPC_Array* writerGroupArray;
-
 } SOPC_SKS_Local_Configuration;
 
 static int32_t pubsubOnline = 0;
@@ -587,7 +581,6 @@ static SOPC_ReturnStatus get_sks_config(SOPC_PubSubConfiguration* pPubSubConfig,
                     if (!PubSub_SearchSKSInArray((*sksConfigArray)->sksArray, desc))
                     {
                         bres &= SOPC_Array_Append((*sksConfigArray)->sksArray, desc);
-                        bres &= SOPC_Array_Append((*sksConfigArray)->writerGroupArray, group);
                         if (0 < sksArraySize)
                         {
                             // 2 groups have different SKS list. All list are merged
@@ -636,7 +629,6 @@ static SOPC_ReturnStatus get_sks_config(SOPC_PubSubConfiguration* pPubSubConfig,
                     if (!PubSub_SearchSKSInArray((*sksConfigArray)->sksArray, desc))
                     {
                         bres &= SOPC_Array_Append((*sksConfigArray)->sksArray, desc);
-                        bres &= SOPC_Array_Append((*sksConfigArray)->readerGroupArray, group);
                         if (0 < sksArraySize)
                         {
                             // 2 groups have different SKS list. All list are merged
@@ -662,18 +654,6 @@ static SOPC_SKS_Local_Configuration* SOPC_SKS_Local_Configuration_Create(void)
         result->sksArray = SOPC_Array_Create(sizeof(SOPC_SecurityKeyServices*), 1, NULL);
         allocSuccess = (NULL != result->sksArray);
     }
-
-    if (allocSuccess)
-    {
-        result->readerGroupArray = SOPC_Array_Create(sizeof(SOPC_ReaderGroup*), 10, NULL);
-        allocSuccess = (NULL != result->readerGroupArray);
-    }
-
-    if (allocSuccess)
-    {
-        result->writerGroupArray = SOPC_Array_Create(sizeof(SOPC_WriterGroup*), 10, NULL);
-        allocSuccess = (NULL != result->writerGroupArray);
-    }
     if (!allocSuccess)
     {
         SOPC_SKS_Local_Configuration_Clear(result);
@@ -692,8 +672,4 @@ static void SOPC_SKS_Local_Configuration_Clear(SOPC_SKS_Local_Configuration* con
 
     SOPC_Array_Delete(config->sksArray);
     config->sksArray = NULL;
-    SOPC_Array_Delete(config->readerGroupArray);
-    config->readerGroupArray = NULL;
-    SOPC_Array_Delete(config->writerGroupArray);
-    config->writerGroupArray = NULL;
 }
