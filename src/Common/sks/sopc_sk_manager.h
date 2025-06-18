@@ -63,9 +63,9 @@ typedef SOPC_ReturnStatus (*SOPC_SKManager_SetSecurityPolicyUri_Func)(SOPC_SKMan
                                                                       SOPC_String* SecurityPolicyUri);
 
 typedef SOPC_ReturnStatus (*SOPC_SKManager_SetKeys_Func)(SOPC_SKManager* skm,
-                                                         SOPC_String* SecurityPolicyUri,
+                                                         const SOPC_String* SecurityPolicyUri,
                                                          uint32_t FirstTokenId,
-                                                         SOPC_ByteString* Keys,
+                                                         const SOPC_ByteString* Keys,
                                                          uint32_t NbKeys,
                                                          uint32_t TimeToNextKey,
                                                          uint32_t KeyLifetime);
@@ -149,9 +149,9 @@ SOPC_ReturnStatus SOPC_SKManager_SetSecurityPolicyUri(SOPC_SKManager* skm, SOPC_
  *  \return                   SOPC_STATUS_OK if keys are set
  */
 SOPC_ReturnStatus SOPC_SKManager_SetKeys(SOPC_SKManager* skm,
-                                         SOPC_String* SecurityPolicyUri,
+                                         const SOPC_String* SecurityPolicyUri,
                                          uint32_t FirstTokenId,
-                                         SOPC_ByteString* Keys,
+                                         const SOPC_ByteString* Keys,
                                          uint32_t NbKeys,
                                          uint32_t TimeToNextKey,
                                          uint32_t KeyLifetime);
@@ -171,10 +171,11 @@ SOPC_ReturnStatus SOPC_SKManager_SetKeys(SOPC_SKManager* skm,
 uint32_t SOPC_SKManager_AddKeys(SOPC_SKManager* skm, SOPC_ByteString* Keys, uint32_t NbToken);
 
 /**
- *  \brief          Gets Keys of a Security Keys Manager for a given security group.
+ *  \brief          Gets Keys of a Security Keys Manager for a given security group
+ *                  (associated to the SKManager creation).
  *                  All returned data are copied by this function. The caller is responsible for deleting these data.
  *
- *  \param securityGroupId    SecurityGroupId
+ *  \param skm                Pointer to Security Keys Manager. Should not be NULL
  *  \param StartingTokenId    The current token is requested by passing 0. It can be a SecurityTokenId from the past to
  * get a key valid for previously sent messages
  *  \param NbRequestedToken   The number of requested keys tokens which should be returned in the response

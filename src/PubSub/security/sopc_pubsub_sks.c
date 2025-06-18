@@ -252,3 +252,12 @@ bool SOPC_PubSubSKS_AddTasks(SOPC_SKscheduler* scheduler,
 
     return context.result;
 }
+
+SOPC_SKManager* SOPC_PubSubSKS_GetSkManager(const char* securityGroupId)
+{
+    if (NULL == securityGroupId)
+    {
+        return NULL;
+    }
+    return SOPC_SK_SecurityGroup_GetSkManager(securityGroupId);
+}

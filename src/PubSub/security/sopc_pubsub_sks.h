@@ -94,7 +94,7 @@ bool SOPC_PubSubSKS_AddSkManager(const char* securityGroupId, SOPC_SKManager* sk
  * \return tokenid and group keys
  *
  */
-SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupid, uint32_t tokenId);
+SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupId, uint32_t tokenId);
 
 /**
  * \brief Clear a SOPC_PubSubSKS_Keys
@@ -106,11 +106,14 @@ SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupid,
 void SOPC_PubSubSKS_Keys_Delete(SOPC_PubSubSKS_Keys* keys);
 
 /**
- * \brief Add a task to the SK scheduler for each security group SK manager.
+ * \brief Add a task to the SK scheduler for each security group SK manager add with ::SOPC_PubSubSKS_AddSkManager.
  *        For each task, the scheduler will trigger the builder
  *        to update the keys from provider to manager.
  *        An initial period is provided for the first update, and subsequent updates
  *        are done at half the keys lifetime.
+ *
+ * \warning This function shall only be called after ::SOPC_PubSubSKS_AddSkManager has been called for all security
+ *          groups.
  *
  * \param scheduler     The scheduler to add tasks to
  * \param builder       The builder to use for updating the keys from provider to managers
@@ -124,5 +127,18 @@ bool SOPC_PubSubSKS_AddTasks(SOPC_SKscheduler* scheduler,
                              SOPC_SKBuilder* builder,
                              SOPC_SKProvider* provider,
                              uint32_t msFirstUpdate);
+
+/**
+ * \brief Get the Security Keys Manager to use to retrieve the keys for UADP secure exchanges
+ *        with the given security group id.
+ *
+ * \note This function should only be needed to retrieve user context in the SK manager.
+ *
+ * \param securityGroupId the security group id to associate the manager with
+ *
+ * \return the SK Manager if it exists for the given security group id, NULL otherwise.
+ *        The returned SK Manager is not owned by the caller, it should not be cleared and no reference shall be kept.
+ */
+SOPC_SKManager* SOPC_PubSubSKS_GetSkManager(const char* securityGroupId);
 
 #endif /* SOPC_PUBSUB_SKS_H_ */
