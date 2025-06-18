@@ -4678,7 +4678,7 @@ void SOPC_Variant_Print(const SOPC_Variant* pvar)
     case SOPC_ByteString_Id:
         SOPC_CONSOLE_PRINTF("ByteString\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.Bstring.Length);
         /* Pretty print */
-        for (i = 0; i < (size_t) pvar->Value.Bstring.Length; ++i)
+        for (i = 0; pvar->Value.Bstring.Length > 0 && i < (size_t) pvar->Value.Bstring.Length; ++i)
         {
             c = pvar->Value.Bstring.Data[i];
             if (0x20 <= c && c < 0x80)
@@ -4693,7 +4693,7 @@ void SOPC_Variant_Print(const SOPC_Variant* pvar)
     case SOPC_XmlElement_Id:
         SOPC_CONSOLE_PRINTF("XmlElement\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.XmlElt.Length);
         /* Pretty print */
-        for (i = 0; i < (size_t) pvar->Value.XmlElt.Length; ++i)
+        for (i = 0; pvar->Value.XmlElt.Length > 0 && i < (size_t) pvar->Value.XmlElt.Length; ++i)
         {
             c = pvar->Value.XmlElt.Data[i];
             if (0x20 <= c && c < 0x80)
