@@ -119,9 +119,9 @@ static void SOPC_SKManager_InitKeys_Default(SOPC_SKManager_DefaultData* data, ui
 }
 
 static SOPC_ReturnStatus SOPC_SKManager_SetKeys_Default(SOPC_SKManager* skm,
-                                                        SOPC_String* SecurityPolicyUri,
+                                                        const SOPC_String* SecurityPolicyUri,
                                                         uint32_t FirstTokenId,
-                                                        SOPC_ByteString* Keys,
+                                                        const SOPC_ByteString* Keys,
                                                         uint32_t NbToken,
                                                         uint32_t TimeToNextKey,
                                                         uint32_t KeyLifetime)
@@ -601,9 +601,9 @@ SOPC_ReturnStatus SOPC_SKManager_SetSecurityPolicyUri(SOPC_SKManager* skm, SOPC_
 }
 
 SOPC_ReturnStatus SOPC_SKManager_SetKeys(SOPC_SKManager* skm,
-                                         SOPC_String* SecurityPolicyUri,
+                                         const SOPC_String* SecurityPolicyUri,
                                          uint32_t FirstTokenId,
-                                         SOPC_ByteString* Keys,
+                                         const SOPC_ByteString* Keys,
                                          uint32_t NbKeys,
                                          uint32_t TimeToNextKey,
                                          uint32_t KeyLifetime)
