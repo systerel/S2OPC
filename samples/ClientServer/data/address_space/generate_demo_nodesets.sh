@@ -41,6 +41,9 @@ gen_nodeset s2opc.xml --remove-max-node-management s2opc_base_nodeset_origin.xml
 # Generate demo NodeSet for Micro profile + SKS
 gen_nodeset s2opc_sks.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_base_sks_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
+# Generate demo NodeSet for Micro profile + SKS
+gen_nodeset s2opc_sks_for_push.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_base_sks_push_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
+
 # Generate demo NodeSet for Micro profile + PUSH
 gen_nodeset s2opc_push.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_base_push_server_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
