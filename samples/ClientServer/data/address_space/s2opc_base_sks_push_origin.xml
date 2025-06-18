@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ * Copyright (c) 2005-2021 The OPC Foundation, Inc. All rights reserved.
+ *
+ * OPC Foundation MIT License 1.00
+ * 
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ * 
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * The complete license agreement can be found here:
+ * http://opcfoundation.org/License/MIT/1.00/
+ *
+ * Modifications: adaptation for S2OPC SKS demo server
+-->
+
+<UANodeSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" LastModified="2022-03-29T00:00:00Z" xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd">
+  <NamespaceUris>
+    <Uri>urn:S2OPC:localhost</Uri>
+    <Uri>https://www.systerel.fr/S2OPC/demo/data/origin</Uri>
+  </NamespaceUris>
+  <Models>
+    <Model ModelUri="http://opcfoundation.org/UA/" XmlSchemaUri="http://opcfoundation.org/UA/2008/02/Types.xsd" Version="1.04.11" PublicationDate="2022-03-29T00:00:00Z" />
+  </Models>
+  <!-- Specific definition for S2OPC SKS pushd management extract -->
+  <UAObject NodeId="i=14443" BrowseName="PublishSubscribe">
+    <DisplayName>PublishSubscribe</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=1;i=17296</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
+       <!-- PubSubKeyServiceType parent type instead of PublishSubscribeType: only service key implemented, event if it should be child type for SetSecurityKeys -->
+      <Reference ReferenceType="HasTypeDefinition">i=14416</Reference>
+    </References>
+  </UAObject>
+  <UAMethod NodeId="ns=1;i=17296" BrowseName="SetSecurityKeys">
+    <DisplayName>SetSecurityKeys</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=17297</Reference> <!-- Reuse input params from PublishSubscribeType -->
+    </References>
+  </UAMethod>
+</UANodeSet>
