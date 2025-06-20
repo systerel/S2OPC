@@ -23,8 +23,8 @@ REFINES
     session_core
 
 DEFINITIONS
-    d_active_sessions   == ( sessions_iterated /\ a_channel~[{p_lost_channel}] /\ a_state~[{e_session_userActivated}]);
-    d_inactive_sessions == ((sessions_iterated /\ a_channel~[{p_lost_channel}]) - a_state~[{e_session_userActivated}])
+    d_active_sessions_0   == ( sessions_iterated /\ a_channel$0~[{p_lost_channel}] /\ a_state$0~[{e_session_userActivated}]);
+    d_inactive_sessions_0 == ((sessions_iterated /\ a_channel$0~[{p_lost_channel}]) - a_state$0~[{e_session_userActivated}])
 
 SEES
     constants,
@@ -1132,18 +1132,18 @@ OPERATIONS
                 sessions_to_iterate \/ sessions_iterated = t_session &
                 l_continue = bool(sessions_to_iterate /= {}) &
                 dom(a_channel) <: dom(a_state) &
-                s_session                    = s_session$0 - d_inactive_sessions                                                         &
-                a_state                      = d_inactive_sessions <<| a_state$0 <+ d_active_sessions * {e_session_scOrphaned}           &
-                a_channel                    = d_inactive_sessions <<| a_channel$0 |>> {p_lost_channel}                                  &
-                a_client_to_create           = d_inactive_sessions <<| a_client_to_create$0                                              &
-                a_client_app_context         = d_inactive_sessions <<| a_client_app_context$0                                            &
-                a_client_orphaned            = d_inactive_sessions <<| a_client_orphaned$0 <+ d_active_sessions * {p_channel_config_idx} &
-                a_user_server                = d_inactive_sessions <<| a_user_server$0                                                   &
-                a_user_client                = d_inactive_sessions <<| a_user_client$0                                                   &
-                a_server_token               = a_server_token$0 |>> d_inactive_sessions                                                  &
-                a_client_token               = d_inactive_sessions <<| a_client_token$0                                                  &
-                a_NonceServer                = d_inactive_sessions <<| a_NonceServer$0                                                   &
-                a_NonceClient                = d_inactive_sessions <<| a_NonceClient$0
+                s_session                    = s_session$0 - d_inactive_sessions_0                                                         &
+                a_state                      = d_inactive_sessions_0 <<| a_state$0 <+ d_active_sessions_0 * {e_session_scOrphaned}           &
+                a_channel                    = d_inactive_sessions_0 <<| a_channel$0 |>> {p_lost_channel}                                  &
+                a_client_to_create           = d_inactive_sessions_0 <<| a_client_to_create$0                                              &
+                a_client_app_context         = d_inactive_sessions_0 <<| a_client_app_context$0                                            &
+                a_client_orphaned            = d_inactive_sessions_0 <<| a_client_orphaned$0 <+ d_active_sessions_0 * {p_channel_config_idx} &
+                a_user_server                = d_inactive_sessions_0 <<| a_user_server$0                                                   &
+                a_user_client                = d_inactive_sessions_0 <<| a_user_client$0                                                   &
+                a_server_token               = a_server_token$0 |>> d_inactive_sessions_0                                                  &
+                a_client_token               = d_inactive_sessions_0 <<| a_client_token$0                                                  &
+                a_NonceServer                = d_inactive_sessions_0 <<| a_NonceServer$0                                                   &
+                a_NonceClient                = d_inactive_sessions_0 <<| a_NonceClient$0
             VARIANT
                 card(sessions_to_iterate)
             END
@@ -1196,18 +1196,18 @@ OPERATIONS
                 sessions_to_iterate \/ sessions_iterated = t_session&
                 l_continue = bool(sessions_to_iterate /= {}) &
                 dom(a_channel) <: dom(a_state) &
-                s_session                    = s_session$0 - d_inactive_sessions                                               &
-                a_state                      = d_inactive_sessions <<| a_state$0 <+ d_active_sessions * {e_session_scOrphaned} &
-                a_channel                    = d_inactive_sessions <<| a_channel$0 |>> {p_lost_channel}                        &
-                a_client_to_create           = d_inactive_sessions <<| a_client_to_create$0                                    &
-                a_client_app_context         = d_inactive_sessions <<| a_client_app_context$0                                  &
-                a_client_orphaned            = d_inactive_sessions <<| a_client_orphaned$0                                     &
-                a_user_server                = d_inactive_sessions <<| a_user_server$0                                         &
-                a_user_client                = d_inactive_sessions <<| a_user_client$0                                         &
-                a_server_token               = a_server_token$0 |>> d_inactive_sessions                                        &
-                a_client_token               = d_inactive_sessions <<| a_client_token$0                                        &
-                a_NonceServer                = d_inactive_sessions <<| a_NonceServer$0                                         &
-                a_NonceClient                = d_inactive_sessions <<| a_NonceClient$0
+                s_session                    = s_session$0 - d_inactive_sessions_0                                               &
+                a_state                      = d_inactive_sessions_0 <<| a_state$0 <+ d_active_sessions_0 * {e_session_scOrphaned} &
+                a_channel                    = d_inactive_sessions_0 <<| a_channel$0 |>> {p_lost_channel}                        &
+                a_client_to_create           = d_inactive_sessions_0 <<| a_client_to_create$0                                    &
+                a_client_app_context         = d_inactive_sessions_0 <<| a_client_app_context$0                                  &
+                a_client_orphaned            = d_inactive_sessions_0 <<| a_client_orphaned$0                                     &
+                a_user_server                = d_inactive_sessions_0 <<| a_user_server$0                                         &
+                a_user_client                = d_inactive_sessions_0 <<| a_user_client$0                                         &
+                a_server_token               = a_server_token$0 |>> d_inactive_sessions_0                                        &
+                a_client_token               = d_inactive_sessions_0 <<| a_client_token$0                                        &
+                a_NonceServer                = d_inactive_sessions_0 <<| a_NonceServer$0                                         &
+                a_NonceClient                = d_inactive_sessions_0 <<| a_NonceClient$0
             VARIANT
                 card(sessions_to_iterate)
             END
