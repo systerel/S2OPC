@@ -151,7 +151,7 @@ SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
 
 SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(SOPC_Socket sock)
 {
-    if (sock == SOPC_INVALID_SOCKET)
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock))
     {
         return NULL;
     }
