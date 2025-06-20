@@ -106,8 +106,6 @@ extern void session_core__INITIALISATION(void);
    LOCAL_OPERATIONS Clause
   --------------------------*/
 extern void session_core__l_client_secure_channel_lost_session_sm(
-   const constants__t_channel_i session_core__p_channel,
-   const constants__t_channel_i session_core__p_lost_channel,
    const constants__t_session_i session_core__p_session,
    const constants__t_channel_config_idx_i session_core__p_channel_config_idx);
 extern void session_core__l_client_user_activate_session_req_sm(

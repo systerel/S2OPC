@@ -394,17 +394,33 @@ LOCAL_OPERATIONS
     END
     ;
 
-    l_client_secure_channel_lost_session_sm(p_channel, p_lost_channel, p_session, p_channel_config_idx) =
+    l_client_secure_channel_lost_session_sm(p_session, p_channel_config_idx) =
     PRE
-        p_channel            : t_channel_i            &
-        p_lost_channel       : t_channel_i            &
-        p_session            : t_session_i            &
-        p_session            : dom(a_state)           &
-        p_session            : dom(a_channel)         &
-        p_channel            = a_channel(p_session)   &
-        p_channel_config_idx : t_channel_config_idx_i &
-        p_channel_config_idx : t_channel_config_idx   &
-        dom(a_client_orphaned) <: dom(a_state |> {e_session_scOrphaned})
+        p_session            : t_session_i               &
+        p_session            : dom(a_state)              &
+        p_session            : dom(a_channel)            &
+        p_channel_config_idx : t_channel_config_idx_i    &
+        p_channel_config_idx : t_channel_config_idx      &
+        s_session = dom(a_state)                         &
+        s_client_session <: s_session                    &
+        a_channel~[{a_channel(p_session)}] <: s_client_session &
+
+        dom(a_channel) = dom(a_state |>> {e_session_init, e_session_scOrphaned}) &
+        dom(a_user_server) = dom(s_client_session <<| a_state |>> {e_session_created}) &
+        dom(a_user_client) = s_client_session &
+        dom(a_client_to_create) <: s_client_session &
+        dom(a_client_app_context) = s_client_session &
+        ran(a_server_token) = s_session - s_client_session &
+        dom(a_client_token) = dom(s_client_session <|a_state |>> {e_session_init, e_session_creating}) &
+        dom(a_client_orphaned) = dom(s_client_session <| a_state |> {e_session_scOrphaned})  &
+        dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
+        dom(a_NonceClient) <: dom(s_client_session <| a_state |>> {e_session_init}) &
+        dom(a_session_roles) <: dom(s_client_session <<| a_state |>> {e_session_created}) &
+        dom(a_user_secu_client) <: dom(a_state) &
+        dom(a_user_server_cert) <: dom(a_state) &
+        dom(a_client_token) <: dom(a_user_secu_client) &
+        dom(a_client_token) <: dom(a_user_server_cert) &
+        dom(a_server_user_auth_attempts) = dom(s_client_session <<| a_state)
     THEN
         s_session,
         s_client_session,
@@ -420,15 +436,18 @@ LOCAL_OPERATIONS
         a_NonceServer,
         a_NonceClient,
         a_session_roles,
+        a_user_secu_client,
         a_user_server_cert,
         a_server_user_auth_attempts,
-        a_server_client_locales,
-        a_user_secu_client
+        a_server_client_locales
         :(
             s_session                   <: t_session                             &
+            s_session                   = dom(a_state)                           &
             s_client_session            <: t_session                             &
+            s_client_session            <: s_session                             &
             a_state                      : t_session +-> t_sessionState          &
             a_channel                    : t_session +-> t_channel               &
+            a_channel~[{a_channel(p_session)}] <: s_client_session                     &
             a_client_to_create           : t_session +-> t_channel_config_idx_i  &
             a_client_app_context         : t_session +-> t_session_application_context_i &
             a_client_orphaned            : t_session +-> t_channel_config_idx_i  &
@@ -439,49 +458,46 @@ LOCAL_OPERATIONS
             a_NonceServer                : t_session +-> t_Nonce                 &
             a_NonceClient                : t_session +-> t_Nonce                 &
             a_session_roles              : t_session +-> t_sessionRoles          &
+            a_user_secu_client           : t_session +-> t_SecurityPolicy        &
             a_user_server_cert           : t_session +-> t_byte_buffer           &
             a_server_user_auth_attempts  : t_session +-> NAT                     &
             a_server_client_locales      : s_session --> t_LocaleIds             &
-            a_user_secu_client           : t_session +-> t_SecurityPolicy        &
 
-            (p_channel = p_lost_channel
-                =>
-                (   a_state$0(p_session) = e_session_userActivated
-                    =>
-                    a_channel                    = {p_session} <<| a_channel$0 &
-                    a_state                      = a_state$0 <+ {p_session |-> e_session_scOrphaned} &
-                    s_session                    = s_session$0 &
-                    a_client_to_create           = a_client_to_create$0 &
-                    a_client_app_context         = a_client_app_context$0 &
-                    a_user_server                = a_user_server$0 &
-                    a_user_client                = a_user_client$0 &
-                    a_server_token               = a_server_token$0 &
-                    a_client_token               = a_client_token$0 &
-                    a_NonceServer                = a_NonceServer$0 &
-                    a_NonceClient                = a_NonceClient$0 &
-                    a_session_roles              = a_session_roles$0 &
-                    a_user_secu_client           = a_user_secu_client$0 &
-                    a_user_server_cert           = a_user_server_cert$0 &
-                    a_server_user_auth_attempts  = a_server_user_auth_attempts$0 &
-                    a_client_orphaned = a_client_orphaned$0 <+ {p_session |-> p_channel_config_idx}
-                ) &
-                (   a_state$0(p_session) /= e_session_userActivated
-                    =>
-                    s_session                    = s_session$0 - {p_session} &
-                    a_state                      = {p_session} <<| a_state$0 &
-                    a_channel                    = {p_session} <<| a_channel$0 &
-                    a_client_to_create           = {p_session} <<| a_client_to_create$0 &
-                    a_client_app_context         = {p_session} <<| a_client_app_context$0 &
-                    a_client_orphaned            = {p_session} <<| a_client_orphaned$0 &
-                    a_user_server                = {p_session} <<| a_user_server$0 &
-                    a_user_client                = {p_session} <<| a_user_client$0 &
-                    a_server_token               = a_server_token$0 |>> {p_session} &
-                    a_client_token               = {p_session} <<| a_client_token$0 &
-                    a_NonceServer                = {p_session} <<| a_NonceServer$0 &
-                    a_NonceClient                = {p_session} <<| a_NonceClient$0 &
-                    a_session_roles              = {p_session} <<| a_session_roles$0
-                )
-            )
+            dom(a_channel) = dom(a_state |>> {e_session_init, e_session_scOrphaned}) &
+            dom(a_user_server) = dom(s_client_session <<| a_state |>> {e_session_created}) &
+            dom(a_user_client) = s_client_session &
+            dom(a_client_to_create) <: s_client_session &
+            dom(a_client_app_context) = s_client_session &
+            ran(a_server_token) = s_session - s_client_session &
+            dom(a_client_token) = dom(s_client_session <|a_state |>> {e_session_init, e_session_creating}) &
+            dom(a_client_orphaned) = dom(s_client_session <| a_state |> {e_session_scOrphaned})  &
+            dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
+            dom(a_NonceClient) <: dom(s_client_session <| a_state |>> {e_session_init}) &
+            dom(a_session_roles) <: dom(s_client_session <<| a_state |>> {e_session_created}) &
+            dom(a_user_secu_client) <: dom(a_state) &
+            dom(a_user_server_cert) <: dom(a_state) &
+            dom(a_client_token) <: dom(a_user_secu_client) &
+            dom(a_client_token) <: dom(a_user_server_cert) &
+            dom(a_server_user_auth_attempts) = dom(s_client_session <<| a_state) &
+
+            s_session                    = s_session$0 - ({p_session} /\ (a_channel$0~[{a_channel(p_session)}] - a_state$0~[{e_session_userActivated}])) &
+            s_client_session             = s_client_session$0 /\ s_session &
+            a_state                      = s_session <| a_state$0 <+ ({p_session} /\ (a_channel$0~[{a_channel(p_session)}] /\ a_state$0~[{e_session_userActivated}])) * {e_session_scOrphaned} &
+            a_channel                    = ({p_session} /\ a_channel$0~[{a_channel(p_session)}]) <<| a_channel$0 &
+            a_client_to_create           = s_session <| a_client_to_create$0 &
+            a_client_app_context         = s_session <| a_client_app_context$0 &
+            a_client_orphaned            = s_session <| a_client_orphaned$0 <+ ({p_session} /\ (a_channel$0~[{a_channel(p_session)}] /\ a_state$0~[{e_session_userActivated}])) * {p_channel_config_idx} &
+            a_user_server                = s_session <| a_user_server$0 &
+            a_user_client                = s_session <| a_user_client$0 &
+            a_server_token               = a_server_token$0 |> s_session &
+            a_client_token               = s_session <| a_client_token$0 &
+            a_NonceServer                = s_session <| a_NonceServer$0 &
+            a_NonceClient                = s_session <| a_NonceClient$0 &
+            a_session_roles              = s_session <| a_session_roles$0 &
+            a_user_secu_client           = s_session <| a_user_secu_client$0 &
+            a_user_server_cert           = s_session <| a_user_server_cert$0 &
+            a_server_user_auth_attempts  = s_session <| a_server_user_auth_attempts$0 &
+            a_server_client_locales      = s_session <| a_server_client_locales$0
         )
     END
     ;
@@ -532,44 +548,40 @@ LOCAL_OPERATIONS
             a_server_client_locales      : s_session --> t_LocaleIds             &
             a_user_secu_client           : t_session +-> t_SecurityPolicy        &
 
-            (p_channel = p_lost_channel
-            =>
-                (   a_state$0(p_session) = e_session_userActivated
-                    =>
-                    a_channel                    = {p_session} <<| a_channel$0 &
-                    a_state                      = a_state$0 <+ {p_session |-> e_session_scOrphaned} &
-                    s_session                    = s_session$0 &
-                    a_client_to_create           = a_client_to_create$0 &
-                    a_client_app_context         = a_client_app_context$0 &
-                    a_user_server                = a_user_server$0 &
-                    a_user_client                = a_user_client$0 &
-                    a_server_token               = a_server_token$0 &
-                    a_client_token               = a_client_token$0 &
-                    a_NonceServer                = a_NonceServer$0 &
-                    a_NonceClient                = a_NonceClient$0 &
-                    a_client_orphaned            = a_client_orphaned$0 &
-                    a_session_roles              = a_session_roles$0
-                ) &
-                (   a_state$0(p_session) /= e_session_userActivated
-                    =>
-                    s_session                    = s_session$0 - {p_session} &
-                    a_state                      = {p_session} <<| a_state$0 &
-                    a_channel                    = {p_session} <<| a_channel$0 &
-                    a_client_to_create           = {p_session} <<| a_client_to_create$0 &
-                    a_client_app_context         = {p_session} <<| a_client_app_context$0 &
-                    a_client_orphaned            = {p_session} <<| a_client_orphaned$0 &
-                    a_user_server                = {p_session} <<| a_user_server$0 &
-                    a_user_client                = {p_session} <<| a_user_client$0 &
-                    a_server_token               = a_server_token$0 |>> {p_session} &
-                    a_client_token               = {p_session} <<| a_client_token$0 &
-                    a_NonceServer                = {p_session} <<| a_NonceServer$0 &
-                    a_NonceClient                = {p_session} <<| a_NonceClient$0 &
-                    a_session_roles              = {p_session} <<| a_session_roles$0 &
-                    a_user_secu_client           = {p_session} <<| a_user_secu_client$0 &
-                    a_user_server_cert           = {p_session} <<| a_user_server_cert$0 &
-                    a_server_user_auth_attempts  = {p_session} <<| a_server_user_auth_attempts$0
-                )
-            )
+            dom(a_channel) = dom(a_state |>> {e_session_init, e_session_scOrphaned}) &
+            dom(a_user_server) = dom(s_client_session <<| a_state |>> {e_session_created}) &
+            dom(a_user_client) = s_client_session &
+            dom(a_client_to_create) <: s_client_session &
+            dom(a_client_app_context) = s_client_session &
+            ran(a_server_token) = s_session - s_client_session &
+            dom(a_client_token) = dom(s_client_session <|a_state |>> {e_session_init, e_session_creating}) &
+            dom(a_client_orphaned) = dom(s_client_session <| a_state |> {e_session_scOrphaned})  &
+            dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
+            dom(a_NonceClient) <: dom(s_client_session <| a_state |>> {e_session_init}) &
+            dom(a_session_roles) <: dom(s_client_session <<| a_state |>> {e_session_created}) &
+            dom(a_user_secu_client) <: dom(a_state) &
+            dom(a_user_server_cert) <: dom(a_state) &
+            dom(a_client_token) <: dom(a_user_secu_client) &
+            dom(a_client_token) <: dom(a_user_server_cert) &
+            dom(a_server_user_auth_attempts) = dom(s_client_session <<| a_state) &
+
+            s_session                    = s_session$0 - ({p_session} /\ (a_channel$0~[{p_lost_channel}] - a_state$0~[{e_session_userActivated}])) &
+            a_state                      = s_session <| a_state$0 <+ ({p_session} /\ (a_channel$0~[{p_lost_channel}] /\ a_state$0~[{e_session_userActivated}])) * {e_session_scOrphaned} &
+            a_channel                    = ({p_session} /\ a_channel$0~[{p_lost_channel}]) <<| a_channel$0 &
+            a_client_to_create           = s_session <| a_client_to_create$0 &
+            a_client_app_context         = s_session <| a_client_app_context$0 &
+            a_client_orphaned            = s_session <| a_client_orphaned$0 &
+            a_user_server                = s_session <| a_user_server$0 &
+            a_user_client                = s_session <| a_user_client$0 &
+            a_server_token               = a_server_token$0 |> s_session &
+            a_client_token               = s_session <| a_client_token$0 &
+            a_NonceServer                = s_session <| a_NonceServer$0 &
+            a_NonceClient                = s_session <| a_NonceClient$0 &
+            a_session_roles              = s_session <| a_session_roles$0 &
+            a_user_secu_client           = s_session <| a_user_secu_client$0 &
+            a_user_server_cert           = s_session <| a_user_server_cert$0 &
+            a_server_user_auth_attempts  = s_session <| a_server_user_auth_attempts$0 &
+            a_server_client_locales      = s_session <| a_server_client_locales$0
         )
     END
 
@@ -1089,23 +1101,20 @@ OPERATIONS
     END
     ;
 
-    l_client_secure_channel_lost_session_sm(p_channel, p_lost_channel, p_session, p_channel_config_idx) =
+    l_client_secure_channel_lost_session_sm(p_session, p_channel_config_idx) =
     VAR
         l_state
     IN
-        IF p_channel = p_lost_channel
+        l_state <-- get_session_state (p_session);
+        IF l_state = e_session_userActivated
         THEN
-            l_state <-- get_session_state (p_session);
-            IF l_state = e_session_userActivated
-            THEN
-                /* Active sessions set to orphaned and channel config idx associated */
-                reset_session_channel(p_session);
-                set_client_orphaned(p_session, p_channel_config_idx);
-                set_session_state (p_session, e_session_scOrphaned)
-            ELSE
-                /* Inactive sessions or all orphaned sessions (if no new channel can be associated) */
-                set_session_state_closed (p_session, e_sc_bad_secure_channel_closed)
-            END
+            /* Active sessions set to orphaned and channel config idx associated */
+            reset_session_channel(p_session);
+            set_client_orphaned(p_session, p_channel_config_idx);
+            set_session_state (p_session, e_session_scOrphaned)
+        ELSE
+            /* Inactive sessions or all orphaned sessions (if no new channel can be associated) */
+            set_session_state_closed (p_session, e_sc_bad_secure_channel_closed)
         END
     END
     ;
@@ -1122,8 +1131,8 @@ OPERATIONS
             WHILE l_continue = TRUE DO
                 l_continue, l_session <-- continue_iter_session;
                 l_dom, l_channel <-- getall_session_channel(l_session);
-                IF l_dom = TRUE THEN
-                    l_client_secure_channel_lost_session_sm(l_channel, p_lost_channel, l_session, p_channel_config_idx)
+                IF l_dom = TRUE & l_channel = p_lost_channel THEN
+                    l_client_secure_channel_lost_session_sm(l_session, p_channel_config_idx)
                 END
             INVARIANT
                 sessions_to_iterate <: t_session &
@@ -1131,19 +1140,44 @@ OPERATIONS
                 sessions_to_iterate /\ sessions_iterated = {} &
                 sessions_to_iterate \/ sessions_iterated = t_session &
                 l_continue = bool(sessions_to_iterate /= {}) &
-                dom(a_channel) <: dom(a_state) &
-                s_session                    = s_session$0 - d_inactive_sessions_0                                                         &
-                a_state                      = d_inactive_sessions_0 <<| a_state$0 <+ d_active_sessions_0 * {e_session_scOrphaned}           &
-                a_channel                    = d_inactive_sessions_0 <<| a_channel$0 |>> {p_lost_channel}                                  &
-                a_client_to_create           = d_inactive_sessions_0 <<| a_client_to_create$0                                              &
-                a_client_app_context         = d_inactive_sessions_0 <<| a_client_app_context$0                                            &
-                a_client_orphaned            = d_inactive_sessions_0 <<| a_client_orphaned$0 <+ d_active_sessions_0 * {p_channel_config_idx} &
-                a_user_server                = d_inactive_sessions_0 <<| a_user_server$0                                                   &
-                a_user_client                = d_inactive_sessions_0 <<| a_user_client$0                                                   &
-                a_server_token               = a_server_token$0 |>> d_inactive_sessions_0                                                  &
-                a_client_token               = d_inactive_sessions_0 <<| a_client_token$0                                                  &
-                a_NonceServer                = d_inactive_sessions_0 <<| a_NonceServer$0                                                   &
-                a_NonceClient                = d_inactive_sessions_0 <<| a_NonceClient$0
+
+                s_session <: t_session &
+                s_session = dom(a_state) &
+                s_client_session <: s_session &
+                a_state : t_session +-> t_sessionState &
+                a_channel : t_session +-> t_channel &
+                a_channel~[{p_lost_channel}] <: s_client_session &
+                dom(a_channel) = dom(a_state |>> {e_session_init, e_session_scOrphaned}) &
+                dom(a_user_server) = dom(s_client_session <<| a_state |>> {e_session_created}) &
+                dom(a_user_client) = s_client_session &
+                dom(a_client_to_create) <: s_client_session &
+                dom(a_client_app_context) = s_client_session &
+                ran(a_server_token) = s_session - s_client_session &
+                dom(a_client_token) = dom(s_client_session <|a_state |>> {e_session_init, e_session_creating}) &
+                dom(a_client_orphaned) = dom(s_client_session <| a_state |> {e_session_scOrphaned})  &
+                dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
+                dom(a_NonceClient) <: dom(s_client_session <| a_state |>> {e_session_init}) &
+                dom(a_session_roles) <: dom(s_client_session <<| a_state |>> {e_session_created}) &
+                dom(a_user_secu_client) <: dom(a_state) &
+                dom(a_user_server_cert) <: dom(a_state) &
+                dom(a_client_token) <: dom(a_user_secu_client) &
+                dom(a_client_token) <: dom(a_user_server_cert) &
+                dom(a_server_user_auth_attempts) = dom(s_client_session <<| a_state) &
+
+                s_session                    = s_session$0 - d_inactive_sessions_0                                    &
+                s_client_session             = s_client_session$0 /\ s_session                                        &
+                a_state                      = s_session <| a_state$0 <+ d_active_sessions_0 * {e_session_scOrphaned} &
+                a_channel                    = (sessions_iterated /\ a_channel$0~[{p_lost_channel}]) <<| a_channel$0  &
+                a_client_to_create           = s_session <| a_client_to_create$0                                      &
+                a_client_app_context         = s_session <| a_client_app_context$0                                    &
+                a_client_orphaned            = s_session <| a_client_orphaned$0 <+ d_active_sessions_0 * {p_channel_config_idx} &
+                a_user_server                = s_session <| a_user_server$0                                           &
+                a_user_client                = s_session <| a_user_client$0                                           &
+                a_server_token               = a_server_token$0 |> s_session                                          &
+                a_client_token               = s_session <| a_client_token$0                                          &
+                a_NonceServer                = s_session <| a_NonceServer$0                                           &
+                a_NonceClient                = s_session <| a_NonceClient$0                                           &
+                a_session_roles              = s_session <| a_session_roles$0
             VARIANT
                 card(sessions_to_iterate)
             END

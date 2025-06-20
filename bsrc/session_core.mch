@@ -552,10 +552,11 @@ OPERATIONS
     // Client channel lost
     client_secure_channel_lost_session_sm (p_lost_channel, p_channel_config_idx) =
     PRE
-        p_lost_channel       : t_channel_i            &
-        p_lost_channel       : s_channel_connected    &
-        p_lost_channel      /: dom(a_endpoint)        &
-        p_channel_config_idx : t_channel_config_idx_i &
+        p_lost_channel       : t_channel_i               &
+        p_lost_channel       : s_channel_connected       &
+        p_lost_channel      /: dom(a_endpoint)           &
+        a_channel~[{p_lost_channel}] <: s_client_session &
+        p_channel_config_idx : t_channel_config_idx_i    &
         p_channel_config_idx : t_channel_config_idx
     THEN
         // We have a new channel to provide (waiting for connection)
@@ -569,17 +570,20 @@ OPERATIONS
             inactive_sessions /\ a_state~[{e_session_userActivated}] = {} &
             inactive_sessions /\ active_sessions = {}
         THEN
-            s_session                    := s_session - inactive_sessions                                                       ||
-            s_client_session             := s_client_session - inactive_sessions                                                ||
-            a_state                      := inactive_sessions <<| a_state <+ (active_sessions * {e_session_scOrphaned})         ||
-            a_channel                    := (inactive_sessions \/ active_sessions) <<| a_channel                                ||
-            a_client_to_create           := inactive_sessions <<| a_client_to_create                                            ||
-            a_client_app_context         := inactive_sessions <<| a_client_app_context                                          ||
+            s_session                    := s_session - inactive_sessions                                               ||
+            s_client_session             := s_client_session - inactive_sessions                                        ||
+            a_state                      := inactive_sessions <<| a_state <+ (active_sessions * {e_session_scOrphaned}) ||
+            a_channel                    := (inactive_sessions \/ active_sessions) <<| a_channel                        ||
+            a_client_to_create           := inactive_sessions <<| a_client_to_create                                    ||
+            a_client_app_context         := inactive_sessions <<| a_client_app_context                                  ||
             a_client_orphaned            := inactive_sessions <<| a_client_orphaned <+ active_sessions * {p_channel_config_idx} ||
-            a_user_client                := inactive_sessions <<| a_user_client                                                 ||
-            a_client_token               := inactive_sessions <<| a_client_token                                                ||
-            a_NonceServer                := inactive_sessions <<| a_NonceServer                                                 ||
-            a_NonceClient                := inactive_sessions <<| a_NonceClient
+            a_user_server                := inactive_sessions <<| a_user_server                                         ||
+            a_user_client                := inactive_sessions <<| a_user_client                                         ||
+            a_server_token               := a_server_token |>> inactive_sessions                                        ||
+            a_client_token               := inactive_sessions <<| a_client_token                                        ||
+            a_NonceServer                := inactive_sessions <<| a_NonceServer                                         ||
+            a_NonceClient                := inactive_sessions <<| a_NonceClient                                         ||
+            a_session_roles              := inactive_sessions <<| a_session_roles
         END
     END
     ;
