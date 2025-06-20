@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.h
 
- Date                 : 28/10/2025 14:35:45
+ Date                 : 01/12/2025 11:08:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -140,15 +140,15 @@ extern void session_core_2__reset_session_orphaned(
    const constants__t_session_i session_core_2__p_session);
 extern void session_core_2__reset_session_to_create(
    const constants__t_session_i session_core_2__p_session);
+extern void session_core_2__set_client_orphaned(
+   const constants__t_session_i session_core_2__p_session,
+   const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx);
 extern void session_core_2__set_server_session_client_app_desc(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_ApplicationDescription_i session_core_2__p_cliAppDesc);
 extern void session_core_2__set_server_session_client_cert_tb(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_CertThumbprint_i session_core_2__p_cliCertTb);
-extern void session_core_2__set_client_orphaned(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx);
 extern void session_core_2__set_server_session_preferred_locales(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_LocaleIds_i session_core_2__p_localesIds);

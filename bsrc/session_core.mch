@@ -592,17 +592,16 @@ OPERATIONS
     // Server channel lost
     server_secure_channel_lost_session_sm (p_lost_channel) =
     PRE
-        p_lost_channel : t_channel_i &
+        p_lost_channel : t_channel_i         &
         p_lost_channel : s_channel_connected &
-        p_lost_channel : dom(a_endpoint)
+        p_lost_channel : dom(a_endpoint)     &
+        a_channel~[{p_lost_channel}] /\ s_client_session = {}
     THEN
         ANY active_sessions, inactive_sessions WHERE
             active_sessions <: t_session &
-            active_sessions <: s_session - s_client_session &
             active_sessions <: a_channel~[{p_lost_channel}] &
             active_sessions <: a_state~[{e_session_userActivated}] &
             inactive_sessions <: t_session &
-            inactive_sessions <: s_session - s_client_session &
             inactive_sessions <: a_channel~[{p_lost_channel}] &
             inactive_sessions /\ a_state~[{e_session_userActivated}] = {} &
             inactive_sessions /\ active_sessions = {}
@@ -615,12 +614,18 @@ OPERATIONS
             // No  need to record channel lost since session will be associated to a new channel by client
             // TODO: trigger a timer on session ?
             s_session                    := s_session - inactive_sessions                                               ||
+            s_client_session             := s_client_session - inactive_sessions                                        ||
             a_state                      := inactive_sessions <<| a_state <+ (active_sessions * {e_session_scOrphaned}) ||
             a_channel                    := (inactive_sessions \/ active_sessions) <<| a_channel                        ||
+            a_client_to_create           := inactive_sessions <<| a_client_to_create                                    ||
+            a_client_app_context         := inactive_sessions <<| a_client_app_context                                  ||
             a_client_orphaned            := inactive_sessions <<| a_client_orphaned                                     ||
             a_user_server                := inactive_sessions <<| a_user_server                                         ||
+            a_user_client                := inactive_sessions <<| a_user_client                                         ||
             a_server_token               := a_server_token |>> inactive_sessions                                        ||
+            a_client_token               := inactive_sessions <<| a_client_token                                        ||
             a_NonceServer                := inactive_sessions <<| a_NonceServer                                         ||
+            a_NonceClient                := inactive_sessions <<| a_NonceClient                                         ||
             a_session_roles              := inactive_sessions <<| a_session_roles
         END
     END

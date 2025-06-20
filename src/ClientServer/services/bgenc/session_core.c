@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 01/12/2025 10:59:56
+ Date                 : 01/12/2025 11:08:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -834,26 +834,22 @@ void session_core__client_secure_channel_lost_session_sm(
 }
 
 void session_core__l_server_secure_channel_lost_session_sm(
-   const constants__t_channel_i session_core__p_channel,
-   const constants__t_channel_i session_core__p_lost_channel,
    const constants__t_session_i session_core__p_session) {
    {
       constants__t_sessionState_i session_core__l_state;
       
-      if (session_core__p_channel == session_core__p_lost_channel) {
-         session_core_1__get_session_state(session_core__p_session,
-            &session_core__l_state);
-         if (session_core__l_state == constants__e_session_userActivated) {
-            session_core_1__reset_session_channel(session_core__p_session);
-            session_core_1__set_session_state(session_core__p_session,
-               constants__e_session_scOrphaned);
-         }
-         else {
-            session_audit_bs__server_notify_session_closed(session_core__p_session,
-               constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
-            session_core_1__set_session_state_closed(session_core__p_session,
-               constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
-         }
+      session_core_1__get_session_state(session_core__p_session,
+         &session_core__l_state);
+      if (session_core__l_state == constants__e_session_userActivated) {
+         session_core_1__reset_session_channel(session_core__p_session);
+         session_core_1__set_session_state(session_core__p_session,
+            constants__e_session_scOrphaned);
+      }
+      else {
+         session_audit_bs__server_notify_session_closed(session_core__p_session,
+            constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
+         session_core_1__set_session_state_closed(session_core__p_session,
+            constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
       }
    }
 }
@@ -878,10 +874,9 @@ void session_core__server_secure_channel_lost_session_sm(
             session_core_1__getall_session_channel(session_core__l_session,
                &session_core__l_dom,
                &session_core__l_channel);
-            if (session_core__l_dom == true) {
-               session_core__l_server_secure_channel_lost_session_sm(session_core__l_channel,
-                  session_core__p_lost_channel,
-                  session_core__l_session);
+            if ((session_core__l_dom == true) &&
+               (session_core__l_channel == session_core__p_lost_channel)) {
+               session_core__l_server_secure_channel_lost_session_sm(session_core__l_session);
             }
          }
       }
