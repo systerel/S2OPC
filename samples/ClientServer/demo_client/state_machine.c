@@ -464,7 +464,7 @@ static SOPC_ReturnStatus fillRegisterServer2Request(OpcUa_RegisterServer2Request
     if (SOPC_STATUS_OK == status)
     {
         SOPC_String_Initialize(&pConfig->MdnsServerName);
-        status = SOPC_String_InitializeFromCString(&pConfig->MdnsServerName, "Mon MDNS Server");
+        status = SOPC_String_InitializeFromCString(&pConfig->MdnsServerName, "My MDNS Server");
 
         // pConfig->NoOfServerCapabilities = 1;
         // SOPC_String_Initialize(pConfig->ServerCapabilities);

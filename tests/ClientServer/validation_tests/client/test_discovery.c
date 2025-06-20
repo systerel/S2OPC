@@ -250,7 +250,7 @@ START_TEST(test_registerServer2)
     if (SOPC_STATUS_OK == status)
     {
         SOPC_String_Initialize(&pConfig->MdnsServerName);
-        status = SOPC_String_InitializeFromCString(&pConfig->MdnsServerName, "Mon MDNS Server");
+        status = SOPC_String_InitializeFromCString(&pConfig->MdnsServerName, "My MDNS Server");
 
         // pConfig->NoOfServerCapabilities = 1;
         // SOPC_String_Initialize(pConfig->ServerCapabilities);
