@@ -1228,7 +1228,7 @@ static MessageCtx* MessageCtx_GetFromPublisherId_WriterGroupId(SOPC_Conf_Publish
     return mes;
 }
 
-static SOPC_DataSetMessageCtx_t* DataSetMessage_GetFrom_DataSetWirterId(const MessageCtx* context,
+static SOPC_DataSetMessageCtx_t* DataSetMessage_GetFrom_DataSetWriterId(const MessageCtx* context,
                                                                         uint16_t dataSetWriterId)
 {
     SOPC_DataSetMessageCtx_t* dsmCtxFound = NULL;
@@ -1264,7 +1264,7 @@ static SOPC_ReturnStatus SOPC_PubScheduler_Set_EnableEmission_DataSetMessage(SOP
     SOPC_DataSetMessageCtx_t* dsmCtx = NULL;
     if (NULL != context)
     {
-        dsmCtx = DataSetMessage_GetFrom_DataSetWirterId(context, dataSetWriterId);
+        dsmCtx = DataSetMessage_GetFrom_DataSetWriterId(context, dataSetWriterId);
     }
     if (NULL != dsmCtx)
     {
