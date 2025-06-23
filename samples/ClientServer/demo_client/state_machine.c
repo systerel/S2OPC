@@ -465,15 +465,11 @@ static SOPC_ReturnStatus fillRegisterServer2Request(OpcUa_RegisterServer2Request
     {
         SOPC_String_Initialize(&pConfig->MdnsServerName);
         status = SOPC_String_InitializeFromCString(&pConfig->MdnsServerName, "My MDNS Server");
-
-        // pConfig->NoOfServerCapabilities = 1;
-        // SOPC_String_Initialize(pConfig->ServerCapabilities);
-        // status = SOPC_String_InitializeFromCString(pConfig->ServerCapabilities, "My Server Capabilities");
     }
 
     pReq->DiscoveryConfiguration = mdnsConfig;
 
-    if (!fillRequest)
+    if (!fillRequest || (SOPC_STATUS_OK != status))
     {
         /* clear ressources */
         SOPC_LocalizedText_Clear(serverName);

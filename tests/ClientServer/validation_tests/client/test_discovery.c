@@ -251,10 +251,7 @@ START_TEST(test_registerServer2)
     {
         SOPC_String_Initialize(&pConfig->MdnsServerName);
         status = SOPC_String_InitializeFromCString(&pConfig->MdnsServerName, "My MDNS Server");
-
-        // pConfig->NoOfServerCapabilities = 1;
-        // SOPC_String_Initialize(pConfig->ServerCapabilities);
-        // status = SOPC_String_InitializeFromCString(pConfig->ServerCapabilities, "My Server Capabilities");
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
     }
 
     pReq->DiscoveryConfiguration = mdnsConfig;
