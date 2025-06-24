@@ -548,6 +548,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
     SOPC_ASSERT(NULL != context);
     SOPC_Dataset_NetworkMessage* message = context->message;
+    SOPC_PubSub_SecurityType* security = context->security;
 
     SOPC_WriterGroup* group = context->group;
     SOPC_ASSERT(NULL != message && NULL != group);
@@ -578,8 +579,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         if (isPreencoded && dsmCtx->enableEmission != oldFlagEnableEmission)
         {
             SOPC_UADP_NetworkMessage_Delete_PreencodedBuffer(message);
-            SOPC_ReturnStatus status =
-                SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(message, context->security);
+            SOPC_ReturnStatus status = SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(message, security);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
@@ -666,7 +666,6 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     /* Finally send it */
     if (typeCheckingSuccess)
     {
-        SOPC_PubSub_SecurityType* security = context->security;
         if (NULL != security)
         {
             // Update keys
