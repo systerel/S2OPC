@@ -1973,16 +1973,14 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     break;
                 case SOPC_IdentifierType_ByteString:
                     // "b=<bstring>\0"
-                    bsOut = NULL;
                     if (nodeId->Data.Bstring.Length > 0)
                     {
-                        bsOutLen = 0;
                         status = SOPC_HelperEncode_Base64(nodeId->Data.Bstring.Data,
                                                           (size_t) nodeId->Data.Bstring.Length, &bsOut, &bsOutLen);
                     }
                     if (SOPC_STATUS_OK == status && bsOut != NULL && bsOutLen > 0)
                     {
-                        SOPC_ASSERT(bsOut[bsOutLen - 1] == '\0' && res >= 0 && maxSize > (size_t) res);
+                        SOPC_ASSERT(bsOut[bsOutLen - 1] == '\0' && maxSize > (size_t) res);
                         res += snprintf(&result[res], maxSize - (size_t) res, "b=%s", bsOut);
                         SOPC_ASSERT(res >= 0 && maxSize > (size_t) res);
                     }

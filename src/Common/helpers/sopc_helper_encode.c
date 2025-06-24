@@ -265,13 +265,20 @@ SOPC_ReturnStatus SOPC_HelperEncode_Base64(const SOPC_Byte* pInput, size_t input
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    *ppOut = (char*) SOPC_Calloc(*pOutLen, sizeof(char));
+    *ppOut = SOPC_Calloc(*pOutLen, sizeof(char));
     if (NULL == *ppOut)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
     bool res = base64encode(pInput, inputLen, *ppOut, *pOutLen);
-    return (res ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
+    if (!res)
+    {
+        SOPC_Free(*ppOut);
+        *ppOut = NULL;
+        *pOutLen = 0;
+        return SOPC_STATUS_NOK;
+    }
+    return SOPC_STATUS_OK;
 }
 
 /* Using https://en.wikibooks.org/wiki/Algorithm_Implementation/Miscellaneous/Base64#C_2

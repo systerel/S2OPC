@@ -47,7 +47,7 @@ SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* pInput, unsigned char** p
  * \param[out] ppOut       A valid pointer. It will be set to the buffer containing the newly encoded
  * null-terminated base64 C string. The allocated buffer must be freed by the caller.
  *
- * \param[out] pOutLen    A valid pointer. In case of success, the content is set to to the size of
+ * \param[out] pOutLen    A valid pointer. In case of success, the content is set to the size of
  *                        \p ppOut computed during the function execution (including NULL terminating char).
  *
  * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
