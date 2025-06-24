@@ -166,7 +166,7 @@ START_TEST(test_add_variable_node)
     OpcUa_VariableAttributes varAttributes;
     OpcUa_VariableAttributes_Initialize(&varAttributes);
     varAttributes.SpecifiedAttributes =
-        OpcUa_NodeAttributesMask_DataType | OpcUa_NodeAttributesMask_AccessLevel | OpcUa_NodeAttributesMask_Value;
+        OpcUa_NodeAttributesMask_DataType | OpcUa_NodeAttributesMask_AccessLevel | OpcUa_NodeAttributesMask_Value | OpcUa_NodeAttributesMask_DisplayName;
     varAttributes.AccessLevel = 1;
     SOPC_Variant_Initialize(&varAttributes.Value);
     varAttributes.Value.BuiltInTypeId = SOPC_Boolean_Id;
@@ -174,6 +174,17 @@ START_TEST(test_add_variable_node)
     varAttributes.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
     const SOPC_NodeId datatype_boolean = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Boolean);
     varAttributes.DataType = datatype_boolean;
+
+    SOPC_String name;
+    SOPC_String_Initialize(&name);
+    status = SOPC_String_AttachFromCstring(&name, "TestDisplayName");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);    
+
+    SOPC_LocalizedText displayName;
+    SOPC_LocalizedText_Initialize(&displayName);
+    displayName.defaultText = name;
+    varAttributes.DisplayName = displayName;
+    
 
     const SOPC_NodeId HasComponentType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
     SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_AddVariableNode(
@@ -186,9 +197,25 @@ START_TEST(test_add_variable_node)
     ck_assert_ptr_nonnull(outValue);
     SOPC_Boolean variantValue = outValue->Value.Value.Boolean;
     ck_assert(variantValue);
+    SOPC_Variant* outValueAttribute = NULL;
 
+    statusCode = SOPC_AddressSpaceAccess_ReadAttribute(addSpaceAccess, nodeId, SOPC_AttributeId_DisplayName, &outValueAttribute);
+    ck_assert_uint_eq(SOPC_GoodGenericStatus, statusCode);
+    ck_assert_ptr_nonnull(outValueAttribute);
+    ck_assert_ptr_nonnull(outValueAttribute->Value.LocalizedText);
+    SOPC_String* defaultText = &outValueAttribute->Value.LocalizedText->defaultText;
+    ck_assert_ptr_nonnull(defaultText);
+    
+    char* actualResult = SOPC_String_GetCString(defaultText);
+    ck_assert_ptr_nonnull(actualResult);
+    ck_assert_str_eq("TestDisplayName", actualResult);
+
+    SOPC_LocalizedText_Clear(&displayName);
+    SOPC_Free(actualResult);
     SOPC_DataValue_Clear(outValue);
     SOPC_Free(outValue);
+    SOPC_Variant_Clear(outValueAttribute);
+    SOPC_Free(outValueAttribute);
     SOPC_Boolean_Clear(&variantValue);
     SOPC_NodeId_Clear(nodeId);
     SOPC_Free(nodeId);
