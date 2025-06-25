@@ -596,7 +596,10 @@ static SOPC_ReturnStatus add_node_variable_and_method_in_added_node_object(SOPC_
     SOPC_String_Clear(&browseName->Name);
 
     // NodeId requested
-    status = SOPC_String_AttachFromCstring(&reqNodeId->NodeId.Data.String, "NewMethod");
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_AttachFromCstring(&reqNodeId->NodeId.Data.String, "NewMethod");
+    }
     if (SOPC_STATUS_OK != status)
     {
         return status;
