@@ -2129,6 +2129,10 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
                 pNid->Data.Bstring.Data = bsOut;
                 pNid->Data.Bstring.Length = (int32_t) bsOutLen;
             }
+            else
+            {
+                SOPC_Free(bsOut);
+            }
             break;
         default:
             break;
