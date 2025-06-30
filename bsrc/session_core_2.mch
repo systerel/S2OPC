@@ -199,29 +199,19 @@ OPERATIONS
     END
     ;
 
-    set_session_channel (session, channel) =
+    set_session_channel (session, p_channel) =
     PRE
         session : t_session_i &
         session : t_session   &
-        channel : t_channel_i &
-        channel : t_channel
+        p_channel : t_channel_i &
+        p_channel : t_channel
     THEN
         a_channel,
         a_channel_nb_sessions
         :(a_channel : t_session +-> t_channel &
-          {session} <<| a_channel = {session} <<| a_channel$0 &
-          a_channel (session) = channel &
+          a_channel = a_channel$0 <+ {session |-> p_channel} &
           a_channel_nb_sessions : t_channel --> NAT &
-          /* No previous channel associated to session: only increment the channel sessions counter */
-          (session /: dom(a_channel$0) =>
-              a_channel_nb_sessions = a_channel_nb_sessions$0 <+ {channel |-> a_channel_nb_sessions$0 (channel) + 1}
-          ) &
-          (session : dom(a_channel$0) =>
-              /* Same channel as previous associated to session: do not change channel sessions counter */
-              (a_channel$0 (session) = channel => a_channel_nb_sessions = a_channel_nb_sessions$0) &
-              /* Previous channel associated to session: decrement previous channel and increment new channel sessions counters */
-              (a_channel$0 (session) /= channel => a_channel_nb_sessions = a_channel_nb_sessions$0 <+ {a_channel$0 (session) |-> a_channel_nb_sessions$0 (a_channel$0 (session)) - 1, channel |-> a_channel_nb_sessions$0 (channel) + 1})
-          )
+          !(channel).(channel : t_channel => a_channel_nb_sessions(channel) = card(a_channel~[{channel}]))
         )
     END
     ;

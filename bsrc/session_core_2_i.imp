@@ -180,17 +180,17 @@ OPERATIONS
     END
     ;
 
-    set_session_channel (session, channel) =
+    set_session_channel (session, p_channel) =
     VAR
         l_prev_channel
     IN
         l_prev_channel := a_channel_i(session);
-        IF l_prev_channel /= channel
+        IF l_prev_channel /= p_channel
         THEN
-            a_channel_nb_sessions_i(channel) := a_channel_nb_sessions_i(channel) + 1;
+            a_channel_nb_sessions_i(p_channel) := a_channel_nb_sessions_i(p_channel) + 1;
             IF l_prev_channel /= c_channel_indet
             THEN
-                ASSERT session : dom(a_channel) & a_channel (session) /= channel THEN
+                ASSERT session : dom(a_channel) & a_channel (session) /= p_channel THEN
                     a_channel_nb_sessions_i(l_prev_channel) := a_channel_nb_sessions_i(l_prev_channel) - 1
                 END
             ELSE
@@ -199,12 +199,12 @@ OPERATIONS
                 END
             END
         ELSE
-            ASSERT session : dom(a_channel) & a_channel(session) = channel THEN
+            ASSERT session : dom(a_channel) & a_channel(session) = p_channel THEN
                 skip
             END
         END
         ;
-        a_channel_i(session) := channel
+        a_channel_i(session) := p_channel
     END
     ;
 

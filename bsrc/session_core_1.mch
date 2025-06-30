@@ -202,14 +202,14 @@ OPERATIONS
     END
     ;
 
-    set_session_channel (session, channel) =
+    set_session_channel (session, p_channel) =
     PRE
         session : t_session_i &
         session : t_session   &
-        channel : t_channel_i &
-        channel : t_channel
+        p_channel : t_channel_i &
+        p_channel : t_channel
     THEN
-        a_channel (session) := channel
+        a_channel (session) := p_channel
     END
     ;
 

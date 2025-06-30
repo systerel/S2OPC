@@ -221,13 +221,13 @@ void session_core_2__set_session_state_1(
 
 void session_core_2__set_session_channel(
    const constants__t_session_i session_core_2__session,
-   const constants__t_channel_i session_core_2__channel) {
+   const constants__t_channel_i session_core_2__p_channel) {
    {
       constants__t_channel_i session_core_2__l_prev_channel;
       
       session_core_2__l_prev_channel = session_core_2__a_channel_i[session_core_2__session];
-      if (session_core_2__l_prev_channel != session_core_2__channel) {
-         session_core_2__a_channel_nb_sessions_i[session_core_2__channel] = session_core_2__a_channel_nb_sessions_i[session_core_2__channel] +
+      if (session_core_2__l_prev_channel != session_core_2__p_channel) {
+         session_core_2__a_channel_nb_sessions_i[session_core_2__p_channel] = session_core_2__a_channel_nb_sessions_i[session_core_2__p_channel] +
             1;
          if (session_core_2__l_prev_channel != constants__c_channel_indet) {
             session_core_2__a_channel_nb_sessions_i[session_core_2__l_prev_channel] = session_core_2__a_channel_nb_sessions_i[session_core_2__l_prev_channel] -
@@ -240,7 +240,7 @@ void session_core_2__set_session_channel(
       else {
          ;
       }
-      session_core_2__a_channel_i[session_core_2__session] = session_core_2__channel;
+      session_core_2__a_channel_i[session_core_2__session] = session_core_2__p_channel;
    }
 }
 

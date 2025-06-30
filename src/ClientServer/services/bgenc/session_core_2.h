@@ -157,7 +157,7 @@ extern void session_core_2__set_server_session_user_auth_attempts(
    const t_entier4 session_core_2__p_attempts);
 extern void session_core_2__set_session_channel(
    const constants__t_session_i session_core_2__session,
-   const constants__t_channel_i session_core_2__channel);
+   const constants__t_channel_i session_core_2__p_channel);
 extern void session_core_2__set_session_roles_2(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_sessionRoles_i session_core_2__p_roles);
