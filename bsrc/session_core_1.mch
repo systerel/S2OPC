@@ -830,7 +830,9 @@ OPERATIONS
         session   : t_session_i    &
         session   : dom(a_state)   &
         sc_reason : t_StatusCode_i &
-        sc_reason : t_StatusCode
+        sc_reason : t_StatusCode   &
+        dom(a_server_user_auth_attempts) = dom(s_client_session <<| a_state) &
+        dom(a_NonceClient) <: dom(s_client_session <| a_state |>> {e_session_init})
     THEN
         s_session                    := s_session - {session}                      ||
         s_client_session             := s_client_session - {session}               ||
