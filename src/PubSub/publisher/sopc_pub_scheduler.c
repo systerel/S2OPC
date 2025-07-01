@@ -693,6 +693,20 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             else
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher failed to get security keys");
+
+                // Signature failure will only occurs when keys are not available here
+                const SOPC_PubSubConnection* connection = SOPC_WriterGroup_Get_Connection(group);
+                SOPC_Pub_SignatureFailed* cb = SOPC_PubSubConfiguration_Get_PubSignatureFailed_Callback(connection);
+                if (cb != NULL)
+                {
+                    // Extract pubId, securityGroupId, and connection from the group
+                    const SOPC_Conf_PublisherId* pubId = NULL;
+                    if (connection != NULL)
+                    {
+                        pubId = SOPC_PubSubConnection_Get_PublisherId(connection);
+                    }
+                    cb(group, pubId, SOPC_WriterGroup_Get_SecurityGroupId(group));
+                }
             }
         }
 

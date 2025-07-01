@@ -1188,9 +1188,9 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
     if (NULL == readerCtx->security.groupKeys || tokenId > readerCtx->security.groupKeys->tokenId)
     {
         SOPC_PubSubSKS_Keys* keys = SOPC_PubSubSKS_GetSecurityKeys(readerCtx->security.securityGroupId, tokenId);
+        security = &readerCtx->security;
         if (NULL != keys && tokenId == keys->tokenId)
         {
-            security = &readerCtx->security;
             SOPC_PubSubSKS_Keys_Delete(security->groupKeys);
             SOPC_Free(security->groupKeys);
             security->groupKeys = keys;

@@ -19,11 +19,14 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pubsub_conf.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_sub_target_variable.h"
 #include "sopc_threads.h"
@@ -34,6 +37,10 @@ static int32_t stateChanged = 0;
 
 static int returnCode = 0;
 static int callIndex = 0;
+
+#define PUB_ID 42
+#define PUB_GROUP_ID 14
+#define SECURITY_GROUP_ID "1"
 
 static bool SOPC_SetTargetVariables_Test(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues)
 {
@@ -132,14 +139,80 @@ static void stateChangedCb(const SOPC_Conf_PublisherId* pubId,
     }
 }
 
+// Callback for signature check failure
+static void subSignatureCheckFailed(const SOPC_ReaderGroup* group, const char* securityGroupId)
+{
+    // Check parameters are the one expected
+    const SOPC_Conf_PublisherId* pubId = SOPC_ReaderGroup_Get_PublisherId(group);
+    if (SOPC_UInteger_PublisherId == pubId->type && PUB_ID == pubId->data.uint &&
+        PUB_GROUP_ID == SOPC_ReaderGroup_Get_GroupId(group) && securityGroupId != NULL &&
+        strcmp(securityGroupId, SECURITY_GROUP_ID) == 0)
+    {
+        exit(125);
+    }
+    else
+    {
+        exit(142);
+    }
+}
+
+static void fillSkManagerWithUnexpectedKeys(SOPC_SKManager* skm)
+{
+    SOPC_SKProvider* skp = SOPC_SKProvider_RandomPubSub_Create(5);
+
+    SOPC_String* SecurityPolicyUri = NULL;
+    uint32_t FirstTokenId = 0;
+    SOPC_ByteString* Keys = NULL;
+    uint32_t NbToken = 0;
+    uint32_t TimeToNextKey = 0;
+    uint32_t KeyLifetime = 0;
+    SOPC_ReturnStatus status =
+        SOPC_SKProvider_GetKeys(skp, skm->securityGroupId, SOPC_SK_MANAGER_CURRENT_TOKEN_ID, UINT32_MAX,
+                                &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
+
+    if (SOPC_STATUS_OK == status && NULL != Keys && 0 < NbToken)
+    {
+        FirstTokenId = 1;
+        TimeToNextKey = 5;
+        KeyLifetime = 5;
+        SOPC_String SecurityPolicyUri1;
+        SOPC_String_Initialize(&SecurityPolicyUri1);
+        status = SOPC_String_AttachFromCstring(&SecurityPolicyUri1, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        status =
+            SOPC_SKManager_SetKeys(skm, &SecurityPolicyUri1, FirstTokenId, Keys, NbToken, TimeToNextKey, KeyLifetime);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
+    else
+    {
+        SOPC_ASSERT(false);
+    }
+
+    for (uint32_t i = 0; i < NbToken; i++)
+    {
+        SOPC_ByteString_Clear(&Keys[i]);
+    }
+    SOPC_Free(Keys);
+    SOPC_String_Clear(SecurityPolicyUri);
+    SOPC_Free(SecurityPolicyUri);
+
+    SOPC_SKProvider_MayDelete(&skp);
+}
+
 int main(int argc, char** argv)
 {
+    bool testWithUnexpectedKeys = false;
+
     int sleepCount = 20;
 
     char* filename;
     if (1 < argc)
     {
         filename = argv[1];
+        if (2 < argc)
+        {
+            testWithUnexpectedKeys = strcmp(argv[2], "true") == 0;
+        }
     }
     else
     {
@@ -153,7 +226,27 @@ int main(int argc, char** argv)
     int closed = fclose(fd);
     SOPC_ASSERT(0 == closed);
 
+    // Register signature check failed callback for each connection
+    for (uint32_t i = 0; i < SOPC_PubSubConfiguration_Nb_SubConnection(config); i++)
+    {
+        SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, i);
+        SOPC_PubSubConfiguration_Set_SubSignatureCheckFailed_Callback(connection, &subSignatureCheckFailed);
+    }
+
     SOPC_SubTargetVariableConfig* targetConfig = SOPC_SubTargetVariableConfig_Create(&SOPC_SetTargetVariables_Test);
+
+    SOPC_PubSubSKS_Init();
+
+    SOPC_SKManager* skm = SOPC_SKManager_Create(SECURITY_GROUP_ID, 0);
+    SOPC_ASSERT(NULL != skm);
+    bool res = SOPC_PubSubSKS_AddSkManager(SECURITY_GROUP_ID, skm);
+    SOPC_ASSERT(res);
+
+    if (testWithUnexpectedKeys)
+    {
+        printf("[sub] test with wrong keys for checking signature\n");
+        fillSkManagerWithUnexpectedKeys(skm);
+    }
 
     bool started = SOPC_SubScheduler_Start(config, targetConfig, stateChangedCb, NULL, NULL, 0);
 
@@ -164,6 +257,8 @@ int main(int argc, char** argv)
     }
 
     SOPC_SubScheduler_Stop();
+
+    SOPC_PubSubSKS_Clear();
 
     if (false == SOPC_Atomic_Int_Get(&stop))
     {

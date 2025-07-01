@@ -85,6 +85,8 @@ struct SOPC_PubSubConnection
     bool acyclicPublisher;
 
     SOPC_PubSub_OnFatalError* onFatalError;
+    SOPC_Pub_SignatureFailed* onPubSignatureFailed;
+    SOPC_Sub_SignatureCheckFailed* onSubSignatureCheckFailed;
     // For the next version:
     // uint32_t connectionPropertiesLength: not used;
     // KeyValuePair *connectionProperties: not used;
@@ -467,6 +469,44 @@ SOPC_PubSub_OnFatalError* SOPC_PubSubConfiguration_Get_FatalError_Callback(SOPC_
     return connection->onFatalError;
 }
 
+void SOPC_PubSubConfiguration_Set_PubSignatureFailed_Callback(SOPC_PubSubConnection* connection,
+                                                              SOPC_Pub_SignatureFailed* callback)
+{
+    if (connection != NULL)
+    {
+        connection->onPubSignatureFailed = callback;
+    }
+}
+
+void SOPC_PubSubConfiguration_Set_SubSignatureCheckFailed_Callback(SOPC_PubSubConnection* connection,
+                                                                   SOPC_Sub_SignatureCheckFailed* callback)
+{
+    if (connection != NULL)
+    {
+        connection->onSubSignatureCheckFailed = callback;
+    }
+}
+
+SOPC_Pub_SignatureFailed* SOPC_PubSubConfiguration_Get_PubSignatureFailed_Callback(
+    const SOPC_PubSubConnection* connection)
+{
+    if (connection != NULL)
+    {
+        return connection->onPubSignatureFailed;
+    }
+    return NULL;
+}
+
+SOPC_Sub_SignatureCheckFailed* SOPC_PubSubConfiguration_Get_SubSignatureCheckFailed_Callback(
+    const SOPC_PubSubConnection* connection)
+{
+    if (connection != NULL)
+    {
+        return connection->onSubSignatureCheckFailed;
+    }
+    return NULL;
+}
+
 // PublisherId
 
 static void SOPC_Conf_PublisherId_Clear(SOPC_Conf_PublisherId* pubId)
@@ -742,7 +782,7 @@ void SOPC_ReaderGroup_Set_GroupVersion(SOPC_ReaderGroup* group, uint32_t version
     group->groupVersion = version;
 }
 
-const SOPC_Conf_PublisherId* SOPC_ReaderGroup_Get_PublisherId(SOPC_ReaderGroup* group)
+const SOPC_Conf_PublisherId* SOPC_ReaderGroup_Get_PublisherId(const SOPC_ReaderGroup* group)
 {
     SOPC_ASSERT(NULL != group);
     return &(group->publisherId);

@@ -20,6 +20,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
@@ -36,8 +37,34 @@
 #include "sopc_xml_loader.h"
 
 #include "sopc_pub_scheduler.h"
+#include "sopc_pubsub_conf.h"
 
 static int32_t stopPublisher = false;
+
+// Global variable for exit code
+static int32_t g_exit_code = 0;
+
+#define PUB_ID 123
+#define PUB_GROUP_ID 14
+#define SECURITY_GROUP_ID "1"
+
+// Callback for signature failure
+static void pubSignatureFailed(const SOPC_WriterGroup* group,
+                               const SOPC_Conf_PublisherId* pubId,
+                               const char* securityGroupId)
+{
+    // Check parameters are the one expected
+    if (SOPC_UInteger_PublisherId == pubId->type && PUB_ID == pubId->data.uint &&
+        PUB_GROUP_ID == SOPC_WriterGroup_Get_Id(group) && securityGroupId != NULL &&
+        strcmp(securityGroupId, SECURITY_GROUP_ID) == 0)
+    {
+        SOPC_Atomic_Int_Set(&g_exit_code, 125);
+    }
+    else
+    {
+        SOPC_Atomic_Int_Set(&g_exit_code, 142);
+    }
+}
 
 static void Test_StopSignal(int sig)
 {
@@ -141,6 +168,20 @@ int main(int argc, char** argv)
     SOPC_PubSourceVariableConfig* sourceConfig = SOPC_PubSourceVariableConfig_Create(&SOPC_GetSourceVariables_TestFunc);
     SOPC_ASSERT(NULL != sourceConfig);
 
+    // For each Publisher connection, set the signature failed callback
+    for (uint32_t i = 0; i < SOPC_PubSubConfiguration_Nb_PubConnection(config); i++)
+    {
+        SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
+        SOPC_PubSubConfiguration_Set_PubSignatureFailed_Callback(connection, &pubSignatureFailed);
+    }
+
+    SOPC_PubSubSKS_Init();
+
+    SOPC_SKManager* skm = SOPC_SKManager_Create(SECURITY_GROUP_ID, 0);
+    SOPC_ASSERT(NULL != skm);
+    bool res = SOPC_PubSubSKS_AddSkManager(SECURITY_GROUP_ID, skm);
+    SOPC_ASSERT(res);
+
     // Start without priority, as this test is not time-sensitive
     bool bres = SOPC_PubScheduler_Start(config, sourceConfig, 0);
     if (!bres)
@@ -150,7 +191,7 @@ int main(int argc, char** argv)
 
     // Wait until sending some message
     // SOPC_Sleep(5000);
-    while (SOPC_Atomic_Int_Get(&stopPublisher) == false)
+    while (SOPC_Atomic_Int_Get(&stopPublisher) == false && SOPC_Atomic_Int_Get(&g_exit_code) == 0)
     {
         SOPC_Sleep(100);
     }
@@ -158,9 +199,11 @@ int main(int argc, char** argv)
     // Stop
     SOPC_PubScheduler_Stop();
 
+    SOPC_PubSubSKS_Clear();
+
     // Clear config
     SOPC_PubSubConfiguration_Delete(config);
     SOPC_PubSourceVariableConfig_Delete(sourceConfig);
 
-    return 0;
+    return SOPC_Atomic_Int_Get(&g_exit_code);
 }

@@ -1,0 +1,11 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="i=42" securityMode="signAndEncrypt" securityGroupId="1">
+          <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
+          <dataset writerId="1">
+            <variable nodeId="ns=1;s=SubBool" displayName="varBool" dataType="Boolean"/>
+            <variable nodeId="ns=1;s=SubString" displayName="varString" dataType="String"/>
+          </dataset>
+        </message>
+    </connection>
+</PubSub>
