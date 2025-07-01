@@ -185,7 +185,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
  * @param security is the data used to encrypt and sign. Can be NULL if security is not used
  * @param buffer_header [IN/OUT] encoded header buffer which will become the final buffer
  * @param buffer_payload encoded payload buffer. Freed in all cases by this function
- * @return SOPC_NetworkMessage_Error_Code_None in case of succes another code otherwise
+ * @return SOPC_NetworkMessage_Error_Code_None in case of success another code otherwise
  */
 SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_BuildFinalMessage(SOPC_PubSub_SecurityType* security,
                                                                           SOPC_Buffer* buffer_header,

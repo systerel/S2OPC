@@ -62,7 +62,8 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
     SOPC_Dataset_LL_NetworkMessage* nm,
     SOPC_Dataset_LL_NetworkMessage_Header* header,
     const SOPC_UADP_NetworkMessage_Reader_Configuration* readerConf,
-    const SOPC_ReaderGroup* group);
+    const SOPC_ReaderGroup* group,
+    const SOPC_PubSubConnection* connection);
 
 /**
  * Decodes the group header
@@ -80,8 +81,10 @@ static inline SOPC_NetworkMessage_Error_Code Decode_SecurityHeader(SOPC_Buffer* 
                                                                    uint32_t payload_position,
                                                                    uint16_t group_id,
                                                                    SOPC_UADP_GetSecurity_Func getSecurity_Func,
-                                                                   SOPC_Dataset_LL_NetworkMessage_Header* header,
-                                                                   SOPC_UADP_Configuration* conf);
+                                                                   const SOPC_Dataset_LL_NetworkMessage_Header* header,
+                                                                   const SOPC_UADP_Configuration* conf,
+                                                                   const SOPC_PubSubConnection* connection,
+                                                                   const SOPC_ReaderGroup* group);
 
 /**
  * Constants definition for Hard-Coded value.
@@ -1758,8 +1761,10 @@ static inline SOPC_NetworkMessage_Error_Code Decode_SecurityHeader(SOPC_Buffer* 
                                                                    uint32_t payload_position,
                                                                    uint16_t group_id,
                                                                    SOPC_UADP_GetSecurity_Func getSecurity_Func,
-                                                                   SOPC_Dataset_LL_NetworkMessage_Header* header,
-                                                                   SOPC_UADP_Configuration* conf)
+                                                                   const SOPC_Dataset_LL_NetworkMessage_Header* header,
+                                                                   const SOPC_UADP_Configuration* conf,
+                                                                   const SOPC_PubSubConnection* connection,
+                                                                   const SOPC_ReaderGroup* group)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_NetworkMessage_Error_Code code = SOPC_NetworkMessage_Error_Code_None;
@@ -1817,16 +1822,27 @@ static inline SOPC_NetworkMessage_Error_Code Decode_SecurityHeader(SOPC_Buffer* 
         {
             set_status_default(&status, &code, SOPC_UADP_NetworkMessage_Error_Read_SecurityConf_Failed);
         }
-    }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_ASSERT(securityTokenId == security->groupKeys->tokenId);
-
-        // Check signature before decoding
-        if (securitySignedEnabled && !SOPC_PubSub_Security_Verify(security, buffer, payload_position))
+        if (SOPC_STATUS_OK == status)
         {
-            set_status_default(&status, &code, SOPC_UADP_NetworkMessage_Error_Read_SecuritySign_Failed);
+            SOPC_ASSERT(securityTokenId == security->groupKeys->tokenId);
+
+            // Check signature before decoding
+            if (securitySignedEnabled && !SOPC_PubSub_Security_Verify(security, buffer, payload_position))
+            {
+                set_status_default(&status, &code, SOPC_UADP_NetworkMessage_Error_Read_SecuritySign_Failed);
+            }
+        }
+
+        // Call the SubSignatureCheckFailed callback if set
+        if (SOPC_STATUS_OK != status && connection != NULL)
+        {
+            SOPC_Sub_SignatureCheckFailed* cb =
+                SOPC_PubSubConfiguration_Get_SubSignatureCheckFailed_Callback(connection);
+            if (cb != NULL)
+            {
+                cb(group, SOPC_ReaderGroup_Get_SecurityGroupId(group));
+            }
         }
     }
 
@@ -1908,7 +1924,8 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
     SOPC_Dataset_LL_NetworkMessage* nm,
     SOPC_Dataset_LL_NetworkMessage_Header* header,
     const SOPC_UADP_NetworkMessage_Reader_Configuration* readerConf,
-    const SOPC_ReaderGroup* group)
+    const SOPC_ReaderGroup* group,
+    const SOPC_PubSubConnection* connection)
 {
     SOPC_ASSERT(NULL != header && NULL != nm && NULL != group && NULL != readerConf &&
                 NULL != readerConf->callbacks.pGetReader_Func && NULL != readerConf->callbacks.pSetDsm_Func);
@@ -2002,7 +2019,7 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
     if (conf->SecurityFlag && SOPC_STATUS_OK == status)
     {
         code = Decode_SecurityHeader(buffer, &buffer_payload, payload_sign_position, group_id,
-                                     readerConf->pGetSecurity_Func, header, conf);
+                                     readerConf->pGetSecurity_Func, header, conf, connection, group);
 
         status = (SOPC_NetworkMessage_Error_Code_None == code) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
@@ -2207,7 +2224,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Decode(
         switch (version)
         {
         case UADP_VERSION1:
-            code = Decode_Message_V1(buffer, payload_sign_position, nm, header, reader_config, group);
+            code = Decode_Message_V1(buffer, payload_sign_position, nm, header, reader_config, group, connection);
             status = (SOPC_NetworkMessage_Error_Code_None == code) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
             break;
         default:

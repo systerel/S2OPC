@@ -725,6 +725,7 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
     ck_assert_ptr_nonnull(buffer_payload);
 
     errorCode = SOPC_UADP_NetworkMessage_BuildFinalMessage(NULL, buffer, &buffer_payload);
+
     ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, errorCode);
     ck_assert_ptr_nonnull(buffer);
     ck_assert_ptr_null(buffer_payload);

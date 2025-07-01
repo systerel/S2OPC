@@ -144,6 +144,7 @@ add_custom_command(
   TARGET pub_scheduler_test POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_interop.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_scheduler.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_scheduler_security.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_scheduler_eth.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_scheduler_eth_err.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   )
@@ -161,6 +162,7 @@ target_link_libraries(sub_scheduler_conf_test PRIVATE s2opc_pubsub)
 # Copy data
 add_custom_command(
   TARGET sub_scheduler_conf_test POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_sub_security.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_sub_eth.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_sub_eth_err.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_sub_eth2.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
@@ -248,6 +250,36 @@ add_test(NAME "validation::pubsub_sched_ethernet_sub_config_err"
   "--publisher-cmd" "$<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_eth.xml"
   $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_eth_err.xml)
 set_tests_properties("validation::pubsub_sched_ethernet_sub_config_err" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_sched_ethernet_sub_config_err.tap;CK_EXP_RET_CODE=255")
+
+# Test signature failure callback is called when publisher has no keys available to sign the message
+add_test(NAME "validation::pubsub_sign_failure_callback"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  $<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_security.xml)
+set_tests_properties("validation::pubsub_sign_failure_callback" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_sign_failure_callback.tap;CK_EXP_RET_CODE=125")
+
+# Test check signature failure callback is called when no keys are available
+add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_no_keys"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+  "--sks-cmd" $<TARGET_FILE:test_server_sks>
+  "--publisher-cmd" $<TARGET_FILE:pubsub_server>
+  $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_security.xml)
+set_tests_properties("validation::pubsub_check_sign_failure_callback_sub_no_keys" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_check_sign_failure_callback_sub_no_keys.tap;CK_EXP_RET_CODE=125")
+
+# Test check signature failure callback is called when keys are available but do not match the publisher ones
+add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_unexpected_keys"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+  "--sks-cmd" $<TARGET_FILE:test_server_sks>
+  "--publisher-cmd" $<TARGET_FILE:pubsub_server>
+  $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_security.xml "true")
+set_tests_properties("validation::pubsub_check_sign_failure_callback_sub_unexpected_keys" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_check_sign_failure_callback_sub_unexpected_keys.tap;CK_EXP_RET_CODE=125")
 
 add_test(NAME "validation::ll_multi_pub_sub_test"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}

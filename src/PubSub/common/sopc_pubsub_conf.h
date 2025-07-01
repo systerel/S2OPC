@@ -169,10 +169,6 @@ bool SOPC_PubSubConnection_Set_Name(SOPC_PubSubConnection* connection, const cha
 bool SOPC_PubSubConnection_Is_Enabled(const SOPC_PubSubConnection* connection);
 void SOPC_PubSubConnection_Set_Enabled(SOPC_PubSubConnection* connection, bool enabled);
 
-void SOPC_PubSubConfiguration_Set_FatalError_Callback(SOPC_PubSubConnection* connection,
-                                                      SOPC_PubSub_OnFatalError* callback);
-SOPC_PubSub_OnFatalError* SOPC_PubSubConfiguration_Get_FatalError_Callback(SOPC_PubSubConnection* connection);
-
 /* Publisher only */
 void SOPC_PubSubConnection_Set_AcyclicPublisher(SOPC_PubSubConnection* connection, bool acyclicPublisher);
 bool SOPC_PubSubConnection_Get_AcyclicPublisher(const SOPC_PubSubConnection* connection);
@@ -206,6 +202,28 @@ bool SOPC_PubSubConnection_Allocate_ReaderGroup_Array(SOPC_PubSubConnection* con
 uint16_t SOPC_PubSubConnection_Nb_ReaderGroup(const SOPC_PubSubConnection* connection);
 SOPC_ReaderGroup* SOPC_PubSubConnection_Get_ReaderGroup_At(const SOPC_PubSubConnection* connection, uint16_t index);
 
+void SOPC_PubSubConfiguration_Set_FatalError_Callback(SOPC_PubSubConnection* connection,
+                                                      SOPC_PubSub_OnFatalError* callback);
+SOPC_PubSub_OnFatalError* SOPC_PubSubConfiguration_Get_FatalError_Callback(SOPC_PubSubConnection* connection);
+
+typedef void SOPC_Sub_SignatureCheckFailed(const SOPC_ReaderGroup* group, const char* securityGroupId);
+
+void SOPC_PubSubConfiguration_Set_SubSignatureCheckFailed_Callback(SOPC_PubSubConnection* connection,
+                                                                   SOPC_Sub_SignatureCheckFailed* callback);
+
+SOPC_Sub_SignatureCheckFailed* SOPC_PubSubConfiguration_Get_SubSignatureCheckFailed_Callback(
+    const SOPC_PubSubConnection* connection);
+
+typedef void SOPC_Pub_SignatureFailed(const SOPC_WriterGroup* group,
+                                      const SOPC_Conf_PublisherId* pubId,
+                                      const char* securityGroupId);
+
+void SOPC_PubSubConfiguration_Set_PubSignatureFailed_Callback(SOPC_PubSubConnection* connection,
+                                                              SOPC_Pub_SignatureFailed* callback);
+
+SOPC_Pub_SignatureFailed* SOPC_PubSubConfiguration_Get_PubSignatureFailed_Callback(
+    const SOPC_PubSubConnection* connection);
+
 /******************/
 /** Reader Group **/
 /******************/
@@ -213,6 +231,7 @@ SOPC_SecurityMode_Type SOPC_ReaderGroup_Get_SecurityMode(const SOPC_ReaderGroup*
 void SOPC_ReaderGroup_Set_SecurityMode(SOPC_ReaderGroup* group, SOPC_SecurityMode_Type mode);
 // make a copy of id
 const char* SOPC_ReaderGroup_Get_SecurityGroupId(const SOPC_ReaderGroup* group);
+
 void SOPC_ReaderGroup_Set_SecurityGroupId(SOPC_ReaderGroup* group, const char* securityGroupId);
 bool SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(SOPC_ReaderGroup* group, uint32_t nb);
 uint32_t SOPC_ReaderGroup_Nb_SecurityKeyServices(const SOPC_ReaderGroup* group);
@@ -228,7 +247,7 @@ void SOPC_ReaderGroup_Set_GroupId(SOPC_ReaderGroup* group, uint16_t id);
 uint32_t SOPC_ReaderGroup_Get_GroupVersion(const SOPC_ReaderGroup* group);
 void SOPC_ReaderGroup_Set_GroupVersion(SOPC_ReaderGroup* group, uint32_t version);
 
-const SOPC_Conf_PublisherId* SOPC_ReaderGroup_Get_PublisherId(SOPC_ReaderGroup* group);
+const SOPC_Conf_PublisherId* SOPC_ReaderGroup_Get_PublisherId(const SOPC_ReaderGroup* group);
 void SOPC_ReaderGroup_Set_PublisherId_UInteger(SOPC_ReaderGroup* group, uint64_t id);
 bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const SOPC_String* id);
 
