@@ -26,8 +26,10 @@ import argparse
 from opcua import ua
 from tap_logger import TapLogger
 from pubsub_server import PubSubServer, PubSubState
+from sks_server import SKSServer
 
 DEFAULT_URI = 'opc.tcp://localhost:4843'
+SKS_URI = 'opc.tcp://localhost:4841'
 NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
 NID_START_STOP = u"ns=1;s=PubSubStartStop"
 NID_STATUS = u"ns=1;s=PubSubStatus"
@@ -51,6 +53,9 @@ NID_PUB_UINT = u"ns=1;s=PubUInt"
 NID_PUB_INT = u"ns=1;s=PubInt"
 
 DEFAULT_XML_PATH = 'config_pubsub_server.xml'
+
+SKS_KEYLIFETIME_SEC = 5
+SKS_NB_GENERATED_KEYS = 2
 
 # PublishingInterval (seconds) of XML default configuration
 STATIC_CONF_PUB_INTERVAL = 1.2
@@ -1649,6 +1654,34 @@ def testPubSubDynamicConf(logger):
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
 
+        # TC 38 : Check SecurityKeys are updated
+        logger.begin_section("TC 38 : Check SecurityKeys are updated:")
+        # Load and start Pubsub with secure config
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED, logger)
+        # Wait for the SKS to update the keys
+        testSKSKeyLifetime(logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 156, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 1654, logger)
+
+        # Change Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 4588, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -27, logger)
+
+        waitForEvent(lambda: True == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
+        waitForEvent(lambda: 4588 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber uint16 is changed', 4588 == pubsubserver.getValue(NID_SUB_UINT16))
+        waitForEvent(lambda: -27 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber int is changed', -27 == pubsubserver.getValue(NID_SUB_INT))
+
+        # Stop server
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
+
         allTestsDone = True
 
     except Exception as e:
@@ -1766,6 +1799,31 @@ def testPubSubStaticConf(logger):
         retcode = -1 if logger.has_failed_tests else 0
         logger.finalize_report()
         sys.exit(retcode)
+
+def testSKSKeyLifetime(logger):
+
+    sksServer = SKSServer(SKS_URI)
+
+    try:
+        sksServer.connect()
+        SecurityGroupId = "1"
+        StartingTokenId = 0
+        RequestedKeyCount = 1
+        inputParameters = (SecurityGroupId, StartingTokenId, RequestedKeyCount)
+        # We will wait SKS_NB_GENERATED_KEYS * SKS_KEYLIFETIME_SEC seconds to be sure that new valid keys generated 
+        # by the SKS and additionnally check if theses keys are different.
+        key_prev, keyLifeTime_prev = sksServer.callGetSecurityKeys(inputParameters)
+        for _ in range(SKS_NB_GENERATED_KEYS):
+            sleep(SKS_KEYLIFETIME_SEC)
+            key_next, keyLifeTime_next = sksServer.callGetSecurityKeys(inputParameters)
+            logger.add_test('Key is changed', key_next != key_prev and keyLifeTime_next == 5)
+            key_prev = key_next
+
+    except Exception as e:
+        logger.add_test('Received exception %s'%e, False)
+
+    finally:
+        sksServer.disconnect()
 
 if __name__=='__main__':
     argparser = argparse.ArgumentParser()
