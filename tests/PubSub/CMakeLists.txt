@@ -57,7 +57,7 @@ endfunction()
 
 # Function to add a validation test using the pubsub server code
 # Note: no tap-wrap used in this case, as caller is directly calling TapLogger (python script).
-function(s2opc_pubsub_server_validation_test name)
+function(s2opc_pubsub_server_validation_test name pubsub_server_name sks_name sks_port)
   set(test_name "validation::${name}")
   if(PUBSUB_STATIC_CONFIG)
     set(test_server_static "--static")
@@ -71,9 +71,10 @@ function(s2opc_pubsub_server_validation_test name)
       WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
       COMMAND
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
-      --sks-cmd $<TARGET_FILE:test_server_sks>
-      "--publisher-cmd" $<TARGET_FILE:pubsub_server>
-      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}" "--tap" "pubsub_server_test.tap" ${test_server_static})
+      --sks-cmd $<TARGET_FILE:${sks_name}>
+      --sks-url "opc.tcp://localhost:${sks_port}"
+      "--publisher-cmd" $<TARGET_FILE:${pubsub_server_name}>
+      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}.py" "--tap" "${name}.tap" ${test_server_static})
   endif()
 
 endfunction()
@@ -259,7 +260,8 @@ set_tests_properties("validation::ll_multi_pub_sub_test" PROPERTIES ENVIRONMENT 
 
 if(NOT S2OPC_PUBSUB_ONLY)
   # This test requires both PubSub and ClientServer libraries
-  s2opc_pubsub_server_validation_test("pubsub_server_test.py")
+  s2opc_pubsub_server_validation_test("pubsub_server_test" pubsub_server test_server_sks 4841)
+  s2opc_pubsub_server_validation_test("controller_device_pubsub_test" controller_sks_client device_sks_server_push 4842)
 endif()
 
 ## S2OPC PubSub interoperability tests ##

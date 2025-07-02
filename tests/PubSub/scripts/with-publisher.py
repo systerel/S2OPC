@@ -42,6 +42,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--publisher-cmd', metavar='CMD', help='The command to start the background publisher')
     parser.add_argument('--sks-cmd', metavar='CMD', help='The command to start the background Security Keys Server')
+    parser.add_argument('--sks-url', metavar='CMD', help='The url of the Security Keys Server')
     parser.add_argument('--no-wait-pub-message', action='store_true', default=False, help='The script does not wait for a publisher message to start subscriber: only sleep(1)')
     parser.add_argument('--wait-publisher', action='store_true', default=False,
                         help='Wait for the publisher to exit instead of killing it when the client is done')
@@ -60,14 +61,15 @@ if __name__ == '__main__':
         log('No Security Keys Server')
     else:
         log('Starting Security Keys Server')
-        sks_process = subprocess.Popen([args.sks_cmd, "master"])
+        sks_process = subprocess.Popen([args.sks_cmd, "1"])
 
-    if sks_process is not None and not wait_publisher.wait_server(wait_publisher.DEFAULT_SKS_URL, wait_publisher.TIMEOUT):
-        log('Timeout for starting SKS server')
-        sks_process.kill()
-        sks_process.wait()
-
-        sys.exit(1)
+    if sks_process is not None:      
+        if not wait_publisher.wait_server(args.sks_url, wait_publisher.TIMEOUT):
+            log('Timeout for starting SKS server')
+            sks_process.kill()
+            sks_process.wait()
+            sys.exit(1)
+            
     elif sks_process is not None:
         # Ensure SKS service is ready for tests
         # TODO: find a better way to ensure that (call get keys as client ?)
