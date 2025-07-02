@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_config.xsd">
+  <ClientConfiguration>
+    <PreferredLocales>
+      <Locale id="en-US"/>
+    </PreferredLocales>
+    <ApplicationCertificates>
+      <ClientCertificate path="client_public/client_2k_cert.der"/>
+      <ClientKey path="client_private/encrypted_client_2k_key.pem" encrypted="true"/>
+      <ClientPublicKeyInfrastructure path="./S2OPC_Demo_PKI"/>
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:localhost"/>
+      <ProductURI uri="urn:S2OPC:localhost"/>
+      <ApplicationName text="S2OPC Client for SKS push" locale="en-US"/>
+    </ApplicationDescription>
+    <Connections>
+      <!-- SecureConnection_Config of SKS will be retrieved from PubSub config and it's better to keep it that
+           way because it appears in PubSub config. Set one random connection config to not fail at parsing.-->
+      <Connection serverURL="opc.tcp://localhost:4841" id="discovery">
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+        <SecurityMode mode="None"/>
+      </Connection>
+    </Connections>
+  </ClientConfiguration>
+</S2OPC>
