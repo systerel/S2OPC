@@ -261,22 +261,31 @@ The handler shall be built using ::SOPC_SubTargetVariableConfig_Create by provid
 
 \subsection pubsub_sks Configure SKS
 
-For Publisher and Subscriber applications a Security Keys manager shall be defined using ::SOPC_PubSubSKS_SetSkManager to permit encrypted/signed communication.
+For Publisher and Subscriber applications a Security Keys manager shall be defined using ::SOPC_PubSubSKS_CreateManagersFromConfig or ::SOPC_PubSubSKS_AddSkManager to permit encrypted/signed communication 
+(that uses ::SOPC_PubSubSKS_GetSecurityKeys).
 
-Publisher and Subscriber schedulers will retrieve the keys directly from the Security Keys manager which is in charge of locally storing the keys.
+Publisher and Subscriber schedulers will retrieve the keys directly from the Security Keys manager which is in charge of locally storing the up to date keys.
 But in order to implement a complete SKS mechanism on Pub/Sub side, the following elements should also be configured to update the keys in the manager:
-- Security Keys Manager (see sopc_sk_manager.h): manages local storage of the keys retrieved from the Security Keys Provider, it should be created using ::SOPC_SKManager_Create.
+- Security Keys Manager(s) (see sopc_sk_manager.h and sopc_sk_secu_group_managers.h): manages local storage of the keys retrieved from the Security Keys Provider for a given security group, it should be created using ::SOPC_SKManager_Create for each security group.
 - Security Keys Provider (see sopc_sk_provider.h): source providing the Security Keys using Security Keys Services, it should implement a client connection calling the GetSecurityKeys method of the SKS server(s).
   Several providers might be defined using ::SOPC_SKProvider_TryList_Create to have alternative SKS sources.
 - Security Keys Builder (see sopc_sk_builder.h): provides update function to retrieve keys from the Security Keys Provider and fills the Security Keys Manager.
-  ::SOPC_SKBuilder_Setter_Create should be used to create a builder replacing all keys on update.
+  ::SOPC_SKBuilder_Setter_Create should be used to create a builder replacing all keys on update (on PubSub side).
+  ::SOPC_SKBuilder_Append_Create + ::SOPC_SKBuilder_Truncate_Create should be used to create a builder appending keys and limiting the number of keys stored (on SKS side).
 - Security Keys Scheduler (see sopc_sk_scheduler.h): schedules the periodic update of keys retrieved using the builder.
-  ::SOPC_SKscheduler_Create should be used to create the scheduler, then ::SOPC_SKscheduler_AddTask should be called to configure the task with defined Security Keys Builder, Provider and Manager.
+  ::SOPC_SKscheduler_Create should be used to create the scheduler, then ::SOPC_SKscheduler_AddTask (or ::SOPC_PubSubSKS_AddTasks for PubSub side) 
+  should be called to configure the task with defined Security Keys Builder, Provider and Manager.
   And finally ::SOPC_SKscheduler_Start should be called to start the scheduler task updating the keys.
 
 Note: Security Keys manager might be configured to stub connection to a real SKS server by using local keys files or data updated externally.
 
-The [`samples/PubSub_ClientServer/pubsub_server/pubsub.c`](https://gitlab.com/systerel/S2OPC/-/blob/master/samples/PubSub_ClientServer/pubsub_server/pubsub.c) provides an example of implementation using Security Key Service with the described elements.
+The [`samples/PubSub_ClientServer/pubsub_server/pubsub.c`](https://gitlab.com/systerel/S2OPC/-/blob/master/samples/PubSub_ClientServer/pubsub_server/pubsub.c) provides an example of implementation using Security Key Service pull model from a dedicated SKS server with the described elements. 
+This application is configured by default to self-communicate variable values in a secure way using Pub/Sub connection and expose the variable values as an OPC UA server.
+
+The [`samples/PubSub_ClientServer/sks_push_model`](https://gitlab.com/systerel/S2OPC/-/blob/master/samples/PubSub_ClientServer/sks_push_model) provides an example of implementation using Security Key Service push model:
+- `controller_sks_client` generates random keys and push them as an OPC UA client to devices OPC UA server with SKS push model, it is also a Pub/Sub application which have direct access to the security keys generated locally.
+- `device_sks_server_push` is a Pub/Sub application using SKS push model to receive up to date keys from the controller through an OPC UA server implementing the SetSecurityKeys method.
+- The controller and device are communicating variable values in a secure way through reciprocal Pub/Sub connections and expose the variable values as an OPC UA server.
 
 \subsection pubsub_lifecycle PubSub lifecycle
 
@@ -289,7 +298,7 @@ The Subscriber state changes might be received by providing a handler with the s
 \section config_constants OPC UA stack behavior configuration constants
 
 Two sets of constants are defined to configure the OPC UA stack behavior. One of them is designed for the OPC UA common encoding layer (message size, string max length, etc.) 
-and another for the OPC UA Client/Server services layer (maximum number of operatoins per call, etc.).
+and another for the OPC UA Client/Server services layer (maximum number of operations per call, etc.).
 Those variables might be changed for specific needs at library compile time and are defined in respectively in sopc_common_constants.h and sopc_toolkit_config_constants.h.
 
  */
