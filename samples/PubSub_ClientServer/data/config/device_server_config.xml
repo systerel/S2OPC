@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_config.xsd">
+  <ServerConfiguration>
+    <Namespaces>
+      <Namespace uri="urn:S2OPC:localhost"/>
+      <Namespace uri="https://www.systerel.fr/S2OPC/demo/data/origin"/>
+    </Namespaces>
+    <Locales>
+      <Locale id="en-US"/>
+      <Locale id="fr-FR"/>
+    </Locales>
+    <ApplicationCertificates>
+      <ServerCertificate path="server_public/server_2k_cert.der"/>
+      <ServerKey path="server_private/encrypted_server_2k_key.pem" encrypted="true"/>
+      <ServerPublicKeyInfrastructure path="./S2OPC_Demo_PKI"/>
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:localhost"/>
+      <ProductURI uri="urn:S2OPC:localhost"/>
+      <ApplicationName text="DEVICE server for push SKS + PubSub" locale="en-US"/>
+    </ApplicationDescription>
+    <Endpoints>
+      <Endpoint url="opc.tcp://localhost:4842">
+        <SecurityPolicies>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
+            <SecurityModes>
+              <SecurityMode mode="None"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
+            <SecurityModes>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+        </SecurityPolicies>
+      </Endpoint>
+    </Endpoints>
+  </ServerConfiguration>
+</S2OPC>

@@ -113,3 +113,39 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_pubsub_nodeset.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/config_pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   )
+
+# Controller Demo PubSub (server) with push SKS client
+add_executable(controller_sks_client "sks_push_model/controller_sks_client/controller_main.c"
+                             "sks_push_model/controller_sks_client/controller_server.c"
+                             "sks_push_model/controller_sks_client/controller_client.c"
+                             "sks_push_model/controller_sks_client/controller_pubsub.c"
+                             "pubsub_server/helpers.c"
+                             )
+target_compile_options(controller_sks_client PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(controller_sks_client PRIVATE ${S2OPC_DEFINITIONS})
+target_link_libraries(controller_sks_client PRIVATE s2opc_pubsub s2opc_clientserver)
+target_include_directories(controller_sks_client PRIVATE pubsub_server controller_sks_client)
+add_custom_command(
+  TARGET controller_sks_client POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/controller_pubsub_SKS_client.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/controller_client_config.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/controller_server_config.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  )
+
+# Device Demo PubSub server with SKS push method
+add_executable(device_sks_server_push "sks_push_model/device_sks_server_push/device_main.c"
+                                      "sks_push_model/device_sks_server_push/device_server.c"
+                                      "sks_push_model/device_sks_server_push/device_pubsub.c"
+                                      "sks_push_model/device_sks_server_push/sks_device_push_methods.c"
+                                      "pubsub_server/helpers.c"
+                                      )
+target_compile_options(device_sks_server_push PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(device_sks_server_push PRIVATE ${S2OPC_DEFINITIONS})
+target_link_libraries(device_sks_server_push PRIVATE s2opc_pubsub s2opc_clientserver)
+target_include_directories(device_sks_server_push PRIVATE pubsub_server device_sks_server_push)
+add_custom_command(
+  TARGET device_sks_server_push POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_pubsub_nodeset_with_SKS_push.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/device_pubsub_SKS_push_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/device_server_config.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  )
