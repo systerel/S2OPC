@@ -28,8 +28,8 @@ from tap_logger import TapLogger
 from pubsub_server import PubSubServer, PubSubState
 from sks_server import SKSServer
 
-DEFAULT_URI = 'opc.tcp://localhost:4843'
-SKS_URI = 'opc.tcp://localhost:4841'
+DEFAULT_URL = 'opc.tcp://localhost:4843'
+SKS_URL = 'opc.tcp://localhost:4841'
 NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
 NID_START_STOP = u"ns=1;s=PubSubStartStop"
 NID_STATUS = u"ns=1;s=PubSubStatus"
@@ -56,6 +56,7 @@ DEFAULT_XML_PATH = 'config_pubsub_server.xml'
 
 SKS_KEYLIFETIME_SEC = 5
 SKS_NB_GENERATED_KEYS = 2
+SKS_SECURITY_GROUP_ID = "1"
 
 # PublishingInterval (seconds) of XML default configuration
 STATIC_CONF_PUB_INTERVAL = 1.2
@@ -1053,7 +1054,7 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
 
 def testPubSubDynamicConf(logger):
 
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND,NID_ACYCLIC_SEND_STATUS, NID_DSM_FILTERING, NID_DSM_FILTERING_STATUS)
+    pubsubserver = PubSubServer(DEFAULT_URL, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND,NID_ACYCLIC_SEND_STATUS, NID_DSM_FILTERING, NID_DSM_FILTERING_STATUS)
 
     def lSubBoolIsFalse():return False == pubsubserver.getValue(NID_SUB_BOOL)
     def lSubBoolIsTrue():return True == pubsubserver.getValue(NID_SUB_BOOL)
@@ -1704,7 +1705,7 @@ def testPubSubDynamicConf(logger):
 # test with static configuration : data/config_pubsub_server.xml
 def testPubSubStaticConf(logger):
 
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND, NID_ACYCLIC_SEND_STATUS, NID_DSM_FILTERING, NID_DSM_FILTERING_STATUS)
+    pubsubserver = PubSubServer(DEFAULT_URL, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND, NID_ACYCLIC_SEND_STATUS, NID_DSM_FILTERING, NID_DSM_FILTERING_STATUS)
 
     defaultXml2Restore = False
 
@@ -1803,20 +1804,18 @@ def testPubSubStaticConf(logger):
 
 def testSKSKeyLifetime(logger):
 
-    sksServer = SKSServer(SKS_URI)
+    sksServer = SKSServer(SKS_URL)
 
     try:
         sksServer.connect()
-        SecurityGroupId = "1"
         StartingTokenId = 0
         RequestedKeyCount = 1
-        inputParameters = (SecurityGroupId, StartingTokenId, RequestedKeyCount)
-        # We will wait SKS_NB_GENERATED_KEYS * SKS_KEYLIFETIME_SEC seconds to be sure that new valid keys generated 
-        # by the SKS and additionnally check if theses keys are different.
-        key_prev, keyLifeTime_prev = sksServer.callGetSecurityKeys(inputParameters)
+        # We will wait SKS_NB_GENERATED_KEYS * SKS_KEYLIFETIME_SEC seconds to be sure that new keys generated  
+        # by the SKS are valid for communication + check if these keys are different from previous ones.
+        key_prev, keyLifeTime_prev = sksServer.callGetSecurityKeys(SKS_SECURITY_GROUP_ID, StartingTokenId, RequestedKeyCount)
         for _ in range(SKS_NB_GENERATED_KEYS):
             sleep(SKS_KEYLIFETIME_SEC)
-            key_next, keyLifeTime_next = sksServer.callGetSecurityKeys(inputParameters)
+            key_next, keyLifeTime_next = sksServer.callGetSecurityKeys(SKS_SECURITY_GROUP_ID, StartingTokenId, RequestedKeyCount)
             logger.add_test('Key is changed', key_next != key_prev and keyLifeTime_next == 5)
             key_prev = key_next
 

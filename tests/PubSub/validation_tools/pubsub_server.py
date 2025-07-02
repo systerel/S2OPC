@@ -37,7 +37,8 @@ class PubSubState(Enum):
     EXCEPTION = 4
 
 class PubSubServer:
-    """Wraps a client that connects to the sample pubsub_server"""
+    """Wraps a client that connects to the sample pubsub_server.
+       Using some of the methods of the module implies defining some NodeIds at init time. """
 
     def __init__(self, uri, nid_configuration, nid_start_stop, nid_status, nid_publisherObject, nid_methodAcyclicSend, nid_acyclicSendStatus, nid_methodDSMFiltering, nid_DSMFilteringStatus):
         self.uri = uri
@@ -56,14 +57,14 @@ class PubSubServer:
     def connect(self):
         self.client.connect()
         print('Connected')
-        self.nodeConfiguration = self.client.get_node(self.nid_configuration)
-        self.nodeStartStop = self.client.get_node(self.nid_start_stop)
-        self.nodeStatus = self.client.get_node(self.nid_status)
-        self.nodePublisherObject = self.client.get_node(self.nid_publisherObject)
-        self.nodeMethodAcyclicSend = self.client.get_node(self.nid_methodAcyclicSend)
-        self.nodeAcyclicSendStatus = self.client.get_node(self.nid_acyclicSendStatus)
-        self.nodeMethodDSMFiltering = self.client.get_node(self.nid_methodDSMFiltering)
-        self.nodeDSMFilteringStatus = self.client.get_node(self.nid_DSMFilteringStatus)
+        self.nodeConfiguration = self.client.get_node(self.nid_configuration) if self.nid_configuration is not None else None
+        self.nodeStartStop = self.client.get_node(self.nid_start_stop) if self.nid_start_stop is not None else None
+        self.nodeStatus = self.client.get_node(self.nid_status) if self.nid_status is not None else None
+        self.nodePublisherObject = self.client.get_node(self.nid_publisherObject) if self.nid_publisherObject is not None else None
+        self.nodeMethodAcyclicSend = self.client.get_node(self.nid_methodAcyclicSend) if self.nid_methodAcyclicSend is not None else None
+        self.nodeAcyclicSendStatus = self.client.get_node(self.nid_acyclicSendStatus) if self.nid_acyclicSendStatus is not None else None
+        self.nodeMethodDSMFiltering = self.client.get_node(self.nid_methodDSMFiltering) if self.nid_methodDSMFiltering is not None else None
+        self.nodeDSMFilteringStatus = self.client.get_node(self.nid_DSMFilteringStatus) if self.nid_DSMFilteringStatus is not None else None
 
     # Is connected to Pub/Sub server
     def isConnected(self):

@@ -24,16 +24,15 @@ from opcua.crypto import security_policies
 from opcua.crypto import uacrypto
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
+import getpass
 
 nid_objectPublisherSubscribeObject = u"i=14443"
 nid_methodGetSecurityKeys = u"i=15215"
 
-USERNAME = "user1"
-USER_PASSWORD = "password"
+TEST_PASSWORD_PRIV_KEY_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
+TEST_PASSWORD_USER_ENV_NAME = "TEST_PASSWORD_USER_SECUADMIN"
 
-######## INSPIRED FROM tests/ClientServer/interop_tools/safety_secure_channels.py ##
-# - only changes are: SignAndEncrypt instead of Sign and username / password instead of anonymous.
-PRIVATE_KEY_PASSWORD = b'password'
+USERNAME = "secuAdmin"
 
 def _load_private_key(key_path, pwd):
     with open(key_path, "rb") as f:
@@ -45,21 +44,31 @@ def secure_channels_connect_username(client, security_policy):
 
     if (security_policy == security_policies.SecurityPolicyBasic256Sha256):
         client_cert = uacrypto.load_certificate(os.path.join(cert_dir, 'client_2k_cert.der'))
-        cient_key = _load_private_key(os.path.join(cert_dir, 'encrypted_client_2k_key.pem'), PRIVATE_KEY_PASSWORD)
+        pwd = os.getenv(TEST_PASSWORD_PRIV_KEY_ENV_NAME)
+        if pwd is None:
+            print("{} not set: it shall be set in the environment".format(TEST_PASSWORD_PRIV_KEY_ENV_NAME))
+            exit(1)
+        pwd = bytes(pwd, 'utf-8')
+
+        client_key = _load_private_key(os.path.join(cert_dir, 'encrypted_client_2k_key.pem'), pwd)
         server_cert = uacrypto.load_certificate(os.path.join(cert_dir, 'server_2k_cert.der'))
 
-        client.security_policy = security_policy(server_cert, client_cert, cient_key, ua.MessageSecurityMode.SignAndEncrypt)
+        client.security_policy = security_policy(server_cert, client_cert, client_key, ua.MessageSecurityMode.SignAndEncrypt)
         client.uaclient.set_security(client.security_policy)
 
     client.set_user(USERNAME)
-    client.set_password(USER_PASSWORD)
+    pwd = os.getenv(TEST_PASSWORD_USER_ENV_NAME)
+    if pwd is None:
+        print("{} not set: it shall be set in the environment".format(TEST_PASSWORD_USER_ENV_NAME))
+        exit(2)
+
+    client.set_password(pwd)
     
     client.connect()
     print('Connected')
-#########
 
 class SKSServer:
-    """Wraps a client that connects to the test test_server_sks"""
+    """Wraps a client that connects to the SKS pull model server with provided URL"""
 
     def __init__(self, uri):
         self.uri = uri
@@ -78,8 +87,7 @@ class SKSServer:
         print('Disconnected')
 
     # Call method GetSecurityKeys with parameters SecurityGroupid, StartingTokenId, RequestedKeyCount
-    def callGetSecurityKeys(self, inputArguments):
-        SecurityGroupid, StartingTokenId, RequestedKeyCount = inputArguments
+    def callGetSecurityKeys(self, SecurityGroupid, StartingTokenId, RequestedKeyCount):
         try:
             # method call failure trigger an exception
             response = self.nodeObjectPublisherSubscribe.call_method(self.nodeMethodGetSecurityKeys,
@@ -93,6 +101,7 @@ class SKSServer:
         keyLifeTime = 0
         key = 0
         if response:
+            assert(5 == len(response)) # GetSecurityKeys method has 5 output arguments
             keys = response[2]
             keyLifeTime = response[4]/1000
             print("Nbr of keys:", len(keys))

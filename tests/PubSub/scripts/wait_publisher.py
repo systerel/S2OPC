@@ -28,10 +28,10 @@ import socket
 from urllib.parse import urlparse
 
 TIMEOUT = 2.0
-DEFAULT_SKS_URL = 'opc.tcp://localhost:4841'
 DEFAULT_PUB_URL = 'opc.udp://232.1.2.100:4840'
 
 def wait_server(url, timeout):
+    assert url != None
     # Parse url to find the endpoint IP, connects while not TIMEOUT
     pr = urlparse(url)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
