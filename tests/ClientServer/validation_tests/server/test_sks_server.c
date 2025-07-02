@@ -73,10 +73,10 @@ static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 /* SKS Constants */
 // Period to init the scheduler is 1s
 #define SKS_SCHEDULER_INIT_MSPERIOD 1000
-// Key Lifetime is 10s
-#define SKS_KEYLIFETIME 10000
+// Key Lifetime is 5s
+#define SKS_KEYLIFETIME 5000
 // Number of keys generated randomly
-#define SKS_NB_GENERATED_KEYS 5
+#define SKS_NB_GENERATED_KEYS 2
 // Maximum number of Security Keys managed. When the number of keys exceed this limit, only the valid Keys are kept
 #define SKS_NB_MAX_KEYS 20
 
