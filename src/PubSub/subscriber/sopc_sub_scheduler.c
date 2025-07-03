@@ -62,7 +62,7 @@ typedef const char* ro_string_t;
 /**
  * Add data related to a Reader Group in Susbcriber security context
  */
-static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group);
+static void SOPC_SubScheduler_Add_Security_Ctx(const SOPC_ReaderGroup* group);
 
 /**
  * Search in Subscriber security context the data associated to a token id, publisher id and writer group id
@@ -1219,7 +1219,7 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
     return security;
 }
 
-static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
+static void SOPC_SubScheduler_Add_Security_Ctx(const SOPC_ReaderGroup* group)
 {
     SOPC_ASSERT(NULL != group);
     if (SOPC_SecurityMode_Invalid == SOPC_ReaderGroup_Get_SecurityMode(group) ||
