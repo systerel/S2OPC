@@ -705,8 +705,8 @@ coverage-analysis:
     - if: "$WITH_COVERAGE != null"
     
     
-build-sonar:
-  stage: build
+sonar-analysis:
+  stage: analyses
   image: registry.gitlab.com/systerel/s2opc/sonarqube@sha256:4baaa859d74163e40467c5fa630ad205a83a4190b7fe472d32f071619a31ca5e # digest of sonarqube:1.0
   needs: []
   variables:
