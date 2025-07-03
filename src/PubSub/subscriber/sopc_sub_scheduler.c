@@ -62,7 +62,7 @@ typedef const char* ro_string_t;
 /**
  * Add data related to a Reader Group in Susbcriber security context
  */
-static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group);
+static void SOPC_SubScheduler_Add_Security_Ctx(const SOPC_ReaderGroup* group);
 
 /**
  * Search in Subscriber security context the data associated to a token id, publisher id and writer group id
@@ -770,7 +770,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                 uint16_t nbGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
                 for (uint16_t rg_i = 0; rg_i < nbGroup; rg_i++)
                 {
-                    SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
+                    const SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
                     SOPC_SubScheduler_Add_Security_Ctx(group);
                     uint8_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
                     const SOPC_Conf_PublisherId* dsmPubId = SOPC_ReaderGroup_Get_PublisherId(group);
@@ -1219,7 +1219,7 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
     return security;
 }
 
-static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
+static void SOPC_SubScheduler_Add_Security_Ctx(const SOPC_ReaderGroup* group)
 {
     SOPC_ASSERT(NULL != group);
     if (SOPC_SecurityMode_Invalid == SOPC_ReaderGroup_Get_SecurityMode(group) ||
