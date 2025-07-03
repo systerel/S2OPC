@@ -23,6 +23,8 @@
 const char* get_IP_str(void);
 const char* get_EP_str(void);
 
+void sopc_main(void);
+
 #define CONFIG_SOPC_ENDPOINT_ADDRESS get_EP_str()
 
 #endif //  FREE_RTOS_PLATFORM_DEP_H

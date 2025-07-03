@@ -46,7 +46,6 @@
 /*******************************************************************************
  * Macros
  ******************************************************************************/
-#define PRINTF SOPC_Shell_Printf
 #define SHELL_COMMAND_SIZE 256u
 #define SHELL_MAX_PRINT_SIZE 256u
 
@@ -54,10 +53,15 @@
 
 // Select a UART for STM32 boards. To support new boards, the following lines may be adapted
 // depending on UART number for ST-LINK attached UART.
-#if defined(STM32H723xx) || defined(STM32H735xx)
+#if defined SDK_PROVIDER_NXP
+#include "fsl_debug_console.h"
+#include "fsl_device_registers.h"
+#elif defined SDK_PROVIDER_STM
 #include <stm32h7xx_hal.h>
 #define STM32_LINK_UART huart3
-#endif
+#else
+#error "Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
 
 #ifdef STM32_LINK_UART
 void SOPC_ETH_MAC_Filter_Config(ETH_HandleTypeDef* heth)
@@ -100,9 +104,11 @@ static uint8_t SOPC_Shell_getc(void)
         const uint16_t numberOfDataReceived = 1;
         HAL_UART_Receive(&STM32_LINK_UART, &result, numberOfDataReceived, HAL_MAX_DELAY);
     }
+#elif defined SDK_PROVIDER_NXP
+    result = GETCHAR();
 #else
 #error "Unknown target, can't figure out how to communicate over Serial line"
-#endif
+#endif // STM32_LINK_UART
     return result;
 }
 
@@ -125,6 +131,14 @@ static inline void shell_putChar(const char c)
 {
     HAL_UART_Transmit(&STM32_LINK_UART, (const unsigned char*) &c, 1, HAL_MAX_DELAY);
 }
+#elif defined SDK_PROVIDER_NXP
+static inline void shell_putChar(const char c)
+{
+    PUTCHAR(c);
+}
+#else
+#error "Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
 
 int __io_putchar(int ch)
 {
@@ -135,10 +149,9 @@ int __io_putchar(int ch)
     {
         shell_putChar('\r');
     }
-#endif
+#endif // IMPLICIT_LF_WITH_CR
     return 1;
 }
-#endif
 
 void shell_putString(const char* str)
 {

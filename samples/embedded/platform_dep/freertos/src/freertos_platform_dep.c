@@ -44,7 +44,13 @@
 
 /* freeRtos includes */
 // order enforced
+#if defined SDK_PROVIDER_NXP
+#include "lwip/init.h"
+#elif defined SDK_PROVIDER_STM
 #include "lwip.h"
+#else
+#error "Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
 #include "lwip/netif.h"
 #include "netif/etharp.h"
 
@@ -57,7 +63,7 @@
 #include "mbedtls.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/entropy_poll.h"
-#endif
+#endif // S2OPC_CRYPTO_MBEDTLS
 
 #include "freertos_shell.h"
 #include "p_sopc_common_time.h"
@@ -71,7 +77,9 @@
 
 #define MAIN_STACK_SIZE ((unsigned short) 2048)
 
+#ifndef PRINTF
 #define PRINTF SOPC_Shell_Printf
+#endif
 #ifndef BOARD_TYPE
 #define BOARD_TYPE "Undefined"
 #endif
@@ -79,20 +87,25 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-#if defined(USE_FreeRTOS_HEAP_5)
-#if defined(STM32H723xx) || defined(STM32H735xx)
+#if defined SDK_PROVIDER_STM
 #define HEAP_REGION2_SIZE (128 * 1024)
 #define HEAP_REGION2_BASE 0x20000000
-#else
-#error "Sorry, Memory mapping is not define for this board. It has to be added"
-#endif // STM32H723xx
 
 static uint8_t ucHeap[configTOTAL_HEAP_SIZE];
+
 HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_SIZE}, // DTCM RAM
                                       {ucHeap, configTOTAL_HEAP_SIZE},
                                       {NULL, 0}};
 
-#endif // USE_FreeRTOS_HEAP_5
+#elif defined SDK_PROVIDER_NXP
+#define HEAP_REGION2_SIZE (128 * 1024)
+#define HEAP_REGION2_BASE 0x20000000
+
+HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_SIZE}, // DTCM RAM
+                                      {NULL, 0}};
+#else
+#error "Sorry, Memory mapping is not defined for this board. Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
 /*******************************************************************************
  * Local Functions
  ******************************************************************************/
@@ -125,8 +138,16 @@ const char* get_IP_str(void)
     {
         result = SOPC_Calloc(17, 1);
         SOPC_ASSERT(NULL != result);
+#if defined SDK_PROVIDER_NXP
+        extern struct netif* netif_list;
+        ip4_addr_t addr = netif_list->ip_addr;
+        snprintf(result, 16, "%u.%u.%u.%u", ip4_addr1(&addr), ip4_addr2(&addr), ip4_addr3(&addr), ip4_addr4(&addr));
+#elif defined SDK_PROVIDER_STM
         extern uint8_t IP_ADDRESS[4];
         snprintf(result, 16, "%u.%u.%u.%u", IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
+#else
+#error "Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
     }
     return result;
 }
@@ -148,8 +169,15 @@ const char* get_EP_str(void)
 // True if lwip stack was already initialized, False otherwise
 static bool IslwipInitialized(void)
 {
+#if defined SDK_PROVIDER_NXP
+    extern struct netif* netif_list;
+    return NULL != netif_list->next;
+#elif defined SDK_PROVIDER_STM
     extern struct netif gnetif;
     return NULL != gnetif.next;
+#else
+#error "Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
 }
 
 /*************************************************/
@@ -158,17 +186,30 @@ void SOPC_Platform_Setup(void)
     if (!IslwipInitialized())
     {
         PRINTF("Initializing LwIP\n");
-        MX_LWIP_Init();
+        lwip_init();
     }
-    extern uint8_t IP_ADDRESS[4];
+#if defined SDK_PROVIDER_NXP
+    extern struct netif* netif_list;
+    ip4_addr_t addr = netif_list->netmask;
+#elif defined SDK_PROVIDER_STM
     extern uint8_t NETMASK_ADDRESS[4];
+#else
+#error "Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
     PRINTF("\r\n************************************************\n");
     PRINTF("SOPC / FreeRTOS / MbedTLS / LwIP example\n");
     PRINTF("************************************************\n");
     PRINTF(" Board type       : %s\n", BOARD_TYPE);
     PRINTF(" IPv4 Address     : %s\n", get_IP_str());
+#if defined SDK_PROVIDER_NXP
+    PRINTF(" IPv4 Subnet mask : %u.%u.%u.%u\n", ip4_addr1(&addr), ip4_addr2(&addr), ip4_addr3(&addr), ip4_addr4(&addr));
+#elif defined SDK_PROVIDER_STM
+
     PRINTF(" IPv4 Subnet mask : %u.%u.%u.%u\n", NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2],
            NETMASK_ADDRESS[3]);
+#else
+#error "Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
     PRINTF("************************************************\n");
 
     PRINTF("Initializing MbedTLS\n");
@@ -228,7 +269,7 @@ int main(void)
     vTaskStartScheduler();
     return 0;
 }
-#endif
+#endif // SOPC_FREERTOS_RAW_INIT
 
 /*************************************************/
 void sopc_main(void)
@@ -236,7 +277,21 @@ void sopc_main(void)
     static const int priority = 0;
     TaskHandle_t tHandle;
 
-    xTaskCreate(sopc_main_entry, "Main", MAIN_STACK_SIZE, NULL, priority, &tHandle);
+#ifdef SOPC_FREERTOS_RAW_INIT
+    vPortDefineHeapRegions(board_heap5_regions);
+#endif // SOPC_FREERTOS_RAW_INIT
+
+    BaseType_t returned;
+    returned = xTaskCreate(sopc_main_entry, "Main", MAIN_STACK_SIZE, NULL, priority, &tHandle);
+    if (returned != pdPASS)
+    {
+        PRINTF("xTaskCreate fail - err %d\n", returned);
+        exit(EXIT_FAILURE);
+    }
+
+#ifdef SOPC_FREERTOS_RAW_INIT
+    vTaskStartScheduler();
+#endif // SOPC_FREERTOS_RAW_INIT
 }
 
 /*************************************************/
@@ -302,4 +357,4 @@ time_t sopc_time_alt(time_t* timer)
     }
     return t;
 }
-#endif
+#endif // S2OPC_CRYPTO_MBEDTLS

@@ -31,15 +31,16 @@
 #endif
 #define MBEDTLS_CONFIG_FILE "sopc_mbedtls_config.h"
 
+// Board-Specific configuration
+
+#define BOARD_TYPE "NUCLEO_H723ZG"
+#define SDK_PROVIDER_STM
+
 #include "stm32h7xx_hal.h"
 
 #include "freertos_platform_dep.h"
 
 #include "freertos_shell.h"
-
-// Board-Specific configuration
-
-#define BOARD_TYPE "NUCLEO_H723ZG"
 
 #define PRINT SOPC_Shell_Printf
 

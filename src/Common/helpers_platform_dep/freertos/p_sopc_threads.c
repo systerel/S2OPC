@@ -18,6 +18,7 @@
  */
 
 /* stdlib includes */
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -38,7 +39,7 @@
 #include "p_sopc_threads.h"         /* private thread include */
 #include "p_sopc_utils.h"           /* private list include */
 
-#include "cmsis_os.h"
+//#include "cmsis_os.h"
 
 #define MAX_THREADS MAX_WAITERS
 
@@ -312,6 +313,6 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, signed char* pcTaskName)
 {
     SOPC_UNUSED_ARG(xTask);
     SOPC_UNUSED_ARG(pcTaskName);
-    osDelay(500);
-    __BKPT(0);
+    vTaskDelay(500);
+    assert(0);
 }

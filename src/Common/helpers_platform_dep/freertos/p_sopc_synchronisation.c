@@ -70,7 +70,7 @@ static void P_SYNCHRO_ClearConditionVariable(SOPC_Condition_Impl* pConditionVari
                                        wClearSignal,                  //
                                        &wCurrentSlotId);              //
 
-                xTaskGenericNotify(handle, wClearSignal, eSetBits, NULL);
+                xTaskNotify(handle, wClearSignal, eSetBits);
             }
         } while (UINT16_MAX != wCurrentSlotId);
 
@@ -140,7 +140,7 @@ static SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(
                                        clearsignal,                   //
                                        &wCurrentSlotId);              //
 
-                configASSERT(pdPASS == xTaskGenericNotify(handle, signal, eSetBits, NULL));
+                configASSERT(pdPASS == xTaskNotify(handle, signal, eSetBits));
                 result = SOPC_STATUS_OK;
             }
         } while (UINT16_MAX != wCurrentSlotId && bSignalAll);
@@ -215,10 +215,9 @@ static inline SOPC_ReturnStatus P_SYNCHRO_WaitSignal(uint32_t* pNotificationValu
         // If others notifications, forward it in order to generate a task event
         if (0 != (notificationValue & (~(uwSignal | uwClearSignal))))
         {
-            xTaskGenericNotify(xTaskGetCurrentTaskHandle(),                       //
-                               notificationValue & (~(uwSignal | uwClearSignal)), //
-                               eSetBits,                                          //
-                               NULL);                                             //
+            xTaskNotify(xTaskGetCurrentTaskHandle(),                       //
+                        notificationValue & (~(uwSignal | uwClearSignal)), //
+                        eSetBits);                                         //
         }
 
         *pNotificationValue = notificationValue;
@@ -284,10 +283,9 @@ static SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         // If others notifications, forward it in order to generate a task event
         if (0 != (notificationValue & (~(uwSignal | uwClearSignal))))
         {
-            xTaskGenericNotify(xTaskGetCurrentTaskHandle(),                       //
-                               notificationValue & (~(uwSignal | uwClearSignal)), //
-                               eSetBits,                                          //
-                               NULL);                                             //
+            xTaskNotify(xTaskGetCurrentTaskHandle(),                       //
+                        notificationValue & (~(uwSignal | uwClearSignal)), //
+                        eSetBits);                                         //
         }
 
         if (SOPC_STATUS_OK != status)
