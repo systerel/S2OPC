@@ -35,7 +35,7 @@ DEFINITIONS
     d_inv_set ==
     RegisteredServer2_CounterResetTime : t_Timestamp & /* It is a simple DateTime but use Timestamp to avoid adding a new type */
     s_RegisteredServer2 <: t_RegisteredServer2Info &
-    a_RegisteredServer2_RecordId : s_RegisteredServer2 >->> NAT &
+    a_RegisteredServer2_RecordId : s_RegisteredServer2 >-> NAT &
     a_RegisteredServer2_RegisteredServer : s_RegisteredServer2 --> t_RegisteredServer &
     a_RegisteredServer2_mDNSconfig : s_RegisteredServer2 --> t_MdnsDiscoveryConfig
     ;

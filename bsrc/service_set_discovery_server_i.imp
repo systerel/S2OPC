@@ -100,6 +100,7 @@ LOCAL_OPERATIONS
                 < min(ran(a_FindServersOnNetworkCompat_RecordId) - ran(FindServersOnNetworkResp_ServerRecordId))) &
             /* We set the config associated to each recordId returned */
             !p_index.(p_index : 0 .. p_nb_servers - 1 =>
+                FindServersOnNetworkResp_ServerRecordId(p_index) : a_RegisteredServer2_RecordId[s_RegisteredServer2] &
                 /* Numercial order compliant */
                 (p_index > 0 =>
                   FindServersOnNetworkResp_ServerRecordId(p_index) > max(FindServersOnNetworkResp_ServerRecordId[0..p_index-1])) &
