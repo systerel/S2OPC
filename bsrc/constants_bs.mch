@@ -236,7 +236,8 @@ CONCRETE_CONSTANTS
     c_RegisteredServer2Info_indet,
     c_DataTypeDefinition_indet,
     c_ServerUri_empty,
-    c_NamespaceUri_empty
+    c_NamespaceUri_empty,
+    c_registerServer2_expiration_time
 
 ABSTRACT_CONSTANTS
 
@@ -762,6 +763,8 @@ PROPERTIES
     c_ServerUri_empty : t_ServerUri &
 
     c_NamespaceUri_empty : t_NamespaceUri &
+
+    c_registerServer2_expiration_time : NAT &
 
     conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &
     conv_AccessLevel_CurrentRead : t_access_level --> BOOL &

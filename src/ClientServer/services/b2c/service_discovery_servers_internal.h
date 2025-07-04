@@ -20,9 +20,12 @@
 #ifndef _service_register_server2_set_internal_h
 #define _service_register_server2_set_internal_h
 
+#include "sopc_time_reference.h"
+
 typedef struct SOPC_RegisterServer2Record_Internal
 {
     OpcUa_RegisteredServer registeredServer;
+    SOPC_TimeReference expirationTime;
     OpcUa_MdnsDiscoveryConfiguration mDNSconfig;
     int32_t recordId;
 } SOPC_RegisterServer2Record_Internal;

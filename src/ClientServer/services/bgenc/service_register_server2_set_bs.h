@@ -21,7 +21,7 @@
 
  File Name            : service_register_server2_set_bs.h
 
- Date                 : 04/08/2022 14:53:45
+ Date                 : 03/07/2025 14:08:07
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -52,6 +52,7 @@ extern void service_register_server2_set_bs__add_to_registered_server2_set(
    const constants__t_RegisteredServer_i service_register_server2_set_bs__p_registered_server,
    const constants__t_MdnsDiscoveryConfig_i service_register_server2_set_bs__p_mdns_config,
    const t_entier4 service_register_server2_set_bs__p_recordId,
+   const constants__t_timeref_i service_register_server2_set_bs__p_expirationTime,
    t_bool * const service_register_server2_set_bs__alloc_success);
 extern void service_register_server2_set_bs__clear_iter_registered_server2_set(void);
 extern void service_register_server2_set_bs__continue_iter_registered_server2_set(
@@ -59,6 +60,9 @@ extern void service_register_server2_set_bs__continue_iter_registered_server2_se
    constants__t_RegisteredServer2Info_i * const service_register_server2_set_bs__p_registeredServerInfo);
 extern void service_register_server2_set_bs__get_card_register2_set(
    t_entier4 * const service_register_server2_set_bs__card_set);
+extern void service_register_server2_set_bs__get_registered_server2_ExpirationTime(
+   const constants__t_RegisteredServer2Info_i service_register_server2_set_bs__p_registeredServerInfo,
+   constants__t_timeref_i * const service_register_server2_set_bs__p_expirationTime);
 extern void service_register_server2_set_bs__get_registered_server2_counter_reset_time(
    constants__t_Timestamp * const service_register_server2_set_bs__p_timestamp);
 extern void service_register_server2_set_bs__get_registered_server2_mdns_config(

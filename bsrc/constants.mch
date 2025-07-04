@@ -488,6 +488,7 @@ CONCRETE_CONSTANTS
     c_DataTypeDefinition_indet,
     c_ServerUri_empty,
     c_NamespaceUri_empty,
+    c_registerServer2_expiration_time,
 
     t_counter,
     t_ValueRank,
@@ -1186,6 +1187,8 @@ PROPERTIES
     c_ServerUri_empty : t_ServerUri &
 
     c_NamespaceUri_empty : t_NamespaceUri &
+
+    c_registerServer2_expiration_time : NAT &
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,

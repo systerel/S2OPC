@@ -247,6 +247,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_
 #define constants_bs__c_opcua_duration_indet -1
 #define constants_bs__c_opcua_duration_zero 0
 #define constants_bs__c_publishReqQueue_indet 0
+#define constants_bs__c_registerServer2_expiration_time SOPC_REGISTERED_SERVER_EXPIRATION_DELAY_SECS
 #define constants_bs__c_request_context_indet 0
 #define constants_bs__c_reverse_endpoint_config_idx_indet 0
 #define constants_bs__c_server_request_handle_any 0

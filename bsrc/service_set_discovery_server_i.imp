@@ -406,6 +406,7 @@ OPERATIONS
         l_alloc_success
     IN
         ret := e_sc_ok;
+        remove_expired_registration;
         l_startingRecordId, l_maxRecordsToReturn, l_serverCapabilities <-- get_find_servers_on_network_req_params (req_msg);
         l_counter_reset_time <-- get_registered_server2_counter_reset_time;
         set_find_servers_on_network_resp (resp_msg, l_counter_reset_time);
@@ -460,6 +461,7 @@ OPERATIONS
         l_allocSuccess
     IN
         ret := e_sc_ok;
+        remove_expired_registration;
         l_LocaleIds, l_nbServerUri, l_ServerUris <-- get_find_servers_req_params (req_msg);
         l_nbServers <-- local_get_nb_servers_to_return (l_nbServerUri, l_ServerUris);
         // Check if we add the current endpoint server information

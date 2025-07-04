@@ -21,7 +21,7 @@
 
  File Name            : service_register_server2.h
 
- Date                 : 04/08/2022 14:53:13
+ Date                 : 03/07/2025 14:07:29
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "service_register_server2_offline_bs.h"
 #include "service_register_server2_set_bs.h"
 
 /*--------------
@@ -46,6 +47,7 @@
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 #include "service_set_discovery_server_data_bs.h"
+#include "time_reference_bs.h"
 
 /*----------------------------
    CONCRETE_VARIABLES Clause
@@ -72,6 +74,8 @@ extern void service_register_server2__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
+extern void service_register_server2__local_fill_s_RegisteredServer2_offline(
+   const constants__t_timeref_i service_register_server2__p_curentTime);
 extern void service_register_server2__local_need_register_server2_update(
    const constants__t_RegisteredServer_i service_register_server2__p_registered_server,
    t_bool * const service_register_server2__hasServerUri,
@@ -86,6 +90,7 @@ extern void service_register_server2__register_server2_create(
    constants_statuscodes_bs__t_StatusCode_i * const service_register_server2__p_sc);
 extern void service_register_server2__register_server2_remove(
    const constants__t_RegisteredServer_i service_register_server2__p_registered_server);
+extern void service_register_server2__remove_expired_registration(void);
 extern void service_register_server2__service_register_server2_UNINITIALISATION(void);
 
 #endif

@@ -28,6 +28,7 @@ DEFINITIONS
     RegisteredServer2_CounterResetTime,
     s_RegisteredServer2,
     a_RegisteredServer2_RecordId,
+    a_RegisteredServer2_ExpirationTime,
     a_RegisteredServer2_RegisteredServer,
     a_RegisteredServer2_mDNSconfig
     ;
@@ -36,6 +37,7 @@ DEFINITIONS
     RegisteredServer2_CounterResetTime : t_Timestamp & /* It is a simple DateTime but use Timestamp to avoid adding a new type */
     s_RegisteredServer2 <: t_RegisteredServer2Info &
     a_RegisteredServer2_RecordId : s_RegisteredServer2 >-> NAT &
+    a_RegisteredServer2_ExpirationTime : s_RegisteredServer2 --> t_timeref &
     a_RegisteredServer2_RegisteredServer : s_RegisteredServer2 --> t_RegisteredServer &
     a_RegisteredServer2_mDNSconfig : s_RegisteredServer2 --> t_MdnsDiscoveryConfig
     ;
@@ -46,6 +48,7 @@ DEFINITIONS
         RegisteredServer2_CounterResetTime : t_Timestamp & /* INITIALISATION timestamp */
         s_RegisteredServer2 = {} &
         a_RegisteredServer2_RecordId = {} &
+        a_RegisteredServer2_ExpirationTime = {} &
         a_RegisteredServer2_RegisteredServer = {} &
         a_RegisteredServer2_mDNSconfig = {}
     )
@@ -144,24 +147,28 @@ OPERATIONS
     THEN
         s_RegisteredServer2,
         a_RegisteredServer2_RecordId,
+        a_RegisteredServer2_ExpirationTime,
         a_RegisteredServer2_RegisteredServer,
         a_RegisteredServer2_mDNSconfig
         :(d_inv_set  &
             s_RegisteredServer2 = s_RegisteredServer2$0 - {a_RegisteredServer2_RecordId~(p_recordId)} &
             a_RegisteredServer2_RecordId = s_RegisteredServer2 <| a_RegisteredServer2_RecordId$0 &
+            a_RegisteredServer2_ExpirationTime = s_RegisteredServer2 <| a_RegisteredServer2_ExpirationTime$0 &
             a_RegisteredServer2_RegisteredServer = s_RegisteredServer2 <| a_RegisteredServer2_RegisteredServer$0 &
             a_RegisteredServer2_mDNSconfig = s_RegisteredServer2 <| a_RegisteredServer2_mDNSconfig$0
         )
     END
     ;
 
-    alloc_success <-- add_to_registered_server2_set (p_registered_server, p_mdns_config, p_recordId) =
+    alloc_success <-- add_to_registered_server2_set (p_registered_server, p_mdns_config, p_recordId, p_expirationTime) =
     PRE
         p_registered_server : t_RegisteredServer_i &
         p_registered_server : t_RegisteredServer &
         p_mdns_config : t_MdnsDiscoveryConfig_i &
         p_mdns_config : t_MdnsDiscoveryConfig &
-        p_recordId : NAT
+        p_recordId : NAT &
+        p_expirationTime : t_timeref_i &
+        p_expirationTime : t_timeref
     THEN
         IF t_RegisteredServer2Info = s_RegisteredServer2
         THEN
@@ -177,6 +184,8 @@ OPERATIONS
                     s_RegisteredServer2 = s_RegisteredServer2$0 \/ {l_registerInfo} &
                     a_RegisteredServer2_RecordId =
                       a_RegisteredServer2_RecordId$0 <+ {l_registerInfo |-> p_recordId} &
+                    a_RegisteredServer2_ExpirationTime =
+                      a_RegisteredServer2_ExpirationTime$0 <+ {l_registerInfo |-> p_expirationTime} &
                     a_RegisteredServer2_RegisteredServer =
                       a_RegisteredServer2_RegisteredServer$0  <+ {l_registerInfo |-> p_registered_server} &
                     a_RegisteredServer2_mDNSconfig =
@@ -218,6 +227,16 @@ OPERATIONS
         p_registeredServerInfo : s_RegisteredServer2
     THEN
         p_recordId := a_RegisteredServer2_RecordId (p_registeredServerInfo)
+    END
+    ;
+
+    p_expirationTime <-- get_registered_server2_ExpirationTime (p_registeredServerInfo) =
+    PRE
+        p_registeredServerInfo : t_RegisteredServer2Info_i &
+        p_registeredServerInfo : s_RegisteredServer2
+    THEN
+        p_expirationTime :( p_expirationTime : t_timeref_i &
+                            p_expirationTime = a_RegisteredServer2_ExpirationTime (p_registeredServerInfo))
     END
     ;
 

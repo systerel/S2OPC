@@ -23,12 +23,14 @@ REFINES
    service_register_server2
 
 SEES
-   constants ,
+   constants,
    constants_statuscodes_bs,
-   service_set_discovery_server_data_bs
+   service_set_discovery_server_data_bs,
+   time_reference_bs
 
 IMPORTS
-    service_register_server2_set_bs
+    service_register_server2_set_bs,
+    service_register_server2_offline_bs
 
 PROMOTES
     init_iter_registered_server2_set,
@@ -75,6 +77,15 @@ LOCAL_OPERATIONS
                 recordId := serverUriRecordId
             END
         END
+    END
+    ;
+
+    local_fill_s_RegisteredServer2_offline(p_curentTime) =
+    PRE
+        p_curentTime : t_timeref_i &
+        p_curentTime : t_timeref
+    THEN
+        s_RegisteredServer2_offline := a_RegisteredServer2_RecordId[a_RegisteredServer2_ExpirationTime~[TimeReference_IsLessThan~[{p_curentTime}]] /\ s_registered_server2_iterated_it]
     END
 
 OPERATIONS
@@ -124,10 +135,44 @@ OPERATIONS
     END
     ;
 
+    local_fill_s_RegisteredServer2_offline(p_curentTime) =
+    VAR
+        l_continue,
+        l_registeredServerInfo,
+        l_exp_time,
+        l_is_older_than,
+        l_recordId
+    IN
+        l_continue <-- init_iter_registered_server2_set;
+        WHILE l_continue = TRUE DO
+            l_continue, l_registeredServerInfo <-- continue_iter_registered_server2_set;
+            l_exp_time <-- get_registered_server2_ExpirationTime(l_registeredServerInfo);
+            l_is_older_than <-- is_less_than_TimeReference(l_exp_time, p_curentTime);
+            IF l_is_older_than = TRUE THEN
+                l_recordId <-- get_registered_server2_recordId(l_registeredServerInfo);
+                add_to_registered_server2_offline_set(l_recordId)
+            END
+        INVARIANT
+            s_RegisteredServer2_offline <: NAT &
+
+            s_registered_server2_to_iterate_it <: s_RegisteredServer2 &
+            s_registered_server2_iterated_it <: s_RegisteredServer2 &
+            s_registered_server2_to_iterate_it /\ s_registered_server2_iterated_it = {} &
+            s_registered_server2_to_iterate_it \/ s_registered_server2_iterated_it = s_RegisteredServer2 &
+            l_continue = bool(s_registered_server2_to_iterate_it /= {}) &
+
+            a_RegisteredServer2_RecordId[a_RegisteredServer2_ExpirationTime~[TimeReference_IsLessThan~[{p_curentTime}]] /\ s_registered_server2_iterated_it] = s_RegisteredServer2_offline
+        VARIANT
+            card(s_registered_server2_to_iterate_it)
+        END
+    END
+    ;
+
     /* OPERATIONS */
     p_sc <-- register_server2_create (p_registered_server , p_mdns_config) =
     VAR
-        l_allocSuccess
+        l_allocSuccess,
+        l_expirationTime
     IN
         p_sc := e_sc_ok;
         IF RegisteredServer2_Counter_i = MAXINT THEN
@@ -135,9 +180,10 @@ OPERATIONS
             RegisteredServer2_Counter_i := 0
         END
         ;
+        l_expirationTime <-- get_target_TimeReference(c_registerServer2_expiration_time);
         /* Generate new recordId */
         RegisteredServer2_Counter_i := RegisteredServer2_Counter_i + 1;
-        l_allocSuccess <-- add_to_registered_server2_set (p_registered_server, p_mdns_config, RegisteredServer2_Counter_i);
+        l_allocSuccess <-- add_to_registered_server2_set (p_registered_server, p_mdns_config, RegisteredServer2_Counter_i, l_expirationTime);
         /* Note: p_registered_server property has been */
         IF l_allocSuccess = FALSE
         THEN
@@ -162,9 +208,41 @@ OPERATIONS
     END
     ;
 
+    remove_expired_registration =
+    VAR
+        l_currentTime,
+        l_continue,
+        l_recordId
+    IN
+        l_currentTime <-- get_current_TimeReference;
+        local_fill_s_RegisteredServer2_offline(l_currentTime);
+        l_continue <-- init_iter_registered_server2_offline_set;
+        WHILE l_continue = TRUE DO
+            l_continue, l_recordId <-- continue_iter_registered_server2_offline_set;
+            remove_from_registered_server2_set(l_recordId)
+        INVARIANT
+            s_registered_server2_offline_to_iterate_it <: s_RegisteredServer2_offline &
+            s_registered_server2_offline_iterated_it <: s_RegisteredServer2_offline &
+            s_registered_server2_offline_to_iterate_it /\ s_registered_server2_offline_iterated_it = {} &
+            s_registered_server2_offline_to_iterate_it \/ s_registered_server2_offline_iterated_it = s_RegisteredServer2_offline &
+            l_continue = bool(s_registered_server2_offline_to_iterate_it /= {}) &
+
+            s_RegisteredServer2 = s_RegisteredServer2$0 - a_RegisteredServer2_RecordId$0~[s_registered_server2_offline_iterated_it] &
+            a_RegisteredServer2_RecordId = s_RegisteredServer2 <| a_RegisteredServer2_RecordId$0 &
+            a_RegisteredServer2_ExpirationTime = s_RegisteredServer2 <| a_RegisteredServer2_ExpirationTime$0 &
+            a_RegisteredServer2_RegisteredServer = s_RegisteredServer2 <| a_RegisteredServer2_RegisteredServer$0 &
+            a_RegisteredServer2_mDNSconfig = s_RegisteredServer2 <| a_RegisteredServer2_mDNSconfig$0
+        VARIANT
+            card(s_registered_server2_offline_to_iterate_it)
+        END;
+        reset_registered_server2_offline_set
+    END
+    ;
+
     service_register_server2_UNINITIALISATION =
     BEGIN
-        service_register_server2_set_bs_UNINITIALISATION
+        service_register_server2_set_bs_UNINITIALISATION;
+        service_register_server2_offline_bs_UNINITIALISATION
     END
 
 END

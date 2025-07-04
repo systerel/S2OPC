@@ -154,6 +154,7 @@
 #include "service_read_it.h"
 #include "service_register_nodes.h"
 #include "service_register_server2.h"
+#include "service_register_server2_offline_bs.h"
 #include "service_register_server2_set_bs.h"
 #include "service_response_cb_bs.h"
 #include "service_set_discovery_server.h"
@@ -372,6 +373,7 @@ void INITIALISATION(void) {
    msg_register_server2_bs__INITIALISATION();
    msg_register_server2__INITIALISATION();
    service_register_server2_set_bs__INITIALISATION();
+   service_register_server2_offline_bs__INITIALISATION();
    service_set_discovery_server_data_bs__INITIALISATION();
    service_register_server2__INITIALISATION();
    msg_find_servers_on_network_bs__INITIALISATION();

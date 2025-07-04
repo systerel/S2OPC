@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 29/07/2025 17:01:24
+ Date                 : 08/08/2025 09:20:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -531,6 +531,7 @@ typedef enum {
 #define constants__c_opcua_duration_indet constants_bs__c_opcua_duration_indet
 #define constants__c_opcua_duration_zero constants_bs__c_opcua_duration_zero
 #define constants__c_publishReqQueue_indet constants_bs__c_publishReqQueue_indet
+#define constants__c_registerServer2_expiration_time constants_bs__c_registerServer2_expiration_time
 #define constants__c_request_context_indet constants_bs__c_request_context_indet
 #define constants__c_reverse_endpoint_config_idx_indet constants_bs__c_reverse_endpoint_config_idx_indet
 #define constants__c_server_request_handle_any constants_bs__c_server_request_handle_any

@@ -23,7 +23,8 @@ MACHINE
 SEES
     constants,
     constants_statuscodes_bs,
-    service_set_discovery_server_data_bs
+    service_set_discovery_server_data_bs,
+    time_reference_bs
 
 DEFINITIONS
 
@@ -32,6 +33,7 @@ DEFINITIONS
     RegisteredServer2_Counter,
     s_RegisteredServer2,
     a_RegisteredServer2_RecordId,
+    a_RegisteredServer2_ExpirationTime,
     a_RegisteredServer2_RegisteredServer,
     a_RegisteredServer2_mDNSconfig
     ;
@@ -41,6 +43,7 @@ DEFINITIONS
     RegisteredServer2_Counter : NAT &
     s_RegisteredServer2 <: t_RegisteredServer2Info &
     a_RegisteredServer2_RecordId : s_RegisteredServer2 >-> NAT &
+    a_RegisteredServer2_ExpirationTime : s_RegisteredServer2 --> t_timeref &
     a_RegisteredServer2_RegisteredServer : s_RegisteredServer2 --> t_RegisteredServer &
     a_RegisteredServer2_mDNSconfig : s_RegisteredServer2 --> t_MdnsDiscoveryConfig
     ;
@@ -52,6 +55,7 @@ DEFINITIONS
         RegisteredServer2_Counter = 0 &
         s_RegisteredServer2 = {} &
         a_RegisteredServer2_RecordId = {} &
+        a_RegisteredServer2_ExpirationTime = {} &
         a_RegisteredServer2_RegisteredServer = {} &
         a_RegisteredServer2_mDNSconfig = {}
         )
@@ -105,13 +109,15 @@ OPERATIONS
         THEN
             p_sc := e_sc_bad_out_of_memory
         ELSE
-            ANY l_registerInfo WHERE
-                l_registerInfo : t_RegisteredServer2Info - s_RegisteredServer2
+            ANY l_registerInfo, l_timeref WHERE
+                l_registerInfo : t_RegisteredServer2Info - s_RegisteredServer2 &
+                l_timeref : t_timeref
             THEN
                 p_sc := e_sc_ok ||
                 s_RegisteredServer2,
                 RegisteredServer2_Counter,
                 a_RegisteredServer2_RecordId,
+                a_RegisteredServer2_ExpirationTime,
                 a_RegisteredServer2_RegisteredServer,
                 a_RegisteredServer2_mDNSconfig
                 :(d_inv &
@@ -121,6 +127,7 @@ OPERATIONS
                         /* Create new server info from empty variables */
                         s_RegisteredServer2 = {l_registerInfo} &
                         a_RegisteredServer2_RecordId = {l_registerInfo |-> RegisteredServer2_Counter} &
+                        a_RegisteredServer2_ExpirationTime = {l_registerInfo |-> l_timeref} &
                         a_RegisteredServer2_RegisteredServer = {l_registerInfo |-> p_registered_server} &
                         a_RegisteredServer2_mDNSconfig = {l_registerInfo |-> p_mdns_config}
                     ) &
@@ -130,6 +137,8 @@ OPERATIONS
                         s_RegisteredServer2 = s_RegisteredServer2$0 \/ {l_registerInfo} &
                         a_RegisteredServer2_RecordId =
                           a_RegisteredServer2_RecordId$0 <+ {l_registerInfo |-> RegisteredServer2_Counter} &
+                        a_RegisteredServer2_ExpirationTime =
+                          a_RegisteredServer2_ExpirationTime$0 <+ {l_registerInfo |-> l_timeref} &
                         a_RegisteredServer2_RegisteredServer =
                           a_RegisteredServer2_RegisteredServer$0 <+ {l_registerInfo |-> p_registered_server} &
                         a_RegisteredServer2_mDNSconfig =
@@ -148,6 +157,7 @@ OPERATIONS
     THEN
         s_RegisteredServer2,
         a_RegisteredServer2_RecordId,
+        a_RegisteredServer2_ExpirationTime,
         a_RegisteredServer2_RegisteredServer,
         a_RegisteredServer2_mDNSconfig
         :(d_inv &
@@ -156,6 +166,7 @@ OPERATIONS
                 RegisteredServer_ServerUri[ran(a_RegisteredServer2_RegisteredServer$0)] =>
                 s_RegisteredServer2 = s_RegisteredServer2$0 &
                 a_RegisteredServer2_RecordId = a_RegisteredServer2_RecordId$0 &
+                a_RegisteredServer2_ExpirationTime = a_RegisteredServer2_ExpirationTime$0 &
                 a_RegisteredServer2_RegisteredServer = a_RegisteredServer2_RegisteredServer$0 &
                 a_RegisteredServer2_mDNSconfig = a_RegisteredServer2_mDNSconfig$0
             ) &
@@ -170,12 +181,31 @@ OPERATIONS
                 and add the new record in each relation */
                 a_RegisteredServer2_RecordId =
                 s_RegisteredServer2 <| a_RegisteredServer2_RecordId$0 &
+                a_RegisteredServer2_ExpirationTime =
+                s_RegisteredServer2 <| a_RegisteredServer2_ExpirationTime$0 &
                 a_RegisteredServer2_RegisteredServer =
                 s_RegisteredServer2 <| a_RegisteredServer2_RegisteredServer$0 &
                 a_RegisteredServer2_mDNSconfig =
                 s_RegisteredServer2 <| a_RegisteredServer2_mDNSconfig$0
             )
         )
+    END
+    ;
+
+    remove_expired_registration =
+    BEGIN
+        s_RegisteredServer2,
+        a_RegisteredServer2_RecordId,
+        a_RegisteredServer2_ExpirationTime,
+        a_RegisteredServer2_RegisteredServer,
+        a_RegisteredServer2_mDNSconfig
+        :(d_inv &
+            s_RegisteredServer2 =  s_RegisteredServer2$0 - a_RegisteredServer2_ExpirationTime$0~[TimeReference_IsLessThan~[{current_time}]] &
+            a_RegisteredServer2_RecordId = s_RegisteredServer2 <| a_RegisteredServer2_RecordId$0 &
+            a_RegisteredServer2_ExpirationTime = s_RegisteredServer2 <| a_RegisteredServer2_ExpirationTime$0 &
+            a_RegisteredServer2_RegisteredServer = s_RegisteredServer2 <| a_RegisteredServer2_RegisteredServer$0 &
+            a_RegisteredServer2_mDNSconfig = s_RegisteredServer2 <| a_RegisteredServer2_mDNSconfig$0
+         )
     END
     ;
 

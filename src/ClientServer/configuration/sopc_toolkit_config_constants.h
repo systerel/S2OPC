@@ -281,6 +281,11 @@
 #define S2OPC_NANO_PROFILE false
 #endif
 
+/* REGISTERED SERVER MANAGEMENT */
+#ifndef SOPC_REGISTERED_SERVER_EXPIRATION_DELAY_SECS
+#define SOPC_REGISTERED_SERVER_EXPIRATION_DELAY_SECS 600 /* 600 seconds */
+#endif
+
 #include "sopc_config_constants_check.h"
 
 #endif /* SOPC_TOOLKIT_CONFIG_CONSTANTS_H_ */

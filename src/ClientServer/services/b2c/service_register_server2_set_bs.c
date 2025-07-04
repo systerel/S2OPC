@@ -48,6 +48,7 @@ void service_register_server2_set_bs__add_to_registered_server2_set(
     const constants__t_RegisteredServer_i service_register_server2_set_bs__p_registered_server,
     const constants__t_MdnsDiscoveryConfig_i service_register_server2_set_bs__p_mdns_config,
     const t_entier4 service_register_server2_set_bs__p_recordId,
+    const constants__t_timeref_i service_register_server2_set_bs__p_expirationTime,
     t_bool* const service_register_server2_set_bs__alloc_success)
 {
     SOPC_ASSERT(service_register_server2_set_bs__p_recordId >= 0);
@@ -72,6 +73,8 @@ void service_register_server2_set_bs__add_to_registered_server2_set(
             status = SOPC_EncodeableObject_Copy(&OpcUa_MdnsDiscoveryConfiguration_EncodeableType,
                                                 &newRecord->mDNSconfig, service_register_server2_set_bs__p_mdns_config);
         }
+
+        newRecord->expirationTime = service_register_server2_set_bs__p_expirationTime;
 
         if (SOPC_STATUS_OK == status)
         {
@@ -189,6 +192,14 @@ void service_register_server2_set_bs__get_card_register2_set(t_entier4* const se
     {
         *service_register_server2_set_bs__card_set = (int32_t) length;
     }
+}
+
+void service_register_server2_set_bs__get_registered_server2_ExpirationTime(
+    const constants__t_RegisteredServer2Info_i service_register_server2_set_bs__p_registeredServerInfo,
+    constants__t_timeref_i* const service_register_server2_set_bs__p_expirationTime)
+{
+    *service_register_server2_set_bs__p_expirationTime =
+        service_register_server2_set_bs__p_registeredServerInfo->expirationTime;
 }
 
 void service_register_server2_set_bs__get_registered_server2_counter_reset_time(

@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.c
 
- Date                 : 04/08/2022 14:53:13
+ Date                 : 11/07/2025 13:24:32
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -263,6 +263,7 @@ void service_set_discovery_server__treat_find_servers_on_network_request(
       t_bool service_set_discovery_server__l_alloc_success;
       
       *service_set_discovery_server__ret = constants_statuscodes_bs__e_sc_ok;
+      service_register_server2__remove_expired_registration();
       msg_find_servers_on_network_bs__get_find_servers_on_network_req_params(service_set_discovery_server__req_msg,
          &service_set_discovery_server__l_startingRecordId,
          &service_set_discovery_server__l_maxRecordsToReturn,
@@ -342,6 +343,7 @@ void service_set_discovery_server__treat_find_servers_request(
       t_bool service_set_discovery_server__l_allocSuccess;
       
       *service_set_discovery_server__ret = constants_statuscodes_bs__e_sc_ok;
+      service_register_server2__remove_expired_registration();
       msg_find_servers_bs__get_find_servers_req_params(service_set_discovery_server__req_msg,
          &service_set_discovery_server__l_LocaleIds,
          &service_set_discovery_server__l_nbServerUri,

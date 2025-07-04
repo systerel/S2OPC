@@ -24,16 +24,22 @@ SEES
     constants
 
 ABSTRACT_VARIABLES
-    TimeReference_IsLessThan
+    TimeReference_IsLessThan,
+    current_time
+
 INVARIANT
-    TimeReference_IsLessThan : t_timeref <-> t_timeref
+    TimeReference_IsLessThan : t_timeref <-> t_timeref &
+    current_time : t_timeref
+
 INITIALISATION
-    TimeReference_IsLessThan :(TimeReference_IsLessThan : t_timeref <-> t_timeref)
+    TimeReference_IsLessThan :(TimeReference_IsLessThan : t_timeref <-> t_timeref) ||
+    current_time :: t_timeref
+
 OPERATIONS
 
     p_timeref <-- get_current_TimeReference =
     BEGIN
-        p_timeref :(p_timeref : t_timeref_i & p_timeref : t_timeref)
+        p_timeref :(p_timeref : t_timeref_i & p_timeref = current_time)
     END
     ;
 
