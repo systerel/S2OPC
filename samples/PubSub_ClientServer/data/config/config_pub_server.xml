@@ -1,0 +1,16 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <!-- one to many -->
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=42">
+        <!-- one to many -->
+        <message groupId="14" groupVersion="1" publishingInterval="100." securityMode="signAndEncrypt" securityGroupId="1">
+          <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
+          <dataset writerId="1">
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=PubBool" displayName="varBool" dataType="Boolean"/>
+            <variable nodeId="ns=1;s=PubInt" displayName="varInt" dataType="Int64"/>
+            <variable nodeId="ns=1;s=PubString" displayName="varString" dataType="String"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+          </dataset>
+        </message>
+    </connection>
+</PubSub>
