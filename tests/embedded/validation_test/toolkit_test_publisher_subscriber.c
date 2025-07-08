@@ -77,7 +77,7 @@ static void log_UserCallback(const char* timestampUtc,
 static SOPC_SKManager* createSKmanager(void)
 {
     /* Create Service Keys manager and set constant keys */
-    SOPC_SKManager* skm = SOPC_SKManager_Create("", 0);
+    SOPC_SKManager* skm = SOPC_SKManager_Create("1", 0);
     SOPC_ASSERT(NULL != skm && "SOPC_SKManager_Create failed");
     uint32_t nbKeys = 0;
     SOPC_Buffer* keysBuffer =
@@ -258,7 +258,7 @@ void suite_test_publisher_subscriber(int* index)
     SOPC_ASSERT(NULL != skmanager);
 
     SOPC_SK_SecurityGroup_Managers_Init();
-    bool res = SOPC_SK_SecurityGroup_SetSkManager("1", skmanager);
+    bool res = SOPC_SK_SecurityGroup_SetSkManager(skmanager);
     SOPC_ASSERT(res);
 
     const uint32_t nbPublisher = SOPC_PubSubConfiguration_Nb_PubConnection(config);

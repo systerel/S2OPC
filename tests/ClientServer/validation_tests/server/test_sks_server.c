@@ -161,7 +161,7 @@ static SOPC_ReturnStatus Server_SKS_Start(uint32_t nbSkMgr, SOPC_SKManager** skM
 
         if (SOPC_STATUS_OK == status)
         {
-            bool res = SOPC_SK_SecurityGroup_SetSkManager(skMgrArr[i]->securityGroupId, skMgrArr[i]);
+            bool res = SOPC_SK_SecurityGroup_SetSkManager(skMgrArr[i]);
 
             if (!res)
             {

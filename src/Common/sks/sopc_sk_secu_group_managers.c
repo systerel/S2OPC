@@ -94,14 +94,14 @@ void SOPC_SK_SecurityGroup_Managers_Clear(void)
     g_init = false;
 }
 
-bool SOPC_SK_SecurityGroup_SetSkManager(const char* securityGroupId, SOPC_SKManager* skm)
+bool SOPC_SK_SecurityGroup_SetSkManager(SOPC_SKManager* skm)
 {
-    if (!g_init || NULL == securityGroupId || NULL == skm || (uintptr_t) securityGroupId == DICT_TOMBSTONE)
+    if (!g_init || NULL == skm || NULL == skm->securityGroupId || (uintptr_t) skm->securityGroupId == DICT_TOMBSTONE)
     {
         // Do not set a SKManager if the service is not initialized or if parameters are invalid
         return false;
     }
-    char* secuGroupId = SOPC_strdup(securityGroupId);
+    char* secuGroupId = SOPC_strdup(skm->securityGroupId);
     if (NULL == secuGroupId)
     {
         return false;

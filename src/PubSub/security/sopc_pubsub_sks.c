@@ -39,15 +39,15 @@ void SOPC_PubSubSKS_Clear(void)
     SOPC_SK_SecurityGroup_Managers_Clear();
 }
 
-bool SOPC_PubSubSKS_AddSkManager(const char* securityGroupId, SOPC_SKManager* skm)
+bool SOPC_PubSubSKS_AddSkManager(SOPC_SKManager* skm)
 {
-    if (NULL == securityGroupId)
+    if (NULL == skm || NULL == skm->securityGroupId)
     {
         return false;
     }
 
-    SOPC_SKManager* prevSkManager = SOPC_SK_SecurityGroup_GetSkManager(securityGroupId);
-    bool result = SOPC_SK_SecurityGroup_SetSkManager(securityGroupId, skm);
+    SOPC_SKManager* prevSkManager = SOPC_SK_SecurityGroup_GetSkManager(skm->securityGroupId);
+    bool result = SOPC_SK_SecurityGroup_SetSkManager(skm);
     if (result && NULL != prevSkManager)
     {
         // If a previous SK Manager exists, delete it
@@ -142,7 +142,7 @@ static bool mayAddSecurityGroupId(const char* securityGroupId)
 
         if (NULL != skm)
         {
-            result = SOPC_PubSubSKS_AddSkManager(securityGroupId, skm);
+            result = SOPC_PubSubSKS_AddSkManager(skm);
         }
         else
         {

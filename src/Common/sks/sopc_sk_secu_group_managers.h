@@ -49,16 +49,15 @@ void SOPC_SK_SecurityGroup_Managers_Clear(void);
 /**
  * \brief Set the Security Keys Manager for the given security group identifier
  *
- * \param securityGroupId the identifier of the security group to associate the manager with
- *
- * \param skm the manager to use to get keys of the given security group
+ * \param skm the manager to use to get keys of the given security group.
+ *            The security group identifier is stored in the manager and shall not be NULL.
  *
  * \warning if this function is called several times with the same security group identifier,
  *          the previous manager is discarded.
  *
  * \return true if the manager was set successfully, false in case of NULL parameter or OOM.
  */
-bool SOPC_SK_SecurityGroup_SetSkManager(const char* securityGroupId, SOPC_SKManager* skm);
+bool SOPC_SK_SecurityGroup_SetSkManager(SOPC_SKManager* skm);
 
 /**
  * \brief Get the Security Keys Manager associated with the given security group identifier

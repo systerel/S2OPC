@@ -275,7 +275,7 @@ static bool PubSub_SKS_Configure(SOPC_SKS_Local_Configuration* sksConfigArray)
                 }
                 if (SOPC_STATUS_OK == status)
                 {
-                    bool res = SOPC_PubSubSKS_AddSkManager(secuGroupId, skMgr);
+                    bool res = SOPC_PubSubSKS_AddSkManager(skMgr);
                     status = (res) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
                     if (!res)
                     {

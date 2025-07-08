@@ -179,7 +179,7 @@ int main(int argc, char** argv)
 
     SOPC_SKManager* skm = SOPC_SKManager_Create(SECURITY_GROUP_ID, 0);
     SOPC_ASSERT(NULL != skm);
-    bool res = SOPC_PubSubSKS_AddSkManager(SECURITY_GROUP_ID, skm);
+    bool res = SOPC_PubSubSKS_AddSkManager(skm);
     SOPC_ASSERT(res);
 
     // Start without priority, as this test is not time-sensitive

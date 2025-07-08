@@ -166,7 +166,7 @@ static void setupConnection(void)
     SOPC_PubSubSKS_Init();
     g_skmanager = createSKmanager(SECURITY_GROUP_ID);
     SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
-    SOPC_PubSubSKS_AddSkManager(g_skmanager->securityGroupId, g_skmanager);
+    SOPC_PubSubSKS_AddSkManager(g_skmanager);
 
     if (SECU_NONE == gSubSecuMode)
     {

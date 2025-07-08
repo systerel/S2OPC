@@ -683,10 +683,10 @@ static bool Server_SetTargetVariables(const OpcUa_WriteValue* lwv, const int32_t
     return true;
 }
 
-static SOPC_SKManager* createSKmanager(void)
+static SOPC_SKManager* createSKmanager(const char* securityGroupId)
 {
     /* Create Service Keys manager and set constant keys */
-    SOPC_SKManager* skm = SOPC_SKManager_Create("", 0);
+    SOPC_SKManager* skm = SOPC_SKManager_Create(securityGroupId, 0);
     SOPC_ASSERT(NULL != skm && "SOPC_SKManager_Create failed");
     uint32_t nbKeys = 0;
     SOPC_Buffer* keysBuffer =
@@ -753,7 +753,7 @@ static void createManagersFromConfig(const SOPC_PubSubConfiguration* pubSubConfi
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
             const char* securityGroupId = SOPC_WriterGroup_Get_SecurityGroupId(group);
             SOPC_ASSERT(NULL != securityGroupId || SOPC_SecurityMode_None == SOPC_WriterGroup_Get_SecurityMode(group));
-            bool res = SOPC_PubSubSKS_AddSkManager(securityGroupId, createSKmanager());
+            bool res = SOPC_PubSubSKS_AddSkManager(createSKmanager(securityGroupId));
             SOPC_ASSERT(res && "SOPC_PubSubSKS_AddSkManager failed");
         }
     }
@@ -780,7 +780,7 @@ static void setupPubSub(void)
     SOPC_ASSERT(NULL != pSourceConfig && "SOPC_PubSourceVariableConfig_Create failed");
 
     /* PubSub Security Keys configuration */
-    g_skmanager = createSKmanager();
+    g_skmanager = createSKmanager("1");
     SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
     SOPC_PubSubSKS_Init();
     createManagersFromConfig(pPubSubConfig);

@@ -75,19 +75,19 @@ bool SOPC_PubSubSKS_CreateManagersFromConfig(const SOPC_PubSubConfiguration* pub
 
 /**
  * \brief Add the Security Keys Manager to use to retrieve the keys for UADP secure exchanges
- *        with the given security group id.
+ *        with the associated security group id defined in the manager.
  *
  *        This function shall be called once for each security group id that is used in the PubSub configuration.
- *        If the security group id is already used, the previous SK Manager is discarded and cleared.
+ *        If the security group id is already used, the previous SK Manager is discarded and cleared. The security group
+ *        id is defined in the manager and shall not be NULL.
  *
  * \note When using ::SOPC_PubSubSKS_CreateManagersFromConfig, this function should not be needed.
  *
- * \param securityGroupId the security group id to associate the manager with
  * \param skm the Security Keys Manager to use to get keys.
  *
  * \return true if the SK Manager is added successfully, false otherwise.
  */
-bool SOPC_PubSubSKS_AddSkManager(const char* securityGroupId, SOPC_SKManager* skm);
+bool SOPC_PubSubSKS_AddSkManager(SOPC_SKManager* skm);
 
 /**
  * \brief Return security key from a security group id.
