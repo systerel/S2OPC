@@ -51,9 +51,7 @@
       <Reference ReferenceType="HasProperty">i=15217</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">i=14443</Reference>
     </References>
-    <RolePermissions>
-      <RolePermission Permissions="4129">i=15668</RolePermission> <!-- Browse + Read + Call for Observer. For pubsub_server_test.py -->
-    </RolePermissions>
+    <!-- RolePermissions: inherits from NS0 DefaultRolePermissions thus only SecurityAdmin ("secuAdmin" username) is authorized to call this method -->
   </UAMethod>
   <UAVariable NodeId="i=15216" BrowseName="InputArguments" ParentNodeId="i=15215" DataType="i=296" ValueRank="1" ArrayDimensions="0">
     <DisplayName>InputArguments</DisplayName>

@@ -33,7 +33,7 @@
 #define SERVER_KEY_PATH "./server_private/encrypted_server_2k_key.pem"
 #define ENCRYPTED_SERVER_KEY true /* set to false otherwise */
 #define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
-#define USER_PASSWORD_ENV_NAME "TEST_PASSWORD_USER"
+#define USER_PASSWORD_ENV_NAME "TEST_PASSWORD_USER_SECUADMIN"
 #define CLIENT_CERT_PATH "./client_public/client_2k_cert.der"
 #define CLIENT_KEY_PATH "./client_private/encrypted_client_2k_key.pem"
 #define ENCRYPTED_CLIENT_KEY true /* set to false otherwise */

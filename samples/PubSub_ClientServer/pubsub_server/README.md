@@ -10,7 +10,7 @@ Thus it also demonstrates interaction with a server implementing **Security Key 
 `TEST_PASSWORD_PRIVATE_KEY=password ./test_server_sks 1`
 
 ## Launch the sample PubSub server
-`TEST_PASSWORD_PRIVATE_KEY=password TEST_PASSWORD_USER=password ./pubsub_server`
+`TEST_PASSWORD_PRIVATE_KEY=password TEST_PASSWORD_USER_SECUADMIN=1234 ./pubsub_server`
 
 The client will connect to the SKS server to retrieve and distribute keys for Pub/Sub message encryption and decryption.
 One optional input argument may be provided: the URL of the SKS server. Default is set to "opc.tcp://localhost:4843"

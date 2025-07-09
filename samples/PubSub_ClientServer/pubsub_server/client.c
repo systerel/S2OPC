@@ -39,7 +39,7 @@ const char* SESSION_NAME = "S2OPC_SKS_client_session";
 #define CLIENT_SKS_REQ_SECURITY_POLICY SOPC_SecurityPolicy_Basic256Sha256
 
 #define CLIENT_SKS_USER_POLICY_ID "username_Basic256Sha256"
-#define CLIENT_SKS_USERNAME "user1"
+#define CLIENT_SKS_USERNAME "secuAdmin"
 
 #define CLIENT_STARTING_TOKENID 0
 #define CLIENT_REQUESTED_KEY_COUNT 5

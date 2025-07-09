@@ -64,13 +64,18 @@ SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_GetSecurityKeys(const SOPC_Cal
 
     // User shall be authorized to call the GetSecurityKeys method
     const SOPC_User* user = SOPC_CallContext_GetUser(callContextPtr);
-    /* Check if the user is authorized to call the method for this Security Group */
+    /* Check if the user is authorized to call the method for this Security Group
+     *
+     * IMPORTANT NOTE: this shall now be enforced using RolePermissions in the address space
+     *                 by obtaining SecurityAdmin role on session activation
+     *                 (see s2opc_base_sks_origin.xml)
+     */
     if (SOPC_User_IsUsername(user))
-    { /* Type of user should be username */
+    {
         const SOPC_String* username = SOPC_User_GetUsername(user);
-        if (0 != strcmp("user1", SOPC_String_GetRawCString(username)))
+        if (0 != strcmp("secuAdmin", SOPC_String_GetRawCString(username)))
         {
-            /* Only user1 is allowed to call getSecurityKeys() */
+            /* Only secuAdmin is allowed to call getSecurityKeys() */
             return OpcUa_BadUserAccessDenied;
         }
     }

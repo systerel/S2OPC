@@ -483,13 +483,6 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
  * Users authentication and authorization:
  *----------------------------------------*/
 
-/* The toolkit test servers shall pass the UACTT tests. Hence it shall authenticate
- * (ids and passwords can be changed in the UACTT settings/Server Test/Session):
- *  - anonymous users
- *  - user1:password
- * Then it shall accept username:password, but return "access denied".
- * Otherwise it shall be "identity token rejected".
- */
 static SOPC_ReturnStatus authentication_test_sks(SOPC_UserAuthentication_Manager* authn,
                                                  const SOPC_ExtensionObject* token,
                                                  SOPC_UserAuthentication_Status* authenticated)
@@ -504,14 +497,15 @@ static SOPC_ReturnStatus authentication_test_sks(SOPC_UserAuthentication_Manager
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
     SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
+    /* Only secuAdmin is authorized to be able to call the GetSecurityKeys method (restricted by role permissions)*/
     if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
         SOPC_String* username = &userToken->UserName;
-        if (strcmp(SOPC_String_GetRawCString(username), "user1") == 0)
+        if (strcmp(SOPC_String_GetRawCString(username), "secuAdmin") == 0)
         {
             SOPC_ByteString* pwd = &userToken->Password;
-            if (pwd->Length == strlen("password") && memcmp(pwd->Data, "password", strlen("password")) == 0)
+            if (pwd->Length == strlen("1234") && memcmp(pwd->Data, "1234", strlen("1234")) == 0)
             {
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;
             }
@@ -547,7 +541,6 @@ static SOPC_ReturnStatus authentication_test_sks(SOPC_UserAuthentication_Manager
             }
             else
             {
-                /* UACTT expected BadIdentityTokenRejected */
                 *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
                 char* tpr = SOPC_KeyManager_Certificate_GetCstring_SHA1(pUserCert);
                 if (NULL == tpr)
@@ -604,29 +597,18 @@ static SOPC_ReturnStatus authorization_test_sks(SOPC_UserAuthorization_Manager* 
 
     *pbOperationAuthorized = false;
 
-    bool read = true; // Authorize
+    bool read = true; // Authorize all users to read
     bool write = false;
     bool exec = false;
 
-    if (SOPC_User_IsCertificate(pUser))
-    {
-        read = true;
-        exec = true;
-    }
-    else if (SOPC_User_IsUsername(pUser))
+    if (SOPC_User_IsUsername(pUser))
     {
         // Authorize some users to execute methods
         const SOPC_String* username = SOPC_User_GetUsername(pUser);
-        if (strcmp(SOPC_String_GetRawCString(username), "user1") == 0)
+        if (strcmp(SOPC_String_GetRawCString(username), "secuAdmin") == 0)
         {
-            read = true;
             exec = true;
         }
-    }
-    else if (SOPC_User_IsAnonymous(pUser))
-    {
-        // Anonymous has read only rights
-        read = true;
     }
 
     switch (operationType)
