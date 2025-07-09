@@ -10,7 +10,7 @@ Start the device:
 `TEST_PASSWORD_PRIVATE_KEY=password ./device_sks_server_push`
 
 Start the controller:
-`TEST_PASSWORD_PRIVATE_KEY=password ./controller_sks_client`
+`TEST_PASSWORD_PRIVATE_KEY=password TEST_PASSWORD_USER_SECUADMIN=1234 ./controller_sks_client`
 
 The two samples will communicate using 2 security group keys and it is possible to update variable in PublisherVars of one server to see result in SubscriberVars of the peer server (cf. XML Pub/Sub configuration to identify which variables are availables).
 

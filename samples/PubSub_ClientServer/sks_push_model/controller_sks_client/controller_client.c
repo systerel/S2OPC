@@ -32,8 +32,8 @@ const char* SESSION_NAME = "S2OPC_SKS_client_session";
 #define CLIENT_SKS_SECURITY_MODE OpcUa_MessageSecurityMode_SignAndEncrypt
 #define CLIENT_SKS_REQ_SECURITY_POLICY SOPC_SecurityPolicy_Basic256Sha256
 
-#define CLIENT_SKS_USER_POLICY_ID "user"
-#define CLIENT_SKS_USERNAME "user1"
+#define CLIENT_SKS_USER_POLICY_ID "username_Basic256Sha256"
+#define CLIENT_SKS_USERNAME "secuAdmin"
 
 #define CLIENT_STARTING_TOKENID 0
 #define CLIENT_REQUESTED_KEY_COUNT 5
@@ -214,9 +214,7 @@ SOPC_SecureConnection_Config* Client_AddSecureConnectionConfig(const char* endpo
 
     if (SOPC_STATUS_OK == status)
     {
-        // TODO: we shall restore use of username but it is not configured on server side
-        // status = SOPC_SecureConnectionConfig_SetUserName(secureConnConfig, CLIENT_SKS_USER_POLICY_ID, NULL, NULL);
-        status = SOPC_STATUS_OK;
+        status = SOPC_SecureConnectionConfig_SetUserName(secureConnConfig, CLIENT_SKS_USER_POLICY_ID, NULL, NULL);
     }
 
     if (SOPC_STATUS_OK == status)

@@ -2743,6 +2743,7 @@
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=16302</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=16303</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=16305</Reference>
+      <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;i=16134</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;i=15958</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=AcyclicSend_Input</Reference>
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">ns=1;s=DataSetMessageFiltering_Input</Reference>
@@ -49856,6 +49857,39 @@
       <Reference ReferenceType="HasTypeDefinition">i=14416</Reference>
     </References>
   </UAObject>
+  <UAVariable NodeId="ns=1;i=16134" BrowseName="DefaultRolePermissions" DataType="i=96" ValueRank="1" ArrayDimensions="0" AccessLevel="1">
+    <DisplayName>DefaultRolePermissions</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15957</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=16126</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:RoleId>
+              <uax:Identifier>i=15668</uax:Identifier>
+            </uax:RoleId>
+            <uax:Permissions>2145</uax:Permissions>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=16126</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:RoleId>
+              <uax:Identifier>i=15704</uax:Identifier>
+            </uax:RoleId>
+            <uax:Permissions>6177</uax:Permissions>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
   <UAMethod NodeId="ns=1;i=17296" BrowseName="SetSecurityKeys">
     <DisplayName>SetSecurityKeys</DisplayName>
     <References>
@@ -49875,6 +49909,7 @@
       <Reference ReferenceType="HasProperty">i=15964</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">i=11715</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=16134</Reference>
     </References>
   </UAObject>
   <UAVariable NodeId="ns=1;i=15958" BrowseName="NamespaceUri" DataType="String">

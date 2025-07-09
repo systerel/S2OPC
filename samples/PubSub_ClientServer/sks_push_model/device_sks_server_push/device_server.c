@@ -134,8 +134,8 @@ SOPC_ReturnStatus Server_CreateServerConfig(void)
     // Server certificates configuration
     if (SOPC_STATUS_OK == status)
     {
-        // TODO: make copy in build with cmake
-        status = SOPC_ServerConfigHelper_ConfigureFromXML(SERVER_CONFIG_XML, ADDRESS_SPACE_PATH, NULL, NULL);
+        status = SOPC_ServerConfigHelper_ConfigureFromXML(SERVER_CONFIG_XML, ADDRESS_SPACE_PATH, SERVER_USER_CONFIG_XML,
+                                                          NULL);
 
         if (SOPC_STATUS_OK != status)
         {

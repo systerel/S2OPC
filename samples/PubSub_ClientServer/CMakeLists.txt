@@ -130,6 +130,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/controller_pubsub_SKS_client.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/controller_client_config.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/controller_server_config.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/pubsub_server_users_config.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   )
 
 # Device Demo PubSub server with SKS push method

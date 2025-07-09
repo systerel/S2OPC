@@ -29,8 +29,9 @@
 
 /* Server Configuration */
 #define SERVER_CONFIG_XML "controller_server_config.xml"
+#define SERVER_USER_CONFIG_XML "pubsub_server_users_config.xml"
 #define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
-#define USER_PASSWORD_ENV_NAME "TEST_PASSWORD_USER"
+#define USER_PASSWORD_ENV_NAME "TEST_PASSWORD_USER_SECUADMIN"
 #define ADDRESS_SPACE_PATH "./s2opc_pubsub_nodeset.xml"
 #define SLEEP_TIMEOUT 100
 

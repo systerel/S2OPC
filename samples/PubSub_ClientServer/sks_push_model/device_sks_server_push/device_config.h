@@ -29,6 +29,7 @@
 
 /* Server Configuration */
 #define SERVER_CONFIG_XML "device_server_config.xml"
+#define SERVER_USER_CONFIG_XML "pubsub_server_users_config.xml"
 #define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
 #define ADDRESS_SPACE_PATH "./s2opc_pubsub_nodeset_with_SKS_push.xml"
 #define SLEEP_TIMEOUT 100

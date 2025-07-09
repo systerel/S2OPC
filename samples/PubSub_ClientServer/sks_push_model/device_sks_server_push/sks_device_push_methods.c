@@ -59,32 +59,34 @@ SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_SetSecurityKeys(const SOPC_Cal
     printf("Enter method SetSecurityKeys with param SecurityGroupId = %s\n",
            SOPC_String_GetRawCString(&inputArgs[0].Value.String));
 
-    // SecureChannel shall use encryption to keep the provided keys secret
+    // SecureChannel shall use encryption to keep the provided keys secret, refuse possibly compromised keys update
     OpcUa_MessageSecurityMode msm = SOPC_CallContext_GetSecurityMode(callContextPtr);
     if (OpcUa_MessageSecurityMode_SignAndEncrypt != msm)
     {
         return OpcUa_BadSecurityModeInsufficient;
     }
 
-    // TODO: add username management in server
-    /*
-    // User shall be authorized to call the GetSecurityKeys method
+    // User shall be authorized to call the SetSecurityKeys method
     const SOPC_User* user = SOPC_CallContext_GetUser(callContextPtr);
-    // Check if the user is authorized to call the method for this Security Group
+    /* Check if the user is authorized to call the method for this Security Group
+     *
+     * IMPORTANT NOTE: this shall now be enforced using RolePermissions in the address space
+     *                 by obtaining SecurityAdmin role on session activation
+     *                 (see s2opc_base_sks_push_origin.xml)
+     */
     if (SOPC_User_IsUsername(user))
-    { // Type of user should be username
+    {
         const SOPC_String* username = SOPC_User_GetUsername(user);
-        if (0 != strcmp("user1", SOPC_String_GetRawCString(username)))
+        if (0 != strcmp("secuAdmin", SOPC_String_GetRawCString(username)))
         {
-            // Only user1 is allowed to call getSecurityKeys()
+            // Only secuAdmin is allowed to call SetSecurityKeys()
             return OpcUa_BadUserAccessDenied;
         }
     }
-    else // TODO: accept particular X509 thumbprint
+    else
     {
         return OpcUa_BadUserAccessDenied;
     }
-    */
 
     /* Check Input Object */
 
