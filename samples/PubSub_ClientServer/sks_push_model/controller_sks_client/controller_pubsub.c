@@ -154,7 +154,7 @@ static bool PubSub_SKS_Configure(SOPC_SKS_Local_Configuration* sksConfigArray)
     {
         return true;
     }
-    else if (!g_isSks)
+    else if (!g_isSks || 0 == SOPC_Array_Size(sksConfigArray->sksArray))
     {
         return false;
     }
@@ -424,15 +424,8 @@ SOPC_ReturnStatus PubSub_Configure(void)
         }
     }
 
-    if (SOPC_STATUS_OK == status && g_isSecurity)
+    if (SOPC_STATUS_OK == status && g_isSecurity && g_isSks)
     {
-        SOPC_ASSERT(UINT32_MAX > SOPC_Array_Size(sksConfigArray->sksArray));
-        uint32_t nbSks = (uint32_t) SOPC_Array_Size(sksConfigArray->sksArray);
-        if (!g_isSks)
-        {
-            SOPC_ASSERT(0 == nbSks);
-            nbSks = 1;
-        }
         // Configure the SKS for both the PubSub applications of controller
         // and to push the security keys to devices
         bool sksOK = PubSub_SKS_Configure(sksConfigArray);

@@ -57,13 +57,8 @@ endfunction()
 
 # Function to add a validation test using the pubsub server code
 # Note: no tap-wrap used in this case, as caller is directly calling TapLogger (python script).
-function(s2opc_pubsub_server_validation_test name pubsub_server_name sks_name sks_port)
+function(s2opc_pubsub_server_validation_test name pubsub_server_name static_flag sks_name sks_port)
   set(test_name "validation::${name}")
-  if(PUBSUB_STATIC_CONFIG)
-    set(test_server_static "--static")
-  else()
-    set(test_server_static "")
-  endif()
 
   if(NOT S2OPC_NANO_PROFILE)
     # Note: use absolute path for scripts to allow ctest to be run from another path
@@ -74,7 +69,7 @@ function(s2opc_pubsub_server_validation_test name pubsub_server_name sks_name sk
       --sks-cmd $<TARGET_FILE:${sks_name}>
       --sks-url "opc.tcp://localhost:${sks_port}"
       "--publisher-cmd" $<TARGET_FILE:${pubsub_server_name}>
-      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}.py" "--tap" "${name}.tap" ${test_server_static})
+      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}.py" "--tap" "${name}.tap" ${static_flag})
   endif()
 
 endfunction()
@@ -269,10 +264,15 @@ add_test(NAME "validation::ll_multi_pub_sub_test"
 set_tests_properties("validation::ll_multi_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_multi_pub_sub_test.tap")
 
 if(NOT S2OPC_PUBSUB_ONLY)
-  # These tests require both PubSub and ClientServer libraries
+  # This test requires both PubSub and ClientServer libraries
+  if(PUBSUB_STATIC_CONFIG)
+     set(test_server_static "--static")
+  else()
+     set(test_server_static "")
+  endif()
 
-  s2opc_pubsub_server_validation_test("pubsub_server_test" pubsub_server test_server_sks 4841)
-  s2opc_pubsub_server_validation_test("controller_device_pubsub_test" controller_sks_client device_sks_server_push 4842)
+  s2opc_pubsub_server_validation_test("pubsub_server_test" pubsub_server "${test_server_static}" test_server_sks 4841)
+  s2opc_pubsub_server_validation_test("controller_device_pubsub_test" controller_sks_client "" device_sks_server_push 4842)
 
   # Test check signature failure callback is called when no keys are available
   add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_no_keys"

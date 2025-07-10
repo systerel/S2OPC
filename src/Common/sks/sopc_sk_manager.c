@@ -532,25 +532,20 @@ SOPC_SKManager* SOPC_SKManager_Create(const char* securityGroupId, uintptr_t use
     skm->securityGroupId = SOPC_strdup(securityGroupId);
     skm->userData = userData;
     skm->data = SOPC_Calloc(1, sizeof(SOPC_SKManager_DefaultData));
-    if (NULL == skm->securityGroupId || NULL == skm->data)
+    SOPC_Array* keys =
+        SOPC_Array_Create(sizeof(SOPC_ByteString), SOPC_SK_MANAGER_DEFAULT_INITIAL_SIZE, SOPC_ByteString_ClearAux);
+
+    if (NULL == skm->securityGroupId || NULL == skm->data || NULL == keys)
     {
         SOPC_Free(skm->securityGroupId);
         SOPC_Free(skm->data);
         SOPC_Free(skm);
+        SOPC_Array_Delete(keys);
         return NULL;
     }
 
     SOPC_SKManager_DefaultData* data = (SOPC_SKManager_DefaultData*) skm->data;
-
-    data->Keys =
-        SOPC_Array_Create(sizeof(SOPC_ByteString), SOPC_SK_MANAGER_DEFAULT_INITIAL_SIZE, SOPC_ByteString_ClearAux);
-
-    if (NULL == data->Keys)
-    {
-        SOPC_Free(skm->data);
-        SOPC_Free(skm);
-        return NULL;
-    }
+    data->Keys = keys;
 
     SOPC_Mutex_Initialization(&data->mutex);
     data->CurrentTokenId = 0;

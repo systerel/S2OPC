@@ -59,7 +59,6 @@ static int32_t pubsubOnline = 0;
 static SOPC_PubSubConfiguration* g_pPubSubConfig = NULL;
 static SOPC_SubTargetVariableConfig* g_pTargetConfig = NULL;
 static SOPC_PubSourceVariableConfig* g_pSourceConfig = NULL;
-static bool g_isSecurity = false;
 static bool g_isSks = false;
 
 /* Initialise and start SK Scheduler and SK Manager if security is needed */
@@ -95,15 +94,6 @@ static void Server_GapInDsmSnCb(SOPC_Conf_PublisherId pubId,
 
 static bool PubSub_SKS_Configure(SOPC_PubSubConfiguration* pPubSubConfig)
 {
-    if (!g_isSecurity)
-    {
-        return true;
-    }
-    else if (!g_isSks)
-    {
-        return false;
-    }
-
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     // Create the SK managers for each security group from the configuration
@@ -184,15 +174,13 @@ SOPC_ReturnStatus PubSub_Configure(void)
     }
 
     /* at least one message with encrypt and/or sign security  */
-    g_isSecurity = true;
-    g_isSks = true;
 
-    if (SOPC_STATUS_OK == status && g_isSecurity)
+    if (SOPC_STATUS_OK == status)
     {
         // Configure the SKS for both the PubSub applications of controller
         // and to push the security keys to devices
-        bool sksOK = PubSub_SKS_Configure(pPubSubConfig);
-        status = sksOK ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        g_isSks = PubSub_SKS_Configure(pPubSubConfig);
+        status = g_isSks ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -219,11 +207,7 @@ bool PubSub_IsRunning(void)
 
 static bool PubSub_SKS_Start(void)
 {
-    if (!g_isSecurity)
-    {
-        return true;
-    }
-    else if (!g_isSks)
+    if (!g_isSks)
     {
         return false;
     }

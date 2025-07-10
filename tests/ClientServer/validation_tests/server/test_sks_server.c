@@ -89,6 +89,11 @@ SOPC_SKscheduler* skScheduler = NULL;
 
 static SOPC_ReturnStatus Server_SKS_Start(uint32_t nbSkMgr, SOPC_SKManager** skMgrArr)
 {
+    if (nbSkMgr == 0 || NULL == skMgrArr)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     /* Init SK Scheduler */
