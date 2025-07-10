@@ -259,32 +259,6 @@ add_test(NAME "validation::pubsub_sign_failure_callback"
   $<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_security.xml)
 set_tests_properties("validation::pubsub_sign_failure_callback" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_sign_failure_callback.tap;CK_EXP_RET_CODE=125")
 
-# Test check signature failure callback is called when no keys are available
-add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_no_keys"
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
-  "--sks-cmd" $<TARGET_FILE:test_server_sks>
-  "--sks-url" "opc.tcp://localhost:4841"
-  "--kill-publisher"
-  "--publisher-cmd" $<TARGET_FILE:pubsub_server>
-  $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_security.xml)
-set_tests_properties("validation::pubsub_check_sign_failure_callback_sub_no_keys" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_check_sign_failure_callback_sub_no_keys.tap;CK_EXP_RET_CODE=125")
-
-# Test check signature failure callback is called when keys are available but do not match the publisher ones
-add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_unexpected_keys"
-  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
-  "--sks-cmd" $<TARGET_FILE:test_server_sks>
-  "--sks-url" "opc.tcp://localhost:4841"
-  "--kill-publisher"
-  "--publisher-cmd" $<TARGET_FILE:pubsub_server>
-  $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_security.xml "true")
-set_tests_properties("validation::pubsub_check_sign_failure_callback_sub_unexpected_keys" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_check_sign_failure_callback_sub_unexpected_keys.tap;CK_EXP_RET_CODE=125")
-
 add_test(NAME "validation::ll_multi_pub_sub_test"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
@@ -295,9 +269,36 @@ add_test(NAME "validation::ll_multi_pub_sub_test"
 set_tests_properties("validation::ll_multi_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_multi_pub_sub_test.tap")
 
 if(NOT S2OPC_PUBSUB_ONLY)
-  # This test requires both PubSub and ClientServer libraries
+  # These tests require both PubSub and ClientServer libraries
+
   s2opc_pubsub_server_validation_test("pubsub_server_test" pubsub_server test_server_sks 4841)
   s2opc_pubsub_server_validation_test("controller_device_pubsub_test" controller_sks_client device_sks_server_push 4842)
+
+  # Test check signature failure callback is called when no keys are available
+  add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_no_keys"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "--sks-cmd" $<TARGET_FILE:test_server_sks>
+    "--sks-url" "opc.tcp://localhost:4841"
+    "--kill-publisher"
+    "--publisher-cmd" $<TARGET_FILE:pubsub_server>
+    $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_security.xml)
+  set_tests_properties("validation::pubsub_check_sign_failure_callback_sub_no_keys" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_check_sign_failure_callback_sub_no_keys.tap;CK_EXP_RET_CODE=125")
+
+  # Test check signature failure callback is called when keys are available but do not match the publisher ones
+  add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_unexpected_keys"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "--sks-cmd" $<TARGET_FILE:test_server_sks>
+    "--sks-url" "opc.tcp://localhost:4841"
+    "--kill-publisher"
+    "--publisher-cmd" $<TARGET_FILE:pubsub_server>
+    $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_security.xml "true")
+  set_tests_properties("validation::pubsub_check_sign_failure_callback_sub_unexpected_keys" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_check_sign_failure_callback_sub_unexpected_keys.tap;CK_EXP_RET_CODE=125")
 endif()
 
 ## S2OPC PubSub interoperability tests ##
