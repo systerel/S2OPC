@@ -51,10 +51,12 @@
 #     - test-zephyr
 #########################################################
 
-# Ensures job failure when intermediate script line fails
+# 1. Ensures job failure when intermediate script line fails
 # (see gitlab issues #25394 and #383355)
+# 2. Ensure isolated network are used for each job
 variables:
   FF_ENABLE_BASH_EXIT_CODE_CHECK: "true"
+  FF_NETWORK_PER_BUILD: "true"
 
 .nominal_build_variables: &nominal_build_variables
   S2OPC_NODE_MANAGEMENT: 1
