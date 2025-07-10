@@ -1205,6 +1205,7 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
             SOPC_Free(security->groupKeys);
             security->groupKeys = keys;
             security->sequenceNumber = 0;
+            security->sequenceNumberSet = false;
         }
         else
         {

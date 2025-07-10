@@ -672,9 +672,11 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     {
         if (NULL != security)
         {
+            uint32_t prevTokenId = 0;
             // Update keys
             if (NULL != security->groupKeys)
             {
+                prevTokenId = security->groupKeys->tokenId;
                 SOPC_PubSubSKS_Keys_Delete(security->groupKeys);
                 SOPC_Free(security->groupKeys);
             }
@@ -686,6 +688,13 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
                 security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
                 if (NULL != security->msgNonceRandom)
                 {
+                    if (security->groupKeys->tokenId != prevTokenId)
+                    {
+                        // Spec v1.05 part 14 section 7.2.4.4.3.2:
+                        // "The sequence number is reset to 1 after the key and SecurityTokenId
+                        //  are updated in the Publisher."
+                        pubSchedulerCtx.sequenceNumber = 1;
+                    }
                     security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
                     pubSchedulerCtx.sequenceNumber++;
                 }
