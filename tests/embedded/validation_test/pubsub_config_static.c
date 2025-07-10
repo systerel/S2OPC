@@ -33,6 +33,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            double interval,
                                                            int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode,
+                                                           const char* securityGroupId,
                                                            const char* mqttTopic,
                                                            const SOPC_Pubsub_MessageEncodingType encoding,
                                                            const bool isFixedBufferSize)
@@ -42,6 +43,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
     SOPC_WriterGroup_Set_Version(group, groupVersion);
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
+    SOPC_WriterGroup_Set_SecurityGroupId(group, securityGroupId);
     SOPC_WriterGroup_Set_MqttTopic(group, mqttTopic);
     SOPC_WriterGroup_Set_Encoding(group, encoding);
     const SOPC_WriterGroup_Options writerGroupOptions = {.useFixedSizeBuffer = isFixedBufferSize};
@@ -103,6 +105,7 @@ static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
 static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection* connection,
                                                            uint16_t index,
                                                            SOPC_SecurityMode_Type securityMode,
+                                                           const char* securityGroupId,
                                                            uint16_t groupId,
                                                            uint32_t groupVersion,
                                                            SOPC_Conf_PublisherId publisherId,
@@ -112,6 +115,7 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
     SOPC_ASSERT(readerGroup != NULL);
     SOPC_ReaderGroup_Set_SecurityMode(readerGroup, securityMode);
+    SOPC_ReaderGroup_Set_SecurityGroupId(readerGroup, securityGroupId);
     SOPC_ReaderGroup_Set_GroupVersion(readerGroup, groupVersion);
     SOPC_ReaderGroup_Set_GroupId(readerGroup, groupId);
     SOPC_ASSERT(nbDataSets < 0x100);
@@ -218,8 +222,9 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Offest = -1 us
         // mqttTopic = NULL
         // encoding = SOPC_MessageEncodeUADP
+        // securityGroupId =
         writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 200.000000, -1, SOPC_SecurityMode_None,
-                                                        NULL, SOPC_MessageEncodeUADP, 0);
+                                                        "", NULL, SOPC_MessageEncodeUADP, 0);
         alloc = NULL != writerGroup;
     }
 
@@ -272,8 +277,9 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Offest = -1 us
         // mqttTopic = NULL
         // encoding = SOPC_MessageEncodeUADP
+        // securityGroupId =
         writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 100.000000, -1, SOPC_SecurityMode_None,
-                                                        NULL, SOPC_MessageEncodeUADP, 0);
+                                                        "", NULL, SOPC_MessageEncodeUADP, 0);
         alloc = NULL != writerGroup;
     }
 
@@ -326,9 +332,11 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupId = 14
         // GroupVersion = 1
         // PubId = 123
+        // securityGroupId =
         // mqttTopic = NULL
         SOPC_Conf_PublisherId pubId = {.type = SOPC_UInteger_PublisherId, .data.uint = 123};
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, SOPC_SecurityMode_None, 14, 1, pubId, 2, NULL);
+        readerGroup =
+            SOPC_PubSubConfig_SetSubMessageAt(connection, 0, SOPC_SecurityMode_None, "", 14, 1, pubId, 2, NULL);
         alloc = NULL != readerGroup;
     }
 
