@@ -179,12 +179,12 @@ uint32_t SOPC_SKManager_AddKeys(SOPC_SKManager* skm, SOPC_ByteString* Keys, uint
  *  \param StartingTokenId    The current token is requested by passing 0. It can be a SecurityTokenId from the past to
  * get a key valid for previously sent messages
  *  \param NbRequestedToken   The number of requested keys tokens which should be returned in the response
- *  \param SecurityPolicyUri  The URI for the set of algorithms and key lengths used to secure the messages
- *  \param FirstTokenId       The SecurityTokenId of the first key in the array of returned keys.
- *  \param Keys               An ordered list of keys that are used when the KeyLifetime elapses
- *  \param NbKeys             The number of keys tokens in \p Keys array
- *  \param TimeToNextKey      The time, in milliseconds, before the CurrentKey is expected to expire
- *  \param KeyLifetime        The lifetime of a key in milliseconds
+ *  \param[out] SecurityPolicyUri  The URI for the set of algorithms and key lengths used to secure the messages
+ *  \param[out] FirstTokenId       The SecurityTokenId of the first key in the array of returned keys.
+ *  \param[out] Keys               An ordered list of keys that are used when the KeyLifetime elapses
+ *  \param[out] NbKeys             The number of keys tokens in \p Keys array
+ *  \param[out] TimeToNextKey      The time, in milliseconds, before the CurrentKey is expected to expire
+ *  \param[out] KeyLifetime        The lifetime of a key in milliseconds
  *  \return                   SOPC_STATUS_OK if keys are get
  */
 SOPC_ReturnStatus SOPC_SKManager_GetKeys(SOPC_SKManager* skm,
