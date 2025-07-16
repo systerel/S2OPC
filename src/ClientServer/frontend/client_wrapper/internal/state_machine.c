@@ -689,7 +689,7 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM)
 SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machine* pSM,
                                                                SOPC_StaMacNotification_Fct* pNotificationCb)
 {
-    if (NULL == pSM || NULL == pNotificationCb)
+    if (NULL == pSM)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -698,7 +698,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machi
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (NULL != pSM->pCbkNotification)
+    if (NULL != pNotificationCb && NULL != pSM->pCbkNotification)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
