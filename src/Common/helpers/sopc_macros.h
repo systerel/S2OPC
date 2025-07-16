@@ -38,6 +38,12 @@
 #define SOPC_GCC_DIAGNOSTIC_RESTORE
 #endif
 
+#if defined(__GNUC__) && (__GNUC__ >= 6)
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_POTENTIAL_NULL_POINTER_DEREF _Pragma("GCC diagnostic ignored \"-Wnull-dereference\"")
+#else
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_POTENTIAL_NULL_POINTER_DEREF
+#endif
+
 #if defined(__GNUC__) && (__GNUC__ > 4) && !defined(__clang__)
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER _Pragma("GCC diagnostic ignored \"-Wdiscarded-qualifiers\"")
 #elif defined(__clang__)
