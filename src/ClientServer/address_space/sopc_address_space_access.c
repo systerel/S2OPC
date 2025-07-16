@@ -125,13 +125,13 @@ static void SOPC_InternalAddressSpaceAccess_FreeOperation(uint32_t id, uintptr_t
     switch (op->operation)
     {
     case SOPC_ADDSPACE_WRITE:
-        SOPC_EncodeableObject_Delete(&OpcUa_WriteValue_EncodeableType, &op->param1);
-        SOPC_EncodeableObject_Delete(&OpcUa_WriteValue_EncodeableType, &op->param2);
+        SOPC_EncodeableObject_Delete(&OpcUa_WriteValue_EncodeableType, (void**) &op->param1);
+        SOPC_EncodeableObject_Delete(&OpcUa_WriteValue_EncodeableType, (void**) &op->param2);
         break;
     case SOPC_ADDSPACE_CHANGE_NODE:
-        SOPC_NodeId_Clear((SOPC_NodeId*) op->param1);
-        SOPC_Free(op->param1);
-        SOPC_ASSERT(NULL == op->param2);
+        SOPC_NodeId_Clear((SOPC_NodeId*) op->param2);
+        SOPC_Free((void*) op->param2);
+        op->param2 = (uintptr_t) NULL;
         break;
     default:
         SOPC_ASSERT(false);
@@ -380,8 +380,8 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
         OpcUa_WriteValue_Initialize(prevWV);
         OpcUa_WriteValue_Initialize(newWV);
         op->operation = SOPC_ADDSPACE_WRITE;
-        op->param1 = prevWV;
-        op->param2 = newWV;
+        op->param1 = (uintptr_t) prevWV;
+        op->param2 = (uintptr_t) newWV;
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -572,23 +572,51 @@ static SOPC_StatusCode check_valid_params_and_state(SOPC_AddressSpaceAccess* add
 }
 
 // Set reciprocal reference from parent and add node to address space
-static SOPC_ReturnStatus add_node_and_set_reciprocal_reference(SOPC_AddressSpace* addSpace,
+static SOPC_ReturnStatus add_node_and_set_reciprocal_reference(SOPC_AddressSpaceAccess* addSpaceAccess,
                                                                const SOPC_NodeId* parentNodeId,
                                                                const SOPC_NodeId* childNodeId,
                                                                SOPC_AddressSpace_Node* newNode,
                                                                const SOPC_NodeId* refTypeId)
 {
-    SOPC_ReturnStatus status =
-        SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(addSpace, parentNodeId, childNodeId, refTypeId);
+    SOPC_ReturnStatus status = SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(addSpaceAccess->addSpaceRef,
+                                                                                  parentNodeId, childNodeId, refTypeId);
     // Add node to address space
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_AddressSpace_Append(addSpace, newNode);
+        status = SOPC_AddressSpace_Append(addSpaceAccess->addSpaceRef, newNode);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_ASSERT(SOPC_STATUS_OUT_OF_MEMORY == status);
             // Rollback reference added in parent
-            SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(addSpace, parentNodeId);
+            SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(addSpaceAccess->addSpaceRef, parentNodeId);
+        }
+        else
+        {
+            // Record operation if required (node added)
+            if (addSpaceAccess->recordOperations)
+            {
+                SOPC_ASSERT(NULL != addSpaceAccess->operations);
+                SOPC_AddressSpaceAccessOperation* op = SOPC_Calloc(1, sizeof(*op));
+                SOPC_NodeId* nodeIdCopy = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+                status = SOPC_NodeId_Copy(nodeIdCopy, childNodeId);
+                const void* addedOp = NULL;
+                if (NULL != op && SOPC_STATUS_OK == status && NULL != nodeIdCopy)
+                {
+                    addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, (uintptr_t) op);
+                }
+                if (NULL != addedOp)
+                {
+                    op->operation = SOPC_ADDSPACE_CHANGE_NODE;
+                    op->param1 = true; // true for add
+                    op->param2 = (uintptr_t) nodeIdCopy;
+                }
+                else
+                {
+                    SOPC_Free(op);
+                    SOPC_NodeId_Clear(nodeIdCopy);
+                    SOPC_Free(nodeIdCopy);
+                }
+            }
         }
     }
 
@@ -641,8 +669,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
 
     if (SOPC_STATUS_OK == status)
     {
-        status = add_node_and_set_reciprocal_reference(addSpaceAccess->addSpaceRef, &parentNodeId->NodeId, newNodeId,
-                                                       newNode, refToParentTypeId);
+        status = add_node_and_set_reciprocal_reference(addSpaceAccess, &parentNodeId->NodeId, newNodeId, newNode,
+                                                       refToParentTypeId);
         // reset retCode to default failure value
         retCode = OpcUa_BadOutOfMemory;
     }
@@ -711,8 +739,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
     {
         // reset retCode to default failure value
         retCode = OpcUa_BadOutOfMemory;
-        status = add_node_and_set_reciprocal_reference(addSpaceAccess->addSpaceRef, &parentNodeId->NodeId, newNodeId,
-                                                       newNode, refToParentTypeId);
+        status = add_node_and_set_reciprocal_reference(addSpaceAccess, &parentNodeId->NodeId, newNodeId, newNode,
+                                                       refToParentTypeId);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -787,8 +815,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* a
     {
         // reset retCode to default failure value
         retCode = OpcUa_BadOutOfMemory;
-        status = add_node_and_set_reciprocal_reference(addSpaceAccess->addSpaceRef, &parentNodeId->NodeId, newNodeId,
-                                                       newNode, refToParentTypeId);
+        status = add_node_and_set_reciprocal_reference(addSpaceAccess, &parentNodeId->NodeId, newNodeId, newNode,
+                                                       refToParentTypeId);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -1171,18 +1199,18 @@ static void SOPC_AddressSpaceAccess_DeleteNodeOnly(const SOPC_AddressSpaceAccess
         if (SOPC_STATUS_OK == status && NULL != nodeIdCopy)
         {
             addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, (uintptr_t) op);
-            if (NULL != addedOp)
-            {
-                op->operation = SOPC_ADDSPACE_CHANGE_NODE;
-                op->param1 = false;
-                SOPC_NodeId* nodeIdCopy = SOPC_Calloc(1, sizeof(SOPC_NodeId));
-                SOPC_ASSERT(SOPC_STATUS_OK == SOPC_NodeId_Copy(nodeIdCopy, nodeId));
-                op->param2 = nodeIdCopy;
-            }
-            else
-            {
-                SOPC_Free(op);
-            }
+        }
+        if (NULL != addedOp)
+        {
+            op->operation = SOPC_ADDSPACE_CHANGE_NODE;
+            op->param1 = false; // false for delete
+            op->param2 = (uintptr_t) nodeIdCopy;
+        }
+        else
+        {
+            SOPC_Free(op);
+            SOPC_NodeId_Clear(nodeIdCopy);
+            SOPC_Free(nodeIdCopy);
         }
     }
 

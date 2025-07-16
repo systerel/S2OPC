@@ -50,7 +50,6 @@
 
 bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
-SOPC_AddressSpaceAccess* addSpaceAccess = NULL;
 
 #define InputArguments_BrowseName "InputArguments"
 
@@ -61,9 +60,6 @@ void SOPC_AddressSpace_Check_Configured(void)
     if (sopc_addressSpace_configured)
     {
         SOPC_ASSERT(NULL != address_space_bs__nodes);
-        // TODO: UNINIT !
-        addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, false);
-        SOPC_ASSERT(NULL != addSpaceAccess);
     }
 }
 
@@ -78,13 +74,7 @@ void address_space_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-void address_space_bs__address_space_bs_UNINITIALISATION(void)
-{
-    if (NULL != addSpaceAccess)
-    {
-        SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
-    }
-}
+void address_space_bs__address_space_bs_UNINITIALISATION(void) {}
 
 static void generate_notifs_after_address_space_access(SOPC_SLinkedList* operations)
 {
@@ -99,11 +89,11 @@ static void generate_notifs_after_address_space_access(SOPC_SLinkedList* operati
         {
         case SOPC_ADDSPACE_WRITE:
             SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_DATA_CHANGED, 0,
-                                         (uintptr_t) operation->param1, (uintptr_t) operation->param2);
+                                         operation->param1, operation->param2);
             break;
         case SOPC_ADDSPACE_CHANGE_NODE:
             SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_NODE_CHANGED, 0,
-                                         (uintptr_t) operation->param1, (uintptr_t) operation->param2);
+                                         operation->param1, operation->param2);
             break;
         default:
             SOPC_ASSERT(false);
@@ -243,12 +233,20 @@ void address_space_bs__addNode_AddressSpace_Variable(
     SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
     SOPC_ASSERT(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
                 &OpcUa_VariableAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
     SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddVariableNode(
         addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
         address_space_bs__p_browseName,
         (const OpcUa_VariableAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value,
         address_space_bs__p_typeDefId);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
+
+    if (SOPC_IsGoodStatus(retCode))
+    {
+        // Trigger notification on MI on the added nodes
+        generate_notifs_after_address_space_access(SOPC_AddressSpaceAccess_GetOperations(addSpaceAccess));
+    }
+    SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 
 void address_space_bs__addNode_AddressSpace_Object(
@@ -266,12 +264,20 @@ void address_space_bs__addNode_AddressSpace_Object(
     SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
     SOPC_ASSERT(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
                 &OpcUa_ObjectAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
     SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddObjectNode(
         addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
         address_space_bs__p_browseName,
         (const OpcUa_ObjectAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value,
         address_space_bs__p_typeDefId);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
+
+    if (SOPC_IsGoodStatus(retCode))
+    {
+        // Trigger notification on MI on the added nodes
+        generate_notifs_after_address_space_access(SOPC_AddressSpaceAccess_GetOperations(addSpaceAccess));
+    }
+    SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 
 void address_space_bs__addNode_AddressSpace_Method(
@@ -288,11 +294,19 @@ void address_space_bs__addNode_AddressSpace_Method(
     SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
     SOPC_ASSERT(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
                 &OpcUa_MethodAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
     SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddMethodNode(
         addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
         address_space_bs__p_browseName,
         (const OpcUa_MethodAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
+
+    if (SOPC_IsGoodStatus(retCode))
+    {
+        // Trigger notification on MI on the added nodes
+        generate_notifs_after_address_space_access(SOPC_AddressSpaceAccess_GetOperations(addSpaceAccess));
+    }
+    SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 
 void address_space_bs__addNode_check_valid_node_attributes_type(
@@ -346,32 +360,6 @@ void address_space_bs__addNode_check_valid_node_attributes_type(
     else
     {
         *address_space_bs__bres = false;
-    }
-}
-
-void address_space_bs__gen_addNode_event(const constants__t_NodeId_i address_space_bs__p_newNodeId)
-{
-    SOPC_ASSERT(NULL != address_space_bs__p_newNodeId);
-    SOPC_NodeId* nodeIdCopy = SOPC_Calloc(1, sizeof(*nodeIdCopy));
-    if (NULL != nodeIdCopy)
-    {
-        SOPC_NodeId_Initialize(nodeIdCopy);
-        SOPC_ReturnStatus status = SOPC_NodeId_Copy(nodeIdCopy, address_space_bs__p_newNodeId);
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_NODE_CHANGED, 0, (uintptr_t) true,
-                                   (uintptr_t) nodeIdCopy);
-        }
-        else
-        {
-            SOPC_Free(nodeIdCopy);
-            nodeIdCopy = NULL;
-        }
-    }
-    if (NULL == nodeIdCopy)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "address_space_bs__gen_addNode_event: NodeId allocation or copy issue");
     }
 }
 

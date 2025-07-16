@@ -791,11 +791,6 @@ OPERATIONS
                 // Unsupported for now => returns invalid node class
                 sc_addnode := e_sc_bad_node_class_invalid
             END
-            ;
-            IF sc_addnode = e_sc_ok
-            THEN
-                gen_addNode_event(p_newNodeId)
-            END
         ELSE
             sc_addnode := e_sc_bad_node_attributes_invalid
         END

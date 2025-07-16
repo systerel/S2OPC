@@ -1647,15 +1647,5 @@ OPERATIONS
             )
         )
     END
-    ;
 
-    /* Generates an internal event for subscriptions */
-    gen_addNode_event(p_newNodeId) =
-    PRE
-        p_newNodeId : t_NodeId_i &
-        p_newNodeId : t_NodeId &
-        p_newNodeId : ran(a_NodeId)
-    THEN
-        skip
-    END
 END

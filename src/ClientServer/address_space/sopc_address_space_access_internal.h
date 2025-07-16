@@ -69,8 +69,8 @@ typedef enum
 typedef struct _SOPC_AddressSpaceAccessOperation
 {
     SOPC_AddressSpaceAccessOperationEnum operation;
-    void* param1;
-    void* param2;
+    uintptr_t param1;
+    uintptr_t param2;
 } SOPC_AddressSpaceAccessOperation;
 
 #endif /* SOPC_ADDRESS_SPACE_ACCESS_INTERNAL_H_ */

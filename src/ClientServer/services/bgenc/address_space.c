@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 02/04/2025 07:55:15
+ Date                 : 21/07/2025 16:06:22
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -784,9 +784,6 @@ void address_space__addNode_AddressSpace(
          }
          else {
             *address_space__sc_addnode = constants_statuscodes_bs__e_sc_bad_node_class_invalid;
-         }
-         if (*address_space__sc_addnode == constants_statuscodes_bs__e_sc_ok) {
-            address_space_authorization__gen_addNode_event(address_space__p_newNodeId);
          }
       }
       else {
