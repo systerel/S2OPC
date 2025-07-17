@@ -199,5 +199,9 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_ns0_single.xml', [],
                       'ns0.xml')
 
+    def test_sanitize_parentnodeid_cases(self):
+        self.run_test('test_sanitize_parentnodeid_cases.xml', [],
+                      'ns0.xml', 'TestParentNodeIdCases.xml')
+
 if __name__ == '__main__':
     unittest.main()

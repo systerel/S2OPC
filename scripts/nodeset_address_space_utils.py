@@ -861,7 +861,7 @@ class NodesetMerger(NSFinder):
             if len(refs_nodes) < 1:
                 print('Sanitize: child Node without references (Node {} has an attribute ParentNodeId but no reference)'
                       .format(_get_node_id(node)), file=sys.stderr)
-                ns_to_show.add(self._get_namespace_index(node))
+                ns_to_show.add(self._get_namespace_index(_get_node_id(node)))
                 # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
                 del node.attrib['ParentNodeId']
                 continue
@@ -871,7 +871,7 @@ class NodesetMerger(NSFinder):
             if not any(self.__get_unaliased_nodeid_from_text(parent) == pnid for parent in parent_refs):
                 print('Sanitize: child Node without reference to its parent (Node {}, which parent is {})'
                       .format(_get_node_id(node), pnid), file=sys.stderr)
-                ns_to_show.add(self._get_namespace_index(node))
+                ns_to_show.add(self._get_namespace_index(_get_node_id(node)))
                 # Type is unknown in fact
                 #refs.append(self._create_elem('Reference', {'ReferenceType': 'HasComponent', 'IsForward': 'false'}, text=pnid))
                 # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd">
+  <NamespaceUris>
+    <Uri>http://example.org/test/parentnodeid</Uri>
+    <Uri>http://example.org/test/parentnodeid2</Uri>
+  </NamespaceUris>
+  <Models>
+    <Model ModelUri="http://example.org/test/parentnodeid" Version="1.0.0" PublicationDate="2024-06-01T00:00:00Z">
+      <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.05" PublicationDate="2019-05-01T00:00:00Z" />
+    </Model>
+    <Model ModelUri="http://example.org/test/parentnodeid2" Version="1.0.0" PublicationDate="2024-06-01T00:00:00Z">
+      <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.05" PublicationDate="2019-05-01T00:00:00Z" />
+    </Model>
+  </Models>
+  <Aliases>
+    <Alias Alias="HasComponent">i=47</Alias>
+  </Aliases>
+  <!-- NodeA: Has ParentNodeId, no <References> -->
+  <UAObject NodeId="ns=1;i=1001" BrowseName="1:NodeA" ParentNodeId="i=84">
+    <DisplayName>NodeA</DisplayName>
+    <!-- No <References> -->
+  </UAObject>
+  <!-- NodeB: Has ParentNodeId, has <References> but no backward reference to parent -->
+  <UAObject NodeId="ns=2;i=1002" BrowseName="2:NodeB" ParentNodeId="i=84">
+    <DisplayName>NodeB</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=2;i=1003</Reference>
+      <!-- Missing: <Reference ReferenceType="HasComponent" IsForward="false">i=84</Reference> -->
+    </References>
+  </UAObject>
+  <!-- Child of NodeB, to make the reference valid -->
+  <UAObject NodeId="ns=2;i=1003" BrowseName="2:ChildOfNodeB">
+    <DisplayName>ChildOfNodeB</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=2;i=1002</Reference>
+    </References>
+  </UAObject>
+</UANodeSet> 
