@@ -1407,6 +1407,10 @@ PROPERTIES
     t_prio_idx = 1..k_n_subscriptionPerSession_max &
     t_prio_idx_i = 0..k_n_subscriptionPerSession_max
 
+ASSERTIONS
+
+   card(t_session) : NAT
+
 OPERATIONS
 
     p_res <-- is_t_channel_config_idx(p_config_idx) =
