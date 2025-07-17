@@ -44,6 +44,7 @@ typedef struct SOPC_PubSub_SecurityType
     SOPC_PubSubSKS_Keys* groupKeys;
     SOPC_ExposedBuffer* msgNonceRandom;
     uint32_t sequenceNumber;
+    bool sequenceNumberSet;
 } SOPC_PubSub_SecurityType;
 
 /**

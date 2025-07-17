@@ -340,6 +340,7 @@ static void SOPC_SubScheduler_UpdateDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, 
             if (NULL != security)
             {
                 security->sequenceNumber = 0;
+                security->sequenceNumberSet = false;
             }
         }
     }

@@ -248,18 +248,6 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
  */
 static bool Network_Layer_Is_Flags1_Enabled(SOPC_Dataset_LL_NetworkMessage_Header* nmh, bool security);
 
-/**
- * Private
- * Check if the received NetworkMessage is newer than the last processed.
- * To do this, compare the sequence number of the NetworkMessage which should be strictly monotonically increasing.
- * This function manages sequence numbers roll over (change from 4294967295 to 0).
- * See OPCUA Spec Part 14 - Table 75
- *
- * received is the sequence number in the current message
- * processed is the last processed sequence number
- */
-static bool Network_Layer_Is_Sequence_Number_Newer(uint32_t received, uint32_t processed);
-
 static SOPC_UADP_NetworkMessage* SOPC_Network_Message_Create(void)
 {
     SOPC_UADP_NetworkMessage* result = SOPC_Calloc(1, sizeof(SOPC_UADP_NetworkMessage));
@@ -434,32 +422,26 @@ static bool Network_Layer_DataSetMessage_Is_Flags2_Enabled(SOPC_DataSet_LL_UadpD
     return (DataSet_LL_MessageType_KeyFrame != conf.dataSetMessageType || conf.timestampFlag || conf.picoSecondsFlag);
 }
 
-static bool Network_Layer_Is_Sequence_Number_Newer(uint32_t received, uint32_t processed)
+static bool SOPC_Is_UInt32_Sequence_Number_Newer(uint32_t received, uint32_t processed)
 {
-    // See Spec OPC UA Part 14 - Table 75
-    // NetworkMessages the following formula shall be used:
-    // (4294967295 + received sequence number – last processed sequence number) modulo 4294967296.
-    // Results below 1073741824 indicate that the received NetworkMessages is newer than
-    // the last processed NetworkMessages...
+    // See Spec v1.05.03 OPC UA Part 14 - Table 135
+    // For SequenceNumber the following formula shall be used:
+    // (received sequence number - 1 - last processed sequence number) modulo 4294967296.
+    // Results below 1073741824 indicate that the received message is newer than
+    // the last processed message...
     // Results above 3221225472 indicate that the received message is older (or same) than
-    // the last processed NetworkMessages...
+    // the last processed message...
     // Other results are invalid...
-    uint64_t max_uint32 = UINT32_MAX;
-    uint64_t diff = max_uint32 + received - processed;
-    uint64_t res = diff % (max_uint32 + 1);
-    if (1073741824 > res)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    const uint32_t diff = (uint32_t)(received - 1 - processed);
+
+    /* We actually don't make difference between results above upper bound and between lower and upper bound
+     * because we don't handle reordering message */
+    return diff < 1073741824;
 }
 
 bool SOPC_Is_UInt16_Sequence_Number_Newer(uint16_t received, uint16_t processed)
 {
-    // See Spec OPC UA Part 14 - Table 133 - rev 1.05
+    // See Spec OPC UA Part 14 - Table 135 - rev 1.05.03
     // NetworkMessages the following formula shall be used:
     // (received sequence number - 1 - last processed sequence number) modulo 65536.
     // Results below 16384 indicate that the received NetworkMessages is newer than
@@ -1772,7 +1754,7 @@ static inline SOPC_NetworkMessage_Error_Code Decode_SecurityHeader(SOPC_Buffer* 
     uint32_t securityTokenId;
     uint8_t securityNonceLength;
     uint8_t securityMessageNonce[4];
-    uint32_t sequenceNumber;
+    uint32_t securityMessageNonceSequenceNumber;
     uint8_t securitySignedEnabled = false;
     uint8_t securityEncryptedEnabled = false;
     uint8_t securityFooterEnabled = false;
@@ -1870,18 +1852,20 @@ static inline SOPC_NetworkMessage_Error_Code Decode_SecurityHeader(SOPC_Buffer* 
     if (SOPC_STATUS_OK == status)
     {
         // Get sequence number and check it is greater than last one received for the same (TokenId, PublisherId)
-        status = SOPC_UInt32_Read(&sequenceNumber, buffer, 0);
+        status = SOPC_UInt32_Read(&securityMessageNonceSequenceNumber, buffer, 0);
         code = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Read_SeqNum_Failed);
     }
 
-    if (SOPC_STATUS_OK == status && !Network_Layer_Is_Sequence_Number_Newer(sequenceNumber, security->sequenceNumber))
+    if (SOPC_STATUS_OK == status && security->sequenceNumberSet &&
+        !SOPC_Is_UInt32_Sequence_Number_Newer(securityMessageNonceSequenceNumber, security->sequenceNumber))
     {
         set_status_default(&status, &code, SOPC_UADP_NetworkMessage_Error_Read_SeqNum_Failed);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        security->sequenceNumber = sequenceNumber;
+        security->sequenceNumber = securityMessageNonceSequenceNumber;
+        security->sequenceNumberSet = true;
     }
 
     // Note: security footer not used for now
