@@ -334,6 +334,13 @@ static void SOPC_SubScheduler_UpdateDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, 
             // Update dsm context
             ctx->dataSetMessageSequenceNumberSet = false;
             ctx->dataSetMessageSequenceNumber = 0;
+            // Update Security SN if security is managed
+            SOPC_PubSub_SecurityType* security =
+                SOPC_SubScheduler_Get_Security_Infos(SOPC_PUBSUB_SKS_CURRENT_TOKENID, ctx->pubId, ctx->groupId);
+            if (NULL != security)
+            {
+                security->sequenceNumber = 0;
+            }
         }
     }
 }
