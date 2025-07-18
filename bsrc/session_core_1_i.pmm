@@ -18,7 +18,63 @@
  */
 
 THEORY User_Pass IS
-Operation(init_new_session) & ff(0) & pp(rt.1);
-Operation(init_new_session) & ff(0) & dd & pr(Tac(th_variant));
-Operation(init_new_session) & ff(0) & dd & pr(Tac(th_invariant))
+
+Operation(set_server_client_create_session_info) & Pattern({p_session}<<|(a_server_session_name$1<+{p_session|->p_genSessionName$1}) = {p_session}<<|a_server_session_name$1)
+    & pr(Tac(SimplifyRelDoaLongXY));
+
+Operation(get_channel_nb_sessions) & Pattern(not(a : ran(b)))
+    & ff(0) & dd(0) & eh(a_channel_nb_sessions$1(p_channel),_h,AllHyp) & mp & ah(a_channel$1~[{p_channel}] = {}) & pr(Tac(empty_card;th_eh_pred)) & pp(rt.0);
+
+Operation(check_server_session_user_auth_attempts) & Pattern(#a.b)
+    & ff(0) & dd(0) & dc(a_server_user_auth_attempts$1(p_session)+1: 0..k_n_UserAuthAttempts_max-1) & pr & ss & se(c_session_indet) & pr & pr & ss & se(p_session) & pr & ah(0<=1+a_server_user_auth_attempts$1(p_session)-k_n_UserAuthAttempts_max = k_n_UserAuthAttempts_max<=1+a_server_user_auth_attempts$1(p_session)) & pr & dd & eh(0<=1+a_server_user_auth_attempts$1(p_session)-k_n_UserAuthAttempts_max,_h,Goal) & ah(a_server_user_auth_attempts$1(p_session): 0..k_n_UserAuthAttempts_max-1) & ah(not(1+a_server_user_auth_attempts$1(p_session): 0.. -1+k_n_UserAuthAttempts_max)) & pp(rt.0) & pr & dd(0) & pr & fh(1+a_server_user_auth_attempts$1(p_session): 0.. -1+k_n_UserAuthAttempts_max) & ah(not(a_server_user_auth_attempts$1(p_session)+1: 0..k_n_UserAuthAttempts_max-1)) & pp(rt.0);
+
+Operation(set_server_session_preferred_locales_or_indet) & Pattern(a<+{b} = c<+{b})
+    & ff(0) & pr(Tac(rewriting));
+
+Operation(set_session_roles) & Pattern(a = b<+{c})
+    & ff(0) & pr(Tac(rewriting));
+
+Operation(set_session_state_closed) & Pattern(a_NonceClient$1 = {b}<<|a_NonceClient$1)
+    & ff(0) & pr(Tac(rewriting)) & ah(session/:dom(s_client_session$1<|a_state$1|>>{e_session_init})) & pr & pr;
+
+Operation(set_session_state_closed) & Pattern(a_NonceClient$1 = {session}<<|a_NonceClient$1)
+    & ff(0) & dd(0) & ah(not(session: dom(a_NonceClient$1))) & ah(not(session: dom(s_client_session$1<|a_state$1|>>{e_session_init}))) & ah(not(session: s_client_session$1)) & pp(rt.0) & pr & pr;
+
+Operation(set_session_state_closed) & Pattern(a_server_user_auth_attempts$1 = {b}<<|a_server_user_auth_attempts$1)
+    & ff(0) & pr(Tac(rewriting)) & eh(dom(a_server_user_auth_attempts$1),_h,Goal) & pr;
+
+Operation(is_auto_close_session_active) & Pattern(bool(a<=b) = bool(c<=b))
+    & ff(0) & pr(Tac(SimplifyTryEnsCard)) & pr
+
+END
+&
+
+THEORY simplify IS
+   /* Rule Systerel.92 - bd.90 [464583d0f010165c666bccb01956e735] */
+   bcall1(AtomicRule(Systerel.92))
+   =>
+   {a} <<| (b <+ {a |-> c}) == {a} <<| b
+END
+&
+
+THEORY rewriting IS
+   /* Rule Systerel.984 - bd.972 [94e9b885186bbc3490baed82a799026d] */
+   bcall1(AtomicRule(Systerel.984))
+   =>
+   a <+ b == dom(b) <<| a \/ b
+   ;
+
+   /* Rule Systerel.1464 - bd.450 [1bb3bf712f7a05f505394ceafa22b167] */
+   bcall1(BackwardRule(Systerel.1464)) &
+   dom(a) /\ b = {}
+   =>
+   a = b <<| a
+END
+&
+
+THEORY empty_card IS
+   /* Rule Systerel.1613 - bd.597 [a61bfdae17f645bff9551d81003adbd0] */
+   bcall1(AtomicRule(Systerel.1613))
+   =>
+   a = {} == (card(a) = 0)
 END

@@ -114,6 +114,9 @@ DEFINITIONS
             d_adsp_nodes_invariant
         )
 
+INVARIANT
+    ReqAuditEntryInfo = c_msg_header_indet
+
 ASSERTIONS
 
     /* These trivial predicates occur as goal of many POs, adding them here

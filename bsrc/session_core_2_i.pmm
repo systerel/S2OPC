@@ -18,19 +18,90 @@
  */
 
 THEORY User_Pass IS
-ff(0) & dd & pr(Tac(th_se));
-ff(0) & dd & pr(Tac(th_raf_var));
-ff(0) & mp & pp(rt.1);
-ff(0) & mp & pp(rp.1);
-ff(0) & dd & pp(rt.1);
-ff(0) & dd(0) & pp(rt.1)
+
+Operation(add_session) & Pattern(a+b<=c)
+    & ff(0) & dd(0) & eh(card_s_session$1,_h,Goal) & ah(card(a_state$1)+1<=card(t_session)) & ah(card(a_state$1) = card(dom(a_state$1)))
+    & pr & dd & eh(card(a_state$1),_h,Goal) & ah(card(dom(a_state$1))+1 = card(dom(a_state$1)\/{p_session})) & pr & dd
+    & eh(card(dom(a_state$1))+1,_h,Goal) & ah(dom(a_state$1)\/{p_session} : POW(t_session)) & pr & dd & pr(Tac(OrderXY)) & pr;
+
+Operation(remove_session) & Pattern(a~[{b}] = c-{d})
+    & ff(0) & pr(Tac(SimplifyRelImaLongXY));
+
+Operation(remove_session) & Pattern(a-b = card(c<<|d))
+    & ff(0) & pr(Tac(th_card));
+
+Operation(remove_session) & Pattern(a<=b)
+    & ff(0) & dd(0) & pr & ah(p_session: dom(a_state$1)) & pp(rt.0);
+
+Operation(remove_session) & Pattern((a_client_session$1<+{p_session|->FALSE})~[{TRUE}] <: dom({p_session}<<|a_state$1))
+    & ff(1) & pr;
+
+Operation(reset_session_channel) & Pattern(a<=b(c)-d)
+    & ff(0) & mp & ah(a_channel_nb_sessions$1(p_channel$1) = card((a_channel$1)~[{p_channel$1}])) & pr & dd & eh(a_channel_nb_sessions$1(p_channel$1),_h,Goal) & pr & pr(Tac(not_empty));
+
+Operation(set_session_channel) & Pattern(a<=b(c)-d)
+    & ff(0) & mp & eh(a_channel_nb_sessions$1(p_channel$1),_h,Goal) & pr(Tac(not_empty));
+
+Operation(set_session_channel) & Pattern(a(b)+1<=2147483647)
+    & ff(0) & dd(0) & eh(a_channel_nb_sessions$1(p_channel),_h,Goal) & ah(card((a_channel$1)~[{p_channel}])<card(t_session))
+    & ah(card((a_channel$1)~[{p_channel}])+1 = card((a_channel$1)~[{p_channel}]\/{session})) & pr & dd & eh(card((a_channel$1)~[{p_channel}])+1,_h,Goal)
+    & ah((a_channel$1)~[{p_channel}]\/{session} : POW(t_session)) & pr(Tac(include)) & dd & pr(Tac(OrderXY)) & pr;
+
+Operation(set_session_channel) & Pattern(a(b)+1<=2147483647)
+    & ff(0) & dd(0) & ah(card(a_channel$1~[{p_channel}])<card(t_session)) & ah(card(a_channel$1~[{p_channel}])+1 = card(a_channel$1~[{p_channel}]\/{session})) & pr & dd & eh(card(a_channel$1~[{p_channel}])+1,_h,Goal) & ah(a_channel$1~[{p_channel}]\/{session}: POW(t_session)) & pr(Tac(include)) & dd & pr(Tac(OrderXY)) & pr & eh(a_channel_nb_sessions$1(p_channel),_h,Goal) & pr;
+
+Operation(set_session_channel) & Pattern((a<+b)(c) = card(d[e]))
+    & ff(0) & dd & dc(channel = p_channel) & pr & ah(session/:a_channel$1~[{p_channel}]) & pr & pr & pr & dd(0) & ar(s1.12,Goal) & ar(th_fct_at_pt.5,Goal) & dc(channel = p_channel$1) & ah(not(a_channel$1(session) = p_channel)) & dd(0) & pr & ar(th_card) & pr & pr & dd(0) & pr & ah(card(a_channel$1~[{channel}]-{session}) = card(a_channel$1~[{channel}])) & ah(a_channel$1~[{channel}]-{session} = a_channel$1~[{channel}]) & pr & dd(0) & eh(a_channel$1~[{channel}]-{session},_h,Goal) & pr & dd(0) & eh(card(a_channel$1~[{channel}]-{session}),_h,Goal) & ah(channel: t_channel) & ah(!channel.(channel: t_channel => a_channel_nb_sessions$1(channel) = card(a_channel$1~[{channel}]))) & pp(rt.0);
+
+Operation(set_session_channel) & Pattern(a(b) = card(c[d]))
+    & ff(0) & dd(0) & pr & pr(Tac(th_card)) & dd(0) & pr & fh(session: a_channel$1~[{channel}]) & ah(not(a_channel$1(session) = channel)) & pr & pp(rt.0)
+
 END
 &
 
-THEORY th_se IS
+THEORY not_empty IS
+   /* Rule Systerel.18 - bd.18 [f735bda33b1e827bea5d9f0d8fb90e8f] */
+   bcall1(AtomicRule(Systerel.18))
+   =>
+   a~[{b}] = {} == not(b : a[dom(a)])
+END
+&
 
-    a\ (b,c,d,e) &
-    b <: d &
-    e : c
-    =>
+THEORY include IS
+   /* Rule Systerel.1470 - bd.456 [16a3d7af60d75a551d401d28424f07b0] */
+   binhyp(a : c +-> d)
+   =>
+   a~[b] : POW(c)
+END
+&
+
+THEORY th_surch IS
+   /* Rule Systerel.1448 - bd.434 [aec766f71fc1078b178c2d2772084efe] */
+   bguard(th_fct : (a : dom(a) +-> ran(a))) &
+   not(c : dom(b)) &
+   blvar(d) &
+   d\(a,b,c)
+   =>
+   (a <+ b)(c) == a(c)
+   ;
+
+   /* Rule Systerel.1313 - bd.299 [2fbf159759175f0532f5bc93323e87d2] */
+   bguard(th_fct : (a : dom(a) +-> ran(a))) &
+   bguard(th_diff : not(f = b)) &
+   bguard(th_diff : not(f = d)) &
+   blvar(g) &
+   g\(a,b,d,f)
+   =>
+   (a <+ ({b |-> c} \/ {d |-> e}))(f) == a(f)
+END
+&
+
+THEORY th_card IS
+   /* Rule Systerel.1487 - bd.472 [5b49cefdc9f207614064a8e970c67730] */
+   b : a &
+   bnot(bpattern(b,(c,d))) &
+   blvar(e) &
+   e\(a,b)
+   =>
+   card(a-{b}) == card(a)-1
 END

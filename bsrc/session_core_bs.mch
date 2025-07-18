@@ -213,12 +213,16 @@ OPERATIONS
     p_user <-- get_session_user_server (session) =
     PRE
         session : t_session_i &
-        session : t_session   &
-        session : dom(a_user_server)
+        session : t_session
     THEN
-        p_user :(p_user : t_user_i &
-                 p_user : t_user &
-                 p_user = a_user_server (session))
+        p_user :(
+            p_user : t_user_i &
+            (session : dom(a_user_server) =>
+                p_user : t_user &
+                p_user = a_user_server (session)) &
+            (session /: dom(a_user_server) =>
+                p_user = c_user_indet)
+         )
     END
     ;
 
@@ -415,7 +419,9 @@ OPERATIONS
           (bres = TRUE =>
            a_NonceServer : t_session +-> t_Nonce &
            {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
-           p_session : dom(a_NonceServer))
+           p_session : dom(a_NonceServer)) &
+          (bres = FALSE =>
+           a_NonceServer = a_NonceServer$0)
         )
     END
     ;
@@ -712,9 +718,9 @@ OPERATIONS
         session : t_session_i &
         session : t_session &
         resp_msg : t_msg_i &
-        resp_msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_create_resp
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_resp
     THEN
         /* Use resp message to retrieve revised session timeout and activate first timer:
            - trigger TIMER_SE_EVAL_SESSION_TIMEOUT*/

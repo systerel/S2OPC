@@ -18,16 +18,659 @@
  */
 
 THEORY User_Pass IS
-  ff(0) & mp(Tac(Simp_Delete))
-;
-  ff(0) & mp(Tac(ContradictingState))
-;
-  Pattern(#a.b or c) &
-    ff(0) & mp(Tac(Simp_Delete)) & ar(SplitOr.2,Once) & mp(Tac(Simp_Delete))
-;
-  Pattern(#a.b or c) &
-    ff(0) & mp(Tac(Simp_Delete)) & ar(SplitOr.1,Once) &
-      dd(0) & se(l_nsession$1,l_request_handle) & mp
+/* client_init_session_sm */
+
+Operation(client_init_session_sm) & Pattern(dom(a) = (b\/c)-(d\/c))
+    & ff(0) & dd(0) & ar(SimplifySetSubXY.37,Goal) & eh(dom(a_server_user_auth_attempts$1),_h,Goal) & ah(not(l_nsession: s_session$1)) & pp(rt.0);
+
+/* END client_init_session_sm */
+
+/* client_create_session_req_sm */
+
+Operation(client_create_session_req_sm) & Pattern(a : b +-> c)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+
+Operation(client_create_session_req_sm) & Pattern(a : b +-> c)
+    & ff(0) & pr(Tac(InFunctionXY;dom_rewrite));
+
+Operation(client_create_session_req_sm) & Pattern({a}<<|b = {a}<<|c)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+
+Operation(client_create_session_req_sm) & Pattern(a : dom(b<|(c<+d)|>>e))
+    & ff(0) & dd(0) & ah(session: s_client_session$1) & pp(rt.0);
+
+Operation(client_create_session_req_sm) & Pattern(dom(a) = b-c)
+    & ff(0) & dd(0) & eh(a_server_user_auth_attempts$2,_h,Goal) & eh(dom(a_server_user_auth_attempts$1),_h,Goal) & pr;
+
+/* END client_create_session_req_sm */
+
+/* server_create_session_req_and_resp_sm */
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(a = {b}<<|a)
+    & ff(0) & mp(Tac(Simp_Delete));
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(dom(a) <: dom(b<|(c<+d)|>>e))
+    & ff(0) & dd(0) & ah(dom(s_client_session$1<|(a_state$1<+{l_nsession$1|->e_session_init})|>>{e_session_init}) = dom(s_client_session$1<|a_state$1|>>{e_session_init})) & ar(SimplifyRelDorLongXY.1,Goal) & pr & dd(0) & eh(dom(s_client_session$1<|(a_state$1<+{l_nsession$1|->e_session_init})|>>{e_session_init}),_h,Goal) & pr;
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(#a.b or c)
+    & ff(0) & dd(0) & ar(SplitOr.1,Once) & dd(0) & pr & se(l_nsession_token) & pr;
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & dd(0) & ah(dom(a_state$1<+{l_nsession$1|->e_session_init}|>>{e_session_init,e_session_creating}) = dom(a_state$1|>>{e_session_init,e_session_creating})) & ar(SimplifyRelRaaLongXY.1,Goal) & ah({l_nsession$1|->e_session_init}|>>{e_session_init,e_session_creating} = {}) & pr & dd(0) & eh({l_nsession$1|->e_session_init}|>>{e_session_init,e_session_creating},_h,Goal) & ar(SimplifySetUniXY.36,Goal) & ar(SimplifyRelDomXY.21,Goal) & ah(dom({l_nsession$1}<<|a_state$1|>>{e_session_init,e_session_creating}) = dom(a_state$1|>>{e_session_init,e_session_creating})-{l_nsession$1}) & pr & dd(0) & eh(dom({l_nsession$1}<<|a_state$1|>>{e_session_init,e_session_creating}),_h,Goal) & ah(l_nsession$1/:dom(a_state$1|>>{e_session_init,e_session_creating})) & ah(not(l_nsession$1: s_session$1)) & eh(s_session$1,_h,Goal) & pr & pr & dd(0) & eh(dom(a_state$1<+{l_nsession$1|->e_session_init}|>>{e_session_init,e_session_creating}),_h,Goal) & pr;
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(a or b)
+    & ff(0) & dd(0) & ar(SplitOr.2,Once) & dd(0) & se(p_service_ret$0) & pr & pr & pr & ar(SimplifyRelDoaLongXY.1,Goal) & pr & bb(pr(Tac(simplify_dom_subtraction;Simp_Delete)) & ll(?));
+
+Operation(server_create_session_req_and_resp_sm)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+
+/* END server_create_session_req_and_resp_sm */
+
+/* client_create_session_resp_sm */
+
+Operation(client_create_session_resp_sm) & Pattern(a & b & #c.(d) or (e = f & g = h))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+
+Operation(client_create_session_resp_sm) & Pattern(a & b & #c.(d) or (e & f => not(g)))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+
+Operation(client_create_session_resp_sm) & Pattern(not(a : dom(b)))
+    & ff(1) & pr;
+
+Operation(client_create_session_resp_sm)
+    & ff(0) & pr(Tac(dom_rewrite));
+
+/* END client_create_session_resp_sm */
+
+/* client_user_activate_session_req_sm */
+
+Operation(client_user_activate_session_req_sm) & Pattern(a or b)
+    & ff(0) & dd(0) & fh(not(session: dom(a_channel$1))) & pr(Tac(simplify_inverse));
+
+Operation(client_user_activate_session_req_sm) & Pattern(a & b & #c.(d) or #e.(f & g))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+
+Operation(client_user_activate_session_req_sm) & Pattern(a : dom(b))
+    & ff(0) & pr(Tac(simplify_inverse));
+
+/* END client_user_activate_session_req_sm */
+
+/* client_sc_activate_session_req_sm */
+
+Operation(client_sc_activate_session_req_sm) & Pattern(a : dom(b))
+    & ff(0) & mp & ar(dom_eq.1,Goal) & ar(CommutativityXY.20,Goal) & pr & pr(Tac(th_raf_var));
+
+/* END client_sc_activate_session_req_sm */
+
+/* allocate_authenticated_user */
+
+Operation(allocate_authenticated_user) & Pattern(ran(a) : POW(b..c))
+    & ff(0) & dd(0) & ah(ran({max_attempts_reached_server_session$1}<<|a_server_user_auth_attempts$1) <: 0..k_n_UserAuthAttempts_max-1) & eh(max_attempts_reached_server_session$1,_h,Goal) & ah(c_session_indet/:dom(a_server_user_auth_attempts$1)) & pr & pp(rt.0);
+
+Operation(allocate_authenticated_user) & Pattern(dom(a) = b-c)
+    & ff(0) & dd(0) & dc(p_sc_valid_user$2 = e_sc_ok) & dd(0) & ah(a_server_user_auth_attempts$2 = a_server_user_auth_attempts$1<+{p_session|->a_server_user_auth_attempts$1(p_session)+1}) & pr & pr & pr & pr;
+
+/* END allocate_authenticated_user */
+
+/* server_activate_session_created_req_and_resp_sm */
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(a or b)
+    & ff(0) & dd(0) & ar(SplitOr.1,Once) & dd(0) & se(a_session_roles$2) & pr & ah(a_session_roles$2 = a_session_roles$1<+{session|->p_roles$0}) & pr & pr(Tac(SimplifyRelDoaLongXY)) & pr & pr & pr;
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(a = b)
+    & ff(0) & dd(0) & fh(not(session: dom(a_channel$1))) & ar(SimplifyX.88,Goal) & eh(dom(a_channel$1),_h,Goal) & pr & ar(simplify_inverse.2,Goal) & pr & pr & eh(a_state$1(session),_h,Goal) & pr & eh(a_state$1(session),_h,Goal) & pr;
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(a : dom(b))
+    & ff(0) & pr(Tac(simplify_inverse)) & eh(a_state$1(session),_h,Goal) & pr & eh(a_state$1(session),_h,Goal) & pr;
+
+Operation(server_activate_session_created_req_and_resp_sm)
+    & ff(0) & dd(0) & fh(not(session: dom(a_channel$1) & a_channel$1(session) = channel)) & pr(Tac(simplify_inverse)) & eh(a_state$1(session),_h,Goal) & pr & eh(a_state$1(session),_h,Goal) & pr & pr;
+
+/* END server_activate_session_created_req_and_resp_sm */
+
+/* server_activate_session_userActivated_req_and_resp_sm */
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(a : b)
+    & ff(0) & dd(0) & ah(session: dom(a_user_server$1)) & eh(dom(a_user_server$1),_h,Goal) & ah(not(session: s_client_session$1)) & ah(a_state$1(session) = e_session_userActivated) & ah(session: dom(a_state$1)) & pr & pp(rt.0);
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(a => b)
+    & ff(0) & dd(0) & fh(not(session: dom(a_channel$1))) & ar(SimplifyX.88,Goal) & eh(dom(a_channel$1),_h,Goal) & pr & ar(simplify_inverse.2,Goal) & pr & eh(a_state$1(session),_h,Goal) & pr & eh(a_state$1(session),_h,Goal) & pr;
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(a => b)
+    & ff(0) & dd(0) & ar(SplitOr.2,Once) & dd(0) & dd & eh(a_channel$1(session),_h,Goal) & pr & mp & eh(dom(a_user_server$1),_h,Goal) & ah(not(session: s_client_session$1)) & ah(a_state$1(session) = e_session_userActivated) & ah(session: dom(a_state$1)) & pp(rt.0) & ah(session: dom(a_user_server$1)) & eh(dom(a_user_server$1),_h,Goal) & ah(not(session: s_client_session$1)) & ah(a_state$1(session) = e_session_userActivated) & ah(session: dom(a_state$1)) & pr & pp(rt.0) & pr & pr(Tac(SimplifyRelDoaLongXY)) & pr(Tac(SimplifyRelDoaLongXY)) & pr & pr & eh(a_session_roles$2,_h,Goal) & pr(Tac(SimplifyRelDoaLongXY)) & pr & pr;
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(a or b)
+    & ff(0) & dd(0) & pr & ar(SplitOr.1,Once) & dd(0) & pr & pr & ah(a_session_roles$2 = a_session_roles$1<+{session|->p_roles$0}) & pr(Tac(SimplifyRelDoaLongXY)) & pr & pr & pr & dd(0) & ar(SplitOr.1,Once) & dd(0) & pr & pr & pr & pr & pr & pr;
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(a or b)
+    & ff(0) & dd(0) & ar(SplitOr.1,Once) & dd(0) & pr & pr(Tac(simplify_inverse)) & eh(a_state$1(session),_h,Goal) & mp & eh(a_state$1(session),_h,Goal) & pr & pr;
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(a or b)
+    & ff(0) & mp & ar(SplitOr.1,Once) & dd(0) & pr & pr(Tac(simplify_inverse)) & eh(a_state$1(session),_h,Goal) & pr & eh(a_state$1(session),_h,Goal) & pr & pr & pr & dc(not(p_roles$0: t_sessionRoles)) & mp & pp(rt.0) & pr & pr & pr & pr;
+
+/* END server_activate_session_userActivated_req_and_resp_sm */
+
+/* server_activate_session_scOrphaned_req_and_resp_sm */
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(a or b)
+    & ff(0) & dd(0) & ar(SplitOr.1,Once) & dd(0) & pr & pr & ah(a_session_roles$2 = a_session_roles$1<+{session|->p_roles$0}) & pr(Tac(SimplifyRelDoaLongXY)) & pr & pr;
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(a = b)
+    & ff(0) & dd(0) & fh(not(session: dom(a_user_server$1) & a_user_server$1(session) = user)) & ss & ah(session: dom(a_user_server$1)) & eh(dom(a_user_server$1),_h,Goal) & ah(not(session: s_client_session$1)) & ah(a_state$1(session) = e_session_scOrphaned) & ah(session: dom(a_state$1)) & pr & pp(rt.0) & pr;
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(a : b)
+    & ff(0) & dd(0) & ah(session: dom(a_user_server$1)) & ar(dom_eq.1,Goal) & pr & pr(Tac(th_raf_var)) & pr;
+
+/* END server_activate_session_scOrphaned_req_and_resp_sm */
+
+/* client_secure_channel_lost_session_sm */
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b<|a)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b-c\/d<<|e)
+    & ff(0) & dd(0) & eh(a_channelz$7777,_h,Goal) & ah(sessions_iteratedz$7777 = t_session) & pr & ah(t_session/\a_channel$1~[{p_lost_channel}] = a_channel$1~[{p_lost_channel}]) & pr & dd(0) & eh(t_session/\a_channel$1~[{p_lost_channel}],_h,Goal) & ah(a_channelz$7777 = sessions_iteratedz$7777/\a_channel$1~[{p_lost_channel}]<<|a_channel$1) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b<|a<+c*d)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a: dom(b))
+    & ff(0) & pr(Tac(membership;th_iter));
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c))
+    & ff(0) & dd(0) & ss & pr(Tac(th_iter));
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c))
+    & ff(0) & dd(0) & ss & ar(th_iter.12,Goal) & ar(CommutativityXY.20,Goal) & pr(Tac(SimplifyRelDomXY));
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c))
+    & ff(0) & dd(0) & ss & ar(th_iter.12,Goal) & ar(SimplifyRelRaaLongXY.1,Goal) & ar(SimplifyRelDomXY.21,Goal) & ah({l_session$1|->e_session_scOrphaned}|>>{e_session_init,e_session_scOrphaned} = {}) & pr & dd & eh({l_session$1|->e_session_scOrphaned}|>>{e_session_init,e_session_scOrphaned},_h,Goal) & ar(SimplifySetUniXY.36,Goal) & ar(CommutativityXY.21,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c))
+    & ff(0) & dd(0) & ss & ar(th_iter.12,Goal) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<+b) = dom(c<|(d<+e)|>f))
+    & ff(0) & dd(0) & ar(SimplifyRelDomXY.15,Goal) & ar(SimplifyRelDomXY.21,Goal) & eh(dom(a_client_orphaned$2),_h,Goal) & ah(l_session$1: s_client_session$2) & ah(a_channel$2~[{p_lost_channel}] <: s_client_session$2) & ah(l_session$1: a_channel$2~[{p_lost_channel}]) & pr & pr & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a) <: dom(b<<|(c<+d)|>>e))
+    & ff(0) & dd(0) & ah(dom(s_client_session$2<<|(a_state$2<+{l_session$1|->e_session_scOrphaned})|>>{e_session_created}) = dom(s_client_session$2<<|a_state$2|>>{e_session_created})) & ar(SimplifyRelDoaLongXY.1,Goal) & ah(l_session$1: s_client_session$2) & ah(a_channel$2~[{p_lost_channel}] <: s_client_session$2) & ah(l_session$1: a_channel$2~[{p_lost_channel}]) & pr & pr & pr & dd & eh(dom(s_client_session$2<<|(a_state$2<+{l_session$1|->e_session_scOrphaned})|>>{e_session_created}),_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(ran(a|>>b) = c-b-(d-b))
+    & ff(0) & dd(0) & ar(SimplifyRelRanXY.11,Goal) & eh(ran(a_server_token$2),_h,Goal) & ss & ar(AssociativityXY.3,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(c<<|(a<<|d)|>>e))
+    & ff(0) & dd(0) & ss & ah(dom(a_session_roles$2) <: dom(s_client_session$2<<|a_state$2|>>{e_session_created})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a<<|b = c\/a/\d<<|e)
+    & ff(0) & dd(0) & eh(a_channel$2,_h,Goal) & ar(SimplifyRelDoaXY.16,Goal) & ah(sessions_iterated$2\/{l_session$1}/\a_channel$1~[{p_lost_channel}] = {l_session$1}\/sessions_iterated$2/\a_channel$1~[{p_lost_channel}]) & ar(CommutativityXY.4,Goal) & pr & dd & eh(sessions_iterated$2\/{l_session$1}/\a_channel$1~[{p_lost_channel}],_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}/\a_channel$1~[{p_lost_channel}] = {l_session$1}) & ah(l_session$1: a_channel$2~[{p_lost_channel}]) & pr & eh(a_channel$2,_h,Goal) & pr & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a : b)
+    & ff(0) & dd(0) & ah(a_channel$2~[{p_lost_channel}] <: s_client_session$2) & ah(p_lost_channel = a_channel$2(l_session$1)) & ah(l_session$1: a_channel$2~[{a_channel$2(l_session$1)}]) & pr & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a<+b = c<|d<+e*f)
+    & ff(0) & mp & eh(a_client_orphaned$2,_h,Goal) & ah({l_session$1|->p_channel_config_idx} = {l_session$1}*{p_channel_config_idx}) & pr & dd & eh({l_session$1|->p_channel_config_idx},_h,Goal) & ah(sessions_iterated$2*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx})<+{l_session$1}*{p_channel_config_idx} = sessions_iterated$2*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx})\/{l_session$1}*{p_channel_config_idx}) & pp(rt.0) & dd & ar(CommutativityXY.28,Goal) & eh(sessions_iterated$2*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx})<+{l_session$1}*{p_channel_config_idx},_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx}) = {l_session$1}*{p_channel_config_idx}) & pr & ar(simplify_inverse.2,Goal) & pr & eh(a_state$1(l_session$1),_h,Goal) & eh(a_state$2(l_session$1),e_session_userActivated,Goal) & pr & pr & pr & ar(simplify_inverse.2,Goal) & pr & eh(a_state$1(l_session$1),_h,Goal) & pr & pr & dd & eh({l_session$1}*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx}),_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a<+b = c<|d<+e*f)
+    & ff(0) & mp & eh(a_state$2,_h,Goal) & ar(CommutativityXY.28,Goal) & ah({l_session$1|->e_session_scOrphaned} = {l_session$1}*{e_session_scOrphaned}) & pr & dd & eh({l_session$1|->e_session_scOrphaned},_h,Goal) & ah(sessions_iterated$2*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned})<+{l_session$1}*{e_session_scOrphaned} = sessions_iterated$2*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned})\/{l_session$1}*{e_session_scOrphaned}) & pp(rt.0) & dd & eh(sessions_iterated$2*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned})<+{l_session$1}*{e_session_scOrphaned},_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}) = {l_session$1}*{e_session_scOrphaned}) & ar(AssociativityXY.9,Goal) & ah({l_session$1}*{e_session_scOrphaned}/\a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned} = {l_session$1}*{e_session_scOrphaned}) & ah(l_session$1: a_channel$1~[{p_lost_channel}]) & ah(a_channel$1(l_session$1) = p_lost_channel) & pr & ar(simplify_inverse.1,Goal) & pr & ar(simplify_inverse.2,Goal) & pr & eh(a_state$1(l_session$1),_h,Goal) & eh(a_state$2(l_session$1),e_session_userActivated,Goal) & pr & pr & dd & eh({l_session$1}*{e_session_scOrphaned}/\a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned},_h,Goal) & pr & eh(a_state$1(l_session$1),_h,Goal) & pr & pr & eh(a_state$1(l_session$1),_h,Goal) & pr & pr & dd & eh({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}),_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a-b = c-d)
+    & ff(0) & mp & eh(s_session$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}/\a_channel$1~[{p_lost_channel}] = {l_session$1}) & ah(l_session$1: a_channel$1~[{p_lost_channel}]) & ah(a_channel$2(l_session$1) = p_lost_channel) & pr & eh(a_channel$2(l_session$1),_h,Goal) & ah(a_channel$1: t_session +-> t_channel) & ah(l_session$1: dom(a_channel$2)) & eh(a_channel$2,_h,Goal) & pp(rt.0) & pr & dd & eh({l_session$1}/\a_channel$1~[{p_lost_channel}],_h,Goal) & ar(diff_distrib_union.1,Goal) & ar(SimplifySetSubXY.37,Goal) & ah({l_session$1}-a_state$1~[{e_session_userActivated}] = {l_session$1}) & pr & ar(simplify_inverse.2,Goal) & pr & ah(l_session$1: dom(a_channel$2)) & eh(dom(a_channel$2),_h,Goal) & eh(a_state$2,_h,Goal) & pp(rt.0) & ah(a_state$1(l_session$1) = a_state$2(l_session$1)) & eh(a_state$2,_h,Goal) & pr(Tac(simplify_override;cartesian_factorisation)) & dd & eh(a_state$1(l_session$1),_h,Goal) & pr & dd & eh({l_session$1}-a_state$1~[{e_session_userActivated}],_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = c-d)
+    & ff(0) & dd(0) & eh(s_session$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}/\a_channel$1~[{p_lost_channel}] = {}) & ah(l_session$1/:dom(a_channel$1)) & ah(not(l_session$1: dom(a_channel$2))) & ah(a_channel$2 = sessions_iterated$2/\a_channel$1~[{p_lost_channel}]<<|a_channel$1) & ah(l_session$1/:sessions_iterated$2) & pr & pp(rt.0) & pp(rt.0) & dd(0) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a<<|b = c-a<|d<+e*f)
+    & ff(0) & mp & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}) = {}) & ar(AssociativityXY.9,Goal) & ah(l_session$1/:a_state$1~[{e_session_userActivated}]) & ar(simplify_inverse.2,Goal) & ah(l_session$1: dom(a_channel$2)) & eh(a_channel$2,_h,Goal) & pr & ah(a_state$1(l_session$1) = a_state$2(l_session$1)) & pr & ar(simplify_override.2,Goal) & ah(not(l_session$1: sessions_iterated$2)) & pp(rt.0) & pr & dd & eh(a_state$1(l_session$1),_h,Goal) & pr & pr & dd & eh({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}),_h,Goal) & eh(a_state$2,_h,Goal) & ar(SimplifySetUniXY.36,Goal) & ae(sessions_iterated$2*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}),aa) & dd & ar(SimplifyRelDoaLongXY.1,Goal) & ah({l_session$1}<<|aa = aa) & eh(aa,_h,Goal) & ar(simplify_dom_subtraction.1,Goal) & mp & ah(l_session$1/:sessions_iterated$2) & pp(rt.0) & pr & dd & eh({l_session$1}<<|aa,_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a<<|b = c-a<|d<+e*f)
+    & ff(0) & mp & eh(a_client_orphaned$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx}) = {}) & ar(AssociativityXY.9,Goal) & ah(l_session$1/:a_state$1~[{e_session_userActivated}]) & ar(simplify_inverse.2,Goal) & ah(l_session$1: dom(a_channel$2)) & eh(a_channel$2,_h,Goal) & pr & ah(a_state$1(l_session$1) = a_state$2(l_session$1)) & eh(a_state$2,_h,Goal) & ar(simplify_override.2,Goal) & ah(not(l_session$1: sessions_iterated$2)) & pp(rt.0) & pr & dd & eh(a_state$1(l_session$1),_h,Goal) & pr & pr & dd & eh({l_session$1}*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx}),_h,Goal) & ar(SimplifySetUniXY.36,Goal) & ae(sessions_iterated$2*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx}),aa) & dd & ar(SimplifyRelDoaLongXY.1,Goal) & ah({l_session$1}<<|aa = aa) & eh(aa,_h,Goal) & ar(simplify_dom_subtraction.1,Goal) & mp & ah(l_session$1/:sessions_iterated$2) & pp(rt.0) & pr & dd & eh({l_session$1}<<|aa,_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(card(a)+b<=card(c))
+    & ff(0) & dd & pr(Tac(th_variant));
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a-b\/(c\/b) = d)
+    & ff(0) & dd & pr(Tac(th_invariant));
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = (e/\b)-c<<|d)
+    & ff(0) & dd(0) & ar(th_eh_ident.5,Once) & ar(dom_eq.1,Goal) & ah(sessions_iteratedz$7777 = t_session) & pr & ae((t_session/\a_channel$1~[{p_lost_channel}])-a_state$1~[{e_session_userActivated}],aa) & dd(0) & ah(t_session/\a_channel$1~[{p_lost_channel}]-a_state$1~[{e_session_userActivated}] = aa) & pr & dd & eh(t_session/\a_channel$1~[{p_lost_channel}]-a_state$1~[{e_session_userActivated}],_h,Goal) & ar(SimplifyRelDorLongXY.7,Goal) & ar(th_eh_hyp_loc.18,Once) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = d|>>(e/\b)-c)
+    & ff(0) & dd(0) & eh(a_server_tokenz$7777,_h,Goal) & eh(dom(a_statez$7777),_h,Goal) & ah(sessions_iteratedz$7777 = t_session) & pr & ah(a_server_token$1: t_session_token +-> s_session$1) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = e\/b/\c<<|d)
+    & ff(0) & dd(0) & ar(CommutativityXY.24,Goal) & ah({l_session$1}/\a_channel$1~[{p_lost_channel}] = {}) & ah(l_session$1/:dom(a_channel$1)) & ah(not(l_session$1: dom(a_channel$2))) & ah(a_channel$2 = sessions_iterated$2/\a_channel$1~[{p_lost_channel}]<<|a_channel$1) & ah(l_session$1/:sessions_iterated$2) & pr & pp(rt.0) & pp(rt.0) & dd(0) & eh({l_session$1}/\a_channel$1~[{p_lost_channel}],_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b-c<<|d<+e)
+    & ff(0) & dd(0) & eh(a_statez$7777,_h,Goal) & eh(dom(a_statez$7777),_h,Goal) & ah(sessions_iteratedz$7777 = t_session) & pr & ah(s_session$1 = dom(a_state$1)) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b-c<<|d<+e)
+    & ff(0) & dd(0) & eh(a_client_orphanedz$7777,_h,Goal) & eh(dom(a_statez$7777),_h,Goal) & ah(sessions_iteratedz$7777 = t_session) & pr & ah(a_client_orphaned$1: s_session$1 +-> t_channel_config_idx_i) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b<|c<+(d\/e/\(f/\g))*h)
+    & ff(0) & mp & eh(a_state$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}) = {}) & ar(AssociativityXY.9,Goal) & ah(l_session$1/:a_channel$1~[{p_lost_channel}]) & pr & pr & dd & eh({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}),_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b<|c<+(d\/e/\(f/\g))*h)
+    & ff(0) & mp & eh(a_client_orphaned$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx}) = {}) & ah(l_session$1/:a_channel$1~[{p_lost_channel}]) & pr & pr & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b<|c<+(d\/e/\(f/\g))*h)
+    & ff(0) & mp & eh(a_state$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}) = {}) & ah(l_session$1/:a_channel$1~[{p_lost_channel}]) & ah(l_session$1/:a_channel$2~[{p_lost_channel}]) & pr & eh(a_channel$2,_h,Goal) & ah(l_session$1/:sessions_iterated$2) & pp(rt.0) & pr & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b<|c<+(d\/e/\(f/\g))*h)
+    & ff(0) & mp & eh(a_client_orphaned$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{p_channel_config_idx}/\(a_channel$1~[{p_lost_channel}]*{p_channel_config_idx}/\a_state$1~[{e_session_userActivated}]*{p_channel_config_idx}) = {}) & ah(l_session$1/:a_channel$1~[{p_lost_channel}]) & ah(l_session$1/:a_channel$2~[{p_lost_channel}]) & pr & eh(a_channel$2,_h,Goal) & ah(l_session$1/:sessions_iterated$2) & pp(rt.0) & pr & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a) = dom(b<<|c|>>d))
+    & ff(0) & dd(0) & eh(a_state$3,_h,Goal) & eh(dom(a_user_server$2),_h,Goal) & ar(SimplifyRelDoaLongXY.1,Goal) & ah(l_session$1: s_client_session$2) & ah(a_channel$2~[{p_lost_channel}] <: s_client_session$2) & ah(p_lost_channel = a_channel$2(l_session$1)) & ah(l_session$1: a_channel$2~[{a_channel$2(l_session$1)}]) & pr & pr & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a) <: dom(b|>>c))
+    & ff(0) & dd(0) & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDomXY.13,Goal) & ar(InPOWXY.24,Once) & ar(SimplifySetUniXY.33,Goal) & ar(inclusion_transitivity.1,Once) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a) <: dom(b|>>c))
+    & ff(0) & dd(0) & eh(a_state$3,_h,Goal) & ah(dom(a_NonceServer$2) <: dom(a_state$2|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a) <: dom(b<|c|>>d))
+    & ff(0) & dd(0) & eh(a_state$3,_h,Goal) & ah(dom(a_NonceClient$2) <: dom(s_client_session$2<|a_state$2|>>{e_session_init})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a) = dom(b<|(c<+d)|>>e))
+    & ff(0) & dd(0) & eh(dom(a_client_token$2),_h,Goal) & ah(l_session$1: s_client_session$2) & ah(l_session$1: a_channel$2~[{p_lost_channel}]) & pr & pr & dd & ah(l_session$1: dom(s_client_session$2<|a_state$2|>>{e_session_init,e_session_creating})) & ah(dom(s_client_session$2<|a_state$2|>>{e_session_init,e_session_creating}) = dom(s_client_session$2<|a_state$2)-a_state$2~[{e_session_init,e_session_creating}]) & ar(CommutativityXY.20,Goal) & pr & dd & eh(dom(s_client_session$2<|a_state$2|>>{e_session_init,e_session_creating}),_h,Goal) & ah(l_session$1: dom(s_client_session$2<|a_state$2)) & pr & ah(l_session$1/:a_state$2~[{e_session_init,e_session_creating}]) & ah(a_state$2(l_session$1) = e_session_userActivated) & ah(a_state$2: t_session +-> t_sessionState) & pp(rt.0) & pr & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b-(c\/d/\e-f))
+    & ff(0) & dd(0) & eh(s_session$2,_h,Goal) & ah(sessions_iterated$2\/{l_session$1}/\a_channel$1~[{p_lost_channel}]-a_state$1~[{e_session_userActivated}] = sessions_iterated$2/\a_channel$1~[{p_lost_channel}]-a_state$1~[{e_session_userActivated}]) & ah(l_session$1/:a_channel$1~[{p_lost_channel}]) & ar(simplify_inverse.1,Goal) & ah(l_session$1: dom(a_channel$2)) & eh(a_channel$2,_h,Goal) & pr & ah(a_channel$2(l_session$1)/=p_lost_channel) & eh(a_channel$2(l_session$1),_h,Goal) & pr & pr & pr & dd & eh(sessions_iterated$2\/{l_session$1}/\a_channel$1~[{p_lost_channel}]-a_state$1~[{e_session_userActivated}],_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b-(c\/d/\e-f))
+    & ff(0) & mp & eh(s_session$2,_h,Goal) & ah((sessions_iterated$2\/{l_session$1}/\a_channel$1~[{p_lost_channel}])-a_state$1~[{e_session_userActivated}] = (sessions_iterated$2/\a_channel$1~[{p_lost_channel}])-a_state$1~[{e_session_userActivated}]) & ah(l_session$1: a_state$1~[{e_session_userActivated}]) & ah(a_state$1(l_session$1) = e_session_userActivated) & eh(a_state$1(l_session$1),_h,Goal) & pr & ar(th_raf_var.39,Goal) & ah(l_session$1: dom(a_channel$2)) & pp(rt.0) & dd & eh((sessions_iterated$2\/{l_session$1}/\a_channel$1~[{p_lost_channel}])-a_state$1~[{e_session_userActivated}],_h,Goal) & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a = b\/c/\d<<|e)
+    & ff(0) & ar(PatchProverB0;th_eh_hyp_loc;SUB;th_simp;th_eh_pred) & pr(Tac(th_eh_pred;th_simp));
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a) = b-((c/\d)-e))
+    & ff(0) & ar(PatchProverB0;th_eh_hyp_loc;SUB;th_simp;th_eh_pred) & pr(Tac(th_eh_pred;th_simp));
+
+Operation(client_secure_channel_lost_session_sm)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+
+/* END client_secure_channel_lost_session_sm */
+
+/* server_secure_channel_lost_session_sm */
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b<|a)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b-c)
+    & ff(0) & dd(0) & eh(s_session$2,_h,Goal) & ah(not(l_session$1: dom(a_channel$2))) & ah(a_channel$2 = sessions_iterated$2/\a_channel$1~[{p_lost_channel}]<<|a_channel$1) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b<|c<+d*e)
+    & ff(0) & dd(0) & eh(a_state$2,_h,Goal) & ah(not(l_session$1: dom(a_channel$2))) & eh(a_channel$2,_h,Goal) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b-c<<|d<+e*f)
+    & ff(0) & dd(0) & eh(a_statez$7777,_h,Goal) & eh(dom(a_statez$7777),_h,Goal) & ah(sessions_iteratedz$7777 = t_session) & pr & ah(a_state$1: s_session$1 +-> t_sessionState) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b-c\/d<<|e)
+    & ff(0) & dd(0) & eh(a_channelz$7777,_h,Goal) & ah(sessions_iteratedz$7777 = t_session) & pr & ah(a_channel$1: s_session$1 +-> t_channel) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b-c<<|d)
+    & ff(0) & dd(0) & ar(th_eh_ident.5,Once) & ar(dom_eq.1,Goal) & ah(sessions_iteratedz$7777 = t_session) & pr & ae((t_session/\a_channel$1~[{p_lost_channel}])-a_state$1~[{e_session_userActivated}],aa) & dd(0) & ah(t_session/\a_channel$1~[{p_lost_channel}]-a_state$1~[{e_session_userActivated}] = aa) & pr & dd & eh(t_session/\a_channel$1~[{p_lost_channel}]-a_state$1~[{e_session_userActivated}],_h,Goal) & ar(SimplifyRelDorLongXY.7,Goal) & ar(th_eh_hyp_loc.18,Once) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b\/c/\d<<|e)
+    & ff(0) & dd(0) & eh(s_session$2,_h,Goal) & ah(not(l_session$1: dom(a_channel$2))) & ah(a_channel$2 = sessions_iterated$2/\a_channel$1~[{p_lost_channel}]<<|a_channel$1) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b|>>c-d)
+    & ff(0) & dd(0) & eh(a_server_tokenz$7777,_h,Goal) & eh(dom(a_statez$7777),_h,Goal) & ah(sessions_iteratedz$7777 = t_session) & pr & ah(a_server_token$1: t_session_token +-> s_session$1) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a) = dom(b<<|c|>>d))
+    & ff(0) & dd(0) & eh(dom(a_user_server$2),_h,Goal) & ah(l_session$1/:s_client_session$2) & ah(l_session$1: a_channel$2~[{p_lost_channel}]) & pr & pr & dd & ah(l_session$1: dom(s_client_session$2<<|a_state$2|>>{e_session_created})) & ah(a_state$2(l_session$1) = e_session_userActivated) & ah(not(l_session$1: s_client_session$2)) & ah(l_session$1: dom(a_state$2)) & ah(l_session$1: dom(a_channel$2)) & eh(dom(a_channel$2),_h,Goal) & pr & pp(rt.0) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a) <: dom(b|>>c))
+    & ff(0) & dd(0) & eh(a_state$3,_h,Goal) & ah(dom(a_NonceServer$2) <: dom(a_state$2|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a) <: dom(b<|c|>>d))
+    & ff(0) & dd(0) & eh(a_state$3,_h,Goal) & ah(dom(a_NonceClient$2) <: dom(s_client_session$2<|a_state$2|>>{e_session_init})) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a) <: dom(b<<|c|>>d))
+    & ff(0) & dd(0) & eh(a_state$3,_h,Goal) & ah(dom(a_session_roles$2) <: dom(s_client_session$2<<|a_state$2|>>{e_session_created})) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a) = dom(b<<|c))
+    & ff(0) & dd(0) & eh(a_state$3,_h,Goal) & eh(dom(a_server_user_auth_attempts$2),_h,Goal) & ah(l_session$1/:s_client_session$2) & ah(l_session$1: a_channel$2~[{p_lost_channel}]) & pr & ah(a_channel$2~[{p_lost_channel}]/\s_client_session$2 = {}) & pp(rt.0) & dd & ah(l_session$1: dom(s_client_session$2<<|a_state$2)) & ah(l_session$1: dom(a_state$2)) & ah(l_session$1: dom(a_channel$2)) & eh(dom(a_channel$2),_h,Goal) & pr & pr & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = dom(b<+c))
+    & ff(0) & dd(0) & ah(s_session$2 = dom(a_state$2)) & ah(l_session$1: dom(a_state$2)) & ah(l_session$1: dom(a_channel$2)) & eh(a_channel$2,_h,Goal) & pr & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c<+d|>>e))
+    & ff(0) & dd(0) & ar(SimplifyRelDomXY.13,Goal) & ar(th_iter.12,Goal) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a) = dom(b))
+    & ff(0) & dd(0) & ar(th_iter.12,Goal) & ar(SimplifyRelDorLongXY.1,Goal) & ah(l_session$1/:s_client_session$2) & ah(l_session$1: a_channel$2~[{p_lost_channel}]) & pr & pr & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b\/c/\d<<|e)
+    & ff(0) & dd(0) & eh(a_channel$2,_h,Goal) & ar(CommutativityXY.24,Goal) & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a : b)
+    & ff(0) & dd(0) & ah(dom(a_channel$2) <: s_session$2) & ah(s_session$2 = dom(a_state$2)) & eh(dom(a_channel$2),_h,Goal) & pr & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b-(c\/d/\e-f))
+    & ff(0) & dd(0) & eh(s_session$2,_h,Goal) & ah(l_session$1: a_state$1~[{e_session_userActivated}]) & ah(a_state$2(l_session$1) = e_session_userActivated) & eh(a_state$2,_h,Goal) & ar(simplify_override.2,Goal) & ah(l_session$1/:sessions_iterated$2) & pr & pr & ar(SimplifyRelFonXY.3,Goal) & ar(simplify_inverse.1,Goal) & ar(th_raf_var.30,Once) & pr & dd(0) & ar(SimplifySetIntXY.28,Goal) & ar(CommutativityXY.24,Goal) & ar(diff_distrib_union.1,Goal) & ah(({l_session$1}/\a_channel$1~[{p_lost_channel}])-a_state$1~[{e_session_userActivated}] = {}) & pr & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b-(c\/d/\e-f))
+    & ff(0) & mp & eh(s_session$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}/\a_channel$1~[{p_lost_channel}] = {}) & ah(l_session$1/:a_channel$1~[{p_lost_channel}]) & ah(a_channel$1(l_session$1)/=p_lost_channel) & eh(a_channel$1(l_session$1),_h,Goal) & pr & pr & pr & dd & eh({l_session$1}/\a_channel$1~[{p_lost_channel}],_h,Goal) & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b<|c<+d*e)
+    & ff(0) & mp & eh(a_state$3,_h,Goal) & eh(a_state$2,_h,Goal) & eh(s_session$3,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}) = {}) & ah(l_session$1/:a_state$1~[{e_session_userActivated}]) & pr & pr & dd & eh({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}),_h,Goal) & ar(SimplifySetUniXY.36,Goal) & ae(sessions_iterated$2*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}),aa) & dd & ar(SimplifyRelDoaLongXY.1,Goal) & ah({l_session$1}<<|aa = aa) & eh(aa,_h,Goal) & ar(simplify_dom_subtraction.1,Goal) & mp & ah(l_session$1/:sessions_iterated$2) & pp(rt.0) & pr & dd & eh({l_session$1}<<|aa,_h,Goal) & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(card(a)+b<=card(c))
+    & ff(0) & dd & pr(Tac(th_variant));
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a~[b]/\c = {})
+    & ff(0) & dd(0) & eh(a_channel$2(l_session$1),_h,Goal) & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a-b\/(c\/b) = d)
+    & ff(0) & dd & pr(Tac(th_invariant));
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a<<|b = d\/a/\e<<|f)
+    & ff(0) & dd(0) & ar(simplify_dom_subtraction.2,Goal) & ar(SimplifyRelDoaXY.16,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}/\a_channel$1~[{p_lost_channel}] = {l_session$1}) & ah(l_session$1: a_channel$2~[{p_lost_channel}]) & pr & ah(a_channel$2 = sessions_iterated$2/\a_channel$1~[{p_lost_channel}]<<|a_channel$1) & pr & dd & eh({l_session$1}/\a_channel$1~[{p_lost_channel}],_h,Goal) & ar(CommutativityXY.25,Goal) & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b\/c/\d<<|e)
+    & ff(0) & dd(0) & eh(a_channel$3,_h,Goal) & eh(a_channel$2,_h,Goal) & ar(SimplifyRelDoaXY.16,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}/\a_channel$1~[{p_lost_channel}] = {l_session$1}) & ah(a_channel$1~[{p_lost_channel}] = a_channel$1~[{a_channel$1(l_session$1)}]) & pr & dd & eh(a_channel$1~[{p_lost_channel}],_h,Goal) & ah(l_session$1: dom(a_channel$2)) & eh(a_channel$2,_h,Goal) & pp(rt.0) & dd & eh({l_session$1}/\a_channel$1~[{p_lost_channel}],_h,Goal) & ar(CommutativityXY.4,Goal) & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(not(a : b))
+    & ff(0) & dd(0) & ah(l_session$1: a_channel$2~[{p_lost_channel}]) & pr & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b-(c\/d/\e-f))
+    & ff(0) & dd(0) & eh(s_session$3,_h,Goal) & eh(s_session$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ar(SimplifySetIntXY.28,Goal) & ah({l_session$1}/\a_channel$1~[{p_lost_channel}] = {l_session$1}) & ah(l_session$1: a_channel$1~[{p_lost_channel}]) & ar(InSetXY.30,Once) & ah(l_session$1: dom(a_channel$2)) & eh(a_channel$2,_h,Goal) & pr & pr & pr & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a(b) = c(b))
+    & ff(0) & mp & ah(a_state$1(session) = a_state$2(session)) & ah(session: dom(a_channel$2)) & ah(session: dom(a_channel$3)) & eh(a_channel$3,_h,Goal) & pr & ah(!session.(session: sessions_to_iterate$2 & session: dom(a_channel$2) => a_state$2(session) = a_state$1(session))) & ah(session: sessions_to_iterate$2) & pp(rt.0) & dd & eh(a_state$1(session),_h,Goal) & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b/\c)
+    & ff(0) & mp & eh(s_client_session$2,_h,Goal) & eh(s_session$3,_h,Goal) & ah(l_session$1/:s_client_session$1) & ah(a_channel$1~[{p_lost_channel}]/\s_client_session$1 = {}) & ah(l_session$1: a_channel$1~[{p_lost_channel}]) & ah(a_channel$1(l_session$1) = p_lost_channel) & pr & ar(simplify_inverse.1,Goal) & ah(l_session$1: dom(a_channel$2)) & eh(a_channel$2,_h,Goal) & pr & pr & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a<+b = c<|d<+e*f)
+    & ff(0) & mp & eh(a_state$2,_h,Goal) & ar(CommutativityXY.28,Goal) & ah({l_session$1|->e_session_scOrphaned} = {l_session$1}*{e_session_scOrphaned}) & pr & dd & eh({l_session$1|->e_session_scOrphaned},_h,Goal) & ah(sessions_iterated$2*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned})<+{l_session$1}*{e_session_scOrphaned} = sessions_iterated$2*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned})\/{l_session$1}*{e_session_scOrphaned}) & pp(rt.0) & dd & eh(sessions_iterated$2*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned})<+{l_session$1}*{e_session_scOrphaned},_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}) = {l_session$1}*{e_session_scOrphaned}) & ar(AssociativityXY.9,Goal) & ah({l_session$1}*{e_session_scOrphaned}/\a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned} = {l_session$1}*{e_session_scOrphaned}) & ah(l_session$1: a_channel$1~[{p_lost_channel}]) & ah(a_channel$1(l_session$1) = p_lost_channel) & pr & ar(simplify_inverse.1,Goal) & ah(l_session$1: dom(a_channel$2)) & eh(a_channel$2,_h,Goal) & pr & pr & dd & eh({l_session$1}*{e_session_scOrphaned}/\a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned},_h,Goal) & ah(l_session$1: a_state$1~[{e_session_userActivated}]) & ah(a_state$1(l_session$1) = e_session_userActivated) & eh(a_state$1(l_session$1),_h,Goal) & pr & ar(simplify_inverse.1,Goal) & ah(l_session$1: dom(a_state$2)) & ah(l_session$1: dom(a_channel$2)) & eh(dom(a_channel$2),_h,Goal) & pr & pr & pr & dd & eh({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}),_h,Goal) & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a = b<|c<+d*e)
+    & ff(0) & mp & eh(a_state$2,_h,Goal) & ar(CommutativityXY.24,Goal) & ah({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}) = {}) & ah(l_session$1/:a_channel$1~[{p_lost_channel}]) & ah(a_channel$1(l_session$1)/=p_lost_channel) & eh(a_channel$1(l_session$1),_h,Goal) & pr & pr & pr & dd & eh({l_session$1}*{e_session_scOrphaned}/\(a_channel$1~[{p_lost_channel}]*{e_session_scOrphaned}/\a_state$1~[{e_session_userActivated}]*{e_session_scOrphaned}),_h,Goal) & pr;
+
+Operation(server_secure_channel_lost_session_sm)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+
+/* END server_secure_channel_lost_session_sm */
+
+/* server_close_sessions */
+
+Operation(server_close_sessions) & Pattern(card(a)+b<=card(c))
+    & ff(0) & dd & pr(Tac(th_variant));
+
+Operation(server_close_sessions) & Pattern(a-b\/(c\/b) = d)
+    & ff(0) & dd & pr(Tac(th_invariant));
+
+Operation(server_close_sessions) & Pattern(dom(a<<|b) <: dom(a<<|c|>>d))
+    & ff(0) & dd(0) & ah(dom(a_NonceServer$2) <: dom(a_state$2|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(ran(a|>>b) = c-b-(d-b))
+    & ff(0)
+    & dd(0) & ar(SimplifyRelRanXY.11,Goal) & eh(ran(a_server_token$2),_h,Goal) & ar(SimplifyTrySetSubXY.1,Goal) & pr(Tac(AssociativityXY));
+
+Operation(server_close_sessions) & Pattern(dom(a<<|b) <: dom(e<<|(c<<|f)|>>d))
+    & ff(0) & dd(0) & ss & ah(dom(a_session_roles$2) <: dom(s_client_session$1<<|a_state$2|>>{e_session_created})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(a<<|b = c)
+    & ff(0) & dd(0) & eh(a_client_orphaned$2,_h,Goal) & ah(l_session$1/:dom(a_client_orphaned$1)) & pr & pr;
+
+Operation(server_close_sessions) & Pattern(a<<|b = c)
+    & ff(0) & dd(0) & eh(a_client_token$2,_h,Goal) & ah(l_session$1/:dom(a_client_token$1)) & pr & pr;
+
+Operation(server_close_sessions) & Pattern(a = b/\(c\/d)<|e)
+    & ff(0) & dd(0) & eh(a_statez$7777,_h,Goal) & pr & pr;
+
+Operation(server_close_sessions) & Pattern(a = b|>(c/\d))
+    & ff(0) & dd(0) & eh(a_server_tokenz$7777,_h,Goal) & eh(dom(a_statez$7777),_h,Goal) & ah(ran(a_server_token$1) = s_session$1-s_client_session$1) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(a = b/\c<|d)
+    & ff(0) & dd(0) & eh(a_user_serverz$7777,_h,Goal) & eh(dom(a_statez$7777),_h,Goal) & ss & ar(SimplifyRelDorLongXY.5,Goal) & ah(s_client_session$1\/{exceptSession}<|a_user_server$1 = {exceptSession}<|a_user_server$1) & ar(SimplifyRelDorLongXY.6,Goal) & ah(s_client_session$1<|a_user_server$1 = {}) & ah(dom(a_user_server$1) = dom(s_client_session$1<<|a_state$1|>>{e_session_created})) & pp(rt.0) & pr & dd & eh(s_client_session$1\/{exceptSession}<|a_user_server$1,_h,Goal) & pr;
+
+Operation(server_close_sessions) & Pattern(a = b/\c<|d)
+    & ff(0) & dd(0) & eh(a_session_rolesz$7777,_h,Goal) & eh(dom(a_statez$7777),_h,Goal) & ss & ah(dom(a_session_roles$1) <: dom(s_client_session$1<<|a_state$1|>>{e_session_created})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(a<<|b = c)
+    & ff(0) & dd(0) & eh(a_NonceClient$2,_h,Goal) & ar(simplify_dom_subtraction.1,Goal) & ah(l_session$1/:dom(s_client_session$1<|a_state$1|>>{e_session_init})) & pr & pr & pr;
+
+Operation(server_close_sessions) & Pattern(a = b/\(c\/d\/e-f))
+    & ff(0) & dd(0) & eh(s_session$2,_h,Goal) & eh(s_client_session$1,_h,Goal) & ah(s_client_session$2\/{exceptSession}\/sessions_to_iterate$2-{l_session$1} = s_client_session$2\/{exceptSession}\/sessions_to_iterate$2) & ah(l_session$1: s_client_session$1) & eh(s_client_session$1,_h,Goal) & pp(rt.0) & dd & eh(s_client_session$2\/{exceptSession}\/sessions_to_iterate$2-{l_session$1},_h,Goal) & pr;
+
+Operation(server_close_sessions) & Pattern(dom(a<<|b) = dom(c<<|(a<<|d)))
+    & ff(0) & dd(0) & ss & pr(Tac(th_iter));
+
+Operation(server_close_sessions) & Pattern(a-b = c/\(d-b\/e\/f-b))
+    & ff(0) & dd(0) & eh(s_session$2,_h,Goal) & ah(s_client_session$2-{l_session$1}\/{exceptSession}\/sessions_to_iterate$2-{l_session$1} = (s_client_session$2\/{exceptSession}\/sessions_to_iterate$2)-{l_session$1}) & pr & dd & eh(s_client_session$2-{l_session$1}\/{exceptSession}\/sessions_to_iterate$2-{l_session$1},_h,Goal) & pr;
+
+Operation(server_close_sessions) & Pattern(a = b/\(c\/d\/e-f))
+    & ff(0) & mp & eh(s_session$2,_h,Goal) & dc(l_session$1: s_session$2) & dd & ah(l_session$1 = exceptSession) & ah(not(l_session$1: s_session$2 & not(l_session$1 = exceptSession))) & ar(De_Morgan_law.1,Goal) & pr & pr & eh(s_session$2,_h,Goal) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(dom(a<<|b) = dom(c))
+    & ff(0) & dd(0) & ss & ar(th_iter.12,Goal) & ar(CommutativityXY.21,Goal) & pr(Tac(SimplifyRelDomXY));
+
+Operation(server_close_sessions)
+    & ff(0) & ar(PatchProverB0;th_eh_hyp_loc;SUB;th_simp) & dd(0) & pr(Tac(th_eh_pred;th_simp));
+
+Operation(server_close_sessions)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+
+/* END server_close_sessions */
+
+/* client_close_session_req_sm */
+
+Operation(client_close_session_req_sm) & Pattern(#a.(b) & #c.(d) or (e & f & g = h))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+
+Operation(client_close_session_req_sm) & Pattern(a : dom(b))
+    & ff(0) & pr(Tac(simplify_inverse));
+
+/* END client_close_session_req_sm */
+
+/* find_channel_to_close */
+
+Operation(find_channel_to_close) & Pattern(card(a)+b<=card(c))
+    & ff(0) & dd & pr(Tac(th_variant));
+
+Operation(find_channel_to_close) & Pattern(a-b\/(c\/b) = d)
+    & ff(0) & dd & pr(Tac(th_invariant));
+
+Operation(find_channel_to_close) & Pattern(a : POW(ran(b)))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+
+Operation(find_channel_to_close) & Pattern(not(a) or b)
+    & ff(0) & dd(0) & dc(l_channel$1: s_channel_connected) & mp & ah(p_nb_sessions$1/=0) & pr & pr & pr;
+
+Operation(find_channel_to_close) & Pattern(a : b)
+    & ff(0) & mp & ah(channels_iteratedz$7777/\s_channel_connected <: ran(a_channel$1)) & eh(channels_iteratedz$7777,_h,Goal) & ss & pr;
+
+Operation(find_channel_to_close) & Pattern(a |-> b : c)
+    & ff(0) & dd(0) & dc(p_channel: channels_iterated$2) & pr & mp;
+
+Operation(find_channel_to_close) & Pattern(a = b)
+    & ff(0) & dd(0) & fh(not(c_timeref_indet: t_timeref)) & pr;
+
+Operation(find_channel_to_close) & Pattern(a |-> b : c)
+    & ff(0) & dd(0) & dc(p_channel: channels_iterated$2) & pr & mp & ah(p_channel = l_channel$1) & pr;
+
+Operation(find_channel_to_close) & Pattern(a |-> b : c)
+    & ff(0) & dd(0) & dc(p_channel: channels_iterated$2) & mp & dc(l_oldest_channel_timeref$0 = a_channel_connected_time(p_channel)) & dd & eh(l_oldest_channel_timeref$0,_h,AllHyp) & dd(0) & ph(p_channel,!p_channel.(p_channel: channels_iterated$2 & (p_channel: s_channel_connected & not(p_channel: ran(a_channel$1))) & not(l_oldest_channel_timeref$0 = a_channel_connected_time(p_channel)) => l_oldest_channel_timeref$0|->a_channel_connected_time(p_channel): TimeReference_IsLessThan)) & pr & pr & pr & pr & ah(p_timeref$1|->l_oldest_channel_timeref$0: TimeReference_IsLessThan) & ah((TimeReference_IsLessThan;TimeReference_IsLessThan) <: TimeReference_IsLessThan) & pp(rt.0) & mp & eh(l_channel$1,_h,AllHyp) & pr;
+
+Operation(find_channel_to_close) & Pattern(a |-> b : c)
+    & ff(0) & dd(0) & dc(p_channel: channels_iterated$2) & dd & fh(channels_iterated$2/\s_channel_connected-ran(a_channel$1) = {}) & ah(p_channel: s_channel_connected) & ah(p_channel: channels_iterated$2) & ah(not(p_channel: ran(a_channel$1))) & pp(rt.0) & dd(0) & ah(p_channel = l_channel$1) & ah(p_channel: channels_iterated$2\/{l_channel$1}) & ah(not(p_channel: channels_iterated$2)) & pp(rt.0) & pr;
+
+/* END find_channel_to_close */
+
+/* may_close_unactivated_session */
+
+Operation(may_close_unactivated_session) & Pattern(#a.b or c)
+    & ff(0) & dd(0) & ah(#l_session.(l_session: t_session_i & l_session: s_session$1 & a_state$1(l_session) = e_session_created & (s_session$1-{p_session_to_close$1} = s_session$1-{l_session} & s_client_session$1-{p_session_to_close$1} = s_client_session$1-{l_session} & {p_session_to_close$1}<<|a_state$1 = {l_session}<<|a_state$1 & {p_session_to_close$1}<<|a_channel$1 = {l_session}<<|a_channel$1 & {p_session_to_close$1}<<|a_client_to_create$1 = {l_session}<<|a_client_to_create$1 & {p_session_to_close$1}<<|a_client_app_context$1 = {l_session}<<|a_client_app_context$1 & {p_session_to_close$1}<<|a_client_orphaned$1 = {l_session}<<|a_client_orphaned$1 & {p_session_to_close$1}<<|a_client_token$1 = {l_session}<<|a_client_token$1 & a_server_token$1|>>{p_session_to_close$1} = a_server_token$1|>>{l_session} & {p_session_to_close$1}<<|a_user_server$1 = {l_session}<<|a_user_server$1 & {p_session_to_close$1}<<|a_user_client$1 = {l_session}<<|a_user_client$1 & {p_session_to_close$1}<<|a_NonceServer$1 = {l_session}<<|a_NonceServer$1 & {p_session_to_close$1}<<|a_NonceClient$1 = {l_session}<<|a_NonceClient$1 & {p_session_to_close$1}<<|a_session_roles$1 = {l_session}<<|a_session_roles$1))) & se(p_session_to_close$1) & pr & pp(rt.0);
+
+Operation(may_close_unactivated_session) & Pattern(dom(a<<|b) = c-a-(d-a))
+    & ff(0) & pr(Tac(SimplifySetSubXY;SimplifyRelDomXY;dom_eq;AssociativityXY));
+
+Operation(may_close_unactivated_session)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+
+/* END may_close_unactivated_session */
+
+/* getall_valid_session_channel */
+
+Operation(getall_valid_session_channel) & Pattern(a : dom(b))
+    & ff(0) & pr(Tac(simplify_inverse));
+
+/* FIN getall_valid_session_channel */
+
+/* session_core_UNINITIALISATION */
+
+Operation(session_core_UNINITIALISATION) & Pattern(card(a)+b<=card(c))
+    & ff(0) & dd & pr(Tac(th_variant));
+
+Operation(session_core_UNINITIALISATION) & Pattern(a-b\/(c\/b) = d)
+    & ff(0) & dd & pr(Tac(th_invariant));
+
+Operation(session_core_UNINITIALISATION) & Pattern(a<<|b = c\/a<<|d)
+    & ff(0) & pr(Tac(SimplifyRelDoaLongXY));
+
+Operation(session_core_UNINITIALISATION) & Pattern(a = b\/c<<|d)
+    & ff(0) & dd(0) & ar(SimplifyRelDoaLongXY.5,Goal) & ah({l_session$1}<<|a_NonceClient$1 = a_NonceClient$1) & ah(l_session$1/:dom(a_NonceClient$1)) & ah(l_session$1/:s_client_session$1) & ah(l_session$1/:s_session$1) & ah(l_session$1/:sessions_iterated$2) & pr & pr & pr & dd & ah(l_session$1/:dom(s_client_session$1<|a_state$1|>>{e_session_init})) & pr & pr & pr & pr;
+
+Operation(session_core_UNINITIALISATION) & Pattern(dom(a) = dom(b-c<<|(c<<|d)))
+    & ff(0) & dd(0) & ar(SimplifyRelDoaLongXY.7,Goal) & ah(sessions_iterated$2<|(sessions_iterated$2<<|a_state$1) = {}) & pr & dd & eh(sessions_iterated$2<|(sessions_iterated$2<<|a_state$1),_h,Goal) & ar(SimplifySetUniXY.36,Goal) & pr & eh(dom(a_state$1),_h,Goal) & eh(dom(a_client_app_context$1),_h,Goal) & ah(dom(a_server_user_auth_attempts$2) = s_session$1-sessions_iterated$2-(s_client_session$1-sessions_iterated$2)) & pp(rt.0);
+
+Operation(session_core_UNINITIALISATION) & Pattern(dom(a<<|b) = c-d-e-(f-d-e))
+    & ff(0) & dd(0) & ah(dom(a_server_user_auth_attempts$2) = s_session$1-sessions_iterated$2-(s_client_session$1-sessions_iterated$2)) & pp(rt.0);
+
+Operation(session_core_UNINITIALISATION) & Pattern(dom(a<<|b) <: dom(a<<|(c<<|d)))
+    & ff(0) & pr(Tac(SimplifyRelDomXY;InPOWXY;InPOWLeavesXY));
+
+Operation(session_core_UNINITIALISATION) & Pattern(a|>>b = a|>>(b\/c))
+    & ff(0) & pr(Tac(th_distrib));
+
+Operation(session_core_UNINITIALISATION)
+    & ff(0) & ar(PatchProverB0;th_eh_hyp_loc;SUB;th_simp) & dd(0) & pr(Tac(th_eh_pred;th_simp));
+
+/* END session_core_UNINITIALISATION */
+
+Operation(get_session_channel) & Pattern(a = b(c))
+    & ff(0) & mp & fh(not(session: dom(a_channel$1))) & pr(Tac(simplify_inverse));
+
+/* refinement_of_l_server_create_session_req_and_resp_sm */
+
+Operation(refinement_of_l_server_create_session_req_and_resp_sm) & Pattern(dom(a) <: dom(b<+c|>>d))
+    & ff(0) & dd(0) & ah(dom(a_NonceServer$1) <: dom(a_state$1|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(refinement_of_l_server_create_session_req_and_resp_sm) & Pattern(dom(a) <: dom(e<|(b<+c)|>>d))
+    & ff(0) & pr(Tac(simplify_restriction));
+
+Operation(refinement_of_l_server_create_session_req_and_resp_sm) & Pattern(ran(a<<|b) <: c)
+    & ff(0) & dd(0) & dc(p_session: s_client_session$1) & dd(0) & ah(ran({max_attempts_reached_server_session$1}<<|(a_server_user_auth_attempts$1<+{p_session|->0})) = ran({max_attempts_reached_server_session$1}<<|a_server_user_auth_attempts$1)\/{0}) & pr & mp & ah(dom(a_server_user_auth_attempts$1) = s_session$1-{p_session}-s_client_session$1) & pp(rt.0) & dd(0) & eh(max_attempts_reached_server_session$1,_h,Goal) & eh(ran({c_session_indet}<<|(a_server_user_auth_attempts$1<+{p_session|->0})),_h,Goal) & eh(c_session_indet,_h,Goal) & ah(max_attempts_reached_server_session = max_attempts_reached_server_session$1) & pr;
+
+Operation(refinement_of_l_server_create_session_req_and_resp_sm) & Pattern(dom(a) = dom(b<<|(c<+d)))
+    & ff(0) & dd(0) & dc(p_session: s_client_session$1) & pr & pr(Tac(SimplifyRelDomXY;AssociativityXY));
+
+Operation(refinement_of_l_server_create_session_req_and_resp_sm) & Pattern(a => b)
+    & ff(0) & dd(0) & ar(SplitOr.2,Once) & dd(0) & se(e_sc_bad_security_checks_failed) & pr & pr & ar(SimplifyRelDoaLongXY.1,Goal) & pr & ar(SimplifyRelDoaLongXY.1,Goal) & pr & pr & ar(SimplifyRelDoaLongXY.1,Goal) & pr;
+
+Operation(refinement_of_l_server_create_session_req_and_resp_sm) & Pattern(a => b)
+    & ff(0) & dd(0) & ar(SplitOr.2,Once) & pr(Tac(s1;SimplifyRelDoaLongXY));
+
+Operation(refinement_of_l_server_create_session_req_and_resp_sm) & Pattern(a => b)
+    & ff(0) & dd(0) & ar(SplitOr.1,Once) & dd(0) & se(l_ntoken) & pr;
+
+/* END refinement_of_l_server_create_session_req_and_resp_sm */
+
+/* refinement_of_l_server_write_create_session_resp */
+
+Operation(refinement_of_l_server_write_create_session_resp) & Pattern(a = b & #c.(d) or #e.(f & g))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & pr(Tac(th_eh_pred; th_simp));
+
+Operation(refinement_of_l_server_write_create_session_resp) & Pattern(a => b)
+    & ff(0) & dd(0) & ar(SplitOr.1,Once) & dd(0) & se(a_NonceServer$2,a_server_client_app_desc$2,a_server_client_cert_tb$2,a_server_session_name$2) & pr & ah(dom(a_state$1|>>{e_session_init,e_session_creating}) <: dom(a_state$1)) & pr & dd & ar(InPOWLeavesXY.68,Once) & pr & ah(dom(a_NonceServer$1) <: dom(a_state$1|>>{e_session_init,e_session_creating})) & ss & pp(rt.0) & ar(membership.2,Goal) & ar(simplify_inverse.2,Goal) & pr & eh(a_state$1(p_session),_h,Goal) & pr & pr & eh(a_NonceServer$2,_h,Goal) & ar(SimplifyRelDoaLongXY.1,Goal) & pr & eh(a_server_client_app_desc$2,_h,Goal) & ar(SimplifyRelDoaLongXY.1,Goal) & pr & eh(a_server_client_cert_tb$2,_h,Goal) & ar(SimplifyRelDoaLongXY.1,Goal) & pr & eh(a_server_session_name$2,_h,Goal) & ar(SimplifyRelDoaLongXY.1,Goal) & pr & pr & pr & pr & pr;
+
+/* END refinement_of_l_server_write_create_session_resp */
+
+/* refinement_of_server_internal_activate_req_and_resp */
+
+Operation(refinement_of_server_internal_activate_req_and_resp) & Pattern(a & b & #c.(d) or (e = f & g = h))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+
+Operation(refinement_of_server_internal_activate_req_and_resp)
+    & ff(0) & dd(0) & ar(SplitOr.1,Once) & pr(Tac(simplify_override;SimplifyRelDoaXY));
+
+/* END refinement_of_server_internal_activate_req_and_resp */
+
+/* refinement_of_l_server_secure_channel_lost_session_sm */
+
+Operation(refinement_of_l_server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(a<<|c|>>d))
+    & ff(0) & dd(0) & ar(CommutativityXY.21,Goal) & pr(Tac(SimplifyRelDomXY));
+
+Operation(refinement_of_l_server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(a<<|c|>>d))
+    & ff(0) & dd(0) & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDomXY.13,Goal) & ar(InPOWXY.24,Once) & ah(dom(a_state$1|>>{e_session_init,e_session_creating}) <: dom(a_state$1|>>{e_session_init,e_session_creating})-{p_session}\/{p_session}) & pr & dd & pr(Tac(InPOWLeavesXY));
+
+Operation(refinement_of_l_server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c<<|(a<<|d)|>>e))
+    & ff(0) & dd(0) & ah(dom(a_user_server$1) = dom(s_client_session$1<<|a_state$1|>>{e_session_created})) & pp(rt.0);
+
+Operation(refinement_of_l_server_secure_channel_lost_session_sm) & Pattern(ran(a|>>b) = dom(b<<|c)-d)
+    & ff(0) & dd(0) & ar(SimplifyRelDomXY.13,Goal) & ar(SimplifyRelRanXY.11,Goal) & eh(ran(a_server_token$1),_h,Goal) & pr(Tac(AssociativityXY));
+
+Operation(refinement_of_l_server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(c<<|(a<<|d)|>>e))
+    & ff(0) & dd(0) & ah(dom(a_session_roles$1) <: dom(s_client_session$1<<|a_state$1|>>{e_session_created})) & pp(rt.0);
+
+/* END refinement_of_l_server_secure_channel_lost_session_sm */
+
+/* local operations */
+
+Operation(l_client_secure_channel_lost_session_sm) & Pattern(ran(a<<|b) : POW(c..d))
+    & ff(0) & dd(0) & eh(a_server_user_auth_attempts$2,_h,Goal) & ah(ran({max_attempts_reached_server_session}<<|({p_session}<<|a_server_user_auth_attempts)) <: ran({max_attempts_reached_server_session}<<|a_server_user_auth_attempts)) & pr & pr(Tac(InPOWTryXY)) & dd & pr & pr & pr;
+
+Operation(l_client_secure_channel_lost_session_sm) & Pattern(dom(a) <: dom(b<|c|>>d))
+    & ff(0) & dd(0) & eh(a_state$2,_h,Goal) & ah(dom(s_client_session<|(a_state<+{p_session|->e_session_scOrphaned})|>>{e_session_init}) = dom(s_client_session<|a_state|>>{e_session_init})\/{p_session}) & ah(p_session: dom(s_client_session<|(a_state<+{p_session|->e_session_scOrphaned})|>>{e_session_init})) & ah(p_session: s_client_session) & ah(p_session: a_channel~[{a_channel(p_session)}]) & pr & ah(a_channel~[{a_channel(p_session)}] <: s_client_session) & pp(rt.0) & pp(rt.0) & pp(rt.0) & dd & eh(dom(s_client_session<|(a_state<+{p_session|->e_session_scOrphaned})|>>{e_session_init}),_h,Goal) & pr;
+
+Operation(l_server_secure_channel_lost_session_sm) & Pattern(ran(a<<|b) : POW(c..d))
+    & ff(0) & dd(0) & eh(a_server_user_auth_attempts$2,_h,Goal) & ah(ran({max_attempts_reached_server_session}<<|({p_session}<<|a_server_user_auth_attempts)) <: ran({max_attempts_reached_server_session}<<|a_server_user_auth_attempts)) & pr & pr(Tac(InPOWTryXY)) & dd & pr & pr & pr;
+
+Operation(l_server_secure_channel_lost_session_sm) & Pattern(dom(a) <: dom(b<|c|>>d))
+    & ff(0) & pr(Tac(simplify_restriction));
+
+Operation(l_server_create_session_req_and_resp_sm) & Pattern(ran(a<<|(b<<|c)) <: d)
+    & ff(0) & dd(0) & ah(ran({max_attempts_reached_server_session}<<|({p_session}<<|a_server_user_auth_attempts)) <: ran({max_attempts_reached_server_session}<<|a_server_user_auth_attempts)) & pr & pr(Tac(InPOWTryXY)) & dd & pr & pr & pr;
+
+Operation(server_internal_activate_req_and_resp) & Pattern(dom(a) <: dom(b<|(c<+d)|>>e))
+    & ff(0) & pr(Tac(simplify_restriction));
+
+Operation(client_user_activate_session_req_sm) & Pattern(a & b & #c.(d) or (e & f & (g & h)))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+
+Operation(client_user_activate_session_req_sm) & Pattern(a & b & #c.(d) or (e & f & g = h))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+
+Operation(l_client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(c<|(a<<|d)|>>e))
+    & ff(0) & dd(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & pp(rt.0);
+
+Operation(l_server_create_session_req_and_resp_sm) & Pattern(ran(a<<|b) : POW(c..d))
+    & ff(0) & dd(0) & ah(ran({max_attempts_reached_server_session}<<|a_server_user_auth_attempts) <: 0..k_n_UserAuthAttempts_max-1) & ah(0 : 0..k_n_UserAuthAttempts_max-1) & pr & pp(rt.0);
+
+Operation(l_server_create_session_req_and_resp_sm) & Pattern(dom(a) <: dom(b<|(c<+d)|>>e))
+    & ff(0) & pr(Tac(simplify_restriction));
+
+/* END local operations */
+
+Operation(server_get_session_from_token)
+    & ff(0) & ar(PatchProverB0;th_eh_hyp_loc;SUB;th_simp) & dd(0) & pr(Tac(th_eh_pred;th_simp));
+
+Operation(server_close_session_req_and_resp_sm)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+
+Operation(client_close_session_resp_sm)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+
+Operation(client_close_session_sm)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+
+Operation(server_close_session_sm)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+
+Pattern(dom(a<<|b) = c-a-(d-a))
+    & ff(0) & dd(0) & ar(SimplifySetSubXY.5,Goal) & ar(SimplifyRelDomXY.13,Goal) & eh(dom(a_server_user_auth_attempts$1),_h,Goal) & ar(AssociativityXY.3,Goal) & pr
 END
 
 &
@@ -40,19 +683,6 @@ THEORY Simp_Delete IS
   =>
   r|>>{x} == r
 ;
-  binhyp(not(x: dom(r))) &
-  band(binhyp(not(y: A)),
-       binhyp(r: B +-> A)) &
-  blvar(Q) & Q\(x,y,r)
-  =>
-  r<+{x|->y}|>>{y} == r
-;
-  band(binhyp(not(x: A)),
-       binhyp(r: A <-> B)) &
-  blvar(Q) & Q\(x,r)
-  =>
-  {x}<<|(r<+{x|->y}) == r
-;
   band(binhyp(not(x: A)),
        binhyp(r: A <-> B)) &
   blvar(Q) & Q\(x,r)
@@ -63,12 +693,173 @@ END
 
 &
 
-THEORY ContradictingState IS
+THEORY membership IS
 
-  band(binhyp(a = b),
-  band(binhyp(a = c), bnot(bpattern(b,c)))) &  /* TODO improve */
-  not(b = c)
-  =>
-  G
+   /* Rule Systerel.1209 - bd.196 [ed053ce51e3ffa52db1ab0c709b77107] */
+   bcall1(BackwardRule(Systerel.1209)) &
+   binhyp(a : dom(c)) &
+   dom(c) : POW(b)
+   =>
+   a : b
+   ;
+   /* Rule Systerel.362 - bd.353 [b00b8dcb73f4096087bee756b833c7e7] */
+   bcall1(AtomicRule(Systerel.362))
+   =>
+   {a} /\ b = {} == not(a : b)
+
+END
+
+&
+
+THEORY dom_eq IS
+
+   /* Rule Systerel.33 - bd.31 [c0c2bd8666718a180123c7e4af086a36] */
+   bcall1(BackwardRule(Systerel.33)) &
+   binhyp(dom(a) = b) &
+   blvar(c) &
+   c\(a,b)
+   =>
+   dom(a) == b
+
+END
+
+&
+
+THEORY dom_rewrite IS
+
+   /* Rule Systerel.1033 - bd.21 [ec6ddedaa40186472c78a674bd49151a] */
+   bcall1(BackwardRule(Systerel.1033)) &
+   binhyp({c} <<| a = {c} <<| b) &
+   bguard(th_fct : (a : dom(a) +-> ran(a))) &
+   c : dom(a) &
+   bnot(bpattern(c,(d,e))) &
+   blvar(f) &
+   f\(a,b,c)
+   =>
+   dom(a) == dom(b <+ {c |-> a(c)})
+
+END
+
+&
+
+THEORY simplify_restriction IS
+
+   /* Rule Systerel.225 - bd.222 [62e97f2ce8686d0b7a26f0da8cc1dd3e] */
+   bcall1(BackwardRule(Systerel.225)) &
+   not(c : a) &
+   blvar(e) &
+   e\(a,c)
+   =>
+   a <| (b <+ {c |-> d}) == a <| b
+
+END
+
+&
+
+THEORY simplify_override IS
+
+   /* Rule Systerel.220 - bd.217 [a45859aa1b784701412069c8f12b41c5] */
+   bcall1(AtomicRule(Systerel.220))
+   =>
+   a <+ {b |-> c} == {b} <<| a \/ {b |-> c}
+;
+   /* Rule Systerel.1383 - bd.369 [ed2599c7ef730d4bf77fc232a8e76216] */
+   bcall1(BackwardRule(Systerel.1383)) &
+   not(c : dom(b)) &
+   blvar(d) &
+   d\(b,c)
+   =>
+   (a <+ b)(c) == a(c)
+
+END
+
+&
+
+THEORY simplify_inverse IS
+
+   /* Rule Systerel.41 - bd.39 [c8086410f509040af5ad5973792d1f25] */
+   bcall1(BackwardRule(Systerel.41)) &
+   binhyp(b : d +-> e) &
+   a : dom(b) &
+   blvar(f) &
+   f\(a,c,b)
+   =>
+   a : b~[{c}] == (b(a) = c)
+;
+   /* Rule Systerel.755 - bd.743 [bde94360ffc04991f194370d817ed7b0] */
+   bcall1(BackwardRule(Systerel.755)) &
+   binhyp(b : d +-> e) &
+   a : dom(b) &
+   blvar(f) &
+   f\(a,b)
+   =>
+   a : b~[c] == (b(a) : c)
+
+END
+
+&
+
+THEORY simplify_dom_subtraction IS
+
+   /* Rule Systerel.1598 - bd.583 [60d9c0db22906230fb64645462206e81] */
+   bcall1(BackwardRule(Systerel.1598)) &
+   dom(b) /\ a = {} &
+   blvar(c) &
+   c\(b,a)
+   =>
+   a <<| b == b
+;
+   /* Rule Systerel.1501 - bd.486 [9cb062da1e506b775826bb6083f75557] */
+   bcall1(BackwardRule(Systerel.1501)) &
+   binhyp(b = d) &
+   blvar(e) &
+   e\(b,d)
+   =>
+   a <<| b = c == (a <<| d = c)
+
+END
+
+&
+
+THEORY diff_distrib_union IS
+
+   /* Rule Systerel.1554 - bd.539 [d4c54317cac88971cf38900c117ea05d] */
+   bcall1(BackwardRule(Systerel.1554))
+   =>
+   (a \/ b)-c == a-c \/ b-c
+
+END
+
+&
+
+THEORY inclusion_transitivity IS
+
+   /* Rule Systerel.1123 - bd.111 [60d1a3c1671867ea2157daca8c308ced] */
+   bcall1(BackwardRule(Systerel.1123)) &
+   a : POW(b)
+   =>
+   a : POW(b \/ c)
+
+END
+
+&
+
+THEORY cartesian_factorisation IS
+
+   /* Rule Systerel.459 - bd.449 [e07301ce67aee24aaa9b2ba45a82d4d5] */
+   bcall1(AtomicRule(Systerel.459))
+   =>
+   a*b /\ c*b == (a /\ c)*b
+
+END
+
+&
+
+THEORY De_Morgan_law IS
+
+   /* Rule Systerel.1256 - bd.243 [819ee8b20d2963ef3ccf16c2f2a6023c] */
+   bcall1(AtomicRule(Systerel.1256))
+   =>
+   not(a & b) == (not(a) or not(b))
 
 END

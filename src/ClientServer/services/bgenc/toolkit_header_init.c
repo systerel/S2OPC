@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 03/11/2026 08:33:49
+ Date                 : 18/11/2026 09:48:36
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -181,6 +181,7 @@
 #include "session_core_1.h"
 #include "session_core_1_it.h"
 #include "session_core_2.h"
+#include "session_core_3.h"
 #include "session_core_bs.h"
 #include "session_core_it.h"
 #include "session_mgr.h"
@@ -308,6 +309,7 @@ void INITIALISATION(void) {
    session_roles_granted_bs__INITIALISATION();
    session_roles__INITIALISATION();
    session_core_1_it__INITIALISATION();
+   session_core_3__INITIALISATION();
    session_core_2__INITIALISATION();
    session_core_bs__INITIALISATION();
    session_core_1__INITIALISATION();

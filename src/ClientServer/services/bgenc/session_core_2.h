@@ -21,9 +21,9 @@
 
  File Name            : session_core_2.h
 
- Date                 : 22/09/2026 15:23:35
+ Date                 : 18/11/2026 09:48:10
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -35,6 +35,11 @@
   --------------------------*/
 #include "b2c.h"
 
+/*-----------------
+   IMPORTS Clause
+  -----------------*/
+#include "session_core_3.h"
+
 /*--------------
    SEES Clause
   --------------*/
@@ -44,41 +49,45 @@
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
 
-/*----------------------------
-   CONCRETE_VARIABLES Clause
-  ----------------------------*/
-extern constants__t_channel_i session_core_2__a_channel_i[constants__t_session_i_max+1];
-extern t_entier4 session_core_2__a_channel_nb_sessions_i[constants__t_channel_i_max+1];
-extern constants__t_channel_config_idx_i session_core_2__a_client_orphaned_i[constants__t_session_i_max+1];
-extern t_bool session_core_2__a_client_session_i[constants__t_session_i_max+1];
-extern constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants__t_session_i_max+1];
-extern constants__t_ApplicationDescription_i session_core_2__a_server_client_app_desc_i[constants__t_session_i_max+1];
-extern constants__t_CertThumbprint_i session_core_2__a_server_client_cert_tb_i[constants__t_session_i_max+1];
-extern constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
-extern constants__t_SessionName_i session_core_2__a_server_session_name_i[constants__t_session_i_max+1];
-extern t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
-extern constants__t_timeref_i session_core_2__a_session_init_time_i[constants__t_session_i_max+1];
-extern constants__t_sessionRoles_i session_core_2__a_session_roles_i[constants__t_session_i_max+1];
-extern constants__t_sessionState_i session_core_2__a_state_i[constants__t_session_i_max+1];
-extern t_entier4 session_core_2__card_s_session_i;
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 extern void session_core_2__INITIALISATION(void);
 
-/*---------------------
-   Inlined OPERATIONS
-  ---------------------*/
-#define session_core_2__get_session_roles(session_core_2__p_session, \
-   session_core_2__p_session_roles) { \
-   *session_core_2__p_session_roles = session_core_2__a_session_roles_i[session_core_2__p_session]; \
-}
-
-#define session_core_2__get_server_session_name(session_core_2__p_session, \
-   session_core_2__p_sessionName) { \
-   *session_core_2__p_sessionName = session_core_2__a_server_session_name_i[session_core_2__p_session]; \
-}
+/*-------------------------------
+   PROMOTES and EXTENDS Clauses
+  -------------------------------*/
+#define session_core_2__get_card_s_session session_core_3__get_card_s_session
+#define session_core_2__get_channel_nb_sessions session_core_3__get_channel_nb_sessions
+#define session_core_2__get_init_time session_core_3__get_init_time
+#define session_core_2__get_server_session_client_app_desc session_core_3__get_server_session_client_app_desc
+#define session_core_2__get_server_session_client_cert_tb session_core_3__get_server_session_client_cert_tb
+#define session_core_2__get_server_session_name session_core_3__get_server_session_name
+#define session_core_2__get_server_session_preferred_locales session_core_3__get_server_session_preferred_locales
+#define session_core_2__get_server_session_user_auth_attempts session_core_3__get_server_session_user_auth_attempts
+#define session_core_2__get_session_channel session_core_3__get_session_channel
+#define session_core_2__get_session_roles session_core_3__get_session_roles
+#define session_core_2__get_session_state session_core_3__get_session_state
+#define session_core_2__getall_orphaned session_core_3__getall_orphaned
+#define session_core_2__getall_session_channel session_core_3__getall_session_channel
+#define session_core_2__getall_to_create session_core_3__getall_to_create
+#define session_core_2__is_client_session session_core_3__is_client_session
+#define session_core_2__is_valid_session session_core_3__is_valid_session
+#define session_core_2__reset_server_client_create_session_info session_core_3__reset_server_client_create_session_info
+#define session_core_2__reset_server_session_preferred_locales session_core_3__reset_server_session_preferred_locales
+#define session_core_2__reset_server_session_roles session_core_3__reset_server_session_roles
+#define session_core_2__reset_server_session_user_auth_attempts session_core_3__reset_server_session_user_auth_attempts
+#define session_core_2__reset_session_orphaned session_core_3__reset_session_orphaned
+#define session_core_2__reset_session_to_create session_core_3__reset_session_to_create
+#define session_core_2__set_client_orphaned session_core_3__set_client_orphaned
+#define session_core_2__set_server_session_client_app_desc session_core_3__set_server_session_client_app_desc
+#define session_core_2__set_server_session_client_cert_tb session_core_3__set_server_session_client_cert_tb
+#define session_core_2__set_server_session_name session_core_3__set_server_session_name
+#define session_core_2__set_server_session_preferred_locales session_core_3__set_server_session_preferred_locales
+#define session_core_2__set_server_session_user_auth_attempts session_core_3__set_server_session_user_auth_attempts
+#define session_core_2__set_session_roles_2 session_core_3__set_session_roles_2
+#define session_core_2__set_session_state_1 session_core_3__set_session_state_1
+#define session_core_2__set_session_to_create session_core_3__set_session_to_create
 
 /*--------------------
    OPERATIONS Clause
@@ -87,100 +96,12 @@ extern void session_core_2__add_session(
    const constants__t_session_i session_core_2__p_session,
    const t_bool session_core_2__p_is_client,
    const constants__t_timeref_i session_core_2__p_timeref);
-extern void session_core_2__get_card_s_session(
-   t_entier4 * const session_core_2__p_nb_sessions);
-extern void session_core_2__get_channel_nb_sessions(
-   const constants__t_channel_i session_core_2__p_channel,
-   t_entier4 * const session_core_2__p_nb_sessions);
-extern void session_core_2__get_init_time(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_timeref_i * const session_core_2__p_timeref);
-extern void session_core_2__get_server_session_client_app_desc(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_ApplicationDescription_i * const session_core_2__p_cliAppDesc);
-extern void session_core_2__get_server_session_client_cert_tb(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_CertThumbprint_i * const session_core_2__p_cliCertTb);
-extern void session_core_2__get_server_session_preferred_locales(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_LocaleIds_i * const session_core_2__p_localeIds);
-extern void session_core_2__get_server_session_user_auth_attempts(
-   const constants__t_session_i session_core_2__p_session,
-   t_entier4 * const session_core_2__p_attempts);
-extern void session_core_2__get_session_channel(
-   const constants__t_session_i session_core_2__session,
-   constants__t_channel_i * const session_core_2__channel);
-extern void session_core_2__get_session_state(
-   const constants__t_session_i session_core_2__session,
-   constants__t_sessionState_i * const session_core_2__state);
-extern void session_core_2__getall_orphaned(
-   const constants__t_session_i session_core_2__p_session,
-   t_bool * const session_core_2__p_dom,
-   constants__t_channel_config_idx_i * const session_core_2__p_channel_config_idx);
-extern void session_core_2__getall_session_channel(
-   const constants__t_session_i session_core_2__p_session,
-   t_bool * const session_core_2__p_dom,
-   constants__t_channel_i * const session_core_2__p_channel);
-extern void session_core_2__getall_to_create(
-   const constants__t_session_i session_core_2__p_session,
-   t_bool * const session_core_2__p_dom,
-   constants__t_channel_config_idx_i * const session_core_2__p_channel_config_idx);
-extern void session_core_2__is_client_session(
-   const constants__t_session_i session_core_2__p_session,
-   t_bool * const session_core_2__ret);
-extern void session_core_2__is_valid_session(
-   const constants__t_session_i session_core_2__session,
-   t_bool * const session_core_2__ret);
 extern void session_core_2__remove_session(
-   const constants__t_session_i session_core_2__p_session);
-extern void session_core_2__reset_server_client_create_session_info(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_ApplicationDescription_i * const session_core_2__p_cliAppDesc,
-   constants__t_CertThumbprint_i * const session_core_2__p_certTb,
-   constants__t_SessionName_i * const session_core_2__p_sessionName);
-extern void session_core_2__reset_server_session_preferred_locales(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_LocaleIds_i * const session_core_2__p_localeIds);
-extern void session_core_2__reset_server_session_roles(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_sessionRoles_i * const session_core_2__p_roles);
-extern void session_core_2__reset_server_session_user_auth_attempts(
    const constants__t_session_i session_core_2__p_session);
 extern void session_core_2__reset_session_channel(
    const constants__t_session_i session_core_2__p_session);
-extern void session_core_2__reset_session_orphaned(
-   const constants__t_session_i session_core_2__p_session);
-extern void session_core_2__reset_session_to_create(
-   const constants__t_session_i session_core_2__p_session);
-extern void session_core_2__set_client_orphaned(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx);
-extern void session_core_2__set_server_session_client_app_desc(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_ApplicationDescription_i session_core_2__p_cliAppDesc);
-extern void session_core_2__set_server_session_client_cert_tb(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_CertThumbprint_i session_core_2__p_cliCertTb);
-extern void session_core_2__set_server_session_name(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_SessionName_i session_core_2__p_sessionName);
-extern void session_core_2__set_server_session_preferred_locales(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_LocaleIds_i session_core_2__p_localesIds);
-extern void session_core_2__set_server_session_user_auth_attempts(
-   const constants__t_session_i session_core_2__p_session,
-   const t_entier4 session_core_2__p_attempts);
 extern void session_core_2__set_session_channel(
    const constants__t_session_i session_core_2__session,
    const constants__t_channel_i session_core_2__p_channel);
-extern void session_core_2__set_session_roles_2(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_sessionRoles_i session_core_2__p_roles);
-extern void session_core_2__set_session_state_1(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_sessionState_i session_core_2__p_state);
-extern void session_core_2__set_session_to_create(
-   const constants__t_session_i session_core_2__p_session,
-   const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx);
 
 #endif

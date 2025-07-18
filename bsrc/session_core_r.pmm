@@ -1,0 +1,53 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+THEORY User_Pass IS
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & ah({l_nsession}<<|a_NonceServer$2 = {l_nsession}<<|a_NonceServer$1) & ah(a_NonceServer$1: s_session$1 +-> t_Nonce) & ah(a_NonceServer$2: t_session +-> t_Nonce) & pp(rt.0);
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(ran(a) = b-c)
+    & ff(0) & dd(0) & pr & pr;
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(dom(a<+b) = dom(c<+d|>>e))
+    & ff(0) & dd(0) & ah(dom(a_channel$1) = dom(a_state$1|>>{e_session_init,e_session_scOrphaned})) & pp(rt.0);
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(dom(a) <: dom(b<+c|>>d))
+    & ff(0) & dd(0) & ah({l_nsession}<<|a_NonceServer$2 = {l_nsession}<<|a_NonceServer$1) & ah(dom(a_NonceServer$1) <: dom(a_state$1|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(a: b)
+    & ff(0) & dd(0) & pr & ah(service_ret$0: {e_sc_bad_too_many_sessions,e_sc_bad_security_checks_failed,e_sc_bad_unexpected_error,e_sc_bad_nonce_invalid,e_sc_bad_certificate_uri_invalid,e_sc_bad_invalid_argument,e_sc_bad_out_of_memory}) & pp(rt.0) & ah(service_ret$0: {e_sc_bad_too_many_sessions,e_sc_bad_security_checks_failed,e_sc_bad_unexpected_error,e_sc_bad_nonce_invalid,e_sc_bad_certificate_uri_invalid,e_sc_bad_invalid_argument,e_sc_bad_out_of_memory}) & pp(rt.0);
+
+Operation(server_activate_session_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & ah(dom(a_NonceServer$2) <: s_session$1) & ah(session: s_session$1) & ah({session}<<|a_NonceServer$2 = {session}<<|a_NonceServer$1) & ah(a_NonceServer$1: s_session$1 +-> t_Nonce) & pp(rt.0) & ah(a_NonceServer$2: t_session +-> t_Nonce) & pp(rt.0);
+
+Operation(server_activate_session_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & ah(dom(a_session_roles$2) <: s_session$1) & ah(session: s_session$1) & ah({session}<<|a_session_roles$2 = {session}<<|a_session_roles$1) & ah(a_session_roles$1: s_session$1 +-> t_sessionRoles) & pp(rt.0) & ah(a_session_roles$2: t_session +-> t_sessionRoles) & pp(rt.0);
+
+Operation(server_activate_session_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & ah(dom(a_user_server$2) <: s_session$1) & ah(session: s_session$1) & ah({session}<<|a_user_server$2 = {session}<<|a_user_server$1) & ah(a_user_server$1: s_session$1 +-> t_user) & pp(rt.0) & ah(a_user_server$2: t_session +-> t_user) & pp(rt.0);
+
+Operation(server_activate_session_req_and_resp_sm) & Pattern(dom(a) <: dom(b<<|(c<+d)|>>e))
+    & ff(0) & dd(0) & ah(session: dom(s_client_session$1<<|(a_state$1<+{session|->e_session_userActivated})|>>{e_session_created})) & mp & ah(not(session: s_client_session$1)) & pp(rt.0) & dd(0) & ah(dom(s_client_session$1<<|(a_state$1<+{session|->e_session_userActivated})|>>{e_session_created}) = dom(s_client_session$1<<|a_state$1|>>{e_session_created})\/{session}) & ah(session: dom(s_client_session$1<<|(a_state$1<+{session|->e_session_userActivated})|>>{e_session_created})) & pp(rt.0) & dd(0) & eh(dom(s_client_session$1<<|(a_state$1<+{session|->e_session_userActivated})|>>{e_session_created}),_h,Goal) & ah(dom(a_session_roles$2)\/{session} = dom(a_session_roles$1)\/{session}) & ah({session}<<|a_session_roles$2 = {session}<<|a_session_roles$1) & pp(rt.0) & dd(0) & ah(dom(a_session_roles$1)\/{session} <: dom(s_client_session$1<<|a_state$1|>>{e_session_created})\/{session}) & ah(dom(a_session_roles$1) <: dom(s_client_session$1<<|a_state$1|>>{e_session_created})) & pp(rt.0) & ah({session}<<|a_session_roles$2 = {session}<<|a_session_roles$1) & pp(rt.0);
+
+Operation(client_user_activate_session_req_sm) & ff(0) & mp & ar(SplitOr.1,Once) & pr;
+
+Operation(may_close_unactivated_session) & ff(0) & mp & ar(SplitOr.1,Once) & pr & se(l_session) & pr
+
+END

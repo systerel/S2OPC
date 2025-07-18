@@ -101,7 +101,8 @@ PROMOTES
     get_server_session_name
 
 INVARIANT
-    s_session = dom(a_state)
+    s_session = dom(a_state) &
+    dom(a_session_init_time) = dom(a_state)
 
 LOCAL_OPERATIONS
 
@@ -141,7 +142,8 @@ LOCAL_OPERATIONS
         p_session : dom(a_state)
     THEN
         a_server_client_app_desc := {p_session} <<| a_server_client_app_desc ||
-        a_server_client_cert_tb  := {p_session} <<| a_server_client_cert_tb
+        a_server_client_cert_tb  := {p_session} <<| a_server_client_cert_tb  ||
+        a_server_session_name    := {p_session} <<| a_server_session_name
     END
 
 OPERATIONS
@@ -316,6 +318,7 @@ OPERATIONS
         // a_server_token
         // a_client_token
         // a_user_client
+        // a_user_server
         // a_user_secu_client
         // a_user_server_cert
         reset_session_to_create(session);
@@ -433,6 +436,8 @@ OPERATIONS
             l_continue = bool(sessions_to_iterate /= {}) &
             sessions_to_iterate /\ sessions_iterated = {} &
             sessions_to_iterate \/ sessions_iterated = t_session &
+
+            (l_oldest_session_timeref = c_timeref_indet or l_oldest_session_timeref : t_timeref) &
 
             (l_oldest_session = c_session_indet or
                 (l_oldest_session : dom(a_state) & a_state(l_oldest_session) = e_session_created)

@@ -47,7 +47,6 @@ INVARIANT
     s_client_session  <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
     a_session_init_time : t_session +-> t_timeref             &
-    dom(a_session_init_time) = dom(a_state)                   &
     a_channel          : t_session +-> t_channel              &
     a_channel_nb_sessions : t_channel --> NAT                 &
     !(channel).(channel : t_channel => a_channel_nb_sessions(channel) = card(a_channel~[{channel}])) &
@@ -187,7 +186,7 @@ OPERATIONS
         session : t_session_i &
         session : dom(a_state)
     THEN
-        state := a_state(session)
+        state :( state : t_sessionState_i & state = a_state(session) )
     END
     ;
 
@@ -221,7 +220,8 @@ OPERATIONS
 
     p_dom, p_channel <-- getall_session_channel (p_session) =
     PRE
-        p_session : t_session_i
+        p_session : t_session_i &
+        p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_channel)) ||
         IF  p_session : dom(a_channel) THEN
@@ -230,7 +230,7 @@ OPERATIONS
                 p_channel = a_channel(p_session)
             )
         ELSE
-            p_channel := c_channel_indet
+            p_channel :: t_channel_i
         END
     END
     ;
@@ -243,7 +243,7 @@ OPERATIONS
         IF  session : dom(a_channel) THEN
             channel :(channel : t_channel_i & channel = a_channel(session))
         ELSE
-            channel := c_channel_indet
+            channel :: t_channel_i
         END
     END
     ;
@@ -361,7 +361,7 @@ OPERATIONS
                        (p_session : dom(a_server_client_app_desc) =>
                            p_cliAppDesc = a_server_client_app_desc(p_session)) &
                        (p_session /: dom(a_server_client_app_desc) =>
-                           p_cliAppDesc = c_ApplicationDescription_indet)
+                           p_cliAppDesc : t_ApplicationDescription_i)
                       )
     END
     ;
@@ -386,7 +386,7 @@ OPERATIONS
                       (p_session : dom(a_server_client_cert_tb) =>
                          p_cliCertTb = a_server_client_cert_tb(p_session)) &
                       (p_session /: dom(a_server_client_cert_tb) =>
-                         p_cliCertTb = c_CertThumbprint_indet)
+                         p_cliCertTb : t_CertThumbprint_i)
                      )
     END
     ;
@@ -461,15 +461,15 @@ OPERATIONS
           (p_session : dom(a_server_client_app_desc) =>
                 p_cliAppDesc = a_server_client_app_desc$0(p_session)) &
           (p_session /: dom(a_server_client_app_desc) =>
-                p_cliAppDesc = c_ApplicationDescription_indet) &
+                p_cliAppDesc : t_ApplicationDescription_i) &
           (p_session : dom(a_server_client_cert_tb) =>
                 p_certTb = a_server_client_cert_tb$0(p_session)) &
           (p_session /: dom(a_server_client_cert_tb) =>
-                p_certTb = c_CertThumbprint_indet) &
+                p_certTb : t_CertThumbprint_i) &
           (p_session : dom(a_server_session_name) =>
                 p_sessionName = a_server_session_name$0(p_session)) &
           (p_session /: dom(a_server_session_name) =>
-                p_sessionName = c_SessionName_indet) &
+                p_sessionName : t_SessionName_i) &
           a_server_client_app_desc = {p_session} <<| a_server_client_app_desc$0 &
           a_server_client_cert_tb = {p_session} <<| a_server_client_cert_tb$0 &
           a_server_session_name = {p_session} <<| a_server_session_name$0

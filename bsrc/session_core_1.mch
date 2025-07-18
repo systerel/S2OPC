@@ -32,6 +32,7 @@ DEFINITIONS
     d_variables ==
     s_session,
     s_client_session,
+    max_attempts_reached_server_session,
 
     /* Common variables */
     a_state,
@@ -61,6 +62,7 @@ DEFINITIONS
     d_typing ==
     s_session                   <: t_session                             &
     s_client_session            <: t_session                             &
+    max_attempts_reached_server_session : t_session_i                    &
 
     a_state                      : t_session +-> t_sessionState          &
     a_channel                    : t_session +-> t_channel               &
@@ -90,11 +92,15 @@ ABSTRACT_VARIABLES
 INVARIANT
     d_typing &
 
-    dom(a_server_client_locales) <: s_session
+    s_session = dom(a_state) &
+    dom(a_server_client_locales) = s_session &
+    ran({max_attempts_reached_server_session} <<| a_server_user_auth_attempts) <: 0..k_n_UserAuthAttempts_max - 1 &
+    dom(a_NonceClient) <: dom(s_client_session <| a_state |>> {e_session_init})
 
 INITIALISATION
     s_session                    := {} ||
     s_client_session             := {} ||
+    max_attempts_reached_server_session := c_session_indet ||
 
     a_state                      := {} ||
     a_channel                    := {} ||
@@ -218,7 +224,8 @@ OPERATIONS
 
     p_dom, p_channel <-- getall_session_channel (p_session) =
     PRE
-        p_session : t_session_i
+        p_session : t_session_i &
+        p_session : t_session
     THEN
         p_dom := bool(p_session : dom(a_channel)) ||
         IF  p_session : dom(a_channel) THEN
@@ -227,7 +234,7 @@ OPERATIONS
                 p_channel = a_channel(p_session)
             )
         ELSE
-            p_channel := c_channel_indet
+            p_channel :: t_channel_i
         END
     END
     ;
@@ -240,7 +247,7 @@ OPERATIONS
         IF  session : dom(a_channel) THEN
             channel :(channel : t_channel_i & channel = a_channel(session))
         ELSE
-            channel := c_channel_indet
+            channel :: t_channel_i
         END
     END
     ;
@@ -261,7 +268,8 @@ OPERATIONS
     THEN
         p_nb_sessions
         :(p_nb_sessions : NAT &
-          p_nb_sessions = card(a_channel~[{p_channel}])
+          p_nb_sessions = card(a_channel~[{p_channel}]) &
+          (p_nb_sessions = 0 <=> (p_channel /: ran(a_channel)))
          )
     END
     ;
@@ -307,7 +315,9 @@ OPERATIONS
           (bres = TRUE =>
            a_NonceServer : t_session +-> t_Nonce &
            {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
-           p_session : dom(a_NonceServer))
+           p_session : dom(a_NonceServer)) &
+          (bres = FALSE =>
+           a_NonceServer = a_NonceServer$0)
         )
     END
     ;
@@ -429,12 +439,16 @@ OPERATIONS
     p_user <-- get_session_user_server (session) =
     PRE
         session : t_session_i &
-        session : t_session   &
-        session : dom(a_user_server)
+        session : t_session
     THEN
-        p_user :(p_user : t_user_i &
-                 p_user : t_user &
-                 p_user = a_user_server (session))
+        p_user :(
+            p_user : t_user_i &
+            (session : dom(a_user_server) =>
+                p_user : t_user &
+                p_user = a_user_server (session)) &
+            (session /: dom(a_user_server) =>
+                p_user = c_user_indet)
+         )
     END
     ;
 
@@ -542,16 +556,27 @@ OPERATIONS
         p_session    : t_session_i &
         p_session    : dom(a_server_user_auth_attempts) &
         p_success    : BOOL &
-        a_server_user_auth_attempts(p_session) < k_n_UserAuthAttempts_max
+        ran(a_server_user_auth_attempts) <: 0..k_n_UserAuthAttempts_max-1 &
+        max_attempts_reached_server_session = c_session_indet
     THEN
-        p_max_reached, a_server_user_auth_attempts :(
+        p_max_reached, a_server_user_auth_attempts, max_attempts_reached_server_session :(
             p_max_reached : BOOL &
             a_server_user_auth_attempts  : t_session +-> NAT &
-            {p_session} <<| a_server_user_auth_attempts = {p_session} <<| a_server_user_auth_attempts$0 &
-            (p_success = TRUE => p_max_reached = FALSE) &
+            max_attempts_reached_server_session : t_session_i &
+            (p_success = TRUE =>
+                p_max_reached = FALSE &
+                a_server_user_auth_attempts = a_server_user_auth_attempts$0 &
+                max_attempts_reached_server_session = c_session_indet) &
             (p_success = FALSE =>
-                a_server_user_auth_attempts(p_session) = a_server_user_auth_attempts$0(p_session) + 1 &
-                p_max_reached = bool(a_server_user_auth_attempts(p_session) >= k_n_UserAuthAttempts_max))
+                (a_server_user_auth_attempts$0(p_session) + 1 /: 0..k_n_UserAuthAttempts_max-1 =>
+                    p_max_reached = TRUE &
+                    a_server_user_auth_attempts = a_server_user_auth_attempts$0<+ {p_session |-> a_server_user_auth_attempts$0(p_session) + 1} &
+                    max_attempts_reached_server_session = p_session) &
+                (a_server_user_auth_attempts$0(p_session) + 1 : 0..k_n_UserAuthAttempts_max-1 =>
+                    p_max_reached = FALSE &
+                    a_server_user_auth_attempts = a_server_user_auth_attempts$0<+ {p_session |-> a_server_user_auth_attempts$0(p_session) + 1} &
+                    max_attempts_reached_server_session = c_session_indet)
+             )
         )
     END
     ;
@@ -718,6 +743,7 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : t_session   &
+        p_session : dom(s_client_session<|a_state|>>{e_session_init}) &
         p_channel : t_channel_i &
         p_channel : s_channel_connected &
         p_channel_config_idx : t_channel_config_idx_i &
@@ -831,7 +857,7 @@ OPERATIONS
         sc_reason : t_StatusCode_i &
         sc_reason : t_StatusCode   &
         dom(a_server_user_auth_attempts) = dom(s_client_session <<| a_state) &
-        dom(a_NonceClient) <: dom(s_client_session <| a_state |>> {e_session_init})
+        max_attempts_reached_server_session : {c_session_indet, session}
     THEN
         s_session                    := s_session - {session}                      ||
         s_client_session             := s_client_session - {session}               ||
@@ -852,7 +878,9 @@ OPERATIONS
         a_client_to_create           := {session} <<| a_client_to_create           ||
         a_client_app_context         := {session} <<| a_client_app_context         ||
         a_server_client_app_desc     := {session} <<| a_server_client_app_desc     ||
-        a_server_client_cert_tb      := {session} <<| a_server_client_cert_tb
+        a_server_client_cert_tb      := {session} <<| a_server_client_cert_tb      ||
+        a_server_session_name        := {session} <<| a_server_session_name        ||
+        max_attempts_reached_server_session := c_session_indet
     END
     ;
 
@@ -969,9 +997,9 @@ OPERATIONS
         session : t_session_i &
         session : t_session   &
         resp_msg : t_msg_i    &
-        resp_msg = c_msg_in   &
-        c_msg_in : t_msg      &
-        a_msg_in_type = e_msg_session_create_resp
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_resp
     THEN
         timer_created :: BOOL
     END
@@ -1021,18 +1049,19 @@ OPERATIONS
         a_server_client_app_desc, a_server_client_cert_tb, a_server_session_name
         :(a_server_client_app_desc     : t_session +-> t_ApplicationDescription &
           a_server_client_cert_tb      : t_session +-> t_CertThumbprint &
+          a_server_session_name        : t_session +-> t_SessionName &
           (p_cliAppDesc : t_ApplicationDescription =>
-              a_server_client_app_desc = a_server_client_app_desc$0 \/ {p_session |-> p_cliAppDesc}) &
+              a_server_client_app_desc = a_server_client_app_desc$0<+{p_session |-> p_cliAppDesc}) &
           (p_cliAppDesc /: t_ApplicationDescription =>
               a_server_client_app_desc = a_server_client_app_desc$0) &
           (p_cliCertTb : t_CertThumbprint =>
-              a_server_client_cert_tb = a_server_client_cert_tb$0 \/ {p_session |-> p_cliCertTb}) &
+              a_server_client_cert_tb = a_server_client_cert_tb$0<+{p_session |-> p_cliCertTb}) &
           (p_cliCertTb /: t_CertThumbprint =>
               a_server_client_cert_tb = a_server_client_cert_tb$0) &
           (p_sessionName : t_SessionName =>
-              a_server_session_name =  a_server_session_name$0 \/ {p_session |-> p_sessionName}) &
+              a_server_session_name =  a_server_session_name$0<+{p_session |-> p_sessionName}) &
           (p_sessionName /: t_SessionName =>
-              {p_session} <<| a_server_session_name = a_server_session_name$0)
+              {p_session} <<| a_server_session_name = {p_session} <<| a_server_session_name$0)
         )
     END
     ;
@@ -1057,7 +1086,7 @@ OPERATIONS
                        (p_session : dom(a_server_client_app_desc) =>
                            p_cliAppDesc = a_server_client_app_desc(p_session)) &
                        (p_session /: dom(a_server_client_app_desc) =>
-                           p_cliAppDesc = c_ApplicationDescription_indet)
+                           p_cliAppDesc : t_ApplicationDescription_i)
                       )
     END
     ;
@@ -1071,7 +1100,7 @@ OPERATIONS
                       (p_session : dom(a_server_client_cert_tb) =>
                          p_cliCertTb = a_server_client_cert_tb(p_session)) &
                       (p_session /: dom(a_server_client_cert_tb) =>
-                         p_cliCertTb = c_CertThumbprint_indet)
+                         p_cliCertTb : t_CertThumbprint_i)
                      )
     END
     ;

@@ -21,9 +21,9 @@
 
  File Name            : session_mgr.h
 
- Date                 : 09/03/2026 16:29:44
+ Date                 : 18/11/2026 09:48:12
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -103,6 +103,13 @@ extern void session_mgr__local_client_validate_and_drop_session_req_session_hand
    const constants__t_client_request_handle_i session_mgr__req_handle,
    t_bool * const session_mgr__bres,
    constants__t_session_i * const session_mgr__session);
+extern void session_mgr__local_server_activate_session_req_and_resp_sm(
+   const constants__t_channel_i session_mgr__channel,
+   const constants__t_session_i session_mgr__session,
+   const constants__t_user_i session_mgr__user,
+   const constants__t_msg_i session_mgr__activate_req_msg,
+   const constants__t_msg_i session_mgr__activate_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const session_mgr__ret);
 extern void session_mgr__local_session_get_endpoint_config(
    const constants__t_session_i session_mgr__p_session,
    constants__t_endpoint_config_idx_i * const session_mgr__endpoint_config_idx);

@@ -19,105 +19,588 @@
 
 THEORY User_Pass IS
 
-ff(0) & dd(0) & ar(th_simp_overload) & ar(InPOWTryXY);
-ff(0) & dd(0) & pr(Tac(LinkedRelations; InPOWTryXY));
-ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(dom(a_channel)) & pr;
-ff(0) & d0 & pr(Tac(th_simp_overload; InPOWLeavesXY));
-ff(0) & dd(0) & ar(LinkedRelations) & mp & mp & eh(dom(a_user)) & pr;
-ff(0) & mp & pp(rt.1);
-ff(0) & dd & pp(rt.1)
-END
+/* client_init_session */
 
+Operation(client_init_session_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & ar(SimplifyRelRaaLongXY.1,Goal) & ah({l_nsession|->e_session_init}|>>{e_session_init,e_session_scOrphaned} = {}) & pr & pr;
+
+Operation(client_init_session_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & mp & eh(dom(a_user_server),_h,Goal) & mp(Tac(rewriting)) & ar(SimplifyRelDoaLongXY.3,Goal) & ah(s_client_session\/{l_nsession}<<|{l_nsession|->e_session_init} = {})
+    & pr & dd(0) & eh(s_client_session\/{l_nsession}<<|{l_nsession|->e_session_init},_h,Goal) & mp(Tac(SimplifyRelDoaLongXY))
+    & ah(s_client_session<<|a_state/\a_state = s_client_session<<|a_state) & pr & pr;
+
+Operation(client_init_session_sm) & Pattern(ran(a) = (b\/c)-(d\/c))
+    & ff(0) & pr(Tac(AssociativityXY)) & pr;
+
+Operation(client_init_session_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & mp(Tac(SimplifyRelDorLongXY)) & ar(SimplifyRelRaaLongXY.6,Goal) & ah({l_nsession|->e_session_init}|>>{e_session_init,e_session_creating} = {})
+    & pr & dd & eh({l_nsession|->e_session_init}|>>{e_session_init,e_session_creating},_h,Goal) & eh(dom(a_client_token),_h,Goal) & mp;
+
+Operation(client_init_session_sm) & Pattern(dom(a_session_roles) <: dom(s_client_session\/{l_nsession}<<|(a_state<+{l_nsession|->e_session_init})|>>{e_session_created}))
+    & ff(0) & dd(0) & ah(dom(s_client_session\/{l_nsession}<<|(a_state<+{l_nsession|->e_session_init})|>>{e_session_created}) = dom(s_client_session<<|a_state|>>{e_session_created})) & ah(not(l_nsession: s_session)) & pp(rt.0) & dd & eh(dom(s_client_session\/{l_nsession}<<|(a_state<+{l_nsession|->e_session_init})|>>{e_session_created}),_h,Goal) & pr
+     & ah({l_nsession|->e_session_init}|>>{e_session_init,e_session_created} = {})
+     & pr
+     & pr;
+
+Operation(client_init_session_sm) & Pattern(dom(a) = dom(b|>c))
+    & ff(0) & mp(Tac(simplify)) & pr;
+
+Operation(client_init_session_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp & ar(SimplifyRelRaaLongXY.1,Goal) & ah({l_nsession|->e_session_init}|>>{e_session_init,e_session_creating} = {}) & pr
+    & dd & eh({l_nsession|->e_session_init}|>>{e_session_init,e_session_creating},_h,Goal)
+    & ah(dom(dom({l_nsession|->e_session_init})<<|a_state|>>{e_session_init,e_session_creating}\/{}) = dom(a_state|>>{e_session_init,e_session_creating}))
+    & pr & dd & eh(dom(dom({l_nsession|->e_session_init})<<|a_state|>>{e_session_init,e_session_creating}\/{}),_h,Goal) & pr;
+
+Operation(client_init_session_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp(Tac(simplify; SimplifyRelDoaLongXY; SimplifyRelRaaLongXY))
+    & ah(s_client_session<<|a_state|>>{e_session_created}/\(a_state|>>{e_session_created}) = s_client_session<<|a_state|>>{e_session_created})
+    & pr & dd & eh(s_client_session<<|a_state|>>{e_session_created}/\(a_state|>>{e_session_created}),_h,Goal) & pr;
+
+/*Fin client_init_session */
+
+/* client_create_session_req */
+
+Operation(client_create_session_req_sm) & Pattern(dom(a<+b) = dom(c|>>d))
+    & ff(0) & mp(Tac(rewriting)) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(CommutativityXY.21,Goal) & ar(simplify_2.1,Goal) & pr & eh(dom(a_channel),_h,Goal)
+    & ar(SimplifyRelRaaLongXY.2,Goal) & pr;
+
+Operation(client_create_session_req_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & mp(Tac(rewriting)) & ar(CommutativityXY.20,Goal) & ar(SimplifyRelRaaLongXY.6,Goal)
+    & ah({session|->e_session_creating}|>>{e_session_init,e_session_creating} = {}) & pr & dd
+    & eh({session|->e_session_creating}|>>{e_session_init,e_session_creating},_h,Goal) & eh(dom(a_client_token),_h,Goal) & ar(CommutativityXY.21,Goal)
+    & ah({session}<<|(a_state|>>{e_session_init,e_session_creating}) = a_state|>>{e_session_init,e_session_creating}) & mp(Tac(simplify_2))
+    & dd & eh({session}<<|(a_state|>>{e_session_init,e_session_creating}),_h,Goal) & ar(SimplifySetUniXY.36,Goal) & ar(CommutativityXY.15,Goal) & pr;
+
+Operation(client_create_session_req_sm) & Pattern(dom(a) = dom(b|>c))
+    & ff(0) & mp(Tac(SimplifyRelImaLongXY)) & eh(dom(a_client_orphaned),_h,Goal) & ah(session/:a_state~[{e_session_scOrphaned}]) & pr & pr;
+
+Operation(client_create_session_req_sm) & Pattern(dom(a) <: dom(b<+{d}|>>c))
+    & ff(0) & dd & ah(dom(a_state<+{session|->e_session_creating}|>>{e_session_init,e_session_creating}) = dom(a_state|>>{e_session_init,e_session_creating})) &         ah(a_state(session) = e_session_init) & pp(rt.0) & dd & eh(dom(a_state<+{session|->e_session_creating}|>>{e_session_init,e_session_creating}),_h,Goal) & pr;
+
+Operation(client_create_session_req_sm) & Pattern(dom(a) <: dom(b<|c|>>d))
+    & ff(0) & dd(0) & dc(a_SecurityPolicy(channel) = e_secpol_None) & dd(0) & ah(dom(s_client_session<|(a_state<+{session|->e_session_creating})|>>{e_session_init}) = dom(s_client_session<|a_state|>>{e_session_init})\/{session}) & pp(rt.0) & dd(0) & eh(dom(s_client_session<|(a_state<+{session|->e_session_creating})|>>{e_session_init}),_h,Goal) & pr & dd(0) & ah(dom(s_client_session<|(a_state<+{session|->e_session_creating})|>>{e_session_init})-{session} = dom(s_client_session<|a_state|>>{e_session_init})) & ah(session/:dom(s_client_session<|a_state|>>{e_session_init})) & ah(a_state(session) = e_session_init) & pp(rt.0) & pp(rt.0) & dd(0) & ah(dom(a_NonceClient$1)-{session} <: dom(s_client_session<|(a_state<+{session|->e_session_creating})|>>{e_session_init})-{session}) & ah(dom(a_NonceClient$1)-{session} = dom({session}<<|a_NonceClient$1)) & pr & dd(0) & eh(dom(a_NonceClient$1)-{session},_h,Goal) & eh({session}<<|a_NonceClient$1,_h,Goal) & eh(dom(s_client_session<|(a_state<+{session|->e_session_creating})|>>{e_session_init})-{session},_h,Goal) & pr & pp(rt.0);
+
+Operation(client_create_session_req_sm)
+    & ff(0) & mp(Tac(simplify));
+
+/* FIN client_create_session_req */
+
+/* server_create_session_req_and_resp */
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(a : b +-> c)
+    & ff(0) & dd(0) & dc(not(service_ret$1 = e_sc_ok)) & dd(0) & ah(s_client_session<|{nsession$1|->e_session_created} = {}) & pr & dd(0) & pr;
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(dom(a) = dom(d<<|b|>>c))
+    & ff(0) & dd(0) & dc(service_ret$1 = e_sc_ok) & mp & ar(CommutativityXY.21,Goal) & ar(s1.18,Goal) & ar(SimplifyRelDoaXY.4,Goal) & ar(CommutativityXY.19,Goal) & pr;
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(dom(a) <: dom(d<<|b|>>c))
+    & ff(0) & dd(0) & dc(service_ret$1 = e_sc_ok) & mp & ar(CommutativityXY.21,Goal) & ar(s1.18,Goal) & ar(SimplifyRelDoaXY.4,Goal) & ar(CommutativityXY.19,Goal) & pr;
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(dom(a) = dom(d<|b|>>c))
+    & ff(0)
+ & dd(0) & dc(not(service_ret$1 = e_sc_ok)) & ar(SimplifyRelDorLongXY) & dd(0) & ah(s_client_session<|{nsession$1|->e_session_created} = {}) & pr & dd(0) & eh(s_client_session<|{nsession$1|->e_session_created},_h,Goal) & pr;
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(dom(a) <: dom(d<|b|>>c))
+    & ff(0)
+ & dd(0) & dc(not(service_ret$1 = e_sc_ok)) & ar(SimplifyRelDorLongXY) & dd(0) & ah(s_client_session<|{nsession$1|->e_session_created} = {}) & pr & dd(0) & eh(s_client_session<|{nsession$1|->e_session_created},_h,Goal) & pr;
+
+Operation(server_create_session_req_and_resp_sm) & Pattern(dom(a) = dom(d<|b|>c))
+    & ff(0)
+ & dd(0) & dc(not(service_ret$1 = e_sc_ok)) & ar(SimplifyRelDorLongXY) & dd(0) & ah(s_client_session<|{nsession$1|->e_session_created} = {}) & pr & dd(0) & eh(s_client_session<|{nsession$1|->e_session_created},_h,Goal) & pr;
+
+/* FIN server_create_session_req_and_resp */
+
+/* client_create_session_resp */
+Operation(client_create_session_resp_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & mp(Tac(rewriting)) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDomXY.19,Goal)
+    & ah(dom({session|->e_session_created}|>>{e_session_init,e_session_scOrphaned}) = {session}) & ar(SimplifyRelRaaLongXY.2,Goal) & pr
+    & dd & eh(dom({session|->e_session_created}|>>{e_session_init,e_session_scOrphaned}),_h,Goal) & ar(CommutativityXY.21,Goal)
+    & ar(SimplifyRelDomXY.13,Goal) & eh(dom(a_channel),_h,Goal) & ar(simplify_2.2,Goal) & ar(EqualityXY.85,Once) & ar(InPOWXY.13,Once) & pr;
+
+Operation(client_create_session_resp_sm) & Pattern(dom(a) <: dom(d<|b|>>c))
+    & ff(0)
+    & dd & dc(a_SecurityPolicy(channel) = e_secpol_None) & dd(0) & ah(dom(s_client_session<|a_state|>>{e_session_init}) <: dom(s_client_session<|(a_state<+{session|->e_session_created})|>>{e_session_init})) & pp(rt.0) & dd(0) & pr & dd(0) & ar(SimplifyRelDomXY) & mp & ah(dom(s_client_session<|a_state|>>{e_session_init}) <: dom(s_client_session<|(a_state<+{session|->e_session_created})|>>{e_session_init})\/{session}) & pp(rt.0) & dd(0) & mp;
+
+Operation(client_create_session_resp_sm) & Pattern(dom(a<+b) = dom(c|>>d))
+    & ff(0) & mp(Tac(rewriting)) & ar(CommutativityXY.20,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDorLongXY.3,Goal) & ar(SimplifyRelDomXY.19,Goal)
+    & ah(dom(s_client_session<|({session|->e_session_created}|>>{e_session_init,e_session_creating})) = {session}) & ar(SimplifyRelRaaLongXY.2,Goal) & pr
+    & dd & eh(dom(s_client_session<|({session|->e_session_created}|>>{e_session_init,e_session_creating})),_h,Goal) & ar(CommutativityXY.21,Goal)
+    & eh(dom(a_client_token),_h,Goal) & ah({session}<<|(a_state|>>{e_session_init,e_session_creating}) = a_state|>>{e_session_init,e_session_creating}) & mp(Tac(simplify_2))
+    & dd & eh({session}<<|(a_state|>>{e_session_init,e_session_creating}),_h,Goal) & ar(CommutativityXY.15,Goal) & pr;
+
+Operation(client_create_session_resp_sm) & Pattern(dom(a) = dom(b|>c))
+    & ff(0) & dd(0) & ar(rewriting.1,Goal) & ar(CommutativityXY.16,Goal) & ar(SimplifyRelRarLongXY.3,Goal) & ar(SimplifyRelDorLongXY.3,Goal)
+    & ar(SimplifyRelRarXY.14,Goal) & eh(dom(a_client_orphaned),_h,Goal) & ar(CommutativityXY.17,Goal)
+    & ah({session}<<|(a_state|>{e_session_scOrphaned}) = a_state|>{e_session_scOrphaned}) & mp(Tac(simplify_2))
+    & dd & eh({session}<<|(a_state|>{e_session_scOrphaned}),_h,Goal) & ar(CommutativityXY.14,Goal) & pr;
+
+Operation(client_create_session_resp_sm) & Pattern(dom(a) <: dom(b|>>c))
+    & ff(0) & dd(0) & ah(dom(a_state<+{session|->e_session_created}|>>{e_session_init,e_session_creating})-{session} = dom(a_state|>>{e_session_init,e_session_creating})) & ah(session/:dom(a_state|>>{e_session_init,e_session_creating})) & ah(a_state(session) = e_session_creating) & pp(rt.0) & pp(rt.0) & dd(0) & ah(dom(a_NonceServer$1)-{session} <: dom(a_state<+{session|->e_session_created}|>>{e_session_init,e_session_creating})-{session}) & ah(dom(a_NonceServer$1)-{session} = dom({session}<<|a_NonceServer$1)) & pr & dd(0) & eh(dom(a_NonceServer$1)-{session},_h,Goal) & eh({session}<<|a_NonceServer$1,_h,Goal) & eh(dom(a_state<+{session|->e_session_created}|>>{e_session_init,e_session_creating})-{session},_h,Goal) & ah(session/:dom(a_NonceServer)) & ah(session/:dom(a_state|>>{e_session_init,e_session_creating})) & ah(a_state(session) = e_session_creating) & pp(rt.0) & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & pp(rt.0) & dd(0) & ah(dom({session}<<|a_NonceServer) = dom(a_NonceServer)) & pr & dd(0) & eh(dom({session}<<|a_NonceServer),_h,Goal) & pr & pp(rt.0);
+
+Operation(client_create_session_resp_sm)
+    & ff(0) & mp(Tac(simplify));
+
+/* FIN client_create_session_resp*/
+
+/* client_user_activate_session_req_sm */
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & dd(0) & eh(dom(a_channel),_h,Goal) & eh(a_state$1,_h,Goal) & ar(SimplifyRelRaaLongXY.1,Goal) & ss & ah(dom({session|->e_session_userActivating}|>>{e_session_init,e_session_scOrphaned}) = {session}) & pp(rt.0) & dd & eh(dom({session|->e_session_userActivating}|>>{e_session_init,e_session_scOrphaned}),_h,Goal) & pr & ar(AssociativityXY.3,Goal) & ar(simplify_2.2,Goal) & pr & ar(th_raf_var.21,Goal) & pr & pr;
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) = dom(d<<|b|>>c))
+    & ff(0) & dd(0) & ah(dom(a_user_server) = dom(s_client_session<<|a_state|>>{e_session_created})) & eh(a_state$1,_h,Goal) & pp(rt.0);
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) = dom(d<|b|>>c))
+    & ff(0) & dd(0) & ah(dom(a_client_token) = dom(s_client_session<|a_state|>>{e_session_init,e_session_creating})) & eh(a_state$1,_h,Goal) & ah(session: dom(a_client_token)) & pp(rt.0);
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) = dom(d<|b|>c))
+    & ff(0) & dd(0) & ah(dom(a_client_orphaned) = dom(s_client_session<|a_state|>{e_session_scOrphaned})) & eh(a_state$1,_h,Goal) & ah(session/:dom(a_client_orphaned)) & eh(dom(a_client_orphaned),_h,Goal) & pr & pr(Tac(th_raf_var)) & pp(rt.0);
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) <: dom(b|>>c))
+    & ff(0) & dd(0) & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & eh(a_state$1,_h,Goal) & pp(rt.0);
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) <: dom(d<|b|>>c))
+    & ff(0) & dd(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & eh(a_state$1,_h,Goal) & pp(rt.0);
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) <: dom(d<<|b|>>c))
+    & ff(0) & dd(0) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & eh(a_state$1,_h,Goal) & pp(rt.0);
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) = dom(b|>c))
+    & ff(0) & dd(0) & dc(ret$1 = e_sc_ok) & eh(dom(a_client_orphaned),_h,Goal) & mp(Tac(SimplifyRelImaLongXY))
+    & dc(a_state(session),{e_session_created,e_session_userActivated}) & pr & pr;
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & dd(0) & dc(ret$1 = e_sc_ok) & mp(Tac(rewriting)) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDomXY.19,Goal)
+    & ah(dom({session|->e_session_userActivating}|>>{e_session_init,e_session_creating}) = {session}) & ar(SimplifyRelRaaLongXY.2,Goal) & pr
+    & dd & eh(dom({session|->e_session_userActivating}|>>{e_session_init,e_session_creating}),_h,Goal) & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDomXY.13,Goal)
+    & mp & ah(dom(a_state|>>{e_session_init,e_session_creating}) = dom(a_state)-a_state~[{e_session_init,e_session_creating}]) & pr
+    & dd & eh(dom(a_state|>>{e_session_init,e_session_creating}),_h,AllHyp) & pr;
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp & dc(ret$1 = e_sc_ok) & mp(Tac(rewriting)) & ar(CommutativityXY.20,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDorLongXY.3,Goal)
+    & ar(SimplifyRelDomXY.19,Goal) & ah(dom(s_client_session<|({session|->e_session_userActivating}|>>{e_session_init})) = {session}) & pr
+    & dd & eh(dom(s_client_session<|({session|->e_session_userActivating}|>>{e_session_init})),_h,Goal) & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDorXY.20,Goal)
+    & mp & ah(dom(s_client_session<|a_state|>>{e_session_init}) = (s_client_session/\dom(a_state))-a_state~[{e_session_init}]) & ar(CommutativityXY.20,Goal)
+    & ar(SimplifyRelDomXY.11,Goal) & ar(SimplifyRelDomXY.4,Goal) & pr & dd & eh(dom(s_client_session<|a_state|>>{e_session_init}),_h,AllHyp) & pr;
+
+Operation(client_user_activate_session_req_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp & dc(ret$1 = e_sc_ok) & mp(Tac(simplify));
+
+/* FIN client_user_activate_session_req_sm */
+
+/* client_sc_activate_session_req_sm */
+Operation(client_sc_activate_session_req_sm) & Pattern(dom(a<+b) = dom(c|>>d))
+    & ff(0) & mp(Tac(rewriting)) & eh(dom(a_channel),_h,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDomXY.19,Goal)
+    & ah(dom({session|->e_session_scActivating}|>>{e_session_init,e_session_scOrphaned}) = {session}) & pr
+    & dd & eh(dom({session|->e_session_scActivating}|>>{e_session_init,e_session_scOrphaned}),_h,Goal)
+    & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDomXY.13,Goal) & pr;
+
+Operation(client_sc_activate_session_req_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & mp(Tac(rewriting)) & eh(dom(a_client_token),_h,Goal) & ar(SimplifyRelDorLongXY.3,Goal) & ar(SimplifyRelRaaLongXY.6,Goal)
+    & ar(SimplifyRelDomXY.19,Goal) & ah(dom(s_client_session<|{session|->e_session_scActivating}|>>{e_session_init,e_session_creating}) = {session}) & pr
+    & dd & eh(dom(s_client_session<|{session|->e_session_scActivating}|>>{e_session_init,e_session_creating}),_h,Goal) & ar(CommutativityXY.20,Goal) & mp
+    & ar(SimplifySetSubXY.5,Goal) & ar(AssociativityXY.3,Goal) & mp & ar(SimplifyRelImaLongXY.6,Goal)
+    & dc(a_state(session),{e_session_scOrphaned,e_session_userActivated}) & pr & pr;
+
+Operation(client_sc_activate_session_req_sm) & Pattern(dom(a<<|b) = dom(c<|d|>e))
+    & ff(0) & ah(dom(a_client_orphaned) = dom(s_client_session<|a_state|>{e_session_scOrphaned})) & pp(rt.0);
+
+Operation(client_sc_activate_session_req_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp(Tac(rewriting)) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDomXY.19,Goal)
+    & ah(dom({session|->e_session_scActivating}|>>{e_session_init,e_session_creating}) = {session}) & pr
+    & dd & eh(dom({session|->e_session_scActivating}|>>{e_session_init,e_session_creating}),_h,Goal) & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDomXY.13,Goal)
+    & ah(dom(a_state|>>{e_session_init,e_session_creating}) = dom(a_state)-a_state~[{e_session_init,e_session_creating}]) & pr
+    & dd & eh(dom(a_state|>>{e_session_init,e_session_creating}),_h,AllHyp) & pr;
+
+Operation(client_sc_activate_session_req_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp(Tac(rewriting)) & ar(CommutativityXY.20,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDorLongXY.3,Goal) & ar(SimplifyRelDomXY.19,Goal)
+    & ar(CommutativityXY.21,Goal) & mp & ah(dom(s_client_session<|a_state|>>{e_session_init}) = (s_client_session/\dom(a_state))-a_state~[{e_session_init}])
+    & ar(CommutativityXY.20,Goal) & ar(SimplifyRelDomXY.11,Goal) & ar(SimplifyRelDomXY.4,Goal) & pr
+    & dd & eh(dom(s_client_session<|a_state|>>{e_session_init}),_h,AllHyp) & pr;
+
+Operation(client_sc_activate_session_req_sm)
+    & ff(0) & mp(Tac(simplify));
+
+/* FIN client_sc_activate_session_req_sm */
+
+/* server_activate_session_created_req_and_resp_sm */
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & pr & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & ah({session}<<|a_NonceServer$1 = {session}<<|a_NonceServer) & pp(rt.0) & pr;
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & pr & ah({session}<<|a_session_roles$1 = {session}<<|a_session_roles) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & pp(rt.0) & pr;
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(dom(a) = dom(b<+c|>>d))
+    & ff(0) & dd(0) & ah(dom(a_channel) = dom(a_state|>>{e_session_init,e_session_scOrphaned})) & ah(session: dom(a_channel)) & pp(rt.0);
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(dom(a<+e) = dom(f<<|(b<+c)|>>d))
+    & ff(0) & dd(0) & ah(dom(a_user_server<+{session|->user}) = dom(a_user_server)\/{session}) & pr & dd(0) & eh(dom(a_user_server<+{session|->user}),_h,Goal) & ah(dom(s_client_session<<|(a_state<+{session|->e_session_userActivated})|>>{e_session_created}) = dom(s_client_session<<|a_state|>>{e_session_created})\/{session}) & ah(not(session: s_client_session)) & pp(rt.0) & dd(0) & eh(dom(s_client_session<<|(a_state<+{session|->e_session_userActivated})|>>{e_session_created}),_h,Goal) & pr;
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(dom(a) = dom(e<|(b<+c)|>>d))
+    & ff(0) & dd(0) & eh(dom(a_client_token),_h,Goal) & ah(not(session: s_client_session)) & pp(rt.0);
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(dom(a) <: dom(b<+c|>>d))
+    & ff(0) & dd(0) & ah({session}<<|a_NonceServer$1 = {session}<<|a_NonceServer) & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(dom(a) <: dom(e<|(b<+c)|>>d))
+    & ff(0) & dd(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & ah(not(session: s_client_session)) & pp(rt.0);
+
+Operation(server_activate_session_created_req_and_resp_sm) & Pattern(dom(a) <: dom(e<<|(b<+c)|>>d))
+    & ff(0) & dd(0) & ah({session}<<|a_session_roles$1 = {session}<<|a_session_roles) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & ah(not(session: s_client_session)) & pp(rt.0);
+
+/* FIN server_activate_session_created_req_and_resp_sm */
+
+/* server_activate_session_userActivated_req_and_resp_sm */
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & pr & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & ah({session}<<|a_NonceServer$1 = {session}<<|a_NonceServer) & pp(rt.0) & pr;
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & pr & ah({session}<<|a_session_roles$1 = {session}<<|a_session_roles) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & pp(rt.0) & pr;
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(dom(a) = dom(b<+c|>>d))
+    & ff(0) & dd(0) & ah(dom(a_channel) = dom(a_state|>>{e_session_init,e_session_scOrphaned})) & ah(session: dom(a_channel)) & pp(rt.0);
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(dom(a) = dom(e<|(b<+c)|>>d))
+    & ff(0) & dd(0) & eh(dom(a_client_token),_h,Goal) & ah(not(session: s_client_session)) & pp(rt.0);
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(dom(a) <: dom(b<+c|>>d))
+    & ff(0) & dd(0) & ah({session}<<|a_NonceServer$1 = {session}<<|a_NonceServer) & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(dom(a) <: dom(e<|(b<+c)|>>d))
+    & ff(0) & dd(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & ah(not(session: s_client_session)) & pp(rt.0);
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(dom(a) <: dom(e<<|(b<+c)|>>d))
+    & ff(0) & dd(0) & ah({session}<<|a_session_roles$1 = {session}<<|a_session_roles) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & ah(not(session: s_client_session)) & pp(rt.0);
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(a: c +-> d)
+    & ff(0) & dd(0) & ah(a_user_server$1: t_session +-> t_user) & ah({session}<<|a_user_server$1 = {session}<<|a_user_server) & ah(session: dom(a_user_server$1)) & pp(rt.0);
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(dom(a<+b) = dom(c<+d|>>e))
+    & ff(0) & dd(0) & ah(dom(a_channel) = dom(a_state|>>{e_session_init,e_session_scOrphaned})) & pp(rt.0);
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(dom(a<+b) = dom(c<<|(d<+e)|>>f))
+    & ff(0) & dd(0) & ah(dom(a_user_server) = dom(s_client_session<<|a_state|>>{e_session_created})) & ah(session: dom(a_user_server)) & eh(dom(a_user_server),_h,Goal) & ah(not(session: s_client_session)) & ah(a_state(session) = e_session_userActivated) & pp(rt.0) & pp(rt.0);
+
+Operation(server_activate_session_userActivated_req_and_resp_sm) & Pattern(dom(a) = dom(c<<|(d<+e)|>>f))
+    & ff(0) & dd(0) & ah(dom(a_user_server$1) = dom(a_user_server$1)\/{session}) & pr & dd(0) & eh(dom(a_user_server$1),_h,Goal) & ah(dom(a_user_server$1)\/{session} = dom(a_user_server)\/{session}) & ah({session}<<|a_user_server$1 = {session}<<|a_user_server) & pp(rt.0) & dd(0) & eh(dom(a_user_server$1)\/{session},_h,Goal) & ah(dom(a_user_server)\/{session} = dom(a_user_server)) & pr & dd(0) & ah(dom(a_user_server) = dom(s_client_session<<|a_state|>>{e_session_created})) & ah(not(session: s_client_session)) & pp(rt.0);
+
+/* FIN server_activate_session_userActivated_req_and_resp_sm */
+
+/* server_activate_session_scOrphaned_req_and_resp_sm */
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & pr & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & ah({session}<<|a_NonceServer$1 = {session}<<|a_NonceServer) & pp(rt.0) & pr;
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(a: b +-> c)
+    & ff(0) & dd(0) & pr & ah({session}<<|a_session_roles$1 = {session}<<|a_session_roles) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & pp(rt.0) & pr;
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(a: c +-> d)
+    & ff(0) & dd(0) & ah(a_user_server$1: t_session +-> t_user) & ah({session}<<|a_user_server$1 = {session}<<|a_user_server) & ah(session: dom(a_user_server$1)) & pp(rt.0);
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(dom(a) = dom(b<+c|>>d))
+    & ff(0) & dd(0) & ah(dom(a_channel) = dom(a_state|>>{e_session_init,e_session_scOrphaned})) & pp(rt.0);
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(dom(a) = dom(e<|(b<+c)|>>d))
+    & ff(0) & dd(0) & eh(dom(a_client_token),_h,Goal) & ah(not(session: s_client_session)) & pp(rt.0);
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(dom(a) <: dom(b<+c|>>d))
+    & ff(0) & dd(0) & ah({session}<<|a_NonceServer$1 = {session}<<|a_NonceServer) & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(dom(a) <: dom(e<|(b<+c)|>>d))
+    & ff(0) & dd(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & ah(not(session: s_client_session)) & pp(rt.0);
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(dom(a) = dom(b<<|(c<+d)|>>e))
+    & ff(0) & dd(0) & ah(dom(a_user_server$1) = dom(a_user_server$1)\/{session}) & pr & dd(0) & eh(dom(a_user_server$1),_h,Goal) & ah(dom(a_user_server$1)\/{session} = dom(a_user_server)\/{session}) & ah({session}<<|a_user_server$1 = {session}<<|a_user_server) & pp(rt.0) & dd(0) & eh(dom(a_user_server$1)\/{session},_h,Goal) & ah(dom(a_user_server)\/{session} = dom(a_user_server)) & pr & dd(0) & ah(dom(a_user_server) = dom(s_client_session<<|a_state|>>{e_session_created})) & ah(not(session: s_client_session)) & pp(rt.0);
+
+Operation(server_activate_session_scOrphaned_req_and_resp_sm) & Pattern(dom(a) <: dom(e<<|(b<+c)|>>d))
+    & ff(0) & dd(0) & ah({session}<<|a_session_roles$1 = {session}<<|a_session_roles) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & ah(not(session: s_client_session)) & pp(rt.0);
+
+/* FIN server_activate_session_scOrphaned_req_and_resp_sm */
+
+/* client_activate_session_resp_sm */
+
+Operation(client_activate_session_resp_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & mp(Tac(rewriting)) & eh(dom(a_channel),_h,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & mp
+    & ah(dom({session|->e_session_userActivated}|>>{e_session_init,e_session_scOrphaned}) = {session}) & pr
+    & dd & eh(dom({session|->e_session_userActivated}|>>{e_session_init,e_session_scOrphaned}),_h,Goal) & ar(AssociativityXY.3,Goal) & mp
+    & ar(SimplifyRelImaLongXY.6,Goal) & dc(a_state(session),{e_session_userActivating,e_session_scActivating}) & pr & pr;
+
+Operation(client_activate_session_resp_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & mp(Tac(rewriting)) & eh(dom(a_client_token),_h,Goal) & ar(CommutativityXY.20,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDorLongXY.3,Goal)
+    & mp & mp(Tac(SimplifySetSubXY; AssociativityXY)) & ah(s_client_session/\dom({session|->e_session_userActivated}|>>{e_session_init,e_session_creating}) = {session}) & pr
+    & dd & eh(s_client_session/\dom({session|->e_session_userActivated}|>>{e_session_init,e_session_creating}),_h,Goal) & pr & ar(SimplifyRelImaLongXY.6,Goal)
+    & dc(a_state(session),{e_session_userActivating,e_session_scActivating}) & pr & pr;
+
+Operation(client_activate_session_resp_sm) & Pattern(dom(a) = dom(b|>c))
+    & ff(0) & eh(dom(a_client_orphaned),_h,Goal) & mp & ar(SimplifyRelImaLongXY.5,Goal) & mp
+    & dc(a_state(session),{e_session_userActivating,e_session_scActivating}) & pr & pr;
+
+Operation(client_activate_session_resp_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp(Tac(rewriting)) & ar(SimplifyRelRaaLongXY.6,Goal) & mp & ar(AssociativityXY.3,Goal)
+    & ah(dom({session|->e_session_userActivated}|>>{e_session_init,e_session_creating}) = {session}) & pr
+    & dd & eh(dom({session|->e_session_userActivated}|>>{e_session_init,e_session_creating}),_h,Goal)
+    & ah(dom(a_state|>>{e_session_init,e_session_creating}) = dom(a_state)-a_state~[{e_session_init,e_session_creating}]) & pr
+    & dd & eh(dom(a_state|>>{e_session_init,e_session_creating}),_h,AllHyp) & pr;
+
+Operation(client_activate_session_resp_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp(Tac(rewriting)) & ar(CommutativityXY.20,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDorLongXY.3,Goal) & mp
+    & mp(Tac(SimplifySetSubXY; AssociativityXY)) & ah(dom(s_client_session<|a_state|>>{e_session_init}) = (s_client_session/\dom(a_state))-a_state~[{e_session_init}])
+    & ar(CommutativityXY.20,Goal) & pr & dd & eh(dom(s_client_session<|a_state|>>{e_session_init}),_h,AllHyp) & pr;
+
+Operation(client_activate_session_resp_sm)
+    & ff(0) & mp(Tac(simplify));
+
+/* FIN client_activate_session_resp_sm */
+
+/* client_secure_channel_lost_session_sm */
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(a<<|b<+c*d : e-f+->g)
+    & ff(0) & dd(0) & pr(Tac(InFunctionXY;th_init_var)) & pr & pr;
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b<+c) = d)
+    & ff(0) & ar(PatchProverB0;th_eh_hyp_loc;SUB;th_simp) & dd(0) & pr(Tac(th_eh_pred;th_simp));
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(inactive_sessions<<|a_client_orphaned<+active_sessions*{p_channel_config_idx}: s_session-inactive_sessions +-> t_channel_config_idx_i)
+    & ff(0) & ah(dom(a_client_orphaned) = dom(s_client_session<|a_state|>{e_session_scOrphaned})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c<<|d<+f|>>e))
+    & ff(0) & ah(dom(a_channel) = dom(a_state|>>{e_session_init,e_session_scOrphaned})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c<<|(d<<|e<+g)|>>f))
+    & ff(0) & ah(dom(a_user_server) = dom(s_client_session<<|a_state|>>{e_session_created})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(ran(a|>>b) = c)
+    & ff(0) & ah(ran(a_server_token) = s_session-s_client_session) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c<|(a<<|e<+g)|>>f))
+    & ff(0) & ah(dom(a_client_token) = dom(s_client_session<|a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(a<<|c<+e|>>d))
+    & ff(0) & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(e<|(a<<|c<+f)|>>d))
+    & ff(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(e<<|(a<<|c<+f)|>>d))
+    & ff(0) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & pp(rt.0);
+
+Operation(client_secure_channel_lost_session_sm) & Pattern(dom(a<<|b<+g) = dom(e<|(a<<|c<+f)|>d))
+    & ff(0) & dd(0) & ah(active_sessions/\inactive_sessions = {}) & pr & dd(0) & ar(SimplifyRelDorLongXY.7,Goal) & ah(inactive_sessions<|(inactive_sessions<<|a_state<+active_sessions*{e_session_scOrphaned}) = {}) & pr & dd(0) & eh(inactive_sessions<|(inactive_sessions<<|a_state<+active_sessions*{e_session_scOrphaned}),_h,Goal) & ar(SimplifySetSubXY.38,Goal) & ah(dom(inactive_sessions<<|a_client_orphaned<+active_sessions*{p_channel_config_idx}) = dom(inactive_sessions<<|a_client_orphaned)\/active_sessions) & pr & dd(0) & eh(dom(inactive_sessions<<|a_client_orphaned<+active_sessions*{p_channel_config_idx}),_h,Goal) & ah(dom(s_client_session<|(inactive_sessions<<|a_state<+active_sessions*{e_session_scOrphaned})|>{e_session_scOrphaned}) = dom(s_client_session<|(inactive_sessions<<|a_state)|>{e_session_scOrphaned})\/active_sessions) & ar(SimplifyRelDorXY.20,Goal) & ah(active_sessions/\inactive_sessions = {}) & ah(active_sessions <: dom(a_state)) & pr & pp(rt.0) & ah(active_sessions <: s_client_session) & pr & pp(rt.0) & dd(0) & eh(dom(s_client_session<|(inactive_sessions<<|a_state<+active_sessions*{e_session_scOrphaned})|>{e_session_scOrphaned}),_h,Goal) & pr & pr;
+
+/* FIN client_secure_channel_lost_session_sm */
+
+/* server_secure_channel_lost_session_sm */
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a<<|b<+e : c +-> d)
+    & ff(0) & dd(0) & ar(InFunctionXY.14,Once) & pr & ar(th_init_var.1,Once) & ar(InPOWXY.6,Once) & eh(active_sessions,_h,Goal) & eh(s_session,_h,Goal) & ah(a_state~[{e_session_userActivated}] <: dom(a_state)) & pr & pr & pr & pr;
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(a<<|b : c +-> d)
+    & ff(0) & ar(PatchProverB0;th_eh_hyp_loc;SUB;th_simp) & dd(0) & pr(Tac(th_eh_pred;th_simp));
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b<+c) = d)
+    & ff(0) & ah(dom(a_state) = s_session) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(inactive_sessions\/active_sessions<<|a_channel) = dom(inactive_sessions<<|a_state<+active_sessions*{e_session_scOrphaned}|>>{e_session_init,e_session_scOrphaned}))
+    & ff(0) & dd(0) & ah(dom(a_channel) = dom(a_state|>>{e_session_init,e_session_scOrphaned})) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c<<|(d<<|e<+g)|>>f))
+    & ff(0) & ah(dom(a_user_server) = dom(s_client_session<<|a_state|>>{e_session_created})) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(ran(a|>>b) = c)
+    & ff(0) & ah(ran(a_server_token) = s_session-s_client_session) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c<|(a<<|e<+d)|>>f))
+    & ff(0) & ah(dom(a_client_token) = dom(s_client_session<|a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(a<<|c<+e|>>d))
+    & ff(0) & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(d<|(a<<|e<+c)|>>f))
+    & ff(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) <: dom(c<<|(a<<|d<+f)|>>e))
+    & ff(0) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & pp(rt.0);
+
+Operation(server_secure_channel_lost_session_sm) & Pattern(dom(a<<|b) = dom(c<|(a<<|d<+f)|>e))
+    & ff(0) & dd(0) & ah(active_sessions/\inactive_sessions = {}) & pr & dd(0) & ar(SimplifyRelDorLongXY.7,Goal) & ah(inactive_sessions<|(inactive_sessions<<|a_state<+active_sessions*{e_session_scOrphaned}) = {}) & pr & dd(0) & eh(inactive_sessions<|(inactive_sessions<<|a_state<+active_sessions*{e_session_scOrphaned}),_h,Goal) & ar(SimplifySetSubXY.38,Goal) & ah(dom(s_client_session<|(inactive_sessions<<|a_state<+active_sessions*{e_session_scOrphaned})|>{e_session_scOrphaned}) = dom(s_client_session<|(inactive_sessions<<|a_state)|>{e_session_scOrphaned})) & ah(active_sessions/\s_client_session = {}) & ah(a_channel~[{p_lost_channel}]/\s_client_session = {}) & ah(active_sessions = t_session/\a_channel~[{p_lost_channel}]/\a_state~[{e_session_userActivated}]) & pp(rt.0) & pp(rt.0) & dd(0) & eh(dom(s_client_session<|(inactive_sessions<<|a_state<+active_sessions*{e_session_scOrphaned})|>{e_session_scOrphaned}),_h,Goal) & ah(dom(a_client_orphaned) = dom(s_client_session<|a_state|>{e_session_scOrphaned})) & pp(rt.0);
+
+/* FIN server_secure_channel_lost_session_sm */
+
+/* client_close_sessions_resp_sm */
+
+Operation(client_close_session_resp_sm) & Pattern(dom(a<<|b) <: dom(c<|(a<<|d)|>>e))
+    & ff(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & pp(rt.0);
+
+/* FIN client_close_sessions_resp_sm */
+
+/* client_close_sessions_sm */
+
+Operation(client_close_session_sm) & Pattern(dom(a<<|b) <: dom(c<|(a<<|d)|>>e))
+    & ff(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & pp(rt.0);
+
+/* FIN client_close_sessions_sm */
+
+/* server_close_sessions */
+
+Operation(server_close_sessions) & Pattern(a: b +-> c)
+    & ff(0) & ah(dom(a_client_token) = dom(s_client_session<|a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(a: b +-> c)
+    & ff(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(dom(a<|b) = dom(a<|c|>>d))
+    & ff(0) & ah(dom(a_channel) = dom(a_state|>>{e_session_init,e_session_scOrphaned})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(dom(a<|b) = dom(c<<|(d<|e)|>>f))
+    & ff(0) & ah(dom(a_user_server) = dom(s_client_session<<|a_state|>>{e_session_created})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(ran(a) = b)
+    & ff(0) & ah(ran(a_server_token) = s_session-s_client_session) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(dom(a) = dom(b<|(c<|d)|>>e))
+    & ff(0)& ah(dom(a_client_token) = dom(s_client_session<|a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(dom(a) = dom(b<|(c<|d)|>e))
+    & ff(0) & ah(dom(a_client_orphaned) = dom(s_client_session<|a_state|>{e_session_scOrphaned})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(dom(a<|b) <: dom(c<|d|>>e))
+    & ff(0) & ah(dom(a_NonceServer) <: dom(a_state|>>{e_session_init,e_session_creating})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(dom(a) <: dom(b<|(c<|d)|>>e))
+    & ff(0) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & pp(rt.0);
+
+Operation(server_close_sessions) & Pattern(dom(a<|b) <: dom(c<<|(d<|e)|>>f))
+    & ff(0) & ah(dom(a_session_roles) <: dom(s_client_session<<|a_state|>>{e_session_created})) & pp(rt.0);
+
+/* FIN server_close_sessions */
+
+/* client_close_session_req_sm */
+
+Operation(client_close_session_req_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & mp(Tac(rewriting)) & eh(dom(a_channel),_h,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDomXY.19,Goal) & mp
+    & ar(AssociativityXY.3,Goal) & ah(dom({session|->e_session_closing}|>>{e_session_init,e_session_scOrphaned}) = {session}) & pr
+    & dd & eh(dom({session|->e_session_closing}|>>{e_session_init,e_session_scOrphaned}),_h,Goal) & mp & ar(SimplifyRelImaLongXY.6,Goal)
+    & dc(a_state(session),{e_session_created,e_session_userActivating,e_session_userActivated}) & pr & pr & pr;
+
+Operation(client_close_session_req_sm) & Pattern(dom(a) = dom(b|>>c))
+    & ff(0) & mp(Tac(rewriting)) & eh(dom(a_client_token),_h,Goal) & ar(CommutativityXY.20,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDorLongXY.3,Goal)
+    & ar(SimplifyRelDomXY.19,Goal) & mp & ah(s_client_session/\dom({session|->e_session_closing}|>>{e_session_init,e_session_creating}) = {session})
+    & pr & dd & eh(s_client_session/\dom({session|->e_session_closing}|>>{e_session_init,e_session_creating}),_h,Goal) & ar(SimplifySetSubXY.5,Goal) & ar(AssociativityXY.3,Goal)
+    & mp & ar(SimplifyRelImaLongXY.6,Goal) & dc(a_state(session),{e_session_created,e_session_userActivating,e_session_userActivated}) & pr & pr & pr;
+
+Operation(client_close_session_req_sm) & Pattern(dom(a) = dom(b|>c))
+    & ff(0) & eh(dom(a_client_orphaned),_h,Goal) & mp & ar(SimplifyRelImaLongXY.5,Goal) & mp
+    & dc(a_state(session),{e_session_created,e_session_userActivating,e_session_userActivated}) & pr & pr & pr;
+
+Operation(client_close_session_req_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp(Tac(rewriting)) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDomXY.19,Goal)
+    & ah(dom({session|->e_session_closing}|>>{e_session_init,e_session_creating}) = {session}) & pr
+    & dd & eh(dom({session|->e_session_closing}|>>{e_session_init,e_session_creating}),_h,Goal) & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDomXY.13,Goal) & mp
+    & ah(dom(a_state|>>{e_session_init,e_session_creating}) = dom(a_state)-a_state~[{e_session_init,e_session_creating}]) & pr
+    & dd & eh(dom(a_state|>>{e_session_init,e_session_creating}),_h,AllHyp) & pr;
+
+Operation(client_close_session_req_sm) & Pattern(dom(a) : POW(dom(b)))
+    & ff(0) & mp(Tac(rewriting)) & ar(CommutativityXY.20,Goal) & ar(SimplifyRelRaaLongXY.6,Goal) & ar(SimplifyRelDorLongXY.3,Goal) & ar(SimplifyRelDomXY.19,Goal) & mp
+    & mp(Tac(SimplifySetSubXY; AssociativityXY)) & ah(dom(s_client_session<|a_state|>>{e_session_init}) = (s_client_session/\dom(a_state))-a_state~[{e_session_init}])
+    & ar(CommutativityXY.20,Goal) & pr & dd & eh(dom(s_client_session<|a_state|>>{e_session_init}),_h,AllHyp) & pr;
+
+Operation(client_close_session_req_sm)
+    & ff(0) & mp(Tac(simplify));
+
+/* FIN client_close_session_req_sm */
+
+/* may_close_unactivated_session */
+
+Operation(may_close_unactivated_session) & Pattern(dom({l_session}<<|a_client_token) = dom(s_client_session-{l_session}<|({l_session}<<|a_state)|>>{e_session_init,e_session_creating}))
+    & ff(0)
+    & dd & ar(SimplifyRelDomXY) & ar(SimplifyRelDorLongXY) & ar(SimplifyRelDorXY) & ar(SimplifyRelDorLongXY) & ss & ah(({l_session}<|a_state)-({l_session}<|a_state) = {}) & pr & dd & eh(({l_session}<|a_state)-({l_session}<|a_state),_h,Goal) & ar(SimplifySetSubXY) & ah(dom((s_client_session<|a_state|>>{e_session_init,e_session_creating})-({l_session}<|a_state)) = dom(s_client_session<|a_state|>>{e_session_init,e_session_creating})-{l_session}) & pp(rt.0) & dd & eh(dom((s_client_session<|a_state|>>{e_session_init,e_session_creating})-({l_session}<|a_state)),_h,Goal) & pr;
+
+Operation(may_close_unactivated_session) & Pattern(dom({l_session}<<|a_NonceClient) <: dom(s_client_session-{l_session}<|({l_session}<<|a_state)|>>{e_session_init}))
+    & ff(0) & dd(0) & ar(SimplifyRelDomXY) & ar(SimplifyRelDorLongXY) & ar(SimplifyRelDorXY) & ar(SimplifyRelDorLongXY) & ah(({l_session}<|a_state)-({l_session}<|a_state) = {}) & pr & dd & eh(({l_session}<|a_state)-({l_session}<|a_state),_h,Goal) & ar(SimplifySetSubXY) & ah(dom((s_client_session<|a_state)-({l_session}<|a_state)|>>{e_session_init}) = dom(s_client_session<|a_state|>>{e_session_init})-{l_session}) & pp(rt.0) & dd & eh(dom((s_client_session<|a_state)-({l_session}<|a_state)|>>{e_session_init}),_h,Goal) & pr;
+
+/* Fin may_close_unactivated_session */
+
+/* Patterns to close session */
+Pattern(dom(a<<|a_channel) = dom(c|>>d))
+    & ff(0) & mp & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDomXY.13,Goal) & pr;
+
+Pattern(dom(a<<|a_user_server) = dom(c|>>d))
+    & ff(0) & mp & eh(dom(a_user_server),_h,Goal) & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDomXY.13,Goal) & pr;
+
+Pattern(ran(a_server_token|>>b) = c-b-(d-b))
+    & ff(0) & mp & eh(ran(a_server_token),_h,Goal) & ar(AssociativityXY.3,Goal) & pr;
+
+Pattern(dom(a<<|a_NonceServer) : POW(dom(c)))
+    & ff(0) & mp & ar(CommutativityXY.21,Goal) & ar(SimplifyRelDomXY.13,Goal) & pr
+    & ah(dom(a_state|>>{e_session_init,e_session_creating}) = dom(a_state)-a_state~[{e_session_init,e_session_creating}]) & pr
+    & dd & eh(dom(a_state|>>{e_session_init,e_session_creating}),_h,AllHyp) & pr;
+
+Pattern(dom(a<<|a_session_roles) : POW(dom(c)))
+    & ff(0) & mp & ar(CommutativityXY.21,Goal) & mp & ah(dom(s_client_session<<|a_state|>>{e_session_created}) = dom(a_state)-a_state~[{e_session_created}]-s_client_session)
+    & ar(CommutativityXY.21,Goal) & pr & dd & eh(dom(s_client_session<<|a_state|>>{e_session_created}),_h,AllHyp) & pr;
+
+Pattern(dom(a<<|a_client_token) = dom(c|>>d))
+    & ff(0) & mp & ar(SimplifyRelDorLongXY.7,Goal) & mp & eh(dom(a_client_token),_h,Goal) & dc(a_state(session) : {e_session_init,e_session_creating}) & dd
+    & ah(dom(s_client_session<|a_state|>>{e_session_init,e_session_creating})-{session} = dom(s_client_session<|a_state|>>{e_session_init,e_session_creating})) & pr
+    & dd & eh(dom(s_client_session<|a_state|>>{e_session_init,e_session_creating})-{session},_h,Goal)
+    & ah({session|->a_state(session)}/<:s_client_session<|a_state|>>{e_session_init,e_session_creating}) & ah(a_state(session) : {e_session_init,e_session_creating})
+    & pp(rt.0) & pr & dd & ah({session|->a_state(session)} <: s_client_session<|a_state|>>{e_session_init,e_session_creating})
+    & ah(not(a_state(session) : {e_session_init,e_session_creating})) & pp(rt.0) & ah(s_client_session<|a_state|>>{e_session_init,e_session_creating} : s_session +-> t_sessionState)
+    & pr & dd & dd & pr;
+
+/* preuve par tentatives */
+ff(0) & pr & bb(tp(Hyp) & pr & ll(?))
+
+END
 &
 
-THEORY LinkedRelations IS
-    not(x : dom(s|>>L)) &
-    blvar(Q) & Q \ (x,s,L)
-    =>
-    dom(s|>>L) - {x} == dom(s|>>L)
-;
-    binhyp(s(x) : Z) &
-    Z /\ L = {} &
-    blvar(Q) & Q \ (s,x,Z,L)
-    =>
-    dom(s|>>L) \/ {x} == dom(s|>>L)
-;
-    binhyp(s(x) = z) &
-    not(z : L) &
-    blvar(Q) & Q \ (s,x,z,L)
-    =>
-    dom(s|>>L) \/ {x} == dom(s|>>L)
-;
-    binhyp(s(x) = z) &
-    z : L &
-    blvar(Q) & Q \ (s,x,z,L)
-    =>
-    dom(s|>>L) - {x} == dom(s|>>L)
-;
-    binhyp(s(x) : Z) &
-    Z /\ L = {} &
-    blvar(Q) & Q \ (s,x,Z,L)
-    =>
-    dom(s|>L) - {x} == dom(s|>L)
-;
-    not(y : L) &
-    blvar(Q) & Q \ (y,L)
-    =>
-    dom(s<+(x*{y})|>>L) == dom(s|>>L) \/ x
-;
-    bsearch({y}, (L\/?), n) &
-    y : L &
-    blvar(Q) & Q \ (y,L)
-    =>
-    dom(s<+(x*{y})|>>L) == dom(s|>>L) - x
-;
-    not(y : L) &
-    blvar(Q) & Q \ (y,L)
-    =>
-    dom(s<+{x|->y}|>>L) == dom(s|>>L) \/ {x}
-;
-    bsearch({y}, (L\/?), n) &
-    y : L &
-    blvar(Q) & Q \ (y,L)
-    =>
-    dom(s<+{x|->y}|>>L) == dom(s|>>L) - {x}
-;
-    not(y : L) &
-    blvar(Q) & Q \ (y,L)
-    =>
-    dom(s<+(x*{y})|>L) == dom(s|>L) - x
-;
-    bsearch({y}, (L\/?), n) &
-    y : L &
-    blvar(Q) & Q \ (y,L)
-    =>
-    dom(s<+(x*{y})|>L) == dom(s|>L) \/ x
-;
-    not(y : L) &
-    blvar(Q) & Q \ (y,L)
-    =>
-    dom(s<+{x|->y}|>L) == dom(s|>L) - {x}
-;
-    bsearch({y}, (L\/?), n) &
-    y : L &
-    blvar(Q) & Q \ (y,L)
-    =>
-    dom(s<+{x|->y}|>L) == dom(s|>L) \/ {x}
+THEORY rewriting IS
+   /* Rule Systerel.220 - bd.217 [a45859aa1b784701412069c8f12b41c5] */
+   bcall1(AtomicRule(Systerel.220))
+   =>
+   a <+ {b |-> c} == {b} <<| a \/ {b |-> c}
 END
-
 &
 
-THEORY th_simp_overload IS
+THEORY simplify IS
+   /* Rule Systerel.77 - bd.75 [a176fa587349458576e2b45037118df0] */
+   bcall1(AtomicRule(Systerel.77))
+   =>
+   {a} <| (b <+ {a |-> c}) == {a |-> c}
+   ;
 
-    dom(r<+s) == dom(r)\/dom(s)
-/*    ;
-    a<+{b|->c}|>>{d,e} == */
-    ;
-    bnum(c) &
-    bnum(e) &
-    bnot(btest(c = e))
-    =>
-    a<+{b|->(c|->E)}|>{e|->E} == a|>{e|->E} <+ {b|->(c|->E)}
+   /* Rule Systerel.1126 - bd.114 [20dfc5a7ca939d4c1e34f13dd28b7f83] */
+   bcall1(BackwardRule(Systerel.1126)) &
+   binhyp(c : e +-> f) &
+   blvar(g) &
+   g\c
+   =>
+   a \/ {b} <| (c <+ {b |-> d}) == a <| c <+ {b |-> d}
+   ;
 
+   /* Rule Systerel.318 - bd.310 [b064664343dcec9c836743b080d47395] */
+   bcall1(BackwardRule(Systerel.318)) &
+   dom(c) : POW(a) &
+   blvar(d) &
+   d\(a,c)
+   =>
+   a <<| (b <+ c) == a <<| b
 END
+&
 
+THEORY simplify_2 IS
+   /* Rule Systerel.1598 - bd.583 [60d9c0db22906230fb64645462206e81] */
+   bcall1(BackwardRule(Systerel.1598)) &
+   dom(b) /\ a = {} &
+   blvar(c) &
+   c\(b,a)
+   =>
+   a <<| b == b
+   ;
+
+   /* Rule Systerel.473 - bd.463 [6d667735380a6b15c2ebeaa4bb458eee] */
+   bcall1(AtomicRule(Systerel.473))
+   =>
+   a-{b} \/ {b} == a \/ {b}
+END

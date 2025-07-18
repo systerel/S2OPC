@@ -30,346 +30,107 @@ SEES
     message_in_bs,
     channel_mgr
 
-CONCRETE_VARIABLES
-    a_session_roles_i,
-    a_client_session_i,
-    card_s_session_i,
-    a_state_i,
-    a_channel_i,
-    a_channel_nb_sessions_i,
-    a_session_init_time_i,
-    a_client_to_create_i,
-    a_client_orphaned_i,
-    a_server_user_auth_attempts_i,
-    a_server_client_locales_i,
-    a_server_client_app_desc_i,
-    a_server_client_cert_tb_i,
-    a_server_session_name_i
+IMPORTS
+    session_core_3
+
+PROMOTES
+    set_session_roles_2,
+    get_session_roles,
+    reset_session_to_create,
+    reset_session_orphaned,
+    is_valid_session,
+    is_client_session,
+    get_session_state,
+    set_session_state_1,
+    getall_session_channel,
+    get_session_channel,
+    get_channel_nb_sessions,
+    getall_to_create,
+    getall_orphaned,
+    set_session_to_create,
+    set_client_orphaned,
+    set_server_session_preferred_locales,
+    get_server_session_preferred_locales,
+    set_server_session_client_app_desc,
+    get_server_session_client_app_desc,
+    set_server_session_client_cert_tb,
+    get_server_session_client_cert_tb,
+    set_server_session_name,
+    get_server_session_name,
+    reset_server_session_roles,
+    reset_server_session_preferred_locales,
+    reset_server_client_create_session_info,
+    set_server_session_user_auth_attempts,
+    get_server_session_user_auth_attempts,
+    reset_server_session_user_auth_attempts,
+    get_init_time,
+    get_card_s_session
 
 INVARIANT
-    a_session_roles_i      : t_session_i --> t_sessionRoles_i                        &
-    a_client_session_i   : t_session_i --> BOOL                                      &
-    s_client_session     = a_client_session_i~[{TRUE}] /\ dom(a_state)               &
-    card_s_session_i     : NAT                                                       &
-    card_s_session_i     = card(a_state)                                             &
-    a_state_i            : t_session_i --> t_sessionState_i                          &
-    a_session_init_time_i : t_session_i --> t_timeref_i                              &
-    a_channel_i          : t_session_i --> t_channel_i                               &
-    a_channel_nb_sessions_i : t_channel_i --> NAT                                    &
-    a_client_to_create_i : t_session_i --> t_channel_config_idx_i                    &
-    a_client_orphaned_i  : t_session_i --> t_channel_config_idx_i                    &
-    a_server_user_auth_attempts_i : t_session_i --> NAT                              &
-    a_server_client_locales_i : t_session_i --> t_LocaleIds_i                        &
-    a_server_client_app_desc_i : t_session_i --> t_ApplicationDescription_i          &
-    a_server_client_cert_tb_i  : t_session_i --> t_CertThumbprint_i                  &
-    a_server_session_name_i    : t_session_i --> t_SessionName_i                     &
-    a_state             <: a_state_i                                                 &
-    a_state              = a_state_i |>> {e_session_closed}                          &
-    a_session_roles      = t_session <| a_session_roles_i |> t_sessionRoles          &
-    a_session_init_time  = t_session <| a_session_init_time_i |> t_timeref           &
-    a_channel            = t_session <| a_channel_i |>> {c_channel_indet}            &
-    a_channel_nb_sessions = t_channel <| a_channel_nb_sessions_i                     &
-    a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
-    a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx  &
-    a_server_user_auth_attempts <: t_session <| a_server_user_auth_attempts_i         &
-    a_server_client_locales <: t_session <| a_server_client_locales_i                 &
-    a_server_client_app_desc = t_session <| a_server_client_app_desc_i |> t_ApplicationDescription &
-    a_server_client_cert_tb = t_session <| a_server_client_cert_tb_i |> t_CertThumbprint &
-    a_server_session_name = t_session <| a_server_session_name_i |> t_SessionName
-
-INITIALISATION
-    a_session_roles_i := t_session_i * {c_sessionRoles_indet};
-    a_client_session_i := t_session_i * {FALSE};
-    card_s_session_i := 0;
-    a_state_i    := t_session_i * {e_session_closed};
-    a_session_init_time_i := t_session_i * {c_timeref_indet};
-    a_channel_i  := t_session_i * {c_channel_indet};
-    a_channel_nb_sessions_i := t_channel_i * {0};
-    a_client_to_create_i := t_session_i * {c_channel_config_idx_indet};
-    a_client_orphaned_i := t_session_i * {c_channel_config_idx_indet};
-    a_server_user_auth_attempts_i := t_session_i * {0};
-    a_server_client_locales_i := t_session_i * {c_LocaleIds_empty};
-    a_server_client_app_desc_i := t_session_i * {c_ApplicationDescription_indet};
-    a_server_client_cert_tb_i := t_session_i * {c_CertThumbprint_indet};
-    a_server_session_name_i := t_session_i * {c_SessionName_indet}
+    s_client_session = a_client_session~[{TRUE}] &
+    a_client_session~[{TRUE}] <: dom(a_state) &
+    card_s_session   = card(a_state)
 
 OPERATIONS
 
-    /* pragma INLINE(get_server_session_name, get_session_roles) */
-
-    set_session_roles_2(p_session, p_roles) =
-    BEGIN
-        a_session_roles_i(p_session) := p_roles
-    END
-    ;
-
-    p_session_roles <-- get_session_roles(p_session) =
-    BEGIN
-        p_session_roles := a_session_roles_i(p_session)
-    END
-    ;
-
     add_session(p_session, p_is_client, p_timeref) =
     BEGIN
-        card_s_session_i := card_s_session_i + 1;
-        a_state_i  (p_session) := e_session_init;
-        a_client_session_i(p_session) := p_is_client;
-        a_session_init_time_i (p_session) := p_timeref;
-        a_server_client_locales_i (p_session) := c_LocaleIds_empty
+        increase_card_s_session;
+        set_session_state_1 (p_session, e_session_init);
+        set_client_session(p_session, p_is_client);
+        set_init_time (p_session, p_timeref);
+        set_server_session_preferred_locales (p_session, c_LocaleIds_empty)
     END
     ;
 
     remove_session(p_session) =
     BEGIN
-        card_s_session_i := card_s_session_i - 1;
-        a_state_i  (p_session) := e_session_closed;
-        a_session_init_time_i (p_session) := c_timeref_indet
+        decrease_card_s_session;
+        reset_session_state(p_session);
+        set_client_session(p_session, FALSE);
+        reset_init_time(p_session)
     END
     ;
 
     reset_session_channel(p_session) =
     VAR
+        l_dom,
         l_channel
     IN
-        l_channel := a_channel_i(p_session);
-        IF l_channel /= c_channel_indet
+        l_dom, l_channel <-- getall_session_channel(p_session);
+        IF l_dom = TRUE
         THEN
-            ASSERT p_session : dom(a_channel) THEN
-                a_channel_nb_sessions_i(l_channel) := a_channel_nb_sessions_i(l_channel) - 1
-            END
-        ELSE
-            ASSERT p_session /: dom(a_channel) THEN
-                skip
-            END
+            decrease_channel_nb_sessions(l_channel)
         END
         ;
-        a_channel_i(p_session) := c_channel_indet
-    END
-    ;
-
-    reset_session_to_create(p_session) =
-    BEGIN
-        a_client_to_create_i(p_session) := c_channel_config_idx_indet
-    END
-    ;
-
-    reset_session_orphaned(p_session) =
-    BEGIN
-        a_client_orphaned_i(p_session) := c_channel_config_idx_indet
-    END
-    ;
-
-    ret <-- is_valid_session (session) =
-    VAR
-        l_state
-    IN
-        l_state := a_state_i(session);
-        ret := bool(l_state /= e_session_closed)
-    END
-    ;
-
-    ret <-- is_client_session (p_session) =
-    BEGIN
-        ret := a_client_session_i(p_session)
-    END
-    ;
-
-    state <-- get_session_state (session) =
-    BEGIN
-        state := a_state_i(session)
-    END
-    ;
-
-    set_session_state_1(p_session, p_state) =
-    BEGIN
-        a_state_i(p_session) := p_state
+        reset_channel (p_session)
     END
     ;
 
     set_session_channel (session, p_channel) =
     VAR
+        l_dom,
         l_prev_channel
     IN
-        l_prev_channel := a_channel_i(session);
-        IF l_prev_channel /= p_channel
+        l_dom, l_prev_channel <-- getall_session_channel(session);
+        IF l_dom = TRUE
         THEN
-            a_channel_nb_sessions_i(p_channel) := a_channel_nb_sessions_i(p_channel) + 1;
-            IF l_prev_channel /= c_channel_indet
+            IF l_prev_channel /= p_channel
             THEN
                 ASSERT session : dom(a_channel) & a_channel (session) /= p_channel THEN
-                    a_channel_nb_sessions_i(l_prev_channel) := a_channel_nb_sessions_i(l_prev_channel) - 1
-                END
+                    decrease_channel_nb_sessions (l_prev_channel)
+                END;
+                increase_channel_nb_sessions (p_channel)
             ELSE
-                ASSERT session /: dom(a_channel) THEN
+                ASSERT session : dom(a_channel) & a_channel(session) = p_channel THEN
                     skip
                 END
             END
         ELSE
-            ASSERT session : dom(a_channel) & a_channel(session) = p_channel THEN
-                skip
-            END
+             increase_channel_nb_sessions (p_channel)
         END
         ;
-        a_channel_i(session) := p_channel
-    END
-    ;
-
-    p_dom, p_channel <-- getall_session_channel (p_session) =
-    BEGIN
-        p_channel := a_channel_i(p_session);
-        p_dom <-- is_t_channel(p_channel)
-    END
-    ;
-
-    channel <-- get_session_channel (session) =
-    BEGIN
-        channel := a_channel_i(session)
-    END
-    ;
-
-    p_nb_sessions <-- get_channel_nb_sessions (p_channel) =
-    BEGIN
-        p_nb_sessions := a_channel_nb_sessions_i(p_channel)
-    END
-    ;
-
-    p_dom, p_channel_config_idx <-- getall_to_create(p_session) =
-    BEGIN
-        p_channel_config_idx := a_client_to_create_i(p_session);
-        p_dom <-- is_t_channel_config_idx(p_channel_config_idx)
-    END
-    ;
-
-    p_dom, p_channel_config_idx <-- getall_orphaned(p_session) =
-    BEGIN
-        p_channel_config_idx := a_client_orphaned_i(p_session);
-        p_dom <-- is_t_channel_config_idx(p_channel_config_idx)
-    END
-    ;
-
-    set_session_to_create(p_session, p_channel_config_idx) =
-    BEGIN
-        a_client_to_create_i(p_session) := p_channel_config_idx
-    END
-    ;
-
-    set_client_orphaned(p_session, p_channel_config_idx) =
-    BEGIN
-        a_client_orphaned_i(p_session) := p_channel_config_idx
-    END;
-
-    set_server_session_preferred_locales(p_session, p_localesIds) =
-    BEGIN
-        a_server_client_locales_i(p_session) := p_localesIds
-    END
-    ;
-
-    p_localeIds <-- get_server_session_preferred_locales(p_session) =
-    BEGIN
-        p_localeIds := a_server_client_locales_i(p_session)
-    END
-    ;
-
-    set_server_session_client_app_desc(p_session, p_cliAppDesc) =
-    BEGIN
-        a_server_client_app_desc_i(p_session) := p_cliAppDesc
-    END
-    ;
-
-    p_cliAppDesc <-- get_server_session_client_app_desc(p_session) =
-    BEGIN
-        p_cliAppDesc := a_server_client_app_desc_i(p_session)
-    END
-    ;
-
-    set_server_session_client_cert_tb(p_session, p_cliCertTb) =
-    BEGIN
-        a_server_client_cert_tb_i(p_session) := p_cliCertTb
-    END
-    ;
-
-    p_cliCertTb <-- get_server_session_client_cert_tb(p_session) =
-    BEGIN
-        p_cliCertTb := a_server_client_cert_tb_i(p_session)
-    END
-    ;
-
-    set_server_session_name(p_session, p_sessionName) =
-    BEGIN
-        a_server_session_name_i(p_session) := p_sessionName
-    END
-    ;
-
-    p_sessionName <-- get_server_session_name(p_session) =
-    BEGIN
-        p_sessionName := a_server_session_name_i(p_session)
-    END
-    ;
-
-    p_roles <-- reset_server_session_roles(p_session) =
-    VAR
-        l_old_roles
-    IN
-        l_old_roles := a_session_roles_i(p_session);
-        p_roles := l_old_roles;
-        a_session_roles_i(p_session) := c_sessionRoles_indet
-    END
-    ;
-
-    p_localeIds <-- reset_server_session_preferred_locales(p_session) =
-    VAR
-        l_old_localeIds
-    IN
-        l_old_localeIds := a_server_client_locales_i(p_session);
-        IF l_old_localeIds = c_LocaleIds_empty
-        THEN
-            p_localeIds := c_LocaleIds_indet
-        ELSE
-            p_localeIds := l_old_localeIds
-        END
-        ;
-        a_server_client_locales_i(p_session) := c_LocaleIds_empty
-    END
-    ;
-
-    p_cliAppDesc, p_certTb, p_sessionName <-- reset_server_client_create_session_info(p_session) =
-    BEGIN
-        p_cliAppDesc := a_server_client_app_desc_i(p_session);
-        a_server_client_app_desc_i(p_session) := c_ApplicationDescription_indet;
-        p_certTb := a_server_client_cert_tb_i(p_session);
-        a_server_client_cert_tb_i(p_session) := c_CertThumbprint_indet;
-        p_sessionName := a_server_session_name_i(p_session);
-        a_server_session_name_i(p_session) := c_SessionName_indet
-    END
-    ;
-
-    set_server_session_user_auth_attempts(p_session, p_attempts) =
-    BEGIN
-        a_server_user_auth_attempts_i(p_session) := p_attempts
-    END
-    ;
-
-    p_attempts <-- get_server_session_user_auth_attempts(p_session) =
-    BEGIN
-        p_attempts := a_server_user_auth_attempts_i(p_session)
-    END
-    ;
-
-    reset_server_session_user_auth_attempts(p_session) =
-    BEGIN
-        a_server_user_auth_attempts_i(p_session) := 0
-    END
-    ;
-
-    p_timeref <-- get_init_time(p_session) =
-    BEGIN
-        p_timeref := a_session_init_time_i(p_session)
-    END
-    ;
-
-    p_nb_sessions <-- get_card_s_session =
-    BEGIN
-        p_nb_sessions := card_s_session_i
+        set_channel (session, p_channel)
     END
 
 END

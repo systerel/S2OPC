@@ -21,9 +21,9 @@
 
  File Name            : session_core.h
 
- Date                 : 26/02/2026 14:58:02
+ Date                 : 18/11/2026 09:48:11
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -116,13 +116,6 @@ extern void session_core__l_client_user_activate_session_req_sm(
    const constants__t_msg_i session_core__activate_req_msg,
    constants_statuscodes_bs__t_StatusCode_i * const session_core__p_ret,
    constants__t_session_token_i * const session_core__p_session_token);
-extern void session_core__l_server_activate_session_req_and_resp_sm(
-   const constants__t_channel_i session_core__channel,
-   const constants__t_session_i session_core__session,
-   const constants__t_user_i session_core__user,
-   const constants__t_msg_i session_core__activate_req_msg,
-   const constants__t_msg_i session_core__activate_resp_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const session_core__ret);
 extern void session_core__l_server_create_session_req_and_resp_sm(
    const constants__t_session_i session_core__p_session,
    const constants__t_channel_i session_core__p_channel,
@@ -221,7 +214,21 @@ extern void session_core__is_session_valid_for_service(
    const constants__t_session_i session_core__session,
    t_bool * const session_core__ret);
 extern void session_core__may_close_unactivated_session(void);
-extern void session_core__server_activate_session_req_and_resp_sm(
+extern void session_core__server_activate_session_created_req_and_resp_sm(
+   const constants__t_channel_i session_core__channel,
+   const constants__t_session_i session_core__session,
+   const constants__t_user_i session_core__user,
+   const constants__t_msg_i session_core__activate_req_msg,
+   const constants__t_msg_i session_core__activate_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__ret);
+extern void session_core__server_activate_session_scOrphaned_req_and_resp_sm(
+   const constants__t_channel_i session_core__channel,
+   const constants__t_session_i session_core__session,
+   const constants__t_user_i session_core__user,
+   const constants__t_msg_i session_core__activate_req_msg,
+   const constants__t_msg_i session_core__activate_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__ret);
+extern void session_core__server_activate_session_userActivated_req_and_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_user_i session_core__user,

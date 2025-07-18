@@ -28,11 +28,21 @@ SEES
     channel_mgr,
     request_handle_bs
 
+ABSTRACT_VARIABLES
+    ReqAuditEntryInfo
+
+INVARIANT
+    ReqAuditEntryInfo : t_msg_header_i
+
+INITIALISATION
+    ReqAuditEntryInfo := c_msg_header_indet
+
 OPERATIONS
 
     bres, channel <-- getall_valid_session_channel (session) =
     PRE
-        session  : t_session_i
+        session : t_session_i &
+        session : t_session
     THEN
         CHOICE
             bres := FALSE ||
@@ -78,7 +88,10 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
+        channel : dom(a_endpoint) &
         session_token : t_session_token_i &
+        c_msg_in : t_msg_i &
+        c_msg_in : t_msg &
         req_msg : t_msg_i &
         req_msg : t_msg &
         req_msg = c_msg_in &
@@ -88,12 +101,14 @@ OPERATIONS
         a_msg_in_type : {e_msg_session_create_req,
             e_msg_session_activate_req,
             e_msg_session_close_req} &
+        c_msg_out : t_msg_i &
+        c_msg_out : t_msg &
         resp_msg : t_msg_i &
         resp_msg : t_msg &
         resp_msg = c_msg_out &
-        a_msg_out_type : {e_msg_session_create_resp,
-            e_msg_session_activate_resp,
-            e_msg_session_close_resp}
+        (a_msg_in_type = e_msg_session_create_req => a_msg_out_type = e_msg_session_create_resp) &
+        (a_msg_in_type = e_msg_session_activate_req => a_msg_out_type = e_msg_session_activate_resp) &
+        (a_msg_in_type = e_msg_session_close_req => a_msg_out_type = e_msg_session_close_resp)
     THEN
         session,
         service_ret,
@@ -101,7 +116,7 @@ OPERATIONS
         :(session : t_session_i &
           service_ret : t_StatusCode_i & service_ret : t_StatusCode &
           security_failed : BOOL &
-          (service_ret = e_sc_ok => security_failed = TRUE))
+          (service_ret = e_sc_ok => security_failed = FALSE))
     END
     ;
 
@@ -441,7 +456,8 @@ OPERATIONS
     server_secure_channel_lost_session_sm (p_lost_channel) =
     PRE
         p_lost_channel : t_channel_i &
-        p_lost_channel : s_channel_connected
+        p_lost_channel : s_channel_connected &
+        ReqAuditEntryInfo = c_msg_header_indet
     THEN
         skip
     END
@@ -563,15 +579,16 @@ OPERATIONS
         p_channel_config : t_channel_config_idx   &
         req_msg_header : t_msg_header_i &
         req_msg_header : t_msg_header &
-        req_msg_header = c_msg_in_header
+        req_msg_header = c_msg_in_header &
+        ReqAuditEntryInfo = c_msg_header_indet
     THEN
-        skip
+        ReqAuditEntryInfo :: t_msg_header
     END
     ;
 
     clear_audit_info =
     BEGIN
-        skip
+        ReqAuditEntryInfo := c_msg_header_indet
     END
 
 END

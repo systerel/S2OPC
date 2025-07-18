@@ -83,7 +83,6 @@ OPERATIONS
         resp_msg = c_msg_out &
         a_msg_out_type = e_msg_session_create_resp &
         session : t_session_i &
-        session : t_session &
         oper_ret_code : t_StatusCode_i &
         oper_ret_code : t_StatusCode
     THEN
@@ -100,7 +99,6 @@ OPERATIONS
         req_msg = c_msg_in &
         a_msg_in_type = e_msg_session_activate_req &
         session : t_session_i &
-        session : t_session &
         oper_ret_code : t_StatusCode_i &
         oper_ret_code : t_StatusCode
     THEN
@@ -126,7 +124,6 @@ OPERATIONS
     server_notify_session_closed(session, oper_ret_code) =
     PRE
         session : t_session_i &
-        session : t_session &
         oper_ret_code : t_StatusCode_i &
         oper_ret_code : t_StatusCode
     THEN

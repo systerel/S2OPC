@@ -256,9 +256,16 @@ OPERATIONS
     THEN
         IF channel /: s_channel_connected
         THEN
-            config_idx := c_channel_config_idx_indet
+            config_idx :(
+                config_idx : t_channel_config_idx_i &
+                config_idx = c_channel_config_idx_indet
+            )
         ELSE
-            config_idx := a_config(channel)
+            config_idx :(
+                config_idx : t_channel_config_idx_i &
+                config_idx : t_channel_config_idx &
+                config_idx  = a_config(channel)
+            )
         END
     END
     ;

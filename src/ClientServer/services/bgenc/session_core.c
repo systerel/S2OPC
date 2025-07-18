@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 16/09/2026 08:15:31
+ Date                 : 18/11/2026 09:48:11
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -95,118 +95,6 @@ void session_core__server_internal_activate_req_and_resp(
          session_core_1__set_session_state(session_core__session,
             constants__e_session_userActivated);
       }
-   }
-}
-
-void session_core__l_server_activate_session_req_and_resp_sm(
-   const constants__t_channel_i session_core__channel,
-   const constants__t_session_i session_core__session,
-   const constants__t_user_i session_core__user,
-   const constants__t_msg_i session_core__activate_req_msg,
-   const constants__t_msg_i session_core__activate_resp_msg,
-   constants_statuscodes_bs__t_StatusCode_i * const session_core__ret) {
-   {
-      constants__t_channel_i session_core__l_channel;
-      constants__t_sessionState_i session_core__l_state;
-      constants__t_user_i session_core__l_user;
-      t_bool session_core__l_is_same_user;
-      t_bool session_core__l_valid;
-      constants_statuscodes_bs__t_StatusCode_i session_core__l_ret;
-      
-      session_core_1__get_session_channel(session_core__session,
-         &session_core__l_channel);
-      session_core_1__get_session_state(session_core__session,
-         &session_core__l_state);
-      if (session_core__l_state == constants__e_session_created) {
-         if (session_core__l_channel == session_core__channel) {
-            session_core__server_internal_activate_req_and_resp(session_core__channel,
-               session_core__session,
-               session_core__user,
-               session_core__activate_req_msg,
-               session_core__activate_resp_msg,
-               &session_core__l_valid);
-            if (session_core__l_valid == true) {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
-            }
-            else {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
-            }
-         }
-         else {
-            session_core__l_ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
-         }
-      }
-      else if (session_core__l_state == constants__e_session_userActivated) {
-         session_core_1__get_session_user_server(session_core__session,
-            &session_core__l_user);
-         if (session_core__l_channel == session_core__channel) {
-            session_core__server_internal_activate_req_and_resp(session_core__channel,
-               session_core__session,
-               session_core__user,
-               session_core__activate_req_msg,
-               session_core__activate_resp_msg,
-               &session_core__l_valid);
-            if (session_core__l_valid == true) {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
-            }
-            else {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
-            }
-         }
-         else if (session_core__l_channel != session_core__channel) {
-            session_core_1__is_same_user_server(session_core__l_user,
-               session_core__user,
-               &session_core__l_is_same_user);
-            if (session_core__l_is_same_user == true) {
-               session_core__server_internal_activate_req_and_resp(session_core__channel,
-                  session_core__session,
-                  session_core__user,
-                  session_core__activate_req_msg,
-                  session_core__activate_resp_msg,
-                  &session_core__l_valid);
-               if (session_core__l_valid == true) {
-                  session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
-               }
-               else {
-                  session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
-               }
-            }
-            else {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_invalid_state;
-            }
-         }
-         else {
-            session_core__l_ret = constants_statuscodes_bs__e_sc_bad_invalid_state;
-         }
-      }
-      else if (session_core__l_state == constants__e_session_scOrphaned) {
-         session_core_1__get_session_user_server(session_core__session,
-            &session_core__l_user);
-         session_core_1__is_same_user_server(session_core__l_user,
-            session_core__user,
-            &session_core__l_is_same_user);
-         if (session_core__l_is_same_user == true) {
-            session_core__server_internal_activate_req_and_resp(session_core__channel,
-               session_core__session,
-               session_core__user,
-               session_core__activate_req_msg,
-               session_core__activate_resp_msg,
-               &session_core__l_valid);
-            if (session_core__l_valid == true) {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_ok;
-            }
-            else {
-               session_core__l_ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
-            }
-         }
-         else {
-            session_core__l_ret = constants_statuscodes_bs__e_sc_bad_invalid_state;
-         }
-      }
-      else {
-         session_core__l_ret = constants_statuscodes_bs__e_sc_bad_invalid_state;
-      }
-      *session_core__ret = session_core__l_ret;
    }
 }
 
@@ -758,7 +646,7 @@ void session_core__allocate_authenticated_user(
    }
 }
 
-void session_core__server_activate_session_req_and_resp_sm(
+void session_core__server_activate_session_created_req_and_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_user_i session_core__user,
@@ -767,13 +655,150 @@ void session_core__server_activate_session_req_and_resp_sm(
    constants_statuscodes_bs__t_StatusCode_i * const session_core__ret) {
    {
       constants__t_sessionRoles_i session_core__l_userRoles;
+      constants__t_channel_i session_core__l_channel;
+      constants__t_sessionState_i session_core__l_state;
+      t_bool session_core__l_valid;
       
-      session_core__l_server_activate_session_req_and_resp_sm(session_core__channel,
-         session_core__session,
+      session_core_1__get_session_channel(session_core__session,
+         &session_core__l_channel);
+      session_core_1__get_session_state(session_core__session,
+         &session_core__l_state);
+      if (session_core__l_channel == session_core__channel) {
+         session_core__server_internal_activate_req_and_resp(session_core__channel,
+            session_core__session,
+            session_core__user,
+            session_core__activate_req_msg,
+            session_core__activate_resp_msg,
+            &session_core__l_valid);
+         if (session_core__l_valid == true) {
+            *session_core__ret = constants_statuscodes_bs__e_sc_ok;
+         }
+         else {
+            *session_core__ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
+         }
+      }
+      else {
+         *session_core__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
+      }
+      if (*session_core__ret == constants_statuscodes_bs__e_sc_ok) {
+         session_roles__compute_user_roles(session_core__user,
+            &session_core__l_userRoles);
+         session_core_1__set_session_roles(session_core__session,
+            session_core__l_userRoles);
+      }
+   }
+}
+
+void session_core__server_activate_session_userActivated_req_and_resp_sm(
+   const constants__t_channel_i session_core__channel,
+   const constants__t_session_i session_core__session,
+   const constants__t_user_i session_core__user,
+   const constants__t_msg_i session_core__activate_req_msg,
+   const constants__t_msg_i session_core__activate_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__ret) {
+   {
+      constants__t_sessionRoles_i session_core__l_userRoles;
+      constants__t_channel_i session_core__l_channel;
+      constants__t_sessionState_i session_core__l_state;
+      constants__t_user_i session_core__l_user;
+      t_bool session_core__l_valid;
+      t_bool session_core__l_is_same_user;
+      
+      session_core_1__get_session_channel(session_core__session,
+         &session_core__l_channel);
+      session_core_1__get_session_state(session_core__session,
+         &session_core__l_state);
+      session_core_1__get_session_user_server(session_core__session,
+         &session_core__l_user);
+      if (session_core__l_channel == session_core__channel) {
+         session_core__server_internal_activate_req_and_resp(session_core__channel,
+            session_core__session,
+            session_core__user,
+            session_core__activate_req_msg,
+            session_core__activate_resp_msg,
+            &session_core__l_valid);
+         if (session_core__l_valid == true) {
+            *session_core__ret = constants_statuscodes_bs__e_sc_ok;
+         }
+         else {
+            *session_core__ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
+         }
+      }
+      else if (session_core__l_channel != session_core__channel) {
+         session_core_1__is_same_user_server(session_core__l_user,
+            session_core__user,
+            &session_core__l_is_same_user);
+         if (session_core__l_is_same_user == true) {
+            session_core__server_internal_activate_req_and_resp(session_core__channel,
+               session_core__session,
+               session_core__user,
+               session_core__activate_req_msg,
+               session_core__activate_resp_msg,
+               &session_core__l_valid);
+            if (session_core__l_valid == true) {
+               *session_core__ret = constants_statuscodes_bs__e_sc_ok;
+            }
+            else {
+               *session_core__ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
+            }
+         }
+         else {
+            *session_core__ret = constants_statuscodes_bs__e_sc_bad_invalid_state;
+         }
+      }
+      else {
+         *session_core__ret = constants_statuscodes_bs__e_sc_bad_invalid_state;
+      }
+      if (*session_core__ret == constants_statuscodes_bs__e_sc_ok) {
+         session_roles__compute_user_roles(session_core__user,
+            &session_core__l_userRoles);
+         session_core_1__set_session_roles(session_core__session,
+            session_core__l_userRoles);
+      }
+   }
+}
+
+void session_core__server_activate_session_scOrphaned_req_and_resp_sm(
+   const constants__t_channel_i session_core__channel,
+   const constants__t_session_i session_core__session,
+   const constants__t_user_i session_core__user,
+   const constants__t_msg_i session_core__activate_req_msg,
+   const constants__t_msg_i session_core__activate_resp_msg,
+   constants_statuscodes_bs__t_StatusCode_i * const session_core__ret) {
+   {
+      constants__t_sessionRoles_i session_core__l_userRoles;
+      constants__t_channel_i session_core__l_channel;
+      constants__t_sessionState_i session_core__l_state;
+      constants__t_user_i session_core__l_user;
+      t_bool session_core__l_is_same_user;
+      t_bool session_core__l_valid;
+      
+      session_core_1__get_session_channel(session_core__session,
+         &session_core__l_channel);
+      session_core_1__get_session_state(session_core__session,
+         &session_core__l_state);
+      session_core_1__get_session_user_server(session_core__session,
+         &session_core__l_user);
+      session_core_1__is_same_user_server(session_core__l_user,
          session_core__user,
-         session_core__activate_req_msg,
-         session_core__activate_resp_msg,
-         session_core__ret);
+         &session_core__l_is_same_user);
+      if (session_core__l_is_same_user == true) {
+         session_core__server_internal_activate_req_and_resp(session_core__channel,
+            session_core__session,
+            session_core__user,
+            session_core__activate_req_msg,
+            session_core__activate_resp_msg,
+            &session_core__l_valid);
+         if (session_core__l_valid == true) {
+            *session_core__ret = constants_statuscodes_bs__e_sc_ok;
+         }
+         else {
+            *session_core__ret = constants_statuscodes_bs__e_sc_bad_application_signature_invalid;
+         }
+      }
+      else {
+         *session_core__ret = constants_statuscodes_bs__e_sc_bad_invalid_state;
+      }
       if (*session_core__ret == constants_statuscodes_bs__e_sc_ok) {
          session_roles__compute_user_roles(session_core__user,
             &session_core__l_userRoles);
@@ -946,31 +971,32 @@ void session_core__server_close_sessions(
          while (session_core__l_continue == true) {
             session_core_it__continue_iter_session(&session_core__l_continue,
                &session_core__l_session);
-            session_core_1__is_client_session(session_core__l_session,
-               &session_core__l_is_client_session);
             session_core_1__is_valid_session(session_core__l_session,
                &session_core__l_valid_session);
             if (session_core__l_valid_session == true &&
-               session_core__l_session != session_core__exceptSession &&
-               session_core__l_is_client_session == false) {
-               session_core_1__get_server_session_client_app_desc(session_core__l_session,
-                  &session_core__l_client_app_desc);
-               session_core_1__get_server_session_client_cert_tb(session_core__l_session,
-                  &session_core__l_client_cert_tb);
-               session_core_1__get_server_session_name(session_core__l_session,
-                  &session_core__l_session_name);
-               session_core_1__get_session_user_server(session_core__l_session,
-                  &session_core__l_user);
-               app_cb_call_context_bs__set_app_call_context_session(session_core__l_session,
-                  session_core__l_client_app_desc,
-                  session_core__l_client_cert_tb,
-                  session_core__l_session_name,
-                  session_core__l_user);
-               session_audit_bs__server_notify_session_closed(session_core__l_session,
-                  constants_statuscodes_bs__e_sc_bad_session_closed);
-               session_core_1__set_session_state_closed(session_core__l_session,
-                  constants_statuscodes_bs__e_sc_bad_session_closed);
-               app_cb_call_context_bs__clear_app_call_context();
+               session_core__l_session != session_core__exceptSession) {
+               session_core_1__is_client_session(session_core__l_session,
+                  &session_core__l_is_client_session);
+               if (session_core__l_is_client_session == false) {
+                  session_core_1__get_server_session_client_app_desc(session_core__l_session,
+                     &session_core__l_client_app_desc);
+                  session_core_1__get_server_session_client_cert_tb(session_core__l_session,
+                     &session_core__l_client_cert_tb);
+                  session_core_1__get_server_session_name(session_core__l_session,
+                     &session_core__l_session_name);
+                  session_core_1__get_session_user_server(session_core__l_session,
+                     &session_core__l_user);
+                  app_cb_call_context_bs__set_app_call_context_session(session_core__l_session,
+                     session_core__l_client_app_desc,
+                     session_core__l_client_cert_tb,
+                     session_core__l_session_name,
+                     session_core__l_user);
+                  session_audit_bs__server_notify_session_closed(session_core__l_session,
+                     constants_statuscodes_bs__e_sc_bad_session_closed);
+                  session_core_1__set_session_state_closed(session_core__l_session,
+                     constants_statuscodes_bs__e_sc_bad_session_closed);
+                  app_cb_call_context_bs__clear_app_call_context();
+               }
             }
          }
       }
@@ -1115,6 +1141,9 @@ void session_core__find_channel_to_close(
                   session_core__l_oldest_channel = session_core__l_channel;
                }
             }
+         }
+         else {
+            ;
          }
       }
       if (session_core__l_oldest_channel_timeref == constants__c_timeref_indet) {

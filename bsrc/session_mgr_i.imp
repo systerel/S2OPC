@@ -58,6 +58,9 @@ PROMOTES
     set_request_audit_info,
     clear_audit_info
 
+INVARIANT
+    max_attempts_reached_server_session = c_session_indet
+
 LOCAL_OPERATIONS
 
     local_client_remove_all_request_handles (session) =
@@ -202,6 +205,52 @@ LOCAL_OPERATIONS
             bres := FALSE ||
             session := c_session_indet
         END
+    END
+    ;
+
+    // Server receives a user activate request and sends response
+    ret <-- local_server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel_connected &
+        channel : dom(a_endpoint) &
+        session : t_session_i &
+        session : s_session &
+        session /: s_client_session &
+        a_state(session) : {e_session_created, e_session_userActivated,
+                            e_session_scOrphaned} &
+        user : t_user_i &
+        user : t_user &
+        activate_req_msg : t_msg_i &
+        activate_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_activate_req &
+        activate_resp_msg : t_msg_i &
+        activate_resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_resp
+    THEN
+        ret,
+        a_user_server, a_session_roles,
+        a_state, a_channel,
+        a_NonceServer :(
+            s_session <: t_session &
+            s_client_session <: s_session &
+            ret : t_StatusCode_i &
+            ret : t_StatusCode &
+            ret : {e_sc_ok, e_sc_bad_application_signature_invalid, e_sc_bad_invalid_argument, e_sc_bad_invalid_state} &
+            a_user_server: s_session +-> t_user &
+            a_session_roles: s_session +-> t_sessionRoles &
+            a_state : s_session --> t_sessionState &
+            {session} <<| a_state = {session} <<| a_state$0 &
+            a_channel : s_session +-> t_channel &
+            a_NonceServer : s_session +-> t_Nonce &
+            dom(a_channel) = dom(a_state |>> {e_session_init, e_session_scOrphaned}) &
+            dom(a_user_server) = dom(s_client_session <<| a_state |>> {e_session_created}) &
+            dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
+            dom(a_session_roles) <: dom(s_client_session <<| a_state |>> {e_session_created}) &
+            s_client_session <| a_state = s_client_session <| a_state$0 // redundant but needed because of a bug in AtelierB
+       )
     END
 
 OPERATIONS
@@ -354,6 +403,27 @@ OPERATIONS
                 endpoint_config_idx <-- server_get_endpoint_config (l_channel)
             END
         END
+    END
+    ;
+
+    ret <-- local_server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
+    VAR
+        l_state,
+        l_ret
+    IN
+        l_state <-- get_session_state_or_closed(session);
+        CASE l_state OF
+            EITHER e_session_created THEN
+                l_ret <-- server_activate_session_created_req_and_resp_sm(channel, session, user, activate_req_msg, activate_resp_msg)
+            OR e_session_userActivated THEN
+                l_ret <-- server_activate_session_userActivated_req_and_resp_sm(channel, session, user, activate_req_msg, activate_resp_msg)
+            OR e_session_scOrphaned THEN
+                l_ret <-- server_activate_session_scOrphaned_req_and_resp_sm(channel, session, user, activate_req_msg, activate_resp_msg)
+            ELSE
+                l_ret := e_sc_bad_invalid_state
+            END
+        END;
+        ret := l_ret
     END
     ;
 
@@ -539,9 +609,27 @@ OPERATIONS
         session := c_session_indet;
         service_ret := c_StatusCode_indet;
         l_channel_config_idx <-- get_channel_info (channel);
+        ASSERT
+            // factors out common POs
+            e_sc_ok : t_StatusCode &
+            e_sc_bad_resource_unavailable : t_StatusCode &
+            e_sc_bad_service_unsupported : t_StatusCode &
+            e_sc_bad_identity_token_invalid : t_StatusCode &
+            e_sc_bad_invalid_state : t_StatusCode &
+            e_sc_bad_session_id_invalid : t_StatusCode &
+            e_sc_bad_secure_channel_id_invalid : t_StatusCode &
+            e_sc_bad_too_many_sessions : t_StatusCode
+        THEN
+            skip
+        END;
         CASE req_typ OF
             EITHER e_msg_session_create_req THEN
                 // SESSION CREATION REQUEST
+                ASSERT
+                    // factors out common POs
+                    a_msg_in_type = e_msg_session_create_req &
+                    a_msg_out_type = e_msg_session_create_resp
+                THEN skip END;
                 // If there is no way to activate a session, it means service is not supported for this secure channel
                 // This status code is reported in all error cases
                 l_endpoint_config_idx <-- server_get_endpoint_config (channel);
@@ -567,12 +655,12 @@ OPERATIONS
                             /* Activate auto-close mechanism in case maximum number of sessions will be reached on next creation */
                             may_close_unactivated_session
                         END
+                        ;
+                        l_client_app_desc <-- get_server_session_client_app_desc (session);
+                        l_client_cert_tb <-- get_server_session_client_cert_tb (session);
+                        l_session_name <-- get_server_session_name (session);
+                        set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user)
                     END
-                    ;
-                    l_client_app_desc <-- get_server_session_client_app_desc (session);
-                    l_client_cert_tb <-- get_server_session_client_cert_tb (session);
-                    l_session_name <-- get_server_session_name (session);
-                    set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user)
                 ELSIF l_has_user_token_policy_available = FALSE
                 THEN
                     service_ret := e_sc_bad_service_unsupported
@@ -583,6 +671,11 @@ OPERATIONS
                 server_notify_session_create(l_channel_config_idx, req_msg, resp_msg, session, service_ret)
             OR e_msg_session_activate_req THEN
                 // SESSION ACTIVATION REQUEST
+                ASSERT
+                    // factors out common POs
+                    a_msg_in_type = e_msg_session_activate_req &
+                    a_msg_out_type = e_msg_session_activate_resp
+                THEN skip END;
                 // TODO: add a local operation for rest
                 session <-- server_get_session_from_token (session_token);
                 l_valid_session <-- is_valid_session (session);
@@ -604,7 +697,7 @@ OPERATIONS
                                 // Note: we need it to be set for the role computation (and we need it at the end to cover failures)
                                 set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user);
                                 // TODO: differentiate sc_activate from user_activate directly here
-                                service_ret <-- server_activate_session_req_and_resp_sm (channel, session, l_user, req_msg, resp_msg)
+                                service_ret <-- local_server_activate_session_req_and_resp_sm (channel, session, l_user, req_msg, resp_msg)
                             ELSIF security_failed = TRUE
                             THEN
                                 /* Close session as counter measure for repeated user authentication failures */
@@ -639,6 +732,11 @@ OPERATIONS
                 END
             OR e_msg_session_close_req THEN
                 // SESSION CLOSE REQUEST
+                ASSERT
+                    // factors out common POs
+                    a_msg_in_type = e_msg_session_close_req &
+                    a_msg_out_type = e_msg_session_close_resp
+                THEN skip END;
                 // TODO: add a local operation for rest
                 session <-- server_get_session_from_token (session_token);
                 l_valid_session <-- is_valid_session (session);

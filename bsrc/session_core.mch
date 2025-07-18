@@ -42,7 +42,9 @@ DEFINITIONS
     a_user_client,
     a_NonceServer,
     a_NonceClient,
-    a_session_roles;
+    a_session_roles,
+    max_attempts_reached_server_session,
+    ReqAuditEntryInfo;
 
     d_typing ==
     s_session <: t_session &
@@ -60,7 +62,9 @@ DEFINITIONS
     a_NonceServer : s_session +-> t_Nonce &
     /* The NonceClient is remembered by the client in Sess_Creating */
     a_NonceClient : s_session +-> t_Nonce &
-    a_session_roles : s_session +-> t_sessionRoles; // a session may be associated to roles
+    a_session_roles : s_session +-> t_sessionRoles & // a session may be associated to roles
+    max_attempts_reached_server_session : t_session_i &
+    ReqAuditEntryInfo : t_msg_header_i;
 
     d_init ==
     s_session                    := {} ||
@@ -76,7 +80,9 @@ DEFINITIONS
     a_user_client                := {} ||
     a_NonceServer                := {} ||
     a_NonceClient                := {} ||
-    a_session_roles              := {};
+    a_session_roles              := {} ||
+    max_attempts_reached_server_session := c_session_indet ||
+    ReqAuditEntryInfo := c_msg_header_indet;
 
     d_close_session (session) ==
     s_session            := s_session - {session}              || // If session was valid session, remove it
@@ -92,7 +98,8 @@ DEFINITIONS
     a_user_client        := {session} <<| a_user_client        || // If session had a user, remove this relation
     a_NonceServer        := {session} <<| a_NonceServer        || // If session had a server nonce, remove it
     a_NonceClient        := {session} <<| a_NonceClient        || // If session had a client nonce, remove it
-    a_session_roles      := {session} <<| a_session_roles;         // If session had a role, remove this relation
+    a_session_roles      := {session} <<| a_session_roles      || // If session had a role, remove this relation
+    max_attempts_reached_server_session := c_session_indet;
 
     d_close_server_sessions (exceptSession) ==
     s_session            := s_session /\ (s_client_session \/ {exceptSession})                     || // If session is not client or exceptSession remove it
@@ -102,6 +109,7 @@ DEFINITIONS
     a_user_server        := (s_session /\ {exceptSession}) <| a_user_server                        || // If sessions had a user, remove this relation
     a_NonceServer        := (s_session /\ (s_client_session \/ {exceptSession})) <| a_NonceServer  || // If sessions had a server nonce, remove it
     a_session_roles      := (s_session /\ {exceptSession}) <| a_session_roles                         // If sessions had a role, remove this relation
+
 
 ABSTRACT_VARIABLES
     d_variables
@@ -143,6 +151,10 @@ INVARIANT
 
     // Server sessions (except in created state) can have associated roles.
     dom(a_session_roles) <: dom(s_client_session <<| a_state |>> {e_session_created})
+
+ASSERTIONS
+
+    c_session_indet /: s_client_session
 
 INITIALISATION
     d_init
@@ -231,7 +243,6 @@ OPERATIONS
     END
     ;
 
-    // Server receives create session request on channel and sends response
     nsession, service_ret <-- server_create_session_req_and_resp_sm (channel, create_req_msg, create_resp_msg) =
     PRE
         channel : t_channel_i  &
@@ -244,55 +255,38 @@ OPERATIONS
         create_resp_msg : t_msg_i &
         create_resp_msg = c_msg_out &
         c_msg_out : t_msg &
-        a_msg_out_type = e_msg_session_create_resp
+        a_msg_out_type = e_msg_session_create_resp &
+        max_attempts_reached_server_session = c_session_indet &
+        dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})
     THEN
-        CHOICE
-            ANY l_nsession WHERE
-                l_nsession : t_session_i &
-                l_nsession : t_session - s_session
-            THEN
-                ANY l_nsession_token WHERE
-                    l_nsession_token : t_session_token_i &
-                    l_nsession_token : t_session_token - dom(a_server_token)
-                THEN
-                    nsession, service_ret,
-                    s_session,
-                    a_state, a_channel, a_server_token,
-                    a_NonceServer :(
-                        nsession : t_session_i &
-                        service_ret : t_StatusCode_i &
-                        s_session <: t_session &
-                        a_state : s_session --> t_sessionState &
-                        a_channel : s_session +-> t_channel &
-                        a_server_token : t_session_token >+> s_session &
-                        a_NonceServer : t_session +-> t_Nonce &
-                        {l_nsession} <<| a_state = {l_nsession} <<| a_state$0 &
-                        {l_nsession} <<| a_channel = {l_nsession} <<| a_channel$0 &
-                        a_server_token |>> {l_nsession} = a_server_token$0 |>> {l_nsession} &
-                        service_ret : {e_sc_bad_unexpected_error, e_sc_bad_nonce_invalid, e_sc_bad_certificate_uri_invalid,
-                                         e_sc_bad_invalid_argument, e_sc_ok, e_sc_bad_out_of_memory} &
-                        (service_ret = e_sc_ok =>
-                            nsession = l_nsession &
-                            s_session = s_session \/ {l_nsession} & // add new session to active sessions
-                            a_state = a_state$0 <+ {l_nsession |-> e_session_created} & // add new session to created sessions
-                            a_channel = a_channel$0 <+ {l_nsession |-> channel} & // associate current channel
-                            a_server_token = a_server_token$0 <+ {l_nsession_token |-> l_nsession} &
-                            {l_nsession} <<| a_NonceServer = {l_nsession} <<| a_NonceServer$0) &
-                        (service_ret /= e_sc_ok =>
-                            nsession = c_session_indet &
-                            s_session = s_session$0 &
-                            a_state = a_state$0 &
-                            a_channel = a_channel$0 &
-                            a_server_token = a_server_token$0 &
-                            a_NonceServer = a_NonceServer$0)
-                    )
-                END
-            END
-        OR
-            nsession := c_session_indet ||
-            // TODO: could return at least all result codes from table 15
-            service_ret :: {e_sc_bad_too_many_sessions, e_sc_bad_security_checks_failed}
-        END
+        nsession, service_ret,
+        s_session,
+        a_state, a_channel, a_server_token,
+        a_NonceServer :(
+            nsession : t_session_i &
+            nsession /: s_session$0 &
+            service_ret : t_StatusCode_i &
+            service_ret : t_StatusCode &
+            s_session <: t_session &
+            a_state : s_session --> t_sessionState &
+            a_channel : s_session +-> t_channel &
+            a_server_token : t_session_token >+> s_session &
+            a_NonceServer : s_session +-> t_Nonce &
+            dom(a_channel) = dom(a_state |>> {e_session_init, e_session_scOrphaned}) &
+            ran(a_server_token) = s_session - s_client_session &
+            dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
+            service_ret : {e_sc_bad_unexpected_error, e_sc_bad_nonce_invalid, e_sc_bad_certificate_uri_invalid,
+                e_sc_bad_invalid_argument, e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_too_many_sessions, e_sc_bad_security_checks_failed} &
+            (service_ret = e_sc_ok =>
+                nsession : t_session &
+                s_session = s_session$0 \/ {nsession} &
+                nsession /: s_client_session &
+                a_state = a_state$0 <+ {nsession |-> e_session_created}) &
+            (service_ret /= e_sc_ok =>
+                nsession = c_session_indet &
+                s_session = s_session$0 &
+                a_state = a_state$0)
+        )
     END
     ;
 
@@ -360,7 +354,7 @@ OPERATIONS
                 a_user_client : s_session +-> t_user_token &
                 ret : {e_sc_bad_security_checks_failed, e_sc_bad_unexpected_error, e_sc_ok} &
                 (ret = e_sc_ok  => a_state = a_state$0 <+ {session |-> e_session_userActivating} & a_user_client = a_user_client$0 <+ {session |-> p_user_token}) &
-                (ret /= e_sc_ok => a_state = a_state$0)
+                (ret /= e_sc_ok => a_state = a_state$0 & a_user_client = a_user_client$0)
             )
         OR
             // applicative code provided invalid p_user_token: no change
@@ -406,23 +400,27 @@ OPERATIONS
                               e_session_scOrphaned} &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token &
-        p_user_token_signature : t_SignatureData_i
+        p_user_token_signature : t_SignatureData_i &
+        max_attempts_reached_server_session = c_session_indet
     THEN
         p_sc_valid_user,
         p_max_attempts,
-        p_user
+        p_user,
+        max_attempts_reached_server_session
         :(p_sc_valid_user : t_StatusCode_i &
           p_sc_valid_user : t_StatusCode &
           p_max_attempts : BOOL &
           p_user : t_user_i &
-          (p_sc_valid_user = e_sc_ok => p_user : t_user & p_max_attempts = FALSE) &
-          (p_sc_valid_user /= e_sc_ok =>
-              p_user = c_user_indet))
+          max_attempts_reached_server_session : t_session_i &
+          (p_sc_valid_user  = e_sc_ok => p_user : t_user & p_max_attempts = FALSE) &
+          (p_sc_valid_user /= e_sc_ok => p_user = c_user_indet) &
+          (p_max_attempts = FALSE => max_attempts_reached_server_session = max_attempts_reached_server_session$0) &
+          (p_max_attempts = TRUE  => max_attempts_reached_server_session = p_session)
+         )
     END
     ;
 
-    // Server receives a user activate request and sends response
-    ret <-- server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
+    ret <-- server_activate_session_created_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -430,8 +428,7 @@ OPERATIONS
         session : t_session_i &
         session : s_session &
         session /: s_client_session &
-        a_state(session) : {e_session_created, e_session_userActivated,
-                            e_session_scOrphaned} &
+        a_state(session) = e_session_created &
         user : t_user_i &
         user : t_user &
         activate_req_msg : t_msg_i &
@@ -443,103 +440,139 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_activate_resp
     THEN
-        /* Note: same cases have same post-conditions */
-        IF a_state(session) = e_session_created
-        THEN
-            IF session : dom(a_channel) &
+        IF session : dom(a_channel) &
                a_channel(session) = channel // current channel is the channel associated to the current session
-            THEN
-                /* Case 1: keep same channel and set user */
-                CHOICE
-                    a_state(session) := e_session_userActivated ||
-                    a_user_server(session) := user ||
-                    a_session_roles :(
-                        a_session_roles : t_session +-> t_sessionRoles &
-                        {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
-                    a_NonceServer :(
-                        a_NonceServer : t_session +-> t_Nonce &
-                        {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                        session : dom(a_NonceServer)) ||
-                    ret := e_sc_ok
-                OR
-                    ret := e_sc_bad_application_signature_invalid
-                END
-            ELSE
-                ret := e_sc_bad_invalid_argument
-            END
-        ELSIF a_state(session) = e_session_userActivated
         THEN
-            IF session : dom(a_channel) &
-               a_channel(session) = channel // current channel is the channel associated to the current session
-            THEN
-                /* Case 1: keep same channel and set (change) user */
-                CHOICE
-                    a_state(session) := e_session_userActivated ||
-                    a_user_server(session) := user ||
-                    a_session_roles :(
-                        a_session_roles : t_session +-> t_sessionRoles &
-                        {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
-                    a_NonceServer :(
-                        a_NonceServer : t_session +-> t_Nonce &
-                        {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                        session : dom(a_NonceServer)) ||
-                    ret := e_sc_ok
-                OR
-                    ret := e_sc_bad_application_signature_invalid
-                END
-            ELSIF session : dom(a_user_server) &
-                  a_user_server(session) = user // user provided in activate request is the user associated to the current session
-            THEN
-                /* Case 2: keep same user and change channel */
-                CHOICE
-                    a_channel(session) := channel         ||
-                    a_state(session) := e_session_userActivated ||
-                    a_user_server :(
-                        a_user_server : t_session +-> t_user &
-                        {session} <<| a_user_server = {session} <<| a_user_server$0 &
-                        session : dom(a_user_server))||
-                    a_session_roles :(
-                        a_session_roles : t_session +-> t_sessionRoles &
-                        {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
-                    a_NonceServer :(
-                        a_NonceServer : t_session +-> t_Nonce &
-                        {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                        session : dom(a_NonceServer)) ||
-                    ret := e_sc_ok
-                OR
-                    ret := e_sc_bad_application_signature_invalid
-                    // sends response with error
-                END
-            ELSE
-                ret := e_sc_bad_invalid_state
+            /* Case 1: keep same channel and set user */
+            CHOICE
+                a_state(session) := e_session_userActivated ||
+                a_user_server(session) := user ||
+                a_session_roles :(
+                    a_session_roles : t_session +-> t_sessionRoles &
+                    {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
+                a_NonceServer :(
+                    a_NonceServer : t_session +-> t_Nonce &
+                    {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                    session : dom(a_NonceServer)) ||
+                ret := e_sc_ok
+            OR
+                ret := e_sc_bad_application_signature_invalid
             END
-        ELSIF a_state(session) = e_session_scOrphaned
+        ELSE
+            ret := e_sc_bad_invalid_argument
+        END
+    END
+    ;
+
+    ret <-- server_activate_session_userActivated_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel_connected &
+        channel : dom(a_endpoint) &
+        session : t_session_i &
+        session : s_session &
+        session /: s_client_session &
+        a_state(session) = e_session_userActivated &
+        user : t_user_i &
+        user : t_user &
+        activate_req_msg : t_msg_i &
+        activate_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_activate_req &
+        activate_resp_msg : t_msg_i &
+        activate_resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_resp
+    THEN
+        IF session : dom(a_channel) &
+           a_channel(session) = channel // current channel is the channel associated to the current session
         THEN
-            IF session : dom(a_user_server) &
-               a_user_server(session) = user
-            THEN
-                /* Case 2: keep same user and change channel */
-                CHOICE
-                    a_channel(session) := channel         ||
-                    a_state(session) := e_session_userActivated ||
-                    a_user_server :(
-                        a_user_server : t_session +-> t_user &
-                        {session} <<| a_user_server = {session} <<| a_user_server$0 &
-                        session : dom(a_user_server))||
-                    a_session_roles :(
-                        a_session_roles : t_session +-> t_sessionRoles &
-                        {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
-                    a_NonceServer :(
-                        a_NonceServer : t_session +-> t_Nonce &
-                        {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                        session : dom(a_NonceServer)) ||
-                    ret := e_sc_ok
-                OR
-                    ret := e_sc_bad_application_signature_invalid
-                    // sends response with error
-                END
-            ELSE
-                ret := e_sc_bad_invalid_state
+            /* Case 1: keep same channel and set (change) user */
+            CHOICE
+                a_state(session) := e_session_userActivated ||
+                a_user_server(session) := user ||
+                a_session_roles :(
+                    a_session_roles : t_session +-> t_sessionRoles &
+                    {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
+                a_NonceServer :(
+                    a_NonceServer : t_session +-> t_Nonce &
+                    {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                    session : dom(a_NonceServer)) ||
+                ret := e_sc_ok
+            OR
+                ret := e_sc_bad_application_signature_invalid
+            END
+        ELSIF session : dom(a_user_server) &
+              a_user_server(session) = user // user provided in activate request is the user associated to the current session
+        THEN
+            /* Case 2: keep same user and change channel */
+            CHOICE
+                a_channel(session) := channel         ||
+                a_state(session) := e_session_userActivated ||
+                a_user_server :(
+                    a_user_server : t_session +-> t_user &
+                    {session} <<| a_user_server = {session} <<| a_user_server$0 &
+                    session : dom(a_user_server))||
+                a_session_roles :(
+                    a_session_roles : t_session +-> t_sessionRoles &
+                    {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
+                a_NonceServer :(
+                    a_NonceServer : t_session +-> t_Nonce &
+                    {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                    session : dom(a_NonceServer)) ||
+                ret := e_sc_ok
+            OR
+                ret := e_sc_bad_application_signature_invalid
+                // sends response with error
+            END
+        ELSE
+            ret := e_sc_bad_invalid_state
+        END
+    END
+    ;
+
+    ret <-- server_activate_session_scOrphaned_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel_connected &
+        channel : dom(a_endpoint) &
+        session : t_session_i &
+        session : s_session &
+        session /: s_client_session &
+        a_state(session) = e_session_scOrphaned &
+        user : t_user_i &
+        user : t_user &
+        activate_req_msg : t_msg_i &
+        activate_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_activate_req &
+        activate_resp_msg : t_msg_i &
+        activate_resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_resp
+    THEN
+        IF session : dom(a_user_server) &
+           a_user_server(session) = user
+        THEN
+            /* Case 2: keep same user and change channel */
+            CHOICE
+                a_channel(session) := channel         ||
+                a_state(session) := e_session_userActivated ||
+                a_user_server :(
+                    a_user_server : t_session +-> t_user &
+                    {session} <<| a_user_server = {session} <<| a_user_server$0 &
+                    session : dom(a_user_server))||
+                a_session_roles :(
+                    a_session_roles : t_session +-> t_sessionRoles &
+                    {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
+                a_NonceServer :(
+                    a_NonceServer : t_session +-> t_Nonce &
+                    {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                    session : dom(a_NonceServer)) ||
+                ret := e_sc_ok
+            OR
+                ret := e_sc_bad_application_signature_invalid
+                // sends response with error
             END
         ELSE
             ret := e_sc_bad_invalid_state
@@ -580,7 +613,9 @@ OPERATIONS
         p_lost_channel      /: dom(a_endpoint)           &
         a_channel~[{p_lost_channel}] <: s_client_session &
         p_channel_config_idx : t_channel_config_idx_i    &
-        p_channel_config_idx : t_channel_config_idx
+        p_channel_config_idx : t_channel_config_idx      &
+        max_attempts_reached_server_session = c_session_indet
+
     THEN
         // We have a new channel to provide (waiting for connection)
         LET active_sessions, inactive_sessions BE
@@ -611,7 +646,9 @@ OPERATIONS
         p_lost_channel : t_channel_i         &
         p_lost_channel : s_channel_connected &
         p_lost_channel : dom(a_endpoint)     &
-        a_channel~[{p_lost_channel}] /\ s_client_session = {}
+        a_channel~[{p_lost_channel}] /\ s_client_session = {} &
+        ReqAuditEntryInfo = c_msg_header_indet &
+        max_attempts_reached_server_session = c_session_indet
     THEN
         LET active_sessions, inactive_sessions BE
             active_sessions   = ( t_session /\ a_channel~[{p_lost_channel}] /\ a_state~[{e_session_userActivated}]) &
@@ -644,7 +681,9 @@ OPERATIONS
 
     server_close_sessions (exceptSession) =
     PRE
-        exceptSession : t_session_i
+        exceptSession : t_session_i &
+        max_attempts_reached_server_session = c_session_indet
+
     THEN
         d_close_server_sessions (exceptSession)
     END
@@ -687,6 +726,7 @@ OPERATIONS
         session /: s_client_session &
         a_channel(session) = channel &
         a_state(session) : {e_session_created,
+            e_session_userActivating,
             e_session_userActivated} &
         close_req_msg : t_msg_i &
         close_req_msg = c_msg_in &
@@ -695,12 +735,17 @@ OPERATIONS
         close_resp_msg : t_msg_i &
         close_resp_msg = c_msg_out &
         c_msg_out : t_msg &
-        a_msg_out_type = e_msg_session_close_resp
+        a_msg_out_type = e_msg_session_close_resp &
+        max_attempts_reached_server_session = c_session_indet
     THEN
         // TODO: respond to pending requests with error if requested in request
         d_close_session(session) ||
-        ret :: {e_sc_ok,
-            e_sc_bad_unexpected_error}
+        ret :(
+            ret : t_StatusCode_i &
+            ret : t_StatusCode &
+            ret : {e_sc_ok,
+                e_sc_bad_unexpected_error}
+        )
     END
     ;
 
@@ -716,7 +761,8 @@ OPERATIONS
         close_resp_msg : t_msg_i &
         close_resp_msg = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_close_resp
+        a_msg_in_type = e_msg_session_close_resp &
+        max_attempts_reached_server_session = c_session_indet
     THEN
         // In any case session is closed, invalid cases or valid cases have same result
         d_close_session(session)
@@ -730,7 +776,8 @@ OPERATIONS
         session : s_session &
         session : s_client_session &
         sc_reason : t_StatusCode_i &
-        sc_reason : t_StatusCode
+        sc_reason : t_StatusCode &
+        max_attempts_reached_server_session = c_session_indet
     THEN
         // In any case session is closed, invalid cases or valid cases have same result
         d_close_session(session)
@@ -743,7 +790,8 @@ OPERATIONS
         session : s_session &
         session /: s_client_session &
         sc_reason : t_StatusCode_i &
-        sc_reason : t_StatusCode
+        sc_reason : t_StatusCode &
+        max_attempts_reached_server_session : {c_session_indet, session}
     THEN
         // In any case session is closed, invalid cases or valid cases have same result
         // In any case session is closed, but behavior different:
@@ -786,7 +834,11 @@ OPERATIONS
         IF session_token : t_session_token &
             session_token : dom(a_server_token)
         THEN
-            session :(session : t_session_i & session = a_server_token(session_token))
+            session :(
+                session : t_session_i &
+                session = a_server_token(session_token) &
+                session /: s_client_session
+            )
         ELSE
             session := c_session_indet
         END
@@ -813,7 +865,7 @@ OPERATIONS
         IF  session : dom(a_channel) THEN
             channel :(channel : t_channel_i & channel = a_channel(session))
         ELSE
-            channel := c_channel_indet
+            channel :: t_channel_i
         END
     END
     ;
@@ -976,9 +1028,9 @@ OPERATIONS
         session : t_session_i &
         session : t_session &
         resp_msg : t_msg_i &
-        resp_msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_create_resp
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_resp
     THEN
         timer_created :: BOOL
     END
@@ -1059,15 +1111,11 @@ OPERATIONS
 
     bres, channel <-- getall_valid_session_channel (session) =
     PRE
-        session  : t_session_i
+        session : t_session_i &
+        session : t_session
     THEN
-        CHOICE
-            bres := FALSE ||
-            channel := c_channel_indet
-        OR
-            bres := TRUE ||
-            channel :: t_channel_i
-        END
+        bres :: BOOL ||
+        channel :: t_channel_i
     END
     ;
 
@@ -1101,7 +1149,9 @@ OPERATIONS
     ;
 
     may_close_unactivated_session =
-    BEGIN
+    PRE
+        max_attempts_reached_server_session = c_session_indet
+    THEN
         CHOICE
             ANY l_session WHERE
                 l_session : t_session_i &
@@ -1162,15 +1212,16 @@ OPERATIONS
         p_channel_config : t_channel_config_idx   &
         req_msg_header : t_msg_header_i &
         req_msg_header : t_msg_header &
-        req_msg_header = c_msg_in_header
+        req_msg_header = c_msg_in_header &
+        ReqAuditEntryInfo = c_msg_header_indet
     THEN
-        skip
+        ReqAuditEntryInfo :: t_msg_header
     END
     ;
 
     clear_audit_info =
     BEGIN
-        skip
+        ReqAuditEntryInfo := c_msg_header_indet
     END
     ;
 
@@ -1187,7 +1238,6 @@ OPERATIONS
         resp_msg = c_msg_out &
         a_msg_out_type = e_msg_session_create_resp &
         session : t_session_i &
-        session : t_session &
         oper_ret_code : t_StatusCode_i &
         oper_ret_code : t_StatusCode
     THEN
@@ -1204,7 +1254,6 @@ OPERATIONS
         req_msg = c_msg_in &
         a_msg_in_type = e_msg_session_activate_req &
         session : t_session_i &
-        session : t_session &
         oper_ret_code : t_StatusCode_i &
         oper_ret_code : t_StatusCode
     THEN
@@ -1215,7 +1264,6 @@ OPERATIONS
     server_notify_session_closed(session, oper_ret_code) =
     PRE
         session : t_session_i &
-        session : t_session &
         oper_ret_code : t_StatusCode_i &
         oper_ret_code : t_StatusCode
     THEN
@@ -1224,7 +1272,10 @@ OPERATIONS
     ;
 
     session_core_UNINITIALISATION =
-    BEGIN
+    PRE
+        max_attempts_reached_server_session = c_session_indet &
+        ReqAuditEntryInfo = c_msg_header_indet
+    THEN
         d_init
     END
 END

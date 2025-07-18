@@ -962,7 +962,7 @@ PROPERTIES
     k_n_nodesToAdd_max : NAT &
     k_n_nodesToDelete_max : NAT &
 
-    k_n_UserAuthAttempts_max : NAT &
+    k_n_UserAuthAttempts_max : NAT1 &
 
     k_n_NamespaceIndex_max : NAT &
 

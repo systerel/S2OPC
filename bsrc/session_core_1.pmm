@@ -19,5 +19,11 @@
 
 THEORY User_Pass IS
 ff(0) & dd & pp(rp.1);
-ff(0) & dd
+ff(0) & dd;
+
+Operation(check_server_session_user_auth_attempts) & Pattern(ran({a}<<|b) <: c)
+& ff(0) & dd(0) & dc(p_success = TRUE) & mp & dd(0) & dc(a_server_user_auth_attempts(p_session)+1: 0..k_n_UserAuthAttempts_max-1) & dd(0) & ah(a_server_user_auth_attempts$1 = a_server_user_auth_attempts<+{p_session|->a_server_user_auth_attempts(p_session)+1}) & pr & ah(max_attempts_reached_server_session$1 = c_session_indet) & pr & ah(ran({c_session_indet}<<|(a_server_user_auth_attempts<+{p_session|->a_server_user_auth_attempts(p_session)+1})) = ran(a_server_user_auth_attempts<+{p_session|->a_server_user_auth_attempts(p_session)+1})) & pr & pr & pr & dd(0) & eh(ran({c_session_indet}<<|(a_server_user_auth_attempts<+{p_session|->a_server_user_auth_attempts(p_session)+1})),_h,Goal) & pr & dd(0) & ah(a_server_user_auth_attempts$1 = a_server_user_auth_attempts<+{p_session|->a_server_user_auth_attempts(p_session)+1}) & pr & ah(max_attempts_reached_server_session$1 = p_session) & pr & pr(Tac(SimplifyRelDoaLongXY));
+
+Operation(check_server_session_user_auth_attempts) & Pattern(dom(a<<|b) <: dom(c-a<|(a<<|d)|>>e))
+    & ff(0) & dd(0) & ar(SimplifyRelDorLongXY.7,Goal) & ah({session}<|({session}<<|a_state) = {}) & pr & dd(0) & eh({session}<|({session}<<|a_state),_h,Goal) & ar(th_simp.41,Goal) & ah(dom(a_NonceClient) <: dom(s_client_session<|a_state|>>{e_session_init})) & pp(rt.0)
 END
