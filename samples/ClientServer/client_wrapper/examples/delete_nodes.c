@@ -169,24 +169,31 @@ int main(int argc, char* const argv[])
         }
     }
 
-    SOPC_NodeId* nodeIdToDelete = SOPC_NodeId_FromCString(argv[1]);
     OpcUa_DeleteNodesResponse* deleteNodesResp = NULL;
     OpcUa_DeleteNodesRequest* deleteNodesReq = NULL;
-    deleteNodesReq = SOPC_DeleteNodesRequest_Create(1);
-    status = SOPC_DeleteNodesRequest_SetParameters(deleteNodesReq, 0, nodeIdToDelete,
-                                                   0 == strcmp(argv[2], "true") ? true : false);
-    SOPC_NodeId_Clear(nodeIdToDelete);
-    SOPC_Free(nodeIdToDelete);
-
-    if (SOPC_STATUS_OK == status)
+    SOPC_NodeId* nodeIdToDelete = SOPC_NodeId_FromCString(argv[1]);
+    if (NULL == nodeIdToDelete)
     {
-        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) deleteNodesReq, (void**) &deleteNodesResp);
+        printf("Fail to recognize input NodeId %s. Please verify that it is a good format NodeId.\n", argv[1]);
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
     else
     {
-        SOPC_ReturnStatus delStatus =
-            SOPC_EncodeableObject_Delete(&OpcUa_DeleteNodesRequest_EncodeableType, (void**) &deleteNodesReq);
-        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+        deleteNodesReq = SOPC_DeleteNodesRequest_Create(1);
+        status = SOPC_DeleteNodesRequest_SetParameters(deleteNodesReq, 0, nodeIdToDelete,
+                                                       0 == strcmp(argv[2], "true") ? true : false);
+        SOPC_NodeId_Clear(nodeIdToDelete);
+        SOPC_Free(nodeIdToDelete);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) deleteNodesReq, (void**) &deleteNodesResp);
+        }
+        else
+        {
+            SOPC_ReturnStatus delStatus =
+                SOPC_EncodeableObject_Delete(&OpcUa_DeleteNodesRequest_EncodeableType, (void**) &deleteNodesReq);
+            SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+        }
     }
 
     if (SOPC_STATUS_OK == status)

@@ -98,6 +98,7 @@ int main(int argc, char* argv[])
     }
     if (NULL == g_pNid)
     {
+        printf("--------\n\nInput %s is an invalid format of NodeId!\n\n--------\n", nid);
         status = SOPC_STATUS_NOK;
     }
 
