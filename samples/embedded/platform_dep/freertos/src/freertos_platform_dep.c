@@ -77,7 +77,8 @@
 
 #define MAIN_STACK_SIZE ((unsigned short) 2048)
 
-#ifndef PRINTF
+#ifdef PRINTF
+#undef PRINTF
 #define PRINTF SOPC_Shell_Printf
 #endif
 #ifndef BOARD_TYPE
@@ -98,11 +99,8 @@ HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_S
                                       {NULL, 0}};
 
 #elif defined SDK_PROVIDER_NXP
-#define HEAP_REGION2_SIZE (128 * 1024)
-#define HEAP_REGION2_BASE 0x20000000
-
-HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_SIZE}, // DTCM RAM
-                                      {NULL, 0}};
+// cant get _HeapSize or _pvHeapStart this early in compilation
+//todo
 #else
 #error "Sorry, Memory mapping is not defined for this board. Unsuported or Undefined SDK provider"
 #endif // SDK_PROVIDER
@@ -196,7 +194,7 @@ void SOPC_Platform_Setup(void)
 #else
 #error "Unsuported or Undefined SDK provider"
 #endif // SDK_PROVIDER
-    PRINTF("\r\n************************************************\n");
+    PRINTF("\n************************************************\n");
     PRINTF("SOPC / FreeRTOS / MbedTLS / LwIP example\n");
     PRINTF("************************************************\n");
     PRINTF(" Board type       : %s\n", BOARD_TYPE);
@@ -212,7 +210,7 @@ void SOPC_Platform_Setup(void)
 #endif // SDK_PROVIDER
     PRINTF("************************************************\n");
 
-    PRINTF("Initializing MbedTLS\n");
+    PRINTF(" Initializing MbedTLS\n");
     //    MX_MBEDTLS_Init(); / Already done by generated main
 
     PRINTF(" Call command \"help\" to get help about usage of this sample \n");
@@ -224,11 +222,11 @@ void SOPC_Platform_Shutdown(const bool reboot)
     vTaskEndScheduler();
     if (reboot)
     {
-        PRINTF("\n# Rebooting in 5 seconds...\r\n");
+        PRINTF("\n# Rebooting in 5 seconds...\n");
         SOPC_Sleep(5000);
         SOPC_Platform_Main();
     }
-    PRINTF("\n# Shutdown\r\n");
+    PRINTF("\n# Shutdown\n");
     configASSERT(0);
 }
 
@@ -277,21 +275,21 @@ void sopc_main(void)
     static const int priority = 0;
     TaskHandle_t tHandle;
 
-#ifdef SOPC_FREERTOS_RAW_INIT
+#ifndef SOPC_FREERTOS_RAW_INIT
+
+#ifndef SDK_PROVIDER_NXP
     vPortDefineHeapRegions(board_heap5_regions);
-#endif // SOPC_FREERTOS_RAW_INIT
+#endif // !SDK_PROVIDER_NXP
+
+#endif // !SOPC_FREERTOS_RAW_INIT
 
     BaseType_t returned;
     returned = xTaskCreate(sopc_main_entry, "Main", MAIN_STACK_SIZE, NULL, priority, &tHandle);
-    if (returned != pdPASS)
-    {
-        PRINTF("xTaskCreate fail - err %d\n", returned);
-        exit(EXIT_FAILURE);
-    }
+    SOPC_ASSERT(pdPASS == returned);
 
-#ifdef SOPC_FREERTOS_RAW_INIT
+#ifndef SOPC_FREERTOS_RAW_INIT
     vTaskStartScheduler();
-#endif // SOPC_FREERTOS_RAW_INIT
+#endif // !SOPC_FREERTOS_RAW_INIT
 }
 
 /*************************************************/
@@ -312,15 +310,21 @@ void SOPC_Platform_Target_Debug(const char* param)
     if (NULL == param || *param == 0)
     {
         PRINTF(
-            "\r\n"
-            "************************************\r\n");
-        PRINTF("** BOOTING FreeRTOS S2OPC SAMPLE  **\r\n");
-        PRINTF("** BUILD ON " __DATE__ " " __TIME__ "  **\r\n");
+            "\n"
+            "************************************\n");
+        PRINTF("** BOOTING FreeRTOS S2OPC SAMPLE  **\n");
+        PRINTF("** BUILD ON " __DATE__ " " __TIME__ "  **\n");
 
+#ifndef SDK_PROVIDER_NXP
         const unsigned remHeap = xPortGetFreeHeapSize();
         const unsigned minHeap = xPortGetMinimumEverFreeHeapSize();
-        PRINTF("** HEAP : Size : %u, Free: %u, MinFree : %u \r\n", configTOTAL_HEAP_SIZE + HEAP_REGION2_SIZE, remHeap,
+        PRINTF("** HEAP : Size : %u, Free: %u, MinFree : %u \n", configTOTAL_HEAP_SIZE + HEAP_REGION2_SIZE, remHeap,
                minHeap);
+#else
+            //GetMinimumEverFree is not available in newlib's malloc implementation.
+        const unsigned remHeap = xPortGetFreeHeapSize();
+        PRINTF("** HEAP : Free: %u, Free : %u \n", configTOTAL_HEAP_SIZE, remHeap);
+#endif //! SDK_PROVIDER_NXP
     }
     else if (0 == strcmp(param, "help"))
     {

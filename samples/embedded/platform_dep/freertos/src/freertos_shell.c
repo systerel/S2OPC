@@ -34,7 +34,11 @@
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
+#include "FreeRTOS.h"
+#include "atomic.h"
 #include "freertos_shell.h"
+#include "semphr.h"
+#include "task.h"
 
 /*******************************************************************************
  * Options
@@ -93,7 +97,7 @@ typedef struct _shell_context_struct
  * Variables
  ******************************************************************************/
 static shell_context_struct g_shell_context = {.stat = kSHELL_Normal, .l_pos = 0, .c_pos = 0};
-static SOPC_Mutex printMutex;
+static SOPC_Mutex printMutex = NULL;
 
 static uint8_t SOPC_Shell_getc(void)
 {
@@ -168,23 +172,39 @@ void shell_putString(const char* str)
 
 void SOPC_Shell_Printf(const char* msg, ...)
 {
-    static bool once = true;
-    if (once)
+    static uint32_t state = 0; // 0=not init, 1=initializing, 2=initialized
+    if (Atomic_CompareAndSwap_u32(&state, 1U, 0U) == ATOMIC_COMPARE_AND_SWAP_SUCCESS)
     {
         SOPC_ReturnStatus res = SOPC_Mutex_Initialization(&printMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == res);
-        once = false;
+        Atomic_CompareAndSwap_u32(&state, 2U, 1U);
     }
-    SOPC_Mutex_Lock(&printMutex);
+    else
+    {
+        while (Atomic_CompareAndSwap_u32(&state, 2U, 2U) == ATOMIC_COMPARE_AND_SWAP_FAILURE)
+        {
+            taskYIELD();
+        }
+    }
+
+    SOPC_ReturnStatus lock = SOPC_Mutex_Lock(&printMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == lock);
     va_list args;
 
     va_start(args, msg);
 
     static char buf[0x100]; // Static is OK because this is mutex-protected
+
+    UBaseType_t highWater = uxTaskGetStackHighWaterMark(NULL);
+    SOPC_ASSERT(highWater > 0);
     int nbWritten = vsnprintf(buf, sizeof(buf), msg, args);
 
     for (const char* ptr = buf; 0 != (*ptr); ptr++)
     {
+        if(*ptr == '\n'){
+            shell_putChar('\r');
+        }
+        
         shell_putChar(*ptr);
     }
     if (nbWritten >= sizeof(buf))
@@ -194,7 +214,8 @@ void SOPC_Shell_Printf(const char* msg, ...)
     }
 
     va_end(args);
-    SOPC_Mutex_Unlock(&printMutex);
+    lock = SOPC_Mutex_Unlock(&printMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == lock);
 }
 
 char* SOPC_Shell_ReadLine(void)
@@ -209,7 +230,7 @@ char* SOPC_Shell_ReadLine(void)
     {
         ch = SOPC_Shell_getc();
         /* If error occurred when getting a char, continue to receive a new char. */
-        if ((uint8_t)(-1) == ch)
+        if ((uint8_t) (-1) == ch)
         {
             PRINTF("\n[EE] Reading from SHELL failed!\n");
             SOPC_Sleep(1000);

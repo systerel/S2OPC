@@ -32,12 +32,14 @@
 
 #define BOARD_TYPE "MIMXRT1180-EVK"
 #define SDK_PROVIDER_NXP
+#define PRINT SOPC_Shell_Printf
 
 // Board-Specific configuration
 #include "FreeRTOSConfig_Gen.h"
 #include "freertos_platform_dep.h"
 #include "freertos_shell.h"
 #include "sopc_mbedtls_config.h"
+#include <errno.h>
 
 // MbedTLS
 #define MBEDTLS_HAVE_TIME
@@ -87,6 +89,20 @@
 #endif
 #define configUSE_TICK_HOOK 1
 
+#ifdef INCLUDE_uxTaskGetStackHighWaterMark
+#undef INCLUDE_uxTaskGetStackHighWaterMark
+#endif
+#define INCLUDE_uxTaskGetStackHighWaterMark 1
+
+#ifdef configUSE_NEWLIB_REENTRANT
+#undef configUSE_NEWLIB_REENTRANT
+#endif
+#define configUSE_NEWLIB_REENTRANT 1
+
+#define __HeapBase _pvHeapStart
+#define __HeapLimit  _pvHeapLimit
+#define HEAP_SIZE _HeapSize
+
 // LWIP
 #define LWIP_DNS 1
 
@@ -102,6 +118,10 @@
 
 #define LWIP_MULTICAST_TX_OPTIONS 1
 
+#define MEMP_MEM_MALLOC 0
+#define MEMP_MEM_INIT 0
+#define MEM_LIBC_MALLOC 0
+
 // Disable hardware-assisted checksum
 #define CHECKSUM_GEN_IP 1
 #define CHECKSUM_GEN_UDP 1
@@ -112,6 +132,15 @@
 #define CHECKSUM_CHECK_ICMP6 1
 #define IP_REASSEMBLY 0
 #define IP_FRAG 0
+
+#include "lwipopts.h"
+
+//needs to be seet after "lwipopts.h" because the overwrite guard are broken
+#define LWIP_ERRNO_STDINCLUDE 1
+
+#ifdef LWIP_PROVIDE_ERRNO
+#undef LWIP_PROVIDE_ERRNO
+#endif
 
 #define NETC_PROMISCUOUS 1
 
