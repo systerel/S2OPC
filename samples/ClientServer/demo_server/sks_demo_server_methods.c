@@ -52,8 +52,10 @@ SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_GetSecurityKeys(const SOPC_Cal
     SOPC_UNUSED_ARG(param);
     /* Check Call Context */
 
+    /*
     printf("Enter method GetSecurityKeys with param SecurityGroupId = %s\n",
            SOPC_String_GetRawCString(&inputArgs[0].Value.String));
+    */
 
     // SecureChannel shall use encryption to keep the provided keys secret
     OpcUa_MessageSecurityMode msm = SOPC_CallContext_GetSecurityMode(callContextPtr);
