@@ -1323,28 +1323,49 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
 static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx)
 {
-    SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
+    if (ctx->nb_connections == 0)
+    {
+        LOG_XML_ERROR("No connections defined.");
+        return NULL;
+    }
 
+    bool success = true;
+    bool allocSuccess = false;
+
+    SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
     if (NULL == config)
     {
         return NULL;
     }
-    bool allocSuccess = SOPC_PubSubConfiguration_Allocate_PubConnection_Array(config, ctx->nb_pubconnections);
-    if (allocSuccess)
+
+    if (ctx->nb_pubconnections > 0)
     {
-        allocSuccess =
+        success = SOPC_PubSubConfiguration_Allocate_PubConnection_Array(config, ctx->nb_pubconnections);
+    }
+    if (success && ctx->nb_connections - ctx->nb_pubconnections > 0)
+    {
+        success =
             SOPC_PubSubConfiguration_Allocate_SubConnection_Array(config, ctx->nb_connections - ctx->nb_pubconnections);
     }
 
     SOPC_ASSERT(ctx->nb_messages <= UINT16_MAX);
 
-    if (ctx->has_publisher && allocSuccess)
+    if (ctx->has_publisher && success)
     {
-        allocSuccess = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, (uint16_t) ctx->nb_datasets);
+        if (ctx->nb_datasets > 0)
+        {
+            success = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, (uint16_t) ctx->nb_datasets);
+        }
+        else
+        {
+            success = false;
+            allocSuccess = true;
+            LOG_XML_ERROR("No datasets defined for publisher connections");
+        }
     }
     uint16_t pubDataSetIndex = 0; // Index in "SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array"
 
-    for (uint16_t icon = 0, pubicon = 0, subicon = 0; icon < ctx->nb_connections && allocSuccess; icon++)
+    for (uint16_t icon = 0, pubicon = 0, subicon = 0; icon < ctx->nb_connections && success; icon++)
     {
         SOPC_PubSubConnection* connection;
         struct sopc_xml_pubsub_connection_t* p_connection = &ctx->connectionArr[icon];
@@ -1356,6 +1377,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, pubicon);
             SOPC_ASSERT(NULL != connection);
             pubicon++;
+            SOPC_PublishedDataSetSourceType type = SOPC_PublishedDataItemsDataType;
 
             // Publisher connection
             if (SOPC_String_PublisherId == p_connection->publisher_id.type)
@@ -1366,9 +1388,17 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             {
                 SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, p_connection->publisher_id.data.uint);
             }
-            allocSuccess = SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, p_connection->nb_messages);
-            SOPC_PublishedDataSetSourceType type = SOPC_PublishedDataItemsDataType;
-            if (allocSuccess)
+            if (p_connection->nb_messages > 0)
+            {
+                success = SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, p_connection->nb_messages);
+            }
+            else
+            {
+                success = false;
+                allocSuccess = true;
+                LOG_XML_ERROR("No messages defined for publisher connection");
+            }
+            if (success)
             {
                 SOPC_PubSubConnection_Set_AcyclicPublisher(connection, p_connection->is_acyclic);
                 if (p_connection->is_acyclic)
@@ -1377,7 +1407,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 }
             }
 
-            for (uint16_t imsg = 0; imsg < p_connection->nb_messages && allocSuccess; imsg++)
+            for (uint16_t imsg = 0; imsg < p_connection->nb_messages && success; imsg++)
             {
                 struct sopc_xml_pubsub_message_t* msg = &p_connection->messageArr[imsg];
 
@@ -1398,53 +1428,78 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
 
                 // Associate dataSet with writer
                 SOPC_ASSERT(msg->nb_datasets < 0x100);
-                allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, (uint8_t) msg->nb_datasets);
+                if (msg->nb_datasets > 0)
+                {
+                    success = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, (uint8_t) msg->nb_datasets);
+                }
+                else
+                {
+                    success = false;
+                    allocSuccess = true;
+                    LOG_XML_ERRORF("No datasets defined for writerGroup (groupId=%" PRIu16 ")", msg->groupId);
+                }
                 // msg->publisher_id ignored if present
 
-                if (allocSuccess)
+                if (success)
                 {
                     SOPC_WriterGroup_Set_MqttTopic(writerGroup, msg->mqttTopic);
                 }
 
-                if (NULL != msg->sksArr && allocSuccess)
+                if (NULL != msg->sksArr && success)
                 {
-                    allocSuccess = SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(writerGroup, msg->nb_sks);
-                    for (uint32_t isks = 0; isks < msg->nb_sks && allocSuccess; isks++)
+                    SOPC_ASSERT(msg->nb_sks > 0);
+                    success = SOPC_WriterGroup_Allocate_SecurityKeyServices_Array(writerGroup, msg->nb_sks);
+                    for (uint32_t isks = 0; isks < msg->nb_sks && success; isks++)
                     {
                         SOPC_SerializedCertificate* cert = NULL;
                         struct sopc_xml_pubsub_sks_t* xmlsks = &msg->sksArr[isks];
                         SOPC_SecurityKeyServices* sks = SOPC_WriterGroup_Get_SecurityKeyServices_At(writerGroup, isks);
                         SOPC_ASSERT(sks != NULL);
-                        allocSuccess = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, xmlsks->endpointUrl);
+                        success = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, xmlsks->endpointUrl);
                         SOPC_ReturnStatus status =
                             SOPC_KeyManager_SerializedCertificate_CreateFromFile(xmlsks->serverCertPath, &cert);
                         SOPC_SecurityKeyServices_Set_ServerCertificate(sks, cert);
-                        allocSuccess = (allocSuccess && SOPC_STATUS_OK == status);
+                        success = (success && SOPC_STATUS_OK == status);
                     }
                 }
 
-                for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
+                for (uint8_t ids = 0; ids < msg->nb_datasets && success; ids++)
                 {
                     struct sopc_xml_pubsub_dataset_t* ds = &msg->datasetArr[ids];
 
                     SOPC_PublishedDataSet* pubDataSet =
                         SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, pubDataSetIndex);
                     pubDataSetIndex++;
-                    SOPC_PublishedDataSet_Init(pubDataSet, type, ds->nb_variables);
 
-                    SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, ids);
-                    SOPC_ASSERT(dataSetWriter != NULL);
-                    SOPC_DataSetWriter_Set_Id(dataSetWriter, ds->writer_id);
-                    const SOPC_DataSetWriter_Options dsmOptions = {
-                        .noUseSeqNum = !ds->useDsmSeqNum,
-                        .noTimestamp = !ds->useDsmTimestamp,
-                        .disableEmission = !ds->enableEmission,
-                    };
-                    SOPC_DataSetWriter_Set_Options(dataSetWriter, &dsmOptions);
+                    if (ds->nb_variables > 0)
+                    {
+                        success = SOPC_PublishedDataSet_Init(pubDataSet, type, ds->nb_variables);
+                    }
+                    else
+                    {
+                        success = false;
+                        allocSuccess = true;
+                        LOG_XML_ERRORF("No variables defined for publishedDataSet (groupId=%" PRIu16
+                                       ", writerId=%" PRIu16 ")",
+                                       msg->groupId, ds->writer_id);
+                    }
 
-                    SOPC_DataSetWriter_Set_DataSet(dataSetWriter, pubDataSet);
+                    if (success)
+                    {
+                        SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, ids);
+                        SOPC_ASSERT(dataSetWriter != NULL);
+                        SOPC_DataSetWriter_Set_Id(dataSetWriter, ds->writer_id);
+                        const SOPC_DataSetWriter_Options dsmOptions = {
+                            .noUseSeqNum = !ds->useDsmSeqNum,
+                            .noTimestamp = !ds->useDsmTimestamp,
+                            .disableEmission = !ds->enableEmission,
+                        };
+                        SOPC_DataSetWriter_Set_Options(dataSetWriter, &dsmOptions);
 
-                    for (uint16_t ivar = 0; ivar < ds->nb_variables && allocSuccess; ivar++)
+                        SOPC_DataSetWriter_Set_DataSet(dataSetWriter, pubDataSet);
+                    }
+
+                    for (uint16_t ivar = 0; ivar < ds->nb_variables && success; ivar++)
                     {
                         // Fill dataset
                         struct sopc_xml_pubsub_variable_t* var = &ds->variableArr[ivar];
@@ -1453,7 +1508,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                         SOPC_ASSERT(fieldMetaData != NULL);
                         SOPC_PubSub_ArrayDimension arrDimension = {
                             .valueRank = var->valueRank, .arrayDimensions = var->arrayDimensions.arrayDimensions};
-                        allocSuccess = SOPC_FieldMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
+                        success = SOPC_FieldMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
                         SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
                         SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
                         SOPC_ASSERT(publishedVar != NULL);
@@ -1473,8 +1528,18 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             SOPC_ASSERT(NULL != connection);
             subicon++;
 
-            allocSuccess = SOPC_PubSubConnection_Allocate_ReaderGroup_Array(connection, p_connection->nb_messages);
-            for (uint16_t imsg = 0; imsg < p_connection->nb_messages && allocSuccess; imsg++)
+            if (p_connection->nb_messages > 0)
+            {
+                success = SOPC_PubSubConnection_Allocate_ReaderGroup_Array(connection, p_connection->nb_messages);
+            }
+            else
+            {
+                success = false;
+                allocSuccess = true;
+                LOG_XML_ERROR("No messages defined for subscriber connection");
+            }
+
+            for (uint16_t imsg = 0; imsg < p_connection->nb_messages && success; imsg++)
             {
                 struct sopc_xml_pubsub_message_t* msg = &p_connection->messageArr[imsg];
                 // Create reader group
@@ -1496,27 +1561,40 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 }
                 SOPC_ASSERT(msg->nb_datasets < 0x100);
 
-                allocSuccess = SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(readerGroup, msg->nb_sks);
-                for (uint32_t isks = 0; isks < msg->nb_sks && allocSuccess; isks++)
+                if (NULL != msg->sksArr && success)
                 {
-                    SOPC_SerializedCertificate* cert = NULL;
-                    struct sopc_xml_pubsub_sks_t* xmlsks = &msg->sksArr[isks];
-                    SOPC_SecurityKeyServices* sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(readerGroup, isks);
-                    SOPC_ASSERT(sks != NULL);
-                    allocSuccess = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, xmlsks->endpointUrl);
-                    SOPC_ReturnStatus status =
-                        SOPC_KeyManager_SerializedCertificate_CreateFromFile(xmlsks->serverCertPath, &cert);
-                    SOPC_SecurityKeyServices_Set_ServerCertificate(sks, cert);
-                    allocSuccess = (allocSuccess && SOPC_STATUS_OK == status);
+                    SOPC_ASSERT(msg->nb_sks > 0);
+                    success = SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(readerGroup, msg->nb_sks);
+                    for (uint32_t isks = 0; isks < msg->nb_sks && success; isks++)
+                    {
+                        SOPC_SerializedCertificate* cert = NULL;
+                        struct sopc_xml_pubsub_sks_t* xmlsks = &msg->sksArr[isks];
+                        SOPC_SecurityKeyServices* sks = SOPC_ReaderGroup_Get_SecurityKeyServices_At(readerGroup, isks);
+                        SOPC_ASSERT(sks != NULL);
+                        success = SOPC_SecurityKeyServices_Set_EndpointUrl(sks, xmlsks->endpointUrl);
+                        SOPC_ReturnStatus status =
+                            SOPC_KeyManager_SerializedCertificate_CreateFromFile(xmlsks->serverCertPath, &cert);
+                        SOPC_SecurityKeyServices_Set_ServerCertificate(sks, cert);
+                        success = (success && SOPC_STATUS_OK == status);
+                    }
                 }
 
-                if (allocSuccess)
+                if (success)
                 {
-                    allocSuccess =
-                        SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) msg->nb_datasets);
+                    if (msg->nb_datasets > 0)
+                    {
+                        success =
+                            SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) msg->nb_datasets);
+                    }
+                    else
+                    {
+                        success = false;
+                        allocSuccess = true;
+                        LOG_XML_ERRORF("No datasets defined for readerGroup (groupId=%" PRIu16 ")", msg->groupId);
+                    }
                 }
 
-                for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
+                for (uint8_t ids = 0; ids < msg->nb_datasets && success; ids++)
                 {
                     struct sopc_xml_pubsub_dataset_t* ds = &msg->datasetArr[ids];
 
@@ -1525,10 +1603,21 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     SOPC_DataSetReader_Set_DataSetWriterId(dataSetReader, ds->writer_id);
                     SOPC_DataSetReader_Set_ReceiveTimeout(dataSetReader, 2 * msg->publishing_interval);
 
-                    allocSuccess = SOPC_DataSetReader_Allocate_FieldMetaData_Array(
-                        dataSetReader, SOPC_TargetVariablesDataType, ds->nb_variables);
+                    if (ds->nb_variables > 0)
+                    {
+                        success = SOPC_DataSetReader_Allocate_FieldMetaData_Array(
+                            dataSetReader, SOPC_TargetVariablesDataType, ds->nb_variables);
+                    }
+                    else
+                    {
+                        success = false;
+                        allocSuccess = true;
+                        LOG_XML_ERRORF("No variables defined for dataSetReader (groupId=%" PRIu16 ", writerId=%" PRIu16
+                                       ")",
+                                       msg->groupId, ds->writer_id);
+                    }
 
-                    for (uint16_t ivar = 0; ivar < ds->nb_variables && allocSuccess; ivar++)
+                    for (uint16_t ivar = 0; ivar < ds->nb_variables && success; ivar++)
                     {
                         struct sopc_xml_pubsub_variable_t* var = &ds->variableArr[ivar];
 
@@ -1540,7 +1629,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                         SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
                         SOPC_PubSub_ArrayDimension arrDimension = {
                             .valueRank = var->valueRank, .arrayDimensions = var->arrayDimensions.arrayDimensions};
-                        allocSuccess = SOPC_FieldMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
+                        success = SOPC_FieldMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
                         /* FieldTarget: link to the source/target data */
                         SOPC_FieldTarget* fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldMetaData);
                         SOPC_ASSERT(fieldTarget != NULL);
@@ -1553,29 +1642,33 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 }
             }
         }
-        if (allocSuccess)
+        if (success)
         {
-            allocSuccess = SOPC_PubSubConnection_Set_Address(connection, p_connection->address);
+            success = SOPC_PubSubConnection_Set_Address(connection, p_connection->address);
         }
-        if (allocSuccess && NULL != p_connection->interfaceName)
+        if (success && NULL != p_connection->interfaceName)
         {
-            allocSuccess = SOPC_PubSubConnection_Set_InterfaceName(connection, p_connection->interfaceName);
+            success = SOPC_PubSubConnection_Set_InterfaceName(connection, p_connection->interfaceName);
         }
-        if (allocSuccess && NULL != p_connection->mqttUsername)
+        if (success && NULL != p_connection->mqttUsername)
         {
-            allocSuccess = SOPC_PubSubConnection_Set_MqttUsername(connection, p_connection->mqttUsername);
+            success = SOPC_PubSubConnection_Set_MqttUsername(connection, p_connection->mqttUsername);
         }
-        if (allocSuccess && NULL != p_connection->mqttPassword)
+        if (success && NULL != p_connection->mqttPassword)
         {
-            allocSuccess = SOPC_PubSubConnection_Set_MqttPassword(connection, p_connection->mqttPassword);
+            success = SOPC_PubSubConnection_Set_MqttPassword(connection, p_connection->mqttPassword);
         }
     }
-    if (!allocSuccess)
+    if (!success && !allocSuccess)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
+    }
+    if (!success)
+    {
         SOPC_PubSubConfiguration_Delete(config);
         config = NULL;
     }
+
     return config;
 }
 
