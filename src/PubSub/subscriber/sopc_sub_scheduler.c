@@ -768,13 +768,15 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                 double minTimeout = 500.0;
                 // add security context
                 uint16_t nbGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
-                for (uint16_t rg_i = 0; rg_i < nbGroup; rg_i++)
+                status = (nbGroup > 0 ? status : SOPC_STATUS_INVALID_PARAMETERS);
+                for (uint16_t rg_i = 0; rg_i < nbGroup && SOPC_STATUS_OK == status; rg_i++)
                 {
                     const SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
                     SOPC_SubScheduler_Add_Security_Ctx(group);
                     uint8_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
+                    status = (nbReaders > 0 ? status : SOPC_STATUS_INVALID_PARAMETERS);
                     const SOPC_Conf_PublisherId* dsmPubId = SOPC_ReaderGroup_Get_PublisherId(group);
-                    for (uint8_t r_i = 0; r_i < nbReaders; r_i++)
+                    for (uint8_t r_i = 0; r_i < nbReaders && SOPC_STATUS_OK == status; r_i++)
                     {
                         SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, r_i);
                         const double timeout = SOPC_DataSetReader_Get_ReceiveTimeout(reader);

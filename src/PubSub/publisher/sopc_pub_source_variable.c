@@ -90,12 +90,16 @@ static OpcUa_ReadValueId* createAndInitialize_readValues(const SOPC_PublishedDat
 
 SOPC_SourceVariableCtx* SOPC_PubSourceVariable_SourceVariablesCtx_Create(const SOPC_PublishedDataSet* pubDataset)
 {
+    uint16_t nbFieldsMetadata = SOPC_PublishedDataSet_Nb_FieldMetaData(pubDataset);
+    if (nbFieldsMetadata == 0)
+    {
+        return NULL;
+    }
     SOPC_SourceVariableCtx* variableCtx = SOPC_Malloc(sizeof(*variableCtx));
     if (NULL == variableCtx)
     {
         return NULL;
     }
-    uint16_t nbFieldsMetadata = SOPC_PublishedDataSet_Nb_FieldMetaData(pubDataset);
 
     OpcUa_ReadValueId* readValues = createAndInitialize_readValues(pubDataset, nbFieldsMetadata);
     if (NULL == readValues)

@@ -187,13 +187,17 @@ static OpcUa_WriteValue* createAndInitialize_writeValues(const SOPC_DataSetReade
 
 SOPC_TargetVariableCtx* SOPC_SubTargetVariable_TargetVariablesCtx_Create(const SOPC_DataSetReader* reader)
 {
+    uint16_t nbFields = SOPC_DataSetReader_Nb_FieldMetaData(reader);
+    if (nbFields == 0)
+    {
+        return NULL;
+    }
+
     SOPC_TargetVariableCtx* variableCtx = SOPC_Malloc(sizeof(*variableCtx));
     if (NULL == variableCtx)
     {
         return NULL;
     }
-
-    uint16_t nbFields = SOPC_DataSetReader_Nb_FieldMetaData(reader);
 
     OpcUa_WriteValue* writeValues = createAndInitialize_writeValues(reader, nbFields);
     if (NULL == writeValues)

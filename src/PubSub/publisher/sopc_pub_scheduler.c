@@ -267,13 +267,13 @@ static void SOPC_PubScheduler_Context_Clear(bool isPubThreadStarted)
 
 static bool MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config)
 {
-    bool result = true;
     const uint64_t length = SOPC_PubScheduler_Nb_Message(config);
-    pubSchedulerCtx.messages.current = 0;
-    pubSchedulerCtx.messages.array = SOPC_Calloc((size_t) length, sizeof(MessageCtx));
-    if (NULL == pubSchedulerCtx.messages.array)
+    bool result = length > 0;
+    if (result)
     {
-        result = false;
+        pubSchedulerCtx.messages.current = 0;
+        pubSchedulerCtx.messages.array = SOPC_Calloc((size_t) length, sizeof(MessageCtx));
+        result = (NULL != pubSchedulerCtx.messages.array);
     }
     if (result)
     {
@@ -357,26 +357,30 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         context->mqttTopic = NULL;
     }
 
+    SOPC_SecurityMode_Type smode = SOPC_SecurityMode_Invalid;
     uint8_t nbDataset = SOPC_WriterGroup_Nb_DataSetWriter(group);
-    bool result = true;
+    bool result = nbDataset > 0;
 
-    context->group = group;
-    context->pubId = pubId;
-    SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
-    context->warned = false;
-    context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group, false);
-    context->messageKeepAlive = NULL; // by default NULL and set only if publisher is acyclic
-    context->keepAliveTimeUs = 0;     // by default equal to 0 and set only if publisher is acyclic
-    context->next_timeout = SOPC_HighRes_TimeReference_Create();
-    context->nbOfDsmActive = 0;
-    SOPC_HighRes_TimeReference_Copy(context->next_timeout, tRef);
-    context->dataSetMessageCtx =
-        SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, clear_dataSetMessageCtx_array);
-    SOPC_ASSERT(NULL != context->dataSetMessageCtx);
-    if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
+    if (result)
     {
-        context->security = SOPC_Calloc(1, sizeof(SOPC_PubSub_SecurityType));
-        result = (NULL != context->security);
+        context->group = group;
+        context->pubId = pubId;
+        smode = SOPC_WriterGroup_Get_SecurityMode(group);
+        context->warned = false;
+        context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group, false);
+        context->messageKeepAlive = NULL; // by default NULL and set only if publisher is acyclic
+        context->keepAliveTimeUs = 0;     // by default equal to 0 and set only if publisher is acyclic
+        context->next_timeout = SOPC_HighRes_TimeReference_Create();
+        context->nbOfDsmActive = 0;
+        SOPC_HighRes_TimeReference_Copy(context->next_timeout, tRef);
+        context->dataSetMessageCtx =
+            SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, clear_dataSetMessageCtx_array);
+        result = (NULL != context->dataSetMessageCtx);
+        if (result && (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode))
+        {
+            context->security = SOPC_Calloc(1, sizeof(SOPC_PubSub_SecurityType));
+            result = (NULL != context->security);
+        }
     }
 
     /* If publisher is acyclic we don't need to compute publishing interval */
@@ -983,7 +987,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
         const SOPC_Conf_PublisherId* pubId = SOPC_PubSubConnection_Get_PublisherId(connection);
         const uint16_t nbWriterGroup = SOPC_PubSubConnection_Nb_WriterGroup(connection);
-        if (!SOPC_PubScheduler_Connection_Get_Transport(i, connection, &transportCtx))
+        resultSOPC = (nbWriterGroup > 0 ? resultSOPC : SOPC_STATUS_INVALID_PARAMETERS);
+        if (SOPC_STATUS_OK == resultSOPC && !SOPC_PubScheduler_Connection_Get_Transport(i, connection, &transportCtx))
         {
             resultSOPC = SOPC_STATUS_NOK;
         }
@@ -1345,6 +1350,10 @@ SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_Netwo
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     const uint8_t nbDataset = SOPC_WriterGroup_Nb_DataSetWriter(group);
+    if (nbDataset == 0)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool res = true;
     for (uint8_t iWg = 0; iWg < nbDataset; iWg++)
