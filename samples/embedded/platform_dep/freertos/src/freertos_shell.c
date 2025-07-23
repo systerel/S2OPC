@@ -37,8 +37,6 @@
 #include "FreeRTOS.h"
 #include "atomic.h"
 #include "freertos_shell.h"
-#include "semphr.h"
-#include "task.h"
 
 /*******************************************************************************
  * Options
@@ -59,7 +57,7 @@
 // depending on UART number for ST-LINK attached UART.
 #if defined SDK_PROVIDER_NXP
 #include "fsl_debug_console.h"
-#include "fsl_device_registers.h"
+#include "task.h"
 #elif defined SDK_PROVIDER_STM
 #include <stm32h7xx_hal.h>
 #define STM32_LINK_UART huart3
@@ -78,6 +76,7 @@ void SOPC_ETH_MAC_Filter_Config(ETH_HandleTypeDef* heth)
     HAL_ETH_SetMACFilterConfig(heth, &macFilterConfig);
 }
 #endif
+// NXP's eth config set mac filtering to false
 
 typedef enum _fun_key_status
 {
@@ -109,7 +108,10 @@ static uint8_t SOPC_Shell_getc(void)
         HAL_UART_Receive(&STM32_LINK_UART, &result, numberOfDataReceived, HAL_MAX_DELAY);
     }
 #elif defined SDK_PROVIDER_NXP
-    result = GETCHAR();
+    while (DbgConsole_TryGetchar(&result) != kStatus_Success)
+    {
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
 #else
 #error "Unknown target, can't figure out how to communicate over Serial line"
 #endif // STM32_LINK_UART
@@ -138,7 +140,9 @@ static inline void shell_putChar(const char c)
 #elif defined SDK_PROVIDER_NXP
 static inline void shell_putChar(const char c)
 {
-    PUTCHAR(c);
+    PUTCHAR((int) c);
+    // uint8_t uartHandleBuffer[HAL_UART_HANDLE_SIZE];
+    // HAL_UartSendBlocking((hal_uart_handle_t) uartHandleBuffer[0], (uint8_t*) (&c), 1);
 }
 #else
 #error "Unsuported or Undefined SDK provider"
@@ -201,10 +205,11 @@ void SOPC_Shell_Printf(const char* msg, ...)
 
     for (const char* ptr = buf; 0 != (*ptr); ptr++)
     {
-        if(*ptr == '\n'){
+        if (*ptr == '\n')
+        {
             shell_putChar('\r');
         }
-        
+
         shell_putChar(*ptr);
     }
     if (nbWritten >= sizeof(buf))
@@ -230,7 +235,7 @@ char* SOPC_Shell_ReadLine(void)
     {
         ch = SOPC_Shell_getc();
         /* If error occurred when getting a char, continue to receive a new char. */
-        if ((uint8_t) (-1) == ch)
+        if ((uint8_t)(-1) == ch)
         {
             PRINTF("\n[EE] Reading from SHELL failed!\n");
             SOPC_Sleep(1000);

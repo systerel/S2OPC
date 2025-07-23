@@ -33,7 +33,7 @@
 
 // Board-Specific configuration
 
-#define BOARD_TYPE_STM32H735G-DK
+#define BOARD_TYPE_STM32H735G -DK
 #define SDK_PROVIDER_STM
 
 #include "stm32h7xx_hal.h"

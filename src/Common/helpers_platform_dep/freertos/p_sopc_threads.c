@@ -309,7 +309,7 @@ void SOPC_Sleep(unsigned int milliseconds)
 }
 
 // Hook used to show stack overflows
-void vApplicationStackOverflowHook(xTaskHandle xTask, signed char* pcTaskName)
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
 {
     SOPC_UNUSED_ARG(xTask);
     SOPC_UNUSED_ARG(pcTaskName);

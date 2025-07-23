@@ -25,7 +25,11 @@
 
 extern time_t sopc_time_alt(time_t* timer);
 
+#if defined SDK_PROVIDER_NXP
+#include "mbedtls/mbedtls_config.h"
+#else
 #include "mbedtls_config.h"
+#endif // SDK_PROVIDER
 
 #define MBEDTLS_PLATFORM_STD_TIME sopc_time_alt
 

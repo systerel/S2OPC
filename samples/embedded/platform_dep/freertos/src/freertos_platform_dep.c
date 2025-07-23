@@ -39,13 +39,19 @@
 #endif // SOPC_FREERTOS_RAW_INIT
 #include "FreeRTOS.h"
 
+#ifdef SDK_PROVIDER_STM
+#define xTaskHandle TaskHandle_t
+#endif // SDK_PROVIDER
+
 #include "ethernetif.h"
 #include "task.h"
 
 /* freeRtos includes */
 // order enforced
 #if defined SDK_PROVIDER_NXP
+#include "board.h"
 #include "lwip/init.h"
+#include "lwip/tcpip.h"
 #elif defined SDK_PROVIDER_STM
 #include "lwip.h"
 #else
@@ -58,11 +64,20 @@
 #include "samples_platform_dep.h"
 
 #if S2OPC_CRYPTO_MBEDTLS
+#include "entropy_poll.h"
 #include "sopc_mbedtls_config.h"
 
+#if defined SDK_PROVIDER_NXP
+#include "mbedtls/entropy.h"
+
+#elif defined SDK_PROVIDER_STM
 #include "mbedtls.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/entropy_poll.h"
+#else
+#error "Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
+
 #endif // S2OPC_CRYPTO_MBEDTLS
 
 #include "freertos_shell.h"
@@ -99,8 +114,14 @@ HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_S
                                       {NULL, 0}};
 
 #elif defined SDK_PROVIDER_NXP
-// cant get _HeapSize or _pvHeapStart this early in compilation
-//todo
+typedef struct TcpIpInitSync
+{
+    SOPC_Mutex mutex;
+    SOPC_Condition cond;
+    bool initialized;
+} TcpIpInitSync_t;
+
+// todo
 #else
 #error "Sorry, Memory mapping is not defined for this board. Unsuported or Undefined SDK provider"
 #endif // SDK_PROVIDER
@@ -138,8 +159,8 @@ const char* get_IP_str(void)
         SOPC_ASSERT(NULL != result);
 #if defined SDK_PROVIDER_NXP
         extern struct netif* netif_list;
-        ip4_addr_t addr = netif_list->ip_addr;
-        snprintf(result, 16, "%u.%u.%u.%u", ip4_addr1(&addr), ip4_addr2(&addr), ip4_addr3(&addr), ip4_addr4(&addr));
+        ip4_addr_t* addr = ip_2_ip4(&netif_list->ip_addr);
+        snprintf(result, 16, "%u.%u.%u.%u", ip4_addr1(addr), ip4_addr2(addr), ip4_addr3(addr), ip4_addr4(addr));
 #elif defined SDK_PROVIDER_STM
         extern uint8_t IP_ADDRESS[4];
         snprintf(result, 16, "%u.%u.%u.%u", IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
@@ -165,18 +186,87 @@ const char* get_EP_str(void)
 
 /*************************************************/
 // True if lwip stack was already initialized, False otherwise
+#if defined SDK_PROVIDER_STM
 static bool IslwipInitialized(void)
 {
-#if defined SDK_PROVIDER_NXP
-    extern struct netif* netif_list;
-    return NULL != netif_list->next;
-#elif defined SDK_PROVIDER_STM
     extern struct netif gnetif;
     return NULL != gnetif.next;
-#else
-#error "Unsuported or Undefined SDK provider"
-#endif // SDK_PROVIDER
 }
+#endif // SDK_PROVIDER
+
+#if defined SDK_PROVIDER_NXP
+static bool IslwipInitialized(void)
+{
+    extern struct netif* netif_list;
+    return (netif_list != NULL);
+}
+/*
+ethernetif_config_t* get_ethernetif_config(void)
+{
+    static phy_handle_t phyHandle;
+
+    static ethernetif_config_t enet0_config = {.phyHandle = &phyHandle,
+                                        .phyAddr = BOARD_EP0_PHY_ADDR,
+                                        .phyOps = &g_app_phy_rtl8201_ops,
+                                        .phyResource = &g_phy_rtl8201_resource,
+                                        .srcClockHz = CLOCK_GetRootClockFreq(kCLOCK_Root_Netc),
+#ifdef configMAC_ADDR
+                                        .macAddress = configMAC_ADDR
+#endif
+    };
+    return enet0_config;
+}
+
+void set_ip(void)
+{
+    static const int ippadr_arr[4] = SOPC_IPADDR;
+    static const int netmask_arr[4] = SOPC_NETMASK;
+    static const int gw_arr[4] = SOPC_GW;
+    ip4_addr_t enet0_ipaddr, enet0_netmask, enet0_gw;
+    IP4_ADDR(&enet0_ipaddr, ippadr_arr[0], ippadr_arr[1], ippadr_arr[2], ippadr_arr[3]);
+    IP4_ADDR(&enet0_netmask, netmask_arr[0], netmask_arr[1], netmask_arr[2], netmask_arr[3]);
+    IP4_ADDR(&enet0_gw, gw_arr[0], gw_arr[1], gw_arr[2], gw_arr[3]);
+
+    static struct netif enet0_netif;
+    netif_add(&enet0_netif, &enet0_ipaddr, &enet0_netmask, &enet0_gw, get_ethernetif_config(), ethernetif0_init,
+tcpip_input); netif_set_default(&enet0_netif); netif_set_up(&enet0_netif);
+
+    PRINTF("IP Address set");
+}
+
+static void tcpip_init_done_cb(void* arg)
+{
+    TcpIpInitSync_t* sync = (TcpIpInitSync_t*) arg;
+    SOPC_Mutex_Lock(&sync->mutex);
+    sync->initialized = true;
+    SOPC_Condition_SignalAll(&sync->cond);
+    set_ip();
+    SOPC_Mutex_Unlock(&sync->mutex);
+}
+
+void start_and_wait_tcpip(void)
+{
+    TcpIpInitSync_t sync;
+    SOPC_ReturnStatus status = SOPC_Mutex_Initialization(&sync.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    status = SOPC_Condition_Init(&sync.cond);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_Mutex_Lock(&sync.mutex);
+    sync.initialized = false;
+
+    tcpip_init(tcpip_init_done_cb, &sync);
+    while (!sync.initialized)
+    {
+        SOPC_Mutex_UnlockAndWaitCond(&sync.cond, &sync.mutex);
+        // SOPC_Mutex_Lock(&sync.mutex);
+    }
+    SOPC_Mutex_Unlock(&sync.mutex);
+    SOPC_Mutex_Clear(&sync.mutex);
+    SOPC_Condition_Clear(&sync.cond);
+    PRINTF("LwIP TCP Initialized");
+}
+*/
+#endif // SDK_PROVIDER
 
 /*************************************************/
 void SOPC_Platform_Setup(void)
@@ -188,7 +278,7 @@ void SOPC_Platform_Setup(void)
     }
 #if defined SDK_PROVIDER_NXP
     extern struct netif* netif_list;
-    ip4_addr_t addr = netif_list->netmask;
+    ip4_addr_t* addr = ip_2_ip4(&netif_list->netmask);
 #elif defined SDK_PROVIDER_STM
     extern uint8_t NETMASK_ADDRESS[4];
 #else
@@ -200,7 +290,7 @@ void SOPC_Platform_Setup(void)
     PRINTF(" Board type       : %s\n", BOARD_TYPE);
     PRINTF(" IPv4 Address     : %s\n", get_IP_str());
 #if defined SDK_PROVIDER_NXP
-    PRINTF(" IPv4 Subnet mask : %u.%u.%u.%u\n", ip4_addr1(&addr), ip4_addr2(&addr), ip4_addr3(&addr), ip4_addr4(&addr));
+    PRINTF(" IPv4 Subnet mask : %u.%u.%u.%u\n", ip4_addr1(addr), ip4_addr2(addr), ip4_addr3(addr), ip4_addr4(addr));
 #elif defined SDK_PROVIDER_STM
 
     PRINTF(" IPv4 Subnet mask : %u.%u.%u.%u\n", NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2],
@@ -275,21 +365,9 @@ void sopc_main(void)
     static const int priority = 0;
     TaskHandle_t tHandle;
 
-#ifndef SOPC_FREERTOS_RAW_INIT
-
-#ifndef SDK_PROVIDER_NXP
-    vPortDefineHeapRegions(board_heap5_regions);
-#endif // !SDK_PROVIDER_NXP
-
-#endif // !SOPC_FREERTOS_RAW_INIT
-
     BaseType_t returned;
     returned = xTaskCreate(sopc_main_entry, "Main", MAIN_STACK_SIZE, NULL, priority, &tHandle);
     SOPC_ASSERT(pdPASS == returned);
-
-#ifndef SOPC_FREERTOS_RAW_INIT
-    vTaskStartScheduler();
-#endif // !SOPC_FREERTOS_RAW_INIT
 }
 
 /*************************************************/
@@ -321,7 +399,7 @@ void SOPC_Platform_Target_Debug(const char* param)
         PRINTF("** HEAP : Size : %u, Free: %u, MinFree : %u \n", configTOTAL_HEAP_SIZE + HEAP_REGION2_SIZE, remHeap,
                minHeap);
 #else
-            //GetMinimumEverFree is not available in newlib's malloc implementation.
+        // GetMinimumEverFree is not available in newlib's malloc implementation.
         const unsigned remHeap = xPortGetFreeHeapSize();
         PRINTF("** HEAP : Free: %u, Free : %u \n", configTOTAL_HEAP_SIZE, remHeap);
 #endif //! SDK_PROVIDER_NXP
@@ -349,7 +427,7 @@ void SOPC_Platform_Target_Debug(const char* param)
 #if S2OPC_CRYPTO_MBEDTLS
 // MBEDTLS Platform specific declarations
 /*************************************************/
-#warning "Following function should return time since 1970 à 00:00:00 of 1st january"
+//#warning "Following function should return time since 1970 à 00:00:00 of 1st january"
 time_t sopc_time_alt(time_t* timer)
 {
     time_t t;

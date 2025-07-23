@@ -86,7 +86,9 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(SOPC_Unix_Time t, struct tm* tm)
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
+#if !S2OPC_CRYPTO_MBEDTLS // stop multiple definition of 'sopc_time_alt'
 time_t sopc_time_alt(time_t* timer)
 {
     return (time_t) P_SOPC_COMMON_TIME_get_tick() / configTICK_RATE_HZ;
 }
+#endif // S2OPC_CRYPTO_MBEDTLS

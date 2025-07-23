@@ -25,12 +25,14 @@ S2OPC_SRC=${S2OPC_BASE-}/src
 S2OPC_SAMPLE=${S2OPC_BASE-}/samples/embedded
 
 cd `dirname $0`/..
-FREERTOS_DIR=`pwd`
-FREERTOS_CORE_DIR=${FREERTOS_DIR}/temp
-mkdir -p ${FREERTOS_CORE_DIR}
+PROJECT_DIR=`pwd`
+SOPC_INCLUDE_DIR=${PROJECT_DIR}/sopc_incldue
+mkdir -p ${SOPC_INCLUDE_DIR}
 
-SRC_DIR=${FREERTOS_CORE_DIR-}/sopc
+SRC_DIR=${SOPC_INCLUDE_DIR-}/sopc
 mkdir -p ${SRC_DIR}
+
+MAIN_FILE=${PROJECT_DIR-}/source/lwip_ipv4_ipv6_echo_freertos.c
 
 GET_BOARD=
 OPT_LAZY=false
@@ -49,7 +51,7 @@ done
 echo "Installing S2OPC for freeRTOS samples..."
 
 # Check FreeRTOS
-[[ -z ${FREERTOS_CORE_DIR-} ]] && echo "[EE] FREERTOS_CORE_DIR must be set to Core folder of FREERTOS installation dir" && exit 1
+[[ -z ${SOPC_INCLUDE_DIR-} ]] && echo "[EE] SOPC_INCLUDE_DIR must be set to Core folder of FREERTOS installation dir" && exit 1
 
 # Check sample
 [[ -z ${FREERTOS_SAMPLE-} ]] && echo "[WW] FREERTOS_SAMPLE not defined, using default cli_pubsub_server" && FREERTOS_SAMPLE=cli_pubsub_server
@@ -84,8 +86,52 @@ echo "[II] Using crypto library '${OPT_CRYPTO-}'"
 echo "[II] Source copied to ${S2OPC_SRC-}"
 
 # Move .h files to include folder
-find  "${SRC_DIR-}" -name "*.*" ! -path "*/sample_inc/*" -exec mv {} ${FREERTOS_CORE_DIR-}/ \;
-cp -ur ${S2OPC_SAMPLE-}/platform_dep/include/*.* ${FREERTOS_CORE_DIR-}/ || exit 14
+find  "${SRC_DIR-}" -name "*.*" ! -path "*/sample_inc/*" -exec mv {} ${SOPC_INCLUDE_DIR-}/ \;
+cp -ur ${S2OPC_SAMPLE-}/platform_dep/include/*.* ${SOPC_INCLUDE_DIR-}/ || exit 14
 find "${SRC_DIR-}/" -mindepth 1 -type d -exec rm -rf {} +
-echo "[II] All copied to ${FREERTOS_CORE_DIR}/"
+echo "[II] All copied to ${SOPC_INCLUDE_DIR}/"
 
+# Patch LWIP example
+FILE=${PROJECT_DIR-}/source/lwipopts_gen.h
+sed -i 's/^#define[ \t]\+LWIP_PROVIDE_ERRNO[ \t]\+[0-9]\+/#define LWIP_PROVIDE_ERRNO 0/' "${FILE-}"
+sed -i 's/^#define[ \t]\+LWIP_SINGLE_NETIF[ \t]\+[0-9]\+/#define LWIP_SINGLE_NETIF 0/' "${FILE-}"
+sed -i 's/^#define[ \t]\+MEMP_NUM_NETCONN[ \t]\+[0-9]\+U\?\([ \t]\|$\)/#define MEMP_NUM_NETCONN 16U\1/' "${FILE-}"
+sed -i 's/^#define[ \t]\+MEMP_NUM_NETBUF[ \t]\+[0-9]\+U\?\([ \t]\|$\)/#define MEMP_NUM_NETBUF 8U\1/' "${FILE-}"
+sed -i 's/^#define[ \t]\+MEMP_NUM_NETDB[ \t]\+[0-9]\+U\?\([ \t]\|$\)/#define MEMP_NUM_NETDB 4U\1/' "${FILE-}"
+sed -i 's/^#define[ \t]\+TCPIP_THREAD_STACKSIZE[ \t]\+[0-9]\+U\?\([ \t]\|$\)/#define TCPIP_THREAD_STACKSIZE 2048U\1/' "${FILE-}"
+sed -i 's/^#define[ \t]\+DEFAULT_THREAD_STACKSIZE[ \t]\+[0-9]\+U\?\([ \t]\|$\)/#define DEFAULT_THREAD_STACKSIZE 2048U\1/' "${FILE-}"
+echo "[II] LWIP conf_gen patched"
+
+if ! grep -qF "sopc_main();" "${MAIN_FILE-}"; then
+  sed -i '/vTaskDelete(NULL);/i\sopc_main();' "${MAIN_FILE-}"
+fi
+echo "[II] patched sopc_main"
+
+function add_init {
+  if ! grep -qF "$1" "$3"; then
+    # remove escape for use in sed
+    esc_1=$(printf '%s\n' "$1" | sed -e 's/[&/\]/\\&/g')
+    esc_2=$(printf '%s\n' "$2" | sed -e 's/[&/\]/\\&/g')
+
+    sed -i "/$esc_2/{
+      N
+      s|$esc_2\n|$esc_2\n$esc_1\n|
+    }" "$3"
+  fi
+}
+
+#Add include
+FILE=${MAIN_FILE}
+INCLUDE="#include \"lwip/sockets.h\""
+add_init "#include \"freertos_platform_dep.h\"" "${INCLUDE}" "${FILE}"
+echo "[II] lwip_ipv4_ipv6_echo_freertos_cm33.c patched include to main.c"
+
+#Remove unused files
+rm -rf "${PROJECT_DIR-}/source/shell_task.c"
+rm -rf "${PROJECT_DIR-}/source/shell_task.h"
+rm -rf "${PROJECT_DIR-}/source/shell_task_mode.h"
+rm -rf "${PROJECT_DIR-}/source/socket_task.c"
+rm -rf "${PROJECT_DIR-}/source/socket_task.h"
+FILE=${MAIN_FILE}
+sed -i '/^#include[ \t]*"shell_task\.h"/d' "${FILE-}"
+echo "[II] ${MAIN_FILE} patched for unused files"
