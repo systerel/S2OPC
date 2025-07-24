@@ -235,12 +235,22 @@
 
 /* ADDRESS SPACE MANAGEMENT */
 
-/** @brief Node management services activation for clients (AddNodes only for now)
+/** @brief Node management services activation for clients (AddNodes and DeleteNodes)
  * Note: the services are always accessible as server local service if address space is not constant nor statically
  * defined.
  * */
 #ifndef S2OPC_NODE_MANAGEMENT
 #define S2OPC_NODE_MANAGEMENT false
+#endif
+
+/** @brief DeleteNodes option to recursively delete child nodes of the requested deleted node. */
+#ifndef S2OPC_NODE_DELETE_CHILD_NODES
+#define S2OPC_NODE_DELETE_CHILD_NODES true
+#endif
+
+/** @brief DeleteNodes option to consider "Organizes" reference type when regarding for child nodes. */
+#ifndef S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
+#define S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES true
 #endif
 
 /** @brief Event management services activation for servers */
