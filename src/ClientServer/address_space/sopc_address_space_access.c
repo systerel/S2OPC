@@ -29,6 +29,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_node_mgt_helper_internal.h"
+#include "sopc_toolkit_config_constants.h"
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
@@ -37,9 +38,12 @@
 
 #include "sopc_logger.h"
 
+// NodeIds used for DeleteNodes
 #if 0 != S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
-static const SOPC_NodeId Organizes_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
+static const SOPC_NodeId organizesType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organizes);
 #endif
+static const SOPC_NodeId hasComponentType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
+static const SOPC_NodeId hasChildType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasChild);
 
 /* Log macros used for references between two SOPC_AddressSpace_Node */
 #define LOG_NODE_REF(level, addSpace, msg, sourceNode, targetNode)                                         \
@@ -69,10 +73,6 @@ static const SOPC_NodeId Organizes_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Organi
         SOPC_Free(sourceNodeIdStr);                                                                        \
         SOPC_Free(targetNodeIdStr);                                                                        \
     }
-
-// NodeIds used for DeleteNodes
-static const SOPC_NodeId HasComponent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
-static const SOPC_NodeId HasChild_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasChild);
 
 struct _SOPC_AddressSpaceAccess
 {
@@ -773,7 +773,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* a
 
     /* §5.7.1 Part 3 (1.05): A Method shall always be the TargetNode of at least one HasComponent Reference.
      */
-    bool isHasComponentRef = is_type_or_subtype(addSpaceAccess->addSpaceRef, refToParentTypeId, &HasComponent_Type);
+    bool isHasComponentRef = is_type_or_subtype(addSpaceAccess->addSpaceRef, refToParentTypeId, &hasComponentType);
     if (!isHasComponentRef)
     {
         // Added Method node has no HasComponent Reference
@@ -1242,9 +1242,9 @@ static bool is_single_parent(const SOPC_AddressSpaceAccess* addSpaceAccess,
                 // If it has one inverse reference with parent / child type (same type when checking childs)
                 // that is different from the identified parent, b_otherParentFound = TRUE.
                 bool b_ref_type_child_or_organizes =
-                    is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &HasChild_Type);
+                    is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &hasChildType);
 #if 0 != S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
-                b_ref_type_child_or_organizes |= is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &Organizes_Type);
+                b_ref_type_child_or_organizes |= is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &organizesType);
 #endif
                 if (b_ref_type_child_or_organizes)
                 {
@@ -1335,9 +1335,9 @@ static SOPC_StatusCode SOPC_AddressSpaceAccess_DeleteNodeRec(const SOPC_AddressS
                 // - delete target references is set,
                 // - it has a single parent in the address space.
                 bool b_ref_type_child_or_organizes =
-                    is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &HasChild_Type);
+                    is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &hasChildType);
 #if 0 != S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
-                b_ref_type_child_or_organizes |= is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &Organizes_Type);
+                b_ref_type_child_or_organizes |= is_type_or_subtype(addSpaceAccess->addSpaceRef, &reference->ReferenceTypeId, &organizesType);
 #endif
                 bool deleteChilds = (deleteChildNodes && b_ref_type_child_or_organizes && !reference->IsInverse &&
                                      is_single_parent(addSpaceAccess, nodeToDelete, targetNode));
