@@ -179,24 +179,22 @@ OPERATIONS
     END
     ;
 
-    create_session (session, channel, state, is_client) =
+    create_session (session, channel, state) =
     PRE
         session : t_session_i  &
         session : dom(a_state) &
         channel : t_channel_i  &
         channel : t_channel    &
         state   : t_sessionState_i &
-        state   : {e_session_created, e_session_creating} &
-        is_client : BOOL       &
-        is_client = bool(session : s_client_session)
+        state   : {e_session_created, e_session_creating}
     THEN
         a_channel (session) := channel ||
         a_state   (session) := state   ||
         a_server_user_auth_attempts :(
             a_server_user_auth_attempts : t_session +-> NAT &
-            (is_client = FALSE =>
+            (session /: s_client_session =>
                 a_server_user_auth_attempts = a_server_user_auth_attempts$0 <+ {session |-> 0}) &
-            (is_client = TRUE =>
+            (session : s_client_session =>
                 a_server_user_auth_attempts = a_server_user_auth_attempts$0))
     END
     ;

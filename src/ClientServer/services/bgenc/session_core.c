@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 01/12/2025 10:47:30
+ Date                 : 01/12/2025 10:59:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -237,8 +237,7 @@ void session_core__client_create_session_req_sm(
       
       session_core_1__create_session(session_core__session,
          session_core__channel,
-         constants__e_session_creating,
-         true);
+         constants__e_session_creating);
       channel_mgr__get_channel_info(session_core__channel,
          &session_core__l_channel_config_idx);
       session_core_1__client_create_session_req_do_crypto(session_core__session,
@@ -390,8 +389,7 @@ void session_core__l_server_create_session_req_and_resp_sm(
       
       session_core_1__create_session(session_core__p_session,
          session_core__p_channel,
-         constants__e_session_created,
-         false);
+         constants__e_session_created);
       channel_mgr__get_channel_info(session_core__p_channel,
          &session_core__l_channel_config_idx);
       msg_session_bs__create_session_req_check_client_certificate(session_core__create_req_msg,
@@ -1070,6 +1068,7 @@ void session_core__may_close_unactivated_session(void) {
       t_bool session_core__l_auto_closed_active;
       t_bool session_core__l_has_session_to_close;
       constants__t_session_i session_core__l_session_to_close;
+      t_bool session_core__l_is_client;
       
       session_core_1__is_auto_close_session_active(&session_core__l_auto_closed_active);
       if (session_core__l_auto_closed_active == true) {

@@ -239,11 +239,14 @@ OPERATIONS
     END
     ;
 
-    create_session (session, channel, state, is_client) =
-    BEGIN
+    create_session (session, channel, state) =
+    VAR
+        l_is_client
+    IN
         set_session_channel(session, channel);
         l_set_session_state(session, state);
-        IF is_client = FALSE
+        l_is_client <-- is_client_session(session);
+        IF l_is_client = FALSE
         THEN
             set_server_session_user_auth_attempts(session, 0)
         END

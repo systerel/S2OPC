@@ -147,15 +147,20 @@ void session_core_1__set_session_state(
 void session_core_1__create_session(
    const constants__t_session_i session_core_1__session,
    const constants__t_channel_i session_core_1__channel,
-   const constants__t_sessionState_i session_core_1__state,
-   const t_bool session_core_1__is_client) {
-   session_core_2__set_session_channel(session_core_1__session,
-      session_core_1__channel);
-   session_core_1__l_set_session_state(session_core_1__session,
-      session_core_1__state);
-   if (session_core_1__is_client == false) {
-      session_core_2__set_server_session_user_auth_attempts(session_core_1__session,
-         0);
+   const constants__t_sessionState_i session_core_1__state) {
+   {
+      t_bool session_core_1__l_is_client;
+      
+      session_core_2__set_session_channel(session_core_1__session,
+         session_core_1__channel);
+      session_core_1__l_set_session_state(session_core_1__session,
+         session_core_1__state);
+      session_core_2__is_client_session(session_core_1__session,
+         &session_core_1__l_is_client);
+      if (session_core_1__l_is_client == false) {
+         session_core_2__set_server_session_user_auth_attempts(session_core_1__session,
+            0);
+      }
    }
 }
 

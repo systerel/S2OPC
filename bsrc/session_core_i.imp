@@ -758,7 +758,7 @@ OPERATIONS
         l_nonce,
         l_app_context
     IN
-        create_session (session, channel, e_session_creating, TRUE);
+        create_session (session, channel, e_session_creating);
         l_channel_config_idx <-- get_channel_info (channel);
         valid, l_nonce_needed <-- client_create_session_req_do_crypto(session, channel, l_channel_config_idx);
         IF valid = TRUE THEN
@@ -869,7 +869,7 @@ OPERATIONS
         l_valid_session_token,
         l_valid_server_cert
     IN
-        create_session(p_session, p_channel, e_session_created, FALSE);
+        create_session(p_session, p_channel, e_session_created);
         l_channel_config_idx <-- get_channel_info (p_channel);
         l_valid_server_cert <-- create_session_req_check_client_certificate (create_req_msg, l_channel_config_idx);
         l_nsession_token <-- server_get_fresh_session_token (l_channel_config_idx, p_session);
