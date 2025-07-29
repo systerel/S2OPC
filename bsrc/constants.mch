@@ -1383,6 +1383,14 @@ OPERATIONS
     END
     ;
 
+    p_nsIndexNat <-- get_reverse_cast_t_NamespaceIdx(p_nsIndex) =
+    PRE
+        p_nsIndex : t_NamespaceIdx
+    THEN
+        p_nsIndexNat := cast_t_NamespaceIdx~(p_nsIndex)
+    END
+    ;
+
     p_res <-- is_t_endpoint_config_idx(p_endpoint_config_idx) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i

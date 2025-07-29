@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.h
 
- Date                 : 28/07/2025 09:08:33
+ Date                 : 29/07/2025 17:01:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "address_space_namespaces_indexes.h"
 #include "call_method_mgr.h"
 
 /*--------------
@@ -126,6 +127,9 @@ extern void service_add_nodes_1__check_add_nodes_item_params_type_def(
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_typeDefId,
    const constants_statuscodes_bs__t_StatusCode_i service_add_nodes_1__p_sc_operation,
    constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation);
+extern void service_add_nodes_1__has_NamespaceIndex(
+   const constants__t_NamespaceIdx service_add_nodes_1__p_idx,
+   t_bool * const service_add_nodes_1__bres);
 
 /*--------------------
    OPERATIONS Clause

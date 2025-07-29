@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.c
 
- Date                 : 28/07/2025 15:01:46
+ Date                 : 30/07/2025 08:56:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -41,6 +41,14 @@ void service_add_nodes_1__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void service_add_nodes_1__has_NamespaceIndex(
+   const constants__t_NamespaceIdx service_add_nodes_1__p_idx,
+   t_bool * const service_add_nodes_1__bres) {
+   address_space_namespaces_indexes__may_initialize_max_namespace_idx();
+   address_space_namespaces_indexes__has_NamespaceIndex_index(service_add_nodes_1__p_idx,
+      service_add_nodes_1__bres);
+}
+
 void service_add_nodes_1__check_add_nodes_item_params_parent_nid(
    const constants__t_ExpandedNodeId_i service_add_nodes_1__p_parentNid,
    constants_statuscodes_bs__t_StatusCode_i * const service_add_nodes_1__sc_operation) {
@@ -149,6 +157,8 @@ void service_add_nodes_1__check_add_nodes_item_params_req_node_id(
    {
       t_bool service_add_nodes_1__l_local_server_exp_node_id;
       constants__t_NodeId_i service_add_nodes_1__l_node_id;
+      constants__t_NamespaceIdx service_add_nodes_1__l_ns_index;
+      t_bool service_add_nodes_1__l_ns_index_valid;
       t_bool service_add_nodes_1__l_node_exists;
       constants__t_Node_i service_add_nodes_1__l_node;
       t_bool service_add_nodes_1__l_bres;
@@ -165,13 +175,21 @@ void service_add_nodes_1__check_add_nodes_item_params_req_node_id(
                call_method_mgr__readall_AddressSpace_Node(service_add_nodes_1__l_node_id,
                   &service_add_nodes_1__l_node_exists,
                   &service_add_nodes_1__l_node);
-               if (service_add_nodes_1__l_node_exists == false) {
+               constants__get_NodeId_NamespaceIndex(service_add_nodes_1__l_node_id,
+                  &service_add_nodes_1__l_ns_index);
+               service_add_nodes_1__has_NamespaceIndex(service_add_nodes_1__l_ns_index,
+                  &service_add_nodes_1__l_ns_index_valid);
+               if ((service_add_nodes_1__l_node_exists == false) &&
+                  (service_add_nodes_1__l_ns_index_valid == true)) {
                   node_id_pointer_bs__copy_node_id_pointer_content(service_add_nodes_1__l_node_id,
                      &service_add_nodes_1__l_bres,
                      service_add_nodes_1__new_nid);
                   if (service_add_nodes_1__l_bres == false) {
                      *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
                   }
+               }
+               else if (service_add_nodes_1__l_ns_index_valid == false) {
+                  *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_node_id_rejected;
                }
                else {
                   *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_node_id_exists;

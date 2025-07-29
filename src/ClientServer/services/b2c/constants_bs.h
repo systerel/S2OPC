@@ -295,6 +295,8 @@ extern void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNode
 extern void constants_bs__free_roles(const constants_bs__t_sessionRoles_i constants_bs__p_in);
 extern void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in);
 extern void constants_bs__get_CurrentTimestamp(constants_bs__t_Timestamp* const constants_bs__p_currentTs);
+extern void constants_bs__get_NodeId_NamespaceIndex(const constants_bs__t_NodeId_i constants_bs__p_nodeId,
+                                                    constants_bs__t_NamespaceIdx* const constants_bs__p_idx);
 extern void constants_bs__get_SupportedLocales(const constants_bs__t_endpoint_config_idx_i constants_bs__p_in,
                                                constants_bs__t_LocaleIds_i* const constants_bs__p_localeIds);
 extern void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel);
@@ -319,8 +321,8 @@ extern void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__
 extern void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,
                                                   t_bool* const constants_bs__p_alloc,
                                                   constants_bs__t_ExpandedNodeId_i* const constants_bs__p_out);
-extern void constants_bs__get_NodeId_NamespaceIndex(const constants_bs__t_NodeId_i constants_bs__p_nodeId,
-                                                    constants_bs__t_NamespaceIdx* const constants_bs__p_idx);
+extern void constants_bs__get_reverse_cast_t_NamespaceIdx(const constants_bs__t_NamespaceIdx constants_bs__p_nsIndex,
+                                                          t_entier4* const constants_bs__p_nsIndexNat);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
     t_bool* const constants_bs__p_local_server,

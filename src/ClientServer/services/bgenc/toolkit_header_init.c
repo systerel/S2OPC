@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 29/04/2025 08:30:22
+ Date                 : 29/07/2025 17:01:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -42,6 +42,8 @@
 #include "address_space_itf.h"
 #include "address_space_local.h"
 #include "address_space_namespaces.h"
+#include "address_space_namespaces_indexes.h"
+#include "address_space_namespaces_indexes_bs.h"
 #include "address_space_namespaces_metadata.h"
 #include "address_space_typing.h"
 #include "address_space_typing_bs.h"
@@ -271,6 +273,8 @@ void INITIALISATION(void) {
    call_method_result_it__INITIALISATION();
    argument_pointer_bs__INITIALISATION();
    call_method_mgr__INITIALISATION();
+   address_space_namespaces_indexes_bs__INITIALISATION();
+   address_space_namespaces_indexes__INITIALISATION();
    service_add_nodes_1__INITIALISATION();
    service_add_nodes__INITIALISATION();
    service_delete_nodes__INITIALISATION();

@@ -345,6 +345,12 @@ void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_
     }
 }
 
+void constants_bs__get_reverse_cast_t_NamespaceIdx(const constants_bs__t_NamespaceIdx constants_bs__p_nsIndex,
+                                                   t_entier4* const constants_bs__p_nsIndexNat)
+{
+    *constants_bs__p_nsIndexNat = (t_entier4) constants_bs__p_nsIndex;
+}
+
 void constants_bs__get_NodeId_NamespaceIndex(const constants_bs__t_NodeId_i constants_bs__p_nodeId,
                                              constants_bs__t_NamespaceIdx* const constants_bs__p_idx)
 {

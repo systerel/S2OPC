@@ -32,7 +32,8 @@ SEES
     msg_node_management_add_nodes
 
 IMPORTS
-    call_method_mgr
+    call_method_mgr,
+    address_space_namespaces_indexes
 
 /* Note: We would like to use EXTENDS instead of IMPORTS + PROMOTES,
    but it would trigger a bug in the project check. */
@@ -81,6 +82,20 @@ PROMOTES
     deleteNode_AddressSpace
 
 LOCAL_OPERATIONS
+
+    /* Set number of namespaces in cache if it was not done previously.
+    Checks if the given NS index is defined in the server NamespacesArray */
+    bres <-- has_NamespaceIndex(p_idx) =
+    PRE
+        p_idx : t_NamespaceIdx
+    THEN
+        bres, a_nsIdxMax
+        :(a_nsIdxMax : t_NamespaceIdx &
+          bres : BOOL &
+          bres = bool(cast_t_NamespaceIdx~(p_idx) <= cast_t_NamespaceIdx~(a_nsIdxMax))
+        )
+    END
+    ;
 
     sc_operation <-- check_add_nodes_item_params_parent_nid(p_parentNid) =
     PRE
@@ -160,16 +175,25 @@ LOCAL_OPERATIONS
         p_sc_operation : t_StatusCode
     THEN
         sc_operation,
-        new_nid
+        new_nid,
+        a_nsIdxMax
         :(
             sc_operation : t_StatusCode_i &
             new_nid : t_NodeId_i &
+            a_nsIdxMax : t_NamespaceIdx &
             (p_sc_operation = e_sc_ok =>
                 (p_reqNodeId : t_ExpandedNodeId =>
-                    ((p_reqNodeId : dom(conv_ExpandedNodeId_NodeId) & conv_ExpandedNodeId_NodeId(p_reqNodeId) /: ran(a_NodeId)) =>
+                    ((p_reqNodeId : dom(conv_ExpandedNodeId_NodeId) & conv_ExpandedNodeId_NodeId(p_reqNodeId) /: ran(a_NodeId) &
+                            cast_t_NamespaceIdx~(conv_NodeId_NamespaceIdx(conv_ExpandedNodeId_NodeId(p_reqNodeId))) <= cast_t_NamespaceIdx~(a_nsIdxMax)) =>
                         new_nid = conv_ExpandedNodeId_NodeId(p_reqNodeId) & sc_operation = e_sc_ok) &
+                    /* Not a local server node id */
                     (not(p_reqNodeId : dom(conv_ExpandedNodeId_NodeId)) => sc_operation = e_sc_bad_node_id_rejected) &
-                    ((p_reqNodeId : dom(conv_ExpandedNodeId_NodeId) & not(conv_ExpandedNodeId_NodeId(p_reqNodeId) /: ran(a_NodeId))) =>
+                    /* Not a local server valid namespace index */
+                    ((p_reqNodeId : dom(conv_ExpandedNodeId_NodeId) & not(cast_t_NamespaceIdx~(conv_NodeId_NamespaceIdx(conv_ExpandedNodeId_NodeId(p_reqNodeId))) <= cast_t_NamespaceIdx~(a_nsIdxMax)))
+                        => sc_operation = e_sc_bad_node_id_rejected) &
+                    /* Already used local server node id */
+                    ((p_reqNodeId : dom(conv_ExpandedNodeId_NodeId) & cast_t_NamespaceIdx~(conv_NodeId_NamespaceIdx(conv_ExpandedNodeId_NodeId(p_reqNodeId))) <= cast_t_NamespaceIdx~(a_nsIdxMax) &
+                            not(conv_ExpandedNodeId_NodeId(p_reqNodeId) /: ran(a_NodeId))) =>
                         sc_operation = e_sc_bad_node_id_exists)
                 ) &
                 (not (p_reqNodeId : t_ExpandedNodeId) =>
@@ -239,6 +263,14 @@ LOCAL_OPERATIONS
 OPERATIONS
 
     /* LOCAL_OPERATIONS */
+
+    bres <-- has_NamespaceIndex(p_idx) =
+    BEGIN
+        may_initialize_max_namespace_idx;
+        bres <-- has_NamespaceIndex_index(p_idx)
+    END
+    ;
+
 
     sc_operation <-- check_add_nodes_item_params_parent_nid(p_parentNid) =
     VAR
@@ -330,6 +362,8 @@ OPERATIONS
     VAR
         l_local_server_exp_node_id,
         l_node_id,
+        l_ns_index,
+        l_ns_index_valid,
         l_node_exists,
         l_node,
         l_bres
@@ -346,13 +380,18 @@ OPERATIONS
                 IF l_local_server_exp_node_id = TRUE
                 THEN
                     l_node_exists, l_node <-- readall_AddressSpace_Node(l_node_id);
-                    IF l_node_exists = FALSE
+                    l_ns_index <-- get_NodeId_NamespaceIndex(l_node_id);
+                    l_ns_index_valid <-- has_NamespaceIndex(l_ns_index);
+                    IF l_node_exists = FALSE & l_ns_index_valid = TRUE
                     THEN
                         l_bres, new_nid <-- copy_node_id_pointer_content(l_node_id);
                         IF l_bres = FALSE
                         THEN
                             sc_operation := e_sc_bad_out_of_memory
                         END
+                    ELSIF l_ns_index_valid = FALSE
+                    THEN
+                        sc_operation := e_sc_bad_node_id_rejected
                     ELSE
                         sc_operation := e_sc_bad_node_id_exists
                     END

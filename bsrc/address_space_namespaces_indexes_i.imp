@@ -1,0 +1,85 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    address_space_namespaces_indexes_i
+
+REFINES
+    address_space_namespaces_indexes
+
+IMPORTS
+    address_space_namespaces_indexes_bs
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    address_space_bs
+
+CONCRETE_VARIABLES
+    has_NamespaceIndexMax_i,
+    a_nsIdxMax_i
+
+INVARIANT
+    has_NamespaceIndexMax_i : BOOL &
+    a_nsIdxMax_i : NAT &
+    a_nsIdxMax = cast_t_NamespaceIdx(a_nsIdxMax_i)
+
+INITIALISATION
+    has_NamespaceIndexMax_i := FALSE;
+    a_nsIdxMax_i := 0
+
+OPERATIONS
+
+    /* OPERATIONS OF THE MODULE */
+    may_initialize_max_namespace_idx =
+    VAR
+        l_nid_valid,
+        l_Server_NamespaceArray_node,
+        l_sc,
+        l_val,
+        l_val_sc,
+        l_val_ts_src
+    IN
+        IF has_NamespaceIndexMax_i = FALSE THEN
+            // Read the value of the server NamespaceArray which is the "namespace table" (OPC UA)
+            l_nid_valid, l_Server_NamespaceArray_node <-- readall_AddressSpace_Node(c_Server_NamespaceArray_NodeId);
+            IF l_nid_valid = TRUE THEN
+                l_sc, l_val, l_val_sc, l_val_ts_src
+                    <-- read_AddressSpace_Raw_Node_Value_value(l_Server_NamespaceArray_node, c_Server_NamespaceArray_NodeId, e_aid_Value);
+                IF l_sc = e_sc_ok
+                THEN
+                    // Get the number of namespaces URIs in the array
+                    a_nsIdxMax_i <-- read_variant_max_namespaceIndex(l_val);
+                    has_NamespaceIndexMax_i := TRUE;
+                    read_AddressSpace_free_variant(l_val) /* Frees the shallow copy only */
+                END
+            END
+        END
+    END
+    ;
+
+    bres <-- has_NamespaceIndex_index(p_idx) =
+    VAR
+        l_natIdx
+    IN
+        l_natIdx <-- get_reverse_cast_t_NamespaceIdx(p_idx);
+        bres := bool(l_natIdx <= a_nsIdxMax_i)
+    END
+
+END
