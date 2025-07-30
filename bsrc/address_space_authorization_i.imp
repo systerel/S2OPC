@@ -52,6 +52,9 @@ DEFINITIONS
     d_access_level_TimestampWrite ==
         conv_AccessLevel_TimestampWrite(a_AccessLevel(node)) = TRUE;
 
+    d_access_level_histRead ==
+        conv_AccessLevel_HistRead(a_AccessLevel(node)) = TRUE;
+
     d_access_level_executable ==
         node |-> TRUE : a_Executable
 
@@ -78,6 +81,11 @@ INVARIANT
              (d_access_level_StatusWrite or conv_RawStatusCode_To_StatusCode(raw_sc) = e_sc_ok) &
              (d_access_level_TimestampWrite or source_ts = c_Timestamp_null)))
          }
+    &
+    s_access_histRead = { node |
+        node : t_Node_i &
+        node : s_Node &
+        (local_service_treatment = TRUE or d_access_level_histRead)}
     &
     s_executable = { node |
         node : t_Node_i &
@@ -163,6 +171,21 @@ OPERATIONS
             END
             ;
             bres := bool(l_access_write = TRUE & l_access_write_status = TRUE & l_access_write_timestamp = TRUE)
+        END
+    END
+    ;
+
+    bres <-- has_access_level_histRead(node) =
+    VAR
+        l_local_service_treatment,
+        l_access_level
+    IN
+        l_local_service_treatment <-- is_local_service_treatment;
+        IF l_local_service_treatment = TRUE THEN
+            bres := TRUE
+        ELSE
+            l_access_level <-- get_AccessLevel(node);
+            bres <-- is_t_access_level_histRead(l_access_level)
         END
     END
     ;

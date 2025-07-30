@@ -663,6 +663,28 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
         }
+        else if (strcmp("Historizing", attr) == 0)
+        {
+            if (OpcUa_NodeClass_Variable != element_type)
+            {
+                LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                               "Unexpected Historizing attribute (value '%s') on node of class = %s", attrs[++i],
+                               tag_from_element_id(element_type));
+                return false;
+            }
+
+            const char* attr_val = attrs[++i];
+
+            if ((0 != strcmp(attr_val, "true")) && (0 != strcmp(attr_val, "false")))
+            {
+                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid Historizing on node value: '%s", attr_val);
+                return false;
+            }
+            else
+            {
+                ctx->node.data.variable.Historizing = (strcmp(attr_val, "true") == 0);
+            }
+        }
         else if (strcmp("Executable", attr) == 0)
         {
             if (OpcUa_NodeClass_Method != element_type)

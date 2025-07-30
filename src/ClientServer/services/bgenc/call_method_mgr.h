@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 24/07/2025 13:38:27
+ Date                 : 29/08/2025 12:49:45
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -87,6 +87,7 @@ extern void call_method_mgr__INITIALISATION(void);
 #define call_method_mgr__get_user_authorization service_write__get_user_authorization
 #define call_method_mgr__get_user_roles service_write__get_user_roles
 #define call_method_mgr__has_access_level_executable service_write__has_access_level_executable
+#define call_method_mgr__has_access_level_histRead service_write__has_access_level_histRead
 #define call_method_mgr__is_AddressSpace_constant service_write__is_AddressSpace_constant
 #define call_method_mgr__is_IndexRangeDefined service_write__is_IndexRangeDefined
 #define call_method_mgr__is_NodeId_equal service_write__is_NodeId_equal

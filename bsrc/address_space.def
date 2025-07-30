@@ -129,6 +129,7 @@ DEFINITIONS
         /* Node authorizations (includes local treatment) */
         s_access_read,
         s_access_write,
+        s_access_histRead,
         s_executable,
 
         /* User authorization */
@@ -234,6 +235,7 @@ DEFINITIONS
         /* Node authorizations (includes local treatment) */
         s_access_read <: t_Node_i &
         s_access_write <: t_Node_i * t_RawStatusCode * t_Timestamp &
+        s_access_histRead <: t_Node_i &
         s_executable <: t_Node_i &
 
         /* User authorization */
@@ -1085,6 +1087,15 @@ DEFINITIONS
     BEGIN
         a_set_user := c_user_indet ||
         a_set_roles := c_sessionRoles_indet
+    END
+    ;
+
+    bres <-- has_access_level_histRead(node) =
+    PRE
+        node : t_Node_i &
+        node : t_Node
+    THEN
+        bres := bool(node : s_access_histRead)
     END
     ;
 

@@ -25,6 +25,7 @@ SETS
     t_NodeId_i;
     t_Variant_i;
     t_DataValue_i;
+    t_DataValue_array_i;
     t_byte_buffer_i;
     t_Timestamp;
     t_Int32;
@@ -95,6 +96,8 @@ SETS
     t_client_handle_i;
     t_timer_id_i;
     t_IndexRange_i;
+    t_readRawModifiedDetails_i;
+    t_historyReadValueId_i;
     t_ContinuationPoint_i;
     t_ContinuationPointId_i;
     t_ArrayDimensions_i;
@@ -129,6 +132,7 @@ CONCRETE_CONSTANTS
     k_n_genericOperationPerReq_max,
     k_n_registerNodes_max,
     k_n_unregisterNodes_max,
+    k_n_histRead_max,
     k_n_nodesToAdd_max,
     k_n_nodesToDelete_max,
     k_n_UserAuthAttempts_max,
@@ -155,6 +159,7 @@ CONCRETE_CONSTANTS
 
     c_Variant_indet,
     c_DataValue_indet,
+    c_DataValue_array_indet,
     c_Node_indet,
     c_NodeId_indet,
     c_byte_buffer_indet,
@@ -215,6 +220,8 @@ CONCRETE_CONSTANTS
     c_BrowseResultMask_all,
     c_timer_id_indet,
     c_IndexRange_indet,
+    c_readRawModifiedDetails_indet,
+    c_historyReadValueId_indet,
     c_ContinuationPoint_indet,
     c_ContinuationPointId_indet,
     c_ArrayDimensions_indet,
@@ -243,6 +250,7 @@ ABSTRACT_CONSTANTS
 
     t_Variant,
     t_DataValue,
+    t_DataValue_array,
     t_Node,
     t_NodeId,
     t_byte_buffer,
@@ -276,6 +284,8 @@ ABSTRACT_CONSTANTS
     cast_t_NamespaceIdx,
 
     t_endpoint_config_idx,
+    t_readRawModifiedDetails,
+    t_historyReadValueId,
     t_reverse_endpoint_config_idx,
     t_client_request_handle,
     t_ExpandedNodeId,
@@ -317,6 +327,7 @@ ABSTRACT_CONSTANTS
     t_DataTypeDefinition,
 
     conv_AccessLevel_CurrentRead,
+    conv_AccessLevel_HistRead,
     conv_AccessLevel_CurrentWrite,
     conv_AccessLevel_StatusWrite,
     conv_AccessLevel_TimestampWrite,
@@ -349,6 +360,7 @@ PROPERTIES
     k_n_genericOperationPerReq_max : NAT &
     k_n_registerNodes_max : NAT &
     k_n_unregisterNodes_max : NAT &
+    k_n_histRead_max : NAT &
     k_n_nodesToAdd_max : NAT &
     k_n_nodesToDelete_max : NAT &
     k_n_UserAuthAttempts_max : NAT &
@@ -362,6 +374,10 @@ PROPERTIES
     t_DataValue <: t_DataValue_i &
     c_DataValue_indet : t_DataValue_i &
     c_DataValue_indet /: t_DataValue &
+
+    t_DataValue_array <: t_DataValue_array_i &
+    c_DataValue_array_indet : t_DataValue_array_i &
+    c_DataValue_array_indet /: t_DataValue_array &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -674,6 +690,14 @@ PROPERTIES
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet /: t_endpoint_config_idx &
 
+    t_readRawModifiedDetails <: t_readRawModifiedDetails_i &
+    c_readRawModifiedDetails_indet : t_readRawModifiedDetails_i &
+    c_readRawModifiedDetails_indet /: t_readRawModifiedDetails &
+
+    t_historyReadValueId <: t_historyReadValueId_i &
+    c_historyReadValueId_indet : t_historyReadValueId_i &
+    c_historyReadValueId_indet /: t_historyReadValueId &
+
     t_reverse_endpoint_config_idx <: t_reverse_endpoint_config_idx_i &
     c_reverse_endpoint_config_idx_indet : t_reverse_endpoint_config_idx_i &
     c_reverse_endpoint_config_idx_indet /: t_reverse_endpoint_config_idx &
@@ -768,6 +792,7 @@ PROPERTIES
 
     conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &
     conv_AccessLevel_CurrentRead : t_access_level --> BOOL &
+    conv_AccessLevel_HistRead : t_access_level --> BOOL &
     conv_AccessLevel_StatusWrite : t_access_level --> BOOL &
     conv_AccessLevel_TimestampWrite : t_access_level --> BOOL &
 
@@ -964,6 +989,14 @@ OPERATIONS
     END
     ;
 
+    bres <-- is_t_access_level_histRead(p_access_lvl) =
+    PRE
+        p_access_lvl : t_access_level
+    THEN
+        bres := conv_AccessLevel_HistRead(p_access_lvl)
+    END
+    ;
+
     bres <-- is_t_access_level_statusWrite(p_access_lvl) =
     PRE
         p_access_lvl : t_access_level
@@ -1091,6 +1124,13 @@ OPERATIONS
 
     /* Returns true if clients are allowed to use NodeManagement service set, false otherwise */
     bres <-- is_ClientNodeManagementActive =
+    BEGIN
+        bres :: BOOL
+    END
+    ;
+
+    /* Returns true if the flag S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE is set, false otherwise */
+    bres <-- is_ExternalHistoryRawReadServiceActive =
     BEGIN
         bres :: BOOL
     END

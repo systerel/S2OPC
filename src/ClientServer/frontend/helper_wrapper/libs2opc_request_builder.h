@@ -1311,4 +1311,115 @@ SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCallFromStrings(OpcUa_CallRequest*
                                                               int32_t nbOfInputArguments,
                                                               const SOPC_Variant* inputArguments);
 
+/**
+ * \brief Creates a history read request
+ *
+ * \param nbHistoryReadValues  Number of items (node, attribute, index range) to read with this read request.
+ *                             \p nbHistoryReadValues <= INT32_MAX.
+ * ::SOPC_HistoryReadRequest_SetHistoryReadValueFromStrings or ::SOPC_HistoryReadRequest_SetHistoryReadValue shall be
+ * called for each historyRead value index. Otherwise empty historyRead value is sent for the index not configured.
+ *
+ * \param tsToReturn    The kind of Timestamps to be returned for each requested Variable Value Attribute
+ *
+ * \param releaseContinuationPoints True for the server to free ressources of passed continuationPoints in request.
+ *
+ * \param historyReadDetails The details of the history read that must be performed. See spec v1.05.03 Part 11
+ * Section 6.5.
+ *
+ * \return allocated history read request in case of success, NULL in case of failure (invalid timestamp kind or out of
+ * memory)
+ */
+OpcUa_HistoryReadRequest* SOPC_HistoryReadRequest_Create(size_t nbHistoryReadValues,
+                                                         OpcUa_TimestampsToReturn tsToReturn,
+                                                         bool releaseContinuationPoints,
+                                                         SOPC_ExtensionObject* historyReadDetails);
+
+/**
+ * \brief Creates and allocates an extension object to be provided to
+ *        ::SOPC_HistoryReadRequest_Create function.
+ *
+ * \param isReadModified   TRUE for Read Modified functionality, FALSE for Read Raw functionality.
+ * \param startTime        Beginning of period to read.
+ * \param endTime          End of period to read.
+ * \param numValuesPerNode The maximum number of values returned for any Node over the time range.
+ * \param returnBounds     TRUE for bounding values to be returned, FALSE otherwise.
+ *
+ * \return the extension object packaging the OpcUa_ReadRawModifiedDetails in case of success, NULL otherwise.
+ */
+SOPC_ExtensionObject* SOPC_HistoryReadRequest_CreateReadRawModifiedDetails(SOPC_Boolean isReadModified,
+                                                                           SOPC_DateTime startTime,
+                                                                           SOPC_DateTime endTime,
+                                                                           uint32_t numValuesPerNode,
+                                                                           SOPC_Boolean returnBounds);
+
+/**
+ * \brief Sets the value to history read at given index in history read request (using C strings for node id and index
+ * range)
+ *
+ * \param historyReadRequest  The history read request to configure
+ *
+ * \param index        Index of the history read value to configure in the history read request.
+ *                     \p index < number of history read value configured in ::SOPC_HistoryReadRequest_Create
+ *
+ * \param nodeId       The id of the node to history read as a C string, e.g. 'ns=1;s=MyNode'.
+ *                     \p nodeId shall not be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
+ *                     OPC UA specification</a>.
+ *
+ * \param indexRange   The index range used to identify a single element of an array,
+ *                     or a single range of indexes for arrays.
+ *                     If not used for the history read value requested it should be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                     OPC UA specification</a>.
+ *
+ * \param dataEncoding  The data encoding to use
+ *
+ * \param continuationPoint  The continuation point returned from a previous HistoryRead call.
+ *                           It may be NULL if not used.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid history read request or invalid other parameters.
+ */
+SOPC_ReturnStatus SOPC_HistoryReadRequest_SetHistoryReadValueFromStrings(OpcUa_HistoryReadRequest* historyReadRequest,
+                                                                         size_t index,
+                                                                         const char* nodeId,
+                                                                         const char* indexRange,
+                                                                         const SOPC_QualifiedName* dataEncoding,
+                                                                         const SOPC_ByteString* continuationPoint);
+
+/**
+ * \brief Sets the value to history read at given index in history read request
+ *
+ * \param historyReadRequest  The history read request to configure
+ *
+ * \param index        Index of the history read value to configure in the history read request.
+ *                     \p index < number of history read value configured in ::SOPC_HistoryReadRequest_Create
+ *
+ * \param nodeId       The id of the node to history read.
+ *                     \p nodeId shall not be NULL
+ *
+ * \param indexRange   The index range used to identify a single element of an array,
+ *                     or a single range of indexes for arrays.
+ *                     If not used for the history read value requested it should be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                     OPC UA specification</a>.
+ *
+ * \param dataEncoding  The data encoding to use
+ *
+ * \param continuationPoint  The continuation point returned from a previous HistoryRead call.
+ *                           It may be NULL if not used.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid history read request or invalid other parameters.
+ */
+SOPC_ReturnStatus SOPC_HistoryReadRequest_SetHistoryReadValue(OpcUa_HistoryReadRequest* historyReadRequest,
+                                                              size_t index,
+                                                              const SOPC_NodeId* nodeId,
+                                                              const SOPC_String* indexRange,
+                                                              const SOPC_QualifiedName* dataEncoding,
+                                                              const SOPC_ByteString* continuationPoint);
+
 #endif /* LIBS2OPC_REQUEST_BUILDER_H_ */

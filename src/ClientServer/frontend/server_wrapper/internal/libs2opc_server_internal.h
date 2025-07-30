@@ -79,6 +79,9 @@ typedef struct SOPC_ServerHelper_Config
     // Address space instance
     SOPC_AddressSpace* addressSpace;
 
+    // Callback called on HistoryRead requests
+    SOPC_ExternalHistoryRawRead_Fct* externalHistoryReadCb;
+    uintptr_t externalHistoryReadContext;
     // Application write notification callback record
     SOPC_WriteNotif_Fct* writeNotifCb;
     // Application node availability for CreateMonitoreItem callback

@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 07/05/2025 08:49:58
+ Date                 : 21/08/2025 14:45:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -76,6 +76,8 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_nothing_to_do,
    constants_statuscodes_bs__e_sc_bad_too_many_ops,
    constants_statuscodes_bs__e_sc_bad_timestamps_to_return_invalid,
+   constants_statuscodes_bs__e_sc_bad_history_operation_invalid,
+   constants_statuscodes_bs__e_sc_bad_history_operation_unsupported,
    constants_statuscodes_bs__e_sc_bad_max_age_invalid,
    constants_statuscodes_bs__e_sc_bad_node_id_unknown,
    constants_statuscodes_bs__e_sc_bad_node_id_invalid,
@@ -118,6 +120,7 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_query_too_complex,
    constants_statuscodes_bs__e_sc_bad_no_match,
    constants_statuscodes_bs__e_sc_bad_data_encoding_invalid,
+   constants_statuscodes_bs__e_sc_bad_data_encoding_unsupported,
    constants_statuscodes_bs__e_sc_bad_server_uri_invalid,
    constants_statuscodes_bs__e_sc_bad_server_name_missing,
    constants_statuscodes_bs__e_sc_bad_discovery_url_missing,

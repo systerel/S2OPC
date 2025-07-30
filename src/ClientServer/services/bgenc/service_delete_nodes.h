@@ -21,7 +21,7 @@
 
  File Name            : service_delete_nodes.h
 
- Date                 : 29/04/2025 08:29:58
+ Date                 : 29/08/2025 12:49:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -79,6 +79,7 @@ extern void service_delete_nodes__INITIALISATION(void);
 #define service_delete_nodes__get_user_authorization service_add_nodes__get_user_authorization
 #define service_delete_nodes__get_user_roles service_add_nodes__get_user_roles
 #define service_delete_nodes__has_access_level_executable service_add_nodes__has_access_level_executable
+#define service_delete_nodes__has_access_level_histRead service_add_nodes__has_access_level_histRead
 #define service_delete_nodes__is_AddressSpace_constant service_add_nodes__is_AddressSpace_constant
 #define service_delete_nodes__is_IndexRangeDefined service_add_nodes__is_IndexRangeDefined
 #define service_delete_nodes__is_NodeId_equal service_add_nodes__is_NodeId_equal

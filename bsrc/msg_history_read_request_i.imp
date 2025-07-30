@@ -1,0 +1,75 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    msg_history_read_request_i
+
+REFINES
+    msg_history_read_request
+
+IMPORTS
+    msg_history_read_request_bs
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    message_in_bs
+
+PROMOTES
+    getall_msg_hist_read_req_singleValueId
+
+OPERATIONS
+
+    p_StatusCode, p_readRawDetails, p_TsSrcRequired, p_TsSrvRequired, p_ContinuationPoint, p_nb_nodes_to_read <-- check_history_read_request (p_req_msg) =
+    VAR
+        l_read_ok,
+        l_TSToReturn
+    IN
+        p_StatusCode := c_StatusCode_indet;
+        p_readRawDetails := c_readRawModifiedDetails_indet;
+        p_TsSrcRequired := FALSE;
+        p_TsSrvRequired := FALSE;
+        p_ContinuationPoint := FALSE;
+        p_nb_nodes_to_read <-- get_msg_hist_read_req_nb_nodes_to_read (p_req_msg);
+        l_read_ok := bool(0                  <  p_nb_nodes_to_read &
+                          p_nb_nodes_to_read <= k_n_histRead_max);
+        IF l_read_ok = TRUE THEN
+            p_StatusCode, p_readRawDetails <-- getall_msg_hist_read_req_read_details (p_req_msg);
+            IF p_StatusCode = e_sc_ok THEN
+                l_TSToReturn <-- get_msg_hist_read_req_TSToReturn (p_req_msg);
+                IF l_TSToReturn = e_ttr_source or l_TSToReturn = e_ttr_server or l_TSToReturn = e_ttr_both THEN
+                    p_TsSrcRequired := bool(l_TSToReturn /= e_ttr_server);
+                    p_TsSrvRequired := bool(l_TSToReturn /= e_ttr_source);
+                    p_ContinuationPoint <-- get_msg_hist_read_req_release_CP (p_req_msg);
+                    p_StatusCode := e_sc_ok
+                ELSE
+                    p_StatusCode := e_sc_bad_timestamps_to_return_invalid
+                END
+            END
+        ELSE
+            IF p_nb_nodes_to_read <= 0 THEN
+                p_StatusCode := e_sc_bad_nothing_to_do
+            ELSIF p_nb_nodes_to_read > k_n_histRead_max THEN
+                p_StatusCode := e_sc_bad_too_many_ops
+            END;
+            p_nb_nodes_to_read := 0
+        END
+    END
+
+END

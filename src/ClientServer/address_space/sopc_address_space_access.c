@@ -287,6 +287,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
     case SOPC_AttributeId_EventNotifier:
     case SOPC_AttributeId_MinimumSamplingInterval:
     case SOPC_AttributeId_Historizing:
+        val = util_variant__new_Variant_from_Bool(SOPC_AddressSpace_Get_Historizing(addSpaceAccess->addSpaceRef, node));
+        break;
     case SOPC_AttributeId_UserAccessLevel:
     case SOPC_AttributeId_UserExecutable:
     default:

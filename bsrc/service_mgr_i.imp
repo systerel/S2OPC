@@ -41,7 +41,8 @@ IMPORTS
     subscription_mgr,
     service_set_discovery_server,
     service_register_nodes,
-    service_unregister_nodes
+    service_unregister_nodes,
+    service_history_read
 
 PROMOTES
     /* message_in_bs */
@@ -744,6 +745,14 @@ OPERATIONS
             OR e_msg_method_call_req THEN
                 l_user <-- get_session_user_server(session);
                 StatusCode_service <-- treat_method_call_request (l_user, endpoint_config_idx, req_msg, resp_msg)
+            OR e_msg_attribute_history_read_req THEN
+                l_bres <-- is_ExternalHistoryRawReadServiceActive;
+                IF l_bres = TRUE THEN
+                    l_user <-- get_session_user_server(session);
+                    StatusCode_service <-- treat_history_read_request(req_msg, resp_msg, l_user)
+                ELSE
+                    StatusCode_service := e_sc_bad_service_unsupported
+                END
             OR e_msg_node_add_nodes_req THEN
                 l_bres <-- is_ClientNodeManagementActive;
                 IF l_bres = TRUE

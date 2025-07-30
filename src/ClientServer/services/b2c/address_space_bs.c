@@ -399,7 +399,8 @@ static SOPC_Byte SOPC_Internal_ComputeAccessLevel_Value(const SOPC_AddressSpace_
 {
     SOPC_ASSERT(node->node_class == OpcUa_NodeClass_Variable);
     SOPC_Byte accessLevel = node->data.variable.AccessLevel;
-    SOPC_Byte supportedFlags = (SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite);
+    SOPC_Byte supportedFlags =
+        (SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite | SOPC_AccessLevelMask_HistoryRead);
     bool onlyValueWritable = SOPC_AddressSpace_AreReadOnlyNodes(address_space_bs__nodes);
     if (!onlyValueWritable)
     {
@@ -642,8 +643,8 @@ void address_space_bs__read_AddressSpace_Historizing_value(
 {
     SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
-    // Note: always returns false since we do not implement historization
-    *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
+    SOPC_Boolean historizing = SOPC_AddressSpace_Get_Historizing(address_space_bs__nodes, address_space_bs__p_node);
+    *address_space_bs__variant = util_variant__new_Variant_from_Bool(historizing);
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;

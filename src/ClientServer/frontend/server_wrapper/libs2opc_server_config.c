@@ -43,6 +43,8 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .initialized = false,
     .state = SOPC_SERVER_STATE_INITIALIZING,
     .addressSpace = NULL,
+    .externalHistoryReadCb = NULL,
+    .externalHistoryReadContext = 0,
     .writeNotifCb = NULL,
     .asyncRespCb = NULL,
     .syncLocalServiceId = 0,
@@ -602,6 +604,25 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMethodCallManager(SOPC_MethodCallMa
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
     pConfig->serverConfig.mcm = mcm;
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetExternalHistoryRawReadCallback(SOPC_ExternalHistoryRawRead_Fct* rawReadCb,
+                                                                            uintptr_t userContext)
+{
+#ifndef S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
+    return SOPC_STATUS_NOT_SUPPORTED;
+#endif
+    if (!SOPC_ServerInternal_IsConfiguring())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == rawReadCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    sopc_server_helper_config.externalHistoryReadCb = rawReadCb;
+    sopc_server_helper_config.externalHistoryReadContext = userContext;
     return SOPC_STATUS_OK;
 }
 

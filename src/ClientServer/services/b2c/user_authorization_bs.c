@@ -82,6 +82,9 @@ void user_authorization_bs__get_user_authorization_bs(
         case SOPC_USER_AUTHORIZATION_OPERATION_DELETENODE:
             operation = "deleteNode";
             break;
+        case SOPC_USER_AUTHORIZATION_OPERATION_HISTORY_READ:
+            operation = "historyRead";
+            break;
         default:
             operation = "unknown";
             break;

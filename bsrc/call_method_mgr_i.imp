@@ -70,6 +70,7 @@ PROMOTES
     set_user_roles,
     get_user_roles,
     clear_user_roles,
+    has_access_level_histRead,
     has_access_level_executable,
     get_EventNotifier,
     get_InputArguments,

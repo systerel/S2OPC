@@ -27,6 +27,7 @@
 
 #include "sopc_address_space_access.h"
 #include "sopc_askpass.h"
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -51,6 +52,34 @@ static void Demo_WriteNotificationCallback(const SOPC_CallContext* callContextPt
                            writeSuccess, sNodeId, SOPC_User_ToCString(user));
     SOPC_Free(sNodeId);
 }
+
+#ifdef S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
+/*
+ * Server callback definition for external history read
+ */
+static void Demo_ExternalHistoryReadCallback(const OpcUa_ReadRawModifiedDetails* readRawDetails,
+                                             bool sourceTsRequired,
+                                             bool releaseContinuationPoint,
+                                             const OpcUa_HistoryReadValueId* singleValueId,
+                                             uintptr_t userContext,
+                                             SOPC_StatusCode* outStatusCode,
+                                             SOPC_ByteString** outContinuationPoint,
+                                             int32_t* outNbDataValues,
+                                             SOPC_DataValue** outDataValues)
+{
+    SOPC_UNUSED_ARG(readRawDetails);
+    SOPC_UNUSED_ARG(sourceTsRequired);
+    SOPC_UNUSED_ARG(releaseContinuationPoint);
+    SOPC_UNUSED_ARG(singleValueId);
+    SOPC_UNUSED_ARG(userContext);
+    SOPC_UNUSED_ARG(outStatusCode);
+    SOPC_UNUSED_ARG(outContinuationPoint);
+    SOPC_UNUSED_ARG(outNbDataValues);
+    SOPC_UNUSED_ARG(outDataValues);
+
+    /* There is a real example in test server */
+}
+#endif
 
 /*
  * Server callback definition to ask for private key password during configuration phase
@@ -222,6 +251,19 @@ int main(int argc, char* argv[])
                                    "Failed to configure the @ space modification notification callback");
         }
     }
+
+#ifdef S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
+    /* Define history read external callback */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerConfigHelper_SetExternalHistoryRawReadCallback(Demo_ExternalHistoryReadCallback, 0);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Failed to configure the external history read callback");
+        }
+    }
+#endif
 
     if (SOPC_STATUS_OK == status)
     {

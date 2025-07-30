@@ -142,6 +142,66 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyPasswordCallback(SOPC_GetServerK
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMethodCallManager(SOPC_MethodCallManager* mcm);
 
 /**
+ * \brief Type of callback to provide to retrieve raw history data from external history server.
+ *
+ * \param readRawDetails            The history read raw details (IsReadModified is always false)
+ * \param sourceTsRequired          The flag indicating if the source timestamp is required
+ *                                  (server timestamp is managed by server and filled after the callback returned)
+ * \param releaseContinuationPoint  The release continuation point
+ * \param singleValueId             The single history read value id
+ * \param userContext               The application user context
+ * \param[out] outStatusCode        The result status code for the history read raw operation
+ *                                  Possible status code returned by the function are :
+ *                                      - Bad_NodeIdInvalid : The syntax of the node id is not valid or refers to a node
+ *                                                            that is not valid for the operation.
+ *                                      - Bad_NodeIdUnknown : The node id refers to a node that does not exist in the
+ *                                                            Server address space.
+ *                                      - Bad_ContinuationPointInvalid : The continuation point provided is no longer
+ *                                                                       valid.
+ *                                      - Bad_IndexRangeInvalid : The syntax of the index range parameter is invalid.
+ *                                      - Bad_IndexRangeNoData : No data exists within the range of indexes specified.
+ *                                      - Bad_NoContinuationPoints : The operation could not be processed because all
+ *                                                                   continuation points have been allocated.
+ *                                      - Bad_OutOfMemory : Memory allocation problem.
+ *                                      - Good_GenericStatus : history read succeeded and only in this case values might
+ *                                                             have been returned depending on \p outNbDataValues
+ *                                                             content.
+ * \param[out] outContinuationPoint The optional continuation point for the history read raw operation to be
+ *                                  continued. The bytestring might be allocated and filled if a continuation point is
+ *                                  created.
+ * \param[out] outNbDataValues      The result number of data values for the history read raw operation
+ * \param[out] outDataValues        The \p outNbDataValues data values array for the history read raw operation. The
+ *                                  callback shall allocate the data values and shall not access them after the
+ *                                  callback returned. Memory is managed by the library after the callback returned.
+ */
+typedef void SOPC_ExternalHistoryRawRead_Fct(const OpcUa_ReadRawModifiedDetails* readRawDetails,
+                                             bool sourceTsRequired,
+                                             bool releaseContinuationPoint,
+                                             const OpcUa_HistoryReadValueId* singleValueId,
+                                             uintptr_t userContext,
+                                             SOPC_StatusCode* outStatusCode,
+                                             SOPC_ByteString** outContinuationPoint,
+                                             int32_t* outNbDataValues,
+                                             SOPC_DataValue** outDataValues);
+
+/**
+ * \brief Defines the callback to retrieve raw history data from external history server.
+ *
+ * This is optional but if used it shall be defined before starting server.
+ * The S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE compilation flag shall be defined
+ * to implement this service and set the callback.
+ *
+ * \param rawReadCb  The callback to read raw history data from application history database
+ * \param userContext The application user context provided when callback is called
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p rawReadCb is invalid,
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (toolkit not initialized, server already
+ * started), SOPC_STATUS_NOT_SUPPORTED if S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE is not set.
+ */
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetExternalHistoryRawReadCallback(SOPC_ExternalHistoryRawRead_Fct* rawReadCb,
+                                                                            uintptr_t userContext);
+
+/**
  * \brief Type of callback to provide to receive write notification on address space.
  *
  * \param callCtxPtr   Context provided by server, see getters available (::SOPC_CallContext_GetUser, etc.)

@@ -38,6 +38,7 @@ SETS
                      e_ncl_View};
     t_Variant_i; /* (SOPC_Variant*) */
     t_DataValue_i; /* (SOPC_DataValue*) */
+    t_DataValue_array_i;
     t_AttributeId_i = {c_AttributeId_indet,
                        e_aid_NodeId,
                        e_aid_NodeClass,
@@ -324,8 +325,11 @@ SETS
                           e_operation_type_executable,
                           e_operation_type_addnode,
                           e_operation_type_receive_events,
-                          e_operation_type_deletenode};
+                          e_operation_type_deletenode,
+                          e_operation_type_historyread};
 
+    t_readRawModifiedDetails_i;
+    t_historyReadValueId_i;
     t_ContinuationPoint_i;
     t_ContinuationPointId_i;
 
@@ -369,6 +373,7 @@ CONCRETE_CONSTANTS
     k_n_genericOperationPerReq_max,
     k_n_registerNodes_max,
     k_n_unregisterNodes_max,
+    k_n_histRead_max,
 
     k_n_nodesToAdd_max,
     k_n_nodesToDelete_max,
@@ -398,6 +403,7 @@ CONCRETE_CONSTANTS
 
     c_Variant_indet,
     c_DataValue_indet,
+    c_DataValue_array_indet,
     c_NodeId_indet,
     c_ExpandedNodeId_indet,
     c_Reference_indet,
@@ -475,6 +481,8 @@ CONCRETE_CONSTANTS
     c_ValueRank_Scalar,
     c_ValueRank_Any,
     c_ValueRank_ScalarOrOneDimension,
+    c_readRawModifiedDetails_indet,
+    c_historyReadValueId_indet,
     c_ContinuationPoint_indet,
     c_ContinuationPointId_indet,
     c_ArrayDimensions_indet,
@@ -509,6 +517,7 @@ ABSTRACT_CONSTANTS
 
     conv_AccessLevel_CurrentWrite,
     conv_AccessLevel_CurrentRead,
+    conv_AccessLevel_HistRead,
     conv_AccessLevel_StatusWrite,
     conv_AccessLevel_TimestampWrite,
 
@@ -522,6 +531,7 @@ ABSTRACT_CONSTANTS
     t_NodeClass,
     t_Variant,
     t_DataValue,
+    t_DataValue_array,
     t_NodeId,
     t_ExpandedNodeId,
     t_Reference,
@@ -605,6 +615,9 @@ ABSTRACT_CONSTANTS
     t_operation_type,
     t_registerNodesReqIndex,
     t_unregisterNodesReqIndex,
+    t_readRawModifiedDetails,
+    t_historyReadValueId,
+    t_historyReadReqIndex,
     t_nodeToAddReqIndex,
     t_nodeToDeleteReqIndex,
     t_ContinuationPoint,
@@ -642,6 +655,10 @@ PROPERTIES
     t_DataValue <: t_DataValue_i &
     c_DataValue_indet : t_DataValue_i &
     c_DataValue_indet /: t_DataValue &
+
+    t_DataValue_array <: t_DataValue_array_i &
+    c_DataValue_array_indet : t_DataValue_array_i &
+    c_DataValue_array_indet /: t_DataValue_array &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -837,6 +854,7 @@ PROPERTIES
     k_n_genericOperationPerReq_max : NAT &
     k_n_registerNodes_max : NAT &
     k_n_unregisterNodes_max : NAT &
+    k_n_histRead_max : NAT &
     k_n_noRemainingPathIndex : NAT &
     k_n_noRemainingPathIndex > k_n_genericOperationPerReq_max &
 
@@ -887,6 +905,8 @@ PROPERTIES
 
     t_registerNodesReqIndex <: NAT &
     t_unregisterNodesReqIndex <: NAT &
+
+    t_historyReadReqIndex <: NAT &
 
     t_nodeToAddReqIndex <: NAT &
     t_nodeToDeleteReqIndex <: NAT &
@@ -1200,7 +1220,16 @@ PROPERTIES
                         e_operation_type_executable,
                         e_operation_type_addnode,
                         e_operation_type_receive_events,
-                        e_operation_type_deletenode} &
+                        e_operation_type_deletenode,
+                        e_operation_type_historyread} &
+
+    t_readRawModifiedDetails <: t_readRawModifiedDetails_i &
+    c_readRawModifiedDetails_indet : t_readRawModifiedDetails_i &
+    c_readRawModifiedDetails_indet /: t_readRawModifiedDetails &
+
+    t_historyReadValueId <: t_historyReadValueId_i &
+    c_historyReadValueId_indet : t_historyReadValueId_i &
+    c_historyReadValueId_indet /: t_historyReadValueId &
 
     s_session_treatment_reqs = {e_msg_session_create_req,
         e_msg_session_activate_req,
@@ -1332,6 +1361,7 @@ PROPERTIES
 
     conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &
     conv_AccessLevel_CurrentRead : t_access_level --> BOOL &
+    conv_AccessLevel_HistRead : t_access_level --> BOOL &
     conv_AccessLevel_StatusWrite : t_access_level --> BOOL &
     conv_AccessLevel_TimestampWrite : t_access_level --> BOOL &
 
@@ -1346,6 +1376,7 @@ PROPERTIES
     1..k_n_monitoredItemNotif_max <: t_monitoredItemNotifIndex &
     1..k_n_registerNodes_max <: t_registerNodesReqIndex &
     1..k_n_unregisterNodes_max <: t_unregisterNodesReqIndex &
+    1..k_n_histRead_max <: t_historyReadReqIndex &
 
     1..k_n_nodesToAdd_max <: t_nodeToAddReqIndex &
     1..k_n_nodesToDelete_max <: t_nodeToDeleteReqIndex &
@@ -1572,6 +1603,14 @@ OPERATIONS
     END
     ;
 
+    bres <-- is_t_access_level_histRead(p_access_lvl) =
+    PRE
+        p_access_lvl : t_access_level
+    THEN
+        bres := conv_AccessLevel_HistRead(p_access_lvl)
+    END
+    ;
+
     bres <-- is_t_access_level_statusWrite(p_access_lvl) =
     PRE
         p_access_lvl : t_access_level
@@ -1661,6 +1700,13 @@ OPERATIONS
 
     /* Returns true if clients are allowed to use NodeManagement service set, false otherwise */
     bres <-- is_ClientNodeManagementActive =
+    BEGIN
+        bres :: BOOL
+    END
+    ;
+
+    /* Returns true if the flag S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE is set, false otherwise */
+    bres <-- is_ExternalHistoryRawReadServiceActive =
     BEGIN
         bres :: BOOL
     END

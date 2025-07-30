@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 29/07/2025 17:01:56
+ Date                 : 31/07/2025 11:35:03
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -74,6 +74,8 @@
 #include "data_value_pointer_bs.h"
 #include "default_role_permissions_array_bs.h"
 #include "gen_subscription_event_bs.h"
+#include "history_read_it.h"
+#include "history_read_treatment_bs.h"
 #include "io_dispatch_mgr.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
@@ -96,6 +98,9 @@
 #include "msg_call_method_bs.h"
 #include "msg_find_servers_bs.h"
 #include "msg_find_servers_on_network_bs.h"
+#include "msg_history_read_request.h"
+#include "msg_history_read_request_bs.h"
+#include "msg_history_read_response_bs.h"
 #include "msg_node_management_add_nodes.h"
 #include "msg_node_management_add_nodes_bs.h"
 #include "msg_node_management_delete_nodes.h"
@@ -147,6 +152,7 @@
 #include "service_browse_it.h"
 #include "service_delete_nodes.h"
 #include "service_get_endpoints_bs.h"
+#include "service_history_read.h"
 #include "service_mgr.h"
 #include "service_mgr_bs.h"
 #include "service_read.h"
@@ -387,6 +393,12 @@ void INITIALISATION(void) {
    msg_unregister_nodes__INITIALISATION();
    unregister_nodes_it__INITIALISATION();
    service_unregister_nodes__INITIALISATION();
+   msg_history_read_request_bs__INITIALISATION();
+   msg_history_read_request__INITIALISATION();
+   history_read_treatment_bs__INITIALISATION();
+   msg_history_read_response_bs__INITIALISATION();
+   history_read_it__INITIALISATION();
+   service_history_read__INITIALISATION();
    service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
    toolkit_header__INITIALISATION();

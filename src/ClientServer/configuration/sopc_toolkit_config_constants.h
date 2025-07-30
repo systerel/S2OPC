@@ -243,6 +243,11 @@
 #define S2OPC_NODE_MANAGEMENT false
 #endif
 
+/** @brief Activation of HistoryRead service (RawRead only): external treatment to be implemented by application */
+#ifndef S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
+#define S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE false
+#endif
+
 /** @brief DeleteNodes option to recursively delete child nodes of the requested deleted node. */
 #ifndef S2OPC_NODE_DELETE_CHILD_NODES
 #define S2OPC_NODE_DELETE_CHILD_NODES true

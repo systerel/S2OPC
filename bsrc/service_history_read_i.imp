@@ -1,0 +1,203 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    service_history_read_i
+
+REFINES
+    service_history_read
+
+IMPORTS
+    msg_history_read_request,
+    history_read_treatment_bs,
+    msg_history_read_response_bs,
+    history_read_it
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    message_in_bs,
+    message_out_bs,
+    address_space_itf
+
+LOCAL_OPERATIONS
+    l_fill_response_hist_read_1 (p_req_msg, p_resp_msg, p_currentTs, p_index, p_user, p_roles, p_readRawDetails, p_TsSrvRequired, p_TsSrcRequired, p_ContinuationPoint) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_attribute_history_read_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_attribute_history_read_resp &
+        p_currentTs : t_Timestamp &
+        p_index : NAT &
+        p_index : t_historyReadReqIndex &
+        p_index <= nbNodesToRead &
+        p_user : t_user_i &
+        p_user : t_user &
+        p_roles : t_sessionRoles_i &
+        p_readRawDetails : t_readRawModifiedDetails_i &
+        p_readRawDetails : t_readRawModifiedDetails &
+        p_TsSrcRequired : BOOL &
+        p_TsSrvRequired : BOOL &
+        p_ContinuationPoint : BOOL &
+        statusCode_alloc = e_sc_ok
+    THEN
+        historyReadResult_historyDataValue :(
+            historyReadResult_historyDataValue : t_historyReadReqIndex +-> t_DataValue_array &
+            p_index : dom(historyReadResult_historyDataValue) &
+            {p_index} <<| historyReadResult_historyDataValue = historyReadResult_historyDataValue$0)
+    END
+    ;
+
+    l_fill_response_hist_read (p_req_msg, p_resp_msg, p_user, p_roles, p_nb_nodes, p_readRawDetails, p_TsSrcRequired, p_TsSrvRequired, p_ContinuationPoint) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg &
+        p_req_msg = c_msg_in &
+        a_msg_in_type = e_msg_attribute_history_read_req &
+        p_resp_msg : t_msg_i &
+        p_resp_msg : t_msg &
+        p_resp_msg = c_msg_out &
+        a_msg_out_type = e_msg_attribute_history_read_resp &
+        p_user : t_user_i &
+        p_user : t_user &
+        p_roles : t_sessionRoles_i &
+        p_nb_nodes : NAT &
+        p_nb_nodes : t_historyReadReqIndex &
+        p_nb_nodes <= k_n_histRead_max &
+        p_nb_nodes = nbNodesToRead &
+        p_readRawDetails : t_readRawModifiedDetails_i &
+        p_readRawDetails : t_readRawModifiedDetails &
+        p_TsSrcRequired : BOOL &
+        p_TsSrvRequired : BOOL &
+        p_ContinuationPoint : BOOL &
+        statusCode_alloc = e_sc_ok
+    THEN
+        historyReadResult_historyDataValue :(
+            historyReadResult_historyDataValue : t_historyReadReqIndex +-> t_DataValue_array &
+            dom(historyReadResult_historyDataValue) = 1..p_nb_nodes)
+    END
+
+OPERATIONS
+    /* Local operations */
+
+    l_fill_response_hist_read_1 (p_req_msg, p_resp_msg, p_currentTs, p_index, p_user, p_roles, p_readRawDetails, p_TsSrvRequired, p_TsSrcRequired, p_ContinuationPoint) =
+    VAR
+        l_singleValueId,
+        l_nodeId,
+        l_nid_valid,
+        l_node,
+        l_access_histRead,
+        l_sc,
+        l_bres,
+        l_contPoint,
+        l_nb_dataValues,
+        l_dataValues
+    IN
+        l_nodeId := c_NodeId_indet;
+        l_contPoint := c_Nonce_indet;
+        l_nb_dataValues := 0;
+        l_dataValues := c_DataValue_array_indet;
+        l_sc, l_singleValueId, l_nodeId <-- getall_msg_hist_read_req_singleValueId (p_req_msg, p_index);
+        IF l_sc = e_sc_ok THEN
+            l_nid_valid, l_node <-- readall_AddressSpace_Node(l_nodeId);
+            IF l_nid_valid = TRUE THEN
+                l_access_histRead <-- has_access_level_histRead (l_node);
+                IF l_access_histRead = TRUE THEN
+                    l_bres <-- get_user_authorization (e_operation_type_historyread, l_nodeId, e_aid_Value, p_user, p_roles);
+                    IF l_bres = TRUE THEN
+                        l_sc, l_contPoint, l_nb_dataValues, l_dataValues <-- external_history_raw_read (p_readRawDetails,
+                                                                                                      p_TsSrcRequired,
+                                                                                                      p_ContinuationPoint,
+                                                                                                      l_singleValueId);
+                        IF p_TsSrvRequired = TRUE & l_sc = e_sc_ok THEN
+                            set_ts_srv_dataValues (l_nb_dataValues, l_dataValues, p_currentTs)
+                        END
+                    ELSE
+                        l_sc := e_sc_bad_user_access_denied
+                    END
+                ELSE
+                    l_sc := e_sc_bad_user_access_denied
+                END
+            END
+        END;
+        set_msg_hist_read_response(p_resp_msg, p_index, l_sc, l_contPoint, l_nb_dataValues, l_dataValues)
+    END
+    ;
+
+    l_fill_response_hist_read (p_req_msg, p_resp_msg, p_user, p_roles, p_nb_nodes, p_readRawDetails, p_TsSrcRequired, p_TsSrvRequired, p_ContinuationPoint) =
+    VAR
+        l_continue,
+        l_index,
+        l_currentTs
+    IN
+        l_index := 0;
+        l_currentTs := c_Timestamp_null;
+
+        IF p_TsSrvRequired = TRUE THEN
+            l_currentTs <-- get_CurrentTimestamp
+        END;
+
+        l_continue <-- init_iter_hist_read_request (p_nb_nodes);
+        WHILE l_continue = TRUE DO
+            l_continue, l_index <-- continue_iter_hist_read_request;
+            l_fill_response_hist_read_1 (p_req_msg, p_resp_msg, l_currentTs, l_index, p_user, p_roles, p_readRawDetails, p_TsSrvRequired, p_TsSrcRequired, p_ContinuationPoint)
+        INVARIANT
+            rreqs_to_iterate <: t_historyReadReqIndex &
+            rreqs_iterated <: t_historyReadReqIndex &
+            rreqs_to_iterate /\ rreqs_iterated = {} &
+            rreqs_to_iterate \/ rreqs_iterated = 1..p_nb_nodes &
+            l_continue = bool(rreqs_to_iterate /= {}) &
+
+            rreqs_iterated = dom(historyReadResult_historyDataValue)
+        VARIANT
+            card(rreqs_to_iterate)
+        END
+    END
+    ;
+
+    /* Operations */
+
+    p_StatusCode <-- treat_history_read_request(p_req_msg, p_resp_msg, p_user) =
+    VAR
+        l_roles,
+        l_readRawDetails,
+        l_TsSrcRequired,
+        l_TsSrvRequired,
+        l_ContinuationPoint,
+        l_nb_nodes_to_read,
+        l_bres
+    IN
+        p_StatusCode := c_StatusCode_indet;
+        l_roles <-- get_user_roles(p_user);
+        p_StatusCode, l_readRawDetails, l_TsSrcRequired, l_TsSrvRequired, l_ContinuationPoint, l_nb_nodes_to_read <-- check_history_read_request(p_req_msg);
+        IF p_StatusCode = e_sc_ok THEN
+            l_bres <-- alloc_msg_hist_read_resp_results (l_nb_nodes_to_read, p_resp_msg);
+            IF l_bres = FALSE THEN
+                p_StatusCode := e_sc_bad_out_of_memory
+            ELSE
+                l_fill_response_hist_read (p_req_msg, p_resp_msg, p_user, l_roles, l_nb_nodes_to_read, l_readRawDetails, l_TsSrcRequired, l_TsSrvRequired, l_ContinuationPoint)
+            END
+        END
+    END
+
+END

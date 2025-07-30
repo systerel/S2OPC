@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.h
 
- Date                 : 29/07/2025 17:01:30
+ Date                 : 29/08/2025 12:49:55
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -81,6 +81,7 @@ extern void service_add_nodes_1__INITIALISATION(void);
 #define service_add_nodes_1__get_user_authorization call_method_mgr__get_user_authorization
 #define service_add_nodes_1__get_user_roles call_method_mgr__get_user_roles
 #define service_add_nodes_1__has_access_level_executable call_method_mgr__has_access_level_executable
+#define service_add_nodes_1__has_access_level_histRead call_method_mgr__has_access_level_histRead
 #define service_add_nodes_1__is_AddressSpace_constant call_method_mgr__is_AddressSpace_constant
 #define service_add_nodes_1__is_IndexRangeDefined call_method_mgr__is_IndexRangeDefined
 #define service_add_nodes_1__is_NodeId_equal call_method_mgr__is_NodeId_equal

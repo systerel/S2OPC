@@ -335,7 +335,7 @@ class VariableValue(object):
 class Node(object):
     __slots__ = 'tag', 'nodeid', 'browse_name', 'description', 'display_name', 'references', 'role_permissions',\
                 'idonly', 'value', 'data_type', 'value_rank', 'accesslevel', 'executable', 'is_abstract', 'definition',\
-                'event_notifier'
+                'event_notifier', 'historizing'
 
     def __init__(self, tag, nodeid, browse_name, description, display_name, references, role_permissions):
         self.tag = tag
@@ -354,7 +354,7 @@ class Node(object):
         self.is_abstract = False # For VariableType, ObjectType, ReferenceType and DataType
         self.definition = None # For DataType node class only
         self.event_notifier = None # For Object or View node class only
-
+        self.historizing = False # For Variables only
 
 class Reference(object):
     __slots__ = 'ty', 'target', 'is_forward'
@@ -1610,6 +1610,9 @@ def parse_uanode(no_dt_definition, xml_node, source, aliases):
             except ValueError:
                 raise ParseError('Non integer AccessLevel for node %s' % xml_node['NodeId'])
 
+    if xml_node.tag == UA_VARIABLE_TAG:
+        node.historizing = parse_boolean_value(xml_node.get('Historizing', 'false'))
+
     if xml_node.tag == UA_METHOD_TAG:
         node.executable = (parse_boolean_value(xml_node.get('Executable', 'true')))
 
@@ -1733,6 +1736,7 @@ def generate_item_variable(is_const_addspace, nodes, ua_node):
                          Value=generate_value_variant(ua_node.value),
                          DataType=generate_nodeid(ua_node.data_type),
                          ValueRank="(%d)" % ua_node.value_rank,
+                         Historizing='true' if ua_node.historizing else 'false',
                          AccessLevel=str(number_coalesce(ua_node.accesslevel, 1)))
 
 

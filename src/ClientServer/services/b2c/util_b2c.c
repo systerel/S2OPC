@@ -726,6 +726,12 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_timestamps_to_return_invalid:
         *status = OpcUa_BadTimestampsToReturnInvalid;
         break;
+    case constants_statuscodes_bs__e_sc_bad_history_operation_invalid:
+        *status = OpcUa_BadHistoryOperationInvalid;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_history_operation_unsupported:
+        *status = OpcUa_BadHistoryOperationUnsupported;
+        break;
     case constants_statuscodes_bs__e_sc_bad_node_id_unknown:
         *status = OpcUa_BadNodeIdUnknown;
         break;
@@ -842,6 +848,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
         break;
     case constants_statuscodes_bs__e_sc_bad_data_encoding_invalid:
         *status = OpcUa_BadDataEncodingInvalid;
+        break;
+    case constants_statuscodes_bs__e_sc_bad_data_encoding_unsupported:
+        *status = OpcUa_BadDataEncodingUnsupported;
         break;
     case constants_statuscodes_bs__e_sc_bad_server_uri_invalid:
         *status = OpcUa_BadServerUriInvalid;
@@ -1103,6 +1112,12 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
     case OpcUa_BadTimestampsToReturnInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_timestamps_to_return_invalid;
         break;
+    case OpcUa_BadHistoryOperationInvalid:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_history_operation_invalid;
+        break;
+    case OpcUa_BadHistoryOperationUnsupported:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_history_operation_unsupported;
+        break;
     case OpcUa_BadNodeIdUnknown:
         *bstatus = constants_statuscodes_bs__e_sc_bad_node_id_unknown;
         break;
@@ -1219,6 +1234,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadDataEncodingInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_data_encoding_invalid;
+        break;
+    case OpcUa_BadDataEncodingUnsupported:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_data_encoding_unsupported;
         break;
     case OpcUa_BadServerUriInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_server_uri_invalid;
@@ -1603,6 +1621,9 @@ void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_Use
         break;
     case constants__e_operation_type_deletenode:
         *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_DELETENODE;
+        break;
+    case constants__e_operation_type_historyread:
+        *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_HISTORY_READ;
         break;
     default:
         SOPC_ASSERT(false); /* Unexpected operation type */

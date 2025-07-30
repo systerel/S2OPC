@@ -63,6 +63,10 @@ static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
 static const bool secuActive = true;
 
+SOPC_NodeId uactt_nodeId1 = SOPC_NODEID_STRING(1, "Boolean_001");
+SOPC_NodeId uactt_nodeId2 = SOPC_NODEID_STRING(1, "Array_Boolean_001");
+SOPC_NodeId uactt_nodeId3 = SOPC_NODEID_NS0_NUMERIC(3187);
+
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
  *---------------------------------------------------------------------------*/
@@ -81,6 +85,86 @@ static void Demo_WriteNotificationCallback(const SOPC_CallContext* callContextPt
                            writeSuccess, sNodeId, SOPC_User_ToCString(user));
     SOPC_Free(sNodeId);
 }
+
+#ifdef S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
+/*
+ * Server callback definition for external history read
+ */
+static void Demo_ExternalHistoryReadCallback(const OpcUa_ReadRawModifiedDetails* readRawDetails,
+                                             bool sourceTsRequired,
+                                             bool releaseContinuationPoint,
+                                             const OpcUa_HistoryReadValueId* singleValueId,
+                                             uintptr_t userContext,
+                                             SOPC_StatusCode* outStatusCode,
+                                             SOPC_ByteString** outContinuationPoint,
+                                             int32_t* outNbDataValues,
+                                             SOPC_DataValue** outDataValues)
+{
+    SOPC_UNUSED_ARG(readRawDetails);
+    SOPC_UNUSED_ARG(sourceTsRequired);
+    SOPC_UNUSED_ARG(releaseContinuationPoint);
+    SOPC_UNUSED_ARG(userContext);
+
+    const SOPC_NodeId* nodeId = &singleValueId->NodeId;
+    int32_t comparaison1 = -1;
+    int32_t comparaison2 = -1;
+    int32_t comparaison3 = -1;
+
+    SOPC_ReturnStatus status1 = SOPC_NodeId_Compare(nodeId, &uactt_nodeId1, &comparaison1);
+    SOPC_ReturnStatus status2 = SOPC_NodeId_Compare(nodeId, &uactt_nodeId2, &comparaison2);
+    SOPC_ReturnStatus status3 = SOPC_NodeId_Compare(nodeId, &uactt_nodeId3, &comparaison3);
+
+    if ((0 == comparaison1 && SOPC_STATUS_OK == status1) || (0 == comparaison2 && SOPC_STATUS_OK == status2) ||
+        (0 == comparaison3 && SOPC_STATUS_OK == status3))
+    {
+        /* Classic values for testing */
+        *outStatusCode = SOPC_GoodGenericStatus;
+        *outContinuationPoint = SOPC_Malloc(1 * sizeof(SOPC_ByteString));
+        SOPC_ByteString_Initialize(*outContinuationPoint);
+
+        /* Fill DataValues array with 3 random values */
+        *outNbDataValues = 3;
+        SOPC_DataValue value0;
+        SOPC_DataValue value1;
+        SOPC_DataValue value2;
+        SOPC_DataValue_Initialize(&value0);
+        SOPC_DataValue_Initialize(&value1);
+        SOPC_DataValue_Initialize(&value2);
+
+        SOPC_Variant* val0 = &value0.Value;
+        SOPC_Variant* val1 = &value1.Value;
+        SOPC_Variant* val2 = &value2.Value;
+        SOPC_Variant_Initialize(val0);
+        SOPC_Variant_Initialize(val1);
+        SOPC_Variant_Initialize(val2);
+
+        val0->BuiltInTypeId = SOPC_UInt32_Id;
+        val0->ArrayType = SOPC_VariantArrayType_SingleValue;
+        val0->Value.Uint32 = 54884;
+
+        val1->BuiltInTypeId = SOPC_UInt32_Id;
+        val1->ArrayType = SOPC_VariantArrayType_SingleValue;
+        val1->Value.Uint32 = 54883;
+
+        val2->BuiltInTypeId = SOPC_UInt32_Id;
+        val2->ArrayType = SOPC_VariantArrayType_SingleValue;
+        val2->Value.Uint32 = 54882;
+
+        *outDataValues = SOPC_Malloc(3 * sizeof(SOPC_DataValue));
+        if (NULL != *outDataValues)
+        {
+            (*outDataValues)[0] = value0;
+            (*outDataValues)[1] = value1;
+            (*outDataValues)[2] = value2;
+        }
+    }
+    else
+    {
+        *outStatusCode = OpcUa_BadHistoryOperationUnsupported;
+        *outNbDataValues = 0;
+    }
+}
+#endif
 
 /*---------------------------------------------------------------------------
  *                          Server initialization
@@ -925,6 +1009,19 @@ int main(int argc, char* argv[])
     {
         status = Server_InitDefaultCallMethodService();
     }
+
+#ifdef S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
+    /* Define history read external callback */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerConfigHelper_SetExternalHistoryRawReadCallback(Demo_ExternalHistoryReadCallback, 0);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Failed to configure the external history read callback");
+        }
+    }
+#endif
 
     /* Define address space write notification callback */
     if (SOPC_STATUS_OK == status)

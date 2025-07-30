@@ -104,6 +104,8 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - FindServersOnNetwork service
   - RegisterServer2 service
   - RegisterNodes service
+  - Only if compiled with S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE set to 1:
+    - HistoryRead service: ReadRaw only (implementation externalized to application)
   - Only if NOT compiled with S2OPC_NANO_PROFILE set to 1:
     - Subscription and MonitoredItem services (except TransferSubscriptions and SetTriggering)
   - Only if compiled with S2OPC_NODE_MANAGEMENT set to 1:
@@ -127,7 +129,8 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
 - Server Micro profile and additional services (only if not compiled with S2OPC_NANO_PROFILE set to 1):
   - subscription (no subscription transfer)
   - method call
-  - add nodes (variable, object and method nodes) if library compiled with S2OPC_NODE_MANAGEMENT set to 1. 
+  - add nodes (variable, object and method nodes) if library compiled with S2OPC_NODE_MANAGEMENT set to 1
+  - history read (ReadRaw only), if library compiled with S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE set to 1
 - Server local services: read, write, browse and discovery services
 - Server address space modification:
   - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control
@@ -286,9 +289,10 @@ To build S2OPC libraries and tests with default configuration on current stable 
 - Paths to external libraries source directory: MbedTLS, Expat (optional: needed for XML parsing features only), Check (optional: needed for S2OPC unit tests). Set the  MBEDTLS_DIR, EXPAT_DIR and CHECK_DIR variables.
 - Visual Studio version to use and type of build (Release, Debug, etc.). Set the VS_VERSION and CONFIG variables.
 
-By setting environment variables S2OPC_NANO_PROFILE, S2OPC_NODE_MANAGEMENT, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
+By setting environment variables S2OPC_NANO_PROFILE, S2OPC_NODE_MANAGEMENT, S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
 - S2OPC_NANO_PROFILE (OFF by default): if set to ON, it excludes the features out of the OPC UA server nano scope (excluded services: subscription, monitored items and method calls services)
-- S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service and DeleteNodes services
+- S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service (variable node only without child nodes generation, no NodeId generation, simplified checks on types) and DeleteNodes services
+- S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE (OFF by default): if set to ON, activates the external treatment for HistoryRead service, which is the only one supported for the moment
 - BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
 - ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
 - ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,

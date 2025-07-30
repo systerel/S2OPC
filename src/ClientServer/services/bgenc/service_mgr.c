@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 11/02/2025 09:51:30
+ Date                 : 29/08/2025 12:49:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -508,6 +508,20 @@ void service_mgr__treat_session_nano_extended_service_req(
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
+         break;
+      case constants__e_msg_attribute_history_read_req:
+         constants__is_ExternalHistoryRawReadServiceActive(&service_mgr__l_bres);
+         if (service_mgr__l_bres == true) {
+            session_mgr__get_session_user_server(service_mgr__session,
+               &service_mgr__l_user);
+            service_history_read__treat_history_read_request(service_mgr__req_msg,
+               service_mgr__resp_msg,
+               service_mgr__l_user,
+               service_mgr__StatusCode_service);
+         }
+         else {
+            *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
+         }
          break;
       case constants__e_msg_node_add_nodes_req:
          constants__is_ClientNodeManagementActive(&service_mgr__l_bres);

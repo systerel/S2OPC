@@ -426,6 +426,20 @@ SOPC_Boolean SOPC_AddressSpace_Get_Executable(SOPC_AddressSpace* space, SOPC_Add
     }
 }
 
+SOPC_Boolean SOPC_AddressSpace_Get_Historizing(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
+{
+    SOPC_ASSERT(space != NULL);
+
+    switch (node->node_class)
+    {
+    case OpcUa_NodeClass_Variable:
+        return node->data.variable.Historizing;
+    default:
+        SOPC_ASSERT(false && "Current element has no Historizing attribute.");
+        return false;
+    }
+}
+
 SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     SOPC_ASSERT(space != NULL);

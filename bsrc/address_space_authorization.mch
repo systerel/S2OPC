@@ -134,6 +134,15 @@ OPERATIONS
     END
     ;
 
+    bres <-- has_access_level_histRead(node) =
+    PRE
+        node : t_Node_i &
+        node : s_Node
+    THEN
+        bres := bool(node : s_access_histRead)
+    END
+    ;
+
     bres <-- has_access_level_executable(node) =
     PRE
         node : t_Node_i &

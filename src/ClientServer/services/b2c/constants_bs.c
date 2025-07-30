@@ -124,6 +124,11 @@ void constants_bs__is_ClientNodeManagementActive(t_bool* const constants_bs__bre
     *constants_bs__bres = S2OPC_NODE_MANAGEMENT;
 }
 
+void constants_bs__is_ExternalHistoryRawReadServiceActive(t_bool* const constants_bs__bres)
+{
+    *constants_bs__bres = S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE;
+}
+
 void constants_bs__is_EventNotifier_SubscribeToEvents(const constants_bs__t_Byte constants_bs__p_eventNotifierByte,
                                                       t_bool* const constants_bs__bres)
 {
@@ -140,6 +145,12 @@ void constants_bs__is_t_access_level_currentWrite(const constants_bs__t_access_l
                                                   t_bool* const constants_bs__bres)
 {
     *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_CurrentWrite) != 0;
+}
+
+void constants_bs__is_t_access_level_histRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                              t_bool* const constants_bs__bres)
+{
+    *constants_bs__bres = (constants_bs__p_access_lvl & SOPC_AccessLevelMask_HistoryRead) != 0;
 }
 
 void constants_bs__is_t_access_level_statusWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,

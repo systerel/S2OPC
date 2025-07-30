@@ -1968,4 +1968,145 @@ SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCallFromStrings(OpcUa_CallRequest*
     return status;
 }
 
+OpcUa_HistoryReadRequest* SOPC_HistoryReadRequest_Create(size_t nbHistoryReadValues,
+                                                         OpcUa_TimestampsToReturn tsToReturn,
+                                                         bool releaseContinuationPoints,
+                                                         SOPC_ExtensionObject* historyReadDetails)
+{
+    OpcUa_HistoryReadRequest* req = NULL;
+    if (nbHistoryReadValues > INT32_MAX)
+    {
+        return req;
+    }
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_HistoryReadRequest_EncodeableType, (void**) &req);
+    if (SOPC_STATUS_OK != status)
+    {
+        return req;
+    }
+    req->NodesToRead = SOPC_Calloc(nbHistoryReadValues, sizeof(*req->NodesToRead));
+    if (NULL != req->NodesToRead)
+    {
+        req->NoOfNodesToRead = (int32_t) nbHistoryReadValues;
+        req->TimestampsToReturn = tsToReturn;
+        req->ReleaseContinuationPoints = releaseContinuationPoints;
+        req->HistoryReadDetails = *historyReadDetails;
+        SOPC_Free(historyReadDetails);
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Initialize elements
+        for (int32_t i = 0; i < req->NoOfNodesToRead; i++)
+        {
+            OpcUa_HistoryReadValueId_Initialize(&req->NodesToRead[i]);
+        }
+    }
+    else
+    {
+        SOPC_EncodeableObject_Delete(&OpcUa_HistoryReadRequest_EncodeableType, (void**) &req);
+    }
+    return req;
+}
+
+SOPC_ExtensionObject* SOPC_HistoryReadRequest_CreateReadRawModifiedDetails(SOPC_Boolean isReadModified,
+                                                                           SOPC_DateTime startTime,
+                                                                           SOPC_DateTime endTime,
+                                                                           uint32_t numValuesPerNode,
+                                                                           SOPC_Boolean returnBounds)
+{
+    SOPC_ExtensionObject* extObj = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    if (NULL == extObj)
+    {
+        return NULL;
+    }
+
+    OpcUa_ReadRawModifiedDetails* readRawModifiedDetails = NULL;
+    SOPC_ReturnStatus status = SOPC_ExtensionObject_CreateObject(extObj, &OpcUa_ReadRawModifiedDetails_EncodeableType,
+                                                                 (void**) &readRawModifiedDetails);
+    if (SOPC_STATUS_OK == status)
+    {
+        readRawModifiedDetails->IsReadModified = isReadModified;
+        readRawModifiedDetails->StartTime = startTime;
+        readRawModifiedDetails->EndTime = endTime;
+        readRawModifiedDetails->NumValuesPerNode = numValuesPerNode;
+        readRawModifiedDetails->ReturnBounds = returnBounds;
+    }
+    else
+    {
+        SOPC_Free(extObj);
+        extObj = NULL;
+    }
+    return extObj;
+}
+
+SOPC_ReturnStatus SOPC_HistoryReadRequest_SetHistoryReadValueFromStrings(OpcUa_HistoryReadRequest* historyReadRequest,
+                                                                         size_t index,
+                                                                         const char* nodeId,
+                                                                         const char* indexRange,
+                                                                         const SOPC_QualifiedName* dataEncoding,
+                                                                         const SOPC_ByteString* continuationPoint)
+{
+    if (!CHECK_ELEMENT_EXISTS(historyReadRequest, NoOfNodesToRead, index) || NULL == nodeId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    OpcUa_HistoryReadValueId* historyReadVal = &historyReadRequest->NodesToRead[index];
+    SOPC_ReturnStatus status =
+        SOPC_NodeId_InitializeFromCString(&historyReadVal->NodeId, nodeId, (int32_t) strlen(nodeId));
+    if (SOPC_STATUS_OK == status && NULL != indexRange)
+    {
+        status = SOPC_String_CopyFromCString(&historyReadVal->IndexRange, indexRange);
+    }
+    if (SOPC_STATUS_OK == status && NULL != dataEncoding)
+    {
+        status = SOPC_QualifiedName_Copy(&historyReadVal->DataEncoding, dataEncoding);
+    }
+    if (SOPC_STATUS_OK == status && NULL != continuationPoint)
+    {
+        status = SOPC_ByteString_Copy(&historyReadVal->ContinuationPoint, continuationPoint);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_HistoryReadValueId_Clear(historyReadVal);
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_HistoryReadRequest_SetHistoryReadValue(OpcUa_HistoryReadRequest* historyReadRequest,
+                                                              size_t index,
+                                                              const SOPC_NodeId* nodeId,
+                                                              const SOPC_String* indexRange,
+                                                              const SOPC_QualifiedName* dataEncoding,
+                                                              const SOPC_ByteString* continuationPoint)
+{
+    if (!CHECK_ELEMENT_EXISTS(historyReadRequest, NoOfNodesToRead, index) || NULL == nodeId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    OpcUa_HistoryReadValueId* historyReadVal = &historyReadRequest->NodesToRead[index];
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&historyReadVal->NodeId, nodeId);
+    if (SOPC_STATUS_OK == status && NULL != indexRange)
+    {
+        status = SOPC_String_Copy(&historyReadVal->IndexRange, indexRange);
+    }
+    if (SOPC_STATUS_OK == status && NULL != dataEncoding)
+    {
+        status = SOPC_QualifiedName_Copy(&historyReadVal->DataEncoding, dataEncoding);
+    }
+    if (SOPC_STATUS_OK == status && NULL != continuationPoint)
+    {
+        status = SOPC_ByteString_Copy(&historyReadVal->ContinuationPoint, continuationPoint);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_HistoryReadValueId_Clear(historyReadVal);
+    }
+    return status;
+}
+
 #undef CHECK_ELEMENT_EXISTS

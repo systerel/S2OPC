@@ -51,6 +51,7 @@
 /* Access levels, taken from Part 3 v1.03 §5.6.2 Table 8 */
 #define SOPC_AccessLevelMask_CurrentRead (uint8_t) 1     // bit0
 #define SOPC_AccessLevelMask_CurrentWrite (uint8_t) 2    // bit1
+#define SOPC_AccessLevelMask_HistoryRead (uint8_t) 4     // bit2
 #define SOPC_AccessLevelMask_StatusWrite (uint8_t) 32    // bit5
 #define SOPC_AccessLevelMask_TimestampWrite (uint8_t) 64 // bit6
 
@@ -73,6 +74,7 @@ typedef SOPC_ContinuationPointData constants_bs__t_ContinuationPoint_i;
 typedef SOPC_String* constants_bs__t_Criteria_i;
 typedef SOPC_ExtensionObject* constants_bs__t_DataTypeDefinition_i;
 typedef SOPC_DataValue* constants_bs__t_DataValue_i;
+typedef SOPC_DataValue* constants_bs__t_DataValue_array_i;
 typedef SOPC_Event* constants_bs__t_Event_i;
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
 typedef OpcUa_IdentityMappingRuleType* constants_bs__t_Identity_i;
@@ -114,6 +116,7 @@ typedef uint32_t constants_bs__t_client_request_handle_i;
 typedef SOPC_EndpointConfigIdx constants_bs__t_endpoint_config_idx_i;
 typedef OpcUa_EventFieldList* constants_bs__t_eventFieldList_i;
 typedef OpcUa_EventFilterResult* constants_bs__t_filterResult_i;
+typedef OpcUa_HistoryReadValueId* constants_bs__t_historyReadValueId_i;
 typedef uint32_t constants_bs__t_monitoredItemId_i;
 typedef void* constants_bs__t_monitoredItemPointer_i;
 typedef SOPC_SLinkedListIterator* constants_bs__t_monitoredItemQueueIterator_i;
@@ -129,6 +132,7 @@ typedef void* constants_bs__t_notificationData;
 typedef SOPC_SLinkedList* constants_bs__t_notificationQueue_i;
 typedef double constants_bs__t_opcua_duration_i;
 typedef SOPC_SLinkedList* constants_bs__t_publishReqQueue_i;
+typedef OpcUa_ReadRawModifiedDetails* constants_bs__t_readRawModifiedDetails_i;
 typedef uint32_t constants_bs__t_request_context_i;
 typedef SOPC_ReverseEndpointConfigIdx constants_bs__t_reverse_endpoint_config_idx_i;
 typedef uint32_t constants_bs__t_server_request_handle_i;
@@ -168,11 +172,14 @@ extern const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 #define constants_bs__c_CallMethodPointer_indet NULL
 #define constants_bs__c_CallMethod_indet 0
+#define constants_bs__c_history_ReadValueId_indet NULL
+#define constants_bs__c_readRawModifiedDetails_indet NULL
 #define constants_bs__c_ContinuationPointId_indet 0
 #define constants_bs__c_ContinuationPoint_indet sopc_continuationPointData_empty;
 #define constants_bs__c_Criteria_indet NULL
 #define constants_bs__c_DataTypeDefinition_indet NULL
 #define constants_bs__c_DataValue_indet NULL
+#define constants_bs__c_DataValue_array_indet NULL
 extern const constants_bs__t_QualifiedName_i constants_bs__c_DefaultRolePermissions_QualifiedName;
 #define constants_bs__c_Event_indet NULL
 #define constants_bs__c_ExpandedNodeId_indet NULL
@@ -229,6 +236,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_
 #define constants_bs__c_endpoint_config_idx_indet 0
 #define constants_bs__c_eventFieldList_indet NULL
 #define constants_bs__c_filterResult_indet NULL
+#define constants_bs__c_historyReadValueId_indet NULL
 #define constants_bs__c_max_channels_connected SOPC_MAX_SECURE_CONNECTIONS
 #define constants_bs__c_max_sessions_per_channel SOPC_MAX_SESSIONS_PER_SECURE_CONNECTION
 #define constants_bs__c_monitoredItemId_indet 0
@@ -271,6 +279,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_
 #define constants_bs__k_n_UserAuthAttempts_max SOPC_MAX_SESSION_AUTH_ATTEMPTS
 #define constants_bs__k_n_WriteResponse_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_genericOperationPerReq_max SOPC_MAX_OPERATIONS_PER_MSG
+#define constants_bs__k_n_histRead_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_monitoredItemNotif_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_monitoredItem_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_nodesToAdd_max SOPC_MAX_HEAVY_OPERATIONS_PER_MSG
@@ -329,6 +338,7 @@ extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     t_bool* const constants_bs__p_local_server,
     constants_bs__t_NodeId_i* const constants_bs__p_nid);
 extern void constants_bs__is_ClientNodeManagementActive(t_bool* const constants_bs__bres);
+extern void constants_bs__is_ExternalHistoryRawReadServiceActive(t_bool* const constants_bs__bres);
 extern void constants_bs__is_EventNotifier_SubscribeToEvents(
     const constants_bs__t_Byte constants_bs__p_eventNotifierByte,
     t_bool* const constants_bs__bres);
@@ -343,6 +353,8 @@ extern void constants_bs__is_t_access_level_currentRead(const constants_bs__t_ac
                                                         t_bool* const constants_bs__bres);
 extern void constants_bs__is_t_access_level_currentWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
                                                          t_bool* const constants_bs__bres);
+extern void constants_bs__is_t_access_level_histRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
+                                                     t_bool* const constants_bs__bres);
 extern void constants_bs__is_t_access_level_statusWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,
                                                         t_bool* const constants_bs__bres);
 extern void constants_bs__is_t_access_level_timestampWrite(

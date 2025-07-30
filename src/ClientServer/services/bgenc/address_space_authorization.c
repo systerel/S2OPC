@@ -21,7 +21,7 @@
 
  File Name            : address_space_authorization.c
 
- Date                 : 04/11/2024 10:51:41
+ Date                 : 20/08/2025 12:48:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -107,6 +107,26 @@ void address_space_authorization__has_access_level_write(
          *address_space_authorization__bres = (((address_space_authorization__l_access_write == true) &&
             (address_space_authorization__l_access_write_status == true)) &&
             (address_space_authorization__l_access_write_timestamp == true));
+      }
+   }
+}
+
+void address_space_authorization__has_access_level_histRead(
+   const constants__t_Node_i address_space_authorization__node,
+   t_bool * const address_space_authorization__bres) {
+   {
+      t_bool address_space_authorization__l_local_service_treatment;
+      constants__t_access_level address_space_authorization__l_access_level;
+      
+      address_space_local__is_local_service_treatment(&address_space_authorization__l_local_service_treatment);
+      if (address_space_authorization__l_local_service_treatment == true) {
+         *address_space_authorization__bres = true;
+      }
+      else {
+         address_space_bs__get_AccessLevel(address_space_authorization__node,
+            &address_space_authorization__l_access_level);
+         constants__is_t_access_level_histRead(address_space_authorization__l_access_level,
+            address_space_authorization__bres);
       }
    }
 }
