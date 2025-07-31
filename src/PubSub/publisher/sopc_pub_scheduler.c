@@ -1302,6 +1302,14 @@ static SOPC_ReturnStatus SOPC_PubScheduler_Set_EnableEmission_DataSetMessage(SOP
         dsmCtx->enableEmission = enableEmission;
         SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.sendingLock);
         status = SOPC_STATUS_OK;
+
+        char* pubIdStr = SOPC_Conf_PublisherIdToString(pubId);
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB,
+                              "DataSetMessage Filtering: PubId=%s WriterGroupId=%" PRIu16 " DataSetWriterId=%" PRIu16
+                              " %s (nbOfDSMactive=%" PRIu32 ")",
+                              pubIdStr, writerGroupId, dataSetWriterId, enableEmission ? "ENABLED" : "DISABLED",
+                              context->nbOfDsmActive);
+        SOPC_Free(pubIdStr);
     }
     return status;
 }
