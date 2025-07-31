@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_conf.h"
@@ -883,6 +884,46 @@ char* SOPC_Allocate_MQTT_DefaultTopic(const SOPC_Conf_PublisherId* publisherId, 
     SOPC_ASSERT(SOPC_String_PublisherId != publisherId->type); // Not handled in current version
     SOPC_ASSERT(res > 0 && res < (int) length_max_default_topic + 1);
     return defaultTopic;
+}
+
+char* SOPC_Conf_PublisherIdToString(const SOPC_Conf_PublisherId* publisherId)
+{
+    if (NULL == publisherId)
+    {
+        return NULL;
+    }
+    char* result = NULL;
+    int res = 0;
+
+    switch (publisherId->type)
+    {
+    case SOPC_Null_PublisherId:
+        result = SOPC_Calloc(5, sizeof(char)); // "null" + null terminator
+        if (NULL != result)
+        {
+            result = SOPC_strdup("null");
+        }
+        break;
+
+    case SOPC_UInteger_PublisherId:
+        result = SOPC_Calloc(SOPC_MAX_LENGTH_UINT64_TO_STRING + 1, sizeof(char));
+        if (NULL != result)
+        {
+            res = snprintf(result, SOPC_MAX_LENGTH_UINT64_TO_STRING + 1, "%" PRIu64, publisherId->data.uint);
+            SOPC_ASSERT(res > 0 && res < (int) SOPC_MAX_LENGTH_UINT64_TO_STRING + 1);
+        }
+        break;
+
+    case SOPC_String_PublisherId:
+        result = SOPC_String_GetCString(&publisherId->data.string);
+        break;
+
+    default:
+        // Unknown type, return NULL
+        break;
+    }
+
+    return result;
 }
 
 bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,

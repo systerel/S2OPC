@@ -136,6 +136,17 @@ typedef struct SOPC_Conf_PublisherId
  */
 char* SOPC_Allocate_MQTT_DefaultTopic(const SOPC_Conf_PublisherId* publisherId, uint16_t groupId);
 
+/**
+ * \brief Convert a Publisher ID to a C string representation
+ *
+ * \param publisherId A non-NULL pointer to the Publisher ID to convert
+ *
+ * \return A C string describing the publisher ID (char*)
+ *         The return value shall be freed by caller after use
+ *         Returns NULL if the publisher ID type is not supported or on allocation failure
+ */
+char* SOPC_Conf_PublisherIdToString(const SOPC_Conf_PublisherId* publisherId);
+
 /*************************/
 /** PubSubConfiguration **/
 /*************************/
