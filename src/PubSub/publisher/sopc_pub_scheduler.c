@@ -874,14 +874,14 @@ static void* thread_start_publish(void* arg)
             {
                 duration = context->keepAliveTimeUs;
                 offset = -1;
-                if (context->nbOfDsmActive)
+                if (context->nbOfDsmActive > 0)
                 {
                     send_keepAlive_message(context);
                 }
             }
             else
             {
-                if (context->nbOfDsmActive)
+                if (context->nbOfDsmActive > 0)
                 {
                     MessageCtx_send_publish_message(context);
                 }
@@ -1322,7 +1322,10 @@ bool SOPC_PubScheduler_AcyclicSend(SOPC_Conf_PublisherId* publisherId, uint16_t 
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_HighRes_TimeReference_GetTime(ctx->next_timeout);
     SOPC_HighRes_TimeReference_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
-    MessageCtx_send_publish_message(ctx);
+    if (ctx->nbOfDsmActive > 0)
+    {
+        MessageCtx_send_publish_message(ctx);
+    }
     status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.sendingLock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     return true;
