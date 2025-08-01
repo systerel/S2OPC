@@ -29,6 +29,7 @@ from urllib.parse import urlparse
 
 TIMEOUT = 2.0
 DEFAULT_PUB_URL = 'opc.udp://232.1.2.100:4840'
+DEFAULT_SUB_SERVER_URL = 'opc.tcp://localhost:4843'
 
 def wait_server(url, timeout):
     assert url != None

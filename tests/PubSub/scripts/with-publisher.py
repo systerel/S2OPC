@@ -39,6 +39,11 @@ def log(msg):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--publisher-cmd', metavar='CMD', help='The command to start the background publisher')
+    parser.add_argument('--pub-endpoint', metavar='CMD', help='The endpoint of the pub server')
+    parser.add_argument('--pub-config', metavar='CMD', help='The config XML of the pub server')
+    parser.add_argument('--sub-cmd', metavar='CMD', help='The command to start the background subscriber')
+    parser.add_argument('--sub-endpoint', metavar='CMD', help='The endpoint of the sub server')
+    parser.add_argument('--sub-config', metavar='CMD', help='The config XML of the sub server')
     parser.add_argument('--sks-cmd', metavar='CMD', help='The command to start the background Security Keys Server')
     parser.add_argument('--sks-url', metavar='CMD', help='The url of the Security Keys Server')
     parser.add_argument('--no-wait-pub-message', action='store_true', default=False, help='The script does not wait for a publisher message to start subscriber: only sleep(1)')
@@ -56,6 +61,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     publisher_process = None
+    subscriber_process = None
     sks_process = None
     try:
         if args.sks_cmd is None:
@@ -71,8 +77,26 @@ if __name__ == '__main__':
                 sks_process.wait()
                 sys.exit(1)
 
+        if args.sub_cmd is not None:
+            log('Starting subscriber')
+            if args.sub_endpoint is not None and args.sub_config is not None:
+                # Arguments are provided to the binary
+                subscriber_process = subprocess.Popen([args.sub_cmd, args.sub_endpoint, args.sub_config])
+            else:
+                subscriber_process = subprocess.Popen(shlex.split(args.sub_cmd))
+            if subscriber_process is not None:
+                if not wait_publisher.wait_server(wait_publisher.DEFAULT_SUB_SERVER_URL, wait_publisher.TIMEOUT):
+                    log('Timeout for starting subscriber')
+                    subscriber_process.kill()
+                    subscriber_process.wait()
+                    sys.exit(1)
+
         log('Starting publisher')
-        publisher_process = subprocess.Popen(shlex.split(args.publisher_cmd))
+        if args.pub_endpoint is not None and args.pub_config is not None:
+                # Arguments are provided to the binary
+            publisher_process = subprocess.Popen([args.publisher_cmd, args.pub_endpoint, args.pub_config])
+        else:
+            publisher_process = subprocess.Popen(shlex.split(args.publisher_cmd))
 
         if args.no_wait_pub_message:
             time.sleep(1)
@@ -117,6 +141,13 @@ if __name__ == '__main__':
             sks_process.kill()
             sks_process.wait()
             sks_process = None
+
+        if subscriber_process is not None:
+            log('killing subscriber Server')
+            subscriber_process.kill()
+            subscriber_process.wait()
+            subscriber_process = None
+
     except Exception as e:
         if sks_process is not None:
             sks_process.kill()

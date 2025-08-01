@@ -107,6 +107,7 @@ xml_parser_test.tap'
 PUBSUB_CLIENTSERVER_TAP_FILES='cli_self_test.tap
 pubsub_server_test.tap
 controller_device_pubsub_test.tap
+pub_sub_communication_test.tap
 pubsub_check_sign_failure_callback_sub_no_keys.tap
 pubsub_check_sign_failure_callback_sub_unexpected_keys.tap'
 

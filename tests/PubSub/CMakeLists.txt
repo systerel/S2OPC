@@ -62,14 +62,25 @@ function(s2opc_pubsub_server_validation_test name pubsub_server_name static_flag
 
   if(NOT S2OPC_NANO_PROFILE)
     # Note: use absolute path for scripts to allow ctest to be run from another path
-    add_test(NAME "${test_name}"
-      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-      COMMAND
+    set(command
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
       --sks-cmd $<TARGET_FILE:${sks_name}>
       --sks-url "opc.tcp://localhost:${sks_port}"
-      "--publisher-cmd" $<TARGET_FILE:${pubsub_server_name}>
+      "--publisher-cmd" $<TARGET_FILE:${pubsub_server_name}>)
+    if("${test_name}" STREQUAL "validation::pub_sub_communication_test")
+      # Special argument for the test validation::pub_sub_communication_test
+      list(APPEND command
+        --pub-endpoint "opc.tcp://localhost:4842"
+        --pub-config "config_pub_server.xml"
+        "--sub-cmd" $<TARGET_FILE:${pubsub_server_name}>
+        --sub-endpoint "opc.tcp://localhost:4843"
+        --sub-config "config_sub_server.xml")
+    endif()
+    list(APPEND command
       "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}.py" "--tap" "${name}.tap" ${static_flag})
+    add_test(NAME "${test_name}"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND ${command})
   endif()
 
 endfunction()
@@ -273,6 +284,7 @@ if(NOT S2OPC_PUBSUB_ONLY)
 
   s2opc_pubsub_server_validation_test("pubsub_server_test" pubsub_server "${test_server_static}" test_server_sks 4841)
   s2opc_pubsub_server_validation_test("controller_device_pubsub_test" controller_sks_client "" device_sks_server_push 4842)
+  s2opc_pubsub_server_validation_test("pub_sub_communication_test" pubsub_server "" test_server_sks 4841)
 
   # Test check signature failure callback is called when no keys are available
   add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_no_keys"
