@@ -42,6 +42,9 @@
 static SOPC_ReturnStatus ClientServer_Initialize(char* logPath);
 static char* ClientServer_GetLogPath(const char* binName, const char* port);
 
+char* ENDPOINT_URL = DEFAULT_ENDPOINT_URL;
+char* PUBSUB_CONFIG_PATH = DEFAULT_PUBSUB_CONFIG_PATH;
+
 volatile sig_atomic_t stopSignal = 0;
 static void signal_stop_server(int sig)
 {
@@ -129,7 +132,7 @@ int main(int argc, char* const argv[])
     /* Parse command line arguments ? */
     if (argc > 1)
     {
-        SOPC_ASSERT(argc == 2);
+        // - argv[1] = endpoint url of server
         size_t tmp, tmp2, tmp3;
         bool res = SOPC_Helper_URI_ParseUri_WithPrefix("opc.tcp://", argv[1], &tmp, &tmp2, &tmp3);
         if (!res)
@@ -139,9 +142,13 @@ int main(int argc, char* const argv[])
         }
         ENDPOINT_URL = argv[1];
     }
-    else
+    if (argc > 2)
     {
-        ENDPOINT_URL = DEFAULT_ENDPOINT_URL;
+        // If 2 args are provided, there shall be only 2 arguments and be as follow:
+        // - argv[1] = endpoint url of server
+        // - argv[2] = XML config pubsub
+        SOPC_ASSERT(argc == 3);
+        PUBSUB_CONFIG_PATH = argv[2];
     }
 
     size_t hostNameLength, portIdx, portLength;

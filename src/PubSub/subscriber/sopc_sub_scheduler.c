@@ -44,8 +44,6 @@
 #include "sopc_threads.h"
 #include "sopc_udp_sockets.h"
 
-char* ENDPOINT_URL = NULL;
-
 typedef const char* ro_string_t;
 
 /********************************************************************************************************
