@@ -35,26 +35,12 @@ from time import sleep
 import sys
 from tap_logger import TapLogger
 from pubsub_server import PubSubServer
+from pubsub_server_helpers import waitForEvent
 
 NODE_VARIANT_TYPE = { NID_SUB_INT : ua.VariantType.Int64,
                       NID_SUB_STRING : ua.VariantType.String,
                       NID_PUB_INT : ua.VariantType.Int64,
                       NID_PUB_STRING : ua.VariantType.String }
-
-def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
-    """
-        @param res_fcn a callable function (no parameters). Must return a boolean.
-        @param maxWait_s Timeout in second waiting for res_fcn() to return True
-        @param period_s Polling period
-        @return True if res_fcn() returned true within expected time
-    """
-    _t = maxWait_s;
-    res = res_fcn()
-    while _t >= 0 and not res:
-        _t -= period_s
-        sleep(period_s)
-        res = res_fcn()
-    return res
 
 def testControllerDevicePubsub(logger):
 

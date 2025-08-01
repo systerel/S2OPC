@@ -23,7 +23,8 @@ from opcua import ua
 from time import sleep
 import sys
 from tap_logger import TapLogger
-from pubsub_server import PubSubServer, PubSubState
+from pubsub_server import PubSubServer
+from pubsub_server_helpers import waitForEvent, helpTestStopStart, helpConfigurationChangeAndStart
 
 PUB_SERVER_URL = 'opc.tcp://localhost:4842'
 SUB_SERVER_URL = 'opc.tcp://localhost:4843'
@@ -44,6 +45,9 @@ NODE_VARIANT_TYPE = { NID_SUB_INT : ua.VariantType.Int64,
 
 TIMEOUT_SEC_COMMUNICATION = 0.2 # 0.2sec
 PUBSUB_SCHEDULER_FIRST_PERIOD = 0.5 # 0.5sec
+
+PUB_DEFAULT_XML_PATH = 'config_pub_server.xml'
+SUB_DEFAULT_XML_PATH = 'config_sub_server.xml'
 
 XML_PUB_NO_SECURITY = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
@@ -68,73 +72,6 @@ XML_SUB_NO_SECURITY = """<PubSub>
         </message>
     </connection>
 </PubSub>"""
-
-######################################################
-
-def helpAssertState(psserver, expected, pLogger):
-    waitForEvent(lambda:psserver.getPubSubState() == expected)
-    state = psserver.getPubSubState()
-    pLogger.add_test(f'PubSub Module state is {state}, should be {expected}', state == expected)
-
-# TODO: group these helpers in an helper class that wraps both the client to the pubsub_server and the logger instances
-# Test connection and status depending of pStart command
-def helpTestStopStart(pPubsubserver, pStart, pLogger, possibleFail=False):
-    if not possibleFail:
-        connected = waitForEvent(lambda:pPubsubserver.isConnected())
-        expectedPubSubStatus = waitForEvent(lambda: pStart == pPubsubserver.isStart())
-        pLogger.add_test('Connected to pubsub_server', connected)
-        if pStart:
-            pLogger.add_test('PubSub Module is started' , expectedPubSubStatus)
-        else:
-            pLogger.add_test('PubSub Module is stopped', expectedPubSubStatus)
-
-    # TODO: for now "possibleFail" is in fact "expectedFail"
-    if pStart:
-        if not possibleFail:
-            helpAssertState(pPubsubserver, PubSubState.OPERATIONAL, pLogger)
-    else:
-        helpAssertState(pPubsubserver, PubSubState.DISABLED, pLogger)
-
-# Send stop command following by start command
-def helpRestart(pPubsubserver, pLogger, possibleFail):
-    pLogger.add_test('Stop Server', True)
-    pPubsubserver.stop()
-    helpTestStopStart(pPubsubserver, False, pLogger, possibleFail)
-
-    pLogger.add_test('Start Server', True)
-    pPubsubserver.start()
-    helpTestStopStart(pPubsubserver, True, pLogger, possibleFail)
-
-# Change the configuration
-def helpConfigurationChange(pPubsubserver, pConfig, pLogger):
-    pLogger.add_test('Set Configuration', True)
-    pPubsubserver.setConfiguration(pConfig)
-    pLogger.add_test('Connected to OPCUA Server', pPubsubserver.isConnected())
-    pubsubconfiguration = pPubsubserver.getConfiguration()
-    pLogger.add_test('PubSub Configuration Node is changed', pConfig == pubsubconfiguration)
-
-# Change the configuration and restart PubSub Server
-# Test connection, status and configuration
-def helpConfigurationChangeAndStart(pPubsubserver, pConfig, pLogger, possibleFail=False):
-    helpConfigurationChange(pPubsubserver, pConfig, pLogger)
-    helpRestart(pPubsubserver, pLogger, possibleFail)
-
-######################################################
-
-def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
-    """
-        @param res_fcn a callable function (no parameters). Must return a boolean.
-        @param maxWait_s Timeout in second waiting for res_fcn() to return True
-        @param period_s Polling period
-        @return True if res_fcn() returned true within expected time
-    """
-    _t = maxWait_s;
-    res = res_fcn()
-    while _t >= 0 and not res:
-        _t -= period_s
-        sleep(period_s)
-        res = res_fcn()
-    return res
 
 def test(logger):
 
@@ -188,8 +125,8 @@ def test(logger):
         helpTestStopStart(pub_server, False, logger)
         sub_server.stop()
         helpTestStopStart(sub_server, False, logger)
-        helpConfigurationChangeAndStart(pub_server, XML_PUB_NO_SECURITY, logger)
-        helpConfigurationChangeAndStart(sub_server, XML_SUB_NO_SECURITY, logger)
+        helpConfigurationChangeAndStart(PUB_DEFAULT_XML_PATH, pub_server, XML_PUB_NO_SECURITY, logger)
+        helpConfigurationChangeAndStart(SUB_DEFAULT_XML_PATH, sub_server, XML_SUB_NO_SECURITY, logger)
         # Write new value in pub server
         pub_server.setValue(NID_PUB_STRING, NODE_VARIANT_TYPE[NID_PUB_STRING], "No security: New text in pub server")
         # Value must have been updated in sub server using Pub Sub communication

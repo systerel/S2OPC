@@ -27,6 +27,7 @@ from opcua import ua
 from tap_logger import TapLogger
 from pubsub_server import PubSubServer, PubSubState
 from sks_server import SKSServer
+from pubsub_server_helpers import waitForEvent, helpTestStopStart, helpAssertState, helpConfigurationChangeAndStart, helpRestart, helpConfigurationChange
 
 DEFAULT_URL = 'opc.tcp://localhost:4843'
 SKS_URL = 'opc.tcp://localhost:4841'
@@ -894,80 +895,6 @@ XML_PUBSUB_DATASET_DYNAMIC_EMISSION_PREENCODE="""<PubSub>
     </connection>
 </PubSub>
 """
-def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
-    """
-        @param res_fcn a callable function (no parameters). Must return a boolean.
-        @param maxWait_s Timeout in second waiting for res_fcn() to return True
-        @param period_s Polling period
-        @return True if res_fcn() returned true within expected time
-    """
-    _t = maxWait_s;
-    res = res_fcn()
-    while _t >= 0 and not res:
-        _t -= period_s
-        sleep(period_s)
-        res = res_fcn()
-    return res
-
-# TODO: group these helpers in an helper class that wraps both the client to the pubsub_server and the logger instances
-# Test connection and status depending of pStart command
-def helpTestStopStart(pPubsubserver, pStart, pLogger, possibleFail=False):
-    if not possibleFail:
-        connected = waitForEvent(lambda:pPubsubserver.isConnected())
-        expectedPubSubStatus = waitForEvent(lambda: pStart == pPubsubserver.isStart())
-        pLogger.add_test('Connected to pubsub_server', connected)
-        if pStart:
-            pLogger.add_test('PubSub Module is started' , expectedPubSubStatus)
-        else:
-            pLogger.add_test('PubSub Module is stopped', expectedPubSubStatus)
-
-    # TODO: for now "possibleFail" is in fact "expectedFail"
-    if pStart:
-        if not possibleFail:
-            helpAssertState(pPubsubserver, PubSubState.OPERATIONAL, pLogger)
-    else:
-        helpAssertState(pPubsubserver, PubSubState.DISABLED, pLogger)
-
-# Send stop command following by start command
-def helpRestart(pPubsubserver, pLogger, possibleFail):
-    pLogger.add_test('Stop Server', True)
-    pPubsubserver.stop()
-    helpTestStopStart(pPubsubserver, False, pLogger, possibleFail)
-
-    pLogger.add_test('Start Server', True)
-    pPubsubserver.start()
-    helpTestStopStart(pPubsubserver, True, pLogger, possibleFail)
-
-# Change the configuration
-def helpConfigurationChange(pPubsubserver, pConfig, pLogger):
-    pLogger.add_test('Set Configuration', True)
-    pPubsubserver.setConfiguration(pConfig)
-    pLogger.add_test('Connected to OPCUA Server', pPubsubserver.isConnected())
-    pubsubconfiguration = pPubsubserver.getConfiguration()
-    pLogger.add_test('PubSub Configuration Node is changed', pConfig == pubsubconfiguration)
-
-# Change the configuration and restart PubSub Server
-# Test connection, status and configuration
-def helpConfigurationChangeAndStart(pPubsubserver, pConfig, pLogger, static=False, possibleFail=False):
-    fd = open(DEFAULT_XML_PATH, "r")
-    oldConfig = fd.read()
-    fd.close()
-
-    helpConfigurationChange(pPubsubserver, pConfig, pLogger)
-    helpRestart(pPubsubserver, pLogger, possibleFail)
-
-    # check configuration saved in default file
-    if not possibleFail:
-        fd = open(DEFAULT_XML_PATH, "r")
-        if static:
-            pLogger.add_test('Default PubSub Configuration file is not changed', oldConfig == fd.read())
-        else:
-            rd = fd.read()
-            pLogger.add_test('Default PubSub Configuration file is changed', pConfig == rd)
-            if not(pConfig == rd):
-                pLogger.add_test(f"pConfig={pConfig}",True)
-                pLogger.add_test(f"fd.read()={rd}",False)
-        fd.close()
 
 def helpTestSetValue(pPubsubserver, nodeId, value, pLogger):
     pPubsubserver.setValue(nodeId, NODE_VARIANT_TYPE[nodeId], value)
@@ -1016,7 +943,7 @@ def helperTestPubSubConnectionFail(pubsubserver, xmlfile, logger, possibleFail=F
     helpTestSetValue(pubsubserver, NID_PUB_UINT16, 456 + pubsubserver._testContext, logger)
     helpTestSetValue(pubsubserver, NID_PUB_INT, 789, logger)
 
-    helpConfigurationChangeAndStart(pubsubserver, xmlfile, logger, possibleFail=possibleFail)
+    helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, xmlfile, logger, possibleFail=possibleFail)
     boolIsTrue = waitForEvent(lambda:pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
 
     logger.add_test('Subscriber bool is not changed', not boolIsTrue)
@@ -1042,7 +969,7 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
     helpTestSetValue(pubsubserver, NID_PUB_UINT16, 456, logger)
     helpTestSetValue(pubsubserver, NID_PUB_INT, 789, logger)
 
-    helpConfigurationChangeAndStart(pubsubserver, xmlfile, logger)
+    helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, xmlfile, logger)
 
     waitForEvent(lambda:pubsubserver.getValue(NID_SUB_BOOL))
 
@@ -1144,7 +1071,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_NULL, logger)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_LOOP_NULL, logger)
         waitForEvent(lSubBoolIsFalse)
         logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
@@ -1171,7 +1098,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
         waitForEvent(lSubBoolIsTrue)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT, logger)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_LOOP_MQTT, logger)
         waitForEvent(lSubBoolIsFalse)
 
         logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
@@ -1337,7 +1264,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT_SECU, logger)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_LOOP_MQTT_SECU, logger)
 
         subIsFalse = waitForEvent(lSubBoolIsFalse)
 
@@ -1367,7 +1294,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC, logger)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC, logger)
 
         subIsFalse = waitForEvent(lSubBoolIsFalse)
 
@@ -1397,7 +1324,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
 
         # Wait some long time and check nothing happen
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_ACYCLIC, logger)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_LOOP_ACYCLIC, logger)
         subIsFalse = waitForEvent(lSubBoolIsFalse)
         logger.add_test('Subscriber bool is not changed', not subIsFalse)
         logger.add_test('Subscriber uint16 is not changed', 500 == pubsubserver.getValue(NID_SUB_UINT16))
@@ -1432,7 +1359,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test String pubId Not set", logger)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_STRING_PUBID, logger)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_LOOP_STRING_PUBID, logger)
 
         waitForEvent(lSubBoolIsFalse)
 
@@ -1474,7 +1401,7 @@ def testPubSubDynamicConf(logger):
         # TC 32 : Test preencode mechanism failed with bad dataSet configuration
         logger.begin_section("TC 32 : Publisher fixed size buffer incompatible dataSetField configured")
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_FIXED_SIZE_BAD_DATASET, logger, possibleFail=True)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_LOOP_FIXED_SIZE_BAD_DATASET, logger, possibleFail=True)
 
         waitForEvent(lambda: 3 == pubsubserver.getValue(NID_STATUS))
 
@@ -1495,7 +1422,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test not set", logger)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_GROUP_ID_FILTER, logger, possibleFail=False)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_GROUP_ID_FILTER, logger, possibleFail=False)
 
         waitForEvent(lSubBoolIsFalse)
 
@@ -1519,7 +1446,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION, logger, possibleFail=False)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION, logger, possibleFail=False)
         boolIsFalse = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
 
         logger.add_test('Subscriber bool is changed', boolIsFalse)
@@ -1541,7 +1468,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION, logger, possibleFail=False)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION, logger, possibleFail=False)
         boolIsTrue = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
 
         logger.add_test('Subscriber bool is changed', boolIsTrue)
@@ -1573,7 +1500,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
         helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION_DISABLE_ALL, logger, possibleFail=False)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION_DISABLE_ALL, logger, possibleFail=False)
         boolIsTrue = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event shall not be reached
 
         logger.add_test('Subscriber bool is not changed',not boolIsTrue)
@@ -1592,7 +1519,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION, logger, possibleFail=False)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION, logger, possibleFail=False)
         boolIsTrue = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
 
         logger.add_test('Subscriber bool is changed', boolIsTrue)
@@ -1626,7 +1553,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
 
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION_PREENCODE, logger, possibleFail=False)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_DATASET_DYNAMIC_EMISSION_PREENCODE, logger, possibleFail=False)
         boolIsTrue = waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
 
         logger.add_test('Subscriber bool is changed', boolIsTrue)
@@ -1664,7 +1591,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_INT, 1654, logger)
 
         # Load and start Pubsub with secure config
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED, logger)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED, logger)
         # Wait for the SKS to update the keys
         testSKSKeyLifetime(logger)
 
@@ -1779,7 +1706,7 @@ def testPubSubStaticConf(logger):
         #
         logger.begin_section("TC 4 : Change Pub-Sub server configuration")
         # Change Pub-Sub configuration node and check file is not change
-        helpConfigurationChangeAndStart(pubsubserver, XML_SUBSCRIBER_ONLY, logger, static=True)
+        helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_SUBSCRIBER_ONLY, logger, static=True)
 
         # Check Pub-Sub module is still running
         helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
