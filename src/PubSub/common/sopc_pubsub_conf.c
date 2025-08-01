@@ -898,13 +898,8 @@ char* SOPC_Conf_PublisherIdToString(const SOPC_Conf_PublisherId* publisherId)
     switch (publisherId->type)
     {
     case SOPC_Null_PublisherId:
-        result = SOPC_Calloc(5, sizeof(char)); // "null" + null terminator
-        if (NULL != result)
-        {
-            result = SOPC_strdup("null");
-        }
+        result = SOPC_strdup("null");
         break;
-
     case SOPC_UInteger_PublisherId:
         result = SOPC_Calloc(SOPC_MAX_LENGTH_UINT64_TO_STRING + 1, sizeof(char));
         if (NULL != result)
