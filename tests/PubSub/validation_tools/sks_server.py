@@ -24,7 +24,6 @@ from opcua.crypto import security_policies
 from opcua.crypto import uacrypto
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-import getpass
 
 nid_objectPublisherSubscribeObject = u"i=14443"
 nid_methodGetSecurityKeys = u"i=15215"

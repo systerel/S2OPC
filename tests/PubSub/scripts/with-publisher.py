@@ -26,8 +26,6 @@ import time
 
 import wait_publisher
 
-from time import sleep
-
 description = '''Runs a program with a test S2OPC publisher running in the
 background.
 

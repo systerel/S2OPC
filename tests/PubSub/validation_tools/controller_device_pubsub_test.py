@@ -21,7 +21,6 @@
 PUBSUB_SERVER_DEVICE_URL = 'opc.tcp://localhost:4842'
 PUBSUB_SERVER_CONTROLLER_URL = 'opc.tcp://localhost:4843'
 
-NID_PUBLISHER= u"ns=1;s=Publisher"
 NID_SUB_STRING = u"ns=1;s=SubString"
 NID_SUB_INT = u"ns=1;s=SubInt"
 NID_PUB_STRING = u"ns=1;s=PubString"
