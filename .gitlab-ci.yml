@@ -534,6 +534,8 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
+  tags:
+    - ipv6
   image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
   script:
     - './.set-bin-root.sh'
