@@ -52,16 +52,16 @@ append_cmake_option ()
     fi
 }
 
-echo "Build log" > $CURDIR/build.log
+echo "Build log" > "$CURDIR/build.log"
 
-echo "Build the library and tests with CMake" | tee -a $CURDIR/build.log
+echo "Build the library and tests with CMake" | tee -a "$CURDIR/build.log"
 if [ -f "$BUILD_DIR/CMakeCache.txt" ]; then
-    echo "- CMake already configured" | tee -a $CURDIR/build.log
+    echo "- CMake already configured" | tee -a "$CURDIR/build.log"
 else
-    echo "- Generate ./$BUILD_DIR directory" | tee -a $CURDIR/build.log
+    echo "- Generate ./$BUILD_DIR directory" | tee -a "$CURDIR/build.log"
     mkdir -p $BUILD_DIR || exit 1
     cd $BUILD_DIR  > /dev/null || exit 1
-    echo "- Run CMake" | tee -a $CURDIR/build.log
+    echo "- Run CMake" | tee -a "$CURDIR/build.log"
     append_cmake_option S2OPC_NANO_PROFILE
     append_cmake_option S2OPC_NODE_MANAGEMENT
     append_cmake_option S2OPC_NODE_DELETE_CHILD_NODES
@@ -101,25 +101,25 @@ else
     append_cmake_option WITH_GCC_STATIC_ANALYSIS
     # append_cmake_option doesn't permit to handle multiple variables because of multiple evaluations of quotes
 
-    echo "cmake $CMAKE_OPTIONS -DCMAKE_C_FLAGS=\"$CMAKE_C_FLAGS\" .." >> $CURDIR/build.log
-    cmake $CMAKE_OPTIONS -DCMAKE_C_FLAGS="$CMAKE_C_FLAGS" .. >> $CURDIR/build.log
+    echo "cmake $CMAKE_OPTIONS -DCMAKE_C_FLAGS=\"$CMAKE_C_FLAGS\" .." >> "$CURDIR/build.log"
+    cmake $CMAKE_OPTIONS -DCMAKE_C_FLAGS="$CMAKE_C_FLAGS" .. >> "$CURDIR/build.log"
     cd - > /dev/null || exit 1
 fi
 if [[ $? != 0 ]]; then
-    echo "Error: build configuration failed" | tee -a $CURDIR/build.log
+    echo "Error: build configuration failed" | tee -a "$CURDIR/build.log"
     exit 1
 fi
 
-echo "- Run make" | tee -a $CURDIR/build.log
-make -j $(nproc) -C $BUILD_DIR >> $CURDIR/build.log
+echo "- Run make" | tee -a "$CURDIR/build.log"
+make -j $(nproc) -C $BUILD_DIR >> "$CURDIR/build.log"
 if [[ $? != 0 ]]; then
-    echo "Error: build failed" | tee -a $CURDIR/build.log
+    echo "Error: build failed" | tee -a "$CURDIR/build.log"
     exit 1
 else
-    echo "Built library and tests with success" | tee -a $CURDIR/build.log
+    echo "Built library and tests with success" | tee -a "$CURDIR/build.log"
 fi
 
 if [[ $? == 0 ]]; then
-    echo "Completed with SUCCESS" | tee -a $CURDIR/build.log
+    echo "Completed with SUCCESS" | tee -a "$CURDIR/build.log"
     exit 0
 fi
