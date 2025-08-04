@@ -577,16 +577,33 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(SOPC_Addr
             if (varAttributes->NoOfArrayDimensions > 0 && NULL != varAttributes->ArrayDimensions)
             {
                 varNode->NoOfArrayDimensions = varAttributes->NoOfArrayDimensions;
-                varNode->ArrayDimensions = varAttributes->ArrayDimensions;
+                varNode->ArrayDimensions = SOPC_Calloc((size_t) varAttributes->NoOfArrayDimensions, sizeof(uint32_t));
+                status = SOPC_Copy_Array(varAttributes->NoOfArrayDimensions, (void*) varNode->ArrayDimensions,
+                                         (const void*) varAttributes->ArrayDimensions, sizeof(uint32_t),
+                                         &SOPC_UInt32_CopyAux);
+                if (SOPC_STATUS_OK != status)
+                {
+                    SOPC_Free(varNode->ArrayDimensions);
+                    varNode->ArrayDimensions = NULL;
+                    varNode->NoOfArrayDimensions = 0;
+                }
             }
-            else if (varAttributes->NoOfArrayDimensions > 0)
+            else
+            {
+                status = NULL == varAttributes->ArrayDimensions && varAttributes->NoOfArrayDimensions > 0
+                             ? SOPC_STATUS_INVALID_PARAMETERS
+                             : SOPC_STATUS_OK;
+            }
+            if (SOPC_STATUS_OK != status)
             {
                 char* nodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, node));
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes: cannot add Variable node "
-                    "%s since NoOfarraysDimensions and ArrayDimensions attributes values are not coherent",
-                    nodeIdStr);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes: cannot add Variable node "
+                                       "%s: either NoOfarraysDimensions (%" PRIi32
+                                       ") and ArrayDimensions (%s) attributes values are not "
+                                       "coherent or OOM occurred",
+                                       nodeIdStr, varAttributes->NoOfArrayDimensions,
+                                       varAttributes->ArrayDimensions == NULL ? "NULL" : "not NULL");
                 SOPC_Free(nodeIdStr);
 
                 // Incoherent parameters
