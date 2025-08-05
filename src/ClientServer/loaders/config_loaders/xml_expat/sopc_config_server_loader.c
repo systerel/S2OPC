@@ -1065,7 +1065,11 @@ bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* serverConfig)
     }
     else
     {
-        SOPC_Array_Delete(ctx.endpoints);
+        SOPC_Array_Delete(endpoints);
+        SOPC_Free(ctx.serverCertificate);
+        SOPC_Free(ctx.serverKey);
+        SOPC_Free(ctx.serverPki);
+        OpcUa_ApplicationDescription_Clear(&ctx.appDesc);
         return false;
     }
 }
