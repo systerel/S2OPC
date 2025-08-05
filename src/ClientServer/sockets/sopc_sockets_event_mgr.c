@@ -182,8 +182,9 @@ static SOPC_InternalSocket* SOPC_SocketsEventMgr_CreateClientSocket(const char* 
             resultSocket = freeSocket;
         }
 
-        if (SOPC_STATUS_OK != status || // connection already failed => do not keep addresses for next attempts
-            (res != NULL && NULL == p)) // async connecting but NO next attempts remaining (if current fails)
+        if (res != NULL &&
+            (SOPC_STATUS_OK != status || // connection already failed => do not keep addresses for next attempts
+             NULL == p))                 // async connecting but NO next attempts remaining (if current fails)
         {
             SOPC_Socket_AddrInfoDelete(&res);
         }
