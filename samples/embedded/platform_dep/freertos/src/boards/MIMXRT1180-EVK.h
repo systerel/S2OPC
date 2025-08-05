@@ -33,7 +33,9 @@
 
 #define BOARD_TYPE "MIMXRT1180-EVK"
 #define SDK_PROVIDER_NXP
-//#define PRINT SOPC_Shell_Printf
+
+#define DEBUG_CONSOLE_TRANSFER_NON_BLOCKING 1
+#define DEBUG_CONSOLE_RX_ENABLE 1
 
 // Board-Specific configuration
 #include <errno.h>
@@ -92,11 +94,6 @@
 #endif
 #define configCHECK_FOR_STACK_OVERFLOW 1
 
-#ifdef INCLUDE_uxTaskGetStackHighWaterMark
-#undef INCLUDE_uxTaskGetStackHighWaterMark
-#endif
-#define INCLUDE_uxTaskGetStackHighWaterMark 1
-
 #ifdef configUSE_NEWLIB_REENTRANT
 #undef configUSE_NEWLIB_REENTRANT
 #endif
@@ -122,6 +119,15 @@
 #define NETC_PROMISCUOUS 1
 
 #define LWIP_SUPPORT_CUSTOM_PBUF 1
+
+//Console Related
+#define DEBUG_CONSOLE_TRANSFER_NON_BLOCKING 1
+#define DEBUG_CONSOLE_RX_ENABLE 1
+#include "fsl_debug_console.h"
+#undef PRINT
+#define PRINT SOPC_Shell_Printf
+#undef PRINTF
+#define PRINTF SOPC_Shell_Printf
 
 #define OPT_LAZY false
 

@@ -108,10 +108,7 @@ static uint8_t SOPC_Shell_getc(void)
         HAL_UART_Receive(&STM32_LINK_UART, &result, numberOfDataReceived, HAL_MAX_DELAY);
     }
 #elif defined SDK_PROVIDER_NXP
-    while (DbgConsole_TryGetchar(&result) != kStatus_Success)
-    {
-        vTaskDelay(pdMS_TO_TICKS(50));
-    }
+    result = (uint8_t)DbgConsole_Getchar(); //This give a raw output
 #else
 #error "Unknown target, can't figure out how to communicate over Serial line"
 #endif // STM32_LINK_UART
@@ -140,7 +137,7 @@ static inline void shell_putChar(const char c)
 #elif defined SDK_PROVIDER_NXP
 static inline void shell_putChar(const char c)
 {
-    PUTCHAR((int) c);
+    DbgConsole_Putchar((int) c);
     // uint8_t uartHandleBuffer[HAL_UART_HANDLE_SIZE];
     // HAL_UartSendBlocking((hal_uart_handle_t) uartHandleBuffer[0], (uint8_t*) (&c), 1);
 }
@@ -199,8 +196,6 @@ void SOPC_Shell_Printf(const char* msg, ...)
 
     static char buf[0x100]; // Static is OK because this is mutex-protected
 
-    UBaseType_t highWater = uxTaskGetStackHighWaterMark(NULL);
-    SOPC_ASSERT(highWater > 0);
     int nbWritten = vsnprintf(buf, sizeof(buf), msg, args);
 
     for (const char* ptr = buf; 0 != (*ptr); ptr++)
@@ -229,7 +224,7 @@ char* SOPC_Shell_ReadLine(void)
     char* buffer = SOPC_Calloc(SHELL_COMMAND_SIZE, sizeof(char));
     g_shell_context.l_pos = 0;
     g_shell_context.c_pos = 0;
-    PRINTF("SHELL >> ");
+    PRINTF("\nSHELL >> ");
     // While we don't received enter command still reading
     while ('\r' != ch && '\n' != ch)
     {
@@ -371,6 +366,5 @@ char* SOPC_Shell_ReadLine(void)
     }
     buffer[g_shell_context.l_pos] = 0;
     __io_putchar('\n');
-
     return buffer;
 }

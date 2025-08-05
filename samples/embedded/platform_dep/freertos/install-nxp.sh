@@ -17,8 +17,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-
-
 cd `dirname $0`/../../../..
 S2OPC_BASE=`pwd`
 S2OPC_SRC=${S2OPC_BASE-}/src
@@ -37,12 +35,14 @@ MAIN_FILE=${PROJECT_DIR-}/source/lwip_ipv4_ipv6_echo_freertos.c
 GET_BOARD=
 OPT_LAZY=false
 OPT_CRYPTO="mbedtls"
+COPY=false
 while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
 shift
 [[ "${PARAM-}" == "-b" ]] && GET_BOARD=$1 && shift && continue
 [[ "${PARAM-}" == "--lazy" ]] && OPT_LAZY=true  && continue
 [[ "${PARAM-}" == "--nocrypto" ]] && OPT_CRYPTO="nocrypto"  && continue
+[[ "${PARAM-}" == "--copy" ]] && COPY=true  && continue
 echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
 done
 
@@ -121,10 +121,16 @@ function add_init {
 }
 
 #Add include
-FILE=${MAIN_FILE}
+FILE=${MAIN_FILE-}
 INCLUDE="#include \"lwip/sockets.h\""
-add_init "#include \"freertos_platform_dep.h\"" "${INCLUDE}" "${FILE}"
-echo "[II] lwip_ipv4_ipv6_echo_freertos_cm33.c patched include to main.c"
+add_init "#include \"freertos_platform_dep.h\"" "${INCLUDE-}" "${FILE-}"
+echo "[II] ${MAIN_FILE-} patched includes."
+
+#Add include
+FILE=${MAIN_FILE-}
+INCLUDE="BOARD_InitHardware();"
+add_init "BOARD_InitDebugConsole();" "${INCLUDE-}" "${FILE-}"
+echo "[II] ${MAIN_FILE-} patched BOARD_InitDebugConsole"
 
 #Remove unused files
 rm -rf "${PROJECT_DIR-}/source/shell_task.c"
@@ -132,6 +138,19 @@ rm -rf "${PROJECT_DIR-}/source/shell_task.h"
 rm -rf "${PROJECT_DIR-}/source/shell_task_mode.h"
 rm -rf "${PROJECT_DIR-}/source/socket_task.c"
 rm -rf "${PROJECT_DIR-}/source/socket_task.h"
-FILE=${MAIN_FILE}
+FILE=${MAIN_FILE-}
 sed -i '/^#include[ \t]*"shell_task\.h"/d' "${FILE-}"
-echo "[II] ${MAIN_FILE} patched for unused files"
+echo "[II] ${MAIN_FILE-} patched for unused files"
+
+SOURCE_DIR="${PROJECT_DIR:-}/source"
+SOURCE_COPY_DIR="${PROJECT_DIR:-}/source_copy"
+
+
+if ! [ -e "$SOURCE_COPY_DIR" ] || [ "$COPY" = true ]; then
+  rm -rf "$SOURCE_COPY_DIR"
+  cp -r "$SOURCE_DIR" "$SOURCE_COPY_DIR"
+fi
+
+rm -rf "$SOURCE_DIR"
+cp -r "$SOURCE_COPY_DIR" "$SOURCE_DIR"
+
