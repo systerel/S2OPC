@@ -1037,7 +1037,7 @@ static SOPC_ReturnStatus SOPC_EventBuilder_RecPopulateEventTypeVariables(const c
                                                                          SOPC_Event* eventCtx,
                                                                          uint16_t depth)
 {
-    if (depth >= RECURSION_LIMIT)
+    if (depth >= SOPC_RECURSION_LIMIT)
     {
         return SOPC_STATUS_WOULD_BLOCK;
     }
@@ -1184,7 +1184,7 @@ static SOPC_ReturnStatus SOPC_EventBuilder_RecPopulateAllEventTypes(SOPC_Address
     SOPC_ASSERT(NULL != eventTypeNodeId);
     SOPC_ASSERT(NULL != eventCtx);
     SOPC_ASSERT(NULL != eventTypesDict);
-    if (depth >= RECURSION_LIMIT)
+    if (depth >= SOPC_RECURSION_LIMIT)
     {
         SOPC_Event_Delete(&eventCtx);
         return SOPC_STATUS_WOULD_BLOCK;

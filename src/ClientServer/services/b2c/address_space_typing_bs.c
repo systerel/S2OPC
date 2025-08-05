@@ -51,7 +51,7 @@ void address_space_typing_bs__is_transitive_subtype(const constants__t_NodeId_i 
                                                     t_bool* const address_space_typing_bs__bres)
 {
     *address_space_typing_bs__bres = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(
-        address_space_bs__nodes, RECURSION_LIMIT, address_space_typing_bs__p_subtype,
+        address_space_bs__nodes, SOPC_RECURSION_LIMIT, address_space_typing_bs__p_subtype,
         address_space_typing_bs__p_subtype, address_space_typing_bs__p_parent_type);
 }
 
@@ -174,7 +174,7 @@ void address_space_typing_bs__check_object_has_method(const constants__t_NodeId_
     const SOPC_NodeId* object = address_space_typing_bs__p_object;
     const SOPC_NodeId* method = address_space_typing_bs__p_method;
 
-    *address_space_typing_bs__p_bool = recursive_check_object_has_method(RECURSION_LIMIT, object, method);
+    *address_space_typing_bs__p_bool = recursive_check_object_has_method(SOPC_RECURSION_LIMIT, object, method);
 }
 
 static bool is_component_of(const SOPC_NodeId* component, const constants_bs__t_Node_i node)

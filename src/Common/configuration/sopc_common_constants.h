@@ -165,6 +165,11 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #define SOPC_MAX_TIMERS UINT8_MAX /* TODO: avoid static maximum (see monitoredItems Id creation) */
 #endif
 
+/** \brief Maximum levels of recursion for recursive functions */
+#ifndef SOPC_RECURSION_LIMIT
+#define SOPC_RECURSION_LIMIT SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL
+#endif /* SOPC_RECURSION_LIMIT */
+
 /** \brief define host-specific console print function
  * If no console is provided or log wants to be omitted, the following can be used:
  * \code{.c}

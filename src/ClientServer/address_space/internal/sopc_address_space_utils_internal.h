@@ -27,8 +27,6 @@
 #include "sopc_common_constants.h"
 #include "sopc_types.h"
 
-#define RECURSION_LIMIT SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL
-
 bool SOPC_AddressSpaceUtil_IsTypeDefinition(const OpcUa_ReferenceNode* ref);
 bool SOPC_AddressSpaceUtil_IsComponent(const OpcUa_ReferenceNode* ref);
 bool SOPC_AddressSpaceUtil_IsProperty(const OpcUa_ReferenceNode* ref);

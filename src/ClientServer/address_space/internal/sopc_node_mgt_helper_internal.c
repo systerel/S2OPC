@@ -48,7 +48,7 @@ static bool is_type_or_subtype(SOPC_AddressSpace* addSpace,
                                const SOPC_NodeId* expectedType)
 {
     return SOPC_NodeId_Equal(actualType, expectedType) ||
-           SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(addSpace, RECURSION_LIMIT, actualType, actualType,
+           SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(addSpace, SOPC_RECURSION_LIMIT, actualType, actualType,
                                                               expectedType);
 }
 
@@ -292,7 +292,7 @@ static bool check_node_reference_type_to_parent(OpcUa_NodeClass targetNodeclass,
     {
         // Evaluate (unknown) Aggregates reference type from parent to this node
         bool isAggregatesRef = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(
-            addSpace, RECURSION_LIMIT, referenceTypeId, referenceTypeId, &Aggregates_Type);
+            addSpace, SOPC_RECURSION_LIMIT, referenceTypeId, referenceTypeId, &Aggregates_Type);
         /* §7.6 Part 3 (1.05): The Aggregates ReferenceType is an abstract ReferenceType; only subtypes of it can be
          * used. It is a subtype of HasChild. [..] There are no constraints defined for this abstract ReferenceType.
          */
@@ -343,7 +343,7 @@ static bool check_browse_name_unique_from_parent(SOPC_AddressSpace* addSpace,
         OpcUa_ReferenceNode* ref = &(*refs)[i];
 
         if (!ref->IsInverse && SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(
-                                   addSpace, RECURSION_LIMIT, &ref->ReferenceTypeId, &ref->ReferenceTypeId,
+                                   addSpace, SOPC_RECURSION_LIMIT, &ref->ReferenceTypeId, &ref->ReferenceTypeId,
                                    &HierarchicalReferences_Type_NodeId))
         {
             // Note: NamespaceUri should not be interpreted as external server but is not managed for now

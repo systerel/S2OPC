@@ -165,7 +165,7 @@ static bool is_type_or_subtype(SOPC_AddressSpace* addSpace,
                                const SOPC_NodeId* expectedType)
 {
     return SOPC_NodeId_Equal(actualType, expectedType) ||
-           SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(addSpace, RECURSION_LIMIT, actualType, actualType,
+           SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(addSpace, SOPC_RECURSION_LIMIT, actualType, actualType,
                                                               expectedType);
 }
 
@@ -900,7 +900,7 @@ static SOPC_StatusCode AddChildNodesRecursive(SOPC_AddressSpaceAccess* addSpaceA
     {
         return OpcUa_BadWouldBlock;
     }
-    int recursionLevel = RECURSION_LIMIT - recursionLimit;
+    int recursionLevel = SOPC_RECURSION_LIMIT - recursionLimit;
     SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
 
     // Get parent type references
@@ -1061,7 +1061,7 @@ static SOPC_StatusCode AddChildNodesRecursiveFromType(SOPC_AddressSpaceAccess* a
     if (SOPC_LOG_LEVEL_DEBUG == SOPC_Logger_GetTraceLogLevel())
     {
         // Get string representation of node ids
-        int recursionLevel = RECURSION_LIMIT - recursionLimit;
+        int recursionLevel = SOPC_RECURSION_LIMIT - recursionLimit;
         char* rootNodeIdStr = SOPC_NodeId_ToCString(rootNode);
         char* typeNodeIdStr = SOPC_NodeId_ToCString(typeNode);
         SOPC_Logger_TraceDebug(
@@ -1074,7 +1074,7 @@ static SOPC_StatusCode AddChildNodesRecursiveFromType(SOPC_AddressSpaceAccess* a
     }
 
     // add nodes from direct type
-    SOPC_StatusCode stCode = AddChildNodesRecursive(addSpaceAccess, &rootNodeExpId, typeNode, RECURSION_LIMIT);
+    SOPC_StatusCode stCode = AddChildNodesRecursive(addSpaceAccess, &rootNodeExpId, typeNode, SOPC_RECURSION_LIMIT);
 
     // add nodes from parent type recursively (overloaded nodes will be ignored as they have same browse name)
     SOPC_AddressSpace_Node* parentType_NodeAddspace = SOPC_InternalAddressSpaceAccess_GetNode(addSpaceAccess, typeNode);
@@ -1224,7 +1224,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
     if (SOPC_IsGoodStatus(stCode) && addChildNodesFromType)
     {
         SOPC_StatusCode stCodeLog =
-            AddChildNodesRecursiveFromType(addSpaceAccess, newNodeId, &typeDefId->NodeId, RECURSION_LIMIT);
+            AddChildNodesRecursiveFromType(addSpaceAccess, newNodeId, &typeDefId->NodeId, SOPC_RECURSION_LIMIT);
         if (!SOPC_IsGoodStatus(stCodeLog))
         {
             SOPC_Logger_TraceWarning(
@@ -1350,7 +1350,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
     if (SOPC_IsGoodStatus(stCode) && addChildNodesFromType)
     {
         SOPC_StatusCode stCodeLog =
-            AddChildNodesRecursiveFromType(addSpaceAccess, newNodeId, &typeDefId->NodeId, RECURSION_LIMIT);
+            AddChildNodesRecursiveFromType(addSpaceAccess, newNodeId, &typeDefId->NodeId, SOPC_RECURSION_LIMIT);
         if (!SOPC_IsGoodStatus(stCodeLog))
         {
             SOPC_Logger_TraceWarning(
@@ -1562,7 +1562,7 @@ static SOPC_AddressSpace_Node* findNextStartingNode(const SOPC_AddressSpaceAcces
 
 /* Recursive browse on relativePathElement. This function return the node targeted by the last browse element
  in relativePathElement array and NULL if something went wrong.
- Note: number of elements is limited to RECURSION_LIMIT and decremented at each step which give guarantee it
+ Note: number of elements is limited to SOPC_RECURSION_LIMIT and decremented at each step which give guarantee it
  terminates.
 */
 static SOPC_AddressSpace_Node* Recursive_BrowseRelativePath(const SOPC_AddressSpaceAccess* addSpaceAccess,
@@ -1570,7 +1570,7 @@ static SOPC_AddressSpace_Node* Recursive_BrowseRelativePath(const SOPC_AddressSp
                                                             const OpcUa_RelativePathElement* elements,
                                                             SOPC_AddressSpace_Node* startingNode)
 {
-    if (0 >= remainingElements || NULL == elements || RECURSION_LIMIT < remainingElements || NULL == startingNode)
+    if (0 >= remainingElements || NULL == elements || SOPC_RECURSION_LIMIT < remainingElements || NULL == startingNode)
     {
         return NULL;
     }
@@ -2028,7 +2028,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_DeleteNode(const SOPC_AddressSpaceAccess
     {
         // If the source node exists, delete it and maybe recursively delete its childs.
         stCode = SOPC_AddressSpaceAccess_DeleteNodeRec(addSpaceAccess, root_node, deleteTargetReferences,
-                                                       deleteChildNodes, RECURSION_LIMIT);
+                                                       deleteChildNodes, SOPC_RECURSION_LIMIT);
     }
 
     if (SOPC_IsGoodStatus(stCode) && deleteTargetReferences)

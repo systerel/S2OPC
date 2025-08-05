@@ -148,7 +148,7 @@ void monitored_item_data_filter_treatment_bs__check_monitored_item_data_filter_v
                 if (!result)
                 {
                     result = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(
-                        address_space_bs__nodes, RECURSION_LIMIT, dataTypeId, dataTypeId, &Number_DataType);
+                        address_space_bs__nodes, SOPC_RECURSION_LIMIT, dataTypeId, dataTypeId, &Number_DataType);
                 }
 
                 if (result)
