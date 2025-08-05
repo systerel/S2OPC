@@ -209,8 +209,8 @@ build-linux64-ASan: &build_linux64_ASan
     <<: [*build_linux_variables, *nominal_build_variables]
     WITH_ASAN: 1
     WITH_UBSAN: 1
-    BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
-    CMAKE_BUILD_RPATH_USE_ORIGIN: 'true' # set a relative path in binaries RPATH for shared libraries
+    BUILD_SHARED_LIBS: "true" # build shared version to limit binaries size
+    CMAKE_BUILD_RPATH_USE_ORIGIN: "true" # set a relative path in binaries RPATH for shared libraries
   needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
@@ -226,7 +226,7 @@ build-linux64-ASan: &build_linux64_ASan
 build-linux64-ASan-light:
   <<: *build_linux64_ASan
   script:
-      - ./build.sh --target toolkit_test_server s2opc_pubsub || exit $?
+    - ./build.sh --target toolkit_test_server s2opc_pubsub || exit $?
   artifacts:
     name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_light"
     paths:
@@ -544,6 +544,8 @@ test-check:
     # Check generated types are up to date
     - "./scripts/gen-sopc-types.py ./schemas/Opc.Ua.Types.bsd"
     - "./scripts/generate-embedded-base-type-info.py ./schemas/Opc.Ua.NodeSet2.xml src/Common/opcua_types/sopc_embedded_nodeset2.h"
+    # Check generated statuscodes helpers are up to date
+    - "./scripts/generate_statuscodes_helpers.py"
     # Check test types are up to date
     - "./scripts/gen-sopc-types.py --types_prefix Custom --ns_index 1 ./tests/ClientServer/data/types/customTypes.bsd --files_path ./tests/ClientServer/unit_tests/helpers/"
     - "./scripts/gen-sopc-types.py --types_prefix Custom2 --ns_index 2 ./tests/ClientServer/data/types/level2Types.bsd --files_path ./tests/ClientServer/unit_tests/helpers/ --imported_ns_prefixes Custom"
@@ -642,9 +644,9 @@ test-unit-all-builds:
 .test-uactt: &test_uactt
   <<: *test_linux
   image: com.systerel.fr:5000/c838/uactt-linux@sha256:8c85eccb42cb856c4795ba367a93f28959295fecc36cd1318aaf89ff27b0db59 # uactt-linux:1.10
-  timeout: 1h                   # set job timeout to 1 hour
+  timeout: 1h # set job timeout to 1 hour
   variables:
-     RUNNER_SCRIPT_TIMEOUT: 50m # only allow script to run for 50 minutes (10 minutes remains to upload artifacts)
+    RUNNER_SCRIPT_TIMEOUT: 50m # only allow script to run for 50 minutes (10 minutes remains to upload artifacts)
   script:
     - ulimit -n 1024
     - "cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh"
@@ -835,4 +837,3 @@ check_doc:
   rules:
     - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
       when: on_success
-

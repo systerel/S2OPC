@@ -520,6 +520,8 @@ test-check:
     # Check generated types are up to date
     - './scripts/gen-sopc-types.py ./schemas/Opc.Ua.Types.bsd'
     - './scripts/generate-embedded-base-type-info.py ./schemas/Opc.Ua.NodeSet2.xml src/Common/opcua_types/sopc_embedded_nodeset2.h'
+    # Check generated statuscodes helpers are up to date
+    - './scripts/generate_statuscodes_helpers.py'
     # Check test types are up to date
     - './scripts/gen-sopc-types.py --types_prefix Custom --ns_index 1 ./tests/ClientServer/data/types/customTypes.bsd --files_path ./tests/ClientServer/unit_tests/helpers/'
     - './scripts/gen-sopc-types.py --types_prefix Custom2 --ns_index 2 ./tests/ClientServer/data/types/level2Types.bsd --files_path ./tests/ClientServer/unit_tests/helpers/ --imported_ns_prefixes Custom'
