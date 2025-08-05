@@ -900,7 +900,7 @@ static SOPC_StatusCode AddChildNodesRecursive(SOPC_AddressSpaceAccess* addSpaceA
     {
         return OpcUa_BadWouldBlock;
     }
-    int recursionLevel = SOPC_RECURSION_LIMIT - recursionLimit;
+    const int recursionLevel = SOPC_RECURSION_LIMIT - recursionLimit;
     SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
 
     // Get parent type references
@@ -1061,7 +1061,7 @@ static SOPC_StatusCode AddChildNodesRecursiveFromType(SOPC_AddressSpaceAccess* a
     if (SOPC_LOG_LEVEL_DEBUG == SOPC_Logger_GetTraceLogLevel())
     {
         // Get string representation of node ids
-        int recursionLevel = SOPC_RECURSION_LIMIT - recursionLimit;
+        const int recursionLevel = SOPC_RECURSION_LIMIT - recursionLimit;
         char* rootNodeIdStr = SOPC_NodeId_ToCString(rootNode);
         char* typeNodeIdStr = SOPC_NodeId_ToCString(typeNode);
         SOPC_Logger_TraceDebug(
@@ -1947,6 +1947,11 @@ static SOPC_StatusCode SOPC_AddressSpaceAccess_DeleteNodeRec(const SOPC_AddressS
         }
     }
 
+    const int recursionLevel = SOPC_RECURSION_LIMIT - recursionLimit;
+    const SOPC_NodeId* nodeId = SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, nodeToDelete);
+    SOPC_ASSERT(NULL != nodeId);
+    char* nodeIdStr = SOPC_NodeId_ToCString(nodeId);
+
     SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
     // If the nodeId does not exist in the address space, ignore.
     const int32_t* noOfReferences = SOPC_AddressSpace_Get_NoOfReferences(addSpaceAccess->addSpaceRef, nodeToDelete);
@@ -1988,24 +1993,27 @@ static SOPC_StatusCode SOPC_AddressSpaceAccess_DeleteNodeRec(const SOPC_AddressS
                     // if DeleteTargetReferences is set.
                     delete_target_reference_in_source_node(addSpaceAccess, targetNode, nodeToDelete);
                 }
-            } // No treament if the TargetNode is not in the same server
+            } // No treatment if the TargetNode is not in the same server
         }
     }
+
+    // Trace deletion of node at info level
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                          "DeleteNode (level=%d): node id=%s has been deleted from address space.", recursionLevel,
+                          nodeIdStr);
+
     // Log if fail in deleting recursively child
     if (!SOPC_IsGoodStatus(stCode))
     {
-        const SOPC_NodeId* nodeId = SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, nodeToDelete);
-        SOPC_ASSERT(NULL != nodeId);
-        char* nodeIdStr = SOPC_NodeId_ToCString(nodeId);
-        SOPC_ASSERT(NULL != nodeIdStr);
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "AddNodes: Fail in deleting child nodes of %s, only node %s was deleted.", nodeIdStr,
+                                 "DeleteNode: Failure deleting child nodes of %s, only node %s was deleted.", nodeIdStr,
                                  nodeIdStr);
-        SOPC_Free(nodeIdStr);
     }
 
     // Delete the node and its references as a source, and post "node deleted" event
     SOPC_AddressSpaceAccess_DeleteNodeOnly(addSpaceAccess, nodeToDelete, op);
+
+    SOPC_Free(nodeIdStr);
 
     return stCode;
 }
