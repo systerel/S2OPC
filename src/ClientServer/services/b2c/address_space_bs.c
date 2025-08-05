@@ -245,7 +245,7 @@ void address_space_bs__addNode_AddressSpace_Variable(
         address_space_bs__p_typeDefId, recursive);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 
-    if (SOPC_IsGoodStatus(retCode))
+    if (SOPC_IsGoodOrUncertainStatus(retCode))
     {
         // Trigger notification on MI on the added nodes
         generate_notifs_after_address_space_access(SOPC_AddressSpaceAccess_GetOperations(addSpaceAccess));
@@ -279,7 +279,7 @@ void address_space_bs__addNode_AddressSpace_Object(
         address_space_bs__p_typeDefId, recursive);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 
-    if (SOPC_IsGoodStatus(retCode))
+    if (SOPC_IsGoodOrUncertainStatus(retCode))
     {
         // Trigger notification on MI on the added nodes
         generate_notifs_after_address_space_access(SOPC_AddressSpaceAccess_GetOperations(addSpaceAccess));

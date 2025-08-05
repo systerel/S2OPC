@@ -74,6 +74,7 @@ OPERATIONS
             d_adsp_nodes_invariant &
             sc_operation : t_StatusCode_i &
             sc_operation : {e_sc_ok,
+                            e_sc_uncertain_generic, /* root node created but (partial) failure for creating whole hierarchy from TypeDefinition */
                             e_sc_bad_parent_node_id_invalid,
                             e_sc_bad_reference_type_id_invalid,
                             e_sc_bad_reference_not_allowed,
@@ -88,7 +89,7 @@ OPERATIONS
                             e_sc_bad_out_of_memory,
                             e_sc_bad_node_class_invalid} & // BadNodeClassInvalid used for unsupported NodeClass for now
             new_nodeId : t_NodeId_i &
-            (sc_operation = e_sc_ok =>
+            (sc_operation = e_sc_ok or sc_operation = e_sc_uncertain_generic =>
                 /* Parent node is valid */
                 p_parentExpNid : dom(conv_ExpandedNodeId_NodeId) &
                 conv_ExpandedNodeId_NodeId(p_parentExpNid) : ran(a_NodeId) &
@@ -107,7 +108,7 @@ OPERATIONS
                         (p_nodeClass = e_ncl_Variable & a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(p_typeDefId))) = e_ncl_VariableType))
                 )
             ) &
-            (not(sc_operation = e_sc_ok) => new_nodeId = c_NodeId_indet)
+            (not(sc_operation = e_sc_ok or sc_operation = e_sc_uncertain_generic) => new_nodeId = c_NodeId_indet)
         )
     END
 END

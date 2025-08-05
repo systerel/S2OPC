@@ -1232,6 +1232,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
                 "AddNode: Variable id=%s: Failure occurred adding child nodes based on type. The root node "
                 "was created successfully but uncertain number of children was created (see previous log details).",
                 newNodeIdStr);
+            stCode = SOPC_UncertainStatusMask; /* Generic Uncertain status */
         }
     }
     SOPC_Free(typeDefIdStr);
@@ -1358,6 +1359,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
                 "AddNode: Object id=%s: Failure occurred adding child nodes based on type. The root node "
                 "was created successfully but uncertain number of children was created (see previous log details).",
                 newNodeIdStr);
+            stCode = SOPC_UncertainStatusMask; /* Generic Uncertain status */
         }
     }
     SOPC_Free(newNodeIdStr);

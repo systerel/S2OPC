@@ -184,7 +184,10 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_GetFreshNodeId(SOPC_AddressSpaceAccess* 
  * \param addChildNodesFromType A flag to activate automatic generation of child nodes based on the variable type
  *                              definition (only mandatory nodes by default, see note).
  *
- * \return SOPC_GoodGenericStatus in case of success, otherwise:
+ * \return SOPC_GoodGenericStatus in case of success,
+ *         SOPC_UncertainStatusMask if variable node is created but
+ *         a (partial) failure occurred during its automatic child nodes creation based on TypeDefinition,
+ *         otherwise address space is unchanged for the following errors:
  *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
  *         - OpcUa_BadServiceUnsupported: if the AddressSpace does not support to add Variable node dynamically.
  *                                        Note: XML loaded AddressSpace supports this operation.
@@ -253,7 +256,10 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
  * \param addChildNodesFromType A flag to activate automatic generation of child nodes based on the object type
  *                              definition (only mandatory nodes by default, see note)
  *
- * \return SOPC_GoodGenericStatus in case of success, otherwise:
+ * \return SOPC_GoodGenericStatus in case of success,
+ *         SOPC_UncertainStatusMask if object node is created but
+ *         a (partial) failure occurred during its automatic child nodes creation based on TypeDefinition,
+ *         otherwise address space is unchanged for the following errors:
  *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
  *         - OpcUa_BadServiceUnsupported: if the AddressSpace does not support to add Object node dynamically.
  *                                        Note: XML loaded AddressSpace supports this operation.
@@ -313,7 +319,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
  *                          The following attributes combination are not supported and will make addition fail:
  *                          WriteMask or UserWriteMask, Executable or UserExecutable
  *
- * \return SOPC_GoodGenericStatus in case of success, otherwise:
+ * \return SOPC_GoodGenericStatus in case of success,
+ *         otherwise address space is unchanged for the following errors:
  *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
  *         - OpcUa_BadServiceUnsupported: if the AddressSpace does not support to add Method node dynamically.
  *                                        Note: XML loaded AddressSpace supports this operation.

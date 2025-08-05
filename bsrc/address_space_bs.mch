@@ -1113,7 +1113,9 @@ OPERATIONS
         ParentNode
         :(
             sc_addnode : t_StatusCode_i &
-            sc_addnode : {e_sc_ok, e_sc_bad_node_attributes_invalid, e_sc_bad_out_of_memory, e_sc_bad_browse_name_duplicated,
+            sc_addnode : {e_sc_ok,
+                          e_sc_uncertain_generic, /* root node created but (partial) failure for creating whole hierarchy from TypeDefinition */
+                          e_sc_bad_node_attributes_invalid, e_sc_bad_out_of_memory, e_sc_bad_browse_name_duplicated,
                           e_sc_bad_reference_not_allowed, e_sc_bad_type_definition_invalid} &
             s_Node <: t_Node &
 
@@ -1142,7 +1144,7 @@ OPERATIONS
             Node_RefIndexEnd        : s_Node     +-> t_RefIndex  &
             RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
 
-            (sc_addnode = e_sc_ok =>
+            (sc_addnode = e_sc_ok or sc_addnode = e_sc_uncertain_generic =>
                 /* We use inclusion since adding 1 node might lead to add several nodes */
                 Ref_HasTypeDefinition$0 <: Ref_HasTypeDefinition &
 
@@ -1197,7 +1199,7 @@ OPERATIONS
                     ParentNode = {(l_node |-> l_parentNode)} \/ ParentNode$0
                 )
             ) &
-            (not (sc_addnode = e_sc_ok) =>
+            (not (sc_addnode = e_sc_ok or sc_addnode = e_sc_uncertain_generic) =>
                 s_Node = s_Node$0 &
 
                 /* Attributes */
@@ -1270,7 +1272,9 @@ OPERATIONS
         ParentNode
         :(
             sc_addnode : t_StatusCode_i &
-            sc_addnode : {e_sc_ok, e_sc_bad_node_attributes_invalid, e_sc_bad_out_of_memory, e_sc_bad_browse_name_duplicated,
+            sc_addnode : {e_sc_ok,
+                          e_sc_uncertain_generic, /* root node created but (partial) failure for creating whole hierarchy from TypeDefinition */
+                          e_sc_bad_node_attributes_invalid, e_sc_bad_out_of_memory, e_sc_bad_browse_name_duplicated,
                           e_sc_bad_reference_not_allowed, e_sc_bad_type_definition_invalid} &
             s_Node <: t_Node &
 
@@ -1293,7 +1297,7 @@ OPERATIONS
             Node_RefIndexEnd        : s_Node     +-> t_RefIndex  &
             RefIndex_Reference      : s_Node * t_RefIndex +-> t_Reference &
 
-            (sc_addnode = e_sc_ok =>
+            (sc_addnode = e_sc_ok or sc_addnode = e_sc_uncertain_generic =>
                 /* We use inclusion since adding 1 node might lead to add several nodes */
                 Ref_HasTypeDefinition$0 <: Ref_HasTypeDefinition &
 
@@ -1339,7 +1343,7 @@ OPERATIONS
                     ParentNode = {(l_node |-> l_parentNode)} \/ ParentNode$0
                 )
             ) &
-            (not (sc_addnode = e_sc_ok) =>
+            (not (sc_addnode = e_sc_ok or sc_addnode = e_sc_uncertain_generic) =>
                 s_Node = s_Node$0 &
 
                 /* Attributes */

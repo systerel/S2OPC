@@ -78,14 +78,14 @@ OPERATIONS
             sc_operation : t_StatusCode_i &
             sc_operation : t_StatusCode &
             new_nodeId : t_NodeId_i &
-            (sc_operation = e_sc_ok =>
+            (sc_operation = e_sc_ok or sc_operation = e_sc_uncertain_generic =>
                 new_nodeId : t_NodeId &
                 new_nodeId : ran(a_NodeId) &
                 (p_reqExpNodeId : t_ExpandedNodeId =>
                     p_reqExpNodeId : dom(conv_ExpandedNodeId_NodeId) &
                     new_nodeId = conv_ExpandedNodeId_NodeId(p_reqExpNodeId))
             ) &
-            (not(sc_operation = e_sc_ok) => new_nodeId = c_NodeId_indet)
+            (not(sc_operation = e_sc_ok or sc_operation = e_sc_uncertain_generic) => new_nodeId = c_NodeId_indet)
         )
     END
 
