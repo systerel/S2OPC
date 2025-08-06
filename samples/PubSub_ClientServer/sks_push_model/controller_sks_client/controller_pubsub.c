@@ -316,29 +316,29 @@ static bool PubSub_SKS_Configure(SOPC_SKS_Local_Configuration* sksConfigArray)
             SOPC_SKscheduler_StopAndClear(g_skScheduler);
             g_skScheduler = NULL;
         }
-
-        if (NULL != skProvider)
-        {
-            SOPC_SKProvider_Clear(skProvider);
-            SOPC_Free(skProvider);
-            skProvider = NULL;
-        }
-
-        if (NULL == skbAppend)
-        {
-            SOPC_SKBuilder_Clear(skbAppend);
-            SOPC_Free(skbAppend);
-            skbAppend = NULL;
-        }
-
-        if (NULL != skBuilder)
-        {
-            SOPC_SKBuilder_Clear(skBuilder);
-            SOPC_Free(skBuilder);
-            skBuilder = NULL;
-        }
-
         printf("<Security Keys Service Error: Start failed\n");
+    }
+
+    // Clean unused SK modules if ownership was not transferred to scheduler
+    if (NULL != skProvider)
+    {
+        SOPC_SKProvider_Clear(skProvider);
+        SOPC_Free(skProvider);
+        skProvider = NULL;
+    }
+
+    if (NULL != skbAppend)
+    {
+        SOPC_SKBuilder_Clear(skbAppend);
+        SOPC_Free(skbAppend);
+        skbAppend = NULL;
+    }
+
+    if (NULL != skBuilder)
+    {
+        SOPC_SKBuilder_Clear(skBuilder);
+        SOPC_Free(skBuilder);
+        skBuilder = NULL;
     }
 
     return (SOPC_STATUS_OK == status);
