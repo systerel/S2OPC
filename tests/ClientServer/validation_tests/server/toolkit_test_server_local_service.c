@@ -816,7 +816,7 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     // Browse
     OpcUa_BrowseResult* result = NULL;
     SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_BrowseResult_EncodeableType, (void**) &result);
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != result)
     {
         status = BrowseOneNode(nodeId, result);
         if (SOPC_STATUS_OK != status)
@@ -830,10 +830,12 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     }
     else
     {
+        status = (NULL == result ? SOPC_STATUS_OUT_OF_MEMORY : status);
         printf(
             "<Test_Server_Local_Service: check_references_added_node: Failed to create BrowseResult encodeableObject. "
             "status = %d \n",
             status);
+        return status;
     }
     // Check references
     if (SOPC_IsGoodStatus(result->StatusCode))
