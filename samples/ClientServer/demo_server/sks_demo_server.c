@@ -193,7 +193,7 @@ static SOPC_ReturnStatus Server_SKS_Start(uint32_t nbSkMgr, SOPC_SKManager** skM
             skProvider = NULL;
         }
 
-        if (NULL == skbAppend)
+        if (NULL != skbAppend)
         {
             SOPC_SKBuilder_Clear(skbAppend);
             SOPC_Free(skbAppend);
