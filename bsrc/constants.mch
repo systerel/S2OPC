@@ -1142,7 +1142,7 @@ PROPERTIES
     cast_t_channel_config_idx : perm(t_channel_config_idx) &
 
     cast_t_NamespaceIdx : NAT +-> t_NamespaceIdx &
-    1..k_n_NamespaceIndex_max = dom(cast_t_NamespaceIdx) &
+    0..k_n_NamespaceIndex_max = dom(cast_t_NamespaceIdx) &
     cast_t_NamespaceIdx : perm(t_NamespaceIdx) &
 
     t_timer_id <: t_timer_id_i &
