@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 24/04/2025 10:11:31
+ Date                 : 13/08/2025 14:11:04
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1173,6 +1173,7 @@ void subscription_core__create_monitored_item(
 
 void subscription_core__modify_monitored_item(
    const constants__t_endpoint_config_idx_i subscription_core__p_endpoint_idx,
+   const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_monitoredItemId_i subscription_core__p_mi_id,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_client_handle_i subscription_core__p_clientHandle,
@@ -1196,6 +1197,7 @@ void subscription_core__modify_monitored_item(
       constants__t_client_handle_i subscription_core__l_clientHandle;
       constants__t_monitoringFilterCtx_i subscription_core__l_filterCtx;
       t_bool subscription_core__l_isEvent;
+      t_bool subscription_core__l_isExpectedSubId;
       
       monitored_item_pointer_bs__getall_monitoredItemId(subscription_core__p_mi_id,
          &subscription_core__bres,
@@ -1217,6 +1219,7 @@ void subscription_core__modify_monitored_item(
             subscription_core__p_queueSize,
             subscription_core__p_revSamplingItv,
             subscription_core__p_revQueueSize);
+         subscription_core__l_isExpectedSubId = (subscription_core__p_subscription == subscription_core__l_subscription);
          monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill_result(subscription_core__p_endpoint_idx,
             subscription_core__l_nid,
             subscription_core__l_aid,
@@ -1226,7 +1229,8 @@ void subscription_core__modify_monitored_item(
             &subscription_core__l_filterCtx,
             subscription_core__p_filterResult,
             &subscription_core__l_isEvent);
-         if (*subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok) {
+         if ((subscription_core__l_isExpectedSubId == true) &&
+            (*subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok)) {
             monitored_item_pointer_bs__modify_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
                subscription_core__p_timestampToReturn,
                subscription_core__p_clientHandle,
@@ -1237,6 +1241,9 @@ void subscription_core__modify_monitored_item(
             if (*subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok) {
                monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer);
             }
+         }
+         else if (subscription_core__l_isExpectedSubId == false) {
+            *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
          }
       }
       else {
@@ -1265,6 +1272,7 @@ void subscription_core__delete_monitored_item(
       t_bool subscription_core__l_bres;
       constants__t_notificationQueue_i subscription_core__l_notificationQueue;
       
+      *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
       subscription_core__l_isMonitoredItemFound = false;
       subscription_core__l_monitoredItemPointer = constants__c_monitoredItemPointer_indet;
       subscription_core__l_monitored_item_queue = constants__c_monitoredItemQueue_indet;
@@ -1273,7 +1281,6 @@ void subscription_core__delete_monitored_item(
          &subscription_core__l_isMonitoredItemFound,
          &subscription_core__l_monitoredItemPointer);
       if (subscription_core__l_isMonitoredItemFound == true) {
-         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_ok;
          monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_monitoredItemId,
             &subscription_core__l_subscription,
@@ -1285,33 +1292,37 @@ void subscription_core__delete_monitored_item(
             &subscription_core__l_clientHandle);
          subscription_core_1__get_subscription_monitoredItemQueue(subscription_core__p_subscription,
             &subscription_core__l_subscription_queue);
-         monitored_item_queue_bs__remove_monitored_item(subscription_core__l_subscription_queue,
-            subscription_core__l_monitoredItemPointer,
-            &subscription_core__l_bres);
-         subscription_core_bs__get_nodeToMonitoredItemQueue(subscription_core__l_nid,
-            &subscription_core__l_bres,
-            &subscription_core__l_monitored_item_queue);
-         if (subscription_core__l_bres == true) {
-            monitored_item_queue_bs__remove_monitored_item(subscription_core__l_monitored_item_queue,
+         subscription_core__l_isMonitoredItemFound = (subscription_core__p_subscription == subscription_core__l_subscription);
+         if (subscription_core__l_isMonitoredItemFound == true) {
+            *subscription_core__p_sc = constants_statuscodes_bs__e_sc_ok;
+            monitored_item_queue_bs__remove_monitored_item(subscription_core__l_subscription_queue,
                subscription_core__l_monitoredItemPointer,
                &subscription_core__l_bres);
+            if (subscription_core__l_bres == true) {
+               subscription_core_bs__get_nodeToMonitoredItemQueue(subscription_core__l_nid,
+                  &subscription_core__l_bres,
+                  &subscription_core__l_monitored_item_queue);
+            }
+            if (subscription_core__l_bres == true) {
+               monitored_item_queue_bs__remove_monitored_item(subscription_core__l_monitored_item_queue,
+                  subscription_core__l_monitoredItemPointer,
+                  &subscription_core__l_bres);
+            }
+            monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
+               &subscription_core__l_bres,
+               &subscription_core__l_notificationQueue);
+            if (subscription_core__l_bres == true) {
+               monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
+                  subscription_core__l_notificationQueue);
+            }
+            monitored_item_pointer_bs__delete_monitored_item_pointer(subscription_core__l_monitoredItemPointer);
          }
-         monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
-            &subscription_core__l_bres,
-            &subscription_core__l_notificationQueue);
-         if (subscription_core__l_bres == true) {
-            monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
-               subscription_core__l_notificationQueue);
-         }
-         monitored_item_pointer_bs__delete_monitored_item_pointer(subscription_core__l_monitoredItemPointer);
-      }
-      else {
-         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
       }
    }
 }
 
 void subscription_core__set_monit_mode_monitored_item(
+   const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_monitoredItemId_i subscription_core__p_mi_id,
    const constants__t_monitoringMode_i subscription_core__p_monitoring_mode,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_sc,
@@ -1328,6 +1339,7 @@ void subscription_core__set_monit_mode_monitored_item(
       constants__t_TimestampsToReturn_i subscription_core__l_timestampToReturn;
       constants__t_client_handle_i subscription_core__l_clientHandle;
       
+      *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
       *subscription_core__p_mi_pointer = constants__c_monitoredItemPointer_indet;
       *subscription_core__p_prevMonitMode = constants__c_monitoringMode_indet;
       subscription_core__l_monitoredItemPointer = constants__c_monitoredItemPointer_indet;
@@ -1345,12 +1357,12 @@ void subscription_core__set_monit_mode_monitored_item(
             &subscription_core__l_timestampToReturn,
             subscription_core__p_prevMonitMode,
             &subscription_core__l_clientHandle);
-         monitored_item_pointer_bs__set_monit_mode_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
-            subscription_core__p_monitoring_mode);
-         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_ok;
-      }
-      else {
-         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
+         subscription_core__l_isMonitoredItemFound = (subscription_core__p_subscription == subscription_core__l_subscription);
+         if (subscription_core__l_isMonitoredItemFound == true) {
+            monitored_item_pointer_bs__set_monit_mode_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
+               subscription_core__p_monitoring_mode);
+            *subscription_core__p_sc = constants_statuscodes_bs__e_sc_ok;
+         }
       }
    }
 }

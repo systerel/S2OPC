@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 03/03/2025 09:32:39
+ Date                 : 13/08/2025 14:11:05
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -106,11 +106,13 @@ extern void subscription_mgr__fill_response_subscription_delete_monitored_items(
    const t_entier4 subscription_mgr__p_nb_monitored_items);
 extern void subscription_mgr__fill_response_subscription_modify_monitored_items(
    const constants__t_endpoint_config_idx_i subscription_mgr__p_endpoint_idx,
+   const constants__t_subscription_i subscription_mgr__p_subscription,
    const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
    const t_entier4 subscription_mgr__p_nb_monitored_items);
 extern void subscription_mgr__fill_response_subscription_set_monit_mode_monitored_items(
+   const constants__t_subscription_i subscription_mgr__p_subscription,
    const constants__t_monitoringMode_i subscription_mgr__p_monitoring_mode,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,

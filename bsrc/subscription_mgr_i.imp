@@ -435,11 +435,13 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_response_subscription_modify_monitored_items (p_endpoint_idx, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_modify_monitored_items (p_endpoint_idx, p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     PRE
         ModifyMonitoredItemResp_Allocated = TRUE &
         p_endpoint_idx : t_endpoint_config_idx_i &
         p_endpoint_idx : t_endpoint_config_idx &
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
         p_tsToReturn : t_TimestampsToReturn_i &
         p_tsToReturn : t_TimestampsToReturn &
         p_req_msg : t_msg_i &
@@ -556,9 +558,11 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_response_subscription_set_monit_mode_monitored_items (p_monitoring_mode, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_set_monit_mode_monitored_items (p_subscription, p_monitoring_mode, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     PRE
         SetMonitModeMonitoredItemResp_Allocated = TRUE &
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
         p_monitoring_mode : t_monitoringMode_i &
         p_monitoring_mode : t_monitoringMode &
         p_req_msg : t_msg_i &
@@ -1251,7 +1255,7 @@ OPERATIONS
     END
     ;
 
-    fill_response_subscription_modify_monitored_items (p_endpoint_idx, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_modify_monitored_items (p_endpoint_idx, p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     VAR
         l_continue,
         l_index,
@@ -1278,7 +1282,7 @@ OPERATIONS
             IF l_bres = TRUE
             THEN
                 l_sc, l_filterResult, l_revSamplingItv, l_revQueueSize
-                  <-- modify_monitored_item (p_endpoint_idx, l_id, p_tsToReturn, l_clientHandle, l_filter, l_discardOldest, l_queueSize)
+                  <-- modify_monitored_item (p_endpoint_idx, p_subscription, l_id, p_tsToReturn, l_clientHandle, l_filter, l_discardOldest, l_queueSize)
             END
             ;
             setall_msg_modify_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_revSamplingItv, l_revQueueSize, l_filterResult)
@@ -1346,7 +1350,7 @@ OPERATIONS
     END
     ;
 
-    fill_response_subscription_set_monit_mode_monitored_items (p_monitoring_mode, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_set_monit_mode_monitored_items (p_subscription, p_monitoring_mode, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     VAR
         l_continue,
         l_index,
@@ -1359,7 +1363,7 @@ OPERATIONS
         WHILE l_continue = TRUE DO
             l_continue, l_index <-- continue_iter_monitored_item_request;
             l_id <-- getall_set_monit_mode_monitored_item_req_params (p_req_msg, l_index);
-            l_sc, l_mi_pointer, l_mi_prevMonitMode <-- set_monit_mode_monitored_item (l_id, p_monitoring_mode);
+            l_sc, l_mi_pointer, l_mi_prevMonitMode <-- set_monit_mode_monitored_item (p_subscription, l_id, p_monitoring_mode);
             setall_msg_set_monit_mode_monitored_item_resp_params (p_resp_msg, l_index, l_sc);
             IF l_sc = e_sc_ok
             THEN
@@ -1744,7 +1748,7 @@ OPERATIONS
                 IF l_bres = TRUE
                 THEN
                     fill_response_subscription_modify_monitored_items
-                      (l_endpoint_config_idx, l_timestampToRet, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                      (l_endpoint_config_idx, l_subscription, l_timestampToRet, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory
@@ -1809,7 +1813,7 @@ OPERATIONS
                 l_bres <-- alloc_msg_set_monit_mode_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
-                    fill_response_subscription_set_monit_mode_monitored_items (l_monitoring_mode, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                    fill_response_subscription_set_monit_mode_monitored_items (l_subscription, l_monitoring_mode, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory

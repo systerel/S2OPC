@@ -1440,7 +1440,7 @@ OPERATIONS
     ;
 
     p_sc, p_filterResult, p_revSamplingItv, p_revQueueSize
-      <-- modify_monitored_item (p_endpoint_idx, p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
+      <-- modify_monitored_item (p_endpoint_idx, p_subscription, p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
     VAR
         bres,
         l_monitoredItemPointer,
@@ -1453,7 +1453,8 @@ OPERATIONS
         l_monitoringMode,
         l_clientHandle,
         l_filterCtx,
-        l_isEvent
+        l_isEvent,
+        l_isExpectedSubId
     IN
         bres, l_monitoredItemPointer <--getall_monitoredItemId (p_mi_id);
         p_filterResult := c_filterResult_indet;
@@ -1471,9 +1472,11 @@ OPERATIONS
             l_clientHandle
               <--getall_monitoredItemPointer (l_monitoredItemPointer);
             p_revSamplingItv, p_revQueueSize <-- local_compute_create_monitored_item_revised_params(l_aid, p_queueSize);
+            /* Check monitored item subscription matches the given subscription */
+            l_isExpectedSubId := bool(p_subscription = l_subscription);
             /* Check constraints on node for MI filter */
             p_sc, l_filterCtx, p_filterResult, l_isEvent  <-- check_monitored_item_filter_valid_and_fill_result (p_endpoint_idx, l_nid, l_aid, p_filter, c_Variant_indet);
-            IF p_sc = e_sc_ok
+            IF l_isExpectedSubId = TRUE & p_sc = e_sc_ok
             THEN
                 p_sc <-- modify_monitored_item_pointer(l_monitoredItemPointer,
                                                        p_timestampToReturn,
@@ -1485,6 +1488,9 @@ OPERATIONS
                 THEN
                     resize_monitored_item_notification_queue(l_monitoredItemPointer)
                 END
+            ELSIF l_isExpectedSubId = FALSE
+            THEN
+                p_sc := e_sc_bad_monitored_item_id_invalid
             END
         ELSE
             p_sc := e_sc_bad_monitored_item_id_invalid
@@ -1509,13 +1515,13 @@ OPERATIONS
         l_bres,
         l_notificationQueue
     IN
+        p_sc := e_sc_bad_monitored_item_id_invalid;
         l_isMonitoredItemFound := FALSE;
         l_monitoredItemPointer := c_monitoredItemPointer_indet;
         l_monitored_item_queue := c_monitoredItemQueue_indet;
         l_nid := c_NodeId_indet;
         l_isMonitoredItemFound, l_monitoredItemPointer <-- getall_monitoredItemId (p_mi_id);
         IF l_isMonitoredItemFound = TRUE THEN
-            p_sc := e_sc_ok;
             l_monitoredItemId,
             l_subscription,
             l_nid,
@@ -1525,27 +1531,35 @@ OPERATIONS
             l_monitoringMode,
             l_clientHandle <-- getall_monitoredItemPointer (l_monitoredItemPointer);
             l_subscription_queue <-- get_subscription_monitoredItemQueue (p_subscription);
-            l_bres <-- remove_monitored_item (l_subscription_queue, l_monitoredItemPointer);
-            l_bres, l_monitored_item_queue <-- get_nodeToMonitoredItemQueue (l_nid);
-            IF l_bres = TRUE
+            /* Check monitored item subscription matches the given subscription */
+            l_isMonitoredItemFound := bool(p_subscription = l_subscription);
+            IF l_isMonitoredItemFound = TRUE
             THEN
-                l_bres <-- remove_monitored_item (l_monitored_item_queue, l_monitoredItemPointer)
+                p_sc := e_sc_ok;
+                l_bres <-- remove_monitored_item (l_subscription_queue, l_monitoredItemPointer);
+                IF l_bres = TRUE
+                THEN
+                    l_bres, l_monitored_item_queue <-- get_nodeToMonitoredItemQueue (l_nid)
+                END
+                ;
+                IF l_bres = TRUE
+                THEN
+                    l_bres <-- remove_monitored_item (l_monitored_item_queue, l_monitoredItemPointer)
+                END
+                ;
+                l_bres, l_notificationQueue <-- get_monitored_item_notification_queue (l_monitoredItemPointer);
+                IF l_bres = TRUE
+                THEN
+                    clear_and_deallocate_monitored_item_notification_queue (l_monitoredItemPointer, l_notificationQueue)
+                END
+                ;
+                delete_monitored_item_pointer (l_monitoredItemPointer)
             END
-            ;
-            l_bres, l_notificationQueue <-- get_monitored_item_notification_queue (l_monitoredItemPointer);
-            IF l_bres = TRUE
-            THEN
-                clear_and_deallocate_monitored_item_notification_queue (l_monitoredItemPointer, l_notificationQueue)
-            END
-            ;
-            delete_monitored_item_pointer (l_monitoredItemPointer)
-        ELSE
-            p_sc := e_sc_bad_monitored_item_id_invalid
         END
     END
     ;
 
-    p_sc, p_mi_pointer, p_prevMonitMode <-- set_monit_mode_monitored_item (p_mi_id, p_monitoring_mode) =
+    p_sc, p_mi_pointer, p_prevMonitMode <-- set_monit_mode_monitored_item (p_subscription, p_mi_id, p_monitoring_mode) =
     VAR
         l_isMonitoredItemFound,
         l_monitoredItemPointer,
@@ -1557,6 +1571,7 @@ OPERATIONS
         l_timestampToReturn,
         l_clientHandle
     IN
+        p_sc := e_sc_bad_monitored_item_id_invalid;
         p_mi_pointer := c_monitoredItemPointer_indet;
         p_prevMonitMode := c_monitoringMode_indet;
         l_monitoredItemPointer := c_monitoredItemPointer_indet;
@@ -1571,11 +1586,14 @@ OPERATIONS
             l_timestampToReturn,
             p_prevMonitMode,
             l_clientHandle
-              <--getall_monitoredItemPointer (l_monitoredItemPointer);
-            set_monit_mode_monitored_item_pointer (l_monitoredItemPointer, p_monitoring_mode);
-            p_sc := e_sc_ok
-        ELSE
-            p_sc := e_sc_bad_monitored_item_id_invalid
+                 <--getall_monitoredItemPointer (l_monitoredItemPointer);
+            /* Check monitored item subscription matches the given subscription */
+            l_isMonitoredItemFound := bool(p_subscription = l_subscription);
+            IF l_isMonitoredItemFound = TRUE
+            THEN
+                set_monit_mode_monitored_item_pointer (l_monitoredItemPointer, p_monitoring_mode);
+                p_sc := e_sc_ok
+            END
         END
     END
     ;

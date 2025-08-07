@@ -927,10 +927,12 @@ OPERATIONS
     ;
 
     p_sc, p_filterResult, p_revSamplingItv, p_revQueueSize
-      <-- modify_monitored_item (p_endpoint_idx, p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
+      <-- modify_monitored_item (p_endpoint_idx, p_subscription, p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
     PRE
         p_endpoint_idx : t_endpoint_config_idx_i &
         p_endpoint_idx : t_endpoint_config_idx &
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
         p_mi_id : t_monitoredItemId_i &
         p_timestampToReturn : t_TimestampsToReturn_i &
         p_timestampToReturn : t_TimestampsToReturn &
@@ -955,8 +957,9 @@ OPERATIONS
             (p_sc /= e_sc_ok =>
                 a_notification_queue_notifications = a_notification_queue_notifications$0
             ) &
-            (p_mi_id /: ran(a_monitoredItemId) => p_sc = e_sc_bad_monitored_item_id_invalid) &
-            (p_mi_id : ran(a_monitoredItemId) &
+            (not (p_mi_id : ran(a_monitoredItemId) & a_monitoredItemSubs(a_monitoredItemId~(p_mi_id)) = p_subscription)
+                => p_sc = e_sc_bad_monitored_item_id_invalid) & /* MI id is invalid or is not valid in the given subscription id */
+            (p_mi_id : ran(a_monitoredItemId) & a_monitoredItemSubs(a_monitoredItemId~(p_mi_id)) = p_subscription &
                 ((a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id)) : ran(a_NodeId) &
                  (a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id)) |-> p_filter) : a_monitoredItemNodeFilterValid)
                   => p_sc = e_sc_ok) &
@@ -988,7 +991,9 @@ OPERATIONS
         a_notification_queue_notifications,
         a_defined_monitored_items
         :( p_sc : t_StatusCode_i &
-            (p_mi_id /: ran(a_monitoredItemId) => p_sc = e_sc_bad_monitored_item_id_invalid &
+            (not (p_mi_id : ran(a_monitoredItemId) & a_monitoredItemSubs(a_monitoredItemId~(p_mi_id)) = p_subscription) =>
+             p_sc = e_sc_bad_monitored_item_id_invalid &
+
              s_monitoredItemId = s_monitoredItemId$0 &
              a_monitoredItemId = a_monitoredItemId$0 &
              a_monitoredItemSubs = a_monitoredItemSubs$0 &
@@ -997,7 +1002,9 @@ OPERATIONS
              a_monitored_item_notification_queue = a_monitored_item_notification_queue$0 &
              a_notification_queue_notifications = a_notification_queue_notifications$0 &
              a_defined_monitored_items = a_defined_monitored_items$0) &
-            (p_mi_id : ran(a_monitoredItemId) =>  p_sc = e_sc_ok &
+            (p_mi_id : ran(a_monitoredItemId) & a_monitoredItemSubs(a_monitoredItemId~(p_mi_id)) = p_subscription =>
+             p_sc = e_sc_ok &
+
              s_monitoredItemId = s_monitoredItemId$0 - {p_mi_id} &
              s_monitoredItemPointer = s_monitoredItemPointer$0 - {a_monitoredItemId$0~(p_mi_id)} &
              a_monitoredItemId = a_monitoredItemId |>> {p_mi_id} &
@@ -1013,8 +1020,10 @@ OPERATIONS
     END
     ;
 
-    p_sc, p_mi_pointer, p_prevMonitMode <-- set_monit_mode_monitored_item (p_mi_id, p_monitoring_mode) =
+    p_sc, p_mi_pointer, p_prevMonitMode <-- set_monit_mode_monitored_item (p_subscription, p_mi_id, p_monitoring_mode) =
     PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription &
         p_mi_id : t_monitoredItemId_i &
         p_monitoring_mode : t_monitoringMode_i &
         p_monitoring_mode : t_monitoringMode
@@ -1025,10 +1034,13 @@ OPERATIONS
            p_mi_pointer : t_monitoredItemPointer_i &
            p_prevMonitMode : t_monitoringMode_i &
            a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
-           (p_mi_id /: ran(a_monitoredItemId) =>
+           (not (p_mi_id : ran(a_monitoredItemId) & a_monitoredItemSubs(a_monitoredItemId~(p_mi_id)) = p_subscription) =>
                p_sc = e_sc_bad_monitored_item_id_invalid &
+
                a_monitoredItemMonitMode = a_monitoredItemMonitMode$0) &
-           (p_mi_id : ran(a_monitoredItemId) =>  p_sc = e_sc_ok &
+           (p_mi_id : ran(a_monitoredItemId) & a_monitoredItemSubs(a_monitoredItemId~(p_mi_id)) = p_subscription =>
+               p_sc = e_sc_ok &
+
                p_mi_pointer = a_monitoredItemId~(p_mi_id) &
                p_monitoring_mode = a_monitoredItemMonitMode(a_monitoredItemId~(p_mi_id)) &
                {a_monitoredItemId~(p_mi_id)} <<| a_monitoredItemMonitMode = {a_monitoredItemId~(p_mi_id)} <<| a_monitoredItemMonitMode$0 &
