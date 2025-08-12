@@ -18,6 +18,7 @@
  */
 
 #include "libs2opc_client_config_custom.h"
+#include "libs2opc_request_builder.h"
 
 #include "libs2opc_client_internal.h"
 #include "libs2opc_common_internal.h"
@@ -32,6 +33,44 @@
 #include <string.h>
 
 #define SOPC_DEFAULT_REQ_LIFETIME_MS 3600000
+
+/* This function gets the most secure UserPolicy Id corresponding to a given configuration
+ * (security mode, security policy and usertoken type) in the GetEndpointsResponse. */
+static const char* get_policy_id(OpcUa_GetEndpointsResponse* resp, SOPC_SecureConnection_Config* config)
+{
+    OpcUa_MessageSecurityMode securityMode = config->scConfig.msgSecurityMode;
+    const char* securityPolicy = config->scConfig.reqSecuPolicyUri;
+    OpcUa_UserTokenType userTokenType = config->sessionConfig.userTokenType;
+
+    SOPC_Byte max_SecurityLevel = 0;
+    const char* policyId = NULL;
+
+    for (int32_t i = 0; i < resp->NoOfEndpoints; i++)
+    {
+        OpcUa_EndpointDescription endpoint = resp->Endpoints[i];
+
+        OpcUa_MessageSecurityMode l_SecurityMode = endpoint.SecurityMode;
+        SOPC_Byte l_SecurityLevel = endpoint.SecurityLevel;
+        const char* l_SecurityPolicy = SOPC_String_GetRawCString(&endpoint.SecurityPolicyUri);
+
+        if ((l_SecurityMode == securityMode) && (0 == SOPC_strcmp_ignore_case(l_SecurityPolicy, securityPolicy)))
+        {
+            for (int32_t j = 0; j < endpoint.NoOfUserIdentityTokens; j++)
+            {
+                SOPC_String l_PolicyId = endpoint.UserIdentityTokens[j].PolicyId;
+                OpcUa_UserTokenType l_UserTokenType = endpoint.UserIdentityTokens[j].TokenType;
+                if (l_UserTokenType == userTokenType && l_SecurityLevel >= max_SecurityLevel)
+                {
+                    /* Get the policyid with the maximum security level for a matching configuration */
+                    max_SecurityLevel = l_SecurityLevel;
+                    policyId = SOPC_String_GetRawCString(&l_PolicyId);
+                }
+            }
+        }
+    }
+
+    return policyId;
+}
 
 SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPreferredLocaleIds(size_t nbLocales, const char** localeIds)
 {
@@ -586,6 +625,62 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC
 
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_UpdateUserPolicyId(SOPC_SecureConnection_Config* secConnConfig)
+
+{
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == secConnConfig)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    OpcUa_GetEndpointsRequest* getEndpointsRequest = NULL;
+    OpcUa_GetEndpointsResponse* getEndpointsResponse = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        getEndpointsRequest = SOPC_GetEndpointsRequest_Create(secConnConfig->scConfig.url);
+        status = (NULL == getEndpointsRequest ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    }
+
+    /* Call Discovery Service without secure connection */
+    if (SOPC_STATUS_OK == status)
+    {
+        // Use discovery config with no secu so client configuration will not be retrieved from SecureChannel and
+        // modification of config after OpenSecureChannel will be taken into account.
+        SOPC_SecureConnection_Config* dicoveryConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
+            "discovery", secConnConfig->scConfig.url, OpcUa_MessageSecurityMode_None, SOPC_SecurityPolicy_None);
+        status =
+            SOPC_ClientHelper_DiscoveryServiceSync(dicoveryConfig, getEndpointsRequest, (void**) &getEndpointsResponse);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (SOPC_IsGoodStatus(getEndpointsResponse->ResponseHeader.ServiceResult))
+        {
+            SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+            const char* policy = get_policy_id(getEndpointsResponse, secConnConfig);
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            SOPC_Free((char*) secConnConfig->sessionConfig.userPolicyId);
+            SOPC_GCC_DIAGNOSTIC_RESTORE
+            secConnConfig->sessionConfig.userPolicyId = SOPC_strdup(policy);
+            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        }
+    }
+    if (NULL != getEndpointsResponse)
+    {
+        SOPC_EncodeableObject_Delete(getEndpointsResponse->encodeableType, (void**) &getEndpointsResponse);
+    }
 
     return status;
 }

@@ -233,6 +233,19 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC
                                                                             const unsigned char* serverCertificate);
 
 /**
+ * \brief Uses GetEndpoint service to retrieve the user policy Id and update configuration.
+ *
+ *
+ * \param secConnConfig  The secure connection configuration to set
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
+ *         or connection config cannot be modified (user authentication mode already set).
+ * \warning Server needs to have Discovery connection (full none)
+ */
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_UpdateUserPolicyId(SOPC_SecureConnection_Config* secConnConfig);
+
+/**
  * \brief Defines the user authentication mode as anonymous for the secure connection
  *        and set the associated user policy Id to be used in server
  *
