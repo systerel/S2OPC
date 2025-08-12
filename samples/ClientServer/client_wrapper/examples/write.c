@@ -33,6 +33,7 @@
 
 #include "libs2opc_client.h"
 #include "libs2opc_client_config.h"
+#include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
 #include "libs2opc_request_builder.h"
 
@@ -342,6 +343,12 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(&AskUserKeyPass_FromTerminal);
+    }
+
+    /* Update UserPolicyId */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SecureConnectionConfig_UpdateUserPolicyId(writeConnCfg);
     }
 
     /* connect to the endpoint */

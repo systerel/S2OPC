@@ -36,6 +36,7 @@
 
 #include "sopc_askpass.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -177,6 +178,12 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
+    }
+
+    /* Update UserPolicyId */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SecureConnectionConfig_UpdateUserPolicyId(discConnCfg);
     }
 
     OpcUa_GetEndpointsRequest* getEndpointsRequest = NULL;
