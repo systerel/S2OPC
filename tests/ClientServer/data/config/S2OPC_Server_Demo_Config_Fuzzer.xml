@@ -3,6 +3,7 @@
   <ServerConfiguration>
     <Namespaces>
       <Namespace uri="urn:S2OPC:localhost"/>
+      <Namespace uri="https://www.systerel.fr/S2OPC/demo/data/origin"/>
     </Namespaces>
     <Locales>
       <Locale id="en-US"/>
