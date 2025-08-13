@@ -132,8 +132,8 @@ SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_GetSecurityKeys(const SOPC_Cal
     uint32_t FirstTokenId = 0;
     SOPC_ByteString* Keys = NULL;
     uint32_t NbToken = 0;
-    uint32_t TimeToNextKey = 0;
-    uint32_t KeyLifetime = 0;
+    uint64_t TimeToNextKey = 0;
+    uint64_t KeyLifetime = 0;
 
     SOPC_SKManager* skm = SOPC_SK_SecurityGroup_GetSkManager(SOPC_String_GetRawCString(&inputArgs[0].Value.String));
     SOPC_ReturnStatus status =

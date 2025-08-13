@@ -117,8 +117,8 @@ static void SKBuilder_Update_Cb(SOPC_SKBuilder* skb, SOPC_SKManager* skm, uintpt
     uint32_t firstToken = 0;
     SOPC_ByteString* keys = NULL;
     uint32_t nbKeys = 0;
-    uint32_t timeToNextKey = 0;
-    uint32_t keyLifetime = 0;
+    uint64_t timeToNextKey = 0;
+    uint64_t keyLifetime = 0;
     SOPC_ReturnStatus status = SOPC_SKManager_GetKeys(skm, 0, UINT32_MAX, &secuPolicyUri, &firstToken, &keys, &nbKeys,
                                                       &timeToNextKey, &keyLifetime);
     if (SOPC_STATUS_OK == status)

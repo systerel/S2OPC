@@ -63,8 +63,8 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_TryList(SOPC_SKProvider* skp,
                                                          uint32_t* FirstTokenId,
                                                          SOPC_ByteString** Keys,
                                                          uint32_t* NbToken,
-                                                         uint32_t* TimeToNextKey,
-                                                         uint32_t* KeyLifetime)
+                                                         uint64_t* TimeToNextKey,
+                                                         uint64_t* KeyLifetime)
 {
     if (NULL == skp || 0 == skp->data || NULL == Keys || NULL == NbToken || 0 == NbRequestedToken)
     {
@@ -122,8 +122,8 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProv
                                                                      uint32_t* FirstTokenId,
                                                                      SOPC_ByteString** Keys,
                                                                      uint32_t* NbToken,
-                                                                     uint32_t* TimeToNextKey,
-                                                                     uint32_t* KeyLifetime)
+                                                                     uint64_t* TimeToNextKey,
+                                                                     uint64_t* KeyLifetime)
 {
     /* Not used*/
     SOPC_UNUSED_ARG(securityGroupId); // not necessary as we generate fresh keys anyway
@@ -277,8 +277,8 @@ SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
                                           uint32_t* FirstTokenId,
                                           SOPC_ByteString** Keys,
                                           uint32_t* NbKeys,
-                                          uint32_t* TimeToNextKey,
-                                          uint32_t* KeyLifetime)
+                                          uint64_t* TimeToNextKey,
+                                          uint64_t* KeyLifetime)
 {
     if (NULL == skp)
     {

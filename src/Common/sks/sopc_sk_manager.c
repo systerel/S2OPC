@@ -38,15 +38,15 @@ typedef struct SOPC_SKManager_DefaultData
     */
     uint32_t CurrentTokenId;
     SOPC_TimeReference CurrentTokenTime; /* Time when current token was set */
-    uint32_t CurrentTokenRemainingTime;  /* remaining time for current token */
+    uint64_t CurrentTokenRemainingTime;  /* remaining time for current token */
 
     SOPC_Array* Keys; // array of SOPC_ByteString
 
     SOPC_String* SecurityPolicyUri;
     uint32_t FirstTokenId;
 
-    uint32_t TimeToNextKey;
-    uint32_t KeyLifetime;
+    uint64_t TimeToNextKey;
+    uint64_t KeyLifetime;
 
 } SOPC_SKManager_DefaultData;
 
@@ -123,8 +123,8 @@ static SOPC_ReturnStatus SOPC_SKManager_SetKeys_Default(SOPC_SKManager* skm,
                                                         uint32_t FirstTokenId,
                                                         const SOPC_ByteString* Keys,
                                                         uint32_t NbToken,
-                                                        uint32_t TimeToNextKey,
-                                                        uint32_t KeyLifetime)
+                                                        uint64_t TimeToNextKey,
+                                                        uint64_t KeyLifetime)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -258,7 +258,7 @@ static void SOPC_SKManager_UpdateCurrentToken_Default(SOPC_SKManager_DefaultData
     if (timeElapsed < data->CurrentTokenRemainingTime)
     {
         // current token is still the one to use
-        data->CurrentTokenRemainingTime = data->CurrentTokenRemainingTime - (uint32_t) timeElapsed;
+        data->CurrentTokenRemainingTime = data->CurrentTokenRemainingTime - (uint64_t) timeElapsed;
         data->CurrentTokenTime = currentTime;
     }
     else
@@ -279,12 +279,12 @@ static void SOPC_SKManager_UpdateCurrentToken_Default(SOPC_SKManager_DefaultData
         data->CurrentTokenId = (uint32_t) newCurrentTokenId;
         data->CurrentTokenTime = currentTime;
         /* Substract overrun time from next remaining time */
-        data->CurrentTokenRemainingTime = (uint32_t)(data->KeyLifetime - (overrunTime % data->KeyLifetime));
+        data->CurrentTokenRemainingTime = (uint64_t)(data->KeyLifetime - (overrunTime % data->KeyLifetime));
         SOPC_ASSERT(data->CurrentTokenRemainingTime <= data->KeyLifetime);
     }
 }
 
-static uint32_t SOPC_SKManager_GetAllKeysLifeTime_Default(SOPC_SKManager* skm)
+static uint64_t SOPC_SKManager_GetAllKeysLifeTime_Default(SOPC_SKManager* skm)
 {
     if (NULL == skm || NULL == skm->data)
     {
@@ -310,19 +310,19 @@ static uint32_t SOPC_SKManager_GetAllKeysLifeTime_Default(SOPC_SKManager* skm)
     // Nb available = Number of stored keys - already used keys
     uint32_t nbAvailable = SOPC_SKManager_Size(skm) - (data->CurrentTokenId - data->FirstTokenId);
 
-    uint32_t result = UINT32_MAX;
-    if (data->CurrentTokenRemainingTime <= UINT32_MAX - (data->KeyLifetime * (nbAvailable - 1)))
+    uint64_t result = UINT64_MAX;
+    if (data->CurrentTokenRemainingTime <= UINT64_MAX - (data->KeyLifetime * (nbAvailable - 1)))
     {
         // Current key remaining time + next available keys lifetime
         result = data->CurrentTokenRemainingTime + (data->KeyLifetime * (nbAvailable - 1));
-    } // else: available lifetime > UINT32_MAX => return UINT32_MAX
+    } // else: available lifetime > UINT64_MAX => return UINT64_MAX
 
     SOPC_Mutex_Unlock(&data->mutex);
 
     return result;
 }
 
-static SOPC_ReturnStatus SOPC_SKManager_SetKeyLifetime_Default(SOPC_SKManager* skm, uint32_t KeyLifetime)
+static SOPC_ReturnStatus SOPC_SKManager_SetKeyLifetime_Default(SOPC_SKManager* skm, uint64_t KeyLifetime)
 {
     /* Check Parameter */
     if (NULL == skm || NULL == skm->data || 0 == KeyLifetime)
@@ -348,8 +348,8 @@ static SOPC_ReturnStatus SOPC_SKManager_GetKeys_Default(SOPC_SKManager* skm,
                                                         uint32_t* FirstTokenId,
                                                         SOPC_ByteString** Keys,
                                                         uint32_t* NbToken,
-                                                        uint32_t* TimeToNextKey,
-                                                        uint32_t* KeyLifetime)
+                                                        uint64_t* TimeToNextKey,
+                                                        uint64_t* KeyLifetime)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -577,7 +577,7 @@ uint32_t SOPC_SKManager_Size(SOPC_SKManager* skm)
     return skm->ptrSize(skm);
 }
 
-SOPC_ReturnStatus SOPC_SKManager_SetKeyLifetime(SOPC_SKManager* skm, uint32_t KeyLifetime)
+SOPC_ReturnStatus SOPC_SKManager_SetKeyLifetime(SOPC_SKManager* skm, uint64_t KeyLifetime)
 {
     if (NULL == skm)
     {
@@ -600,8 +600,8 @@ SOPC_ReturnStatus SOPC_SKManager_SetKeys(SOPC_SKManager* skm,
                                          uint32_t FirstTokenId,
                                          const SOPC_ByteString* Keys,
                                          uint32_t NbKeys,
-                                         uint32_t TimeToNextKey,
-                                         uint32_t KeyLifetime)
+                                         uint64_t TimeToNextKey,
+                                         uint64_t KeyLifetime)
 {
     if (NULL == skm)
     {
@@ -626,8 +626,8 @@ SOPC_ReturnStatus SOPC_SKManager_GetKeys(SOPC_SKManager* skm,
                                          uint32_t* FirstTokenId,
                                          SOPC_ByteString** Keys,
                                          uint32_t* NbKeys,
-                                         uint32_t* TimeToNextKey,
-                                         uint32_t* KeyLifetime)
+                                         uint64_t* TimeToNextKey,
+                                         uint64_t* KeyLifetime)
 {
     if (NULL == skm)
     {
@@ -637,7 +637,7 @@ SOPC_ReturnStatus SOPC_SKManager_GetKeys(SOPC_SKManager* skm,
                            TimeToNextKey, KeyLifetime);
 }
 
-uint32_t SOPC_SKManager_GetAllKeysLifeTime(SOPC_SKManager* skm)
+uint64_t SOPC_SKManager_GetAllKeysLifeTime(SOPC_SKManager* skm)
 {
     if (NULL == skm)
     {

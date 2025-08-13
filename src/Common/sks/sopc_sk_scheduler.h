@@ -41,7 +41,7 @@
 #define SOPC_SK_SCHEDULER_UPDATE_TIMER_MIN 2000
 
 // maximal period for update (by default no max)
-#define SOPC_SK_SCHEDULER_UPDATE_TIMER_MAX UINT32_MAX
+#define SOPC_SK_SCHEDULER_UPDATE_TIMER_MAX UINT64_MAX
 
 typedef struct SOPC_SKscheduler SOPC_SKscheduler;
 
@@ -49,7 +49,7 @@ typedef SOPC_ReturnStatus (*SOPC_SKscheduler_AddTask_Func)(SOPC_SKscheduler* sko
                                                            SOPC_SKBuilder* skb,
                                                            SOPC_SKProvider* skp,
                                                            SOPC_SKManager* skm,
-                                                           uint32_t msPeriod);
+                                                           uint64_t msPeriod);
 typedef SOPC_ReturnStatus (*SOPC_SKscheduler_Start_Func)(SOPC_SKscheduler* sko);
 typedef void (*SOPC_SKscheduler_StopAndClear_Func)(SOPC_SKscheduler* sko);
 
@@ -89,7 +89,7 @@ SOPC_ReturnStatus SOPC_SKscheduler_AddTask(SOPC_SKscheduler* sko,
                                            SOPC_SKBuilder* skb,
                                            SOPC_SKProvider* skp,
                                            SOPC_SKManager* skm,
-                                           uint32_t firstMsPeriod);
+                                           uint64_t firstMsPeriod);
 
 /**
  *  \brief          Starts a Security Keys Scheduler

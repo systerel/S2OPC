@@ -156,8 +156,8 @@ SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_SetSecurityKeys(const SOPC_Cal
     // Prepare local variables for push operation
     const SOPC_String* securityPolicyUri = &securityPolicyUriVariant->Value.String;
     uint32_t startingTokenId = currentTokenIdVariant->Value.Uint32;
-    uint32_t timeToNextKey = (uint32_t) timeToNextKeyVariant->Value.Doublev;
-    uint32_t keyLifetime = (uint32_t) keyLifetimeVariant->Value.Doublev;
+    uint64_t timeToNextKey = (uint64_t) timeToNextKeyVariant->Value.Doublev;
+    uint64_t keyLifetime = (uint64_t) keyLifetimeVariant->Value.Doublev;
 
     // Calculate total number of keys (CurrentKey + FutureKeys)
     uint32_t nbFutureKeys =

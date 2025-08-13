@@ -42,7 +42,7 @@ typedef struct SOPC_SKscheduler_Task
 
     bool run;
     uint32_t timerId;
-    uint32_t msPeriod;
+    uint64_t msPeriod;
 
 } SOPC_SKscheduler_Task;
 
@@ -87,7 +87,7 @@ static void SOPC_SKscheduler_EventHandler_Callback_Default(SOPC_EventHandler* ha
     SOPC_SKBuilder_Update(task->builder, task->provider, task->manager);
 
     /* Get the remaining time to use all available keys */
-    uint32_t halfAllKeysLifeTime = SOPC_SKManager_GetAllKeysLifeTime(task->manager) / 2;
+    uint64_t halfAllKeysLifeTime = SOPC_SKManager_GetAllKeysLifeTime(task->manager) / 2;
     if (halfAllKeysLifeTime < SOPC_SK_SCHEDULER_UPDATE_TIMER_MIN)
     {
         halfAllKeysLifeTime = SOPC_SK_SCHEDULER_UPDATE_TIMER_MIN;
@@ -172,7 +172,7 @@ static SOPC_ReturnStatus SOPC_SKscheduler_AddTask_Default(SOPC_SKscheduler* sko,
                                                           SOPC_SKBuilder* skb,
                                                           SOPC_SKProvider* skp,
                                                           SOPC_SKManager* skm,
-                                                          uint32_t msPeriod)
+                                                          uint64_t msPeriod)
 {
     if (NULL == sko || NULL == sko->data || NULL == skb || NULL == skp || NULL == skm)
     {
@@ -344,7 +344,7 @@ SOPC_ReturnStatus SOPC_SKscheduler_AddTask(SOPC_SKscheduler* sko,
                                            SOPC_SKBuilder* skb,
                                            SOPC_SKProvider* skp,
                                            SOPC_SKManager* skm,
-                                           uint32_t msPeriod)
+                                           uint64_t msPeriod)
 {
     if (NULL == sko)
     {

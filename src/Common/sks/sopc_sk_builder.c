@@ -39,8 +39,8 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Default_Setter(SOPC_SKBuilder* sk
     uint32_t FirstTokenId = 0;
     SOPC_ByteString* Keys = NULL;
     uint32_t NbToken = 0;
-    uint32_t TimeToNextKey = 0;
-    uint32_t KeyLifetime = 0;
+    uint64_t TimeToNextKey = 0;
+    uint64_t KeyLifetime = 0;
 
     SOPC_ReturnStatus status =
         SOPC_SKProvider_GetKeys(skp, skm->securityGroupId, SOPC_SK_MANAGER_CURRENT_TOKEN_ID, UINT32_MAX,
@@ -98,8 +98,8 @@ static SOPC_ReturnStatus SOPC_SKBuilder_Update_Truncate(SOPC_SKBuilder* skb, SOP
         uint32_t FirstTokenId = 0;
         SOPC_ByteString* Keys = NULL;
         uint32_t NbToken = 0;
-        uint32_t TimeToNextKey = 0;
-        uint32_t KeyLifetime = 0;
+        uint64_t TimeToNextKey = 0;
+        uint64_t KeyLifetime = 0;
 
         status = SOPC_SKManager_GetKeys(skm, SOPC_SK_MANAGER_CURRENT_TOKEN_ID, data->sizeMax, &SecurityPolicyUri,
                                         &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);

@@ -45,8 +45,8 @@ typedef SOPC_ReturnStatus (*SOPC_SKProvider_GetKeys_Func)(SOPC_SKProvider* skp,
                                                           uint32_t* FirstTokenId,
                                                           SOPC_ByteString** Keys,
                                                           uint32_t* NbKeys,
-                                                          uint32_t* TimeToNextKey,
-                                                          uint32_t* KeyLifetime);
+                                                          uint64_t* TimeToNextKey,
+                                                          uint64_t* KeyLifetime);
 typedef void (*SOPC_SKProvider_Clear_Func)(void* data);
 
 /**
@@ -106,8 +106,8 @@ SOPC_ReturnStatus SOPC_SKProvider_GetKeys(SOPC_SKProvider* skp,
                                           uint32_t* FirstTokenId,
                                           SOPC_ByteString** Keys,
                                           uint32_t* NbKeys,
-                                          uint32_t* TimeToNextKey,
-                                          uint32_t* KeyLifetime);
+                                          uint64_t* TimeToNextKey,
+                                          uint64_t* KeyLifetime);
 
 /**
  *  \brief          Deallocates Security Keys Provider data bytes content

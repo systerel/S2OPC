@@ -38,8 +38,8 @@ typedef struct Client_SKS_GetKeys_Response
     uint32_t FirstTokenId;
     SOPC_ByteString* Keys;
     uint32_t NbKeys;
-    uint32_t TimeToNextKey;
-    uint32_t KeyLifetime;
+    uint64_t TimeToNextKey;
+    uint64_t KeyLifetime;
 } Client_SKS_GetKeys_Response;
 
 typedef enum

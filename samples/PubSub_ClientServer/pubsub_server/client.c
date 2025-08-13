@@ -472,7 +472,7 @@ static void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Respo
                         variant->ArrayType == SOPC_VariantArrayType_SingleValue && 0 <= variant->Value.Doublev &&
                         UINT32_MAX >= variant->Value.Doublev)
                     {
-                        response->TimeToNextKey = (uint32_t) variant->Value.Doublev;
+                        response->TimeToNextKey = (uint64_t) variant->Value.Doublev;
                         if (0 == response->TimeToNextKey)
                         {
                             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
@@ -495,7 +495,7 @@ static void Client_Copy_CallResponse_To_GetKeysResponse(Client_SKS_GetKeys_Respo
                         variant->ArrayType == SOPC_VariantArrayType_SingleValue && 0 <= variant->Value.Doublev &&
                         UINT32_MAX >= variant->Value.Doublev)
                     {
-                        response->KeyLifetime = (uint32_t) variant->Value.Doublev;
+                        response->KeyLifetime = (uint64_t) variant->Value.Doublev;
                         if (0 == response->KeyLifetime)
                         {
                             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
@@ -641,8 +641,8 @@ static SOPC_ReturnStatus Client_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
                                                        uint32_t* FirstTokenId,
                                                        SOPC_ByteString** Keys,
                                                        uint32_t* NbToken,
-                                                       uint32_t* TimeToNextKey,
-                                                       uint32_t* KeyLifetime)
+                                                       uint64_t* TimeToNextKey,
+                                                       uint64_t* KeyLifetime)
 {
     /* Not used*/
     (void) StartingTokenId;
@@ -718,8 +718,8 @@ static SOPC_ReturnStatus Fallback_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
                                                          uint32_t* FirstTokenId,
                                                          SOPC_ByteString** Keys,
                                                          uint32_t* NbKeys,
-                                                         uint32_t* TimeToNextKey,
-                                                         uint32_t* KeyLifetime)
+                                                         uint64_t* TimeToNextKey,
+                                                         uint64_t* KeyLifetime)
 {
     /* Not used*/
     SOPC_UNUSED_ARG(securityGroupId); // not managed for fallback provider

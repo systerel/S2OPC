@@ -33,7 +33,7 @@ START_TEST(test_default_manager_create)
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 
-    uint32_t expectedKeyLifetime = 5000;
+    uint64_t expectedKeyLifetime = 5000;
     SOPC_ReturnStatus res = SOPC_SKManager_SetKeyLifetime(skm, expectedKeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
 
@@ -48,8 +48,8 @@ START_TEST(test_default_manager_create)
     uint32_t FirstTokenId = 0;
     SOPC_ByteString* Keys = NULL;
     uint32_t NbToken = 0;
-    uint32_t TimeToNextKey = 0;
-    uint32_t KeyLifetime = 0;
+    uint64_t TimeToNextKey = 0;
+    uint64_t KeyLifetime = 0;
     res = SOPC_SKManager_GetKeys(skm, 0, /* current token id */
                                  10, &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
@@ -76,14 +76,14 @@ START_TEST(test_default_manager_add)
     uint32_t FirstTokenId = 0;
     SOPC_ByteString* Keys = NULL;
     uint32_t NbToken = 0;
-    uint32_t TimeToNextKey = 0;
-    uint32_t KeyLifetime = 0;
+    uint64_t TimeToNextKey = 0;
+    uint64_t KeyLifetime = 0;
 
     SOPC_SKManager* skm = SOPC_SKManager_Create("", 0);
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 
-    uint32_t expectedKeyLifetime = 5000;
+    uint64_t expectedKeyLifetime = 5000;
     SOPC_ReturnStatus res = SOPC_SKManager_SetKeyLifetime(skm, expectedKeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
 
@@ -183,14 +183,14 @@ START_TEST(test_default_manager_setkeys)
     uint32_t FirstTokenId = 0;
     SOPC_ByteString* Keys = NULL;
     uint32_t NbToken = 0;
-    uint32_t TimeToNextKey = 0;
-    uint32_t KeyLifetime = 0;
+    uint64_t TimeToNextKey = 0;
+    uint64_t KeyLifetime = 0;
 
     SOPC_SKManager* skm = SOPC_SKManager_Create("", 0);
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 
-    uint32_t expectedKeyLifetime = 5000;
+    uint64_t expectedKeyLifetime = 5000;
     SOPC_ReturnStatus res = SOPC_SKManager_SetKeyLifetime(skm, expectedKeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
 
@@ -290,14 +290,14 @@ START_TEST(test_default_manager_getkeys)
     uint32_t FirstTokenId = 0;
     SOPC_ByteString* Keys = NULL;
     uint32_t NbToken = 0;
-    uint32_t TimeToNextKey = 0;
-    uint32_t KeyLifetime = 0;
+    uint64_t TimeToNextKey = 0;
+    uint64_t KeyLifetime = 0;
 
     SOPC_SKManager* skm = SOPC_SKManager_Create("", 0);
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 
-    uint32_t expectedKeyLifetime = 5000;
+    uint64_t expectedKeyLifetime = 5000;
     SOPC_ReturnStatus res = SOPC_SKManager_SetKeyLifetime(skm, expectedKeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
 
@@ -369,10 +369,10 @@ START_TEST(test_default_manager_getAllKeysLifeTime)
 
     ck_assert_uint_eq(0, SOPC_SKManager_Size(skm));
 
-    uint32_t allKeysLifetime = SOPC_SKManager_GetAllKeysLifeTime(skm);
+    uint64_t allKeysLifetime = SOPC_SKManager_GetAllKeysLifeTime(skm);
     ck_assert_uint_eq(0, allKeysLifetime);
 
-    uint32_t expectedKeyLifetime = 5000;
+    uint64_t expectedKeyLifetime = 5000;
     SOPC_ReturnStatus res = SOPC_SKManager_SetKeyLifetime(skm, expectedKeyLifetime);
     ck_assert(SOPC_STATUS_OK == res);
 
@@ -393,7 +393,7 @@ START_TEST(test_default_manager_getAllKeysLifeTime)
     ck_assert(allKeysLifetime <= expectedKeyLifetime * 3);
     ck_assert(allKeysLifetime > expectedKeyLifetime * 2);
     SOPC_Sleep(50);
-    uint32_t allKeysLifetime2 = SOPC_SKManager_GetAllKeysLifeTime(skm);
+    uint64_t allKeysLifetime2 = SOPC_SKManager_GetAllKeysLifeTime(skm);
     ck_assert(allKeysLifetime2 < allKeysLifetime);
     ck_assert(allKeysLifetime - 1000 < allKeysLifetime2);
 

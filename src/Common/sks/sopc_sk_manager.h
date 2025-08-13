@@ -55,9 +55,9 @@ typedef struct SOPC_SKManager SOPC_SKManager;
  */
 typedef uint32_t (*SOPC_SKManager_GetSize_Func)(SOPC_SKManager* skm);
 
-typedef SOPC_ReturnStatus (*SOPC_SKManager_SetKeyLifetime_Func)(SOPC_SKManager* skm, uint32_t KeyLifetime);
+typedef SOPC_ReturnStatus (*SOPC_SKManager_SetKeyLifetime_Func)(SOPC_SKManager* skm, uint64_t KeyLifetime);
 
-typedef uint32_t (*SOPC_SKManager_GetAllKeysLifeTime_Func)(SOPC_SKManager* skm);
+typedef uint64_t (*SOPC_SKManager_GetAllKeysLifeTime_Func)(SOPC_SKManager* skm);
 
 typedef SOPC_ReturnStatus (*SOPC_SKManager_SetSecurityPolicyUri_Func)(SOPC_SKManager* skm,
                                                                       SOPC_String* SecurityPolicyUri);
@@ -67,8 +67,8 @@ typedef SOPC_ReturnStatus (*SOPC_SKManager_SetKeys_Func)(SOPC_SKManager* skm,
                                                          uint32_t FirstTokenId,
                                                          const SOPC_ByteString* Keys,
                                                          uint32_t NbKeys,
-                                                         uint32_t TimeToNextKey,
-                                                         uint32_t KeyLifetime);
+                                                         uint64_t TimeToNextKey,
+                                                         uint64_t KeyLifetime);
 typedef uint32_t (*SOPC_SKManager_AddKeys_Func)(SOPC_SKManager* skm, SOPC_ByteString* Keys, uint32_t NbToken);
 
 typedef SOPC_ReturnStatus (*SOPC_SKManager_GetKeys_Func)(SOPC_SKManager* skm,
@@ -78,8 +78,8 @@ typedef SOPC_ReturnStatus (*SOPC_SKManager_GetKeys_Func)(SOPC_SKManager* skm,
                                                          uint32_t* FirstTokenId,
                                                          SOPC_ByteString** Keys,
                                                          uint32_t* NbKeys,
-                                                         uint32_t* TimeToNextKey,
-                                                         uint32_t* KeyLifetime);
+                                                         uint64_t* TimeToNextKey,
+                                                         uint64_t* KeyLifetime);
 typedef void (*SOPC_SKManager_Clear_Func)(SOPC_SKManager* skm);
 
 struct SOPC_SKManager
@@ -123,7 +123,7 @@ uint32_t SOPC_SKManager_Size(SOPC_SKManager* skm);
  *
  *  \return             SOPC_STATUS_OK if keys tokens lifetime set
  */
-SOPC_ReturnStatus SOPC_SKManager_SetKeyLifetime(SOPC_SKManager* skm, uint32_t KeyLifetime);
+SOPC_ReturnStatus SOPC_SKManager_SetKeyLifetime(SOPC_SKManager* skm, uint64_t KeyLifetime);
 
 /**
  *  \brief                    Sets the security policy URI for the security keys tokens
@@ -153,8 +153,8 @@ SOPC_ReturnStatus SOPC_SKManager_SetKeys(SOPC_SKManager* skm,
                                          uint32_t FirstTokenId,
                                          const SOPC_ByteString* Keys,
                                          uint32_t NbKeys,
-                                         uint32_t TimeToNextKey,
-                                         uint32_t KeyLifetime);
+                                         uint64_t TimeToNextKey,
+                                         uint64_t KeyLifetime);
 
 /**
  *  \brief          Adds Keys to a Security Keys Manager for a given security group.
@@ -194,8 +194,8 @@ SOPC_ReturnStatus SOPC_SKManager_GetKeys(SOPC_SKManager* skm,
                                          uint32_t* FirstTokenId,
                                          SOPC_ByteString** Keys,
                                          uint32_t* NbKeys,
-                                         uint32_t* TimeToNextKey,
-                                         uint32_t* KeyLifetime);
+                                         uint64_t* TimeToNextKey,
+                                         uint64_t* KeyLifetime);
 
 /**
  *  \brief          Returns the total remaining lifetime of available keys tokens.
@@ -203,7 +203,7 @@ SOPC_ReturnStatus SOPC_SKManager_GetKeys(SOPC_SKManager* skm,
  *  \param skm      Pointer to Security Keys Manager. Should not be NULL
  *  \return         Total remaining lifetime in milliseconds or it shall be 0 in case of error or no key available
  */
-uint32_t SOPC_SKManager_GetAllKeysLifeTime(SOPC_SKManager* skm);
+uint64_t SOPC_SKManager_GetAllKeysLifeTime(SOPC_SKManager* skm);
 
 /**
  *  \brief          Deallocates Security Keys Manager data bytes content

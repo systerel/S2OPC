@@ -38,8 +38,8 @@ typedef struct Client_SKS_GetKeys_Response
     uint32_t FirstTokenId;
     SOPC_ByteString* Keys;
     uint32_t NbKeys;
-    uint32_t TimeToNextKey;
-    uint32_t KeyLifetime;
+    uint64_t TimeToNextKey;
+    uint64_t KeyLifetime;
 } Client_SKS_GetKeys_Response;
 
 typedef enum
@@ -89,8 +89,8 @@ SOPC_ReturnStatus Client_SetSecurityKeys(SOPC_SecureConnection_Config* config,
                                          SOPC_ByteString* CurrentKey,
                                          uint32_t NbKeys,
                                          SOPC_ByteString* FutureKeys,
-                                         uint32_t TimeToNextKey,
-                                         uint32_t KeyLifetime);
+                                         uint64_t TimeToNextKey,
+                                         uint64_t KeyLifetime);
 
 /*
  * \brief  Create an instance of SOPC_SKProvider to get Keys using SKS Get Security Keys request

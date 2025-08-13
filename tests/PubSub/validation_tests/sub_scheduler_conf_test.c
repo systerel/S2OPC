@@ -164,8 +164,8 @@ static void fillSkManagerWithUnexpectedKeys(SOPC_SKManager* skm)
     uint32_t FirstTokenId = 0;
     SOPC_ByteString* Keys = NULL;
     uint32_t NbToken = 0;
-    uint32_t TimeToNextKey = 0;
-    uint32_t KeyLifetime = 0;
+    uint64_t TimeToNextKey = 0;
+    uint64_t KeyLifetime = 0;
     SOPC_ReturnStatus status =
         SOPC_SKProvider_GetKeys(skp, skm->securityGroupId, SOPC_SK_MANAGER_CURRENT_TOKEN_ID, UINT32_MAX,
                                 &SecurityPolicyUri, &FirstTokenId, &Keys, &NbToken, &TimeToNextKey, &KeyLifetime);

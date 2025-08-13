@@ -67,8 +67,8 @@ SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupid,
     uint32_t FirstTokenId = 0;
     SOPC_ByteString* Keys = NULL;
     uint32_t NbKeys = 0;
-    uint32_t TimeToNextKey = 0;
-    uint32_t KeyLifetime = 0;
+    uint64_t TimeToNextKey = 0;
+    uint64_t KeyLifetime = 0;
     SOPC_SKManager* skm = SOPC_SK_SecurityGroup_GetSkManager(securityGroupid);
 
     if (NULL == skm)

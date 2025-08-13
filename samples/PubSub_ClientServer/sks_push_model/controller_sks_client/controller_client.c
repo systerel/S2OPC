@@ -236,8 +236,8 @@ static OpcUa_CallRequest* newCallRequest_client(const char* securityGroupId,
                                                 SOPC_ByteString* CurrentKey,
                                                 uint32_t NbKeys,
                                                 SOPC_ByteString* FutureKeys,
-                                                uint32_t TimeToNextKey,
-                                                uint32_t KeyLifetime)
+                                                uint64_t TimeToNextKey,
+                                                uint64_t KeyLifetime)
 {
     int32_t nbElements = 7; // Number of arguments for the SetSecurityKeys method
     SOPC_Variant* arguments = SOPC_Calloc((size_t) nbElements, sizeof(SOPC_Variant));
@@ -424,8 +424,8 @@ SOPC_ReturnStatus Client_SetSecurityKeys(SOPC_SecureConnection_Config* config,
                                          SOPC_ByteString* CurrentKey,
                                          uint32_t NbKeys,
                                          SOPC_ByteString* FutureKeys,
-                                         uint32_t TimeToNextKey,
-                                         uint32_t KeyLifetime)
+                                         uint64_t TimeToNextKey,
+                                         uint64_t KeyLifetime)
 {
     if (!SOPC_Atomic_Int_Get(&g_Client_Started))
     {
