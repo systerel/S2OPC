@@ -847,6 +847,12 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
     xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
 #endif
 
+    // Set default server configuration if no XML path provided
+    if (SOPC_STATUS_OK == status && NULL == xml_server_config_path)
+    {
+        status = Server_SetDefaultConfiguration();
+    }
+
     if (SOPC_STATUS_OK == status &&
         (NULL != xml_server_config_path || NULL != xml_address_space_config_path || NULL != xml_users_config_path))
     {
@@ -862,11 +868,6 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
             "Or compile with XML library available.\n");
         status = SOPC_STATUS_INVALID_PARAMETERS;
 #endif
-    }
-
-    if (SOPC_STATUS_OK == status && NULL == xml_server_config_path)
-    {
-        status = Server_SetDefaultConfiguration();
     }
 
     if (SOPC_STATUS_OK == status && NULL == xml_address_space_config_path)

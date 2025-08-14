@@ -473,7 +473,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* add
     SOPC_S2OPC_Config* config = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != config);
     uint16_t indexNs = 0;
-    while (config->serverConfig.namespaces[indexNs] != NULL)
+    while (NULL != config->serverConfig.namespaces && config->serverConfig.namespaces[indexNs] != NULL)
     {
         indexNs++;
     }
