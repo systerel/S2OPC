@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 13/08/2025 14:11:04
+ Date                 : 18/08/2025 08:26:07
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1202,6 +1202,8 @@ void subscription_core__modify_monitored_item(
       monitored_item_pointer_bs__getall_monitoredItemId(subscription_core__p_mi_id,
          &subscription_core__bres,
          &subscription_core__l_monitoredItemPointer);
+      *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
+      subscription_core__l_filterCtx = constants__c_monitoringFilterCtx_indet;
       *subscription_core__p_filterResult = constants__c_filterResult_indet;
       *subscription_core__p_revSamplingItv = constants__c_opcua_duration_zero;
       *subscription_core__p_revQueueSize = 0;
@@ -1220,15 +1222,17 @@ void subscription_core__modify_monitored_item(
             subscription_core__p_revSamplingItv,
             subscription_core__p_revQueueSize);
          subscription_core__l_isExpectedSubId = (subscription_core__p_subscription == subscription_core__l_subscription);
-         monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill_result(subscription_core__p_endpoint_idx,
-            subscription_core__l_nid,
-            subscription_core__l_aid,
-            subscription_core__p_filter,
-            constants__c_Variant_indet,
-            subscription_core__p_sc,
-            &subscription_core__l_filterCtx,
-            subscription_core__p_filterResult,
-            &subscription_core__l_isEvent);
+         if (subscription_core__l_isExpectedSubId == true) {
+            monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill_result(subscription_core__p_endpoint_idx,
+               subscription_core__l_nid,
+               subscription_core__l_aid,
+               subscription_core__p_filter,
+               constants__c_Variant_indet,
+               subscription_core__p_sc,
+               &subscription_core__l_filterCtx,
+               subscription_core__p_filterResult,
+               &subscription_core__l_isEvent);
+         }
          if ((subscription_core__l_isExpectedSubId == true) &&
             (*subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok)) {
             monitored_item_pointer_bs__modify_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
@@ -1242,12 +1246,6 @@ void subscription_core__modify_monitored_item(
                monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer);
             }
          }
-         else if (subscription_core__l_isExpectedSubId == false) {
-            *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
-         }
-      }
-      else {
-         *subscription_core__p_sc = constants_statuscodes_bs__e_sc_bad_monitored_item_id_invalid;
       }
    }
 }

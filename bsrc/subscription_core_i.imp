@@ -1457,6 +1457,8 @@ OPERATIONS
         l_isExpectedSubId
     IN
         bres, l_monitoredItemPointer <--getall_monitoredItemId (p_mi_id);
+        p_sc := e_sc_bad_monitored_item_id_invalid;
+        l_filterCtx := c_monitoringFilterCtx_indet;
         p_filterResult := c_filterResult_indet;
         p_revSamplingItv := c_opcua_duration_zero;
         p_revQueueSize := 0;
@@ -1474,8 +1476,12 @@ OPERATIONS
             p_revSamplingItv, p_revQueueSize <-- local_compute_create_monitored_item_revised_params(l_aid, p_queueSize);
             /* Check monitored item subscription matches the given subscription */
             l_isExpectedSubId := bool(p_subscription = l_subscription);
-            /* Check constraints on node for MI filter */
-            p_sc, l_filterCtx, p_filterResult, l_isEvent  <-- check_monitored_item_filter_valid_and_fill_result (p_endpoint_idx, l_nid, l_aid, p_filter, c_Variant_indet);
+            IF l_isExpectedSubId = TRUE
+            THEN
+                /* Check constraints on node for MI filter */
+                p_sc, l_filterCtx, p_filterResult, l_isEvent  <-- check_monitored_item_filter_valid_and_fill_result (p_endpoint_idx, l_nid, l_aid, p_filter, c_Variant_indet)
+            END
+            ;
             IF l_isExpectedSubId = TRUE & p_sc = e_sc_ok
             THEN
                 p_sc <-- modify_monitored_item_pointer(l_monitoredItemPointer,
@@ -1488,12 +1494,7 @@ OPERATIONS
                 THEN
                     resize_monitored_item_notification_queue(l_monitoredItemPointer)
                 END
-            ELSIF l_isExpectedSubId = FALSE
-            THEN
-                p_sc := e_sc_bad_monitored_item_id_invalid
             END
-        ELSE
-            p_sc := e_sc_bad_monitored_item_id_invalid
         END
     END
     ;
