@@ -27,7 +27,6 @@ CHECK_DIGEST=registry.gitlab.com/systerel/s2opc/check@sha256:8be8c50cd484989c987
 TEST_DIGEST=registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # test:2.16
 ZEPHYR_DIGEST=registry.gitlab.com/systerel/s2opc/zephyr_build:v3.7.0-c
 FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1 (FreeRTOS for STM32-H723ZG only for CI purpose)
-CYBERWATCH_DIGEST=registry.gitlab.com/systerel/s2opc/cyberwatch@sha256:df8486140065bb3ea2d7394283ef1adfd403d341edc9ffe28582721ceb199499 # registry.gitlab.com/systerel/s2opc/cyberwatch:2.0
 SONARQUBE_DIGEST=registry.gitlab.com/systerel/s2opc/sonarqube@sha256:4baaa859d74163e40467c5fa630ad205a83a4190b7fe472d32f071619a31ca5e #registry.gitlab.com/systerel/s2opc/sonarqube:1.0
 
 # Private images
@@ -36,3 +35,5 @@ UACTT_WIN_DIGEST=com.systerel.fr:5000/c838/uactt-win@sha256:98b4488aa85310d1e668
 UACTT_LINUX_DIGEST=com.systerel.fr:5000/c838/uactt-linux@sha256:e9118a5aa597d4e7f2bcf1f53817f120182ef3633103b9e6cf128c3945f46ca2 # com.systerel.fr:5000/c838/uactt-linux:1.6
 NETWORK_FUZZING_DIGEST=docker.aix.systerel.fr/c838/opcua-network-fuzzer@sha256:35e40ba847bdfe5f3e7112f465adb2c70d1f0694521f6ba8d018c55f651ef205 # docker.aix.systerel.fr/c838/opcua-network-fuzzer:3.3
 PIKEOS_DIGEST=docker.aix.systerel.fr/c838/pikeos@sha256:3d5dcbab75b0c98a8d27d1cfa239bfa43b5b87bc1bbaca2a7c8a5bfe2adc5aeb # docker.aix.systerel.fr/c838/pikeos:1.2.1
+CYBERWATCH_DIGEST=docker.aix.systerel.fr/c838/cyberwatch@sha256:003b648857636b08825c6214c7ae86390e7c958a6814f15ee4c170c737347292 # docker.aix.systerel.fr/c838/cyberwatch:3.0
+

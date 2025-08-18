@@ -671,7 +671,7 @@ test-fuzz:
 # Generate the Software Bill Of Materials according to the conan.lock file.
 generate_sbom:
   stage: test
-  image: registry.gitlab.com/systerel/s2opc/cyberwatch@sha256:df8486140065bb3ea2d7394283ef1adfd403d341edc9ffe28582721ceb199499 #registry.gitlab.com/systerel/s2opc/cyberwatch:2.0
+  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:003b648857636b08825c6214c7ae86390e7c958a6814f15ee4c170c737347292 #docker.aix.systerel.fr/c838/cyberwatch:3.0
   needs: []
   script:
     - conan remote add gitlab ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan False
@@ -695,7 +695,7 @@ generate_sbom:
 # Look for vulnerabilities in the dependencies of the SBOM generated in the generate_sbom job.
 scan_sbom:
   stage: test
-  image: registry.gitlab.com/systerel/s2opc/cyberwatch@sha256:df8486140065bb3ea2d7394283ef1adfd403d341edc9ffe28582721ceb199499 #registry.gitlab.com/systerel/s2opc/cyberwatch:2.0
+  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:003b648857636b08825c6214c7ae86390e7c958a6814f15ee4c170c737347292 #docker.aix.systerel.fr/c838/cyberwatch:3.0
   needs:
     - job: generate_sbom
   script:
@@ -715,7 +715,7 @@ scan_sbom:
 #Look for exposed secrets as well as vulnerabilities in the dependencies.
 scan_repository:
   stage: test
-  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
+  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:003b648857636b08825c6214c7ae86390e7c958a6814f15ee4c170c737347292 #docker.aix.systerel.fr/c838/cyberwatch:3.0
   script:
     - trivy --insecure repo .
   rules:
