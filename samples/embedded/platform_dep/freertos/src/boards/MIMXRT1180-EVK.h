@@ -42,6 +42,8 @@
 #include "FreeRTOSConfig_Gen.h"
 #include "freertos_platform_dep.h"
 #include "freertos_shell.h"
+
+#if S2OPC_CRYPTO_MBEDTLS
 #include "sopc_mbedtls_config.h"
 
 // MbedTLS
@@ -80,6 +82,7 @@
 #ifdef SD_ENABLED
 #undef SD_ENABLED
 #endif
+#endif // SOPC_MBEDTLS
 
 // FreeRTOS
 #define SOPC_FREERTOS_UDP_RAM_BASE ((void*) 0x20508000) // SRAM OC2 + 8000
@@ -120,7 +123,7 @@
 
 #define LWIP_SUPPORT_CUSTOM_PBUF 1
 
-//Console Related
+// Console Related
 #define DEBUG_CONSOLE_TRANSFER_NON_BLOCKING 1
 #define DEBUG_CONSOLE_RX_ENABLE 1
 #include "fsl_debug_console.h"

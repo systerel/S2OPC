@@ -42,7 +42,10 @@
 
 #include "freertos_shell.h"
 
+#undef PRINT
 #define PRINT SOPC_Shell_Printf
+#undef PRINTF
+#define PRINTF SOPC_Shell_Printf
 
 #define SOPC_FREERTOS_UDP_RAM_BASE ((void*) 0x30007000) // DTCM + 28K (=32 - 4 K)
 

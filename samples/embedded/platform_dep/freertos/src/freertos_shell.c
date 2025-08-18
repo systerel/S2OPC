@@ -61,6 +61,7 @@
 #elif defined SDK_PROVIDER_STM
 #include <stm32h7xx_hal.h>
 #define STM32_LINK_UART huart3
+#include "task.h"
 #else
 #error "Unsuported or Undefined SDK provider"
 #endif // SDK_PROVIDER
@@ -108,7 +109,7 @@ static uint8_t SOPC_Shell_getc(void)
         HAL_UART_Receive(&STM32_LINK_UART, &result, numberOfDataReceived, HAL_MAX_DELAY);
     }
 #elif defined SDK_PROVIDER_NXP
-    result = (uint8_t)DbgConsole_Getchar(); //This give a raw output
+    result = (uint8_t) DbgConsole_Getchar(); // This give a raw output
 #else
 #error "Unknown target, can't figure out how to communicate over Serial line"
 #endif // STM32_LINK_UART

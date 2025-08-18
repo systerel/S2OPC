@@ -200,72 +200,6 @@ static bool IslwipInitialized(void)
     extern struct netif* netif_list;
     return (netif_list != NULL);
 }
-/*
-ethernetif_config_t* get_ethernetif_config(void)
-{
-    static phy_handle_t phyHandle;
-
-    static ethernetif_config_t enet0_config = {.phyHandle = &phyHandle,
-                                        .phyAddr = BOARD_EP0_PHY_ADDR,
-                                        .phyOps = &g_app_phy_rtl8201_ops,
-                                        .phyResource = &g_phy_rtl8201_resource,
-                                        .srcClockHz = CLOCK_GetRootClockFreq(kCLOCK_Root_Netc),
-#ifdef configMAC_ADDR
-                                        .macAddress = configMAC_ADDR
-#endif
-    };
-    return enet0_config;
-}
-
-void set_ip(void)
-{
-    static const int ippadr_arr[4] = SOPC_IPADDR;
-    static const int netmask_arr[4] = SOPC_NETMASK;
-    static const int gw_arr[4] = SOPC_GW;
-    ip4_addr_t enet0_ipaddr, enet0_netmask, enet0_gw;
-    IP4_ADDR(&enet0_ipaddr, ippadr_arr[0], ippadr_arr[1], ippadr_arr[2], ippadr_arr[3]);
-    IP4_ADDR(&enet0_netmask, netmask_arr[0], netmask_arr[1], netmask_arr[2], netmask_arr[3]);
-    IP4_ADDR(&enet0_gw, gw_arr[0], gw_arr[1], gw_arr[2], gw_arr[3]);
-
-    static struct netif enet0_netif;
-    netif_add(&enet0_netif, &enet0_ipaddr, &enet0_netmask, &enet0_gw, get_ethernetif_config(), ethernetif0_init,
-tcpip_input); netif_set_default(&enet0_netif); netif_set_up(&enet0_netif);
-
-    PRINTF("IP Address set");
-}
-
-static void tcpip_init_done_cb(void* arg)
-{
-    TcpIpInitSync_t* sync = (TcpIpInitSync_t*) arg;
-    SOPC_Mutex_Lock(&sync->mutex);
-    sync->initialized = true;
-    SOPC_Condition_SignalAll(&sync->cond);
-    set_ip();
-    SOPC_Mutex_Unlock(&sync->mutex);
-}
-
-void start_and_wait_tcpip(void)
-{
-    TcpIpInitSync_t sync;
-    SOPC_ReturnStatus status = SOPC_Mutex_Initialization(&sync.mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    status = SOPC_Condition_Init(&sync.cond);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    SOPC_Mutex_Lock(&sync.mutex);
-    sync.initialized = false;
-
-    tcpip_init(tcpip_init_done_cb, &sync);
-    while (!sync.initialized)
-    {
-        SOPC_Mutex_UnlockAndWaitCond(&sync.cond, &sync.mutex);
-        // SOPC_Mutex_Lock(&sync.mutex);
-    }
-    SOPC_Mutex_Unlock(&sync.mutex);
-    SOPC_Mutex_Clear(&sync.mutex);
-    SOPC_Condition_Clear(&sync.cond);
-    PRINTF("LwIP TCP Initialized");
-}
-*/
 #endif // SDK_PROVIDER
 
 /*************************************************/
@@ -274,7 +208,13 @@ void SOPC_Platform_Setup(void)
     if (!IslwipInitialized())
     {
         PRINTF("Initializing LwIP\n");
+#if defined SDK_PROVIDER_NXP
         lwip_init();
+#elif defined SDK_PROVIDER_STM
+        MX_LWIP_Init();
+#else
+#error "Unsuported or Undefined SDK provider"
+#endif // SDK_PROVIDER
     }
 #if defined SDK_PROVIDER_NXP
     extern struct netif* netif_list;
@@ -427,7 +367,7 @@ void SOPC_Platform_Target_Debug(const char* param)
 #if S2OPC_CRYPTO_MBEDTLS
 // MBEDTLS Platform specific declarations
 /*************************************************/
-//#warning "Following function should return time since 1970 à 00:00:00 of 1st january"
+// #warning "Following function should return time since 1970 à 00:00:00 of 1st january"
 time_t sopc_time_alt(time_t* timer)
 {
     time_t t;

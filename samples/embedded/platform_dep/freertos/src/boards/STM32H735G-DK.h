@@ -42,7 +42,10 @@
 
 #include "freertos_shell.h"
 
+#undef PRINT
 #define PRINT SOPC_Shell_Printf
+#undef PRINTF
+#define PRINTF SOPC_Shell_Printf
 
 // Here, the default values can be overridden for this specific card.
 #define CONFIG_SOPC_PUBLISHER_ADDRESS "opc.udp://232.1.2.100:4840"
