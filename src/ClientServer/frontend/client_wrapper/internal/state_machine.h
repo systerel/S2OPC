@@ -257,12 +257,14 @@ typedef struct SOPC_CreateMonitoredItems_Ctx
  *
  * \param subscriptionAppCtx    The user application context provided in ::SOPC_StaMac_NewCreateSubscription call
  * \param status                OPC UA status code, \p notification is only valid when ::SOPC_IsGoodStatus
- * \param notificationType      Type of notification received (::OpcUa_DataChangeNotification_EncodeableType or
- *                              ::OpcUa_EventNotificationList_EncodeableType)
+ * \param notificationType      Type of notification received (::OpcUa_DataChangeNotification_EncodeableType,
+ *                              ::OpcUa_EventNotificationList_EncodeableType or
+ *                              ::OpcUa_StatusChangeNotification_EncodeableType)
  * \param nbNotifElts           Number of elements in \p notification received and in \p monitoredItemCtxArray
+ *                              or 0 in case of subscription status change.
  * \param notification          Notification of the type indicated by \p notificationType,
- *                              either pointer to a ::OpcUa_DataChangeNotification or
- *                              ::OpcUa_EventNotificationList.
+ *                              either pointer to a ::OpcUa_DataChangeNotification,
+ *                              ::OpcUa_EventNotificationList or ::OpcUa_StatusChangeNotification.
  *                              Content is freed after callback return, thus any content to record shall be copied.
  * \param monitoredItemCtxArray Array of context for monitored items for which notification were received in
  *                              \p notification.

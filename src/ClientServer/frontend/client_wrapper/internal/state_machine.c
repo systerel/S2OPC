@@ -1900,6 +1900,32 @@ static void LockedStaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* 
     }
 }
 
+static void LockedStaMac_ProcessMsg_PubResp_StatusChangeNotif(SOPC_StaMac_Machine* pSM,
+                                                              OpcUa_PublishResponse* pPubResp,
+                                                              OpcUa_StatusChangeNotification* pStatusNotif)
+{
+    const subscriptionCtx* subCtx =
+        (subscriptionCtx*) SOPC_SLinkedList_FindFromId(pSM->pListSubscriptions, pPubResp->SubscriptionId);
+    if (NULL == subCtx)
+    {
+        return;
+    }
+
+    if (NULL != pSM->pCbkNotification)
+    {
+        // Callback shall not be called with locked mutex to avoid possible deadlock
+        SOPC_ReturnStatus status = SOPC_Mutex_Unlock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+        pSM->pCbkNotification(subCtx->subscriptionAppCtx, pPubResp->ResponseHeader.ServiceResult,
+                              &OpcUa_StatusChangeNotification_EncodeableType, 0, pStatusNotif, NULL);
+
+        // Restore lock on state machine
+        status = SOPC_Mutex_Lock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
+}
+
 static void LockedStaMac_TreatTooManyPublishRequests(SOPC_StaMac_Machine* pSM)
 {
     // Adapt the target to avoid sending too many requests
@@ -1980,6 +2006,17 @@ static void LockedStaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM,
                 OpcUa_EventNotificationList* pEventNotif =
                     (OpcUa_EventNotificationList*) pNotifMsg->NotificationData[iNotif].Body.Object.Value;
                 LockedStaMac_ProcessMsg_PubResp_EventNotifList(pSM, pPubResp, pEventNotif);
+            }
+            else if (&OpcUa_StatusChangeNotification_EncodeableType ==
+                         pNotifMsg->NotificationData[iNotif].Body.Object.ObjType &&
+                     NULL != pSM->pCbkNotification)
+            {
+                SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[iNotif].Encoding);
+
+                // New API compatible only
+                OpcUa_StatusChangeNotification* pStatusChangeNotif =
+                    (OpcUa_StatusChangeNotification*) pNotifMsg->NotificationData[iNotif].Body.Object.Value;
+                LockedStaMac_ProcessMsg_PubResp_StatusChangeNotif(pSM, pPubResp, pStatusChangeNotif);
             }
             else
             {
