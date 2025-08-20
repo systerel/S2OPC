@@ -3932,7 +3932,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         scCfgIdx = (uint32_t) params;
         scConnection = SC_GetConnection(eltId);
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ScStateMgr: SC_DISCONNECTED_ACK scIdx=%" PRIu32 " scCfgIdx=%" PRIX32, eltId, scCfgIdx);
+                               "ScStateMgr: SC_DISCONNECTED_ACK scIdx=%" PRIu32 " scCfgIdx=%" PRIu32, eltId, scCfgIdx);
         if (0 != scCfgIdx)
         {
             result = SOPC_ToolkitServer_RemoveSecureChannelConfig(scCfgIdx);
