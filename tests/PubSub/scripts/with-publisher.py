@@ -131,7 +131,7 @@ if __name__ == '__main__':
                 publisher_process.kill()
             else:
                 publisher_process.terminate()
-        
+
         log('Waiting for publisher to exit')
         publisher_ret = publisher_process.wait()
         publisher_process = None

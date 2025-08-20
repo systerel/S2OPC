@@ -22,7 +22,7 @@ import sys, os, io
 import re
 from subprocess import Popen, PIPE, STDOUT
 from time import sleep
-import threading 
+import threading
 import tap_logger
 class CLI_Tester(threading.Thread):
     """
@@ -43,7 +43,7 @@ class CLI_Tester(threading.Thread):
         # "stdbuf -oL" option is used to prevent OS from buffering input in PIPE
         self.proc= Popen( ["stdbuf", "-oL"] + [exeName], stdin=PIPE, stdout=PIPE, stderr=STDOUT, text=True, universal_newlines=True)
         self.start()
-        
+
     def readCheck(self, param):
         s,t=param
         print (f"---Wait for {s}")
@@ -78,7 +78,7 @@ class CLI_Tester(threading.Thread):
         """
         try:
             for line in iter(self.proc.stdout.readline, b''):
-                
+
                 # Check if the Process under test is still running. Exit thread otherwise.
                 if self.proc.poll() != None : break
                 if not line:
@@ -99,26 +99,26 @@ class CLI_Tester(threading.Thread):
                         # Not waiting. Simple output
                         print(">>> " + line.rstrip())
         finally: self.done = True
-    
+
     def scenExec(self, scenario):
         """
             Executes a scenario on the Process under test (PUT)
             @param scenario a [(cmd:str, param)]
-            cmd is a string providing the action to execute on PUT. Currently supporting 'sleep': 
-              - 'sleep': param is an int (the sleep duration in second) 
+            cmd is a string providing the action to execute on PUT. Currently supporting 'sleep':
+              - 'sleep': param is an int (the sleep duration in second)
               - 'write': param is a str (the text to send in PUT input PIPE)
-              - 'read': param is a (exp:re, timeout:int) with: exp= regular expression (the expected output in 
-              PUT output PIPE) and timeout the timeout for reception (in second). An exception is raised if 
+              - 'read': param is a (exp:re, timeout:int) with: exp= regular expression (the expected output in
+              PUT output PIPE) and timeout the timeout for reception (in second). An exception is raised if
               'exp' is not found within 'timeout' seconds
-              - 'readInfo': param is a (exp:re, timeout:int) with: exp= regular expression (the expected output in 
-              PUT output PIPE) and timeout the timeout for reception (in second). An exception is raised if 
+              - 'readInfo': param is a (exp:re, timeout:int) with: exp= regular expression (the expected output in
+              PUT output PIPE) and timeout the timeout for reception (in second). An exception is raised if
               'exp' is not found within 'timeout' seconds.
         """
         stat=None
         for cmd, param in scenario:
             testName = "STEP %d: %s(%s)"%(self.tap.nb_tests, cmd,param)
             stat = self.proc.poll()
-            
+
             if stat is not None:
                 print("Process exited with status =%s", stat)
                 break
@@ -134,42 +134,41 @@ class CLI_Tester(threading.Thread):
             stat = self.proc.poll()
         self.tap.finalize_report()
         return stat
-    
+
 if __name__=='__main__':
     try:
         tester = CLI_Tester("./S2OPC_CLI_PubSub_Server")
     except Exception as e:
         print(e, file =sys.stderr)
-        
-    scenario=[("sleep",2), 
+
+    scenario=[("sleep",2),
               ("readInfo",(r"Publisher running *: *NO",2.0)),
               ("readInfo",(r"Subscriber *:.*DISABLED",2.0)),
-              
-              ("write","sub start"), 
+
+              ("write","sub start"),
               ("readInfo",(r"Subscriber *:.*OPERATIONAL",2.0)),
-              ("sleep",2), 
+              ("sleep",2),
               ("readInfo",(r".*Group.*WriterId *= *20.*: *ERROR",2.0)),
-              
-              ("write","pub start"), 
+
+              ("write","pub start"),
               ("readInfo",(r"Publisher running *: *YES",2.0)),
-              ("sleep",2), 
+              ("sleep",2),
               ("readInfo",(r".*Group.*WriterId *= *20.*: *OPERATIONAL",2.0)),
-              
-              ("write","pub stop"), 
-              ("sleep",2), 
+
+              ("write","pub stop"),
+              ("sleep",2),
               ("readInfo",(r"Subscriber *:.*OPERATIONAL",2.0)),
-              ("sleep",2), 
+              ("sleep",2),
               ("readInfo",(r".*Group.*WriterId *= *20.*: *ERROR",2.0)),
-              
+
               ("write","quit"),
               ("sleep",2)
               ]
-    
+
     stat = tester.scenExec(scenario)
-    if stat != 0 : 
+    if stat != 0 :
         tester.FAILED.append(f"Exit code unexpected: {stat}")
     if tester.FAILED:
         print (f"Test failed:{tester.FAILED}")
         sys.exit(-1)
     print (f"Test OK!")
-    

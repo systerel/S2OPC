@@ -31,7 +31,7 @@ import time
 import os
 
 # overload the default client method to get key password and username with environment variable
-import utils 
+import utils
 
 from pys2opc import PyS2OPC_Client, BaseClientConnectionHandler
 

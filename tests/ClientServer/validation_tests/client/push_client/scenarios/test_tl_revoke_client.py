@@ -26,7 +26,7 @@ description = '''Test: a CA issued client certificate has been revoked. This cli
                  and he cannot reconnect to the server.'''
 
 if __name__ == '__main__':
-    
+
     # Produce log file.
     logFile = logs.create_logFile("push_server_revoke_trace.log")
     f = open(logFile, "w")
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     step = "2.c"
     clientProcessManager.processExpectNonDisconnection(client_A_process, f, step)
-  
+
     # 3. Check the presence of B in the RejectedList of the server.
     step = "3"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", "getRejectedList"]
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     step = "4.a"
     cmd = ["./push_client", "client_public/client_4k_cert.der", "client_private/encrypted_client_4k_key.pem"]
     clientProcessManager.cmdExpectFail(cmd, f, step)
-    
+
     step = "4.b"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)

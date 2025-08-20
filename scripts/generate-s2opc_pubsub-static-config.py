@@ -365,7 +365,7 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     }
     """% (msgContext.id, msgContext.version, msgContext.interval, msgContext.offset,msgContext.mqttTopic,
         encodingStringToEnum(msgContext.encoding), msgContext.securityGroupId, msgIndex, msgContext.id, msgContext.version, msgContext.interval,
-        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.securityGroupId, msgContext.mqttTopic, 
+        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.securityGroupId, msgContext.mqttTopic,
         encodingStringToEnum(msgContext.encoding), msgContext.fixedSizeBuffer))
 
     if(msgContext.keepAliveTime > 0. and cnxContext.acyclicPublisher):

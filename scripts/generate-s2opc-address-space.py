@@ -629,7 +629,7 @@ def collect_node_references(node, aliases):
 
 def parse_role_permissions(node):
     rolepermissions = []
-    
+
     rolepermissions_node = node.find(UA_ROLEPERMISSIONS_TAG)
 
     if rolepermissions_node is None:
@@ -819,17 +819,17 @@ def parse_role_permission_type_body(n):
 
     if roleid is None:
         raise ParseError('RolePermission without RoleId tag')
-    
+
     if permissions is None:
         raise ParseError('RolePermission without Permissions tag')
-    
+
     if 0 == int(permissions.text) & PERMISSIONTYPE_MASK_BROWSE:
         print("WARNING: DRP permission Browse set to 0 will be ignored because this permission is not managed.")
 
     roleid_nodeid = parse_node_id(roleid)
     if roleid_nodeid is None:
         raise ParseError('RolePermission extension object with invalid RoleId nodeId %s' % roleid_nodeid)
-    
+
     return ValueRolePermissionType(roleid_nodeid, permissions.text)
 
 def parse_identity_mapping_rule_type_body(n):
@@ -838,12 +838,12 @@ def parse_identity_mapping_rule_type_body(n):
 
     if criteria is None:
         raise ParseError('Identity without Criteria tag')
-    
+
     if criteria_type is None:
         raise ParseError('Identity without CriteriaType tag')
-    
+
     return ValueIdentityMappingRuleType(criteria.text, criteria_type.text)
-    
+
 def parse_qualified_name(n):
 
     namespace_index = n.find(UA_VALUE_NAMESPACE_INDEX_TAG)
@@ -1624,7 +1624,7 @@ def parse_uanode(no_dt_definition, xml_node, source, aliases):
             except ValueError:
                 raise ParseError('Non integer EventNotifier for node %s' % xml_node['NodeId'])
 
-    if (xml_node.tag == UA_VARIABLE_TYPE_TAG or xml_node.tag == UA_OBJECT_TYPE_TAG or 
+    if (xml_node.tag == UA_VARIABLE_TYPE_TAG or xml_node.tag == UA_OBJECT_TYPE_TAG or
         xml_node.tag == UA_REFERENCE_TYPE_TAG or xml_node.tag == UA_DATA_TYPE_TAG):
         node.is_abstract = (parse_boolean_value(xml_node.get('IsAbstract', 'false')))
 
@@ -1670,7 +1670,7 @@ def generate_item(is_const_addspace, ua_node, ty, variant_field, value_status='O
     role_permissions_str = ('(' + references_qualifier + 'OpcUa_RolePermissionType[]) {\n' +
                       ',\n'.join(role_permissions) +
                       '\n            }') if role_permissions else 'NULL'
-    
+
     begin_decl = '''    {
         OpcUa_NodeClass_%s,
         %s,
@@ -1696,7 +1696,7 @@ def generate_item(is_const_addspace, ua_node, ty, variant_field, value_status='O
         len(ua_node.references),
         references_str
         )
-    
+
     role_permissions_final = ""
     if 'NULL' != role_permissions_str:
         role_permissions_final = '''
@@ -1745,12 +1745,12 @@ def generate_item_variable_type(is_const_addspace, nodes, ua_node):
                          IsAbstract= 'true' if ua_node.is_abstract else 'false')
 
 def generate_item_object_type(is_const_addspace, nodes, ua_node):
-    return generate_item(is_const_addspace, ua_node, 'ObjectType', 'object_type', 
+    return generate_item(is_const_addspace, ua_node, 'ObjectType', 'object_type',
                          IsAbstract= 'true' if ua_node.is_abstract else 'false')
 
 
 def generate_item_reference_type(is_const_addspace, nodes, ua_node):
-    return generate_item(is_const_addspace, ua_node, 'ReferenceType', 'reference_type', 
+    return generate_item(is_const_addspace, ua_node, 'ReferenceType', 'reference_type',
                          IsAbstract= 'true' if ua_node.is_abstract else 'false')
 
 def generate_item_data_type(is_const_addspace, nodes, ua_node):

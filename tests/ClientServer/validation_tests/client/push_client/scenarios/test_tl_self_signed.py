@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # 0. Get to the server PKI initial state: self_signed certificate not present in trusted.
     step = "0"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "remove", "7925B4747C337AE9A1D382C2007B005E15B7A107", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     # 4. Admin deletes CA root. Checks CA issued client has been disconnected, and self-signed not impacted.
     step = "4.a"
-    cmd = ["./push_client", "S2OPC_Demo_PKI/trusted/certs/ca_selfsigned_pathLen0.der", 
+    cmd = ["./push_client", "S2OPC_Demo_PKI/trusted/certs/ca_selfsigned_pathLen0.der",
            "push_data/ca_selfsigned_pathLen0key.pem", "remove", "8B3615C23983024A9D1E42C404481CB640B5A793", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     step = "5"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem"]
     clientProcessManager.cmdExpectFail(cmd, f, step)
-        
+
     # 6. Safely delete the updatedTrustList of the server
     clearServerPKI.clearUpdatedPKI()
 

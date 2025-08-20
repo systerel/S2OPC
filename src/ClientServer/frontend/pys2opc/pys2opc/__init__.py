@@ -33,7 +33,7 @@ The module can be used simultaneously as a server and as a client, both with sev
 ### Client use
 
 First initialize the client with `PyS2OPC_Client.initialize`.
-Then, configure it by passing an XML configuration file to `PyS2OPC_Client.load_client_configuration_from_file`.   
+Then, configure it by passing an XML configuration file to `PyS2OPC_Client.load_client_configuration_from_file`.
 For more details on XML configuration file, see [s2opc_clientserver_config.xsd](https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd?ref_type=heads)
 Finally, the client can establish a connection to a server using the (`PyS2OPC_Client.connect`) function by selecting the user to be used in the previous XML file.
 
@@ -63,7 +63,7 @@ and receive notifications through `pys2opc.BaseClientConnectionHandler.on_datach
 Server is mainly configured by XML files: the first for the server endpoints configuration,
 which specifies security parameter, session and users parameters,
 the next file is the NodeSet describing the structure and content of the address space,
-the last file to define allowed users and their authorization (read, write, ..).   
+the last file to define allowed users and their authorization (read, write, ..).
 The configuration function migh also register callback to be notified on server (see `BaseAddressSpaceHandler`).
 
 For more details on XML server endpoint configuration file, see [s2opc_clientserver_config.xsd](https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd?ref_type=heads).

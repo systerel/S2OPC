@@ -22,7 +22,7 @@ from test_utils import clientProcessManager, clearServerPKI, logs
 import sys
 
 description = '''Test: CA untrusted is present in server PKI. A client (not known) issued by this untrusted CA cannot connect.
-                 Add this client certificate to trusted TL of the server, and check that it is able to connect. 
+                 Add this client certificate to trusted TL of the server, and check that it is able to connect.
                  Remove CA untrusted, the client is disconnected and cannot reconnect. '''
 
 if __name__ == '__main__':
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     # 0. Put the PKI into the initial state for the test: "trusted_client_cert.der" not present in trusted.
     step = "0"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "remove", "3A57B1EF80F4316AD03CE803E36C4E1A4B7C86D8", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     clientProcessManager.cmdExpectFail(cmd, f, step)
 
     step = "1.b"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", "add", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", "add",
            "client_public/trusted_client_cert.pem"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     # 3. Admin removes untrusted_cacert.der, check the disconnection of the client.
     step = "3.a"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "remove", "7DF45F3C8B546F15D8822FD036E5EDD5DB50A072", "untrusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
@@ -75,11 +75,11 @@ if __name__ == '__main__':
 
     # 6. Re-add the untrusted CA then add its issued certificate.
     step = "6"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
-           "write", "S2OPC_Demo_PKI/issuers/certs/untrusted_cacert.pem", "S2OPC_Demo_PKI/issuers/crl/untrusted_cacrl.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
+           "write", "S2OPC_Demo_PKI/issuers/certs/untrusted_cacert.pem", "S2OPC_Demo_PKI/issuers/crl/untrusted_cacrl.pem",
            "untrusted", "add", "client_public/trusted_client_cert.pem"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
-    
+
     # 7. He can eventually reconnect
     step = "7"
     cmd = ["./push_client", "client_public/trusted_client_cert.pem", "client_private/encrypted_trusted_client_key.pem", "sleep"]
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     # 8. Admin removes the client certificate (not its issuer this time), check the disconnection.
     step = "8.a"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "remove", "3A57B1EF80F4316AD03CE803E36C4E1A4B7C86D8", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     step = "9"
     cmd = ["./push_client", "client_public/trusted_client_cert.pem", "client_private/encrypted_trusted_client_key.pem"]
     clientProcessManager.cmdExpectFail(cmd, f, step)
-    
+
     # 10. Delete the updatedTrustList of the server
     clearServerPKI.clearUpdatedPKI()
 

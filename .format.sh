@@ -42,7 +42,8 @@ for f in ${CLANG_FILES}; do
     append_newline $f
 done
 
-OTHER_FILES=$(find $BSRC_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" -or -name "*.pyx"  \))
+# Check format in other files (no tabulation, end of line blank spaces and missing new line at EOF)
+OTHER_FILES=$(find $BSRC_DIR \( -name "*.mch" -or -name "*.imp" -or -name "*.ref" -or -name "*.def" -or -name "*.pmm" -or -name "*.pyx" -or -name "*.py" \))
 OTHER_FILES="$OTHER_FILES $(find . -name CMakeLists.txt)"
 for f in ${OTHER_FILES}; do
     sed 's/\t/    /g' -i $f

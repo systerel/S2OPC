@@ -46,7 +46,7 @@ def parse_xmlns(source):
             prefix, uri = elem
             if prefix not in ns_map:
                 ns_map[prefix] = uri
-    
+
     return ns_map
 
 # When non-NS0 types are generated, use the type prefix to normalize type files names
@@ -100,9 +100,9 @@ def parse_args():
                         help='(optional) directory path for non-NS0 types files generation')
     parser.add_argument('--imported_ns_prefixes', default=[], nargs='+', dest='imported_ns_prefixes',
                         help='''
-                        When other namespace types are imported 
+                        When other namespace types are imported
                         (except for "http://opcfoundation.org/UA" and "http://opcfoundation.org/BinarySchema/")
-                        the value used for --types_prefix used to generate those namespace types shall be provided 
+                        the value used for --types_prefix used to generate those namespace types shall be provided
                         to be able to reference those imported types.
                         ''')
     return parser.parse_args()
@@ -221,7 +221,7 @@ class BinarySchema:
     BUILTIN_CONVERT_TYPE_BARENAME = {
             'CharArray' : 'String'
     }
-    
+
     # Compute self.xmlns_indexes which provide computed NS index for each imported XML NS, and prefixes of imported NS
     # Note: current types NS index <N> is considered as maximum NS index, X dependencies are computed to be <N-X>, <N-X+1>, etc. in the order of Import tags except for NS0.
     def check_and_compute_ns_indexes(self, types_ns_index, imported_ns_prefixes):
@@ -246,9 +246,9 @@ class BinarySchema:
                           if xmlns_rev[nsImport.get('Namespace')] not in self.OPC_NS]
             nbNsImported = len(nsImported)
             if nbNsImported != len(imported_ns_prefixes):
-                raise Exception("Incoherent number of imported namespaces %d and provided NS types prefixes %d" % (nbNsImported, len(imported_ns_prefixes))) 
+                raise Exception("Incoherent number of imported namespaces %d and provided NS types prefixes %d" % (nbNsImported, len(imported_ns_prefixes)))
             if types_ns_index - nbNsImported <= 0:
-                raise Exception("Number of imported NS %d greater than current types NS %d" % (nbNsImported, types_ns_index)) 
+                raise Exception("Number of imported NS %d greater than current types NS %d" % (nbNsImported, types_ns_index))
             # Compute starting NS index to used based on max types_ns_index
             nsImportedIndex = types_ns_index - nbNsImported
             nsImportedCounter = 0
@@ -392,7 +392,7 @@ class BinarySchema:
         for field in fields:
             field_ns_index_name = OPCUA_ORIGIN_NS_INDEX_NAME
             is_built_in, type_index = self.get_type_index(field.type_name)
-            # When the field type is in another NS, the NS index shall be referenced 
+            # When the field type is in another NS, the NS index shall be referenced
             # and type index in this other NS types array is referenced by type index enum name
             if not is_built_in and not field.is_same_ns:
                 field_barename = field.type_name.split(':')[1]
@@ -417,8 +417,8 @@ class BinarySchema:
             field_desc = 'NULL'
         out.write(ENCODEABLE_TYPE_DESC_END.format(
             name=barename,
-            ns_URI=ns_uri, 
-            ns_index_name=self.ns_index_name,  
+            ns_URI=ns_uri,
+            ns_index_name=self.ns_index_name,
             ctype=ctype,
             nof_fields=nof_fields,
             field_desc=field_desc,

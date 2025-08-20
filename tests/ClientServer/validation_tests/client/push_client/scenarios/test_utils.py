@@ -27,7 +27,7 @@ from subprocess import Popen, PIPE
 
 def handler(signum, frame):
         raise Exception("Timeout.")
-    
+
 signal.signal(signal.SIGALRM, handler)
 max_connection_waiting_time = 2
 
@@ -37,7 +37,7 @@ RET_DISCONNECTED = 2
 RET_UPDATE_CERTIFICATE_AND_DISCONNECTED = 3
 class clientProcessManager:
 
-    # Returns the Popen object (the process) if the client has successfully 
+    # Returns the Popen object (the process) if the client has successfully
     # connected to the server (ie the keyword "Connected." has been read in stdout).
     def cmdWaitForConnection(cmd, f, step):
         f.write("Process " + ' '.join(cmd) + " started and pending.\n")
@@ -59,7 +59,7 @@ class clientProcessManager:
         except Exception:
             f.write("Error: step " + step + ": timeout triggered when trying to connect to the server.\n")
             sys.exit(1)
-    
+
     def cmdExpectSuccess(cmd, f, step):
         f.write("Command " + ' '.join(cmd) + " started. Expecting return sucess.\n")
         try:
@@ -71,14 +71,14 @@ class clientProcessManager:
         if 0 != testError:
             f.write("Error: step " + step + " failed. Return code is " + str(testError) + ", was expecting 0.\n")
             sys.exit(1)
-        
+
     def cmdExpectFail(cmd, f, step):
         f.write("Command " + ' '.join(cmd) + " started. Expecting return fail.\n")
         try:
             testError = subprocess.check_call(cmd)
         except subprocess.CalledProcessError as e:
             testError = e.returncode
-        
+
         # We expect fail. Log + exit if success.
         if 0 == testError:
             f.write("Error: step " + step + " failed. Return code is 0, was expecting " + str(RET_EXIT_FAILURE) + ".\n")
@@ -92,7 +92,7 @@ class clientProcessManager:
         except subprocess.TimeoutExpired:
             proc.kill()
             testError = 1
-        
+
         if needCertUpdated:
             if RET_UPDATE_CERTIFICATE_AND_DISCONNECTED != testError:
                 f.write("Error: step " + step + " failed. Return code is " + str(testError) + ", was expecting " + str(RET_UPDATE_CERTIFICATE_AND_DISCONNECTED) + ".\n")
@@ -110,7 +110,7 @@ class clientProcessManager:
         except subprocess.TimeoutExpired:
             proc.kill()
             testError = 0
-        
+
         # We expect non-disconnection, ie Timeout, ie testError = 0.
         # Log + exit if testError != 0.
         if 0 != testError:

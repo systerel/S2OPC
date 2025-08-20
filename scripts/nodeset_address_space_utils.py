@@ -211,7 +211,7 @@ class NSIndexReassigner(NSFinder):
 
     def __remove_ns0_index(self, expr: str):
         return _normalize_nodeid(expr)
-    
+
     def __reassigned_ns_index(self, expr: str):
         return self.__get_reassigned_expr(expr, NS_IDX_MATCHER, NS_IDX_FORMATTER)
 
@@ -231,7 +231,7 @@ class NodesetMerger(NSFinder):
     def __init__(self, verbose):
         super(NodesetMerger, self).__init__(dict())
         self.verbose = verbose
-        self.__aliases = {}  # dict ( str = alias =>  str = aliased value ) 
+        self.__aliases = {}  # dict ( str = alias =>  str = aliased value )
         self.__namespaces_uri = []  # filled in 'merge()
         self.__source = None
         self.tree = None
@@ -249,11 +249,11 @@ class NodesetMerger(NSFinder):
 
     def _iter_nid_nodes(self):
         yield from self._iter_nid_nodes_in(self.tree)
-    
+
     def _get_namespace_uri(self, nsi : int) -> str: # | None: is unsupported on python 3.9
         try: return self.__namespaces_uri[nsi]
         except:return None
-        
+
     def _get_namespace_index(self, nid : str) -> int:
         m = NS_IDX_MATCHER.match(self.__get_unaliased_node_id(nid))
         if not m :return 0
@@ -320,7 +320,7 @@ class NodesetMerger(NSFinder):
             if len(declared_ns) != len(declarations):
                 raise Exception("Duplicate Namespace URI declaration in: " + str(declarations))
             ns_count = len(declared_ns)
-    
+
         for attr in ['NodeId', 'ParentNodeId', 'DataType']:
             for node in self._iterfind(any_tree, f'*[@{attr}]'):
                 nid = node.get(attr)
@@ -384,21 +384,21 @@ class NodesetMerger(NSFinder):
                     raise Exception(f"Incompatible NS0 version in file '{source}': provided {ns0_version} but require {req_ns0_version}")
             tree_models.append(model)
         return True
-    
+
     def __init_aliases(self):
         self.__tree_aliases = self._find('uanodeset:Aliases')
         if self.__tree_aliases is None:
             print('Merge: Aliases expected to be present in first address space')
             return False
         self.__aliases = {alias.get('Alias'):_normalize_nodeid(alias.text) for alias in self.__tree_aliases}
-        
+
     def __merge_aliases(self, new: ET.ElementTree):
         source : str = self.__source
         new_aliases = self._find_in(new, 'uanodeset:Aliases')
         new_alias_dict = {}
         if new_aliases is not None:
             new_alias_dict = {alias.get('Alias'):self.ns_idx_reassigner.get_ns_index(_normalize_nodeid(alias.text)) for alias in new_aliases}
-                
+
         # Assert existing aliases are the same
         res = True
         for alias in sorted(set(self.__aliases) & set(new_alias_dict)):
@@ -614,7 +614,7 @@ class NodesetMerger(NSFinder):
         self._remove_refs_to_nids(removed_nids)
         if children:
             self._rec_bf_remove_subtree(children, subtree)
-    
+
     def remove_subtree(self, remove_root_nid: str):
         subtree = dict()
         self._rec_compute_subtree(remove_root_nid, subtree)
@@ -644,18 +644,18 @@ class NodesetMerger(NSFinder):
     def __get_unaliased_node_id(self, nid : str) -> str:
         try: return _normalize_nodeid(self.__aliases[nid])
         except: return _normalize_nodeid(nid)
-        
+
     def __get_reference_type(self, ref : ET.Element) -> str:
         # explicitly do not UNALIAS the ReferenceType
         return ref.get('ReferenceType')
-        
+
     def __get_aliases(self):
         if self.__tree_aliases is None:
             return {}
         return {alias.text: alias.get('Alias') for alias in self.__tree_aliases}
 
     def __try_unalias_and_get_nodeid(self, ref : ET.Element) -> str:
-        ''' Read text as NodeId. If it is an alias, resolve it and replace original node 
+        ''' Read text as NodeId. If it is an alias, resolve it and replace original node
             @return the unaliased NodeId
             '''
         nid = _normalize_nodeid(ref.text.strip())
@@ -663,14 +663,14 @@ class NodesetMerger(NSFinder):
             nid = self.__aliases[nid]
         except:
             pass
-        
+
         ref.text = nid
         # Replace current text
         return nid
-          
+
     def __get_unaliased_nodeid_from_text(self, ref : ET.Element) -> str:
         return self.__get_unaliased_node_id(ref.text.strip())
-        
+
     def __exists_ref(self, search: str, nids_or_aliases: set):
         for ref_node in self._iterfind(self.tree, search):
             ref_nid = ref_node.text.strip()
@@ -767,7 +767,7 @@ class NodesetMerger(NSFinder):
             nodes[nid] = node
         if error:
             return False
-    
+
         # Add reciprocal References
         # References are a tuple (SourceNode, ReferenceType, TargetNode) (Part 3, §4.3.4)
         # Only the SourceNode is required to be in the address space.
@@ -776,7 +776,7 @@ class NodesetMerger(NSFinder):
         #  if type0 and type1 are subclasses of the same concrete ReferenceType.
         # When the reference a -> b exists, and when browsing b, b <- a also exists in the inverse direction.
         # We add reciprocal References to avoid their computations at browse-time.
-    
+
         # First, compute the a -> b and b <- a sets of references
         # If no reference is missing, refs_fwd == refs_inv
         # In the Address Space, b <- a References are stored in b, hence the difficulty
@@ -790,7 +790,7 @@ class NodesetMerger(NSFinder):
         refs_inv_list = [] # [(a, type, b), ...], already existing inverse references b <- a
         # List of NSI in which issues were found (for log purpose)
         ns_to_show = set()
-        
+
         for node in self._iterfind(self.tree, './*[uanodeset:References]'):
             nids = self.__get_unaliased_node_id(_get_node_id(node))  # The starting node of the references below
             refs, = self._iterfind(node, 'uanodeset:References')
@@ -821,7 +821,7 @@ class NodesetMerger(NSFinder):
                     else:
                         refs_inv.add((nidt, type_ref, nids))
                         refs_inv_list.append((nidt, type_ref, nids))
-    
+
         # Add forward refs a -> b for which b <- a exists
         for a, t, b in refs_inv_list:
             if (a, t, b) in refs_fwd:
@@ -836,7 +836,7 @@ class NodesetMerger(NSFinder):
                     ns_to_show.update([self._get_namespace_index(x) for x in [a, b]])
                 node = nodes[a]
                 self._add_ref(node, t, b, is_forward=True)
-    
+
         # Now add inverse refs b <- a for which a -> b exists
         for a, t, b in refs_fwd_list:
             if (a, t, b) in refs_inv:
@@ -851,7 +851,7 @@ class NodesetMerger(NSFinder):
                     ns_to_show.update([self._get_namespace_index(x) for x in [a, b]])
                 node = nodes[b]
                 self._add_ref(node, t, a, is_forward=False)
-    
+
         # Note: ParentNodeId is an optional attribute. It refers to the parent node.
         #  In case the ParentNodeId is present, but the reference to the parent is not, the attribute is removed.
         # The reference to the ParentNodeId should be typed "HasComponent" (not verified)
@@ -876,15 +876,15 @@ class NodesetMerger(NSFinder):
                 #refs.append(self._create_elem('Reference', {'ReferenceType': 'HasComponent', 'IsForward': 'false'}, text=pnid))
                 # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
                 del node.attrib['ParentNodeId']
-    
+
         # Note: we don't check that the Address Space Model specified in Part 3 is valid.
-    
+
         # TODO: Remove empty <References />
-    
+
         # Help : remind the NS URI of defects found
         if ns_to_show:
             print ("Note:\n- " + "\n- ".join([f" NSI={nsi} <=> '{self._get_namespace_uri(nsi)}'" for nsi in ns_to_show]))
-               
+
         return True
 
     def __fetch_subelement(self, elem, subtag) -> ET.Element:
@@ -942,7 +942,7 @@ class NodesetMerger(NSFinder):
         return retain | corresp
 
     def remove_backward_refs(self, retain: set):
-        # HasSubtype backward refs should be kept since it might be necessary for type resolution. 
+        # HasSubtype backward refs should be kept since it might be necessary for type resolution.
         retain |= {'HasSubtype'}
         all_retain = self.__get_all_retain_values(retain)
         for node, _ in self._iter_nid_nodes():
@@ -1069,7 +1069,7 @@ def make_argparser():
                         ''')
     rm_unused.add_argument('--remove-unused', action='store_true', dest='remove_unused',
                         help='''
-                        Remove all of the type definitions which are not used by the model, as well as unused nodes. 
+                        Remove all of the type definitions which are not used by the model, as well as unused nodes.
                         This  option forces the creation of reciprocal references (sanitize).
                         This option starts with the removal of orphan nodes (see option --remove-orphans),
                         then removes the unused type definitions.

@@ -59,14 +59,14 @@ def run_test(test_key, build_config_path, hardware_capa_path, log_file):
     try:
         build_config_json = safe_json_load(Path(build_config_path))
         hardware_capa_json = safe_json_load(Path(hardware_capa_path))
-        
+
         logger.info(f"Running test : {test_key}")
         executor = Executor(build_config_json, test_key, logger, hardware_capa_json)
-        
+
         scenario_path = Path(__file__).parent / f"scenario/{executor.test_script}"
         scenario_data = safe_json_load(scenario_path)
         script_actions = parse_scenario(scenario_data)
-        
+
         executor.execute(script_actions)
     except Exception as E:
         logger.error(f"{E}")
@@ -143,7 +143,7 @@ class RemoteProcess:
         self.comm_protocol, self.comm_options \
             = get_json_arg(hardware_capa_json,["capabilities",board_name,"comm_config"])
         self.format=get_json_arg(hardware_capa_json,["os_specificities",_os,"target_write_prefix"])
-        
+
         try:
             script_path = Path(__file__).parent / "comm" / self.comm_protocol
             script_path = str(script_path.resolve())
@@ -153,7 +153,7 @@ class RemoteProcess:
         except Exception as E:
             logger.error(E)
             raise Exception(f"Unknown communication protocol {self.comm_protocol} for board {board_name}")
-        
+
         result = subprocess.run([script_path, 'get_dev', self.SN], capture_output=True, text=True)
         port = result.stdout.strip()
         _DEBUG(port)

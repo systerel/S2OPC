@@ -32,7 +32,7 @@ import random
 import os
 
 # overload the default client method to get key password and username with environment variable
-import utils 
+import utils
 
 from pys2opc import PyS2OPC, PyS2OPC_Client, SOPC_Log_Level, VariantType, DataValue, Variant
 

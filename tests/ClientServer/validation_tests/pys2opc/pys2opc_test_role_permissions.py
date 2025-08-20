@@ -38,7 +38,7 @@ Int64_DRP_no_RP : 1. Read with DRP (obs) -> OK
                   2. Write with DRP (obs) -> NOK
 
 Int64_DRP_RP : 3. Read with RP (obs) -> NOK (RP overrides DRP and RP write for obs)
-               4. Write with RP (obs) -> OK 
+               4. Write with RP (obs) -> OK
 
 Int64_DRP_RP_2 : 5. Read with RP (obs) -> NOK (RP overrides DRP and no RP for obs)
 

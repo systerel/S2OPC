@@ -42,7 +42,7 @@ class TapLogger(object):
         if self.verbose:
             print(text)
         self.tests_results.append(text)
-        
+
     def begin_section(self, section_name):
         if self.verbose:
             print(section_name)

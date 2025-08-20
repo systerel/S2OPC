@@ -58,7 +58,7 @@ def testControllerDevicePubsub(logger):
         # Maximum wait time is that SetSecurityKeys is called by controller and success.
         maxWait_call_SetSecurityKeys = CONTROLLER_SKS_KEYLIFETIME_SEC * CONTROLLER_SKS_NB_GENERATED_KEYS / 2
         waitForEvent(lambda: "Text modified by the test!" == pubsubserver_device.getValue(NID_SUB_STRING), maxWait_s=maxWait_call_SetSecurityKeys)
-        logger.add_test('TC 1: Write in controller -> Published -> Read expected value in device', 
+        logger.add_test('TC 1: Write in controller -> Published -> Read expected value in device',
                         "Text modified by the test!" == pubsubserver_device.getValue(NID_SUB_STRING))
 
         # make sure Pubsub will use new key
@@ -69,14 +69,14 @@ def testControllerDevicePubsub(logger):
         pubsubserver_device.setValue(NID_PUB_INT, NODE_VARIANT_TYPE[NID_PUB_INT], -288888)
         # Value must have been updated in controller server using Pub Sub communication
         waitForEvent(lambda: -288888 == pubsubserver_controller.getValue(NID_SUB_INT))
-        logger.add_test('TC 1: Write in device -> Published -> Read expected value in controller', 
+        logger.add_test('TC 1: Write in device -> Published -> Read expected value in controller',
                         -288888 == pubsubserver_controller.getValue(NID_SUB_INT))
 
         # Write new value in controller server
         pubsubserver_controller.setValue(NID_PUB_STRING, NODE_VARIANT_TYPE[NID_PUB_STRING], "Text modified after key renewal")
         # Value must have been updated in device server using Pub Sub communication
         waitForEvent(lambda: "Text modified after key renewal" == pubsubserver_device.getValue(NID_SUB_STRING))
-        logger.add_test('TC 1: Write in controller -> Published -> Read expected value in device', 
+        logger.add_test('TC 1: Write in controller -> Published -> Read expected value in device',
                         "Text modified after key renewal" == pubsubserver_device.getValue(NID_SUB_STRING))
 
     except Exception as e:

@@ -103,9 +103,9 @@ PYS2OPC_TYPES = {ua.VariantType.Int64: VariantType.Int64,
 
 
 class ConnectionHandler(BaseClientConnectionHandler):
-    
-    sub_count = 0    
-    
+
+    sub_count = 0
+
     """
     BaseClientConnectionHandler with datachange callback and new methods which implement the tests.
     """

@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     # 0. Put PKI into the initial state of test: "int_cli_cacert.der" and its CRL not present in trusted.
     step = "0"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "remove", "F9BC1EC02D083879F11638286C9894288DA2D26D", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
@@ -46,17 +46,17 @@ if __name__ == '__main__':
 
     # 2. Write the CA intermediate and its CRL to trusted in the server PKI. Connection with issued client possible now.
     step = "2.a"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "write", "S2OPC_Demo_PKI/trusted/certs/int_cli_cacert.pem", "S2OPC_Demo_PKI/trusted/crl/int_cli_cacrl.pem", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
     step = "2.b"
     cmd = ["./push_client", "client_public/int_client_cert.pem", "client_private/encrypted_int_client_key.pem"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
-    
+
     # 3. Write remove CA root (issuer of the CA int), fail at CloseAndUpdate.
     step = "3"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "write_remove", "8B3615C23983024A9D1E42C404481CB640B5A793", "trusted"]
     clientProcessManager.cmdExpectFail(cmd, f, step)
 
@@ -66,14 +66,14 @@ if __name__ == '__main__':
     client_process = clientProcessManager.cmdWaitForConnection(cmd, f, step)
 
     step = "4.b"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "remove", "F9BC1EC02D083879F11638286C9894288DA2D26D", "trusted"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
     step = "4.c"
     needCertUpdated = False
     clientProcessManager.processExpectDisconnection(client_process, needCertUpdated, f, step)
-    
+
     # 6. Delete the updatedTrustList of the server
     clearServerPKI.clearUpdatedPKI()
 

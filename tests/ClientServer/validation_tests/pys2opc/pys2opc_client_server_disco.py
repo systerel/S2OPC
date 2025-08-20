@@ -82,7 +82,7 @@ if __name__ == '__main__':
             # Close server_thread with server shutdown.
             PyS2OPC_Server.stop_serve()
             server_thread.join()
-        else: # Server started 
+        else: # Server started
             print("Server started", flush=True)
             with PyS2OPC_Client.initialize():
                 try :

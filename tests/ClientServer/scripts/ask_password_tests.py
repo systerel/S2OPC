@@ -50,11 +50,11 @@ if __name__ == '__main__':
     res = test_ask_password("toto", "titi", False) and res
     res = test_ask_password("tototo", "toto", False) and res
     res = test_ask_password("toto", "tototo", False) and res
-    
+
     exp_password = get_random_pwd_of_length(PASSWORD_MAX_LENGTH)
     res = test_ask_password(exp_password, exp_password, True) and res
 
     exp_password = get_random_pwd_of_length(PASSWORD_MAX_LENGTH + 1)
     res = test_ask_password(exp_password, exp_password, False) and res
-    
+
     sys.exit(0 if res else 1)

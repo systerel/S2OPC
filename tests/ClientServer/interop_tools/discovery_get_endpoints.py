@@ -83,7 +83,7 @@ def discovery_get_endpoints_tests(client, logger):
         logger.add_test('Discovery Get Endpoints Test - Aes128Sha256RsaOaep endPoint exists', False)
         logger.add_test('Discovery Get Endpoints Test - Aes128Sha256RsaOaep endPoint security mode', False)
         logger.add_test('Discovery Get Endpoints Test - Aes128Sha256RsaOaep endPoint security level', False)
-    
+
     # Aes256Sha256RsaPss
     for ep in endPoints:
         if ep.SecurityPolicyUri == securityPolicyAes256Sha256RsaPss:

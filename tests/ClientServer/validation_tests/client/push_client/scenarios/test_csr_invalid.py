@@ -21,8 +21,8 @@
 from test_utils import clientProcessManager, logs
 import sys
 
-description = '''Test: Update the server certificate (with the method UpdateCertificate) with the same certificate, expected success 
-                 and no impact on the client connections. Create some signing requests with invalid parameters and check for the 
+description = '''Test: Update the server certificate (with the method UpdateCertificate) with the same certificate, expected success
+                 and no impact on the client connections. Create some signing requests with invalid parameters and check for the
                  response of the server.'''
 
 if __name__ == '__main__':
@@ -39,26 +39,26 @@ if __name__ == '__main__':
 
     # 2. Update the server certificate with the same certificate.
     step = "2.a"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "updateCertificate", "server_public/server_4k_cert.der", "1", "S2OPC_Demo_PKI/trusted/certs/cacert.der"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
-    
+
     # this update must have no impact on the other client connection:
     clientProcessManager.processExpectNonDisconnection(client_process, f, step)
 
     # 3. Create 3 successive invalid csr requests
     # --> invalid groupID + valid certificateTypeID
     step = "3.a"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "csr", "groupIdInvalid", "certificateTypeIdValid", "noNewKey", "noNonce"]
     clientProcessManager.cmdExpectFail(cmd, f, step)
 
     # --> empty groupID + invalid certificateTypeID
     step = "3.b"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "csr", "groupIdEmpty", "certificateTypeIdInvalid", "noNewKey", "noNonce"]
     clientProcessManager.cmdExpectFail(cmd, f, step)
-    
+
     # Exit success
     f.write("Test completed with success.\n")
     f.close()

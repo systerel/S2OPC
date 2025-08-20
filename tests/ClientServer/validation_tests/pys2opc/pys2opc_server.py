@@ -238,7 +238,7 @@ if __name__ == '__main__':
         # Close server_thread with server shutdown.
         PyS2OPC_Server.stop_serve()
         server_thread.join()
-    else: # Server started 
+    else: # Server started
         res_server_start = True
         # Client writes on 2 nodes #
         res_write_notif_cb = client_write_nodes_count_cb(NODES, [DV_ns1_Int32_007,DV_ns1_UInt64_099], addSpaceHandler)

@@ -62,7 +62,7 @@ def secure_channels_connect_username(client, security_policy):
         exit(2)
 
     client.set_password(pwd)
-    
+
     client.connect()
     print('Connected')
 
@@ -96,7 +96,7 @@ class SKSServer:
         except Exception as e:
             print('Client probably not connected to SKS server. Error:')
             print(e)
-        
+
         keyLifeTime = 0
         key = 0
         if response:
@@ -109,6 +109,5 @@ class SKSServer:
                 print(f"Hexa of key {i}:", key.hex())
             print("TimeToNextKey:", response[3]/1000, "s")
             print("KeyLifeTime:", keyLifeTime, "s")
-        
+
         return key, keyLifeTime
-    

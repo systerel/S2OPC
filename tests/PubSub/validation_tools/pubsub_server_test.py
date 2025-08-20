@@ -1737,7 +1737,7 @@ def testSKSKeyLifetime(logger):
         sksServer.connect()
         StartingTokenId = 0
         RequestedKeyCount = 1
-        # We will wait SKS_NB_GENERATED_KEYS * SKS_KEYLIFETIME_SEC seconds to be sure that new keys generated  
+        # We will wait SKS_NB_GENERATED_KEYS * SKS_KEYLIFETIME_SEC seconds to be sure that new keys generated
         # by the SKS are valid for communication + check if these keys are different from previous ones.
         key_prev, keyLifeTime_prev = sksServer.callGetSecurityKeys(SKS_SECURITY_GROUP_ID, StartingTokenId, RequestedKeyCount)
         for _ in range(SKS_NB_GENERATED_KEYS):

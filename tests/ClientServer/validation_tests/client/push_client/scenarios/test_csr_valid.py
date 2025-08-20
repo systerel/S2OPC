@@ -34,12 +34,12 @@ description = '''Test: Server receives a valid CSR without new key request, it t
                  mentionning the new certificate. Same scenario with a CSR with new key this time.'''
 
 def create_certificate_from_csr_and_ca(csr, ca_cert, ca_private_key):
-    
+
     # Calling csr.extensions raises an error: "ValueError: error parsing asn1 value: ParseError { kind: EncodedDefault, location: ["BasicConstraints::ca"] }".
-    # It seems like we cannot use for example (csr.extensions.get_extension_for_class(x509.BasicConstraints).value, 
+    # It seems like we cannot use for example (csr.extensions.get_extension_for_class(x509.BasicConstraints).value,
     # csr.extensions.get_extension_for_class(x509.BasicConstraints).critical) with the Python version in the docker test.
     # Add manually the extensions to the certificate then.
-    
+
     cert = x509.CertificateBuilder().subject_name(csr.subject).issuer_name(ca_cert.subject).public_key(
     csr.public_key()).serial_number(x509.random_serial_number()).not_valid_before(
     datetime.utcnow()).not_valid_after(datetime.utcnow() + timedelta(days=10)).add_extension(
@@ -49,11 +49,11 @@ def create_certificate_from_csr_and_ca(csr, ca_cert, ca_private_key):
     x509.ExtendedKeyUsage([x509.OID_SERVER_AUTH]), critical=False).add_extension(
     x509.SubjectAlternativeName([x509.UniformResourceIdentifier('urn:S2OPC:localhost'), x509.DNSName('localhost')]), critical=False).sign(
     ca_private_key, hashes.SHA256())
-    
+
     return cert.public_bytes(serialization.Encoding.DER)
 
 def scenario_with_or_without_newKey(with_newKey, logFile):
-    
+
     # Produce log file.
     f = open(logFile, "w")
     f.write("Starting test.\n")
@@ -66,7 +66,7 @@ def scenario_with_or_without_newKey(with_newKey, logFile):
 
     # 1. CSR with new certificate and without new key. Creation succeeds.
     step = "1"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "csr", "groupIdValid", "certificateTypeIdValid", newKey, nonce]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
 
@@ -77,7 +77,7 @@ def scenario_with_or_without_newKey(with_newKey, logFile):
         ca_cert = x509.load_der_x509_certificate(ca_cert_file.read())
     with open("push_data/cakey.pem", 'rb') as ca_private_key_file:
         ca_private_key = serialization.load_pem_private_key(ca_private_key_file.read(), bytes(os.getenv("TEST_PASSWORD_CACERT"), 'utf-8'))
-        
+
     der_cert = create_certificate_from_csr_and_ca(csr, ca_cert, ca_private_key)
 
     with open("push_data/output_cert.der", 'wb') as der_cert_file:
@@ -88,10 +88,10 @@ def scenario_with_or_without_newKey(with_newKey, logFile):
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", "sleep"]
     clientA_process = clientProcessManager.cmdWaitForConnection(cmd, f, step)
 
-    # 3. Another client updates the server certificate with the new certificate, it works, 
+    # 3. Another client updates the server certificate with the new certificate, it works,
     # so they are both disconnected from the server.
     step = "3"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", "updateCertificate", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", "updateCertificate",
            "push_data/output_cert.der", "1", "S2OPC_Demo_PKI/trusted/certs/cacert.der", "sleep"]
     clientB_process = clientProcessManager.cmdWaitForConnection(cmd, f, step)
 
@@ -102,15 +102,15 @@ def scenario_with_or_without_newKey(with_newKey, logFile):
     step = "3.b"
     needCertUpdated = False
     clientProcessManager.processExpectDisconnection(clientA_process, needCertUpdated, f, step)
-    
+
     # 4. The client cannot reconnect with old server certificate, but is able to connect with the new certificate
     step = "4.a"
-    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem", 
+    cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem",
            "server_certificate", "push_data/server_4k_cert.der"]
     clientProcessManager.cmdExpectFail(cmd, f, step)
 
-    # Client uses "server_public/server_4k_cert.der" (which is the updated certificate) since no server certificate is 
-    # mentionned as argument. 
+    # Client uses "server_public/server_4k_cert.der" (which is the updated certificate) since no server certificate is
+    # mentionned as argument.
     step = "4.b"
     cmd = ["./push_client", "client_public/client_2k_cert.der", "client_private/encrypted_client_2k_key.pem"]
     clientProcessManager.cmdExpectSuccess(cmd, f, step)
@@ -119,7 +119,7 @@ def scenario_with_or_without_newKey(with_newKey, logFile):
     if with_newKey:
         os.remove("server_private/encrypted_server_4k_key.pem")
         shutil.copy("push_data/encrypted_server_4k_key.pem", "server_private")
-    
+
     ## Get back at the initial state before shutting down the server
     # Clear the data generated (csr and cert)...
     os.remove("push_data/input_csr.der")
@@ -134,7 +134,7 @@ def scenario_with_or_without_newKey(with_newKey, logFile):
 
 
 if __name__ == '__main__':
-    
+
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('scenario', help='The scenario to run, newKey or noNewKey')
     args = parser.parse_args()
