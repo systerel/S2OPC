@@ -114,14 +114,7 @@ HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_S
                                       {NULL, 0}};
 
 #elif defined SDK_PROVIDER_NXP
-typedef struct TcpIpInitSync
-{
-    SOPC_Mutex mutex;
-    SOPC_Condition cond;
-    bool initialized;
-} TcpIpInitSync_t;
 
-// todo
 #else
 #error "Sorry, Memory mapping is not defined for this board. Unsuported or Undefined SDK provider"
 #endif // SDK_PROVIDER
@@ -186,22 +179,18 @@ const char* get_EP_str(void)
 
 /*************************************************/
 // True if lwip stack was already initialized, False otherwise
-#if defined SDK_PROVIDER_STM
 static bool IslwipInitialized(void)
 {
+#if defined SDK_PROVIDER_STM
     extern struct netif gnetif;
     return NULL != gnetif.next;
-}
 #endif // SDK_PROVIDER
 
 #if defined SDK_PROVIDER_NXP
-static bool IslwipInitialized(void)
-{
     extern struct netif* netif_list;
     return (netif_list != NULL);
-}
 #endif // SDK_PROVIDER
-
+}
 /*************************************************/
 void SOPC_Platform_Setup(void)
 {

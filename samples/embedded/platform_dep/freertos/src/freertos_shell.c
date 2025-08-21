@@ -131,20 +131,17 @@ static void shell_putChar(const char c);
 
 #ifdef STM32_LINK_UART
 extern UART_HandleTypeDef STM32_LINK_UART;
+#endif // STM32_LINK_UART
 static inline void shell_putChar(const char c)
 {
+#ifdef STM32_LINK_UART
     HAL_UART_Transmit(&STM32_LINK_UART, (const unsigned char*) &c, 1, HAL_MAX_DELAY);
-}
 #elif defined SDK_PROVIDER_NXP
-static inline void shell_putChar(const char c)
-{
     DbgConsole_Putchar((int) c);
-    // uint8_t uartHandleBuffer[HAL_UART_HANDLE_SIZE];
-    // HAL_UartSendBlocking((hal_uart_handle_t) uartHandleBuffer[0], (uint8_t*) (&c), 1);
-}
 #else
 #error "Unsuported or Undefined SDK provider"
 #endif // SDK_PROVIDER
+}
 
 int __io_putchar(int ch)
 {

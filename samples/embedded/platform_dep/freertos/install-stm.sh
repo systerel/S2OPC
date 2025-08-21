@@ -25,9 +25,11 @@ SRC_DIR=${FREERTOS_CORE_DIR-}/Src/sopc
 
 OPT_LAZY=false
 OPT_CRYPTO="mbedtls"
+FREERTOS_SAMPLE=
 while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
 shift
+[[ "${PARAM-}" == "--sample" ]] && FREERTOS_SAMPLE=$1 && shift && continue
 [[ "${PARAM-}" == "--lazy" ]] && OPT_LAZY=true  && continue
 [[ "${PARAM-}" == "--nocrypto" ]] && OPT_CRYPTO="nocrypto"  && continue
 echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
@@ -43,7 +45,7 @@ echo "[II] FreeRTOS found!"
 
 # Check sample
 [[ -z ${FREERTOS_SAMPLE-} ]] && echo "[WW] FREERTOS_SAMPLE not defined, using default cli_pubsub_server" && FREERTOS_SAMPLE=cli_pubsub_server
-! [[ -d ${S2OPC_SAMPLE-}/${FREERTOS_SAMPLE-} ]] && echo "[EE] Sample '${FREERTOS_SAMPLE-}' not found. Check env var FREERTOS_SAMPLE"
+! [[ -d ${S2OPC_SAMPLE-}/${FREERTOS_SAMPLE-} ]] && echo "[EE] Sample '${FREERTOS_SAMPLE-}' not found. var --sample"
 
 echo "[II] Sample ${FREERTOS_SAMPLE-} found!"
 

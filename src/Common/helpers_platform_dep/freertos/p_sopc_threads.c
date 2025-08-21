@@ -314,5 +314,5 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
     SOPC_UNUSED_ARG(xTask);
     SOPC_UNUSED_ARG(pcTaskName);
     vTaskDelay(500);
-    assert(0);
+    SOPC_Assert_Failure(0);
 }

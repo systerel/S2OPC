@@ -358,7 +358,7 @@ static void* CLI_thread_exec(void* arg)
     SOPC_UNUSED_ARG(arg);
     PRINT("Command-Line interface ready\n");
 
-    while (SOPC_Atomic_Int_Get(&stopSignal) == 0)
+    while (SOPC_Atomic_Int_Get((int32_t*) &stopSignal) == 0)
     {
         char* line = SOPC_Shell_ReadLine();
         char* wordList = line;

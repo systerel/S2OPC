@@ -382,16 +382,15 @@ build-zephyr:
 
 build-freertos:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/freertos_build@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1
+  image: docker.aix.systerel.fr/c838/freertos_build@sha256:e41b842a3302cd0c5ce394b10553002f81c0bc7a40d16c7eed60fb2397d073ea # freertos_build:v1.2
   needs: []
   script:
-    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh'
-    - 'test -f build_freertos/freertos-sopc.elf'
-    - 'mv build_freertos/freertos-sopc.elf build_freertos/freertos-sopc-stm32h723zg.elf'
+    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_pubsub_server --nocrypto'
+    - 'test -f build_freertos/cli_pubsub_server_NUCLEO-H723ZG.elf'
     - 'rm -rf /tmp/ws_freertos/build'
-    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh -- --nocrypto'
-    - 'test -f build_freertos/freertos-sopc.elf'
-    - 'mv build_freertos/freertos-sopc.elf build_freertos/freertos-sopc-stm32h723zg-nocrypto.elf'
+    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_client --nocrypto'
+    - 'test -f build_freertos/cli_client_NUCLEO-H723ZG.elf'
+    - 'rm -rf /tmp/ws_freertos/build'
   artifacts:
     name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
