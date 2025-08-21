@@ -508,6 +508,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
     SOPC_UNUSED_ARG(params);
     SOPC_SecureListener* scListener = NULL;
     SOPC_SecureConnection* sc = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     bool result = false;
     uint32_t scIdx = 0;
     uint32_t newScIdx = 0;
@@ -579,13 +580,16 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                     sc->socketIndex = (uint32_t) auxParam;
                     sc->state = SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN;
 
-                    SOPC_SecureListenerStateMgr_SC_Token_ReverseHelloTimer(
+                    status = SOPC_SecureListenerStateMgr_SC_Token_ReverseHelloTimer(
                         &sc->connectionTimeoutTimerId, newScIdx, SOPC_REVERSE_CONNECTION_RECEIVE_RHE_DELAY_MS);
-
-                    SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, (uint32_t) auxParam, (uintptr_t) NULL,
-                                              (uintptr_t) newScIdx);
+                    result = (SOPC_STATUS_OK == status);
+                    if (result)
+                    {
+                        SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, (uint32_t) auxParam, (uintptr_t) NULL,
+                                                  (uintptr_t) newScIdx);
+                    }
                 }
-                else
+                if (!result)
                 {
                     if (0 != newScIdx)
                     {

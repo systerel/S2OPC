@@ -122,9 +122,8 @@ static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t r
 
     if (0 == timerId)
     {
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "Services: connection=%" PRIu32 " request timeout timer creation failed",
-                                 connectionIdx);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Services: connection=%" PRIu32 " request timeout timer creation failed", connectionIdx);
     }
 
     return timerId;
@@ -3616,10 +3615,12 @@ static bool SC_Chunks_CreateClientSentRequestContext(uint32_t scConnectionIdx,
             msgCtx->requestHandle = requestIdOrHandle; // Client side: it contains request handle
             msgCtx->msgType = sendMsgType;
             msgCtx->timerId = SC_Client_StartRequestTimeout(scConnectionIdx, requestIdOrHandle, requestId);
-            msgCtxRes = (SOPC_SentRequestMsg_Context*) SOPC_SLinkedList_Append(
-                scConnection->tcpSeqProperties.sentRequestIds, requestId, (uintptr_t) msgCtx);
-
-            result = (msgCtx == msgCtxRes);
+            if (0 != msgCtx->timerId)
+            {
+                msgCtxRes = (SOPC_SentRequestMsg_Context*) SOPC_SLinkedList_Append(
+                    scConnection->tcpSeqProperties.sentRequestIds, requestId, (uintptr_t) msgCtx);
+                result = (msgCtx == msgCtxRes);
+            }
         }
         break;
     case SOPC_MSG_TYPE_SC_CLO:
