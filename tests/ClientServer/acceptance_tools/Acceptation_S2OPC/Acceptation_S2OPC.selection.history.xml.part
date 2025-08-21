@@ -1,0 +1,17 @@
+  <ConformanceGroup name="History">
+   <ConformanceUnit name="Historical Access Read Raw">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="Err-001.js"/>
+     <TestCase name="Err-002.js"/>
+     <TestCase name="Err-003.js"/>
+     <TestCase name="Err-007.js"/>
+     <TestCase name="Err-008.js"/>
+     <TestCase name="Err-009.js"/>
+     <TestCase name="Err-010.js"/>
+     <TestCase name="Err-011.js"/>
+     <TestCase name="Err-012.js"/>
+     <TestCase name="Err-026.js"/>
+    </TestCases>
+   </ConformanceUnit>
+  </ConformanceGroup>

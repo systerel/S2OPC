@@ -137,7 +137,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
   </UAObject>
-  <UAVariable AccessLevel="99" BrowseName="1:Boolean_001" DataType="Boolean" NodeId="ns=1;s=Boolean_001" ParentNodeId="ns=1;i=20006" ValueRank="-1">
+  <UAVariable AccessLevel="103" BrowseName="1:Boolean_001" DataType="Boolean" NodeId="ns=1;s=Boolean_001" ParentNodeId="ns=1;i=20006" ValueRank="-1">
     <DisplayName>Boolean_001</DisplayName>
     <Description>Boolean_001</Description>
     <References>
@@ -148,7 +148,7 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="99" BrowseName="1:Boolean_002" DataType="Boolean" NodeId="ns=1;s=Boolean_002" ParentNodeId="ns=1;i=20006" ValueRank="-1">
+  <UAVariable AccessLevel="0" BrowseName="1:Boolean_002" DataType="Boolean" NodeId="ns=1;s=Boolean_002" ParentNodeId="ns=1;i=20006" ValueRank="-1">
     <DisplayName>Boolean_002</DisplayName>
     <Description>Boolean_002</Description>
     <References>
@@ -18714,7 +18714,7 @@
       </uax:ListOfDateTime>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="99" BrowseName="1:Array_Boolean_001" DataType="Boolean" NodeId="ns=1;s=Array_Boolean_001" ParentNodeId="ns=1;i=20003" ValueRank="1">
+  <UAVariable AccessLevel="103" BrowseName="1:Array_Boolean_001" DataType="Boolean" NodeId="ns=1;s=Array_Boolean_001" ParentNodeId="ns=1;i=20003" ValueRank="1">
     <DisplayName>Array_Boolean_001</DisplayName>
     <Description>Array_Boolean_001</Description>
     <References>

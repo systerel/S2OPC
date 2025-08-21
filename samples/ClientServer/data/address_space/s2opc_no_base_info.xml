@@ -3523,7 +3523,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=WriteOnlySByte</Reference>
     </References>
   </UAObject>
-  <UAVariable AccessLevel="99" BrowseName="1:Int64" DataType="Int64" NodeId="ns=1;i=1001" ParentNodeId="ns=1;i=1000">
+  <UAVariable AccessLevel="103" Historizing="true" BrowseName="1:Int64" DataType="Int64" NodeId="ns=1;i=1001" ParentNodeId="ns=1;i=1000">
     <DisplayName>Int64_1dn</DisplayName>
     <Description>Int64_1d</Description>
     <References>
@@ -3877,7 +3877,7 @@
       </uax:ListOfXmlElement>
     </Value>
   </UAVariable>
-  <UAVariable AccessLevel="99" BrowseName="1:Boolean" DataType="Boolean" NodeId="ns=1;i=1029" ParentNodeId="ns=1;i=1000" ValueRank="-1">
+  <UAVariable AccessLevel="103" BrowseName="1:Boolean" DataType="Boolean" NodeId="ns=1;i=1029" ParentNodeId="ns=1;i=1000" ValueRank="-1">
     <DisplayName>Boolean</DisplayName>
     <Description>Boolean Description</Description>
     <References>
@@ -4174,7 +4174,7 @@
       </uax:ListOfInt32>
     </Value>
   </UAVariable>
-  <UAVariable NodeId="ns=1;s=AnalogItemArrayInt32EURange" BrowseName="0:EURange" DataType="i=884" ValueRank="-1">
+  <UAVariable AccessLevel="5" NodeId="ns=1;s=AnalogItemArrayInt32EURange" BrowseName="0:EURange" DataType="i=884" ValueRank="-1">
     <DisplayName>EURange</DisplayName>
     <Description>EURange description</Description>
     <References>

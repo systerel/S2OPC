@@ -6610,7 +6610,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=Boolean_001"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -7213,7 +7213,7 @@
                </Column>
                <Column column="1">
                 <ItemData role="0" rolename="DisplayRole">
-                 <Value typename="QString" type="10" data=""/>
+                 <Value typename="QString" type="10" data="ns=1;s=AnalogItemArrayInt32EURange"/>
                 </ItemData>
                 <ChildRows size="0"/>
                </Column>
@@ -7257,7 +7257,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=Array_Boolean_001"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -8626,7 +8626,7 @@
                   </Column>
                   <Column column="1">
                    <ItemData role="0" rolename="DisplayRole">
-                    <Value typename="QString" type="10" data=""/>
+                    <Value typename="QString" type="10" data="ns=1;s=Boolean_002"/>
                    </ItemData>
                    <ChildRows size="0"/>
                   </Column>
@@ -11174,7 +11174,7 @@
                </Column>
                <Column column="1">
                 <ItemData role="0" rolename="DisplayRole">
-                 <Value typename="QString" type="10" data="0"/>
+                 <Value typename="QString" type="10" data="2"/>
                 </ItemData>
                 <ChildRows size="0"/>
                </Column>
@@ -21551,7 +21551,7 @@
          </Column>
          <Column column="1">
           <ItemData role="0" rolename="DisplayRole">
-           <Value typename="QString" type="10" data="&quot;http://opcfoundation.org/UA/&quot;, &quot;urn:S2OPC:localhost&quot;, &quot;urn:S2OPC:localhost_2&quot;"/>
+           <Value typename="QString" type="10" data="&quot;http://opcfoundation.org/UA/&quot;, &quot;urn:S2OPC:localhost&quot;, &quot;https://www.systerel.fr/S2OPC/demo/data/origin&quot;"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
