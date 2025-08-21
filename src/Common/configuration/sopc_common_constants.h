@@ -160,11 +160,6 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #define SOPC_HAS_FILESYSTEM true
 #endif /* SOPC_HAS_FILESYSTEM */
 
-/** \brief Maximum number of timers. */
-#ifndef SOPC_MAX_TIMERS
-#define SOPC_MAX_TIMERS UINT8_MAX /* TODO: avoid static maximum (see monitoredItems Id creation) */
-#endif
-
 /** \brief Maximum levels of recursion for recursive functions */
 #ifndef SOPC_RECURSION_LIMIT
 #define SOPC_RECURSION_LIMIT SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL

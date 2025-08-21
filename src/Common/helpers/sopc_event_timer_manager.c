@@ -45,8 +45,8 @@ typedef struct SOPC_EventTimer
     uint64_t periodMs;
 } SOPC_EventTimer;
 
-static bool usedTimerIds[SOPC_MAX_TIMERS + 1]; // 0 idx value is invalid (max idx = MAX)
-static uint32_t latestTimerId = 0;
+static SOPC_SLinkedList* timerIdsFreed = NULL;
+static uint32_t timerIdMax = 0;
 
 static SOPC_SLinkedList* timers = NULL;
 static SOPC_SLinkedList* periodicTimersToRestart = NULL;
@@ -74,46 +74,22 @@ static uint32_t SOPC_Internal_GetFreshTimerId_WithoutLock(void)
 {
     uint32_t result = 0;
 
-    uint32_t idx = latestTimerId;
-    if (SOPC_SLinkedList_GetLength(timers) < SOPC_MAX_TIMERS)
+    if (SOPC_SLinkedList_GetLength(timerIdsFreed) == 0)
     {
-        if (idx < SOPC_MAX_TIMERS) // 0 idx value is invalid (max idx = MAX)
+        if (timerIdMax < UINT32_MAX)
         {
-            idx = idx + 1;
+            timerIdMax++;
+            result = timerIdMax;
         }
         else
         {
-            idx = 1;
-        }
-    } // else idx == latestTimerId which leads to terminate with result == 0
-
-    while (0 == result && idx != latestTimerId)
-    {
-        if (false == usedTimerIds[idx])
-        {
-            result = idx;
-            usedTimerIds[idx] = true;
-        }
-        else
-        {
-            if (idx < SOPC_MAX_TIMERS) // 0 idx value is invalid (max idx = MAX)
-            {
-                idx = idx + 1;
-            }
-            else
-            {
-                idx = 1;                // 0 is invalid value
-                if (latestTimerId == 0) // deal with case of init to guarantee no infinite loop
-                {
-                    latestTimerId = 1;
-                }
-            }
+            // No available identifier remaining
+            result = 0;
         }
     }
-
-    if (result != 0)
+    else
     {
-        latestTimerId = result;
+        result = (uint32_t) SOPC_SLinkedList_PopHead(timerIdsFreed);
     }
 
     return result;
@@ -141,50 +117,42 @@ static int8_t SOPC_Internal_SLinkedList_EventTimerCompare(uintptr_t left, uintpt
     return result;
 }
 
-static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventTimer* timer)
+static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
 {
-    SOPC_EventTimer* result = NULL;
-
-    if (usedTimerIds[timer->id])
+    SOPC_EventTimer* timer = NULL;
+    timer = (SOPC_EventTimer*) SOPC_SLinkedList_RemoveFromId(timers, timerId);
+    if (timer != NULL)
     {
-        result = (SOPC_EventTimer*) SOPC_SLinkedList_RemoveFromId(timers, timer->id);
-        SOPC_ASSERT(result == timer);
-
-        // Set timer
-        result = (SOPC_EventTimer*) SOPC_SLinkedList_SortedInsert(timers, timer->id, (uintptr_t) timer,
-                                                                  SOPC_Internal_SLinkedList_EventTimerCompare);
-
-        if (result != timer)
+        // Release identifier for reuse
+        uintptr_t appended = SOPC_SLinkedList_Append(timerIdsFreed, timerId, (uintptr_t) timerId);
+        if (appended != (uintptr_t) timerId)
         {
-            usedTimerIds[timer->id] = false;
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
-                                   " with event=%" PRIi32 " and associated id=%" PRIu32,
-                                   timer->id, timer->event.event, timer->event.eltId);
-            SOPC_Free(timer);
+                                   "EventTimerManager: failed to add freed timer id=%" PRIu32 " to freed list",
+                                   timerId);
         }
-    }
-    else
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "EventTimerManager: failed to restart the disabled periodic timer id=%" PRIu32
-                               " with event=%" PRIi32 " and associated id=%" PRIu32,
-                               timer->id, timer->event.event, timer->event.eltId);
         SOPC_Free(timer);
     }
 }
 
-static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
+static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventTimer* timer)
 {
-    SOPC_EventTimer* timer = NULL;
-    if (usedTimerIds[timerId])
+    SOPC_EventTimer* removed = NULL;
+
+    removed = (SOPC_EventTimer*) SOPC_SLinkedList_RemoveFromId(timers, timer->id);
+    SOPC_ASSERT(removed == timer);
+
+    // Reinsert timer for sorting it by endTime
+    removed = (SOPC_EventTimer*) SOPC_SLinkedList_SortedInsert(timers, timer->id, (uintptr_t) timer,
+                                                               SOPC_Internal_SLinkedList_EventTimerCompare);
+
+    if (removed != timer)
     {
-        timer = (SOPC_EventTimer*) SOPC_SLinkedList_RemoveFromId(timers, timerId);
-        if (timer != NULL)
-        {
-            SOPC_Free(timer);
-        }
-        usedTimerIds[timerId] = false;
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
+                               " with event=%" PRIi32 " and associated id=%" PRIu32,
+                               timer->id, timer->event.event, timer->event.eltId);
+        SOPC_Internal_EventTimer_Cancel_WithoutLock(timer->id);
     }
 }
 
@@ -304,14 +272,15 @@ void SOPC_EventTimer_Initialize(void)
     }
 
     SOPC_Mutex_Initialization(&timersMutex);
-    memset(usedTimerIds, false, sizeof(bool) * (SOPC_MAX_TIMERS + 1)); // 0 idx value is invalid (max idx = MAX + 1)
-    timers = SOPC_SLinkedList_Create(SOPC_MAX_TIMERS);
-    periodicTimersToRestart = SOPC_SLinkedList_Create(SOPC_MAX_TIMERS);
+    timers = SOPC_SLinkedList_Create(0);
+    periodicTimersToRestart = SOPC_SLinkedList_Create(0);
+    timerIdsFreed = SOPC_SLinkedList_Create(0);
 
-    if (timers == NULL || periodicTimersToRestart == NULL)
+    if (timers == NULL || periodicTimersToRestart == NULL || timerIdsFreed == NULL)
     {
         SOPC_SLinkedList_Delete(timers);
         SOPC_SLinkedList_Delete(periodicTimersToRestart);
+        SOPC_SLinkedList_Delete(timerIdsFreed);
         return;
     }
 
@@ -347,6 +316,9 @@ void SOPC_EventTimer_Clear(void)
     // No need to iterate to free elements, elements are temporary added only during timer evaluation
     SOPC_SLinkedList_Delete(periodicTimersToRestart);
     periodicTimersToRestart = NULL;
+    timerIdMax = 0;
+    SOPC_SLinkedList_Delete(timerIdsFreed);
+    timerIdsFreed = NULL;
     SOPC_Mutex_Unlock(&timersMutex);
     SOPC_Mutex_Clear(&timersMutex);
 }
@@ -405,6 +377,15 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
         if (insertResult == NULL)
         {
             result = 0;
+            // Return identifier to freed list since insertion failed
+            uintptr_t appended = SOPC_SLinkedList_Append(timerIdsFreed, newTimer->id, (uintptr_t) newTimer->id);
+            if (appended != (uintptr_t) newTimer->id)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                       "EventTimerManager: failed to add freed timer id=%" PRIu32
+                                       " to freed list on insert failure",
+                                       newTimer->id);
+            }
             SOPC_Free(newTimer);
         }
     } // else 0 is invalid value => no timer available
