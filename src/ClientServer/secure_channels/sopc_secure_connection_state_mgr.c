@@ -2624,19 +2624,21 @@ static bool initServerSC(uint32_t socketIndex,
     scConnection->isServerConnection = true;
 
     result = sc_init_key_and_certs(scConnection);
+    if (result)
+    {
+        // Activate SC connection timeout (server side)
+        SOPC_ReturnStatus status =
+            SC_StartConnectionEstablishTimer(&(scConnection->connectionTimeoutTimerId), *connIdx);
+        result = (SOPC_STATUS_OK == status);
+    }
+
     if (!result)
     {
-        return false;
+        // Reset connection state to closed, socket closure is managed by caller (keep socketFailure=true here)
+        SC_CloseConnection(*connIdx, true);
     }
 
-    // Activate SC connection timeout (server side)
-    SOPC_ReturnStatus status = SC_StartConnectionEstablishTimer(&(scConnection->connectionTimeoutTimerId), *connIdx);
-    if (SOPC_STATUS_NOK == status)
-    {
-        return false;
-    }
-
-    return true;
+    return result;
 }
 
 static void onClientSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx, SOPC_Buffer* msg)
