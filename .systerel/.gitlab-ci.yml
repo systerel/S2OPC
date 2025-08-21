@@ -177,9 +177,28 @@ hil-build-zephyr:
     - if: "$HIL_TESTS != null"
       when: always
 
+hil-build-freertos:
+  stage: hil-build
+  needs: []
+  image: # digest of freertos_build :v1.2.1
+    name: docker.aix.systerel.fr/c838/freertos_build@sha256:378cc71985d8d224d1031be5d735695d84fee27ee89b04c4509a5b8d9590064a
+    entrypoint: ['']
+  script:
+    - cd .systerel/HIL_tests
+    - ./build.py --os freertos
+  artifacts:
+    name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    paths:
+      - 'build_freertos/'
+    expire_in: '1 week'
+    when: always
+  rules:
+    - if: "$HIL_TESTS != null"
+      when: always
+
 hil-test:
   stage: hil-test
-  needs: [hil-build-zephyr]
+  needs: [hil-build-zephyr, hil-build-freertos]
   tags:
       - hil
   script:
@@ -187,6 +206,7 @@ hil-test:
     - ./flash_all.py
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - 'log/'
     expire_in: '1 week'
@@ -382,7 +402,7 @@ build-zephyr:
 
 build-freertos:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/freertos_build@sha256:e41b842a3302cd0c5ce394b10553002f81c0bc7a40d16c7eed60fb2397d073ea # freertos_build:v1.2
+  image: docker.aix.systerel.fr/c838/freertos_build@sha256:378cc71985d8d224d1031be5d735695d84fee27ee89b04c4509a5b8d9590064a # freertos_build:v1.2.1.1
   needs: []
   script:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_pubsub_server --nocrypto'

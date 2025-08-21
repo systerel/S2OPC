@@ -235,3 +235,6 @@ arm-none-eabi-objcopy -O binary ${OUT_ELF-} ${OUT_BIN-}
 
 echo
 cat "${LOG_PATH}.err"
+
+# Necessary to avoid issue when doing multiple builds
+rm -rf ${BUILD_DIR}

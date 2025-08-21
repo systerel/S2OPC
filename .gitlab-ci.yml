@@ -420,7 +420,7 @@ build-zephyr:
 
 build-freertos:
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/freertos_build@sha256:e41b842a3302cd0c5ce394b10553002f81c0bc7a40d16c7eed60fb2397d073ea # freertos_build:v1.2
+  image: registry.gitlab.com/systerel/s2opc/freertos_build@sha256:378cc71985d8d224d1031be5d735695d84fee27ee89b04c4509a5b8d9590064a # freertos_build:v1.2.1
   needs: []
   script:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_pubsub_server --nocrypto'
