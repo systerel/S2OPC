@@ -3637,6 +3637,7 @@ static bool SC_Chunks_CreateClientSentRequestContext(uint32_t scConnectionIdx,
 
     if (!result)
     {
+        SOPC_Free(msgCtx);
         *errorStatus = OpcUa_BadTcpInternalError;
     }
     return result;
