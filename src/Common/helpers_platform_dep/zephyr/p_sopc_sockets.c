@@ -61,8 +61,8 @@
 
 /* Max pending connection based on max pending connections allowed by zephyr */
 
-#ifdef CONFIG_NET_SOCKETS_POLL_MAX
-#define MAX_PENDING_CONNECTION CONFIG_NET_SOCKETS_POLL_MAX
+#ifdef CONFIG_ZVFS_POLL_MAX
+#define MAX_PENDING_CONNECTION CONFIG_ZVFS_POLL_MAX
 #else
 #define MAX_PENDING_CONNECTION 4
 #endif
