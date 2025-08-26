@@ -61,10 +61,12 @@ variables:
 .nominal_build_variables: &nominal_build_variables
   S2OPC_NODE_MANAGEMENT: 1
   S2OPC_EVENT_MANAGEMENT: 1
+  S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE: 1
 
 .nominal_test_variables: &nominal_test_variables
   S2OPC_NODE_MANAGEMENT: 1
   S2OPC_EVENT_MANAGEMENT: 1
+  S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE: 1
   TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
@@ -588,7 +590,7 @@ test-unit-all-builds:
 
 .test-uactt: &test_uactt
   <<: *test_linux
-  image: com.systerel.fr:5000/c838/uactt-linux@sha256:e9118a5aa597d4e7f2bcf1f53817f120182ef3633103b9e6cf128c3945f46ca2 # uactt-linux:1.6
+  image: com.systerel.fr:5000/c838/uactt-linux@sha256:a0ae7d8858cf7da2a5cb02631807a6181f3511cc6c59498a2f2d4d92d95c048f # uactt-linux:1.8
   script:
     - ulimit -n 1024
     - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
