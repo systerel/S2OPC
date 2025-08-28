@@ -1182,6 +1182,7 @@ class PyS2OPC_Server(PyS2OPC):
         >>> with PyS2OPC_Server.serve():
         ...     # Do things here
         ...     pass
+
         When reaching out of the `with` statement, the server is automatically closed.
         See `PyS2OPC_Server.stop_serve`.
 
