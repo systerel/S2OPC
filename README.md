@@ -139,7 +139,7 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
     Permissions managed: Read, Write, Call, AddNodes, DeleteNodes, ReceiveEvents. 
     Supported role mapping criterias: anonymous, username, authenticated user.
 - Client instantiation: multiple secure channel instances and session instances
-- Client subscription service: automated management of 1 subscription per connection with monitored items
+- Client subscription service: management of subscriptions with monitored items
 - Client services requests: any discovery service or service on session request. Some request builders are provided, requests are only forwarded to server (no functional behavior).
 - Address space with all mandatory attributes: AccessLevel, (AccessLevelEx), (ArrayDimensions), BrowseName, ContainsNoLoop, DataType, (DataTypeDefinition),
   DisplayName, EvenNotifier, Executable, Historizing, IsAbstract, NodeClass, NodeId, Symmetric, UserAccessLevel, UserExecutable, Value, ValueRank (and References)

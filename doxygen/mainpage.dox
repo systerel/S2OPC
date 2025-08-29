@@ -114,7 +114,7 @@ The main functions for client execution are defined by libs2opc_client.h:
 - ::SOPC_ClientHelper_ServiceAsync: executes a service asynchronously on a connection instance.
 - ::SOPC_ClientHelper_ServiceSync: executes a service synchronously on a connection instance.
 
-Additional functions are provided and dedicated to subscription related services, it provides management of 1 subscription per connection instance:
+Additional functions are provided and dedicated to subscription related services:
 - ::SOPC_ClientHelper_CreateSubscription: creates a subscription on a connection and returns the subscription instance.
 - ::SOPC_ClientHelper_DeleteSubscription: deletes a subscription instance.
 - ::SOPC_ClientHelper_Subscription_CreateMonitoredItems: creates monitored items on a subscription instance with associated context.
