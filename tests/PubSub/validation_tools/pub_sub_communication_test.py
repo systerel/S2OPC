@@ -73,7 +73,7 @@ XML_SUB_NO_SECURITY = """<PubSub>
     </connection>
 </PubSub>"""
 
-def test(logger, isStatic):
+def test(logger):
 
     pub_server = PubSubServer(PUB_SERVER_URL, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, None, None, None, None, None)
     sub_server = PubSubServer(SUB_SERVER_URL, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, None, None, None, None, None)
@@ -118,46 +118,44 @@ def test(logger, isStatic):
         logger.add_test("TC 1: Communication has resumed after the interruption", res == True)
         
         ### 
-        #   TC 2 : Test communication without security. We only do it if the conf is not static because we need to change the 
-        #          config from secure to none.
+        #   TC 2 : Test communication without security.
         ###
-        if (isStatic == False):
-            # Load new configuration
-            pub_server.stop()
-            helpTestStopStart(pub_server, False, logger)
-            sub_server.stop()
-            helpTestStopStart(sub_server, False, logger)
-            helpConfigurationChangeAndStart(PUB_DEFAULT_XML_PATH, pub_server, XML_PUB_NO_SECURITY, logger)
-            helpConfigurationChangeAndStart(SUB_DEFAULT_XML_PATH, sub_server, XML_SUB_NO_SECURITY, logger)
-            # Write new value in pub server
-            pub_server.setValue(NID_PUB_STRING, NODE_VARIANT_TYPE[NID_PUB_STRING], "No security: New text in pub server")
-            # Value must have been updated in sub server using Pub Sub communication
-            res = waitForEvent(lambda: "No security: New text in pub server" == sub_server.getValue(NID_SUB_STRING))
-            logger.add_test("TC 2: Basic communication operational", res == True)
-            # Stop pub after the security SN has reached a value that is not easily resynchronizable with sub's value
-            sleep(1)
-            # Check that the communication is still operational before stopping the pub.
-            pub_server.setValue(NID_PUB_INT, NODE_VARIANT_TYPE[NID_PUB_INT], 57778)
-            # Value must have been updated in sub server using Pub Sub communication
-            res = waitForEvent(lambda: 57778 == sub_server.getValue(NID_SUB_INT))
-            logger.add_test("TC 2: Basic communication operational right before stopping the pub", res == True)
-            # Stop the pub
-            pub_server.stop()
-            helpTestStopStart(pub_server, False, logger)
-            logger.add_test("TC 2: Stop pub", True)
-            # Write new value in pub server
-            pub_server.setValue(NID_PUB_STRING, NODE_VARIANT_TYPE[NID_PUB_STRING], "No security: New text in pub server that will not be set in sub server")
-            # Value must have NOT been updated in sub server because Pub is stopped
-            res = waitForEvent(lambda: "No security: New text in pub server that will not be set in sub server" == sub_server.getValue(NID_SUB_STRING),
-                               maxWait_s = 2 * TIMEOUT_SEC_COMMUNICATION)
-            logger.add_test("TC 2: Basic communication not operational", res == False)
-            # Restart pub and write new published value
-            pub_server.start()
-            helpTestStopStart(pub_server, True, logger)
-            pub_server.setValue(NID_PUB_INT, NODE_VARIANT_TYPE[NID_PUB_INT], 996)
-            # Value must have been updated in sub server using Pub Sub communication
-            res = waitForEvent(lambda: 996 == sub_server.getValue(NID_SUB_INT), maxWait_s = 2 * TIMEOUT_SEC_COMMUNICATION)
-            logger.add_test("TC 2: Communication has resumed after the interruption", res == True)
+        # Load new configuration
+        pub_server.stop()
+        helpTestStopStart(pub_server, False, logger)
+        sub_server.stop()
+        helpTestStopStart(sub_server, False, logger)
+        helpConfigurationChangeAndStart(PUB_DEFAULT_XML_PATH, pub_server, XML_PUB_NO_SECURITY, logger)
+        helpConfigurationChangeAndStart(SUB_DEFAULT_XML_PATH, sub_server, XML_SUB_NO_SECURITY, logger)
+        # Write new value in pub server
+        pub_server.setValue(NID_PUB_STRING, NODE_VARIANT_TYPE[NID_PUB_STRING], "No security: New text in pub server")
+        # Value must have been updated in sub server using Pub Sub communication
+        res = waitForEvent(lambda: "No security: New text in pub server" == sub_server.getValue(NID_SUB_STRING))
+        logger.add_test("TC 2: Basic communication operational", res == True)
+        # Stop pub after the security SN has reached a value that is not easily resynchronizable with sub's value
+        sleep(1)
+        # Check that the communication is still operational before stopping the pub.
+        pub_server.setValue(NID_PUB_INT, NODE_VARIANT_TYPE[NID_PUB_INT], 57778)
+        # Value must have been updated in sub server using Pub Sub communication
+        res = waitForEvent(lambda: 57778 == sub_server.getValue(NID_SUB_INT))
+        logger.add_test("TC 2: Basic communication operational right before stopping the pub", res == True)
+        # Stop the pub
+        pub_server.stop()
+        helpTestStopStart(pub_server, False, logger)
+        logger.add_test("TC 2: Stop pub", True)
+        # Write new value in pub server
+        pub_server.setValue(NID_PUB_STRING, NODE_VARIANT_TYPE[NID_PUB_STRING], "No security: New text in pub server that will not be set in sub server")
+        # Value must have NOT been updated in sub server because Pub is stopped
+        res = waitForEvent(lambda: "No security: New text in pub server that will not be set in sub server" == sub_server.getValue(NID_SUB_STRING),
+                           maxWait_s = 2 * TIMEOUT_SEC_COMMUNICATION)
+        logger.add_test("TC 2: Basic communication not operational", res == False)
+        # Restart pub and write new published value
+        pub_server.start()
+        helpTestStopStart(pub_server, True, logger)
+        pub_server.setValue(NID_PUB_INT, NODE_VARIANT_TYPE[NID_PUB_INT], 996)
+        # Value must have been updated in sub server using Pub Sub communication
+        res = waitForEvent(lambda: 996 == sub_server.getValue(NID_SUB_INT), maxWait_s = 2 * TIMEOUT_SEC_COMMUNICATION)
+        logger.add_test("TC 2: Communication has resumed after the interruption", res == True)
 
         # Stop pub and sub
         pub_server.stop()
@@ -177,11 +175,9 @@ def test(logger, isStatic):
 
 if __name__=='__main__':
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('--static', action='store_true', default=False,
-                           help='Flag to indicates that Pub-Sub configuration is static. Default is false')
     argparser.add_argument('--tap', dest='tap', default='pub_sub_communication_test.tap', help='Set the TAP file name for tests results')
     argparser.add_argument('--verbose', action='store_true', default=False, help='Verbose mode. Default is false')
     args = argparser.parse_args()
     logger = TapLogger(args.tap, verbose=args.verbose)
-    test(logger, args.static)
+    test(logger)
 

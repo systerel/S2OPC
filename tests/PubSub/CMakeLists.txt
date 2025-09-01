@@ -280,11 +280,11 @@ if(NOT S2OPC_PUBSUB_ONLY)
      set(test_server_static "--static")
   else()
      set(test_server_static "")
+     s2opc_pubsub_server_validation_test("pub_sub_communication_test" pubsub_server "" test_server_sks 4841)
   endif()
 
   s2opc_pubsub_server_validation_test("pubsub_server_test" pubsub_server "${test_server_static}" test_server_sks 4841)
   s2opc_pubsub_server_validation_test("controller_device_pubsub_test" controller_sks_client "" device_sks_server_push 4842)
-  s2opc_pubsub_server_validation_test("pub_sub_communication_test" pubsub_server "${test_server_static}" test_server_sks 4841)
 
   # Test check signature failure callback is called when no keys are available
   add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_no_keys"
