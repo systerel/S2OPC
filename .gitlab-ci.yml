@@ -26,7 +26,7 @@
 #   - build: # 'WITH_STATIC_SECURITY_DATA: 1', 'WITH_CONST_ADDSPACE: 1' and 'PUBSUB_STATIC_CONFIG: 1'
 #     - build-linux64-static-conf
 #   - tests:
-#     - test-unit
+#     - test-unit-all-builds
 #   - build-others:
 #     - build-win32
 #     - build-win64
@@ -568,7 +568,7 @@ test-unit-all-tests:
     - if: "$ALL_TESTS != null"
       when: on_success
 
-# Test unit for NOT ALL_TESTS variable
+# Test unit for (NOT ALL_TESTS && NOT ALL_BUILDS) variables
 test-unit:
   <<: *test_unit
   variables:
@@ -577,7 +577,17 @@ test-unit:
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
            $WITH_COVERITY == null && $WITH_DOC == null && \
-           $ALL_TESTS == null && $WITH_SONAR == null" # + excludes ALL_TESTS
+           $ALL_TESTS == null && $ALL_BUILDS == null && \
+           $WITH_SONAR == null" # + excludes ALL_TESTS, and ALL_BUILDS since it has a special test job
+      when: on_success
+
+# Test unit for (ALL_BUILDS && NOT ALL_TESTS) variables
+test-unit-all-builds:
+  <<: *test_unit
+  variables:
+    <<: [*nominal_test_variables,*all-builds_build_variables]
+  rules:
+    - if: "$ALL_BUILDS != null && $ALL_TESTS == null" 
       when: on_success
 
 .test-uactt: &test_uactt

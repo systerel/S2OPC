@@ -107,9 +107,10 @@ xml_parser_test.tap'
 PUBSUB_CLIENTSERVER_TAP_FILES='cli_self_test.tap
 pubsub_server_test.tap
 controller_device_pubsub_test.tap
-pub_sub_communication_test.tap
 pubsub_check_sign_failure_callback_sub_no_keys.tap
 pubsub_check_sign_failure_callback_sub_unexpected_keys.tap'
+
+PUBSUB_CLIENTSERVER_DYNAMIC_ONLY_TAP_FILES='pub_sub_communication_test.tap'
 
 PYS2OPC_TAP_FILES=$'\nvalidation_pys2opc_client.tap
 validation_pys2opc_client_server_disco.tap
@@ -203,6 +204,9 @@ if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
    EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_TAP_FILES
    if [ -z $S2OPC_PUBSUB_ONLY ]; then
        EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_CLIENTSERVER_TAP_FILES
+       if [ -z $PUBSUB_STATIC_CONFIG ]; then
+          EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_CLIENTSERVER_DYNAMIC_ONLY_TAP_FILES
+       fi
    fi
    ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
    CTEST_RET2=$?
