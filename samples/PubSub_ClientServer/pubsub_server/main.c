@@ -144,6 +144,12 @@ int main(int argc, char* const argv[])
     }
     if (argc > 2)
     {
+#ifdef PUBSUB_STATIC_CONFIG
+        printf(
+            "Error: Pubsub config is loaded statically (option PUBSUB_STATIC_CONFIG), therefore you cannot provide a "
+            "XML config path.\n");
+        exit(1);
+#endif
         // If 2 args are provided, there shall be only 2 arguments and be as follow:
         // - argv[1] = endpoint url of server
         // - argv[2] = XML config pubsub
