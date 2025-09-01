@@ -152,7 +152,7 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
         printf(
             "Error. Client config is loaded by XML: variable TEST_CLIENT_XML_CONFIG needs "
             "to be set, e.g.: TEST_CLIENT_XML_CONFIG=./S2OPC_Client_Test_Config.xml "
-            "TEST_PASSWORD_PRIVATE_KEY=password ./toolkit_test_client_add_nodes\n");
+            "TEST_PASSWORD_PRIVATE_KEY=password ./toolkit_test_client_delete_nodes\n");
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
