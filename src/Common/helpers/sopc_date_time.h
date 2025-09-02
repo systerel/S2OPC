@@ -52,7 +52,9 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
  * \param time     time value in DataTime format, which is 100 nanoseconds from 1601/01/01 00:00:00 UTC
  * \param local    provides local time if set, UTC time otherwise
  * \param compact  provides compact version when flag is set
- * \return         A new allocated representation of time. Must be freed by caller with \p SOPC_Free
+ * \return         A new allocated representation of time, or NULL in case of allocation failure or
+ *                 bad input parameters \p time value like 0 or out of bounds.
+ *                 Must be freed by caller with \p SOPC_Free
  *
  */
 char* SOPC_Time_GetString(SOPC_DateTime time, bool local, bool compact);

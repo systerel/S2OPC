@@ -43,7 +43,10 @@ char* SOPC_Time_GetString(SOPC_DateTime time, bool local, bool compact)
 
     time_t seconds = 0;
     SOPC_ReturnStatus status = SOPC_Time_ToUnixTime(time, &seconds);
-    SOPC_ASSERT(status == SOPC_STATUS_OK);
+    if (SOPC_STATUS_OK != status)
+    {
+        return NULL;
+    }
 
     uint32_t milliseconds = (uint32_t)((time / 10000) % 1000);
     struct tm tm;
