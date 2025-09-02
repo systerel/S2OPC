@@ -221,6 +221,6 @@ void SOPC_CircularLogFile_Delete(SOPC_CircularLogFile** ppFile)
             SOPC_Free(pFile->filePath);
         }
         SOPC_Free(pFile);
-        pFile = NULL;
+        *ppFile = NULL;
     }
 }
