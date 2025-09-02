@@ -384,13 +384,13 @@ build-rpi:
 # Used by coverity, also starts the analysis
 build-linux64-coverity:
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:96d7f30b13b7b0404f4f20c37dc50cc22fcf959899be409b3d9e45d57127014e # digest of coverity:1.12
+  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:00c26504f3603510996ff846e88e02c7f4d01113ea9eaa2e4ac5337536b56116 # digest of coverity:1.13
   needs: []
   script: |-
     mkdir build
     cd build
     cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DS2OPC_NODE_MANAGEMENT=1 -DS2OPC_EVENT_MANAGEMENT=1 ..
-    /opt/cov-analysis-linux64-2024.6.1/bin/cov-build --dir cov-int make
+    /opt/cov-analysis-linux64/bin/cov-build --dir cov-int make
     tar czf cov-int.tar.gz cov-int
     curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC
   rules:
