@@ -84,7 +84,7 @@ def test(logger):
         helpTestStopStart(sub_server, True, logger)
 
         ###
-        #   TC 1 : Test communication with security 
+        #   TC 1 : Test communication with security
         ###
         # Write new value in pub server
         pub_server.setValue(NID_PUB_STRING, NODE_VARIANT_TYPE[NID_PUB_STRING], "New text in pub server")
@@ -111,12 +111,12 @@ def test(logger):
         # Restart pub and write new published value
         pub_server.start()
         helpTestStopStart(pub_server, True, logger)
-        sleep(PUBSUB_SCHEDULER_FIRST_PERIOD) # need to wait for the pub to GetSecurityKeys here 
+        sleep(PUBSUB_SCHEDULER_FIRST_PERIOD) # need to wait for the pub to GetSecurityKeys here
         pub_server.setValue(NID_PUB_INT, NODE_VARIANT_TYPE[NID_PUB_INT], -578)
         # Value must have been updated in sub server using Pub Sub communication
         res = waitForEvent(lambda: -578 == sub_server.getValue(NID_SUB_INT), maxWait_s = 2 * TIMEOUT_SEC_COMMUNICATION)
         logger.add_test("TC 1: Communication has resumed after the interruption", res == True)
-        
+
         ### 
         #   TC 2 : Test communication without security.
         ###
