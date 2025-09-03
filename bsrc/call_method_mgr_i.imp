@@ -462,7 +462,8 @@ OPERATIONS
                     CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1          &
                     CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) &
 
-                    /* TODO $0 is not allowed..
+                    /* TODO $0 is not allowed: we should declare CallMethodRes_AllocatedInputArgumentResult in current machine
+                       Note: $0 only references the state prior to the OPERATION (and not the LOOP nor LOOP iteration)
                     {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult =
                     {p_callMethod} <<| CallMethodRes_AllocatedInputArgumentResult$0 &
                     {p_callMethod} <<| CallMethodRes_InputArgumentResult =
