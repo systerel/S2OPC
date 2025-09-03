@@ -326,6 +326,7 @@ static void free_subscriptionCtx(uint32_t id, uintptr_t val)
         subCtx->miCliHandleToUserAppCtxDict = NULL;
         SOPC_Dict_Delete(subCtx->miIdToCliHandleDict);
         subCtx->miIdToCliHandleDict = NULL;
+        SOPC_Free(subCtx);
     }
 }
 
@@ -2082,8 +2083,6 @@ static void LockedStaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machi
                                    "to memory allocation problem.",
                                    resp->SubscriptionId);
             free_subscriptionCtx(0, (uintptr_t) subCtx);
-            SOPC_Free(subCtx);
-            subCtx = NULL;
         }
         else
         {
