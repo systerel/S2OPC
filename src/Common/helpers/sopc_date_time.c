@@ -142,12 +142,6 @@ SOPC_ReturnStatus SOPC_Time_ToUnixTime(SOPC_DateTime dt, SOPC_Unix_Time* res)
 
     secs -= SOPC_SECONDS_BETWEEN_EPOCHS;
 
-    // Prevent using two memory words on 32-bit systems
-    if (secs > LONG_MAX)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
     if (secs == (int64_t)(SOPC_Unix_Time) secs)
     {
         *res = (SOPC_Unix_Time) secs;
