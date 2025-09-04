@@ -37,6 +37,7 @@
 #include "opcua_identifiers.h"
 
 static const SOPC_NodeId namespaceArray_nid = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_NamespaceArray);
+static const SOPC_String opcua_uri = SOPC_STRING("http://opcfoundation.org/UA/");
 
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
@@ -434,6 +435,83 @@ bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint)
     return true;
 }
 
+// Check that NamespaceArray array has at least 2 values (+ type), and precisely:
+// - NamespaceArray[0] = OPC UA ("http://opcfoundation.org/UA/")
+// - NamespaceArray[1] = ProductURI (= ApplicationURI)
+static SOPC_ReturnStatus check_opcua_values_nsArray(SOPC_Variant* nsArray_value)
+{
+    SOPC_ASSERT(NULL != nsArray_value);
+
+    SOPC_S2OPC_Config* config = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ReturnStatus status = (NULL != config) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Check: needs at least 2 values.
+        status = (2 <= nsArray_value->Value.Array.Length) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Check: values must be String.
+            status = (SOPC_String_Id == nsArray_value->BuiltInTypeId) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+            if (SOPC_STATUS_OK == status)
+            {
+                int32_t comparison = -1;
+                // First value
+                const SOPC_String* value0 = &nsArray_value->Value.Array.Content.StringArr[0];
+                status = SOPC_String_Compare(&opcua_uri, value0, false, &comparison);
+                if (SOPC_STATUS_OK != status || 0 != comparison)
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "First value of node 'NamespaceArray': %s is not equal to OPC UA "
+                                           "URI ('http://opcfoundation.org/UA/'). "
+                                           "Server will stop.",
+                                           SOPC_String_GetRawCString(value0));
+                    status = SOPC_STATUS_NOK;
+                }
+                else
+                {
+                    // Second value
+                    const SOPC_String* value1 = &nsArray_value->Value.Array.Content.StringArr[1];
+                    status = SOPC_String_Compare(&config->serverConfig.serverDescription.ProductUri, value1, false,
+                                                 &comparison);
+                    if (SOPC_STATUS_OK != status || 0 != comparison)
+                    {
+                        SOPC_Logger_TraceError(
+                            SOPC_LOG_MODULE_CLIENTSERVER,
+                            "Second value of node 'NamespaceArray': %s is not equal to ProductURI (which is "
+                            "also ApplicationURI): %s. Server will stop.",
+                            SOPC_String_GetRawCString(value1),
+                            SOPC_String_GetRawCString(&config->serverConfig.serverDescription.ProductUri));
+                        status = SOPC_STATUS_NOK;
+                    }
+                }
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Node 'NamespaceArray' has invalid value DataType. Must be String. "
+                                       "Server will stop.");
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Node 'NamespaceArray' has invalid number of values. Needs at least 2."
+                                   "Server will stop.");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Unable to retrieve server config. Make sure to have initialized the toolkit."
+                               "Server will stop.");
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
@@ -470,6 +548,12 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* add
                     "Inconsistency in the number of NS between: value of node NamespaceArray (nb NS = %d) and "
                     "address space (nodes NS index).",
                     nbOfNS);
+            }
+            else
+            {
+                // Number of NS in NamespaceArray = nbr of NS in address space.
+                // Now check that the two first values are the good ones (OPC UA).
+                status = check_opcua_values_nsArray(value);
             }
         }
         else
