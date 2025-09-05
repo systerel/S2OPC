@@ -32,22 +32,19 @@ SEES
     address_space_bs
 
 CONCRETE_VARIABLES
-    has_NamespaceIndexMax_i,
     a_nsIdxMax_i
 
 INVARIANT
-    has_NamespaceIndexMax_i : BOOL &
     a_nsIdxMax_i : NAT &
     a_nsIdxMax = cast_t_NamespaceIdx(a_nsIdxMax_i)
 
 INITIALISATION
-    has_NamespaceIndexMax_i := FALSE;
     a_nsIdxMax_i := 0
 
 OPERATIONS
 
     /* OPERATIONS OF THE MODULE */
-    may_initialize_max_namespace_idx =
+    update_max_namespace_idx =
     VAR
         l_nid_valid,
         l_Server_NamespaceArray_node,
@@ -56,19 +53,16 @@ OPERATIONS
         l_val_sc,
         l_val_ts_src
     IN
-        IF has_NamespaceIndexMax_i = FALSE THEN
-            // Read the value of the server NamespaceArray which is the "namespace table" (OPC UA)
-            l_nid_valid, l_Server_NamespaceArray_node <-- readall_AddressSpace_Node(c_Server_NamespaceArray_NodeId);
-            IF l_nid_valid = TRUE THEN
-                l_sc, l_val, l_val_sc, l_val_ts_src
-                    <-- read_AddressSpace_Raw_Node_Value_value(l_Server_NamespaceArray_node, c_Server_NamespaceArray_NodeId, e_aid_Value);
-                IF l_sc = e_sc_ok
-                THEN
-                    // Get the number of namespaces URIs in the array
-                    a_nsIdxMax_i <-- read_variant_max_namespaceIndex(l_val);
-                    has_NamespaceIndexMax_i := TRUE;
-                    read_AddressSpace_free_variant(l_val) /* Frees the shallow copy only */
-                END
+        // Read the value of the server NamespaceArray which is the "namespace table" (OPC UA)
+        l_nid_valid, l_Server_NamespaceArray_node <-- readall_AddressSpace_Node(c_Server_NamespaceArray_NodeId);
+        IF l_nid_valid = TRUE THEN
+            l_sc, l_val, l_val_sc, l_val_ts_src
+                <-- read_AddressSpace_Raw_Node_Value_value(l_Server_NamespaceArray_node, c_Server_NamespaceArray_NodeId, e_aid_Value);
+            IF l_sc = e_sc_ok
+            THEN
+                // Get the number of namespaces URIs in the array
+                a_nsIdxMax_i <-- read_variant_max_namespaceIndex(l_val);
+                read_AddressSpace_free_variant(l_val) /* Frees the shallow copy only */
             END
         END
     END

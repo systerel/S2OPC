@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.c
 
- Date                 : 30/07/2025 08:56:23
+ Date                 : 05/09/2025 13:22:12
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -44,9 +44,18 @@ void service_add_nodes_1__INITIALISATION(void) {
 void service_add_nodes_1__has_NamespaceIndex(
    const constants__t_NamespaceIdx service_add_nodes_1__p_idx,
    t_bool * const service_add_nodes_1__bres) {
-   address_space_namespaces_indexes__may_initialize_max_namespace_idx();
-   address_space_namespaces_indexes__has_NamespaceIndex_index(service_add_nodes_1__p_idx,
-      service_add_nodes_1__bres);
+   {
+      t_bool service_add_nodes_1__l_bres;
+      
+      address_space_namespaces_indexes__has_NamespaceIndex_index(service_add_nodes_1__p_idx,
+         &service_add_nodes_1__l_bres);
+      if (service_add_nodes_1__l_bres == false) {
+         address_space_namespaces_indexes__update_max_namespace_idx();
+         address_space_namespaces_indexes__has_NamespaceIndex_index(service_add_nodes_1__p_idx,
+            &service_add_nodes_1__l_bres);
+      }
+      *service_add_nodes_1__bres = service_add_nodes_1__l_bres;
+   }
 }
 
 void service_add_nodes_1__check_add_nodes_item_params_parent_nid(

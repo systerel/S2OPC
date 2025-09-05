@@ -83,8 +83,8 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    /* Set number of namespaces in cache if it was not done previously.
-    Checks if the given NS index is defined in the server NamespacesArray */
+    /* Checks if the given NS index is defined in the server NamespacesArray.
+       This operation may update the number of namespaces in cache. */
     bres <-- has_NamespaceIndex(p_idx) =
     PRE
         p_idx : t_NamespaceIdx
@@ -265,12 +265,20 @@ OPERATIONS
     /* LOCAL_OPERATIONS */
 
     bres <-- has_NamespaceIndex(p_idx) =
-    BEGIN
-        may_initialize_max_namespace_idx;
-        bres <-- has_NamespaceIndex_index(p_idx)
+    VAR
+        l_bres
+    IN
+        l_bres <-- has_NamespaceIndex_index(p_idx);
+        // Optimization: update only once per AddNodes request (do not enter
+        // in the IF in this case).
+        IF l_bres = FALSE
+        THEN
+            update_max_namespace_idx;
+            l_bres <-- has_NamespaceIndex_index(p_idx)
+        END;
+        bres := l_bres
     END
     ;
-
 
     sc_operation <-- check_add_nodes_item_params_parent_nid(p_parentNid) =
     VAR

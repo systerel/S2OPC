@@ -21,7 +21,7 @@
 
  File Name            : address_space_namespaces_indexes.h
 
- Date                 : 29/07/2025 17:01:20
+ Date                 : 05/09/2025 13:22:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -51,7 +51,6 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 extern t_entier4 address_space_namespaces_indexes__a_nsIdxMax_i;
-extern t_bool address_space_namespaces_indexes__has_NamespaceIndexMax_i;
 
 /*------------------------
    INITIALISATION Clause
@@ -64,6 +63,6 @@ extern void address_space_namespaces_indexes__INITIALISATION(void);
 extern void address_space_namespaces_indexes__has_NamespaceIndex_index(
    const constants__t_NamespaceIdx address_space_namespaces_indexes__p_idx,
    t_bool * const address_space_namespaces_indexes__bres);
-extern void address_space_namespaces_indexes__may_initialize_max_namespace_idx(void);
+extern void address_space_namespaces_indexes__update_max_namespace_idx(void);
 
 #endif

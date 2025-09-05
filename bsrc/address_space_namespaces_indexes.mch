@@ -33,7 +33,7 @@ INITIALISATION
     a_nsIdxMax := cast_t_NamespaceIdx(0)
 OPERATIONS
 
-    may_initialize_max_namespace_idx =
+    update_max_namespace_idx =
     BEGIN
         a_nsIdxMax :(a_nsIdxMax : t_NamespaceIdx)
     END
