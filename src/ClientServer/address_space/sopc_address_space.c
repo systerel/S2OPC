@@ -22,9 +22,9 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_address_space.h"
+#include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
-#include "sopc_dict.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
@@ -56,9 +56,9 @@ struct _SOPC_AddressSpace
     SOPC_AddressSpace_Node* const_nodes;
     uint32_t nb_variables;
     SOPC_Variant* variables;
-    /* Used to store max numeric id stored in each namespace (used by the fresh nodeId generation function). */
-    uint16_t nb_ns;
-    uint32_t* maxNsNumId;
+    /* Array of uint32_t, used to store max numeric id stored in each namespace (used by the fresh nodeId
+       generation function). */
+    SOPC_Array* array_maxNsNumId;
 };
 
 void SOPC_AddressSpace_Node_Initialize(SOPC_AddressSpace* space,
@@ -665,12 +665,8 @@ void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space)
         space->const_nodes = NULL;
         space->nb_variables = 0;
         space->variables = NULL;
-        space->nb_ns = 0;
-        if (space->maxNsNumId != NULL)
-        {
-            SOPC_Free(space->maxNsNumId);
-            space->maxNsNumId = NULL;
-        }
+        SOPC_Array_Delete(space->array_maxNsNumId);
+        space->array_maxNsNumId = NULL;
         SOPC_Free(space);
     }
 }
@@ -741,32 +737,33 @@ void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEa
 
 typedef struct
 {
-    uint32_t* nsMaxIdArray;
-    uint16_t nbNs;
+    // Array of uint32_t
+    SOPC_Array* array_nsMaxIdArray;
     SOPC_ReturnStatus status;
 } AddressSpace_NsInitialize_Context;
 
 /**
  * \brief Compare the numeric ID (if any) of incoming node: \p key with the maxId: \p user_data
  *        for the same NS. If greater, then update maxId.
- *        If the NS of a nodeId in AddSpace is greater than the number of NS (nbNs),
+ *        If the NS of a nodeId in AddSpace is greater than the number of NS (length of the array),
  *        nsInitCtx->status is set to SOPC_STATUS_INVALID_STATE.
  *
  * \param key       The incoming node Id ::SOPC_NodeId*
  * \param value     Unused
- * \param user_data ctx with nsMaxIdArray, nbNs and a status
+ * \param user_data ctx with dict_nsMaxIdArray and a status
  */
 static void CompareNodeNumIdWithMaxId_ForEachNS(const uintptr_t key, const uintptr_t value, uintptr_t user_data)
 {
     SOPC_UNUSED_ARG(value);
     AddressSpace_NsInitialize_Context* nsInitCtx = (AddressSpace_NsInitialize_Context*) user_data;
     const SOPC_NodeId* nodeId = (SOPC_NodeId*) key;
-    if (nodeId->Namespace < nsInitCtx->nbNs)
+    if (nodeId->Namespace < (uint16_t) SOPC_Array_Size(nsInitCtx->array_nsMaxIdArray))
     {
-        if (SOPC_IdentifierType_Numeric == nodeId->IdentifierType &&
-            nodeId->Data.Numeric > nsInitCtx->nsMaxIdArray[nodeId->Namespace])
+        uint32_t* pCurrMax = (uint32_t*) SOPC_Array_Get_Ptr(nsInitCtx->array_nsMaxIdArray, nodeId->Namespace);
+        if (SOPC_IdentifierType_Numeric == nodeId->IdentifierType && NULL != pCurrMax &&
+            nodeId->Data.Numeric > *pCurrMax)
         {
-            nsInitCtx->nsMaxIdArray[nodeId->Namespace] = nodeId->Data.Numeric;
+            *pCurrMax = nodeId->Data.Numeric;
         }
     }
     else
@@ -780,80 +777,81 @@ static void CompareNodeNumIdWithMaxId_ForEachNS(const uintptr_t key, const uintp
  * \brief Run though all AddSpace to find the max numeric ID
  *        of each namespace.
  *
- * \param addSpace     The addressSpace.
- * \param nbNs         The number of namespaces in addressSpace.
- * \param nsMaxIdArray Array of max numeric id for each NS [0-nbNs].
+ * \param addSpace          The addressSpace.
+ * \param dict_nsMaxIdArray Dict of max numeric id for each NS [0-nbNs].
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_STATE if NS index of a nodeId in AddSpace is greater than the number of NS (nbNs).
 
  */
-static SOPC_ReturnStatus FindInternalMaxIdForEachNS(SOPC_AddressSpace* addSpace,
-                                                    const uint16_t nbNs,
-                                                    uint32_t* nsMaxIdArray)
+static SOPC_ReturnStatus FindInternalMaxIdForEachNS(SOPC_AddressSpace* addSpace, SOPC_Array* array_nsMaxNsId)
 {
-    AddressSpace_NsInitialize_Context nsInitCtx = {
-        .nsMaxIdArray = nsMaxIdArray, .nbNs = nbNs, .status = SOPC_STATUS_OK};
+    AddressSpace_NsInitialize_Context nsInitCtx = {.array_nsMaxIdArray = array_nsMaxNsId, .status = SOPC_STATUS_OK};
     SOPC_AddressSpace_ForEach(addSpace, CompareNodeNumIdWithMaxId_ForEachNS, (uintptr_t) &nsInitCtx);
     return nsInitCtx.status;
 }
 
 SOPC_ReturnStatus SOPC_AddressSpace_MaxNsNumId_Initialize(SOPC_AddressSpace* addSpace, uint16_t nbNs)
 {
-    uint32_t* nsMaxIdArray = SOPC_Calloc(nbNs, sizeof(*nsMaxIdArray));
-    SOPC_ReturnStatus status = FindInternalMaxIdForEachNS(addSpace, nbNs, nsMaxIdArray);
+    SOPC_Array* array_nsMaxNsId = SOPC_Array_Create(sizeof(uint32_t), nbNs, NULL);
+    SOPC_ReturnStatus status = (NULL != array_nsMaxNsId) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     if (SOPC_STATUS_OK == status)
     {
-        addSpace->nb_ns = nbNs;
-        addSpace->maxNsNumId = nsMaxIdArray;
+        status = SOPC_Array_Append_Values(array_nsMaxNsId, NULL, nbNs) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = FindInternalMaxIdForEachNS(addSpace, array_nsMaxNsId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        addSpace->array_maxNsNumId = array_nsMaxNsId;
     }
     else
     {
-        SOPC_Free(nsMaxIdArray);
-        nsMaxIdArray = NULL;
+        SOPC_Array_Delete(array_nsMaxNsId);
+        array_nsMaxNsId = NULL;
     }
     return status;
 }
 
-static uint16_t Get_NumberOfNs(const SOPC_AddressSpace* addSpace)
+static size_t Get_NumberOfNs(const SOPC_AddressSpace* addSpace)
 {
-    return addSpace->nb_ns;
+    SOPC_ASSERT(NULL != addSpace && NULL != addSpace->array_maxNsNumId);
+    return SOPC_Array_Size(addSpace->array_maxNsNumId);
 }
 
-static uint32_t Get_MaxNumIdForNs(const SOPC_AddressSpace* addSpace, uint16_t ns)
+static uint32_t* Get_MaxNumIdForNs(const SOPC_AddressSpace* addSpace, uint16_t ns)
 {
-    return addSpace->maxNsNumId[ns];
-}
-
-static void Set_MaxNumIdForNs(SOPC_AddressSpace* addSpace, uint16_t ns, uint32_t maxId)
-{
-    addSpace->maxNsNumId[ns] = maxId;
-    return;
+    SOPC_ASSERT(NULL != addSpace && NULL != addSpace->array_maxNsNumId);
+    return (uint32_t*) SOPC_Array_Get_Ptr(addSpace->array_maxNsNumId, ns);
 }
 
 SOPC_NodeId* SOPC_AddressSpace_GetFreshNodeId(SOPC_AddressSpace* addSpace, uint16_t ns)
 {
     SOPC_ASSERT(addSpace != NULL);
     // Check that ns exist in the array of ns index
-    uint16_t nbNs = Get_NumberOfNs(addSpace);
+    size_t nbNs = Get_NumberOfNs(addSpace);
     if (ns > nbNs)
     {
         return NULL;
     }
-    uint32_t maxNsNumId = Get_MaxNumIdForNs(addSpace, ns);
-    uint32_t finalMaxId = maxNsNumId + SOPC_FRESH_NODEID_MAX_RETRIES;
+    uint32_t* maxNsNumId = Get_MaxNumIdForNs(addSpace, ns);
+    SOPC_ASSERT(NULL != maxNsNumId); // maxNsNumId is not supposed to be NULL here since we checked that ns <= nbNs
+    uint32_t finalMaxId = *maxNsNumId + SOPC_FRESH_NODEID_MAX_RETRIES;
     bool nodeIdAlreadyExists = true;
     SOPC_NodeId* newNodeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
     SOPC_NodeId_Initialize(newNodeId);
     newNodeId->Namespace = ns;
     newNodeId->IdentifierType = SOPC_IdentifierType_Numeric;
 
-    while ((maxNsNumId < finalMaxId) && nodeIdAlreadyExists)
+    while ((*maxNsNumId < finalMaxId) && nodeIdAlreadyExists)
     {
-        newNodeId->Data.Numeric = maxNsNumId;
+        newNodeId->Data.Numeric = *maxNsNumId;
         const SOPC_AddressSpace_Node* maybeNode = SOPC_AddressSpace_Get_Node(addSpace, newNodeId, &nodeIdAlreadyExists);
         SOPC_UNUSED_RESULT(maybeNode);
-        maxNsNumId++;
+        (*maxNsNumId)++;
     }
     // If no new fresh nodeId found
     if (nodeIdAlreadyExists)
@@ -862,6 +860,5 @@ SOPC_NodeId* SOPC_AddressSpace_GetFreshNodeId(SOPC_AddressSpace* addSpace, uint1
         SOPC_Free(newNodeId);
         newNodeId = NULL;
     }
-    Set_MaxNumIdForNs(addSpace, ns, maxNsNumId);
     return newNodeId;
 }
