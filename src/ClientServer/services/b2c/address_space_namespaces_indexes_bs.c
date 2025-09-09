@@ -62,6 +62,6 @@ void address_space_namespaces_indexes_bs__read_variant_max_namespaceIndex(
     }
     else
     {
-        *address_space_namespaces_indexes_bs__p_maxNsIdx = variant->Value.Array.Length;
+        *address_space_namespaces_indexes_bs__p_maxNsIdx = variant->Value.Array.Length - 1;
     }
 }
