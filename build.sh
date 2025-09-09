@@ -30,6 +30,25 @@
 # - build the library and tests
 # - prepare test execution
 
+function _help() {
+    echo "$1 build S2OPC"
+    echo "Usage: $1 [-h] [--jobs <NPROC>]"
+    echo "    --jobs <NPROC>  : Change number of CPUs used for make, default to nproc"
+    echo "    -h : print this help and exit"
+}
+
+NPROC=
+
+while [[ "$#" -gt 0 ]] ; do
+PARAM=$1
+shift
+[[ "${PARAM-}" =~ "-h(elp)?" ]] && _help "$0" && exit 0
+[[ "${PARAM-}" == "--jobs" ]] && NPROC="$1" && shift && continue
+echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
+done
+
+[[ -z $NPROC ]] && export NPROC="$(nproc)" && echo "Using default jobs : make -j $NPROC"
+
 CURDIR=`pwd`
 EXEC_DIR=bin
 set -e
@@ -114,7 +133,7 @@ if [[ $? != 0 ]]; then
 fi
 
 echo "- Run make" | tee -a "$CURDIR/build.log"
-make -j $(nproc) -C $BUILD_DIR >> "$CURDIR/build.log"
+make -j $NPROC -C $BUILD_DIR >> "$CURDIR/build.log"
 if [[ $? != 0 ]]; then
     echo "Error: build failed" | tee -a "$CURDIR/build.log"
     exit 1
