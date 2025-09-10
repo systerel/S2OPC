@@ -306,7 +306,7 @@ bool SOPC_ConfigLoaderInternal_start_cert(bool isServer,
 
     const char* attr_val = SOPC_HelperExpat_GetAttr(ctx, "path", attrs);
 
-    if (strlen(attr_val) > 0)
+    if (NULL != attr_val && strlen(attr_val) > 0)
     {
         char* path = SOPC_strdup(attr_val);
 
@@ -339,7 +339,7 @@ bool SOPC_ConfigLoaderInternal_start_key(bool isServer,
 
     const char* attr_val = SOPC_HelperExpat_GetAttr(ctx, "path", attrs);
 
-    if (strlen(attr_val) > 0)
+    if (NULL != attr_val && strlen(attr_val) > 0)
     {
         char* path = SOPC_strdup(attr_val);
 
@@ -370,7 +370,7 @@ bool SOPC_ConfigLoaderInternal_start_pki(bool isServer, SOPC_HelperExpatCtx* ctx
 
     const char* attr_val = SOPC_HelperExpat_GetAttr(ctx, "path", attrs);
 
-    if (strlen(attr_val) > 0)
+    if (NULL != attr_val && strlen(attr_val) > 0)
     {
         char* path = SOPC_strdup(attr_val);
         if (path == NULL)
@@ -383,7 +383,8 @@ bool SOPC_ConfigLoaderInternal_start_pki(bool isServer, SOPC_HelperExpatCtx* ctx
     }
     else
     {
-        LOG_XML_ERRORF(ctx->parser, "%s PublicKeyInfrastructure: empty path is forbidden", CLIENT_OR_SERVER(isServer));
+        LOG_XML_ERRORF(ctx->parser, "%s PublicKeyInfrastructure: empty or missing path is forbidden",
+                       CLIENT_OR_SERVER(isServer));
         return false;
     }
 
