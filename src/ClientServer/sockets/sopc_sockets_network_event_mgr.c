@@ -113,10 +113,20 @@ static bool SOPC_Internal_InitSocketsToInterruptSelect(void)
     return SOPC_STATUS_OK == status;
 }
 
-static bool SOPC_Internal_ConsumeSigBytes(SOPC_Socket sigSocket, SOPC_SocketSet* readSet)
+/** Read bytes from sigSocket(discard data)
+ * @param sigSocket The internal signal socket (accept socket)
+ * @param readSet The "read" result of SELECT
+ * @param exceptSet The "except" result of SELECT
+ * @return false if the socket has been closed. True otherwise
+ */
+static bool SOPC_Internal_ConsumeSigBytes(SOPC_Socket sigSocket, SOPC_SocketSet* readSet, SOPC_SocketSet* exceptSet)
 {
     uint32_t readSigBytes;
 
+    if (SOPC_SocketSet_IsPresent(sigSocket, exceptSet))
+    {
+        return false;
+    }
     if (SOPC_SocketSet_IsPresent(sigSocket, readSet))
     {
         SOPC_ReturnStatus status = SOPC_Socket_Read(sigSocket, sigBytes, MAX_CONSUMED_SIG_BYTES, &readSigBytes);
@@ -183,7 +193,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_Socket sigSocket
     else if (nbReady > 0)
     {
         /* Consumes bytes sent to signal input event and set result to false in case of close signal */
-        result = SOPC_Internal_ConsumeSigBytes(sigSocket, readSet);
+        result = SOPC_Internal_ConsumeSigBytes(sigSocket, readSet, exceptSet);
 
         /* Treat the input events available from upper layer level */
         status = SOPC_STATUS_OK;

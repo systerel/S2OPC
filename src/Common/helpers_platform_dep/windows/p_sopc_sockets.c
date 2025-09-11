@@ -19,13 +19,20 @@
 
 #include "p_sopc_sockets.h"
 
+#include "sopc_assert.h"
 #include "sopc_common_constants.h"
+#include "sopc_dict.h"
 #include "sopc_raw_sockets.h"
 
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
+// Initial count of FDs in the socket set.
+#define NB_SOCKET_INIT 64
+
 static WSADATA wsaData;
+
+#define WSAPOLL_VALID_EVENTS (POLLRDNORM | POLLWRNORM | POLLPRI)
 
 SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(SOPC_Socket sock,
                                                        unsigned int time,
@@ -458,22 +465,57 @@ SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(SOPC_Socket sock)
     return status;
 }
 
-SOPC_SocketSet* SOPC_SocketSet_Create(void)
+static SOPC_SocketSet* SOPC_SocketSet_Create_Internal(size_t nbElem)
 {
     SOPC_SocketSet* res = SOPC_Calloc(1, sizeof(SOPC_SocketSet));
     if (NULL != res)
     {
-        SOPC_SocketSet_Clear(res);
+        res->size = nbElem;
+        res->fds = SOPC_Calloc(res->size, sizeof(WSAPOLLFD));
     }
     return res;
+}
+
+SOPC_SocketSet* SOPC_SocketSet_Create(void)
+{
+    return SOPC_SocketSet_Create_Internal(NB_SOCKET_INIT);
 }
 
 void SOPC_SocketSet_Delete(SOPC_SocketSet** set)
 {
     if (NULL != set)
     {
+        if (NULL != *set)
+        {
+            SOPC_Free((*set)->fds);
+        }
         SOPC_Free(*set);
         *set = NULL;
+    }
+}
+
+static void SOPC_SocketSet_Add_Internal(SOCKET sock, SOPC_SocketSet* sockSet, SHORT event)
+{
+    if (sockSet != NULL)
+    {
+        WSAPOLLFD* entry = NULL;
+        if (sockSet->count >= sockSet->size)
+        {
+            // Need to grow and realloc
+            const size_t old_size = sizeof(WSAPOLLFD) * sockSet->size;
+            sockSet->size *= 2;
+            const size_t new_size = sizeof(WSAPOLLFD) * sockSet->size;
+            sockSet->fds = SOPC_Realloc(sockSet->fds, old_size, new_size);
+            SOPC_ASSERT(NULL != sockSet->fds);
+        }
+
+        entry = &sockSet->fds[sockSet->count];
+        sockSet->count++;
+
+        // Add new item
+        entry->fd = sock;
+        entry->events = event;
+        entry->revents = 0;
     }
 }
 
@@ -481,7 +523,7 @@ void SOPC_SocketSet_Add(SOPC_Socket sock, SOPC_SocketSet* sockSet)
 {
     if (sock != SOPC_INVALID_SOCKET && sockSet != NULL)
     {
-        FD_SET(sock->sock, &sockSet->set);
+        SOPC_SocketSet_Add_Internal(sock->sock, sockSet, 0);
     }
 }
 
@@ -489,13 +531,12 @@ bool SOPC_SocketSet_IsPresent(SOPC_Socket sock, SOPC_SocketSet* sockSet)
 {
     if (sock != SOPC_INVALID_SOCKET && sockSet != NULL)
     {
-        if (false == FD_ISSET(sock->sock, &sockSet->set))
+        for (ULONG i = 0; i < sockSet->count; i++)
         {
-            return false;
-        }
-        else
-        {
-            return true;
+            if (sockSet->fds[i].fd == sock->sock)
+            {
+                return true;
+            }
         }
     }
     return false;
@@ -503,9 +544,114 @@ bool SOPC_SocketSet_IsPresent(SOPC_Socket sock, SOPC_SocketSet* sockSet)
 
 void SOPC_SocketSet_Clear(SOPC_SocketSet* sockSet)
 {
-    if (sockSet != NULL)
+    if (NULL != sockSet)
     {
-        FD_ZERO(&sockSet->set);
+        // Only clear the content to avoid further reallocation on next use.
+        // memset is not strictly necessary, but this avoid keeping traces of
+        // obsolete data.
+        memset(sockSet->fds, 0, sockSet->size * sizeof(WSAPOLLFD));
+        sockSet->count = 0;
+    }
+}
+
+/**
+ * @param inputFds The FD to add in \a mergedFds
+ * @param mergedFds The output result
+ * @param mask The mask to apply to all elements of \a inputFds. Must be in WSAPOLL_VALID_EVENTS.
+ *          Note that "POLLERR" does not exist with this API, it will always be checked and returned
+ *          if present, even with "0" as mask.
+ */
+static void SOPC_SocketSet_MergeSingleSet(const SOPC_SocketSet* inputFds, SOPC_SocketSet* mergedFds, SHORT mask)
+{
+    SOPC_ASSERT(NULL != inputFds && NULL != mergedFds);
+
+    for (ULONG i = 0; i < inputFds->count; i++)
+    {
+        // Add New element
+        SOPC_SocketSet_Add_Internal(inputFds->fds[i].fd, mergedFds, mask & WSAPOLL_VALID_EVENTS);
+    }
+}
+
+/* Merge different sets in a single SOPC_SocketSetArray for WSAPoll
+ *  Returned object shall be cleared by caller (SOPC_SocketSet_Delete) */
+static inline SOPC_SocketSet* SOPC_SocketSet_MergeSets(const SOPC_SocketSet* readSet,
+                                                       const SOPC_SocketSet* writeSet,
+                                                       const SOPC_SocketSet* exceptSet)
+{
+    size_t nbElem = 1; // just avoid empty allocation.
+    if (readSet != NULL)
+    {
+        nbElem += readSet->count;
+    }
+    if (writeSet != NULL)
+    {
+        nbElem += writeSet->count;
+    }
+
+    if (exceptSet != NULL)
+    {
+        nbElem += exceptSet->count;
+    }
+
+    SOPC_SocketSet* mergedFds = SOPC_SocketSet_Create_Internal(nbElem);
+    if (NULL == mergedFds)
+    {
+        return NULL;
+    }
+
+    // Add "READ" sockets
+    if (readSet != NULL)
+    {
+        SOPC_SocketSet_MergeSingleSet(readSet, mergedFds, POLLRDNORM);
+    }
+
+    // Add "WRITE" sockets
+    if (writeSet != NULL)
+    {
+        SOPC_SocketSet_MergeSingleSet(writeSet, mergedFds, POLLWRNORM);
+    }
+
+    // Add "EXCEPT" sockets
+    if (exceptSet != NULL)
+    {
+        SOPC_SocketSet_MergeSingleSet(exceptSet, mergedFds, 0);
+    }
+    return mergedFds;
+}
+
+// Rebuild output SocketSets by splitting response in "pollfds"
+static inline void SOPC_SocketSet_UpdateSetsAfterPoll(const SOPC_SocketSet* pollfds,
+                                                      SOPC_SocketSet* readSet,
+                                                      SOPC_SocketSet* writeSet,
+                                                      SOPC_SocketSet* exceptSet)
+{
+    SOPC_ASSERT(NULL != pollfds);
+    // Clear results
+    SOPC_SocketSet_Clear(readSet);
+    SOPC_SocketSet_Clear(writeSet);
+    SOPC_SocketSet_Clear(exceptSet);
+
+    // Populate result with sockets that have events
+    for (ULONG i = 0; i < pollfds->count; i++)
+    {
+        const SHORT evt = pollfds->fds[i].events;
+        const SHORT revt = pollfds->fds[i].revents;
+        const SOCKET sock = pollfds->fds[i].fd;
+
+        if (revt & (POLLIN | POLLRDNORM))
+        {
+            SOPC_SocketSet_Add_Internal(sock, readSet, 0);
+        }
+
+        if (revt & (POLLOUT | POLLWRNORM))
+        {
+            SOPC_SocketSet_Add_Internal(sock, writeSet, 0);
+        }
+
+        if (revt & (POLLERR | POLLHUP | POLLNVAL))
+        {
+            SOPC_SocketSet_Add_Internal(sock, exceptSet, 0);
+        }
     }
 }
 
@@ -514,39 +660,53 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
                                      SOPC_SocketSet* exceptSet,
                                      uint32_t waitMs)
 {
-    int32_t nbReady = 0;
-    const int ignored = 0; // ignored in winsocks
-    struct timeval timeout;
-    struct timeval* val;
+    INT timeout;
 
-    if (waitMs == 0)
+    SOPC_SocketSet* mergedFds = SOPC_SocketSet_MergeSets(readSet, writeSet, exceptSet);
+    if (NULL == mergedFds)
     {
-        val = NULL;
+        return -1; // Allocation failure
+    }
+
+    if (0 == mergedFds->count)
+    {
+        SOPC_SocketSet_Delete(&mergedFds);
+        return 0; // No events to receive
+    }
+
+    if (0 == waitMs)
+    {
+        timeout = -1; // Infinite wait
+    }
+    else if (waitMs > INT_MAX)
+    {
+        timeout = INT_MAX;
     }
     else
     {
-        if (waitMs / 1000 > LONG_MAX)
-        {
-            timeout.tv_sec = LONG_MAX;
-        }
-        else
-        {
-            timeout.tv_sec = (long) (waitMs / 1000);
-        }
-        if (1000 * (waitMs % 1000) > LONG_MAX)
-        {
-            timeout.tv_usec = LONG_MAX;
-        }
-        else
-        {
-            timeout.tv_usec = (long) (1000 * (waitMs % 1000));
-        }
-        val = &timeout;
+        timeout = (INT) waitMs;
     }
-    nbReady = select(ignored, &readSet->set, &writeSet->set, &exceptSet->set, val);
-    if (nbReady == SOCKET_ERROR || nbReady > INT32_MAX || nbReady < INT32_MIN)
-        return -1;
-    return (int32_t) nbReady;
+
+    int result = WSAPoll(mergedFds->fds, (ULONG) mergedFds->count, timeout);
+
+    if (result == SOCKET_ERROR)
+    {
+        int errCode = WSAGetLastError();
+
+        SOPC_CONSOLE_PRINTF("ERROR: WSAPoll returned errCode %d\n", errCode);
+        result = -1;
+    }
+    else
+    {
+        if (mergedFds->count > INT32_MAX || mergedFds->count < 0)
+        {
+            result = -1;
+        }
+        SOPC_SocketSet_UpdateSetsAfterPoll(mergedFds, readSet, writeSet, exceptSet);
+    }
+
+    SOPC_SocketSet_Delete(&mergedFds);
+    return (int32_t) result;
 }
 
 SOPC_ReturnStatus SOPC_Socket_Write(SOPC_Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)

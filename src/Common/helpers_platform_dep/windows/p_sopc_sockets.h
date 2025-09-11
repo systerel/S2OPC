@@ -58,7 +58,9 @@ struct SOPC_Socket_Address
  */
 struct SOPC_SocketSet
 {
-    fd_set set; /**< set */
+    WSAPOLLFD* fds;
+    size_t size;  /**< Actual size of fds */
+    size_t count; /**< Current number of used items in fds */
 };
 
 #endif /* SOPC_P_SOCKETS_H_ */
