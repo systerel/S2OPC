@@ -738,7 +738,6 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         }
         else
         {
-            errorCode = SOPC_NetworkMessage_Error_Code_None;
             if (isPreencoded)
             {
                 buffer = SOPC_UADP_NetworkMessage_Get_PreencodedBuffer(message, security);
@@ -773,20 +772,23 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             }
         }
 
+        // If no error occurred, send the message
+        if (SOPC_NetworkMessage_Error_Code_None == errorCode && NULL != buffer)
+        {
+            context->transport->mqttTopic = context->mqttTopic;
+            context->transport->pFctSend(context->transport, buffer);
+        }
+
+        // Clear security nonce if needed
         if (NULL != security)
         {
             SOPC_Free(security->msgNonceRandom);
             security->msgNonceRandom = NULL;
         }
-        context->transport->mqttTopic = context->mqttTopic;
-        if (NULL != buffer)
+        // Clear buffer if needed
+        if (!isPreencoded)
         {
-            context->transport->pFctSend(context->transport, buffer);
-            if (!isPreencoded)
-            {
-                SOPC_Buffer_Delete(buffer);
-                buffer = NULL;
-            }
+            SOPC_Buffer_Delete(buffer);
         }
     }
 }
@@ -839,17 +841,23 @@ static void send_keepAlive_message(MessageCtx* context)
                 (unsigned) errorCode);
         }
     }
+
+    // If no error occurred, send the message
+    if (SOPC_NetworkMessage_Error_Code_None == errorCode && NULL != buffer)
+    {
+        context->transport->mqttTopic = context->mqttTopic;
+        context->transport->pFctSend(context->transport, buffer);
+    }
+
+    // Clear security nonce if needed
     if (NULL != security)
     {
         SOPC_Free(security->msgNonceRandom);
         security->msgNonceRandom = NULL;
     }
 
-    context->transport->mqttTopic = context->mqttTopic;
-
-    context->transport->pFctSend(context->transport, buffer);
+    // Clear buffer if needed
     SOPC_Buffer_Delete(buffer);
-    buffer = NULL;
 }
 
 static void* thread_start_publish(void* arg)
