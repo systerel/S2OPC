@@ -36,8 +36,10 @@
 
 #include "opcua_identifiers.h"
 
-static const SOPC_NodeId namespaceArray_nid = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_NamespaceArray);
-static const SOPC_String opcua_uri = SOPC_STRING("http://opcfoundation.org/UA/");
+static const SOPC_NodeId SOPC_NSARRAY_NID = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_NamespaceArray);
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+static const SOPC_String SOPC_OPCUA_URI = SOPC_STRING("http://opcfoundation.org/UA/");
+SOPC_GCC_DIAGNOSTIC_RESTORE
 
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
@@ -460,7 +462,7 @@ static SOPC_ReturnStatus check_opcua_values_nsArray(SOPC_Variant* nsArray_value)
                 int32_t comparison = -1;
                 // First value
                 const SOPC_String* value0 = &nsArray_value->Value.Array.Content.StringArr[0];
-                status = SOPC_String_Compare(&opcua_uri, value0, false, &comparison);
+                status = SOPC_String_Compare(&SOPC_OPCUA_URI, value0, false, &comparison);
                 if (SOPC_STATUS_OK != status || 0 != comparison)
                 {
                     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -532,7 +534,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* add
     uint16_t nbOfNS = 0;
     bool foundNode = false;
     SOPC_AddressSpace_Node* namespaceArray =
-        SOPC_AddressSpace_Get_Node(addressSpaceConfig, &namespaceArray_nid, &foundNode);
+        SOPC_AddressSpace_Get_Node(addressSpaceConfig, &SOPC_NSARRAY_NID, &foundNode);
     if (foundNode)
     {
         // Initialize Max numeric id for each namespace
