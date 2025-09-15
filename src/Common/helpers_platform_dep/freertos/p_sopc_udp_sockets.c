@@ -304,8 +304,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddr
 
 SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(SOPC_Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)
 {
-    SOPC_ASSERT(buffer->position == 0);
-    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock) || NULL == destAddr || NULL == buffer)
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock) || NULL == destAddr || NULL == buffer || buffer->position != 0)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
