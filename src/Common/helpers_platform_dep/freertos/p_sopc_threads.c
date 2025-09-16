@@ -39,8 +39,6 @@
 #include "p_sopc_threads.h"         /* private thread include */
 #include "p_sopc_utils.h"           /* private list include */
 
-//#include "cmsis_os.h"
-
 #define MAX_THREADS MAX_WAITERS
 
 // The FreeRTOS "No Task" marker

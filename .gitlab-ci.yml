@@ -420,14 +420,14 @@ build-zephyr:
 
 build-freertos:
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/freertos_build@sha256:378cc71985d8d224d1031be5d735695d84fee27ee89b04c4509a5b8d9590064a # freertos_build:v1.2.1
+  image: registry.gitlab.com/systerel/s2opc/freertos_build@sha256:d3da42d15ae8e1973d388cd09e75fc3dfb316763d6fd10115d0fe790e3c81346 # freertos_build:v1.2.2
   needs: []
   script:
+    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_client'
+    - 'test -f build_freertos/cli_client_NUCLEO-H723ZG.elf'
+    - 'rm -rf /tmp/ws_freertos/build'
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_pubsub_server --nocrypto'
     - 'test -f build_freertos/cli_pubsub_server_NUCLEO-H723ZG.elf'
-    - 'rm -rf /tmp/ws_freertos/build'
-    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_client --nocrypto'
-    - 'test -f build_freertos/cli_client_NUCLEO-H723ZG.elf'
     - 'rm -rf /tmp/ws_freertos/build'
   artifacts:
     name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'

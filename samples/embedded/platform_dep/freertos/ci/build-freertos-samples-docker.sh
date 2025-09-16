@@ -83,11 +83,6 @@ done
 [[ -z $APP ]]   && export APP="cli_pubsub_server" && echo "Using default application ${APP}"
 [[ -z $IP_ADDRESS ]] && IP_ADDRESS="192.168.42.21" && echo "Using default IP address : ${IP_ADDRESS}"
 
-# TODO : Re-add MbedTLS Support
-if [ OPT_CRYPTO == "mbedtls" ]; then
-    fail "mbedtls is not supported for now --nocrypto is necessary"
-fi
-
 if [[ -z "${HAL[$BOARD]}" ]]; then
     echo "Error: Unsupported board '$BOARD'."
     echo "Supported boards are: ${!HAL[@]}"
@@ -106,7 +101,7 @@ export GCC=arm-none-eabi-gcc
 cd `dirname $0`/../../../../..
 export SOPC_ROOT=`pwd`
 echo "SOPC_ROOT=$SOPC_ROOT"
-export WS=/tmp/ws_freertos
+export WS=/tmp/ws_freertos/${BOARD}
 export OUT_DIR=${SOPC_ROOT-}/build_freertos
 export BUILD_DIR=${WS-}/build
 export FREERTOS_CORE_DIR=${WS-}/Core
@@ -128,8 +123,8 @@ export OUT_ELF="${BIN_PATH}.elf"
 export OUT_BIN="${BIN_PATH}.bin"
 
 ${OPT_LAZY-} &&  echo "Lazy build => not reinstalling sources"
-${OPT_LAZY-} || cp -rf /stmcube_ws/* ${WS-}
-${SOPC_ROOT-}/samples/embedded/platform_dep/freertos/install-stm.sh --sample ${APP} ${OPT_INSTALL-} $([ "$OPT_CRYPTO" = "nocrypto" ] && echo --nocrypto) "$@" || exit $?
+${OPT_LAZY-} || cp -rf /stmcube_ws/${BOARD}/* ${WS-}
+${SOPC_ROOT-}/samples/embedded/platform_dep/freertos/install-stm.sh --sample ${APP} ${OPT_INSTALL-} $([ $OPT_CRYPTO = "nocrypto" ] && echo --nocrypto) "$@" || exit $?
 
 echo "Installation OK, starting compile step"
 
@@ -140,6 +135,7 @@ C_OPT_CSTD="-std=gnu11 "
 C_OPT_SPECS="--specs=nano.specs "
 C_OPT_F="-ffunction-sections -fdata-sections -fstack-usage"
 C_DEFS="-DUSE_HAL_DRIVER -D${BOARD_HAL} "
+[ $OPT_CRYPTO = "mbedtls" ] && C_DEFS+=" -DMBEDTLS_CONFIG_FILE=\"mbedtls_config.h\""
 C_DEFS+=" -D_RETARGETABLE_LOCKING=1" # Necessary since configuration differs in newlib.h
 C_INCS="-I../Core/Inc -I../Drivers/${BOARD_HAL_Driver}_HAL_Driver/Inc -I../Drivers/${BOARD_HAL_Driver}_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/${BOARD_HAL_Driver}/Include"
 C_INCS+=" -I../Drivers/CMSIS/Include -I../Core/Src/sopc/sample_inc -I../LWIP/App -I../LWIP/Target -I../Middlewares/Third_Party/LwIP/src/include"
@@ -150,6 +146,7 @@ C_INCS+=" -I../Middlewares/Third_Party/LwIP/src/include/lwip/priv -I../Middlewar
 C_INCS+=" -I../Middlewares/Third_Party/LwIP/src/include/compat/posix -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/arpa"
 C_INCS+=" -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/net -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/sys"
 C_INCS+=" -I../Middlewares/Third_Party/LwIP/src/include/compat/stdc -I../Middlewares/Third_Party/LwIP/system/arch"
+[ $OPT_CRYPTO = "mbedtls" ] && C_INCS+=" -I../MBEDTLS/App -I../Middlewares/Third_Party/mbedTLS/include/mbedtls -I../Middlewares/Third_Party/mbedTLS/include"
 C_DEFS+=" -include../Core/Src/sopc/sample_inc/${BOARD}.h "
 
 function build_c_file() {

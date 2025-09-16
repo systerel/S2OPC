@@ -105,6 +105,15 @@ if [ ${OPT_CRYPTO} == "mbedtls" ]; then
 
 fi
 
+if [ ${OPT_CRYPTO} != "mbedtls" ]; then
+    FILE=${FREERTOS_CORE_DIR-}/Src/main.c
+    sed -i 's/^[ \t]*#include[ \t]*"mbedtls\.h"/\/\/&/' ${FILE-}
+    sed -i 's/^[ \t]*MX_MBEDTLS_Init();/\/\/&/' ${FILE-}
+    rm -rf ${FREERTOS_CORE_DIR}/../MBEDTLS ${FREERTOS_CORE_DIR}/../Middlewares/Third_Party/mbedTLS
+    echo "[II] '`basename ${FILE-}`' patched to remove mbedtls"
+fi
+
+
 # Patch ETH MAC filter
 # Replace 
 # ETH_MACDMAConfig(heth); 
@@ -120,6 +129,18 @@ sed -i 's/^\( *ETH_MACDMAConfig(heth); *\)$/\1 extern void SOPC_ETH_MAC_Filter_C
 unix2dos.exe ${FILE-} >/dev/null 2>/dev/null
 echo "[II] '`basename ${FILE-}`' patched for 'ETH MAC filter'"
 
+
+# mbedtls_sha512_finish_ret's output parameter is declared as a 64-byte buffer, but sice we're using SHA-384, we know that the
+# output fits in 48 bytes. This is correct C, but GCC warns about it. https://github.com/Mbed-TLS/mbedtls/pull/4493
+SSL_TLS_C=${FREERTOS_CORE_DIR-}/../Middlewares/Third_Party/mbedTLS/library/ssl_tls.c
+if [ ${OPT_CRYPTO} == "mbedtls" ]; then
+echo "[II] '`basename ${SSL_TLS_C-}`' patched for 'mbedtls_sha512_finish_ret'"
+sed -i '/^[[:space:]]*mbedtls_sha512_finish_ret( &sha512, padbuf );[[:space:]]*$/c\
+#pragma GCC diagnostic push\
+#pragma GCC diagnostic ignored "-Wstringop-overflow"\
+    mbedtls_sha512_finish_ret( &sha512, padbuf );\
+#pragma GCC diagnostic pop' ${SSL_TLS_C}
+fi
 
 # Patches below are not used anymore since this is in USER BEGIN/END tags (not lost when regenerating code from STMCube Ide)
 # This is kept for traceability of updates in environments
