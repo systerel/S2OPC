@@ -45,7 +45,7 @@ test_script:
     - set MBEDTLS_DIR=%ROOT_DIR%\%MBEDTLS_DIR_NAME%
     - set MBEDTLS_BUILD_DIR=%MBEDTLS_DIR%\build
     - set MBEDTLS_INSTALL_DIR=%MBEDTLS_DIR%\install
-    - set EXPAT_DIR_NAME=expat-2.7.1
+    - set EXPAT_DIR_NAME=expat-2.7.2
     - set EXPAT_FILE_NAME=R_2_7_1
     - set EXPAT_DIR=%ROOT_DIR%\libexpat-%EXPAT_FILE_NAME%\expat
     - set EXPAT_INSTALL_DIR=%EXPAT_DIR%\install

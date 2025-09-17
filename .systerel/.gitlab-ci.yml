@@ -202,11 +202,11 @@ hil-test:
 
 .build-linux: &build_linux
   stage: build
-  image: docker.aix.systerel.fr/c838/build@sha256:8cbb2881dc3798ce6b6cf078fa744ef357b30509a5c3e12e2e59cf8bed9c521f # digest of build:1.51
+  image: docker.aix.systerel.fr/c838/build@sha256:20edbadef44599912096cd2c7323964a6665d1f1196251e2ae61dde11ae09ae3 # digest of build:1.52
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR || exit 1'
   variables: &build_linux_variables
-    DOCKER_DIGEST: 'sha256:8cbb2881dc3798ce6b6cf078fa744ef357b30509a5c3e12e2e59cf8bed9c521f'
+    DOCKER_DIGEST: 'sha256:20edbadef44599912096cd2c7323964a6665d1f1196251e2ae61dde11ae09ae3'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
