@@ -85,6 +85,16 @@ SOPC_Toolkit_Build_Info SOPC_CommonHelper_GetBuildInfo(void);
  *
  * \return The returned value is ensured to be a non-NULL pointer to Helper configuration
  *
+ * \warning Applications are generally not allowed to modify any data in the configuration since it may lead
+ *          to undetermined behavior. The only exceptions apply to server applications (see push server sample),
+ *          as follows:
+ *          - serverConfig.pki: might be modified during server configuration to implement TOFU mode,
+ *          - serverConfig.pki and serverConfig.authenticationManager->pUsrPKI: might be accessed at runtime to update
+ *            PKIs (server PKI and server user PKI, thread-safe API),
+ *          - serverConfig.serverKeyCertPair: might be accessed at runtime to update server Key and Certificate
+ *            (thread-safe API).
+ *
+ *          Modifying some other fields is reserved for internal libs2opc use.
  */
 SOPC_S2OPC_Config* SOPC_CommonHelper_GetConfiguration(void);
 
