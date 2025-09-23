@@ -464,6 +464,8 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
             {
                 status = SOPC_STATUS_NOK;
                 libsubEvent = SOPC_StaMac_ApplicativeEvent_SendFailed;
+                // set param to NULL to keep same behavior as non discovery service failure
+                param = NULL;
             }
             // Release mutex to avoid possible deadlock in user callback
             mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);

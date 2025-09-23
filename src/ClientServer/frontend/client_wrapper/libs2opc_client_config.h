@@ -114,6 +114,7 @@ const char* SOPC_ClientConfigHelper_GetUserIdFromConfig(const SOPC_SecureConnect
  * \brief Type of callback to provide asynchronous service response
  *
  * \param type         The ::SOPC_EncodeableType of the provided response \p response
+ *                     or NULL in case of request sending failure
  * \param response     An asynchronous response to a service request sent using
  *                     ::SOPC_ClientHelper_ServiceAsync
  *                     Response will be a pointer to the service response corresponding to sent request:
@@ -126,9 +127,10 @@ const char* SOPC_ClientConfigHelper_GetUserIdFromConfig(const SOPC_SecureConnect
  *                     \li ::OpcUa_RegisterServer2Response
  *
  *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
- *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
+ *                     in this case \p type and the \c response.encodeableType point to
+ *                     ::OpcUa_ServiceFault_EncodeableType
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
- *                     In case of sending failure the response is NULL and only the userContext is provided.
+ *                     In case of request sending failure the response is NULL and only the userContext is provided.
  *
  * \param userContext  The context that was provided with the corresponding request provided on
  *                     ::SOPC_ClientHelper_ServiceAsync call
