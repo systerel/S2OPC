@@ -216,7 +216,7 @@
 
 /** @brief Minimum size of a MonitoredItem event notification queue */
 #ifndef SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE
-#define SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE 10
+#define SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE 100
 #endif
 
 /** @brief Default size of a MonitoredItem event notification queue */
