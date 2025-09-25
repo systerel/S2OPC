@@ -70,20 +70,21 @@ static error_t CyclonePrngRead(void* context, uint8_t* output, size_t length)
 
 const PrngAlgo CyclonePrng = {NULL, 0, NULL, NULL, NULL, (PrngAlgoRead) CyclonePrngRead, NULL};
 
-static SOPC_ReturnStatus generic_SymmEncrypt(SOPC_SecurityPolicy_ID policyId,
-                                             const uint8_t* pInput,
-                                             uint32_t lenPlainText,
-                                             const SOPC_ExposedBuffer* pKey,
-                                             const SOPC_ExposedBuffer* pIV,
-                                             uint8_t* pOutput,
-                                             uint32_t lenOutput)
+static SOPC_ReturnStatus generic_SymmCrypt(SOPC_SecurityPolicy_ID policyId,
+                                           const uint8_t* pInput,
+                                           uint32_t lenInput,
+                                           const SOPC_ExposedBuffer* pKey,
+                                           const SOPC_ExposedBuffer* pIV,
+                                           uint8_t* pOutput,
+                                           uint32_t lenOutput,
+                                           bool isEncrypt)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const SOPC_SecurityPolicy_Config* policy = SOPC_SecurityPolicy_Config_Get(policyId);
     const uint32_t symmLen_Block = policy->symmLen_Block;
     const uint32_t symmLen_CryptoKey = policy->symmLen_CryptoKey;
 
-    if (lenOutput >= lenPlainText)
+    if (lenOutput >= lenInput)
     {
         /* Perform a copy of pIV because pIV is modified during the operation */
         unsigned char* iv_cpy = (unsigned char*) SOPC_Malloc(symmLen_Block);
@@ -96,48 +97,14 @@ static SOPC_ReturnStatus generic_SymmEncrypt(SOPC_SecurityPolicy_ID policyId,
 
         if (errLib == 0)
         {
-            errLib = cbcEncrypt(&aesCipherAlgo, &aes, (uint8_t*) iv_cpy, pInput, pOutput, lenPlainText);
-
-            if (errLib == 0)
+            if (isEncrypt)
             {
-                memset(iv_cpy, 0, symmLen_Block);
-                status = SOPC_STATUS_OK;
+                errLib = cbcEncrypt(&aesCipherAlgo, &aes, (uint8_t*) iv_cpy, pInput, pOutput, lenInput);
             }
-        }
-        aesDeinit(&aes);
-        SOPC_Free(iv_cpy);
-    }
-
-    return status;
-}
-
-static SOPC_ReturnStatus generic_SymmDecrypt(SOPC_SecurityPolicy_ID policyId,
-                                             const uint8_t* pInput,
-                                             uint32_t lenCipherText,
-                                             const SOPC_ExposedBuffer* pKey,
-                                             const SOPC_ExposedBuffer* pIV,
-                                             uint8_t* pOutput,
-                                             uint32_t lenOutput)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    const SOPC_SecurityPolicy_Config* policy = SOPC_SecurityPolicy_Config_Get(policyId);
-    const uint32_t symmLen_Block = policy->symmLen_Block;
-    const uint32_t symmLen_CryptoKey = policy->symmLen_CryptoKey;
-
-    if (lenOutput >= lenCipherText)
-    {
-        /* Perform a copy of pIV because pIV is modified during the operation */
-        unsigned char* iv_cpy = (unsigned char*) SOPC_Malloc(symmLen_Block);
-        SOPC_ASSERT(NULL != iv_cpy);
-        memcpy(iv_cpy, pIV, symmLen_Block);
-
-        /* Declare and initialize the AES context */
-        AesContext aes = {0};
-        error_t errLib = aesInit(&aes, pKey, symmLen_CryptoKey);
-
-        if (errLib == 0)
-        {
-            errLib = cbcDecrypt(&aesCipherAlgo, &aes, (uint8_t*) iv_cpy, pInput, pOutput, lenCipherText);
+            else
+            {
+                errLib = cbcDecrypt(&aesCipherAlgo, &aes, (uint8_t*) iv_cpy, pInput, pOutput, lenInput);
+            }
 
             if (errLib == 0)
             {
@@ -157,30 +124,26 @@ static SOPC_ReturnStatus generic_SymmDecrypt(SOPC_SecurityPolicy_ID policyId,
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES128(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenPlainText,
-                                                    const SOPC_ExposedBuffer* pKey,
-                                                    const SOPC_ExposedBuffer* pIV,
-                                                    uint8_t* pOutput,
-                                                    uint32_t lenOutput)
+SOPC_ReturnStatus CryptoProvider_SymmCrypt_AES128(const SOPC_CryptoProvider* pProvider,
+                                                  const uint8_t* pInput,
+                                                  uint32_t lenInput,
+                                                  const SOPC_ExposedBuffer* pKey,
+                                                  const SOPC_ExposedBuffer* pIV,
+                                                  uint8_t* pOutput,
+                                                  uint32_t lenOutput,
+                                                  bool isEncrypt)
 {
     SOPC_UNUSED_ARG(pProvider);
-    return generic_SymmEncrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pInput, lenPlainText, pKey, pIV, pOutput,
-                               lenOutput);
-}
-
-SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenCipherText,
-                                                    const SOPC_ExposedBuffer* pKey,
-                                                    const SOPC_ExposedBuffer* pIV,
-                                                    uint8_t* pOutput,
-                                                    uint32_t lenOutput)
-{
-    SOPC_UNUSED_ARG(pProvider);
-    return generic_SymmDecrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pInput, lenCipherText, pKey, pIV, pOutput,
-                               lenOutput);
+    if (isEncrypt)
+    {
+        return generic_SymmCrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pInput, lenInput, pKey, pIV, pOutput,
+                                 lenOutput, true);
+    }
+    else
+    {
+        return generic_SymmCrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pInput, lenInput, pKey, pIV, pOutput,
+                                 lenOutput, false);
+    }
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -189,30 +152,26 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* p
  */
 
 // TODO: think about the necessity of lenOutput and pInput might be an ExposedBuffer? Clean Symm + Asym
-SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenPlainText,
-                                                    const SOPC_ExposedBuffer* pKey,
-                                                    const SOPC_ExposedBuffer* pIV,
-                                                    uint8_t* pOutput,
-                                                    uint32_t lenOutput)
+SOPC_ReturnStatus CryptoProvider_SymmCrypt_AES256(const SOPC_CryptoProvider* pProvider,
+                                                  const uint8_t* pInput,
+                                                  uint32_t lenInput,
+                                                  const SOPC_ExposedBuffer* pKey,
+                                                  const SOPC_ExposedBuffer* pIV,
+                                                  uint8_t* pOutput,
+                                                  uint32_t lenOutput,
+                                                  bool isEncrypt)
 {
     SOPC_UNUSED_ARG(pProvider);
-    return generic_SymmEncrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pInput, lenPlainText, pKey, pIV, pOutput,
-                               lenOutput);
-}
-
-SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenCipherText,
-                                                    const SOPC_ExposedBuffer* pKey,
-                                                    const SOPC_ExposedBuffer* pIV,
-                                                    uint8_t* pOutput,
-                                                    uint32_t lenOutput)
-{
-    SOPC_UNUSED_ARG(pProvider);
-    return generic_SymmDecrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pInput, lenCipherText, pKey, pIV, pOutput,
-                               lenOutput);
+    if (isEncrypt)
+    {
+        return generic_SymmCrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pInput, lenInput, pKey, pIV, pOutput, lenOutput,
+                                 true);
+    }
+    else
+    {
+        return generic_SymmCrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pInput, lenInput, pKey, pIV, pOutput, lenOutput,
+                                 false);
+    }
 }
 
 static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,

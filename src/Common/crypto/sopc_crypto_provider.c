@@ -612,7 +612,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
     const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
-    if (NULL == pProfile || NULL == pProfile->pFnSymmEncrypt)
+    if (NULL == pProfile || NULL == pProfile->pFnSymmCrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -642,7 +642,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
     pExpKey = SOPC_SecretBuffer_Expose(pKey);
     pExpIV = SOPC_SecretBuffer_Expose(pIV);
 
-    status = pProfile->pFnSymmEncrypt(pProvider, pInput, lenPlainText, pExpKey, pExpIV, pOutput, lenOutput);
+    status = pProfile->pFnSymmCrypt(pProvider, pInput, lenPlainText, pExpKey, pExpIV, pOutput, lenOutput, true);
 
     SOPC_SecretBuffer_Unexpose(pExpKey, pKey);
     SOPC_SecretBuffer_Unexpose(pExpIV, pIV);
@@ -669,7 +669,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
     const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
-    if (NULL == pProfile || NULL == pProfile->pFnSymmDecrypt)
+    if (NULL == pProfile || NULL == pProfile->pFnSymmCrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -700,7 +700,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
     pExpKey = SOPC_SecretBuffer_Expose(pKey);
     pExpIV = SOPC_SecretBuffer_Expose(pIV);
 
-    status = pProfile->pFnSymmDecrypt(pProvider, pInput, lenCipherText, pExpKey, pExpIV, pOutput, lenOutput);
+    status = pProfile->pFnSymmCrypt(pProvider, pInput, lenCipherText, pExpKey, pExpIV, pOutput, lenOutput, false);
 
     SOPC_SecretBuffer_Unexpose(pExpKey, pKey);
     SOPC_SecretBuffer_Unexpose(pExpIV, pIV);

@@ -32,40 +32,29 @@
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES128(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenPlainText,
-                                                    const SOPC_ExposedBuffer* pKey,
-                                                    const SOPC_ExposedBuffer* pIV,
-                                                    uint8_t* pOutput,
-                                                    uint32_t lenOutput);
-SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenCipherText,
-                                                    const SOPC_ExposedBuffer* pKey,
-                                                    const SOPC_ExposedBuffer* pIV,
-                                                    uint8_t* pOutput,
-                                                    uint32_t lenOutput);
+SOPC_ReturnStatus CryptoProvider_SymmCrypt_AES128(const SOPC_CryptoProvider* pProvider,
+                                                  const uint8_t* pInput,
+                                                  uint32_t lenInput,
+                                                  const SOPC_ExposedBuffer* pKey,
+                                                  const SOPC_ExposedBuffer* pIV,
+                                                  uint8_t* pOutput,
+                                                  uint32_t lenOutput,
+                                                  bool isEncrypt);
 
 /* ------------------------------------------------------------------------------------------------
  * Basic256Sha256
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenPlainText,
-                                                    const SOPC_ExposedBuffer* pKey,
-                                                    const SOPC_ExposedBuffer* pIV,
-                                                    uint8_t* pOutput,
-                                                    uint32_t lenOutput);
-SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* pProvider,
-                                                    const uint8_t* pInput,
-                                                    uint32_t lenCipherText,
-                                                    const SOPC_ExposedBuffer* pKey,
-                                                    const SOPC_ExposedBuffer* pIV,
-                                                    uint8_t* pOutput,
-                                                    uint32_t lenOutput);
+SOPC_ReturnStatus CryptoProvider_SymmCrypt_AES256(const SOPC_CryptoProvider* pProvider,
+                                                  const uint8_t* pInput,
+                                                  uint32_t lenInput,
+                                                  const SOPC_ExposedBuffer* pKey,
+                                                  const SOPC_ExposedBuffer* pIV,
+                                                  uint8_t* pOutput,
+                                                  uint32_t lenOutput,
+                                                  bool isEncrypt);
+
 SOPC_ReturnStatus CryptoProvider_SymmSign_HMAC_SHA256(const SOPC_CryptoProvider* pProvider,
                                                       const uint8_t* pInput,
                                                       uint32_t lenInput,

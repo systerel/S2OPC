@@ -63,8 +63,7 @@ START_TEST(test_crypto_load_Aes128Sha256RsaOaep)
     ck_assert_ptr_nonnull(profile);
 
     ck_assert(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID == profile->SecurityPolicyID);
-    ck_assert(NULL != profile->pFnSymmEncrypt);
-    ck_assert(NULL != profile->pFnSymmDecrypt);
+    ck_assert(NULL != profile->pFnSymmCrypt);
     ck_assert(NULL != profile->pFnSymmSign);
     ck_assert(NULL != profile->pFnSymmVerif);
     ck_assert(NULL != profile->pFnGenRnd);

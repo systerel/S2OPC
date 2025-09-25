@@ -34,8 +34,7 @@
 
 const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss = {
     .SecurityPolicyID = SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID,
-    .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
-    .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
+    .pFnSymmCrypt = &CryptoProvider_SymmCrypt_AES256,
     .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
     .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
@@ -48,8 +47,7 @@ const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss = {
 
 const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep = {
     .SecurityPolicyID = SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID,
-    .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES128,
-    .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES128,
+    .pFnSymmCrypt = &CryptoProvider_SymmCrypt_AES128,
     .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
     .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
@@ -62,8 +60,7 @@ const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep = {
 
 const SOPC_CryptoProfile sopc_g_cpBasic256Sha256 = {
     .SecurityPolicyID = SOPC_SecurityPolicy_Basic256Sha256_ID,
-    .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
-    .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
+    .pFnSymmCrypt = &CryptoProvider_SymmCrypt_AES256,
     .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
     .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
@@ -76,8 +73,7 @@ const SOPC_CryptoProfile sopc_g_cpBasic256Sha256 = {
 
 const SOPC_CryptoProfile sopc_g_cpBasic256 = {
     .SecurityPolicyID = SOPC_SecurityPolicy_Basic256_ID,
-    .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
-    .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
+    .pFnSymmCrypt = &CryptoProvider_SymmCrypt_AES256,
     .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA1,
     .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA1,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
@@ -90,8 +86,7 @@ const SOPC_CryptoProfile sopc_g_cpBasic256 = {
 
 const SOPC_CryptoProfile sopc_g_cpNone = {
     .SecurityPolicyID = SOPC_SecurityPolicy_None_ID,
-    .pFnSymmEncrypt = NULL,
-    .pFnSymmDecrypt = NULL,
+    .pFnSymmCrypt = NULL,
     .pFnSymmSign = NULL,
     .pFnSymmVerif = NULL,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
