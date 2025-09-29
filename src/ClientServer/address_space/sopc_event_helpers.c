@@ -145,14 +145,22 @@ void SOPC_EventHelpers_SetStatusCode(SOPC_Event* const event, const char* qnPath
 /*********************************************************************************/
 void SOPC_EventHelpers_SetCString(SOPC_Event* const event, const char* qnPath, const char* value)
 {
-    if (NULL == event || NULL == qnPath || NULL == value)
+    if (NULL == event || NULL == qnPath)
     {
         return;
     }
     SOPC_Variant var;
     SOPC_Variant_Initialize(&var);
     var.BuiltInTypeId = SOPC_String_Id;
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&var.Value.String, value);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL != value)
+    {
+        status = SOPC_String_CopyFromCString(&var.Value.String, value);
+    }
+    else
+    {
+        var.Value.String.Length = -1;
+    }
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Event_SetVariableFromStrPath(event, qnPath, &var);
@@ -192,14 +200,22 @@ void SOPC_EventHelpers_SetByteString(SOPC_Event* const event,
                                      const uint8_t* value,
                                      const uint32_t len)
 {
-    if (NULL == event || NULL == qnPath || NULL == value)
+    if (NULL == event || NULL == qnPath)
     {
         return;
     }
     SOPC_Variant var;
     SOPC_Variant_Initialize(&var);
     var.BuiltInTypeId = SOPC_ByteString_Id;
-    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&var.Value.Bstring, value, (int32_t) len);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL != value && len > 0)
+    {
+        status = SOPC_ByteString_CopyFromBytes(&var.Value.Bstring, value, (int32_t) len);
+    }
+    else
+    {
+        var.Value.Bstring.Length = -1; // NULL ByteString
+    }
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_Event_SetVariableFromStrPath(event, qnPath, &var);
