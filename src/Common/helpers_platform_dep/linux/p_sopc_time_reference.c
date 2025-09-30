@@ -149,7 +149,7 @@ static void SOPC_HighRes_TimeReference_AddDuration(SOPC_HighRes_TimeReference* t
         t->tp.tv_sec -= 1;
         t->tp.tv_nsec += SOPC_SECOND_TO_NANOSECONDS;
     }
-    else if (t->tp.tv_nsec > SOPC_SECOND_TO_NANOSECONDS)
+    else if (t->tp.tv_nsec >= SOPC_SECOND_TO_NANOSECONDS)
     {
         t->tp.tv_sec += 1;
         t->tp.tv_nsec -= SOPC_SECOND_TO_NANOSECONDS;
