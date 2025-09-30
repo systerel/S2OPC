@@ -683,7 +683,6 @@ OPERATIONS
     secure_channel_lost (channel) =
     VAR
         l_connected_channel,
-        l_disconnecting_channel,
         l_valid_new_channel,
         l_is_client,
         l_channel_config_idx,
@@ -701,30 +700,16 @@ OPERATIONS
                 l_channel_config_idx, l_reverse_endpoint_config_idx <-- get_all_channel_info (channel);
                 ASSERT l_channel_config_idx : t_channel_config_idx
                 THEN
-                    l_disconnecting_channel <-- is_disconnecting_channel (l_channel_config_idx);
-                    client_secure_channel_lost_session_sm (channel, l_channel_config_idx);
-                    IF l_disconnecting_channel = FALSE
-                    THEN
-                        // attempt to reconnect channel
-                        l_new_channel <-- get_connected_channel (l_channel_config_idx);
-                        IF l_new_channel = c_channel_indet
-                        THEN
-                            l_is_one_sc_closing <-- l_may_close_secure_channel_without_session;
-                            l_bres <-- cli_open_secure_channel (l_channel_config_idx, l_reverse_endpoint_config_idx, l_is_one_sc_closing)
-                            // async operation => cannot use channel until connection is effective ?
-                        END;
-
-                        l_valid_new_channel <-- is_connected_channel (l_new_channel);
-
-                        IF l_valid_new_channel = TRUE
-                        THEN
-                            client_channel_connected_event_session (l_channel_config_idx, l_new_channel)
-                        END
-                    END
+                    // Updates associated sessions states
+                    client_secure_channel_lost_session_sm (channel, l_channel_config_idx)
+                    // TODO: manage a reconnection mechanism in case of ORPHANED session:
+                    // - automated mechanism to same SC config with a timer ?
+                    // - API to activate same session on another SC config (APP_TO_SE_REACTIVATE_SESSION)
                 END
             ELSE
                 server_secure_channel_lost_session_sm (channel)
-            END;
+            END
+            ;
             channel_lost (channel)
         END
     END

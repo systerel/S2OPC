@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 30/09/2025 13:03:14
+ Date                 : 30/09/2025 14:54:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -784,14 +784,9 @@ void io_dispatch_mgr__secure_channel_lost(
    const constants__t_channel_i io_dispatch_mgr__channel) {
    {
       t_bool io_dispatch_mgr__l_connected_channel;
-      t_bool io_dispatch_mgr__l_disconnecting_channel;
-      t_bool io_dispatch_mgr__l_valid_new_channel;
       t_bool io_dispatch_mgr__l_is_client;
       constants__t_channel_config_idx_i io_dispatch_mgr__l_channel_config_idx;
       constants__t_reverse_endpoint_config_idx_i io_dispatch_mgr__l_reverse_endpoint_config_idx;
-      constants__t_channel_i io_dispatch_mgr__l_new_channel;
-      t_bool io_dispatch_mgr__l_bres;
-      t_bool io_dispatch_mgr__l_is_one_sc_closing;
       
       channel_mgr__is_connected_channel(io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_connected_channel);
@@ -802,27 +797,8 @@ void io_dispatch_mgr__secure_channel_lost(
             channel_mgr__get_all_channel_info(io_dispatch_mgr__channel,
                &io_dispatch_mgr__l_channel_config_idx,
                &io_dispatch_mgr__l_reverse_endpoint_config_idx);
-            channel_mgr__is_disconnecting_channel(io_dispatch_mgr__l_channel_config_idx,
-               &io_dispatch_mgr__l_disconnecting_channel);
             service_mgr__client_secure_channel_lost_session_sm(io_dispatch_mgr__channel,
                io_dispatch_mgr__l_channel_config_idx);
-            if (io_dispatch_mgr__l_disconnecting_channel == false) {
-               channel_mgr__get_connected_channel(io_dispatch_mgr__l_channel_config_idx,
-                  &io_dispatch_mgr__l_new_channel);
-               if (io_dispatch_mgr__l_new_channel == constants__c_channel_indet) {
-                  io_dispatch_mgr__l_may_close_secure_channel_without_session(&io_dispatch_mgr__l_is_one_sc_closing);
-                  channel_mgr__cli_open_secure_channel(io_dispatch_mgr__l_channel_config_idx,
-                     io_dispatch_mgr__l_reverse_endpoint_config_idx,
-                     io_dispatch_mgr__l_is_one_sc_closing,
-                     &io_dispatch_mgr__l_bres);
-               }
-               channel_mgr__is_connected_channel(io_dispatch_mgr__l_new_channel,
-                  &io_dispatch_mgr__l_valid_new_channel);
-               if (io_dispatch_mgr__l_valid_new_channel == true) {
-                  service_mgr__client_channel_connected_event_session(io_dispatch_mgr__l_channel_config_idx,
-                     io_dispatch_mgr__l_new_channel);
-               }
-            }
          }
          else {
             service_mgr__server_secure_channel_lost_session_sm(io_dispatch_mgr__channel);
