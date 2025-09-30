@@ -232,7 +232,7 @@ static bool is_connected_unlocked(StateMachine_Machine* pSM)
     {
     case stActivating:
     case stActivated:
-    case stClosing:
+    case stClosingSession:
         return true;
     default:
         return false;
@@ -259,7 +259,7 @@ SOPC_ReturnStatus StateMachine_StopSession(StateMachine_Machine* pSM)
     if (SOPC_STATUS_OK == status)
     {
         SOPC_ToolkitClient_AsyncCloseSession(pSM->iSessionID);
-        pSM->state = stClosing;
+        pSM->state = stClosingSession;
     }
     else
     {
@@ -717,6 +717,7 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
 
     SOPC_ReturnStatus status = SOPC_Mutex_Lock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
+    StateMachine_State prevState = pSM->state;
 
     /* Is this event targeted to the machine? */
     if (bProcess)
@@ -746,6 +747,16 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
             if ((uintptr_t) pSM->pCtxRequest != appCtx)
             {
                 bProcess = false;
+            }
+            break;
+        case SE_CLOSED_CHANNEL:
+            if (pSM->iscConfig != arg)
+            {
+                bProcess = false;
+            }
+            else
+            {
+                SOPC_ASSERT(appCtx == arg);
             }
             break;
         default:
@@ -795,15 +806,15 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
                 break;
             }
             break;
-        case stClosing:
+        case stClosingSession:
             switch (event)
             {
             case SE_CLOSED_SESSION:
-                pSM->state = stConfigured;
+                pSM->state = stClosingSc;
                 break;
             default:
                 /* This might be a response to a pending request, so this might not an error */
-                printf("# Warning: Unexpected event in stClosing state, ignoring.\n");
+                printf("# Warning: Unexpected event in stClosingSession state, ignoring.\n");
                 break;
             }
             break;
@@ -815,10 +826,23 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
             case SE_RCV_DISCOVERY_RESPONSE:
                 /* This assert is ok because of the test that would otherwise set bProcess to false */
                 SOPC_ASSERT((uintptr_t) pSM->pCtxRequest == appCtx);
-                pSM->state = stConfigured;
+                pSM->state = stClosingSc;
                 break;
             default:
                 printf("# Error: Unexpected event %i in stDiscovering state.\n", event);
+                pSM->state = stError;
+                break;
+            }
+            break;
+        /* SC closing state */
+        case stClosingSc:
+            switch (event)
+            {
+            case SE_CLOSED_CHANNEL:
+                pSM->state = stConfigured;
+                break;
+            default:
+                printf("# Error: Unexpected event %i in stClosingSc state.\n", event);
                 pSM->state = stError;
                 break;
             }
@@ -851,6 +875,12 @@ bool StateMachine_EventDispatcher(StateMachine_Machine* pSM,
             }
             SOPC_Free(pSM->pCtxRequest);
             pSM->pCtxRequest = NULL;
+        }
+
+        if (prevState != pSM->state && stClosingSc == pSM->state)
+        {
+            SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
+            SOPC_ToolkitClient_AsyncCloseChannel(endpointConnectionCfg, (uintptr_t) pSM->iscConfig);
         }
     }
 

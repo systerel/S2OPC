@@ -38,9 +38,10 @@ typedef enum
 {
     stInit,
     stConfigured,
+    stClosingSc,
     stActivating,
     stActivated,
-    stClosing,
+    stClosingSession,
     stDiscovering,
     stRegister,
     stError
@@ -141,7 +142,7 @@ bool StateMachine_IsConnectable(StateMachine_Machine* pSM);
 
 /**
  * \brief Returns a bool whether the machine is in a connected state or not.
- *  Connected states are: stActivating, stActivated, stClosing.
+ *  Connected states are: stActivating, stActivated, stClosingSession.
  */
 bool StateMachine_IsConnected(StateMachine_Machine* pSM);
 

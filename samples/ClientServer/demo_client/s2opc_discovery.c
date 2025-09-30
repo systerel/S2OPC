@@ -128,6 +128,9 @@ static void EventDispatcher_Discovery(SOPC_App_Com_Event event, uint32_t arg, vo
             exitStatus = 2;
             PrintEndpoints((OpcUa_GetEndpointsResponse*) pParam);
             break;
+        case SE_CLOSED_CHANNEL:
+            exitStatus = 0;
+            break;
         default:
             break;
         }
