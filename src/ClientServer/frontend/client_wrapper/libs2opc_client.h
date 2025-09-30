@@ -90,6 +90,10 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* conn,
  *        Service response callback configured through ::SOPC_ClientConfigHelper_SetServiceAsyncResponse will be
  *        called on service response or in case of service request sending failure.
  *
+ *  \warning ::SOPC_ClientHelper_DiscoveryAsyncCloseConnection should be called to close
+ *           the underlying connection created when no more discovery requests will be sent,
+ *           otherwise it will only be closed on connection timeout or when the client is cleared.
+ *
  * \param secConnConfig  The secure connection configuration.
  * \param request   An instance of one of the following OPC UA request:
  *                  - ::OpcUa_FindServersRequest
@@ -114,10 +118,6 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* conn,
  *
  * \warning If the server endpoint is not a discovery endpoint, or an activated session is expected,
  *          usual connection and generic services functions shall be used.
- *
- * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
- *          and prior to call ::SOPC_ClientConfigHelper_Clear.
- *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
                                                           void* request,
@@ -134,7 +134,25 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsyncCustom(SOPC_SecureConne
                                                                 SOPC_ServiceAsyncResp_Fct* asyncRespCb);
 
 /**
+ * \brief Closes the connection to the server used for asynchronous discovery requests given the connection
+ *        configuration.
+ *
+ * \note If the same connection configuration was also used to create a ::SOPC_ClientConnection,
+ *       it will fail with SOPC_STATUS_WOULD_BLOCK.
+ *
+ *
+ * \param secConnConfig  The secure connection configuration for which connection shall be closed.
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ *         otherwise SOPC_STATUS_INVALID_STATE if the given configuration is invalid, the connection is already closed,
+ *         or SOPC_STATUS_WOULD_BLOCK in case the connection was also used to create a ::SOPC_ClientConnection.
+ *         In the latter case, the expected behavior is to call ::SOPC_ClientHelper_Disconnect.
+ */
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryAsyncCloseConnection(SOPC_SecureConnection_Config* secConnConfig);
+
+/**
  * \brief Sends a discovery request without user session creation and activation and retrieve response synchronously.
+ *        A connection is established only during the call to execute the discovery service and closed before returning.
  *
  * \param secConnConfig  The secure connection configuration.
  * \param request   An instance of one of the following OPC UA request:

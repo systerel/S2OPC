@@ -96,7 +96,8 @@ typedef enum
     stCreatingMonIt,
     stDeletingMonIt,
     stDeletingSubscr,
-    stClosing
+    stClosingSession,
+    stClosingChannel
 } SOPC_StaMac_State;
 
 /* Request types */
@@ -187,6 +188,24 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM);
  * If not SOPC_StaMac_IsConnected(), the machine is put in state stError.
  */
 SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM);
+
+/**
+ * \brief Closes the secure channel (shall only be used when session is not started)
+ *
+ * \note: Call is ignored if ::SOPC_StaMac_IsConnected() returns true
+ */
+void SOPC_StaMac_CloseChannel(SOPC_StaMac_Machine* pSM);
+
+/**
+ * \brief Stops the state machine with given error status (provided on connection closed notification)
+ */
+void SOPC_StaMac_StopsWithError(SOPC_StaMac_Machine* pSM, SOPC_StatusCode status);
+
+/**
+ * \brief Returns the current connection status, in case of connection closed returns the reason
+ *        (Good if disconnection was requested)
+ */
+SOPC_StatusCode SOPC_StaMac_GetConnectionStatus(SOPC_StaMac_Machine* pSM);
 
 /**
  * \brief Sends a request, wraps SOPC_ToolkitClient_AsyncSendRequestOnSession().
@@ -350,7 +369,7 @@ bool SOPC_StaMac_IsConnectable(SOPC_StaMac_Machine* pSM);
 /**
  * \brief Returns a bool whether the machine is in a connected state or not.
  *
- * Connected states are: stActivating, stActivated, stCreating*, stClosing.
+ * Connected states are: stActivating, stActivated, stCreating*, stClosingSession.
  */
 bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM);
 
@@ -358,11 +377,6 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM);
  * \brief Returns a bool whether the machine is in stError or not.
  */
 bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM);
-
-/**
- * \brief Put the state machine in error state (without closing). This avoids additional notifications.
- */
-void SOPC_StaMac_SetError(SOPC_StaMac_Machine* pSM);
 
 // Returns true if a subscription creation is in progress
 bool SOPC_StaMac_IsSubscriptionInProgress(SOPC_StaMac_Machine* pSM);

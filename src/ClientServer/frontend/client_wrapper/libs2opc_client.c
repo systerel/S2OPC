@@ -326,12 +326,11 @@ static void SOPC_ClientInternal_EventCbk(uint32_t c_id,
 }
 
 static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event,
-                                                        void* param,
+                                                        SOPC_StatusCode status,
                                                         SOPC_ClientConnection* cc)
 {
     SOPC_ASSERT(NULL != cc);
-    if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event || SE_SESSION_REACTIVATING == event ||
-        SE_ACTIVATED_SESSION == event)
+    if (SE_CLOSED_CHANNEL == event || SE_ACTIVATED_SESSION == event)
     {
         SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -352,7 +351,7 @@ static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event
         if (isSyncConnDiscon)
         {
             /* Synchronous connection operation:
-               Signal that the response is available */
+               Signal that the disconnection is done */
             statusMutex = SOPC_Condition_SignalAll(&cc->syncCond);
             SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         }
@@ -361,25 +360,14 @@ static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event
             /* Unexpected connection event
                or asynchronous connection operation response (NOT IMPLEMENTED YET) */
             SOPC_ClientConnectionEvent connEvent;
-            SOPC_StatusCode serviceStatus = SOPC_GoodGenericStatus;
+            SOPC_StatusCode serviceStatus = status;
             switch (event)
             {
             case SE_ACTIVATED_SESSION:
                 connEvent = SOPC_ClientConnectionEvent_Connected;
                 break;
-            case SE_SESSION_ACTIVATION_FAILURE:
+            case SE_CLOSED_CHANNEL:
                 connEvent = SOPC_ClientConnectionEvent_Disconnected;
-                serviceStatus =
-                    (SOPC_StatusCode)(uintptr_t) param; // TODO: casting void to unintptr is not legit, only reverse is
-                break;
-            case SE_SESSION_REACTIVATING:
-                connEvent = SOPC_ClientConnectionEvent_Disconnected; // TODO: reconnecting when managed by SM
-                serviceStatus = OpcUa_BadWouldBlock;
-                break;
-            case SE_CLOSED_SESSION:
-                connEvent = SOPC_ClientConnectionEvent_Disconnected;
-                serviceStatus =
-                    (SOPC_StatusCode)(uintptr_t) param; // TODO: casting void to unintptr is not legit, only reverse is
                 break;
             default:
                 SOPC_ASSERT(false);
@@ -389,7 +377,10 @@ static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event
             mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             unlockedMutex = true;
-            cc->connCb(cc, connEvent, serviceStatus);
+            if (!cc->isDiscovery) // inhibit discovery closed channel
+            {
+                cc->connCb(cc, connEvent, serviceStatus);
+            }
         }
         if (!unlockedMutex)
         {
@@ -439,6 +430,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
     case SE_ACTIVATED_SESSION:
     case SE_SESSION_REACTIVATING:
     case SE_CLOSED_SESSION:
+    case SE_CLOSED_CHANNEL:
         cc = sopc_client_helper_config.secureConnections[appContext];
         break;
     /* IdOrStatus is reverse endpoint config index */
@@ -475,8 +467,9 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
             unlockedMutex = true;
             SOPC_ClientInternal_EventCbk(serviceReqCtx->secureConnectionIdx, libsubEvent, status, param,
                                          (uintptr_t) serviceReqCtx);
+            // Delete the discovery request context
             uintptr_t removedContext = SOPC_SLinkedList_RemoveFromValuePtr(cc->discoveryReqCtxList, appContext);
-            SOPC_UNUSED_RESULT(removedContext == appContext);
+            SOPC_UNUSED_RESULT(removedContext);
             SOPC_Free((void*) appContext);
         }
         else if (event !=
@@ -502,7 +495,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
                 if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext) && NULL != cc)
                 {
                     /* Post process the event in case of connection management events */
-                    SOPC_ClientInternal_ConnectionStateCallback(event, param, cc);
+                    SOPC_ClientInternal_ConnectionStateCallback(event, SOPC_StaMac_GetConnectionStatus(pSM), cc);
                 }
             }
             else
@@ -806,7 +799,11 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_C
                                                          void* request,
                                                          void** response)
 {
-    return SOPC_ClientHelperInternal_DiscoveryService(true, secConnConfig, request, response, 0, NULL);
+    SOPC_ReturnStatus status =
+        SOPC_ClientHelperInternal_DiscoveryService(true, secConnConfig, request, response, 0, NULL);
+    SOPC_ReturnStatus discoStatus = SOPC_ClientHelper_DiscoveryAsyncCloseConnection(secConnConfig);
+    SOPC_UNUSED_RESULT(discoStatus);
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secConnConfig,
@@ -929,7 +926,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureConnection)
+static SOPC_ReturnStatus SOPC_ClientHelperInternal_Disconnect(SOPC_ClientConnection** secureConnection,
+                                                              bool isDiscovery)
 {
     if (NULL == secureConnection || NULL == *secureConnection)
     {
@@ -991,7 +989,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
         SOPC_Free(subsToDelete);
     }
 
-    if (SOPC_StaMac_IsConnected(pSM))
+    // Note: in discovery mode, SM is unused for messages but we use it for closing channel
+    if (SOPC_StaMac_IsConnected(pSM) || isDiscovery)
     {
         mutStatus = SOPC_Mutex_Lock(&pSc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -999,7 +998,14 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
         if (!pSc->syncConnDisconStarted)
         {
             pSc->syncConnDisconStarted = true;
-            status = SOPC_StaMac_StopSession(pSM);
+            if (!isDiscovery)
+            {
+                status = SOPC_StaMac_StopSession(pSM);
+            }
+            else
+            {
+                SOPC_StaMac_CloseChannel(pSM);
+            }
         }
         else
         {
@@ -1039,6 +1045,58 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureConnection)
+{
+    return SOPC_ClientHelperInternal_Disconnect(secureConnection, false);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryAsyncCloseConnection(SOPC_SecureConnection_Config* secConnConfig)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ClientConnection* res = NULL;
+    if (NULL == secConnConfig)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    if (SOPC_STATUS_OK == status && !SOPC_ClientInternal_IsInitialized())
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        // Check connection is valid and is not already created
+        if (!SOPC_ClientHelperInternal_CheckConnectionValid(pConfig, secConnConfig))
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            res = sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx];
+            if (NULL == res)
+            {
+                status = SOPC_STATUS_INVALID_STATE;
+            }
+            else if (!res->isDiscovery)
+            {
+                status = SOPC_STATUS_WOULD_BLOCK;
+            }
+        }
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ClientHelperInternal_Disconnect(&res, true);
+        }
+    }
     return status;
 }
 
@@ -1388,7 +1446,7 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
             else if (count * CONNECTION_TIMEOUT_MS_STEP >= SOPC_REQUEST_TIMEOUT_MS)
             {
                 status = SOPC_STATUS_TIMEOUT;
-                SOPC_StaMac_SetError(pSM);
+                SOPC_StaMac_StopsWithError(pSM, OpcUa_BadTimeout);
             }
             else
             {
@@ -1639,7 +1697,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
             else if (count * CONNECTION_TIMEOUT_MS_STEP >= SOPC_REQUEST_TIMEOUT_MS)
             {
                 status = SOPC_STATUS_TIMEOUT;
-                SOPC_StaMac_SetError(pSM);
+                SOPC_StaMac_StopsWithError(pSM, OpcUa_BadTimeout);
             }
         }
         SOPC_Free(appCtx);
@@ -1736,7 +1794,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
             else if (count * CONNECTION_TIMEOUT_MS_STEP >= SOPC_REQUEST_TIMEOUT_MS)
             {
                 status = SOPC_STATUS_TIMEOUT;
-                SOPC_StaMac_SetError(pSM);
+                SOPC_StaMac_StopsWithError(pSM, OpcUa_BadTimeout);
             }
         }
         SOPC_Free(appCtx);
@@ -1816,7 +1874,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
         else if (count * CONNECTION_TIMEOUT_MS_STEP >= SOPC_REQUEST_TIMEOUT_MS)
         {
             status = SOPC_STATUS_TIMEOUT;
-            SOPC_StaMac_SetError(pSM);
+            SOPC_StaMac_StopsWithError(pSM, OpcUa_BadTimeout);
         }
         else if (SOPC_StaMac_HasSubscriptionId(pSM, subscription->subscriptionId))
         {

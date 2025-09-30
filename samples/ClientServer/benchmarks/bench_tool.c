@@ -342,6 +342,11 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
         ctx->status = BENCH_FINISHED_ERROR;
         shutdown = true;
         break;
+    case SE_CLOSED_CHANNEL:
+        fprintf(stderr, "Channel closed\n");
+        ctx->status = BENCH_FINISHED_ERROR;
+        shutdown = true;
+        break;
     case SE_SND_REQUEST_FAILED:
         fprintf(stderr, "Request failed\n");
         ctx->status = BENCH_FINISHED_ERROR;

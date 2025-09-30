@@ -55,6 +55,7 @@ struct SOPC_StaMac_Machine
 {
     SOPC_Mutex mutex;
     SOPC_StaMac_State state;
+    SOPC_StatusCode connectionStatus;
     uint32_t iscConfig; /* Toolkit scConfig ID */
     SOPC_ReverseEndpointConfigIdx
         reverseConfigIdx; /* Reverse configuration index > 0 if reverse connection mechanism shall be used */
@@ -143,6 +144,10 @@ static void LockedStaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pS
                                                          uint32_t arg,
                                                          void* pParam,
                                                          uintptr_t appCtx);
+static void LockedStaMac_ProcessMsg_CloseChannelResponse(SOPC_StaMac_Machine* pSM,
+                                                         uint32_t arg,
+                                                         void* pParam,
+                                                         uintptr_t appCtx);
 static void LockedStaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM,
                                                     uint32_t arg,
                                                     void* pParam,
@@ -217,6 +222,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
     if (SOPC_STATUS_OK == status)
     {
         pSM->state = stInit;
+        pSM->connectionStatus = SOPC_GoodGenericStatus;
         pSM->iscConfig = iscConfig;
         pSM->reverseConfigIdx = reverseConfigIdx;
         pSM->iCliId = iCliId;
@@ -448,13 +454,75 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
     if (SOPC_STATUS_OK == status)
     {
         SOPC_ToolkitClient_AsyncCloseSession(pSM->iSessionID);
-        pSM->state = stClosing;
+        pSM->state = stClosingSession;
     }
 
     mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
+}
+
+static void SOPC_StaMacInternal_CloseChannel(SOPC_StaMac_Machine* pSM)
+{
+    SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(pSM->iscConfig);
+    SOPC_ToolkitClient_AsyncCloseChannel(endpointConnectionCfg, (uintptr_t) pSM->iCliId);
+    pSM->state = stClosingChannel;
+}
+
+void SOPC_StaMac_CloseChannel(SOPC_StaMac_Machine* pSM)
+{
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    bool isSessionConnected = SOPC_StaMac_IsConnected(pSM);
+    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    if (!isSessionConnected)
+    {
+        SOPC_StaMacInternal_CloseChannel(pSM);
+    }
+}
+
+void SOPC_StaMac_StopsWithError(SOPC_StaMac_Machine* pSM, SOPC_StatusCode errorStatus)
+{
+    if (NULL == pSM)
+    {
+        return;
+    }
+
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    if (pSM->state != stError && SOPC_IsGoodStatus(pSM->connectionStatus))
+    {
+        pSM->connectionStatus = errorStatus;
+    }
+    bool isConnected = SOPC_StaMac_IsConnected(pSM);
+    status = SOPC_Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    if (isConnected)
+    {
+        SOPC_StaMac_StopSession(pSM);
+    }
+    else
+    {
+        SOPC_StaMac_CloseChannel(pSM);
+    }
+}
+
+SOPC_StatusCode SOPC_StaMac_GetConnectionStatus(SOPC_StaMac_Machine* pSM)
+{
+    if (NULL == pSM)
+    {
+        return OpcUa_BadInvalidState;
+    }
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_StatusCode connectionStatus = pSM->connectionStatus;
+    status = SOPC_Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    return connectionStatus;
 }
 
 SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
@@ -1011,7 +1079,8 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM)
     case stCreatingSubscr:
     case stCreatingMonIt:
     case stDeletingSubscr:
-    case stClosing:
+    case stClosingSession:
+    case stClosingChannel:
         bConnected = true;
         break;
     default:
@@ -1038,20 +1107,6 @@ bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM)
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return return_code;
-}
-
-void SOPC_StaMac_SetError(SOPC_StaMac_Machine* pSM)
-{
-    if (NULL == pSM)
-    {
-        return;
-    }
-
-    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    pSM->state = stError;
-    status = SOPC_Mutex_Unlock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 bool SOPC_StaMac_IsSubscriptionInProgress(SOPC_StaMac_Machine* pSM)
@@ -1247,7 +1302,10 @@ static bool LockedStaMac_GiveAuthorization_stClosing(SOPC_StaMac_Machine* pSM,
     switch (event)
     {
     case SE_CLOSED_SESSION:
-        authorization = true;
+        authorization = stClosingSession == pSM->state;
+        break;
+    case SE_CLOSED_CHANNEL:
+        authorization = stClosingChannel == pSM->state;
         break;
     default:
         break;
@@ -1415,6 +1473,8 @@ static const char* SOPC_ClientAppComEvent_ToString(SOPC_App_Com_Event event)
         return "SE_RCV_SESSION_RESPONSE";
     case SE_CLOSED_SESSION:
         return "SE_CLOSED_SESSION";
+    case SE_CLOSED_CHANNEL:
+        return "SE_CLOSED_CHANNEL";
     case SE_RCV_DISCOVERY_RESPONSE:
         return "SE_RCV_DISCOVERY_RESPONSE";
     case SE_SND_REQUEST_FAILED:
@@ -1444,8 +1504,10 @@ static const char* SOPC_StaMacState_ToString(SOPC_StaMac_State state)
         return "stDeletingMonIt";
     case stDeletingSubscr:
         return "stDeletingSubscr";
-    case stClosing:
-        return "stClosing";
+    case stClosingSession:
+        return "stClosingSession";
+    case stClosingChannel:
+        return "stClosingChannel";
     default:
         return "UNKNOWN STATE VALUE";
     }
@@ -1510,7 +1572,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                            (SOPC_StatusCode)(uintptr_t) pParam);
                 }
                 break;
-            case stClosing:
+            case stClosingSession:
+            case stClosingChannel:
                 processingAuthorization = LockedStaMac_GiveAuthorization_stClosing(pSM, event, pEncType);
                 break;
             /* Main state */
@@ -1569,6 +1632,10 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 else if (SE_CLOSED_SESSION == event)
                 {
                     LockedStaMac_ProcessMsg_CloseSessionResponse(pSM, arg, pParam, appCtx);
+                }
+                else if (SE_CLOSED_CHANNEL == event)
+                {
+                    LockedStaMac_ProcessMsg_CloseChannelResponse(pSM, arg, pParam, appCtx);
                 }
                 else if (SE_RCV_SESSION_RESPONSE == event)
                 {
@@ -1631,7 +1698,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             uint32_t cliId = pSM->iCliId;
             if (SE_SND_REQUEST_FAILED == event)
             {
-                pSM->state = stClosing;
+                pSM->state = stClosingSession;
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "Applicative message could not be sent, closing the connection.");
 
@@ -1659,6 +1726,10 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         }
 
         LockedStaMac_PostProcessActions(pSM, oldState);
+        // Note: bProcess now only reflects if the connection callback in client layer will be called or not,
+        //       i.e. in case of connection or disconnection events.
+        //       (LockedStaMac_IsEventTargeted already filtered unexpected events)
+        bProcess = (event == SE_ACTIVATED_SESSION || event == SE_CLOSED_CHANNEL);
     }
 
     if (!unlockedMutex)
@@ -1667,7 +1738,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
-    return bProcess;
+    return bProcess; // true if it shall be processed by client layer
 }
 
 /* ========================
@@ -1752,6 +1823,31 @@ static bool LockedStaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
         {
             bProcess = false;
         }
+        else
+        {
+            // Update connection error status if not already set
+            if (SOPC_IsGoodStatus(pSM->connectionStatus))
+            {
+                if (SE_SESSION_ACTIVATION_FAILURE == event)
+                {
+                    pSM->connectionStatus = (SOPC_StatusCode)(uintptr_t) pParam;
+                }
+                else if (SE_SESSION_REACTIVATING == event)
+                {
+                    pSM->connectionStatus = OpcUa_BadWouldBlock;
+                }
+                else if (SE_CLOSED_SESSION == event)
+                {
+                    pSM->connectionStatus = (SOPC_StatusCode)(uintptr_t) pParam;
+                }
+            }
+        }
+        break;
+    case SE_CLOSED_CHANNEL:
+        if (pSM->iCliId != toolkitCtx)
+        {
+            bProcess = false;
+        }
         break;
     case SE_REVERSE_ENDPOINT_CLOSED:
         // Not managed in state machine
@@ -1780,6 +1876,19 @@ static void LockedStaMac_ProcessMsg_ActivateSessionResponse(SOPC_StaMac_Machine*
 }
 
 static void LockedStaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
+                                                         uint32_t arg,
+                                                         void* pParam,
+                                                         uintptr_t appCtx)
+{
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_ARG(pParam);
+    SOPC_UNUSED_ARG(appCtx);
+
+    /* Change machine state to closing channel */
+    pSM->state = stClosingChannel;
+}
+
+static void LockedStaMac_ProcessMsg_CloseChannelResponse(SOPC_StaMac_Machine* pSM,
                                                          uint32_t arg,
                                                          void* pParam,
                                                          uintptr_t appCtx)
@@ -2390,6 +2499,7 @@ static void LockedStaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
     {
     case SE_SESSION_ACTIVATION_FAILURE:
     case SE_CLOSED_SESSION:
+    case SE_CLOSED_CHANNEL:
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
                               "Received post-closed closed event or activation failure, ignored.");
         break;
@@ -2536,9 +2646,23 @@ static void LockedStaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMa
             }
         }
         break;
-    /* Try to send a close session if the session was connected before the error */
-    case stError:
-        if (stError != oldState && stClosing != oldState)
+    case stClosingChannel:
+        if (oldState != stClosingChannel)
+        {
+            SOPC_StaMacInternal_CloseChannel(pSM);
+        }
+        break;
+    default:
+        break;
+    }
+
+    /* If state machine is still in error state:
+     *  try to send a close session / channel if the state machine was connected before the error */
+    if (stError == pSM->state)
+    {
+        // If session was activated and not closed try to close it
+        if (stError != oldState && stClosingChannel != oldState && stClosingSession != oldState &&
+            stActivating != oldState && stInit != oldState)
         {
             pSM->state = oldState;
             if (SOPC_StaMac_IsConnected(pSM))
@@ -2559,8 +2683,12 @@ static void LockedStaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMa
                 pSM->state = stError;
             }
         }
-        break;
-    default:
-        break;
+        // If session is not closing and channel was not closed try to close it
+        if (stError == pSM->state && stError != oldState && stClosingChannel != oldState && stInit != oldState)
+        {
+            SOPC_StaMacInternal_CloseChannel(pSM);
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                  "Closing the connection because of the previous error.");
+        }
     }
 }
