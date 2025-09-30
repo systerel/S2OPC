@@ -150,6 +150,11 @@ typedef enum SOPC_Services_Event
     APP_TO_SE_CLOSE_SESSION,          /**< Client side only:<BR/>
                                          requests to close an activated session.<BR/>
                                          id = session id */
+    APP_TO_SE_CLOSE_CONNECTION,       /**< Client side only:<BR/>
+                                         requests to close an established or pending SC connection.<BR/>
+                                         id = secure channel config index<BR/>
+                                         auxParam = user application close connection context
+                                       */
     APP_TO_SE_CLOSE_ALL_CONNECTIONS,  /**< (internal use only). Request to close all established SC connections<BR/>
                                          It might be used to close only SC established as client or both client/server.
                                          Automatically called by ::SOPC_Toolkit_Clear for both client and server.<BR/>

@@ -118,6 +118,21 @@ OPERATIONS
          )
     END;
 
+    /* Close a client channel by application request */
+    bres <-- close_client_channel (p_config_idx, p_close_ctx) =
+    PRE
+        p_config_idx : t_channel_config_idx_i &
+        p_config_idx : t_channel_config_idx &
+        p_close_ctx : t_application_context_i
+    THEN
+        s_cli_channel_disconnecting,
+        bres
+        :(  s_cli_channel_disconnecting <: t_channel_config_idx &
+
+            bres : BOOL
+         )
+    END;
+
     bres <-- close_all_channel (p_clientOnly) =
     PRE
         p_clientOnly : BOOL

@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 27/02/2025 16:13:05
+ Date                 : 30/09/2025 13:03:14
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -947,6 +947,19 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
       if (io_dispatch_mgr__l_msg_typ != constants__c_msg_type_indet) {
          service_mgr__dealloc_msg_out(io_dispatch_mgr__p_publish_resp_msg);
       }
+   }
+}
+
+void io_dispatch_mgr__client_close_channel(
+   const constants__t_channel_config_idx_i io_dispatch_mgr__p_config_idx,
+   const constants__t_application_context_i io_dispatch_mgr__p_close_ctx,
+   t_bool * const io_dispatch_mgr__bres) {
+   channel_mgr__is_valid_channel_config_idx(io_dispatch_mgr__p_config_idx,
+      io_dispatch_mgr__bres);
+   if (*io_dispatch_mgr__bres == true) {
+      channel_mgr__close_client_channel(io_dispatch_mgr__p_config_idx,
+         io_dispatch_mgr__p_close_ctx,
+         io_dispatch_mgr__bres);
    }
 }
 

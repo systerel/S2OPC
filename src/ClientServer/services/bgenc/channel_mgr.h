@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.h
 
- Date                 : 29/05/2024 08:51:39
+ Date                 : 30/09/2025 13:03:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -82,7 +82,8 @@ extern void channel_mgr__INITIALISATION(void);
 extern void channel_mgr__l_check_all_channel_lost(void);
 extern void channel_mgr__l_close_secure_channel(
    const constants__t_channel_i channel_mgr__p_channel,
-   const constants_statuscodes_bs__t_StatusCode_i channel_mgr__p_statusCode);
+   const constants_statuscodes_bs__t_StatusCode_i channel_mgr__p_statusCode,
+   const constants__t_application_context_i channel_mgr__p_close_ctx);
 extern void channel_mgr__l_is_new_sc_connection_allowed(
    const t_bool channel_mgr__is_one_sc_auto_closing,
    t_bool * const channel_mgr__l_allowed_new_sc);
@@ -107,6 +108,10 @@ extern void channel_mgr__cli_set_connection_timeout_channel(
    t_bool * const channel_mgr__bres);
 extern void channel_mgr__close_all_channel(
    const t_bool channel_mgr__p_clientOnly,
+   t_bool * const channel_mgr__bres);
+extern void channel_mgr__close_client_channel(
+   const constants__t_channel_config_idx_i channel_mgr__p_config_idx,
+   const constants__t_application_context_i channel_mgr__p_close_ctx,
    t_bool * const channel_mgr__bres);
 extern void channel_mgr__close_secure_channel(
    const constants__t_channel_i channel_mgr__channel,

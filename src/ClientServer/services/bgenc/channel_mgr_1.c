@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_1.c
 
- Date                 : 21/03/2023 09:17:33
+ Date                 : 30/09/2025 13:03:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -37,6 +37,7 @@
   ----------------------------*/
 constants__t_timeref_i channel_mgr_1__a_channel_connected_time_i[constants__t_channel_i_max+1];
 constants__t_timeref_i channel_mgr_1__a_channel_create_session_locked_i[constants__t_channel_i_max+1];
+constants__t_application_context_i channel_mgr_1__a_cli_channel_closing_ctx_i[constants__t_channel_config_idx_i_max+1];
 constants__t_channel_config_idx_i channel_mgr_1__a_config_i[constants__t_channel_i_max+1];
 constants__t_channel_i channel_mgr_1__a_config_inv_i[constants__t_channel_config_idx_i_max+1];
 constants__t_endpoint_config_idx_i channel_mgr_1__a_endpoint_i[constants__t_channel_i_max+1];
@@ -62,6 +63,12 @@ void channel_mgr_1__INITIALISATION(void) {
       t_entier4 i;
       for (i = constants__t_channel_config_idx_i_max; 0 <= i; i = i - 1) {
          channel_mgr_1__s_cli_channel_disconnecting_i[i] = false;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_channel_config_idx_i_max; 0 <= i; i = i - 1) {
+         channel_mgr_1__a_cli_channel_closing_ctx_i[i] = constants__c_no_application_context;
       }
    }
    {
@@ -297,8 +304,12 @@ void channel_mgr_1__is_cli_channel_connecting(
 }
 
 void channel_mgr_1__add_cli_channel_disconnecting(
-   const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx) {
+   const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx,
+   const constants__t_application_context_i channel_mgr_1__p_close_ctx) {
    channel_mgr_1__s_cli_channel_disconnecting_i[channel_mgr_1__p_config_idx] = true;
+   if (channel_mgr_1__p_close_ctx != constants__c_no_application_context) {
+      channel_mgr_1__a_cli_channel_closing_ctx_i[channel_mgr_1__p_config_idx] = channel_mgr_1__p_close_ctx;
+   }
 }
 
 void channel_mgr_1__remove_channel_connected(
@@ -317,8 +328,10 @@ void channel_mgr_1__remove_channel_connected(
 }
 
 void channel_mgr_1__remove_cli_channel_disconnecting(
-   const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx) {
+   const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx,
+   constants__t_application_context_i * const channel_mgr_1__p_close_ctx) {
    channel_mgr_1__s_cli_channel_disconnecting_i[channel_mgr_1__p_config_idx] = false;
+   *channel_mgr_1__p_close_ctx = channel_mgr_1__a_cli_channel_closing_ctx_i[channel_mgr_1__p_config_idx];
 }
 
 void channel_mgr_1__reset_config(

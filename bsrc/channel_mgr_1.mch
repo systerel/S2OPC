@@ -27,6 +27,7 @@ DEFINITIONS
     d_variables ==
     s_cli_channel_connecting,
     s_cli_channel_disconnecting,
+    a_cli_channel_closing_ctx,
     s_channel_connected,
     a_channel_connected_time,
     a_channel_create_session_locked,
@@ -38,6 +39,9 @@ DEFINITIONS
     d_typage ==
     s_cli_channel_connecting    <: t_channel_config_idx                &
     s_cli_channel_disconnecting <: t_channel_config_idx                &
+    a_cli_channel_closing_ctx    : t_channel_config_idx +-> t_application_context_i &
+    dom(a_cli_channel_closing_ctx) <: s_cli_channel_disconnecting      &
+    c_no_application_context       /: ran(a_cli_channel_closing_ctx)   &
     s_channel_connected         <: t_channel                           &
     a_channel_connected_time     : t_channel +-> t_timeref             &
     dom(a_channel_connected_time) = s_channel_connected                &
@@ -55,6 +59,7 @@ INVARIANT
 
 INITIALISATION
     s_cli_channel_connecting    := {} ||
+    a_cli_channel_closing_ctx   := {} ||
     s_cli_channel_disconnecting := {} ||
     s_channel_connected         := {} ||
     a_channel_connected_time    := {} ||
@@ -259,12 +264,21 @@ OPERATIONS
     END
     ;
 
-    add_cli_channel_disconnecting(p_config_idx) =
+    add_cli_channel_disconnecting(p_config_idx, p_close_ctx) =
     PRE
         p_config_idx : t_channel_config_idx_i &
-        p_config_idx : t_channel_config_idx
+        p_config_idx : t_channel_config_idx &
+        p_close_ctx : t_application_context_i &
+        (p_close_ctx /= c_no_application_context =>
+            p_config_idx /: s_cli_channel_disconnecting)
     THEN
-        s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {p_config_idx}
+        s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {p_config_idx} ||
+        a_cli_channel_closing_ctx
+        :(a_cli_channel_closing_ctx : t_channel_config_idx +-> t_application_context_i &
+            (p_close_ctx /= c_no_application_context =>
+                a_cli_channel_closing_ctx = a_cli_channel_closing_ctx$0 \/  {p_config_idx |-> p_close_ctx}) &
+            (p_close_ctx = c_no_application_context =>
+                a_cli_channel_closing_ctx = a_cli_channel_closing_ctx$0))
     END
     ;
 
@@ -278,12 +292,17 @@ OPERATIONS
     END
     ;
 
-    remove_cli_channel_disconnecting(p_config_idx) =
+    p_close_ctx <-- remove_cli_channel_disconnecting(p_config_idx) =
     PRE
         p_config_idx : t_channel_config_idx_i &
         p_config_idx : t_channel_config_idx
     THEN
-        s_cli_channel_disconnecting := s_cli_channel_disconnecting - {p_config_idx}
+        s_cli_channel_disconnecting := s_cli_channel_disconnecting - {p_config_idx} ||
+        p_close_ctx :(p_close_ctx : t_application_context_i &
+            (p_config_idx : dom(a_cli_channel_closing_ctx) =>
+                p_close_ctx = a_cli_channel_closing_ctx (p_config_idx)) &
+            (not (p_config_idx : dom(a_cli_channel_closing_ctx)) =>
+                p_close_ctx = c_no_application_context))
     END
     ;
 

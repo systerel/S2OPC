@@ -392,6 +392,15 @@ OPERATIONS
 
     /* CLEAR OPERATIONS */
 
+
+    bres <-- client_close_channel (p_config_idx, p_close_ctx) =
+    PRE
+        p_config_idx : t_channel_config_idx_i &
+        p_close_ctx : t_application_context_i
+    THEN
+        bres :: BOOL // indicates if close client channel process is engaged (=> p_close_ctx ownership to B model)
+    END;
+
     // TODO: add close all sessions / subscriptions
 
     bres <-- close_all_active_connections (p_clientOnly) =

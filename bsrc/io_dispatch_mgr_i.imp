@@ -36,6 +36,7 @@ IMPORTS
 PROMOTES
     internal_server_inactive_session_prio_event
 
+
 LOCAL_OPERATIONS
 
     header_type <-- get_msg_header_type (msg_typ) =
@@ -802,6 +803,16 @@ OPERATIONS
         IF l_msg_typ /= c_msg_type_indet
         THEN
             dealloc_msg_out (p_publish_resp_msg)
+        END
+    END
+    ;
+
+    bres <-- client_close_channel (p_config_idx, p_close_ctx) =
+    BEGIN
+        bres <-- is_valid_channel_config_idx (p_config_idx) ;
+        IF bres = TRUE
+        THEN
+            bres <-- close_client_channel (p_config_idx, p_close_ctx)
         END
     END
     ;

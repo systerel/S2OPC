@@ -34,6 +34,7 @@
 
 #include "util_b2c.h"
 
+#include "sopc_internal_app_dispatcher.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_toolkit_config_internal.h"
 
@@ -135,6 +136,14 @@ void channel_mgr_bs__last_connected_channel_lost(const t_bool channel_mgr_bs__p_
 {
     SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SC_ALL_DISCONNECTED, 0,
                            (uintptr_t) channel_mgr_bs__p_clientOnly, 0);
+}
+
+void channel_mgr_bs__notify_client_connection_closed(
+    const constants__t_channel_config_idx_i channel_mgr_bs__p_config_idx,
+    const constants__t_application_context_i channel_mgr_bs__p_close_ctx)
+{
+    SOPC_App_EnqueueComEvent(SE_CLOSED_CHANNEL, channel_mgr_bs__p_config_idx, (uintptr_t) true,
+                             channel_mgr_bs__p_close_ctx);
 }
 
 extern void channel_mgr_bs__define_SecurityPolicy(const constants__t_channel_i channel_mgr_bs__p_channel)

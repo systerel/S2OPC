@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_1.h
 
- Date                 : 21/03/2023 09:17:32
+ Date                 : 30/09/2025 13:03:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -45,6 +45,7 @@
   ----------------------------*/
 extern constants__t_timeref_i channel_mgr_1__a_channel_connected_time_i[constants__t_channel_i_max+1];
 extern constants__t_timeref_i channel_mgr_1__a_channel_create_session_locked_i[constants__t_channel_i_max+1];
+extern constants__t_application_context_i channel_mgr_1__a_cli_channel_closing_ctx_i[constants__t_channel_config_idx_i_max+1];
 extern constants__t_channel_config_idx_i channel_mgr_1__a_config_i[constants__t_channel_i_max+1];
 extern constants__t_channel_i channel_mgr_1__a_config_inv_i[constants__t_channel_config_idx_i_max+1];
 extern constants__t_endpoint_config_idx_i channel_mgr_1__a_endpoint_i[constants__t_channel_i_max+1];
@@ -69,7 +70,8 @@ extern void channel_mgr_1__add_channel_connected(
 extern void channel_mgr_1__add_cli_channel_connecting(
    const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx);
 extern void channel_mgr_1__add_cli_channel_disconnecting(
-   const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx);
+   const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx,
+   const constants__t_application_context_i channel_mgr_1__p_close_ctx);
 extern void channel_mgr_1__get_all_channel_info(
    const constants__t_channel_i channel_mgr_1__channel,
    constants__t_channel_config_idx_i * const channel_mgr_1__config_idx,
@@ -120,7 +122,8 @@ extern void channel_mgr_1__remove_channel_connected(
 extern void channel_mgr_1__remove_cli_channel_connecting(
    const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx);
 extern void channel_mgr_1__remove_cli_channel_disconnecting(
-   const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx);
+   const constants__t_channel_config_idx_i channel_mgr_1__p_config_idx,
+   constants__t_application_context_i * const channel_mgr_1__p_close_ctx);
 extern void channel_mgr_1__reset_config(
    const constants__t_channel_i channel_mgr_1__p_channel);
 extern void channel_mgr_1__reset_endpoint(

@@ -87,6 +87,7 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
     case SE_SESSION_REACTIVATING:
     case SE_RCV_SESSION_RESPONSE:
     case SE_CLOSED_SESSION:
+    case SE_CLOSED_CHANNEL:
     case SE_RCV_DISCOVERY_RESPONSE:
     case SE_SND_REQUEST_FAILED:
         if (NULL != sopc_helper_config.clientComEventCb)

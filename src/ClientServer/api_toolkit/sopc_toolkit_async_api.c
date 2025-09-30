@@ -359,6 +359,27 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConn
     return SOPC_STATUS_OK;
 }
 
+void SOPC_ToolkitClient_AsyncCloseChannel(SOPC_EndpointConnectionCfg endpointConnectionCfg, uintptr_t closeCtx)
+{
+    // Note: context should be NULL in B model otherwise callback will not be called,
+    // manage NULL user context provided by encapsulation in allocated memory
+    uintptr_t* pCloseCtx = SOPC_Calloc(1, sizeof(uintptr_t));
+    if (NULL != pCloseCtx)
+    {
+        *pCloseCtx = closeCtx;
+    }
+    else
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Failed to allocate context for APP_TO_SE_CLOSE_CONNECTION with scIdx=%" PRIu32
+                                 " ctx = %" PRIuPTR
+                                 ": disconnection callback will not be called with SE_CLOSED_CHANNEL",
+                                 endpointConnectionCfg.secureChannelConfigIdx, closeCtx);
+    }
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_CONNECTION, endpointConnectionCfg.secureChannelConfigIdx, 0,
+                               (uintptr_t) pCloseCtx);
+}
+
 void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx)
 {
     SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_REVERSE_ENDPOINT, reverseEndpointConfigIdx, (uintptr_t) NULL, 0);

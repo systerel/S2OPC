@@ -420,6 +420,15 @@ typedef enum _SOPC_App_Com_Event
                                          *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
                                          *   auxParam = user application session context
                                          */
+    SE_CLOSED_CHANNEL,                  /**< Client side only:<br/>
+                                         *   Notifies the channel connection is closed after requesting a connection close with
+                                         *   ::APP_TO_SE_CLOSE_CONNECTION. <br/>
+                                         *   id = secure channel config index<br/>
+                                         *   params = (bool) true if connection was a client connection and is closed,
+                                         *                   false if it was not a known client connection
+                                         *                   or the connection is already disconnecting. <br/>
+                                         *   auxParam = user application close connection context
+                                         */
     SE_RCV_DISCOVERY_RESPONSE,          /**< Client side only:<br/>
                                          *   Notifies the service response to a previously discovery service request sent<br/>
                                          *   params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload<br/>

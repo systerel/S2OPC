@@ -597,6 +597,16 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                    "ServicesMgr: APP_TO_SE_CLOSE_SESSION failed session=%" PRIu32, id);
         }
         break;
+    case APP_TO_SE_CLOSE_CONNECTION:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: APP_TO_SE_CLOSE_CONNECTION  scCfgIdx=%" PRIu32, id);
+        // id = secure channel config index
+        io_dispatch_mgr__client_close_channel(id, auxParam, &bres);
+        if (!bres)
+        {
+            SOPC_App_EnqueueComEvent(SE_CLOSED_CHANNEL, id, (uintptr_t) false, auxParam);
+        }
+        break;
     case APP_TO_SE_SEND_DISCOVERY_REQUEST:
         // id = secure channel config index,
         // params = reverse endpoint connection index or 0 if not a reverse connection

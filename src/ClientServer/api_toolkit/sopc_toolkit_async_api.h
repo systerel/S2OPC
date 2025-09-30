@@ -309,6 +309,17 @@ void SOPC_ToolkitClient_AsyncCloseSession(SOPC_SessionId sessionId);
 SOPC_ReturnStatus SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConnectionCfg endpointConnectionCfg,
                                                                void* discoveryReqStruct,
                                                                uintptr_t requestContext);
+
+/**
+ * \brief Requests to close the secure channel for the given endpoint connection configuration.
+ *
+ *   When the channel is closed, the SE_CLOSED_CHANNEL event will be triggered to SOPC_ComEvent_Fct().
+ *
+ * \param endpointConnectionCfg  Endpoint connection configuration to be closed
+ * \param closeCtx               A context value, it will be provided with ::SE_CLOSED_CHANNEL event.
+ */
+void SOPC_ToolkitClient_AsyncCloseChannel(SOPC_EndpointConnectionCfg endpointConnectionCfg, uintptr_t closeCtx);
+
 /**
  * \brief Requests to open a connection listener for the given reverse endpoint description configuration as a client.
  *

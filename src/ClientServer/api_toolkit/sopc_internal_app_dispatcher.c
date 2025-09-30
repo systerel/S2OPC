@@ -39,6 +39,7 @@ static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, u
     SOPC_UNUSED_ARG(handler);
 
     void* params = (void*) uintParams; // Always used as a pointer content here
+    uintptr_t* tmpCloseChannelCtxEncapsulationPtr = NULL;
     SOPC_App_Com_Event comEvent = (SOPC_App_Com_Event) event;
     SOPC_EncodeableType* encType = NULL;
 
@@ -73,6 +74,17 @@ static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, u
     case SE_CLOSED_SESSION:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "App: SE_CLOSED_SESSION session=%" PRIu32 " context=%" PRIuPTR, id, auxParam);
+        break;
+    case SE_CLOSED_CHANNEL:
+        // Dereference the context which is encapsulated in an allocated uintptr_t and keep it for callback call,
+        // free the pointer allocated for encapsulation. See ::SOPC_ToolkitClient_AsyncCloseChannel for allocation.
+        tmpCloseChannelCtxEncapsulationPtr = (uintptr_t*) auxParam;
+        // set actual context for callback call
+        auxParam = *tmpCloseChannelCtxEncapsulationPtr;
+        SOPC_Free(tmpCloseChannelCtxEncapsulationPtr);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "App: SE_CLOSED_CHANNEL connection=%" PRIu32 " actualDisconnect=%s context=%" PRIuPTR,
+                               id, ((bool) params) ? "true" : "false", auxParam);
         break;
     case SE_RCV_DISCOVERY_RESPONSE:
         if (params != NULL)

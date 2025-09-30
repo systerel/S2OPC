@@ -61,17 +61,27 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    l_close_secure_channel(p_channel, p_statusCode) =
+    l_close_secure_channel(p_channel, p_statusCode, p_close_ctx) =
     PRE
         p_channel : t_channel_i &
         p_channel : t_channel &
         p_statusCode : t_StatusCode_i &
-        p_statusCode : t_StatusCode
+        p_statusCode : t_StatusCode &
+        p_close_ctx : t_application_context_i &
+        /* Setting a close context is only possible if the channel is not already disconnecting */
+        (p_close_ctx /= c_no_application_context =>
+            a_config(p_channel) /: s_cli_channel_disconnecting)
     THEN
         IF  p_channel : s_channel_connected &
             p_channel /: dom(a_endpoint) /* Client side only: */
         THEN
-            s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {a_config(p_channel)}
+            s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {a_config(p_channel)} ||
+            a_cli_channel_closing_ctx
+            :(a_cli_channel_closing_ctx : t_channel_config_idx +-> t_application_context_i &
+              (p_close_ctx /= c_no_application_context =>
+                    a_cli_channel_closing_ctx = a_cli_channel_closing_ctx$0 \/  {a_config(p_channel) |-> p_close_ctx}) &
+              (p_close_ctx = c_no_application_context =>
+                    a_cli_channel_closing_ctx = a_cli_channel_closing_ctx$0))
         END
     END
     ;
@@ -108,7 +118,7 @@ OPERATIONS
 
     /* Local operations */
 
-    l_close_secure_channel(p_channel, p_statusCode) =
+    l_close_secure_channel(p_channel, p_statusCode, p_close_ctx) =
     VAR
         l_res,
         l_channel_conf,
@@ -119,7 +129,7 @@ OPERATIONS
             l_is_client_channel <-- is_client_channel(p_channel);
             IF l_is_client_channel = TRUE
             THEN
-                add_cli_channel_disconnecting(l_channel_conf)
+                add_cli_channel_disconnecting(l_channel_conf, p_close_ctx)
             END
             ;
             finalize_close_secure_channel(p_channel, p_statusCode)
@@ -261,7 +271,43 @@ OPERATIONS
 
     close_secure_channel(channel, statusCode) =
     BEGIN
-        l_close_secure_channel(channel, statusCode)
+        l_close_secure_channel(channel, statusCode, c_no_application_context)
+    END
+    ;
+
+    bres <-- close_client_channel (p_config_idx, p_close_ctx) =
+    VAR
+        l_channel,
+        l_config_idx,
+        l_connected,
+        l_connecting,
+        l_disconnecting,
+        l_cli_con,
+        l_new_sc_disconnecting
+    IN
+        l_new_sc_disconnecting := FALSE;
+        l_connecting <-- is_cli_channel_connecting (p_config_idx);
+        l_disconnecting <-- is_disconnecting_channel (p_config_idx);
+        l_channel <-- get_connected_channel (p_config_idx);
+        l_connected <-- is_connected_channel (l_channel);
+        IF l_disconnecting = FALSE
+        THEN
+            IF l_connected = TRUE
+            THEN
+                l_cli_con <-- is_client_channel (l_channel);
+                IF l_cli_con = TRUE
+                THEN
+                    l_close_secure_channel(l_channel, e_sc_bad_secure_channel_closed, p_close_ctx);
+                    l_new_sc_disconnecting := TRUE
+                END
+            ELSIF l_connecting = TRUE
+            THEN
+                add_cli_channel_disconnecting(p_config_idx, p_close_ctx);
+                l_new_sc_disconnecting := TRUE
+            END /* ELSE: channel already disconnected and not connecting neither */
+        END /* ELSE: already disconnecting: nothing to do */
+        ;
+        bres := l_new_sc_disconnecting
     END
     ;
 
@@ -286,7 +332,7 @@ OPERATIONS
                 (p_clientOnly = FALSE or l_cli_con = TRUE)
             THEN
                 l_any_channel_closing_or_connecting := TRUE;
-                l_close_secure_channel(l_channel, e_sc_bad_secure_channel_closed)
+                l_close_secure_channel(l_channel, e_sc_bad_secure_channel_closed, c_no_application_context)
             END
         INVARIANT
             channels_to_iterate <: t_channel &
@@ -305,7 +351,7 @@ OPERATIONS
             THEN
                 l_any_channel_closing_or_connecting := TRUE;
                 /* Set as disconnecting to be closed in case of set connected event: see cli_set_connected_channel */
-                add_cli_channel_disconnecting(l_config_idx)
+                add_cli_channel_disconnecting(l_config_idx, c_no_application_context)
             END
         INVARIANT
             channel_configs_to_iterate <: t_channel_config_idx &
@@ -325,12 +371,18 @@ OPERATIONS
     channel_lost (channel) =
     VAR
         l_res,
-        l_channel_conf
+        l_channel_conf,
+        l_closing_ctx
     IN
         l_res, l_channel_conf <-- getall_channel_connected(channel);
         IF  l_res = TRUE THEN
             remove_channel_connected(channel);
-            remove_cli_channel_disconnecting(l_channel_conf);
+            l_closing_ctx <-- remove_cli_channel_disconnecting(l_channel_conf);
+            IF l_closing_ctx /= c_no_application_context
+            THEN
+                notify_client_connection_closed(l_channel_conf, l_closing_ctx)
+            END
+            ;
             reset_config(channel);
             reset_endpoint(channel);
             reset_SecurityPolicy(channel);
@@ -344,7 +396,8 @@ OPERATIONS
         l_is_channel_connecting,
         l_is_channel_disconnecting,
         l_is_channel_connected,
-        l_current_time
+        l_current_time,
+        l_closing_ctx
     IN
         l_is_channel_connecting <-- is_cli_channel_connecting(config_idx);
         l_is_channel_disconnecting <-- is_disconnecting_channel(config_idx);
@@ -360,7 +413,8 @@ OPERATIONS
             /* If channel was tagged for disconnection, close it now it is connected */
             IF l_is_channel_disconnecting = TRUE
             THEN
-                l_close_secure_channel(channel, e_sc_bad_secure_channel_closed)
+                l_closing_ctx <-- remove_cli_channel_disconnecting (config_idx);
+                l_close_secure_channel(channel, e_sc_bad_secure_channel_closed, l_closing_ctx)
             END
             ;
             bres := TRUE

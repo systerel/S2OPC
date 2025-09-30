@@ -81,6 +81,17 @@ OPERATIONS
     END
     ;
 
+    notify_client_connection_closed(p_config_idx, p_close_ctx) =
+    PRE
+        p_config_idx : t_channel_config_idx_i &
+        p_config_idx : t_channel_config_idx &
+        p_close_ctx  : t_application_context_i &
+        p_close_ctx /= c_no_application_context
+    THEN
+        skip
+    END
+    ;
+
     define_SecurityPolicy(p_channel) =
     PRE
         p_channel : t_channel_i &
