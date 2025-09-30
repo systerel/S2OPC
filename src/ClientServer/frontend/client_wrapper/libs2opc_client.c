@@ -63,6 +63,8 @@ struct SOPC_ClientConnection
 
     // Reference on client's subscriptions (used in case of Disconnect call)
     SOPC_SLinkedList* subscriptions; // list of SOPC_ClientHelper_Subscription*
+    // Reference on client's discovery requests context
+    SOPC_SLinkedList* discoveryReqCtxList; // list of SOPC_StaMac_ReqCtx**
 };
 
 /* The request context is used to manage
@@ -473,6 +475,8 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
             unlockedMutex = true;
             SOPC_ClientInternal_EventCbk(serviceReqCtx->secureConnectionIdx, libsubEvent, status, param,
                                          (uintptr_t) serviceReqCtx);
+            uintptr_t removedContext = SOPC_SLinkedList_RemoveFromValuePtr(cc->discoveryReqCtxList, appContext);
+            SOPC_UNUSED_RESULT(removedContext == appContext);
             SOPC_Free((void*) appContext);
         }
         else if (event !=
@@ -568,6 +572,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
         res->isDiscovery = isDiscovery;
         res->stateMachine = stateMachine;
         res->subscriptions = SOPC_SLinkedList_Create(0);
+        res->discoveryReqCtxList = SOPC_SLinkedList_Create(0);
         if (NULL == res->subscriptions)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -584,6 +589,15 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
     }
 
     return status;
+}
+
+static void SOPC_ClientHelperInternal_ClearDiscoveryReqCtx(uint32_t id, uintptr_t val)
+{
+    SOPC_UNUSED_ARG(id);
+    SOPC_StaMac_ReqCtx* reqCtx = (SOPC_StaMac_ReqCtx*) val;
+    SOPC_ASSERT(NULL != reqCtx);
+    SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree((SOPC_ClientHelper_ReqCtx*) reqCtx->appCtx);
+    SOPC_Free(reqCtx);
 }
 
 static void SOPC_ClientHelperInternal_ClearClientConnection(SOPC_ClientConnection* connection)
@@ -608,6 +622,14 @@ static void SOPC_ClientHelperInternal_ClearClientConnection(SOPC_ClientConnectio
             SOPC_SLinkedList_Delete(connection->subscriptions);
             connection->subscriptions = NULL;
         }
+
+        if (NULL != connection->discoveryReqCtxList)
+        {
+            // Clear discovery requests
+            SOPC_SLinkedList_Apply(connection->discoveryReqCtxList, SOPC_ClientHelperInternal_ClearDiscoveryReqCtx);
+            SOPC_SLinkedList_Delete(connection->discoveryReqCtxList);
+            connection->discoveryReqCtxList = NULL;
+        }
         sopc_client_helper_config.secureConnections[connection->secureConnectionIdx] = NULL;
         SOPC_Free(connection);
     }
@@ -622,6 +644,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
 {
     bool requestSentToServices = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ClientConnection* res = NULL;
     SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
     SOPC_StaMac_ReqCtx* smReqCtx = NULL;
     SOPC_ServiceAsyncResp_Fct* customAsyncRespCb = asyncRespCb;
@@ -651,7 +674,6 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             status = SOPC_STATUS_INVALID_STATE;
         }
 
-        SOPC_ClientConnection* res = NULL;
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_ClientHelperInternal_MayFinalizeSecureConnection(pConfig, secConnConfig);
@@ -723,6 +745,18 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             if (SOPC_STATUS_OK == status)
             {
                 requestSentToServices = true;
+            }
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            uintptr_t addedCtx = SOPC_SLinkedList_Append(res->discoveryReqCtxList, 0, (uintptr_t) smReqCtx);
+            if (addedCtx != (uintptr_t) smReqCtx)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "Unable to add discovery request context to list of connectionConfigIdx %" PRIu16,
+                    secConnConfig->secureConnectionIdx);
             }
         }
 
@@ -1381,7 +1415,8 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
         mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        // Free the allocated context if the subscription creation failed, otherwise kept during subscription lifetime
+        // Free the allocated context if the subscription creation failed, otherwise kept during subscription
+        // lifetime
         if (SOPC_STATUS_OK != status && NULL != reqCtx)
         {
             SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
