@@ -886,9 +886,10 @@ int main(void)
     }
 
     /* Asynchronous request to get endpoints using reverse connection */
+    SOPC_SecureConnection_Config* reverseSecureConnConfig = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_SecureConnection_Config* reverseSecureConnConfig = SOPC_ClientConfigHelper_GetConfigFromId("3");
+        reverseSecureConnConfig = SOPC_ClientConfigHelper_GetConfigFromId("3");
         if (NULL == reverseSecureConnConfig)
         {
             status = SOPC_STATUS_INVALID_STATE;
@@ -918,6 +919,7 @@ int main(void)
     else if (SOPC_STATUS_OK == status)
     {
         printf(">>Test_Client_Toolkit: GetEndpoints Response received: OK\n");
+        SOPC_ClientHelper_DiscoveryAsyncCloseConnection(reverseSecureConnConfig);
     }
 
     /* Create the 3 connections */
