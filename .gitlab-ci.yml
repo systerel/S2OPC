@@ -674,7 +674,7 @@ windows-appveyor:
   image: cicirello/pyaction@sha256:1e61034d26988094c92b629bf1d5f2027bc0659a347f31653ae405a7b05f97ae # digest of cicirello/pyaction:v4.25.0
   needs: []
   script:
-    - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
+    - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds | grep "created"'
   rules:
     - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null && $WINDOWS_ARTIFACTS == null || $CI_COMMIT_TAG || \
            $CI_COMMIT_BRANCH == 'master' && $ALL_TESTS == null && \
