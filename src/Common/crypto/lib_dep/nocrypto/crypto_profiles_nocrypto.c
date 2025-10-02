@@ -44,8 +44,7 @@ const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss = {
     .pFnSymmVerif = NULL,
     .pFnGenRnd = NULL,
     .pFnDeriveData = NULL,
-    .pFnAsymEncrypt = NULL,
-    .pFnAsymDecrypt = NULL,
+    .pFnAsymCrypt = NULL,
     .pFnAsymSign = NULL,
     .pFnAsymVerify = NULL,
 };
@@ -57,8 +56,7 @@ const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep = {
     .pFnSymmVerif = NULL,
     .pFnGenRnd = NULL,
     .pFnDeriveData = NULL,
-    .pFnAsymEncrypt = NULL,
-    .pFnAsymDecrypt = NULL,
+    .pFnAsymCrypt = NULL,
     .pFnAsymSign = NULL,
     .pFnAsymVerify = NULL,
 };
@@ -70,8 +68,7 @@ const SOPC_CryptoProfile sopc_g_cpBasic256Sha256 = {
     .pFnSymmVerif = NULL,
     .pFnGenRnd = NULL,
     .pFnDeriveData = NULL,
-    .pFnAsymEncrypt = NULL,
-    .pFnAsymDecrypt = NULL,
+    .pFnAsymCrypt = NULL,
     .pFnAsymSign = NULL,
     .pFnAsymVerify = NULL,
 };
@@ -83,8 +80,7 @@ const SOPC_CryptoProfile sopc_g_cpBasic256 = {
     .pFnSymmVerif = NULL,
     .pFnGenRnd = NULL,
     .pFnDeriveData = NULL,
-    .pFnAsymEncrypt = NULL,
-    .pFnAsymDecrypt = NULL,
+    .pFnAsymCrypt = NULL,
     .pFnAsymSign = NULL,
     .pFnAsymVerify = NULL,
 };
@@ -96,8 +92,7 @@ const SOPC_CryptoProfile sopc_g_cpNone = {
     .pFnSymmVerif = NULL,
     .pFnGenRnd = &pseudoRandom,
     .pFnDeriveData = NULL,
-    .pFnAsymEncrypt = NULL,
-    .pFnAsymDecrypt = NULL,
+    .pFnAsymCrypt = NULL,
     .pFnAsymSign = NULL,
     .pFnAsymVerify = NULL,
 };

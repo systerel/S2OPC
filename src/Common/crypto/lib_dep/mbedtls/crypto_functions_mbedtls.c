@@ -584,42 +584,40 @@ SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
     return status;
 }
 
-SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
-                                                      const uint8_t* pInput,
-                                                      uint32_t lenPlainText,
-                                                      const SOPC_AsymmetricKey* pKey,
-                                                      uint8_t* pOutput)
+SOPC_ReturnStatus CryptoProvider_AsymCrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
+                                                    const uint8_t* pInput,
+                                                    uint32_t lenInput,
+                                                    const SOPC_AsymmetricKey* pKey,
+                                                    uint8_t* pOutput,
+                                                    uint32_t* pLenWritten,
+                                                    bool isEncrypt)
 {
-    return AsymEncrypt_RSA_OAEP(pProvider, pInput, lenPlainText, pKey, pOutput, MBEDTLS_MD_SHA1);
+    if (isEncrypt)
+    {
+        return AsymEncrypt_RSA_OAEP(pProvider, pInput, lenInput, pKey, pOutput, MBEDTLS_MD_SHA1);
+    }
+    else
+    {
+        return AsymDecrypt_RSA_OAEP(pProvider, pInput, lenInput, pKey, pOutput, pLenWritten, MBEDTLS_MD_SHA1);
+    }
 }
 
-SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
-                                                      const uint8_t* pInput,
-                                                      uint32_t lenCipherText,
-                                                      const SOPC_AsymmetricKey* pKey,
-                                                      uint8_t* pOutput,
-                                                      uint32_t* pLenWritten)
+SOPC_ReturnStatus CryptoProvider_AsymCrypt_RSA_OAEP_SHA256(const SOPC_CryptoProvider* pProvider,
+                                                           const uint8_t* pInput,
+                                                           uint32_t lenInput,
+                                                           const SOPC_AsymmetricKey* pKey,
+                                                           uint8_t* pOutput,
+                                                           uint32_t* pLenWritten,
+                                                           bool isEncrypt)
 {
-    return AsymDecrypt_RSA_OAEP(pProvider, pInput, lenCipherText, pKey, pOutput, pLenWritten, MBEDTLS_MD_SHA1);
-}
-
-SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP_SHA256(const SOPC_CryptoProvider* pProvider,
-                                                             const uint8_t* pInput,
-                                                             uint32_t lenPlainText,
-                                                             const SOPC_AsymmetricKey* pKey,
-                                                             uint8_t* pOutput)
-{
-    return AsymEncrypt_RSA_OAEP(pProvider, pInput, lenPlainText, pKey, pOutput, MBEDTLS_MD_SHA256);
-}
-
-SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP_SHA256(const SOPC_CryptoProvider* pProvider,
-                                                             const uint8_t* pInput,
-                                                             uint32_t lenCipherText,
-                                                             const SOPC_AsymmetricKey* pKey,
-                                                             uint8_t* pOutput,
-                                                             uint32_t* pLenWritten)
-{
-    return AsymDecrypt_RSA_OAEP(pProvider, pInput, lenCipherText, pKey, pOutput, pLenWritten, MBEDTLS_MD_SHA256);
+    if (isEncrypt)
+    {
+        return AsymEncrypt_RSA_OAEP(pProvider, pInput, lenInput, pKey, pOutput, MBEDTLS_MD_SHA256);
+    }
+    else
+    {
+        return AsymDecrypt_RSA_OAEP(pProvider, pInput, lenInput, pKey, pOutput, pLenWritten, MBEDTLS_MD_SHA256);
+    }
 }
 
 /**

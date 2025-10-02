@@ -96,20 +96,6 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
  * Internal CryptoProfile function pointers.
  * ------------------------------------------------------------------------------------------------
  */
-// typedef SOPC_ReturnStatus FnSymmetricEncrypt(const SOPC_CryptoProvider* pProvider,
-//                                              const uint8_t* pInput,
-//                                              uint32_t lenPlainText,
-//                                              const SOPC_ExposedBuffer* pKey,
-//                                              const SOPC_ExposedBuffer* pIV,
-//                                              uint8_t* pOutput,
-//                                              uint32_t lenOutput);
-// typedef SOPC_ReturnStatus FnSymmetricDecrypt(const SOPC_CryptoProvider* pProvider,
-//                                              const uint8_t* pInput,
-//                                              uint32_t lenCipherText,
-//                                              const SOPC_ExposedBuffer* pKey,
-//                                              const SOPC_ExposedBuffer* pIV,
-//                                              uint8_t* pOutput,
-//                                              uint32_t lenOutput);
 typedef SOPC_ReturnStatus FnSymmetricCrypt(const SOPC_CryptoProvider* pProvider,
                                            const uint8_t* pInput,
                                            uint32_t lenInput,
@@ -138,17 +124,13 @@ typedef SOPC_ReturnStatus FnDerivePseudoRandomData(const SOPC_CryptoProvider* pP
                                                    uint32_t lenSeed,
                                                    SOPC_ExposedBuffer* pOutput,
                                                    uint32_t lenOutput);
-typedef SOPC_ReturnStatus FnAsymmetricEncrypt(const SOPC_CryptoProvider* pProvider,
-                                              const uint8_t* pInput,
-                                              uint32_t lenPlainText,
-                                              const SOPC_AsymmetricKey* pKey,
-                                              uint8_t* pOutput);
-typedef SOPC_ReturnStatus FnAsymmetricDecrypt(const SOPC_CryptoProvider* pProvider,
-                                              const uint8_t* pInput,
-                                              uint32_t lenCipherText,
-                                              const SOPC_AsymmetricKey* pKey,
-                                              uint8_t* pOutput,
-                                              uint32_t* lenWritten);
+typedef SOPC_ReturnStatus FnAsymmetricCrypt(const SOPC_CryptoProvider* pProvider,
+                                            const uint8_t* pInput,
+                                            uint32_t lenInput,
+                                            const SOPC_AsymmetricKey* pKey,
+                                            uint8_t* pOutput,
+                                            uint32_t* lenWritten,
+                                            bool isEncrypt);
 typedef SOPC_ReturnStatus FnAsymmetricSign(const SOPC_CryptoProvider* pProvider,
                                            const uint8_t* pInput,
                                            uint32_t lenInput,
@@ -193,8 +175,7 @@ struct SOPC_CryptoProfile
     FnSymmetricVerify* const pFnSymmVerif;
     FnGenerateRandom* const pFnGenRnd;
     FnDerivePseudoRandomData* const pFnDeriveData;
-    FnAsymmetricEncrypt* const pFnAsymEncrypt;
-    FnAsymmetricDecrypt* const pFnAsymDecrypt;
+    FnAsymmetricCrypt* const pFnAsymCrypt;
     FnAsymmetricSign* const pFnAsymSign;
     FnAsymmetricVerify* const pFnAsymVerify;
 };

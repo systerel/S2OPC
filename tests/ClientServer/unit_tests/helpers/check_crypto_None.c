@@ -71,8 +71,9 @@ START_TEST(test_crypto_load_None)
     ck_assert(NULL == profile->pFnSymmVerif);
     ck_assert(NULL != profile->pFnGenRnd);
     ck_assert(NULL == profile->pFnDeriveData);
-    ck_assert(NULL == profile->pFnAsymEncrypt);
-    ck_assert(NULL == profile->pFnAsymDecrypt);
+    // ck_assert(NULL == profile->pFnAsymEncrypt);
+    // ck_assert(NULL == profile->pFnAsymDecrypt);
+    ck_assert(NULL == profile->pFnAsymCrypt);
     ck_assert(NULL == profile->pFnAsymSign);
     ck_assert(NULL == profile->pFnAsymVerify);
 

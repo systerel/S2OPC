@@ -39,8 +39,8 @@ const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss = {
     .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
     .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
-    .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP_SHA256,
-    .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP_SHA256,
+
+    .pFnAsymCrypt = &CryptoProvider_AsymCrypt_RSA_OAEP_SHA256,
     .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PSS,
     .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PSS,
 };
@@ -52,8 +52,7 @@ const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep = {
     .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
     .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
-    .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
-    .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
+    .pFnAsymCrypt = &CryptoProvider_AsymCrypt_RSA_OAEP,
     .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256,
     .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256,
 };
@@ -65,8 +64,7 @@ const SOPC_CryptoProfile sopc_g_cpBasic256Sha256 = {
     .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
     .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
-    .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
-    .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
+    .pFnAsymCrypt = &CryptoProvider_AsymCrypt_RSA_OAEP,
     .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256,
     .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256,
 };
@@ -78,8 +76,7 @@ const SOPC_CryptoProfile sopc_g_cpBasic256 = {
     .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA1,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
     .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA1,
-    .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
-    .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
+    .pFnAsymCrypt = &CryptoProvider_AsymCrypt_RSA_OAEP,
     .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1,
     .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1,
 };
@@ -91,8 +88,7 @@ const SOPC_CryptoProfile sopc_g_cpNone = {
     .pFnSymmVerif = NULL,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
     .pFnDeriveData = NULL,
-    .pFnAsymEncrypt = NULL,
-    .pFnAsymDecrypt = NULL,
+    .pFnAsymCrypt = NULL,
     .pFnAsymSign = NULL,
     .pFnAsymVerify = NULL,
 };

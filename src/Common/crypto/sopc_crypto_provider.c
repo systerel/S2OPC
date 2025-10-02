@@ -1225,7 +1225,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
     const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
-    if (NULL == pProfile || NULL == pProfile->pFnAsymEncrypt)
+    if (NULL == pProfile || NULL == pProfile->pFnAsymCrypt)
     {
         *errorReason = "invalid cryptographic provider (invalid profile)";
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1256,7 +1256,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
     }
 
     // We can now proceed
-    SOPC_ReturnStatus status = pProfile->pFnAsymEncrypt(pProvider, pInput, lenInput, pKey, pOutput);
+    SOPC_ReturnStatus status = pProfile->pFnAsymCrypt(pProvider, pInput, lenInput, pKey, pOutput, &lenOutput, true);
     if (SOPC_STATUS_OK != status)
     {
         *errorReason = "encryption processing failed (invalid key type or message length)";
@@ -1287,7 +1287,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
     const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
-    if (NULL == pProfile || NULL == pProfile->pFnAsymDecrypt)
+    if (NULL == pProfile || NULL == pProfile->pFnAsymCrypt)
     {
         *errorReason = "invalid cryptographic provider (invalid profile)";
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1318,7 +1318,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
     }
 
     // We can now proceed
-    SOPC_ReturnStatus status = pProfile->pFnAsymDecrypt(pProvider, pInput, lenInput, pKey, pOutput, pLenWritten);
+    SOPC_ReturnStatus status = pProfile->pFnAsymCrypt(pProvider, pInput, lenInput, pKey, pOutput, pLenWritten, false);
     if (SOPC_STATUS_OK != status)
     {
         *errorReason = "decryption processing failed (invalid key type or message length)";
