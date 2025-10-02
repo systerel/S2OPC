@@ -195,7 +195,7 @@ static SOPC_Byte getSecurityLevel(OpcUa_MessageSecurityMode SecurityMode, SOPC_S
     {
         return 0;
     }
-    const SOPC_CryptoProfile* secPolicy = pProfileCfg->profile;
+    const SOPC_CryptoProfile* secPolicy = pProfileCfg->profile(pProfileCfg->uri);
     if (NULL == secPolicy)
     {
         // Unknown security policy, return unrecommended endpoint value

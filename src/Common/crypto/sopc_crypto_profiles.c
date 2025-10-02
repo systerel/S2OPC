@@ -25,6 +25,65 @@
 #include "sopc_crypto_profiles_lib_itf.h"
 #include "sopc_helper_string.h"
 
+// CryptoProfiles instances
+extern const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss;
+extern const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep;
+extern const SOPC_CryptoProfile sopc_g_cpBasic256Sha256;
+extern const SOPC_CryptoProfile sopc_g_cpBasic256;
+extern const SOPC_CryptoProfile sopc_g_cpNone;
+extern const SOPC_CryptoProfile_PubSub sopc_g_cppsPubSubAes256;
+extern const SOPC_CryptoProfile_PubSub sopc_g_cppsNone;
+
+static const SOPC_CryptoProfile* SOPC_CryptoProfile_LibProfile_Get(const char* uri)
+{
+    if (uri == NULL)
+    {
+        return NULL;
+    }
+
+    if (strcmp(uri, SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI) == 0)
+    {
+        return &sopc_g_cpAes256Sha256RsaPss;
+    }
+    else if (strcmp(uri, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI) == 0)
+    {
+        return &sopc_g_cpAes128Sha256RsaOaep;
+    }
+    else if (strcmp(uri, SOPC_SecurityPolicy_Basic256Sha256_URI) == 0)
+    {
+        return &sopc_g_cpBasic256Sha256;
+    }
+    else if (strcmp(uri, SOPC_SecurityPolicy_Basic256_URI) == 0)
+    {
+        return &sopc_g_cpBasic256;
+    }
+    else if (strcmp(uri, SOPC_SecurityPolicy_None_URI) == 0)
+    {
+        return &sopc_g_cpNone;
+    }
+
+    return NULL;
+}
+
+static const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_LibPubSub_Get(const char* uri)
+{
+    if (uri == NULL)
+    {
+        return NULL;
+    }
+
+    if (strcmp(uri, SOPC_SecurityPolicy_PubSub_Aes256_URI) == 0)
+    {
+        return &sopc_g_cppsPubSubAes256;
+    }
+    else if (strcmp(uri, SOPC_SecurityPolicy_None_URI) == 0)
+    {
+        return &sopc_g_cppsNone;
+    }
+
+    return NULL;
+}
+
 const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID] = {
     // SOPC_SecurityPolicy_Invalid_ID
     {.uri = NULL,
@@ -49,7 +108,7 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
     {.uri = SOPC_SecurityPolicy_Basic256Sha256_URI,
      .name = "Basic256Sha256",
      .isInvalid = false,
-     .profile = &sopc_g_cpBasic256Sha256,
+     .profile = &SOPC_CryptoProfile_LibProfile_Get,
      .psProfile = NULL,
      .secuPolicyWeight = 3,
      .symmLen_CryptoKey = 32,
@@ -68,7 +127,7 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
     {.uri = SOPC_SecurityPolicy_Basic256_URI,
      .name = "Basic256",
      .isInvalid = false,
-     .profile = &sopc_g_cpBasic256,
+     .profile = &SOPC_CryptoProfile_LibProfile_Get,
      .psProfile = NULL,
      .secuPolicyWeight = 2,
      .symmLen_CryptoKey = 32,
@@ -87,8 +146,8 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
     {.uri = SOPC_SecurityPolicy_None_URI,
      .name = "None",
      .isInvalid = false,
-     .profile = &sopc_g_cpNone,
-     .psProfile = &sopc_g_cppsNone,
+     .profile = &SOPC_CryptoProfile_LibProfile_Get,
+     .psProfile = &SOPC_CryptoProfile_LibPubSub_Get,
      .secuPolicyWeight = 0,
      .symmLen_CryptoKey = 0,
      .symmLen_SignKey = 0,
@@ -107,7 +166,7 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
      .name = "Aes256",
      .isInvalid = false,
      .profile = NULL,
-     .psProfile = &sopc_g_cppsPubSubAes256,
+     .psProfile = &SOPC_CryptoProfile_LibPubSub_Get,
      .secuPolicyWeight = 0,
      .symmLen_CryptoKey = 32,
      .symmLen_SignKey = 32,
@@ -125,7 +184,7 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
     {.uri = SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI,
      .name = "Aes128-Sha256-RsaOaep",
      .isInvalid = false,
-     .profile = &sopc_g_cpAes128Sha256RsaOaep,
+     .profile = &SOPC_CryptoProfile_LibProfile_Get,
      .psProfile = NULL,
      .secuPolicyWeight = 1,
      .symmLen_CryptoKey = 16,
@@ -144,7 +203,7 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
     {.uri = SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI,
      .name = "Aes256-Sha256-RsaPss",
      .isInvalid = false,
-     .profile = &sopc_g_cpAes256Sha256RsaPss,
+     .profile = &SOPC_CryptoProfile_LibProfile_Get,
      .psProfile = NULL,
      .secuPolicyWeight = 4,
      .symmLen_CryptoKey = 32,
@@ -209,7 +268,7 @@ const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri)
 
         if (SOPC_strncmp_ignore_case(uri, policy->uri, len) == 0)
         {
-            return policy->psProfile;
+            return policy->psProfile(uri);
         }
     }
 

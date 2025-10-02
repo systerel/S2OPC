@@ -29,17 +29,6 @@
 
 #include "sopc_crypto_decl.h"
 
-// CryptoProfiles instances
-extern const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss;
-extern const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep;
-extern const SOPC_CryptoProfile sopc_g_cpBasic256Sha256;
-extern const SOPC_CryptoProfile sopc_g_cpBasic256;
-extern const SOPC_CryptoProfile sopc_g_cpNone;
-
-// CryptoProfiles instances
-extern const SOPC_CryptoProfile_PubSub sopc_g_cppsPubSubAes256;
-extern const SOPC_CryptoProfile_PubSub sopc_g_cppsNone;
-
 /**
  * This function should return true if any other profile than "None" is supported
  */

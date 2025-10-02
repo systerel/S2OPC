@@ -66,8 +66,8 @@ typedef struct SOPC_SecurityPolicy_Config
     const char* uri;
     const bool isInvalid; /**< True for "Invalid" configuration (SOPC_SecurityPolicy_Invalid_ID) */
     const char* name;     /**< A human-readable short name */
-    const SOPC_CryptoProfile* profile;
-    const SOPC_CryptoProfile_PubSub* psProfile;
+    const SOPC_CryptoProfile* (*profile)(const char* uri);
+    const SOPC_CryptoProfile_PubSub* (*psProfile)(const char* uri);
     uint8_t secuPolicyWeight;          /**< 0 = less secure */
     uint32_t symmLen_CryptoKey;        /**< Length (Bytes) of symmetric signature encryption key. O if not supported. */
     uint32_t symmLen_SignKey;          /**< Length (Bytes) of symmetric signature signing key. O if not supported. */

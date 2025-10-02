@@ -123,7 +123,7 @@ SOPC_CryptoProvider* SOPC_CryptoProvider_Create(const char* uri)
     {
         return NULL;
     }
-    const SOPC_CryptoProfile* pProfile = pProfileCfg->profile;
+    const SOPC_CryptoProfile* pProfile = pProfileCfg->profile(uri);
     if (NULL == pProfile)
     {
         return NULL;
@@ -611,7 +611,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricEncrypt(const SOPC_CryptoProvider
     }
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
-    const SOPC_CryptoProfile* pProfile = pPolicy->profile;
+    const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
     if (NULL == pProfile || NULL == pProfile->pFnSymmEncrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -668,7 +668,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_SymmetricDecrypt(const SOPC_CryptoProvider
     }
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
-    const SOPC_CryptoProfile* pProfile = pPolicy->profile;
+    const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
     if (NULL == pProfile || NULL == pProfile->pFnSymmDecrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -729,7 +729,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_PubSubCrypt(const SOPC_CryptoProvider* pPr
     }
 
     const SOPC_SecurityPolicy_Config* pPolicy = getPSSecurityPolicyFromProvider(pProvider);
-    const SOPC_CryptoProfile_PubSub* pProfilePubSub = pPolicy->psProfile;
+    const SOPC_CryptoProfile_PubSub* pProfilePubSub = pPolicy->psProfile(pPolicy->uri);
     if (NULL == pProfilePubSub || NULL == pProfilePubSub->pFnCrypt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1224,7 +1224,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
     }
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
-    const SOPC_CryptoProfile* pProfile = pPolicy->profile;
+    const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
     if (NULL == pProfile || NULL == pProfile->pFnAsymEncrypt)
     {
         *errorReason = "invalid cryptographic provider (invalid profile)";
@@ -1286,7 +1286,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
     }
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
-    const SOPC_CryptoProfile* pProfile = pPolicy->profile;
+    const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
     if (NULL == pProfile || NULL == pProfile->pFnAsymDecrypt)
     {
         *errorReason = "invalid cryptographic provider (invalid profile)";
@@ -1354,7 +1354,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
     }
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
-    const SOPC_CryptoProfile* pProfile = pPolicy->profile;
+    const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
     if (NULL == pProfile || NULL == pProfile->pFnAsymSign)
     {
         *errorReason = "invalid cryptographic provider (invalid profile)";
@@ -1412,7 +1412,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
     }
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
-    const SOPC_CryptoProfile* pProfile = pPolicy->profile;
+    const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
     if (NULL == pProfile || NULL == pProfile->pFnAsymVerify)
     {
         *errorReason = "invalid cryptographic provider (invalid profile)";
@@ -1469,7 +1469,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
     }
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
-    const SOPC_CryptoProfile* pProfile = pPolicy->profile;
+    const SOPC_CryptoProfile* pProfile = pPolicy->profile(pPolicy->uri);
     if (NULL == pProfile)
     {
         return status;
