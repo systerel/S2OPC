@@ -44,3 +44,4 @@ the legal rights to contribute.
 * Mathieu Clabaut <mathieu.clabaut@systerel.fr>
 * Florian Antheunis <florian.antheunis-stg@systerel.fr>
 * Max Bernard <max.bernard-stg@systerel.fr>
+* Cinthya Kouamou <cinthya.kouamou.kouamou@systerel.fr>
