@@ -617,6 +617,7 @@ test-unit-all-builds:
   rules:
     - if: "$HIL_TESTS == null"
       when: always
+    - when: never
   artifacts:
     name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
