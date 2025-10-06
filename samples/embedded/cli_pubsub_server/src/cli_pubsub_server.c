@@ -70,8 +70,8 @@
 
 // project includes
 #include "cache.h"
+#include "common_static_security_data.h"
 #include "pubsub_config_static.h"
-#include "static_security_data.h"
 #include "test_config.h"
 
 /***************************************************/

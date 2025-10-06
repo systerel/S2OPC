@@ -47,7 +47,7 @@
 #include "libs2opc_server_config_custom.h"
 
 #ifdef WITH_STATIC_SECURITY_DATA
-#include "server_static_security_data.h"
+#include "common_static_security_data.h"
 #endif
 
 #include "client.h"

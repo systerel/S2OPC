@@ -63,7 +63,7 @@ target_include_directories(${SAMPLE_PROJECT_NAME} PRIVATE
       ${SAMPLE_SRC_DIR}/src
       ${SAMPLE_PTF_DEP}/include
       ${SAMPLE_PTF_DEP}/${PLATFORM_DIR}/src
-      )
+      ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert)
 if (WITH_STATIC_SECURITY_DATA)
   target_compile_definitions(${SAMPLE_PROJECT_NAME} PRIVATE "WITH_STATIC_SECURITY_DATA")
 endif()

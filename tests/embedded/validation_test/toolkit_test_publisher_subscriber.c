@@ -34,8 +34,8 @@
 #include "sopc_threads.h"
 
 #include "../unit_test/unit_test_include.h"
+#include "common_static_security_data.h"
 #include "pubsub_config_static.h"
-#include "static_security_data.h"
 
 #define NB_VARS 8
 

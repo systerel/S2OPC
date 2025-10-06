@@ -60,6 +60,7 @@ cp -ur ${S2OPC_SAMPLE-}/platform_dep/freertos/src/* "${SRC_DIR-}/sample_src" || 
 cp -ur ${S2OPC_SRC-}/Common "${SRC_DIR-}" || exit 12
 cp -ur ${S2OPC_SRC-}/PubSub "${SRC_DIR-}" || exit 13
 cp -ur ${S2OPC_SRC-}/ClientServer "${SRC_DIR-}" || exit 14
+cp -u ${S2OPC_BASE}/samples/ClientServer/data/cert/*.h "${SRC_DIR-}" || exit 15
 
 mv ${SRC_DIR-}/Common/helpers_platform_dep/freertos/s2opc_common_export.h_ ${SRC_DIR-}/Common/helpers_platform_dep/freertos/s2opc_common_export.h
 

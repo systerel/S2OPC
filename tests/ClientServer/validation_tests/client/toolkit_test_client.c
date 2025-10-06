@@ -68,7 +68,7 @@ static const char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
 
 #ifdef WITH_STATIC_SECURITY_DATA
 #include "client_static_security_data.h"
-#include "server_static_security_data.h"
+#include "common_static_security_data.h"
 #else
 // PKI path
 #define SOPC_PKI_PATH "./S2OPC_Demo_PKI"

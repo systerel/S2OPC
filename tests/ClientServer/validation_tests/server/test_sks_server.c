@@ -46,7 +46,7 @@
 #include "sks_demo_server_methods.h"
 
 #ifdef WITH_STATIC_SECURITY_DATA
-#include "server_static_security_data.h"
+#include "common_static_security_data.h"
 #else
 // Default certificate paths
 

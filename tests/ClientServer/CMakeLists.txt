@@ -108,7 +108,8 @@ add_executable(check_helpers ${INTERNAL_TESTS_SRCS}
                              ${TEST_SERVER_ADDRESS_SPACE_C})
 add_dependencies(check_helpers make-server-address-space)
 target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
-                                                 "validation_tests/server") # Reuse data of test server
+                                                 "validation_tests/server"
+                                                 "${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert") # Reuse data of test server
 
 target_link_libraries(check_helpers PRIVATE Check::check s2opc_clientserver s2opc_clientserver-loader-embedded)
 target_compile_options(check_helpers PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -603,6 +604,7 @@ add_executable(toolkit_test_discovery_server
   ${TEST_SERVER_ADDRESS_SPACE_C})
 add_dependencies(toolkit_test_discovery_server make-server-address-space)
 target_link_libraries(toolkit_test_discovery_server PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+target_include_directories(toolkit_test_discovery_server PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert")
 target_compile_options(toolkit_test_discovery_server PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_discovery_server PRIVATE ${S2OPC_DEFINITIONS})
 

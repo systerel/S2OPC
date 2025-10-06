@@ -29,7 +29,7 @@
 #include "sopc_key_manager.h"
 #include "sopc_mem_alloc.h"
 
-#include "server_static_security_data.h"
+#include "common_static_security_data.h"
 
 #define PASSWORD "password"
 #define CSR_KEY_PATH "./server_private/encrypted_server_2k_key.pem"

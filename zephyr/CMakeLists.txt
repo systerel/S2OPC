@@ -80,6 +80,7 @@ zephyr_include_directories(
     ${S2OPC_SRC}/PubSub/subscriber
     ${S2OPC_SRC}/PubSub/real_time_api
     ${S2OPC_SRC}/PubSub/security
+    ${ZEPHYR_CURRENT_MODULE_DIR}/samples/ClientServer/data/cert
 )
 
 zephyr_library()

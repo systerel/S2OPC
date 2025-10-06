@@ -44,8 +44,8 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
+#include "common_static_security_data.h"
 #include "embedded/sopc_addspace_loader.h"
-#include "static_security_data.h"
 
 #include "../unit_test/unit_test_include.h"
 
