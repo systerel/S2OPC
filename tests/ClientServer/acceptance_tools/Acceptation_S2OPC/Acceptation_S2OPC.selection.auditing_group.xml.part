@@ -1,0 +1,20 @@
+<ConformanceGroup name="Auditing">
+ <ConformanceUnit name="Auditing Base">
+  <TestCases>
+   <TestCase name="AASET-001.js"/>
+   <TestCase name="AASET-002.js"/>
+   <TestCase name="AASET-004.js"/>
+   <TestCase name="AASET-005.js"/>
+   <TestCase name="ACSET-001.js"/>
+   <TestCase name="ACSET-002.js"/>
+   <TestCase name="ACSET-004.js"/>
+   <TestCase name="AOSCET-001.js"/>
+   <TestCase name="AOSCET-002.js"/>
+   <TestCase name="AOSCET-003.js"/>
+   <TestCase name="AOSCET-004.js"/>
+   <TestCase name="AOSCET-005.js"/>
+   <TestCase name="AOSCET-006.js"/>
+   <TestCase name="ASET-003.js"/>
+  </TestCases>
+ </ConformanceUnit>
+</ConformanceGroup>
