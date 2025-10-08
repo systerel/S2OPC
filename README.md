@@ -111,6 +111,7 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
       If compiled with S2OPC_NODE_ADD_OPTIONAL optional child nodes from type will be added when adding a node (only mandatory ones otherwise).
       If compiled with S2OPC_NODE_INTERNAL_ADD_CHILD_NODES adding child nodes from type is active when using local services (set by default).
       If compiled with S2OPC_NODE_ADD_INVERSE_TYPEDEF adds 'HasTypeDefinition' inverse reference from type node to child node (set by default).
+      If compiled with S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME the uniqueness of the BrowseName of added nodes among their parent's references will not be verified. The constraint is externalized.
     - DeleteNodes service
       If compiled with S2OPC_NODE_DELETE_CHILD_NODES (option set by default), the child nodes of the deleted node will be recursively deleted. The DeleteNodes permission on child nodes will not be considered: only the permission on root node will be considered.
       If compiled with S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES (option set by default), Organizes reference will be considered when regarding for child nodes.

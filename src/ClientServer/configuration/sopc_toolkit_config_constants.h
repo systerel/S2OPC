@@ -270,6 +270,12 @@
 #define S2OPC_NODE_ADD_INVERSE_TYPEDEF true
 #endif
 
+/** @brief Selects whether the AddNodes operation needs to verify if the BrowseName of the added node is unique among
+ *  its parent's references. */
+#ifndef S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME
+#define S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME false
+#endif
+
 /** @brief Event management services activation for servers */
 #ifndef S2OPC_EVENT_MANAGEMENT
 #define S2OPC_EVENT_MANAGEMENT false

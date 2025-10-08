@@ -41,7 +41,9 @@ static const SOPC_NodeId Aggregates_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Aggre
 static const SOPC_NodeId HasComponent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
 static const SOPC_NodeId HasProperty_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasProperty);
 
+#if 0 == S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME
 static const SOPC_NodeId HierarchicalReferences_Type_NodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HierarchicalReferences);
+#endif
 
 static bool is_type_or_subtype(SOPC_AddressSpace* addSpace,
                                const SOPC_NodeId* actualType,
@@ -319,6 +321,7 @@ static bool check_node_reference_type_to_parent(OpcUa_NodeClass targetNodeclass,
     return validRef;
 }
 
+#if 0 == S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME
 static bool check_browse_name_unique_from_parent(SOPC_AddressSpace* addSpace,
                                                  SOPC_AddressSpace_Node* parentNode,
                                                  const SOPC_QualifiedName* browseName,
@@ -374,6 +377,7 @@ static bool check_browse_name_unique_from_parent(SOPC_AddressSpace* addSpace,
     }
     return true;
 }
+#endif
 
 SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeClass targetNodeclass,
                                                                     SOPC_AddressSpace* addSpace,
@@ -446,7 +450,12 @@ SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddNode(OpcUa_NodeCl
         }
     }
 
-    bool browseNameOk = check_browse_name_unique_from_parent(addSpace, parentNode, browseName, &retCode);
+    bool browseNameOk = true;
+#if 0 == S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME
+    browseNameOk = check_browse_name_unique_from_parent(addSpace, parentNode, browseName, &retCode);
+#else
+    SOPC_UNUSED_ARG(browseName);
+#endif
     if (browseNameOk)
     {
         retCode = SOPC_GoodGenericStatus;

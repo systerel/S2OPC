@@ -255,6 +255,7 @@ option(S2OPC_NODE_MANAGEMENT "Make NodeManagement service set available to clien
 option(S2OPC_NODE_ADD_OPTIONAL "Enables optional child nodes to be added when adding a node (only mandatory otherwise)." OFF)
 option(S2OPC_NODE_INTERNAL_ADD_CHILD_NODES "Enables recursive add of child nodes internally." ON)
 option(S2OPC_NODE_ADD_INVERSE_TYPEDEF "Enables addition of 'HasTypeDefinition' inverse reference from type node to child node" ON)
+option(S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME "Disable check of uniqueness of BrowseName among its parent's references" OFF)
 option(S2OPC_NODE_DELETE_CHILD_NODES "Make DeleteNodes service recursively delete new orphans child nodes" ON)
 option(S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES "Make DeleteNodes service delete child nodes with Organizes hierarchical references" ON)
 option(S2OPC_EVENT_MANAGEMENT "Make OPC UA Events available" OFF)
@@ -454,6 +455,8 @@ list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_ADD_OPTIONAL}>:S2OPC_NODE_AD
 list(APPEND S2OPC_DEFINITIONS $<$<NOT:$<BOOL:${S2OPC_NODE_INTERNAL_ADD_CHILD_NODES}>>:S2OPC_NODE_INTERNAL_ADD_CHILD_NODES=0>)
 # Add S2OPC_NODE_ADD_INVERSE_TYPEDEF=0 to compilation definition if option desactivated
 list(APPEND S2OPC_DEFINITIONS $<$<NOT:$<BOOL:${S2OPC_NODE_ADD_INVERSE_TYPEDEF}>>:S2OPC_NODE_ADD_INVERSE_TYPEDEF=0>)
+# Add S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME to compilation definition if option activated
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME}>:S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME>)
 # Add S2OPC_NODE_DELETE_CHILD_NODES to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_DELETE_CHILD_NODES}>:S2OPC_NODE_DELETE_CHILD_NODES>)
 # Add S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES to compilation definition if option activated

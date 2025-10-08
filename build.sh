@@ -86,6 +86,7 @@ else
     append_cmake_option S2OPC_NODE_ADD_OPTIONAL
     append_cmake_option S2OPC_NODE_INTERNAL_ADD_CHILD_NODES
     append_cmake_option S2OPC_NODE_ADD_INVERSE_TYPEDEF
+    append_cmake_option S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME
     append_cmake_option S2OPC_NODE_DELETE_CHILD_NODES
     append_cmake_option S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
     append_cmake_option S2OPC_EVENT_MANAGEMENT

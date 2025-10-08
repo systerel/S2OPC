@@ -216,6 +216,9 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_GetFreshNodeId(SOPC_AddressSpaceAccess* 
  *        Optional nodes can also be added by setting S2OPC_NODE_ADD_OPTIONAL=1 at compile time.
  *        Only children with an 'Aggregates' reference type or sub-type are added.
  *        Children with 'Organizes' and 'HasEventSource' reference types are ignored.
+ *
+ * \note: The uniqueness of the BrowseName among the parent's references of the added node is checked by default.
+ *        This check may be avoided by setting S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME=1 at compile time.
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
                                                         const SOPC_ExpandedNodeId* parentNodeId,
@@ -288,6 +291,9 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess*
  *        Optional nodes can also be added by setting S2OPC_NODE_ADD_OPTIONAL=1 at compile time.
  *        Only children with an 'Aggregates' reference type or sub-type are added.
  *        Children with 'Organizes' and 'HasEventSource' reference types are ignored.
+ *
+ * \note: The uniqueness of the BrowseName among the parent's references of the added node is checked by default.
+ *        This check may be avoided by setting S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME=1 at compile time.
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* addSpaceAccess,
                                                       const SOPC_ExpandedNodeId* parentNodeId,
@@ -338,6 +344,9 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_AddObjectNode(SOPC_AddressSpaceAccess* a
  * \note: Add Method node operation includes creation of mutual references with parent / type.
  *        Inverse reference from type to new node is added by default. This reference creation
  *        can be avoided by setting S2OPC_NODE_ADD_INVERSE_TYPEDEF=0 at compile time.
+ *
+ * \note: The uniqueness of the BrowseName among the parent's references of the added node is checked by default.
+ *        This check may be avoided by setting S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME=1 at compile time.
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_AddMethodNode(SOPC_AddressSpaceAccess* addSpaceAccess,
                                                       const SOPC_ExpandedNodeId* parentNodeId,
