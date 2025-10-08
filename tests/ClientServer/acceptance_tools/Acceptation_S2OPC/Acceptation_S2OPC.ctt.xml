@@ -1032,7 +1032,7 @@
          </Column>
          <Column column="1">
           <ItemData role="0" rolename="DisplayRole">
-           <Value typename="QString" type="10" data="0"/>
+           <Value typename="QString" type="10" data="1"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
@@ -1070,7 +1070,7 @@
          </Column>
          <Column column="1">
           <ItemData role="0" rolename="DisplayRole">
-           <Value typename="QString" type="10" data="user1"/>
+           <Value typename="QString" type="10" data="secuAdmin"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
@@ -1108,7 +1108,7 @@
          </Column>
          <Column column="1">
           <ItemData role="0" rolename="DisplayRole">
-           <Value typename="QString" type="10" data="password"/>
+           <Value typename="QString" type="10" data="1234"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
