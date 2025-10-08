@@ -139,9 +139,8 @@ generation:
     when: always
     expire_in: '1 week'
   rules:
-    - if: "$HIL_TESTS != null"
-      when: never
-    - if: "$NO_GEN == null && \
+    - if: "$HIL_TESTS == null && \
+           $NO_GEN == null && \
            $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && \
@@ -250,9 +249,7 @@ build-linux64-ASan:
     BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
   needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
-    - if: "$HIL_TESTS != null"
-      when: never
-    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+    - if: "$HIL_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null && \
            $HIL_TESTS == null && $SCAN_SBOM == null && \
@@ -614,10 +611,6 @@ test-unit-all-builds:
   script:
     - ulimit -n 1024
     - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
-  rules:
-    - if: "$HIL_TESTS == null"
-      when: always
-    - when: never
   artifacts:
     name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
@@ -649,7 +642,7 @@ test-uactt:
   rules:
     - if: "$NO_TESTS != null || $WINDOWS_TEST != null || $CROSS_COMPILE != null || \
            $WITH_COVERITY != null || $WITH_COVERAGE != null || $WITH_DOC != null || \
-           $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null"
+           $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null || $HIL_TESTS != null"
       when: never
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG || $RUN_UACTT != null"
       when: on_success
