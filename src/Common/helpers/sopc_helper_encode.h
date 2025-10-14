@@ -32,7 +32,8 @@
  * \param[out] ppOut       A valid pointer poiting to NULL. It will be set to the buffer containing the newly decoded
  * data. The allocated buffer must be freed by the caller.
  *
- * \param pOutLen    The size of the \p ppOut computed during the function execution.
+ * \param pOutLen    A valid pointer. On success, it is set to the exact size
+ *                    of the decoded binary data stored in \p ppOut.
  *
  * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  */

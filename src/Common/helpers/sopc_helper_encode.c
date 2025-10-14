@@ -70,6 +70,13 @@ static int hexlify(const unsigned char* src, char* dst, size_t n)
     return (int) n;
 }
 
+// Scan src up to maxLen and return its length if a '\0' is found
+static size_t sopc_strnlen(const char* src, size_t maxLen)
+{
+    const void* p = memchr(src, '\0', maxLen);
+    return p ? (size_t)((const char*) p - src) : maxLen;
+}
+
 // You should allocate strlen(src)/2 in dst. n is strlen(dst)
 // Returns n the number of translated couples (< 0 for errors)
 static int unhexlify(const char* src, unsigned char* dst, size_t n)
@@ -100,7 +107,7 @@ static int unhexlify(const char* src, unsigned char* dst, size_t n)
     return (int) n;
 }
 
-/* The following functions have been extracted and slighly adapted from MbedTLS library. */
+/* The following functions have been extracted and slightly adapted from MbedTLS library. */
 
 /** Output buffer too small. */
 #define MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL -0x002A
@@ -147,7 +154,7 @@ static int mbedtls_base64_encode(unsigned char* dst, size_t dlen, size_t* olen, 
 
     n *= 4;
 
-    if (dlen < n + 1)
+    if (dst == NULL || dlen < n + 1)
     {
         *olen = n + 1; // +1 for the null terminator
         return (MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL);
@@ -191,12 +198,13 @@ static int mbedtls_base64_encode(unsigned char* dst, size_t dlen, size_t* olen, 
 
 static int mbedtls_base64_decode(unsigned char** dst, size_t* olen, const unsigned char* src, size_t slen)
 {
-    size_t i, n, expected_len = 0;
+    size_t i, n, expectedLen = 0;
     uint32_t j, x;
     unsigned char* p;
 
+    i = n = j = 0;
     /* First pass: check for validity and get output length */
-    for (i = n = j = 0; i < slen; i++)
+    while (i < slen)
     {
         /* Skip spaces before checking for EOL */
         x = 0;
@@ -207,29 +215,31 @@ static int mbedtls_base64_decode(unsigned char** dst, size_t* olen, const unsign
         }
 
         /* Spaces at end of buffer are OK */
-        if (i == slen)
-            break;
+        if (i < slen)
+        {
+            if (((slen - i) >= 2 && src[i] == '\r' && src[i + 1] == '\n') || (src[i] == '\n'))
+            {
+                /* Do nothing */
+            }
+            else
+            {
+                /* Space inside a line is an error */
+                if (x != 0)
+                    return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
 
-        if ((slen - i) >= 2 && src[i] == '\r' && src[i + 1] == '\n')
-            continue;
+                if (src[i] == '=' && ++j > 2)
+                    return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
 
-        if (src[i] == '\n')
-            continue;
+                if (src[i] > 127 || base64_dec_map[src[i]] == 127)
+                    return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
 
-        /* Space inside a line is an error */
-        if (x != 0)
-            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
+                if (base64_dec_map[src[i]] < 64 && j != 0)
+                    return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
 
-        if (src[i] == '=' && ++j > 2)
-            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
-
-        if (src[i] > 127 || base64_dec_map[src[i]] == 127)
-            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
-
-        if (base64_dec_map[src[i]] < 64 && j != 0)
-            return (MBEDTLS_ERR_BASE64_INVALID_CHARACTER);
-
-        n++;
+                n++;
+            }
+        }
+        ++i;
     }
 
     if (n == 0)
@@ -240,46 +250,39 @@ static int mbedtls_base64_decode(unsigned char** dst, size_t* olen, const unsign
 
     n = ((n * 6) + 7) >> 3;
     n -= j;
-    expected_len = n + 1; // +1 for the null terminator
+    expectedLen = n + 1; // +1 for the null terminator
 
     /* Allocate the necessary buffer */
-    unsigned char* pBuffer = SOPC_Calloc(expected_len, sizeof(char));
+    unsigned char* pBuffer = SOPC_Calloc(expectedLen, sizeof(char));
     if (pBuffer == NULL)
     {
         *olen = 0;
         return (SOPC_STATUS_OUT_OF_MEMORY);
     }
 
-    // if (dst == NULL || dlen < n)
-    // {
-    //     *olen = n;
-    //     return (MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL);
-    // }
-
     for (j = 3, n = x = 0, p = pBuffer; i > 0; i--, src++)
     {
-        if (*src == '\r' || *src == '\n' || *src == ' ')
-            continue;
-
-        j -= (base64_dec_map[*src] == 64);
-        x = (x << 6) | (base64_dec_map[*src] & 0x3F);
-
-        if (++n == 4)
+        if (*src != '\r' && *src != '\n' && *src != ' ')
         {
-            n = 0;
-            if (j > 0)
-                *p++ = (unsigned char) (x >> 16);
-            if (j > 1)
-                *p++ = (unsigned char) (x >> 8);
-            if (j > 2)
-                *p++ = (unsigned char) (x);
+            j -= (base64_dec_map[*src] == 64);
+            x = (x << 6) | (base64_dec_map[*src] & 0x3F);
+
+            if (++n == 4)
+            {
+                n = 0;
+                if (j > 0)
+                    *p++ = (unsigned char) (x >> 16);
+                if (j > 1)
+                    *p++ = (unsigned char) (x >> 8);
+                if (j > 2)
+                    *p++ = (unsigned char) (x);
+            }
         }
     }
     *p++ = '\0'; // Null-terminate the output buffer
-
     *olen = (size_t)(p - pBuffer);
     /* check that lenght is the expected one */
-    SOPC_ASSERT(*olen == expected_len);
+    SOPC_ASSERT(*olen == expectedLen);
 
     *dst = pBuffer; // Assign the allocated buffer to the output pointer
 
@@ -292,21 +295,16 @@ SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* pInput, unsigned char** p
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    size_t input_len = strlen(pInput);
-    SOPC_ReturnStatus return_status = SOPC_STATUS_NOK;
-    int ret = mbedtls_base64_decode(ppOut, pOutLen, (const unsigned char*) pInput, input_len);
+    size_t inputLen = sopc_strnlen(pInput, (size_t) SOPC_DEFAULT_MAX_STRING_LENGTH);
+    int ret = mbedtls_base64_decode(ppOut, pOutLen, (const unsigned char*) pInput, inputLen);
     if (ret != 0)
     {
         SOPC_Free(*ppOut);
         *ppOut = NULL;
         *pOutLen = 0;
-        return_status = SOPC_STATUS_NOK;
+        return SOPC_STATUS_NOK;
     }
-    else
-    {
-        return_status = SOPC_STATUS_OK;
-    }
-    return return_status;
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_HelperEncode_Base64(const SOPC_Byte* pInput, size_t inputLen, char** ppOut, size_t* pOutLen)
@@ -334,7 +332,7 @@ SOPC_ReturnStatus SOPC_HelperEncode_Base64(const SOPC_Byte* pInput, size_t input
 
     // Actual encoding
     ret = mbedtls_base64_encode((unsigned char*) *ppOut, buffer_len, pOutLen, (const unsigned char*) pInput, inputLen);
-    assert(*pOutLen == buffer_len);
+    SOPC_ASSERT(*pOutLen == buffer_len);
     if (ret != 0)
     {
         SOPC_Free(*ppOut);

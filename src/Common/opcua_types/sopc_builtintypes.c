@@ -2144,6 +2144,10 @@ SOPC_ReturnStatus SOPC_NodeId_InitializeFromCString(SOPC_NodeId* pNid, const cha
             status = SOPC_HelperDecode_Base64(p, &bsOut, &bsOutLen);
             if (SOPC_STATUS_OK == status)
             {
+                if (bsOutLen > 0 && bsOut[bsOutLen - 1] == '\0')
+                {
+                    bsOutLen--;
+                }
                 status = bsOutLen <= INT32_MAX ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
             }
             if (SOPC_STATUS_OK == status)
