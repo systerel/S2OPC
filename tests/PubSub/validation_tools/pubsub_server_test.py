@@ -985,6 +985,8 @@ def testPubSubDynamicConf(logger):
 
     def lSubBoolIsFalse():return False == pubsubserver.getValue(NID_SUB_BOOL)
     def lSubBoolIsTrue():return True == pubsubserver.getValue(NID_SUB_BOOL)
+    def lPubBoolIsFalse():return False == pubsubserver.getValue(NID_PUB_BOOL)
+    def lPubBoolIsTrue():return True == pubsubserver.getValue(NID_PUB_BOOL)
 
     defaultXml2Restore = False
     allTestsDone = False
@@ -1317,11 +1319,15 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+        PubIsFalse = waitForEvent(lPubBoolIsFalse)
+        logger.add_test('Init subscriber variables', PubIsFalse)
 
         # Init Subscriber variables
         helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
         helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+        subIsTrue = waitForEvent(lSubBoolIsTrue)
+        logger.add_test('Init subscriber variables', subIsTrue)
 
         # Wait some long time and check nothing happen
         helpConfigurationChangeAndStart(DEFAULT_XML_PATH, pubsubserver, XML_PUBSUB_LOOP_ACYCLIC, logger)

@@ -274,8 +274,6 @@ Note 2: it is possible to use the `hardening-check` tool on binaries to check op
 
 ## S2OPC Windows compilation
 
-Note: Windows compilation is only possible if S2OPC_CLIENTSERVER_ONLY variable is set during the build (only Client/Server built).
-
 Tested under Windows 10 (32 and 64 bits) and Windows Server 2016 (64 bits).
 Prerequisites:
 - Visual Studio (tested with Visual Studio 2017)
@@ -284,20 +282,26 @@ Prerequisites:
 - [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 3.6.5 compiled with CMake)
 - [expat](https://libexpat.github.io/) (tested with expat version 2.7.3 compiled with CMake)
 - [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14 compiled with CMake)
+- Python3 (tested with version 3.12.0, >= 3.9 for PyS2OPC compatibility)
+- [Paho](https://github.com/eclipse/paho.mqtt.c) only needed for PubSub with MQTT (tested with version 1.3.15 compiled with CMake)
 
 To build S2OPC libraries and tests with default configuration on current stable release, you can use the build_s2opc.bat script by adapting few parameters through environment variables:
-- Paths to external libraries source directory: MbedTLS, Expat (optional: needed for XML parsing features only), Check (optional: needed for S2OPC unit tests). Set the  MBEDTLS_DIR, EXPAT_DIR and CHECK_DIR variables.
+- Paths to external libraries source directory: MbedTLS, Expat (optional: needed for XML parsing features only), Check (optional: needed for S2OPC unit tests), Paho (optional: needed for S2OPC PubSub MQTT). Set the  MBEDTLS_DIR, EXPAT_DIR, CHECK_DIR and PAHO_DIR variables.
 - Visual Studio version to use and type of build (Release, Debug, etc.). Set the VS_VERSION and CONFIG variables.
 
-By setting environment variables S2OPC_NANO_PROFILE, S2OPC_NODE_MANAGEMENT, S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
+By setting environment variables S2OPC_NANO_PROFILE, S2OPC_EVENT_MANAGEMENT, S2OPC_HAS_AUDITING, S2OPC_NODE_MANAGEMENT, S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE, S2OPC_CLIENTSERVER_ONLY, WARNINGS_AS_ERRORS, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES, WITH_PYS2OPC, PYS2OPC_VERSION and PYS2OPC_WHEEL_NAME it is possible to customize S2OPC build.
 - S2OPC_NANO_PROFILE (OFF by default): if set to ON, it excludes the features out of the OPC UA server nano scope (excluded services: subscription, monitored items and method calls services)
+- S2OPC_EVENT_MANAGEMENT (OFF by default): if set to ON, activates OPC UA Events
+- S2OPC_HAS_AUDITING (OFF by default)
 - S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service (variable node only without child nodes generation, no NodeId generation, simplified checks on types) and DeleteNodes services
 - S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE (OFF by default): if set to ON, activates the external treatment for HistoryRead service, which is the only one supported for the moment
+- S2OPC_CLIENTSERVER_ONLY (OFF by default): if set to ON, Only build the common library and client server libraries, tests, and samples (effectively excludes pubsub).
+- WARNINGS_AS_ERRORS (ON by default): if set to OFF, Do not treat warnings as errors when building.
 - BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
 - ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
 - ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,
 etc.)
-- WITH_PYS2OPC (OFF by default): if set to ON, it builds the Python binding wheel for S2OPC and PYS2OPC_WHEEL_NAME variable shall also be set to define the wheel file name.
+- WITH_PYS2OPC (OFF by default): if set to ON, it builds the Python binding wheel for S2OPC and PYS2OPC_WHEEL_NAME variable shall also be set to define the wheel file name. PYS2OPC_VERSION and PYS2OPC_WHEEL_NAME can be defined to name the PyS2OPC wheel.
 
 The generated project file S2OPC*.sln can then be imported in Visual Studio environment.
 

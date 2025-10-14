@@ -515,17 +515,21 @@ SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(SOPC_Buffer* buf, const double va
     {
         status = SOPC_Buffer_Write(buf, (const uint8_t*) nan_str_json_format, (uint32_t) strlen(nan_str_json_format));
     }
-    // If it's a +Inf
-    else if (1 == isinf(value))
+    // If it's a Infinity
+    else if (isinf(value) != 0)
     {
-        status = SOPC_Buffer_Write(buf, (const uint8_t*) infinity_str_json_format,
-                                   (uint32_t) strlen(infinity_str_json_format));
-    }
-    // If it's a -Inf
-    else if (-1 == isinf(value))
-    {
-        status = SOPC_Buffer_Write(buf, (const uint8_t*) infinity_str_minus_json_format,
-                                   (uint32_t) strlen(infinity_str_minus_json_format));
+        // If it's a -Inf
+        if (signbit(value) != 0)
+        {
+            status = SOPC_Buffer_Write(buf, (const uint8_t*) infinity_str_minus_json_format,
+                                       (uint32_t) strlen(infinity_str_minus_json_format));
+        }
+        // If it's a +Inf
+        else
+        {
+            status = SOPC_Buffer_Write(buf, (const uint8_t*) infinity_str_json_format,
+                                       (uint32_t) strlen(infinity_str_json_format));
+        }
     }
     // Else, it's a normal decimal number
     else

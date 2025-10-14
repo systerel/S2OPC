@@ -165,7 +165,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         SOPC_CryptoProfile_Is_Implemented() ? CONFIG_SOPC_PUBSUB_SECURITY_MODE : SOPC_SecurityMode_None;
     bool alloc = true;
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
-    SOPC_PubSubConnection* connection;
+    SOPC_PubSubConnection* connection = NULL;
 
     /* 1 connection pub */
     alloc = SOPC_PubSubConfiguration_Allocate_PubConnection_Array(config, 1);

@@ -61,8 +61,8 @@ static SOPC_Variant varArrJSON[NB_VARS_JSON] = {SOPC_VARIANT_BOOL(true),
                                                 SOPC_VARIANT_INT32(-65133),
                                                 SOPC_VARIANT_DOUBLE((double) 5462.16515561), // ~ 5462.165156
                                                 SOPC_VARIANT_FLOAT((float) 546216515561),    // ~ 5.462165094e+11
-                                                SOPC_VARIANT_FLOAT((float) 1.0 / 0.0),
-                                                SOPC_VARIANT_FLOAT((float) -1.0 / 0.0),
+                                                SOPC_VARIANT_FLOAT((float) INFINITY),
+                                                SOPC_VARIANT_FLOAT((float) -INFINITY),
                                                 SOPC_VARIANT_DOUBLE(NAN),
                                                 SOPC_VARIANT_STRING(gSampleText)};
 
@@ -1236,6 +1236,7 @@ static SOPC_TargetVariableCtx* getGlobalTargetVariable(const SOPC_Conf_Publisher
     {
         // Should not go there
         ck_assert(false);
+        return NULL;
     }
 }
 

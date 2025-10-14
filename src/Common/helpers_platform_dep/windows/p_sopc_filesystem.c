@@ -207,3 +207,31 @@ SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFilePaths(const char* directo
 
     return res;
 }
+
+/* Warning: Not a real fmemopn, emulated with a temporary file*/
+FILE* SOPC_FileSystem_fmemopen(void* buf, size_t size, const char* opentype)
+{
+    if (NULL == buf || 0 == size || NULL == opentype)
+    {
+        return NULL;
+    }
+
+    // Create a temporary file on disk
+    FILE* f = tmpfile();
+    if (NULL == f)
+    {
+        return NULL;
+    }
+
+    // Write buf to this temporary file
+    size_t written = fwrite(buf, 1, size, f);
+    if (written != size)
+    {
+        fclose(f);
+        return NULL;
+    }
+
+    // Go back to the beginning of the file.
+    rewind(f);
+    return f;
+}

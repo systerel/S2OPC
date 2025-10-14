@@ -30,6 +30,7 @@ from urllib.parse import urlparse
 TIMEOUT = 2.0
 DEFAULT_PUB_URL = 'opc.udp://232.1.2.100:4840'
 DEFAULT_SUB_SERVER_URL = 'opc.tcp://localhost:4843'
+INADDR_ANY = "0.0.0.0"
 
 def wait_server(url, timeout):
     assert url != None
@@ -62,7 +63,8 @@ def wait_publisher(url, timeout):
             _, _, _, _, sockaddr = socket.getaddrinfo(None, pr.port, family=socket.AF_INET, type=socket.SOCK_DGRAM, proto=socket.IPPROTO_UDP, flags=socket.AI_PASSIVE)[0]
             iface = socket.inet_aton(sockaddr[0]) # first element of tuple is address
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, group + iface)
-            sock.bind((pr.hostname, pr.port))
+            # Bind on INADDR_ANY for Windows compatibility
+            sock.bind((INADDR_ANY, pr.port))
 
             data = sock.recv(4096)
             sock.close()

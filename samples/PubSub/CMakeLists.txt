@@ -25,22 +25,24 @@ target_compile_definitions(pubsub PRIVATE ${S2OPC_DEFINITIONS} "-D_GNU_SOURCE")
 target_link_libraries(pubsub PRIVATE s2opc_pubsub)
 target_include_directories(pubsub PRIVATE pubsub)
 
-# Demo TSN PubSub server
-add_definitions(-D_GNU_SOURCE)
-add_executable(udp_rt_pub "tsn/udp_rt_pub.c")
-target_compile_options(udp_rt_pub PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(udp_rt_pub PRIVATE ${S2OPC_DEFINITIONS})
-target_include_directories(udp_rt_pub PRIVATE ${S2OPC_ROOT_PATH}/src/Common/helpers_platform_dep/linux)
-target_link_libraries(udp_rt_pub PRIVATE s2opc_pubsub)
+if(UNIX) # Presence of include/code specific to Linux in pubsub RT and benchmark
+  # Demo TSN PubSub server
+  add_definitions(-D_GNU_SOURCE)
+  add_executable(udp_rt_pub "tsn/udp_rt_pub.c")
+  target_compile_options(udp_rt_pub PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(udp_rt_pub PRIVATE ${S2OPC_DEFINITIONS})
+  target_include_directories(udp_rt_pub PRIVATE ${S2OPC_ROOT_PATH}/src/Common/helpers_platform_dep/linux)
+  target_link_libraries(udp_rt_pub PRIVATE s2opc_pubsub)
 
-# Benchmark Pubsub
-add_executable(bench_pubsub "benchmark/main.c"
-                            "benchmark/pubsub.c"
-                            "benchmark/cache.c")
+  # Benchmark Pubsub
+  add_executable(bench_pubsub "benchmark/main.c"
+                              "benchmark/pubsub.c"
+                              "benchmark/cache.c")
 
-target_compile_options(bench_pubsub PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(bench_pubsub PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(bench_pubsub PRIVATE s2opc_pubsub)
+  target_compile_options(bench_pubsub PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(bench_pubsub PRIVATE ${S2OPC_DEFINITIONS})
+  target_link_libraries(bench_pubsub PRIVATE s2opc_pubsub)
+endif()
 
 # Copy data
 add_custom_command(
