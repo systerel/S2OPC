@@ -177,7 +177,7 @@ SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(SOPC_Socket sock)
         if (0 == res)
         {
             result->address.ai_family = sockAddrStorage->ss_family;
-            result->address.ai_addrlen = sockAddrStorageLen;
+            result->address.ai_addrlen = (size_t) sockAddrStorageLen;
             result->address.ai_addr = (struct sockaddr*) sockAddrStorage;
         }
     }

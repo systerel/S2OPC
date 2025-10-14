@@ -19,24 +19,24 @@
 
 #include "p_sopc_sockets.h"
 #include "sopc_assert.h"
-#include "sopc_udp_sockets.h"
+#include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_udp_sockets.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <mswsock.h>
-#include <stdio.h>
-#include <stdlib.h> 
-#include <string.h>
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#define DEFAULT_TTL 32u
 #pragma comment(lib, "Ws2_32.lib")
 
-static int gInitialized = 0;
+static bool gInitialized = false;
 static WSADATA wsaData;
-
-#define PRINT_DEBUG printf // Activation du debug
 
 void SOPC_UDP_Socket_Close(SOPC_Socket* sock);
 
@@ -45,7 +45,7 @@ static inline void Network_Initialize(void)
     if (!gInitialized)
     {
         WSAStartup(MAKEWORD(2, 2), &wsaData);
-        gInitialized = 1;
+        gInitialized = true;
     }
 }
 
@@ -59,6 +59,7 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_AddrInfo_Get(int IPv6,
                                                       const char* port,
                                                       SOPC_Socket_AddressInfo** addrs)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo hints;
     memset(&hints, 0, sizeof(SOPC_Socket_AddressInfo));
     hints.addrInfo.ai_family = (IPv6 ? AF_INET6 : AF_INET);
@@ -71,12 +72,16 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_AddrInfo_Get(int IPv6,
         int rc = getaddrinfo(node, port, (struct addrinfo*) &hints, (struct addrinfo**) addrs);
         if (rc != 0)
         {
-            PRINT_DEBUG("Invalid address %s, getaddrinfo failed: %s(%d)\n", node, gai_strerrorA(rc), rc);
-            return SOPC_STATUS_NOK;
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: Invalid address %s, getaddrinfo failed: %s(%d)",
+                                   node, gai_strerrorA(rc), rc);
+            status = SOPC_STATUS_NOK;
         }
-        return SOPC_STATUS_OK;
+        else
+        {
+            status = SOPC_STATUS_OK;
+        }
     }
-    return SOPC_STATUS_INVALID_PARAMETERS;
+    return status;
 }
 
 SOPC_Socket_AddressInfo* SOPC_UDP_SocketAddress_Create(bool IPv6, const char* node, const char* service)
@@ -84,53 +89,29 @@ SOPC_Socket_AddressInfo* SOPC_UDP_SocketAddress_Create(bool IPv6, const char* no
     Network_Initialize();
     SOPC_Socket_AddressInfo* addr = NULL;
     SOPC_ReturnStatus status = SOPC_UDP_Socket_AddrInfo_Get(IPv6, node, service, &addr);
-    return (status == SOPC_STATUS_OK) ? addr : NULL;
+    if (SOPC_STATUS_OK != status)
+    {
+        addr = NULL;
+    }
+    return addr;
 }
 
 void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** addr)
 {
-    if (addr && *addr)
-    {
-        free(*addr);
-        *addr = NULL;
-    }
+    SOPC_Socket_AddrInfoDelete(addr);
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(SOPC_Socket pSock, uint8_t TTL_scope)
+SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(SOPC_Socket sock, uint8_t TTL_scope)
 {
-    int optlen = sizeof(TTL_scope);
-
-    if (pSock->sock != INVALID_SOCKET)
+    if (sock != NULL && sock->sock != INVALID_SOCKET)
     {
-        PRINT_DEBUG("setsockopt(%d, IPPROTO_IP, IP_MULTICAST_TTL, (%d))\n", (int) pSock->sock, TTL_scope);
-        int setOptStatus = setsockopt(pSock->sock, IPPROTO_IP, IP_MULTICAST_TTL, (const char*) &TTL_scope, optlen);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock: setsockopt(%d, IPPROTO_IP, IP_MULTICAST_TTL, (%d))",
+                               (int) sock->sock, TTL_scope);
+        int setOptStatus =
+            setsockopt(sock->sock, IPPROTO_IP, IP_MULTICAST_TTL, (const char*) &TTL_scope, (int) sizeof(TTL_scope));
         return (setOptStatus == SOCKET_ERROR) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }
     return SOPC_STATUS_INVALID_PARAMETERS;
-}
-
-static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo* addr,
-                                                   const char* interfaceName,
-                                                   int setReuseAddr,
-                                                   int setNonBlocking,
-                                                   SOCKET* sock)
-{
-    if (addr == NULL || sock == NULL)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    *sock = socket(addr->addrInfo.ai_family, addr->addrInfo.ai_socktype, addr->addrInfo.ai_protocol);
-    PRINT_DEBUG("socket(SND) => %llu \n", (unsigned long long) *sock);
-
-    if (*sock == INVALID_SOCKET)
-        return SOPC_STATUS_NOK;
-
-    if (setReuseAddr)
-    {
-        int trueInt = 1;
-        setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const char*) &trueInt, sizeof(int));
-    }
-
-    return SOPC_STATUS_OK;
 }
 
 static void* get_ai_addr(const SOPC_Socket_AddressInfo* addr)
@@ -138,221 +119,190 @@ static void* get_ai_addr(const SOPC_Socket_AddressInfo* addr)
     return (void*) addr->addrInfo.ai_addr;
 }
 
-static int JoinMulticastGroup(SOCKET s, const struct addrinfo* group, struct addrinfo* iface)
+static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo* addr,
+                                                   const char* interfaceName,
+                                                   bool setReuseAddr,
+                                                   bool setNonBlocking,
+                                                   SOPC_Socket* sock)
 {
-    struct ip_mreq mreqv4;
-    char* optval = NULL;
-    int optlevel, option, optlen, rc;
-
-    rc = NO_ERROR;
-    if (group->ai_family == AF_INET)
+    SOPC_UNUSED_ARG(interfaceName);
+    if (NULL == addr || NULL == sock)
     {
-        optlevel = IPPROTO_IP;
-        option = IP_ADD_MEMBERSHIP;
-        optval = (char*) &mreqv4;
-        optlen = sizeof(mreqv4);
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-        mreqv4.imr_multiaddr.s_addr = ((SOCKADDR_IN*) group->ai_addr)->sin_addr.s_addr;
-        mreqv4.imr_interface.s_addr = ((SOCKADDR_IN*) iface->ai_addr)->sin_addr.s_addr;
+    SOPC_Socket_Impl* socketImpl = SOPC_Calloc(1, sizeof(*socketImpl));
+    if (NULL == socketImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const int trueInt = true;
+    int setOptStatus = -1;
+
+    socketImpl->sock = socket(addr->addrInfo.ai_family, addr->addrInfo.ai_socktype, addr->addrInfo.ai_protocol);
+    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock: socket => %llu ", (unsigned long long) socketImpl->sock);
+
+    if (INVALID_SOCKET == socketImpl->sock)
+    {
+        status = SOPC_STATUS_NOK;
     }
     else
     {
-        fprintf(stderr, "Attempting to join multicast group for invalid address family!\n");
-        rc = SOCKET_ERROR;
+        status = SOPC_STATUS_OK;
     }
 
-    if (rc != SOCKET_ERROR)
+    if (SOPC_STATUS_OK == status && setReuseAddr)
     {
-        PRINT_DEBUG("setsockopt(%d, IPPROTO_IP, IP_ADD_MEMBERSHIP, ...)\n", (int) s);
-        rc = setsockopt(s, optlevel, option, optval, optlen);
-        if (rc == SOCKET_ERROR)
+        setOptStatus = setsockopt(socketImpl->sock, SOL_SOCKET, SO_REUSEADDR, (const char*) &trueInt, sizeof(int));
+        if (setOptStatus < 0)
         {
-            PRINT_DEBUG("JoinMulticastGroup: setsockopt failed with error code %d\n", WSAGetLastError());
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: setsockopt (SO_REUSEADDR) failed with error: %ld",
+                                   setOptStatus);
+            status = SOPC_STATUS_NOK;
         }
     }
-    return rc;
-}
 
-int SetSendInterface(SOCKET s, struct addrinfo* iface)
-{
-    char* optval = NULL;
-    int optlevel, option, optlen, rc;
-    rc = NO_ERROR;
-
-    if (iface->ai_family == AF_INET)
+    if (SOPC_STATUS_OK == status && setNonBlocking)
     {
-        optlevel = IPPROTO_IP;
-        option = IP_MULTICAST_IF;
-        optval = (char*) &((SOCKADDR_IN*) iface->ai_addr)->sin_addr.s_addr;
-        optlen = sizeof(((SOCKADDR_IN*) iface->ai_addr)->sin_addr.s_addr);
+        u_long iMode = 1; // iMode = 0 => blocking is enabled. iMode != 0 => non-blocking mode is enabled.
+        setOptStatus = ioctlsocket(socketImpl->sock, FIONBIO, &iMode);
+        if (setOptStatus != NO_ERROR)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: ioctlsocket failed with error: %ld",
+                                   setOptStatus);
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *sock = socketImpl;
     }
     else
     {
-        fprintf(stderr, "Attempting to set sent interface for invalid address family!\n");
-        rc = SOCKET_ERROR;
+        SOPC_Socket_Close(&socketImpl);
     }
 
-    if (rc != SOCKET_ERROR)
-    {
-        const SOCKADDR_IN* inaddr = (SOCKADDR_IN*) (iface->ai_addr);
-
-        PRINT_DEBUG("setsockopt(%d, IPPROTO_IP, IP_MULTICAST_IF, %d.%d.%d.%d:%d)\n", (int) s,
-                    inaddr->sin_addr.S_un.S_un_b.s_b1, inaddr->sin_addr.S_un.S_un_b.s_b2,
-                    inaddr->sin_addr.S_un.S_un_b.s_b3, inaddr->sin_addr.S_un.S_un_b.s_b4,
-                    (int) htons(inaddr->sin_port));
-        rc = setsockopt(s, optlevel, option, optval, optlen);
-        if (rc == SOCKET_ERROR)
-        {
-            PRINT_DEBUG("setsockopt() failed with error code %d\n", WSAGetLastError());
-        }
-    }
-    return rc;
+    return status;
 }
 
-struct addrinfo* ResolveAddress(const char* addr, const char* port, int af, int type, int proto)
-{
-    struct addrinfo hints, *res = NULL;
-    int rc;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_flags = ((addr) ? 0 : AI_PASSIVE);
-    hints.ai_family = af;
-    hints.ai_socktype = type;
-    hints.ai_protocol = proto;
-
-    rc = getaddrinfo(addr, port, &hints, &res);
-    if (rc != 0)
-    {
-        PRINT_DEBUG("Invalid address %s, getaddrinfo failed: %d\n", addr, rc);
-        return NULL;
-    }
-    return res;
-}
-
+/* WARNING: interfaceName must be and ipv4 address or NULL */
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
                                                   const char* interfaceName,
                                                   bool setReuseAddr,
                                                   bool setNonBlocking,
-                                                  SOPC_Socket* pSock)
+                                                  SOPC_Socket* sock)
 {
-    SOCKET s;
-    SOCKADDR_IN localif;
-    struct ip_mreq mreq;
+    SOPC_ReturnStatus status =
+        SOPC_UDP_Socket_CreateNew(listenAddress, interfaceName, setReuseAddr, setNonBlocking, sock);
 
-    struct sockaddr_in* listenAddr;
-
-    s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
-    *pSock = malloc(sizeof(SOPC_Socket_Impl));
-
-    if (pSock == NULL)
+    if (SOPC_STATUS_OK == status)
     {
-        closesocket(s);
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
+        int res = SOCKET_ERROR;
+        struct sockaddr_in* listenAddr = (struct sockaddr_in*) get_ai_addr(listenAddress);
 
-    PRINT_DEBUG("socket(RCV) => %lld \n", s);
-
-    listenAddr = (struct sockaddr_in*) get_ai_addr(listenAddress);
-
-    localif.sin_family = AF_INET;
-    localif.sin_port = listenAddr->sin_port;
-    localif.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    int res = bind(s, (SOCKADDR*) &localif, sizeof(localif));
-    PRINT_DEBUG("bind(%d, %d.%d.%d.%d:%d)\n", (int) s, localif.sin_addr.S_un.S_un_b.s_b4,
-                localif.sin_addr.S_un.S_un_b.s_b3, localif.sin_addr.S_un.S_un_b.s_b2, localif.sin_addr.S_un.S_un_b.s_b1,
-                (int) htons(localif.sin_port));
-
-    if (res == SOCKET_ERROR)
-    {
-        PRINT_DEBUG("Failed to Bind socket %d on port %d (%s)\n", (int) (*pSock)->sock, htons(localif.sin_port),
-                    gai_strerrorA(WSAGetLastError()));
-        SOPC_UDP_Socket_Close(pSock);
-
-        return SOPC_STATUS_NOK;
-    }
-
-    // Note: only add membership if socket is a Multicast address
-    bool isMC = listenAddress->addrInfo.ai_family == AF_INET;
-    if (isMC)
-    {
-        // IPV4: first address byte indicates if this is a multicast address
-        struct sockaddr_in* sAddr = (struct sockaddr_in*) get_ai_addr(listenAddress);
-        const uint32_t ip = htonl(sAddr->sin_addr.s_addr);
-        isMC = ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
-    }
-
-    if (isMC)
-    {
-        PRINT_DEBUG("Detected a Multicast address. Set option 'IP_ADD_MEMBERSHIP'\n");
-
-        struct in_addr interfaceAddr;
-        int ptonResult = inet_pton(AF_INET, interfaceName, &interfaceAddr);
-        if (ptonResult != 1)
+        // Note: only add membership if socket is a Multicast address
+        bool isMC = false;
+        if (listenAddress->addrInfo.ai_family == AF_INET)
         {
-            PRINT_DEBUG("inet_pton failed for interfaceName: %s\n", interfaceName);
-            closesocket(s);
-            return SOPC_STATUS_INVALID_PARAMETERS;
+            // IPV4: first address byte indicates if this is a multicast address
+            const uint32_t ip = htonl(listenAddr->sin_addr.s_addr);
+            isMC = ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
         }
 
-        mreq.imr_interface = interfaceAddr;
-        mreq.imr_multiaddr = listenAddr->sin_addr;
+        if (isMC)
+        {
+            // Bind with INADDR_ANY and the right port, then specify the multicast address
+            // and the name of the interface on which you want to listen.
+            SOPC_Logger_TraceDebug(
+                SOPC_LOG_MODULE_COMMON,
+                "UDP sock: Detected a Multicast address. Bind with INADDR_ANY, then Set option 'IP_ADD_MEMBERSHIP'");
+            // Bind socket with INADDR_ANY and listen port
+            SOCKADDR_IN localif;
+            localif.sin_family = AF_INET;
+            localif.sin_port = listenAddr->sin_port;
+            localif.sin_addr.s_addr = htonl(INADDR_ANY);
+            res = bind((*sock)->sock, (SOCKADDR*) &localif, sizeof(localif));
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock: bind(%d, %d.%d.%d.%d:%d)", (int) (*sock)->sock,
+                                   localif.sin_addr.S_un.S_un_b.s_b4, localif.sin_addr.S_un.S_un_b.s_b3,
+                                   localif.sin_addr.S_un.S_un_b.s_b2, localif.sin_addr.S_un.S_un_b.s_b1,
+                                   (int) htons(localif.sin_port));
 
-        PRINT_DEBUG("setsockopt(%d, IPPROTO_IP, IP_ADD_MEMBERSHIP, (%s / %d.%d.%d.%d:%d))\n", (int) s, interfaceName,
-                    listenAddr->sin_addr.S_un.S_un_b.s_b4, listenAddr->sin_addr.S_un.S_un_b.s_b3,
-                    listenAddr->sin_addr.S_un.S_un_b.s_b2, listenAddr->sin_addr.S_un.S_un_b.s_b1,
-                    htons(listenAddr->sin_port));
-        res = setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*) &mreq, sizeof(mreq));
+            // Add membership (listen addr) and interfaceName addr, if != NULL
+            struct ip_mreq mreq;
+            if (interfaceName != NULL)
+            {
+                struct in_addr interfaceAddr;
+                int resInet = inet_pton(AF_INET, interfaceName, &interfaceAddr);
+                if (resInet <= 0)
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: Failed to inet_pton on socket %d  (%s)",
+                                           (int) (*sock)->sock, gai_strerrorA(WSAGetLastError()));
+                }
+                else
+                {
+                    mreq.imr_interface = interfaceAddr;
+                }
+            }
+            else
+            {
+                mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+            }
+
+            mreq.imr_multiaddr.s_addr = listenAddr->sin_addr.s_addr;
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON,
+                                   "UDP sock: setsockopt(%d, IPPROTO_IP, IP_ADD_MEMBERSHIP, (%s / %d.%d.%d.%d:%d))",
+                                   (int) (*sock)->sock, interfaceName, listenAddr->sin_addr.S_un.S_un_b.s_b1,
+                                   listenAddr->sin_addr.S_un.S_un_b.s_b2, listenAddr->sin_addr.S_un.S_un_b.s_b3,
+                                   listenAddr->sin_addr.S_un.S_un_b.s_b4, htons(listenAddr->sin_port));
+            res = setsockopt((*sock)->sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*) &mreq, sizeof(mreq));
+        }
+        else // Bind directly with unicast addr
+        {
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock: bind(%d, %d.%d.%d.%d:%d)", (int) (*sock)->sock,
+                                   listenAddr->sin_addr.S_un.S_un_b.s_b1, listenAddr->sin_addr.S_un.S_un_b.s_b2,
+                                   listenAddr->sin_addr.S_un.S_un_b.s_b3, listenAddr->sin_addr.S_un.S_un_b.s_b4,
+                                   (int) htons(listenAddr->sin_port));
+            res = bind((*sock)->sock, listenAddress->addrInfo.ai_addr, (int) listenAddress->addrInfo.ai_addrlen);
+        }
         if (res == SOCKET_ERROR)
         {
-            PRINT_DEBUG("Failed to IP_ADD_MEMBERSHIP on socket %d  (%s)\n", (int) (*pSock)->sock,
-                        gai_strerrorA(WSAGetLastError()));
-            SOPC_UDP_Socket_Close(pSock);
-            return SOPC_STATUS_NOK;
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: Failed to Bind socket %d on port %d (%s)",
+                                   (int) (*sock)->sock, htons(listenAddr->sin_port), gai_strerrorA(WSAGetLastError()));
+            SOPC_UDP_Socket_Close(sock);
+            status = SOPC_STATUS_NOK;
         }
     }
-
-    //*sock = s;
-    (*pSock)->sock = s;
-    return SOPC_STATUS_OK;
+    return status;
 }
 
+/* WARNING: interfaceName is NOT USED */
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress,
                                                const char* interfaceName,
                                                bool setNonBlocking,
-                                               SOPC_Socket* pSock)
+                                               SOPC_Socket* sock)
 {
-    if (pSock == NULL)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    *pSock = malloc(sizeof(SOPC_Socket_Impl));
-
-    if (pSock == NULL)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-    return SOPC_UDP_Socket_CreateNew(destAddress, interfaceName, 0, setNonBlocking, &(*pSock)->sock);
+    // TODO : Enable interfaceName for sending (set IP_MULTICAST_IF or IP_UNICAST_IF, depending uni/multicast)
+    return SOPC_UDP_Socket_CreateNew(destAddress, interfaceName, false, setNonBlocking, sock);
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(SOPC_Socket pSock,
-                                         const SOPC_Socket_AddressInfo* destAddr,
-                                         SOPC_Buffer* buffer)
+SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(SOPC_Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)
 {
-    if (pSock->sock == INVALID_SOCKET || destAddr == NULL || buffer == NULL || buffer->position != 0)
+    if (INVALID_SOCKET == sock->sock || NULL == destAddr || NULL == buffer || buffer->position != 0)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     const SOCKADDR_IN* inaddr = (SOCKADDR_IN*) (destAddr->addrInfo.ai_addr);
-    PRINT_DEBUG("sendto(%d, (...), %u, to (%d.%d.%d.%d:%d))\n", (int) pSock->sock, (int) buffer->length,
-                inaddr->sin_addr.S_un.S_un_b.s_b1, inaddr->sin_addr.S_un.S_un_b.s_b2, inaddr->sin_addr.S_un.S_un_b.s_b3,
-                inaddr->sin_addr.S_un.S_un_b.s_b4, htons(inaddr->sin_port));
-    int res = sendto(pSock->sock, (const char*) buffer->data, buffer->length, 0, destAddr->addrInfo.ai_addr,
+    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock: sendto(%d, (...), %u, to (%d.%d.%d.%d:%d))",
+                           (int) sock->sock, (int) buffer->length, inaddr->sin_addr.S_un.S_un_b.s_b1,
+                           inaddr->sin_addr.S_un.S_un_b.s_b2, inaddr->sin_addr.S_un.S_un_b.s_b3,
+                           inaddr->sin_addr.S_un.S_un_b.s_b4, htons(inaddr->sin_port));
+    int res = sendto(sock->sock, (const char*) buffer->data, (int) buffer->length, 0, destAddr->addrInfo.ai_addr,
                      (int) destAddr->addrInfo.ai_addrlen);
 
-    if (res == SOCKET_ERROR || (uint32_t) res != buffer->length)
+    if (SOCKET_ERROR == res || (uint32_t) res != buffer->length)
     {
         return SOPC_STATUS_NOK;
     }
@@ -360,9 +310,9 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(SOPC_Socket pSock,
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(SOPC_Socket pSock, SOPC_Buffer* buffer)
+SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(SOPC_Socket sock, SOPC_Buffer* buffer)
 {
-    if (pSock->sock == INVALID_SOCKET || buffer == NULL)
+    if (INVALID_SOCKET == sock->sock || NULL == buffer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -371,7 +321,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(SOPC_Socket pSock, SOPC_Buffer* bu
     socklen_t slen = sizeof(si_client);
 
     int recv_len =
-        recvfrom(pSock->sock, (char*) buffer->data, buffer->current_size, 0, (struct sockaddr*) &si_client, &slen);
+        recvfrom(sock->sock, (char*) buffer->data, (int) buffer->current_size, 0, (struct sockaddr*) &si_client, &slen);
 
     if (recv_len == SOCKET_ERROR)
     {
@@ -387,12 +337,11 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(SOPC_Socket pSock, SOPC_Buffer* bu
     return SOPC_STATUS_OK;
 }
 
-void SOPC_UDP_Socket_Close(SOPC_Socket* pSock)
+void SOPC_UDP_Socket_Close(SOPC_Socket* sock)
 {
-    //  if (sock && *sock != INVALID_SOCKET)
-    if (pSock != NULL && *pSock != NULL && (*pSock)->sock && (*pSock)->sock != INVALID_SOCKET)
+    if (sock != NULL && *sock != NULL && (*sock)->sock && (*sock)->sock != INVALID_SOCKET)
     {
-        closesocket((*pSock)->sock);
-        (*pSock)->sock = INVALID_SOCKET;
+        closesocket((*sock)->sock);
+        (*sock)->sock = INVALID_SOCKET;
     }
 }

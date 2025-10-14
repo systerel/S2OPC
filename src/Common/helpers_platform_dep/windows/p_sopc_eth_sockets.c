@@ -39,9 +39,9 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateSendAddressInfo(const char* interfaceNam
                                                         const char* destMACaddr,
                                                         SOPC_ETH_Socket_SendAddressInfo** sendAddInfo)
 {
-    (void) interfaceName;
-    (void) destMACaddr;
-    (void) sendAddInfo;
+    SOPC_UNUSED_ARG(interfaceName);
+    SOPC_UNUSED_ARG(destMACaddr);
+    SOPC_UNUSED_ARG(sendAddInfo);
 
     // Ethernet raw socket not supported on Windows
     return SOPC_STATUS_NOT_SUPPORTED;
@@ -51,9 +51,9 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* 
                                                bool setNonBlocking,
                                                SOPC_Socket* sock)
 {
-    (void) sendAddrInfo;
-    (void) setNonBlocking;
-    (void) sock;
+    SOPC_UNUSED_ARG(sendAddrInfo);
+    SOPC_UNUSED_ARG(setNonBlocking);
+    SOPC_UNUSED_ARG(sock);
 
     // Ethernet raw socket not supported on Windows
     return SOPC_STATUS_NOT_SUPPORTED;
@@ -64,10 +64,10 @@ SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(SOPC_Socket sock,
                                          uint16_t etherType,
                                          SOPC_Buffer* buffer)
 {
-    (void) sock;
-    (void) sendAddrInfo;
-    (void) etherType;
-    (void) buffer;
+    SOPC_UNUSED_ARG(sock);
+    SOPC_UNUSED_ARG(sendAddrInfo);
+    SOPC_UNUSED_ARG(etherType);
+    SOPC_UNUSED_ARG(buffer);
 
     // Ethernet raw socket not supported on Windows
     return SOPC_STATUS_NOT_SUPPORTED;
@@ -77,8 +77,8 @@ void SOPC_ETH_Socket_Close(SOPC_Socket* sock)
 {
     if (NULL != sock && SOPC_INVALID_SOCKET != *sock)
     {
-        int res = 0;
-        S2OPC_TEMP_FAILURE_RETRY(res, closesocket((*sock)->sock));
+        // There is no concept of EINTR on Windows, so we don't need to retry
+        closesocket((*sock)->sock);
         SOPC_Free(*sock);
         *sock = SOPC_INVALID_SOCKET;
     }
@@ -90,10 +90,10 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateReceiveAddressInfo(const char* interface
                                                            const char* sourceMACaddr,
                                                            SOPC_ETH_Socket_ReceiveAddressInfo** recvAddInfo)
 {
-    (void) interfaceName;
-    (void) recvMulticast;
-    (void) destMACaddr;
-    (void) sourceMACaddr;
+    SOPC_UNUSED_ARG(interfaceName);
+    SOPC_UNUSED_ARG(recvMulticast);
+    SOPC_UNUSED_ARG(destMACaddr);
+    SOPC_UNUSED_ARG(sourceMACaddr);
 
     if (NULL == recvAddInfo)
     {
@@ -115,8 +115,8 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
                                                   bool setNonBlocking,
                                                   SOPC_Socket* sock)
 {
-    (void) receiveAddrInfo;
-    (void) setNonBlocking;
+    SOPC_UNUSED_ARG(receiveAddrInfo);
+    SOPC_UNUSED_ARG(setNonBlocking);
 
     if (NULL == sock)
     {
@@ -135,11 +135,11 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(SOPC_Socket sock,
                                               uint16_t etherType,
                                               SOPC_Buffer* buffer)
 {
-    (void) sock;
-    (void) receiveAddrInfo;
-    (void) checkEtherType;
-    (void) etherType;
-    (void) buffer;
+    SOPC_UNUSED_ARG(sock);
+    SOPC_UNUSED_ARG(receiveAddrInfo);
+    SOPC_UNUSED_ARG(checkEtherType);
+    SOPC_UNUSED_ARG(etherType);
+    SOPC_UNUSED_ARG(buffer);
 
     // Ethernet raw socket not supported on Windows
     return SOPC_STATUS_NOT_SUPPORTED;
