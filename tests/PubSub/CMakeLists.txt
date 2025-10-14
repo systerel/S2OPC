@@ -102,6 +102,13 @@ add_custom_command(TARGET xml_parser_test POST_BUILD
 
 s2opc_unit_test(xml_parser_test)
 
+add_executable(time_test "unit_tests/time_test.c")
+target_link_libraries(time_test PRIVATE s2opc_pubsub Check::check)
+target_compile_options(time_test PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(time_test PRIVATE ${S2OPC_DEFINITIONS})
+
+s2opc_unit_test(time_test)
+
 add_executable(pubsub_modules_test "unit_tests/pubsub_modules_test.c")
 target_link_libraries(pubsub_modules_test PRIVATE s2opc_pubsub Check::check)
 target_compile_options(pubsub_modules_test PRIVATE ${S2OPC_COMPILER_FLAGS})
