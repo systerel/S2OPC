@@ -384,8 +384,10 @@ static int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbS
             {
                 contextClient->subContext.qos[i] = MQTT_LIB_QOS;
                 SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
+                SOPC_MSVC_WARNING_DISABLE(4090)
                 contextClient->subContext.topic[i] = subTopic[i];
                 SOPC_GCC_DIAGNOSTIC_RESTORE
+                SOPC_MSVC_WARNING_RESTORE
             }
             else
             {

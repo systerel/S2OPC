@@ -1813,6 +1813,7 @@ def generate_address_space(is_const_addspace, no_dt_definition, source, out):
     if is_const_addspace:
         out.write('SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER\n')
         out.write('SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST\n')
+        out.write('SOPC_MSVC_WARNING_DISABLE(4090)\n')
         out.write('const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {\n')
     else:
         out.write('SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {\n')
@@ -1885,6 +1886,7 @@ def generate_address_space(is_const_addspace, no_dt_definition, source, out):
             if is_const_addspace :
                 out.write('SOPC_GCC_DIAGNOSTIC_RESTORE\n')
                 out.write('SOPC_GCC_DIAGNOSTIC_RESTORE\n')
+                out.write('SOPC_MSVC_WARNING_RESTORE\n')
 
             out.write('const uint32_t SOPC_Embedded_VariableVariant_nb = %d;\n' % len(variables))
 

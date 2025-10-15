@@ -33,6 +33,7 @@ const bool sopc_embedded_is_const_addspace = true;
 
 SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
 SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+SOPC_MSVC_WARNING_DISABLE(4090)
 const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
     {
         {OpcUa_NodeClass_DataType,
@@ -4075,4 +4076,5 @@ SOPC_Variant SOPC_Embedded_VariableVariant[55] = {
 };
 SOPC_GCC_DIAGNOSTIC_RESTORE
 SOPC_GCC_DIAGNOSTIC_RESTORE
+SOPC_MSVC_WARNING_RESTORE
 const uint32_t SOPC_Embedded_VariableVariant_nb = 55;

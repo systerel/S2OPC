@@ -53,6 +53,14 @@
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
 #endif
 
+#if defined(_MSC_VER)
+#define SOPC_MSVC_WARNING_DISABLE(w) __pragma(warning(push)) __pragma(warning(disable : w))
+#define SOPC_MSVC_WARNING_RESTORE __pragma(warning(pop))
+#else
+#define SOPC_MSVC_WARNING_DISABLE(w)
+#define SOPC_MSVC_WARNING_RESTORE
+#endif
+
 // This macro is used to avoid warning about unused argument :
 #define SOPC_UNUSED_ARG(arg) (void) (arg)
 
