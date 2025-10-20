@@ -28,6 +28,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_toolkit_config_constants.h"
 
 #include "sopc_node_mgt_helper_internal.h"
 
