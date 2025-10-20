@@ -467,10 +467,10 @@ static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
     }
 }
 
-static void SOPC_ServerHelper_AdressSpaceNotifCb(const SOPC_CallContext* callCtxPtr,
-                                                 SOPC_App_AddSpace_Event event,
-                                                 void* opParam,
-                                                 SOPC_StatusCode opStatus)
+static void SOPC_ServerHelper_AddressSpaceNotifCb(const SOPC_CallContext* callCtxPtr,
+                                                  SOPC_App_AddSpace_Event event,
+                                                  void* opParam,
+                                                  SOPC_StatusCode opStatus)
 {
     if (AS_WRITE_EVENT != event || NULL == sopc_server_helper_config.writeNotifCb)
     {
@@ -518,7 +518,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void)
     mutStatus = SOPC_Mutex_Initialization(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_ServerHelper_AdressSpaceNotifCb);
+    status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_ServerHelper_AddressSpaceNotifCb);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_ServerConfigHelper_Clear();
@@ -742,4 +742,20 @@ char** SOPC_ServerConfigHelper_GetLocaleIds(void)
         return NULL;
     }
     return pConfig->serverConfig.localeIds;
+}
+
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetOverwriteRequestCb(SOPC_OverwriteSessionRequest_Fct* overwriteReqCb)
+{
+    if (!SOPC_ServerInternal_IsConfiguring())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == overwriteReqCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ASSERT(NULL != pConfig);
+    pConfig->serverConfig.overwriteRequestFunc = overwriteReqCb;
+    return SOPC_STATUS_OK;
 }

@@ -936,6 +936,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_uncertain_reference_not_deleted:
         *status = OpcUa_UncertainReferenceNotDeleted;
         break;
+    case constants_statuscodes_bs__e_sc_bad_server_too_busy:
+        *status = OpcUa_BadServerTooBusy;
+        break;
     default:
         *status = OpcUa_BadInternalError;
     }
@@ -1321,6 +1324,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_UncertainReferenceNotDeleted:
         *bstatus = constants_statuscodes_bs__e_sc_uncertain_reference_not_deleted;
+        break;
+    case OpcUa_BadServerTooBusy:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_server_too_busy;
         break;
     default:
         if ((status & SOPC_GoodStatusOppositeMask) == 0)

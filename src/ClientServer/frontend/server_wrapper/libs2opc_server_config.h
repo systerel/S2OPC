@@ -373,4 +373,54 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetCurrentTimeRefreshInterval(uint16_t
  */
 char** SOPC_ServerConfigHelper_GetLocaleIds(void);
 
+/**
+ * \brief Type of callback to override the service on session request received by server prior to its treatment.
+ *
+ * \warning Modifying the request (or returned status code) content might lead to unexpected behavior
+ *          of the service for the client that sent request
+ *          or not to comply with OPC UA standard specification behavior for this service.
+ *          The application using it is fully responsible of the modification and its consequences,
+ *          it shall be used with particular care and as a last resort.
+ *
+ * \param type         The ::SOPC_EncodeableType of the provided \p request
+ * \param[out] request The service request received from a client by the server
+ *                     and for which content might be overwritten.
+ *                     All service requests on a session sent by a client are provided.
+ *
+ *                     If modified the necessary ressources to deallocate / allocate
+ *                     are managed by the callback function.
+ *
+ *                     The encodeableType field of \p request shall not be modified otherwise an assertion is triggered.
+ *
+ * \return SOPC_GoodGenericStatus if the request can be processed by the server,
+ *         OpcUa_BadServerTooBusy or OpcUa_BadResourceUnavailable if the server is too busy
+ *         or unable to process the request.
+ *         Any other status SHALL BE VERIFIED TO BE COMPLIANT with OPC UA specification
+ *         and should not be used to avoid unexpected behavior.
+ *         Returning a status code different from SOPC_GoodGenericStatus will lead to generate a ServiceFault response.
+ *
+ * \warning The callback function SHALL NOT DO ANYTHING BLOCKING or long treatment since it will block any other
+ *          service treatment by the server.
+ */
+typedef SOPC_StatusCode SOPC_OverwriteSessionRequest_Fct(const SOPC_CallContext* callCtxPtr,
+                                                         SOPC_EncodeableType* type,
+                                                         void* request);
+
+/**
+ * \brief Defines the overwrite service request callback to be used.
+ *
+ * This shall be defined before starting the server
+ *
+ * \param overwriteReqCb  The overwrite service request callback to be used
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p overwriteReqCb is invalid
+ *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
+ *         (toolkit not initialized, server already started).
+ *
+ * \warning The application using it is fully responsible of consequences (see warnings in callback type definition).
+ * \warning The callback function SHALL NOT DO ANYTHING BLOCKING or long treatment since it will block any other
+ *          service treatment by the server.
+ */
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetOverwriteRequestCb(SOPC_OverwriteSessionRequest_Fct* overwriteReqCb);
+
 #endif

@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 21/08/2025 14:45:19
+ Date                 : 20/11/2025 15:07:43
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -141,7 +141,8 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_browse_name_duplicated,
    constants_statuscodes_bs__e_sc_bad_node_attributes_invalid,
    constants_statuscodes_bs__e_sc_bad_type_definition_invalid,
-   constants_statuscodes_bs__e_sc_uncertain_reference_not_deleted
+   constants_statuscodes_bs__e_sc_uncertain_reference_not_deleted,
+   constants_statuscodes_bs__e_sc_bad_server_too_busy
 } constants_statuscodes_bs__t_StatusCode_i;
 
 /*------------------------

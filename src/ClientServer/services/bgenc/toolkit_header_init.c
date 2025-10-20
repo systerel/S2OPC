@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 20/11/2025 11:22:22
+ Date                 : 24/11/2025 17:29:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -50,6 +50,7 @@
 #include "address_space_user_permissions.h"
 #include "address_space_user_permissions_bs.h"
 #include "app_cb_call_context_bs.h"
+#include "app_overwrite_req_cb_bs.h"
 #include "argument_pointer_bs.h"
 #include "browse_treatment.h"
 #include "browse_treatment_1.h"
@@ -401,6 +402,7 @@ void INITIALISATION(void) {
    msg_history_read_response_bs__INITIALISATION();
    history_read_it__INITIALISATION();
    service_history_read__INITIALISATION();
+   app_overwrite_req_cb_bs__INITIALISATION();
    service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
    toolkit_header__INITIALISATION();
