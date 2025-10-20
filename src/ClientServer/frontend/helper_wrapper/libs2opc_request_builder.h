@@ -176,7 +176,11 @@ OpcUa_WriteRequest* SOPC_WriteRequest_Create(size_t nbWriteValues);
  *                     only one element is being written.
  *
  * \param value        The value to write for given item (node, attribute, index range).
- *                     \p value shall not be NULL
+ *                     \p value shall not be NULL.
+ *                     The value to write includes the variant, the source timestamp
+ *                     and the status code of the ::SOPC_DataValue, the caller shall check if
+ *                     the node access level allows to write those information.
+ *                     If this is not the case ::OpcUa_BadWriteNotSupported will be returned by Server.
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid write request, index, nodeId, attribute or value.
@@ -216,6 +220,10 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
  *
  * \param value        The value to write for given item (node, attribute, index range).
  *                     \p value shall not be NULL
+ *                     The value to write includes the variant, the source timestamp
+ *                     and the status code of the ::SOPC_DataValue, the caller shall check if
+ *                     the node access level allows to write those information.
+ *                     If this is not the case ::OpcUa_BadWriteNotSupported will be returned by Server.
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid write request, index, nodeId, attribute or value.
