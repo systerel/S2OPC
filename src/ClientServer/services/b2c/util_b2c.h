@@ -26,7 +26,6 @@
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 
-#include "address_space_impl.h"
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
 #include "sopc_encodeabletype.h"
