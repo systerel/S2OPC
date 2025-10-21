@@ -985,6 +985,45 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
     return status;
 }
 
+/*
+ * Test the overwrite client request callback:
+ * - Change the written StatusCode to GoodCompletesAsynchronously and value to 9998 for the write of the node
+ * ns=1;s=1012 with value 9999 when user is authenticated with username/password.
+ * - Change the global request treatment result status code to Bad_ServerTooBusy if 666 write operations are
+ * intended when user is authenticated with username/password.
+ */
+static SOPC_StatusCode Test_OverwriteClientRequestCallback(const SOPC_CallContext* callCtxPtr,
+                                                           SOPC_EncodeableType* type,
+                                                           void* request)
+{
+    SOPC_UNUSED_ARG(callCtxPtr);
+    const SOPC_User* user = SOPC_CallContext_GetUser(callCtxPtr);
+    if (type == &OpcUa_WriteRequest_EncodeableType && SOPC_User_IsUsername(user))
+    {
+        OpcUa_WriteRequest* writeRequest = (OpcUa_WriteRequest*) request;
+        if (666 == writeRequest->NoOfNodesToWrite)
+        {
+            return OpcUa_BadServerTooBusy;
+        }
+        for (int32_t i = 0; i < writeRequest->NoOfNodesToWrite; i++)
+        {
+            OpcUa_WriteValue* nodeToWrite = &writeRequest->NodesToWrite[i];
+            if (1 == nodeToWrite->NodeId.Namespace &&
+                SOPC_IdentifierType_Numeric == nodeToWrite->NodeId.IdentifierType &&
+                1012 == nodeToWrite->NodeId.Data.Numeric && nodeToWrite->Value.Value.BuiltInTypeId == SOPC_UInt64_Id &&
+                nodeToWrite->Value.Value.ArrayType == SOPC_VariantArrayType_SingleValue &&
+                nodeToWrite->Value.Value.Value.Uint64 == 9999)
+            {
+                // Simulate an asynchronous termination of the write request
+                writeRequest->NodesToWrite[i].Value.Status = OpcUa_GoodCompletesAsynchronously;
+                // Change value to (value - 1) (allows test with const addspace)
+                writeRequest->NodesToWrite[i].Value.Value.Value.Uint64 = nodeToWrite->Value.Value.Value.Uint64 - 1;
+            }
+        }
+    }
+    return SOPC_GoodGenericStatus;
+}
+
 /*---------------------------------------------------------------------------
  *                             Server main function
  *---------------------------------------------------------------------------*/
@@ -1054,6 +1093,18 @@ int main(int argc, char* argv[])
         }
     }
 
+    /* Define overwrite client request callback */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerConfigHelper_SetOverwriteRequestCb(Test_OverwriteClientRequestCallback);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Failed to configure the overwrite client request callback");
+        }
+    }
+
+    /* Start the server */
     if (SOPC_STATUS_OK == status)
     {
         printf("<Demo_Server: Server started\n");

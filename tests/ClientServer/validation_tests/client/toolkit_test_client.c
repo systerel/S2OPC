@@ -844,6 +844,114 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
     return status;
 }
 
+static SOPC_ReturnStatus test_request_overwrite(SOPC_ClientConnection* connection,
+                                                uint64_t value,
+                                                bool expectOverwrittenStatusAndValue)
+{
+    const SOPC_NodeId overwriteRequestNodeId = SOPC_NODEID_NUMERIC(1, 1012);
+    // Value with generic Good status
+    SOPC_DataValue dv;
+    SOPC_DataValue_Initialize(&dv);
+    dv.Value.BuiltInTypeId = SOPC_UInt64_Id;
+    dv.Value.Value.Uint64 = value;
+    dv.Status = SOPC_GoodGenericStatus;
+    // Build the write request
+    OpcUa_WriteResponse* pWriteResp = NULL;
+    OpcUa_WriteRequest* pWriteReq = SOPC_WriteRequest_Create(1);
+    SOPC_ASSERT(NULL != pWriteReq);
+    SOPC_ReturnStatus status =
+        SOPC_WriteRequest_SetWriteValue(pWriteReq, 0, &overwriteRequestNodeId, SOPC_AttributeId_Value, NULL, &dv);
+    if (SOPC_STATUS_OK == status)
+    {
+        // Send first write request
+        status = SOPC_ClientHelper_ServiceSync(connection, (void*) pWriteReq, (void**) &pWriteResp);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Check first write response
+        if (pWriteResp->NoOfResults != 1 || !SOPC_IsGoodStatus(pWriteResp->Results[0]))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    // Create read request to verify written value
+    OpcUa_ReadResponse* pReadResp = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        OpcUa_ReadRequest* pReadReq = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
+        SOPC_ASSERT(NULL != pReadReq);
+        status = SOPC_ReadRequest_SetReadValue(pReadReq, 0, &overwriteRequestNodeId, SOPC_AttributeId_Value, NULL);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Send read request
+            status = SOPC_ClientHelper_ServiceSync(connection, (void*) pReadReq, (void**) &pReadResp);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            // Check read response
+            if (pReadResp->NoOfResults != 1 || !SOPC_IsGoodStatus(pReadResp->Results[0].Status))
+            {
+                status = SOPC_STATUS_NOK;
+            }
+            else
+            { // Check status is overwritten
+                SOPC_StatusCode actualStatus = pReadResp->Results[0].Status;
+#ifndef WITH_STATIC_SECURITY_DATA
+                SOPC_StatusCode expectedStatus =
+                    expectOverwrittenStatusAndValue ? OpcUa_GoodCompletesAsynchronously : SOPC_GoodGenericStatus;
+#else
+                SOPC_StatusCode expectedStatus =
+                    SOPC_GoodGenericStatus; // Status cannot be overwritten in static security data mode
+#endif
+                if (actualStatus != expectedStatus)
+                {
+                    status = SOPC_STATUS_INVALID_STATE;
+                }
+                if (expectOverwrittenStatusAndValue && pReadResp->Results[0].Value.Value.Uint64 != (value - 1))
+                {
+                    status = SOPC_STATUS_INVALID_STATE;
+                }
+            }
+        }
+    }
+    if (NULL != pReadResp)
+    {
+        SOPC_EncodeableObject_Delete(pReadResp->encodeableType, (void**) &pReadResp);
+    }
+    if (NULL != pWriteResp)
+    {
+        SOPC_EncodeableObject_Delete(pWriteResp->encodeableType, (void**) &pWriteResp);
+    }
+
+    return status;
+}
+
+static SOPC_ReturnStatus test_request_overwrite2(SOPC_ClientConnection* connection)
+{
+    // Build the write request
+    OpcUa_WriteResponse* pWriteResp = NULL;
+    OpcUa_WriteRequest* pWriteReq = SOPC_WriteRequest_Create(666);
+    SOPC_ASSERT(NULL != pWriteReq);
+    // Send first write request
+    SOPC_ReturnStatus status = SOPC_ClientHelper_ServiceSync(connection, (void*) pWriteReq, (void**) &pWriteResp);
+    if (SOPC_STATUS_OK == status)
+    {
+        if (OpcUa_BadServerTooBusy != pWriteResp->ResponseHeader.ServiceResult ||
+            &OpcUa_ServiceFault_EncodeableType != pWriteResp->encodeableType)
+        {
+            status = SOPC_STATUS_NOK; // Expecting a global failure with OpcUa_BadServerTooBusy for 666 write operations
+        }
+    }
+    if (NULL != pWriteResp)
+    {
+        SOPC_EncodeableObject_Delete(pWriteResp->encodeableType, (void**) &pWriteResp);
+    }
+
+    return status;
+}
+
 int main(void)
 {
     // Counter to stop waiting on timeout
@@ -999,9 +1107,52 @@ int main(void)
     test_results_set_WriteRequest(NULL);
     SOPC_EncodeableObject_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &pWriteReqCopy);
 
+    /* Test subscription on 1st connection */
     if (SOPC_STATUS_OK == status)
     {
         status = test_subscription(secureConnections[0]);
+    }
+
+    /* Test request overwrite mechanism (overwrite content) */
+    if (SOPC_STATUS_OK == status)
+    {
+        // Second connection shall overwrite the request (username user)
+        status = test_request_overwrite(secureConnections[1], 9999, true); // Username user
+
+        // First connection shall not overwrite the request (anonymous user)
+        if (SOPC_STATUS_OK == status)
+        {
+            status = test_request_overwrite(secureConnections[0], 9999, false); // Anonymous user
+        }
+
+        // Second connection shall not overwrite the request if value is not 9999
+        if (SOPC_STATUS_OK == status)
+        {
+            status = test_request_overwrite(secureConnections[1], 8888, false); // Username user
+        }
+
+        if (SOPC_STATUS_OK != status)
+        {
+            printf(">>Test_Client_Toolkit: request overwrite test NOK\n");
+        }
+        else
+        {
+            printf(">>Test_Client_Toolkit: request overwrite test OK\n");
+        }
+    }
+
+    /* Test request overwrite mechanism (global request failure) */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = test_request_overwrite2(secureConnections[1]);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf(">>Test_Client_Toolkit: request overwrite (expected) global failure test NOK\n");
+        }
+        else
+        {
+            printf(">>Test_Client_Toolkit: request overwrite (expected) global failure test OK\n");
+        }
     }
 
     /* Close the connections */
