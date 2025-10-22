@@ -830,12 +830,6 @@ SOPC_ReturnStatus SOPC_AddressSpace_MaxNsNumId_Initialize(SOPC_AddressSpace* add
     return status;
 }
 
-static size_t Get_NumberOfNs(const SOPC_AddressSpace* addSpace)
-{
-    SOPC_ASSERT(NULL != addSpace && NULL != addSpace->array_maxNsNumId);
-    return SOPC_Array_Size(addSpace->array_maxNsNumId);
-}
-
 static uint32_t* Get_MaxNumIdForNs(const SOPC_AddressSpace* addSpace, uint16_t ns)
 {
     SOPC_ASSERT(NULL != addSpace && NULL != addSpace->array_maxNsNumId);
@@ -846,13 +840,23 @@ SOPC_NodeId* SOPC_AddressSpace_GetFreshNodeId(SOPC_AddressSpace* addSpace, uint1
 {
     SOPC_ASSERT(addSpace != NULL);
     // Check that ns exist in the array of ns index
-    size_t nbNs = Get_NumberOfNs(addSpace);
+    size_t nbNs = SOPC_Array_Size(addSpace->array_maxNsNumId);
     if (ns > nbNs)
     {
-        return NULL;
+        // Grow array size to NS required index, initialized to 0 max numeric id
+        bool res = SOPC_Array_Append_Values(addSpace->array_maxNsNumId, NULL, ns);
+        if (!res)
+        {
+            return NULL;
+        }
     }
     uint32_t* maxNsNumId = Get_MaxNumIdForNs(addSpace, ns);
     SOPC_ASSERT(NULL != maxNsNumId); // maxNsNumId is not supposed to be NULL here since we checked that ns <= nbNs
+    if (*maxNsNumId == 0)            // Avoid 0 id which might be considered as invalid
+    {
+        // First fresh id start from 1
+        *maxNsNumId = 1;
+    }
     uint32_t finalMaxId = *maxNsNumId + SOPC_FRESH_NODEID_MAX_RETRIES;
     bool nodeIdAlreadyExists = true;
     SOPC_NodeId* newNodeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));

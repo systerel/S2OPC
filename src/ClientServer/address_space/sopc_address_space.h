@@ -216,7 +216,8 @@ SOPC_AddressSpace_Node* SOPC_AddressSpace_Node_Copy(const SOPC_AddressSpace_Node
  * \brief Initialize the array of maximum numeric id for namespaces in \p addSpace
  * \note  Allocate this array in addSpace.
  * \return SOPC_STATUS_OK in case of success,
- *         SOPC_STATUS_INVALID_STATE if NS index of a nodeId in AddSpace is greater than the number of NS (nbNs).
+ *         SOPC_STATUS_INVALID_STATE if NS index of a nodeId in AddSpace is greater than the number of NS (nbNs),
+ *         SOPC_STATUS_NOK in case of failure
  */
 SOPC_ReturnStatus SOPC_AddressSpace_MaxNsNumId_Initialize(SOPC_AddressSpace* addSpace, uint16_t nbNs);
 
@@ -226,6 +227,11 @@ SOPC_ReturnStatus SOPC_AddressSpace_MaxNsNumId_Initialize(SOPC_AddressSpace* add
  *        Increment this Id and check that it is not used.
  *        If not, try again in limit of ::SOPC_FRESH_NODEID_MAX_RETRIES.
  *        Finally, set the new maxNumId for selected \p ns
+ *
+ * \warning \p ns value should be less or equal to the maximum NS index in address space,
+ *          using a value greater than the number of addresspace namespaces
+ *          will make grow the array (of maximum numeric Ids) size to this \p ns value
+ *          without any prior check.
  *
  * \return The fresh nodeId allocated, if successful.
  *         NULL if obtaining a fresh nodeId failed.

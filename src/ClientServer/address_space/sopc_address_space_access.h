@@ -136,11 +136,16 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addS
 
 /**
  * \brief Get a fresh numeric node Id from the namespace \p nsIndex in \p addSpaceAccess,
- *        and copy it to the out parameter \p nodeToAdd
+ *        and copy it to the out parameter \p freshNodeId
  *
  * \param addSpaceAccess   The AddressSpace Access used for write operation
  * \param nsIndex          The Namespace index of the fresh nodeId requested
  * \param[out] freshNodeId A valid pointer to the nodeId which will receive the fresh nodeId.
+ *
+ * \warning \p nsIndex value should be less or equal to the maximum NS index in address space,
+ *          using a value greater than the number of addresspace namespaces
+ *          will make grow the array (of maximum numeric Ids) size to this \p nsIndex value
+ *          without any prior check.
  *
  * \return SOPC_GoodGenericStatus in case of success, otherwise:
  *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL, incoherent parameters)
