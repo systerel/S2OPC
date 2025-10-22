@@ -100,7 +100,7 @@ void SOPC_Array_Delete(SOPC_Array* array);
  *
  * \param array       The array.
  * \param data        The memory location of the first value. If \c NULL, the array
- *                    grows by \p n_elements items, but does not initialize them.
+ *                    grows by \p n_elements items, but does not initialize them (memory set to 0).
  * \param n_elements  The number of values present in memory.
  *
  * \return \c TRUE on success, \c FALSE on memory allocation failure or if \p array is NULL.
