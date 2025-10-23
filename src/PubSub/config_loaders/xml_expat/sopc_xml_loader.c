@@ -217,7 +217,8 @@ struct parse_context_t
 
 static bool parse(XML_Parser parser, FILE* fd)
 {
-    char buf[65365];
+    const size_t BUF_SIZE = 65365;
+    char* buf = SOPC_Malloc(BUF_SIZE);
     if (NULL == fd)
     {
         LOG("Error: no input file provided");
@@ -226,7 +227,7 @@ static bool parse(XML_Parser parser, FILE* fd)
 
     while (!feof(fd))
     {
-        size_t r = fread(buf, sizeof(char), sizeof(buf) / sizeof(char), fd);
+        size_t r = fread(buf, sizeof(char), BUF_SIZE, fd);
 
         if ((0 == r) && (ferror(fd) != 0))
         {
@@ -247,6 +248,7 @@ static bool parse(XML_Parser parser, FILE* fd)
             // else, the error comes from one of the callbacks, that log an error
             // themselves.
 
+            SOPC_Free(buf);
             return false;
         }
     }
@@ -254,9 +256,11 @@ static bool parse(XML_Parser parser, FILE* fd)
     // Tell the parser that we are at the end of the file
     if (XML_Parse(parser, "", 0, 1) != XML_STATUS_OK)
     {
+        SOPC_Free(buf);
         return false;
     }
 
+    SOPC_Free(buf);
     return true;
 }
 

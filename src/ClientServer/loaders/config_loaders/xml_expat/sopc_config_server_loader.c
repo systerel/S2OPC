@@ -92,11 +92,12 @@ struct parse_context_t
 
 static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 {
-    char buf[65365];
+    const size_t BUF_SIZE = 65365;
+    char* buf = SOPC_Malloc(BUF_SIZE);
 
     while (!feof(fd))
     {
-        size_t r = fread(buf, sizeof(char), sizeof(buf) / sizeof(char), fd);
+        size_t r = fread(buf, sizeof(char), BUF_SIZE, fd);
 
         if ((0 == r) && (ferror(fd) != 0))
         {
@@ -117,6 +118,7 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
             // else, the error comes from one of the callbacks, that log an error
             // themselves.
 
+            SOPC_Free(buf);
             return SOPC_STATUS_NOK;
         }
     }
@@ -124,9 +126,11 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
     // Tell the parser that we are at the end of the file
     if (XML_Parse(parser, "", 0, 1) != XML_STATUS_OK)
     {
+        SOPC_Free(buf);
         return SOPC_STATUS_NOK;
     }
 
+    SOPC_Free(buf);
     return SOPC_STATUS_OK;
 }
 
