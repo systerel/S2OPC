@@ -564,6 +564,7 @@ OPERATIONS
         IF l_valid_session = TRUE THEN
             create_session(l_nsession, channel, e_session_created, FALSE);
             l_channel_config_idx <-- get_channel_info (channel);
+            /* Check client certificate is the same than the one used for SC */
             l_valid_server_cert <-- create_session_req_check_client_certificate (create_req_msg, l_channel_config_idx);
             l_nsession_token <-- server_get_fresh_session_token (l_channel_config_idx, l_nsession);
             l_valid_session_token <-- server_is_valid_session_token (l_nsession_token);
