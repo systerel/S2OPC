@@ -57,7 +57,8 @@ void SOPC_UserAuthentication_PKIProviderUpdateCb(uintptr_t updateParam)
     SOPC_ToolkitServer_AsyncReEvalUserCertSessions();
 }
 
-SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuthorization* userWithAuthorization,
+SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(const SOPC_CallContext* callContextPtr,
+                                                               SOPC_UserWithAuthorization* userWithAuthorization,
                                                                SOPC_UserAuthorization_OperationType operationType,
                                                                const SOPC_NodeId* nodeId,
                                                                uint32_t attributeId,
@@ -73,8 +74,8 @@ SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuth
     SOPC_ASSERT(NULL != authorizationManager->pFunctions);
     SOPC_ASSERT(NULL != authorizationManager->pFunctions->pFuncAuthorizeOperation);
 
-    return (authorizationManager->pFunctions->pFuncAuthorizeOperation)(authorizationManager, operationType, nodeId,
-                                                                       attributeId, user, pbOperationAuthorized);
+    return (authorizationManager->pFunctions->pFuncAuthorizeOperation)(
+        callContextPtr, authorizationManager, operationType, nodeId, attributeId, user, pbOperationAuthorized);
 }
 
 void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAuthenticationManager)
@@ -119,13 +120,15 @@ static SOPC_ReturnStatus AuthenticateAllowAll(SOPC_UserAuthentication_Manager* a
 }
 
 /** \brief A helper implementation of the authorize R/W operation callback, which always returns OK. */
-static SOPC_ReturnStatus AuthorizeAllowAll(SOPC_UserAuthorization_Manager* authorizationManager,
+static SOPC_ReturnStatus AuthorizeAllowAll(const SOPC_CallContext* callContextPtr,
+                                           SOPC_UserAuthorization_Manager* authorizationManager,
                                            SOPC_UserAuthorization_OperationType operationType,
                                            const SOPC_NodeId* nodeId,
                                            uint32_t attributeId,
                                            const SOPC_User* pUser,
                                            bool* pbOperationAuthorized)
 {
+    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(authorizationManager);
     SOPC_UNUSED_ARG(operationType);
     SOPC_UNUSED_ARG(nodeId);

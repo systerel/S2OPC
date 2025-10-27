@@ -106,13 +106,15 @@ static const SOPC_UserAuthentication_Functions selectiveAuthenticationFunctions 
     .pFuncFree = (SOPC_UserAuthentication_Free_Func*) &SOPC_Free,
     .pFuncValidateUserIdentity = selectiveAuthenticationValidate};
 
-static SOPC_ReturnStatus selectiveAuthorizationAllow(SOPC_UserAuthorization_Manager* authz,
+static SOPC_ReturnStatus selectiveAuthorizationAllow(const SOPC_CallContext* callContextPtr,
+                                                     SOPC_UserAuthorization_Manager* authz,
                                                      SOPC_UserAuthorization_OperationType operationType,
                                                      const SOPC_NodeId* nodeId,
                                                      uint32_t attributeId,
                                                      const SOPC_User* user,
                                                      bool* authorized)
 {
+    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(authz);
 
     assert(NULL != nodeId && NULL != user && NULL != authorized && 1 <= attributeId && attributeId <= 22);
@@ -341,10 +343,10 @@ START_TEST(test_authorization_allow_all)
     SOPC_UserWithAuthorization* userUsername = NULL;
     create_users_with_authorization(gAuthorizationManager, &userLocal, &userAnonymous, &userUsername);
 
-#define TEST_AUTHZ(user, operation, nid, attribute, expected)                                              \
-    authorized = !expected;                                                                                \
-    ck_assert(SOPC_STATUS_OK ==                                                                            \
-              SOPC_UserAuthorization_IsAuthorizedOperation(user, operation, nid, attribute, &authorized)); \
+#define TEST_AUTHZ(user, operation, nid, attribute, expected)                                                    \
+    authorized = !expected;                                                                                      \
+    ck_assert(SOPC_STATUS_OK ==                                                                                  \
+              SOPC_UserAuthorization_IsAuthorizedOperation(NULL, user, operation, nid, attribute, &authorized)); \
     ck_assert(authorized == expected);
 
     TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_BROWSENAME, true)
@@ -414,10 +416,10 @@ START_TEST(test_authorization_selective)
     SOPC_UserWithAuthorization* userUsername = NULL;
     create_users_with_authorization(gAuthorizationManagerSelective, &userLocal, &userAnonymous, &userUsername);
 
-#define TEST_AUTHZ(user, operation, nid, attribute, expected)                                              \
-    authorized = !expected;                                                                                \
-    ck_assert(SOPC_STATUS_OK ==                                                                            \
-              SOPC_UserAuthorization_IsAuthorizedOperation(user, operation, nid, attribute, &authorized)); \
+#define TEST_AUTHZ(user, operation, nid, attribute, expected)                                                    \
+    authorized = !expected;                                                                                      \
+    ck_assert(SOPC_STATUS_OK ==                                                                                  \
+              SOPC_UserAuthorization_IsAuthorizedOperation(NULL, user, operation, nid, attribute, &authorized)); \
     ck_assert(authorized == expected);
 
     TEST_AUTHZ(userLocal, SOPC_USER_AUTHORIZATION_OPERATION_READ, &authorizedNodeId, ATTRIBUTEID_BROWSENAME, false)

@@ -18,6 +18,8 @@
  */
 
 #include "user_authorization_bs.h"
+
+#include "app_cb_call_context_internal.h"
 #include "constants_bs.h"
 #include "util_b2c.h"
 
@@ -48,7 +50,7 @@ void user_authorization_bs__get_user_authorization_bs(
     util_operation_type__B_to_C(user_authorization_bs__p_operation_type, &operationType);
 
     SOPC_ReturnStatus status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        user_authorization_bs__p_user, operationType, user_authorization_bs__p_node_id,
+        SOPC_CallContext_GetCurrent(), user_authorization_bs__p_user, operationType, user_authorization_bs__p_node_id,
         user_authorization_bs__p_attribute_id, user_authorization_bs__p_authorized);
 
     /* Log failures */

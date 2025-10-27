@@ -1086,13 +1086,15 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 }
 
 /** \brief Authorize R/W/X operation callback */
-static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* authorizationManager,
+static SOPC_ReturnStatus authorization_fct(const SOPC_CallContext* callContextPtr,
+                                           SOPC_UserAuthorization_Manager* authorizationManager,
                                            SOPC_UserAuthorization_OperationType operationType,
                                            const SOPC_NodeId* nodeId,
                                            uint32_t attributeId,
                                            const SOPC_User* pUser,
                                            bool* pbOperationAuthorized)
 {
+    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(nodeId);
     SOPC_UNUSED_ARG(attributeId);
     SOPC_ASSERT(NULL != authorizationManager && NULL != authorizationManager->pData);

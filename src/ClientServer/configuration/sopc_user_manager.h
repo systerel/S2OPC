@@ -37,6 +37,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_pki_decl.h"
+#include "sopc_service_call_context.h"
 #include "sopc_user.h"
 
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
@@ -84,6 +85,7 @@ typedef SOPC_ReturnStatus SOPC_UserAuthentication_ValidateUserIdentity_Func(
 
 typedef void SOPC_UserAuthorization_Free_Func(SOPC_UserAuthorization_Manager* authorizationManager);
 typedef SOPC_ReturnStatus SOPC_UserAuthorization_AuthorizeOperation_Func(
+    const SOPC_CallContext* callContextPtr,
     SOPC_UserAuthorization_Manager* authorizationManager,
     SOPC_UserAuthorization_OperationType operationType,
     const SOPC_NodeId* nodeId,
@@ -129,14 +131,18 @@ typedef struct SOPC_UserAuthorization_Functions
     SOPC_UserAuthorization_Free_Func* pFuncFree;
 
     /**
-     * \brief Called to authorize a read or a write operation in the address space.
+     * \brief Called to authorize an operation (e.g.: read, write)in the address space for a given nodeId
+     *        and attributeId.
      *
      * \warning This callback should not block the thread that calls it, and shall return immediately.
      *          It also needs to be thread safe.
      *
+     * \param callContextPtr         The call context pointer for the authorization, in certain cases incomplete:
+     *                               read / events operation will not provide connection/endpoint information
+     *                               when authorization is requested to generate a subscription notification.
      * \param authorizationManager   The SOPC_UserAuthorization_Manager instance.
      * \param operationType          Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
-                                     or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
+                                     or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation, etc.
      * \param nodeId                 The operation reads/write this NodeId.
      * \param attributeId            The operation reads/write this attribute.
      * \param pUser                  The connected SOPC_User which attempts the operation.
@@ -194,9 +200,12 @@ void SOPC_UserAuthentication_PKIProviderUpdateCb(uintptr_t updateParam);
 /**
  * \brief Authorize an operation with the chosen authorization manager.
  *
+ * \param callContextPtr         The call context pointer for the authorization, in certain cases incomplete:
+ *                               read / events operation will not provide connection/endpoint information
+ *                               when authorization is requested to generate a subscription notification.
  * \param userWithAuthorization  The user and authorization manager to use.
  * \param operationType          Set to SOPC_USER_AUTHORIZATION_OPERATION_READ for a read operation,
-                                 or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation.
+ *                               or SOPC_USER_AUTHORIZATION_OPERATION_WRITE for a write operation, etc.
  * \param nodeId                 The operation reads/write this NodeId.
  * \param attributeId            The operation reads/write this attribute.
  * \param pbOperationAuthorized  A valid pointer to the uninitialized result of the operation.
@@ -204,7 +213,8 @@ void SOPC_UserAuthentication_PKIProviderUpdateCb(uintptr_t updateParam);
  *
  * \return SOPC_STATUS_OK when \p pbUserAuthorized was set.
  */
-SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuthorization* userWithAuthorization,
+SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(const SOPC_CallContext* callContextPtr,
+                                                               SOPC_UserWithAuthorization* userWithAuthorization,
                                                                SOPC_UserAuthorization_OperationType operationType,
                                                                const SOPC_NodeId* nodeId,
                                                                uint32_t attributeId,

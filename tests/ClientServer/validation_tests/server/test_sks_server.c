@@ -579,7 +579,8 @@ static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authenticat
     }
 }
 
-static SOPC_ReturnStatus authorization_test_sks(SOPC_UserAuthorization_Manager* authorizationManager,
+static SOPC_ReturnStatus authorization_test_sks(const SOPC_CallContext* callContextPtr,
+                                                SOPC_UserAuthorization_Manager* authorizationManager,
                                                 SOPC_UserAuthorization_OperationType operationType,
                                                 const SOPC_NodeId* nodeId,
                                                 uint32_t attributeId,
@@ -587,6 +588,7 @@ static SOPC_ReturnStatus authorization_test_sks(SOPC_UserAuthorization_Manager* 
                                                 bool* pbOperationAuthorized)
 {
     // We use global user rights only and do not check user rights for a specific node
+    (void) (callContextPtr);
     (void) (nodeId);
     (void) (attributeId);
     SOPC_ASSERT(NULL != authorizationManager);

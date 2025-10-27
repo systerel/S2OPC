@@ -783,6 +783,8 @@ static const SOPC_ExtensionObject anonymousIdentityToken = {
 static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authenticationManager,
                                       SOPC_UserAuthorization_Manager* authorizationManager)
 {
+    SOPC_CallContext* callContext = NULL;
+
     SOPC_ExtensionObject* invalidUserNameToken = build_user_name_token("invalid user name", "12345");
     SOPC_ExtensionObject* invalidPasswordToken = build_user_name_token("user1", "01234");
     SOPC_ExtensionObject* noAccessToken = build_user_name_token("noaccess", "secret");
@@ -872,237 +874,241 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     uint32_t attr = 13;
     bool authorized = false;
     // invalidNoAccesses
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_READ,
-                                                          &node, attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
     status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+        callContext, invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, invalidNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
     // anonNoAccesses
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, anonNoAccesses, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
     // noAccess
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(noAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr,
-                                                          &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(callContext, noAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ,
+                                                          &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(noAccess, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, noAccess, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(noAccess, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, noAccess, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(noAccess, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, noAccess, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
     // writeExecAdd
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
 
     // readExecAdd
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
 
     // readWriteAdd
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
 
     // readWriteExec
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node,
-                                                          attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
     // x509_untrustedIssued_defaultAccess --> dafault issuers rights is used (read only)
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        x509_untrustedIssued_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
+    status =
+        SOPC_UserAuthorization_IsAuthorizedOperation(callContext, x509_untrustedIssued_defaultAccess,
+                                                     SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        x509_untrustedIssued_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
+    status =
+        SOPC_UserAuthorization_IsAuthorizedOperation(callContext, x509_untrustedIssued_defaultAccess,
+                                                     SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        x509_untrustedIssued_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(callContext, x509_untrustedIssued_defaultAccess,
+                                                          SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr,
+                                                          &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        x509_untrustedIssued_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(callContext, x509_untrustedIssued_defaultAccess,
+                                                          SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr,
+                                                          &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
     // x509_defaultAccess --> Read, execute and addnode rights are set to the default value False because rights are
     // partialy defined
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
     status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+        callContext, x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_defaultAccess, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
     // x509_writeExecAdd
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
     status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+        callContext, x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_writeExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
 
     // x509_readExecAdd
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
     status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+        callContext, x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_readExecAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
 
     // x509_readWriteAdd
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ,
-                                                          &node, attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
     status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+        callContext, x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_readWriteAdd, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
 
     // x509_readWriteExec
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_READ,
-                                                          &node, attr, &authorized);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_READ, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
     status = SOPC_UserAuthorization_IsAuthorizedOperation(
-        x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+        callContext, x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_WRITE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(authorized);
-    status = SOPC_UserAuthorization_IsAuthorizedOperation(x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE,
-                                                          &node, attr, &authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_EXECUTABLE, &node, attr, &authorized);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(authorized);
+    status = SOPC_UserAuthorization_IsAuthorizedOperation(
+        callContext, x509_readWriteExec, SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE, &node, attr, &authorized);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!authorized);
 
