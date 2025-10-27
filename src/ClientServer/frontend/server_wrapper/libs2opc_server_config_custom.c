@@ -37,6 +37,7 @@
 #include "opcua_identifiers.h"
 
 static const SOPC_NodeId SOPC_NSARRAY_NID = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_NamespaceArray);
+static const SOPC_NodeId SOPC_SERVERARRAY_NID = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerArray);
 SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 static const SOPC_String SOPC_OPCUA_URI = SOPC_STRING("http://opcfoundation.org/UA/");
 SOPC_GCC_DIAGNOSTIC_RESTORE
@@ -514,6 +515,101 @@ static SOPC_ReturnStatus check_opcua_values_nsArray(SOPC_Variant* nsArray_value)
     return status;
 }
 
+// Check that the URI of the ServerArray with index 0 is identical to ProductURI (= ApplicationURI)
+static SOPC_ReturnStatus check_opcua_values_serverArray(SOPC_Variant* serverArray_value)
+{
+    SOPC_ASSERT(NULL != serverArray_value);
+
+    SOPC_S2OPC_Config* config = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ReturnStatus status = (NULL != config) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Check: needs at least 1 value.
+        status = (1 <= serverArray_value->Value.Array.Length) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Check: value must be String.
+            status = (SOPC_String_Id == serverArray_value->BuiltInTypeId) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+            if (SOPC_STATUS_OK == status)
+            {
+                int32_t comparison = -1;
+                const SOPC_String* value0 = &serverArray_value->Value.Array.Content.StringArr[0];
+                status =
+                    SOPC_String_Compare(&config->serverConfig.serverDescription.ProductUri, value0, false, &comparison);
+                if (SOPC_STATUS_OK != status || 0 != comparison)
+                {
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "First value of node 'ServerArray': %s is not equal to ProductURI (which is "
+                        "also ApplicationURI): %s. Server will stop.",
+                        SOPC_String_GetRawCString(value0),
+                        SOPC_String_GetRawCString(&config->serverConfig.serverDescription.ProductUri));
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Node 'ServerArray' has invalid value DataType. Must be String. "
+                                       "Server will stop.");
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Node 'ServerArray' has invalid number of values. Needs at least 1."
+                                   "Server will stop.");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Unable to retrieve server config. Make sure to have initialized the toolkit."
+                               "Server will stop.");
+    }
+
+    return status;
+}
+
+static SOPC_ReturnStatus GetArrayNodeValue(SOPC_AddressSpace* addressSpaceConfig,
+                                           const SOPC_NodeId* nodeId,
+                                           const char* nodeName,
+                                           SOPC_Variant** value)
+{
+    if (NULL == addressSpaceConfig)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    bool foundNode = false;
+    SOPC_AddressSpace_Node* node = SOPC_AddressSpace_Get_Node(addressSpaceConfig, nodeId, &foundNode);
+
+    if (foundNode)
+    {
+        *value = SOPC_AddressSpace_Get_Value(addressSpaceConfig, node);
+        if (NULL == *value || SOPC_VariantArrayType_Array != (*value)->ArrayType)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Value of mandatory node '%s' is not well defined. "
+                                   "Server will stop.",
+                                   nodeName);
+            return SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Mandatory node '%s' missing in the address space. "
+                               "Server will stop.",
+                               nodeName);
+        return SOPC_STATUS_NOK;
+    }
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
@@ -530,48 +626,42 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* add
     SOPC_ASSERT(NULL != pEventConfig);
     SOPC_EventManager_CreateEventTypes(addressSpaceConfig, &pEventConfig->serverConfig.eventTypes);
 #endif
+
     // Find number of namespaces: it is the size of the array value NamespaceArray
     uint16_t nbOfNS = 0;
-    bool foundNode = false;
-    SOPC_AddressSpace_Node* namespaceArray =
-        SOPC_AddressSpace_Get_Node(addressSpaceConfig, &SOPC_NSARRAY_NID, &foundNode);
-    if (foundNode)
+    SOPC_Variant* nsArrayvalue = NULL;
+
+    status = GetArrayNodeValue(addressSpaceConfig, &SOPC_NSARRAY_NID, "NamespaceArray", &nsArrayvalue);
+    if (SOPC_STATUS_OK == status)
     {
-        // Initialize Max numeric id for each namespace
-        SOPC_Variant* value = SOPC_AddressSpace_Get_Value(addressSpaceConfig, namespaceArray);
-        if (NULL != value && SOPC_VariantArrayType_Array == value->ArrayType)
+        nbOfNS = (uint16_t) nsArrayvalue->Value.Array.Length;
+        status = SOPC_AddressSpace_MaxNsNumId_Initialize(addressSpaceConfig, nbOfNS);
+        if (SOPC_STATUS_OK != status)
         {
-            nbOfNS = (uint16_t) value->Value.Array.Length;
-            status = SOPC_AddressSpace_MaxNsNumId_Initialize(addressSpaceConfig, nbOfNS);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "Inconsistency in the number of NS between: value of node NamespaceArray (nb NS = %d) and "
-                    "address space (nodes NS index).",
-                    nbOfNS);
-            }
-            else
-            {
-                // Number of NS in NamespaceArray = nbr of NS in address space.
-                // Now check that the two first values are the good ones (OPC UA).
-                status = check_opcua_values_nsArray(value);
-            }
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Inconsistency in the number of NS between: value of node NamespaceArray (nb NS = %d) and "
+                "address space (nodes NS index).",
+                nbOfNS);
         }
         else
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Value of mandatory node 'NamespaceArray' is not well defined. "
-                                   "Server will stop.");
-            status = SOPC_STATUS_NOK;
+            // Number of NS in NamespaceArray = nbr of NS in address space.
+            // Now check that the two first values are the good ones (OPC UA).
+            status = check_opcua_values_nsArray(nsArrayvalue);
         }
     }
-    else
+
+    // Process ServerArray
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Mandatory node 'NamespaceArray' missing in the address space. "
-                               "Server will stop.");
-        status = SOPC_STATUS_NOK;
+        SOPC_Variant* serverArrayvalue = NULL;
+
+        status = GetArrayNodeValue(addressSpaceConfig, &SOPC_SERVERARRAY_NID, "ServerArray", &serverArrayvalue);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = check_opcua_values_serverArray(serverArrayvalue);
+        }
     }
 
     if (SOPC_STATUS_OK == status)
