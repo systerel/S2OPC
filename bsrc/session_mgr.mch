@@ -484,6 +484,24 @@ OPERATIONS
     END
     ;
 
+    p_cliAppDesc <-- get_server_session_client_app_desc(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_cliAppDesc :: t_ApplicationDescription_i
+    END
+    ;
+
+    p_cliCertTb <-- get_server_session_client_cert_tb(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_cliCertTb :: t_CertThumbprint_i
+    END
+    ;
+
     p_has_channel_to_close, p_channel_to_close <-- find_channel_to_close =
     BEGIN
         p_has_channel_to_close,

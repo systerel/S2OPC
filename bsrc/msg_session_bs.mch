@@ -27,6 +27,28 @@ SEES
 
 OPERATIONS
 
+    p_cliAppDesc <-- get_create_session_req_client_desc_copy (p_req_msg) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_req
+    THEN
+        p_cliAppDesc :(p_cliAppDesc : t_ApplicationDescription_i & p_cliAppDesc : t_ApplicationDescription)
+    END
+    ;
+
+    p_cliCertTb <-- get_create_session_req_client_certificate_tb (p_req_msg) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_req
+    THEN
+        p_cliCertTb :(p_cliCertTb : t_CertThumbprint_i & p_cliCertTb : t_CertThumbprint)
+    END
+    ;
+
     write_create_session_req_msg_sessionTimeout (create_req_msg) =
     PRE
         create_req_msg : t_msg_i &

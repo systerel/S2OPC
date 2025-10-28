@@ -47,7 +47,9 @@ DEFINITIONS
     a_user_server_cert,
     a_NonceServer,
     a_NonceClient,
-    a_server_client_locales;
+    a_server_client_locales,
+    a_server_client_app_desc,
+    a_server_client_cert_tb;
 
     d_typing ==
     s_session                   <: t_session                             &
@@ -67,7 +69,9 @@ DEFINITIONS
     a_user_server_cert           : t_session +-> t_byte_buffer           &
     a_NonceServer                : t_session +-> t_Nonce                 &
     a_NonceClient                : t_session +-> t_Nonce                 &
-    a_server_client_locales      : t_session --> t_LocaleIds
+    a_server_client_locales      : t_session --> t_LocaleIds             &
+    a_server_client_app_desc     : t_session +-> t_ApplicationDescription &
+    a_server_client_cert_tb      : t_session +-> t_CertThumbprint
 
 ABSTRACT_VARIABLES
     d_variables
@@ -93,7 +97,9 @@ INITIALISATION
     a_user_server_cert           := {} ||
     a_NonceServer                := {} ||
     a_NonceClient                := {} ||
-    a_server_client_locales := t_session * {c_LocaleIds_empty}
+    a_server_client_locales      := t_session * {c_LocaleIds_empty} ||
+    a_server_client_app_desc     := {} ||
+    a_server_client_cert_tb      := {}
 
 OPERATIONS
 
@@ -305,7 +311,9 @@ OPERATIONS
         a_client_token               := {session} <<| a_client_token               ||
         a_NonceServer                := {session} <<| a_NonceServer                ||
         a_NonceClient                := {session} <<| a_NonceClient                ||
-        a_server_client_locales(session) := c_LocaleIds_empty
+        a_server_client_locales(session) := c_LocaleIds_empty                      ||
+        a_server_client_app_desc     := {session} <<| a_server_client_app_desc     ||
+        a_server_client_cert_tb      := {session} <<| a_server_client_cert_tb
     END
     ;
 
@@ -977,12 +985,62 @@ OPERATIONS
     END
     ;
 
+    set_server_client_create_session_info (p_session, p_cliAppDesc, p_cliCertTb) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session &
+        p_cliAppDesc : t_ApplicationDescription_i &
+        p_cliCertTb  : t_CertThumbprint_i
+    THEN
+        a_server_client_app_desc, a_server_client_cert_tb
+        :(a_server_client_app_desc     : t_session +-> t_ApplicationDescription &
+          a_server_client_cert_tb      : t_session +-> t_CertThumbprint &
+          (p_cliAppDesc : t_ApplicationDescription =>
+              a_server_client_app_desc = a_server_client_app_desc$0 \/ {p_session |-> p_cliAppDesc}) &
+          (p_cliAppDesc /: t_ApplicationDescription =>
+              a_server_client_app_desc = a_server_client_app_desc$0) &
+          (p_cliCertTb : t_CertThumbprint =>
+              a_server_client_cert_tb = a_server_client_cert_tb$0 \/ {p_session |-> p_cliCertTb}) &
+          (p_cliCertTb /: t_CertThumbprint =>
+              a_server_client_cert_tb = a_server_client_cert_tb$0)
+        )
+    END
+    ;
+
     p_localeIds <-- get_server_session_preferred_locales(p_session) =
     PRE
         p_session    : t_session_i &
         p_session    : t_session
     THEN
         p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds = a_server_client_locales(p_session))
+    END
+    ;
+
+    p_cliAppDesc <-- get_server_session_client_app_desc(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_cliAppDesc :(p_cliAppDesc : t_ApplicationDescription_i &
+                       (p_session : dom(a_server_client_app_desc) =>
+                           p_cliAppDesc = a_server_client_app_desc(p_session)) &
+                       (p_session /: dom(a_server_client_app_desc) =>
+                           p_cliAppDesc = c_ApplicationDescription_indet)
+                      )
+    END
+    ;
+
+    p_cliCertTb <-- get_server_session_client_cert_tb(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_cliCertTb :(p_cliCertTb : t_CertThumbprint_i &
+                      (p_session : dom(a_server_client_cert_tb) =>
+                         p_cliCertTb = a_server_client_cert_tb(p_session)) &
+                      (p_session /: dom(a_server_client_cert_tb) =>
+                         p_cliCertTb = c_CertThumbprint_indet)
+                     )
     END
     ;
 

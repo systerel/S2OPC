@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.c
 
- Date                 : 09/12/2024 17:00:57
+ Date                 : 28/10/2025 14:35:45
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -40,6 +40,8 @@ t_entier4 session_core_2__a_channel_nb_sessions_i[constants__t_channel_i_max+1];
 constants__t_channel_config_idx_i session_core_2__a_client_orphaned_i[constants__t_session_i_max+1];
 t_bool session_core_2__a_client_session_i[constants__t_session_i_max+1];
 constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants__t_session_i_max+1];
+constants__t_ApplicationDescription_i session_core_2__a_server_client_app_desc_i[constants__t_session_i_max+1];
+constants__t_CertThumbprint_i session_core_2__a_server_client_cert_tb_i[constants__t_session_i_max+1];
 constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
 constants__t_timeref_i session_core_2__a_session_init_time_i[constants__t_session_i_max+1];
@@ -110,6 +112,18 @@ void session_core_2__INITIALISATION(void) {
       t_entier4 i;
       for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
          session_core_2__a_server_client_locales_i[i] = constants__c_LocaleIds_empty;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         session_core_2__a_server_client_app_desc_i[i] = constants__c_ApplicationDescription_indet;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         session_core_2__a_server_client_cert_tb_i[i] = constants__c_CertThumbprint_indet;
       }
    }
 }
@@ -283,6 +297,30 @@ void session_core_2__get_server_session_preferred_locales(
    *session_core_2__p_localeIds = session_core_2__a_server_client_locales_i[session_core_2__p_session];
 }
 
+void session_core_2__set_server_session_client_app_desc(
+   const constants__t_session_i session_core_2__p_session,
+   const constants__t_ApplicationDescription_i session_core_2__p_cliAppDesc) {
+   session_core_2__a_server_client_app_desc_i[session_core_2__p_session] = session_core_2__p_cliAppDesc;
+}
+
+void session_core_2__get_server_session_client_app_desc(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_ApplicationDescription_i * const session_core_2__p_cliAppDesc) {
+   *session_core_2__p_cliAppDesc = session_core_2__a_server_client_app_desc_i[session_core_2__p_session];
+}
+
+void session_core_2__set_server_session_client_cert_tb(
+   const constants__t_session_i session_core_2__p_session,
+   const constants__t_CertThumbprint_i session_core_2__p_cliCertTb) {
+   session_core_2__a_server_client_cert_tb_i[session_core_2__p_session] = session_core_2__p_cliCertTb;
+}
+
+void session_core_2__get_server_session_client_cert_tb(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_CertThumbprint_i * const session_core_2__p_cliCertTb) {
+   *session_core_2__p_cliCertTb = session_core_2__a_server_client_cert_tb_i[session_core_2__p_session];
+}
+
 void session_core_2__reset_server_session_roles(
    const constants__t_session_i session_core_2__p_session,
    constants__t_sessionRoles_i * const session_core_2__p_roles) {
@@ -310,6 +348,16 @@ void session_core_2__reset_server_session_preferred_locales(
       }
       session_core_2__a_server_client_locales_i[session_core_2__p_session] = constants__c_LocaleIds_empty;
    }
+}
+
+void session_core_2__reset_server_client_create_session_info(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_ApplicationDescription_i * const session_core_2__p_cliAppDesc,
+   constants__t_CertThumbprint_i * const session_core_2__p_certTb) {
+   *session_core_2__p_cliAppDesc = session_core_2__a_server_client_app_desc_i[session_core_2__p_session];
+   session_core_2__a_server_client_app_desc_i[session_core_2__p_session] = constants__c_ApplicationDescription_indet;
+   *session_core_2__p_certTb = session_core_2__a_server_client_cert_tb_i[session_core_2__p_session];
+   session_core_2__a_server_client_cert_tb_i[session_core_2__p_session] = constants__c_CertThumbprint_indet;
 }
 
 void session_core_2__set_server_session_user_auth_attempts(

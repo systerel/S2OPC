@@ -41,7 +41,9 @@ CONCRETE_VARIABLES
     a_client_to_create_i,
     a_client_orphaned_i,
     a_server_user_auth_attempts_i,
-    a_server_client_locales_i
+    a_server_client_locales_i,
+    a_server_client_app_desc_i,
+    a_server_client_cert_tb_i
 
 INVARIANT
     a_session_roles_i      : t_session_i --> t_sessionRoles_i                        &
@@ -55,14 +57,18 @@ INVARIANT
     a_client_orphaned_i  : t_session_i --> t_channel_config_idx_i                    &
     a_server_user_auth_attempts_i : t_session_i --> NAT                              &
     a_server_client_locales_i : t_session_i --> t_LocaleIds_i                        &
+    a_server_client_app_desc_i : t_session_i --> t_ApplicationDescription_i          &
+    a_server_client_cert_tb_i  : t_session_i --> t_CertThumbprint_i                  &
     a_state             <: a_state_i                                                 &
     a_state              = a_state_i |>> {e_session_closed}                          &
     a_session_init_time  = t_session <| a_session_init_time_i |> t_timeref           &
     a_channel            = t_session <| a_channel_i |> t_channel                     &
     a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
     a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx  &
-    a_server_user_auth_attempts = t_session <| a_server_user_auth_attempts_i &
-    a_server_client_locales = t_session <| a_server_client_locales_i
+    a_server_user_auth_attempts = t_session <| a_server_user_auth_attempts_i         &
+    a_server_client_locales = t_session <| a_server_client_locales_i                 &
+    a_server_client_app_desc = t_session <| a_server_client_app_desc_i |> t_ApplicationDescription &
+    a_server_client_cert_tb = t_session <| a_server_client_cert_tb_i |> t_CertThumbprint
 
 INITIALISATION
     a_session_roles_i := t_session_i * {c_sessionRoles_indet};
@@ -75,7 +81,9 @@ INITIALISATION
     a_client_to_create_i := t_session_i * {c_channel_config_idx_indet};
     a_client_orphaned_i := t_session_i * {c_channel_config_idx_indet};
     a_server_user_auth_attempts_i := t_session_i * {0};
-    a_server_client_locales_i := t_session_i * {c_LocaleIds_empty}
+    a_server_client_locales_i := t_session_i * {c_LocaleIds_empty};
+    a_server_client_app_desc_i := t_session_i * {c_ApplicationDescription_indet};
+    a_server_client_cert_tb_i := t_session_i * {c_CertThumbprint_indet}
 
 OPERATIONS
 
@@ -235,6 +243,30 @@ OPERATIONS
     END
     ;
 
+    set_server_session_client_app_desc(p_session, p_cliAppDesc) =
+    BEGIN
+        a_server_client_app_desc_i(p_session) := p_cliAppDesc
+    END
+    ;
+
+    p_cliAppDesc <-- get_server_session_client_app_desc(p_session) =
+    BEGIN
+        p_cliAppDesc := a_server_client_app_desc_i(p_session)
+    END
+    ;
+
+    set_server_session_client_cert_tb(p_session, p_cliCertTb) =
+    BEGIN
+        a_server_client_cert_tb_i(p_session) := p_cliCertTb
+    END
+    ;
+
+    p_cliCertTb <-- get_server_session_client_cert_tb(p_session) =
+    BEGIN
+        p_cliCertTb := a_server_client_cert_tb_i(p_session)
+    END
+    ;
+
     p_roles <-- reset_server_session_roles(p_session) =
     VAR
         l_old_roles
@@ -258,6 +290,15 @@ OPERATIONS
         END
         ;
         a_server_client_locales_i(p_session) := c_LocaleIds_empty
+    END
+    ;
+
+    p_cliAppDesc, p_certTb <-- reset_server_client_create_session_info(p_session) =
+    BEGIN
+        p_cliAppDesc := a_server_client_app_desc_i(p_session);
+        a_server_client_app_desc_i(p_session) := c_ApplicationDescription_indet;
+        p_certTb := a_server_client_cert_tb_i(p_session);
+        a_server_client_cert_tb_i(p_session) := c_CertThumbprint_indet
     END
     ;
 

@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 06/10/2025 10:18:03
+ Date                 : 26/11/2025 10:52:16
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -292,6 +292,8 @@ void session_core__server_create_session_req_and_resp_sm(
       constants__t_Nonce_i session_core__l_nonce;
       constants__t_SecurityPolicy session_core__l_secpol;
       t_bool session_core__l_set_cert;
+      constants__t_ApplicationDescription_i session_core__l_cli_app_desc;
+      constants__t_CertThumbprint_i session_core__l_cli_cert_tb;
       t_bool session_core__l_bret;
       
       session_core__l_set_cert = false;
@@ -378,6 +380,15 @@ void session_core__server_create_session_req_and_resp_sm(
                         msg_session_bs__write_create_session_resp_nonce(session_core__create_resp_msg,
                            session_core__l_nonce);
                      }
+                  }
+                  if (session_core__l_bret == true) {
+                     msg_session_bs__get_create_session_req_client_desc_copy(session_core__create_req_msg,
+                        &session_core__l_cli_app_desc);
+                     msg_session_bs__get_create_session_req_client_certificate_tb(session_core__create_req_msg,
+                        &session_core__l_cli_cert_tb);
+                     session_core_1__set_server_client_create_session_info(session_core__l_nsession,
+                        session_core__l_cli_app_desc,
+                        session_core__l_cli_cert_tb);
                   }
                   if (session_core__l_bret == false) {
                      *session_core__service_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;

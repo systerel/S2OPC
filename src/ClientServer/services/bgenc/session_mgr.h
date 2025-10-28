@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 06/10/2025 10:18:04
+ Date                 : 26/11/2025 10:52:17
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -67,6 +67,8 @@ extern void session_mgr__INITIALISATION(void);
 #define session_mgr__deallocate_x509_token session_core__deallocate_x509_token
 #define session_mgr__find_channel_to_close session_core__find_channel_to_close
 #define session_mgr__get_local_user session_core__get_local_user
+#define session_mgr__get_server_session_client_app_desc session_core__get_server_session_client_app_desc
+#define session_mgr__get_server_session_client_cert_tb session_core__get_server_session_client_cert_tb
 #define session_mgr__get_server_session_preferred_locales session_core__get_server_session_preferred_locales
 #define session_mgr__get_session_roles session_core__get_session_roles
 #define session_mgr__get_session_user_server session_core__get_session_user_server

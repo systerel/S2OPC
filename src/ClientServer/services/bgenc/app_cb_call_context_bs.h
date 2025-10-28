@@ -21,7 +21,7 @@
 
  File Name            : app_cb_call_context_bs.h
 
- Date                 : 27/02/2025 16:13:17
+ Date                 : 28/10/2025 14:54:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -54,6 +54,8 @@ extern void app_cb_call_context_bs__set_app_call_context_channel_config(
    const constants__t_endpoint_config_idx_i app_cb_call_context_bs__p_endpoint_config);
 extern void app_cb_call_context_bs__set_app_call_context_session(
    const constants__t_session_i app_cb_call_context_bs__p_session,
+   const constants__t_ApplicationDescription_i app_cb_call_context_bs__p_cliAppDesc,
+   const constants__t_CertThumbprint_i app_cb_call_context_bs__p_cliCertTb,
    const constants__t_user_i app_cb_call_context_bs__p_user);
 
 #endif

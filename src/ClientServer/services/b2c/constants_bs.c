@@ -285,6 +285,20 @@ void constants_bs__is_Timestamps_Null(const constants_bs__t_Timestamp constants_
                            constants_bs__c_Timestamp_null.picoSeconds == constants_bs__p_ts.picoSeconds);
 }
 
+void constants_bs__free_ApplicationDescription(const constants_bs__t_ApplicationDescription_i constants_bs__p_in)
+{
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    OpcUa_ApplicationDescription_Clear(constants_bs__p_in);
+    SOPC_Free(constants_bs__p_in);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+}
+void constants_bs__free_CertThumbprint(const constants_bs__t_CertThumbprint_i constants_bs__p_in)
+{
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_Free(constants_bs__p_in);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+}
+
 void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in)
 {
     if (NULL != constants_bs__p_in)

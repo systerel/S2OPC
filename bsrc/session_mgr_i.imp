@@ -45,6 +45,8 @@ PROMOTES
     get_session_roles,
     get_local_user,
     get_server_session_preferred_locales,
+    get_server_session_client_app_desc,
+    get_server_session_client_cert_tb,
     find_channel_to_close,
     getall_valid_session_channel,
     allocate_x509_token_from_user,
@@ -448,7 +450,9 @@ OPERATIONS
         l_nb_sessions_on_SC,
         l_timer_creation_ok,
         l_user,
-        l_user_token_signature
+        l_user_token_signature,
+        l_client_app_desc,
+        l_client_cert_tb
     IN
         security_failed := FALSE; /* Only evaluated in case of user authentication attempt */
         session := c_session_indet;
@@ -554,7 +558,9 @@ OPERATIONS
                         THEN
                             /* Set the user context for Audit event generation (only if activated session) */
                             l_user <-- get_session_user_server (session);
-                            set_app_call_context_session (session, l_user)
+                            l_client_app_desc <-- get_server_session_client_app_desc (session);
+                            l_client_cert_tb <-- get_server_session_client_cert_tb (session);
+                            set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_user)
                         END
                         ;
                         l_session_channel <-- get_session_channel (session);
@@ -653,7 +659,9 @@ OPERATIONS
         l_valid_session,
         l_session_state,
         l_session_channel,
-        l_user
+        l_user,
+        l_client_app_desc,
+        l_client_cert_tb
     IN
         l_session <-- server_get_session_from_token (session_token);
         l_valid_session <-- is_valid_session (l_session);
@@ -671,8 +679,10 @@ OPERATIONS
                 session := l_session;
                 IF is_valid_res = TRUE
                 THEN
+                    l_client_app_desc <-- get_server_session_client_app_desc (l_session);
+                    l_client_cert_tb <-- get_server_session_client_cert_tb (l_session);
                     l_user <-- get_session_user_server (l_session);
-                    set_app_call_context_session (l_session, l_user);
+                    set_app_call_context_session (l_session, l_client_app_desc, l_client_cert_tb, l_user);
                     server_session_timeout_msg_received (l_session)
                 END
             ELSE

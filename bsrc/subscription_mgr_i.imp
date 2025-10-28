@@ -31,7 +31,8 @@ SEES
     address_space_itf,
     request_handle_bs,
     session_mgr,
-    channel_mgr
+    channel_mgr,
+    app_cb_call_context_bs
 
 DEFINITIONS
     "definitions.def"
@@ -977,6 +978,8 @@ OPERATIONS
         l_session,
         l_session_valid,
         l_user,
+        l_client_app_desc,
+        l_client_cert_tb,
         l_valid_user_access,
         l_locales,
         l_nid,
@@ -1008,7 +1011,7 @@ OPERATIONS
         l_locales := c_LocaleIds_empty;
         IF l_session_valid = TRUE & l_filter_sub_and_mi = TRUE & l_aid = e_aid_EventNotifier
         THEN
-            /* Note: AccessLevel not checked here, it is a condition to generate a DataChange event (inhibition if read forbidden)*/
+                /* Note: AccessLevel not checked here, it is a condition to generate a DataChange event (inhibition if read forbidden)*/
                 l_user <-- get_session_user_server(l_session);
                 l_roles <-- get_session_roles(l_session);
                 l_locales <-- get_server_session_preferred_locales(l_session);
@@ -1058,6 +1061,8 @@ OPERATIONS
         l_session,
         l_session_valid,
         l_user,
+        l_client_app_desc,
+        l_client_cert_tb,
         l_valid_user_access,
         l_locales,
         l_nid,
@@ -1088,12 +1093,17 @@ OPERATIONS
             IF l_session_valid = TRUE
             THEN
                 l_user <-- get_session_user_server(l_session);
+                l_client_app_desc <-- get_server_session_client_app_desc(l_session);
+                l_client_cert_tb <-- get_server_session_client_cert_tb(l_session);
+                /* Temporarily set the session context for the authorization callback */
+                set_app_call_context_session (l_session, l_client_app_desc, l_client_cert_tb, l_user);
                 /* TODO: when user access right property will be modifiable previous user right shall be
                 checked to notify a user access denied status when it is newly denied for the user
                 */
                 l_roles <-- get_session_roles(l_session);
                 l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user, l_roles);
-                l_locales <-- get_server_session_preferred_locales(l_session)
+                l_locales <-- get_server_session_preferred_locales(l_session);
+                clear_app_call_context
             END
         END
         ;
@@ -1834,6 +1844,9 @@ OPERATIONS
         l_nodeClass,
         l_eventNotifierByte,
         l_bres,
+        l_user,
+        l_client_app_desc,
+        l_client_cert_tb,
         l_monitoredItemQueue
     IN
         /* For each MI in queue:
@@ -1844,6 +1857,11 @@ OPERATIONS
 
         /* Trigger event for notifier node */
         l_bres := FALSE;
+        l_user <-- get_session_user_server(p_session);
+        l_client_app_desc <-- get_server_session_client_app_desc(p_session);
+        l_client_cert_tb <-- get_server_session_client_cert_tb(p_session);
+        /* Temporarily set the session context for the authorization callback */
+        set_app_call_context_session (p_session, l_client_app_desc, l_client_cert_tb, l_user);
         l_nid_valid, l_node <-- readall_AddressSpace_Node (p_notifierId);
         IF l_nid_valid = TRUE
         THEN
@@ -1882,6 +1900,7 @@ OPERATIONS
             l_bres := TRUE // Do not fail in case of directly targeted Server node or unexpected invalid properties on Server node
         END
         ;
+        clear_app_call_context;
         bres := l_bres
     END
     ;

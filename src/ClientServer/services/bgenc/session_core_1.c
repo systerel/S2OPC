@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 09/12/2024 17:00:57
+ Date                 : 28/10/2025 14:35:45
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -81,6 +81,20 @@ void session_core_1__l_reset_server_session_preferred_locales(
       if (session_core_1__l_old_localeIds != constants__c_LocaleIds_indet) {
          constants__free_LocaleIds(session_core_1__l_old_localeIds);
       }
+   }
+}
+
+void session_core_1__l_reset_server_client_create_session_info(
+   const constants__t_session_i session_core_1__p_session) {
+   {
+      constants__t_ApplicationDescription_i session_core_1__l_cli_app_desc;
+      constants__t_CertThumbprint_i session_core_1__l_cli_cert_tb;
+      
+      session_core_2__reset_server_client_create_session_info(session_core_1__p_session,
+         &session_core_1__l_cli_app_desc,
+         &session_core_1__l_cli_cert_tb);
+      constants__free_ApplicationDescription(session_core_1__l_cli_app_desc);
+      constants__free_CertThumbprint(session_core_1__l_cli_cert_tb);
    }
 }
 
@@ -176,6 +190,7 @@ void session_core_1__set_session_state_closed(
       session_core_bs__delete_session_application_context(session_core_1__session);
       session_core_2__reset_session_orphaned(session_core_1__session);
       session_core_1__l_reset_server_session_preferred_locales(session_core_1__session);
+      session_core_1__l_reset_server_client_create_session_info(session_core_1__session);
       session_core_bs__remove_NonceServer(session_core_1__session,
          session_core_1__is_client);
       session_core_2__remove_session(session_core_1__session);
@@ -220,6 +235,20 @@ void session_core_1__set_server_session_preferred_locales_or_indet(
          session_core_2__set_server_session_preferred_locales(session_core_1__p_session,
             session_core_1__p_localesIds);
       }
+   }
+}
+
+void session_core_1__set_server_client_create_session_info(
+   const constants__t_session_i session_core_1__p_session,
+   const constants__t_ApplicationDescription_i session_core_1__p_cliAppDesc,
+   const constants__t_CertThumbprint_i session_core_1__p_cliCertTb) {
+   if (session_core_1__p_cliAppDesc != constants__c_ApplicationDescription_indet) {
+      session_core_2__set_server_session_client_app_desc(session_core_1__p_session,
+         session_core_1__p_cliAppDesc);
+   }
+   if (session_core_1__p_cliCertTb != constants__c_CertThumbprint_indet) {
+      session_core_2__set_server_session_client_cert_tb(session_core_1__p_session,
+         session_core_1__p_cliCertTb);
    }
 }
 

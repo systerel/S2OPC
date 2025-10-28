@@ -70,6 +70,7 @@ typedef uint8_t constants_bs__t_Byte;
 typedef OpcUa_CallMethodRequest* constants_bs__t_CallMethodPointer_i;
 typedef int32_t constants_bs__t_CallMethod_i;
 typedef uint64_t constants_bs__t_ContinuationPointId_i;
+typedef char* constants_bs__t_CertThumbprint_i;
 typedef SOPC_ContinuationPointData constants_bs__t_ContinuationPoint_i;
 typedef SOPC_String* constants_bs__t_Criteria_i;
 typedef SOPC_ExtensionObject* constants_bs__t_DataTypeDefinition_i;
@@ -172,8 +173,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 #define constants_bs__c_CallMethodPointer_indet NULL
 #define constants_bs__c_CallMethod_indet 0
-#define constants_bs__c_history_ReadValueId_indet NULL
-#define constants_bs__c_readRawModifiedDetails_indet NULL
+#define constants_bs__c_CertThumbprint_indet NULL
 #define constants_bs__c_ContinuationPointId_indet 0
 #define constants_bs__c_ContinuationPoint_indet sopc_continuationPointData_empty;
 #define constants_bs__c_Criteria_indet NULL
@@ -255,6 +255,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_
 #define constants_bs__c_opcua_duration_indet -1
 #define constants_bs__c_opcua_duration_zero 0
 #define constants_bs__c_publishReqQueue_indet 0
+#define constants_bs__c_readRawModifiedDetails_indet NULL
 #define constants_bs__c_registerServer2_expiration_time SOPC_REGISTERED_SERVER_EXPIRATION_DELAY_SECS
 #define constants_bs__c_request_context_indet 0
 #define constants_bs__c_reverse_endpoint_config_idx_indet 0
@@ -301,6 +302,9 @@ extern void constants_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void constants_bs__free_ApplicationDescription(
+    const constants_bs__t_ApplicationDescription_i constants_bs__p_in);
+extern void constants_bs__free_CertThumbprint(const constants_bs__t_CertThumbprint_i constants_bs__p_in);
 extern void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in);
 extern void constants_bs__free_roles(const constants_bs__t_sessionRoles_i constants_bs__p_in);
 extern void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in);

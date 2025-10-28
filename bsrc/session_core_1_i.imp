@@ -87,6 +87,8 @@ PROMOTES
     server_session_timeout_evaluation,
     server_session_timeout_msg_received,
     get_server_session_preferred_locales,
+    get_server_session_client_app_desc,
+    get_server_session_client_cert_tb,
     get_session_user_secu_client,
     client_create_session_set_user_token_secu_properties,
     get_session_user_server_certificate,
@@ -125,6 +127,16 @@ LOCAL_OPERATIONS
     THEN
         a_server_client_locales(p_session) := c_LocaleIds_empty
     END
+    ;
+
+    l_reset_server_client_create_session_info(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : dom(a_state)
+    THEN
+        a_server_client_app_desc := {p_session} <<| a_server_client_app_desc ||
+        a_server_client_cert_tb  := {p_session} <<| a_server_client_cert_tb
+    END
 
 OPERATIONS
 
@@ -158,6 +170,17 @@ OPERATIONS
         THEN
             free_LocaleIds(l_old_localeIds)
         END
+    END
+    ;
+
+    l_reset_server_client_create_session_info(p_session) =
+    VAR
+        l_cli_app_desc,
+        l_cli_cert_tb
+    IN
+        l_cli_app_desc, l_cli_cert_tb <-- reset_server_client_create_session_info(p_session);
+        free_ApplicationDescription (l_cli_app_desc);
+        free_CertThumbprint (l_cli_cert_tb)
     END
     ;
 
@@ -253,6 +276,8 @@ OPERATIONS
         reset_session_orphaned(session);
         // a_client_orphaned
         l_reset_server_session_preferred_locales (session);
+        // a_server_client_app_desc, a_server_client_cert_tb
+        l_reset_server_client_create_session_info (session);
         // a_server_client_locales
         remove_NonceServer(session, is_client);
         // a_NonceServer
@@ -296,6 +321,20 @@ OPERATIONS
             END
             ;
             set_server_session_preferred_locales(p_session, p_localesIds)
+        END
+    END
+    ;
+
+    set_server_client_create_session_info (p_session, p_cliAppDesc, p_cliCertTb) =
+    BEGIN
+        IF p_cliAppDesc /= c_ApplicationDescription_indet
+        THEN
+            set_server_session_client_app_desc (p_session, p_cliAppDesc)
+        END
+        ;
+        IF p_cliCertTb /= c_CertThumbprint_indet
+        THEN
+            set_server_session_client_cert_tb (p_session, p_cliCertTb)
         END
     END
     ;

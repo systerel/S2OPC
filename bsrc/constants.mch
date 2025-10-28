@@ -337,6 +337,7 @@ SETS
     t_LocaleIds_i; /* char* array NULL terminated of locales ids */
     t_RegisteredServer_i; /* (OpcUa_RegisteredServer*) */
     t_ApplicationDescription_i; /* (OpcUa_ApplicationDescription*) */
+    t_CertThumbprint_i; /* (char*) */
     t_MdnsDiscoveryConfig_i; /* (OpcUa_MdnsDiscoveryConfiguration*) */
     t_RegisteredServer2Info_i; /* (SOPC_RegisterServer2Record_Internal*) */
     t_DataTypeDefinition_i; /* (SOPC_ExtensionObject*) */
@@ -491,6 +492,7 @@ CONCRETE_CONSTANTS
     c_BrowseResultMask_all,
     c_RegisteredServer_indet,
     c_ApplicationDescription_indet,
+    c_CertThumbprint_indet,
     c_MdnsDiscoveryConfig_indet,
     c_RegisteredServer2Info_indet,
     c_DataTypeDefinition_indet,
@@ -626,6 +628,7 @@ ABSTRACT_CONSTANTS
     t_LocaleIds,
     t_RegisteredServer,
     t_ApplicationDescription,
+    t_CertThumbprint,
     t_MdnsDiscoveryConfig,
     t_RegisteredServer2Info,
     t_DataTypeDefinition,
@@ -1195,6 +1198,9 @@ PROPERTIES
     c_ApplicationDescription_indet : t_ApplicationDescription_i &
     t_ApplicationDescription = t_ApplicationDescription_i - {c_ApplicationDescription_indet} &
 
+    c_CertThumbprint_indet : t_CertThumbprint_i &
+    t_CertThumbprint = t_CertThumbprint_i - {c_CertThumbprint_indet} &
+
     c_MdnsDiscoveryConfig_indet : t_MdnsDiscoveryConfig_i &
     t_MdnsDiscoveryConfig = t_MdnsDiscoveryConfig_i - {c_MdnsDiscoveryConfig_indet} &
 
@@ -1674,6 +1680,22 @@ OPERATIONS
     THEN
         skip
     END;
+
+    free_ApplicationDescription(p_in) =
+    PRE
+        p_in : t_ApplicationDescription_i
+    THEN
+        skip
+    END
+    ;
+
+    free_CertThumbprint(p_in) =
+    PRE
+        p_in : t_CertThumbprint_i
+    THEN
+        skip
+    END
+    ;
 
     p_localeIds <-- get_SupportedLocales(p_in) =
     PRE

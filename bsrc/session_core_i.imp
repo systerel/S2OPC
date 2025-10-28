@@ -68,6 +68,8 @@ PROMOTES
     get_session_user_server,
     session_has_user_server,
     get_server_session_preferred_locales,
+    get_server_session_client_app_desc,
+    get_server_session_client_cert_tb,
     deallocate_user,
     get_local_user,
     has_user_token_policy_available,
@@ -554,6 +556,8 @@ OPERATIONS
         l_nonce,
         l_secpol,
         l_set_cert,
+        l_cli_app_desc,
+        l_cli_cert_tb,
         l_bret
     IN
         l_set_cert := FALSE;
@@ -616,6 +620,12 @@ OPERATIONS
                                 /* Write server nonce */
                                 write_create_session_resp_nonce(create_resp_msg, l_nonce)
                             END
+                        END
+                        ;
+                        IF l_bret = TRUE THEN
+                            l_cli_app_desc <-- get_create_session_req_client_desc_copy(create_req_msg);
+                            l_cli_cert_tb <-- get_create_session_req_client_certificate_tb(create_req_msg);
+                            set_server_client_create_session_info (l_nsession, l_cli_app_desc, l_cli_cert_tb)
                         END
                         ;
                         IF l_bret = FALSE THEN

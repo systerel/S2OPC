@@ -34,6 +34,9 @@
 /**
  * \brief Context provided when a service callback is called (write notification, method call).
  *        The context can only be used during the callback call, see getters available.
+ *
+ * \warning Depending on the callback called and its context, some fields may be NULL or invalid.
+ *          Validity of fields retrieved shall always be checked prior to use.
  */
 typedef struct SOPC_CallContext SOPC_CallContext;
 
@@ -45,15 +48,21 @@ uint32_t SOPC_CallContext_GetSessionId(const SOPC_CallContext* callContextPtr);
 /** \brief Returns the user that called the service */
 const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr);
 
-/** \brief Returns the security mode of the connection used to call the service */
+/** \brief Returns the (read-only) security mode of the connection used to call the service */
 OpcUa_MessageSecurityMode SOPC_CallContext_GetSecurityMode(const SOPC_CallContext* callContextPtr);
 
-/** \brief Returns the security policy of the connection used to call the service */
+/** \brief Returns the (read-only) security policy of the connection used to call the service */
 const char* SOPC_CallContext_GetSecurityPolicy(const SOPC_CallContext* callContextPtr);
 
 /** \brief Returns the server endpoint index (::SOPC_EndpointConfigIdx type)
  *         of the connection used to call the service */
 uint32_t SOPC_CallContext_GetEndpointConfigIdx(const SOPC_CallContext* callContextPtr);
+
+/** \brief Returns the (read-only) client application URI of the connection used to call the service */
+const char* SOPC_CallContext_GetClientApplicationURI(const SOPC_CallContext* callContextPtr);
+
+/** \brief Returns the (read-only) client certificate thumbprint of the connection used to call the service */
+const char* SOPC_CallContext_GetClientCertThumbprint(const SOPC_CallContext* callContextPtr);
 
 /** \brief Get direct access to the address space.
  *         AddressSpace is only available during a method call and shall not be kept

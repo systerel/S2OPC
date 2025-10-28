@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 07/10/2025 09:58:23
+ Date                 : 26/11/2025 10:52:17
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -342,6 +342,8 @@ void session_mgr__server_receive_session_req(
       t_bool session_mgr__l_timer_creation_ok;
       constants__t_user_i session_mgr__l_user;
       constants__t_SignatureData_i session_mgr__l_user_token_signature;
+      constants__t_ApplicationDescription_i session_mgr__l_client_app_desc;
+      constants__t_CertThumbprint_i session_mgr__l_client_cert_tb;
       
       *session_mgr__security_failed = false;
       *session_mgr__session = constants__c_session_indet;
@@ -468,7 +470,13 @@ void session_mgr__server_receive_session_req(
                if (session_mgr__l_session_state != constants__e_session_created) {
                   session_core__get_session_user_server(*session_mgr__session,
                      &session_mgr__l_user);
+                  session_core__get_server_session_client_app_desc(*session_mgr__session,
+                     &session_mgr__l_client_app_desc);
+                  session_core__get_server_session_client_cert_tb(*session_mgr__session,
+                     &session_mgr__l_client_cert_tb);
                   app_cb_call_context_bs__set_app_call_context_session(*session_mgr__session,
+                     session_mgr__l_client_app_desc,
+                     session_mgr__l_client_cert_tb,
                      session_mgr__l_user);
                }
                session_core__get_session_channel(*session_mgr__session,
@@ -604,6 +612,8 @@ void session_mgr__server_validate_session_service_req(
       constants__t_sessionState_i session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
       constants__t_user_i session_mgr__l_user;
+      constants__t_ApplicationDescription_i session_mgr__l_client_app_desc;
+      constants__t_CertThumbprint_i session_mgr__l_client_cert_tb;
       
       session_core__server_get_session_from_token(session_mgr__session_token,
          &session_mgr__l_session);
@@ -623,9 +633,15 @@ void session_mgr__server_validate_session_service_req(
             *session_mgr__status_code_err = constants_statuscodes_bs__e_sc_ok;
             *session_mgr__session = session_mgr__l_session;
             if (*session_mgr__is_valid_res == true) {
+               session_core__get_server_session_client_app_desc(session_mgr__l_session,
+                  &session_mgr__l_client_app_desc);
+               session_core__get_server_session_client_cert_tb(session_mgr__l_session,
+                  &session_mgr__l_client_cert_tb);
                session_core__get_session_user_server(session_mgr__l_session,
                   &session_mgr__l_user);
                app_cb_call_context_bs__set_app_call_context_session(session_mgr__l_session,
+                  session_mgr__l_client_app_desc,
+                  session_mgr__l_client_cert_tb,
                   session_mgr__l_user);
                session_core__server_session_timeout_msg_received(session_mgr__l_session);
             }

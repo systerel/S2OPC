@@ -21,7 +21,7 @@
 
  File Name            : msg_session_bs.h
 
- Date                 : 16/05/2023 16:34:49
+ Date                 : 28/10/2025 14:35:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -69,6 +69,12 @@ extern void msg_session_bs__create_session_resp_check_server_endpoints(
 extern void msg_session_bs__create_session_resp_export_maxRequestMessageSize(
    const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
    const constants__t_msg_i msg_session_bs__p_resp_msg);
+extern void msg_session_bs__get_create_session_req_client_certificate_tb(
+   const constants__t_msg_i msg_session_bs__p_req_msg,
+   constants__t_CertThumbprint_i * const msg_session_bs__p_cliCertTb);
+extern void msg_session_bs__get_create_session_req_client_desc_copy(
+   const constants__t_msg_i msg_session_bs__p_req_msg,
+   constants__t_ApplicationDescription_i * const msg_session_bs__p_cliAppDesc);
 extern void msg_session_bs__write_activate_msg_user(
    const constants__t_msg_i msg_session_bs__msg,
    const constants__t_user_token_i msg_session_bs__p_user_token);

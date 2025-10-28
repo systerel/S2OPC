@@ -254,6 +254,24 @@ uint32_t SOPC_CallContext_GetEndpointConfigIdx(const SOPC_CallContext* callConte
     return callContextPtr->endpointConfigIdx;
 }
 
+const char* SOPC_CallContext_GetClientApplicationURI(const SOPC_CallContext* callContextPtr)
+{
+    if (NULL == callContextPtr || NULL == callContextPtr->clientAppDescription)
+    {
+        return NULL;
+    }
+    return SOPC_String_GetRawCString(&callContextPtr->clientAppDescription->ApplicationUri);
+}
+
+const char* SOPC_CallContext_GetClientCertThumbprint(const SOPC_CallContext* callContextPtr)
+{
+    if (NULL == callContextPtr || NULL == callContextPtr->clientCertThumbprint)
+    {
+        return NULL;
+    }
+    return callContextPtr->clientCertThumbprint;
+}
+
 SOPC_AddressSpaceAccess* SOPC_CallContext_GetAddressSpaceAccess(const SOPC_CallContext* callContextPtr)
 {
     if (NULL == callContextPtr)

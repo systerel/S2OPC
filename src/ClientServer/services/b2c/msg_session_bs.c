@@ -47,6 +47,42 @@ void msg_session_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
+void msg_session_bs__get_create_session_req_client_certificate_tb(
+    const constants__t_msg_i msg_session_bs__p_req_msg,
+    constants__t_CertThumbprint_i* const msg_session_bs__p_cliCertTb)
+{
+    *msg_session_bs__p_cliCertTb = constants_bs__c_CertThumbprint_indet;
+    OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) msg_session_bs__p_req_msg;
+
+    if (pReq->ClientCertificate.Length > 0)
+    {
+        SOPC_CertificateList* pCert = NULL;
+        SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
+            pReq->ClientCertificate.Data, (uint32_t) pReq->ClientCertificate.Length, &pCert);
+        if (SOPC_STATUS_OK == status)
+        {
+            *msg_session_bs__p_cliCertTb = SOPC_KeyManager_Certificate_GetCstring_SHA1(pCert);
+        }
+        SOPC_KeyManager_Certificate_Free(pCert);
+    }
+}
+
+void msg_session_bs__get_create_session_req_client_desc_copy(
+    const constants__t_msg_i msg_session_bs__p_req_msg,
+    constants__t_ApplicationDescription_i* const msg_session_bs__p_cliAppDesc)
+{
+    *msg_session_bs__p_cliAppDesc = constants__c_ApplicationDescription_indet;
+    OpcUa_ApplicationDescription* appDesc = SOPC_Malloc(sizeof(OpcUa_ApplicationDescription));
+    if (NULL != appDesc)
+    {
+        OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) msg_session_bs__p_req_msg;
+        // move data to appDesc as it is done after create request treatment is done
+        *appDesc = pReq->ClientDescription;
+        OpcUa_ApplicationDescription_Initialize(&pReq->ClientDescription);
+        *msg_session_bs__p_cliAppDesc = appDesc;
+    }
+}
+
 void msg_session_bs__write_activate_msg_user(const constants__t_msg_i msg_session_bs__msg,
                                              const constants__t_user_token_i msg_session_bs__p_user_token)
 {

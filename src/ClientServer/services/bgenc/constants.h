@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 17/10/2025 12:36:12
+ Date                 : 20/11/2025 14:48:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -54,6 +54,7 @@
 #define constants__t_Byte constants_bs__t_Byte
 #define constants__t_CallMethodPointer_i constants_bs__t_CallMethodPointer_i
 #define constants__t_CallMethod_i constants_bs__t_CallMethod_i
+#define constants__t_CertThumbprint_i constants_bs__t_CertThumbprint_i
 #define constants__t_ContinuationPointId_i constants_bs__t_ContinuationPointId_i
 #define constants__t_ContinuationPoint_i constants_bs__t_ContinuationPoint_i
 #define constants__t_Criteria_i constants_bs__t_Criteria_i
@@ -367,6 +368,7 @@ typedef enum {
 #define constants__t_Byte_max constants_bs__t_Byte_max
 #define constants__t_CallMethodPointer_i_max constants_bs__t_CallMethodPointer_i_max
 #define constants__t_CallMethod_i_max constants_bs__t_CallMethod_i_max
+#define constants__t_CertThumbprint_i_max constants_bs__t_CertThumbprint_i_max
 #define constants__t_ContinuationPointId_i_max constants_bs__t_ContinuationPointId_i_max
 #define constants__t_ContinuationPoint_i_max constants_bs__t_ContinuationPoint_i_max
 #define constants__t_Criteria_i_max constants_bs__t_Criteria_i_max
@@ -465,6 +467,7 @@ typedef enum {
 #define constants__c_Byte_Type_NodeId constants_bs__c_Byte_Type_NodeId
 #define constants__c_CallMethodPointer_indet constants_bs__c_CallMethodPointer_indet
 #define constants__c_CallMethod_indet constants_bs__c_CallMethod_indet
+#define constants__c_CertThumbprint_indet constants_bs__c_CertThumbprint_indet
 #define constants__c_ContinuationPointId_indet constants_bs__c_ContinuationPointId_indet
 #define constants__c_ContinuationPoint_indet constants_bs__c_ContinuationPoint_indet
 #define constants__c_Criteria_indet constants_bs__c_Criteria_indet
@@ -595,6 +598,8 @@ extern void constants__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define constants__free_ApplicationDescription constants_bs__free_ApplicationDescription
+#define constants__free_CertThumbprint constants_bs__free_CertThumbprint
 #define constants__free_ExpandedNodeId constants_bs__free_ExpandedNodeId
 #define constants__free_LocaleIds constants_bs__free_LocaleIds
 #define constants__free_roles constants_bs__free_roles

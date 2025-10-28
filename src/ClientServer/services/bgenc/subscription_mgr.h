@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 13/08/2025 14:11:05
+ Date                 : 28/10/2025 16:45:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -51,6 +51,7 @@
    SEES Clause
   --------------*/
 #include "address_space_itf.h"
+#include "app_cb_call_context_bs.h"
 #include "channel_mgr.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"

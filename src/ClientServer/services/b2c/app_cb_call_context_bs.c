@@ -70,10 +70,14 @@ void app_cb_call_context_bs__set_app_call_context_channel_config(
 }
 
 void app_cb_call_context_bs__set_app_call_context_session(
-    const constants__t_session_i app_cb_call_context_bs__p_session_id,
+    const constants__t_session_i app_cb_call_context_bs__p_session,
+    const constants__t_ApplicationDescription_i app_cb_call_context_bs__p_cliAppDesc,
+    const constants__t_CertThumbprint_i app_cb_call_context_bs__p_cliCertTb,
     const constants__t_user_i app_cb_call_context_bs__p_user)
 {
-    currentCtx.sessionId = app_cb_call_context_bs__p_session_id;
+    currentCtx.sessionId = app_cb_call_context_bs__p_session;
+    currentCtx.clientAppDescription = app_cb_call_context_bs__p_cliAppDesc;
+    currentCtx.clientCertThumbprint = app_cb_call_context_bs__p_cliCertTb;
     currentCtx.user = SOPC_UserWithAuthorization_GetUser(app_cb_call_context_bs__p_user);
 }
 
@@ -89,6 +93,10 @@ SOPC_CallContext* SOPC_CallContext_Copy(const SOPC_CallContext* cc)
         return NULL;
     }
     SOPC_CallContext* copy = SOPC_Calloc(1, sizeof(*copy));
+    OpcUa_ApplicationDescription* appDescCopy = NULL;
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_Create(&OpcUa_ApplicationDescription_EncodeableType, (void**) &appDescCopy);
+    SOPC_UNUSED_RESULT(status);
     if (NULL != copy)
     {
         copy->isCopy = true;
@@ -97,6 +105,21 @@ SOPC_CallContext* SOPC_CallContext_Copy(const SOPC_CallContext* cc)
         copy->msgSecurityMode = cc->msgSecurityMode;
         copy->secuPolicyUri = SOPC_strdup(cc->secuPolicyUri);
         copy->sessionId = cc->sessionId;
+        if (SOPC_STATUS_OK == status)
+        {
+            // Note: we only copy the ApplicationURI to avoid unnecessary allocations,
+            //       we might do more in the future if needed
+            status = SOPC_String_Copy(&appDescCopy->ApplicationUri, &cc->clientAppDescription->ApplicationUri);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            copy->clientAppDescription = appDescCopy;
+        }
+        else
+        {
+            SOPC_EncodeableObject_Delete(&OpcUa_ApplicationDescription_EncodeableType, (void**) &appDescCopy);
+        }
+        copy->clientCertThumbprint = SOPC_strdup(cc->clientCertThumbprint);
         copy->user = SOPC_User_Copy(cc->user);
         copy->auxParam = cc->auxParam;
     }
@@ -109,6 +132,8 @@ void SOPC_CallContext_Free(SOPC_CallContext* cc)
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
         SOPC_Free((char*) cc->secuPolicyUri);
+        SOPC_EncodeableObject_Delete(&OpcUa_ApplicationDescription_EncodeableType, (void**) &cc->clientAppDescription);
+        SOPC_Free((char*) cc->clientCertThumbprint);
         SOPC_User_Free((SOPC_User**) &cc->user);
         SOPC_GCC_DIAGNOSTIC_RESTORE
         SOPC_Free(cc);

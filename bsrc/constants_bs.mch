@@ -104,6 +104,7 @@ SETS
     t_LocaleIds_i;
     t_RegisteredServer_i;
     t_ApplicationDescription_i;
+    t_CertThumbprint_i;
     t_MdnsDiscoveryConfig_i;
     t_RegisteredServer2Info_i;
     t_DataTypeDefinition_i;
@@ -239,6 +240,7 @@ CONCRETE_CONSTANTS
     c_NodeAttributes_indet,
     c_RegisteredServer_indet,
     c_ApplicationDescription_indet,
+    c_CertThumbprint_indet,
     c_MdnsDiscoveryConfig_indet,
     c_RegisteredServer2Info_indet,
     c_DataTypeDefinition_indet,
@@ -322,6 +324,7 @@ ABSTRACT_CONSTANTS
     t_LocaleIds,
     t_RegisteredServer,
     t_ApplicationDescription,
+    t_CertThumbprint,
     t_MdnsDiscoveryConfig,
     t_RegisteredServer2Info,
     t_DataTypeDefinition,
@@ -775,6 +778,9 @@ PROPERTIES
     c_ApplicationDescription_indet : t_ApplicationDescription_i &
     t_ApplicationDescription = t_ApplicationDescription_i - {c_ApplicationDescription_indet} &
 
+    c_CertThumbprint_indet : t_CertThumbprint_i &
+    t_CertThumbprint = t_CertThumbprint_i - {c_CertThumbprint_indet} &
+
     c_MdnsDiscoveryConfig_indet : t_MdnsDiscoveryConfig_i &
     t_MdnsDiscoveryConfig = t_MdnsDiscoveryConfig_i - {c_MdnsDiscoveryConfig_indet} &
 
@@ -1094,6 +1100,22 @@ OPERATIONS
     PRE
         p_in : t_LocaleIds_i &
         p_in : t_LocaleIds
+    THEN
+        skip
+    END
+    ;
+
+    free_ApplicationDescription(p_in) =
+    PRE
+        p_in : t_ApplicationDescription_i
+    THEN
+        skip
+    END
+    ;
+
+    free_CertThumbprint(p_in) =
+    PRE
+        p_in : t_CertThumbprint_i
     THEN
         skip
     END
