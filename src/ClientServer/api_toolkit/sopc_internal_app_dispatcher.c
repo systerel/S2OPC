@@ -19,7 +19,6 @@
 
 #include <inttypes.h>
 
-#include "app_cb_call_context_internal.h"
 #include "sopc_assert.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_internal_app_dispatcher.h"
@@ -203,7 +202,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
         break;
     }
 
-    SOPC_CallContext_Free(cc);
+    SOPC_CallContext_FreeCopy(cc);
 }
 
 void SOPC_App_Initialize(void)
@@ -231,26 +230,17 @@ void SOPC_App_Clear(void)
     appAddressSpaceNotificationHandler = NULL;
 }
 
-static uintptr_t getCurrentContextCopyWithAuxParams(uintptr_t auxParam)
-{
-    SOPC_CallContext* newCC = SOPC_CallContext_Copy(SOPC_CallContext_GetCurrent());
-    if (NULL != newCC)
-    {
-        newCC->auxParam = auxParam;
-    }
-    return (uintptr_t) newCC;
-}
-
 SOPC_ReturnStatus SOPC_App_EnqueueComEvent(SOPC_App_Com_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     return SOPC_EventHandler_Post(appComEventHandler, (int32_t) event, id, params, auxParam);
 }
 
-SOPC_ReturnStatus SOPC_App_EnqueueAddressSpaceNotification(SOPC_App_AddSpace_Event event,
+SOPC_ReturnStatus SOPC_App_EnqueueAddressSpaceNotification(SOPC_CallContextCopy* cc,
+                                                           SOPC_App_AddSpace_Event event,
                                                            uint32_t id,
                                                            uintptr_t params,
                                                            uintptr_t auxParam)
 {
-    return SOPC_EventHandler_Post(appAddressSpaceNotificationHandler, (int32_t) event, id, params,
-                                  getCurrentContextCopyWithAuxParams(auxParam));
+    cc->auxParam = auxParam;
+    return SOPC_EventHandler_Post(appAddressSpaceNotificationHandler, (int32_t) event, id, params, (uintptr_t) cc);
 }

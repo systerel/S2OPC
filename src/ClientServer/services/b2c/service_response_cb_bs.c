@@ -19,6 +19,7 @@
 
 #include "service_response_cb_bs.h"
 
+#include "app_cb_call_context_internal.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
 #include "sopc_services_api.h"
@@ -84,11 +85,18 @@ void service_response_cb_bs__srv_write_notification(
 {
     SOPC_StatusCode sc;
     OpcUa_WriteValue* wv = service_response_cb_bs__write_request_pointer;
+    SOPC_CallContextCopy* ccc = NULL;
     if (NULL != wv)
     {
         util_status_code__B_to_C(service_response_cb_bs__write_status, &sc);
+        ccc = SOPC_CallContext_CreateCurrentCopy();
         // Trigger notification event
-        SOPC_App_EnqueueAddressSpaceNotification(AS_WRITE_EVENT, 0, (uintptr_t) wv, (uintptr_t) sc);
+        SOPC_ReturnStatus enqStatus =
+            SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_WRITE_EVENT, 0, (uintptr_t) wv, sc);
+        if (SOPC_STATUS_OK != enqStatus)
+        {
+            SOPC_CallContext_FreeCopy(ccc);
+        }
     }
     else
     {

@@ -85,7 +85,8 @@ static void Demo_WriteNotificationCallback(const SOPC_CallContext* callContextPt
     SOPC_Logger_TraceDebug(
         SOPC_LOG_MODULE_CLIENTSERVER,
         "Write notification (%s) on node '%s' by user '%s' from client application URI=%s CertificateTB=%s",
-        writeSuccess, sNodeId, SOPC_User_ToCString(user), SOPC_CallContext_GetClientApplicationURI(callContextPtr),
+        writeSuccess, sNodeId, SOPC_User_ToCString(user),
+        SOPC_String_GetRawCString(&SOPC_CallContext_GetClientApplicationDesc(callContextPtr)->ApplicationUri),
         SOPC_CallContext_GetClientCertThumbprint(callContextPtr));
     SOPC_Free(sNodeId);
 }

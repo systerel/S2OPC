@@ -20,6 +20,7 @@
 #ifndef SOPC_INTERNAL_APP_DISPATCHER_H
 #define SOPC_INTERNAL_APP_DISPATCHER_H
 
+#include "app_cb_call_context_internal.h"
 #include "sopc_event_handler.h"
 #include "sopc_user_app_itf.h"
 
@@ -31,7 +32,8 @@ SOPC_Looper* SOPC_App_GetLooper(void);
 void SOPC_App_Clear(void);
 
 SOPC_ReturnStatus SOPC_App_EnqueueComEvent(SOPC_App_Com_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam);
-SOPC_ReturnStatus SOPC_App_EnqueueAddressSpaceNotification(SOPC_App_AddSpace_Event event,
+SOPC_ReturnStatus SOPC_App_EnqueueAddressSpaceNotification(SOPC_CallContextCopy* cc,
+                                                           SOPC_App_AddSpace_Event event,
                                                            uint32_t id,
                                                            uintptr_t params,
                                                            uintptr_t auxParam);

@@ -27,6 +27,7 @@
 struct SOPC_CallContext
 {
     bool isCopy;
+    int32_t* refCopyCount; // Number of references to this copy (only allocated if isCopy set to true)
 
     uint32_t secureChannelConfigIdx; // Only valid for client side (type ::SOPC_SecureChannelConfigIdx)
     uint32_t endpointConfigIdx;      // Only valid for server side (type ::SOPC_EndpointConfigIdx)
@@ -37,15 +38,24 @@ struct SOPC_CallContext
     SOPC_SessionId sessionId;
     const SOPC_User* user;
 
+    /* Specific use of call context that is never copied (in ::SOPC_CallContext_CreateCurrentCopy) */
     SOPC_AddressSpaceAccess* addressSpaceForMethodCall;
-
     uintptr_t auxParam; // Used to store initial auxParam in application events (it will be replaced by call context)
 };
 
+typedef SOPC_CallContext SOPC_CallContextCopy;
+
 const SOPC_CallContext* SOPC_CallContext_GetCurrent(void);
 
-SOPC_CallContext* SOPC_CallContext_Copy(const SOPC_CallContext* cc);
+/*
+ * It shall be used only when call context is used asynchronously and or when specific context content is added.
+ * A reference counter is used to avoid unecessary allocations are done.
+ * The copy shall still be const as it might share content between several copies of same current context.
+ *
+ * Note: this function SHALL only be called from the service layer thread (i.e. only form *bs.c modules)
+ */
+SOPC_CallContextCopy* SOPC_CallContext_CreateCurrentCopy(void);
 
-void SOPC_CallContext_Free(SOPC_CallContext* cc);
+void SOPC_CallContext_FreeCopy(SOPC_CallContextCopy* cc);
 
 #endif

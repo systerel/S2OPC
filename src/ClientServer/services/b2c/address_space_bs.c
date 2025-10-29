@@ -178,11 +178,11 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
     SOPC_Variant* inputArgs = methodToCall->InputArguments;
     uint32_t noOfOutput = 0;
     SOPC_Variant* outputArgs = NULL;
-    SOPC_CallContext* cc = SOPC_CallContext_Copy(SOPC_CallContext_GetCurrent());
+    SOPC_CallContextCopy* cc = SOPC_CallContext_CreateCurrentCopy();
     cc->addressSpaceForMethodCall = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
     if (NULL == cc->addressSpaceForMethodCall)
     {
-        SOPC_CallContext_Free(cc);
+        SOPC_CallContext_FreeCopy(cc);
         *address_space_bs__p_rawStatusCode = OpcUa_BadOutOfMemory;
         return;
     }
@@ -190,7 +190,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
         method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput, &outputArgs, method_c->pParam);
     generate_notifs_after_address_space_access(SOPC_AddressSpaceAccess_GetOperations(cc->addressSpaceForMethodCall));
     SOPC_AddressSpaceAccess_Delete(&cc->addressSpaceForMethodCall);
-    SOPC_CallContext_Free(cc);
+    SOPC_CallContext_FreeCopy(cc);
     if (0 != noOfOutput && NULL == outputArgs)
     {
         char* mNodeId = SOPC_NodeId_ToCString(methodId);

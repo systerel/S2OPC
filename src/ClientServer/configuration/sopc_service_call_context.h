@@ -59,7 +59,7 @@ const char* SOPC_CallContext_GetSecurityPolicy(const SOPC_CallContext* callConte
 uint32_t SOPC_CallContext_GetEndpointConfigIdx(const SOPC_CallContext* callContextPtr);
 
 /** \brief Returns the (read-only) client application URI of the connection used to call the service */
-const char* SOPC_CallContext_GetClientApplicationURI(const SOPC_CallContext* callContextPtr);
+const OpcUa_ApplicationDescription* SOPC_CallContext_GetClientApplicationDesc(const SOPC_CallContext* callContextPtr);
 
 /** \brief Returns the (read-only) client certificate thumbprint of the connection used to call the service */
 const char* SOPC_CallContext_GetClientCertThumbprint(const SOPC_CallContext* callContextPtr);
