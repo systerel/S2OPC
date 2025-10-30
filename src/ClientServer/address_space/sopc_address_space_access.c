@@ -99,7 +99,7 @@ struct _SOPC_AddressSpaceAccess
 {
     SOPC_AddressSpace* addSpaceRef;
     bool recordOperations;
-    SOPC_SLinkedList* operations; // SOPC_AddressSpaceAccessOperation* prepended operations since creation
+    SOPC_AddressSpaceAccessOperations* operations;
 };
 
 // Constant to define initial capacity of array of reference description.
@@ -117,24 +117,26 @@ SOPC_AddressSpaceAccess* SOPC_AddressSpaceAccess_Create(SOPC_AddressSpace* addSp
     if (recordOperations)
     {
         newAccess->recordOperations = true;
-        newAccess->operations = SOPC_SLinkedList_Create(0);
-        if (NULL == newAccess->operations)
+        newAccess->operations = SOPC_Calloc(1, sizeof(SOPC_AddressSpaceAccessOperations));
+        SOPC_SLinkedList* opList = SOPC_SLinkedList_Create(0);
+        if (NULL == newAccess->operations || NULL == opList)
         {
+            SOPC_Free(opList);
             SOPC_Free(newAccess);
             return NULL;
         }
+        newAccess->operations->opList = opList;
     }
     return newAccess;
 }
 
-SOPC_SLinkedList* SOPC_AddressSpaceAccess_GetOperations(SOPC_AddressSpaceAccess* addSpaceAccess)
+SOPC_AddressSpaceAccessOperations* SOPC_AddressSpaceAccess_GetOperations(SOPC_AddressSpaceAccess* addSpaceAccess)
 {
     SOPC_ASSERT(NULL != addSpaceAccess);
-    SOPC_SLinkedList* operations = NULL;
+    SOPC_AddressSpaceAccessOperations* operations = NULL;
     if (addSpaceAccess->recordOperations)
     {
         operations = addSpaceAccess->operations;
-        addSpaceAccess->operations = NULL;
     }
     return operations;
 }
@@ -176,8 +178,9 @@ void SOPC_AddressSpaceAccess_Delete(SOPC_AddressSpaceAccess** ppAddSpaceAccess)
     SOPC_ASSERT(NULL != access);
     if (access->recordOperations && NULL != access->operations)
     {
-        SOPC_SLinkedList_Apply(access->operations, &SOPC_InternalAddressSpaceAccess_FreeOperation);
-        SOPC_SLinkedList_Delete(access->operations);
+        SOPC_SLinkedList_Apply(access->operations->opList, &SOPC_InternalAddressSpaceAccess_FreeOperation);
+        SOPC_SLinkedList_Delete(access->operations->opList);
+        SOPC_Free(access->operations);
         access->operations = NULL;
     }
     SOPC_ASSERT(NULL == access->operations);
@@ -398,7 +401,7 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
     }
     else
     {
-        addedOp = (void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, (uintptr_t) op);
+        addedOp = (void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
         status = (NULL == addedOp ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
         OpcUa_WriteValue_Initialize(prevWV);
         OpcUa_WriteValue_Initialize(newWV);
@@ -408,6 +411,7 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
     }
     if (SOPC_STATUS_OK == status)
     {
+        addSpaceAccess->operations->writeCount++;
         prevWV->AttributeId = attribId;
         status = SOPC_NodeId_Copy(&prevWV->NodeId, nodeId);
     }
@@ -434,7 +438,8 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
     {
         if (NULL != addedOp)
         {
-            SOPC_SLinkedList_PopHead(addSpaceAccess->operations);
+            SOPC_SLinkedList_PopHead(addSpaceAccess->operations->opList);
+            addSpaceAccess->operations->writeCount--;
         }
         SOPC_Free(op);
         OpcUa_WriteValue_Clear(prevWV);
@@ -649,10 +654,11 @@ static SOPC_ReturnStatus add_node_and_set_reciprocal_reference(SOPC_AddressSpace
             const void* addedOp = NULL;
             if (NULL != op && SOPC_STATUS_OK == status && NULL != nodeIdCopy)
             {
-                addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, (uintptr_t) op);
+                addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
             }
             if (NULL != addedOp)
             {
+                addSpaceAccess->operations->changeNodeCount++;
                 op->operation = SOPC_ADDSPACE_CHANGE_NODE;
                 op->param1 = true; // true for add
                 op->param2 = (uintptr_t) nodeIdCopy;
@@ -1835,10 +1841,11 @@ static void SOPC_AddressSpaceAccess_DeleteNodeOnly(const SOPC_AddressSpaceAccess
             SOPC_NodeId_Copy(nodeIdCopy, SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, node));
         if (SOPC_STATUS_OK == status && NULL != nodeIdCopy)
         {
-            addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, (uintptr_t) op);
+            addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
         }
         if (NULL != addedOp)
         {
+            addSpaceAccess->operations->changeNodeCount++;
             op->operation = SOPC_ADDSPACE_CHANGE_NODE;
             op->param1 = false; // false for delete
             op->param2 = (uintptr_t) nodeIdCopy;

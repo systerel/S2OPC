@@ -32,6 +32,17 @@
  */
 
 /**
+ * \brief Structure used to store write and add/delete node operations
+ *        that occurred during AddressSpaceAccess lifetime
+ */
+typedef struct SOPC_AddressSpaceAccessOperations
+{
+    SOPC_SLinkedList* opList; /**< List of SOPC_AddressSpaceAccessOperation */
+    uint32_t writeCount;      /**< Number of write operations */
+    uint32_t changeNodeCount; /**< Number of add/delete node operations */
+} SOPC_AddressSpaceAccessOperations;
+
+/**
  * \brief Create an AddressSpaceAccess from the given AddressSpace with a flag indicating
  *        if the (write) operations should be recorded.
  * \param addSpaceRef       The AddressSpace for which an AddressSpaceAccess will be created
@@ -47,10 +58,11 @@ SOPC_AddressSpaceAccess* SOPC_AddressSpaceAccess_Create(SOPC_AddressSpace* addSp
  *
  * \warning It is responsibility of caller to deallocate content and list once called.
  *
+ *
  * \return A SLinkedList containing prepended SOPC_AddressSpaceAccessOperation* operations since access creation.
  *         NULL if recordOperations == false or operations == NULL, operations becomes NULL after this call
  */
-SOPC_SLinkedList* SOPC_AddressSpaceAccess_GetOperations(SOPC_AddressSpaceAccess* addSpaceAccess);
+SOPC_AddressSpaceAccessOperations* SOPC_AddressSpaceAccess_GetOperations(SOPC_AddressSpaceAccess* addSpaceAccess);
 
 /**
  * \brief Delete an AddressSpaceAccess previously created with ::SOPC_AddressSpaceAccess_Create
@@ -66,6 +78,9 @@ typedef enum
     SOPC_ADDSPACE_CHANGE_NODE /* param1 = bool (true if added, false if removed); param2 = SOPC_NodeId* */
 } SOPC_AddressSpaceAccessOperationEnum;
 
+/**
+ * \brief Structure used to store one write or change node operation
+ */
 typedef struct _SOPC_AddressSpaceAccessOperation
 {
     SOPC_AddressSpaceAccessOperationEnum operation;

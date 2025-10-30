@@ -19,17 +19,37 @@
 
 #include "gen_subscription_event_bs.h"
 
+#include "sopc_array.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_types.h"
 #include "util_b2c.h"
 
+SOPC_Array* dataChangedEvents = NULL;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void gen_subscription_event_bs__INITIALISATION(void)
 { /*Translated from B but an intialisation is not needed from this module.*/
+}
+
+void gen_subscription_event_bs__flush_data_changed_event(void)
+{
+    if (dataChangedEvents != NULL)
+    {
+        if (SOPC_Array_Size(dataChangedEvents) > 0)
+        {
+            SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_DATA_CHANGED, 0,
+                                   (uintptr_t) dataChangedEvents, (uintptr_t) NULL);
+        }
+        else
+        {
+            SOPC_Array_Delete(dataChangedEvents);
+        }
+        dataChangedEvents = NULL;
+    }
 }
 
 /*--------------------
@@ -44,6 +64,11 @@ void gen_subscription_event_bs__gen_data_changed_event(
     const constants__t_Timestamp gen_subscription_event_bs__p_new_val_ts_src,
     const constants__t_Timestamp gen_subscription_event_bs__p_new_val_ts_srv)
 {
+    if (NULL == dataChangedEvents)
+    {
+        return;
+    }
+    bool res = false;
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     OpcUa_WriteValue* newValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
     OpcUa_WriteValue_Initialize(newValue);
@@ -87,29 +112,23 @@ void gen_subscription_event_bs__gen_data_changed_event(
         /* Generate data changed event with old & new WriteValue */
         if (SOPC_STATUS_OK == retStatus)
         {
-            SOPC_EventHandler_Post(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_DATA_CHANGED, 0,
-                                   (uintptr_t) oldValue, (uintptr_t) newValue);
-        }
-        else
-        {
-            // Delete the WriteValues allocated
-            OpcUa_WriteValue_Clear(oldValue);
-            SOPC_Free(oldValue);
-            OpcUa_WriteValue_Clear(newValue);
-            SOPC_Free(newValue);
+            SOPC_WriteDataChanged writeDataChanged = {
+                .oldValue = oldValue,
+                .newValue = newValue,
+            };
+            res = SOPC_Array_Append(dataChangedEvents, writeDataChanged);
         }
     }
-    else
+    if (!res)
     {
+        // Delete the WriteValues allocated
         OpcUa_WriteValue_Clear(oldValue);
         SOPC_Free(oldValue);
         OpcUa_WriteValue_Clear(newValue);
         SOPC_Free(newValue);
-
-        SOPC_Logger_TraceError(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "gen_subscription_event_bs__gen_data_changed_event: failed to generate a data changed event (out of "
-            "memory for wv alloc)");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "gen_subscription_event_bs__gen_data_changed_event: failed to generate a data "
+                               "changed event");
     }
 }
 
@@ -119,4 +138,18 @@ void gen_subscription_event_bs__gen_data_changed_event_failed(void)
         SOPC_LOG_MODULE_CLIENTSERVER,
         "gen_subscription_event_bs__gen_data_changed_event_failed: failed to generate a data changed event (out of "
         "memory ?)");
+}
+
+void gen_subscription_event_bs__init_data_changed_event(const t_entier4 gen_subscription_event_bs__maxEvents)
+{
+    dataChangedEvents =
+        SOPC_Array_Create(sizeof(SOPC_WriteDataChanged), (size_t) gen_subscription_event_bs__maxEvents, NULL);
+    if (NULL == dataChangedEvents)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "gen_subscription_event_bs__init_data_changed_event: failed to init data changed event nb=%" PRIi32
+            " (out of memory)",
+            gen_subscription_event_bs__maxEvents);
+    }
 }

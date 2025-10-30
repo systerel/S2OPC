@@ -69,6 +69,8 @@ PROMOTES
     get_conv_Variant_Type,
     check_object_has_method,
     is_IndexRangeDefined,
+    init_data_changed_event,
+    flush_data_changed_event,
 
     gen_fresh_NodeId,
     exec_callMethod,

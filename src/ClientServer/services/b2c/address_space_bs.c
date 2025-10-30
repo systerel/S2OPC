@@ -34,6 +34,7 @@
 #include "opcua_identifiers.h"
 #include "sopc_address_space_access_internal.h"
 #include "sopc_address_space_utils_internal.h"
+#include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_date_time.h"
@@ -78,11 +79,13 @@ void address_space_bs__INITIALISATION(void)
 
 void address_space_bs__address_space_bs_UNINITIALISATION(void) {}
 
-static void generate_notifs_after_address_space_access(SOPC_SLinkedList* operations)
+static void generate_notifs_after_address_space_access(SOPC_AddressSpaceAccessOperations* operations)
 {
+    SOPC_Array* dataChangedEvents = SOPC_Array_Create(sizeof(SOPC_WriteDataChanged), operations->writeCount, NULL);
+    SOPC_WriteDataChanged writeDataChanged;
     SOPC_ASSERT(NULL != operations);
     SOPC_AddressSpaceAccessOperation* operation =
-        (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations);
+        (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations->opList);
     // Note: operations were pushed (prepended) and we pop (head) them which leads to a FILO behavior.
     //       Since we push them as next events in the services event queue, it finally leads to a FIFO behavior.
     while (NULL != operation)
@@ -90,8 +93,11 @@ static void generate_notifs_after_address_space_access(SOPC_SLinkedList* operati
         switch (operation->operation)
         {
         case SOPC_ADDSPACE_WRITE:
-            SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_DATA_CHANGED, 0,
-                                         operation->param1, operation->param2);
+            writeDataChanged = (SOPC_WriteDataChanged){
+                .oldValue = (OpcUa_WriteValue*) operation->param1,
+                .newValue = (OpcUa_WriteValue*) operation->param2,
+            };
+            SOPC_Array_Append(dataChangedEvents, writeDataChanged);
             break;
         case SOPC_ADDSPACE_CHANGE_NODE:
             SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_NODE_CHANGED, 0,
@@ -102,9 +108,20 @@ static void generate_notifs_after_address_space_access(SOPC_SLinkedList* operati
             break;
         }
         SOPC_Free(operation);
-        operation = (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations);
+        operation = (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations->opList);
     }
-    SOPC_SLinkedList_Delete(operations);
+    if (SOPC_Array_Size(dataChangedEvents) > 0)
+    {
+        SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_DATA_CHANGED, 0,
+                                     (uintptr_t) dataChangedEvents, 0);
+    }
+    else
+    {
+        SOPC_Array_Delete(dataChangedEvents);
+    }
+    SOPC_ASSERT(0 == SOPC_SLinkedList_GetLength(operations->opList));
+    operations->changeNodeCount = 0;
+    operations->writeCount = 0;
 }
 
 void address_space_bs__deleteNode_AddressSpace(

@@ -21,7 +21,7 @@
 
  File Name            : gen_subscription_event_bs.h
 
- Date                 : 02/05/2023 15:03:46
+ Date                 : 30/10/2025 16:59:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -50,6 +50,7 @@ extern void gen_subscription_event_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void gen_subscription_event_bs__flush_data_changed_event(void);
 extern void gen_subscription_event_bs__gen_data_changed_event(
    const constants__t_NodeId_i gen_subscription_event_bs__p_nid,
    const constants__t_AttributeId_i gen_subscription_event_bs__p_attribute,
@@ -59,5 +60,7 @@ extern void gen_subscription_event_bs__gen_data_changed_event(
    const constants__t_Timestamp gen_subscription_event_bs__p_new_val_ts_src,
    const constants__t_Timestamp gen_subscription_event_bs__p_new_val_ts_srv);
 extern void gen_subscription_event_bs__gen_data_changed_event_failed(void);
+extern void gen_subscription_event_bs__init_data_changed_event(
+   const t_entier4 gen_subscription_event_bs__maxEvents);
 
 #endif

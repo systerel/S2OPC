@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
 #include "sopc_enums.h"
@@ -234,8 +235,11 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     SOPC_Endpoint_Config* epConfig = NULL;
     constants_statuscodes_bs__t_StatusCode_i sCode = constants_statuscodes_bs__e_sc_ok;
     SOPC_EncodeableType* encType = NULL;
+    bool lbres = false;
     bool bres = false;
     void* msg = NULL;
+    SOPC_Array* dataChangedArray = NULL;
+    SOPC_WriteDataChanged* writeDataChanged = NULL;
     OpcUa_WriteValue* old_value = NULL;
     OpcUa_WriteValue* new_value = NULL;
     SOPC_Internal_AsyncSendMsgData* msg_data;
@@ -298,14 +302,19 @@ static void onServiceEvent(SOPC_EventHandler* handler,
          */
         SOPC_ASSERT((void*) params != NULL);
 
-        old_value = (void*) params;
-        new_value = (void*) auxParam;
-        SOPC_ASSERT(old_value != NULL);
-        SOPC_ASSERT(new_value != NULL);
-
-        /* Note: write values deallocation managed by B model */
-        io_dispatch_mgr__internal_server_data_changed(old_value, new_value, &bres);
-
+        dataChangedArray = (SOPC_Array*) params;
+        bres = true;
+        for (size_t i = 0; i < SOPC_Array_Size(dataChangedArray); i++)
+        {
+            writeDataChanged = (SOPC_WriteDataChanged*) SOPC_Array_Get_Ptr(dataChangedArray, i);
+            SOPC_ASSERT(writeDataChanged != NULL);
+            old_value = writeDataChanged->oldValue;
+            new_value = writeDataChanged->newValue;
+            /* Note: write values deallocation managed by B model */
+            io_dispatch_mgr__internal_server_data_changed(old_value, new_value, &lbres);
+            bres = bres && lbres;
+        }
+        SOPC_Array_Delete(dataChangedArray);
         if (bres == false)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

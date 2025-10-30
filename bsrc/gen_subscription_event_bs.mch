@@ -51,5 +51,20 @@ OPERATIONS
         /* Failed to generate data event, generate trace */
         skip
     END
+    ;
+
+    init_data_changed_event (maxEvents) =
+    PRE
+        maxEvents : NAT
+    THEN
+        skip
+    END
+    ;
+
+    flush_data_changed_event =
+    BEGIN
+        /* Flush the list of data changed into an event */
+        skip
+    END
 
 END

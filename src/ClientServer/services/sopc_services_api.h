@@ -31,6 +31,16 @@
 #include <stdint.h>
 
 #include "sopc_event_handler.h"
+#include "sopc_types.h"
+
+/**
+ * Structure used to store old and new values for data changed event
+ */
+typedef struct SOPC_WriteDataChanged
+{
+    OpcUa_WriteValue* oldValue;
+    OpcUa_WriteValue* newValue;
+} SOPC_WriteDataChanged;
 
 /**
  * Services events input events from application, services layer it-self or timer manager
@@ -62,10 +72,9 @@ typedef enum SOPC_Services_Event
                                          */
 
     SE_TO_SE_SERVER_DATA_CHANGED, /**< Server side only:<BR/>
-                                    Notifies that address space data has changed, used to generate notification in
+                                    Notifies that address space data have changed, used to generate notification in
                                     subscription mechanism.<BR/>
-                                    params = (OpcUa_WriteValue*) old data value<BR/>
-                                    auxParam = (OpcUa_WriteValue*) new data value
+                                    params = (SOPC_Array*) array of SOPC_WriteDataChanged<BR/>
                                   */
 
     SE_TO_SE_SERVER_NODE_CHANGED, /**< Server side only:<BR/>

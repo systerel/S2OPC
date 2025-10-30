@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 29/08/2025 12:49:40
+ Date                 : 06/11/2025 17:51:43
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -65,6 +65,7 @@ extern void address_space__INITIALISATION(void);
 #define address_space__clear_user_roles address_space_authorization__clear_user_roles
 #define address_space__deleteNode_AddressSpace address_space_authorization__deleteNode_AddressSpace
 #define address_space__exec_callMethod address_space_authorization__exec_callMethod
+#define address_space__flush_data_changed_event gen_subscription_event_bs__flush_data_changed_event
 #define address_space__gen_fresh_NodeId address_space_authorization__gen_fresh_NodeId
 #define address_space__get_BrowseName address_space_authorization__get_BrowseName
 #define address_space__get_DisplayName address_space_authorization__get_DisplayName
@@ -84,6 +85,7 @@ extern void address_space__INITIALISATION(void);
 #define address_space__get_user_roles address_space_authorization__get_user_roles
 #define address_space__has_access_level_executable address_space_authorization__has_access_level_executable
 #define address_space__has_access_level_histRead address_space_authorization__has_access_level_histRead
+#define address_space__init_data_changed_event gen_subscription_event_bs__init_data_changed_event
 #define address_space__is_AddressSpace_constant address_space_authorization__is_AddressSpace_constant
 #define address_space__is_IndexRangeDefined address_space_authorization__is_IndexRangeDefined
 #define address_space__is_NodeId_equal address_space_authorization__is_NodeId_equal

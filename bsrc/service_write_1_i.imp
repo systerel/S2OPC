@@ -124,6 +124,7 @@ OPERATIONS
     IN
         StatusCode_service := e_sc_ok;
         l_nb_req <-- get_nb_WriteValue;
+        init_data_changed_event(l_nb_req);
         l_continue <-- init_iter_write_request(l_nb_req);
         WHILE l_continue = TRUE DO
             l_continue, l_wvi <-- continue_iter_write_request;
@@ -150,6 +151,8 @@ OPERATIONS
         VARIANT
             card(wreqs_to_iterate)
         END
+        ;
+        flush_data_changed_event
     END
     ;
 
