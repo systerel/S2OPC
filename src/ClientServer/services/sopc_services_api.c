@@ -296,9 +296,6 @@ static void onServiceEvent(SOPC_EventHandler* handler,
            params = (OpcUa_WriteValue*) old data value
            auxParam = (OpcUa_WriteValue*) new data value
          */
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32, id);
-
         SOPC_ASSERT((void*) params != NULL);
 
         old_value = (void*) params;
@@ -381,8 +378,6 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         io_dispatch_mgr__internal_server_evaluate_session_timeout((constants__t_session_i) id);
         break;
     case TIMER_SE_PUBLISH_CYCLE_TIMEOUT:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ServicesMgr: TIMER_SE_PUBLISH_CYCLE_TIMEOUT subscription=%" PRIu32, id);
         /* Server side only: id = subscription id */
         io_dispatch_mgr__internal_server_subscription_publish_timeout((constants__t_subscription_i) id, &bres);
         if (bres == false)
