@@ -75,6 +75,18 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
             // 1 for each type
             notifMsg->NoOfNotificationData = 2;
         }
+        else if (!hasData && !hasEvent)
+        {
+            // In degraded case it is possible the MoreNotification flag was set
+            // but no more data nor event notification is present (MI deleted),
+            // return an empty notification message will fix it and indicate MoreNotification=false.
+            notifMsg->NoOfNotificationData = 0;
+            *msg_subscription_publish_bs__p_notifMsg = notifMsg;
+            *msg_subscription_publish_bs__bres = true;
+
+            // EARLY RETURN
+            return;
+        }
 
         // Create the extension object
         notifMsg->NotificationData = SOPC_Calloc((size_t) notifMsg->NoOfNotificationData, sizeof(SOPC_ExtensionObject));
