@@ -60,7 +60,7 @@ DEFINITIONS
     a_NonceServer : s_session +-> t_Nonce &
     /* The NonceClient is remembered by the client in Sess_Creating */
     a_NonceClient : s_session +-> t_Nonce &
-     a_session_roles : s_session +-> t_sessionRoles; // a session may be associated to roles
+    a_session_roles : s_session +-> t_sessionRoles; // a session may be associated to roles
 
     d_init ==
     s_session                    := {} ||
@@ -371,6 +371,7 @@ OPERATIONS
     THEN
         a_channel(session) := channel ||
         a_state(session) := e_session_scActivating ||
+        a_client_orphaned := {session} <<| a_client_orphaned ||
         session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
     END
     ;
@@ -453,6 +454,7 @@ OPERATIONS
                a_channel(session) = channel // current channel is the channel associated to the current session
             THEN
                 CHOICE
+                    /* Case 1: keep same channel and change user */
                     a_state(session) := e_session_userActivated ||
                     a_user_server(session) := user ||
                     a_session_roles :(
@@ -470,6 +472,7 @@ OPERATIONS
                   a_user_server(session) = user // user provided in activate request is the user associated to the current session
             THEN
                     CHOICE
+                        /* Case 2: keep same user and change channel */
                         a_channel(session) := channel         ||
                         a_state(session) := e_session_userActivated ||
                         a_user_server :(
@@ -561,16 +564,10 @@ OPERATIONS
         p_channel_config_idx : t_channel_config_idx
     THEN
         // We have a new channel to provide (waiting for connection)
-        ANY active_sessions, inactive_sessions WHERE
-            active_sessions <: t_session                                  &
-            active_sessions <: a_channel~[{p_lost_channel}]               &
-            active_sessions <: a_state~[{e_session_userActivated}]        &
-            inactive_sessions <: t_session                                &
-            inactive_sessions <: s_client_session                         &
-            inactive_sessions <: a_channel~[{p_lost_channel}]             &
-            inactive_sessions /\ a_state~[{e_session_userActivated}] = {} &
-            inactive_sessions /\ active_sessions = {}
-        THEN
+        LET active_sessions, inactive_sessions BE
+            active_sessions   = ( t_session /\ a_channel~[{p_lost_channel}] /\ a_state~[{e_session_userActivated}]) &
+            inactive_sessions = ((t_session /\ a_channel~[{p_lost_channel}]) - a_state~[{e_session_userActivated}])
+        IN
             s_session                    := s_session - inactive_sessions                                               ||
             s_client_session             := s_client_session - inactive_sessions                                        ||
             a_state                      := inactive_sessions <<| a_state <+ (active_sessions * {e_session_scOrphaned}) ||
@@ -597,16 +594,10 @@ OPERATIONS
         p_lost_channel : dom(a_endpoint)     &
         a_channel~[{p_lost_channel}] /\ s_client_session = {}
     THEN
-        ANY active_sessions, inactive_sessions WHERE
-            active_sessions <: t_session &
-            active_sessions <: a_channel~[{p_lost_channel}] &
-            active_sessions <: a_state~[{e_session_userActivated}] &
-            inactive_sessions <: t_session &
-            inactive_sessions <: a_channel~[{p_lost_channel}] &
-            inactive_sessions /\ a_state~[{e_session_userActivated}] = {} &
-            inactive_sessions /\ active_sessions = {}
-
-        THEN
+        LET active_sessions, inactive_sessions BE
+            active_sessions   = ( t_session /\ a_channel~[{p_lost_channel}] /\ a_state~[{e_session_userActivated}]) &
+            inactive_sessions = ((t_session /\ a_channel~[{p_lost_channel}]) - a_state~[{e_session_userActivated}])
+        IN
             // sessions on lost channel that were in activated state are now channel orphaned,
             // other created sessions on channel are closed
             // channel is not the channel of any session

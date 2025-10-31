@@ -1426,10 +1426,7 @@ void session_core_bs__server_activate_session_check_crypto(
     /* Default answer */
     *session_core_bs__valid = false;
 
-    if (constants__c_session_indet == session_core_bs__session)
-    {
-        return;
-    }
+    SOPC_ASSERT(session_core_bs__session != constants__c_session_indet);
 
     pSession = &serverSessionDataArray[session_core_bs__session];
 

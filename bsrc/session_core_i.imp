@@ -322,6 +322,7 @@ LOCAL_OPERATIONS
                a_channel(session) = channel // current channel is the channel associated to the current session
             THEN
                 CHOICE
+                    /* Case 1: keep same channel and change user */
                     a_state(session) := e_session_userActivated ||
                     a_user_server(session) := user ||
                     a_server_client_locales :(
@@ -339,6 +340,7 @@ LOCAL_OPERATIONS
                   a_user_server(session) = user // user provided in activate request is the user associated to the current session
             THEN
                     CHOICE
+                        /* Case 2: keep same user and change channel */
                         a_channel(session) := channel         ||
                         a_state(session) := e_session_userActivated ||
                         a_user_server :(
