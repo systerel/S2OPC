@@ -1061,6 +1061,7 @@ OPERATIONS
             ret := e_sc_bad_unexpected_error
         END;
         IF ret = e_sc_ok THEN
+            set_session_user_client(session, p_user_token);
             set_session_state(session, e_session_userActivating)
         END
     END

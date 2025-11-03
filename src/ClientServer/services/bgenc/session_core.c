@@ -673,6 +673,8 @@ void session_core__client_user_activate_session_req_sm(
          *session_core__ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
       }
       if (*session_core__ret == constants_statuscodes_bs__e_sc_ok) {
+         session_core_1__set_session_user_client(session_core__session,
+            session_core__p_user_token);
          session_core_1__set_session_state(session_core__session,
             constants__e_session_userActivating);
       }

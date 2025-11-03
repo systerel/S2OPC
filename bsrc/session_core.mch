@@ -336,11 +336,12 @@ OPERATIONS
         CHOICE
             channel :(channel : t_channel_i & channel : s_channel_connected) ||
             session_token :(session_token : t_session_token_i & session_token = a_client_token(session)) ||
-            ret, a_state :(
+            ret, a_state, a_user_client :(
                 ret : t_StatusCode_i &
                 a_state : s_session --> t_sessionState &
+                a_user_client : s_session +-> t_user_token &
                 ret : {e_sc_bad_security_checks_failed, e_sc_bad_unexpected_error, e_sc_ok} &
-                (ret = e_sc_ok  => a_state = a_state$0 <+ {session |-> e_session_userActivating}) &
+                (ret = e_sc_ok  => a_state = a_state$0 <+ {session |-> e_session_userActivating} & a_user_client = a_user_client$0 <+ {session |-> p_user_token}) &
                 (ret /= e_sc_ok => a_state = a_state$0)
             )
         OR

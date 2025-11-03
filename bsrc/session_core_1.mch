@@ -88,7 +88,7 @@ ABSTRACT_VARIABLES
 INVARIANT
     d_typing &
 
-    dom(a_server_client_locales) = s_session
+    dom(a_server_client_locales) <: s_session
 
 INITIALISATION
     s_session                    := {} ||
