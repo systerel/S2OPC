@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 22/05/2025 13:27:02
+ Date                 : 03/11/2025 14:46:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -119,10 +119,6 @@ extern void session_core_bs__drop_user_server(
 extern void session_core_bs__get_NonceClient(
    const constants__t_session_i session_core_bs__p_session,
    constants__t_Nonce_i * const session_core_bs__nonce);
-extern void session_core_bs__get_NonceServer(
-   const constants__t_session_i session_core_bs__p_session,
-   const t_bool session_core_bs__p_is_client,
-   constants__t_Nonce_i * const session_core_bs__nonce);
 extern void session_core_bs__get_session_app_context(
    const constants__t_session_i session_core_bs__p_session,
    constants__t_session_application_context_i * const session_core_bs__p_app_context);
@@ -138,6 +134,11 @@ extern void session_core_bs__get_session_user_server(
 extern void session_core_bs__get_session_user_server_certificate(
    const constants__t_session_i session_core_bs__session,
    constants__t_byte_buffer_i * const session_core_bs__p_user_server_cert);
+extern void session_core_bs__getall_NonceServer(
+   const constants__t_session_i session_core_bs__p_session,
+   const t_bool session_core_bs__p_is_client,
+   t_bool * const session_core_bs__p_dom,
+   constants__t_Nonce_i * const session_core_bs__p_nonce);
 extern void session_core_bs__is_same_user_server(
    const constants__t_user_i session_core_bs__p_user_left,
    const constants__t_user_i session_core_bs__p_user_right,

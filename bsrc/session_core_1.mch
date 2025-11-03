@@ -306,18 +306,19 @@ OPERATIONS
     END
     ;
 
-    nonce <-- get_NonceServer(p_session, p_is_client) =
+    p_dom, p_nonce <-- getall_NonceServer(p_session, p_is_client) =
     PRE
         p_session : t_session_i &
         p_session : t_session   &
-        p_session : dom(a_NonceServer) &
-        p_is_client : BOOL      &
+        p_is_client : BOOL &
         p_is_client = bool(p_session : s_client_session)
     THEN
-        nonce :(
-            nonce : t_Nonce_i &
-            nonce = a_NonceServer(p_session)
-        )
+        p_dom := bool(p_session : dom(a_NonceServer)) ||
+        IF p_session : dom(a_NonceServer) THEN
+            p_nonce :( p_nonce : t_Nonce_i & p_nonce = a_NonceServer(p_session))
+        ELSE
+            p_nonce :( p_nonce : t_Nonce_i & p_nonce = c_Nonce_indet)
+        END
     END
     ;
 

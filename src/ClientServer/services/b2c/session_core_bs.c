@@ -1031,24 +1031,36 @@ void session_core_bs__sign_user_token(const constants__t_byte_buffer_i session_c
     }
 }
 
-void session_core_bs__get_NonceServer(const constants__t_session_i session_core_bs__p_session,
-                                      const t_bool session_core_bs__p_is_client,
-                                      constants__t_Nonce_i* const session_core_bs__nonce)
+void session_core_bs__getall_NonceServer(const constants__t_session_i session_core_bs__p_session,
+                                         const t_bool session_core_bs__p_is_client,
+                                         t_bool* const session_core_bs__p_dom,
+                                         constants__t_Nonce_i* const session_core_bs__p_nonce)
 {
-    if (constants__c_session_indet != session_core_bs__p_session)
+    if (session_core_bs__p_is_client)
     {
-        if (session_core_bs__p_is_client)
+        if (NULL != clientSessionDataArray[session_core_bs__p_session].nonceServer.Data)
         {
-            *session_core_bs__nonce = &clientSessionDataArray[session_core_bs__p_session].nonceServer;
+            *session_core_bs__p_dom = true;
+            *session_core_bs__p_nonce = &clientSessionDataArray[session_core_bs__p_session].nonceServer;
         }
         else
         {
-            *session_core_bs__nonce = &serverSessionDataArray[session_core_bs__p_session].nonceServer;
+            *session_core_bs__p_dom = false;
+            *session_core_bs__p_nonce = constants__c_Nonce_indet;
         }
     }
     else
     {
-        *session_core_bs__nonce = constants__c_Nonce_indet;
+        if (NULL != serverSessionDataArray[session_core_bs__p_session].nonceServer.Data)
+        {
+            *session_core_bs__p_dom = true;
+            *session_core_bs__p_nonce = &serverSessionDataArray[session_core_bs__p_session].nonceServer;
+        }
+        else
+        {
+            *session_core_bs__p_dom = false;
+            *session_core_bs__p_nonce = constants__c_Nonce_indet;
+        }
     }
 }
 

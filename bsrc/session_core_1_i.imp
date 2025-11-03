@@ -48,7 +48,7 @@ PROMOTES
     get_channel_nb_sessions,
     server_set_fresh_nonce,
     client_set_NonceServer,
-    get_NonceServer,
+    getall_NonceServer,
     getall_orphaned,
     set_client_orphaned,
     reset_session_orphaned,
