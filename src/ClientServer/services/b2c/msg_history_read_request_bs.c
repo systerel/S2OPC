@@ -35,7 +35,10 @@
 #include "sopc_macros.h"
 
 #define DEFAULT_BINARY "Default Binary"
-static const SOPC_String SOPC_DEFAULT_BINARY = SOPC_STRING(DEFAULT_BINARY);
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST // Build pikeos: "name" instances are const and cannot cast into (SOPC_Byte*)
+                                      // which is not const
+    static const SOPC_String SOPC_DEFAULT_BINARY = SOPC_STRING(DEFAULT_BINARY);
+SOPC_GCC_DIAGNOSTIC_RESTORE
 const SOPC_NodeId structureNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Structure);
 
 /*------------------------
