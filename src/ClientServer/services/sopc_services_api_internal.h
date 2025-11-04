@@ -36,6 +36,7 @@ typedef struct SOPC_Internal_AsyncSendMsgData
     uint32_t requestId;     // t_request_context
     uint32_t requestHandle; // t_request_handle
     void* msgToSend;        // OpcUa_<Msg> *
+    uint32_t bStatusCode;   // constants_statuscodes_bs__t_StatusCode_i
 } SOPC_Internal_AsyncSendMsgData;
 
 typedef struct SOPC_Internal_SessionAppContext

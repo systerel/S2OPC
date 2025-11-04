@@ -376,7 +376,6 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         /* Server side only:
            id = session id
            params = (SOPC_Internal_AsyncSendMsgData*)
-           auxParams = (constants_statuscodes_bs__t_StatusCode_i) service result code
          */
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32, id);
@@ -386,7 +385,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
 
         io_dispatch_mgr__internal_server_send_publish_response_prio_event(
             (constants__t_session_i) id, msg_data->requestHandle, msg_data->requestId, msg_data->msgToSend,
-            (constants_statuscodes_bs__t_StatusCode_i) auxParam, &bres);
+            (constants_statuscodes_bs__t_StatusCode_i) msg_data->bStatusCode, &bres);
         SOPC_Free(msg_data);
 
         if (bres == false)

@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 27/11/2025 16:24:44
+ Date                 : 27/11/2025 17:05:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1618,7 +1618,7 @@ void subscription_mgr__server_subscription_publish_timeout(
             subscription_mgr__fill_publish_response_msg(subscription_mgr__l_publish_resp_msg,
                subscription_mgr__p_subscription,
                subscription_mgr__l_moreNotifs);
-            subscription_core__generate_internal_send_publish_response_event(subscription_mgr__l_session,
+            subscription_core__generate_internal_multi_send_publish_response_event(subscription_mgr__l_session,
                subscription_mgr__l_publish_resp_msg,
                subscription_mgr__l_req_handle,
                subscription_mgr__l_req_context,
@@ -1639,7 +1639,7 @@ void subscription_mgr__server_subscription_publish_timeout(
                   subscription_mgr__fill_publish_response_msg(subscription_mgr__l_publish_resp_msg,
                      subscription_mgr__p_subscription,
                      subscription_mgr__l_moreNotifs);
-                  subscription_core__generate_internal_send_publish_response_event(subscription_mgr__l_session,
+                  subscription_core__generate_internal_multi_send_publish_response_event(subscription_mgr__l_session,
                      subscription_mgr__l_publish_resp_msg,
                      subscription_mgr__l_req_handle,
                      subscription_mgr__l_req_context,
@@ -1650,6 +1650,7 @@ void subscription_mgr__server_subscription_publish_timeout(
                   }
                }
             }
+            subscription_core__flush_internal_multi_send_publish_response_events();
          }
       }
       else {

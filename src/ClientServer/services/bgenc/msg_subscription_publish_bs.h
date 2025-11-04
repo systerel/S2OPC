@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_publish_bs.h
 
- Date                 : 29/03/2024 15:47:29
+ Date                 : 04/11/2025 13:35:16
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -58,6 +58,13 @@ extern void msg_subscription_publish_bs__alloc_notification_message_items(
    const t_entier4 msg_subscription_publish_bs__p_nb_event_notifications,
    t_bool * const msg_subscription_publish_bs__bres,
    constants__t_notif_msg_i * const msg_subscription_publish_bs__p_notifMsg);
+extern void msg_subscription_publish_bs__flush_internal_multi_send_publish_response_events(void);
+extern void msg_subscription_publish_bs__generate_internal_multi_send_publish_response_event(
+   const constants__t_session_i msg_subscription_publish_bs__p_session,
+   const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
+   const constants__t_server_request_handle_i msg_subscription_publish_bs__p_req_handle,
+   const constants__t_request_context_i msg_subscription_publish_bs__p_req_context,
+   const constants_statuscodes_bs__t_StatusCode_i msg_subscription_publish_bs__p_statusCode);
 extern void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
    const constants__t_session_i msg_subscription_publish_bs__p_session,
    const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
@@ -67,6 +74,7 @@ extern void msg_subscription_publish_bs__generate_internal_send_publish_response
 extern void msg_subscription_publish_bs__get_notification_message_no_items(
    const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
    constants__t_notif_msg_i * const msg_subscription_publish_bs__p_notifMsg);
+extern void msg_subscription_publish_bs__msg_subscription_publish_bs_UNINITIALISATION(void);
 extern void msg_subscription_publish_bs__set_msg_publish_resp_notificationMsg(
    const constants__t_msg_i msg_subscription_publish_bs__p_resp_msg,
    const t_bool msg_subscription_publish_bs__p_moreNotifs);

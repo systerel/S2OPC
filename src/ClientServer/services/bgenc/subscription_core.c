@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 04/11/2025 11:30:34
+ Date                 : 04/11/2025 13:35:05
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1933,6 +1933,7 @@ void subscription_core__subscription_core_UNINITIALISATION(void) {
       }
       subscription_core_bs__subscription_core_bs_UNINITIALISATION();
       monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION();
+      msg_subscription_publish_bs__msg_subscription_publish_bs_UNINITIALISATION();
    }
 }
 

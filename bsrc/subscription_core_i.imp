@@ -65,6 +65,8 @@ PROMOTES
     set_msg_publish_resp_subscription,
     set_msg_publish_resp_notificationMsg,
     generate_internal_send_publish_response_event,
+    generate_internal_multi_send_publish_response_event,
+    flush_internal_multi_send_publish_response_events,
     /* notif republish queue */
     get_republish_notif_from_queue,
     /* monitored_item_filter_treatment */
@@ -2077,7 +2079,8 @@ OPERATIONS
             card(subscriptions_to_iterate)
         END;
         subscription_core_bs_UNINITIALISATION;
-        monitored_item_pointer_bs_UNINITIALISATION
+        monitored_item_pointer_bs_UNINITIALISATION;
+        msg_subscription_publish_bs_UNINITIALISATION
     END
     ;
 

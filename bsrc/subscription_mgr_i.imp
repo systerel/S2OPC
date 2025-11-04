@@ -1985,11 +1985,11 @@ OPERATIONS
             IF l_msg_to_send = TRUE
             THEN
                 fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_moreNotifs);
-                generate_internal_send_publish_response_event (l_session,
-                                                               l_publish_resp_msg,
-                                                               l_req_handle,
-                                                               l_req_context,
-                                                               l_msg_sc);
+                generate_internal_multi_send_publish_response_event (l_session,
+                                                                     l_publish_resp_msg,
+                                                                     l_req_handle,
+                                                                     l_req_context,
+                                                                     l_msg_sc);
                 IF l_moreNotifs = TRUE
                 THEN
                     /* TODO: move in a LOCAL operation and specify variables changes */
@@ -1998,11 +1998,11 @@ OPERATIONS
                         l_msg_to_send, l_msg_sc, l_publish_resp_msg,
                         l_req_handle, l_req_context, l_moreNotifs <-- server_subscription_core_publish_timeout_return_moreNotifs (l_session, p_subscription);
                         fill_publish_response_msg (l_publish_resp_msg, p_subscription, l_moreNotifs);
-                        generate_internal_send_publish_response_event (l_session,
-                            l_publish_resp_msg,
-                            l_req_handle,
-                            l_req_context,
-                            l_msg_sc);
+                        generate_internal_multi_send_publish_response_event (l_session,
+                                                                             l_publish_resp_msg,
+                                                                             l_req_handle,
+                                                                             l_req_context,
+                                                                             l_msg_sc);
                         IF l_moreNotifs = TRUE
                         THEN
                             l_validPublishingReqQueued <-- server_subscription_core_check_valid_publish_req_queue (l_session)
@@ -2021,6 +2021,8 @@ OPERATIONS
                         card(a_publish_responses~[{a_publishRequestQueue (l_session)}])
                     END
                 END
+                ;
+                flush_internal_multi_send_publish_response_events
             END
         ELSE
             close_subscription (p_subscription);

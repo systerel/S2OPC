@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 13/08/2025 14:27:25
+ Date                 : 04/11/2025 11:03:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -90,6 +90,8 @@ extern void subscription_core__INITIALISATION(void);
 #define subscription_core__compute_create_subscription_revised_params subscription_core_bs__compute_create_subscription_revised_params
 #define subscription_core__continue_iter_monitored_item monitored_item_queue_it_bs__continue_iter_monitored_item
 #define subscription_core__continue_iter_notif_republish notification_republish_queue_it_bs__continue_iter_notif_republish
+#define subscription_core__flush_internal_multi_send_publish_response_events msg_subscription_publish_bs__flush_internal_multi_send_publish_response_events
+#define subscription_core__generate_internal_multi_send_publish_response_event msg_subscription_publish_bs__generate_internal_multi_send_publish_response_event
 #define subscription_core__generate_internal_send_publish_response_event msg_subscription_publish_bs__generate_internal_send_publish_response_event
 #define subscription_core__get_available_republish notification_republish_queue_it_bs__get_available_republish
 #define subscription_core__get_card_session_seq_subscription subscription_core_1__get_card_session_seq_subscription

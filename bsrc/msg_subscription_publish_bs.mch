@@ -97,6 +97,7 @@ OPERATIONS
     END
     ;
 
+    /* Generate an internal event to send a publish response: SHALL only be used when sending 1 PublishResponse in the cycle */
     generate_internal_send_publish_response_event (p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_statusCode) =
     PRE
         p_session : t_session_i & p_session : t_session &
@@ -106,6 +107,30 @@ OPERATIONS
         p_req_context : t_request_context_i & p_req_context : t_request_context &
         p_statusCode : t_StatusCode_i & p_statusCode : t_StatusCode
     THEN
+        skip
+    END
+    ;
+
+    /* Generate an internal event to send one or several publish response:
+       - SHALL be used when sending <N> PublishResponse WITH notifications in the same cycle
+       - flush_internal_multi_send_publish_response_event SHALL be called at end of cycle
+    */
+    generate_internal_multi_send_publish_response_event (p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_statusCode) =
+    PRE
+        p_session : t_session_i & p_session : t_session &
+        p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg &
+        publish_response_message = p_publish_resp_msg &
+        p_req_handle : t_server_request_handle_i &
+        p_req_context : t_request_context_i & p_req_context : t_request_context &
+        p_statusCode : t_StatusCode_i & p_statusCode : t_StatusCode
+    THEN
+        skip
+    END
+    ;
+
+    /* Flush the internal send publish response events generated in the correct order */
+    flush_internal_multi_send_publish_response_events =
+    BEGIN
         skip
     END
     ;
@@ -203,6 +228,13 @@ OPERATIONS
     THEN
         EventNotification_MonitoredItemId(p_index) := p_monitored_item_id ||
         EventNotification_MonitoredItemNotif(p_index) := p_event_field_list
+    END
+    ;
+
+    /* Needs UNINIT to deallocate linked list to store multiple publish responses to be sent */
+    msg_subscription_publish_bs_UNINITIALISATION =
+    BEGIN
+        skip
     END
 
 END

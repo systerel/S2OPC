@@ -103,8 +103,6 @@ typedef enum SOPC_Services_Event
                                                  Provides an asynchronous publish response to be sent.<BR/>
                                                  id = session id<BR/>
                                                  params = (SOPC_Internal_AsyncSendMsgData*)<BR/>
-                                                 auxParams = (constants_statuscodes_bs__t_StatusCode_i) service result
-                                                 code
                                                */
 
     /* Timer to services events */

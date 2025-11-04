@@ -1467,6 +1467,25 @@ OPERATIONS
     END
     ;
 
+    generate_internal_multi_send_publish_response_event (p_session, p_publish_resp_msg, p_req_handle, p_req_context, p_statusCode) =
+    PRE
+        p_session : t_session_i & p_session : t_session &
+        p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg &
+        publish_response_message = p_publish_resp_msg &
+        p_req_handle : t_server_request_handle_i &
+        p_req_context : t_request_context_i & p_req_context : t_request_context &
+        p_statusCode : t_StatusCode_i & p_statusCode : t_StatusCode
+    THEN
+        skip
+    END
+    ;
+
+    flush_internal_multi_send_publish_response_events =
+    BEGIN
+        skip
+    END
+    ;
+
     subscription_core_UNINITIALISATION =
     BEGIN
         d_init

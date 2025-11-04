@@ -37,11 +37,21 @@
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
 
+SOPC_SLinkedList* multiPubRespsLIFO = NULL;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void msg_subscription_publish_bs__INITIALISATION(void)
-{ /*Translated from B but an intialisation is not needed from this module.*/
+{
+    multiPubRespsLIFO = SOPC_SLinkedList_Create(0);
+    SOPC_ASSERT(NULL != multiPubRespsLIFO);
+}
+
+void msg_subscription_publish_bs__msg_subscription_publish_bs_UNINITIALISATION(void)
+{
+    SOPC_SLinkedList_Delete(multiPubRespsLIFO);
+    multiPubRespsLIFO = NULL;
 }
 
 /*--------------------
@@ -183,6 +193,74 @@ void msg_subscription_publish_bs__get_notification_message_no_items(
     *msg_subscription_publish_bs__p_notifMsg = &pubResp->NotificationMessage;
 }
 
+static void gen_or_queue_send_pub_resp_event(bool postEventFlag,
+                                             SOPC_SessionId sessionId,
+                                             void* msgToSend,
+                                             uint32_t requestHandle,
+                                             uint32_t requestId,
+                                             constants_statuscodes_bs__t_StatusCode_i bStatusCode)
+{
+    SOPC_Internal_AsyncSendMsgData* eventData = SOPC_Malloc(sizeof(SOPC_Internal_AsyncSendMsgData));
+    bool result = (NULL != eventData);
+    if (result)
+    {
+        eventData->msgToSend = msgToSend;
+        eventData->requestHandle = requestHandle;
+        eventData->requestId = requestId;
+        eventData->bStatusCode = (uint32_t) bStatusCode; // valid in a uint32_t since enum value starts at 0
+
+        if (postEventFlag)
+        {
+            SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO,
+                                         sessionId, (uintptr_t) eventData, (uintptr_t) NULL);
+        }
+        else
+        {
+            uintptr_t prepended = SOPC_SLinkedList_Prepend(multiPubRespsLIFO, sessionId, (uintptr_t) eventData);
+            result = (0 != prepended);
+        }
+    }
+    if (!result)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "generate_internal_send_publish_response_event: out of memory error sending publish response "
+            "postEventFlag=%s,session=%" PRIu32 ", requestId/Handle=%" PRIu32 "/%" PRIu32 "",
+            postEventFlag ? "true" : "false", sessionId, requestId, requestHandle);
+    }
+}
+
+void msg_subscription_publish_bs__flush_internal_multi_send_publish_response_events(void)
+{
+    SOPC_SLinkedListIterator eventDataIter = SOPC_SLinkedList_GetIterator(multiPubRespsLIFO);
+    uint32_t sessionId = 0;
+    // Note: operations were pushed (prepended) and we iterate from head to tail which leads to a FILO behavior.
+    //       Since we push them as next events in the services event queue, it finally leads to a FIFO behavior
+    //       that complies with the expected order of publish responses / notifications.
+    while (SOPC_SLinkedList_HasNext(&eventDataIter))
+    {
+        SOPC_Internal_AsyncSendMsgData* eventData =
+            (SOPC_Internal_AsyncSendMsgData*) SOPC_SLinkedList_NextWithId(&eventDataIter, &sessionId);
+
+        SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO,
+                                     sessionId, (uintptr_t) eventData, (uintptr_t) NULL);
+    }
+    SOPC_SLinkedList_Clear(multiPubRespsLIFO);
+}
+
+void msg_subscription_publish_bs__generate_internal_multi_send_publish_response_event(
+    const constants__t_session_i msg_subscription_publish_bs__p_session,
+    const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
+    const constants__t_server_request_handle_i msg_subscription_publish_bs__p_req_handle,
+    const constants__t_request_context_i msg_subscription_publish_bs__p_req_context,
+    const constants_statuscodes_bs__t_StatusCode_i msg_subscription_publish_bs__p_statusCode)
+{
+    gen_or_queue_send_pub_resp_event(
+        false, msg_subscription_publish_bs__p_session, msg_subscription_publish_bs__p_publish_resp_msg,
+        msg_subscription_publish_bs__p_req_handle, msg_subscription_publish_bs__p_req_context,
+        msg_subscription_publish_bs__p_statusCode);
+}
+
 void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
     const constants__t_session_i msg_subscription_publish_bs__p_session,
     const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
@@ -190,26 +268,10 @@ void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
     const constants__t_request_context_i msg_subscription_publish_bs__p_req_context,
     const constants_statuscodes_bs__t_StatusCode_i msg_subscription_publish_bs__p_statusCode)
 {
-    SOPC_Internal_AsyncSendMsgData* eventData = SOPC_Malloc(sizeof(SOPC_Internal_AsyncSendMsgData));
-    if (NULL != eventData)
-    {
-        eventData->msgToSend = msg_subscription_publish_bs__p_publish_resp_msg;
-        eventData->requestHandle = msg_subscription_publish_bs__p_req_handle;
-        eventData->requestId = msg_subscription_publish_bs__p_req_context;
-
-        SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO,
-                                     (uint32_t) msg_subscription_publish_bs__p_session, (uintptr_t) eventData,
-                                     (uintptr_t) msg_subscription_publish_bs__p_statusCode);
-    }
-    else
-    {
-        SOPC_Logger_TraceError(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "generate_internal_send_publish_response_event: out of memory error sending publish response "
-            "session=%" PRIu32 ", requestId/Handle=%" PRIu32 "/%" PRIu32 "",
-            msg_subscription_publish_bs__p_session, msg_subscription_publish_bs__p_req_context,
-            msg_subscription_publish_bs__p_req_handle);
-    }
+    gen_or_queue_send_pub_resp_event(
+        true, msg_subscription_publish_bs__p_session, msg_subscription_publish_bs__p_publish_resp_msg,
+        msg_subscription_publish_bs__p_req_handle, msg_subscription_publish_bs__p_req_context,
+        msg_subscription_publish_bs__p_statusCode);
 }
 
 void msg_subscription_publish_bs__set_msg_publish_resp_notificationMsg(
