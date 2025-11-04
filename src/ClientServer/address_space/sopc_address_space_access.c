@@ -1782,8 +1782,7 @@ static void delete_target_reference_in_source_node(const SOPC_AddressSpaceAccess
     const int32_t* noOfReferences = SOPC_AddressSpace_Get_NoOfReferences(addSpaceAccess->addSpaceRef, sourceNode);
     OpcUa_ReferenceNode** references = SOPC_AddressSpace_Get_References(addSpaceAccess->addSpaceRef, sourceNode);
     OpcUa_ReferenceNode* reference = NULL;
-    int32_t nodeId_comparison = -1;
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    bool nodeIdEqual = false;
     if (noOfReferences != NULL && 0 < *noOfReferences && NULL != references)
     {
         SOPC_SLinkedList* indexOfRefsToDelete = SOPC_SLinkedList_Create((size_t) *noOfReferences);
@@ -1795,15 +1794,15 @@ static void delete_target_reference_in_source_node(const SOPC_AddressSpaceAccess
             reference = &(*references)[indexReference];
             const SOPC_NodeId* targetNodeId = SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, targetNode);
             SOPC_ASSERT(NULL != targetNodeId);
-            status = SOPC_NodeId_Compare(targetNodeId, &reference->TargetId.NodeId, &nodeId_comparison);
-            if (0 == nodeId_comparison && SOPC_STATUS_OK == status)
+            nodeIdEqual = SOPC_NodeId_Equal(targetNodeId, &reference->TargetId.NodeId);
+            if (nodeIdEqual)
             {
                 SOPC_SLinkedList_Append(indexOfRefsToDelete, 0,
                                         (uintptr_t)(indexReference + 1)); // prevent from adding value 0 and fail
             }
         }
         SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(indexOfRefsToDelete);
-        while (SOPC_SLinkedList_HasNext(&it) && SOPC_STATUS_OK == status)
+        while (SOPC_SLinkedList_HasNext(&it))
         {
             int32_t indexOfRef = (int32_t) SOPC_SLinkedList_Next(&it);
             // Delete reference
@@ -1874,7 +1873,7 @@ static bool is_single_parent(const SOPC_AddressSpaceAccess* addSpaceAccess,
     const OpcUa_ReferenceNode* reference = NULL;
     bool b_initial_parent_found = false;
     bool b_otherParentFound = false;
-    int32_t nodeId_comparison = -1;
+    bool nodeIdEqual = false;
     if (noOfReferences != NULL && 0 < *noOfReferences && NULL != references)
     {
         for (int32_t indexReference = 0; indexReference < *noOfReferences && !b_otherParentFound; indexReference++)
@@ -1900,12 +1899,8 @@ static bool is_single_parent(const SOPC_AddressSpaceAccess* addSpaceAccess,
                         const SOPC_NodeId* alreadyKnownParentNodeId =
                             SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, alreadyKnownParentNode);
                         SOPC_ASSERT(NULL != alreadyKnownParentNodeId);
-                        status = SOPC_NodeId_Compare(alreadyKnownParentNodeId, &reference->TargetId.NodeId,
-                                                     &nodeId_comparison);
-                    }
-                    if (SOPC_STATUS_OK == status)
-                    {
-                        if (0 == nodeId_comparison)
+                        nodeIdEqual = SOPC_NodeId_Equal(alreadyKnownParentNodeId, &reference->TargetId.NodeId);
+                        if (nodeIdEqual)
                         {
                             b_initial_parent_found = true;
                         }

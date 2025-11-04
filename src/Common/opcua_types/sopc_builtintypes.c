@@ -1712,6 +1712,43 @@ void SOPC_NodeId_Clear(SOPC_NodeId* nodeId)
     }
 }
 
+bool SOPC_NodeId_Equal(const SOPC_NodeId* left, const SOPC_NodeId* right)
+{
+    if (NULL == left || NULL == right)
+    {
+        return false;
+    }
+    bool result = false;
+    if (left == right)
+    {
+        result = true;
+    }
+    else if (left->Namespace == right->Namespace && left->IdentifierType == right->IdentifierType)
+    {
+        switch (left->IdentifierType)
+        {
+        case SOPC_IdentifierType_Numeric:
+            result = left->Data.Numeric == right->Data.Numeric;
+            break;
+        case SOPC_IdentifierType_String:
+            result = SOPC_String_Equal(&left->Data.String, &right->Data.String);
+            break;
+        case SOPC_IdentifierType_Guid:
+            if (NULL != left->Data.Guid && NULL != right->Data.Guid)
+            {
+                result = (0 == memcmp(left->Data.Guid, right->Data.Guid, sizeof(SOPC_Guid)));
+            } // else invalid parameters
+            break;
+        case SOPC_IdentifierType_ByteString:
+            result = SOPC_ByteString_Equal(&left->Data.Bstring, &right->Data.Bstring);
+            break;
+        default:
+            break;
+        }
+    }
+    return result;
+}
+
 SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId* right, int32_t* comparison)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -1793,21 +1830,6 @@ SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId
 SOPC_ReturnStatus SOPC_NodeId_CompareAux(const void* left, const void* right, int32_t* comparison)
 {
     return SOPC_NodeId_Compare((const SOPC_NodeId*) left, (const SOPC_NodeId*) right, comparison);
-}
-
-bool SOPC_NodeId_Equal(const SOPC_NodeId* left, const SOPC_NodeId* right)
-{
-    if (NULL == left || NULL == right)
-    {
-        return false;
-    }
-    int32_t compare = -1;
-    SOPC_ReturnStatus status = SOPC_NodeId_Compare(left, right, &compare);
-    if (SOPC_STATUS_OK != status)
-    {
-        return false;
-    }
-    return compare == 0;
 }
 
 bool SOPC_NodeId_IsNull(const SOPC_NodeId* nodeId)
@@ -2189,12 +2211,7 @@ static uint64_t nodeid_hash(const uintptr_t id)
 
 static bool nodeid_equal(const uintptr_t a, const uintptr_t b)
 {
-    int32_t cmp = 0;
-
-    SOPC_ReturnStatus status = SOPC_NodeId_Compare((const SOPC_NodeId*) a, (const SOPC_NodeId*) b, &cmp);
-    SOPC_ASSERT(status == SOPC_STATUS_OK);
-
-    return cmp == 0;
+    return SOPC_NodeId_Equal((const SOPC_NodeId*) a, (const SOPC_NodeId*) b);
 }
 
 static void nodeid_free(uintptr_t id)

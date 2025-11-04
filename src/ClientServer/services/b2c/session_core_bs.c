@@ -295,13 +295,12 @@ void session_core_bs__server_get_session_from_token(const constants__t_session_t
 {
     constants__t_session_i result = constants__c_session_indet;
     SOPC_NodeId* requestedToken = session_core_bs__session_token;
-    int32_t comparison = 1;
+    bool equalNodeId = false;
 
     for (uint32_t idx = (uint32_t) constants__t_session_i_max; constants__c_session_indet == result && idx > 0; idx--)
     {
-        SOPC_ReturnStatus status =
-            SOPC_NodeId_Compare(&serverSessionDataArray[idx].sessionToken, requestedToken, &comparison);
-        if (SOPC_STATUS_OK == status && 0 == comparison)
+        equalNodeId = SOPC_NodeId_Equal(&serverSessionDataArray[idx].sessionToken, requestedToken);
+        if (equalNodeId)
         {
             result = idx;
         }
