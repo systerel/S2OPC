@@ -1912,16 +1912,13 @@ OPERATIONS
         l_bres
     IN
         l_nid, l_aid <-- get_write_value_pointer_NodeId_AttributeId (p_new_write_value_pointer);
-        l_nid_valid, l_node <-- readall_AddressSpace_Node (l_nid);
-        IF l_nid_valid = TRUE
+        l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_nid);
+        IF l_bres = TRUE
         THEN
-            l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (l_nid);
-            IF l_bres = TRUE
-            THEN
-                create_notification_on_monitored_items_if_data_changed
-                (l_monitoredItemQueue, p_old_write_value_pointer, p_new_write_value_pointer)
-            END
-        END;
+            create_notification_on_monitored_items_if_data_changed
+            (l_monitoredItemQueue, p_old_write_value_pointer, p_new_write_value_pointer)
+        END
+        ;
         free_write_value_pointer (p_old_write_value_pointer);
         free_write_value_pointer (p_new_write_value_pointer)
     END

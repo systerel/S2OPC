@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 26/11/2025 13:53:25
+ Date                 : 27/11/2025 16:05:49
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1522,26 +1522,19 @@ void subscription_mgr__server_subscription_data_changed(
    {
       constants__t_NodeId_i subscription_mgr__l_nid;
       constants__t_AttributeId_i subscription_mgr__l_aid;
-      t_bool subscription_mgr__l_nid_valid;
-      constants__t_Node_i subscription_mgr__l_node;
       constants__t_monitoredItemQueue_i subscription_mgr__l_monitoredItemQueue;
       t_bool subscription_mgr__l_bres;
       
       write_value_pointer_bs__get_write_value_pointer_NodeId_AttributeId(subscription_mgr__p_new_write_value_pointer,
          &subscription_mgr__l_nid,
          &subscription_mgr__l_aid);
-      address_space_itf__readall_AddressSpace_Node(subscription_mgr__l_nid,
-         &subscription_mgr__l_nid_valid,
-         &subscription_mgr__l_node);
-      if (subscription_mgr__l_nid_valid == true) {
-         subscription_core__get_nodeToMonitoredItemQueue(subscription_mgr__l_nid,
-            &subscription_mgr__l_bres,
-            &subscription_mgr__l_monitoredItemQueue);
-         if (subscription_mgr__l_bres == true) {
-            subscription_mgr__create_notification_on_monitored_items_if_data_changed(subscription_mgr__l_monitoredItemQueue,
-               subscription_mgr__p_old_write_value_pointer,
-               subscription_mgr__p_new_write_value_pointer);
-         }
+      subscription_core__get_nodeToMonitoredItemQueue(subscription_mgr__l_nid,
+         &subscription_mgr__l_bres,
+         &subscription_mgr__l_monitoredItemQueue);
+      if (subscription_mgr__l_bres == true) {
+         subscription_mgr__create_notification_on_monitored_items_if_data_changed(subscription_mgr__l_monitoredItemQueue,
+            subscription_mgr__p_old_write_value_pointer,
+            subscription_mgr__p_new_write_value_pointer);
       }
       write_value_pointer_bs__free_write_value_pointer(subscription_mgr__p_old_write_value_pointer);
       write_value_pointer_bs__free_write_value_pointer(subscription_mgr__p_new_write_value_pointer);
