@@ -659,16 +659,17 @@ START_TEST(test_UserEncodeableTypeNS1)
 
     // Get_DataType returns the generic structure type
     SOPC_Variant variant;
+    SOPC_NodeId outNodeId;
+    SOPC_NodeId_Initialize(&outNodeId);
     SOPC_Variant_Initialize(&variant);
     variant.BuiltInTypeId = SOPC_ExtensionObject_Id;
     variant.Value.ExtObject = &extObj;
-    SOPC_NodeId* typeId = SOPC_Variant_Get_DataType(&variant);
+    const SOPC_NodeId* typeId = SOPC_Variant_Get_DataType(&variant, &outNodeId);
     ck_assert_ptr_nonnull(typeId);
     ck_assert_int_eq(0, typeId->Namespace);
     ck_assert_int_eq(SOPC_IdentifierType_Numeric, typeId->IdentifierType);
     ck_assert_int_eq(OpcUaId_Structure, typeId->Data.Numeric);
-    SOPC_NodeId_Clear(typeId);
-    SOPC_Free(typeId);
+    SOPC_NodeId_Clear(&outNodeId);
     // Record the encodeable type encoder
     for (uint32_t i = 0; SOPC_STATUS_OK == status && i < SOPC_Custom_TypeInternalIndex_SIZE; i++)
     {
@@ -694,13 +695,12 @@ START_TEST(test_UserEncodeableTypeNS1)
     ck_assert(extObj.Encoding == SOPC_ExtObjBodyEncoding_Object);
     ck_assert_ptr_eq(&OpcUa_Custom_CustomDataType_EncodeableType, extObj.Body.Object.ObjType);
     // Get_DataType returns the type id
-    typeId = SOPC_Variant_Get_DataType(&variant);
+    typeId = SOPC_Variant_Get_DataType(&variant, &outNodeId);
     ck_assert_ptr_nonnull(typeId);
     ck_assert_int_eq(NS_INDEX, typeId->Namespace);
     ck_assert_int_eq(SOPC_IdentifierType_Numeric, typeId->IdentifierType);
     ck_assert_int_eq(OpcUaId_Custom_CustomDataType, typeId->Data.Numeric);
-    SOPC_NodeId_Clear(typeId);
-    SOPC_Free(typeId);
+    SOPC_NodeId_Clear(&outNodeId);
 
     // Remove custom type from recorded encoders
     status = SOPC_EncodeableType_RemoveUserType(&OpcUa_Custom_CustomDataType_EncodeableType);

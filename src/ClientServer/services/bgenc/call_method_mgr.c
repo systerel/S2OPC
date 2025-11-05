@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 24/03/2025 16:18:47
+ Date                 : 05/11/2025 13:42:14
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -318,7 +318,6 @@ void call_method_mgr__check_method_call_one_argument_type(
          call_method_mgr__l_arg_valueRank,
          &call_method_mgr__l_bool,
          &call_method_mgr__l_compat_with_conv);
-      node_id_pointer_bs__free_node_id_pointer(call_method_mgr__l_value_type);
       if (call_method_mgr__l_bool == false) {
          *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_type_mismatch;
       }

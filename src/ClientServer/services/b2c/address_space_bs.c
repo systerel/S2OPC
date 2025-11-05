@@ -1560,13 +1560,17 @@ static const SOPC_NodeId* getVariantEncodingId(SOPC_Variant* varExtObj)
     return NULL;
 }
 
+static SOPC_NodeId localConvVariantType;
+
 void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i address_space_bs__p_variant,
                                              constants__t_NodeId_i* const address_space_bs__p_type)
 {
     SOPC_ASSERT(NULL != address_space_bs__p_variant);
     SOPC_ASSERT(NULL != address_space_bs__p_type);
-    SOPC_NodeId* result = NULL;
-    result = SOPC_Variant_Get_DataType(address_space_bs__p_variant);
+    *address_space_bs__p_type = constants__c_NodeId_indet;
+    SOPC_NodeId_Initialize(&localConvVariantType);
+    const SOPC_NodeId* result = NULL;
+    result = SOPC_Variant_Get_DataType(address_space_bs__p_variant, &localConvVariantType);
 
     // In case resolution was not possible due to unknown encoder, try to retrieve type from address space
     if (NULL != result && /* NULL is possible due to ExtensionObject with None encoding mask case */
@@ -1581,17 +1585,15 @@ void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i addres
                 SOPC_AddressSpaceUtil_GetEncodingDataType(address_space_bs__nodes, encodingNodeId);
             if (NULL != resolvedDataTypeId)
             {
-                SOPC_NodeId_Clear(result);
-                SOPC_ReturnStatus status = SOPC_NodeId_Copy(result, resolvedDataTypeId);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Free(result);
-                    result = NULL;
-                }
+                result = resolvedDataTypeId;
             }
         }
     }
-    *address_space_bs__p_type = result;
+    if (NULL != result)
+    {
+        localConvVariantType = *result;
+        *address_space_bs__p_type = &localConvVariantType;
+    }
 }
 
 void address_space_bs__get_conv_Variant_ValueRank(const constants__t_Variant_i address_space_bs__p_variant,

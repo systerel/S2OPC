@@ -1391,11 +1391,13 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(SOPC_Variant* dest,
  *
  *
  * \param var  The Variant for which the DataType is returned
+ * \param outNodeId  An allocated NodeId in which the DataType NodeId is copied (without allocation)
+ *                   and its pointer is returned as result in case of success.
  *
  * \return     The newly DataType NodeId of the given variant (to be deallocated by caller)
  *             or NULL (NULL variant or extension object without body encoded or allocation failure)
  */
-SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var);
+const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var, SOPC_NodeId* outNodeId);
 int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var);
 bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRank);
 

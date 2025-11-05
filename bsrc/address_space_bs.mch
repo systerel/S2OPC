@@ -1013,6 +1013,8 @@ OPERATIONS
     END
     ;
 
+    /* Provide the NodeId DataType matching the variant content
+       WARNING: RESULT SHALL ONLY BE USED LOCALLY AND IS CONST => NO DEALLOCATION */
     p_type <-- get_conv_Variant_Type(p_variant) =
     PRE
         p_variant : t_Variant_i &

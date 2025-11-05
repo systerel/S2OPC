@@ -515,7 +515,6 @@ OPERATIONS
                     l_dv_datatype_vr <-- get_conv_DataValue_ValueRank(dataValue);
                     l_compatible_type, l_compat_with_conv
                       <-- is_variable_compat_type(l_dv_datatype_nid, l_dv_datatype_vr, l_var_datatype_nid, l_var_vr);
-                    free_node_id_pointer(l_dv_datatype_nid);
                     l_server_ts <-- get_conv_DataValue_ServerTimestamp(dataValue);
                     /* Only null server timestamp allowed since we do not support to write it (ignore when it is a local treatment) */
                     l_server_ts_null <-- is_Timestamps_Null(l_server_ts);

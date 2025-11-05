@@ -505,7 +505,6 @@ OPERATIONS
         l_bool, l_compat_with_conv
         <-- read_variable_compat_type(l_value_type, l_value_valueRank, l_arg_type, l_arg_valueRank);
         /* l_compat_with_conv is not used */
-        free_node_id_pointer(l_value_type);
 
         IF l_bool = FALSE THEN
             StatusCode := e_sc_bad_type_mismatch

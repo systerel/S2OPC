@@ -6337,7 +6337,7 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(SOPC_Variant* dest,
     return false;
 }
 
-static SOPC_NodeId* SOPC_ExtensionObject_Get_DataType(SOPC_ExtensionObject* extObj, SOPC_NodeId* outNodeId)
+static const SOPC_NodeId* SOPC_ExtensionObject_Get_DataType(SOPC_ExtensionObject* extObj, SOPC_NodeId* outNodeId)
 {
     SOPC_ASSERT(NULL != outNodeId);
     if (extObj->Encoding == SOPC_ExtObjBodyEncoding_Object && NULL != extObj->Body.Object.ObjType)
@@ -6409,17 +6409,16 @@ int32_t SOPC_Variant_GetArrayOrMatrixLength(const SOPC_Variant* var)
     return length;
 }
 
-SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
+const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var, SOPC_NodeId* outNodeId)
 {
-    if (NULL == var)
+    if (NULL == var || NULL == outNodeId)
     {
         return NULL;
     }
     SOPC_NodeId nextEltTypeId = SOPC_Null_Type;
     SOPC_NodeId eltTypeId = SOPC_Null_Type;
     bool resultSet = false;
-    const SOPC_NodeId* resultToCopy = NULL;
-    SOPC_NodeId* result = NULL;
+    const SOPC_NodeId* result = NULL;
     int32_t extObjArrayLength = 0;
     SOPC_ExtensionObject* extObjArray = NULL;
     switch (var->BuiltInTypeId)
@@ -6449,12 +6448,12 @@ SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
     case SOPC_DiagnosticInfo_Id:
     case SOPC_DataValue_Id:
     case SOPC_Variant_Id: /* Corresponds to BaseDataType: could only be an array of Variant */
-        resultToCopy = SOPC_BuiltInTypeId_To_DataTypeNodeId[var->BuiltInTypeId];
+        result = SOPC_BuiltInTypeId_To_DataTypeNodeId[var->BuiltInTypeId];
         break;
     case SOPC_ExtensionObject_Id:
         if (SOPC_VariantArrayType_SingleValue == var->ArrayType)
         {
-            resultToCopy = SOPC_ExtensionObject_Get_DataType(var->Value.ExtObject, &eltTypeId);
+            result = SOPC_ExtensionObject_Get_DataType(var->Value.ExtObject, &eltTypeId);
         }
         else
         {
@@ -6467,24 +6466,22 @@ SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
                 for (int32_t i = 0; i < extObjArrayLength && !resultSet; i++)
                 {
                     SOPC_NodeId_Initialize(&nextEltTypeId);
-                    resultToCopy = SOPC_ExtensionObject_Get_DataType(&extObjArray[i], &nextEltTypeId);
-                    if (&nextEltTypeId != resultToCopy)
+                    result = SOPC_ExtensionObject_Get_DataType(&extObjArray[i], &nextEltTypeId);
+                    if (&nextEltTypeId != result)
                     {
                         resultSet = true;
-                        resultToCopy = NULL;
+                        result = NULL;
                     }
                     else if (i > 0 && !SOPC_NodeId_Equal(&eltTypeId, &nextEltTypeId))
                     {
                         // Note: it would be necessary to find the first common ancestor of both types
                         // but structure is at least expected to be a common ancestor (loss of type precision)
-                        SOPC_NodeId_Clear(&nextEltTypeId);
                         resultSet = true;
-                        resultToCopy = &SOPC_Structure_Type;
+                        result = &SOPC_Structure_Type;
                     }
                     else
                     {
                         // All previous element types are identical
-                        SOPC_NodeId_Clear(&eltTypeId);
                         eltTypeId = nextEltTypeId;
                     }
                 }
@@ -6492,7 +6489,7 @@ SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
             else if (0 == extObjArrayLength)
             {
                 // => Null type id if array empty
-                resultToCopy = &eltTypeId;
+                result = &eltTypeId;
             }
             else
             {
@@ -6506,17 +6503,11 @@ SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
         return NULL;
     }
 
-    if (NULL != resultToCopy)
+    if (NULL != result)
     {
-        result = SOPC_Calloc(1, sizeof(SOPC_NodeId));
-        SOPC_ReturnStatus status = SOPC_NodeId_Copy(result, resultToCopy);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Free(result);
-            result = NULL;
-        }
+        *outNodeId = *result;
+        result = outNodeId;
     }
-    SOPC_NodeId_Clear(&eltTypeId);
     return result;
 }
 
