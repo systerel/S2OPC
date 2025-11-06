@@ -46,3 +46,4 @@ the legal rights to contribute.
 * Max Bernard <max.bernard-stg@systerel.fr>
 * Cinthya Kouamou <cinthya.kouamou.kouamou@systerel.fr>
 * Florian Antheunis <florian.antheunis@systerel.fr>
+* Theo Pirouelle <theo.pirouelle@systerel.fr>
