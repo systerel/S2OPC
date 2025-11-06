@@ -102,6 +102,7 @@ pubsub_sched_ethernet_with_recv_itf.tap
 pubsub_sched_ethernet_pub_config_err.tap
 pubsub_sched_ethernet_sub_config_err.tap
 pubsub_modules_test.tap
+time_test.tap
 xml_parser_test.tap'
 
 PUBSUB_CLIENTSERVER_TAP_FILES='cli_self_test.tap
