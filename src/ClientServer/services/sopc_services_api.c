@@ -238,12 +238,13 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     bool lbres = false;
     bool bres = false;
     void* msg = NULL;
-    SOPC_Array* dataChangedArray = NULL;
+    size_t length = 0;
+    SOPC_Array* dataOrNodeChangedArray = NULL;
     SOPC_WriteDataChanged* writeDataChanged = NULL;
+    SOPC_NodeChanged* nodeChanged = NULL;
     OpcUa_WriteValue* old_value = NULL;
     OpcUa_WriteValue* new_value = NULL;
     SOPC_Internal_AsyncSendMsgData* msg_data;
-    SOPC_NodeId* nodeId = NULL;
     const SOPC_NodeId* nodeId2 = NULL;
     char* nodeIdStr = NULL;
     char* nodeIdStr2 = NULL;
@@ -302,11 +303,12 @@ static void onServiceEvent(SOPC_EventHandler* handler,
          */
         SOPC_ASSERT((void*) params != NULL);
 
-        dataChangedArray = (SOPC_Array*) params;
+        dataOrNodeChangedArray = (SOPC_Array*) params;
         bres = true;
-        for (size_t i = 0; i < SOPC_Array_Size(dataChangedArray); i++)
+        length = SOPC_Array_Size(dataOrNodeChangedArray);
+        for (size_t i = 0; i < length; i++)
         {
-            writeDataChanged = (SOPC_WriteDataChanged*) SOPC_Array_Get_Ptr(dataChangedArray, i);
+            writeDataChanged = (SOPC_WriteDataChanged*) SOPC_Array_Get_Ptr(dataOrNodeChangedArray, i);
             SOPC_ASSERT(writeDataChanged != NULL);
             old_value = writeDataChanged->oldValue;
             new_value = writeDataChanged->newValue;
@@ -314,7 +316,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
             io_dispatch_mgr__internal_server_data_changed(old_value, new_value, &lbres);
             bres = bres && lbres;
         }
-        SOPC_Array_Delete(dataChangedArray);
+        SOPC_Array_Delete(dataOrNodeChangedArray);
         if (bres == false)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -324,18 +326,34 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         break;
     case SE_TO_SE_SERVER_NODE_CHANGED:
         /* Server side only:
-           params = (bool) true if node added, false if node deleted
-           auxParam = (SOPC_NodeId*) NodeId of the node added/deleted
+           params = (SOPC_Array*) array of SOPC_NodeChanged
          */
-        SOPC_ASSERT(NULL != (void*) auxParam);
-        nodeId = (SOPC_NodeId*) auxParam;
-        nodeIdStr = SOPC_NodeId_ToCString(nodeId);
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: SE_TO_SE_SERVER_NODE_CHANGED %s nodeId: %s",
-                               params ? "added" : "deleted", nodeIdStr);
-        SOPC_Free(nodeIdStr);
-        io_dispatch_mgr__internal_server_node_changed((bool) params, (SOPC_NodeId*) auxParam);
-        SOPC_NodeId_Clear(nodeId);
-        SOPC_Free(nodeId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: SE_TO_SE_SERVER_NODE_CHANGED batched notifications");
+
+        SOPC_ASSERT(NULL != (void*) params);
+        {
+            dataOrNodeChangedArray = (SOPC_Array*) params;
+            length = SOPC_Array_Size(dataOrNodeChangedArray);
+            lbres = SOPC_LOG_LEVEL_DEBUG == SOPC_Logger_GetTraceLogLevel();
+            for (size_t i = 0; i < length; i++)
+            {
+                nodeChanged = (SOPC_NodeChanged*) SOPC_Array_Get_Ptr(dataOrNodeChangedArray, i);
+                SOPC_ASSERT(NULL != nodeChanged);
+                if (lbres)
+                {
+                    nodeIdStr = SOPC_NodeId_ToCString(nodeChanged->nodeId);
+                    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "ServicesMgr: SE_TO_SE_SERVER_NODE_CHANGED %s nodeId: %s",
+                                           nodeChanged->added ? "added" : "deleted", nodeIdStr);
+                    SOPC_Free(nodeIdStr);
+                }
+                io_dispatch_mgr__internal_server_node_changed(nodeChanged->added, nodeChanged->nodeId);
+                SOPC_NodeId_Clear(nodeChanged->nodeId);
+                SOPC_Free(nodeChanged->nodeId);
+            }
+            SOPC_Array_Delete(dataOrNodeChangedArray);
+        }
         break;
     case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
         /* Server side only:

@@ -82,7 +82,9 @@ void address_space_bs__address_space_bs_UNINITIALISATION(void) {}
 static void generate_notifs_after_address_space_access(SOPC_AddressSpaceAccessOperations* operations)
 {
     SOPC_Array* dataChangedEvents = SOPC_Array_Create(sizeof(SOPC_WriteDataChanged), operations->writeCount, NULL);
+    SOPC_Array* nodeChangedEvents = SOPC_Array_Create(sizeof(SOPC_NodeChanged), operations->changeNodeCount, NULL);
     SOPC_WriteDataChanged writeDataChanged;
+    SOPC_NodeChanged nodeChanged;
     SOPC_ASSERT(NULL != operations);
     SOPC_AddressSpaceAccessOperation* operation =
         (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations->opList);
@@ -100,8 +102,11 @@ static void generate_notifs_after_address_space_access(SOPC_AddressSpaceAccessOp
             SOPC_Array_Append(dataChangedEvents, writeDataChanged);
             break;
         case SOPC_ADDSPACE_CHANGE_NODE:
-            SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_NODE_CHANGED, 0,
-                                         operation->param1, operation->param2);
+            nodeChanged = (SOPC_NodeChanged){
+                .added = (bool) operation->param1,
+                .nodeId = (SOPC_NodeId*) operation->param2,
+            };
+            SOPC_Array_Append(nodeChangedEvents, nodeChanged);
             break;
         default:
             SOPC_ASSERT(false);
@@ -118,6 +123,16 @@ static void generate_notifs_after_address_space_access(SOPC_AddressSpaceAccessOp
     else
     {
         SOPC_Array_Delete(dataChangedEvents);
+    }
+
+    if (SOPC_Array_Size(nodeChangedEvents) > 0)
+    {
+        SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_NODE_CHANGED, 0,
+                                     (uintptr_t) nodeChangedEvents, 0);
+    }
+    else
+    {
+        SOPC_Array_Delete(nodeChangedEvents);
     }
     SOPC_ASSERT(0 == SOPC_SLinkedList_GetLength(operations->opList));
     operations->changeNodeCount = 0;

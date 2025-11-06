@@ -28,6 +28,7 @@
 #ifndef SOPC_SERVICES_API_H_
 #define SOPC_SERVICES_API_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "sopc_event_handler.h"
@@ -41,6 +42,15 @@ typedef struct SOPC_WriteDataChanged
     OpcUa_WriteValue* oldValue;
     OpcUa_WriteValue* newValue;
 } SOPC_WriteDataChanged;
+
+/**
+ * Structure used to store node change notifications
+ */
+typedef struct SOPC_NodeChanged
+{
+    bool added;          /* true if node added, false if node deleted */
+    SOPC_NodeId* nodeId; /* NodeId of the node added/deleted */
+} SOPC_NodeChanged;
 
 /**
  * Services events input events from application, services layer it-self or timer manager
@@ -78,8 +88,9 @@ typedef enum SOPC_Services_Event
                                   */
 
     SE_TO_SE_SERVER_NODE_CHANGED, /**< Server side only:<BR/>
-                                     params = (bool) true if node added, false if node deleted<BR/>
-                                     auxParam = (SOPC_NodeId*) NodeId of the node added/deleted
+                                     Notifies that address space nodes have changed, used to update
+                                     subscription/monitored items state.<BR/>
+                                     params = (SOPC_Array*) array of SOPC_NodeChanged<BR/>
                                    */
 
     SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO, /**< Server side only:<BR/>
