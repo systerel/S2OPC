@@ -116,6 +116,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
             res = is_public ? mbedtls_pk_parse_public_key(&key->pk, null_terminated_buffer, 1 + lenBuf)
                             : MBEDTLS_PK_PARSE_KEY(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0,
                                                    mbedtls_ctr_drbg_random, &ctr_drbg);
+            memset(null_terminated_buffer, 0, 1 + lenBuf);
             SOPC_Free(null_terminated_buffer);
         }
     }
@@ -308,6 +309,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
         status = SOPC_STATUS_OK;
     }
 
+    // Clear and free the temporary buffer
+    memset(buffer, 0, (size_t) lengthWritten);
     SOPC_Free(buffer);
 
     return status;
@@ -730,6 +733,8 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(const SO
         status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(buffer, pLenWritten, out);
     }
 
+    // Clear and free the temporary buffer
+    memset(buffer, 0, pLenWritten);
     SOPC_Free(buffer);
 
     return status;
