@@ -959,6 +959,7 @@ void OpcUa_KeyValuePair_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor KeyValuePair_Fields[] = {
     {
+        false,                                       // isOptional
         true,                                        // isBuiltIn
         false,                                       // isArrayLength
         true,                                        // isToEncode
@@ -968,6 +969,7 @@ static const SOPC_EncodeableType_FieldDescriptor KeyValuePair_Fields[] = {
         (uint32_t) offsetof(OpcUa_KeyValuePair, Key) // offset
     },
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -991,6 +993,7 @@ SOPC_EncodeableType OpcUa_KeyValuePair_EncodeableType = {
     sizeof(OpcUa_KeyValuePair),
     OpcUa_KeyValuePair_Initialize,
     OpcUa_KeyValuePair_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof KeyValuePair_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     KeyValuePair_Fields,
     g_KnownEncodeableTypes};
@@ -1018,6 +1021,7 @@ void OpcUa_AdditionalParametersType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AdditionalParametersType_Fields[] = {
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -1027,6 +1031,7 @@ static const SOPC_EncodeableType_FieldDescriptor AdditionalParametersType_Fields
         (uint32_t) offsetof(OpcUa_AdditionalParametersType, NoOfParameters) // offset
     },
     {
+        false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -1050,6 +1055,7 @@ SOPC_EncodeableType OpcUa_AdditionalParametersType_EncodeableType = {
     sizeof(OpcUa_AdditionalParametersType),
     OpcUa_AdditionalParametersType_Initialize,
     OpcUa_AdditionalParametersType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AdditionalParametersType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AdditionalParametersType_Fields,
     g_KnownEncodeableTypes};
@@ -1077,6 +1083,7 @@ void OpcUa_EphemeralKeyType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EphemeralKeyType_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -1086,6 +1093,7 @@ static const SOPC_EncodeableType_FieldDescriptor EphemeralKeyType_Fields[] = {
         (uint32_t) offsetof(OpcUa_EphemeralKeyType, PublicKey) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -1109,6 +1117,7 @@ SOPC_EncodeableType OpcUa_EphemeralKeyType_EncodeableType = {
     sizeof(OpcUa_EphemeralKeyType),
     OpcUa_EphemeralKeyType_Initialize,
     OpcUa_EphemeralKeyType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EphemeralKeyType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EphemeralKeyType_Fields,
     g_KnownEncodeableTypes};
@@ -1136,6 +1145,7 @@ void OpcUa_EndpointType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EndpointType_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -1145,6 +1155,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointType_Fields[] = {
         (uint32_t) offsetof(OpcUa_EndpointType, EndpointUrl) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -1154,6 +1165,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointType_Fields[] = {
         (uint32_t) offsetof(OpcUa_EndpointType, SecurityMode) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -1163,6 +1175,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointType_Fields[] = {
         (uint32_t) offsetof(OpcUa_EndpointType, SecurityPolicyUri) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -1186,6 +1199,7 @@ SOPC_EncodeableType OpcUa_EndpointType_EncodeableType = {
     sizeof(OpcUa_EndpointType),
     OpcUa_EndpointType_Initialize,
     OpcUa_EndpointType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EndpointType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EndpointType_Fields,
     g_KnownEncodeableTypes};
@@ -1213,6 +1227,7 @@ void OpcUa_RationalNumber_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RationalNumber_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -1222,6 +1237,7 @@ static const SOPC_EncodeableType_FieldDescriptor RationalNumber_Fields[] = {
         (uint32_t) offsetof(OpcUa_RationalNumber, Numerator) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -1245,6 +1261,7 @@ SOPC_EncodeableType OpcUa_RationalNumber_EncodeableType = {
     sizeof(OpcUa_RationalNumber),
     OpcUa_RationalNumber_Initialize,
     OpcUa_RationalNumber_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RationalNumber_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RationalNumber_Fields,
     g_KnownEncodeableTypes};
@@ -1272,6 +1289,7 @@ void OpcUa_ThreeDVector_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ThreeDVector_Fields[] = {
     {
+        false,                                     // isOptional
         true,                                      // isBuiltIn
         false,                                     // isArrayLength
         true,                                      // isToEncode
@@ -1281,6 +1299,7 @@ static const SOPC_EncodeableType_FieldDescriptor ThreeDVector_Fields[] = {
         (uint32_t) offsetof(OpcUa_ThreeDVector, X) // offset
     },
     {
+        false,                                     // isOptional
         true,                                      // isBuiltIn
         false,                                     // isArrayLength
         true,                                      // isToEncode
@@ -1290,6 +1309,7 @@ static const SOPC_EncodeableType_FieldDescriptor ThreeDVector_Fields[] = {
         (uint32_t) offsetof(OpcUa_ThreeDVector, Y) // offset
     },
     {
+        false,                                     // isOptional
         true,                                      // isBuiltIn
         false,                                     // isArrayLength
         true,                                      // isToEncode
@@ -1313,6 +1333,7 @@ SOPC_EncodeableType OpcUa_ThreeDVector_EncodeableType = {
     sizeof(OpcUa_ThreeDVector),
     OpcUa_ThreeDVector_Initialize,
     OpcUa_ThreeDVector_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ThreeDVector_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ThreeDVector_Fields,
     g_KnownEncodeableTypes};
@@ -1340,6 +1361,7 @@ void OpcUa_ThreeDCartesianCoordinates_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ThreeDCartesianCoordinates_Fields[] = {
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -1349,6 +1371,7 @@ static const SOPC_EncodeableType_FieldDescriptor ThreeDCartesianCoordinates_Fiel
         (uint32_t) offsetof(OpcUa_ThreeDCartesianCoordinates, X) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -1358,6 +1381,7 @@ static const SOPC_EncodeableType_FieldDescriptor ThreeDCartesianCoordinates_Fiel
         (uint32_t) offsetof(OpcUa_ThreeDCartesianCoordinates, Y) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -1381,6 +1405,7 @@ SOPC_EncodeableType OpcUa_ThreeDCartesianCoordinates_EncodeableType = {
     sizeof(OpcUa_ThreeDCartesianCoordinates),
     OpcUa_ThreeDCartesianCoordinates_Initialize,
     OpcUa_ThreeDCartesianCoordinates_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ThreeDCartesianCoordinates_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ThreeDCartesianCoordinates_Fields,
     g_KnownEncodeableTypes};
@@ -1408,6 +1433,7 @@ void OpcUa_ThreeDOrientation_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ThreeDOrientation_Fields[] = {
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -1417,6 +1443,7 @@ static const SOPC_EncodeableType_FieldDescriptor ThreeDOrientation_Fields[] = {
         (uint32_t) offsetof(OpcUa_ThreeDOrientation, A) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -1426,6 +1453,7 @@ static const SOPC_EncodeableType_FieldDescriptor ThreeDOrientation_Fields[] = {
         (uint32_t) offsetof(OpcUa_ThreeDOrientation, B) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -1449,6 +1477,7 @@ SOPC_EncodeableType OpcUa_ThreeDOrientation_EncodeableType = {
     sizeof(OpcUa_ThreeDOrientation),
     OpcUa_ThreeDOrientation_Initialize,
     OpcUa_ThreeDOrientation_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ThreeDOrientation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ThreeDOrientation_Fields,
     g_KnownEncodeableTypes};
@@ -1476,6 +1505,7 @@ void OpcUa_ThreeDFrame_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ThreeDFrame_Fields[] = {
     {
+        false,                                                        // isOptional
         false,                                                        // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -1485,6 +1515,7 @@ static const SOPC_EncodeableType_FieldDescriptor ThreeDFrame_Fields[] = {
         (uint32_t) offsetof(OpcUa_ThreeDFrame, CartesianCoordinates)  // offset
     },
     {
+        false,                                               // isOptional
         false,                                               // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -1508,6 +1539,7 @@ SOPC_EncodeableType OpcUa_ThreeDFrame_EncodeableType = {
     sizeof(OpcUa_ThreeDFrame),
     OpcUa_ThreeDFrame_Initialize,
     OpcUa_ThreeDFrame_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ThreeDFrame_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ThreeDFrame_Fields,
     g_KnownEncodeableTypes};
@@ -1535,6 +1567,7 @@ void OpcUa_IdentityMappingRuleType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor IdentityMappingRuleType_Fields[] = {
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -1544,6 +1577,7 @@ static const SOPC_EncodeableType_FieldDescriptor IdentityMappingRuleType_Fields[
         (uint32_t) offsetof(OpcUa_IdentityMappingRuleType, CriteriaType) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -1567,6 +1601,7 @@ SOPC_EncodeableType OpcUa_IdentityMappingRuleType_EncodeableType = {
     sizeof(OpcUa_IdentityMappingRuleType),
     OpcUa_IdentityMappingRuleType_Initialize,
     OpcUa_IdentityMappingRuleType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof IdentityMappingRuleType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     IdentityMappingRuleType_Fields,
     g_KnownEncodeableTypes};
@@ -1594,6 +1629,7 @@ void OpcUa_CurrencyUnitType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CurrencyUnitType_Fields[] = {
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -1603,6 +1639,7 @@ static const SOPC_EncodeableType_FieldDescriptor CurrencyUnitType_Fields[] = {
         (uint32_t) offsetof(OpcUa_CurrencyUnitType, NumericCode) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -1612,6 +1649,7 @@ static const SOPC_EncodeableType_FieldDescriptor CurrencyUnitType_Fields[] = {
         (uint32_t) offsetof(OpcUa_CurrencyUnitType, Exponent) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -1621,6 +1659,7 @@ static const SOPC_EncodeableType_FieldDescriptor CurrencyUnitType_Fields[] = {
         (uint32_t) offsetof(OpcUa_CurrencyUnitType, AlphabeticCode) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -1644,6 +1683,7 @@ SOPC_EncodeableType OpcUa_CurrencyUnitType_EncodeableType = {
     sizeof(OpcUa_CurrencyUnitType),
     OpcUa_CurrencyUnitType_Initialize,
     OpcUa_CurrencyUnitType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CurrencyUnitType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CurrencyUnitType_Fields,
     g_KnownEncodeableTypes};
@@ -1671,6 +1711,7 @@ void OpcUa_TrustListDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TrustListDataType_Fields[] = {
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -1680,6 +1721,7 @@ static const SOPC_EncodeableType_FieldDescriptor TrustListDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_TrustListDataType, SpecifiedLists) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -1689,6 +1731,7 @@ static const SOPC_EncodeableType_FieldDescriptor TrustListDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_TrustListDataType, NoOfTrustedCertificates) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -1698,6 +1741,7 @@ static const SOPC_EncodeableType_FieldDescriptor TrustListDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_TrustListDataType, TrustedCertificates) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         true,                                                         // isArrayLength
         true,                                                         // isToEncode
@@ -1707,6 +1751,7 @@ static const SOPC_EncodeableType_FieldDescriptor TrustListDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_TrustListDataType, NoOfTrustedCrls) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -1716,6 +1761,7 @@ static const SOPC_EncodeableType_FieldDescriptor TrustListDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_TrustListDataType, TrustedCrls) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -1725,6 +1771,7 @@ static const SOPC_EncodeableType_FieldDescriptor TrustListDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_TrustListDataType, NoOfIssuerCertificates) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -1734,6 +1781,7 @@ static const SOPC_EncodeableType_FieldDescriptor TrustListDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_TrustListDataType, IssuerCertificates) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -1743,6 +1791,7 @@ static const SOPC_EncodeableType_FieldDescriptor TrustListDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_TrustListDataType, NoOfIssuerCrls) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -1766,6 +1815,7 @@ SOPC_EncodeableType OpcUa_TrustListDataType_EncodeableType = {
     sizeof(OpcUa_TrustListDataType),
     OpcUa_TrustListDataType_Initialize,
     OpcUa_TrustListDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof TrustListDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TrustListDataType_Fields,
     g_KnownEncodeableTypes};
@@ -1793,6 +1843,7 @@ void OpcUa_DecimalDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DecimalDataType_Fields[] = {
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -1802,6 +1853,7 @@ static const SOPC_EncodeableType_FieldDescriptor DecimalDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_DecimalDataType, Scale) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -1825,6 +1877,7 @@ SOPC_EncodeableType OpcUa_DecimalDataType_EncodeableType = {
     sizeof(OpcUa_DecimalDataType),
     OpcUa_DecimalDataType_Initialize,
     OpcUa_DecimalDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DecimalDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DecimalDataType_Fields,
     g_KnownEncodeableTypes};
@@ -1852,6 +1905,7 @@ void OpcUa_StructureField_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor StructureField_Fields[] = {
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -1861,6 +1915,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureField_Fields[] = {
         (uint32_t) offsetof(OpcUa_StructureField, Name) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -1870,6 +1925,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureField_Fields[] = {
         (uint32_t) offsetof(OpcUa_StructureField, Description) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -1879,6 +1935,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureField_Fields[] = {
         (uint32_t) offsetof(OpcUa_StructureField, DataType) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -1888,6 +1945,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureField_Fields[] = {
         (uint32_t) offsetof(OpcUa_StructureField, ValueRank) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -1897,6 +1955,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureField_Fields[] = {
         (uint32_t) offsetof(OpcUa_StructureField, NoOfArrayDimensions) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -1906,6 +1965,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureField_Fields[] = {
         (uint32_t) offsetof(OpcUa_StructureField, ArrayDimensions) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -1915,6 +1975,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureField_Fields[] = {
         (uint32_t) offsetof(OpcUa_StructureField, MaxStringLength) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -1938,6 +1999,7 @@ SOPC_EncodeableType OpcUa_StructureField_EncodeableType = {
     sizeof(OpcUa_StructureField),
     OpcUa_StructureField_Initialize,
     OpcUa_StructureField_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof StructureField_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     StructureField_Fields,
     g_KnownEncodeableTypes};
@@ -1965,6 +2027,7 @@ void OpcUa_StructureDefinition_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor StructureDefinition_Fields[] = {
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -1974,6 +2037,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureDefinition_Fields[] = 
         (uint32_t) offsetof(OpcUa_StructureDefinition, DefaultEncodingId) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -1983,6 +2047,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureDefinition_Fields[] = 
         (uint32_t) offsetof(OpcUa_StructureDefinition, BaseDataType) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -1992,6 +2057,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureDefinition_Fields[] = 
         (uint32_t) offsetof(OpcUa_StructureDefinition, StructureType) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         true,                                                      // isArrayLength
         true,                                                      // isToEncode
@@ -2001,6 +2067,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureDefinition_Fields[] = 
         (uint32_t) offsetof(OpcUa_StructureDefinition, NoOfFields) // offset
     },
     {
+        false,                                                 // isOptional
         false,                                                 // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -2024,6 +2091,7 @@ SOPC_EncodeableType OpcUa_StructureDefinition_EncodeableType = {
     sizeof(OpcUa_StructureDefinition),
     OpcUa_StructureDefinition_Initialize,
     OpcUa_StructureDefinition_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof StructureDefinition_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     StructureDefinition_Fields,
     g_KnownEncodeableTypes};
@@ -2051,6 +2119,7 @@ void OpcUa_StructureDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor StructureDescription_Fields[] = {
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -2060,6 +2129,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_StructureDescription, DataTypeId) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -2069,6 +2139,7 @@ static const SOPC_EncodeableType_FieldDescriptor StructureDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_StructureDescription, Name) // offset
     },
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -2092,6 +2163,7 @@ SOPC_EncodeableType OpcUa_StructureDescription_EncodeableType = {
     sizeof(OpcUa_StructureDescription),
     OpcUa_StructureDescription_Initialize,
     OpcUa_StructureDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof StructureDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     StructureDescription_Fields,
     g_KnownEncodeableTypes};
@@ -2119,6 +2191,7 @@ void OpcUa_EnumField_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EnumField_Fields[] = {
     {
+        false,                                      // isOptional
         true,                                       // isBuiltIn
         false,                                      // isArrayLength
         true,                                       // isToEncode
@@ -2128,6 +2201,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumField_Fields[] = {
         (uint32_t) offsetof(OpcUa_EnumField, Value) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -2137,6 +2211,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumField_Fields[] = {
         (uint32_t) offsetof(OpcUa_EnumField, DisplayName) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -2146,6 +2221,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumField_Fields[] = {
         (uint32_t) offsetof(OpcUa_EnumField, Description) // offset
     },
     {
+        false,                                     // isOptional
         true,                                      // isBuiltIn
         false,                                     // isArrayLength
         true,                                      // isToEncode
@@ -2169,6 +2245,7 @@ SOPC_EncodeableType OpcUa_EnumField_EncodeableType = {
     sizeof(OpcUa_EnumField),
     OpcUa_EnumField_Initialize,
     OpcUa_EnumField_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EnumField_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EnumField_Fields,
     g_KnownEncodeableTypes};
@@ -2196,6 +2273,7 @@ void OpcUa_EnumDefinition_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EnumDefinition_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         true,                                                 // isArrayLength
         true,                                                 // isToEncode
@@ -2205,6 +2283,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumDefinition_Fields[] = {
         (uint32_t) offsetof(OpcUa_EnumDefinition, NoOfFields) // offset
     },
     {
+        false,                                            // isOptional
         false,                                            // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -2228,6 +2307,7 @@ SOPC_EncodeableType OpcUa_EnumDefinition_EncodeableType = {
     sizeof(OpcUa_EnumDefinition),
     OpcUa_EnumDefinition_Initialize,
     OpcUa_EnumDefinition_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EnumDefinition_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EnumDefinition_Fields,
     g_KnownEncodeableTypes};
@@ -2255,6 +2335,7 @@ void OpcUa_EnumDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EnumDescription_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -2264,6 +2345,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_EnumDescription, DataTypeId) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -2273,6 +2355,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_EnumDescription, Name) // offset
     },
     {
+        false,                                                     // isOptional
         false,                                                     // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -2282,6 +2365,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_EnumDescription, EnumDefinition) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -2305,6 +2389,7 @@ SOPC_EncodeableType OpcUa_EnumDescription_EncodeableType = {
     sizeof(OpcUa_EnumDescription),
     OpcUa_EnumDescription_Initialize,
     OpcUa_EnumDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EnumDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EnumDescription_Fields,
     g_KnownEncodeableTypes};
@@ -2332,6 +2417,7 @@ void OpcUa_SimpleTypeDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SimpleTypeDescription_Fields[] = {
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -2341,6 +2427,7 @@ static const SOPC_EncodeableType_FieldDescriptor SimpleTypeDescription_Fields[] 
         (uint32_t) offsetof(OpcUa_SimpleTypeDescription, DataTypeId) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -2350,6 +2437,7 @@ static const SOPC_EncodeableType_FieldDescriptor SimpleTypeDescription_Fields[] 
         (uint32_t) offsetof(OpcUa_SimpleTypeDescription, Name) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -2359,6 +2447,7 @@ static const SOPC_EncodeableType_FieldDescriptor SimpleTypeDescription_Fields[] 
         (uint32_t) offsetof(OpcUa_SimpleTypeDescription, BaseDataType) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -2382,6 +2471,7 @@ SOPC_EncodeableType OpcUa_SimpleTypeDescription_EncodeableType = {
     sizeof(OpcUa_SimpleTypeDescription),
     OpcUa_SimpleTypeDescription_Initialize,
     OpcUa_SimpleTypeDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SimpleTypeDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SimpleTypeDescription_Fields,
     g_KnownEncodeableTypes};
@@ -2409,6 +2499,7 @@ void OpcUa_DataTypeSchemaHeader_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataTypeSchemaHeader_Fields[] = {
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         true,                                                           // isArrayLength
         true,                                                           // isToEncode
@@ -2418,6 +2509,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeSchemaHeader_Fields[] =
         (uint32_t) offsetof(OpcUa_DataTypeSchemaHeader, NoOfNamespaces) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -2427,6 +2519,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeSchemaHeader_Fields[] =
         (uint32_t) offsetof(OpcUa_DataTypeSchemaHeader, Namespaces) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -2436,6 +2529,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeSchemaHeader_Fields[] =
         (uint32_t) offsetof(OpcUa_DataTypeSchemaHeader, NoOfStructureDataTypes) // offset
     },
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -2445,6 +2539,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeSchemaHeader_Fields[] =
         (uint32_t) offsetof(OpcUa_DataTypeSchemaHeader, StructureDataTypes) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -2454,6 +2549,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeSchemaHeader_Fields[] =
         (uint32_t) offsetof(OpcUa_DataTypeSchemaHeader, NoOfEnumDataTypes) // offset
     },
     {
+        false,                                                         // isOptional
         false,                                                         // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -2463,6 +2559,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeSchemaHeader_Fields[] =
         (uint32_t) offsetof(OpcUa_DataTypeSchemaHeader, EnumDataTypes) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -2472,6 +2569,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeSchemaHeader_Fields[] =
         (uint32_t) offsetof(OpcUa_DataTypeSchemaHeader, NoOfSimpleDataTypes) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -2495,6 +2593,7 @@ SOPC_EncodeableType OpcUa_DataTypeSchemaHeader_EncodeableType = {
     sizeof(OpcUa_DataTypeSchemaHeader),
     OpcUa_DataTypeSchemaHeader_Initialize,
     OpcUa_DataTypeSchemaHeader_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DataTypeSchemaHeader_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataTypeSchemaHeader_Fields,
     g_KnownEncodeableTypes};
@@ -2522,6 +2621,7 @@ void OpcUa_DataTypeDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataTypeDescription_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -2531,6 +2631,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataTypeDescription, DataTypeId) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -2554,6 +2655,7 @@ SOPC_EncodeableType OpcUa_DataTypeDescription_EncodeableType = {
     sizeof(OpcUa_DataTypeDescription),
     OpcUa_DataTypeDescription_Initialize,
     OpcUa_DataTypeDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DataTypeDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataTypeDescription_Fields,
     g_KnownEncodeableTypes};
@@ -2581,6 +2683,7 @@ void OpcUa_UABinaryFileDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] = {
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         true,                                                           // isArrayLength
         true,                                                           // isToEncode
@@ -2590,6 +2693,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, NoOfNamespaces) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -2599,6 +2703,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, Namespaces) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -2608,6 +2713,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, NoOfStructureDataTypes) // offset
     },
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -2617,6 +2723,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, StructureDataTypes) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -2626,6 +2733,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, NoOfEnumDataTypes) // offset
     },
     {
+        false,                                                         // isOptional
         false,                                                         // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -2635,6 +2743,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, EnumDataTypes) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -2644,6 +2753,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, NoOfSimpleDataTypes) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -2653,6 +2763,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, SimpleDataTypes) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -2662,6 +2773,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, SchemaLocation) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         true,                                                           // isArrayLength
         true,                                                           // isToEncode
@@ -2671,6 +2783,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, NoOfFileHeader) // offset
     },
     {
+        false,                                                      // isOptional
         false,                                                      // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -2680,6 +2793,7 @@ static const SOPC_EncodeableType_FieldDescriptor UABinaryFileDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_UABinaryFileDataType, FileHeader) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -2703,6 +2817,7 @@ SOPC_EncodeableType OpcUa_UABinaryFileDataType_EncodeableType = {
     sizeof(OpcUa_UABinaryFileDataType),
     OpcUa_UABinaryFileDataType_Initialize,
     OpcUa_UABinaryFileDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UABinaryFileDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UABinaryFileDataType_Fields,
     g_KnownEncodeableTypes};
@@ -2730,6 +2845,7 @@ void OpcUa_FieldMetaData_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -2739,6 +2855,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, Name) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -2748,6 +2865,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, Description) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -2757,6 +2875,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, FieldFlags) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -2766,6 +2885,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, BuiltInType) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -2775,6 +2895,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, DataType) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -2784,6 +2905,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, ValueRank) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         true,                                                         // isArrayLength
         true,                                                         // isToEncode
@@ -2793,6 +2915,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, NoOfArrayDimensions) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -2802,6 +2925,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, ArrayDimensions) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -2811,6 +2935,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, MaxStringLength) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -2820,6 +2945,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, DataSetFieldId) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         true,                                                    // isArrayLength
         true,                                                    // isToEncode
@@ -2829,6 +2955,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldMetaData_Fields[] = {
         (uint32_t) offsetof(OpcUa_FieldMetaData, NoOfProperties) // offset
     },
     {
+        false,                                               // isOptional
         false,                                               // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -2852,6 +2979,7 @@ SOPC_EncodeableType OpcUa_FieldMetaData_EncodeableType = {
     sizeof(OpcUa_FieldMetaData),
     OpcUa_FieldMetaData_Initialize,
     OpcUa_FieldMetaData_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof FieldMetaData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FieldMetaData_Fields,
     g_KnownEncodeableTypes};
@@ -2879,6 +3007,7 @@ void OpcUa_ConfigurationVersionDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ConfigurationVersionDataType_Fields[] = {
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -2888,6 +3017,7 @@ static const SOPC_EncodeableType_FieldDescriptor ConfigurationVersionDataType_Fi
         (uint32_t) offsetof(OpcUa_ConfigurationVersionDataType, MajorVersion) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -2911,6 +3041,7 @@ SOPC_EncodeableType OpcUa_ConfigurationVersionDataType_EncodeableType = {
     sizeof(OpcUa_ConfigurationVersionDataType),
     OpcUa_ConfigurationVersionDataType_Initialize,
     OpcUa_ConfigurationVersionDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ConfigurationVersionDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ConfigurationVersionDataType_Fields,
     g_KnownEncodeableTypes};
@@ -2938,6 +3069,7 @@ void OpcUa_DataSetMetaDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = {
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -2947,6 +3079,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, NoOfNamespaces) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -2956,6 +3089,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, Namespaces) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         true,                                                                  // isArrayLength
         true,                                                                  // isToEncode
@@ -2965,6 +3099,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, NoOfStructureDataTypes) // offset
     },
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -2974,6 +3109,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, StructureDataTypes) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -2983,6 +3119,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, NoOfEnumDataTypes) // offset
     },
     {
+        false,                                                        // isOptional
         false,                                                        // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -2992,6 +3129,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, EnumDataTypes) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -3001,6 +3139,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, NoOfSimpleDataTypes) // offset
     },
     {
+        false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -3010,6 +3149,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, SimpleDataTypes) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -3019,6 +3159,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, Name) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -3028,6 +3169,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, Description) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         true,                                                      // isArrayLength
         true,                                                      // isToEncode
@@ -3037,6 +3179,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, NoOfFields) // offset
     },
     {
+        false,                                                 // isOptional
         false,                                                 // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -3046,6 +3189,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, Fields) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -3055,6 +3199,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetMetaDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_DataSetMetaDataType, DataSetClassId) // offset
     },
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -3078,6 +3223,7 @@ SOPC_EncodeableType OpcUa_DataSetMetaDataType_EncodeableType = {
     sizeof(OpcUa_DataSetMetaDataType),
     OpcUa_DataSetMetaDataType_Initialize,
     OpcUa_DataSetMetaDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DataSetMetaDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataSetMetaDataType_Fields,
     g_KnownEncodeableTypes};
@@ -3105,6 +3251,7 @@ void OpcUa_PublishedDataSetDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PublishedDataSetDataType_Fields[] = {
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -3114,6 +3261,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedDataSetDataType_Fields
         (uint32_t) offsetof(OpcUa_PublishedDataSetDataType, Name) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         true,                                                                  // isArrayLength
         true,                                                                  // isToEncode
@@ -3123,6 +3271,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedDataSetDataType_Fields
         (uint32_t) offsetof(OpcUa_PublishedDataSetDataType, NoOfDataSetFolder) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -3132,6 +3281,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedDataSetDataType_Fields
         (uint32_t) offsetof(OpcUa_PublishedDataSetDataType, DataSetFolder) // offset
     },
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -3141,6 +3291,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedDataSetDataType_Fields
         (uint32_t) offsetof(OpcUa_PublishedDataSetDataType, DataSetMetaData) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         true,                                                                    // isArrayLength
         true,                                                                    // isToEncode
@@ -3150,6 +3301,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedDataSetDataType_Fields
         (uint32_t) offsetof(OpcUa_PublishedDataSetDataType, NoOfExtensionFields) // offset
     },
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -3159,6 +3311,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedDataSetDataType_Fields
         (uint32_t) offsetof(OpcUa_PublishedDataSetDataType, ExtensionFields) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -3182,6 +3335,7 @@ SOPC_EncodeableType OpcUa_PublishedDataSetDataType_EncodeableType = {
     sizeof(OpcUa_PublishedDataSetDataType),
     OpcUa_PublishedDataSetDataType_Initialize,
     OpcUa_PublishedDataSetDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof PublishedDataSetDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PublishedDataSetDataType_Fields,
     g_KnownEncodeableTypes};
@@ -3209,6 +3363,7 @@ void OpcUa_PublishedVariableDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PublishedVariableDataType_Fields[] = {
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -3218,6 +3373,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedVariableDataType_Field
         (uint32_t) offsetof(OpcUa_PublishedVariableDataType, PublishedVariable) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -3227,6 +3383,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedVariableDataType_Field
         (uint32_t) offsetof(OpcUa_PublishedVariableDataType, AttributeId) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -3236,6 +3393,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedVariableDataType_Field
         (uint32_t) offsetof(OpcUa_PublishedVariableDataType, SamplingIntervalHint) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -3245,6 +3403,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedVariableDataType_Field
         (uint32_t) offsetof(OpcUa_PublishedVariableDataType, DeadbandType) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -3254,6 +3413,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedVariableDataType_Field
         (uint32_t) offsetof(OpcUa_PublishedVariableDataType, DeadbandValue) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -3263,6 +3423,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedVariableDataType_Field
         (uint32_t) offsetof(OpcUa_PublishedVariableDataType, IndexRange) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -3272,6 +3433,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedVariableDataType_Field
         (uint32_t) offsetof(OpcUa_PublishedVariableDataType, SubstituteValue) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         true,                                                                        // isArrayLength
         true,                                                                        // isToEncode
@@ -3281,6 +3443,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedVariableDataType_Field
         (uint32_t) offsetof(OpcUa_PublishedVariableDataType, NoOfMetaDataProperties) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -3304,6 +3467,7 @@ SOPC_EncodeableType OpcUa_PublishedVariableDataType_EncodeableType = {
     sizeof(OpcUa_PublishedVariableDataType),
     OpcUa_PublishedVariableDataType_Initialize,
     OpcUa_PublishedVariableDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof PublishedVariableDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PublishedVariableDataType_Fields,
     g_KnownEncodeableTypes};
@@ -3331,6 +3495,7 @@ void OpcUa_PublishedDataItemsDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PublishedDataItemsDataType_Fields[] = {
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         true,                                                                    // isArrayLength
         true,                                                                    // isToEncode
@@ -3340,6 +3505,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedDataItemsDataType_Fiel
         (uint32_t) offsetof(OpcUa_PublishedDataItemsDataType, NoOfPublishedData) // offset
     },
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -3363,6 +3529,7 @@ SOPC_EncodeableType OpcUa_PublishedDataItemsDataType_EncodeableType = {
     sizeof(OpcUa_PublishedDataItemsDataType),
     OpcUa_PublishedDataItemsDataType_Initialize,
     OpcUa_PublishedDataItemsDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof PublishedDataItemsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PublishedDataItemsDataType_Fields,
     g_KnownEncodeableTypes};
@@ -3390,6 +3557,7 @@ void OpcUa_SimpleAttributeOperand_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SimpleAttributeOperand_Fields[] = {
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -3399,6 +3567,7 @@ static const SOPC_EncodeableType_FieldDescriptor SimpleAttributeOperand_Fields[]
         (uint32_t) offsetof(OpcUa_SimpleAttributeOperand, TypeDefinitionId) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -3408,6 +3577,7 @@ static const SOPC_EncodeableType_FieldDescriptor SimpleAttributeOperand_Fields[]
         (uint32_t) offsetof(OpcUa_SimpleAttributeOperand, NoOfBrowsePath) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -3417,6 +3587,7 @@ static const SOPC_EncodeableType_FieldDescriptor SimpleAttributeOperand_Fields[]
         (uint32_t) offsetof(OpcUa_SimpleAttributeOperand, BrowsePath) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -3426,6 +3597,7 @@ static const SOPC_EncodeableType_FieldDescriptor SimpleAttributeOperand_Fields[]
         (uint32_t) offsetof(OpcUa_SimpleAttributeOperand, AttributeId) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -3449,6 +3621,7 @@ SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType = {
     sizeof(OpcUa_SimpleAttributeOperand),
     OpcUa_SimpleAttributeOperand_Initialize,
     OpcUa_SimpleAttributeOperand_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SimpleAttributeOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SimpleAttributeOperand_Fields,
     g_KnownEncodeableTypes};
@@ -3476,6 +3649,7 @@ void OpcUa_ContentFilterElement_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ContentFilterElement_Fields[] = {
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -3485,6 +3659,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterElement_Fields[] =
         (uint32_t) offsetof(OpcUa_ContentFilterElement, FilterOperator) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -3494,6 +3669,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterElement_Fields[] =
         (uint32_t) offsetof(OpcUa_ContentFilterElement, NoOfFilterOperands) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -3517,6 +3693,7 @@ SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType = {
     sizeof(OpcUa_ContentFilterElement),
     OpcUa_ContentFilterElement_Initialize,
     OpcUa_ContentFilterElement_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ContentFilterElement_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ContentFilterElement_Fields,
     g_KnownEncodeableTypes};
@@ -3544,6 +3721,7 @@ void OpcUa_ContentFilter_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ContentFilter_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         true,                                                  // isArrayLength
         true,                                                  // isToEncode
@@ -3553,6 +3731,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilter_Fields[] = {
         (uint32_t) offsetof(OpcUa_ContentFilter, NoOfElements) // offset
     },
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -3576,6 +3755,7 @@ SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType = {
     sizeof(OpcUa_ContentFilter),
     OpcUa_ContentFilter_Initialize,
     OpcUa_ContentFilter_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ContentFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ContentFilter_Fields,
     g_KnownEncodeableTypes};
@@ -3603,6 +3783,7 @@ void OpcUa_PublishedEventsDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PublishedEventsDataType_Fields[] = {
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -3612,6 +3793,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedEventsDataType_Fields[
         (uint32_t) offsetof(OpcUa_PublishedEventsDataType, EventNotifier) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         true,                                                                  // isArrayLength
         true,                                                                  // isToEncode
@@ -3621,6 +3803,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedEventsDataType_Fields[
         (uint32_t) offsetof(OpcUa_PublishedEventsDataType, NoOfSelectedFields) // offset
     },
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -3630,6 +3813,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishedEventsDataType_Fields[
         (uint32_t) offsetof(OpcUa_PublishedEventsDataType, SelectedFields) // offset
     },
     {
+        false,                                                     // isOptional
         false,                                                     // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -3653,6 +3837,7 @@ SOPC_EncodeableType OpcUa_PublishedEventsDataType_EncodeableType = {
     sizeof(OpcUa_PublishedEventsDataType),
     OpcUa_PublishedEventsDataType_Initialize,
     OpcUa_PublishedEventsDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof PublishedEventsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PublishedEventsDataType_Fields,
     g_KnownEncodeableTypes};
@@ -3680,6 +3865,7 @@ void OpcUa_DataSetWriterDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -3689,6 +3875,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetWriterDataType, Name) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -3698,6 +3885,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetWriterDataType, Enabled) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -3707,6 +3895,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetWriterDataType, DataSetWriterId) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -3716,6 +3905,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetWriterDataType, DataSetFieldContentMask) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -3725,6 +3915,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetWriterDataType, KeyFrameCount) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -3734,6 +3925,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetWriterDataType, DataSetName) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -3743,6 +3935,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetWriterDataType, NoOfDataSetWriterProperties) // offset
     },
     {
+        false,                                                                    // isOptional
         false,                                                                    // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -3752,6 +3945,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetWriterDataType, DataSetWriterProperties) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -3761,6 +3955,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetWriterDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetWriterDataType, TransportSettings) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -3784,6 +3979,7 @@ SOPC_EncodeableType OpcUa_DataSetWriterDataType_EncodeableType = {
     sizeof(OpcUa_DataSetWriterDataType),
     OpcUa_DataSetWriterDataType_Initialize,
     OpcUa_DataSetWriterDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DataSetWriterDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataSetWriterDataType_Fields,
     g_KnownEncodeableTypes};
@@ -3811,6 +4007,7 @@ void OpcUa_ApplicationDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[] = {
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -3820,6 +4017,7 @@ static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[]
         (uint32_t) offsetof(OpcUa_ApplicationDescription, ApplicationUri) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -3829,6 +4027,7 @@ static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[]
         (uint32_t) offsetof(OpcUa_ApplicationDescription, ProductUri) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -3838,6 +4037,7 @@ static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[]
         (uint32_t) offsetof(OpcUa_ApplicationDescription, ApplicationName) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -3847,6 +4047,7 @@ static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[]
         (uint32_t) offsetof(OpcUa_ApplicationDescription, ApplicationType) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -3856,6 +4057,7 @@ static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[]
         (uint32_t) offsetof(OpcUa_ApplicationDescription, GatewayServerUri) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -3865,6 +4067,7 @@ static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[]
         (uint32_t) offsetof(OpcUa_ApplicationDescription, DiscoveryProfileUri) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -3874,6 +4077,7 @@ static const SOPC_EncodeableType_FieldDescriptor ApplicationDescription_Fields[]
         (uint32_t) offsetof(OpcUa_ApplicationDescription, NoOfDiscoveryUrls) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -3897,6 +4101,7 @@ SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType = {
     sizeof(OpcUa_ApplicationDescription),
     OpcUa_ApplicationDescription_Initialize,
     OpcUa_ApplicationDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ApplicationDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ApplicationDescription_Fields,
     g_KnownEncodeableTypes};
@@ -3924,6 +4129,7 @@ void OpcUa_UserTokenPolicy_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UserTokenPolicy_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -3933,6 +4139,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserTokenPolicy_Fields[] = {
         (uint32_t) offsetof(OpcUa_UserTokenPolicy, PolicyId) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -3942,6 +4149,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserTokenPolicy_Fields[] = {
         (uint32_t) offsetof(OpcUa_UserTokenPolicy, TokenType) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -3951,6 +4159,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserTokenPolicy_Fields[] = {
         (uint32_t) offsetof(OpcUa_UserTokenPolicy, IssuedTokenType) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -3960,6 +4169,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserTokenPolicy_Fields[] = {
         (uint32_t) offsetof(OpcUa_UserTokenPolicy, IssuerEndpointUrl) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -3983,6 +4193,7 @@ SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType = {
     sizeof(OpcUa_UserTokenPolicy),
     OpcUa_UserTokenPolicy_Initialize,
     OpcUa_UserTokenPolicy_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UserTokenPolicy_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UserTokenPolicy_Fields,
     g_KnownEncodeableTypes};
@@ -4010,6 +4221,7 @@ void OpcUa_EndpointDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = {
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -4019,6 +4231,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_EndpointDescription, EndpointUrl) // offset
     },
     {
+        false,                                                    // isOptional
         false,                                                    // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -4028,6 +4241,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_EndpointDescription, Server)    // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4037,6 +4251,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_EndpointDescription, ServerCertificate) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -4046,6 +4261,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_EndpointDescription, SecurityMode) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4055,6 +4271,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_EndpointDescription, SecurityPolicyUri) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         true,                                                                  // isArrayLength
         true,                                                                  // isToEncode
@@ -4064,6 +4281,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_EndpointDescription, NoOfUserIdentityTokens) // offset
     },
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -4073,6 +4291,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_EndpointDescription, UserIdentityTokens) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -4082,6 +4301,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_EndpointDescription, TransportProfileUri) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -4105,6 +4325,7 @@ SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType = {
     sizeof(OpcUa_EndpointDescription),
     OpcUa_EndpointDescription_Initialize,
     OpcUa_EndpointDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EndpointDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EndpointDescription_Fields,
     g_KnownEncodeableTypes};
@@ -4132,6 +4353,7 @@ void OpcUa_PubSubGroupDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PubSubGroupDataType_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -4141,6 +4363,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_PubSubGroupDataType, Name) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -4150,6 +4373,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_PubSubGroupDataType, Enabled) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -4159,6 +4383,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_PubSubGroupDataType, SecurityMode) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4168,6 +4393,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_PubSubGroupDataType, SecurityGroupId) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -4177,6 +4403,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_PubSubGroupDataType, NoOfSecurityKeyServices) // offset
     },
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -4186,6 +4413,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_PubSubGroupDataType, SecurityKeyServices) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -4195,6 +4423,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_PubSubGroupDataType, MaxNetworkMessageSize) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -4204,6 +4433,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_PubSubGroupDataType, NoOfGroupProperties) // offset
     },
     {
+        false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4227,6 +4457,7 @@ SOPC_EncodeableType OpcUa_PubSubGroupDataType_EncodeableType = {
     sizeof(OpcUa_PubSubGroupDataType),
     OpcUa_PubSubGroupDataType_Initialize,
     OpcUa_PubSubGroupDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof PubSubGroupDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PubSubGroupDataType_Fields,
     g_KnownEncodeableTypes};
@@ -4254,6 +4485,7 @@ void OpcUa_WriterGroupDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -4263,6 +4495,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, Name) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -4272,6 +4505,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, Enabled) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -4281,6 +4515,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, SecurityMode) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4290,6 +4525,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, SecurityGroupId) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -4299,6 +4535,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, NoOfSecurityKeyServices) // offset
     },
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -4308,6 +4545,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, SecurityKeyServices) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -4317,6 +4555,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, MaxNetworkMessageSize) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -4326,6 +4565,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, NoOfGroupProperties) // offset
     },
     {
+        false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4335,6 +4575,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, GroupProperties) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -4344,6 +4585,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, WriterGroupId) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -4353,6 +4595,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, PublishingInterval) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -4362,6 +4605,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, KeepAliveTime) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -4371,6 +4615,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, Priority) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         true,                                                         // isArrayLength
         true,                                                         // isToEncode
@@ -4380,6 +4625,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, NoOfLocaleIds) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -4389,6 +4635,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, LocaleIds) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4398,6 +4645,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, HeaderLayoutUri) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4407,6 +4655,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, TransportSettings) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4416,6 +4665,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, MessageSettings) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -4425,6 +4675,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriterGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_WriterGroupDataType, NoOfDataSetWriters) // offset
     },
     {
+        false,                                                         // isOptional
         false,                                                         // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -4448,6 +4699,7 @@ SOPC_EncodeableType OpcUa_WriterGroupDataType_EncodeableType = {
     sizeof(OpcUa_WriterGroupDataType),
     OpcUa_WriterGroupDataType_Initialize,
     OpcUa_WriterGroupDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof WriterGroupDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     WriterGroupDataType_Fields,
     g_KnownEncodeableTypes};
@@ -4475,6 +4727,7 @@ void OpcUa_DataSetReaderDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -4484,6 +4737,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, Name) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -4493,6 +4747,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, Enabled) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -4502,6 +4757,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, PublisherId) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4511,6 +4767,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, WriterGroupId) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4520,6 +4777,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, DataSetWriterId) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4529,6 +4787,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, DataSetMetaData) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -4538,6 +4797,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, DataSetFieldContentMask) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -4547,6 +4807,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, MessageReceiveTimeout) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4556,6 +4817,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, KeyFrameCount) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4565,6 +4827,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, HeaderLayoutUri) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -4574,6 +4837,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, SecurityMode) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4583,6 +4847,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, SecurityGroupId) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         true,                                                                     // isArrayLength
         true,                                                                     // isToEncode
@@ -4592,6 +4857,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, NoOfSecurityKeyServices) // offset
     },
     {
+        false,                                                                // isOptional
         false,                                                                // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -4601,6 +4867,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, SecurityKeyServices) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -4610,6 +4877,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, NoOfDataSetReaderProperties) // offset
     },
     {
+        false,                                                                    // isOptional
         false,                                                                    // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -4619,6 +4887,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, DataSetReaderProperties) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -4628,6 +4897,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, TransportSettings) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4637,6 +4907,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataSetReaderDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_DataSetReaderDataType, MessageSettings) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -4660,6 +4931,7 @@ SOPC_EncodeableType OpcUa_DataSetReaderDataType_EncodeableType = {
     sizeof(OpcUa_DataSetReaderDataType),
     OpcUa_DataSetReaderDataType_Initialize,
     OpcUa_DataSetReaderDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DataSetReaderDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataSetReaderDataType_Fields,
     g_KnownEncodeableTypes};
@@ -4687,6 +4959,7 @@ void OpcUa_ReaderGroupDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -4696,6 +4969,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, Name) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -4705,6 +4979,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, Enabled) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -4714,6 +4989,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, SecurityMode) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4723,6 +4999,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, SecurityGroupId) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -4732,6 +5009,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, NoOfSecurityKeyServices) // offset
     },
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -4741,6 +5019,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, SecurityKeyServices) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -4750,6 +5029,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, MaxNetworkMessageSize) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -4759,6 +5039,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, NoOfGroupProperties) // offset
     },
     {
+        false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4768,6 +5049,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, GroupProperties) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4777,6 +5059,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, TransportSettings) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -4786,6 +5069,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, MessageSettings) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -4795,6 +5079,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReaderGroupDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_ReaderGroupDataType, NoOfDataSetReaders) // offset
     },
     {
+        false,                                                         // isOptional
         false,                                                         // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -4818,6 +5103,7 @@ SOPC_EncodeableType OpcUa_ReaderGroupDataType_EncodeableType = {
     sizeof(OpcUa_ReaderGroupDataType),
     OpcUa_ReaderGroupDataType_Initialize,
     OpcUa_ReaderGroupDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReaderGroupDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReaderGroupDataType_Fields,
     g_KnownEncodeableTypes};
@@ -4845,6 +5131,7 @@ void OpcUa_PubSubConnectionDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields[] = {
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -4854,6 +5141,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, Name) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -4863,6 +5151,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, Enabled) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -4872,6 +5161,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, PublisherId) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -4881,6 +5171,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, TransportProfileUri) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -4890,6 +5181,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, Address) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -4899,6 +5191,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, NoOfConnectionProperties) // offset
     },
     {
+        false,                                                                    // isOptional
         false,                                                                    // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -4908,6 +5201,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, ConnectionProperties) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -4917,6 +5211,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, TransportSettings) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -4926,6 +5221,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, NoOfWriterGroups) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4935,6 +5231,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, WriterGroups) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -4944,6 +5241,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConnectionDataType_Fields
         (uint32_t) offsetof(OpcUa_PubSubConnectionDataType, NoOfReaderGroups) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -4967,6 +5265,7 @@ SOPC_EncodeableType OpcUa_PubSubConnectionDataType_EncodeableType = {
     sizeof(OpcUa_PubSubConnectionDataType),
     OpcUa_PubSubConnectionDataType_Initialize,
     OpcUa_PubSubConnectionDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof PubSubConnectionDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PubSubConnectionDataType_Fields,
     g_KnownEncodeableTypes};
@@ -4994,6 +5293,7 @@ void OpcUa_NetworkAddressDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NetworkAddressDataType_Fields[] = {
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -5017,6 +5317,7 @@ SOPC_EncodeableType OpcUa_NetworkAddressDataType_EncodeableType = {
     sizeof(OpcUa_NetworkAddressDataType),
     OpcUa_NetworkAddressDataType_Initialize,
     OpcUa_NetworkAddressDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof NetworkAddressDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NetworkAddressDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5044,6 +5345,7 @@ void OpcUa_NetworkAddressUrlDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NetworkAddressUrlDataType_Fields[] = {
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -5053,6 +5355,7 @@ static const SOPC_EncodeableType_FieldDescriptor NetworkAddressUrlDataType_Field
         (uint32_t) offsetof(OpcUa_NetworkAddressUrlDataType, NetworkInterface) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -5076,6 +5379,7 @@ SOPC_EncodeableType OpcUa_NetworkAddressUrlDataType_EncodeableType = {
     sizeof(OpcUa_NetworkAddressUrlDataType),
     OpcUa_NetworkAddressUrlDataType_Initialize,
     OpcUa_NetworkAddressUrlDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof NetworkAddressUrlDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NetworkAddressUrlDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5103,6 +5407,7 @@ void OpcUa_FieldTargetDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FieldTargetDataType_Fields[] = {
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -5112,6 +5417,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldTargetDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_FieldTargetDataType, DataSetFieldId) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -5121,6 +5427,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldTargetDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_FieldTargetDataType, ReceiverIndexRange) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -5130,6 +5437,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldTargetDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_FieldTargetDataType, TargetNodeId) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -5139,6 +5447,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldTargetDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_FieldTargetDataType, AttributeId) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -5148,6 +5457,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldTargetDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_FieldTargetDataType, WriteIndexRange) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -5157,6 +5467,7 @@ static const SOPC_EncodeableType_FieldDescriptor FieldTargetDataType_Fields[] = 
         (uint32_t) offsetof(OpcUa_FieldTargetDataType, OverrideValueHandling) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -5180,6 +5491,7 @@ SOPC_EncodeableType OpcUa_FieldTargetDataType_EncodeableType = {
     sizeof(OpcUa_FieldTargetDataType),
     OpcUa_FieldTargetDataType_Initialize,
     OpcUa_FieldTargetDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof FieldTargetDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FieldTargetDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5207,6 +5519,7 @@ void OpcUa_TargetVariablesDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TargetVariablesDataType_Fields[] = {
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -5216,6 +5529,7 @@ static const SOPC_EncodeableType_FieldDescriptor TargetVariablesDataType_Fields[
         (uint32_t) offsetof(OpcUa_TargetVariablesDataType, NoOfTargetVariables) // offset
     },
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -5239,6 +5553,7 @@ SOPC_EncodeableType OpcUa_TargetVariablesDataType_EncodeableType = {
     sizeof(OpcUa_TargetVariablesDataType),
     OpcUa_TargetVariablesDataType_Initialize,
     OpcUa_TargetVariablesDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof TargetVariablesDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TargetVariablesDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5266,6 +5581,7 @@ void OpcUa_RolePermissionType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RolePermissionType_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -5275,6 +5591,7 @@ static const SOPC_EncodeableType_FieldDescriptor RolePermissionType_Fields[] = {
         (uint32_t) offsetof(OpcUa_RolePermissionType, RoleId) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -5298,6 +5615,7 @@ SOPC_EncodeableType OpcUa_RolePermissionType_EncodeableType = {
     sizeof(OpcUa_RolePermissionType),
     OpcUa_RolePermissionType_Initialize,
     OpcUa_RolePermissionType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RolePermissionType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RolePermissionType_Fields,
     g_KnownEncodeableTypes};
@@ -5325,6 +5643,7 @@ void OpcUa_SubscribedDataSetMirrorDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SubscribedDataSetMirrorDataType_Fields[] = {
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -5334,6 +5653,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscribedDataSetMirrorDataType
         (uint32_t) offsetof(OpcUa_SubscribedDataSetMirrorDataType, ParentNodeName) // offset
     },
     {
+        false,                                                                          // isOptional
         true,                                                                           // isBuiltIn
         true,                                                                           // isArrayLength
         true,                                                                           // isToEncode
@@ -5343,6 +5663,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscribedDataSetMirrorDataType
         (uint32_t) offsetof(OpcUa_SubscribedDataSetMirrorDataType, NoOfRolePermissions) // offset
     },
     {
+        false,                                                                      // isOptional
         false,                                                                      // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -5366,6 +5687,7 @@ SOPC_EncodeableType OpcUa_SubscribedDataSetMirrorDataType_EncodeableType = {
     sizeof(OpcUa_SubscribedDataSetMirrorDataType),
     OpcUa_SubscribedDataSetMirrorDataType_Initialize,
     OpcUa_SubscribedDataSetMirrorDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SubscribedDataSetMirrorDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SubscribedDataSetMirrorDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5393,6 +5715,7 @@ void OpcUa_PubSubConfigurationDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PubSubConfigurationDataType_Fields[] = {
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -5402,6 +5725,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConfigurationDataType_Fie
         (uint32_t) offsetof(OpcUa_PubSubConfigurationDataType, NoOfPublishedDataSets) // offset
     },
     {
+        false,                                                                    // isOptional
         false,                                                                    // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -5411,6 +5735,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConfigurationDataType_Fie
         (uint32_t) offsetof(OpcUa_PubSubConfigurationDataType, PublishedDataSets) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -5420,6 +5745,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConfigurationDataType_Fie
         (uint32_t) offsetof(OpcUa_PubSubConfigurationDataType, NoOfConnections) // offset
     },
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -5429,6 +5755,7 @@ static const SOPC_EncodeableType_FieldDescriptor PubSubConfigurationDataType_Fie
         (uint32_t) offsetof(OpcUa_PubSubConfigurationDataType, Connections) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -5452,6 +5779,7 @@ SOPC_EncodeableType OpcUa_PubSubConfigurationDataType_EncodeableType = {
     sizeof(OpcUa_PubSubConfigurationDataType),
     OpcUa_PubSubConfigurationDataType_Initialize,
     OpcUa_PubSubConfigurationDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof PubSubConfigurationDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PubSubConfigurationDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5479,6 +5807,7 @@ void OpcUa_UadpWriterGroupMessageDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UadpWriterGroupMessageDataType_Fields[] = {
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -5488,6 +5817,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpWriterGroupMessageDataType_
         (uint32_t) offsetof(OpcUa_UadpWriterGroupMessageDataType, GroupVersion) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -5497,6 +5827,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpWriterGroupMessageDataType_
         (uint32_t) offsetof(OpcUa_UadpWriterGroupMessageDataType, DataSetOrdering) // offset
     },
     {
+        false,                                                                               // isOptional
         true,                                                                                // isBuiltIn
         false,                                                                               // isArrayLength
         true,                                                                                // isToEncode
@@ -5506,6 +5837,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpWriterGroupMessageDataType_
         (uint32_t) offsetof(OpcUa_UadpWriterGroupMessageDataType, NetworkMessageContentMask) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -5515,6 +5847,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpWriterGroupMessageDataType_
         (uint32_t) offsetof(OpcUa_UadpWriterGroupMessageDataType, SamplingOffset) // offset
     },
     {
+        false,                                                                          // isOptional
         true,                                                                           // isBuiltIn
         true,                                                                           // isArrayLength
         true,                                                                           // isToEncode
@@ -5524,6 +5857,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpWriterGroupMessageDataType_
         (uint32_t) offsetof(OpcUa_UadpWriterGroupMessageDataType, NoOfPublishingOffset) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -5547,6 +5881,7 @@ SOPC_EncodeableType OpcUa_UadpWriterGroupMessageDataType_EncodeableType = {
     sizeof(OpcUa_UadpWriterGroupMessageDataType),
     OpcUa_UadpWriterGroupMessageDataType_Initialize,
     OpcUa_UadpWriterGroupMessageDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UadpWriterGroupMessageDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UadpWriterGroupMessageDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5574,6 +5909,7 @@ void OpcUa_UadpDataSetWriterMessageDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UadpDataSetWriterMessageDataType_Fields[] = {
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -5583,6 +5919,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetWriterMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetWriterMessageDataType, DataSetMessageContentMask) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -5592,6 +5929,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetWriterMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetWriterMessageDataType, ConfiguredSize) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -5601,6 +5939,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetWriterMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetWriterMessageDataType, NetworkMessageNumber) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -5624,6 +5963,7 @@ SOPC_EncodeableType OpcUa_UadpDataSetWriterMessageDataType_EncodeableType = {
     sizeof(OpcUa_UadpDataSetWriterMessageDataType),
     OpcUa_UadpDataSetWriterMessageDataType_Initialize,
     OpcUa_UadpDataSetWriterMessageDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UadpDataSetWriterMessageDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UadpDataSetWriterMessageDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5651,6 +5991,7 @@ void OpcUa_UadpDataSetReaderMessageDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UadpDataSetReaderMessageDataType_Fields[] = {
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -5660,6 +6001,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetReaderMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetReaderMessageDataType, GroupVersion) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -5669,6 +6011,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetReaderMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetReaderMessageDataType, NetworkMessageNumber) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -5678,6 +6021,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetReaderMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetReaderMessageDataType, DataSetOffset) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -5687,6 +6031,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetReaderMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetReaderMessageDataType, DataSetClassId) // offset
     },
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -5696,6 +6041,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetReaderMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetReaderMessageDataType, NetworkMessageContentMask) // offset
     },
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -5705,6 +6051,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetReaderMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetReaderMessageDataType, DataSetMessageContentMask) // offset
     },
     {
+        false,                                                                          // isOptional
         true,                                                                           // isBuiltIn
         false,                                                                          // isArrayLength
         true,                                                                           // isToEncode
@@ -5714,6 +6061,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetReaderMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetReaderMessageDataType, PublishingInterval) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -5723,6 +6071,7 @@ static const SOPC_EncodeableType_FieldDescriptor UadpDataSetReaderMessageDataTyp
         (uint32_t) offsetof(OpcUa_UadpDataSetReaderMessageDataType, ReceiveOffset) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -5746,6 +6095,7 @@ SOPC_EncodeableType OpcUa_UadpDataSetReaderMessageDataType_EncodeableType = {
     sizeof(OpcUa_UadpDataSetReaderMessageDataType),
     OpcUa_UadpDataSetReaderMessageDataType_Initialize,
     OpcUa_UadpDataSetReaderMessageDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UadpDataSetReaderMessageDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UadpDataSetReaderMessageDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5773,6 +6123,7 @@ void OpcUa_JsonWriterGroupMessageDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor JsonWriterGroupMessageDataType_Fields[] = {
     {
+        false,                                                                               // isOptional
         true,                                                                                // isBuiltIn
         false,                                                                               // isArrayLength
         true,                                                                                // isToEncode
@@ -5796,6 +6147,7 @@ SOPC_EncodeableType OpcUa_JsonWriterGroupMessageDataType_EncodeableType = {
     sizeof(OpcUa_JsonWriterGroupMessageDataType),
     OpcUa_JsonWriterGroupMessageDataType_Initialize,
     OpcUa_JsonWriterGroupMessageDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof JsonWriterGroupMessageDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     JsonWriterGroupMessageDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5823,6 +6175,7 @@ void OpcUa_JsonDataSetWriterMessageDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor JsonDataSetWriterMessageDataType_Fields[] = {
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -5846,6 +6199,7 @@ SOPC_EncodeableType OpcUa_JsonDataSetWriterMessageDataType_EncodeableType = {
     sizeof(OpcUa_JsonDataSetWriterMessageDataType),
     OpcUa_JsonDataSetWriterMessageDataType_Initialize,
     OpcUa_JsonDataSetWriterMessageDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof JsonDataSetWriterMessageDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     JsonDataSetWriterMessageDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5873,6 +6227,7 @@ void OpcUa_JsonDataSetReaderMessageDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor JsonDataSetReaderMessageDataType_Fields[] = {
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -5882,6 +6237,7 @@ static const SOPC_EncodeableType_FieldDescriptor JsonDataSetReaderMessageDataTyp
         (uint32_t) offsetof(OpcUa_JsonDataSetReaderMessageDataType, NetworkMessageContentMask) // offset
     },
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -5905,6 +6261,7 @@ SOPC_EncodeableType OpcUa_JsonDataSetReaderMessageDataType_EncodeableType = {
     sizeof(OpcUa_JsonDataSetReaderMessageDataType),
     OpcUa_JsonDataSetReaderMessageDataType_Initialize,
     OpcUa_JsonDataSetReaderMessageDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof JsonDataSetReaderMessageDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     JsonDataSetReaderMessageDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5932,6 +6289,7 @@ void OpcUa_DatagramConnectionTransportDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DatagramConnectionTransportDataType_Fields[] = {
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -5955,6 +6313,7 @@ SOPC_EncodeableType OpcUa_DatagramConnectionTransportDataType_EncodeableType = {
     sizeof(OpcUa_DatagramConnectionTransportDataType),
     OpcUa_DatagramConnectionTransportDataType_Initialize,
     OpcUa_DatagramConnectionTransportDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DatagramConnectionTransportDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DatagramConnectionTransportDataType_Fields,
     g_KnownEncodeableTypes};
@@ -5982,6 +6341,7 @@ void OpcUa_DatagramWriterGroupTransportDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DatagramWriterGroupTransportDataType_Fields[] = {
     {
+        false,                                                                              // isOptional
         true,                                                                               // isBuiltIn
         false,                                                                              // isArrayLength
         true,                                                                               // isToEncode
@@ -5991,6 +6351,7 @@ static const SOPC_EncodeableType_FieldDescriptor DatagramWriterGroupTransportDat
         (uint32_t) offsetof(OpcUa_DatagramWriterGroupTransportDataType, MessageRepeatCount) // offset
     },
     {
+        false,                                                                              // isOptional
         true,                                                                               // isBuiltIn
         false,                                                                              // isArrayLength
         true,                                                                               // isToEncode
@@ -6014,6 +6375,7 @@ SOPC_EncodeableType OpcUa_DatagramWriterGroupTransportDataType_EncodeableType = 
     sizeof(OpcUa_DatagramWriterGroupTransportDataType),
     OpcUa_DatagramWriterGroupTransportDataType_Initialize,
     OpcUa_DatagramWriterGroupTransportDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DatagramWriterGroupTransportDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DatagramWriterGroupTransportDataType_Fields,
     g_KnownEncodeableTypes};
@@ -6041,6 +6403,7 @@ void OpcUa_BrokerConnectionTransportDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrokerConnectionTransportDataType_Fields[] = {
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -6050,6 +6413,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerConnectionTransportDataTy
         (uint32_t) offsetof(OpcUa_BrokerConnectionTransportDataType, ResourceUri) // offset
     },
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -6073,6 +6437,7 @@ SOPC_EncodeableType OpcUa_BrokerConnectionTransportDataType_EncodeableType = {
     sizeof(OpcUa_BrokerConnectionTransportDataType),
     OpcUa_BrokerConnectionTransportDataType_Initialize,
     OpcUa_BrokerConnectionTransportDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrokerConnectionTransportDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrokerConnectionTransportDataType_Fields,
     g_KnownEncodeableTypes};
@@ -6100,6 +6465,7 @@ void OpcUa_BrokerWriterGroupTransportDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrokerWriterGroupTransportDataType_Fields[] = {
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -6109,6 +6475,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerWriterGroupTransportDataT
         (uint32_t) offsetof(OpcUa_BrokerWriterGroupTransportDataType, QueueName) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -6118,6 +6485,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerWriterGroupTransportDataT
         (uint32_t) offsetof(OpcUa_BrokerWriterGroupTransportDataType, ResourceUri) // offset
     },
     {
+        false,                                                                                  // isOptional
         true,                                                                                   // isBuiltIn
         false,                                                                                  // isArrayLength
         true,                                                                                   // isToEncode
@@ -6127,6 +6495,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerWriterGroupTransportDataT
         (uint32_t) offsetof(OpcUa_BrokerWriterGroupTransportDataType, AuthenticationProfileUri) // offset
     },
     {
+        false,                                                                                    // isOptional
         true,                                                                                     // isBuiltIn
         false,                                                                                    // isArrayLength
         true,                                                                                     // isToEncode
@@ -6150,6 +6519,7 @@ SOPC_EncodeableType OpcUa_BrokerWriterGroupTransportDataType_EncodeableType = {
     sizeof(OpcUa_BrokerWriterGroupTransportDataType),
     OpcUa_BrokerWriterGroupTransportDataType_Initialize,
     OpcUa_BrokerWriterGroupTransportDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrokerWriterGroupTransportDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrokerWriterGroupTransportDataType_Fields,
     g_KnownEncodeableTypes};
@@ -6177,6 +6547,7 @@ void OpcUa_BrokerDataSetWriterTransportDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetWriterTransportDataType_Fields[] = {
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -6186,6 +6557,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetWriterTransportDat
         (uint32_t) offsetof(OpcUa_BrokerDataSetWriterTransportDataType, QueueName) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -6195,6 +6567,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetWriterTransportDat
         (uint32_t) offsetof(OpcUa_BrokerDataSetWriterTransportDataType, ResourceUri) // offset
     },
     {
+        false,                                                                                    // isOptional
         true,                                                                                     // isBuiltIn
         false,                                                                                    // isArrayLength
         true,                                                                                     // isToEncode
@@ -6204,6 +6577,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetWriterTransportDat
         (uint32_t) offsetof(OpcUa_BrokerDataSetWriterTransportDataType, AuthenticationProfileUri) // offset
     },
     {
+        false,                                                                                      // isOptional
         true,                                                                                       // isBuiltIn
         false,                                                                                      // isArrayLength
         true,                                                                                       // isToEncode
@@ -6213,6 +6587,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetWriterTransportDat
         (uint32_t) offsetof(OpcUa_BrokerDataSetWriterTransportDataType, RequestedDeliveryGuarantee) // offset
     },
     {
+        false,                                                                             // isOptional
         true,                                                                              // isBuiltIn
         false,                                                                             // isArrayLength
         true,                                                                              // isToEncode
@@ -6222,6 +6597,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetWriterTransportDat
         (uint32_t) offsetof(OpcUa_BrokerDataSetWriterTransportDataType, MetaDataQueueName) // offset
     },
     {
+        false,                                                                              // isOptional
         true,                                                                               // isBuiltIn
         false,                                                                              // isArrayLength
         true,                                                                               // isToEncode
@@ -6245,6 +6621,7 @@ SOPC_EncodeableType OpcUa_BrokerDataSetWriterTransportDataType_EncodeableType = 
     sizeof(OpcUa_BrokerDataSetWriterTransportDataType),
     OpcUa_BrokerDataSetWriterTransportDataType_Initialize,
     OpcUa_BrokerDataSetWriterTransportDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrokerDataSetWriterTransportDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrokerDataSetWriterTransportDataType_Fields,
     g_KnownEncodeableTypes};
@@ -6272,6 +6649,7 @@ void OpcUa_BrokerDataSetReaderTransportDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetReaderTransportDataType_Fields[] = {
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -6281,6 +6659,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetReaderTransportDat
         (uint32_t) offsetof(OpcUa_BrokerDataSetReaderTransportDataType, QueueName) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -6290,6 +6669,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetReaderTransportDat
         (uint32_t) offsetof(OpcUa_BrokerDataSetReaderTransportDataType, ResourceUri) // offset
     },
     {
+        false,                                                                                    // isOptional
         true,                                                                                     // isBuiltIn
         false,                                                                                    // isArrayLength
         true,                                                                                     // isToEncode
@@ -6299,6 +6679,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetReaderTransportDat
         (uint32_t) offsetof(OpcUa_BrokerDataSetReaderTransportDataType, AuthenticationProfileUri) // offset
     },
     {
+        false,                                                                                      // isOptional
         true,                                                                                       // isBuiltIn
         false,                                                                                      // isArrayLength
         true,                                                                                       // isToEncode
@@ -6308,6 +6689,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrokerDataSetReaderTransportDat
         (uint32_t) offsetof(OpcUa_BrokerDataSetReaderTransportDataType, RequestedDeliveryGuarantee) // offset
     },
     {
+        false,                                                                             // isOptional
         true,                                                                              // isBuiltIn
         false,                                                                             // isArrayLength
         true,                                                                              // isToEncode
@@ -6331,6 +6713,7 @@ SOPC_EncodeableType OpcUa_BrokerDataSetReaderTransportDataType_EncodeableType = 
     sizeof(OpcUa_BrokerDataSetReaderTransportDataType),
     OpcUa_BrokerDataSetReaderTransportDataType_Initialize,
     OpcUa_BrokerDataSetReaderTransportDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrokerDataSetReaderTransportDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrokerDataSetReaderTransportDataType_Fields,
     g_KnownEncodeableTypes};
@@ -6358,6 +6741,7 @@ void OpcUa_AliasNameDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AliasNameDataType_Fields[] = {
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -6367,6 +6751,7 @@ static const SOPC_EncodeableType_FieldDescriptor AliasNameDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_AliasNameDataType, AliasName) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -6376,6 +6761,7 @@ static const SOPC_EncodeableType_FieldDescriptor AliasNameDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_AliasNameDataType, NoOfReferencedNodes) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -6399,6 +6785,7 @@ SOPC_EncodeableType OpcUa_AliasNameDataType_EncodeableType = {
     sizeof(OpcUa_AliasNameDataType),
     OpcUa_AliasNameDataType_Initialize,
     OpcUa_AliasNameDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AliasNameDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AliasNameDataType_Fields,
     g_KnownEncodeableTypes};
@@ -6426,6 +6813,7 @@ void OpcUa_UnsignedRationalNumber_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UnsignedRationalNumber_Fields[] = {
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -6435,6 +6823,7 @@ static const SOPC_EncodeableType_FieldDescriptor UnsignedRationalNumber_Fields[]
         (uint32_t) offsetof(OpcUa_UnsignedRationalNumber, Numerator) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -6458,6 +6847,7 @@ SOPC_EncodeableType OpcUa_UnsignedRationalNumber_EncodeableType = {
     sizeof(OpcUa_UnsignedRationalNumber),
     OpcUa_UnsignedRationalNumber_Initialize,
     OpcUa_UnsignedRationalNumber_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UnsignedRationalNumber_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UnsignedRationalNumber_Fields,
     g_KnownEncodeableTypes};
@@ -6485,6 +6875,7 @@ void OpcUa_ReferenceNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReferenceNode_Fields[] = {
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -6494,6 +6885,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceNode, ReferenceTypeId) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -6503,6 +6895,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceNode, IsInverse) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -6526,6 +6919,7 @@ SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType = {
     sizeof(OpcUa_ReferenceNode),
     OpcUa_ReferenceNode_Initialize,
     OpcUa_ReferenceNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReferenceNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReferenceNode_Fields,
     g_KnownEncodeableTypes};
@@ -6553,6 +6947,7 @@ void OpcUa_Node_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
     {
+        false,                                  // isOptional
         true,                                   // isBuiltIn
         false,                                  // isArrayLength
         true,                                   // isToEncode
@@ -6562,6 +6957,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, NodeId) // offset
     },
     {
+        false,                                     // isOptional
         true,                                      // isBuiltIn
         false,                                     // isArrayLength
         true,                                      // isToEncode
@@ -6571,6 +6967,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, NodeClass) // offset
     },
     {
+        false,                                      // isOptional
         true,                                       // isBuiltIn
         false,                                      // isArrayLength
         true,                                       // isToEncode
@@ -6580,6 +6977,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, BrowseName) // offset
     },
     {
+        false,                                       // isOptional
         true,                                        // isBuiltIn
         false,                                       // isArrayLength
         true,                                        // isToEncode
@@ -6589,6 +6987,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, DisplayName) // offset
     },
     {
+        false,                                       // isOptional
         true,                                        // isBuiltIn
         false,                                       // isArrayLength
         true,                                        // isToEncode
@@ -6598,6 +6997,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, Description) // offset
     },
     {
+        false,                                     // isOptional
         true,                                      // isBuiltIn
         false,                                     // isArrayLength
         true,                                      // isToEncode
@@ -6607,6 +7007,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, WriteMask) // offset
     },
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -6616,6 +7017,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, UserWriteMask) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         true,                                                // isArrayLength
         true,                                                // isToEncode
@@ -6625,6 +7027,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, NoOfRolePermissions) // offset
     },
     {
+        false,                                                // isOptional
         false,                                                // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -6634,6 +7037,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, RolePermissions)      // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         true,                                                    // isArrayLength
         true,                                                    // isToEncode
@@ -6643,6 +7047,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                // isOptional
         false,                                                // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -6652,6 +7057,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, UserRolePermissions)  // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -6661,6 +7067,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, AccessRestrictions) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         true,                                           // isArrayLength
         true,                                           // isToEncode
@@ -6670,6 +7077,7 @@ static const SOPC_EncodeableType_FieldDescriptor Node_Fields[] = {
         (uint32_t) offsetof(OpcUa_Node, NoOfReferences) // offset
     },
     {
+        false,                                           // isOptional
         false,                                           // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -6692,6 +7100,7 @@ SOPC_EncodeableType OpcUa_Node_EncodeableType = {"Node",
                                                  sizeof(OpcUa_Node),
                                                  OpcUa_Node_Initialize,
                                                  OpcUa_Node_Clear,
+                                                 SOPC_STRUCT_TYPE_CLASSIC,
                                                  sizeof Node_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
                                                  Node_Fields,
                                                  g_KnownEncodeableTypes};
@@ -6719,6 +7128,7 @@ void OpcUa_InstanceNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -6728,6 +7138,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, NodeId) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -6737,6 +7148,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, NodeClass) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -6746,6 +7158,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, BrowseName) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -6755,6 +7168,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, DisplayName) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -6764,6 +7178,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, Description) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -6773,6 +7188,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, WriteMask) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -6782,6 +7198,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, UserWriteMask) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -6791,6 +7208,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -6800,6 +7218,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, RolePermissions) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -6809,6 +7228,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -6818,6 +7238,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, UserRolePermissions) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -6827,6 +7248,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, AccessRestrictions) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         true,                                                   // isArrayLength
         true,                                                   // isToEncode
@@ -6836,6 +7258,7 @@ static const SOPC_EncodeableType_FieldDescriptor InstanceNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_InstanceNode, NoOfReferences) // offset
     },
     {
+        false,                                              // isOptional
         false,                                              // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -6859,6 +7282,7 @@ SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType = {
     sizeof(OpcUa_InstanceNode),
     OpcUa_InstanceNode_Initialize,
     OpcUa_InstanceNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof InstanceNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     InstanceNode_Fields,
     g_KnownEncodeableTypes};
@@ -6886,6 +7310,7 @@ void OpcUa_TypeNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
     {
+        false,                                      // isOptional
         true,                                       // isBuiltIn
         false,                                      // isArrayLength
         true,                                       // isToEncode
@@ -6895,6 +7320,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, NodeId) // offset
     },
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -6904,6 +7330,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, NodeClass) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -6913,6 +7340,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, BrowseName) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -6922,6 +7350,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, DisplayName) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -6931,6 +7360,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, Description) // offset
     },
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -6940,6 +7370,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, WriteMask) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -6949,6 +7380,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, UserWriteMask) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         true,                                                    // isArrayLength
         true,                                                    // isToEncode
@@ -6958,6 +7390,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                // isOptional
         false,                                                // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -6967,6 +7400,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, RolePermissions)  // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -6976,6 +7410,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -6985,6 +7420,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, UserRolePermissions) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -6994,6 +7430,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, AccessRestrictions) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         true,                                               // isArrayLength
         true,                                               // isToEncode
@@ -7003,6 +7440,7 @@ static const SOPC_EncodeableType_FieldDescriptor TypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_TypeNode, NoOfReferences) // offset
     },
     {
+        false,                                           // isOptional
         false,                                           // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -7026,6 +7464,7 @@ SOPC_EncodeableType OpcUa_TypeNode_EncodeableType = {
     sizeof(OpcUa_TypeNode),
     OpcUa_TypeNode_Initialize,
     OpcUa_TypeNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof TypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TypeNode_Fields,
     g_KnownEncodeableTypes};
@@ -7053,6 +7492,7 @@ void OpcUa_ObjectNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
     {
+        false,                                        // isOptional
         true,                                         // isBuiltIn
         false,                                        // isArrayLength
         true,                                         // isToEncode
@@ -7062,6 +7502,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, NodeId) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -7071,6 +7512,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, NodeClass) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -7080,6 +7522,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, BrowseName) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -7089,6 +7532,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, DisplayName) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -7098,6 +7542,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, Description) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -7107,6 +7552,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, WriteMask) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -7116,6 +7562,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, UserWriteMask) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         true,                                                      // isArrayLength
         true,                                                      // isToEncode
@@ -7125,6 +7572,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                 // isOptional
         false,                                                 // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -7134,6 +7582,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, RolePermissions) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -7143,6 +7592,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                     // isOptional
         false,                                                     // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -7152,6 +7602,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, UserRolePermissions) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -7161,6 +7612,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, AccessRestrictions) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         true,                                                 // isArrayLength
         true,                                                 // isToEncode
@@ -7170,6 +7622,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, NoOfReferences) // offset
     },
     {
+        false,                                            // isOptional
         false,                                            // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -7179,6 +7632,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectNode, References) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -7202,6 +7656,7 @@ SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType = {
     sizeof(OpcUa_ObjectNode),
     OpcUa_ObjectNode_Initialize,
     OpcUa_ObjectNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ObjectNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ObjectNode_Fields,
     g_KnownEncodeableTypes};
@@ -7229,6 +7684,7 @@ void OpcUa_ObjectTypeNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -7238,6 +7694,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, NodeId) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -7247,6 +7704,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, NodeClass) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -7256,6 +7714,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, BrowseName) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -7265,6 +7724,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, DisplayName) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -7274,6 +7734,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, Description) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -7283,6 +7744,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, WriteMask) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -7292,6 +7754,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, UserWriteMask) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -7301,6 +7764,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                     // isOptional
         false,                                                     // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -7310,6 +7774,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, RolePermissions) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -7319,6 +7784,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                         // isOptional
         false,                                                         // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -7328,6 +7794,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, UserRolePermissions) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -7337,6 +7804,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, AccessRestrictions) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         true,                                                     // isArrayLength
         true,                                                     // isToEncode
@@ -7346,6 +7814,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, NoOfReferences) // offset
     },
     {
+        false,                                                // isOptional
         false,                                                // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -7355,6 +7824,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectTypeNode, References) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -7378,6 +7848,7 @@ SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType = {
     sizeof(OpcUa_ObjectTypeNode),
     OpcUa_ObjectTypeNode_Initialize,
     OpcUa_ObjectTypeNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ObjectTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ObjectTypeNode_Fields,
     g_KnownEncodeableTypes};
@@ -7405,6 +7876,7 @@ void OpcUa_VariableNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -7414,6 +7886,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, NodeId) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -7423,6 +7896,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, NodeClass) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -7432,6 +7906,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, BrowseName) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -7441,6 +7916,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, DisplayName) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -7450,6 +7926,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, Description) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -7459,6 +7936,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, WriteMask) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -7468,6 +7946,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, UserWriteMask) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -7477,6 +7956,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -7486,6 +7966,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, RolePermissions) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -7495,6 +7976,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -7504,6 +7986,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, UserRolePermissions) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -7513,6 +7996,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, AccessRestrictions) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         true,                                                   // isArrayLength
         true,                                                   // isToEncode
@@ -7522,6 +8006,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, NoOfReferences) // offset
     },
     {
+        false,                                              // isOptional
         false,                                              // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -7531,6 +8016,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, References) // offset
     },
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -7540,6 +8026,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, Value) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -7549,6 +8036,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, DataType) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -7558,6 +8046,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, ValueRank) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -7567,6 +8056,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, NoOfArrayDimensions) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -7576,6 +8066,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, ArrayDimensions) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -7585,6 +8076,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, AccessLevel) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -7594,6 +8086,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, UserAccessLevel) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -7603,6 +8096,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, MinimumSamplingInterval) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -7612,6 +8106,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableNode, Historizing) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -7635,6 +8130,7 @@ SOPC_EncodeableType OpcUa_VariableNode_EncodeableType = {
     sizeof(OpcUa_VariableNode),
     OpcUa_VariableNode_Initialize,
     OpcUa_VariableNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof VariableNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     VariableNode_Fields,
     g_KnownEncodeableTypes};
@@ -7662,6 +8158,7 @@ void OpcUa_VariableTypeNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -7671,6 +8168,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NodeId) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -7680,6 +8178,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NodeClass) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -7689,6 +8188,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, BrowseName) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -7698,6 +8198,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, DisplayName) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -7707,6 +8208,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, Description) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -7716,6 +8218,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, WriteMask) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -7725,6 +8228,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, UserWriteMask) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -7734,6 +8238,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -7743,6 +8248,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, RolePermissions) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -7752,6 +8258,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -7761,6 +8268,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, UserRolePermissions) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -7770,6 +8278,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, AccessRestrictions) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         true,                                                       // isArrayLength
         true,                                                       // isToEncode
@@ -7779,6 +8288,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NoOfReferences) // offset
     },
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -7788,6 +8298,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, References) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -7797,6 +8308,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, Value) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -7806,6 +8318,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, DataType) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -7815,6 +8328,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, ValueRank) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -7824,6 +8338,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, NoOfArrayDimensions) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -7833,6 +8348,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableTypeNode, ArrayDimensions) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -7856,6 +8372,7 @@ SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType = {
     sizeof(OpcUa_VariableTypeNode),
     OpcUa_VariableTypeNode_Initialize,
     OpcUa_VariableTypeNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof VariableTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     VariableTypeNode_Fields,
     g_KnownEncodeableTypes};
@@ -7883,6 +8400,7 @@ void OpcUa_ReferenceTypeNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -7892,6 +8410,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, NodeId) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -7901,6 +8420,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, NodeClass) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -7910,6 +8430,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, BrowseName) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -7919,6 +8440,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, DisplayName) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -7928,6 +8450,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, Description) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -7937,6 +8460,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, WriteMask) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -7946,6 +8470,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, UserWriteMask) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -7955,6 +8480,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                        // isOptional
         false,                                                        // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -7964,6 +8490,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, RolePermissions) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -7973,6 +8500,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -7982,6 +8510,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, UserRolePermissions) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -7991,6 +8520,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, AccessRestrictions) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -8000,6 +8530,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, NoOfReferences) // offset
     },
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -8009,6 +8540,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, References) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -8018,6 +8550,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, IsAbstract) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -8027,6 +8560,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReferenceTypeNode, Symmetric) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -8050,6 +8584,7 @@ SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType = {
     sizeof(OpcUa_ReferenceTypeNode),
     OpcUa_ReferenceTypeNode_Initialize,
     OpcUa_ReferenceTypeNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReferenceTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReferenceTypeNode_Fields,
     g_KnownEncodeableTypes};
@@ -8077,6 +8612,7 @@ void OpcUa_MethodNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
     {
+        false,                                        // isOptional
         true,                                         // isBuiltIn
         false,                                        // isArrayLength
         true,                                         // isToEncode
@@ -8086,6 +8622,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, NodeId) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -8095,6 +8632,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, NodeClass) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -8104,6 +8642,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, BrowseName) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -8113,6 +8652,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, DisplayName) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -8122,6 +8662,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, Description) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -8131,6 +8672,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, WriteMask) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -8140,6 +8682,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, UserWriteMask) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         true,                                                      // isArrayLength
         true,                                                      // isToEncode
@@ -8149,6 +8692,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                 // isOptional
         false,                                                 // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -8158,6 +8702,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, RolePermissions) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -8167,6 +8712,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                     // isOptional
         false,                                                     // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -8176,6 +8722,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, UserRolePermissions) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -8185,6 +8732,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, AccessRestrictions) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         true,                                                 // isArrayLength
         true,                                                 // isToEncode
@@ -8194,6 +8742,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, NoOfReferences) // offset
     },
     {
+        false,                                            // isOptional
         false,                                            // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -8203,6 +8752,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, References) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -8212,6 +8762,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodNode, Executable) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -8235,6 +8786,7 @@ SOPC_EncodeableType OpcUa_MethodNode_EncodeableType = {
     sizeof(OpcUa_MethodNode),
     OpcUa_MethodNode_Initialize,
     OpcUa_MethodNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof MethodNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MethodNode_Fields,
     g_KnownEncodeableTypes};
@@ -8262,6 +8814,7 @@ void OpcUa_ViewNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
     {
+        false,                                      // isOptional
         true,                                       // isBuiltIn
         false,                                      // isArrayLength
         true,                                       // isToEncode
@@ -8271,6 +8824,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, NodeId) // offset
     },
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -8280,6 +8834,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, NodeClass) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -8289,6 +8844,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, BrowseName) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -8298,6 +8854,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, DisplayName) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -8307,6 +8864,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, Description) // offset
     },
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -8316,6 +8874,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, WriteMask) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -8325,6 +8884,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, UserWriteMask) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         true,                                                    // isArrayLength
         true,                                                    // isToEncode
@@ -8334,6 +8894,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                // isOptional
         false,                                                // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -8343,6 +8904,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, RolePermissions)  // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -8352,6 +8914,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -8361,6 +8924,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, UserRolePermissions) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -8370,6 +8934,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, AccessRestrictions) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         true,                                               // isArrayLength
         true,                                               // isToEncode
@@ -8379,6 +8944,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, NoOfReferences) // offset
     },
     {
+        false,                                           // isOptional
         false,                                           // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -8388,6 +8954,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, References)  // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -8397,6 +8964,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewNode, ContainsNoLoops) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -8420,6 +8988,7 @@ SOPC_EncodeableType OpcUa_ViewNode_EncodeableType = {
     sizeof(OpcUa_ViewNode),
     OpcUa_ViewNode_Initialize,
     OpcUa_ViewNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ViewNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ViewNode_Fields,
     g_KnownEncodeableTypes};
@@ -8447,6 +9016,7 @@ void OpcUa_DataTypeNode_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -8456,6 +9026,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, NodeId) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -8465,6 +9036,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, NodeClass) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -8474,6 +9046,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, BrowseName) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -8483,6 +9056,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, DisplayName) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -8492,6 +9066,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, Description) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -8501,6 +9076,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, WriteMask) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -8510,6 +9086,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, UserWriteMask) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -8519,6 +9096,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, NoOfRolePermissions) // offset
     },
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -8528,6 +9106,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, RolePermissions) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -8537,6 +9116,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, NoOfUserRolePermissions) // offset
     },
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -8546,6 +9126,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, UserRolePermissions) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -8555,6 +9136,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, AccessRestrictions) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         true,                                                   // isArrayLength
         true,                                                   // isToEncode
@@ -8564,6 +9146,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, NoOfReferences) // offset
     },
     {
+        false,                                              // isOptional
         false,                                              // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -8573,6 +9156,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, References) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -8582,6 +9166,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeNode_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeNode, IsAbstract) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -8605,6 +9190,7 @@ SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType = {
     sizeof(OpcUa_DataTypeNode),
     OpcUa_DataTypeNode_Initialize,
     OpcUa_DataTypeNode_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DataTypeNode_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataTypeNode_Fields,
     g_KnownEncodeableTypes};
@@ -8632,6 +9218,7 @@ void OpcUa_Argument_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Argument_Fields[] = {
     {
+        false,                                    // isOptional
         true,                                     // isBuiltIn
         false,                                    // isArrayLength
         true,                                     // isToEncode
@@ -8641,6 +9228,7 @@ static const SOPC_EncodeableType_FieldDescriptor Argument_Fields[] = {
         (uint32_t) offsetof(OpcUa_Argument, Name) // offset
     },
     {
+        false,                                        // isOptional
         true,                                         // isBuiltIn
         false,                                        // isArrayLength
         true,                                         // isToEncode
@@ -8650,6 +9238,7 @@ static const SOPC_EncodeableType_FieldDescriptor Argument_Fields[] = {
         (uint32_t) offsetof(OpcUa_Argument, DataType) // offset
     },
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -8659,6 +9248,7 @@ static const SOPC_EncodeableType_FieldDescriptor Argument_Fields[] = {
         (uint32_t) offsetof(OpcUa_Argument, ValueRank) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         true,                                                    // isArrayLength
         true,                                                    // isToEncode
@@ -8668,6 +9258,7 @@ static const SOPC_EncodeableType_FieldDescriptor Argument_Fields[] = {
         (uint32_t) offsetof(OpcUa_Argument, NoOfArrayDimensions) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -8677,6 +9268,7 @@ static const SOPC_EncodeableType_FieldDescriptor Argument_Fields[] = {
         (uint32_t) offsetof(OpcUa_Argument, ArrayDimensions) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -8700,6 +9292,7 @@ SOPC_EncodeableType OpcUa_Argument_EncodeableType = {
     sizeof(OpcUa_Argument),
     OpcUa_Argument_Initialize,
     OpcUa_Argument_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof Argument_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     Argument_Fields,
     g_KnownEncodeableTypes};
@@ -8727,6 +9320,7 @@ void OpcUa_EnumValueType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EnumValueType_Fields[] = {
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -8736,6 +9330,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumValueType_Fields[] = {
         (uint32_t) offsetof(OpcUa_EnumValueType, Value) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -8745,6 +9340,7 @@ static const SOPC_EncodeableType_FieldDescriptor EnumValueType_Fields[] = {
         (uint32_t) offsetof(OpcUa_EnumValueType, DisplayName) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -8768,6 +9364,7 @@ SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType = {
     sizeof(OpcUa_EnumValueType),
     OpcUa_EnumValueType_Initialize,
     OpcUa_EnumValueType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EnumValueType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EnumValueType_Fields,
     g_KnownEncodeableTypes};
@@ -8795,6 +9392,7 @@ void OpcUa_OptionSet_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor OptionSet_Fields[] = {
     {
+        false,                                      // isOptional
         true,                                       // isBuiltIn
         false,                                      // isArrayLength
         true,                                       // isToEncode
@@ -8804,6 +9402,7 @@ static const SOPC_EncodeableType_FieldDescriptor OptionSet_Fields[] = {
         (uint32_t) offsetof(OpcUa_OptionSet, Value) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -8827,6 +9426,7 @@ SOPC_EncodeableType OpcUa_OptionSet_EncodeableType = {
     sizeof(OpcUa_OptionSet),
     OpcUa_OptionSet_Initialize,
     OpcUa_OptionSet_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof OptionSet_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     OptionSet_Fields,
     g_KnownEncodeableTypes};
@@ -8854,6 +9454,7 @@ void OpcUa_TimeZoneDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TimeZoneDataType_Fields[] = {
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -8863,6 +9464,7 @@ static const SOPC_EncodeableType_FieldDescriptor TimeZoneDataType_Fields[] = {
         (uint32_t) offsetof(OpcUa_TimeZoneDataType, Offset) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -8886,6 +9488,7 @@ SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType = {
     sizeof(OpcUa_TimeZoneDataType),
     OpcUa_TimeZoneDataType_Initialize,
     OpcUa_TimeZoneDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof TimeZoneDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TimeZoneDataType_Fields,
     g_KnownEncodeableTypes};
@@ -8913,6 +9516,7 @@ void OpcUa_RequestHeader_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RequestHeader_Fields[] = {
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -8922,6 +9526,7 @@ static const SOPC_EncodeableType_FieldDescriptor RequestHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_RequestHeader, AuthenticationToken) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -8931,6 +9536,7 @@ static const SOPC_EncodeableType_FieldDescriptor RequestHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_RequestHeader, Timestamp) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -8940,6 +9546,7 @@ static const SOPC_EncodeableType_FieldDescriptor RequestHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_RequestHeader, RequestHandle) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -8949,6 +9556,7 @@ static const SOPC_EncodeableType_FieldDescriptor RequestHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_RequestHeader, ReturnDiagnostics) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -8958,6 +9566,7 @@ static const SOPC_EncodeableType_FieldDescriptor RequestHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_RequestHeader, AuditEntryId) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -8967,6 +9576,7 @@ static const SOPC_EncodeableType_FieldDescriptor RequestHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_RequestHeader, TimeoutHint) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -8990,6 +9600,7 @@ SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType = {
     sizeof(OpcUa_RequestHeader),
     OpcUa_RequestHeader_Initialize,
     OpcUa_RequestHeader_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RequestHeader_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RequestHeader_Fields,
     g_KnownEncodeableTypes};
@@ -9017,6 +9628,7 @@ void OpcUa_ResponseHeader_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ResponseHeader_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -9026,6 +9638,7 @@ static const SOPC_EncodeableType_FieldDescriptor ResponseHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_ResponseHeader, Timestamp) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -9035,6 +9648,7 @@ static const SOPC_EncodeableType_FieldDescriptor ResponseHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_ResponseHeader, RequestHandle) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -9044,6 +9658,7 @@ static const SOPC_EncodeableType_FieldDescriptor ResponseHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_ResponseHeader, ServiceResult) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -9053,6 +9668,7 @@ static const SOPC_EncodeableType_FieldDescriptor ResponseHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_ResponseHeader, ServiceDiagnostics) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         true,                                                      // isArrayLength
         true,                                                      // isToEncode
@@ -9062,6 +9678,7 @@ static const SOPC_EncodeableType_FieldDescriptor ResponseHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_ResponseHeader, NoOfStringTable) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -9071,6 +9688,7 @@ static const SOPC_EncodeableType_FieldDescriptor ResponseHeader_Fields[] = {
         (uint32_t) offsetof(OpcUa_ResponseHeader, StringTable) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -9094,6 +9712,7 @@ SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType = {
     sizeof(OpcUa_ResponseHeader),
     OpcUa_ResponseHeader_Initialize,
     OpcUa_ResponseHeader_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ResponseHeader_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ResponseHeader_Fields,
     g_KnownEncodeableTypes};
@@ -9121,6 +9740,7 @@ void OpcUa_ServiceFault_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServiceFault_Fields[] = {
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         false,                                                  // isToEncode
@@ -9144,6 +9764,7 @@ SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType = {
     sizeof(OpcUa_ServiceFault),
     OpcUa_ServiceFault_Initialize,
     OpcUa_ServiceFault_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ServiceFault_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServiceFault_Fields,
     g_KnownEncodeableTypes};
@@ -9171,6 +9792,7 @@ void OpcUa_SessionlessInvokeRequestType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeRequestType_Fields[] = {
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -9180,6 +9802,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeRequestType_Fi
         (uint32_t) offsetof(OpcUa_SessionlessInvokeRequestType, UrisVersion) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         true,                                                                      // isArrayLength
         true,                                                                      // isToEncode
@@ -9189,6 +9812,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeRequestType_Fi
         (uint32_t) offsetof(OpcUa_SessionlessInvokeRequestType, NoOfNamespaceUris) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -9198,6 +9822,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeRequestType_Fi
         (uint32_t) offsetof(OpcUa_SessionlessInvokeRequestType, NamespaceUris) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -9207,6 +9832,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeRequestType_Fi
         (uint32_t) offsetof(OpcUa_SessionlessInvokeRequestType, NoOfServerUris) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -9216,6 +9842,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeRequestType_Fi
         (uint32_t) offsetof(OpcUa_SessionlessInvokeRequestType, ServerUris) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         true,                                                                  // isArrayLength
         true,                                                                  // isToEncode
@@ -9225,6 +9852,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeRequestType_Fi
         (uint32_t) offsetof(OpcUa_SessionlessInvokeRequestType, NoOfLocaleIds) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -9234,6 +9862,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeRequestType_Fi
         (uint32_t) offsetof(OpcUa_SessionlessInvokeRequestType, LocaleIds) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -9257,6 +9886,7 @@ SOPC_EncodeableType OpcUa_SessionlessInvokeRequestType_EncodeableType = {
     sizeof(OpcUa_SessionlessInvokeRequestType),
     OpcUa_SessionlessInvokeRequestType_Initialize,
     OpcUa_SessionlessInvokeRequestType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SessionlessInvokeRequestType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SessionlessInvokeRequestType_Fields,
     g_KnownEncodeableTypes};
@@ -9284,6 +9914,7 @@ void OpcUa_SessionlessInvokeResponseType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeResponseType_Fields[] = {
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         true,                                                                       // isArrayLength
         true,                                                                       // isToEncode
@@ -9293,6 +9924,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeResponseType_F
         (uint32_t) offsetof(OpcUa_SessionlessInvokeResponseType, NoOfNamespaceUris) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -9302,6 +9934,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeResponseType_F
         (uint32_t) offsetof(OpcUa_SessionlessInvokeResponseType, NamespaceUris) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         true,                                                                    // isArrayLength
         true,                                                                    // isToEncode
@@ -9311,6 +9944,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeResponseType_F
         (uint32_t) offsetof(OpcUa_SessionlessInvokeResponseType, NoOfServerUris) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -9320,6 +9954,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionlessInvokeResponseType_F
         (uint32_t) offsetof(OpcUa_SessionlessInvokeResponseType, ServerUris) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -9343,6 +9978,7 @@ SOPC_EncodeableType OpcUa_SessionlessInvokeResponseType_EncodeableType = {
     sizeof(OpcUa_SessionlessInvokeResponseType),
     OpcUa_SessionlessInvokeResponseType_Initialize,
     OpcUa_SessionlessInvokeResponseType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SessionlessInvokeResponseType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SessionlessInvokeResponseType_Fields,
     g_KnownEncodeableTypes};
@@ -9371,6 +10007,7 @@ void OpcUa_FindServersRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FindServersRequest_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -9380,6 +10017,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_FindServersRequest, EndpointUrl) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -9389,6 +10027,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_FindServersRequest, NoOfLocaleIds) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -9398,6 +10037,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_FindServersRequest, LocaleIds) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         true,                                                         // isArrayLength
         true,                                                         // isToEncode
@@ -9407,6 +10047,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_FindServersRequest, NoOfServerUris) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -9430,6 +10071,7 @@ SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType = {
     sizeof(OpcUa_FindServersRequest),
     OpcUa_FindServersRequest_Initialize,
     OpcUa_FindServersRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof FindServersRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FindServersRequest_Fields,
     g_KnownEncodeableTypes};
@@ -9457,6 +10099,7 @@ void OpcUa_FindServersResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FindServersResponse_Fields[] = {
     {
+        false,                                                         // isOptional
         false,                                                         // isBuiltIn
         false,                                                         // isArrayLength
         false,                                                         // isToEncode
@@ -9466,6 +10109,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_FindServersResponse, ResponseHeader) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         true,                                                       // isArrayLength
         true,                                                       // isToEncode
@@ -9475,6 +10119,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_FindServersResponse, NoOfServers) // offset
     },
     {
+        false,                                                    // isOptional
         false,                                                    // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -9498,6 +10143,7 @@ SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType = {
     sizeof(OpcUa_FindServersResponse),
     OpcUa_FindServersResponse_Initialize,
     OpcUa_FindServersResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof FindServersResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FindServersResponse_Fields,
     g_KnownEncodeableTypes};
@@ -9526,6 +10172,7 @@ void OpcUa_ServerOnNetwork_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServerOnNetwork_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -9535,6 +10182,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerOnNetwork_Fields[] = {
         (uint32_t) offsetof(OpcUa_ServerOnNetwork, RecordId) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -9544,6 +10192,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerOnNetwork_Fields[] = {
         (uint32_t) offsetof(OpcUa_ServerOnNetwork, ServerName) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -9553,6 +10202,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerOnNetwork_Fields[] = {
         (uint32_t) offsetof(OpcUa_ServerOnNetwork, DiscoveryUrl) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -9562,6 +10212,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerOnNetwork_Fields[] = {
         (uint32_t) offsetof(OpcUa_ServerOnNetwork, NoOfServerCapabilities) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -9585,6 +10236,7 @@ SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType = {
     sizeof(OpcUa_ServerOnNetwork),
     OpcUa_ServerOnNetwork_Initialize,
     OpcUa_ServerOnNetwork_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ServerOnNetwork_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServerOnNetwork_Fields,
     g_KnownEncodeableTypes};
@@ -9613,6 +10265,7 @@ void OpcUa_FindServersOnNetworkRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkRequest_Fields[] = {
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -9622,6 +10275,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkRequest_Fie
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkRequest, StartingRecordId) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -9631,6 +10285,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkRequest_Fie
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkRequest, MaxRecordsToReturn) // offset
     },
     {
+        false,                                                                             // isOptional
         true,                                                                              // isBuiltIn
         true,                                                                              // isArrayLength
         true,                                                                              // isToEncode
@@ -9640,6 +10295,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkRequest_Fie
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkRequest, NoOfServerCapabilityFilter) // offset
     },
     {
+        false,                                                                         // isOptional
         true,                                                                          // isBuiltIn
         false,                                                                         // isArrayLength
         true,                                                                          // isToEncode
@@ -9663,6 +10319,7 @@ SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType = {
     sizeof(OpcUa_FindServersOnNetworkRequest),
     OpcUa_FindServersOnNetworkRequest_Initialize,
     OpcUa_FindServersOnNetworkRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof FindServersOnNetworkRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FindServersOnNetworkRequest_Fields,
     g_KnownEncodeableTypes};
@@ -9690,6 +10347,7 @@ void OpcUa_FindServersOnNetworkResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkResponse_Fields[] = {
     {
+        false,                                                                  // isOptional
         false,                                                                  // isBuiltIn
         false,                                                                  // isArrayLength
         false,                                                                  // isToEncode
@@ -9699,6 +10357,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkResponse_Fi
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkResponse, ResponseHeader) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -9708,6 +10367,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkResponse_Fi
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkResponse, LastCounterResetTime) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -9717,6 +10377,7 @@ static const SOPC_EncodeableType_FieldDescriptor FindServersOnNetworkResponse_Fi
         (uint32_t) offsetof(OpcUa_FindServersOnNetworkResponse, NoOfServers) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -9740,6 +10401,7 @@ SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType = {
     sizeof(OpcUa_FindServersOnNetworkResponse),
     OpcUa_FindServersOnNetworkResponse_Initialize,
     OpcUa_FindServersOnNetworkResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof FindServersOnNetworkResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     FindServersOnNetworkResponse_Fields,
     g_KnownEncodeableTypes};
@@ -9769,6 +10431,7 @@ void OpcUa_GetEndpointsRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor GetEndpointsRequest_Fields[] = {
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -9778,6 +10441,7 @@ static const SOPC_EncodeableType_FieldDescriptor GetEndpointsRequest_Fields[] = 
         (uint32_t) offsetof(OpcUa_GetEndpointsRequest, EndpointUrl) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         true,                                                         // isArrayLength
         true,                                                         // isToEncode
@@ -9787,6 +10451,7 @@ static const SOPC_EncodeableType_FieldDescriptor GetEndpointsRequest_Fields[] = 
         (uint32_t) offsetof(OpcUa_GetEndpointsRequest, NoOfLocaleIds) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -9796,6 +10461,7 @@ static const SOPC_EncodeableType_FieldDescriptor GetEndpointsRequest_Fields[] = 
         (uint32_t) offsetof(OpcUa_GetEndpointsRequest, LocaleIds) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         true,                                                           // isArrayLength
         true,                                                           // isToEncode
@@ -9805,6 +10471,7 @@ static const SOPC_EncodeableType_FieldDescriptor GetEndpointsRequest_Fields[] = 
         (uint32_t) offsetof(OpcUa_GetEndpointsRequest, NoOfProfileUris) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -9828,6 +10495,7 @@ SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType = {
     sizeof(OpcUa_GetEndpointsRequest),
     OpcUa_GetEndpointsRequest_Initialize,
     OpcUa_GetEndpointsRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof GetEndpointsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     GetEndpointsRequest_Fields,
     g_KnownEncodeableTypes};
@@ -9855,6 +10523,7 @@ void OpcUa_GetEndpointsResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor GetEndpointsResponse_Fields[] = {
     {
+        false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
         false,                                                          // isToEncode
@@ -9864,6 +10533,7 @@ static const SOPC_EncodeableType_FieldDescriptor GetEndpointsResponse_Fields[] =
         (uint32_t) offsetof(OpcUa_GetEndpointsResponse, ResponseHeader) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -9873,6 +10543,7 @@ static const SOPC_EncodeableType_FieldDescriptor GetEndpointsResponse_Fields[] =
         (uint32_t) offsetof(OpcUa_GetEndpointsResponse, NoOfEndpoints) // offset
     },
     {
+        false,                                                     // isOptional
         false,                                                     // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -9896,6 +10567,7 @@ SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType = {
     sizeof(OpcUa_GetEndpointsResponse),
     OpcUa_GetEndpointsResponse_Initialize,
     OpcUa_GetEndpointsResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof GetEndpointsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     GetEndpointsResponse_Fields,
     g_KnownEncodeableTypes};
@@ -9924,6 +10596,7 @@ void OpcUa_RegisteredServer_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -9933,6 +10606,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
         (uint32_t) offsetof(OpcUa_RegisteredServer, ServerUri) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -9942,6 +10616,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
         (uint32_t) offsetof(OpcUa_RegisteredServer, ProductUri) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -9951,6 +10626,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
         (uint32_t) offsetof(OpcUa_RegisteredServer, NoOfServerNames) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -9960,6 +10636,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
         (uint32_t) offsetof(OpcUa_RegisteredServer, ServerNames) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -9969,6 +10646,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
         (uint32_t) offsetof(OpcUa_RegisteredServer, ServerType) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -9978,6 +10656,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
         (uint32_t) offsetof(OpcUa_RegisteredServer, GatewayServerUri) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -9987,6 +10666,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
         (uint32_t) offsetof(OpcUa_RegisteredServer, NoOfDiscoveryUrls) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -9996,6 +10676,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
         (uint32_t) offsetof(OpcUa_RegisteredServer, DiscoveryUrls) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -10005,6 +10686,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisteredServer_Fields[] = {
         (uint32_t) offsetof(OpcUa_RegisteredServer, SemaphoreFilePath) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -10028,6 +10710,7 @@ SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType = {
     sizeof(OpcUa_RegisteredServer),
     OpcUa_RegisteredServer_Initialize,
     OpcUa_RegisteredServer_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RegisteredServer_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisteredServer_Fields,
     g_KnownEncodeableTypes};
@@ -10056,6 +10739,7 @@ void OpcUa_RegisterServerRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterServerRequest_Fields[] = {
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -10079,6 +10763,7 @@ SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType = {
     sizeof(OpcUa_RegisterServerRequest),
     OpcUa_RegisterServerRequest_Initialize,
     OpcUa_RegisterServerRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RegisterServerRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterServerRequest_Fields,
     g_KnownEncodeableTypes};
@@ -10106,6 +10791,7 @@ void OpcUa_RegisterServerResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterServerResponse_Fields[] = {
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         false,                                                            // isToEncode
@@ -10129,6 +10815,7 @@ SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType = {
     sizeof(OpcUa_RegisterServerResponse),
     OpcUa_RegisterServerResponse_Initialize,
     OpcUa_RegisterServerResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RegisterServerResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterServerResponse_Fields,
     g_KnownEncodeableTypes};
@@ -10157,6 +10844,7 @@ void OpcUa_MdnsDiscoveryConfiguration_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MdnsDiscoveryConfiguration_Fields[] = {
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -10166,6 +10854,7 @@ static const SOPC_EncodeableType_FieldDescriptor MdnsDiscoveryConfiguration_Fiel
         (uint32_t) offsetof(OpcUa_MdnsDiscoveryConfiguration, MdnsServerName) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -10175,6 +10864,7 @@ static const SOPC_EncodeableType_FieldDescriptor MdnsDiscoveryConfiguration_Fiel
         (uint32_t) offsetof(OpcUa_MdnsDiscoveryConfiguration, NoOfServerCapabilities) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -10198,6 +10888,7 @@ SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType = {
     sizeof(OpcUa_MdnsDiscoveryConfiguration),
     OpcUa_MdnsDiscoveryConfiguration_Initialize,
     OpcUa_MdnsDiscoveryConfiguration_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof MdnsDiscoveryConfiguration_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MdnsDiscoveryConfiguration_Fields,
     g_KnownEncodeableTypes};
@@ -10226,6 +10917,7 @@ void OpcUa_RegisterServer2Request_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Request_Fields[] = {
     {
+        false,                                                    // isOptional
         false,                                                    // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -10235,6 +10927,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Request_Fields[]
         (uint32_t) offsetof(OpcUa_RegisterServer2Request, Server) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -10244,6 +10937,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Request_Fields[]
         (uint32_t) offsetof(OpcUa_RegisterServer2Request, NoOfDiscoveryConfiguration) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -10267,6 +10961,7 @@ SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType = {
     sizeof(OpcUa_RegisterServer2Request),
     OpcUa_RegisterServer2Request_Initialize,
     OpcUa_RegisterServer2Request_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RegisterServer2Request_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterServer2Request_Fields,
     g_KnownEncodeableTypes};
@@ -10294,6 +10989,7 @@ void OpcUa_RegisterServer2Response_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Response_Fields[] = {
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         false,                                                             // isToEncode
@@ -10303,6 +10999,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Response_Fields[
         (uint32_t) offsetof(OpcUa_RegisterServer2Response, ResponseHeader) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         true,                                                                        // isArrayLength
         true,                                                                        // isToEncode
@@ -10312,6 +11009,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Response_Fields[
         (uint32_t) offsetof(OpcUa_RegisterServer2Response, NoOfConfigurationResults) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -10321,6 +11019,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Response_Fields[
         (uint32_t) offsetof(OpcUa_RegisterServer2Response, ConfigurationResults) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -10330,6 +11029,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterServer2Response_Fields[
         (uint32_t) offsetof(OpcUa_RegisterServer2Response, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -10353,6 +11053,7 @@ SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType = {
     sizeof(OpcUa_RegisterServer2Response),
     OpcUa_RegisterServer2Response_Initialize,
     OpcUa_RegisterServer2Response_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RegisterServer2Response_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterServer2Response_Fields,
     g_KnownEncodeableTypes};
@@ -10381,6 +11082,7 @@ void OpcUa_ChannelSecurityToken_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ChannelSecurityToken_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -10390,6 +11092,7 @@ static const SOPC_EncodeableType_FieldDescriptor ChannelSecurityToken_Fields[] =
         (uint32_t) offsetof(OpcUa_ChannelSecurityToken, ChannelId) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -10399,6 +11102,7 @@ static const SOPC_EncodeableType_FieldDescriptor ChannelSecurityToken_Fields[] =
         (uint32_t) offsetof(OpcUa_ChannelSecurityToken, TokenId) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -10408,6 +11112,7 @@ static const SOPC_EncodeableType_FieldDescriptor ChannelSecurityToken_Fields[] =
         (uint32_t) offsetof(OpcUa_ChannelSecurityToken, CreatedAt) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -10431,6 +11136,7 @@ SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType = {
     sizeof(OpcUa_ChannelSecurityToken),
     OpcUa_ChannelSecurityToken_Initialize,
     OpcUa_ChannelSecurityToken_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ChannelSecurityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ChannelSecurityToken_Fields,
     g_KnownEncodeableTypes};
@@ -10459,6 +11165,7 @@ void OpcUa_OpenSecureChannelRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelRequest_Fields[] = {
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -10468,6 +11175,7 @@ static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelRequest_Fields
         (uint32_t) offsetof(OpcUa_OpenSecureChannelRequest, ClientProtocolVersion) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -10477,6 +11185,7 @@ static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelRequest_Fields
         (uint32_t) offsetof(OpcUa_OpenSecureChannelRequest, RequestType) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -10486,6 +11195,7 @@ static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelRequest_Fields
         (uint32_t) offsetof(OpcUa_OpenSecureChannelRequest, SecurityMode) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -10495,6 +11205,7 @@ static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelRequest_Fields
         (uint32_t) offsetof(OpcUa_OpenSecureChannelRequest, ClientNonce) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -10518,6 +11229,7 @@ SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType = {
     sizeof(OpcUa_OpenSecureChannelRequest),
     OpcUa_OpenSecureChannelRequest_Initialize,
     OpcUa_OpenSecureChannelRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof OpenSecureChannelRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     OpenSecureChannelRequest_Fields,
     g_KnownEncodeableTypes};
@@ -10545,6 +11257,7 @@ void OpcUa_OpenSecureChannelResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelResponse_Fields[] = {
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         false,                                                               // isToEncode
@@ -10554,6 +11267,7 @@ static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelResponse_Field
         (uint32_t) offsetof(OpcUa_OpenSecureChannelResponse, ResponseHeader) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -10563,6 +11277,7 @@ static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelResponse_Field
         (uint32_t) offsetof(OpcUa_OpenSecureChannelResponse, ServerProtocolVersion) // offset
     },
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -10572,6 +11287,7 @@ static const SOPC_EncodeableType_FieldDescriptor OpenSecureChannelResponse_Field
         (uint32_t) offsetof(OpcUa_OpenSecureChannelResponse, SecurityToken) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -10595,6 +11311,7 @@ SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType = {
     sizeof(OpcUa_OpenSecureChannelResponse),
     OpcUa_OpenSecureChannelResponse_Initialize,
     OpcUa_OpenSecureChannelResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof OpenSecureChannelResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     OpenSecureChannelResponse_Fields,
     g_KnownEncodeableTypes};
@@ -10632,6 +11349,7 @@ SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType = {
     sizeof(OpcUa_CloseSecureChannelRequest),
     OpcUa_CloseSecureChannelRequest_Initialize,
     OpcUa_CloseSecureChannelRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     0,
     NULL,
     g_KnownEncodeableTypes};
@@ -10659,6 +11377,7 @@ void OpcUa_CloseSecureChannelResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CloseSecureChannelResponse_Fields[] = {
     {
+        false,                                                                // isOptional
         false,                                                                // isBuiltIn
         false,                                                                // isArrayLength
         false,                                                                // isToEncode
@@ -10682,6 +11401,7 @@ SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType = {
     sizeof(OpcUa_CloseSecureChannelResponse),
     OpcUa_CloseSecureChannelResponse_Initialize,
     OpcUa_CloseSecureChannelResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CloseSecureChannelResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CloseSecureChannelResponse_Fields,
     g_KnownEncodeableTypes};
@@ -10710,6 +11430,7 @@ void OpcUa_SignedSoftwareCertificate_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SignedSoftwareCertificate_Fields[] = {
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -10719,6 +11440,7 @@ static const SOPC_EncodeableType_FieldDescriptor SignedSoftwareCertificate_Field
         (uint32_t) offsetof(OpcUa_SignedSoftwareCertificate, CertificateData) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -10742,6 +11464,7 @@ SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType = {
     sizeof(OpcUa_SignedSoftwareCertificate),
     OpcUa_SignedSoftwareCertificate_Initialize,
     OpcUa_SignedSoftwareCertificate_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SignedSoftwareCertificate_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SignedSoftwareCertificate_Fields,
     g_KnownEncodeableTypes};
@@ -10769,6 +11492,7 @@ void OpcUa_SignatureData_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SignatureData_Fields[] = {
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -10778,6 +11502,7 @@ static const SOPC_EncodeableType_FieldDescriptor SignatureData_Fields[] = {
         (uint32_t) offsetof(OpcUa_SignatureData, Algorithm) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -10801,6 +11526,7 @@ SOPC_EncodeableType OpcUa_SignatureData_EncodeableType = {
     sizeof(OpcUa_SignatureData),
     OpcUa_SignatureData_Initialize,
     OpcUa_SignatureData_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SignatureData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SignatureData_Fields,
     g_KnownEncodeableTypes};
@@ -10829,6 +11555,7 @@ void OpcUa_CreateSessionRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] = {
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -10838,6 +11565,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, ClientDescription) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -10847,6 +11575,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, ServerUri) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -10856,6 +11585,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, EndpointUrl) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -10865,6 +11595,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, SessionName) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -10874,6 +11605,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, ClientNonce) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -10883,6 +11615,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, ClientCertificate) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -10892,6 +11625,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_CreateSessionRequest, RequestedSessionTimeout) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -10915,6 +11649,7 @@ SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType = {
     sizeof(OpcUa_CreateSessionRequest),
     OpcUa_CreateSessionRequest_Initialize,
     OpcUa_CreateSessionRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CreateSessionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateSessionRequest_Fields,
     g_KnownEncodeableTypes};
@@ -10942,6 +11677,7 @@ void OpcUa_CreateSessionResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] = {
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         false,                                                           // isToEncode
@@ -10951,6 +11687,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ResponseHeader) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -10960,6 +11697,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, SessionId) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -10969,6 +11707,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, AuthenticationToken) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -10978,6 +11717,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, RevisedSessionTimeout) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -10987,6 +11727,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerNonce) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -10996,6 +11737,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerCertificate) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -11005,6 +11747,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, NoOfServerEndpoints) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -11014,6 +11757,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerEndpoints) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         true,                                                                            // isArrayLength
         true,                                                                            // isToEncode
@@ -11023,6 +11767,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, NoOfServerSoftwareCertificates) // offset
     },
     {
+        false,                                                                       // isOptional
         false,                                                                       // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -11032,6 +11777,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerSoftwareCertificates) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -11041,6 +11787,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSessionResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_CreateSessionResponse, ServerSignature) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -11064,6 +11811,7 @@ SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType = {
     sizeof(OpcUa_CreateSessionResponse),
     OpcUa_CreateSessionResponse_Initialize,
     OpcUa_CreateSessionResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CreateSessionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateSessionResponse_Fields,
     g_KnownEncodeableTypes};
@@ -11092,6 +11840,7 @@ void OpcUa_UserIdentityToken_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UserIdentityToken_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -11115,6 +11864,7 @@ SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType = {
     sizeof(OpcUa_UserIdentityToken),
     OpcUa_UserIdentityToken_Initialize,
     OpcUa_UserIdentityToken_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UserIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UserIdentityToken_Fields,
     g_KnownEncodeableTypes};
@@ -11142,6 +11892,7 @@ void OpcUa_AnonymousIdentityToken_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AnonymousIdentityToken_Fields[] = {
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -11165,6 +11916,7 @@ SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType = {
     sizeof(OpcUa_AnonymousIdentityToken),
     OpcUa_AnonymousIdentityToken_Initialize,
     OpcUa_AnonymousIdentityToken_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AnonymousIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AnonymousIdentityToken_Fields,
     g_KnownEncodeableTypes};
@@ -11192,6 +11944,7 @@ void OpcUa_UserNameIdentityToken_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UserNameIdentityToken_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -11201,6 +11954,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserNameIdentityToken_Fields[] 
         (uint32_t) offsetof(OpcUa_UserNameIdentityToken, PolicyId) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -11210,6 +11964,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserNameIdentityToken_Fields[] 
         (uint32_t) offsetof(OpcUa_UserNameIdentityToken, UserName) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -11219,6 +11974,7 @@ static const SOPC_EncodeableType_FieldDescriptor UserNameIdentityToken_Fields[] 
         (uint32_t) offsetof(OpcUa_UserNameIdentityToken, Password) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -11242,6 +11998,7 @@ SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType = {
     sizeof(OpcUa_UserNameIdentityToken),
     OpcUa_UserNameIdentityToken_Initialize,
     OpcUa_UserNameIdentityToken_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UserNameIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UserNameIdentityToken_Fields,
     g_KnownEncodeableTypes};
@@ -11269,6 +12026,7 @@ void OpcUa_X509IdentityToken_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor X509IdentityToken_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -11278,6 +12036,7 @@ static const SOPC_EncodeableType_FieldDescriptor X509IdentityToken_Fields[] = {
         (uint32_t) offsetof(OpcUa_X509IdentityToken, PolicyId) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -11301,6 +12060,7 @@ SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType = {
     sizeof(OpcUa_X509IdentityToken),
     OpcUa_X509IdentityToken_Initialize,
     OpcUa_X509IdentityToken_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof X509IdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     X509IdentityToken_Fields,
     g_KnownEncodeableTypes};
@@ -11328,6 +12088,7 @@ void OpcUa_IssuedIdentityToken_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor IssuedIdentityToken_Fields[] = {
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -11337,6 +12098,7 @@ static const SOPC_EncodeableType_FieldDescriptor IssuedIdentityToken_Fields[] = 
         (uint32_t) offsetof(OpcUa_IssuedIdentityToken, PolicyId) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -11346,6 +12108,7 @@ static const SOPC_EncodeableType_FieldDescriptor IssuedIdentityToken_Fields[] = 
         (uint32_t) offsetof(OpcUa_IssuedIdentityToken, TokenData) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -11369,6 +12132,7 @@ SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType = {
     sizeof(OpcUa_IssuedIdentityToken),
     OpcUa_IssuedIdentityToken_Initialize,
     OpcUa_IssuedIdentityToken_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof IssuedIdentityToken_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     IssuedIdentityToken_Fields,
     g_KnownEncodeableTypes};
@@ -11397,6 +12161,7 @@ void OpcUa_ActivateSessionRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ActivateSessionRequest_Fields[] = {
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -11406,6 +12171,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionRequest_Fields[]
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, ClientSignature) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         true,                                                                             // isArrayLength
         true,                                                                             // isToEncode
@@ -11415,6 +12181,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionRequest_Fields[]
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, NoOfClientSoftwareCertificates) // offset
     },
     {
+        false,                                                                        // isOptional
         false,                                                                        // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -11424,6 +12191,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionRequest_Fields[]
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, ClientSoftwareCertificates) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -11433,6 +12201,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionRequest_Fields[]
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, NoOfLocaleIds) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -11442,6 +12211,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionRequest_Fields[]
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, LocaleIds) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -11451,6 +12221,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionRequest_Fields[]
         (uint32_t) offsetof(OpcUa_ActivateSessionRequest, UserIdentityToken) // offset
     },
     {
+        false,                                                                // isOptional
         false,                                                                // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -11474,6 +12245,7 @@ SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType = {
     sizeof(OpcUa_ActivateSessionRequest),
     OpcUa_ActivateSessionRequest_Initialize,
     OpcUa_ActivateSessionRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ActivateSessionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ActivateSessionRequest_Fields,
     g_KnownEncodeableTypes};
@@ -11501,6 +12273,7 @@ void OpcUa_ActivateSessionResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ActivateSessionResponse_Fields[] = {
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         false,                                                             // isToEncode
@@ -11510,6 +12283,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionResponse_Fields[
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, ResponseHeader) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -11519,6 +12293,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionResponse_Fields[
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, ServerNonce) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         true,                                                           // isArrayLength
         true,                                                           // isToEncode
@@ -11528,6 +12303,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionResponse_Fields[
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, NoOfResults) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -11537,6 +12313,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionResponse_Fields[
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, Results) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -11546,6 +12323,7 @@ static const SOPC_EncodeableType_FieldDescriptor ActivateSessionResponse_Fields[
         (uint32_t) offsetof(OpcUa_ActivateSessionResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -11569,6 +12347,7 @@ SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType = {
     sizeof(OpcUa_ActivateSessionResponse),
     OpcUa_ActivateSessionResponse_Initialize,
     OpcUa_ActivateSessionResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ActivateSessionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ActivateSessionResponse_Fields,
     g_KnownEncodeableTypes};
@@ -11598,6 +12377,7 @@ void OpcUa_CloseSessionRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CloseSessionRequest_Fields[] = {
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -11621,6 +12401,7 @@ SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType = {
     sizeof(OpcUa_CloseSessionRequest),
     OpcUa_CloseSessionRequest_Initialize,
     OpcUa_CloseSessionRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CloseSessionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CloseSessionRequest_Fields,
     g_KnownEncodeableTypes};
@@ -11648,6 +12429,7 @@ void OpcUa_CloseSessionResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CloseSessionResponse_Fields[] = {
     {
+        false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
         false,                                                          // isToEncode
@@ -11671,6 +12453,7 @@ SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType = {
     sizeof(OpcUa_CloseSessionResponse),
     OpcUa_CloseSessionResponse_Initialize,
     OpcUa_CloseSessionResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CloseSessionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CloseSessionResponse_Fields,
     g_KnownEncodeableTypes};
@@ -11700,6 +12483,7 @@ void OpcUa_CancelRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CancelRequest_Fields[] = {
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -11723,6 +12507,7 @@ SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType = {
     sizeof(OpcUa_CancelRequest),
     OpcUa_CancelRequest_Initialize,
     OpcUa_CancelRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CancelRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CancelRequest_Fields,
     g_KnownEncodeableTypes};
@@ -11750,6 +12535,7 @@ void OpcUa_CancelResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CancelResponse_Fields[] = {
     {
+        false,                                                    // isOptional
         false,                                                    // isBuiltIn
         false,                                                    // isArrayLength
         false,                                                    // isToEncode
@@ -11759,6 +12545,7 @@ static const SOPC_EncodeableType_FieldDescriptor CancelResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_CancelResponse, ResponseHeader) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -11782,6 +12569,7 @@ SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType = {
     sizeof(OpcUa_CancelResponse),
     OpcUa_CancelResponse_Initialize,
     OpcUa_CancelResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CancelResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CancelResponse_Fields,
     g_KnownEncodeableTypes};
@@ -11810,6 +12598,7 @@ void OpcUa_NodeAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NodeAttributes_Fields[] = {
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -11819,6 +12608,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_NodeAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -11828,6 +12618,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_NodeAttributes, DisplayName) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -11837,6 +12628,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_NodeAttributes, Description) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -11846,6 +12638,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_NodeAttributes, WriteMask) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -11869,6 +12662,7 @@ SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType = {
     sizeof(OpcUa_NodeAttributes),
     OpcUa_NodeAttributes_Initialize,
     OpcUa_NodeAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof NodeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NodeAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -11896,6 +12690,7 @@ void OpcUa_ObjectAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ObjectAttributes_Fields[] = {
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -11905,6 +12700,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -11914,6 +12710,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectAttributes, DisplayName) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -11923,6 +12720,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectAttributes, Description) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -11932,6 +12730,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectAttributes, WriteMask) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -11941,6 +12740,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ObjectAttributes, UserWriteMask) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -11964,6 +12764,7 @@ SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType = {
     sizeof(OpcUa_ObjectAttributes),
     OpcUa_ObjectAttributes_Initialize,
     OpcUa_ObjectAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ObjectAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ObjectAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -11991,6 +12792,7 @@ void OpcUa_VariableAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -12000,6 +12802,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -12009,6 +12812,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, DisplayName) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -12018,6 +12822,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, Description) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -12027,6 +12832,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, WriteMask) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -12036,6 +12842,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, UserWriteMask) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -12045,6 +12852,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, Value) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -12054,6 +12862,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, DataType) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -12063,6 +12872,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, ValueRank) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -12072,6 +12882,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, NoOfArrayDimensions) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -12081,6 +12892,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, ArrayDimensions) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -12090,6 +12902,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, AccessLevel) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -12099,6 +12912,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, UserAccessLevel) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -12108,6 +12922,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_VariableAttributes, MinimumSamplingInterval) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -12131,6 +12946,7 @@ SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType = {
     sizeof(OpcUa_VariableAttributes),
     OpcUa_VariableAttributes_Initialize,
     OpcUa_VariableAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof VariableAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     VariableAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -12158,6 +12974,7 @@ void OpcUa_MethodAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MethodAttributes_Fields[] = {
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -12167,6 +12984,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -12176,6 +12994,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodAttributes, DisplayName) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -12185,6 +13004,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodAttributes, Description) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -12194,6 +13014,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodAttributes, WriteMask) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -12203,6 +13024,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodAttributes, UserWriteMask) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -12212,6 +13034,7 @@ static const SOPC_EncodeableType_FieldDescriptor MethodAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_MethodAttributes, Executable) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -12235,6 +13058,7 @@ SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType = {
     sizeof(OpcUa_MethodAttributes),
     OpcUa_MethodAttributes_Initialize,
     OpcUa_MethodAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof MethodAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MethodAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -12262,6 +13086,7 @@ void OpcUa_ObjectTypeAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ObjectTypeAttributes_Fields[] = {
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -12271,6 +13096,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeAttributes_Fields[] =
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -12280,6 +13106,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeAttributes_Fields[] =
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, DisplayName) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -12289,6 +13116,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeAttributes_Fields[] =
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, Description) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -12298,6 +13126,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeAttributes_Fields[] =
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, WriteMask) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -12307,6 +13136,7 @@ static const SOPC_EncodeableType_FieldDescriptor ObjectTypeAttributes_Fields[] =
         (uint32_t) offsetof(OpcUa_ObjectTypeAttributes, UserWriteMask) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -12330,6 +13160,7 @@ SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType = {
     sizeof(OpcUa_ObjectTypeAttributes),
     OpcUa_ObjectTypeAttributes_Initialize,
     OpcUa_ObjectTypeAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ObjectTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ObjectTypeAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -12357,6 +13188,7 @@ void OpcUa_VariableTypeAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[] = {
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -12366,6 +13198,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -12375,6 +13208,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, DisplayName) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -12384,6 +13218,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, Description) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -12393,6 +13228,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, WriteMask) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -12402,6 +13238,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, UserWriteMask) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -12411,6 +13248,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, Value) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -12420,6 +13258,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, DataType) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -12429,6 +13268,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, ValueRank) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         true,                                                                  // isArrayLength
         true,                                                                  // isToEncode
@@ -12438,6 +13278,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, NoOfArrayDimensions) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -12447,6 +13288,7 @@ static const SOPC_EncodeableType_FieldDescriptor VariableTypeAttributes_Fields[]
         (uint32_t) offsetof(OpcUa_VariableTypeAttributes, ArrayDimensions) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -12470,6 +13312,7 @@ SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType = {
     sizeof(OpcUa_VariableTypeAttributes),
     OpcUa_VariableTypeAttributes_Initialize,
     OpcUa_VariableTypeAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof VariableTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     VariableTypeAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -12497,6 +13340,7 @@ void OpcUa_ReferenceTypeAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[] = {
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -12506,6 +13350,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -12515,6 +13360,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, DisplayName) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -12524,6 +13370,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, Description) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -12533,6 +13380,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, WriteMask) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -12542,6 +13390,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, UserWriteMask) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -12551,6 +13400,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, IsAbstract) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -12560,6 +13410,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceTypeAttributes_Fields[
         (uint32_t) offsetof(OpcUa_ReferenceTypeAttributes, Symmetric) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -12583,6 +13434,7 @@ SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType = {
     sizeof(OpcUa_ReferenceTypeAttributes),
     OpcUa_ReferenceTypeAttributes_Initialize,
     OpcUa_ReferenceTypeAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReferenceTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReferenceTypeAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -12610,6 +13462,7 @@ void OpcUa_DataTypeAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataTypeAttributes_Fields[] = {
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -12619,6 +13472,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -12628,6 +13482,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, DisplayName) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -12637,6 +13492,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, Description) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -12646,6 +13502,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, WriteMask) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -12655,6 +13512,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataTypeAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataTypeAttributes, UserWriteMask) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -12678,6 +13536,7 @@ SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType = {
     sizeof(OpcUa_DataTypeAttributes),
     OpcUa_DataTypeAttributes_Initialize,
     OpcUa_DataTypeAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DataTypeAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataTypeAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -12705,6 +13564,7 @@ void OpcUa_ViewAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ViewAttributes_Fields[] = {
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -12714,6 +13574,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -12723,6 +13584,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewAttributes, DisplayName) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -12732,6 +13594,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewAttributes, Description) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -12741,6 +13604,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewAttributes, WriteMask) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -12750,6 +13614,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewAttributes, UserWriteMask) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -12759,6 +13624,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewAttributes, ContainsNoLoops) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -12782,6 +13648,7 @@ SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType = {
     sizeof(OpcUa_ViewAttributes),
     OpcUa_ViewAttributes_Initialize,
     OpcUa_ViewAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ViewAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ViewAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -12809,6 +13676,7 @@ void OpcUa_GenericAttributeValue_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor GenericAttributeValue_Fields[] = {
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -12818,6 +13686,7 @@ static const SOPC_EncodeableType_FieldDescriptor GenericAttributeValue_Fields[] 
         (uint32_t) offsetof(OpcUa_GenericAttributeValue, AttributeId) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -12841,6 +13710,7 @@ SOPC_EncodeableType OpcUa_GenericAttributeValue_EncodeableType = {
     sizeof(OpcUa_GenericAttributeValue),
     OpcUa_GenericAttributeValue_Initialize,
     OpcUa_GenericAttributeValue_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof GenericAttributeValue_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     GenericAttributeValue_Fields,
     g_KnownEncodeableTypes};
@@ -12868,6 +13738,7 @@ void OpcUa_GenericAttributes_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor GenericAttributes_Fields[] = {
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -12877,6 +13748,7 @@ static const SOPC_EncodeableType_FieldDescriptor GenericAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_GenericAttributes, SpecifiedAttributes) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -12886,6 +13758,7 @@ static const SOPC_EncodeableType_FieldDescriptor GenericAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_GenericAttributes, DisplayName) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -12895,6 +13768,7 @@ static const SOPC_EncodeableType_FieldDescriptor GenericAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_GenericAttributes, Description) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -12904,6 +13778,7 @@ static const SOPC_EncodeableType_FieldDescriptor GenericAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_GenericAttributes, WriteMask) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -12913,6 +13788,7 @@ static const SOPC_EncodeableType_FieldDescriptor GenericAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_GenericAttributes, UserWriteMask) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -12922,6 +13798,7 @@ static const SOPC_EncodeableType_FieldDescriptor GenericAttributes_Fields[] = {
         (uint32_t) offsetof(OpcUa_GenericAttributes, NoOfAttributeValues) // offset
     },
     {
+        false,                                                        // isOptional
         false,                                                        // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -12945,6 +13822,7 @@ SOPC_EncodeableType OpcUa_GenericAttributes_EncodeableType = {
     sizeof(OpcUa_GenericAttributes),
     OpcUa_GenericAttributes_Initialize,
     OpcUa_GenericAttributes_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof GenericAttributes_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     GenericAttributes_Fields,
     g_KnownEncodeableTypes};
@@ -12972,6 +13850,7 @@ void OpcUa_AddNodesItem_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddNodesItem_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -12981,6 +13860,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesItem, ParentNodeId) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -12990,6 +13870,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesItem, ReferenceTypeId) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -12999,6 +13880,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesItem, RequestedNewNodeId) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -13008,6 +13890,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesItem, BrowseName) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -13017,6 +13900,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesItem, NodeClass) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -13026,6 +13910,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesItem, NodeAttributes) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -13049,6 +13934,7 @@ SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType = {
     sizeof(OpcUa_AddNodesItem),
     OpcUa_AddNodesItem_Initialize,
     OpcUa_AddNodesItem_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AddNodesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddNodesItem_Fields,
     g_KnownEncodeableTypes};
@@ -13076,6 +13962,7 @@ void OpcUa_AddNodesResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddNodesResult_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -13085,6 +13972,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesResult, StatusCode) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -13108,6 +13996,7 @@ SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType = {
     sizeof(OpcUa_AddNodesResult),
     OpcUa_AddNodesResult_Initialize,
     OpcUa_AddNodesResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AddNodesResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddNodesResult_Fields,
     g_KnownEncodeableTypes};
@@ -13136,6 +14025,7 @@ void OpcUa_AddNodesRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddNodesRequest_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         true,                                                      // isArrayLength
         true,                                                      // isToEncode
@@ -13145,6 +14035,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesRequest, NoOfNodesToAdd) // offset
     },
     {
+        false,                                                 // isOptional
         false,                                                 // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -13168,6 +14059,7 @@ SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType = {
     sizeof(OpcUa_AddNodesRequest),
     OpcUa_AddNodesRequest_Initialize,
     OpcUa_AddNodesRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AddNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddNodesRequest_Fields,
     g_KnownEncodeableTypes};
@@ -13195,6 +14087,7 @@ void OpcUa_AddNodesResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddNodesResponse_Fields[] = {
     {
+        false,                                                      // isOptional
         false,                                                      // isBuiltIn
         false,                                                      // isArrayLength
         false,                                                      // isToEncode
@@ -13204,6 +14097,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesResponse, ResponseHeader) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         true,                                                    // isArrayLength
         true,                                                    // isToEncode
@@ -13213,6 +14107,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesResponse, NoOfResults) // offset
     },
     {
+        false,                                               // isOptional
         false,                                               // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -13222,6 +14117,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesResponse, Results) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -13231,6 +14127,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddNodesResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddNodesResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -13254,6 +14151,7 @@ SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType = {
     sizeof(OpcUa_AddNodesResponse),
     OpcUa_AddNodesResponse_Initialize,
     OpcUa_AddNodesResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AddNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddNodesResponse_Fields,
     g_KnownEncodeableTypes};
@@ -13282,6 +14180,7 @@ void OpcUa_AddReferencesItem_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddReferencesItem_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -13291,6 +14190,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddReferencesItem, SourceNodeId) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -13300,6 +14200,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddReferencesItem, ReferenceTypeId) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -13309,6 +14210,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddReferencesItem, IsForward) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -13318,6 +14220,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddReferencesItem, TargetServerUri) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -13327,6 +14230,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_AddReferencesItem, TargetNodeId) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -13350,6 +14254,7 @@ SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType = {
     sizeof(OpcUa_AddReferencesItem),
     OpcUa_AddReferencesItem_Initialize,
     OpcUa_AddReferencesItem_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AddReferencesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddReferencesItem_Fields,
     g_KnownEncodeableTypes};
@@ -13378,6 +14283,7 @@ void OpcUa_AddReferencesRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddReferencesRequest_Fields[] = {
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -13387,6 +14293,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_AddReferencesRequest, NoOfReferencesToAdd) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -13410,6 +14317,7 @@ SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType = {
     sizeof(OpcUa_AddReferencesRequest),
     OpcUa_AddReferencesRequest_Initialize,
     OpcUa_AddReferencesRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AddReferencesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddReferencesRequest_Fields,
     g_KnownEncodeableTypes};
@@ -13437,6 +14345,7 @@ void OpcUa_AddReferencesResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AddReferencesResponse_Fields[] = {
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         false,                                                           // isToEncode
@@ -13446,6 +14355,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_AddReferencesResponse, ResponseHeader) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         true,                                                         // isArrayLength
         true,                                                         // isToEncode
@@ -13455,6 +14365,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_AddReferencesResponse, NoOfResults) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -13464,6 +14375,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_AddReferencesResponse, Results) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -13473,6 +14385,7 @@ static const SOPC_EncodeableType_FieldDescriptor AddReferencesResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_AddReferencesResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -13496,6 +14409,7 @@ SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType = {
     sizeof(OpcUa_AddReferencesResponse),
     OpcUa_AddReferencesResponse_Initialize,
     OpcUa_AddReferencesResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AddReferencesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AddReferencesResponse_Fields,
     g_KnownEncodeableTypes};
@@ -13524,6 +14438,7 @@ void OpcUa_DeleteNodesItem_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteNodesItem_Fields[] = {
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -13533,6 +14448,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteNodesItem_Fields[] = {
         (uint32_t) offsetof(OpcUa_DeleteNodesItem, NodeId) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -13556,6 +14472,7 @@ SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType = {
     sizeof(OpcUa_DeleteNodesItem),
     OpcUa_DeleteNodesItem_Initialize,
     OpcUa_DeleteNodesItem_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteNodesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteNodesItem_Fields,
     g_KnownEncodeableTypes};
@@ -13584,6 +14501,7 @@ void OpcUa_DeleteNodesRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteNodesRequest_Fields[] = {
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -13593,6 +14511,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteNodesRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_DeleteNodesRequest, NoOfNodesToDelete) // offset
     },
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -13616,6 +14535,7 @@ SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType = {
     sizeof(OpcUa_DeleteNodesRequest),
     OpcUa_DeleteNodesRequest_Initialize,
     OpcUa_DeleteNodesRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteNodesRequest_Fields,
     g_KnownEncodeableTypes};
@@ -13643,6 +14563,7 @@ void OpcUa_DeleteNodesResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteNodesResponse_Fields[] = {
     {
+        false,                                                         // isOptional
         false,                                                         // isBuiltIn
         false,                                                         // isArrayLength
         false,                                                         // isToEncode
@@ -13652,6 +14573,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteNodesResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_DeleteNodesResponse, ResponseHeader) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         true,                                                       // isArrayLength
         true,                                                       // isToEncode
@@ -13661,6 +14583,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteNodesResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_DeleteNodesResponse, NoOfResults) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -13670,6 +14593,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteNodesResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_DeleteNodesResponse, Results) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -13679,6 +14603,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteNodesResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_DeleteNodesResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -13702,6 +14627,7 @@ SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType = {
     sizeof(OpcUa_DeleteNodesResponse),
     OpcUa_DeleteNodesResponse_Initialize,
     OpcUa_DeleteNodesResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteNodesResponse_Fields,
     g_KnownEncodeableTypes};
@@ -13730,6 +14656,7 @@ void OpcUa_DeleteReferencesItem_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesItem_Fields[] = {
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -13739,6 +14666,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesItem_Fields[] =
         (uint32_t) offsetof(OpcUa_DeleteReferencesItem, SourceNodeId) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -13748,6 +14676,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesItem_Fields[] =
         (uint32_t) offsetof(OpcUa_DeleteReferencesItem, ReferenceTypeId) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -13757,6 +14686,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesItem_Fields[] =
         (uint32_t) offsetof(OpcUa_DeleteReferencesItem, IsForward) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -13766,6 +14696,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesItem_Fields[] =
         (uint32_t) offsetof(OpcUa_DeleteReferencesItem, TargetNodeId) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -13789,6 +14720,7 @@ SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType = {
     sizeof(OpcUa_DeleteReferencesItem),
     OpcUa_DeleteReferencesItem_Initialize,
     OpcUa_DeleteReferencesItem_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteReferencesItem_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteReferencesItem_Fields,
     g_KnownEncodeableTypes};
@@ -13817,6 +14749,7 @@ void OpcUa_DeleteReferencesRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesRequest_Fields[] = {
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         true,                                                                      // isArrayLength
         true,                                                                      // isToEncode
@@ -13826,6 +14759,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesRequest_Fields[
         (uint32_t) offsetof(OpcUa_DeleteReferencesRequest, NoOfReferencesToDelete) // offset
     },
     {
+        false,                                                                 // isOptional
         false,                                                                 // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -13849,6 +14783,7 @@ SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType = {
     sizeof(OpcUa_DeleteReferencesRequest),
     OpcUa_DeleteReferencesRequest_Initialize,
     OpcUa_DeleteReferencesRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteReferencesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteReferencesRequest_Fields,
     g_KnownEncodeableTypes};
@@ -13876,6 +14811,7 @@ void OpcUa_DeleteReferencesResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesResponse_Fields[] = {
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         false,                                                              // isToEncode
@@ -13885,6 +14821,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesResponse_Fields
         (uint32_t) offsetof(OpcUa_DeleteReferencesResponse, ResponseHeader) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -13894,6 +14831,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesResponse_Fields
         (uint32_t) offsetof(OpcUa_DeleteReferencesResponse, NoOfResults) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -13903,6 +14841,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesResponse_Fields
         (uint32_t) offsetof(OpcUa_DeleteReferencesResponse, Results) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         true,                                                                    // isArrayLength
         true,                                                                    // isToEncode
@@ -13912,6 +14851,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteReferencesResponse_Fields
         (uint32_t) offsetof(OpcUa_DeleteReferencesResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -13935,6 +14875,7 @@ SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType = {
     sizeof(OpcUa_DeleteReferencesResponse),
     OpcUa_DeleteReferencesResponse_Initialize,
     OpcUa_DeleteReferencesResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteReferencesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteReferencesResponse_Fields,
     g_KnownEncodeableTypes};
@@ -13963,6 +14904,7 @@ void OpcUa_ViewDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ViewDescription_Fields[] = {
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -13972,6 +14914,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewDescription, ViewId) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -13981,6 +14924,7 @@ static const SOPC_EncodeableType_FieldDescriptor ViewDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_ViewDescription, Timestamp) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -14004,6 +14948,7 @@ SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType = {
     sizeof(OpcUa_ViewDescription),
     OpcUa_ViewDescription_Initialize,
     OpcUa_ViewDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ViewDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ViewDescription_Fields,
     g_KnownEncodeableTypes};
@@ -14031,6 +14976,7 @@ void OpcUa_BrowseDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseDescription_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -14040,6 +14986,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseDescription, NodeId) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -14049,6 +14996,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseDescription, BrowseDirection) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -14058,6 +15006,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseDescription, ReferenceTypeId) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -14067,6 +15016,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseDescription, IncludeSubtypes) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -14076,6 +15026,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseDescription_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseDescription, NodeClassMask) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -14099,6 +15050,7 @@ SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType = {
     sizeof(OpcUa_BrowseDescription),
     OpcUa_BrowseDescription_Initialize,
     OpcUa_BrowseDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrowseDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseDescription_Fields,
     g_KnownEncodeableTypes};
@@ -14126,6 +15078,7 @@ void OpcUa_ReferenceDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReferenceDescription_Fields[] = {
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -14135,6 +15088,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_ReferenceDescription, ReferenceTypeId) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -14144,6 +15098,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_ReferenceDescription, IsForward) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -14153,6 +15108,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_ReferenceDescription, NodeId) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -14162,6 +15118,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_ReferenceDescription, BrowseName) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -14171,6 +15128,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_ReferenceDescription, DisplayName) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -14180,6 +15138,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReferenceDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_ReferenceDescription, NodeClass) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -14203,6 +15162,7 @@ SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType = {
     sizeof(OpcUa_ReferenceDescription),
     OpcUa_ReferenceDescription_Initialize,
     OpcUa_ReferenceDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReferenceDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReferenceDescription_Fields,
     g_KnownEncodeableTypes};
@@ -14230,6 +15190,7 @@ void OpcUa_BrowseResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseResult_Fields[] = {
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -14239,6 +15200,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseResult, StatusCode) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -14248,6 +15210,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseResult, ContinuationPoint) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         true,                                                   // isArrayLength
         true,                                                   // isToEncode
@@ -14257,6 +15220,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseResult, NoOfReferences) // offset
     },
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -14280,6 +15244,7 @@ SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType = {
     sizeof(OpcUa_BrowseResult),
     OpcUa_BrowseResult_Initialize,
     OpcUa_BrowseResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrowseResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseResult_Fields,
     g_KnownEncodeableTypes};
@@ -14308,6 +15273,7 @@ void OpcUa_BrowseRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseRequest_Fields[] = {
     {
+        false,                                             // isOptional
         false,                                             // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -14317,6 +15283,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseRequest, View)     // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -14326,6 +15293,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseRequest, RequestedMaxReferencesPerNode) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         true,                                                       // isArrayLength
         true,                                                       // isToEncode
@@ -14335,6 +15303,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseRequest, NoOfNodesToBrowse) // offset
     },
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -14358,6 +15327,7 @@ SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType = {
     sizeof(OpcUa_BrowseRequest),
     OpcUa_BrowseRequest_Initialize,
     OpcUa_BrowseRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrowseRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseRequest_Fields,
     g_KnownEncodeableTypes};
@@ -14385,6 +15355,7 @@ void OpcUa_BrowseResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseResponse_Fields[] = {
     {
+        false,                                                    // isOptional
         false,                                                    // isBuiltIn
         false,                                                    // isArrayLength
         false,                                                    // isToEncode
@@ -14394,6 +15365,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseResponse, ResponseHeader) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         true,                                                  // isArrayLength
         true,                                                  // isToEncode
@@ -14403,6 +15375,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseResponse, NoOfResults) // offset
     },
     {
+        false,                                             // isOptional
         false,                                             // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -14412,6 +15385,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseResponse, Results) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -14421,6 +15395,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -14444,6 +15419,7 @@ SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType = {
     sizeof(OpcUa_BrowseResponse),
     OpcUa_BrowseResponse_Initialize,
     OpcUa_BrowseResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrowseResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseResponse_Fields,
     g_KnownEncodeableTypes};
@@ -14473,6 +15449,7 @@ void OpcUa_BrowseNextRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseNextRequest_Fields[] = {
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -14482,6 +15459,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseNextRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseNextRequest, ReleaseContinuationPoints) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -14491,6 +15469,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseNextRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseNextRequest, NoOfContinuationPoints) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -14514,6 +15493,7 @@ SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType = {
     sizeof(OpcUa_BrowseNextRequest),
     OpcUa_BrowseNextRequest_Initialize,
     OpcUa_BrowseNextRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrowseNextRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseNextRequest_Fields,
     g_KnownEncodeableTypes};
@@ -14541,6 +15521,7 @@ void OpcUa_BrowseNextResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowseNextResponse_Fields[] = {
     {
+        false,                                                        // isOptional
         false,                                                        // isBuiltIn
         false,                                                        // isArrayLength
         false,                                                        // isToEncode
@@ -14550,6 +15531,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseNextResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseNextResponse, ResponseHeader) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         true,                                                      // isArrayLength
         true,                                                      // isToEncode
@@ -14559,6 +15541,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseNextResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseNextResponse, NoOfResults) // offset
     },
     {
+        false,                                                 // isOptional
         false,                                                 // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -14568,6 +15551,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseNextResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseNextResponse, Results) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -14577,6 +15561,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowseNextResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowseNextResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -14600,6 +15585,7 @@ SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType = {
     sizeof(OpcUa_BrowseNextResponse),
     OpcUa_BrowseNextResponse_Initialize,
     OpcUa_BrowseNextResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrowseNextResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowseNextResponse_Fields,
     g_KnownEncodeableTypes};
@@ -14628,6 +15614,7 @@ void OpcUa_RelativePathElement_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RelativePathElement_Fields[] = {
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -14637,6 +15624,7 @@ static const SOPC_EncodeableType_FieldDescriptor RelativePathElement_Fields[] = 
         (uint32_t) offsetof(OpcUa_RelativePathElement, ReferenceTypeId) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -14646,6 +15634,7 @@ static const SOPC_EncodeableType_FieldDescriptor RelativePathElement_Fields[] = 
         (uint32_t) offsetof(OpcUa_RelativePathElement, IsInverse) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -14655,6 +15644,7 @@ static const SOPC_EncodeableType_FieldDescriptor RelativePathElement_Fields[] = 
         (uint32_t) offsetof(OpcUa_RelativePathElement, IncludeSubtypes) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -14678,6 +15668,7 @@ SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType = {
     sizeof(OpcUa_RelativePathElement),
     OpcUa_RelativePathElement_Initialize,
     OpcUa_RelativePathElement_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RelativePathElement_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RelativePathElement_Fields,
     g_KnownEncodeableTypes};
@@ -14705,6 +15696,7 @@ void OpcUa_RelativePath_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RelativePath_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         true,                                                 // isArrayLength
         true,                                                 // isToEncode
@@ -14714,6 +15706,7 @@ static const SOPC_EncodeableType_FieldDescriptor RelativePath_Fields[] = {
         (uint32_t) offsetof(OpcUa_RelativePath, NoOfElements) // offset
     },
     {
+        false,                                                 // isOptional
         false,                                                 // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -14737,6 +15730,7 @@ SOPC_EncodeableType OpcUa_RelativePath_EncodeableType = {
     sizeof(OpcUa_RelativePath),
     OpcUa_RelativePath_Initialize,
     OpcUa_RelativePath_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RelativePath_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RelativePath_Fields,
     g_KnownEncodeableTypes};
@@ -14764,6 +15758,7 @@ void OpcUa_BrowsePath_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowsePath_Fields[] = {
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -14773,6 +15768,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowsePath_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowsePath, StartingNode) // offset
     },
     {
+        false,                                              // isOptional
         false,                                              // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -14796,6 +15792,7 @@ SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType = {
     sizeof(OpcUa_BrowsePath),
     OpcUa_BrowsePath_Initialize,
     OpcUa_BrowsePath_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrowsePath_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowsePath_Fields,
     g_KnownEncodeableTypes};
@@ -14823,6 +15820,7 @@ void OpcUa_BrowsePathTarget_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowsePathTarget_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -14832,6 +15830,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowsePathTarget_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowsePathTarget, TargetId) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -14855,6 +15854,7 @@ SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType = {
     sizeof(OpcUa_BrowsePathTarget),
     OpcUa_BrowsePathTarget_Initialize,
     OpcUa_BrowsePathTarget_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrowsePathTarget_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowsePathTarget_Fields,
     g_KnownEncodeableTypes};
@@ -14882,6 +15882,7 @@ void OpcUa_BrowsePathResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BrowsePathResult_Fields[] = {
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -14891,6 +15892,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowsePathResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowsePathResult, StatusCode) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         true,                                                    // isArrayLength
         true,                                                    // isToEncode
@@ -14900,6 +15902,7 @@ static const SOPC_EncodeableType_FieldDescriptor BrowsePathResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_BrowsePathResult, NoOfTargets) // offset
     },
     {
+        false,                                               // isOptional
         false,                                               // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -14923,6 +15926,7 @@ SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType = {
     sizeof(OpcUa_BrowsePathResult),
     OpcUa_BrowsePathResult_Initialize,
     OpcUa_BrowsePathResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BrowsePathResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BrowsePathResult_Fields,
     g_KnownEncodeableTypes};
@@ -14951,6 +15955,7 @@ void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsRequest_Fields[] = {
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         true,                                                                            // isArrayLength
         true,                                                                            // isToEncode
@@ -14960,6 +15965,7 @@ static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsRe
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsRequest, NoOfBrowsePaths) // offset
     },
     {
+        false,                                                                       // isOptional
         false,                                                                       // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -14983,6 +15989,7 @@ SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType = 
     sizeof(OpcUa_TranslateBrowsePathsToNodeIdsRequest),
     OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize,
     OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof TranslateBrowsePathsToNodeIdsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TranslateBrowsePathsToNodeIdsRequest_Fields,
     g_KnownEncodeableTypes};
@@ -15010,6 +16017,7 @@ void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsResponse_Fields[] = {
     {
+        false,                                                                           // isOptional
         false,                                                                           // isBuiltIn
         false,                                                                           // isArrayLength
         false,                                                                           // isToEncode
@@ -15019,6 +16027,7 @@ static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsRe
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsResponse, ResponseHeader) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -15028,6 +16037,7 @@ static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsRe
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsResponse, NoOfResults) // offset
     },
     {
+        false,                                                                    // isOptional
         false,                                                                    // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -15037,6 +16047,7 @@ static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsRe
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsResponse, Results) // offset
     },
     {
+        false,                                                                                // isOptional
         true,                                                                                 // isBuiltIn
         true,                                                                                 // isArrayLength
         true,                                                                                 // isToEncode
@@ -15046,6 +16057,7 @@ static const SOPC_EncodeableType_FieldDescriptor TranslateBrowsePathsToNodeIdsRe
         (uint32_t) offsetof(OpcUa_TranslateBrowsePathsToNodeIdsResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -15069,6 +16081,7 @@ SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType =
     sizeof(OpcUa_TranslateBrowsePathsToNodeIdsResponse),
     OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize,
     OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof TranslateBrowsePathsToNodeIdsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TranslateBrowsePathsToNodeIdsResponse_Fields,
     g_KnownEncodeableTypes};
@@ -15098,6 +16111,7 @@ void OpcUa_RegisterNodesRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterNodesRequest_Fields[] = {
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -15107,6 +16121,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterNodesRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_RegisterNodesRequest, NoOfNodesToRegister) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -15130,6 +16145,7 @@ SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType = {
     sizeof(OpcUa_RegisterNodesRequest),
     OpcUa_RegisterNodesRequest_Initialize,
     OpcUa_RegisterNodesRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RegisterNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterNodesRequest_Fields,
     g_KnownEncodeableTypes};
@@ -15157,6 +16173,7 @@ void OpcUa_RegisterNodesResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RegisterNodesResponse_Fields[] = {
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         false,                                                           // isToEncode
@@ -15166,6 +16183,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterNodesResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_RegisterNodesResponse, ResponseHeader) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -15175,6 +16193,7 @@ static const SOPC_EncodeableType_FieldDescriptor RegisterNodesResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_RegisterNodesResponse, NoOfRegisteredNodeIds) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -15198,6 +16217,7 @@ SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType = {
     sizeof(OpcUa_RegisterNodesResponse),
     OpcUa_RegisterNodesResponse_Initialize,
     OpcUa_RegisterNodesResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RegisterNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RegisterNodesResponse_Fields,
     g_KnownEncodeableTypes};
@@ -15227,6 +16247,7 @@ void OpcUa_UnregisterNodesRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UnregisterNodesRequest_Fields[] = {
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         true,                                                                    // isArrayLength
         true,                                                                    // isToEncode
@@ -15236,6 +16257,7 @@ static const SOPC_EncodeableType_FieldDescriptor UnregisterNodesRequest_Fields[]
         (uint32_t) offsetof(OpcUa_UnregisterNodesRequest, NoOfNodesToUnregister) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -15259,6 +16281,7 @@ SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType = {
     sizeof(OpcUa_UnregisterNodesRequest),
     OpcUa_UnregisterNodesRequest_Initialize,
     OpcUa_UnregisterNodesRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UnregisterNodesRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UnregisterNodesRequest_Fields,
     g_KnownEncodeableTypes};
@@ -15286,6 +16309,7 @@ void OpcUa_UnregisterNodesResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UnregisterNodesResponse_Fields[] = {
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         false,                                                             // isToEncode
@@ -15309,6 +16333,7 @@ SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType = {
     sizeof(OpcUa_UnregisterNodesResponse),
     OpcUa_UnregisterNodesResponse_Initialize,
     OpcUa_UnregisterNodesResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UnregisterNodesResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UnregisterNodesResponse_Fields,
     g_KnownEncodeableTypes};
@@ -15337,6 +16362,7 @@ void OpcUa_EndpointConfiguration_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] = {
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -15346,6 +16372,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] 
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, OperationTimeout) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -15355,6 +16382,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] 
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, UseBinaryEncoding) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -15364,6 +16392,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] 
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxStringLength) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -15373,6 +16402,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] 
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxByteStringLength) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -15382,6 +16412,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] 
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxArrayLength) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -15391,6 +16422,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] 
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxMessageSize) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -15400,6 +16432,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] 
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, MaxBufferSize) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -15409,6 +16442,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointConfiguration_Fields[] 
         (uint32_t) offsetof(OpcUa_EndpointConfiguration, ChannelLifetime) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -15432,6 +16466,7 @@ SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType = {
     sizeof(OpcUa_EndpointConfiguration),
     OpcUa_EndpointConfiguration_Initialize,
     OpcUa_EndpointConfiguration_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EndpointConfiguration_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EndpointConfiguration_Fields,
     g_KnownEncodeableTypes};
@@ -15459,6 +16494,7 @@ void OpcUa_QueryDataDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryDataDescription_Fields[] = {
     {
+        false,                                                        // isOptional
         false,                                                        // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -15468,6 +16504,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryDataDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_QueryDataDescription, RelativePath) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -15477,6 +16514,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryDataDescription_Fields[] =
         (uint32_t) offsetof(OpcUa_QueryDataDescription, AttributeId) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -15500,6 +16538,7 @@ SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType = {
     sizeof(OpcUa_QueryDataDescription),
     OpcUa_QueryDataDescription_Initialize,
     OpcUa_QueryDataDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof QueryDataDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryDataDescription_Fields,
     g_KnownEncodeableTypes};
@@ -15527,6 +16566,7 @@ void OpcUa_NodeTypeDescription_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NodeTypeDescription_Fields[] = {
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -15536,6 +16576,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeTypeDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_NodeTypeDescription, TypeDefinitionNode) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -15545,6 +16586,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeTypeDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_NodeTypeDescription, IncludeSubTypes) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -15554,6 +16596,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeTypeDescription_Fields[] = 
         (uint32_t) offsetof(OpcUa_NodeTypeDescription, NoOfDataToReturn) // offset
     },
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -15577,6 +16620,7 @@ SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType = {
     sizeof(OpcUa_NodeTypeDescription),
     OpcUa_NodeTypeDescription_Initialize,
     OpcUa_NodeTypeDescription_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof NodeTypeDescription_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NodeTypeDescription_Fields,
     g_KnownEncodeableTypes};
@@ -15604,6 +16648,7 @@ void OpcUa_QueryDataSet_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryDataSet_Fields[] = {
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -15613,6 +16658,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryDataSet_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryDataSet, NodeId) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -15622,6 +16668,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryDataSet_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryDataSet, TypeDefinitionNode) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         true,                                               // isArrayLength
         true,                                               // isToEncode
@@ -15631,6 +16678,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryDataSet_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryDataSet, NoOfValues) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -15654,6 +16702,7 @@ SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType = {
     sizeof(OpcUa_QueryDataSet),
     OpcUa_QueryDataSet_Initialize,
     OpcUa_QueryDataSet_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof QueryDataSet_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryDataSet_Fields,
     g_KnownEncodeableTypes};
@@ -15681,6 +16730,7 @@ void OpcUa_NodeReference_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NodeReference_Fields[] = {
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -15690,6 +16740,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeReference_Fields[] = {
         (uint32_t) offsetof(OpcUa_NodeReference, NodeId) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -15699,6 +16750,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeReference_Fields[] = {
         (uint32_t) offsetof(OpcUa_NodeReference, ReferenceTypeId) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -15708,6 +16760,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeReference_Fields[] = {
         (uint32_t) offsetof(OpcUa_NodeReference, IsForward) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         true,                                                           // isArrayLength
         true,                                                           // isToEncode
@@ -15717,6 +16770,7 @@ static const SOPC_EncodeableType_FieldDescriptor NodeReference_Fields[] = {
         (uint32_t) offsetof(OpcUa_NodeReference, NoOfReferencedNodeIds) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -15740,6 +16794,7 @@ SOPC_EncodeableType OpcUa_NodeReference_EncodeableType = {
     sizeof(OpcUa_NodeReference),
     OpcUa_NodeReference_Initialize,
     OpcUa_NodeReference_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof NodeReference_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NodeReference_Fields,
     g_KnownEncodeableTypes};
@@ -15767,6 +16822,7 @@ void OpcUa_ElementOperand_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ElementOperand_Fields[] = {
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -15790,6 +16846,7 @@ SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType = {
     sizeof(OpcUa_ElementOperand),
     OpcUa_ElementOperand_Initialize,
     OpcUa_ElementOperand_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ElementOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ElementOperand_Fields,
     g_KnownEncodeableTypes};
@@ -15817,6 +16874,7 @@ void OpcUa_LiteralOperand_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor LiteralOperand_Fields[] = {
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -15840,6 +16898,7 @@ SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType = {
     sizeof(OpcUa_LiteralOperand),
     OpcUa_LiteralOperand_Initialize,
     OpcUa_LiteralOperand_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof LiteralOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     LiteralOperand_Fields,
     g_KnownEncodeableTypes};
@@ -15867,6 +16926,7 @@ void OpcUa_AttributeOperand_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AttributeOperand_Fields[] = {
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -15876,6 +16936,7 @@ static const SOPC_EncodeableType_FieldDescriptor AttributeOperand_Fields[] = {
         (uint32_t) offsetof(OpcUa_AttributeOperand, NodeId) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -15885,6 +16946,7 @@ static const SOPC_EncodeableType_FieldDescriptor AttributeOperand_Fields[] = {
         (uint32_t) offsetof(OpcUa_AttributeOperand, Alias) // offset
     },
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -15894,6 +16956,7 @@ static const SOPC_EncodeableType_FieldDescriptor AttributeOperand_Fields[] = {
         (uint32_t) offsetof(OpcUa_AttributeOperand, BrowsePath) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -15903,6 +16966,7 @@ static const SOPC_EncodeableType_FieldDescriptor AttributeOperand_Fields[] = {
         (uint32_t) offsetof(OpcUa_AttributeOperand, AttributeId) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -15926,6 +16990,7 @@ SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType = {
     sizeof(OpcUa_AttributeOperand),
     OpcUa_AttributeOperand_Initialize,
     OpcUa_AttributeOperand_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AttributeOperand_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AttributeOperand_Fields,
     g_KnownEncodeableTypes};
@@ -15953,6 +17018,7 @@ void OpcUa_ContentFilterElementResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ContentFilterElementResult_Fields[] = {
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -15962,6 +17028,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterElementResult_Fiel
         (uint32_t) offsetof(OpcUa_ContentFilterElementResult, StatusCode) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -15971,6 +17038,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterElementResult_Fiel
         (uint32_t) offsetof(OpcUa_ContentFilterElementResult, NoOfOperandStatusCodes) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -15980,6 +17048,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterElementResult_Fiel
         (uint32_t) offsetof(OpcUa_ContentFilterElementResult, OperandStatusCodes) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         true,                                                                             // isArrayLength
         true,                                                                             // isToEncode
@@ -15989,6 +17058,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterElementResult_Fiel
         (uint32_t) offsetof(OpcUa_ContentFilterElementResult, NoOfOperandDiagnosticInfos) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -16012,6 +17082,7 @@ SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType = {
     sizeof(OpcUa_ContentFilterElementResult),
     OpcUa_ContentFilterElementResult_Initialize,
     OpcUa_ContentFilterElementResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ContentFilterElementResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ContentFilterElementResult_Fields,
     g_KnownEncodeableTypes};
@@ -16039,6 +17110,7 @@ void OpcUa_ContentFilterResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ContentFilterResult_Fields[] = {
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -16048,6 +17120,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterResult_Fields[] = 
         (uint32_t) offsetof(OpcUa_ContentFilterResult, NoOfElementResults) // offset
     },
     {
+        false,                                                         // isOptional
         false,                                                         // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -16057,6 +17130,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterResult_Fields[] = 
         (uint32_t) offsetof(OpcUa_ContentFilterResult, ElementResults) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         true,                                                                      // isArrayLength
         true,                                                                      // isToEncode
@@ -16066,6 +17140,7 @@ static const SOPC_EncodeableType_FieldDescriptor ContentFilterResult_Fields[] = 
         (uint32_t) offsetof(OpcUa_ContentFilterResult, NoOfElementDiagnosticInfos) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -16089,6 +17164,7 @@ SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType = {
     sizeof(OpcUa_ContentFilterResult),
     OpcUa_ContentFilterResult_Initialize,
     OpcUa_ContentFilterResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ContentFilterResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ContentFilterResult_Fields,
     g_KnownEncodeableTypes};
@@ -16116,6 +17192,7 @@ void OpcUa_ParsingResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ParsingResult_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -16125,6 +17202,7 @@ static const SOPC_EncodeableType_FieldDescriptor ParsingResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_ParsingResult, StatusCode) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         true,                                                         // isArrayLength
         true,                                                         // isToEncode
@@ -16134,6 +17212,7 @@ static const SOPC_EncodeableType_FieldDescriptor ParsingResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_ParsingResult, NoOfDataStatusCodes) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -16143,6 +17222,7 @@ static const SOPC_EncodeableType_FieldDescriptor ParsingResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_ParsingResult, DataStatusCodes) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -16152,6 +17232,7 @@ static const SOPC_EncodeableType_FieldDescriptor ParsingResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_ParsingResult, NoOfDataDiagnosticInfos) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -16175,6 +17256,7 @@ SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType = {
     sizeof(OpcUa_ParsingResult),
     OpcUa_ParsingResult_Initialize,
     OpcUa_ParsingResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ParsingResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ParsingResult_Fields,
     g_KnownEncodeableTypes};
@@ -16203,6 +17285,7 @@ void OpcUa_QueryFirstRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryFirstRequest_Fields[] = {
     {
+        false,                                             // isOptional
         false,                                             // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -16212,6 +17295,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, View) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         true,                                                       // isArrayLength
         true,                                                       // isToEncode
@@ -16221,6 +17305,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, NoOfNodeTypes) // offset
     },
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -16230,6 +17315,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, NodeTypes) // offset
     },
     {
+        false,                                               // isOptional
         false,                                               // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -16239,6 +17325,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, Filter) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -16248,6 +17335,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstRequest, MaxDataSetsToReturn) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -16271,6 +17359,7 @@ SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType = {
     sizeof(OpcUa_QueryFirstRequest),
     OpcUa_QueryFirstRequest_Initialize,
     OpcUa_QueryFirstRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof QueryFirstRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryFirstRequest_Fields,
     g_KnownEncodeableTypes};
@@ -16298,6 +17387,7 @@ void OpcUa_QueryFirstResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
     {
+        false,                                                        // isOptional
         false,                                                        // isBuiltIn
         false,                                                        // isArrayLength
         false,                                                        // isToEncode
@@ -16307,6 +17397,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, ResponseHeader) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -16316,6 +17407,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, NoOfQueryDataSets) // offset
     },
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -16325,6 +17417,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, QueryDataSets) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -16334,6 +17427,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, ContinuationPoint) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -16343,6 +17437,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, NoOfParsingResults) // offset
     },
     {
+        false,                                                        // isOptional
         false,                                                        // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -16352,6 +17447,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, ParsingResults) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -16361,6 +17457,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -16370,6 +17467,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryFirstResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryFirstResponse, DiagnosticInfos) // offset
     },
     {
+        false,                                                      // isOptional
         false,                                                      // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -16393,6 +17491,7 @@ SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType = {
     sizeof(OpcUa_QueryFirstResponse),
     OpcUa_QueryFirstResponse_Initialize,
     OpcUa_QueryFirstResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof QueryFirstResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryFirstResponse_Fields,
     g_KnownEncodeableTypes};
@@ -16422,6 +17521,7 @@ void OpcUa_QueryNextRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryNextRequest_Fields[] = {
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -16431,6 +17531,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryNextRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryNextRequest, ReleaseContinuationPoint) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -16454,6 +17555,7 @@ SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType = {
     sizeof(OpcUa_QueryNextRequest),
     OpcUa_QueryNextRequest_Initialize,
     OpcUa_QueryNextRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof QueryNextRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryNextRequest_Fields,
     g_KnownEncodeableTypes};
@@ -16481,6 +17583,7 @@ void OpcUa_QueryNextResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor QueryNextResponse_Fields[] = {
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         false,                                                       // isToEncode
@@ -16490,6 +17593,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryNextResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryNextResponse, ResponseHeader) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         true,                                                           // isArrayLength
         true,                                                           // isToEncode
@@ -16499,6 +17603,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryNextResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryNextResponse, NoOfQueryDataSets) // offset
     },
     {
+        false,                                                      // isOptional
         false,                                                      // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -16508,6 +17613,7 @@ static const SOPC_EncodeableType_FieldDescriptor QueryNextResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_QueryNextResponse, QueryDataSets) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -16531,6 +17637,7 @@ SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType = {
     sizeof(OpcUa_QueryNextResponse),
     OpcUa_QueryNextResponse_Initialize,
     OpcUa_QueryNextResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof QueryNextResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     QueryNextResponse_Fields,
     g_KnownEncodeableTypes};
@@ -16559,6 +17666,7 @@ void OpcUa_ReadValueId_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadValueId_Fields[] = {
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -16568,6 +17676,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadValueId_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadValueId, NodeId) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -16577,6 +17686,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadValueId_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadValueId, AttributeId) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -16586,6 +17696,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadValueId_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadValueId, IndexRange) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -16609,6 +17720,7 @@ SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType = {
     sizeof(OpcUa_ReadValueId),
     OpcUa_ReadValueId_Initialize,
     OpcUa_ReadValueId_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReadValueId_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadValueId_Fields,
     g_KnownEncodeableTypes};
@@ -16637,6 +17749,7 @@ void OpcUa_ReadRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadRequest_Fields[] = {
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -16646,6 +17759,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadRequest, MaxAge) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -16655,6 +17769,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadRequest, TimestampsToReturn) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         true,                                                   // isArrayLength
         true,                                                   // isToEncode
@@ -16664,6 +17779,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadRequest, NoOfNodesToRead) // offset
     },
     {
+        false,                                              // isOptional
         false,                                              // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -16687,6 +17803,7 @@ SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType = {
     sizeof(OpcUa_ReadRequest),
     OpcUa_ReadRequest_Initialize,
     OpcUa_ReadRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReadRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadRequest_Fields,
     g_KnownEncodeableTypes};
@@ -16714,6 +17831,7 @@ void OpcUa_ReadResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadResponse_Fields[] = {
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         false,                                                  // isToEncode
@@ -16723,6 +17841,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadResponse, ResponseHeader) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         true,                                                // isArrayLength
         true,                                                // isToEncode
@@ -16732,6 +17851,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadResponse, NoOfResults) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -16741,6 +17861,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadResponse, Results) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -16750,6 +17871,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -16773,6 +17895,7 @@ SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType = {
     sizeof(OpcUa_ReadResponse),
     OpcUa_ReadResponse_Initialize,
     OpcUa_ReadResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReadResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadResponse_Fields,
     g_KnownEncodeableTypes};
@@ -16801,6 +17924,7 @@ void OpcUa_HistoryReadValueId_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryReadValueId_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -16810,6 +17934,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadValueId_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryReadValueId, NodeId) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -16819,6 +17944,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadValueId_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryReadValueId, IndexRange) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -16828,6 +17954,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadValueId_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryReadValueId, DataEncoding) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -16851,6 +17978,7 @@ SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType = {
     sizeof(OpcUa_HistoryReadValueId),
     OpcUa_HistoryReadValueId_Initialize,
     OpcUa_HistoryReadValueId_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryReadValueId_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryReadValueId_Fields,
     g_KnownEncodeableTypes};
@@ -16878,6 +18006,7 @@ void OpcUa_HistoryReadResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryReadResult_Fields[] = {
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -16887,6 +18016,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryReadResult, StatusCode) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -16896,6 +18026,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryReadResult, ContinuationPoint) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -16919,6 +18050,7 @@ SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType = {
     sizeof(OpcUa_HistoryReadResult),
     OpcUa_HistoryReadResult_Initialize,
     OpcUa_HistoryReadResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryReadResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryReadResult_Fields,
     g_KnownEncodeableTypes};
@@ -16946,6 +18078,7 @@ void OpcUa_EventFilter_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EventFilter_Fields[] = {
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         true,                                                     // isArrayLength
         true,                                                     // isToEncode
@@ -16955,6 +18088,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFilter_Fields[] = {
         (uint32_t) offsetof(OpcUa_EventFilter, NoOfSelectClauses) // offset
     },
     {
+        false,                                                    // isOptional
         false,                                                    // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -16964,6 +18098,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFilter_Fields[] = {
         (uint32_t) offsetof(OpcUa_EventFilter, SelectClauses)     // offset
     },
     {
+        false,                                              // isOptional
         false,                                              // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -16987,6 +18122,7 @@ SOPC_EncodeableType OpcUa_EventFilter_EncodeableType = {
     sizeof(OpcUa_EventFilter),
     OpcUa_EventFilter_Initialize,
     OpcUa_EventFilter_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EventFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EventFilter_Fields,
     g_KnownEncodeableTypes};
@@ -17014,6 +18150,7 @@ void OpcUa_ReadEventDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadEventDetails_Fields[] = {
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -17023,6 +18160,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadEventDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadEventDetails, NumValuesPerNode) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -17032,6 +18170,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadEventDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadEventDetails, StartTime) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -17041,6 +18180,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadEventDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadEventDetails, EndTime) // offset
     },
     {
+        false,                                              // isOptional
         false,                                              // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -17064,6 +18204,7 @@ SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType = {
     sizeof(OpcUa_ReadEventDetails),
     OpcUa_ReadEventDetails_Initialize,
     OpcUa_ReadEventDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReadEventDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadEventDetails_Fields,
     g_KnownEncodeableTypes};
@@ -17091,6 +18232,7 @@ void OpcUa_ReadRawModifiedDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadRawModifiedDetails_Fields[] = {
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -17100,6 +18242,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadRawModifiedDetails_Fields[]
         (uint32_t) offsetof(OpcUa_ReadRawModifiedDetails, IsReadModified) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -17109,6 +18252,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadRawModifiedDetails_Fields[]
         (uint32_t) offsetof(OpcUa_ReadRawModifiedDetails, StartTime) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -17118,6 +18262,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadRawModifiedDetails_Fields[]
         (uint32_t) offsetof(OpcUa_ReadRawModifiedDetails, EndTime) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -17127,6 +18272,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadRawModifiedDetails_Fields[]
         (uint32_t) offsetof(OpcUa_ReadRawModifiedDetails, NumValuesPerNode) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -17150,6 +18296,7 @@ SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType = {
     sizeof(OpcUa_ReadRawModifiedDetails),
     OpcUa_ReadRawModifiedDetails_Initialize,
     OpcUa_ReadRawModifiedDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReadRawModifiedDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadRawModifiedDetails_Fields,
     g_KnownEncodeableTypes};
@@ -17177,6 +18324,7 @@ void OpcUa_AggregateConfiguration_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AggregateConfiguration_Fields[] = {
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -17186,6 +18334,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateConfiguration_Fields[]
         (uint32_t) offsetof(OpcUa_AggregateConfiguration, UseServerCapabilitiesDefaults) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -17195,6 +18344,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateConfiguration_Fields[]
         (uint32_t) offsetof(OpcUa_AggregateConfiguration, TreatUncertainAsBad) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -17204,6 +18354,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateConfiguration_Fields[]
         (uint32_t) offsetof(OpcUa_AggregateConfiguration, PercentDataBad) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -17213,6 +18364,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateConfiguration_Fields[]
         (uint32_t) offsetof(OpcUa_AggregateConfiguration, PercentDataGood) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -17236,6 +18388,7 @@ SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType = {
     sizeof(OpcUa_AggregateConfiguration),
     OpcUa_AggregateConfiguration_Initialize,
     OpcUa_AggregateConfiguration_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AggregateConfiguration_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AggregateConfiguration_Fields,
     g_KnownEncodeableTypes};
@@ -17263,6 +18416,7 @@ void OpcUa_ReadProcessedDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadProcessedDetails_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -17272,6 +18426,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadProcessedDetails_Fields[] =
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, StartTime) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -17281,6 +18436,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadProcessedDetails_Fields[] =
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, EndTime) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -17290,6 +18446,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadProcessedDetails_Fields[] =
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, ProcessingInterval) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -17299,6 +18456,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadProcessedDetails_Fields[] =
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, NoOfAggregateType) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -17308,6 +18466,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadProcessedDetails_Fields[] =
         (uint32_t) offsetof(OpcUa_ReadProcessedDetails, AggregateType) // offset
     },
     {
+        false,                                                                  // isOptional
         false,                                                                  // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -17331,6 +18490,7 @@ SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType = {
     sizeof(OpcUa_ReadProcessedDetails),
     OpcUa_ReadProcessedDetails_Initialize,
     OpcUa_ReadProcessedDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReadProcessedDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadProcessedDetails_Fields,
     g_KnownEncodeableTypes};
@@ -17358,6 +18518,7 @@ void OpcUa_ReadAtTimeDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadAtTimeDetails_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         true,                                                      // isArrayLength
         true,                                                      // isToEncode
@@ -17367,6 +18528,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadAtTimeDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadAtTimeDetails, NoOfReqTimes) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -17376,6 +18538,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadAtTimeDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_ReadAtTimeDetails, ReqTimes) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -17399,6 +18562,7 @@ SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType = {
     sizeof(OpcUa_ReadAtTimeDetails),
     OpcUa_ReadAtTimeDetails_Initialize,
     OpcUa_ReadAtTimeDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReadAtTimeDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadAtTimeDetails_Fields,
     g_KnownEncodeableTypes};
@@ -17426,6 +18590,7 @@ void OpcUa_ReadAnnotationDataDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ReadAnnotationDataDetails_Fields[] = {
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -17435,6 +18600,7 @@ static const SOPC_EncodeableType_FieldDescriptor ReadAnnotationDataDetails_Field
         (uint32_t) offsetof(OpcUa_ReadAnnotationDataDetails, NoOfReqTimes) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -17458,6 +18624,7 @@ SOPC_EncodeableType OpcUa_ReadAnnotationDataDetails_EncodeableType = {
     sizeof(OpcUa_ReadAnnotationDataDetails),
     OpcUa_ReadAnnotationDataDetails_Initialize,
     OpcUa_ReadAnnotationDataDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ReadAnnotationDataDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ReadAnnotationDataDetails_Fields,
     g_KnownEncodeableTypes};
@@ -17485,6 +18652,7 @@ void OpcUa_HistoryData_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryData_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         true,                                                  // isArrayLength
         true,                                                  // isToEncode
@@ -17494,6 +18662,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryData_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryData, NoOfDataValues) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -17517,6 +18686,7 @@ SOPC_EncodeableType OpcUa_HistoryData_EncodeableType = {
     sizeof(OpcUa_HistoryData),
     OpcUa_HistoryData_Initialize,
     OpcUa_HistoryData_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryData_Fields,
     g_KnownEncodeableTypes};
@@ -17544,6 +18714,7 @@ void OpcUa_ModificationInfo_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModificationInfo_Fields[] = {
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -17553,6 +18724,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModificationInfo_Fields[] = {
         (uint32_t) offsetof(OpcUa_ModificationInfo, ModificationTime) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -17562,6 +18734,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModificationInfo_Fields[] = {
         (uint32_t) offsetof(OpcUa_ModificationInfo, UpdateType) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -17585,6 +18758,7 @@ SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType = {
     sizeof(OpcUa_ModificationInfo),
     OpcUa_ModificationInfo_Initialize,
     OpcUa_ModificationInfo_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ModificationInfo_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModificationInfo_Fields,
     g_KnownEncodeableTypes};
@@ -17612,6 +18786,7 @@ void OpcUa_HistoryModifiedData_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryModifiedData_Fields[] = {
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -17621,6 +18796,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryModifiedData_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryModifiedData, NoOfDataValues) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -17630,6 +18806,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryModifiedData_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryModifiedData, DataValues) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -17639,6 +18816,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryModifiedData_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryModifiedData, NoOfModificationInfos) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -17662,6 +18840,7 @@ SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType = {
     sizeof(OpcUa_HistoryModifiedData),
     OpcUa_HistoryModifiedData_Initialize,
     OpcUa_HistoryModifiedData_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryModifiedData_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryModifiedData_Fields,
     g_KnownEncodeableTypes};
@@ -17689,6 +18868,7 @@ void OpcUa_HistoryEventFieldList_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryEventFieldList_Fields[] = {
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -17698,6 +18878,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryEventFieldList_Fields[] 
         (uint32_t) offsetof(OpcUa_HistoryEventFieldList, NoOfEventFields) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -17721,6 +18902,7 @@ SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType = {
     sizeof(OpcUa_HistoryEventFieldList),
     OpcUa_HistoryEventFieldList_Initialize,
     OpcUa_HistoryEventFieldList_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryEventFieldList_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryEventFieldList_Fields,
     g_KnownEncodeableTypes};
@@ -17748,6 +18930,7 @@ void OpcUa_HistoryEvent_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryEvent_Fields[] = {
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         true,                                               // isArrayLength
         true,                                               // isToEncode
@@ -17757,6 +18940,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryEvent_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryEvent, NoOfEvents) // offset
     },
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -17780,6 +18964,7 @@ SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType = {
     sizeof(OpcUa_HistoryEvent),
     OpcUa_HistoryEvent_Initialize,
     OpcUa_HistoryEvent_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryEvent_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryEvent_Fields,
     g_KnownEncodeableTypes};
@@ -17808,6 +18993,7 @@ void OpcUa_HistoryReadRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryReadRequest_Fields[] = {
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -17817,6 +19003,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryReadRequest, HistoryReadDetails) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -17826,6 +19013,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryReadRequest, TimestampsToReturn) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -17835,6 +19023,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryReadRequest, ReleaseContinuationPoints) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -17844,6 +19033,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_HistoryReadRequest, NoOfNodesToRead) // offset
     },
     {
+        false,                                                     // isOptional
         false,                                                     // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -17867,6 +19057,7 @@ SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType = {
     sizeof(OpcUa_HistoryReadRequest),
     OpcUa_HistoryReadRequest_Initialize,
     OpcUa_HistoryReadRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryReadRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryReadRequest_Fields,
     g_KnownEncodeableTypes};
@@ -17894,6 +19085,7 @@ void OpcUa_HistoryReadResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryReadResponse_Fields[] = {
     {
+        false,                                                         // isOptional
         false,                                                         // isBuiltIn
         false,                                                         // isArrayLength
         false,                                                         // isToEncode
@@ -17903,6 +19095,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryReadResponse, ResponseHeader) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         true,                                                       // isArrayLength
         true,                                                       // isToEncode
@@ -17912,6 +19105,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryReadResponse, NoOfResults) // offset
     },
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -17921,6 +19115,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryReadResponse, Results) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -17930,6 +19125,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryReadResponse_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryReadResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -17953,6 +19149,7 @@ SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType = {
     sizeof(OpcUa_HistoryReadResponse),
     OpcUa_HistoryReadResponse_Initialize,
     OpcUa_HistoryReadResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryReadResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryReadResponse_Fields,
     g_KnownEncodeableTypes};
@@ -17981,6 +19178,7 @@ void OpcUa_WriteValue_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor WriteValue_Fields[] = {
     {
+        false,                                        // isOptional
         true,                                         // isBuiltIn
         false,                                        // isArrayLength
         true,                                         // isToEncode
@@ -17990,6 +19188,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteValue_Fields[] = {
         (uint32_t) offsetof(OpcUa_WriteValue, NodeId) // offset
     },
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -17999,6 +19198,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteValue_Fields[] = {
         (uint32_t) offsetof(OpcUa_WriteValue, AttributeId) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -18008,6 +19208,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteValue_Fields[] = {
         (uint32_t) offsetof(OpcUa_WriteValue, IndexRange) // offset
     },
     {
+        false,                                       // isOptional
         true,                                        // isBuiltIn
         false,                                       // isArrayLength
         true,                                        // isToEncode
@@ -18031,6 +19232,7 @@ SOPC_EncodeableType OpcUa_WriteValue_EncodeableType = {
     sizeof(OpcUa_WriteValue),
     OpcUa_WriteValue_Initialize,
     OpcUa_WriteValue_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof WriteValue_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     WriteValue_Fields,
     g_KnownEncodeableTypes};
@@ -18059,6 +19261,7 @@ void OpcUa_WriteRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor WriteRequest_Fields[] = {
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         true,                                                     // isArrayLength
         true,                                                     // isToEncode
@@ -18068,6 +19271,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_WriteRequest, NoOfNodesToWrite) // offset
     },
     {
+        false,                                                // isOptional
         false,                                                // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -18091,6 +19295,7 @@ SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType = {
     sizeof(OpcUa_WriteRequest),
     OpcUa_WriteRequest_Initialize,
     OpcUa_WriteRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof WriteRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     WriteRequest_Fields,
     g_KnownEncodeableTypes};
@@ -18118,6 +19323,7 @@ void OpcUa_WriteResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor WriteResponse_Fields[] = {
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         false,                                                   // isToEncode
@@ -18127,6 +19333,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_WriteResponse, ResponseHeader) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         true,                                                 // isArrayLength
         true,                                                 // isToEncode
@@ -18136,6 +19343,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_WriteResponse, NoOfResults) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -18145,6 +19353,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_WriteResponse, Results) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         true,                                                         // isArrayLength
         true,                                                         // isToEncode
@@ -18154,6 +19363,7 @@ static const SOPC_EncodeableType_FieldDescriptor WriteResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_WriteResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -18177,6 +19387,7 @@ SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType = {
     sizeof(OpcUa_WriteResponse),
     OpcUa_WriteResponse_Initialize,
     OpcUa_WriteResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof WriteResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     WriteResponse_Fields,
     g_KnownEncodeableTypes};
@@ -18205,6 +19416,7 @@ void OpcUa_HistoryUpdateDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateDetails_Fields[] = {
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -18228,6 +19440,7 @@ SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType = {
     sizeof(OpcUa_HistoryUpdateDetails),
     OpcUa_HistoryUpdateDetails_Initialize,
     OpcUa_HistoryUpdateDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryUpdateDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryUpdateDetails_Fields,
     g_KnownEncodeableTypes};
@@ -18255,6 +19468,7 @@ void OpcUa_UpdateDataDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UpdateDataDetails_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -18264,6 +19478,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateDataDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_UpdateDataDetails, NodeId) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -18273,6 +19488,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateDataDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_UpdateDataDetails, PerformInsertReplace) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         true,                                                          // isArrayLength
         true,                                                          // isToEncode
@@ -18282,6 +19498,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateDataDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_UpdateDataDetails, NoOfUpdateValues) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -18305,6 +19522,7 @@ SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType = {
     sizeof(OpcUa_UpdateDataDetails),
     OpcUa_UpdateDataDetails_Initialize,
     OpcUa_UpdateDataDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UpdateDataDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UpdateDataDetails_Fields,
     g_KnownEncodeableTypes};
@@ -18332,6 +19550,7 @@ void OpcUa_UpdateStructureDataDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UpdateStructureDataDetails_Fields[] = {
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -18341,6 +19560,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateStructureDataDetails_Fiel
         (uint32_t) offsetof(OpcUa_UpdateStructureDataDetails, NodeId) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -18350,6 +19570,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateStructureDataDetails_Fiel
         (uint32_t) offsetof(OpcUa_UpdateStructureDataDetails, PerformInsertReplace) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -18359,6 +19580,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateStructureDataDetails_Fiel
         (uint32_t) offsetof(OpcUa_UpdateStructureDataDetails, NoOfUpdateValues) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -18382,6 +19604,7 @@ SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType = {
     sizeof(OpcUa_UpdateStructureDataDetails),
     OpcUa_UpdateStructureDataDetails_Initialize,
     OpcUa_UpdateStructureDataDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UpdateStructureDataDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UpdateStructureDataDetails_Fields,
     g_KnownEncodeableTypes};
@@ -18409,6 +19632,7 @@ void OpcUa_UpdateEventDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor UpdateEventDetails_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -18418,6 +19642,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateEventDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_UpdateEventDetails, NodeId) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -18427,6 +19652,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateEventDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_UpdateEventDetails, PerformInsertReplace) // offset
     },
     {
+        false,                                                // isOptional
         false,                                                // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -18436,6 +19662,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateEventDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_UpdateEventDetails, Filter) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -18445,6 +19672,7 @@ static const SOPC_EncodeableType_FieldDescriptor UpdateEventDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_UpdateEventDetails, NoOfEventData) // offset
     },
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -18468,6 +19696,7 @@ SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType = {
     sizeof(OpcUa_UpdateEventDetails),
     OpcUa_UpdateEventDetails_Initialize,
     OpcUa_UpdateEventDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof UpdateEventDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     UpdateEventDetails_Fields,
     g_KnownEncodeableTypes};
@@ -18495,6 +19724,7 @@ void OpcUa_DeleteRawModifiedDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteRawModifiedDetails_Fields[] = {
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -18504,6 +19734,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteRawModifiedDetails_Fields
         (uint32_t) offsetof(OpcUa_DeleteRawModifiedDetails, NodeId) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -18513,6 +19744,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteRawModifiedDetails_Fields
         (uint32_t) offsetof(OpcUa_DeleteRawModifiedDetails, IsDeleteModified) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -18522,6 +19754,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteRawModifiedDetails_Fields
         (uint32_t) offsetof(OpcUa_DeleteRawModifiedDetails, StartTime) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -18545,6 +19778,7 @@ SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType = {
     sizeof(OpcUa_DeleteRawModifiedDetails),
     OpcUa_DeleteRawModifiedDetails_Initialize,
     OpcUa_DeleteRawModifiedDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteRawModifiedDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteRawModifiedDetails_Fields,
     g_KnownEncodeableTypes};
@@ -18572,6 +19806,7 @@ void OpcUa_DeleteAtTimeDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteAtTimeDetails_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -18581,6 +19816,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteAtTimeDetails_Fields[] = 
         (uint32_t) offsetof(OpcUa_DeleteAtTimeDetails, NodeId) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -18590,6 +19826,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteAtTimeDetails_Fields[] = 
         (uint32_t) offsetof(OpcUa_DeleteAtTimeDetails, NoOfReqTimes) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -18613,6 +19850,7 @@ SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType = {
     sizeof(OpcUa_DeleteAtTimeDetails),
     OpcUa_DeleteAtTimeDetails_Initialize,
     OpcUa_DeleteAtTimeDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteAtTimeDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteAtTimeDetails_Fields,
     g_KnownEncodeableTypes};
@@ -18640,6 +19878,7 @@ void OpcUa_DeleteEventDetails_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteEventDetails_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -18649,6 +19888,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteEventDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_DeleteEventDetails, NodeId) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         true,                                                       // isArrayLength
         true,                                                       // isToEncode
@@ -18658,6 +19898,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteEventDetails_Fields[] = {
         (uint32_t) offsetof(OpcUa_DeleteEventDetails, NoOfEventIds) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -18681,6 +19922,7 @@ SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType = {
     sizeof(OpcUa_DeleteEventDetails),
     OpcUa_DeleteEventDetails_Initialize,
     OpcUa_DeleteEventDetails_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteEventDetails_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteEventDetails_Fields,
     g_KnownEncodeableTypes};
@@ -18708,6 +19950,7 @@ void OpcUa_HistoryUpdateResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResult_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -18717,6 +19960,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResult_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryUpdateResult, StatusCode) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -18726,6 +19970,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResult_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryUpdateResult, NoOfOperationResults) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -18735,6 +19980,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResult_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryUpdateResult, OperationResults) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -18744,6 +19990,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResult_Fields[] = 
         (uint32_t) offsetof(OpcUa_HistoryUpdateResult, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -18767,6 +20014,7 @@ SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType = {
     sizeof(OpcUa_HistoryUpdateResult),
     OpcUa_HistoryUpdateResult_Initialize,
     OpcUa_HistoryUpdateResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryUpdateResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryUpdateResult_Fields,
     g_KnownEncodeableTypes};
@@ -18795,6 +20043,7 @@ void OpcUa_HistoryUpdateRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateRequest_Fields[] = {
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         true,                                                                     // isArrayLength
         true,                                                                     // isToEncode
@@ -18804,6 +20053,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_HistoryUpdateRequest, NoOfHistoryUpdateDetails) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -18827,6 +20077,7 @@ SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType = {
     sizeof(OpcUa_HistoryUpdateRequest),
     OpcUa_HistoryUpdateRequest_Initialize,
     OpcUa_HistoryUpdateRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryUpdateRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryUpdateRequest_Fields,
     g_KnownEncodeableTypes};
@@ -18854,6 +20105,7 @@ void OpcUa_HistoryUpdateResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResponse_Fields[] = {
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         false,                                                           // isToEncode
@@ -18863,6 +20115,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_HistoryUpdateResponse, ResponseHeader) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         true,                                                         // isArrayLength
         true,                                                         // isToEncode
@@ -18872,6 +20125,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_HistoryUpdateResponse, NoOfResults) // offset
     },
     {
+        false,                                                    // isOptional
         false,                                                    // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -18881,6 +20135,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_HistoryUpdateResponse, Results) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -18890,6 +20145,7 @@ static const SOPC_EncodeableType_FieldDescriptor HistoryUpdateResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_HistoryUpdateResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -18913,6 +20169,7 @@ SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType = {
     sizeof(OpcUa_HistoryUpdateResponse),
     OpcUa_HistoryUpdateResponse_Initialize,
     OpcUa_HistoryUpdateResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof HistoryUpdateResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     HistoryUpdateResponse_Fields,
     g_KnownEncodeableTypes};
@@ -18941,6 +20198,7 @@ void OpcUa_CallMethodRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CallMethodRequest_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -18950,6 +20208,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallMethodRequest, ObjectId) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -18959,6 +20218,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallMethodRequest, MethodId) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -18968,6 +20228,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallMethodRequest, NoOfInputArguments) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -18991,6 +20252,7 @@ SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType = {
     sizeof(OpcUa_CallMethodRequest),
     OpcUa_CallMethodRequest_Initialize,
     OpcUa_CallMethodRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CallMethodRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CallMethodRequest_Fields,
     g_KnownEncodeableTypes};
@@ -19018,6 +20280,7 @@ void OpcUa_CallMethodResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CallMethodResult_Fields[] = {
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -19027,6 +20290,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallMethodResult, StatusCode) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -19036,6 +20300,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallMethodResult, NoOfInputArgumentResults) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -19045,6 +20310,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallMethodResult, InputArgumentResults) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -19054,6 +20320,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallMethodResult, NoOfInputArgumentDiagnosticInfos) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -19063,6 +20330,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallMethodResult, InputArgumentDiagnosticInfos) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -19072,6 +20340,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallMethodResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallMethodResult, NoOfOutputArguments) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -19095,6 +20364,7 @@ SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType = {
     sizeof(OpcUa_CallMethodResult),
     OpcUa_CallMethodResult_Initialize,
     OpcUa_CallMethodResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CallMethodResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CallMethodResult_Fields,
     g_KnownEncodeableTypes};
@@ -19123,6 +20393,7 @@ void OpcUa_CallRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CallRequest_Fields[] = {
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         true,                                                     // isArrayLength
         true,                                                     // isToEncode
@@ -19132,6 +20403,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallRequest, NoOfMethodsToCall) // offset
     },
     {
+        false,                                                // isOptional
         false,                                                // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -19155,6 +20427,7 @@ SOPC_EncodeableType OpcUa_CallRequest_EncodeableType = {
     sizeof(OpcUa_CallRequest),
     OpcUa_CallRequest_Initialize,
     OpcUa_CallRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CallRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CallRequest_Fields,
     g_KnownEncodeableTypes};
@@ -19182,6 +20455,7 @@ void OpcUa_CallResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CallResponse_Fields[] = {
     {
+        false,                                                  // isOptional
         false,                                                  // isBuiltIn
         false,                                                  // isArrayLength
         false,                                                  // isToEncode
@@ -19191,6 +20465,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallResponse, ResponseHeader) // offset
     },
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         true,                                                // isArrayLength
         true,                                                // isToEncode
@@ -19200,6 +20475,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallResponse, NoOfResults) // offset
     },
     {
+        false,                                              // isOptional
         false,                                              // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -19209,6 +20485,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallResponse, Results)    // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -19218,6 +20495,7 @@ static const SOPC_EncodeableType_FieldDescriptor CallResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_CallResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -19241,6 +20519,7 @@ SOPC_EncodeableType OpcUa_CallResponse_EncodeableType = {
     sizeof(OpcUa_CallResponse),
     OpcUa_CallResponse_Initialize,
     OpcUa_CallResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CallResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CallResponse_Fields,
     g_KnownEncodeableTypes};
@@ -19269,6 +20548,7 @@ void OpcUa_DataChangeFilter_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataChangeFilter_Fields[] = {
     {
+        false,                                               // isOptional
         true,                                                // isBuiltIn
         false,                                               // isArrayLength
         true,                                                // isToEncode
@@ -19278,6 +20558,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataChangeFilter_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataChangeFilter, Trigger) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -19287,6 +20568,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataChangeFilter_Fields[] = {
         (uint32_t) offsetof(OpcUa_DataChangeFilter, DeadbandType) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -19310,6 +20592,7 @@ SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType = {
     sizeof(OpcUa_DataChangeFilter),
     OpcUa_DataChangeFilter_Initialize,
     OpcUa_DataChangeFilter_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DataChangeFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataChangeFilter_Fields,
     g_KnownEncodeableTypes};
@@ -19337,6 +20620,7 @@ void OpcUa_AggregateFilter_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AggregateFilter_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -19346,6 +20630,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateFilter_Fields[] = {
         (uint32_t) offsetof(OpcUa_AggregateFilter, StartTime) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -19355,6 +20640,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateFilter_Fields[] = {
         (uint32_t) offsetof(OpcUa_AggregateFilter, AggregateType) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -19364,6 +20650,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateFilter_Fields[] = {
         (uint32_t) offsetof(OpcUa_AggregateFilter, ProcessingInterval) // offset
     },
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -19387,6 +20674,7 @@ SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType = {
     sizeof(OpcUa_AggregateFilter),
     OpcUa_AggregateFilter_Initialize,
     OpcUa_AggregateFilter_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AggregateFilter_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AggregateFilter_Fields,
     g_KnownEncodeableTypes};
@@ -19414,6 +20702,7 @@ void OpcUa_EventFilterResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EventFilterResult_Fields[] = {
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -19423,6 +20712,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFilterResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_EventFilterResult, NoOfSelectClauseResults) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -19432,6 +20722,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFilterResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_EventFilterResult, SelectClauseResults) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -19441,6 +20732,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFilterResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_EventFilterResult, NoOfSelectClauseDiagnosticInfos) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -19450,6 +20742,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFilterResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_EventFilterResult, SelectClauseDiagnosticInfos) // offset
     },
     {
+        false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -19473,6 +20766,7 @@ SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType = {
     sizeof(OpcUa_EventFilterResult),
     OpcUa_EventFilterResult_Initialize,
     OpcUa_EventFilterResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EventFilterResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EventFilterResult_Fields,
     g_KnownEncodeableTypes};
@@ -19500,6 +20794,7 @@ void OpcUa_AggregateFilterResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AggregateFilterResult_Fields[] = {
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -19509,6 +20804,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateFilterResult_Fields[] 
         (uint32_t) offsetof(OpcUa_AggregateFilterResult, RevisedStartTime) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -19518,6 +20814,7 @@ static const SOPC_EncodeableType_FieldDescriptor AggregateFilterResult_Fields[] 
         (uint32_t) offsetof(OpcUa_AggregateFilterResult, RevisedProcessingInterval) // offset
     },
     {
+        false,                                                                          // isOptional
         false,                                                                          // isBuiltIn
         false,                                                                          // isArrayLength
         true,                                                                           // isToEncode
@@ -19541,6 +20838,7 @@ SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType = {
     sizeof(OpcUa_AggregateFilterResult),
     OpcUa_AggregateFilterResult_Initialize,
     OpcUa_AggregateFilterResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AggregateFilterResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AggregateFilterResult_Fields,
     g_KnownEncodeableTypes};
@@ -19568,6 +20866,7 @@ void OpcUa_MonitoringParameters_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoringParameters_Fields[] = {
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -19577,6 +20876,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoringParameters_Fields[] =
         (uint32_t) offsetof(OpcUa_MonitoringParameters, ClientHandle) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -19586,6 +20886,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoringParameters_Fields[] =
         (uint32_t) offsetof(OpcUa_MonitoringParameters, SamplingInterval) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -19595,6 +20896,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoringParameters_Fields[] =
         (uint32_t) offsetof(OpcUa_MonitoringParameters, Filter) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -19604,6 +20906,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoringParameters_Fields[] =
         (uint32_t) offsetof(OpcUa_MonitoringParameters, QueueSize) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -19627,6 +20930,7 @@ SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType = {
     sizeof(OpcUa_MonitoringParameters),
     OpcUa_MonitoringParameters_Initialize,
     OpcUa_MonitoringParameters_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof MonitoringParameters_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoringParameters_Fields,
     g_KnownEncodeableTypes};
@@ -19654,6 +20958,7 @@ void OpcUa_MonitoredItemCreateRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateRequest_Fields[] = {
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -19663,6 +20968,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateRequest_Fiel
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateRequest, ItemToMonitor) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -19672,6 +20978,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateRequest_Fiel
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateRequest, MonitoringMode) // offset
     },
     {
+        false,                                                                     // isOptional
         false,                                                                     // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -19695,6 +21002,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType = {
     sizeof(OpcUa_MonitoredItemCreateRequest),
     OpcUa_MonitoredItemCreateRequest_Initialize,
     OpcUa_MonitoredItemCreateRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof MonitoredItemCreateRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemCreateRequest_Fields,
     g_KnownEncodeableTypes};
@@ -19722,6 +21030,7 @@ void OpcUa_MonitoredItemCreateResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateResult_Fields[] = {
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -19731,6 +21040,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateResult_Field
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateResult, StatusCode) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -19740,6 +21050,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateResult_Field
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateResult, MonitoredItemId) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -19749,6 +21060,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateResult_Field
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateResult, RevisedSamplingInterval) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -19758,6 +21070,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemCreateResult_Field
         (uint32_t) offsetof(OpcUa_MonitoredItemCreateResult, RevisedQueueSize) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -19781,6 +21094,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType = {
     sizeof(OpcUa_MonitoredItemCreateResult),
     OpcUa_MonitoredItemCreateResult_Initialize,
     OpcUa_MonitoredItemCreateResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof MonitoredItemCreateResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemCreateResult_Fields,
     g_KnownEncodeableTypes};
@@ -19809,6 +21123,7 @@ void OpcUa_CreateMonitoredItemsRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsRequest_Fields[] = {
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -19818,6 +21133,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsRequest_Fie
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsRequest, SubscriptionId) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -19827,6 +21143,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsRequest_Fie
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsRequest, TimestampsToReturn) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         true,                                                                     // isArrayLength
         true,                                                                     // isToEncode
@@ -19836,6 +21153,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsRequest_Fie
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsRequest, NoOfItemsToCreate) // offset
     },
     {
+        false,                                                                // isOptional
         false,                                                                // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -19859,6 +21177,7 @@ SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType = {
     sizeof(OpcUa_CreateMonitoredItemsRequest),
     OpcUa_CreateMonitoredItemsRequest_Initialize,
     OpcUa_CreateMonitoredItemsRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CreateMonitoredItemsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateMonitoredItemsRequest_Fields,
     g_KnownEncodeableTypes};
@@ -19886,6 +21205,7 @@ void OpcUa_CreateMonitoredItemsResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsResponse_Fields[] = {
     {
+        false,                                                                  // isOptional
         false,                                                                  // isBuiltIn
         false,                                                                  // isArrayLength
         false,                                                                  // isToEncode
@@ -19895,6 +21215,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsResponse, ResponseHeader) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -19904,6 +21225,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsResponse, NoOfResults) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -19913,6 +21235,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsResponse, Results) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         true,                                                                        // isArrayLength
         true,                                                                        // isToEncode
@@ -19922,6 +21245,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_CreateMonitoredItemsResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -19945,6 +21269,7 @@ SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType = {
     sizeof(OpcUa_CreateMonitoredItemsResponse),
     OpcUa_CreateMonitoredItemsResponse_Initialize,
     OpcUa_CreateMonitoredItemsResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CreateMonitoredItemsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateMonitoredItemsResponse_Fields,
     g_KnownEncodeableTypes};
@@ -19973,6 +21298,7 @@ void OpcUa_MonitoredItemModifyRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyRequest_Fields[] = {
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -19982,6 +21308,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyRequest_Fiel
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyRequest, MonitoredItemId) // offset
     },
     {
+        false,                                                                     // isOptional
         false,                                                                     // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -20005,6 +21332,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType = {
     sizeof(OpcUa_MonitoredItemModifyRequest),
     OpcUa_MonitoredItemModifyRequest_Initialize,
     OpcUa_MonitoredItemModifyRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof MonitoredItemModifyRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemModifyRequest_Fields,
     g_KnownEncodeableTypes};
@@ -20032,6 +21360,7 @@ void OpcUa_MonitoredItemModifyResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyResult_Fields[] = {
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -20041,6 +21370,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyResult_Field
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyResult, StatusCode) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -20050,6 +21380,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyResult_Field
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyResult, RevisedSamplingInterval) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -20059,6 +21390,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemModifyResult_Field
         (uint32_t) offsetof(OpcUa_MonitoredItemModifyResult, RevisedQueueSize) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -20082,6 +21414,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType = {
     sizeof(OpcUa_MonitoredItemModifyResult),
     OpcUa_MonitoredItemModifyResult_Initialize,
     OpcUa_MonitoredItemModifyResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof MonitoredItemModifyResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemModifyResult_Fields,
     g_KnownEncodeableTypes};
@@ -20110,6 +21443,7 @@ void OpcUa_ModifyMonitoredItemsRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsRequest_Fields[] = {
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -20119,6 +21453,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsRequest_Fie
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsRequest, SubscriptionId) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -20128,6 +21463,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsRequest_Fie
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsRequest, TimestampsToReturn) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         true,                                                                     // isArrayLength
         true,                                                                     // isToEncode
@@ -20137,6 +21473,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsRequest_Fie
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsRequest, NoOfItemsToModify) // offset
     },
     {
+        false,                                                                // isOptional
         false,                                                                // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -20160,6 +21497,7 @@ SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType = {
     sizeof(OpcUa_ModifyMonitoredItemsRequest),
     OpcUa_ModifyMonitoredItemsRequest_Initialize,
     OpcUa_ModifyMonitoredItemsRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ModifyMonitoredItemsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModifyMonitoredItemsRequest_Fields,
     g_KnownEncodeableTypes};
@@ -20187,6 +21525,7 @@ void OpcUa_ModifyMonitoredItemsResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsResponse_Fields[] = {
     {
+        false,                                                                  // isOptional
         false,                                                                  // isBuiltIn
         false,                                                                  // isArrayLength
         false,                                                                  // isToEncode
@@ -20196,6 +21535,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsResponse, ResponseHeader) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -20205,6 +21545,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsResponse, NoOfResults) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -20214,6 +21555,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsResponse, Results) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         true,                                                                        // isArrayLength
         true,                                                                        // isToEncode
@@ -20223,6 +21565,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifyMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_ModifyMonitoredItemsResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -20246,6 +21589,7 @@ SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType = {
     sizeof(OpcUa_ModifyMonitoredItemsResponse),
     OpcUa_ModifyMonitoredItemsResponse_Initialize,
     OpcUa_ModifyMonitoredItemsResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ModifyMonitoredItemsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModifyMonitoredItemsResponse_Fields,
     g_KnownEncodeableTypes};
@@ -20275,6 +21619,7 @@ void OpcUa_SetMonitoringModeRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeRequest_Fields[] = {
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -20284,6 +21629,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeRequest_Fields
         (uint32_t) offsetof(OpcUa_SetMonitoringModeRequest, SubscriptionId) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -20293,6 +21639,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeRequest_Fields
         (uint32_t) offsetof(OpcUa_SetMonitoringModeRequest, MonitoringMode) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         true,                                                                     // isArrayLength
         true,                                                                     // isToEncode
@@ -20302,6 +21649,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeRequest_Fields
         (uint32_t) offsetof(OpcUa_SetMonitoringModeRequest, NoOfMonitoredItemIds) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -20325,6 +21673,7 @@ SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType = {
     sizeof(OpcUa_SetMonitoringModeRequest),
     OpcUa_SetMonitoringModeRequest_Initialize,
     OpcUa_SetMonitoringModeRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SetMonitoringModeRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetMonitoringModeRequest_Fields,
     g_KnownEncodeableTypes};
@@ -20352,6 +21701,7 @@ void OpcUa_SetMonitoringModeResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeResponse_Fields[] = {
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         false,                                                               // isToEncode
@@ -20361,6 +21711,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeResponse_Field
         (uint32_t) offsetof(OpcUa_SetMonitoringModeResponse, ResponseHeader) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -20370,6 +21721,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeResponse_Field
         (uint32_t) offsetof(OpcUa_SetMonitoringModeResponse, NoOfResults) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -20379,6 +21731,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeResponse_Field
         (uint32_t) offsetof(OpcUa_SetMonitoringModeResponse, Results) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         true,                                                                     // isArrayLength
         true,                                                                     // isToEncode
@@ -20388,6 +21741,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetMonitoringModeResponse_Field
         (uint32_t) offsetof(OpcUa_SetMonitoringModeResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -20411,6 +21765,7 @@ SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType = {
     sizeof(OpcUa_SetMonitoringModeResponse),
     OpcUa_SetMonitoringModeResponse_Initialize,
     OpcUa_SetMonitoringModeResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SetMonitoringModeResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetMonitoringModeResponse_Fields,
     g_KnownEncodeableTypes};
@@ -20440,6 +21795,7 @@ void OpcUa_SetTriggeringRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetTriggeringRequest_Fields[] = {
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -20449,6 +21805,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, SubscriptionId) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -20458,6 +21815,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, TriggeringItemId) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         true,                                                           // isArrayLength
         true,                                                           // isToEncode
@@ -20467,6 +21825,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, NoOfLinksToAdd) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -20476,6 +21835,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, LinksToAdd) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         true,                                                              // isArrayLength
         true,                                                              // isToEncode
@@ -20485,6 +21845,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringRequest_Fields[] =
         (uint32_t) offsetof(OpcUa_SetTriggeringRequest, NoOfLinksToRemove) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -20508,6 +21869,7 @@ SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType = {
     sizeof(OpcUa_SetTriggeringRequest),
     OpcUa_SetTriggeringRequest_Initialize,
     OpcUa_SetTriggeringRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SetTriggeringRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetTriggeringRequest_Fields,
     g_KnownEncodeableTypes};
@@ -20535,6 +21897,7 @@ void OpcUa_SetTriggeringResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] = {
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         false,                                                           // isToEncode
@@ -20544,6 +21907,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, ResponseHeader) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         true,                                                            // isArrayLength
         true,                                                            // isToEncode
@@ -20553,6 +21917,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, NoOfAddResults) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -20562,6 +21927,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, AddResults) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         true,                                                                    // isArrayLength
         true,                                                                    // isToEncode
@@ -20571,6 +21937,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, NoOfAddDiagnosticInfos) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -20580,6 +21947,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, AddDiagnosticInfos) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -20589,6 +21957,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, NoOfRemoveResults) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -20598,6 +21967,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, RemoveResults) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         true,                                                                       // isArrayLength
         true,                                                                       // isToEncode
@@ -20607,6 +21977,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetTriggeringResponse_Fields[] 
         (uint32_t) offsetof(OpcUa_SetTriggeringResponse, NoOfRemoveDiagnosticInfos) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -20630,6 +22001,7 @@ SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType = {
     sizeof(OpcUa_SetTriggeringResponse),
     OpcUa_SetTriggeringResponse_Initialize,
     OpcUa_SetTriggeringResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SetTriggeringResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetTriggeringResponse_Fields,
     g_KnownEncodeableTypes};
@@ -20659,6 +22031,7 @@ void OpcUa_DeleteMonitoredItemsRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsRequest_Fields[] = {
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -20668,6 +22041,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsRequest_Fie
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsRequest, SubscriptionId) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         true,                                                                        // isArrayLength
         true,                                                                        // isToEncode
@@ -20677,6 +22051,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsRequest_Fie
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsRequest, NoOfMonitoredItemIds) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -20700,6 +22075,7 @@ SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType = {
     sizeof(OpcUa_DeleteMonitoredItemsRequest),
     OpcUa_DeleteMonitoredItemsRequest_Initialize,
     OpcUa_DeleteMonitoredItemsRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteMonitoredItemsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteMonitoredItemsRequest_Fields,
     g_KnownEncodeableTypes};
@@ -20727,6 +22103,7 @@ void OpcUa_DeleteMonitoredItemsResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsResponse_Fields[] = {
     {
+        false,                                                                  // isOptional
         false,                                                                  // isBuiltIn
         false,                                                                  // isArrayLength
         false,                                                                  // isToEncode
@@ -20736,6 +22113,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsResponse, ResponseHeader) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -20745,6 +22123,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsResponse, NoOfResults) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -20754,6 +22133,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsResponse, Results) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         true,                                                                        // isArrayLength
         true,                                                                        // isToEncode
@@ -20763,6 +22143,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteMonitoredItemsResponse_Fi
         (uint32_t) offsetof(OpcUa_DeleteMonitoredItemsResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -20786,6 +22167,7 @@ SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType = {
     sizeof(OpcUa_DeleteMonitoredItemsResponse),
     OpcUa_DeleteMonitoredItemsResponse_Initialize,
     OpcUa_DeleteMonitoredItemsResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteMonitoredItemsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteMonitoredItemsResponse_Fields,
     g_KnownEncodeableTypes};
@@ -20815,6 +22197,7 @@ void OpcUa_CreateSubscriptionRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionRequest_Fields[] = {
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -20824,6 +22207,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, RequestedPublishingInterval) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -20833,6 +22217,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, RequestedLifetimeCount) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -20842,6 +22227,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, RequestedMaxKeepAliveCount) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -20851,6 +22237,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, MaxNotificationsPerPublish) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -20860,6 +22247,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_CreateSubscriptionRequest, PublishingEnabled) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -20883,6 +22271,7 @@ SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType = {
     sizeof(OpcUa_CreateSubscriptionRequest),
     OpcUa_CreateSubscriptionRequest_Initialize,
     OpcUa_CreateSubscriptionRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CreateSubscriptionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateSubscriptionRequest_Fields,
     g_KnownEncodeableTypes};
@@ -20910,6 +22299,7 @@ void OpcUa_CreateSubscriptionResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionResponse_Fields[] = {
     {
+        false,                                                                // isOptional
         false,                                                                // isBuiltIn
         false,                                                                // isArrayLength
         false,                                                                // isToEncode
@@ -20919,6 +22309,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionResponse_Fiel
         (uint32_t) offsetof(OpcUa_CreateSubscriptionResponse, ResponseHeader) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -20928,6 +22319,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionResponse_Fiel
         (uint32_t) offsetof(OpcUa_CreateSubscriptionResponse, SubscriptionId) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -20937,6 +22329,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionResponse_Fiel
         (uint32_t) offsetof(OpcUa_CreateSubscriptionResponse, RevisedPublishingInterval) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -20946,6 +22339,7 @@ static const SOPC_EncodeableType_FieldDescriptor CreateSubscriptionResponse_Fiel
         (uint32_t) offsetof(OpcUa_CreateSubscriptionResponse, RevisedLifetimeCount) // offset
     },
     {
+        false,                                                                          // isOptional
         true,                                                                           // isBuiltIn
         false,                                                                          // isArrayLength
         true,                                                                           // isToEncode
@@ -20969,6 +22363,7 @@ SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType = {
     sizeof(OpcUa_CreateSubscriptionResponse),
     OpcUa_CreateSubscriptionResponse_Initialize,
     OpcUa_CreateSubscriptionResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof CreateSubscriptionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     CreateSubscriptionResponse_Fields,
     g_KnownEncodeableTypes};
@@ -20998,6 +22393,7 @@ void OpcUa_ModifySubscriptionRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionRequest_Fields[] = {
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -21007,6 +22403,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, SubscriptionId) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -21016,6 +22413,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, RequestedPublishingInterval) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -21025,6 +22423,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, RequestedLifetimeCount) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -21034,6 +22433,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, RequestedMaxKeepAliveCount) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -21043,6 +22443,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionRequest_Field
         (uint32_t) offsetof(OpcUa_ModifySubscriptionRequest, MaxNotificationsPerPublish) // offset
     },
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -21066,6 +22467,7 @@ SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType = {
     sizeof(OpcUa_ModifySubscriptionRequest),
     OpcUa_ModifySubscriptionRequest_Initialize,
     OpcUa_ModifySubscriptionRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ModifySubscriptionRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModifySubscriptionRequest_Fields,
     g_KnownEncodeableTypes};
@@ -21093,6 +22495,7 @@ void OpcUa_ModifySubscriptionResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionResponse_Fields[] = {
     {
+        false,                                                                // isOptional
         false,                                                                // isBuiltIn
         false,                                                                // isArrayLength
         false,                                                                // isToEncode
@@ -21102,6 +22505,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionResponse_Fiel
         (uint32_t) offsetof(OpcUa_ModifySubscriptionResponse, ResponseHeader) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -21111,6 +22515,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionResponse_Fiel
         (uint32_t) offsetof(OpcUa_ModifySubscriptionResponse, RevisedPublishingInterval) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -21120,6 +22525,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModifySubscriptionResponse_Fiel
         (uint32_t) offsetof(OpcUa_ModifySubscriptionResponse, RevisedLifetimeCount) // offset
     },
     {
+        false,                                                                          // isOptional
         true,                                                                           // isBuiltIn
         false,                                                                          // isArrayLength
         true,                                                                           // isToEncode
@@ -21143,6 +22549,7 @@ SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType = {
     sizeof(OpcUa_ModifySubscriptionResponse),
     OpcUa_ModifySubscriptionResponse_Initialize,
     OpcUa_ModifySubscriptionResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ModifySubscriptionResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModifySubscriptionResponse_Fields,
     g_KnownEncodeableTypes};
@@ -21172,6 +22579,7 @@ void OpcUa_SetPublishingModeRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeRequest_Fields[] = {
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -21181,6 +22589,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeRequest_Fields
         (uint32_t) offsetof(OpcUa_SetPublishingModeRequest, PublishingEnabled) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         true,                                                                    // isArrayLength
         true,                                                                    // isToEncode
@@ -21190,6 +22599,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeRequest_Fields
         (uint32_t) offsetof(OpcUa_SetPublishingModeRequest, NoOfSubscriptionIds) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -21213,6 +22623,7 @@ SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType = {
     sizeof(OpcUa_SetPublishingModeRequest),
     OpcUa_SetPublishingModeRequest_Initialize,
     OpcUa_SetPublishingModeRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SetPublishingModeRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetPublishingModeRequest_Fields,
     g_KnownEncodeableTypes};
@@ -21240,6 +22651,7 @@ void OpcUa_SetPublishingModeResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeResponse_Fields[] = {
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         false,                                                               // isToEncode
@@ -21249,6 +22661,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeResponse_Field
         (uint32_t) offsetof(OpcUa_SetPublishingModeResponse, ResponseHeader) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -21258,6 +22671,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeResponse_Field
         (uint32_t) offsetof(OpcUa_SetPublishingModeResponse, NoOfResults) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -21267,6 +22681,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeResponse_Field
         (uint32_t) offsetof(OpcUa_SetPublishingModeResponse, Results) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         true,                                                                     // isArrayLength
         true,                                                                     // isToEncode
@@ -21276,6 +22691,7 @@ static const SOPC_EncodeableType_FieldDescriptor SetPublishingModeResponse_Field
         (uint32_t) offsetof(OpcUa_SetPublishingModeResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -21299,6 +22715,7 @@ SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType = {
     sizeof(OpcUa_SetPublishingModeResponse),
     OpcUa_SetPublishingModeResponse_Initialize,
     OpcUa_SetPublishingModeResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SetPublishingModeResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SetPublishingModeResponse_Fields,
     g_KnownEncodeableTypes};
@@ -21327,6 +22744,7 @@ void OpcUa_NotificationMessage_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NotificationMessage_Fields[] = {
     {
+        false,                                                         // isOptional
         true,                                                          // isBuiltIn
         false,                                                         // isArrayLength
         true,                                                          // isToEncode
@@ -21336,6 +22754,7 @@ static const SOPC_EncodeableType_FieldDescriptor NotificationMessage_Fields[] = 
         (uint32_t) offsetof(OpcUa_NotificationMessage, SequenceNumber) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -21345,6 +22764,7 @@ static const SOPC_EncodeableType_FieldDescriptor NotificationMessage_Fields[] = 
         (uint32_t) offsetof(OpcUa_NotificationMessage, PublishTime) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -21354,6 +22774,7 @@ static const SOPC_EncodeableType_FieldDescriptor NotificationMessage_Fields[] = 
         (uint32_t) offsetof(OpcUa_NotificationMessage, NoOfNotificationData) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -21377,6 +22798,7 @@ SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType = {
     sizeof(OpcUa_NotificationMessage),
     OpcUa_NotificationMessage_Initialize,
     OpcUa_NotificationMessage_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof NotificationMessage_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NotificationMessage_Fields,
     g_KnownEncodeableTypes};
@@ -21404,6 +22826,7 @@ void OpcUa_MonitoredItemNotification_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor MonitoredItemNotification_Fields[] = {
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -21413,6 +22836,7 @@ static const SOPC_EncodeableType_FieldDescriptor MonitoredItemNotification_Field
         (uint32_t) offsetof(OpcUa_MonitoredItemNotification, ClientHandle) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -21436,6 +22860,7 @@ SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType = {
     sizeof(OpcUa_MonitoredItemNotification),
     OpcUa_MonitoredItemNotification_Initialize,
     OpcUa_MonitoredItemNotification_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof MonitoredItemNotification_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     MonitoredItemNotification_Fields,
     g_KnownEncodeableTypes};
@@ -21463,6 +22888,7 @@ void OpcUa_DataChangeNotification_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DataChangeNotification_Fields[] = {
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -21472,6 +22898,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataChangeNotification_Fields[]
         (uint32_t) offsetof(OpcUa_DataChangeNotification, NoOfMonitoredItems) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -21481,6 +22908,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataChangeNotification_Fields[]
         (uint32_t) offsetof(OpcUa_DataChangeNotification, MonitoredItems) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         true,                                                                  // isArrayLength
         true,                                                                  // isToEncode
@@ -21490,6 +22918,7 @@ static const SOPC_EncodeableType_FieldDescriptor DataChangeNotification_Fields[]
         (uint32_t) offsetof(OpcUa_DataChangeNotification, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -21513,6 +22942,7 @@ SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType = {
     sizeof(OpcUa_DataChangeNotification),
     OpcUa_DataChangeNotification_Initialize,
     OpcUa_DataChangeNotification_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DataChangeNotification_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DataChangeNotification_Fields,
     g_KnownEncodeableTypes};
@@ -21540,6 +22970,7 @@ void OpcUa_EventFieldList_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EventFieldList_Fields[] = {
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -21549,6 +22980,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFieldList_Fields[] = {
         (uint32_t) offsetof(OpcUa_EventFieldList, ClientHandle) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         true,                                                      // isArrayLength
         true,                                                      // isToEncode
@@ -21558,6 +22990,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventFieldList_Fields[] = {
         (uint32_t) offsetof(OpcUa_EventFieldList, NoOfEventFields) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -21581,6 +23014,7 @@ SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType = {
     sizeof(OpcUa_EventFieldList),
     OpcUa_EventFieldList_Initialize,
     OpcUa_EventFieldList_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EventFieldList_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EventFieldList_Fields,
     g_KnownEncodeableTypes};
@@ -21608,6 +23042,7 @@ void OpcUa_EventNotificationList_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EventNotificationList_Fields[] = {
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         true,                                                        // isArrayLength
         true,                                                        // isToEncode
@@ -21617,6 +23052,7 @@ static const SOPC_EncodeableType_FieldDescriptor EventNotificationList_Fields[] 
         (uint32_t) offsetof(OpcUa_EventNotificationList, NoOfEvents) // offset
     },
     {
+        false,                                                   // isOptional
         false,                                                   // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -21640,6 +23076,7 @@ SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType = {
     sizeof(OpcUa_EventNotificationList),
     OpcUa_EventNotificationList_Initialize,
     OpcUa_EventNotificationList_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EventNotificationList_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EventNotificationList_Fields,
     g_KnownEncodeableTypes};
@@ -21667,6 +23104,7 @@ void OpcUa_StatusChangeNotification_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor StatusChangeNotification_Fields[] = {
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -21676,6 +23114,7 @@ static const SOPC_EncodeableType_FieldDescriptor StatusChangeNotification_Fields
         (uint32_t) offsetof(OpcUa_StatusChangeNotification, Status) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -21699,6 +23138,7 @@ SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType = {
     sizeof(OpcUa_StatusChangeNotification),
     OpcUa_StatusChangeNotification_Initialize,
     OpcUa_StatusChangeNotification_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof StatusChangeNotification_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     StatusChangeNotification_Fields,
     g_KnownEncodeableTypes};
@@ -21726,6 +23166,7 @@ void OpcUa_SubscriptionAcknowledgement_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SubscriptionAcknowledgement_Fields[] = {
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -21735,6 +23176,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionAcknowledgement_Fie
         (uint32_t) offsetof(OpcUa_SubscriptionAcknowledgement, SubscriptionId) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -21758,6 +23200,7 @@ SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType = {
     sizeof(OpcUa_SubscriptionAcknowledgement),
     OpcUa_SubscriptionAcknowledgement_Initialize,
     OpcUa_SubscriptionAcknowledgement_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SubscriptionAcknowledgement_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SubscriptionAcknowledgement_Fields,
     g_KnownEncodeableTypes};
@@ -21786,6 +23229,7 @@ void OpcUa_PublishRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PublishRequest_Fields[] = {
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         true,                                                                       // isArrayLength
         true,                                                                       // isToEncode
@@ -21795,6 +23239,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishRequest, NoOfSubscriptionAcknowledgements) // offset
     },
     {
+        false,                                                                  // isOptional
         false,                                                                  // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -21818,6 +23263,7 @@ SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType = {
     sizeof(OpcUa_PublishRequest),
     OpcUa_PublishRequest_Initialize,
     OpcUa_PublishRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof PublishRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PublishRequest_Fields,
     g_KnownEncodeableTypes};
@@ -21845,6 +23291,7 @@ void OpcUa_PublishResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
     {
+        false,                                                     // isOptional
         false,                                                     // isBuiltIn
         false,                                                     // isArrayLength
         false,                                                     // isToEncode
@@ -21854,6 +23301,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishResponse, ResponseHeader) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -21863,6 +23311,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishResponse, SubscriptionId) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         true,                                                                    // isArrayLength
         true,                                                                    // isToEncode
@@ -21872,6 +23321,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishResponse, NoOfAvailableSequenceNumbers) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -21881,6 +23331,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishResponse, AvailableSequenceNumbers) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -21890,6 +23341,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishResponse, MoreNotifications) // offset
     },
     {
+        false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -21899,6 +23351,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishResponse, NotificationMessage) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         true,                                                   // isArrayLength
         true,                                                   // isToEncode
@@ -21908,6 +23361,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishResponse, NoOfResults) // offset
     },
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -21917,6 +23371,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishResponse, Results) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         true,                                                           // isArrayLength
         true,                                                           // isToEncode
@@ -21926,6 +23381,7 @@ static const SOPC_EncodeableType_FieldDescriptor PublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_PublishResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -21949,6 +23405,7 @@ SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType = {
     sizeof(OpcUa_PublishResponse),
     OpcUa_PublishResponse_Initialize,
     OpcUa_PublishResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof PublishResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     PublishResponse_Fields,
     g_KnownEncodeableTypes};
@@ -21978,6 +23435,7 @@ void OpcUa_RepublishRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RepublishRequest_Fields[] = {
     {
+        false,                                                      // isOptional
         true,                                                       // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -21987,6 +23445,7 @@ static const SOPC_EncodeableType_FieldDescriptor RepublishRequest_Fields[] = {
         (uint32_t) offsetof(OpcUa_RepublishRequest, SubscriptionId) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -22010,6 +23469,7 @@ SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType = {
     sizeof(OpcUa_RepublishRequest),
     OpcUa_RepublishRequest_Initialize,
     OpcUa_RepublishRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RepublishRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RepublishRequest_Fields,
     g_KnownEncodeableTypes};
@@ -22037,6 +23497,7 @@ void OpcUa_RepublishResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RepublishResponse_Fields[] = {
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         false,                                                       // isToEncode
@@ -22046,6 +23507,7 @@ static const SOPC_EncodeableType_FieldDescriptor RepublishResponse_Fields[] = {
         (uint32_t) offsetof(OpcUa_RepublishResponse, ResponseHeader) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -22069,6 +23531,7 @@ SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType = {
     sizeof(OpcUa_RepublishResponse),
     OpcUa_RepublishResponse_Initialize,
     OpcUa_RepublishResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RepublishResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RepublishResponse_Fields,
     g_KnownEncodeableTypes};
@@ -22097,6 +23560,7 @@ void OpcUa_TransferResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TransferResult_Fields[] = {
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -22106,6 +23570,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_TransferResult, StatusCode) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -22115,6 +23580,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_TransferResult, NoOfAvailableSequenceNumbers) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -22138,6 +23604,7 @@ SOPC_EncodeableType OpcUa_TransferResult_EncodeableType = {
     sizeof(OpcUa_TransferResult),
     OpcUa_TransferResult_Initialize,
     OpcUa_TransferResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof TransferResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TransferResult_Fields,
     g_KnownEncodeableTypes};
@@ -22166,6 +23633,7 @@ void OpcUa_TransferSubscriptionsRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsRequest_Fields[] = {
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         true,                                                                        // isArrayLength
         true,                                                                        // isToEncode
@@ -22175,6 +23643,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsRequest_Fi
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsRequest, NoOfSubscriptionIds) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -22184,6 +23653,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsRequest_Fi
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsRequest, SubscriptionIds) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -22207,6 +23677,7 @@ SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType = {
     sizeof(OpcUa_TransferSubscriptionsRequest),
     OpcUa_TransferSubscriptionsRequest_Initialize,
     OpcUa_TransferSubscriptionsRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof TransferSubscriptionsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TransferSubscriptionsRequest_Fields,
     g_KnownEncodeableTypes};
@@ -22234,6 +23705,7 @@ void OpcUa_TransferSubscriptionsResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsResponse_Fields[] = {
     {
+        false,                                                                   // isOptional
         false,                                                                   // isBuiltIn
         false,                                                                   // isArrayLength
         false,                                                                   // isToEncode
@@ -22243,6 +23715,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsResponse_F
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsResponse, ResponseHeader) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         true,                                                                 // isArrayLength
         true,                                                                 // isToEncode
@@ -22252,6 +23725,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsResponse_F
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsResponse, NoOfResults) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -22261,6 +23735,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsResponse_F
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsResponse, Results) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         true,                                                                         // isArrayLength
         true,                                                                         // isToEncode
@@ -22270,6 +23745,7 @@ static const SOPC_EncodeableType_FieldDescriptor TransferSubscriptionsResponse_F
         (uint32_t) offsetof(OpcUa_TransferSubscriptionsResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -22293,6 +23769,7 @@ SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType = {
     sizeof(OpcUa_TransferSubscriptionsResponse),
     OpcUa_TransferSubscriptionsResponse_Initialize,
     OpcUa_TransferSubscriptionsResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof TransferSubscriptionsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     TransferSubscriptionsResponse_Fields,
     g_KnownEncodeableTypes};
@@ -22322,6 +23799,7 @@ void OpcUa_DeleteSubscriptionsRequest_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsRequest_Fields[] = {
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         true,                                                                      // isArrayLength
         true,                                                                      // isToEncode
@@ -22331,6 +23809,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsRequest_Fiel
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsRequest, NoOfSubscriptionIds) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -22354,6 +23833,7 @@ SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType = {
     sizeof(OpcUa_DeleteSubscriptionsRequest),
     OpcUa_DeleteSubscriptionsRequest_Initialize,
     OpcUa_DeleteSubscriptionsRequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteSubscriptionsRequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteSubscriptionsRequest_Fields,
     g_KnownEncodeableTypes};
@@ -22381,6 +23861,7 @@ void OpcUa_DeleteSubscriptionsResponse_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsResponse_Fields[] = {
     {
+        false,                                                                 // isOptional
         false,                                                                 // isBuiltIn
         false,                                                                 // isArrayLength
         false,                                                                 // isToEncode
@@ -22390,6 +23871,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsResponse_Fie
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsResponse, ResponseHeader) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         true,                                                               // isArrayLength
         true,                                                               // isToEncode
@@ -22399,6 +23881,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsResponse_Fie
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsResponse, NoOfResults) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -22408,6 +23891,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsResponse_Fie
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsResponse, Results) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         true,                                                                       // isArrayLength
         true,                                                                       // isToEncode
@@ -22417,6 +23901,7 @@ static const SOPC_EncodeableType_FieldDescriptor DeleteSubscriptionsResponse_Fie
         (uint32_t) offsetof(OpcUa_DeleteSubscriptionsResponse, NoOfDiagnosticInfos) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -22440,6 +23925,7 @@ SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType = {
     sizeof(OpcUa_DeleteSubscriptionsResponse),
     OpcUa_DeleteSubscriptionsResponse_Initialize,
     OpcUa_DeleteSubscriptionsResponse_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DeleteSubscriptionsResponse_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DeleteSubscriptionsResponse_Fields,
     g_KnownEncodeableTypes};
@@ -22468,6 +23954,7 @@ void OpcUa_BuildInfo_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor BuildInfo_Fields[] = {
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -22477,6 +23964,7 @@ static const SOPC_EncodeableType_FieldDescriptor BuildInfo_Fields[] = {
         (uint32_t) offsetof(OpcUa_BuildInfo, ProductUri) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -22486,6 +23974,7 @@ static const SOPC_EncodeableType_FieldDescriptor BuildInfo_Fields[] = {
         (uint32_t) offsetof(OpcUa_BuildInfo, ManufacturerName) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -22495,6 +23984,7 @@ static const SOPC_EncodeableType_FieldDescriptor BuildInfo_Fields[] = {
         (uint32_t) offsetof(OpcUa_BuildInfo, ProductName) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -22504,6 +23994,7 @@ static const SOPC_EncodeableType_FieldDescriptor BuildInfo_Fields[] = {
         (uint32_t) offsetof(OpcUa_BuildInfo, SoftwareVersion) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -22513,6 +24004,7 @@ static const SOPC_EncodeableType_FieldDescriptor BuildInfo_Fields[] = {
         (uint32_t) offsetof(OpcUa_BuildInfo, BuildNumber) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -22536,6 +24028,7 @@ SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType = {
     sizeof(OpcUa_BuildInfo),
     OpcUa_BuildInfo_Initialize,
     OpcUa_BuildInfo_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof BuildInfo_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     BuildInfo_Fields,
     g_KnownEncodeableTypes};
@@ -22563,6 +24056,7 @@ void OpcUa_RedundantServerDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor RedundantServerDataType_Fields[] = {
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -22572,6 +24066,7 @@ static const SOPC_EncodeableType_FieldDescriptor RedundantServerDataType_Fields[
         (uint32_t) offsetof(OpcUa_RedundantServerDataType, ServerId) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -22581,6 +24076,7 @@ static const SOPC_EncodeableType_FieldDescriptor RedundantServerDataType_Fields[
         (uint32_t) offsetof(OpcUa_RedundantServerDataType, ServiceLevel) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -22604,6 +24100,7 @@ SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType = {
     sizeof(OpcUa_RedundantServerDataType),
     OpcUa_RedundantServerDataType_Initialize,
     OpcUa_RedundantServerDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof RedundantServerDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     RedundantServerDataType_Fields,
     g_KnownEncodeableTypes};
@@ -22631,6 +24128,7 @@ void OpcUa_EndpointUrlListDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EndpointUrlListDataType_Fields[] = {
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         true,                                                                   // isArrayLength
         true,                                                                   // isToEncode
@@ -22640,6 +24138,7 @@ static const SOPC_EncodeableType_FieldDescriptor EndpointUrlListDataType_Fields[
         (uint32_t) offsetof(OpcUa_EndpointUrlListDataType, NoOfEndpointUrlList) // offset
     },
     {
+        false,                                                              // isOptional
         true,                                                               // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -22663,6 +24162,7 @@ SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType = {
     sizeof(OpcUa_EndpointUrlListDataType),
     OpcUa_EndpointUrlListDataType_Initialize,
     OpcUa_EndpointUrlListDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EndpointUrlListDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EndpointUrlListDataType_Fields,
     g_KnownEncodeableTypes};
@@ -22690,6 +24190,7 @@ void OpcUa_NetworkGroupDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor NetworkGroupDataType_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -22699,6 +24200,7 @@ static const SOPC_EncodeableType_FieldDescriptor NetworkGroupDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_NetworkGroupDataType, ServerUri) // offset
     },
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         true,                                                             // isArrayLength
         true,                                                             // isToEncode
@@ -22708,6 +24210,7 @@ static const SOPC_EncodeableType_FieldDescriptor NetworkGroupDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_NetworkGroupDataType, NoOfNetworkPaths) // offset
     },
     {
+        false,                                                        // isOptional
         false,                                                        // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -22731,6 +24234,7 @@ SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType = {
     sizeof(OpcUa_NetworkGroupDataType),
     OpcUa_NetworkGroupDataType_Initialize,
     OpcUa_NetworkGroupDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof NetworkGroupDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     NetworkGroupDataType_Fields,
     g_KnownEncodeableTypes};
@@ -22758,6 +24262,7 @@ void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SamplingIntervalDiagnosticsDataType_Fields[] = {
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -22767,6 +24272,7 @@ static const SOPC_EncodeableType_FieldDescriptor SamplingIntervalDiagnosticsData
         (uint32_t) offsetof(OpcUa_SamplingIntervalDiagnosticsDataType, SamplingInterval) // offset
     },
     {
+        false,                                                                             // isOptional
         true,                                                                              // isBuiltIn
         false,                                                                             // isArrayLength
         true,                                                                              // isToEncode
@@ -22776,6 +24282,7 @@ static const SOPC_EncodeableType_FieldDescriptor SamplingIntervalDiagnosticsData
         (uint32_t) offsetof(OpcUa_SamplingIntervalDiagnosticsDataType, MonitoredItemCount) // offset
     },
     {
+        false,                                                                                // isOptional
         true,                                                                                 // isBuiltIn
         false,                                                                                // isArrayLength
         true,                                                                                 // isToEncode
@@ -22785,6 +24292,7 @@ static const SOPC_EncodeableType_FieldDescriptor SamplingIntervalDiagnosticsData
         (uint32_t) offsetof(OpcUa_SamplingIntervalDiagnosticsDataType, MaxMonitoredItemCount) // offset
     },
     {
+        false,                                                                                     // isOptional
         true,                                                                                      // isBuiltIn
         false,                                                                                     // isArrayLength
         true,                                                                                      // isToEncode
@@ -22808,6 +24316,7 @@ SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType = {
     sizeof(OpcUa_SamplingIntervalDiagnosticsDataType),
     OpcUa_SamplingIntervalDiagnosticsDataType_Initialize,
     OpcUa_SamplingIntervalDiagnosticsDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SamplingIntervalDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SamplingIntervalDiagnosticsDataType_Fields,
     g_KnownEncodeableTypes};
@@ -22835,6 +24344,7 @@ void OpcUa_ServerDiagnosticsSummaryDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataType_Fields[] = {
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -22844,6 +24354,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, ServerViewCount) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -22853,6 +24364,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, CurrentSessionCount) // offset
     },
     {
+        false,                                                                             // isOptional
         true,                                                                              // isBuiltIn
         false,                                                                             // isArrayLength
         true,                                                                              // isToEncode
@@ -22862,6 +24374,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, CumulatedSessionCount) // offset
     },
     {
+        false,                                                                                    // isOptional
         true,                                                                                     // isBuiltIn
         false,                                                                                    // isArrayLength
         true,                                                                                     // isToEncode
@@ -22871,6 +24384,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, SecurityRejectedSessionCount) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -22880,6 +24394,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, RejectedSessionCount) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -22889,6 +24404,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, SessionTimeoutCount) // offset
     },
     {
+        false,                                                                         // isOptional
         true,                                                                          // isBuiltIn
         false,                                                                         // isArrayLength
         true,                                                                          // isToEncode
@@ -22898,6 +24414,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, SessionAbortCount) // offset
     },
     {
+        false,                                                                                // isOptional
         true,                                                                                 // isBuiltIn
         false,                                                                                // isArrayLength
         true,                                                                                 // isToEncode
@@ -22907,6 +24424,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, CurrentSubscriptionCount) // offset
     },
     {
+        false,                                                                                  // isOptional
         true,                                                                                   // isBuiltIn
         false,                                                                                  // isArrayLength
         true,                                                                                   // isToEncode
@@ -22916,6 +24434,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, CumulatedSubscriptionCount) // offset
     },
     {
+        false,                                                                               // isOptional
         true,                                                                                // isBuiltIn
         false,                                                                               // isArrayLength
         true,                                                                                // isToEncode
@@ -22925,6 +24444,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, PublishingIntervalCount) // offset
     },
     {
+        false,                                                                                     // isOptional
         true,                                                                                      // isBuiltIn
         false,                                                                                     // isArrayLength
         true,                                                                                      // isToEncode
@@ -22934,6 +24454,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerDiagnosticsSummaryDataTyp
         (uint32_t) offsetof(OpcUa_ServerDiagnosticsSummaryDataType, SecurityRejectedRequestsCount) // offset
     },
     {
+        false,                                                                             // isOptional
         true,                                                                              // isBuiltIn
         false,                                                                             // isArrayLength
         true,                                                                              // isToEncode
@@ -22957,6 +24478,7 @@ SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType = {
     sizeof(OpcUa_ServerDiagnosticsSummaryDataType),
     OpcUa_ServerDiagnosticsSummaryDataType_Initialize,
     OpcUa_ServerDiagnosticsSummaryDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ServerDiagnosticsSummaryDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServerDiagnosticsSummaryDataType_Fields,
     g_KnownEncodeableTypes};
@@ -22984,6 +24506,7 @@ void OpcUa_ServerStatusDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServerStatusDataType_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -22993,6 +24516,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerStatusDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, StartTime) // offset
     },
     {
+        false,                                                       // isOptional
         true,                                                        // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -23002,6 +24526,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerStatusDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, CurrentTime) // offset
     },
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -23011,6 +24536,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerStatusDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, State) // offset
     },
     {
+        false,                                                     // isOptional
         false,                                                     // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -23020,6 +24546,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerStatusDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, BuildInfo) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -23029,6 +24556,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServerStatusDataType_Fields[] =
         (uint32_t) offsetof(OpcUa_ServerStatusDataType, SecondsTillShutdown) // offset
     },
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -23052,6 +24580,7 @@ SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType = {
     sizeof(OpcUa_ServerStatusDataType),
     OpcUa_ServerStatusDataType_Initialize,
     OpcUa_ServerStatusDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ServerStatusDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServerStatusDataType_Fields,
     g_KnownEncodeableTypes};
@@ -23079,6 +24608,7 @@ void OpcUa_ServiceCounterDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ServiceCounterDataType_Fields[] = {
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -23088,6 +24618,7 @@ static const SOPC_EncodeableType_FieldDescriptor ServiceCounterDataType_Fields[]
         (uint32_t) offsetof(OpcUa_ServiceCounterDataType, TotalCount) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -23111,6 +24642,7 @@ SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType = {
     sizeof(OpcUa_ServiceCounterDataType),
     OpcUa_ServiceCounterDataType_Initialize,
     OpcUa_ServiceCounterDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ServiceCounterDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ServiceCounterDataType_Fields,
     g_KnownEncodeableTypes};
@@ -23138,6 +24670,7 @@ void OpcUa_SessionDiagnosticsDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fields[] = {
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -23147,6 +24680,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SessionId) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -23156,6 +24690,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SessionName) // offset
     },
     {
+        false,                                                                   // isOptional
         false,                                                                   // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -23165,6 +24700,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ClientDescription) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -23174,6 +24710,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ServerUri) // offset
     },
     {
+        false,                                                             // isOptional
         true,                                                              // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -23183,6 +24720,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, EndpointUrl) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         true,                                                                // isArrayLength
         true,                                                                // isToEncode
@@ -23192,6 +24730,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, NoOfLocaleIds) // offset
     },
     {
+        false,                                                           // isOptional
         true,                                                            // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -23201,6 +24740,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, LocaleIds) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -23210,6 +24750,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ActualSessionTimeout) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -23219,6 +24760,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, MaxResponseMessageSize) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -23228,6 +24770,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ClientConnectionTime) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -23237,6 +24780,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ClientLastContactTime) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -23246,6 +24790,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CurrentSubscriptionsCount) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -23255,6 +24800,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CurrentMonitoredItemsCount) // offset
     },
     {
+        false,                                                                               // isOptional
         true,                                                                                // isBuiltIn
         false,                                                                               // isArrayLength
         true,                                                                                // isToEncode
@@ -23264,6 +24810,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CurrentPublishRequestsInQueue) // offset
     },
     {
+        false,                                                                   // isOptional
         false,                                                                   // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -23273,6 +24820,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, TotalRequestCount) // offset
     },
     {
+        false,                                                                          // isOptional
         true,                                                                           // isBuiltIn
         false,                                                                          // isArrayLength
         true,                                                                           // isToEncode
@@ -23282,6 +24830,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, UnauthorizedRequestCount) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -23291,6 +24840,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ReadCount) // offset
     },
     {
+        false,                                                                  // isOptional
         false,                                                                  // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -23300,6 +24850,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, HistoryReadCount) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -23309,6 +24860,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, WriteCount) // offset
     },
     {
+        false,                                                                    // isOptional
         false,                                                                    // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -23318,6 +24870,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, HistoryUpdateCount) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -23327,6 +24880,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CallCount) // offset
     },
     {
+        false,                                                                           // isOptional
         false,                                                                           // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -23336,6 +24890,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CreateMonitoredItemsCount) // offset
     },
     {
+        false,                                                                           // isOptional
         false,                                                                           // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -23345,6 +24900,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ModifyMonitoredItemsCount) // offset
     },
     {
+        false,                                                                        // isOptional
         false,                                                                        // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -23354,6 +24910,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SetMonitoringModeCount) // offset
     },
     {
+        false,                                                                    // isOptional
         false,                                                                    // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -23363,6 +24920,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SetTriggeringCount) // offset
     },
     {
+        false,                                                                           // isOptional
         false,                                                                           // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -23372,6 +24930,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, DeleteMonitoredItemsCount) // offset
     },
     {
+        false,                                                                         // isOptional
         false,                                                                         // isBuiltIn
         false,                                                                         // isArrayLength
         true,                                                                          // isToEncode
@@ -23381,6 +24940,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, CreateSubscriptionCount) // offset
     },
     {
+        false,                                                                         // isOptional
         false,                                                                         // isBuiltIn
         false,                                                                         // isArrayLength
         true,                                                                          // isToEncode
@@ -23390,6 +24950,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, ModifySubscriptionCount) // offset
     },
     {
+        false,                                                                        // isOptional
         false,                                                                        // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -23399,6 +24960,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, SetPublishingModeCount) // offset
     },
     {
+        false,                                                              // isOptional
         false,                                                              // isBuiltIn
         false,                                                              // isArrayLength
         true,                                                               // isToEncode
@@ -23408,6 +24970,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, PublishCount) // offset
     },
     {
+        false,                                                                // isOptional
         false,                                                                // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -23417,6 +24980,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, RepublishCount) // offset
     },
     {
+        false,                                                                            // isOptional
         false,                                                                            // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -23426,6 +24990,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, TransferSubscriptionsCount) // offset
     },
     {
+        false,                                                                          // isOptional
         false,                                                                          // isBuiltIn
         false,                                                                          // isArrayLength
         true,                                                                           // isToEncode
@@ -23435,6 +25000,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, DeleteSubscriptionsCount) // offset
     },
     {
+        false,                                                               // isOptional
         false,                                                               // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -23444,6 +25010,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, AddNodesCount) // offset
     },
     {
+        false,                                                                    // isOptional
         false,                                                                    // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -23453,6 +25020,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, AddReferencesCount) // offset
     },
     {
+        false,                                                                  // isOptional
         false,                                                                  // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -23462,6 +25030,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, DeleteNodesCount) // offset
     },
     {
+        false,                                                                       // isOptional
         false,                                                                       // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -23471,6 +25040,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, DeleteReferencesCount) // offset
     },
     {
+        false,                                                             // isOptional
         false,                                                             // isBuiltIn
         false,                                                             // isArrayLength
         true,                                                              // isToEncode
@@ -23480,6 +25050,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, BrowseCount) // offset
     },
     {
+        false,                                                                 // isOptional
         false,                                                                 // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -23489,6 +25060,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, BrowseNextCount) // offset
     },
     {
+        false,                                                                                    // isOptional
         false,                                                                                    // isBuiltIn
         false,                                                                                    // isArrayLength
         true,                                                                                     // isToEncode
@@ -23498,6 +25070,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, TranslateBrowsePathsToNodeIdsCount) // offset
     },
     {
+        false,                                                                 // isOptional
         false,                                                                 // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -23507,6 +25080,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, QueryFirstCount) // offset
     },
     {
+        false,                                                                // isOptional
         false,                                                                // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -23516,6 +25090,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, QueryNextCount) // offset
     },
     {
+        false,                                                                    // isOptional
         false,                                                                    // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -23525,6 +25100,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionDiagnosticsDataType_Fiel
         (uint32_t) offsetof(OpcUa_SessionDiagnosticsDataType, RegisterNodesCount) // offset
     },
     {
+        false,                                                                      // isOptional
         false,                                                                      // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -23548,6 +25124,7 @@ SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType = {
     sizeof(OpcUa_SessionDiagnosticsDataType),
     OpcUa_SessionDiagnosticsDataType_Initialize,
     OpcUa_SessionDiagnosticsDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SessionDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SessionDiagnosticsDataType_Fields,
     g_KnownEncodeableTypes};
@@ -23575,6 +25152,7 @@ void OpcUa_SessionSecurityDiagnosticsDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataType_Fields[] = {
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -23584,6 +25162,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, SessionId) // offset
     },
     {
+        false,                                                                               // isOptional
         true,                                                                                // isBuiltIn
         false,                                                                               // isArrayLength
         true,                                                                                // isToEncode
@@ -23593,6 +25172,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, ClientUserIdOfSession) // offset
     },
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         true,                                                                                  // isArrayLength
         true,                                                                                  // isToEncode
@@ -23602,6 +25182,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, NoOfClientUserIdHistory) // offset
     },
     {
+        false,                                                                             // isOptional
         true,                                                                              // isBuiltIn
         false,                                                                             // isArrayLength
         true,                                                                              // isToEncode
@@ -23611,6 +25192,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, ClientUserIdHistory) // offset
     },
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -23620,6 +25202,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, AuthenticationMechanism) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -23629,6 +25212,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, Encoding) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -23638,6 +25222,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, TransportProtocol) // offset
     },
     {
+        false,                                                                      // isOptional
         true,                                                                       // isBuiltIn
         false,                                                                      // isArrayLength
         true,                                                                       // isToEncode
@@ -23647,6 +25232,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, SecurityMode) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -23656,6 +25242,7 @@ static const SOPC_EncodeableType_FieldDescriptor SessionSecurityDiagnosticsDataT
         (uint32_t) offsetof(OpcUa_SessionSecurityDiagnosticsDataType, SecurityPolicyUri) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -23679,6 +25266,7 @@ SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType = {
     sizeof(OpcUa_SessionSecurityDiagnosticsDataType),
     OpcUa_SessionSecurityDiagnosticsDataType_Initialize,
     OpcUa_SessionSecurityDiagnosticsDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SessionSecurityDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SessionSecurityDiagnosticsDataType_Fields,
     g_KnownEncodeableTypes};
@@ -23706,6 +25294,7 @@ void OpcUa_StatusResult_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor StatusResult_Fields[] = {
     {
+        false,                                              // isOptional
         true,                                               // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -23715,6 +25304,7 @@ static const SOPC_EncodeableType_FieldDescriptor StatusResult_Fields[] = {
         (uint32_t) offsetof(OpcUa_StatusResult, StatusCode) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -23738,6 +25328,7 @@ SOPC_EncodeableType OpcUa_StatusResult_EncodeableType = {
     sizeof(OpcUa_StatusResult),
     OpcUa_StatusResult_Initialize,
     OpcUa_StatusResult_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof StatusResult_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     StatusResult_Fields,
     g_KnownEncodeableTypes};
@@ -23765,6 +25356,7 @@ void OpcUa_SubscriptionDiagnosticsDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType_Fields[] = {
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -23774,6 +25366,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, SessionId) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -23783,6 +25376,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, SubscriptionId) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -23792,6 +25386,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, Priority) // offset
     },
     {
+        false,                                                                         // isOptional
         true,                                                                          // isBuiltIn
         false,                                                                         // isArrayLength
         true,                                                                          // isToEncode
@@ -23801,6 +25396,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, PublishingInterval) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -23810,6 +25406,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MaxKeepAliveCount) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -23819,6 +25416,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MaxLifetimeCount) // offset
     },
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -23828,6 +25426,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MaxNotificationsPerPublish) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -23837,6 +25436,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, PublishingEnabled) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -23846,6 +25446,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, ModifyCount) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -23855,6 +25456,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, EnableCount) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -23864,6 +25466,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, DisableCount) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -23873,6 +25476,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, RepublishRequestCount) // offset
     },
     {
+        false,                                                                                   // isOptional
         true,                                                                                    // isBuiltIn
         false,                                                                                   // isArrayLength
         true,                                                                                    // isToEncode
@@ -23882,6 +25486,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, RepublishMessageRequestCount) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -23891,6 +25496,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, RepublishMessageCount) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -23900,6 +25506,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, TransferRequestCount) // offset
     },
     {
+        false,                                                                                  // isOptional
         true,                                                                                   // isBuiltIn
         false,                                                                                  // isArrayLength
         true,                                                                                   // isToEncode
@@ -23909,6 +25516,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, TransferredToAltClientCount) // offset
     },
     {
+        false,                                                                                   // isOptional
         true,                                                                                    // isBuiltIn
         false,                                                                                   // isArrayLength
         true,                                                                                    // isToEncode
@@ -23918,6 +25526,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, TransferredToSameClientCount) // offset
     },
     {
+        false,                                                                          // isOptional
         true,                                                                           // isBuiltIn
         false,                                                                          // isArrayLength
         true,                                                                           // isToEncode
@@ -23927,6 +25536,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, PublishRequestCount) // offset
     },
     {
+        false,                                                                                   // isOptional
         true,                                                                                    // isBuiltIn
         false,                                                                                   // isArrayLength
         true,                                                                                    // isToEncode
@@ -23936,6 +25546,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, DataChangeNotificationsCount) // offset
     },
     {
+        false,                                                                              // isOptional
         true,                                                                               // isBuiltIn
         false,                                                                              // isArrayLength
         true,                                                                               // isToEncode
@@ -23945,6 +25556,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, EventNotificationsCount) // offset
     },
     {
+        false,                                                                         // isOptional
         true,                                                                          // isBuiltIn
         false,                                                                         // isArrayLength
         true,                                                                          // isToEncode
@@ -23954,6 +25566,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, NotificationsCount) // offset
     },
     {
+        false,                                                                              // isOptional
         true,                                                                               // isBuiltIn
         false,                                                                              // isArrayLength
         true,                                                                               // isToEncode
@@ -23963,6 +25576,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, LatePublishRequestCount) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -23972,6 +25586,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, CurrentKeepAliveCount) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -23981,6 +25596,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, CurrentLifetimeCount) // offset
     },
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -23990,6 +25606,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, UnacknowledgedMessageCount) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         false,                                                                            // isArrayLength
         true,                                                                             // isToEncode
@@ -23999,6 +25616,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, DiscardedMessageCount) // offset
     },
     {
+        false,                                                                         // isOptional
         true,                                                                          // isBuiltIn
         false,                                                                         // isArrayLength
         true,                                                                          // isToEncode
@@ -24008,6 +25626,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MonitoredItemCount) // offset
     },
     {
+        false,                                                                                 // isOptional
         true,                                                                                  // isBuiltIn
         false,                                                                                 // isArrayLength
         true,                                                                                  // isToEncode
@@ -24017,6 +25636,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, DisabledMonitoredItemCount) // offset
     },
     {
+        false,                                                                                   // isOptional
         true,                                                                                    // isBuiltIn
         false,                                                                                   // isArrayLength
         true,                                                                                    // isToEncode
@@ -24026,6 +25646,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, MonitoringQueueOverflowCount) // offset
     },
     {
+        false,                                                                         // isOptional
         true,                                                                          // isBuiltIn
         false,                                                                         // isArrayLength
         true,                                                                          // isToEncode
@@ -24035,6 +25656,7 @@ static const SOPC_EncodeableType_FieldDescriptor SubscriptionDiagnosticsDataType
         (uint32_t) offsetof(OpcUa_SubscriptionDiagnosticsDataType, NextSequenceNumber) // offset
     },
     {
+        false,                                                                              // isOptional
         true,                                                                               // isBuiltIn
         false,                                                                              // isArrayLength
         true,                                                                               // isToEncode
@@ -24058,6 +25680,7 @@ SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType = {
     sizeof(OpcUa_SubscriptionDiagnosticsDataType),
     OpcUa_SubscriptionDiagnosticsDataType_Initialize,
     OpcUa_SubscriptionDiagnosticsDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SubscriptionDiagnosticsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SubscriptionDiagnosticsDataType_Fields,
     g_KnownEncodeableTypes};
@@ -24085,6 +25708,7 @@ void OpcUa_ModelChangeStructureDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ModelChangeStructureDataType_Fields[] = {
     {
+        false,                                                            // isOptional
         true,                                                             // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -24094,6 +25718,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModelChangeStructureDataType_Fi
         (uint32_t) offsetof(OpcUa_ModelChangeStructureDataType, Affected) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -24103,6 +25728,7 @@ static const SOPC_EncodeableType_FieldDescriptor ModelChangeStructureDataType_Fi
         (uint32_t) offsetof(OpcUa_ModelChangeStructureDataType, AffectedType) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -24126,6 +25752,7 @@ SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType = {
     sizeof(OpcUa_ModelChangeStructureDataType),
     OpcUa_ModelChangeStructureDataType_Initialize,
     OpcUa_ModelChangeStructureDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ModelChangeStructureDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ModelChangeStructureDataType_Fields,
     g_KnownEncodeableTypes};
@@ -24153,6 +25780,7 @@ void OpcUa_SemanticChangeStructureDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SemanticChangeStructureDataType_Fields[] = {
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -24162,6 +25790,7 @@ static const SOPC_EncodeableType_FieldDescriptor SemanticChangeStructureDataType
         (uint32_t) offsetof(OpcUa_SemanticChangeStructureDataType, Affected) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -24185,6 +25814,7 @@ SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType = {
     sizeof(OpcUa_SemanticChangeStructureDataType),
     OpcUa_SemanticChangeStructureDataType_Initialize,
     OpcUa_SemanticChangeStructureDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SemanticChangeStructureDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SemanticChangeStructureDataType_Fields,
     g_KnownEncodeableTypes};
@@ -24212,6 +25842,7 @@ void OpcUa_Range_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Range_Fields[] = {
     {
+        false,                                // isOptional
         true,                                 // isBuiltIn
         false,                                // isArrayLength
         true,                                 // isToEncode
@@ -24221,6 +25852,7 @@ static const SOPC_EncodeableType_FieldDescriptor Range_Fields[] = {
         (uint32_t) offsetof(OpcUa_Range, Low) // offset
     },
     {
+        false,                                 // isOptional
         true,                                  // isBuiltIn
         false,                                 // isArrayLength
         true,                                  // isToEncode
@@ -24243,6 +25875,7 @@ SOPC_EncodeableType OpcUa_Range_EncodeableType = {"Range",
                                                   sizeof(OpcUa_Range),
                                                   OpcUa_Range_Initialize,
                                                   OpcUa_Range_Clear,
+                                                  SOPC_STRUCT_TYPE_CLASSIC,
                                                   sizeof Range_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
                                                   Range_Fields,
                                                   g_KnownEncodeableTypes};
@@ -24270,6 +25903,7 @@ void OpcUa_EUInformation_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor EUInformation_Fields[] = {
     {
+        false,                                                 // isOptional
         true,                                                  // isBuiltIn
         false,                                                 // isArrayLength
         true,                                                  // isToEncode
@@ -24279,6 +25913,7 @@ static const SOPC_EncodeableType_FieldDescriptor EUInformation_Fields[] = {
         (uint32_t) offsetof(OpcUa_EUInformation, NamespaceUri) // offset
     },
     {
+        false,                                           // isOptional
         true,                                            // isBuiltIn
         false,                                           // isArrayLength
         true,                                            // isToEncode
@@ -24288,6 +25923,7 @@ static const SOPC_EncodeableType_FieldDescriptor EUInformation_Fields[] = {
         (uint32_t) offsetof(OpcUa_EUInformation, UnitId) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -24297,6 +25933,7 @@ static const SOPC_EncodeableType_FieldDescriptor EUInformation_Fields[] = {
         (uint32_t) offsetof(OpcUa_EUInformation, DisplayName) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -24320,6 +25957,7 @@ SOPC_EncodeableType OpcUa_EUInformation_EncodeableType = {
     sizeof(OpcUa_EUInformation),
     OpcUa_EUInformation_Initialize,
     OpcUa_EUInformation_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof EUInformation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     EUInformation_Fields,
     g_KnownEncodeableTypes};
@@ -24347,6 +25985,7 @@ void OpcUa_ComplexNumberType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ComplexNumberType_Fields[] = {
     {
+        false,                                             // isOptional
         true,                                              // isBuiltIn
         false,                                             // isArrayLength
         true,                                              // isToEncode
@@ -24356,6 +25995,7 @@ static const SOPC_EncodeableType_FieldDescriptor ComplexNumberType_Fields[] = {
         (uint32_t) offsetof(OpcUa_ComplexNumberType, Real) // offset
     },
     {
+        false,                                                  // isOptional
         true,                                                   // isBuiltIn
         false,                                                  // isArrayLength
         true,                                                   // isToEncode
@@ -24379,6 +26019,7 @@ SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType = {
     sizeof(OpcUa_ComplexNumberType),
     OpcUa_ComplexNumberType_Initialize,
     OpcUa_ComplexNumberType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ComplexNumberType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ComplexNumberType_Fields,
     g_KnownEncodeableTypes};
@@ -24406,6 +26047,7 @@ void OpcUa_DoubleComplexNumberType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor DoubleComplexNumberType_Fields[] = {
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -24415,6 +26057,7 @@ static const SOPC_EncodeableType_FieldDescriptor DoubleComplexNumberType_Fields[
         (uint32_t) offsetof(OpcUa_DoubleComplexNumberType, Real) // offset
     },
     {
+        false,                                                        // isOptional
         true,                                                         // isBuiltIn
         false,                                                        // isArrayLength
         true,                                                         // isToEncode
@@ -24438,6 +26081,7 @@ SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType = {
     sizeof(OpcUa_DoubleComplexNumberType),
     OpcUa_DoubleComplexNumberType_Initialize,
     OpcUa_DoubleComplexNumberType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof DoubleComplexNumberType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     DoubleComplexNumberType_Fields,
     g_KnownEncodeableTypes};
@@ -24465,6 +26109,7 @@ void OpcUa_AxisInformation_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor AxisInformation_Fields[] = {
     {
+        false,                                                       // isOptional
         false,                                                       // isBuiltIn
         false,                                                       // isArrayLength
         true,                                                        // isToEncode
@@ -24474,6 +26119,7 @@ static const SOPC_EncodeableType_FieldDescriptor AxisInformation_Fields[] = {
         (uint32_t) offsetof(OpcUa_AxisInformation, EngineeringUnits) // offset
     },
     {
+        false,                                              // isOptional
         false,                                              // isBuiltIn
         false,                                              // isArrayLength
         true,                                               // isToEncode
@@ -24483,6 +26129,7 @@ static const SOPC_EncodeableType_FieldDescriptor AxisInformation_Fields[] = {
         (uint32_t) offsetof(OpcUa_AxisInformation, EURange) // offset
     },
     {
+        false,                                            // isOptional
         true,                                             // isBuiltIn
         false,                                            // isArrayLength
         true,                                             // isToEncode
@@ -24492,6 +26139,7 @@ static const SOPC_EncodeableType_FieldDescriptor AxisInformation_Fields[] = {
         (uint32_t) offsetof(OpcUa_AxisInformation, Title) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -24501,6 +26149,7 @@ static const SOPC_EncodeableType_FieldDescriptor AxisInformation_Fields[] = {
         (uint32_t) offsetof(OpcUa_AxisInformation, AxisScaleType) // offset
     },
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         true,                                                     // isArrayLength
         true,                                                     // isToEncode
@@ -24510,6 +26159,7 @@ static const SOPC_EncodeableType_FieldDescriptor AxisInformation_Fields[] = {
         (uint32_t) offsetof(OpcUa_AxisInformation, NoOfAxisSteps) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -24533,6 +26183,7 @@ SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType = {
     sizeof(OpcUa_AxisInformation),
     OpcUa_AxisInformation_Initialize,
     OpcUa_AxisInformation_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof AxisInformation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     AxisInformation_Fields,
     g_KnownEncodeableTypes};
@@ -24560,6 +26211,7 @@ void OpcUa_XVType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor XVType_Fields[] = {
     {
+        false,                               // isOptional
         true,                                // isBuiltIn
         false,                               // isArrayLength
         true,                                // isToEncode
@@ -24569,6 +26221,7 @@ static const SOPC_EncodeableType_FieldDescriptor XVType_Fields[] = {
         (uint32_t) offsetof(OpcUa_XVType, X) // offset
     },
     {
+        false,                                   // isOptional
         true,                                    // isBuiltIn
         false,                                   // isArrayLength
         true,                                    // isToEncode
@@ -24591,6 +26244,7 @@ SOPC_EncodeableType OpcUa_XVType_EncodeableType = {"XVType",
                                                    sizeof(OpcUa_XVType),
                                                    OpcUa_XVType_Initialize,
                                                    OpcUa_XVType_Clear,
+                                                   SOPC_STRUCT_TYPE_CLASSIC,
                                                    sizeof XVType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
                                                    XVType_Fields,
                                                    g_KnownEncodeableTypes};
@@ -24618,6 +26272,7 @@ void OpcUa_ProgramDiagnosticDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Fields[] = {
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -24627,6 +26282,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, CreateSessionId) // offset
     },
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -24636,6 +26292,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, CreateClientName) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -24645,6 +26302,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, InvocationCreationTime) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -24654,6 +26312,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastTransitionTime) // offset
     },
     {
+        false,                                                               // isOptional
         true,                                                                // isBuiltIn
         false,                                                               // isArrayLength
         true,                                                                // isToEncode
@@ -24663,6 +26322,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodCall) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -24672,6 +26332,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodSessionId) // offset
     },
     {
+        false,                                                                             // isOptional
         true,                                                                              // isBuiltIn
         true,                                                                              // isArrayLength
         true,                                                                              // isToEncode
@@ -24681,6 +26342,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, NoOfLastMethodInputArguments) // offset
     },
     {
+        false,                                                                         // isOptional
         false,                                                                         // isBuiltIn
         false,                                                                         // isArrayLength
         true,                                                                          // isToEncode
@@ -24690,6 +26352,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodInputArguments) // offset
     },
     {
+        false,                                                                              // isOptional
         true,                                                                               // isBuiltIn
         true,                                                                               // isArrayLength
         true,                                                                               // isToEncode
@@ -24699,6 +26362,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, NoOfLastMethodOutputArguments) // offset
     },
     {
+        false,                                                                          // isOptional
         false,                                                                          // isBuiltIn
         false,                                                                          // isArrayLength
         true,                                                                           // isToEncode
@@ -24708,6 +26372,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodOutputArguments) // offset
     },
     {
+        false,                                                                   // isOptional
         true,                                                                    // isBuiltIn
         false,                                                                   // isArrayLength
         true,                                                                    // isToEncode
@@ -24717,6 +26382,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnosticDataType_Field
         (uint32_t) offsetof(OpcUa_ProgramDiagnosticDataType, LastMethodCallTime) // offset
     },
     {
+        false,                                                                       // isOptional
         false,                                                                       // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -24740,6 +26406,7 @@ SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType = {
     sizeof(OpcUa_ProgramDiagnosticDataType),
     OpcUa_ProgramDiagnosticDataType_Initialize,
     OpcUa_ProgramDiagnosticDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ProgramDiagnosticDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ProgramDiagnosticDataType_Fields,
     g_KnownEncodeableTypes};
@@ -24767,6 +26434,7 @@ void OpcUa_ProgramDiagnostic2DataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fields[] = {
     {
+        false,                                                                 // isOptional
         true,                                                                  // isBuiltIn
         false,                                                                 // isArrayLength
         true,                                                                  // isToEncode
@@ -24776,6 +26444,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, CreateSessionId) // offset
     },
     {
+        false,                                                                  // isOptional
         true,                                                                   // isBuiltIn
         false,                                                                  // isArrayLength
         true,                                                                   // isToEncode
@@ -24785,6 +26454,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, CreateClientName) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -24794,6 +26464,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, InvocationCreationTime) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -24803,6 +26474,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, LastTransitionTime) // offset
     },
     {
+        false,                                                                // isOptional
         true,                                                                 // isBuiltIn
         false,                                                                // isArrayLength
         true,                                                                 // isToEncode
@@ -24812,6 +26484,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, LastMethodCall) // offset
     },
     {
+        false,                                                                     // isOptional
         true,                                                                      // isBuiltIn
         false,                                                                     // isArrayLength
         true,                                                                      // isToEncode
@@ -24821,6 +26494,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, LastMethodSessionId) // offset
     },
     {
+        false,                                                                              // isOptional
         true,                                                                               // isBuiltIn
         true,                                                                               // isArrayLength
         true,                                                                               // isToEncode
@@ -24830,6 +26504,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, NoOfLastMethodInputArguments) // offset
     },
     {
+        false,                                                                          // isOptional
         false,                                                                          // isBuiltIn
         false,                                                                          // isArrayLength
         true,                                                                           // isToEncode
@@ -24839,6 +26514,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, LastMethodInputArguments) // offset
     },
     {
+        false,                                                                               // isOptional
         true,                                                                                // isBuiltIn
         true,                                                                                // isArrayLength
         true,                                                                                // isToEncode
@@ -24848,6 +26524,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, NoOfLastMethodOutputArguments) // offset
     },
     {
+        false,                                                                           // isOptional
         false,                                                                           // isBuiltIn
         false,                                                                           // isArrayLength
         true,                                                                            // isToEncode
@@ -24857,6 +26534,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, LastMethodOutputArguments) // offset
     },
     {
+        false,                                                                           // isOptional
         true,                                                                            // isBuiltIn
         true,                                                                            // isArrayLength
         true,                                                                            // isToEncode
@@ -24866,6 +26544,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, NoOfLastMethodInputValues) // offset
     },
     {
+        false,                                                                       // isOptional
         true,                                                                        // isBuiltIn
         false,                                                                       // isArrayLength
         true,                                                                        // isToEncode
@@ -24875,6 +26554,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, LastMethodInputValues) // offset
     },
     {
+        false,                                                                            // isOptional
         true,                                                                             // isBuiltIn
         true,                                                                             // isArrayLength
         true,                                                                             // isToEncode
@@ -24884,6 +26564,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, NoOfLastMethodOutputValues) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -24893,6 +26574,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, LastMethodOutputValues) // offset
     },
     {
+        false,                                                                    // isOptional
         true,                                                                     // isBuiltIn
         false,                                                                    // isArrayLength
         true,                                                                     // isToEncode
@@ -24902,6 +26584,7 @@ static const SOPC_EncodeableType_FieldDescriptor ProgramDiagnostic2DataType_Fiel
         (uint32_t) offsetof(OpcUa_ProgramDiagnostic2DataType, LastMethodCallTime) // offset
     },
     {
+        false,                                                                        // isOptional
         true,                                                                         // isBuiltIn
         false,                                                                        // isArrayLength
         true,                                                                         // isToEncode
@@ -24925,6 +26608,7 @@ SOPC_EncodeableType OpcUa_ProgramDiagnostic2DataType_EncodeableType = {
     sizeof(OpcUa_ProgramDiagnostic2DataType),
     OpcUa_ProgramDiagnostic2DataType_Initialize,
     OpcUa_ProgramDiagnostic2DataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof ProgramDiagnostic2DataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     ProgramDiagnostic2DataType_Fields,
     g_KnownEncodeableTypes};
@@ -24952,6 +26636,7 @@ void OpcUa_Annotation_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Annotation_Fields[] = {
     {
+        false,                                         // isOptional
         true,                                          // isBuiltIn
         false,                                         // isArrayLength
         true,                                          // isToEncode
@@ -24961,6 +26646,7 @@ static const SOPC_EncodeableType_FieldDescriptor Annotation_Fields[] = {
         (uint32_t) offsetof(OpcUa_Annotation, Message) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -24970,6 +26656,7 @@ static const SOPC_EncodeableType_FieldDescriptor Annotation_Fields[] = {
         (uint32_t) offsetof(OpcUa_Annotation, UserName) // offset
     },
     {
+        false,                                                // isOptional
         true,                                                 // isBuiltIn
         false,                                                // isArrayLength
         true,                                                 // isToEncode
@@ -24993,6 +26680,7 @@ SOPC_EncodeableType OpcUa_Annotation_EncodeableType = {
     sizeof(OpcUa_Annotation),
     OpcUa_Annotation_Initialize,
     OpcUa_Annotation_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof Annotation_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     Annotation_Fields,
     g_KnownEncodeableTypes};

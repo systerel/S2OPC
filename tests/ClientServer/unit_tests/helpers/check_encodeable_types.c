@@ -477,6 +477,7 @@ typedef struct
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor SPDURequest_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -486,6 +487,7 @@ static const SOPC_EncodeableType_FieldDescriptor SPDURequest_Fields[] = {
         (uint32_t) offsetof(SPDURequest, zSpdu.dwSafetyConsumerId) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -495,6 +497,7 @@ static const SOPC_EncodeableType_FieldDescriptor SPDURequest_Fields[] = {
         (uint32_t) offsetof(SPDURequest, zSpdu.dwMonitoringNumber) // offset
     },
     {
+        false,                                          // isOptional
         true,                                           // isBuiltIn
         false,                                          // isArrayLength
         true,                                           // isToEncode
@@ -515,6 +518,7 @@ SOPC_EncodeableType SPDURequest_EncodeableType = {
     sizeof(SPDURequest),
     SPDURequest_Initialize,
     SPDURequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SPDURequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SPDURequest_Fields,
     NULL};
@@ -529,6 +533,7 @@ SOPC_EncodeableType SPDURequest_EncodeableType2 = {
     sizeof(SPDURequest),
     SPDURequest_Initialize,
     SPDURequest_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof SPDURequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     SPDURequest_Fields,
     NULL};
@@ -944,6 +949,353 @@ START_TEST(test_EncodeAndDecode_ToAndFrom_ByteString)
 }
 END_TEST
 
+static bool CheckEncodedBuffer(SOPC_Buffer* bufToCheck, uint32_t bufLengthExpected, const uint8_t* bufExpected)
+{
+    SOPC_Buffer_SetPosition(bufToCheck, 0);
+    uint8_t buf[100] = {0};
+    SOPC_Buffer_Read((uint8_t*) buf, bufToCheck, bufToCheck->length);
+    bool res = bufToCheck->length == bufLengthExpected ? true : false;
+    for (int i = 0; i < (int) bufToCheck->length && res; i++)
+    {
+        res = (buf[i] == bufExpected[i]);
+    }
+    return res;
+}
+
+START_TEST(test_UserEncodeableType_Union)
+{
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableType_RegisterTypesArray(SOPC_Custom_TypeInternalIndex_SIZE, sopc_Custom_KnownEncodeableTypes);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    /*** CREATE/INIT and CLEAR ***/
+    SOPC_ExtensionObject extObjUnion;
+    SOPC_ExtensionObject_Initialize(&extObjUnion);
+    OpcUa_Custom_CustomUnionDataType* instCDT_Union = NULL;
+    status = SOPC_ExtensionObject_CreateObject(&extObjUnion, &OpcUa_Custom_CustomUnionDataType_EncodeableType,
+                                               (void**) &instCDT_Union);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_ExtensionObject_Clear(&extObjUnion);
+
+    /*** ENCODE/DECODE***/
+    SOPC_Buffer* buf = SOPC_Buffer_Create(1024);
+    OpcUa_Custom_CustomUnionDataType instCDT1_Union, instCDT2_Union;
+    OpcUa_Custom_CustomUnionDataType_Initialize(&instCDT1_Union);
+    OpcUa_Custom_CustomUnionDataType_Initialize(&instCDT2_Union);
+    instCDT1_Union.SwitchField = 2;
+    instCDT1_Union.Value.FieldUint16 = UINT16_MAX;
+
+    // Encode
+    status = SOPC_EncodeableObject_Encode(&OpcUa_Custom_CustomUnionDataType_EncodeableType, &instCDT1_Union, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Union SwitchField = 2 (field 2 selected)
+    uint8_t expectedEncode[6] = {0x2, 0x0, 0x0, 0x0, 0xff, 0xff};
+    ck_assert(CheckEncodedBuffer(buf, 6, expectedEncode));
+
+    // Reset the buffer position and type instance, then decode from buffer
+    OpcUa_Custom_CustomUnionDataType_Clear(&instCDT1_Union);
+    ck_assert_uint_eq(0, instCDT1_Union.Value.FieldUint16);
+    status = SOPC_Buffer_SetPosition(buf, 0);
+
+    // Decode
+    status = SOPC_EncodeableObject_Decode(&OpcUa_Custom_CustomUnionDataType_EncodeableType, &instCDT1_Union, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(2, instCDT1_Union.SwitchField);
+    ck_assert_uint_eq(UINT16_MAX, instCDT1_Union.Value.FieldUint16);
+
+    // Encode cleared Union
+    OpcUa_Custom_CustomUnionDataType_Clear(&instCDT1_Union);
+    ck_assert_uint_eq(0, instCDT1_Union.SwitchField);
+    ck_assert_uint_eq(0, instCDT1_Union.Value.FieldUint16);
+    SOPC_Buffer_Reset(buf);
+    status = SOPC_EncodeableObject_Encode(&OpcUa_Custom_CustomUnionDataType_EncodeableType, &instCDT1_Union, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    uint8_t expectedClearedUnion[4] = {0x0, 0x0, 0x0, 0x0}; // Only switch field set to 0
+    ck_assert(CheckEncodedBuffer(buf, 4, expectedClearedUnion));
+
+    // Encode Union with an overly large switch field (= 3 for only 2 fields in the union)
+    instCDT1_Union.SwitchField = 3;
+    status = SOPC_EncodeableObject_Encode(&OpcUa_Custom_CustomUnionDataType_EncodeableType, &instCDT1_Union, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
+
+    /*** COPY ***/
+    instCDT1_Union.SwitchField = 2;
+    instCDT1_Union.Value.FieldUint16 = UINT16_MAX;
+    OpcUa_Custom_CustomUnionDataType_Initialize(&instCDT2_Union);
+    status =
+        SOPC_EncodeableObject_Copy(&OpcUa_Custom_CustomUnionDataType_EncodeableType, &instCDT2_Union, &instCDT1_Union);
+    // Check
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(2, instCDT1_Union.SwitchField);
+    ck_assert_uint_eq(UINT16_MAX, instCDT2_Union.Value.FieldUint16);
+    ck_assert_uint_eq(2, instCDT2_Union.SwitchField);
+    ck_assert_uint_eq(UINT16_MAX, instCDT2_Union.Value.FieldUint16);
+
+    /*** MOVE ***/
+    OpcUa_Custom_CustomUnionDataType_Initialize(&instCDT2_Union);
+    status = SOPC_EncodeableObject_Move(&instCDT2_Union, &instCDT1_Union);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Check
+    ck_assert_uint_eq(0, instCDT1_Union.SwitchField);
+    ck_assert_uint_eq(0, instCDT1_Union.Value.FieldUint16);
+    ck_assert_uint_eq(2, instCDT2_Union.SwitchField);
+    ck_assert_uint_eq(UINT16_MAX, instCDT2_Union.Value.FieldUint16);
+
+    /*** COMPARE ***/
+    int32_t resCmp = 0;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomUnionDataType_EncodeableType, &instCDT1_Union,
+                                           &instCDT2_Union, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(-1, resCmp);
+
+    instCDT1_Union.SwitchField = 2;
+    instCDT1_Union.Value.FieldUint16 = UINT16_MAX;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomUnionDataType_EncodeableType, &instCDT1_Union,
+                                           &instCDT2_Union, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, resCmp);
+
+    instCDT2_Union.Value.FieldUint16 = UINT16_MAX - 1;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomUnionDataType_EncodeableType, &instCDT1_Union,
+                                           &instCDT2_Union, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(1, resCmp);
+
+    // Clear
+    SOPC_Buffer_Delete(buf);
+    // Unrecord the encodeable type encoders
+    SOPC_EncodeableType_RemoveAllUserTypes();
+}
+
+START_TEST(test_UserEncodeableType_OptionFields)
+{
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableType_RegisterTypesArray(SOPC_Custom_TypeInternalIndex_SIZE, sopc_Custom_KnownEncodeableTypes);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    /*** CREATE/INIT and CLEAR ***/
+    SOPC_ExtensionObject extObjOptFields;
+    SOPC_ExtensionObject_Initialize(&extObjOptFields);
+    OpcUa_Custom_CustomOptFieldsDataType* instCDT_OptFields = NULL;
+    status = SOPC_ExtensionObject_CreateObject(&extObjOptFields, &OpcUa_Custom_CustomOptFieldsDataType_EncodeableType,
+                                               (void**) &instCDT_OptFields);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_ExtensionObject_Clear(&extObjOptFields);
+
+    /*** ENCODE/DECODE***/
+    SOPC_Buffer* buf = SOPC_Buffer_Create(1024);
+    OpcUa_Custom_CustomOptFieldsDataType instCDT1_OptFields, instCDT2_OptFields;
+    OpcUa_Custom_CustomOptFieldsDataType_Initialize(&instCDT1_OptFields);
+    OpcUa_Custom_CustomOptFieldsDataType_Initialize(&instCDT2_OptFields);
+    ck_assert_ptr_null(instCDT1_OptFields.FieldUint32_2);
+    ck_assert_ptr_null(instCDT1_OptFields.FieldUint32_3);
+    ck_assert_ptr_null(instCDT1_OptFields.NoOfArrayUint16);
+    ck_assert_ptr_null(instCDT1_OptFields.ArrayUint16);
+    ck_assert_ptr_null(instCDT1_OptFields.Fieldcdt);
+    instCDT1_OptFields.FieldBool = true;
+    instCDT1_OptFields.FieldUint32_1 = UINT32_MAX;
+    instCDT1_OptFields.FieldUint32_2 = SOPC_Calloc(1, sizeof(*instCDT1_OptFields.FieldUint32_2));
+    *instCDT1_OptFields.FieldUint32_2 = 0xff0000ff;
+    instCDT1_OptFields.NoOfArrayUint16 = SOPC_Calloc(1, sizeof(*instCDT1_OptFields.NoOfArrayUint16));
+    *instCDT1_OptFields.NoOfArrayUint16 = 2;
+    instCDT1_OptFields.ArrayUint16 =
+        SOPC_Calloc((size_t) *instCDT1_OptFields.NoOfArrayUint16, sizeof(*instCDT1_OptFields.ArrayUint16));
+    instCDT1_OptFields.ArrayUint16[0] = 5;
+    instCDT1_OptFields.ArrayUint16[1] = 6;
+    OpcUa_Custom_CustomDataType* instCDT = SOPC_Calloc(1, sizeof(*instCDT));
+    OpcUa_Custom_CustomDataType_Initialize(instCDT);
+    instCDT->fieldb = true;
+    instCDT->fieldu = 7;
+    instCDT1_OptFields.Fieldcdt = instCDT;
+
+    // Encode
+    status =
+        SOPC_EncodeableObject_Encode(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /*
+     * OptMask : 0b00001101 = 0x0d (field opt 1, 3, and 4), 0x00, 0x00, 0x00. (4 Bytes)
+     * SOPC_Boolean FieldBool = true : 0x01
+     * uint32_t FieldUint32_1 = UINT32_MAX : 0xff, 0xff, 0xff, 0xff
+     * uint32_t* FieldUint32_2 = 0xff0000ff : 0xff, 0x00, 0x00, 0xff
+     * uint32_t* FieldUint32_3 = NULL
+     * int32_t* NoOfArrayUint16 = 2 : 0x02, 0x00, 0x00, 0x00
+     * uint16_t* ArrayUint16 = [5, 6] : 0x05, 0x00, 0x06, 0x00
+     * OpcUa_Custom_CustomDataType* Fieldcdt = {SOPC_Boolean: true, uint16_t: 7} : 0x01, 0x07, 0x00
+     */
+    uint8_t expectedEncode[24] = {0x0d, 0x00, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00,
+                                  0xff, 0x02, 0x00, 0x00, 0x00, 0x05, 0x00, 0x06, 0x00, 0x01, 0x07, 0x00};
+    ck_assert(CheckEncodedBuffer(buf, 24, expectedEncode));
+
+    // Reset the buffer position and type instance, then decode from buffer
+    OpcUa_Custom_CustomOptFieldsDataType_Clear(&instCDT1_OptFields);
+    ck_assert(false == instCDT1_OptFields.FieldBool);
+    ck_assert_uint_eq(0, instCDT1_OptFields.FieldUint32_1);
+    ck_assert_ptr_null(instCDT1_OptFields.FieldUint32_2);
+    ck_assert_ptr_null(instCDT1_OptFields.FieldUint32_3);
+    ck_assert_ptr_null(instCDT1_OptFields.NoOfArrayUint16);
+    ck_assert_ptr_null(instCDT1_OptFields.ArrayUint16);
+    ck_assert_ptr_null(instCDT1_OptFields.Fieldcdt);
+
+    status = SOPC_Buffer_SetPosition(buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Decode
+    status =
+        SOPC_EncodeableObject_Decode(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(true == instCDT1_OptFields.FieldBool);
+    ck_assert_uint_eq(UINT32_MAX, instCDT1_OptFields.FieldUint32_1);
+    ck_assert_uint_eq(0xff0000ff, *instCDT1_OptFields.FieldUint32_2);
+    ck_assert_ptr_null(instCDT1_OptFields.FieldUint32_3);
+    ck_assert_int_eq(2, *instCDT1_OptFields.NoOfArrayUint16);
+    ck_assert_uint_eq(5, instCDT1_OptFields.ArrayUint16[0]);
+    ck_assert_uint_eq(6, instCDT1_OptFields.ArrayUint16[1]);
+    ck_assert_ptr_nonnull(instCDT1_OptFields.Fieldcdt);
+    ck_assert(true == instCDT1_OptFields.Fieldcdt->fieldb);
+    ck_assert_uint_eq(7, instCDT1_OptFields.Fieldcdt->fieldu);
+
+    // Encode cleared OptFields
+    OpcUa_Custom_CustomOptFieldsDataType_Clear(&instCDT1_OptFields);
+    ck_assert(false == instCDT1_OptFields.FieldBool);
+    ck_assert_uint_eq(0, instCDT1_OptFields.FieldUint32_1);
+    ck_assert_ptr_null(instCDT1_OptFields.FieldUint32_2);
+    ck_assert_ptr_null(instCDT1_OptFields.FieldUint32_3);
+    ck_assert_ptr_null(instCDT1_OptFields.NoOfArrayUint16);
+    ck_assert_ptr_null(instCDT1_OptFields.ArrayUint16);
+    ck_assert_ptr_null(instCDT1_OptFields.Fieldcdt);
+    SOPC_Buffer_Reset(buf);
+    status =
+        SOPC_EncodeableObject_Encode(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // mask set to 0 and non-optional fields set to 0.
+    uint8_t expectedClearedOptFields[9] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+    ck_assert(CheckEncodedBuffer(buf, 9, expectedClearedOptFields));
+
+    /*** COPY ***/
+    instCDT1_OptFields.FieldBool = true;
+    instCDT1_OptFields.FieldUint32_1 = UINT32_MAX;
+    instCDT1_OptFields.FieldUint32_2 = SOPC_Calloc(1, sizeof(*instCDT1_OptFields.FieldUint32_2));
+    *instCDT1_OptFields.FieldUint32_2 = 0xff0000ff;
+    instCDT1_OptFields.NoOfArrayUint16 = SOPC_Calloc(1, sizeof(*instCDT1_OptFields.NoOfArrayUint16));
+    *instCDT1_OptFields.NoOfArrayUint16 = 2;
+    instCDT1_OptFields.ArrayUint16 =
+        SOPC_Calloc((size_t) *instCDT1_OptFields.NoOfArrayUint16, sizeof(*instCDT1_OptFields.ArrayUint16));
+    instCDT1_OptFields.ArrayUint16[0] = 5;
+    instCDT1_OptFields.ArrayUint16[1] = 6;
+    OpcUa_Custom_CustomDataType* instCDTcpy = SOPC_Calloc(1, sizeof(*instCDTcpy));
+    OpcUa_Custom_CustomDataType_Initialize(instCDTcpy);
+    instCDTcpy->fieldb = true;
+    instCDTcpy->fieldu = 7;
+    instCDT1_OptFields.Fieldcdt = instCDTcpy;
+    OpcUa_Custom_CustomOptFieldsDataType_Initialize(&instCDT2_OptFields);
+    status = SOPC_EncodeableObject_Copy(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT2_OptFields,
+                                        &instCDT1_OptFields);
+    // Check
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(true == instCDT2_OptFields.FieldBool);
+    ck_assert_uint_eq(UINT32_MAX, instCDT2_OptFields.FieldUint32_1);
+    ck_assert_uint_eq(0xff0000ff, *instCDT2_OptFields.FieldUint32_2);
+    ck_assert_ptr_null(instCDT2_OptFields.FieldUint32_3);
+    ck_assert_int_eq(2, *instCDT2_OptFields.NoOfArrayUint16);
+    ck_assert_uint_eq(5, instCDT2_OptFields.ArrayUint16[0]);
+    ck_assert_uint_eq(6, instCDT2_OptFields.ArrayUint16[1]);
+    ck_assert_ptr_nonnull(instCDT1_OptFields.Fieldcdt);
+    ck_assert(true == instCDT1_OptFields.Fieldcdt->fieldb);
+    ck_assert_uint_eq(7, instCDT1_OptFields.Fieldcdt->fieldu);
+
+    /*** MOVE ***/
+    OpcUa_Custom_CustomOptFieldsDataType_Clear(&instCDT2_OptFields);
+    status = SOPC_EncodeableObject_Move(&instCDT2_OptFields, &instCDT1_OptFields);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Check
+    ck_assert_uint_eq(0, instCDT1_OptFields.FieldUint32_1);
+    ck_assert_ptr_null(instCDT1_OptFields.FieldUint32_2);
+    ck_assert_ptr_null(instCDT1_OptFields.FieldUint32_3);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(true == instCDT2_OptFields.FieldBool);
+    ck_assert_uint_eq(UINT32_MAX, instCDT2_OptFields.FieldUint32_1);
+    ck_assert_uint_eq(0xff0000ff, *instCDT2_OptFields.FieldUint32_2);
+    ck_assert_ptr_null(instCDT2_OptFields.FieldUint32_3);
+    ck_assert_int_eq(2, *instCDT2_OptFields.NoOfArrayUint16);
+    ck_assert_uint_eq(5, instCDT2_OptFields.ArrayUint16[0]);
+    ck_assert_uint_eq(6, instCDT2_OptFields.ArrayUint16[1]);
+    ck_assert_ptr_nonnull(instCDT2_OptFields.Fieldcdt);
+    ck_assert(true == instCDT2_OptFields.Fieldcdt->fieldb);
+    ck_assert_uint_eq(7, instCDT2_OptFields.Fieldcdt->fieldu);
+
+    /*** COMPARE ***/
+    int32_t resCmp = 0;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields,
+                                           &instCDT2_OptFields, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(-1, resCmp);
+
+    status = SOPC_EncodeableObject_Copy(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields,
+                                        &instCDT2_OptFields);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields,
+                                           &instCDT2_OptFields, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, resCmp);
+
+    instCDT1_OptFields.ArrayUint16[0] = 777;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields,
+                                           &instCDT2_OptFields, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(1, resCmp);
+
+    instCDT1_OptFields.ArrayUint16[0] = 5;
+    SOPC_Free(instCDT1_OptFields.FieldUint32_2);
+    instCDT1_OptFields.FieldUint32_2 = NULL;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields,
+                                           &instCDT2_OptFields, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(-1, resCmp);
+
+    instCDT1_OptFields.FieldUint32_2 = SOPC_Calloc(1, sizeof(*instCDT1_OptFields.FieldUint32_2));
+    *instCDT1_OptFields.FieldUint32_2 = 0xff0000ff;
+    SOPC_Free(instCDT1_OptFields.NoOfArrayUint16);
+    instCDT1_OptFields.NoOfArrayUint16 = NULL;
+    SOPC_Free(instCDT1_OptFields.ArrayUint16);
+    instCDT1_OptFields.ArrayUint16 = NULL;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields,
+                                           &instCDT2_OptFields, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(-1, resCmp);
+
+    SOPC_Free(instCDT2_OptFields.NoOfArrayUint16);
+    instCDT2_OptFields.NoOfArrayUint16 = NULL;
+    SOPC_Free(instCDT2_OptFields.ArrayUint16);
+    instCDT2_OptFields.ArrayUint16 = NULL;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields,
+                                           &instCDT2_OptFields, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, resCmp);
+
+    instCDT1_OptFields.Fieldcdt->fieldu = 8;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields,
+                                           &instCDT2_OptFields, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(1, resCmp);
+
+    OpcUa_Custom_CustomDataType_Clear(instCDT1_OptFields.Fieldcdt);
+    SOPC_Free(instCDT1_OptFields.Fieldcdt);
+    instCDT1_OptFields.Fieldcdt = NULL;
+    status = SOPC_EncodeableObject_Compare(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, &instCDT1_OptFields,
+                                           &instCDT2_OptFields, &resCmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(-1, resCmp);
+
+    /*** CLEAR ***/
+    OpcUa_Custom_CustomOptFieldsDataType_Clear(&instCDT1_OptFields);
+    OpcUa_Custom_CustomOptFieldsDataType_Clear(&instCDT2_OptFields);
+    SOPC_Buffer_Delete(buf);
+
+    // Unrecord the encodeable type encoders
+    SOPC_EncodeableType_RemoveAllUserTypes();
+}
+END_TEST
+
 Suite* tests_make_suite_encodeable_types(void)
 {
     Suite* s;
@@ -963,6 +1315,8 @@ Suite* tests_make_suite_encodeable_types(void)
     tcase_add_test(tc_encodeable_types, test_UserEncodeableTypeNS1);
     tcase_add_test(tc_encodeable_types, test_UserEncodeableTypeNS2);
     tcase_add_test(tc_encodeable_types, test_EncodeAndDecode_ToAndFrom_ByteString);
+    tcase_add_test(tc_encodeable_types, test_UserEncodeableType_Union);
+    tcase_add_test(tc_encodeable_types, test_UserEncodeableType_OptionFields);
     suite_add_tcase(s, tc_encodeable_types);
 
     return s;

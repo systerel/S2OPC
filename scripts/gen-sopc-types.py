@@ -222,6 +222,12 @@ class BinarySchema:
             'CharArray' : 'String'
     }
 
+    STRUCT_TYPE = {
+        'Classic' : 'SOPC_STRUCT_TYPE_CLASSIC',
+        'OptFields' : 'SOPC_STRUCT_TYPE_OPT_FIELDS',
+        'Union' : 'SOPC_STRUCT_TYPE_UNION',
+    }
+
     # Compute self.xmlns_indexes which provide computed NS index for each imported XML NS, and prefixes of imported NS
     # Note: current types NS index <N> is considered as maximum NS index, X dependencies are computed to be <N-X>, <N-X+1>, etc. in the order of Import tags except for NS0.
     def check_and_compute_ns_indexes(self, types_ns_index, imported_ns_prefixes):
@@ -324,8 +330,9 @@ class BinarySchema:
 
         if node.tag == self.STRUC_TAG:
             if node.get('BaseType') == 'ua:Union':
-                fatal("Unsupported BaseType %s for type %s" % (node.get('BaseType'), node.get('Name')))
-            ctype = self._gen_struct_decl(out, out_enum, node, barename)
+                ctype = self._gen_struct_union_decl(out, out_enum, node, barename)
+            else:
+                ctype = self._gen_struct_decl(out, out_enum, node, barename)
             self.known_writer.encodeable_types.append((typename, barename))
         elif node.tag == self.ENUM_TAG:
             utype, utype_id = get_enumerated_opcua_unsigned_type_and_id(node)
@@ -389,29 +396,46 @@ class BinarySchema:
         fields = self.fields[barename]
         if fields:
             out.write(ENCODEABLE_TYPE_FIELD_DESC_START.format(name=barename))
+        # For Unions, field_name (used to define offsetof must be replaced by 'Value.FieldName')
+        if fields and fields[0].name == 'SwitchField': # We have an Union struct
+            for field in fields[1:]:
+                field.name = 'Value.' + field.name
         for field in fields:
-            field_ns_index_name = OPCUA_ORIGIN_NS_INDEX_NAME
-            is_built_in, type_index = self.get_type_index(field.type_name)
-            # When the field type is in another NS, the NS index shall be referenced
-            # and type index in this other NS types array is referenced by type index enum name
-            if not is_built_in and not field.is_same_ns:
-                field_barename = field.type_name.split(':')[1]
-                field_ns_index_name = self.xmlns_indexes_name[field.type_ns]
-                type_index = 'SOPC_TypeInternalIndex_' + self.xmlns_types_prefixes[field.type_ns] + field_barename
-            out.write(ENCODEABLE_TYPE_FIELD_DESC.format(
-                name=barename,
-                is_built_in=c_bool_value(is_built_in),
-                is_array_length=c_bool_value(field.is_array_length),
-                is_to_encode=c_bool_value(field.is_to_encode),
-                is_same_ns=c_bool_value(is_built_in or field.is_same_ns),
-                ns_index_name=field_ns_index_name,
-                type_index=type_index,
-                field_name=field.name
-            ))
+            # Fields 'opc:Bit' are not to be written on an encodable type
+            if field.type_name != 'opc:Bit':
+                field_ns_index_name = OPCUA_ORIGIN_NS_INDEX_NAME
+                is_built_in, type_index = self.get_type_index(field.type_name)
+                # When the field type is in another NS, the NS index shall be referenced
+                # and type index in this other NS types array is referenced by type index enum name
+                if not is_built_in and not field.is_same_ns:
+                    field_barename = field.type_name.split(':')[1]
+                    field_ns_index_name = self.xmlns_indexes_name[field.type_ns]
+                    type_index = 'SOPC_TypeInternalIndex_' + self.xmlns_types_prefixes[field.type_ns] + field_barename
+                out.write(ENCODEABLE_TYPE_FIELD_DESC.format(
+                    name=barename,
+                    is_optional=c_bool_value(field.is_optional),
+                    is_built_in=c_bool_value(is_built_in),
+                    is_array_length=c_bool_value(field.is_array_length),
+                    is_to_encode=c_bool_value(field.is_to_encode),
+                    is_same_ns=c_bool_value(is_built_in or field.is_same_ns),
+                    ns_index_name=field_ns_index_name,
+                    type_index=type_index,
+                    field_name=field.name
+                ))
+        struct_type = self.STRUCT_TYPE['Classic']
         if fields:
             out.write(ENCODEABLE_TYPE_FIELD_DESC_END.format())
             nof_fields = ENCODEABLE_TYPE_NOF_FIELDS.format(name=barename)
             field_desc = barename + '_Fields'
+            # Check if it is a special structure
+            if fields[0].type_name == 'opc:Bit':
+                struct_type = self.STRUCT_TYPE['OptFields']
+            else:
+                barename_without_prefix = barename[len(self.types_prefix):]
+                node = self._get_node(barename_without_prefix)
+                if node.tag == self.STRUC_TAG:
+                    if node.get('BaseType') == 'ua:Union':
+                        struct_type = self.STRUCT_TYPE['Union']
         else:
             nof_fields = '0'
             field_desc = 'NULL'
@@ -420,6 +444,7 @@ class BinarySchema:
             ns_URI=ns_uri,
             ns_index_name=self.ns_index_name,
             ctype=ctype,
+            struct_type=struct_type,
             nof_fields=nof_fields,
             field_desc=field_desc,
             prefix=self.types_prefix))
@@ -471,9 +496,9 @@ class BinarySchema:
         names = (self.normalize_typename(node.get('Name')) for node in nodes)
         return set(filter(lambda n: n not in self.bsd2c, names))
 
-    def _gen_struct_decl(self, out, out_enum, node, name):
+    def _gen_struct_union_decl(self, out, out_enum, node, name):
         """
-        Generates the declarations for a structured type.
+        Generates the declarations for a structured union type.
         """
         children = node.findall('./opc:Field', self.xmlns)
         fields = [Field(self, child) for child in children]
@@ -488,9 +513,41 @@ class BinarySchema:
             out.write(STRUCT_DECL_START.format(export="S2OPC_COMMON_EXPORT ", name=name))
         else:
             out.write(STRUCT_DECL_START.format(export="", name=name))
+        # Write 1st field (:SwitchField)
+        self._gen_field_decl(out, fields[0])
+
+        # Write Union
+        out.write(STRUCT_DECL_FIELD_UNION_START)
+        for field in fields[1:]:
+            self._gen_field_decl(out, field)
+        out.write(STRUCT_DECL_FIELD_UNION_END)
+
+        out.write(STRUCT_DECL_END.format(name=name))
+        self.fields[name] = fields
+        return 'OpcUa_' + name
+
+    def _gen_struct_decl(self, out, out_enum, node, name):
+        """
+        Generates the declarations for a structured type.
+        """
+        children = node.findall('./opc:Field', self.xmlns)
+        fields = [Field(self, child) for child in children]
+        for field in fields:
+            # Generate field type if not already done and if defined in target/current NS
+            if field.is_same_ns:
+                self.gen_header_type(out, out_enum, field.type_name)
+        fields = [field for field in fields if field.name != 'RequestHeader']
+        self._check_opt_fields(name, fields)
+        self._check_array_fields(name, fields)
+
+        if self.is_ns0_types():
+            out.write(STRUCT_DECL_START.format(export="S2OPC_COMMON_EXPORT ", name=name))
+        else:
+            out.write(STRUCT_DECL_START.format(export="", name=name))
 
         for field in fields:
-            self._gen_field_decl(out, field)
+            if field.type_name != 'opc:Bit':
+                self._gen_field_decl(out, field)
 
         out.write(STRUCT_DECL_END.format(name=name))
         self.fields[name] = fields
@@ -502,10 +559,45 @@ class BinarySchema:
         """
         typename = self.normalize_typename(field.type_name)
         ctype = self.get_ctype(typename)
-        if field.length_field:
+        if field.length_field or field.is_optional:
             ctype += '*'
         out.write(STRUCT_DECL_FIELD.format(ctype=ctype,
                                            name=field.name))
+
+    def _check_opt_fields(self, name, fields):
+        """
+        Checks if there are any option fields in a structure.
+        Then mark the is_optional for each field concerned.
+        Check also order consistency of optional fields.
+        Warning : Do not use this function on a union struct
+                  to avoid confusion between switch fields.
+        """
+        opt_fields_name_list = []
+        index = 0
+        index_max = 0
+        for i, field in enumerate(fields):
+            if field.type_name == 'opc:Bit': # In first part of structure definition
+                opt_fields_name_list.append(field.name)
+                index_max = index_max + 1
+            if field.switch_field != None: # Optional field
+                field.is_optional = True
+
+                # Check order consistency of optional fields
+                if field.length_field != None: # Array case*
+                    index = index - 1 # Must be the same switch field as the previous field
+                    if field.switch_field != opt_fields_name_list[index] or fields[i - 1].switch_field != opt_fields_name_list[index]:
+                        fatal(("switch field for %s is not right "
+                                + "in struct %s : field.switch_field = %s, "
+                                + " field_prev.switch_field = %s, expected switch_field = %s")
+                                % (field.name, name, field.switch_field, fields[i - 1].switch_field, opt_fields_name_list[index]))
+                else:
+                    if field.switch_field != opt_fields_name_list[index]:
+                        fatal(("switch field for %s is not right "
+                                + "in struct %s : field.switch_field = %s, expected switch_field = %s")
+                                % (field.name, name, field.switch_field, opt_fields_name_list[index]))
+                index = index + 1
+        if index_max > 32:
+            fatal("The optional fields mask exceeds the maximum number of optional fields (32).")
 
     def _check_array_fields(self, name, fields):
         """
@@ -634,7 +726,9 @@ class Field:
             fatal("Missing name for field node: %s", node)
         if not self.type_name:
             fatal("Missing type name for field node: %s", node)
-        # Will be updated later when checking arrays
+        self.switch_field = node.get('SwitchField')
+        # Will be updated later during struct generation (with arrays checking)
+        self.is_optional = False
         self.is_array_length = False
         self.is_to_encode = self.name != 'ResponseHeader'
 
@@ -934,6 +1028,13 @@ STRUCT_DECL_FIELD = """
     {ctype} {name};
 """[1:]
 
+STRUCT_DECL_FIELD_UNION_START = """    union
+    {
+"""
+
+STRUCT_DECL_FIELD_UNION_END = """    } Value;
+"""
+
 STRUCT_DECL_END = """
 }} OpcUa_{name};
 
@@ -1088,6 +1189,7 @@ static const SOPC_EncodeableType_FieldDescriptor {name}_Fields[] = {{
 
 ENCODEABLE_TYPE_FIELD_DESC = """
     {{
+        {is_optional},  // isOptional
         {is_built_in},  // isBuiltIn
         {is_array_length}, // isArrayLength
         {is_to_encode}, // isToEncode
@@ -1121,6 +1223,7 @@ SOPC_EncodeableType OpcUa_{name}_EncodeableType =
     sizeof({ctype}),
     OpcUa_{name}_Initialize,
     OpcUa_{name}_Clear,
+    {struct_type},
     {nof_fields},
     {field_desc},
     g_{prefix}KnownEncodeableTypes

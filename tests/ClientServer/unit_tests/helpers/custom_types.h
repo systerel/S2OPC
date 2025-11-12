@@ -95,6 +95,59 @@ void OpcUa_Custom_CustomWithNS0DataType_Clear(void* pValue);
 
 #endif
 
+#ifndef OPCUA_EXCLUDE_Custom_CustomUnionDataType
+/*============================================================================
+ * The Custom_CustomUnionDataType structure.
+ *===========================================================================*/
+extern SOPC_EncodeableType OpcUa_Custom_CustomUnionDataType_EncodeableType;
+
+typedef struct _OpcUa_Custom_CustomUnionDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    uint32_t SwitchField;
+    union
+    {
+        SOPC_Boolean FieldBool;
+        uint16_t FieldUint16;
+    } Value;
+} OpcUa_Custom_CustomUnionDataType;
+
+void OpcUa_Custom_CustomUnionDataType_Initialize(void* pValue);
+
+void OpcUa_Custom_CustomUnionDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_Custom_CustomOptFieldsDataType
+/*============================================================================
+ * The Custom_CustomOptFieldsDataType structure.
+ *===========================================================================*/
+extern SOPC_EncodeableType OpcUa_Custom_CustomOptFieldsDataType_EncodeableType;
+
+typedef struct _OpcUa_Custom_CustomOptFieldsDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_Boolean FieldBool;
+    uint32_t FieldUint32_1;
+    uint32_t* FieldUint32_2;
+    uint32_t* FieldUint32_3;
+    int32_t* NoOfArrayUint16;
+    uint16_t* ArrayUint16;
+    OpcUa_Custom_CustomDataType* Fieldcdt;
+} OpcUa_Custom_CustomOptFieldsDataType;
+
+void OpcUa_Custom_CustomOptFieldsDataType_Initialize(void* pValue);
+
+void OpcUa_Custom_CustomOptFieldsDataType_Clear(void* pValue);
+
+#endif
+
 /*============================================================================
  * Indexes in the table of known encodeable types.
  *
@@ -110,6 +163,12 @@ typedef enum _SOPC_Custom_TypeInternalIndex
 #endif
 #ifndef OPCUA_EXCLUDE_Custom_CustomWithNS0DataType
     SOPC_TypeInternalIndex_Custom_CustomWithNS0DataType,
+#endif
+#ifndef OPCUA_EXCLUDE_Custom_CustomUnionDataType
+    SOPC_TypeInternalIndex_Custom_CustomUnionDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_Custom_CustomOptFieldsDataType
+    SOPC_TypeInternalIndex_Custom_CustomOptFieldsDataType,
 #endif
     SOPC_Custom_TypeInternalIndex_SIZE
 } SOPC_Custom_TypeInternalIndex;

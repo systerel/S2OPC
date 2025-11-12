@@ -158,14 +158,22 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnComp)(const void* left, const
  */
 typedef struct SOPC_EncodeableType_FieldDescriptor
 {
+    bool isOptional : 1;
     bool isBuiltIn : 1;
     bool isArrayLength : 1;
     bool isToEncode : 1;
     bool isSameNs : 1;
     uint16_t nsIndex : 7;
-    uint32_t typeIndex : 21;
+    uint32_t typeIndex : 20;
     uint32_t offset;
 } SOPC_EncodeableType_FieldDescriptor;
+
+typedef enum
+{
+    SOPC_STRUCT_TYPE_CLASSIC,
+    SOPC_STRUCT_TYPE_OPT_FIELDS,
+    SOPC_STRUCT_TYPE_UNION,
+} SOPC_EncodeableType_StructureType;
 
 /**
  *  \brief Encodeable object type structure definition. It provides all the services
@@ -185,6 +193,7 @@ typedef const struct SOPC_EncodeableType_Struct
     size_t AllocationSize;
     SOPC_EncodeableObject_PfnInitialize* Initialize;
     SOPC_EncodeableObject_PfnClear* Clear;
+    SOPC_EncodeableType_StructureType StructType;
     int32_t NoOfFields;
     const SOPC_EncodeableType_FieldDescriptor* Fields;
 
@@ -274,6 +283,14 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint16_t nsIndex, uin
  *  \return         The name of the encodeable type as a C string
  */
 const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType);
+
+/**
+ *  \brief          Get the structure type of the given encodeable type
+ *
+ *  \param encType  The encodeable type for which structure type is requested (must not be NULL)
+ *  \return         The structure type of the encodeable
+ */
+SOPC_EncodeableType_StructureType SOPC_EncodeableType_GetStructureType(SOPC_EncodeableType* encType);
 
 /**
  * \brief Initialize an encodeable object of the given encodeable type.

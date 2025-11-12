@@ -12,4 +12,25 @@
     <opc:Field Name="fieldb" TypeName="opc:Boolean"/>
     <opc:Field Name="keyPair" TypeName="ua:KeyValuePair" /> <!-- depends on NS0 types -->
   </opc:StructuredType>
+  <!-- Union structure -->
+  <opc:StructuredType BaseType="ua:Union" Name="CustomUnionDataType">
+    <opc:Field TypeName="opc:UInt32" Name="SwitchField"/>
+    <opc:Field SwitchField="SwitchField" TypeName="opc:Boolean" SwitchValue="1" Name="FieldBool"/>
+    <opc:Field SwitchField="SwitchField" TypeName="opc:UInt16" SwitchValue="2" Name="FieldUint16"/>
+  </opc:StructuredType>
+  <!-- Structure with option fields -->
+  <opc:StructuredType BaseType="ua:ExtensionObject" Name="CustomOptFieldsDataType">
+    <opc:Field TypeName="opc:Bit" Name="FieldUint16_2_Specified"/>
+    <opc:Field TypeName="opc:Bit" Name="FieldUint16_3_Specified"/>
+    <opc:Field TypeName="opc:Bit" Name="ArrayUint16Specified"/>
+    <opc:Field TypeName="opc:Bit" Name="FieldcdtSpecified"/>
+    <opc:Field Length="29" TypeName="opc:Bit" Name="Reserved1"/> <!-- Reserved mask (32 bits = max option fields into a struct) -->
+    <opc:Field TypeName="opc:Boolean" Name="FieldBool"/>
+    <opc:Field TypeName="opc:UInt32" Name="FieldUint32_1"/>
+    <opc:Field SwitchField="FieldUint16_2_Specified" TypeName="opc:UInt32" Name="FieldUint32_2"/>
+    <opc:Field SwitchField="FieldUint16_3_Specified" TypeName="opc:UInt32" Name="FieldUint32_3"/>
+    <opc:Field SwitchField="ArrayUint16Specified" TypeName="opc:Int32" Name="NoOfArrayUint16"/>
+    <opc:Field LengthField="NoOfArrayUint16" SwitchField="ArrayUint16Specified" TypeName="opc:UInt16" Name="ArrayUint16"/>
+    <opc:Field SwitchField="FieldcdtSpecified" TypeName="tns:CustomDataType" Name="Fieldcdt"/>
+  </opc:StructuredType>
 </opc:TypeDictionary>

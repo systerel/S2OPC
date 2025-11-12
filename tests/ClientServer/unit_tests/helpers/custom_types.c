@@ -36,6 +36,12 @@ static SOPC_EncodeableType* g_Custom_KnownEncodeableTypes[SOPC_Custom_TypeIntern
 #ifndef OPCUA_EXCLUDE_Custom_CustomWithNS0DataType
     &OpcUa_Custom_CustomWithNS0DataType_EncodeableType,
 #endif
+#ifndef OPCUA_EXCLUDE_Custom_CustomUnionDataType
+    &OpcUa_Custom_CustomUnionDataType_EncodeableType,
+#endif
+#ifndef OPCUA_EXCLUDE_Custom_CustomOptFieldsDataType
+    &OpcUa_Custom_CustomOptFieldsDataType_EncodeableType,
+#endif
     NULL};
 
 /*============================================================================
@@ -64,6 +70,7 @@ void OpcUa_Custom_CustomDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Custom_CustomDataType_Fields[] = {
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -73,6 +80,7 @@ static const SOPC_EncodeableType_FieldDescriptor Custom_CustomDataType_Fields[] 
         (uint32_t) offsetof(OpcUa_Custom_CustomDataType, fieldb) // offset
     },
     {
+        false,                                                   // isOptional
         true,                                                    // isBuiltIn
         false,                                                   // isArrayLength
         true,                                                    // isToEncode
@@ -96,6 +104,7 @@ SOPC_EncodeableType OpcUa_Custom_CustomDataType_EncodeableType = {
     sizeof(OpcUa_Custom_CustomDataType),
     OpcUa_Custom_CustomDataType_Initialize,
     OpcUa_Custom_CustomDataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof Custom_CustomDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     Custom_CustomDataType_Fields,
     g_Custom_KnownEncodeableTypes};
@@ -123,6 +132,7 @@ void OpcUa_Custom_CustomDataType2_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Custom_CustomDataType2_Fields[] = {
     {
+        false,                                                    // isOptional
         true,                                                     // isBuiltIn
         false,                                                    // isArrayLength
         true,                                                     // isToEncode
@@ -132,6 +142,7 @@ static const SOPC_EncodeableType_FieldDescriptor Custom_CustomDataType2_Fields[]
         (uint32_t) offsetof(OpcUa_Custom_CustomDataType2, fieldb) // offset
     },
     {
+        false,                                                      // isOptional
         false,                                                      // isBuiltIn
         false,                                                      // isArrayLength
         true,                                                       // isToEncode
@@ -155,6 +166,7 @@ SOPC_EncodeableType OpcUa_Custom_CustomDataType2_EncodeableType = {
     sizeof(OpcUa_Custom_CustomDataType2),
     OpcUa_Custom_CustomDataType2_Initialize,
     OpcUa_Custom_CustomDataType2_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof Custom_CustomDataType2_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     Custom_CustomDataType2_Fields,
     g_Custom_KnownEncodeableTypes};
@@ -182,6 +194,7 @@ void OpcUa_Custom_CustomWithNS0DataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Custom_CustomWithNS0DataType_Fields[] = {
     {
+        false,                                                          // isOptional
         true,                                                           // isBuiltIn
         false,                                                          // isArrayLength
         true,                                                           // isToEncode
@@ -191,6 +204,7 @@ static const SOPC_EncodeableType_FieldDescriptor Custom_CustomWithNS0DataType_Fi
         (uint32_t) offsetof(OpcUa_Custom_CustomWithNS0DataType, fieldb) // offset
     },
     {
+        false,                                                           // isOptional
         false,                                                           // isBuiltIn
         false,                                                           // isArrayLength
         true,                                                            // isToEncode
@@ -214,8 +228,193 @@ SOPC_EncodeableType OpcUa_Custom_CustomWithNS0DataType_EncodeableType = {
     sizeof(OpcUa_Custom_CustomWithNS0DataType),
     OpcUa_Custom_CustomWithNS0DataType_Initialize,
     OpcUa_Custom_CustomWithNS0DataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof Custom_CustomWithNS0DataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     Custom_CustomWithNS0DataType_Fields,
+    g_Custom_KnownEncodeableTypes};
+#endif
+
+#ifndef OPCUA_EXCLUDE_Custom_CustomUnionDataType
+/*============================================================================
+ * OpcUa_Custom_CustomUnionDataType_Initialize
+ *===========================================================================*/
+void OpcUa_Custom_CustomUnionDataType_Initialize(void* pValue)
+{
+    SOPC_EncodeableObject_Initialize(&OpcUa_Custom_CustomUnionDataType_EncodeableType, pValue);
+}
+
+/*============================================================================
+ * OpcUa_Custom_CustomUnionDataType_Clear
+ *===========================================================================*/
+void OpcUa_Custom_CustomUnionDataType_Clear(void* pValue)
+{
+    SOPC_EncodeableObject_Clear(&OpcUa_Custom_CustomUnionDataType_EncodeableType, pValue);
+}
+
+/*============================================================================
+ * Field descriptors of the Custom_CustomUnionDataType encodeable type.
+ *===========================================================================*/
+static const SOPC_EncodeableType_FieldDescriptor Custom_CustomUnionDataType_Fields[] = {
+    {
+        false,                                                             // isOptional
+        true,                                                              // isBuiltIn
+        false,                                                             // isArrayLength
+        true,                                                              // isToEncode
+        true,                                                              // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                    // nsIndex
+        (uint32_t) SOPC_UInt32_Id,                                         // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomUnionDataType, SwitchField) // offset
+    },
+    {
+        false,                                                                 // isOptional
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        true,                                                                  // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                        // nsIndex
+        (uint32_t) SOPC_Boolean_Id,                                            // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomUnionDataType, Value.FieldBool) // offset
+    },
+    {
+        false,                                                                   // isOptional
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        true,                                                                    // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                          // nsIndex
+        (uint32_t) SOPC_UInt16_Id,                                               // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomUnionDataType, Value.FieldUint16) // offset
+    },
+};
+
+/*============================================================================
+ * Descriptor of the Custom_CustomUnionDataType encodeable type.
+ *===========================================================================*/
+SOPC_EncodeableType OpcUa_Custom_CustomUnionDataType_EncodeableType = {
+    "Custom_CustomUnionDataType",
+    OpcUaId_Custom_CustomUnionDataType,
+    OpcUaId_Custom_CustomUnionDataType_Encoding_DefaultBinary,
+    OpcUaId_Custom_CustomUnionDataType_Encoding_DefaultXml,
+    NULL,
+    SOPC_CUSTOM_NS_INDEX,
+    sizeof(OpcUa_Custom_CustomUnionDataType),
+    OpcUa_Custom_CustomUnionDataType_Initialize,
+    OpcUa_Custom_CustomUnionDataType_Clear,
+    SOPC_STRUCT_TYPE_UNION,
+    sizeof Custom_CustomUnionDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
+    Custom_CustomUnionDataType_Fields,
+    g_Custom_KnownEncodeableTypes};
+#endif
+
+#ifndef OPCUA_EXCLUDE_Custom_CustomOptFieldsDataType
+/*============================================================================
+ * OpcUa_Custom_CustomOptFieldsDataType_Initialize
+ *===========================================================================*/
+void OpcUa_Custom_CustomOptFieldsDataType_Initialize(void* pValue)
+{
+    SOPC_EncodeableObject_Initialize(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, pValue);
+}
+
+/*============================================================================
+ * OpcUa_Custom_CustomOptFieldsDataType_Clear
+ *===========================================================================*/
+void OpcUa_Custom_CustomOptFieldsDataType_Clear(void* pValue)
+{
+    SOPC_EncodeableObject_Clear(&OpcUa_Custom_CustomOptFieldsDataType_EncodeableType, pValue);
+}
+
+/*============================================================================
+ * Field descriptors of the Custom_CustomOptFieldsDataType encodeable type.
+ *===========================================================================*/
+static const SOPC_EncodeableType_FieldDescriptor Custom_CustomOptFieldsDataType_Fields[] = {
+    {
+        false,                                                               // isOptional
+        true,                                                                // isBuiltIn
+        false,                                                               // isArrayLength
+        true,                                                                // isToEncode
+        true,                                                                // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                      // nsIndex
+        (uint32_t) SOPC_Boolean_Id,                                          // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomOptFieldsDataType, FieldBool) // offset
+    },
+    {
+        false,                                                                   // isOptional
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        true,                                                                    // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                          // nsIndex
+        (uint32_t) SOPC_UInt32_Id,                                               // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomOptFieldsDataType, FieldUint32_1) // offset
+    },
+    {
+        true,                                                                    // isOptional
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        true,                                                                    // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                          // nsIndex
+        (uint32_t) SOPC_UInt32_Id,                                               // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomOptFieldsDataType, FieldUint32_2) // offset
+    },
+    {
+        true,                                                                    // isOptional
+        true,                                                                    // isBuiltIn
+        false,                                                                   // isArrayLength
+        true,                                                                    // isToEncode
+        true,                                                                    // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                          // nsIndex
+        (uint32_t) SOPC_UInt32_Id,                                               // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomOptFieldsDataType, FieldUint32_3) // offset
+    },
+    {
+        true,                                                                      // isOptional
+        true,                                                                      // isBuiltIn
+        true,                                                                      // isArrayLength
+        true,                                                                      // isToEncode
+        true,                                                                      // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                            // nsIndex
+        (uint32_t) SOPC_Int32_Id,                                                  // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomOptFieldsDataType, NoOfArrayUint16) // offset
+    },
+    {
+        true,                                                                  // isOptional
+        true,                                                                  // isBuiltIn
+        false,                                                                 // isArrayLength
+        true,                                                                  // isToEncode
+        true,                                                                  // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                        // nsIndex
+        (uint32_t) SOPC_UInt16_Id,                                             // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomOptFieldsDataType, ArrayUint16) // offset
+    },
+    {
+        true,                                                               // isOptional
+        false,                                                              // isBuiltIn
+        false,                                                              // isArrayLength
+        true,                                                               // isToEncode
+        true,                                                               // isSameNs
+        (uint16_t) SOPC_OPCUA_NS_INDEX,                                     // nsIndex
+        (uint32_t) SOPC_TypeInternalIndex_Custom_CustomDataType,            // typeIndex
+        (uint32_t) offsetof(OpcUa_Custom_CustomOptFieldsDataType, Fieldcdt) // offset
+    },
+};
+
+/*============================================================================
+ * Descriptor of the Custom_CustomOptFieldsDataType encodeable type.
+ *===========================================================================*/
+SOPC_EncodeableType OpcUa_Custom_CustomOptFieldsDataType_EncodeableType = {
+    "Custom_CustomOptFieldsDataType",
+    OpcUaId_Custom_CustomOptFieldsDataType,
+    OpcUaId_Custom_CustomOptFieldsDataType_Encoding_DefaultBinary,
+    OpcUaId_Custom_CustomOptFieldsDataType_Encoding_DefaultXml,
+    NULL,
+    SOPC_CUSTOM_NS_INDEX,
+    sizeof(OpcUa_Custom_CustomOptFieldsDataType),
+    OpcUa_Custom_CustomOptFieldsDataType_Initialize,
+    OpcUa_Custom_CustomOptFieldsDataType_Clear,
+    SOPC_STRUCT_TYPE_OPT_FIELDS,
+    sizeof Custom_CustomOptFieldsDataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
+    Custom_CustomOptFieldsDataType_Fields,
     g_Custom_KnownEncodeableTypes};
 #endif
 

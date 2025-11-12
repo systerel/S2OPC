@@ -32,4 +32,12 @@
 #define OpcUaId_Custom_CustomWithNS0DataType_Encoding_DefaultBinary 30021
 #define OpcUaId_Custom_CustomWithNS0DataType_Encoding_DefaultXml 30022
 
+#define OpcUaId_Custom_CustomUnionDataType 40020
+#define OpcUaId_Custom_CustomUnionDataType_Encoding_DefaultBinary 40021
+#define OpcUaId_Custom_CustomUnionDataType_Encoding_DefaultXml 40022
+
+#define OpcUaId_Custom_CustomOptFieldsDataType 50020
+#define OpcUaId_Custom_CustomOptFieldsDataType_Encoding_DefaultBinary 50021
+#define OpcUaId_Custom_CustomOptFieldsDataType_Encoding_DefaultXml 50022
+
 #endif

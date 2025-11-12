@@ -176,7 +176,7 @@ SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encode
     SOPC_Dict_Remove(g_UserEncodeableTypes, (const uintptr_t) &key);
     key.typeId = encoder->BinaryEncodingTypeId;
     SOPC_Dict_Remove(g_UserEncodeableTypes, (const uintptr_t) &key);
-    // Delete the dictionnay if empty
+    // Delete the dictionary if empty
     if (SOPC_Dict_Size(g_UserEncodeableTypes) == 0)
     {
         SOPC_Dict_Delete(g_UserEncodeableTypes);
@@ -340,6 +340,12 @@ const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType)
         result = encType->TypeName;
     }
     return result;
+}
+
+SOPC_EncodeableType_StructureType SOPC_EncodeableType_GetStructureType(SOPC_EncodeableType* encType)
+{
+    SOPC_ASSERT(encType != NULL && "EncType parameter is NULL");
+    return encType->StructType;
 }
 
 static inline bool checkEncodeableTypeDescIsValid(const SOPC_EncodeableType_FieldDescriptor* desc)
@@ -509,10 +515,10 @@ static SOPC_EncodeableObject_PfnComp* getPfnCompare(const SOPC_EncodeableType_Fi
     }
 }
 
-static void** retrieveArrayAddressPtr(void* pValue, const SOPC_EncodeableType_FieldDescriptor* arrayDesc)
+static void** retrieveAddressPtr(void* pValue, const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     /* Avoid "warning: cast increases required alignment of target type [-Wcast-align]"
-     * There is no issue in this case since arrayDesc->offset has been computed using 'offsetof' operator and
+     * There is no issue in this case since desc->offset has been computed using 'offsetof' operator and
      * actually contains a void* address (address of the allocated array).
      * Therefore casting this address into a (void**) is valid and cannot lead to lose information on the
      * address due to alignment normalization (e.g.: when casting a char* to a int*, char* might not be aligned on
@@ -520,17 +526,16 @@ static void** retrieveArrayAddressPtr(void* pValue, const SOPC_EncodeableType_Fi
      * operation | see EXP36-C SEI CERT rule).*/
     SOPC_GCC_DIAGNOSTIC_PUSH
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN
-    return (void**) ((char*) pValue + arrayDesc->offset);
+    return (void**) ((char*) pValue + desc->offset);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 
-static const void* const* retrieveConstArrayAddressPtr(const void* pValue,
-                                                       const SOPC_EncodeableType_FieldDescriptor* arrayDesc)
+static const void* const* retrieveConstAddressPtr(const void* pValue, const SOPC_EncodeableType_FieldDescriptor* desc)
 {
-    /* See retrieveArrayAddressPtr comment */
+    /* See retrieveAddressPtr comment */
     SOPC_GCC_DIAGNOSTIC_PUSH
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN
-    return (const void* const*) ((const char*) pValue + arrayDesc->offset);
+    return (const void* const*) ((const char*) pValue + desc->offset);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 
@@ -555,6 +560,7 @@ static SOPC_ReturnStatus SOPC_EncodeableObject_InternalInitialize(SOPC_Encodeabl
         else
         {
             void* pField = (char*) pValue + desc->offset;
+            void** pFieldPointer = retrieveAddressPtr(pValue, desc);
             SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
 
             if (desc->isArrayLength)
@@ -565,19 +571,30 @@ static SOPC_ReturnStatus SOPC_EncodeableObject_InternalInitialize(SOPC_Encodeabl
 
                 SOPC_ASSERT(desc->isBuiltIn);
                 SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-                pLength = pField;
 
                 // Increment to obtain the array content field
                 ++i;
                 SOPC_ASSERT(i < type->NoOfFields);
                 arrayDesc = &type->Fields[i];
-                pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
+                pArray = retrieveAddressPtr(pValue, arrayDesc);
                 // initFunction is not used since we initialize to empty/unallocated array
                 // initFunction = getPfnInitialize(type, arrayDesc);
 
-                // Initialize array fields to 0, array is not allocated by init (unknown length)
-                *pLength = 0;
+                // Initialize array fields to 0 (or NULL), array is not allocated by init (unknown length)
+                if (desc->isOptional) // Optional Array
+                {
+                    *pFieldPointer = NULL;
+                }
+                else
+                {
+                    pLength = pField;
+                    *pLength = 0;
+                }
                 *pArray = NULL;
+            }
+            else if (desc->isOptional) // Optional field: pointer to the optional value
+            {
+                *pFieldPointer = NULL;
             }
             else
             {
@@ -613,6 +630,8 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
             return;
         }
         void* pField = (char*) pValue + desc->offset;
+        void** pFieldPointer = retrieveAddressPtr(pValue, desc);
+
         SOPC_EncodeableObject_PfnClear* clearFunction = NULL;
 
         if (desc->isArrayLength)
@@ -624,17 +643,44 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
 
             SOPC_ASSERT(desc->isBuiltIn);
             SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-            pLength = pField;
+            if (desc->isOptional) // Optional Array
+            {
+                pLength = *pFieldPointer;
+            }
+            else
+            {
+                pLength = pField;
+            }
 
             // Increment to obtain the array content field
             ++i;
             SOPC_ASSERT(i < type->NoOfFields);
-            arrayDesc = &type->Fields[i];
-            pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
-            size = getAllocationSize(type, arrayDesc);
-            clearFunction = getPfnClear(type, arrayDesc);
-
-            SOPC_Clear_Array(pLength, pArray, size, clearFunction);
+            // Avoid case where Optional Array is not available (: pLength == NULL)
+            if (pLength != NULL)
+            {
+                arrayDesc = &type->Fields[i];
+                pArray = retrieveAddressPtr(pValue, arrayDesc);
+                size = getAllocationSize(type, arrayDesc);
+                clearFunction = getPfnClear(type, arrayDesc);
+                SOPC_Clear_Array(pLength, pArray, size, clearFunction);
+                if (desc->isOptional) // Optional Array
+                {
+                    SOPC_Free(*pFieldPointer);
+                    *pFieldPointer = NULL;
+                }
+            }
+        }
+        else if (desc->isOptional) // Optional field
+        {
+            if (*pFieldPointer != NULL) // Optional field available
+            {
+                // Clear value
+                clearFunction = getPfnClear(type, desc);
+                clearFunction(*pFieldPointer);
+                // Free pointer
+                SOPC_Free(*pFieldPointer);
+                *pFieldPointer = NULL;
+            }
         }
         else
         {
@@ -677,28 +723,21 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Delete(SOPC_EncodeableType* encTyp, void
     return status;
 }
 
-SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
-                                               const void* pValue,
-                                               SOPC_Buffer* buf,
-                                               uint32_t nestedStructLevel)
+/**
+ * \brief Encode the mask for option fields ( \p encodingMask ).
+ *        If a field is optional and allocated (!= NULL),
+ *        the field is available and must be encoded.
+ *        Refer to OPC UA part 6, 5.2.7.
+ */
+static SOPC_ReturnStatus EncodeableObject_EncodeMaskOptFields(SOPC_EncodeableType* type,
+                                                              const void* pValue,
+                                                              SOPC_Buffer* buf,
+                                                              uint32_t nestedStructLevel,
+                                                              uint32_t* encodingMask)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-
-    if (NULL == type || NULL == pValue || NULL == buf || *((SOPC_EncodeableType* const*) pValue) != type)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    const uint32_t prevLength = buf->length;
-    const uint32_t prevPosition = buf->position;
-
-    nestedStructLevel++;
-    status = SOPC_STATUS_OK;
-
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    uint8_t indexOptional = 0;
+    // 1st iteration to rebuild the mask for optional fields
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
@@ -709,9 +748,136 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
         }
         else
         {
-            const void* pField = (const char*) pValue + desc->offset;
+            const void* const* pFieldPointer = retrieveConstAddressPtr(pValue, desc);
+            if (desc->isOptional) // Is an optional field
+            {
+                if (*pFieldPointer != NULL) // Is an optional field available
+                {
+                    *encodingMask = *encodingMask + (0x1u << indexOptional);
+                    if (desc->isArrayLength)
+                    {
+                        // Jump over the Array field (if Arraylength is available, Array is also available)
+                        i++;
+                    }
+                }
+                indexOptional++;
+            }
+        }
+    }
+    // Encode the mask of optional fields
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_UInt32_Write(encodingMask, buf, nestedStructLevel);
+    }
+    return status;
+}
 
-            if (!desc->isToEncode)
+static SOPC_ReturnStatus EncodeableObject_EncodeUnion(SOPC_EncodeableType* type,
+                                                      const void* pValue,
+                                                      SOPC_Buffer* buf,
+                                                      uint32_t nestedStructLevel)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const void* pSwitchField = NULL;
+    const uint32_t prevLength = buf->length;
+    const uint32_t prevPosition = buf->position;
+
+    // 1. Encode the switch field
+    const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[0];
+    bool validDesc = checkEncodeableTypeDescIsValid(desc);
+    if (!validDesc)
+    {
+        status = SOPC_STATUS_NOT_SUPPORTED;
+    }
+    else
+    {
+        pSwitchField = (const char*) pValue + desc->offset;
+        SOPC_UInt32_Write((const uint32_t*) pSwitchField, buf, nestedStructLevel);
+    }
+
+    // 2. Encode the selected union field
+    if (SOPC_STATUS_OK == status)
+    {
+        const int32_t indexSwitchField = (const int32_t) * (const uint32_t*) pSwitchField;
+        // Check and Set the index of selected field
+        if (indexSwitchField >= type->NoOfFields)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
+        if (SOPC_STATUS_OK == status && indexSwitchField > 0)
+        {
+            desc = &type->Fields[indexSwitchField];
+            validDesc = checkEncodeableTypeDescIsValid(desc);
+            if (!validDesc)
+            {
+                status = SOPC_STATUS_NOT_SUPPORTED;
+            }
+            else
+            {
+                const void* pField = (const char*) pValue + desc->offset;
+                SOPC_EncodeableObject_PfnEncode* encodeFunction = getPfnEncode(desc);
+                status = encodeFunction(pField, buf, nestedStructLevel);
+            }
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        // Restore initial position and length buffer states (ignore possibly written data)
+        buf->length = prevLength;
+        buf->position = prevPosition;
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
+                                               const void* pValue,
+                                               SOPC_Buffer* buf,
+                                               uint32_t nestedStructLevel)
+{
+    if (NULL == type || NULL == pValue || NULL == buf || *((SOPC_EncodeableType* const*) pValue) != type)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    nestedStructLevel++;
+
+    /* Encode Union */
+    if (SOPC_STRUCT_TYPE_UNION == type->StructType)
+    {
+        return EncodeableObject_EncodeUnion(type, pValue, buf, nestedStructLevel);
+    }
+
+    const uint32_t prevLength = buf->length;
+    const uint32_t prevPosition = buf->position;
+    uint32_t encodingMask = 0; // For OptFields struct
+    uint8_t indexOptional = 0; // For OptFields struct
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* Encode Classic/OptFields */
+    if (SOPC_STATUS_OK == status && SOPC_STRUCT_TYPE_OPT_FIELDS == type->StructType)
+    {
+        // If OptFields struct: first find available optional fields and encode mask of optional fields.
+        status = EncodeableObject_EncodeMaskOptFields(type, pValue, buf, nestedStructLevel, &encodingMask);
+    }
+    for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
+    {
+        const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        bool validDesc = checkEncodeableTypeDescIsValid(desc);
+        if (!validDesc)
+        {
+            status = SOPC_STATUS_NOT_SUPPORTED;
+        }
+        else // Encode Field
+        {
+            const void* pField = (const char*) pValue + desc->offset;
+            const void* const* pFieldPointer = retrieveConstAddressPtr(pValue, desc);
+            bool isOptAndNotAvailable = (desc->isOptional && ((0x1u << indexOptional) & ~encodingMask));
+            indexOptional = desc->isOptional ? (uint8_t)(indexOptional + 1u) : indexOptional;
+
+            if (!desc->isToEncode || isOptAndNotAvailable)
             {
                 // Skip this field
             }
@@ -725,19 +891,32 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
 
                 SOPC_ASSERT(desc->isBuiltIn);
                 SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-                pLength = pField;
+                if (desc->isOptional) // Optional Array => ArrayLength is a pointer
+                {
+                    pLength = *pFieldPointer;
+                }
+                else
+                {
+                    pLength = pField;
+                }
 
                 // Increment to obtain the array content field
                 ++i;
                 SOPC_ASSERT(i < type->NoOfFields);
+                // pLength == NULL guarded by isOptAndNotAvailable condition
+                SOPC_ASSERT(pLength != NULL);
                 arrayDesc = &type->Fields[i];
-                pArray = retrieveConstArrayAddressPtr(pValue, arrayDesc);
+                pArray = retrieveConstAddressPtr(pValue, arrayDesc);
                 size = getAllocationSize(type, arrayDesc);
                 encodeFunction = getPfnEncode(arrayDesc);
-
                 status = SOPC_Write_Array(buf, pLength, pArray, size, encodeFunction, nestedStructLevel);
             }
-            else
+            else if (desc->isOptional) // Optional field available
+            {
+                SOPC_EncodeableObject_PfnEncode* encodeFunction = getPfnEncode(desc);
+                status = encodeFunction(*pFieldPointer, buf, nestedStructLevel);
+            }
+            else // Classic field
             {
                 SOPC_EncodeableObject_PfnEncode* encodeFunction = getPfnEncode(desc);
                 status = encodeFunction(pField, buf, nestedStructLevel);
@@ -750,7 +929,113 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
         buf->length = prevLength;
         buf->position = prevPosition;
     }
+    return status;
+}
 
+/**
+ * \brief Allocate optional fields available (= defined by encoding mask).
+ *        Refer to OPC UA part 6, 5.2.7.
+ */
+static SOPC_ReturnStatus EncodeableObject_AllocateOptFields(SOPC_EncodeableType* type,
+                                                            void* pValue,
+                                                            SOPC_Buffer* buf,
+                                                            uint32_t nestedStructLevel)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    uint32_t encodingMask = 0;
+    uint8_t indexOptional = 0;
+
+    // First, decode the encoding mask.
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_UInt32_Read(&encodingMask, buf, nestedStructLevel);
+    }
+
+    // Allocation of available optional fields.
+    for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
+    {
+        const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
+        bool validDesc = checkEncodeableTypeDescIsValid(desc);
+        if (!validDesc)
+        {
+            status = SOPC_STATUS_NOT_SUPPORTED;
+        }
+        else
+        {
+            if (desc->isOptional) // Optional field
+            {
+                if ((0x1u << indexOptional) & encodingMask) // Optional field available
+                {
+                    // Allocate and Initialize the field pointer
+                    size_t size = getAllocationSize(type, desc);
+                    void** pFieldPointer = retrieveAddressPtr(pValue, desc);
+                    *pFieldPointer = SOPC_Calloc(1, size);
+                    initFunction = getPfnInitialize(type, desc);
+                    initFunction(*pFieldPointer);
+                }
+                if (desc->isArrayLength)
+                {
+                    // Skip the array field (already marked with the array length field).
+                    i++;
+                }
+                indexOptional++;
+            }
+        }
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus EncodeableObject_DecodeUnion(SOPC_EncodeableType* type,
+                                                      void* pValue,
+                                                      SOPC_Buffer* buf,
+                                                      uint32_t nestedStructLevel)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    void* pSwitchField = NULL;
+
+    // 1. Decode the switch field
+    const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[0];
+    bool validDesc = checkEncodeableTypeDescIsValid(desc);
+    if (!validDesc)
+    {
+        status = SOPC_STATUS_NOT_SUPPORTED;
+    }
+    else
+    {
+        pSwitchField = (char*) pValue + desc->offset;
+        SOPC_UInt32_Read((uint32_t*) pSwitchField, buf, nestedStructLevel);
+    }
+
+    // 2. Decode the selected union field
+    if (SOPC_STATUS_OK == status)
+    {
+        const int32_t indexSwitchField = (const int32_t) * (uint32_t*) pSwitchField;
+        // Check and Set the index of selected field
+        if (indexSwitchField >= type->NoOfFields)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
+        if (SOPC_STATUS_OK == status && indexSwitchField > 0)
+        {
+            desc = &type->Fields[indexSwitchField];
+            validDesc = checkEncodeableTypeDescIsValid(desc);
+            if (!validDesc)
+            {
+                status = SOPC_STATUS_NOT_SUPPORTED;
+            }
+            else
+            {
+                void* pField = (char*) pValue + desc->offset;
+                SOPC_EncodeableObject_PfnDecode* decodeFunction = getPfnDecode(desc);
+                status = decodeFunction(pField, buf, nestedStructLevel);
+            }
+        }
+    }
+    if (status != SOPC_STATUS_OK)
+    {
+        SOPC_EncodeableObject_Clear(type, pValue);
+    }
     return status;
 }
 
@@ -760,7 +1045,6 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
                                                uint32_t nestedStructLevel)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-
     if (NULL == type || NULL == pValue || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -769,15 +1053,25 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-
-    nestedStructLevel++; // increment for future calls
-    status = SOPC_STATUS_OK;
-
-    if (SOPC_STATUS_OK == status)
+    else
     {
         status = SOPC_EncodeableObject_InternalInitialize(type, pValue);
     }
+    nestedStructLevel++; // increment for future calls
 
+    /* Decode Union */
+    if (SOPC_STATUS_OK == status && SOPC_STRUCT_TYPE_UNION == type->StructType)
+    {
+        return EncodeableObject_DecodeUnion(type, pValue, buf, nestedStructLevel);
+    }
+
+    /* Decode Classic/OptFields */
+    if (SOPC_STATUS_OK == status && SOPC_STRUCT_TYPE_OPT_FIELDS == type->StructType)
+    {
+        // If OptFields struct: first allocate the available fields,
+        // then fill them in during the rest of the decoding process.
+        status = EncodeableObject_AllocateOptFields(type, pValue, buf, nestedStructLevel);
+    }
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
@@ -789,9 +1083,11 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
         else
         {
             void* pField = (char*) pValue + desc->offset;
+            void** pFieldPointer = retrieveAddressPtr(pValue, desc);
             SOPC_EncodeableObject_PfnDecode* decodeFunction = NULL;
 
-            if (!desc->isToEncode)
+            // Not to encode or optional field not available
+            if (!desc->isToEncode || (desc->isOptional && *pFieldPointer == NULL))
             {
                 // Skip this field
             }
@@ -806,20 +1102,33 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
 
                 SOPC_ASSERT(desc->isBuiltIn);
                 SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-                pLength = pField;
+                if (desc->isOptional) // Optional Array => ArrayLength is a pointer
+                {
+                    pLength = *pFieldPointer;
+                }
+                else
+                {
+                    pLength = pField;
+                }
 
                 // Increment to obtain the array content field
                 ++i;
                 SOPC_ASSERT(i < type->NoOfFields);
+                // pLength == NULL guarded by if(desc->isOptional && *pFieldPointer == NULL) + if(desc->isOptional)
+                SOPC_ASSERT(pLength != NULL);
                 arrayDesc = &type->Fields[i];
-                pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
+                pArray = retrieveAddressPtr(pValue, arrayDesc);
                 size = getAllocationSize(type, arrayDesc);
                 decodeFunction = getPfnDecode(arrayDesc);
                 initFunction = getPfnInitialize(type, arrayDesc);
                 clearFunction = getPfnClear(type, arrayDesc);
-
                 status = SOPC_Read_Array(buf, pLength, pArray, size, decodeFunction, initFunction, clearFunction,
                                          nestedStructLevel);
+            }
+            else if (desc->isOptional) // Optional field
+            {
+                decodeFunction = getPfnDecode(desc);
+                status = decodeFunction(*pFieldPointer, buf, nestedStructLevel);
             }
             else
             {
@@ -828,27 +1137,82 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
             }
         }
     }
-
     if (status != SOPC_STATUS_OK)
     {
         SOPC_EncodeableObject_Clear(type, pValue);
     }
+    return status;
+}
 
+static SOPC_ReturnStatus EncodeableObject_CopyUnion(SOPC_EncodeableType* type, void* destValue, const void* srcValue)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const void* pSrcSwitchField = NULL;
+
+    // Copy switchField
+    const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[0];
+    bool validDesc = checkEncodeableTypeDescIsValid(desc);
+    if (!validDesc)
+    {
+        status = SOPC_STATUS_NOT_SUPPORTED;
+    }
+    else
+    {
+        pSrcSwitchField = (const char*) srcValue + desc->offset;
+        void* pDestSwitchField = (char*) destValue + desc->offset;
+        SOPC_EncodeableObject_PfnCopy* copyFunction = getPfnCopy(desc, false);
+        status = copyFunction(pDestSwitchField, pSrcSwitchField);
+    }
+
+    // Copy selected union field
+    if (SOPC_STATUS_OK == status)
+    {
+        const int32_t indexSwitchField = (const int32_t) * (const uint32_t*) pSrcSwitchField;
+        // Check and Set the index of selected field
+        if (indexSwitchField >= type->NoOfFields)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
+        if (SOPC_STATUS_OK == status && indexSwitchField > 0)
+        {
+            desc = &type->Fields[indexSwitchField];
+            validDesc = checkEncodeableTypeDescIsValid(desc);
+            if (!validDesc)
+            {
+                status = SOPC_STATUS_NOT_SUPPORTED;
+            }
+            else
+            {
+                const void* pSrcField = (const char*) srcValue + desc->offset;
+                void* pDestField = (char*) destValue + desc->offset;
+                SOPC_EncodeableObject_PfnCopy* copyFunction = getPfnCopy(desc, false);
+                status = copyFunction(pDestField, pSrcField);
+            }
+        }
+    }
+    if (status != SOPC_STATUS_OK)
+    {
+        SOPC_EncodeableObject_Clear(type, destValue);
+    }
     return status;
 }
 
 SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* destValue, const void* srcValue)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-
     if (NULL == type || NULL == destValue || NULL == srcValue || *((SOPC_EncodeableType* const*) srcValue) != type ||
         *((SOPC_EncodeableType* const*) destValue) != type)
     {
-        return status;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    status = SOPC_STATUS_OK;
+    /* Copy Union */
+    if (SOPC_STRUCT_TYPE_UNION == type->StructType)
+    {
+        return EncodeableObject_CopyUnion(type, destValue, srcValue);
+    }
 
+    /* Copy Classic/OptFields */
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
@@ -860,13 +1224,12 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
         else
         {
             const void* pSrcField = (const char*) srcValue + desc->offset;
+            const void* const* pSrcFieldPointer = retrieveConstAddressPtr(srcValue, desc);
             void* pDestField = (char*) destValue + desc->offset;
+            void** pDestFieldPointer = retrieveAddressPtr(destValue, desc);
 
             if (desc->isArrayLength)
             {
-                const int32_t* pSrcLength = pSrcField;
-                int32_t* pDestLength = pDestField;
-
                 const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
                 void** pArrayDest = NULL;
                 const void* const* pArraySource = NULL;
@@ -879,11 +1242,25 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
                 // Increment to obtain the array content field
                 ++i;
                 SOPC_ASSERT(i < type->NoOfFields);
-                if (*pSrcLength > 0)
+
+                const int32_t* pSrcLength = NULL;
+                int32_t* pDestLength = NULL;
+                if (desc->isOptional) // Optional Array
+                {
+                    pSrcLength = *pSrcFieldPointer;
+                    pDestLength = *pDestFieldPointer;
+                }
+                else
+                {
+                    pSrcLength = pSrcField;
+                    pDestLength = pDestField;
+                }
+                // Avoid case where Optional Array is not available (: pSrcLength == NULL)
+                if (pSrcLength != NULL && *pSrcLength > 0)
                 {
                     arrayDesc = &type->Fields[i];
-                    pArrayDest = retrieveArrayAddressPtr(destValue, arrayDesc);
-                    pArraySource = retrieveConstArrayAddressPtr(srcValue, arrayDesc);
+                    pArrayDest = retrieveAddressPtr(destValue, arrayDesc);
+                    pArraySource = retrieveConstAddressPtr(srcValue, arrayDesc);
                     size = getAllocationSize(type, arrayDesc);
                     copyFunction = getPfnCopy(arrayDesc, true);
 
@@ -898,11 +1275,38 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
                     {
                         status = SOPC_STATUS_OUT_OF_MEMORY;
                     }
-                } // else NULL array with 0 length
-                if (SOPC_STATUS_OK == status)
+                } // else NULL array with 0 length (or null length when optional array not available)
+                // Avoid case where Optional Array is not available (: pSrcLength == NULL)
+                if (SOPC_STATUS_OK == status && pSrcLength != NULL)
                 {
-                    // Set dest length
-                    *pDestLength = *pSrcLength;
+                    // Copy dest length
+                    if (desc->isOptional) // Optional array length
+                    {
+                        size_t sizeArrayLength = getAllocationSize(type, desc);
+                        *pDestFieldPointer = SOPC_Calloc(1, sizeArrayLength);
+                        void* destFieldPointer = *pDestFieldPointer;
+                        const void* srcFieldPointer = *pSrcFieldPointer;
+                        copyFunction = getPfnCopy(desc, false);
+                        status = copyFunction(destFieldPointer, srcFieldPointer);
+                    }
+                    else
+                    {
+                        *pDestLength = *pSrcLength;
+                    }
+                }
+            }
+            else if (desc->isOptional) // optional field available
+            {
+                if (*pSrcFieldPointer != NULL)
+                {
+                    size_t size = getAllocationSize(type, desc);
+                    *pDestFieldPointer = SOPC_Calloc(1, size);
+                    void* destFieldPointer = *pDestFieldPointer;
+                    const void* srcFieldPointer = *pSrcFieldPointer;
+                    SOPC_EncodeableObject_PfnInitialize* initFunction = getPfnInitialize(type, desc);
+                    initFunction(destFieldPointer);
+                    SOPC_EncodeableObject_PfnCopy* copyFunction = getPfnCopy(desc, false);
+                    status = copyFunction(destFieldPointer, srcFieldPointer);
                 }
             }
             else
@@ -934,14 +1338,68 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Move(void* destObj, void* srcObj)
     return SOPC_EncodeableObject_InternalInitialize(encType, srcObj);
 }
 
+static SOPC_ReturnStatus EncodeableObject_CompareUnion(SOPC_EncodeableType* type,
+                                                       const void* leftValue,
+                                                       const void* rightValue,
+                                                       int32_t* comp)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int32_t resultComp = 0;
+    const void* pLeftSwitchField = NULL;
+
+    // Compare switchField
+    const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[0];
+    bool validDesc = checkEncodeableTypeDescIsValid(desc);
+    if (!validDesc)
+    {
+        status = SOPC_STATUS_NOT_SUPPORTED;
+    }
+    else
+    {
+        pLeftSwitchField = (const char*) leftValue + desc->offset;
+        const void* pRightSwitchField = (const char*) rightValue + desc->offset;
+        SOPC_EncodeableObject_PfnComp* compFunction = getPfnCompare(desc);
+        status = compFunction(pLeftSwitchField, pRightSwitchField, &resultComp);
+    }
+
+    // Compare selected union field
+    if (SOPC_STATUS_OK == status && 0 == resultComp)
+    {
+        const int32_t indexSwitchField = (const int32_t) * (const uint32_t*) pLeftSwitchField;
+        // Check and Set the index of selected field
+        if (indexSwitchField >= type->NoOfFields)
+        {
+            status = SOPC_STATUS_ENCODING_ERROR;
+        }
+        if (SOPC_STATUS_OK == status && indexSwitchField > 0)
+        {
+            desc = &type->Fields[indexSwitchField];
+            validDesc = checkEncodeableTypeDescIsValid(desc);
+            if (!validDesc)
+            {
+                status = SOPC_STATUS_NOT_SUPPORTED;
+            }
+            else
+            {
+                const void* pLeftField = (const char*) leftValue + desc->offset;
+                const void* pRightField = (const char*) rightValue + desc->offset;
+                SOPC_EncodeableObject_PfnComp* compFunction = getPfnCompare(desc);
+                status = compFunction(pLeftField, pRightField, &resultComp);
+            }
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *comp = resultComp;
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
                                                 const void* leftValue,
                                                 const void* rightValue,
                                                 int32_t* comp)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    int32_t resultComp = 0;
-
     if (NULL == type || NULL == leftValue || NULL == rightValue ||
         *((SOPC_EncodeableType* const*) rightValue) != type || *((SOPC_EncodeableType* const*) leftValue) != type ||
         NULL == comp)
@@ -949,9 +1407,16 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    status = SOPC_STATUS_OK;
+    /* Compare Union*/
+    if (SOPC_STRUCT_TYPE_UNION == type->StructType)
+    {
+        return EncodeableObject_CompareUnion(type, leftValue, rightValue, comp);
+    }
 
-    for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
+    /* Compare Classic/OptFields */
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int32_t resultComp = 0;
+    for (int32_t i = 0; SOPC_STATUS_OK == status && 0 == resultComp && i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
         bool validDesc = checkEncodeableTypeDescIsValid(desc);
@@ -962,13 +1427,11 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
         else
         {
             const void* pRightField = (const char*) rightValue + desc->offset;
+            const void* const* pRightFieldPointer = retrieveConstAddressPtr(rightValue, desc);
             const void* pLeftField = (const char*) leftValue + desc->offset;
-
+            const void* const* pLeftFieldPointer = retrieveConstAddressPtr(leftValue, desc);
             if (desc->isArrayLength)
             {
-                const int32_t* pLeftLength = pLeftField;
-                const int32_t* pRightLength = pRightField;
-
                 const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
                 const void* const* pArrayLeft = NULL;
                 const void* const* pArrayRight = NULL;
@@ -978,10 +1441,36 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
                 SOPC_ASSERT(desc->isBuiltIn);
                 SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
 
+                const int32_t* pLeftLength = NULL;
+                const int32_t* pRightLength = NULL;
+                if (desc->isOptional) // Optional Array
+                {
+                    pLeftLength = *pLeftFieldPointer;
+                    pRightLength = *pRightFieldPointer;
+                }
+                else
+                {
+                    pLeftLength = pLeftField;
+                    pRightLength = pRightField;
+                }
+
                 // Increment to obtain the array content field
                 ++i;
                 SOPC_ASSERT(i < type->NoOfFields);
-                if (*pLeftLength < *pRightLength)
+                // Both optional arrays are not available
+                if (NULL == pLeftLength && NULL == pRightLength)
+                {
+                    // -> comp OK
+                    resultComp = 0;
+                }
+                // One of optional arrays is not available
+                else if (NULL == pLeftLength || NULL == pRightLength)
+                {
+                    resultComp = pLeftLength != NULL ? 1 : -1;
+                }
+                /* Both optional array are available or classic array cases */
+                // Compare length
+                else if (*pLeftLength < *pRightLength)
                 {
                     resultComp = -1;
                 }
@@ -989,16 +1478,42 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
                 {
                     resultComp = 1;
                 }
+                // Compare array
                 else if (*pLeftLength > 0)
                 {
                     arrayDesc = &type->Fields[i];
-                    pArrayLeft = retrieveConstArrayAddressPtr(leftValue, arrayDesc);
-                    pArrayRight = retrieveConstArrayAddressPtr(rightValue, arrayDesc);
+                    pArrayLeft = retrieveConstAddressPtr(leftValue, arrayDesc);
+                    pArrayRight = retrieveConstAddressPtr(rightValue, arrayDesc);
                     size = getAllocationSize(type, arrayDesc);
                     compFunction = getPfnCompare(arrayDesc);
-
                     status = SOPC_Comp_Array(*pLeftLength, *pArrayLeft, *pArrayRight, size, compFunction, &resultComp);
                 } // else both have length == 0
+            }
+            else if (desc->isOptional) // Optional field
+            {
+                // Both field are available
+                if (*pLeftFieldPointer != NULL && *pRightFieldPointer != NULL)
+                {
+                    const void* leftFieldPointer = *pLeftFieldPointer;
+                    const void* rightFieldPointer = *pRightFieldPointer;
+                    SOPC_EncodeableObject_PfnComp* compFunction = getPfnCompare(desc);
+                    status = compFunction(leftFieldPointer, rightFieldPointer, &resultComp);
+                }
+                // Left available, right not available
+                else if (*pLeftFieldPointer != NULL && *pRightFieldPointer == NULL)
+                {
+                    resultComp = 1;
+                }
+                // Left not available, right available
+                else if (*pLeftFieldPointer == NULL && *pRightFieldPointer != NULL)
+                {
+                    resultComp = -1;
+                }
+                // Both are not available
+                else
+                {
+                    resultComp = 0;
+                }
             }
             else
             {
@@ -1007,11 +1522,9 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
             }
         }
     }
-
     if (SOPC_STATUS_OK == status)
     {
         *comp = resultComp;
     }
-
     return status;
 }

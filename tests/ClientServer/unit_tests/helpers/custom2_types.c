@@ -61,6 +61,7 @@ void OpcUa_Custom2_Custom2DataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Custom2_Custom2DataType_Fields[] = {
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -70,6 +71,7 @@ static const SOPC_EncodeableType_FieldDescriptor Custom2_Custom2DataType_Fields[
         (uint32_t) offsetof(OpcUa_Custom2_Custom2DataType, fieldb) // offset
     },
     {
+        false,                                                     // isOptional
         true,                                                      // isBuiltIn
         false,                                                     // isArrayLength
         true,                                                      // isToEncode
@@ -93,6 +95,7 @@ SOPC_EncodeableType OpcUa_Custom2_Custom2DataType_EncodeableType = {
     sizeof(OpcUa_Custom2_Custom2DataType),
     OpcUa_Custom2_Custom2DataType_Initialize,
     OpcUa_Custom2_Custom2DataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof Custom2_Custom2DataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     Custom2_Custom2DataType_Fields,
     g_Custom2_KnownEncodeableTypes};
@@ -120,6 +123,7 @@ void OpcUa_Custom2_CustomWithNS1DataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor Custom2_CustomWithNS1DataType_Fields[] = {
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -129,6 +133,7 @@ static const SOPC_EncodeableType_FieldDescriptor Custom2_CustomWithNS1DataType_F
         (uint32_t) offsetof(OpcUa_Custom2_CustomWithNS1DataType, custom2) // offset
     },
     {
+        false,                                                            // isOptional
         false,                                                            // isBuiltIn
         false,                                                            // isArrayLength
         true,                                                             // isToEncode
@@ -152,6 +157,7 @@ SOPC_EncodeableType OpcUa_Custom2_CustomWithNS1DataType_EncodeableType = {
     sizeof(OpcUa_Custom2_CustomWithNS1DataType),
     OpcUa_Custom2_CustomWithNS1DataType_Initialize,
     OpcUa_Custom2_CustomWithNS1DataType_Clear,
+    SOPC_STRUCT_TYPE_CLASSIC,
     sizeof Custom2_CustomWithNS1DataType_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
     Custom2_CustomWithNS1DataType_Fields,
     g_Custom2_KnownEncodeableTypes};
