@@ -241,8 +241,7 @@ int main(int argc, char* argv[])
         return 0;
     }
     status = SOPC_CommonHelper_Initialize(&logConfig, NULL);
-    SOPC_Free(logDirPath);
-    logDirPath = NULL;
+
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_Initialize();
