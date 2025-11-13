@@ -180,15 +180,15 @@ else()
 endif()
 
 if (expat_FOUND)
-  add_executable(toolkit_demo_file_transfer_new
-    "demo_file_transfer/toolkit_demo_file_transfer_new.c")
-  target_link_libraries(toolkit_demo_file_transfer_new PRIVATE s2opc_clientserver)
-  target_compile_options(toolkit_demo_file_transfer_new PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(toolkit_demo_file_transfer_new PRIVATE ${S2OPC_DEFINITIONS})
-  target_compile_definitions(toolkit_demo_file_transfer_new PRIVATE "WITH_EXPAT")
+  add_executable(toolkit_demo_server_file_transfer
+    "demo_file_transfer/toolkit_demo_server_file_transfer.c")
+  target_link_libraries(toolkit_demo_server_file_transfer PRIVATE s2opc_clientserver)
+  target_compile_options(toolkit_demo_server_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(toolkit_demo_server_file_transfer PRIVATE ${S2OPC_DEFINITIONS})
+  target_compile_definitions(toolkit_demo_server_file_transfer PRIVATE "WITH_EXPAT")
   add_custom_command(
-    TARGET toolkit_demo_file_transfer_new POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_file_transfer.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/s2opc_file_transfer.xml)
+    TARGET toolkit_demo_server_file_transfer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_file_transfer.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ft_data/s2opc_file_transfer.xml)
 else()
   message(WARNING "Demo file transfer toolkit_demo_file_transfer executable will not be compiled since Expat library not available.")
 endif()
