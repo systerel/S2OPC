@@ -1852,7 +1852,7 @@ static void SOPC_AddressSpaceAccess_DeleteNodeOnly(const SOPC_AddressSpaceAccess
     }
 
     // Delete the node
-    SOPC_AddressSpace_Node_Clear(addSpaceAccess->addSpaceRef, node);
+    SOPC_AddressSpace_Node_Delete(addSpaceAccess->addSpaceRef, node);
 }
 
 static bool is_single_parent(const SOPC_AddressSpaceAccess* addSpaceAccess,

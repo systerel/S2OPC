@@ -543,8 +543,14 @@ static void SOPC_AddressSpace_Node_Clear_Local(SOPC_AddressSpace_Node* node)
 void SOPC_AddressSpace_Node_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     SOPC_ASSERT(space != NULL);
-
     SOPC_AddressSpace_Node_Clear_Local(node);
+}
+
+void SOPC_AddressSpace_Node_Delete(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
+{
+    SOPC_ASSERT(space != NULL);
+    SOPC_NodeId* nid = SOPC_AddressSpace_Get_NodeId(space, node);
+    SOPC_Dict_Remove(space->dict_nodes, (uintptr_t) nid);
 }
 
 SOPC_AddressSpace_Node* SOPC_AddressSpace_Node_Copy(const SOPC_AddressSpace_Node* src)
@@ -601,6 +607,7 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes)
         SOPC_Free(result);
         return NULL;
     }
+    SOPC_Dict_SetTombstoneKey(result->dict_nodes, UINTPTR_MAX);
     return result;
 }
 
