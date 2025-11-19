@@ -862,7 +862,7 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
         *status = OpcUa_BadDiscoveryUrlMissing;
         break;
     case constants_statuscodes_bs__e_sc_bad_semaphore_file_missing:
-        *status = OpcUa_BadSempahoreFileMissing;
+        *status = OpcUa_BadSemaphoreFileMissing;
         break;
     case constants_statuscodes_bs__e_sc_bad_not_supported:
         *status = OpcUa_BadNotSupported;
@@ -1247,7 +1247,7 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
     case OpcUa_BadDiscoveryUrlMissing:
         *bstatus = constants_statuscodes_bs__e_sc_bad_discovery_url_missing;
         break;
-    case OpcUa_BadSempahoreFileMissing:
+    case OpcUa_BadSemaphoreFileMissing:
         *bstatus = constants_statuscodes_bs__e_sc_bad_semaphore_file_missing;
         break;
     case OpcUa_BadNotSupported:

@@ -1,5 +1,5 @@
 /* ========================================================================
- * Copyright (c) 2005-2021 The OPC Foundation, Inc. All rights reserved.
+ * Copyright (c) 2005-2024 The OPC Foundation, Inc. All rights reserved.
  *
  * OPC Foundation MIT License 1.00
  *
@@ -78,7 +78,7 @@
 #define OpcUa_BadRequestTooLarge 0x80B80000
 
 /*============================================================================
- * The response message size exceeds limits set by the client.
+ * The response message size exceeds limits set by the client or server.
  *===========================================================================*/
 #define OpcUa_BadResponseTooLarge 0x80B90000
 
@@ -113,7 +113,7 @@
 #define OpcUa_BadServerHalted 0x800E0000
 
 /*============================================================================
- * There was nothing to do because the client passed a list of operations with no elements.
+ * No processing could be done because there was nothing to do.
  *===========================================================================*/
 #define OpcUa_BadNothingToDo 0x800F0000
 
@@ -295,6 +295,16 @@
 #define OpcUa_BadLicenseNotAvailable 0x81100000
 
 /*============================================================================
+ * The Server does not have the resources to process the request at this time.
+ *===========================================================================*/
+#define OpcUa_BadServerTooBusy 0x80EE0000
+
+/*============================================================================
+ * The log-on for the user succeeded but the user is required to change the password.
+ *===========================================================================*/
+#define OpcUa_GoodPasswordChangeRequired 0x00EF0000
+
+/*============================================================================
  * The subscription was transferred to another session.
  *===========================================================================*/
 #define OpcUa_GoodSubscriptionTransferred 0x002D0000
@@ -325,7 +335,7 @@
 #define OpcUa_BadWaitingForInitialData 0x80320000
 
 /*============================================================================
- * The syntax of the node id is not valid.
+ * The syntax the node id is not valid or refers to a node that is not valid for the operation.
  *===========================================================================*/
 #define OpcUa_BadNodeIdInvalid 0x80330000
 
@@ -348,6 +358,11 @@
  * No data exists within the range of indexes specified.
  *===========================================================================*/
 #define OpcUa_BadIndexRangeNoData 0x80370000
+
+/*============================================================================
+ * The written data does not match the IndexRange specified.
+ *===========================================================================*/
+#define OpcUa_BadIndexRangeDataMismatch 0x80EA0000
 
 /*============================================================================
  * The data encoding is invalid.
@@ -495,6 +510,16 @@
 #define OpcUa_BadNumericOverflow 0x81120000
 
 /*============================================================================
+ * The locale in the requested write operation is not supported.
+ *===========================================================================*/
+#define OpcUa_BadLocaleNotSupported 0x80ED0000
+
+/*============================================================================
+ * The variable has no default value and no initial value.
+ *===========================================================================*/
+#define OpcUa_BadNoValue 0x80F00000
+
+/*============================================================================
  * The ServerUri is not a valid URI.
  *===========================================================================*/
 #define OpcUa_BadServerUriInvalid 0x804F0000
@@ -512,7 +537,7 @@
 /*============================================================================
  * The semaphore file specified by the client is not valid.
  *===========================================================================*/
-#define OpcUa_BadSempahoreFileMissing 0x80520000
+#define OpcUa_BadSemaphoreFileMissing 0x80520000
 
 /*============================================================================
  * The security token request type is not valid.
@@ -923,7 +948,7 @@
 #define OpcUa_UncertainEngineeringUnitsExceeded 0x40940000
 
 /*============================================================================
- * The value is derived from multiple sources and has less than the required number of Good sources.
+ * The data value is derived from multiple sources and has less than the required number of Good sources.
  *===========================================================================*/
 #define OpcUa_UncertainSubNormal 0x40950000
 
@@ -931,6 +956,12 @@
  * The value has been overridden.
  *===========================================================================*/
 #define OpcUa_GoodLocalOverride 0x00960000
+
+/*============================================================================
+ * The value is derived from multiple sources and has the required number of Good sources, but less than the full number
+ *of Good sources.
+ *===========================================================================*/
+#define OpcUa_GoodSubNormal 0x00EB0000
 
 /*============================================================================
  * This Condition refresh failed, a Condition refresh operation is already in progress.
@@ -1034,8 +1065,7 @@
 #define OpcUa_BadNoEntryExists 0x80A00000
 
 /*============================================================================
- * The client requested history using a timestamp format the server does not support (i.e requested ServerTimestamp when
- *server only supports SourceTimestamp).
+ * The Client requested history using a TimestampsToReturn the Server does not support.
  *===========================================================================*/
 #define OpcUa_BadTimestampNotSupported 0x80A10000
 
@@ -1050,7 +1080,7 @@
 #define OpcUa_GoodEntryReplaced 0x00A30000
 
 /*============================================================================
- * The value is derived from multiple values and has less than the required number of Good values.
+ * The aggregate value is derived from multiple values and has less than the required number of Good values.
  *===========================================================================*/
 #define OpcUa_UncertainDataSubNormal 0x40A40000
 
@@ -1060,7 +1090,7 @@
 #define OpcUa_GoodNoData 0x00A50000
 
 /*============================================================================
- * The data or event field was successfully replaced in the historical database.
+ * More data is available in the time range beyond the number of values requested.
  *===========================================================================*/
 #define OpcUa_GoodMoreData 0x00A60000
 
@@ -1100,6 +1130,16 @@
 #define OpcUa_BadRequestNotComplete 0x81130000
 
 /*============================================================================
+ * The operation is not allowed because a transaction is in progress.
+ *===========================================================================*/
+#define OpcUa_BadTransactionPending 0x80E80000
+
+/*============================================================================
+ * The operation failed and all changes which were part of the transaction are rolled back.
+ *===========================================================================*/
+#define OpcUa_BadTransactionFailed 0x80F10000
+
+/*============================================================================
  * The device identity needs a ticket before it can be accepted.
  *===========================================================================*/
 #define OpcUa_BadTicketRequired 0x811F0000
@@ -1108,6 +1148,16 @@
  * The device identity needs a ticket before it can be accepted.
  *===========================================================================*/
 #define OpcUa_BadTicketInvalid 0x81200000
+
+/*============================================================================
+ * The requested operation is not allowed, because the Node is locked by a different application.
+ *===========================================================================*/
+#define OpcUa_BadLocked 0x80E90000
+
+/*============================================================================
+ * The requested operation is not allowed, because the Node is not locked by the application.
+ *===========================================================================*/
+#define OpcUa_BadRequiresLock 0x80EC0000
 
 /*============================================================================
  * The value does not come from the real source and has been edited by the server.
@@ -1339,6 +1389,11 @@
  * The value is accurate, and the signal source supports cascade handshaking.
  *===========================================================================*/
 #define OpcUa_GoodCascade 0x04090000
+
+/*============================================================================
+ * The DataSet specified for the DataSetWriter creation is invalid.
+ *===========================================================================*/
+#define OpcUa_BadDataSetIdInvalid 0x80E70000
 
 #endif /* OpcUa_StatusCodes_H_ */
 /* This is the last line of an autogenerated file. */
