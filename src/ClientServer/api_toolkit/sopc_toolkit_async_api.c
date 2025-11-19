@@ -124,10 +124,10 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectio
     if (NULL != sessionName)
     {
         size_t len = strlen(sessionName);
-        sessionAppContext->sessionName = SOPC_Calloc(len, sizeof(*sessionAppContext->sessionName));
+        sessionAppContext->sessionName = SOPC_Calloc(len + 1, sizeof(*sessionAppContext->sessionName));
         if (NULL != sessionAppContext->sessionName)
         {
-            sessionAppContext->sessionName = strncpy(sessionAppContext->sessionName, sessionName, len - 1);
+            sessionAppContext->sessionName = strncpy(sessionAppContext->sessionName, sessionName, len + 1);
             status = SOPC_STATUS_OK;
         }
         else
