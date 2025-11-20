@@ -619,7 +619,7 @@ int main(int argc, char** argv)
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./bench_tool_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(&logConfiguration, NULL);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_Toolkit_Initialize(event_handler);

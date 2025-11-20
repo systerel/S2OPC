@@ -24,6 +24,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_audit.h"
 #include "sopc_common_constants.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_logger.h"
@@ -225,8 +226,19 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
         logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_logs/";
     }
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+
+    SOPC_Audit_Configuration* pAuditCfg = NULL;
+#ifdef S2OPC_HAS_AUDITING
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_Audit_Configuration auditCfg;
+    auditCfg.auditEntryPath = logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath;
+    auditCfg.logMaxBytes = logConfiguration.logSysConfig.fileSystemLogConfig.logMaxBytes;
+    auditCfg.logMaxFiles = logConfiguration.logSysConfig.fileSystemLogConfig.logMaxFiles;
+    auditCfg.options = SOPC_Audit_DefaultSecuOptions;
+    pAuditCfg = &auditCfg;
+#endif
+
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, pAuditCfg);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_Initialize();
@@ -581,6 +593,14 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;
             }
         }
+        else if (strcmp(SOPC_String_GetRawCString(username), "secuAdmin") == 0)
+        {
+            SOPC_ByteString* pwd = &userToken->Password;
+            if (pwd->Length == strlen("1234") && memcmp(pwd->Data, "1234", strlen("1234")) == 0)
+            {
+                *authenticated = SOPC_USER_AUTHENTICATION_OK;
+            }
+        }
         else if (strcmp(SOPC_String_GetRawCString(username), "username") == 0)
         {
             SOPC_ByteString* pwd = &userToken->Password;
@@ -613,7 +633,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
         if (SOPC_STATUS_OK == status)
         {
             // Verify certificate through PKIProvider callback
-            status = SOPC_PKIProvider_ValidateCertificate(pkiProvider, pUserCert, pProfile, &errorStatus);
+            status = SOPC_PKIProvider_ValidateCertificate(pkiProvider, pUserCert, pProfile, &errorStatus, NULL);
             if (SOPC_STATUS_OK == status)
             {
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;

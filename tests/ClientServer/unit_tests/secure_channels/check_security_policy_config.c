@@ -68,7 +68,7 @@ static SOPC_ReturnStatus check_security_combination(char* securityPolicy,
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_security_policy_config_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(&logConfiguration, NULL);
 
     // Endpoint URL
     char* endpointUrl = "opc.tcp://localhost:4841/myEndPoint";

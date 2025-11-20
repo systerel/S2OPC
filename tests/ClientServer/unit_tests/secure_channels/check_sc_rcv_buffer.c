@@ -100,7 +100,7 @@ static void establishSC(void)
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./check_sc_rcv_buffer_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    status = SOPC_Common_Initialize(logConfiguration);
+    status = SOPC_Common_Initialize(&logConfiguration, NULL);
 
     ck_assert(SOPC_STATUS_OK == status);
 

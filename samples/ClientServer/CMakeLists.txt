@@ -277,6 +277,12 @@ if (expat_FOUND)
     target_compile_definitions(s2opc_wrapper_event PRIVATE ${S2OPC_DEFINITIONS})
   endif()
 
+  add_executable(s2opc_wrapper_connect "client_wrapper/examples/connect.c")
+  target_include_directories(s2opc_wrapper_connect PRIVATE s2opc_clientserver)
+  target_link_libraries(s2opc_wrapper_connect PRIVATE s2opc_clientserver)
+  target_compile_options(s2opc_wrapper_connect PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(s2opc_wrapper_connect PRIVATE ${S2OPC_DEFINITIONS})
+
   add_executable(s2opc_wrapper_browse "client_wrapper/examples/browse.c")
   target_include_directories(s2opc_wrapper_browse PRIVATE s2opc_clientserver)
   target_link_libraries(s2opc_wrapper_browse PRIVATE s2opc_clientserver)

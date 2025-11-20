@@ -328,7 +328,7 @@ static SOPC_ReturnStatus Client_Initialize(void)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_client_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ClientConfigHelper_Initialize();
@@ -509,9 +509,9 @@ static bool SOPC_GetClientUserKeyPassword(const SOPC_SecureConnection_Config* se
 }
 #endif // WITH_STATIC_SECURITY_DATA
 
-static bool SOPC_GetClientUser1Password(const SOPC_SecureConnection_Config* secConnConfig,
-                                        char** outUserName,
-                                        char** outPassword)
+static bool SOPC_GetClientUserSecuAdminPassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                                char** outUserName,
+                                                char** outPassword)
 {
     SOPC_UNUSED_ARG(secConnConfig);
     const char* user1 = "user1";
@@ -574,7 +574,7 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     // Set callback necessary to retrieve user password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(&SOPC_GetClientUser1Password);
+        status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(&SOPC_GetClientUserSecuAdminPassword);
     }
 
     if (SOPC_STATUS_OK == status && NULL == xml_client_config_path)

@@ -122,6 +122,8 @@ pys2opc_server-1-browse.py.tap
 pys2opc_server-2-subscribe.py.tap
 pys2opc_server-3-multi-connection-multi-request.py.tap'
 
+AUDIT_TAP_FILES=$'\nclient_server_audit_test.tap'
+
 EVENT_TAP_FILES=$'\nclient_server_events_test.tap'
 
 rm -f "${TAP_DIR}"/*.tap
@@ -146,6 +148,9 @@ if [ -z $S2OPC_PUBSUB_ONLY ]; then
        EXPECTED_TAP_FILES=$CLIENTSERVER_TAP_FILES
    else
        EXPECTED_TAP_FILES=$CLIENTSERVER_TAP_FILES$EVENT_TAP_FILES
+   fi
+   if [ -n "$S2OPC_HAS_AUDITING" ]; then
+       EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$AUDIT_TAP_FILES
    fi
    if [ "$PYS2OPC_LIB_IS_PRESENT" == "0" ]; then
        ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -E 'pys2opc*'

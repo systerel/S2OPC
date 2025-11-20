@@ -200,7 +200,7 @@ file(GLOB SECURE_CHANNELS_BUFFER_TEST
 add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
   ${SECURE_CHANNELS_BUFFER_TEST})
 target_link_libraries(check_sc_rcv_buffer PRIVATE Check::check s2opc_common)
-target_compile_options(check_sc_rcv_buffer PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_options(check_sc_rcv_buffer PRIVATE ${S2OPC_COMPILER_FLAGS} "-US2OPC_HAS_AUDITING")
 target_compile_definitions(check_sc_rcv_buffer PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(check_sc_rcv_buffer PRIVATE "unit_tests/secure_channels/stubs"
   "unit_tests/secure_channels"
@@ -221,7 +221,7 @@ add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}
   ${SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
 target_link_libraries(check_sc_rcv_encrypted_buffer PRIVATE Check::check s2opc_common)
-target_compile_options(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_options(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_COMPILER_FLAGS} "-US2OPC_HAS_AUDITING")
 target_compile_definitions(check_sc_rcv_encrypted_buffer PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(check_sc_rcv_encrypted_buffer PRIVATE "unit_tests/secure_channels/stubs"
   "unit_tests/secure_channels"
@@ -262,7 +262,7 @@ add_executable(test_secure_channels_client ${SOCKETS_SRC}
 target_include_directories(test_secure_channels_client PRIVATE "unit_tests/secure_channels/stubs"
   ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
-target_compile_options(test_secure_channels_client PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_options(test_secure_channels_client PRIVATE ${S2OPC_COMPILER_FLAGS} "-US2OPC_HAS_AUDITING")
 target_compile_definitions(test_secure_channels_client PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(test_secure_channels_client PRIVATE s2opc_common)
 
@@ -273,7 +273,7 @@ add_executable(test_secure_channels_server ${SOCKETS_SRC}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
 target_link_libraries(test_secure_channels_server PRIVATE s2opc_common)
 target_include_directories(test_secure_channels_server PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
-target_compile_options(test_secure_channels_server PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_options(test_secure_channels_server PRIVATE ${S2OPC_COMPILER_FLAGS} "-US2OPC_HAS_AUDITING")
 target_compile_definitions(test_secure_channels_server PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(test_secure_channels_server PRIVATE "unit_tests/secure_channels/stubs"
   ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
@@ -327,6 +327,7 @@ endif()
 
 # Client scenario
 set(TEST_CLIENT_CONFIG_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Test_Config.xml")
+set(TEST_AUDIT_CLIENT_CONFIG_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Audit_Config.xml")
 
 add_executable(toolkit_test_client "validation_tests/client/toolkit_test_client.c"
   "validation_tests/client/wrap_read.c"
@@ -399,6 +400,21 @@ target_link_libraries(toolkit_test_client_multi_sub PRIVATE s2opc_clientserver)
 target_include_directories(toolkit_test_client_multi_sub PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(toolkit_test_client_multi_sub PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_client_multi_sub PRIVATE ${S2OPC_DEFINITIONS})
+
+# Client test for audits
+if (expat_FOUND)
+  add_executable(toolkit_test_client_audit "validation_tests/client/toolkit_test_client_audit.c"
+                 ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+  target_link_libraries(toolkit_test_client_audit PRIVATE s2opc_clientserver)
+  target_include_directories(toolkit_test_client_audit PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
+  target_compile_options(toolkit_test_client_audit PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(toolkit_test_client_audit PRIVATE ${S2OPC_DEFINITIONS})
+
+  add_custom_command(
+  TARGET toolkit_test_client_audit POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${TEST_AUDIT_CLIENT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  )
+endif()
 
 # Client scenario with service faults
 add_executable(toolkit_test_client_service_faults "validation_tests/client/toolkit_test_client_service_faults.c")
@@ -613,10 +629,14 @@ s2opc_validation_test(client_server_test_delete_nodes toolkit_test_client_delete
 s2opc_validation_test(client_service_faults_test toolkit_test_client_service_faults)
 s2opc_validation_test(client_RHE_faults_test toolkit_test_client_rhe_faults)
 
-if(S2OPC_EVENT_MANAGEMENT)
+
+if(expat_FOUND AND S2OPC_EVENT_MANAGEMENT)
   s2opc_validation_test(client_server_events_test toolkit_test_client_events)
 endif()
 
+if(expat_FOUND AND S2OPC_HAS_AUDITING)
+  s2opc_validation_test(client_server_audit_test toolkit_test_client_audit)
+endif()
 
 if (NOT WIN32 AND expat_FOUND)
   add_test(NAME "validation::check_file_transfer"

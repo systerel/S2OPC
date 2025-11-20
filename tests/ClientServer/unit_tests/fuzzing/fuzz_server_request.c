@@ -45,7 +45,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     SOPC_Buffer_SetPosition(sopc_buffer, 0);
 
     uint32_t conn_idx;
-    bool init = SC_InitNewConnection(&conn_idx);
+    bool init = SC_InitNewConnection(&conn_idx, NULL);
     SOPC_ASSERT(init);
     SOPC_SecureConnection* sc = SC_GetConnection(conn_idx);
     sc->isServerConnection = true;

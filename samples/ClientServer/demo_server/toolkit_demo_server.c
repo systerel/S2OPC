@@ -28,6 +28,7 @@
 #include "sopc_address_space_access.h"
 #include "sopc_askpass.h"
 #include "sopc_assert.h"
+#include "sopc_audit.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -204,8 +205,17 @@ int main(int argc, char* argv[])
     char* logDirPath = Server_ConfigLogPath(argv[0]);
     logConfig.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
 
+    SOPC_Audit_Configuration* pAuditCfg = NULL;
+#ifdef S2OPC_HAS_AUDITING
+    // Initialize the toolkit library and define the log configuration
+    SOPC_Audit_Configuration auditCfg;
+    auditCfg.auditEntryPath = NULL;
+    auditCfg.options = SOPC_Audit_DefaultSecuOptions;
+    pAuditCfg = &auditCfg;
+#endif
+
     /* Initialize the server library (start library threads) */
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfig);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfig, pAuditCfg);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_Initialize();

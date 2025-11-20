@@ -185,6 +185,7 @@ void suite_test_check_sockets(int* index)
                       clientSecureChannelConnectionId, &ev2);
         serverSocketIdx = (uint32_t) ev1->auxParam;
         clientSocketIdx = (uint32_t) ev2->auxParam;
+        SOPC_Free((void*) ev1->params);
         SOPC_Free(ev1);
         SOPC_Free(ev2);
     }

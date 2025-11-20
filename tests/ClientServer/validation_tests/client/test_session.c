@@ -80,9 +80,9 @@ static void SOPC_ClientConnectionEventCb(SOPC_ClientConnection* config,
     ck_assert(false);
 }
 
-static bool SOPC_GetClientUser1Password(const SOPC_SecureConnection_Config* secConnConfig,
-                                        char** outUserName,
-                                        char** outPassword)
+static bool SOPC_GetClientUserSecuAdminPassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                                char** outUserName,
+                                                char** outPassword)
 {
     SOPC_UNUSED_ARG(secConnConfig);
     const char* user1 = "user";
@@ -109,7 +109,7 @@ START_TEST(test_anonymous)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_session_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -162,7 +162,7 @@ START_TEST(test_username_password)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_session_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -170,7 +170,7 @@ START_TEST(test_username_password)
     status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     // Set callback necessary to retrieve user password (from environment variable)
-    status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(&SOPC_GetClientUser1Password);
+    status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(&SOPC_GetClientUserSecuAdminPassword);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Load client certificate and key from files */
@@ -218,7 +218,7 @@ START_TEST(test_auto_disco)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_session_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -252,7 +252,7 @@ START_TEST(test_auto_disco_and_sub)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_auto_disco_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);

@@ -1164,7 +1164,7 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
         {
             profile.bApplyLeafProfile = true;
             /* Validate the certificate */
-            status = SOPC_PKIProvider_ValidateCertificate(pTmpPKI, pCert, &profile, &validationError);
+            status = SOPC_PKIProvider_ValidateCertificate(pTmpPKI, pCert, &profile, &validationError, NULL);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Logger_TraceError(

@@ -1126,7 +1126,7 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
                                              .bBackwardInteroperability = false, // Disable CA interop
                                              .chainProfile = &chainProfile,
                                              .leafProfile = &leafProfile};
-        status = SOPC_PKIProvider_ValidateCertificate(pTrustListCtx->pPKI, pNewCert, &pkiProfile, &errorCode);
+        status = SOPC_PKIProvider_ValidateCertificate(pTrustListCtx->pPKI, pNewCert, &pkiProfile, &errorCode, NULL);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

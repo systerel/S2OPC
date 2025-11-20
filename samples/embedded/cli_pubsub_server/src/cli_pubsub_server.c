@@ -869,7 +869,7 @@ void SOPC_Platform_Main(void)
     logConfig.logSystem = SOPC_LOG_SYSTEM_USER;
     logConfig.logLevel = SOPC_LOG_LEVEL_WARNING;
     logConfig.logSysConfig.userSystemLogConfig.doLog = &log_UserCallback;
-    status = SOPC_CommonHelper_Initialize(&logConfig);
+    status = SOPC_CommonHelper_Initialize(&logConfig, NULL);
     SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_CommonHelper_Initialize failed");
 
     gLastReceptionDateMs = SOPC_HighRes_TimeReference_Create();

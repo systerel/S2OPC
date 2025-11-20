@@ -204,7 +204,7 @@ int main(void)
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_client_service_faults_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(&logConfiguration, NULL);
     if (SOPC_STATUS_OK != status)
     {
         printf(">>Test_Client_Toolkit: Common initialization Failed\n");

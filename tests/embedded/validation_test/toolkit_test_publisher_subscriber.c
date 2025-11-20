@@ -239,7 +239,7 @@ void suite_test_publisher_subscriber(int* index)
     logConfiguration.logSystem = SOPC_LOG_SYSTEM_USER;
     logConfiguration.logSysConfig.userSystemLogConfig.doLog = (SOPC_Log_UserDoLog*) &log_UserCallback;
 
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(&logConfiguration, NULL);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfig_GetStatic();

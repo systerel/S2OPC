@@ -131,7 +131,7 @@ int main(int argc, char* const argv[])
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = log_path;
     logConfiguration.logLevel = SOPC_LOG_LEVEL_INFO;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(&logConfiguration, NULL);
     t0 = SOPC_HighRes_TimeReference_Create();
 
     if (SOPC_STATUS_OK != status)

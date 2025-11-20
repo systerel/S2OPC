@@ -151,7 +151,7 @@ START_TEST(cert_invalid_application_uri)
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
     ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
     ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_UriInvalid, err);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
@@ -180,7 +180,7 @@ START_TEST(cert_valid_application_uri)
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
     ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
     ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
     SOPC_KeyManager_Certificate_Free(pCertToValidate);
@@ -208,7 +208,7 @@ START_TEST(cert_invalid_hostName)
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
     ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
     ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_HostNameInvalid, err);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
@@ -237,7 +237,7 @@ START_TEST(cert_valid_hostName)
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
     ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
     ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
     SOPC_KeyManager_Certificate_Free(pCertToValidate);
@@ -270,7 +270,7 @@ START_TEST(cert_invalid_keyUsage)
     ck_assert((SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
                SOPC_PKI_KU_NON_REPUDIATION) == pLeafProfile->keyUsage);
     pLeafProfile->extendedKeyUsage = SOPC_PKI_EKU_NONE;
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_UseNotAllowed, err);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
@@ -305,7 +305,7 @@ START_TEST(cert_valid_keyUsage)
                       SOPC_PKI_KU_NON_REPUDIATION),
                      pLeafProfile->keyUsage);
     pLeafProfile->extendedKeyUsage = SOPC_PKI_EKU_NONE;
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
     SOPC_KeyManager_Certificate_Free(pCertToValidate);
@@ -336,7 +336,7 @@ START_TEST(cert_invalid_extendedKeyUsage)
     ck_assert_int_eq(SOPC_PKI_EKU_CLIENT_AUTH, pLeafProfile->extendedKeyUsage);
     pLeafProfile->keyUsage = SOPC_PKI_KU_NONE;
     pLeafProfile->pkAlgo = SOPC_PKI_PK_RSA;
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_UseNotAllowed, err);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
@@ -368,7 +368,7 @@ START_TEST(cert_valid_extendedKeyUsage)
     ck_assert_int_eq(SOPC_PKI_EKU_SERVER_AUTH, pLeafProfile->extendedKeyUsage);
     pLeafProfile->keyUsage = SOPC_PKI_KU_NONE;
     pLeafProfile->pkAlgo = SOPC_PKI_PK_RSA;
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
     SOPC_KeyManager_Certificate_Free(pCertToValidate);
@@ -392,7 +392,7 @@ START_TEST(cert_invalid_security_policy_mdsig)
                                         .extendedKeyUsage = SOPC_PKI_EKU_NONE,
                                         .sanApplicationUri = NULL,
                                         .sanURL = NULL};
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, &leafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, &leafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_PolicyCheckFailed, err);
     SOPC_KeyManager_Certificate_Free(pCertToValidate);
@@ -416,13 +416,13 @@ START_TEST(cert_invalid_security_policy_keySize)
                                         .extendedKeyUsage = SOPC_PKI_EKU_NONE,
                                         .sanApplicationUri = NULL,
                                         .sanURL = NULL};
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, &leafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, &leafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_PolicyCheckFailed, err);
     /* Invalid RSAMaximumKeySize (4096 is nominal for Basic256Sha256) */
     leafProfile.RSAMinimumKeySize = SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits;
     leafProfile.RSAMaximumKeySize = 1000;
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, &leafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, &leafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_PolicyCheckFailed, err);
     SOPC_KeyManager_Certificate_Free(pCertToValidate);
@@ -449,7 +449,7 @@ START_TEST(cert_valid_security_policy)
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
     ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
-    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
+    status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
     SOPC_KeyManager_Certificate_Free(pCertToValidate);
@@ -479,7 +479,7 @@ START_TEST(functional_test_from_list)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, error);
     SOPC_CertificateList* pRejectedList = NULL;
@@ -514,7 +514,7 @@ START_TEST(functional_test_from_list)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(1, updateCheck);
     /* Validation is OK */
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* The rejected list is now empty */
     SOPC_KeyManager_Certificate_Free(pRejectedList);
@@ -554,7 +554,7 @@ START_TEST(functional_test_from_store)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_PKIProvider_DeleteProfile(&pProfile);
@@ -678,11 +678,11 @@ START_TEST(functional_test_pki_permissive)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
     /* Validation OK (permissive PKI) */
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error, NULL);
     ck_assert_int_eq(0, error);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* Even if with invalid arguments */
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, NULL, NULL, NULL);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, NULL, NULL, NULL, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(0, error);
     /* Empty lists */
@@ -707,7 +707,7 @@ START_TEST(functional_test_pki_permissive)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(1, updateCheck);
     /* Validation NOK (missing CRL )*/
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, error);
 
@@ -955,12 +955,12 @@ START_TEST(functional_test_pki_without_revocation_list)
     status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* Validation failed as no CRL is provided for the trusted root */
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, error);
     /* Disable the revocation check => No error */
     pProfile->chainProfile->bDisableRevocationCheck = true;
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_KeyManager_Certificate_Free(pTrustedRoot);

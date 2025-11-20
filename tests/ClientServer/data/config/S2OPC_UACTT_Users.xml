@@ -12,6 +12,10 @@
     <UserPassword user="user2" hash="196033013b0257d030f14f53d516ba7c7e5f7347f485edf82d455bb29b57a27f" salt="bf7d2bc1e1e7e330199439c0e58e3a6b">
       <UserAuthorization write="true" read="true" execute="true" addnode="true" receive_events="true" deletenode="true" historyread="true"/>
     </UserPassword>
+    <!-- "secuAdmin" pwd=1234 -->
+    <UserPassword user="secuAdmin" hash="847d892ffaccb9822d417866f9d491389b29134b3c73c3a429ac95c627f9d40a" salt="17faf802f81c2503d3043042e79004b4">
+      <UserAuthorization write="true" read="true" execute="true" addnode="true" receive_events="true"/>
+    </UserPassword>
     <!-- user="username" pwd="password" -->
     <UserPassword user="username" hash="5e8af97d601661db77267ada40909a7fffdd34db4f45afcf63bf1b07773117d1" salt="df06802c57675f3924e02fa5ab290e7d">
       <!-- user with no right: refused with use access denied -->

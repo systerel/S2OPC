@@ -1247,7 +1247,7 @@ static void setup(void)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./check_wrapper_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 }
 

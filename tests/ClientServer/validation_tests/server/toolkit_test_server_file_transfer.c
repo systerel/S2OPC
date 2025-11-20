@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     log_config.logLevel = SOPC_LOG_LEVEL_DEBUG;
     gLogDirPath = Server_ConfigLogPath(argv[0]);
     log_config.logSysConfig.fileSystemLogConfig.logDirPath = gLogDirPath;
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config, NULL);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_Initialize();

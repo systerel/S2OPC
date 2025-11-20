@@ -697,7 +697,7 @@ START_TEST(test_pki_cert_validation_None)
 {
     uint32_t errorStatus;
     SOPC_ReturnStatus status =
-        SOPC_CryptoProvider_Certificate_Validate(crypto, pki, SOPC_PKI_TYPE_CLIENT_APP, crt_pub, &errorStatus);
+        SOPC_CryptoProvider_Certificate_Validate(crypto, pki, SOPC_PKI_TYPE_CLIENT_APP, crt_pub, &errorStatus, NULL);
     // Checks that the PKI validates our server.pub with our cacert.der
     ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
 }

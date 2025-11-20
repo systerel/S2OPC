@@ -405,7 +405,7 @@ void SOPC_Platform_Main(void)
     SOPC_Log_Configuration logCfg = {.logLevel = SOPC_LOG_LEVEL_WARNING,
                                      .logSystem = SOPC_LOG_SYSTEM_USER,
                                      .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
-    status = SOPC_CommonHelper_Initialize(&logCfg);
+    status = SOPC_CommonHelper_Initialize(&logCfg, NULL);
     SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_CommonHelper_Initialize failed");
 
     /* Create thread for Command Line Input management*/

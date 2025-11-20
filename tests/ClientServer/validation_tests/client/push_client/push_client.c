@@ -633,7 +633,7 @@ int main(int argc, char* const argv[])
         SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
         logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./push_client_logs/";
         logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-        status = SOPC_CommonHelper_Initialize(&logConfiguration);
+        status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     }
 
     // Initialize client

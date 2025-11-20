@@ -79,7 +79,7 @@ bool PubSub_common_init(void)
     logConfiguration.logLevel = SOPC_LOG_LEVEL_ERROR;
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = logPath;
 
-    bool res = (SOPC_STATUS_OK == SOPC_Common_Initialize(logConfiguration));
+    bool res = (SOPC_STATUS_OK == SOPC_Common_Initialize(&logConfiguration, NULL));
 
     if (!res)
     {

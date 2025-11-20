@@ -37,6 +37,7 @@ import socket
 import signal
 import sys
 import argparse
+import re
 from random import randint
 from random import seed
 from tap_logger import TapLogger
@@ -55,6 +56,8 @@ CREATE_SESSION_MSG = b"\x4d\x53\x47\x46\xc7\x00\x00\x00\xbf\xab\x84\x6a\x11\x5f\
 ACTIVATE_SESSION_MSG = b"\x4d\x53\x47\x46\x6c\x00\x00\x00\xbf\xab\x84\x6a\x11\x5f\xce\x37\x03\x00\x00\x00\x03\x00\x00\x00\x01\x00\xd3\x01\x02\x00\x00\x3a\x04\x24\x3f\xd9\x2c\xd0\x1e\x1e\x8c\xda\x01\x02\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\x88\x13\x00\x00\x00\x00\x00\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x41\x01\x01\x0d\x00\x00\x00\x09\x00\x00\x00\x61\x6e\x6f\x6e\x79\x6d\x6f\x75\x73\xff\xff\xff\xff\xff\xff\xff\xff"
 CLOSE_SESSION_MSG = b"\x4d\x53\x47\x46\x3f\x00\x00\x00\x30\x80\xb7\x75\x4e\x01\xc2\xe7\x05\x00\x00\x00\x05\x00\x00\x00\x01\x00\xd9\x01\x02\x00\x00\xc4\xcc\x27\x76\x44\x73\x45\x91\xaf\x8c\xda\x01\x04\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\x88\x13\x00\x00\x00\x00\x00\x00"
 CLOSE_CHANNEL_MSG = b"\x43\x4c\x4f\x46\x39\x00\x00\x00\x30\x80\xb7\x75\x4e\x01\xc2\xe7\x06\x00\x00\x00\x06\x00\x00\x00\x01\x00\xc4\x01\x00\x00\x4b\xfa\x60\x91\xaf\x8c\xda\x01\x01\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x00\x00\x00\x00"
+CLOSE_CHANNEL_MSG_2ND_POSITION = b"\x43\x4c\x4f\x46\x39\x00\x00\x00\x30\x80\xb7\x75\x4e\x01\xc2\xe7\x02\x00\x00\x00\x02\x00\x00\x00\x01\x00\xc4\x01\x00\x00\x4b\xfa\x60\x91\xaf\x8c\xda\x01\x01\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\x00\x00\x00\x00\x00\x00\x00"
+CLOSE_SESSION_MSG_4TH_POSITION = b"\x4d\x53\x47\x46\x3f\x00\x00\x00\x30\x80\xb7\x75\x4e\x01\xc2\xe7\x04\x00\x00\x00\x04\x00\x00\x00\x01\x00\xd9\x01\x02\x00\x00\xc4\xcc\x27\x76\x44\x73\x45\x91\xaf\x8c\xda\x01\x04\x00\x00\x00\x00\x00\x00\x00\xff\xff\xff\xff\x88\x13\x00\x00\x00\x00\x00\x00"
 
 # First memory leak found with a poor gan: Ticket 1434 gitlab, https://gitlab.com/systerel/S2OPC/-/issues/1434
 BROWSE_MSG_BUG1 = b"\x4d\x53\x47\x46\xa7\x00\x00\x00\xc9\xc8\x47\x2e\x8c\xa7\x95\xf9\x04\x00\x00\x00\x04\x00\x00\x00\x80\x80\x80\x80\x80\x80\x80\xf8\xc3\xf8\xe3\xa4\xce\xb9\x80\x8c\xab\xff\x81\x80\xd2\x80\x80\x80\x80\x80\x80\xff\xff\xff\xff\xf6\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x82\x80\x80\x82\x80\x80\x80\x80\xb7\x80\x80\x80\x81\x80\x80\x80\x81\x80\x97\x82\x80\x80\x80\x80\x80\x85\xae\xfe\x88\x84\x86\x80\x80\x81\x80\x80\xbf\x80\x80\x80\x8b\x80\x81\x80\x80\x81\x81\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\x80\xb4\x80\x80\x80\x80\x80\x80\x80\x88\x80\x80\x80\x80\x88\x80\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80\x92\x80\x80"
@@ -236,7 +239,7 @@ def random_msg_browse():
     return browse_msg
 
 
-def creating_msg_closesession(ChannelID, TokenID, IdentifierNumeric):
+def creating_msg_closesession(baseMessage, ChannelID, TokenID, IdentifierNumeric):
     """
     Inputs: "ChannelId" and "TokenID" from the return of "get_security_tokens" function. "IdentifierNumeric" from the return
     of "get_identifier_numeric"
@@ -245,8 +248,7 @@ def creating_msg_closesession(ChannelID, TokenID, IdentifierNumeric):
 
     Return: CloseSession message modified in bytes
     """
-    global CLOSE_SESSION_MSG
-    tmp = bytearray(CLOSE_SESSION_MSG)
+    tmp = bytearray(baseMessage)
     tmp[8:12] = ChannelID
     tmp[12:16] = TokenID
     tmp[31:35] = IdentifierNumeric
@@ -254,7 +256,7 @@ def creating_msg_closesession(ChannelID, TokenID, IdentifierNumeric):
 
 
 
-def creating_msg_closechannel(ChannelID, TokenID):
+def creating_msg_closechannel(baseMessage, ChannelID, TokenID):
     """
     Inputs: "ChannelId" and "TokenID" from the return of "get_security_tokens" function.
 
@@ -262,34 +264,43 @@ def creating_msg_closechannel(ChannelID, TokenID):
 
     Return: CloseSecureChannel modified in bytes
     """
-    global CLOSE_CHANNEL_MSG
-    tmp = bytearray(CLOSE_CHANNEL_MSG)
+    tmp = bytearray(baseMessage)
     tmp[8:12] = ChannelID
     tmp[12:16] = TokenID
     return bytes(tmp)
 
+def establish_channel():
+    status = 1
+    ChannelID, TokenID = None , None
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.connect((HOST, PORT))
+        # Hello request and answer
+        sock.sendall(HELLO_MSG)
+        hello_answer = sock.recv(1024)
+        # OpenSecureChannel request and answer
+        sock.sendall(OPEN_SECURE_CHANNEL_MSG)
+        open_secure_answer = sock.recv(1024)
+        ChannelID, TokenID = get_security_tokens(open_secure_answer)
+        status = 0
+    except Exception as e:
+        sock.close()
+        signal.alarm(0)
+        raise e
+
+    return (status, ChannelID, TokenID, sock)
 
 def establish_connection():
     """
     Output: (status, (ChannelID, TokenID, IdentifierNumeric, socket))
 
-    Establish conection with the server. return the ChannelID, TokenID and IdentifierNumeric to send faulty packet and close properly the session.
-    A status is also return, 0 in case of successfull connection and session activation, 100 in case of timeout and 1 in case of exception.
+    Establish connection with the server. return the ChannelID, TokenID and IdentifierNumeric to send faulty packet and close properly the session.
+    A status is also returned, 0 in case of successful connection and session activation, 100 in case of timeout and 1 in case of exception.
     """
-    status = 1
-    ChannelID, TokenID, IdentifierNumeric = None , None , None
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    status, ChannelID, TokenID, sock = 1, None , None, None
     try:
-        sock.connect((HOST, PORT))
-
-        # Hello request and answer
-        sock.sendall(HELLO_MSG)
-        hello_answer = sock.recv(1024)
-
-        # OpenSecureChannel request and answer
-        sock.sendall(OPEN_SECURE_CHANNEL_MSG)
-        open_secure_answer = sock.recv(1024)
-        ChannelID, TokenID = get_security_tokens(open_secure_answer)
+        # Establish channel
+        (status, ChannelID, TokenID, sock) = establish_channel()
 
         # CreateSession request and answer
         sock.sendall(creating_msg_createsession(ChannelID, TokenID))
@@ -299,11 +310,11 @@ def establish_connection():
         IdentifierNumeric = get_identifier_numeric(session_answer)
         sock.sendall(creating_msg_activatesession(ChannelID, TokenID, IdentifierNumeric))
         activate_answer = sock.recv(1024)
-        status = 0
 
     except TimeoutError as browse_err:
         status = 100
-        sock.close()
+        if sock is not None:
+            sock.close()
 
     # The connection has been reset by the server
     except ConnectionResetError as reset:
@@ -311,8 +322,8 @@ def establish_connection():
 
     # Problem with the connection
     except Exception as e:
-        status = 1
-        sock.close()
+        if sock is not None:
+            sock.close()
         signal.alarm(0)
         raise e
 
@@ -365,11 +376,11 @@ def wait_response(channelContext):
 
         try :
             # CloseSession
-            sock.sendall(creating_msg_closesession(ChannelID, TokenID, IdentifierNumeric))
+            sock.sendall(creating_msg_closesession(CLOSE_SESSION_MSG, ChannelID, TokenID, IdentifierNumeric))
             close_session_answer = sock.recv(1024)
 
             # CloseChannel
-            sock.sendall(creating_msg_closechannel(ChannelID, TokenID))
+            sock.sendall(creating_msg_closechannel(CLOSE_CHANNEL_MSG, ChannelID, TokenID))
 
         # If an error message is sent from server it will cause it to close socket connection and lead to broken pipe
         # If there is no err message then close channel
@@ -430,17 +441,18 @@ def multiple_client(scenario_context, logger) :
 
     # List that will record all the browse requests
     l_fuzz_requests = []
+    status = 0
     with open(FILE_BROWSE_REQUESTS, '+wb') as file:
         for _ in range(NUMBER_OF_BROWSE_REQUEST):
             browse_msg = random_msg_browse()
             scenario_context=(browse_msg, True, False, None, None)
             l_fuzz_requests.append(browse_msg)
-            single_client(scenario_context, logger)
+            status = status + single_client(scenario_context, logger)
             # Log the different packets
             file.write(browse_msg)
             file.write(b"\x99\x98\x97\x96") # Putting that at the end of each request thus we can determinate the end of each request inside a file
                                             # Otherwise some bytes could represent an \n preventing the reconstruction of the packets.
-
+    return status
 
 # Handler to interrupt a function after a SIGALARM
 def timeout_handler(num, stack):
@@ -453,8 +465,12 @@ def single_client(scenario_context, logger) :
     signal.alarm(TIMEOUT)
     (status, channelContext) = establish_connection()
     if not expect_connection :
-        logger.add_test("Establish Connection failed", status == 100)
-        status = 0
+        res = (status == 100)
+        logger.add_test("Establish Connection failed (expected)", res)
+        if res:
+            status = 0
+        else:
+            status = 1
     else :
         logger.add_test("Establish Connection succeed", status == 0)
         status = send_request(browse_message, channelContext)
@@ -472,9 +488,82 @@ def single_client(scenario_context, logger) :
             logger.add_test(f"""Expected diagnostic from server match. expected {expected_diagnostic}
                             received {bytes(received_diagnostic_info) if received_diagnostic_info != None else None}""",
                             not(status & STATUS_CHECK_RESPONSE_DIAGNOSTIC_MASK))
-
+        else:
+            # ignore the server response status
+            status = 0
     signal.alarm(0)
     return status
+
+###############################################################################
+# Audit event test functions and declarations
+###############################################################################
+
+# Audit log messages.
+AUDIT_FAIL_CLO = r'AUDIT\s*{\s*"0:ReceiveTime":".*?",\s*"0:ClientAuditEntryId":".*?",\s*"0:SourceNode":"i=2253",\s*"0:Status":"false",\s*"0:Time":".*?",\s*'\
+                 r'"0:SourceName":"SecureChannel/CloseSecureChannel",\s*"0:EventId":".*?",\s*"0:ActionTimeStamp":".*?",\s*'\
+                 r'"0:LocalTime":"<ExtensionObject>",\s*"0:Severity":"10",\s*"0:EventType":"i=2059",\s*'\
+                 r'"0:Message":"[^"]*? Failure .*?'
+
+AUDIT_FAIL_CLOSE_SESSION = r'AUDIT\s*{\s*"0:ReceiveTime":".*?",\s*"0:ClientAuditEntryId":".*?",\s*"0:SourceNode":"i=2253",\s*"0:Status":"false",\s*'\
+                           r'"0:EventId":".*?",\s*"0:SessionId":"i=0",\s*"0:SourceName":"Session/CloseSession",\s*"0:Time":".*?",\s*"0:ActionTimeStamp":".*?",\s*'\
+                           r'"0:LocalTime":"<ExtensionObject>",\s*"0:Severity":"10",\s*"0:EventType":"i=2069",\s*'\
+                           r'"0:Message":"[^"]*? Session with invalid id .*'
+
+def run_scenario(scenario, logger) :
+    signal.alarm(TIMEOUT)
+    logger.begin_section(f"Faulty packet audit scenario {scenario}")
+    sock = None
+    status = 1
+    # 1. Send CLO BAD channelId.
+    if scenario == 1:
+        print("Scenario 1 playing.")
+        (status, ChannelID, TokenID, sock) = establish_channel()
+        logger.add_test("Establish Connection success", status == 0)
+        if status == 0:
+            try:
+                # CLO request and answer
+                ChannelID = b"\x00\x00\x00\x00"
+                sock.sendall(creating_msg_closechannel(CLOSE_CHANNEL_MSG_2ND_POSITION, ChannelID, TokenID))
+                clo_answer = sock.recv(1024)
+            except socket.error as e:
+                status = 1
+                raise
+
+    # 2. OPN, CreateSession, ActivateSession, CloseSession BAD.
+    elif scenario == 2:
+        print("Scenario 2 playing.")
+        (status, ChannelID, TokenID, sock) = establish_channel()
+        logger.add_test("Establish Connection success", status == 0)
+        if status == 0:
+            try:
+                # CreateSession request and answer
+                sock.sendall(creating_msg_createsession(ChannelID, TokenID))
+                session_answer = sock.recv(4096) # The answer is more or less 3000 bytes
+                # ActivateSession
+                IdentifierNumeric = get_identifier_numeric(session_answer)
+                sock.sendall(creating_msg_activatesession(ChannelID, TokenID, IdentifierNumeric))
+                activate_answer = sock.recv(1024)
+                # Bad CloseSession: get bad identifier, the one containing the sessionId is the response of CreateSession.
+                BadIdentifierNumeric = b"\x00\x00\x00\x00"
+                sock.sendall(creating_msg_closesession(CLOSE_SESSION_MSG_4TH_POSITION, ChannelID, TokenID, BadIdentifierNumeric))
+                close_session_answer = sock.recv(1024)
+                status = 0
+            except socket.error as e:
+                status = 1
+                raise
+    else:
+        print("Invalid scenario")
+        return 1
+
+    sock.close()
+    signal.alarm(0)
+    return status
+
+def parseLog(file, message):
+    pattern = re.compile(message)
+    with open(file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        return bool(pattern.search(content))
 
 ###############################################################################
 # MAIN
@@ -483,27 +572,60 @@ def single_client(scenario_context, logger) :
 if __name__ == '__main__':
     # Specifying the system to use SIGALARM to stop a function
     signal.signal(signal.SIGALRM, timeout_handler)
-    res = 0
+    globRes = 0
     parser = argparse.ArgumentParser(description="""Run single or multiple client connected to a server then send a malformed packet""")
     parser.add_argument('--scenario', required=True, type=int, help=f"Scenario which is run can take value from 1 to {len(CONTEXT_SCENARIO)}")
+    parser.add_argument('--logFile', required=False, type=str, help=f"Audit log file")
     args = parser.parse_args()
 
-    if not ((args.scenario - 1) in range(len(CONTEXT_SCENARIO))):
-        print(f"Invalid scenario {args.scenario}, accepted scenario go from 1 to {len(CONTEXT_SCENARIO)}")
+    if ((args.scenario - 1) in range(len(CONTEXT_SCENARIO))):
+        # Faulty packet
+        logger = TapLogger("faulty_packet_scen_%d.tap" %(args.scenario))
+
+        is_single, id, client_context = CONTEXT_SCENARIO[args.scenario - 1]
+        logger.begin_section(f"faulty packet scenario {id}")
+        try :
+            if is_single:
+                res = single_client(client_context, logger)
+            else :
+                res = multiple_client(client_context, logger)
+            if res != 0:
+                globRes = 1
+        except Exception as e :
+            logger.add_test(f"Exception occur {e}", False)
+            sys.exit(1)
+
+    elif (args.scenario - 1 == 5):
+        if args.logFile is None:
+            print("Please specify the audit log file with option --logFile for this test")
+            sys.exit(10)
+        # Audit test with faulty packets
+        log_file = args.logFile
+        logger = TapLogger("faulty_packet_test_audit_events.tap")
+
+        res = run_scenario(1, logger)
+        logger.add_test("Test success", res == 0)
+        if res != 0:
+            globRes = 1
+
+        res = parseLog(log_file, AUDIT_FAIL_CLO)
+        logger.add_test("Parsed event fail CLO", res == True)
+        if not res:
+            globRes = 1
+
+        res = run_scenario(2, logger)
+        logger.add_test("Test success", res == 0)
+        if res != 0:
+            globRes = 1
+
+        res = parseLog(log_file, AUDIT_FAIL_CLOSE_SESSION)
+        logger.add_test("Parsed event fail CloseSession", res == True)
+        if not res:
+            globRes = 1
+
+    else:
+        # Invalid scenario number
         sys.exit(1)
 
-    logger = TapLogger("faulty_packet_scen_%d.tap" %(args.scenario))
-
-    is_single, id, client_context = CONTEXT_SCENARIO[args.scenario - 1]
-    logger.begin_section(f"faulty packet scenario {id}")
-    try :
-        if is_single:
-            res = single_client(client_context, logger)
-        else :
-            res = multiple_client(client_context, logger)
-    except Exception as e :
-        logger.add_test(f"Exception occur {e}", False)
-        sys.exit(1)
-
-    sys.exit(res)
-
+    logger.finalize_report(globRes != 0)
+    sys.exit(globRes)

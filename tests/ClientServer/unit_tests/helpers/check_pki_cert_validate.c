@@ -75,7 +75,7 @@ START_TEST(certificate_validation_one_ca_trusted_only_in_chain)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // 1st validation: Root CA trusted only
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &validation_error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &validation_error, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // 2nd validation: Intermediate CA trusted only
@@ -84,7 +84,7 @@ START_TEST(certificate_validation_one_ca_trusted_only_in_chain)
                                              int_cli_cacrl, cacert, cacrl, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(1, updateCheck);
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &validation_error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &validation_error, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Free
@@ -138,7 +138,7 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_SetUpdateCb(pPKI, &update_callback, (uintptr_t) &updateCheck);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen0, pProfile, &validation_error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen0, pProfile, &validation_error, NULL);
     // Validation result: shall be OK.
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -149,7 +149,7 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
                                              self_signed_ca_pathLen0, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(1, updateCheck);
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen0, pProfile, &validation_error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen0, pProfile, &validation_error, NULL);
     // Validation result: shall be NOK cert untrusted
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, validation_error);
@@ -160,7 +160,7 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
                                              NULL, NULL, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(2, updateCheck);
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen1, pProfile, &validation_error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen1, pProfile, &validation_error, NULL);
     // Validation result: shall be NOK
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_UseNotAllowed, validation_error);
@@ -171,7 +171,8 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
                                              self_signed_ca_missingPathLen, NULL, NULL, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(3, updateCheck);
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_missingPathLen, pProfile, &validation_error);
+    status =
+        SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_missingPathLen, pProfile, &validation_error, NULL);
     // Validation result: shall be NOK
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_UseNotAllowed, validation_error);
@@ -217,7 +218,7 @@ START_TEST(certificate_validation_crl_not_renewed)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Validate. It shall fail there since the CRL has not been renewed.
-    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &validation_error);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &validation_error, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, validation_error);
 

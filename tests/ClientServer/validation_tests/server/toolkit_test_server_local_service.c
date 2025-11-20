@@ -1072,7 +1072,7 @@ int main(int argc, char* argv[])
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_local_service_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_Initialize();

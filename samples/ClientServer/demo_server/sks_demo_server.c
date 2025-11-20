@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
     logConfig.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
 
     /* Initialize the server library (start library threads) */
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfig);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfig, NULL);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_Initialize();

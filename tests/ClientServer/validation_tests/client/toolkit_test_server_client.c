@@ -582,7 +582,7 @@ START_TEST(test_server_client)
     log_config.logLevel = SOPC_LOG_LEVEL_DEBUG;
     log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_client_logs/";
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config, NULL);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_Initialize();

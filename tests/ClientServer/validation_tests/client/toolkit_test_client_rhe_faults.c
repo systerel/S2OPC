@@ -271,7 +271,7 @@ int main(void)
         SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
         logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_client_rhe_faults_logs/";
         logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-        status = SOPC_Common_Initialize(logConfiguration);
+        status = SOPC_Common_Initialize(&logConfiguration, NULL);
     }
 
     /* Init stack configuration */

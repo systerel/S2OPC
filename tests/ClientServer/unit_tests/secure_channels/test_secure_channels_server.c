@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
         SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
         logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_secure_channel_server_logs/";
         logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-        status = SOPC_Common_Initialize(logConfiguration);
+        status = SOPC_Common_Initialize(&logConfiguration, NULL);
     }
 
     // Init toolkit configuration

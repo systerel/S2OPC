@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
         printf("******* Failed to configure message size of S2OPC\n");
         return 0;
     }
-    status = SOPC_CommonHelper_Initialize(&logConfig);
+    status = SOPC_CommonHelper_Initialize(&logConfig, NULL);
     SOPC_Free(logDirPath);
     logDirPath = NULL;
     if (SOPC_STATUS_OK == status)

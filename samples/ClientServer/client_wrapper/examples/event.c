@@ -582,7 +582,7 @@ int main(int argc, char* const argv[])
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
 
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ClientConfigHelper_Initialize();

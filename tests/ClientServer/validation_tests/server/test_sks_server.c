@@ -306,7 +306,7 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
     }
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_Initialize();
@@ -531,7 +531,7 @@ static SOPC_ReturnStatus authentication_test_sks(SOPC_UserAuthentication_Manager
         if (SOPC_STATUS_OK == status)
         {
             // Verify certificate through PKIProvider callback
-            status = SOPC_PKIProvider_ValidateCertificate(pkiProvider, pUserCert, pProfile, &errorStatus);
+            status = SOPC_PKIProvider_ValidateCertificate(pkiProvider, pUserCert, pProfile, &errorStatus, NULL);
             if (SOPC_STATUS_OK == status)
             {
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;

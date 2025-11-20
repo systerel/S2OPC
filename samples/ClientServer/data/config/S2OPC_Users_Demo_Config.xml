@@ -17,7 +17,7 @@
     </UserPassword>
     <!-- "secuAdmin" pwd=1234 -->
     <UserPassword user="secuAdmin" hash="847d892ffaccb9822d417866f9d491389b29134b3c73c3a429ac95c627f9d40a" salt="17faf802f81c2503d3043042e79004b4">
-      <UserAuthorization write="true" read="true" execute="true" addnode="true"/>
+      <UserAuthorization write="true" read="true" execute="true" addnode="true" receive_events="true"/>
     </UserPassword>
   </UserPasswordConfiguration>
   <UserCertificates>

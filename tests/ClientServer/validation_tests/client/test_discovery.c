@@ -46,7 +46,7 @@ START_TEST(test_getEndpoints)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_getEndpoints_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -149,7 +149,7 @@ START_TEST(test_registerServer)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_registerServer_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -204,7 +204,7 @@ START_TEST(test_registerServer2)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_registerServer2_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);

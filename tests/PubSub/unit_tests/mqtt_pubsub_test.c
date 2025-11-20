@@ -260,7 +260,7 @@ int main(void)
     SOPC_Log_Configuration logCfg;
     logCfg.logSystem = SOPC_LOG_SYSTEM_USER;
     logCfg.logSysConfig.userSystemLogConfig.doLog = &logCb;
-    SOPC_Common_Initialize(logCfg);
+    SOPC_Common_Initialize(&logCfg, NULL);
 #endif
     TCase* tc_client = tcase_create("Mqtt client creation and initialisation");
     suite_add_tcase(suite, tc_client);

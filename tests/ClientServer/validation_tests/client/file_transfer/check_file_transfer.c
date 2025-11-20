@@ -932,7 +932,7 @@ static void setup(void)
     if (!initialized)
     {
         /* Initialize the toolkit library */
-        SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(NULL);
+        SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(NULL, NULL);
         ck_assert(SOPC_STATUS_OK == status);
     }
     /* Create client configuration */

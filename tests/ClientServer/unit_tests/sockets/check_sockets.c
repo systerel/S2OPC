@@ -175,6 +175,7 @@ START_TEST(test_sockets)
         SOPC_LooperEvent* ev2 = NULL;
         expect_events(SOCKET_LISTENER_CONNECTION, endpointDescConfigId, &ev1, SOCKET_CONNECTION,
                       clientSecureChannelConnectionId, &ev2);
+        SOPC_Free((void*) ev1->params);
         serverSocketIdx = (uint32_t) ev1->auxParam;
         clientSocketIdx = (uint32_t) ev2->auxParam;
         SOPC_Free(ev1);
