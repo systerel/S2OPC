@@ -52,7 +52,7 @@ bool SOPC_Audit_Initialize(const SOPC_Audit_Configuration* optAuditConfig)
     {
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_COMMON, "Initializing the Auditing option (Options flags=%04X)",
                               (unsigned) optAuditConfig->options);
-        if ((optAuditConfig->options & ~SOPC_Audit_SupportedSecuOptions))
+        if (0 != (optAuditConfig->options & ~SOPC_Audit_SupportedSecuOptions))
         {
             result = SOPC_STATUS_NOT_SUPPORTED;
         }
@@ -62,6 +62,11 @@ bool SOPC_Audit_Initialize(const SOPC_Audit_Configuration* optAuditConfig)
             {
                 SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_COMMON, "Initializing the Auditing Entry option in '%s'",
                                       optAuditConfig->auditEntryPath);
+            }
+            else
+            {
+                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_COMMON,
+                                      "No Auditing Entry activated since configuration path provided is NULL");
             }
             gAuditCfg = (Audit_Configuration_Internal*) SOPC_Malloc(sizeof(*gAuditCfg));
             if (NULL == gAuditCfg)
@@ -81,7 +86,7 @@ bool SOPC_Audit_Initialize(const SOPC_Audit_Configuration* optAuditConfig)
             }
         }
     }
-    return result == SOPC_STATUS_OK;
+    return (SOPC_STATUS_OK == result);
 }
 
 bool SOPC_Audit_IsAuditing(void)

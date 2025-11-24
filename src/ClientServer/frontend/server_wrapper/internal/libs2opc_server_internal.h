@@ -226,4 +226,15 @@ bool SOPC_ServerInternal_LocalServiceAsync(SOPC_LocalServiceAsyncResp_Fct* async
                                            uintptr_t userCtx,
                                            const char* errorMsg);
 
+/**
+ * \brief Triggers an audit event from the Server node and log a trace in audit log entry.
+ *
+ * \param event  The audit event to be triggered
+ *
+ *  \return SOPC_STATUS_OK in case of success,
+ *          SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE or
+ *          SOPC_STATUS_NOT_SUPPORTED otherwise.
+ */
+SOPC_ReturnStatus SOPC_ServerInternal_TriggerAuditEvent(SOPC_Event* event);
+
 #endif

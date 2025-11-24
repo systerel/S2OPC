@@ -39,11 +39,11 @@
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_server.h"
+#include "libs2opc_server_internal.h"
 
 /********************/
 /* LOCAL VARIABLES  */
 /********************/
-static const SOPC_NodeId ServerObject_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server);
 static const SOPC_NodeId AuditOpenSecureChannelEvent_Type =
     SOPC_NS0_NUMERIC_NODEID(OpcUaId_AuditOpenSecureChannelEventType);
 static const SOPC_NodeId AuditChannelEvent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_AuditChannelEventType);
@@ -199,7 +199,7 @@ void SOPC_Audit_TriggerEvent_OpenSecuredChannel(const char* message,
             SOPC_EventHelpers_SetByteString(event, "0:CertificateErrorEventId", auditCertEventId->Data,
                                             (uint32_t) auditCertEventId->Length);
         }
-        status = SOPC_ServerHelper_TriggerEvent(&ServerObject_NodeId, event, 0, 0, 0);
+        status = SOPC_ServerInternal_TriggerAuditEvent(event);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -262,7 +262,7 @@ void SOPC_Audit_TriggerEvent_CloseSecuredChannel(const char* message,
             SOPC_String_GetRawCString(&pConfig->serverConfig.serverDescription.ApplicationUri),
             "System/CloseSecureChannel", (statusCode == OpcUa_BadSecureChannelClosed));
 
-        status = SOPC_ServerHelper_TriggerEvent(&ServerObject_NodeId, event, 0, 0, 0);
+        status = SOPC_ServerInternal_TriggerAuditEvent(event);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -353,7 +353,7 @@ void SOPC_Audit_TriggerEvent_CertificateFailure(const SOPC_Audit_Certificate_Err
         }
 
         // Send event
-        SOPC_ReturnStatus status = SOPC_ServerHelper_TriggerEvent(&ServerObject_NodeId, event, 0, 0, 0);
+        SOPC_ReturnStatus status = SOPC_ServerInternal_TriggerAuditEvent(event);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Certificate Event(%s) failed with code=> %d",

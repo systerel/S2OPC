@@ -28,8 +28,6 @@
 #include "sopc_builtintypes.h"
 #include "sopc_enums.h"
 #include "sopc_event.h"
-#include "sopc_secure_channels_internal_ctx.h"
-#include "sopc_user_app_itf.h"
 
 // The following helpers set a single value in a variant (various types)
 void SOPC_EventHelpers_SetNull(SOPC_Event* const event, const char* qnPath);

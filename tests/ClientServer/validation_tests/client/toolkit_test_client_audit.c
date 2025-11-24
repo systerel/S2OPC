@@ -196,8 +196,6 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
     SOPC_UNUSED_ARG(monitoredItemCtxArray);
     SOPC_ASSERT(NULL != sEvtReceived);
 
-    SOPC_Buffer* buf = SOPC_Buffer_CreateResizable(1024, 1024 * 16);
-
     uintptr_t userCtx = SOPC_ClientHelper_Subscription_GetUserParam(subscription);
     SOPC_UNUSED_ARG(userCtx);
 
@@ -206,6 +204,8 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
 
     if (!SOPC_IsGoodStatus(status))
         return;
+
+    SOPC_Buffer* buf = SOPC_Buffer_CreateResizable(1024, 1024 * 16);
 
     if (&OpcUa_EventNotificationList_EncodeableType == notificationType)
     {
@@ -229,7 +229,11 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                     continue;
                 SOPC_Variant_Dump(buf, var);
                 // Ensure that there is a ZERO char at the end.
-                uint32_t pos = (buf->position < buf->maximum_size ? buf->position : buf->length - 1);
+                uint32_t pos = 0;
+                if (buf->length > 0)
+                {
+                    pos = (buf->position < buf->maximum_size ? buf->position : buf->length - 1);
+                }
                 buf->data[pos] = 0;
 
                 DEBUG_PRINT("  {\"%s\", \"%s\"},\n", selectClauses[iField].path, (const char*) buf->data);
@@ -747,7 +751,10 @@ int main(void)
             SOPC_CONSOLE_PRINTF("[EE] Could not load client configuration. Missing id='%s'\n", cfgid);
             status = SOPC_STATUS_NOK;
         }
-        status = SOPC_ClientHelper_Connect(cfg, SOPC_Client_ConnEventCb, &secureConnection);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_ClientHelper_Connect(cfg, SOPC_Client_ConnEventCb, &secureConnection);
+        }
         if (SOPC_STATUS_OK != status)
         {
             SOPC_CONSOLE_PRINTF("[EE] Could not connect client using configuration id='%s'. Is the server running?\n",

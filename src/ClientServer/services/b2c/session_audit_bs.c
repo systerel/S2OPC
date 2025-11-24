@@ -38,6 +38,7 @@
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_server.h"
+#include "libs2opc_server_internal.h"
 
 #include "app_cb_call_context_internal.h"
 #include "constants.h"
@@ -285,7 +286,7 @@ static SOPC_Event* prepare_session_event(const SOPC_NodeId* eventType)
 
 static void send_event(SOPC_Event* event, const char* title, const char* message)
 {
-    SOPC_ReturnStatus status = SOPC_ServerHelper_TriggerEvent(&ServerObject_NodeId, event, 0, 0, 0);
+    SOPC_ReturnStatus status = SOPC_ServerInternal_TriggerAuditEvent(event);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Audit %s(%s) failed with code=> %d", title, message,

@@ -22,10 +22,12 @@
  * \brief Provides various helpers for events fields filling.
  */
 
+#include <stdio.h>
 #include <string.h>
 
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
+#include "sopc_date_time.h"
 #include "sopc_event_helpers.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"

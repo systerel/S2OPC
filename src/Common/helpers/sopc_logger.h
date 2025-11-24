@@ -125,20 +125,6 @@ void SOPC_Logger_TraceInfo(SOPC_Log_Module logModule, const char* format, ...) L
 void SOPC_Logger_TraceDebug(SOPC_Log_Module logModule, const char* format, ...) LOGGER_FUNC_FORMAT_ENUM;
 
 /**
- * \brief Log a trace for the security audit log
- *
- * \param format    String specifying how subsequent arguments are converted for output
- */
-void SOPC_Logger_TraceSecurityAudit(const char* format, ...) LOGGER_FUNC_FORMAT;
-
-/**
- * \brief Log a warning trace for the security audit log
- *
- * \param format    String specifying how subsequent arguments are converted for output
- */
-void SOPC_Logger_TraceSecurityAuditWarning(const char* format, ...) LOGGER_FUNC_FORMAT;
-
-/**
  * \brief Clears the logger and close the current log files
  * */
 void SOPC_Logger_Clear(void);

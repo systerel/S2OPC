@@ -757,8 +757,9 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
                             status = SOPC_STATUS_NOK;
                         }
                         queueSize *= 10;
-                        SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(delMonItReq, (size_t) i,
-                                                                            createMonItResp.Results[i].MonitoredItemId);
+                        SOPC_ReturnStatus delStatus = SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(
+                            delMonItReq, (size_t) i, createMonItResp.Results[i].MonitoredItemId);
+                        SOPC_UNUSED_RESULT(delStatus);
                     }
                 }
                 deleteMonitoredItems = true;

@@ -72,7 +72,7 @@ static bool askUserPass_FromEnv(const SOPC_SecureConnection_Config* secConnConfi
     }
 
     char* _outPassword = getenv(TEST_PASSWORD_USER);
-    if (NULL == _outUser)
+    if (NULL == _outPassword)
     {
         printf("<" APP_NAME ": The following environment variable is missing: %s\n", TEST_PASSWORD_USER);
         return false;

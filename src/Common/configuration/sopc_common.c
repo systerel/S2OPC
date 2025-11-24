@@ -63,14 +63,14 @@ SOPC_ReturnStatus SOPC_Common_Initialize(const SOPC_Log_Configuration* optLogCon
     /* Initialize logs */
     res = SOPC_Logger_Initialize(optLogConfig);
 
-    if (true == res)
+    if (res)
     {
         /* Initialize Audit */
         res = SOPC_Audit_Initialize(optAuditConfig);
     }
 
     /* Set the IsInitialized status if everything was successful */
-    if (true == res)
+    if (res)
     {
         status = SOPC_STATUS_OK;
         bCommon_IsInitialized = true;

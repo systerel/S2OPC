@@ -32,6 +32,8 @@
 
 /**
  * Configuration options for Auditing. Any combination of following values is possible.
+ *
+ * \note For now, only security-related options are supported (see ::SOPC_Audit_SupportedSecuOptions).
  */
 typedef enum SOPC_Audit_OptionMask
 {
