@@ -78,8 +78,12 @@ static const Test_ExpectedValue Audit_OpenSCEvent_User[] = {
 
 static const Test_ExpectedValue Audit_CertificateInvalidEvent_Fail[] = {
     {"0:SourceName", "Security/Certificate"},
+#ifndef S2OPC_CRYPTO_CYCLONE
     // Subject Name of the Certificate (it should be user one but in this case event SC certificate one seems OK)
     {"0:ClientUserId", "C=FR, ST=France, L=Aix-en-Provence, O=Systerel, CN=S2OPC Demo Certificate for Client Tests"},
+#else
+    {"0:ClientUserId", ""},
+#endif
     // Certificate thumbprint is provided instead of certificate as in this case we only have the receiver thumbprint
     {"0:Certificate", "CDDBA5D672C60CDEF94ADCB69C025719959281E0"},
     {"0:StatusCodeId", "0x80120000"}, // BadCertificateInvalid
