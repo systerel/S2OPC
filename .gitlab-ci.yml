@@ -161,7 +161,7 @@ proof_obligations:
 
 check_commit_signature:
   stage: gen
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:20edbadef44599912096cd2c7323964a6665d1f1196251e2ae61dde11ae09ae3 # digest of build:1.52
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:2fdc121cf7c346c7e46e40fd05fc52ecaf759867b5d0b3ffaab809cbf89f0247 # digest of build:1.53
   needs: []
   script:
     - ./.check_signed_commit.sh
@@ -185,12 +185,12 @@ check_commit_validity:
 
 .build-linux: &build_linux
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:20edbadef44599912096cd2c7323964a6665d1f1196251e2ae61dde11ae09ae3 # digest of build:1.52
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:2fdc121cf7c346c7e46e40fd05fc52ecaf759867b5d0b3ffaab809cbf89f0247 # digest of build:1.53
   script:
     - &build_command_line "./build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?"
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: "../install_linux64"
-    DOCKER_DIGEST: "sha256:20edbadef44599912096cd2c7323964a6665d1f1196251e2ae61dde11ae09ae3"
+    DOCKER_DIGEST: "sha256:2fdc121cf7c346c7e46e40fd05fc52ecaf759867b5d0b3ffaab809cbf89f0247"
     BUILD_DIR: build
   artifacts:
     name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"

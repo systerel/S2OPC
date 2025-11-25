@@ -40,13 +40,13 @@ test_script:
     - set CHECK_DIR_NAME=check-0.14.0
     - set CHECK_DIR=%ROOT_DIR%\%CHECK_DIR_NAME%
     - set CHECK_BUILD_DIR=%CHECK_DIR%\build
-    - set MBEDTLS_VERSION=3.6.4
+    - set MBEDTLS_VERSION=3.6.5
     - set MBEDTLS_DIR_NAME=mbedtls-%MBEDTLS_VERSION%
     - set MBEDTLS_DIR=%ROOT_DIR%\%MBEDTLS_DIR_NAME%
     - set MBEDTLS_BUILD_DIR=%MBEDTLS_DIR%\build
     - set MBEDTLS_INSTALL_DIR=%MBEDTLS_DIR%\install
-    - set EXPAT_DIR_NAME=expat-2.7.2
-    - set EXPAT_FILE_NAME=R_2_7_1
+    - set EXPAT_DIR_NAME=expat-2.7.3
+    - set EXPAT_FILE_NAME=R_2_7_3
     - set EXPAT_DIR=%ROOT_DIR%\libexpat-%EXPAT_FILE_NAME%\expat
     - set EXPAT_INSTALL_DIR=%EXPAT_DIR%\install
     - set S2OPC_CLIENTSERVER_ONLY=1

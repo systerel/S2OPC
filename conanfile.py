@@ -26,10 +26,10 @@ class CompressorRecipe(ConanFile):
 
     def requirements(self):
         self.requires("binutils/2.36.1@Systerel+S2OPC/default")
-        self.requires("expat/2.7.2@Systerel+S2OPC/default")
+        self.requires("expat/2.7.3@Systerel+S2OPC/default")
         self.requires("gcc/13.3.0@Systerel+S2OPC/default")
         self.requires("make/4.3")
-        self.requires("mbedtls/3.6.4@Systerel+S2OPC/default")
+        self.requires("mbedtls/3.6.5@Systerel+S2OPC/default")
         self.requires("paho-mqtt-c/1.3.4")
         self.requires("libcheck/0.14.0@Systerel+S2OPC/default")
         self.requires("doxygen/1.12.0@Systerel+S2OPC/default")

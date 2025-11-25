@@ -1,7 +1,7 @@
 @REM Uncomment or set variables to build without build_s2opc script
 @REM set CHECK_DIR=%~dp0..\check-0.14.0
 @REM set CHECK_INSTALL_DIR="%CHECK_DIR%\install"
-@REM set VS_VERSION="Visual Studio 15 2017 Win64"
+@REM set VS_VERSION="Visual Studio 17 2022"
 @REM set CONFIG="Release"
 @
 REM Build CHECK
