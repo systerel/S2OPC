@@ -94,21 +94,8 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateReceiveAddressInfo(const char* interface
     SOPC_UNUSED_ARG(recvMulticast);
     SOPC_UNUSED_ARG(destMACaddr);
     SOPC_UNUSED_ARG(sourceMACaddr);
-
-    if (NULL == recvAddInfo)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    // Dump allocation for API
-    *recvAddInfo = SOPC_Calloc(1, sizeof(SOPC_ETH_Socket_ReceiveAddressInfo));
-    if (NULL == *recvAddInfo)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    // Marque le stub comme "non fonctionnel" si jamais appelé.
-    return SOPC_STATUS_OK;
+    SOPC_UNUSED_ARG(recvAddInfo);
+    return SOPC_STATUS_NOT_SUPPORTED;
 }
 
 SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddressInfo* receiveAddrInfo,

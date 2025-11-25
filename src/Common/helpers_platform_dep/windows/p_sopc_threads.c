@@ -23,6 +23,7 @@
 #include "p_sopc_threads.h"
 
 #include "sopc_assert.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
@@ -279,7 +280,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 const char* taskName)
 {
     // Windows doesn't support SCHED_FIFO or real time priority in a simple manner
-    (void) priority; // remove warning
+    SOPC_UNUSED_ARG(priority);
     return SOPC_Thread_Create(thread, startFct, startArgs, taskName);
 }
 

@@ -103,7 +103,7 @@ void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** addr)
 
 SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(SOPC_Socket sock, uint8_t TTL_scope)
 {
-    if (sock != NULL && sock->sock != INVALID_SOCKET)
+    if (NULL != sock && INVALID_SOCKET != sock->sock)
     {
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock: setsockopt(%d, IPPROTO_IP, IP_MULTICAST_TTL, (%d))",
                                (int) sock->sock, TTL_scope);

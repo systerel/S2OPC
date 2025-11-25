@@ -73,7 +73,7 @@ bool SOPC_Socket_Network_Clear(void)
     }
     return status;
 }
-#include <stdio.h>
+
 SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(const char* hostname, const char* port, SOPC_Socket_AddressInfo** addrs)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -87,9 +87,10 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(const char* hostname, const char* por
 
     if ((hostname != NULL || port != NULL) && addrs != NULL)
     {
-        if (getaddrinfo(hostname, port, &hints.addrInfo, &getAddrInfoRes) != 0)
+        INT retGetAddrInfo = getaddrinfo(hostname, port, &hints.addrInfo, &getAddrInfoRes);
+        if (retGetAddrInfo != 0)
         {
-            SOPC_CONSOLE_PRINTF("ERROR: %d\n", getaddrinfo(hostname, port, &hints.addrInfo, &getAddrInfoRes));
+            SOPC_CONSOLE_PRINTF("ERROR: %d\n", retGetAddrInfo);
             status = SOPC_STATUS_NOK;
         }
         else

@@ -73,10 +73,13 @@ void SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
         QueryPerformanceCounter(&tick);
         // We now have the elapsed number of ticks, along with the number of ticks-per-second.
         // We use these values to convert to the number of elapsed microseconds.
-        // To guard against loss-of-precision, we convert to microseconds *before* dividing by ticks-per-second.
-        LONGLONG tickUs = (tick.QuadPart * SOPC_SECONDS_TO_MICROSECONDS);
-        SOPC_ASSERT(tickUs <= MAXLONGLONG && "tickUs greater than MAXLONGLONG");
-        t->timeUs = tickUs / g_freq.QuadPart;
+        // To guard against loss-of-precision and to avoid overflow, we compute seconds and remaining microseconds
+        // separetely
+        LONGLONG seconds = tick.QuadPart / g_freq.QuadPart;
+        LONGLONG remainder = tick.QuadPart % g_freq.QuadPart;
+        LONGLONG tickUs =
+            seconds * SOPC_SECONDS_TO_MICROSECONDS + ((remainder * SOPC_SECONDS_TO_MICROSECONDS) / g_freq.QuadPart);
+        t->timeUs = tickUs;
     }
 }
 
@@ -167,7 +170,7 @@ static void SleepUs(uint64_t microseconds)
     while (!timeEnded)
     {
         QueryPerformanceCounter(&now);
-        LONGLONG elapsed_us = (now.QuadPart - start.QuadPart) * SOPC_SECONDS_TO_MICROSECONDS / g_freq.QuadPart;
+        elapsed_us = (now.QuadPart - start.QuadPart) * SOPC_SECONDS_TO_MICROSECONDS / g_freq.QuadPart;
         if (elapsed_us >= remainingUs)
         {
             timeEnded = true;
@@ -179,7 +182,7 @@ void SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* dat
 {
     SOPC_ASSERT(NULL != date);
     int64_t TimeUsToWait = SOPC_HighRes_TimeReference_DeltaUs(date, NULL); // NULL => delta with current time
-    SleepUs((uint64_t) -TimeUsToWait);
+    SleepUs((uint64_t)(TimeUsToWait < 0 ? -TimeUsToWait : 0));
 }
 
 /***************************************************/
