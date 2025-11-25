@@ -798,26 +798,30 @@ int main(void)
         nbFailures = 0;
         SOPC_CONSOLE_PRINTF("\n=========== TC 1: Normal 'None' connection (Success case) ===========\n");
         // launch a test.
-        system("./s2opc_read --none -n i=2259 -a 13");
+        int ret = system("./s2opc_read --none -n i=2259 -a 13");
+        SOPC_ASSERT(ret == 0);
 
         status = exec_audit_test(&audit_NoneOk[0], 2000);
 
         SOPC_CONSOLE_PRINTF("\n=========== TC 2: connection with user/pass (Success case) ===========\n");
         // launch a test.
-        system("TEST_USERNAME=user1 TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 2");
+        ret = system("TEST_USERNAME=user1 TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 2");
+        SOPC_ASSERT(ret == 0);
 
         status = exec_audit_test(&audit_User1Ok[0], 2000);
 
         SOPC_CONSOLE_PRINTF("\n=========== TC 3: connection with bad user/pass (ActivateSession failed) ===========\n");
         // launch a test.
-        system("TEST_USERNAME=user1 TEST_PASSWORD_USER=PASSword ./s2opc_wrapper_connect 2");
+        ret = system("TEST_USERNAME=user1 TEST_PASSWORD_USER=PASSword ./s2opc_wrapper_connect 2");
+        SOPC_ASSERT(ret != 0);
 
         status = exec_audit_test(&audit_User1_BadPass[0], 2000);
 
         SOPC_CONSOLE_PRINTF(
             "\n=========== TC 4: connection with bad server certificate (OpenSecureChannel failed) ===========\n");
         // launch a test.
-        system("TEST_USERNAME=user1 TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 4");
+        ret = system("TEST_USERNAME=user1 TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 4");
+        SOPC_ASSERT(ret != 0);
 
         status = exec_audit_test(&audit_User1_BadServerCertificate[0], 2000);
 
