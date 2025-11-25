@@ -686,7 +686,7 @@ cdef class Response:
     def __dealloc__(self):
         cdef SOPC_EncodeableType** encType = <SOPC_EncodeableType**> self._response
         if self._response is not NULL:
-            SOPC_Encodeable_Delete(encType[0], <void**> &self._response)
+            SOPC_EncodeableObject_Delete(encType[0], <void**> &self._response)
 
     @staticmethod
     cdef Response c_new_response(void* response, uintptr_t responseContext):

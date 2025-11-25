@@ -23,7 +23,7 @@
 #include "push_server_methods.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_trustlist_internal_helper.h" // common helper to the demo push server lib
@@ -146,7 +146,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Read(SOPC_ClientConnection* secureConnecti
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
     return status;
 }
@@ -178,7 +178,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Close(SOPC_ClientConnection* secureConnect
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
     return status;
 }
@@ -230,7 +230,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Open(SOPC_ClientConnection* secureConnecti
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
     return status;
 }
@@ -275,7 +275,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_Write(SOPC_ClientConnection* secureConnect
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
     return status;
 }
@@ -316,7 +316,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_CloseAndUpdate(SOPC_ClientConnection* secu
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
     return status;
 }
@@ -358,7 +358,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_AddCertificate(SOPC_ClientConnection* secu
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
     return status;
 }
@@ -399,7 +399,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_RemoveCertificate(SOPC_ClientConnection* s
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
     return status;
 }
@@ -578,7 +578,7 @@ SOPC_ReturnStatus SOPC_TEST_ServerConfiguration_UpdateCertificate(SOPC_ClientCon
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
 
     SOPC_Variant_Clear(&UpdateCertificateInputArguments[2]);
@@ -624,7 +624,7 @@ SOPC_ReturnStatus SOPC_TEST_ServerConfiguration_GetRejectedList(SOPC_ClientConne
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
     return status;
 }
@@ -674,7 +674,7 @@ SOPC_ReturnStatus SOPC_TEST_TrustList_OpenWithMasks(SOPC_ClientConnection* secur
         }
     }
 
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
 
     return status;

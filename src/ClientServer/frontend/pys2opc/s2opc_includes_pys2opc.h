@@ -29,7 +29,7 @@
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "sopc_builtintypes.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_logger.h"
 #include "sopc_service_call_context.h"
 #include "sopc_user_app_itf.h"

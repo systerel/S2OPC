@@ -30,7 +30,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_date_time.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_encode.h"
 #include "sopc_key_cert_pair.h"

@@ -25,7 +25,7 @@
 #include "push_client_connection_helper.h"
 #include "sopc_assert.h"
 #include "sopc_crypto_provider.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
@@ -543,7 +543,7 @@ static SOPC_ReturnStatus Ask_CSR_To_The_Server_And_Write_CSR_File(SOPC_ClientCon
 #endif
 
     // Free the response and the csr
-    SOPC_ReturnStatus localStatus = SOPC_Encodeable_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
+    SOPC_ReturnStatus localStatus = SOPC_EncodeableObject_Delete(&OpcUa_CallResponse_EncodeableType, (void**) &resp);
     SOPC_UNUSED_RESULT(localStatus);
     SOPC_ByteString_Delete(csr);
     SOPC_ByteString_Delete(nonce);
