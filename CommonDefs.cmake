@@ -470,6 +470,8 @@ list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_EVENT_MANAGEMENT}>:S2OPC_EVENT_MANAGEMENT>)
 # Add S2OPC_HAS_AUDITING to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_HAS_AUDITING}>:S2OPC_HAS_AUDITING>)
+# Add S2OPC_CRYPTO_CYCLONE to compilation definition if option activated (for tests since implementation is incomplete)
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_CRYPTO_CYCLONE}>:S2OPC_CRYPTO_CYCLONE>)
 
 # Check Auditing/Events dependancy
 if (${S2OPC_HAS_AUDITING})
