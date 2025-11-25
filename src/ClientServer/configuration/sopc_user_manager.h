@@ -131,7 +131,7 @@ typedef struct SOPC_UserAuthorization_Functions
     SOPC_UserAuthorization_Free_Func* pFuncFree;
 
     /**
-     * \brief Called to authorize an operation (e.g.: read, write)in the address space for a given nodeId
+     * \brief Called to authorize an operation (e.g.: read, write) in the address space for a given nodeId
      *        and attributeId.
      *
      * \warning This callback should not block the thread that calls it, and shall return immediately.

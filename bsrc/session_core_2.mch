@@ -446,11 +446,11 @@ OPERATIONS
 
           (p_session : dom(a_server_client_app_desc) =>
                 p_cliAppDesc = a_server_client_app_desc$0(p_session)) &
-          (p_session : dom(a_server_client_app_desc) =>
+          (p_session /: dom(a_server_client_app_desc) =>
                 p_cliAppDesc = c_ApplicationDescription_indet) &
           (p_session : dom(a_server_client_cert_tb) =>
                 p_certTb = a_server_client_cert_tb$0(p_session)) &
-          (p_session : dom(a_server_client_app_desc) =>
+          (p_session /: dom(a_server_client_cert_tb) =>
                 p_certTb = c_CertThumbprint_indet) &
           a_server_client_app_desc = {p_session} <<| a_server_client_app_desc$0 &
           a_server_client_cert_tb = {p_session} <<| a_server_client_cert_tb$0
