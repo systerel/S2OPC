@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 28/10/2025 16:45:24
+ Date                 : 26/11/2025 13:53:25
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -357,6 +357,8 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_event_sele
       constants__t_session_i subscription_mgr__l_session;
       t_bool subscription_mgr__l_session_valid;
       constants__t_user_i subscription_mgr__l_user;
+      constants__t_ApplicationDescription_i subscription_mgr__l_client_app_desc;
+      constants__t_CertThumbprint_i subscription_mgr__l_client_cert_tb;
       t_bool subscription_mgr__l_valid_user_access;
       constants__t_LocaleIds_i subscription_mgr__l_locales;
       constants__t_NodeId_i subscription_mgr__l_nid;
@@ -403,10 +405,19 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_event_sele
             &subscription_mgr__l_roles);
          session_mgr__get_server_session_preferred_locales(subscription_mgr__l_session,
             &subscription_mgr__l_locales);
+         session_mgr__get_server_session_client_app_desc(subscription_mgr__l_session,
+            &subscription_mgr__l_client_app_desc);
+         session_mgr__get_server_session_client_cert_tb(subscription_mgr__l_session,
+            &subscription_mgr__l_client_cert_tb);
+         app_cb_call_context_bs__set_app_call_context_session(subscription_mgr__l_session,
+            subscription_mgr__l_client_app_desc,
+            subscription_mgr__l_client_cert_tb,
+            subscription_mgr__l_user);
          subscription_core__get_event_user_authorization(subscription_mgr__p_event,
             subscription_mgr__l_user,
             subscription_mgr__l_roles,
             &subscription_mgr__l_valid_user_access);
+         app_cb_call_context_bs__clear_app_call_context();
       }
       if ((((subscription_mgr__l_session_valid == true) &&
          (subscription_mgr__l_filter_sub_and_mi == true)) &&
@@ -1450,22 +1461,9 @@ void subscription_mgr__server_subscription_event_triggered(
       constants__t_NodeClass_i subscription_mgr__l_nodeClass;
       constants__t_Byte subscription_mgr__l_eventNotifierByte;
       t_bool subscription_mgr__l_bres;
-      constants__t_user_i subscription_mgr__l_user;
-      constants__t_ApplicationDescription_i subscription_mgr__l_client_app_desc;
-      constants__t_CertThumbprint_i subscription_mgr__l_client_cert_tb;
       constants__t_monitoredItemQueue_i subscription_mgr__l_monitoredItemQueue;
       
       subscription_mgr__l_bres = false;
-      session_mgr__get_session_user_server(subscription_mgr__p_session,
-         &subscription_mgr__l_user);
-      session_mgr__get_server_session_client_app_desc(subscription_mgr__p_session,
-         &subscription_mgr__l_client_app_desc);
-      session_mgr__get_server_session_client_cert_tb(subscription_mgr__p_session,
-         &subscription_mgr__l_client_cert_tb);
-      app_cb_call_context_bs__set_app_call_context_session(subscription_mgr__p_session,
-         subscription_mgr__l_client_app_desc,
-         subscription_mgr__l_client_cert_tb,
-         subscription_mgr__l_user);
       address_space_itf__readall_AddressSpace_Node(subscription_mgr__p_notifierId,
          &subscription_mgr__l_nid_valid,
          &subscription_mgr__l_node);
@@ -1514,7 +1512,6 @@ void subscription_mgr__server_subscription_event_triggered(
          }
          subscription_mgr__l_bres = true;
       }
-      app_cb_call_context_bs__clear_app_call_context();
       *subscription_mgr__bres = subscription_mgr__l_bres;
    }
 }

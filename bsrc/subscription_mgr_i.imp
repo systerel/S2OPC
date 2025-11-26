@@ -1015,8 +1015,14 @@ OPERATIONS
                 l_user <-- get_session_user_server(l_session);
                 l_roles <-- get_session_roles(l_session);
                 l_locales <-- get_server_session_preferred_locales(l_session);
+                l_client_app_desc <-- get_server_session_client_app_desc(l_session);
+                l_client_cert_tb <-- get_server_session_client_cert_tb(l_session);
+                /* Temporarily set the session context for the authorization callback */
+                set_app_call_context_session (l_session, l_client_app_desc, l_client_cert_tb, l_user);
                 // Check user access
-                l_valid_user_access <-- get_event_user_authorization(p_event, l_user, l_roles)
+                l_valid_user_access <-- get_event_user_authorization(p_event, l_user, l_roles);
+                /* Clear the session context */
+                clear_app_call_context
         END
         ;
         IF l_session_valid = TRUE & l_filter_sub_and_mi = TRUE & l_monitoringMode = e_monitoringMode_reporting & l_aid = e_aid_EventNotifier
@@ -1844,9 +1850,6 @@ OPERATIONS
         l_nodeClass,
         l_eventNotifierByte,
         l_bres,
-        l_user,
-        l_client_app_desc,
-        l_client_cert_tb,
         l_monitoredItemQueue
     IN
         /* For each MI in queue:
@@ -1857,11 +1860,6 @@ OPERATIONS
 
         /* Trigger event for notifier node */
         l_bres := FALSE;
-        l_user <-- get_session_user_server(p_session);
-        l_client_app_desc <-- get_server_session_client_app_desc(p_session);
-        l_client_cert_tb <-- get_server_session_client_cert_tb(p_session);
-        /* Temporarily set the session context for the authorization callback */
-        set_app_call_context_session (p_session, l_client_app_desc, l_client_cert_tb, l_user);
         l_nid_valid, l_node <-- readall_AddressSpace_Node (p_notifierId);
         IF l_nid_valid = TRUE
         THEN
@@ -1900,7 +1898,6 @@ OPERATIONS
             l_bres := TRUE // Do not fail in case of directly targeted Server node or unexpected invalid properties on Server node
         END
         ;
-        clear_app_call_context;
         bres := l_bres
     END
     ;
