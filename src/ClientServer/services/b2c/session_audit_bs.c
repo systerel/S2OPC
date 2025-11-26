@@ -162,9 +162,11 @@ static void copy_SignedSoftwareCertificates(SOPC_Event* const event,
         SOPC_ExtensionObject_Initialize(&obj[i]);
         if (SOPC_STATUS_OK == copyStatus)
         {
-            SOPC_ExtensionObject_CreateObject(&obj[i], &OpcUa_SignedSoftwareCertificate_EncodeableType,
-                                              (void**) &ssCert);
-
+            copyStatus = SOPC_ExtensionObject_CreateObject(&obj[i], &OpcUa_SignedSoftwareCertificate_EncodeableType,
+                                                           (void**) &ssCert);
+        }
+        if (SOPC_STATUS_OK == copyStatus)
+        {
             copyStatus = SOPC_EncodeableObject_Copy(&OpcUa_SignedSoftwareCertificate_EncodeableType, ssCert, &ssc[i]);
         }
     }
