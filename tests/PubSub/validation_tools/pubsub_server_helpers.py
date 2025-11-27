@@ -20,6 +20,7 @@
 
 from pubsub_server import PubSubState
 from time import sleep
+import sys
 
 def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
     """
@@ -93,6 +94,7 @@ def helpConfigurationChangeAndStart(defaultXmlPath, pPubsubserver, pConfig, pLog
             rd = fd.read()
             pLogger.add_test('Default PubSub Configuration file is changed', pConfig == rd)
             if not(pConfig == rd):
-                pLogger.add_test(f"pConfig={pConfig}",True)
-                pLogger.add_test(f"fd.read()={rd}",False)
+                print(f"Traces for NOK in section={pLogger.section}", file=sys.stderr)
+                print(f"pConfig={pConfig}", file=sys.stderr)
+                print(f"fd.read()={rd}", file=sys.stderr)
         fd.close()
