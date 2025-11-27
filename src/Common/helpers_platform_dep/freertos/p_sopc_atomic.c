@@ -19,6 +19,9 @@
 
 #include "sopc_atomic.h"
 
+#include "FreeRTOS.h"
+#include "atomic.h"
+
 int32_t SOPC_Atomic_Int_Get(int32_t* atomic)
 {
 #if !defined(__clang__) && (__GNUC__ > 4)
@@ -40,13 +43,25 @@ void SOPC_Atomic_Int_Set(int32_t* atomic, int32_t val)
 #endif
 }
 
+/* Using the __atomic_fetch_add instruction as compiled by GCC generates LDREX/STREX binary
+   instructions, which are unsafe for non-cacheable memory regions in ARM architecture.
+   The function has therefore been updated to use the FreeRTOS atomic API, which is immune
+   to this issue.
+   Notes:
+   * all the operations of this module are not ported to FreeRTOS API as it does not provided all elements for that
+   * trying to use ATOMIC_ENTER_CRITICAL / ATOMIC_EXIT_CRITICAL to use a section results in instability
+   * the function below is limited to the storage of positive values
+*/
 int32_t SOPC_Atomic_Int_Add(int32_t* atomic, int32_t val)
 {
-#if !defined(__clang__) && (__GNUC__ > 4)
-    return __atomic_fetch_add(atomic, val, __ATOMIC_SEQ_CST);
-#else
-    return __sync_fetch_and_add(atomic, val);
-#endif
+    if (val > 0)
+    {
+        return (int32_t) Atomic_Add_u32((uint32_t*) atomic, (uint32_t) val);
+    }
+    else
+    {
+        return (int32_t) Atomic_Subtract_u32((uint32_t*) atomic, -(uint32_t) val);
+    }
 }
 
 void* SOPC_Atomic_Ptr_Get(void** atomic)
