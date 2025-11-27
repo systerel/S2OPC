@@ -122,6 +122,7 @@ SOPC_AddressSpaceAccess* SOPC_AddressSpaceAccess_Create(SOPC_AddressSpace* addSp
         if (NULL == newAccess->operations || NULL == opList)
         {
             SOPC_Free(opList);
+            SOPC_Free(newAccess->operations);
             SOPC_Free(newAccess);
             return NULL;
         }
@@ -401,7 +402,7 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
     }
     else
     {
-        addedOp = (void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
+        addedOp = (void*) SOPC_SLinkedList_Append(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
         status = (NULL == addedOp ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
         OpcUa_WriteValue_Initialize(prevWV);
         OpcUa_WriteValue_Initialize(newWV);
@@ -438,7 +439,7 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
     {
         if (NULL != addedOp)
         {
-            SOPC_SLinkedList_PopHead(addSpaceAccess->operations->opList);
+            SOPC_SLinkedList_PopLast(addSpaceAccess->operations->opList);
             addSpaceAccess->operations->writeCount--;
         }
         SOPC_Free(op);
@@ -654,7 +655,7 @@ static SOPC_ReturnStatus add_node_and_set_reciprocal_reference(SOPC_AddressSpace
             const void* addedOp = NULL;
             if (NULL != op && SOPC_STATUS_OK == status && NULL != nodeIdCopy)
             {
-                addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
+                addedOp = (const void*) SOPC_SLinkedList_Append(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
             }
             if (NULL != addedOp)
             {
@@ -1840,7 +1841,7 @@ static void SOPC_AddressSpaceAccess_DeleteNodeOnly(const SOPC_AddressSpaceAccess
             SOPC_NodeId_Copy(nodeIdCopy, SOPC_AddressSpace_Get_NodeId(addSpaceAccess->addSpaceRef, node));
         if (SOPC_STATUS_OK == status && NULL != nodeIdCopy)
         {
-            addedOp = (const void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
+            addedOp = (const void*) SOPC_SLinkedList_Append(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
         }
         if (NULL != addedOp)
         {

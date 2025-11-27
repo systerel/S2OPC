@@ -298,8 +298,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         break;
     case SE_TO_SE_SERVER_DATA_CHANGED:
         /* Server side only:
-           params = (OpcUa_WriteValue*) old data value
-           auxParam = (OpcUa_WriteValue*) new data value
+           params = (SOPC_Array*) array of SOPC_WriteDataChanged
          */
         SOPC_ASSERT((void*) params != NULL);
 
@@ -332,28 +331,26 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                "ServicesMgr: SE_TO_SE_SERVER_NODE_CHANGED batched notifications");
 
         SOPC_ASSERT(NULL != (void*) params);
+        dataOrNodeChangedArray = (SOPC_Array*) params;
+        length = SOPC_Array_Size(dataOrNodeChangedArray);
+        lbres = SOPC_LOG_LEVEL_DEBUG == SOPC_Logger_GetTraceLogLevel();
+        for (size_t i = 0; i < length; i++)
         {
-            dataOrNodeChangedArray = (SOPC_Array*) params;
-            length = SOPC_Array_Size(dataOrNodeChangedArray);
-            lbres = SOPC_LOG_LEVEL_DEBUG == SOPC_Logger_GetTraceLogLevel();
-            for (size_t i = 0; i < length; i++)
+            nodeChanged = (SOPC_NodeChanged*) SOPC_Array_Get_Ptr(dataOrNodeChangedArray, i);
+            SOPC_ASSERT(NULL != nodeChanged);
+            if (lbres)
             {
-                nodeChanged = (SOPC_NodeChanged*) SOPC_Array_Get_Ptr(dataOrNodeChangedArray, i);
-                SOPC_ASSERT(NULL != nodeChanged);
-                if (lbres)
-                {
-                    nodeIdStr = SOPC_NodeId_ToCString(nodeChanged->nodeId);
-                    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "ServicesMgr: SE_TO_SE_SERVER_NODE_CHANGED %s nodeId: %s",
-                                           nodeChanged->added ? "added" : "deleted", nodeIdStr);
-                    SOPC_Free(nodeIdStr);
-                }
-                io_dispatch_mgr__internal_server_node_changed(nodeChanged->added, nodeChanged->nodeId);
-                SOPC_NodeId_Clear(nodeChanged->nodeId);
-                SOPC_Free(nodeChanged->nodeId);
+                nodeIdStr = SOPC_NodeId_ToCString(nodeChanged->nodeId);
+                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "ServicesMgr: SE_TO_SE_SERVER_NODE_CHANGED %s nodeId: %s",
+                                       nodeChanged->added ? "added" : "deleted", nodeIdStr);
+                SOPC_Free(nodeIdStr);
             }
-            SOPC_Array_Delete(dataOrNodeChangedArray);
+            io_dispatch_mgr__internal_server_node_changed(nodeChanged->added, nodeChanged->nodeId);
+            SOPC_NodeId_Clear(nodeChanged->nodeId);
+            SOPC_Free(nodeChanged->nodeId);
         }
+        SOPC_Array_Delete(dataOrNodeChangedArray);
         break;
     case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
         /* Server side only:

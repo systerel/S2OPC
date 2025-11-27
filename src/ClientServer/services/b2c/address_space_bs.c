@@ -83,13 +83,13 @@ static void generate_notifs_after_address_space_access(SOPC_AddressSpaceAccessOp
 {
     SOPC_Array* dataChangedEvents = SOPC_Array_Create(sizeof(SOPC_WriteDataChanged), operations->writeCount, NULL);
     SOPC_Array* nodeChangedEvents = SOPC_Array_Create(sizeof(SOPC_NodeChanged), operations->changeNodeCount, NULL);
+    bool resAppend = false;
     SOPC_WriteDataChanged writeDataChanged;
     SOPC_NodeChanged nodeChanged;
     SOPC_ASSERT(NULL != operations);
     SOPC_AddressSpaceAccessOperation* operation =
         (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations->opList);
-    // Note: operations were pushed (prepended) and we pop (head) them which leads to a FILO behavior.
-    //       Since we push them as next events in the services event queue, it finally leads to a FIFO behavior.
+    // Note: operations were appended (tail) and we pop (head) them which leads to a FIFO behavior (same order).
     while (NULL != operation)
     {
         switch (operation->operation)
@@ -99,19 +99,21 @@ static void generate_notifs_after_address_space_access(SOPC_AddressSpaceAccessOp
                 .oldValue = (OpcUa_WriteValue*) operation->param1,
                 .newValue = (OpcUa_WriteValue*) operation->param2,
             };
-            SOPC_Array_Append(dataChangedEvents, writeDataChanged);
+            resAppend = SOPC_Array_Append(dataChangedEvents, writeDataChanged);
             break;
         case SOPC_ADDSPACE_CHANGE_NODE:
             nodeChanged = (SOPC_NodeChanged){
                 .added = (bool) operation->param1,
                 .nodeId = (SOPC_NodeId*) operation->param2,
             };
-            SOPC_Array_Append(nodeChangedEvents, nodeChanged);
+            resAppend = SOPC_Array_Append(nodeChangedEvents, nodeChanged);
             break;
         default:
             SOPC_ASSERT(false);
             break;
         }
+        // Append shall not fail since we preallocated enough space in each array
+        SOPC_ASSERT(resAppend);
         SOPC_Free(operation);
         operation = (SOPC_AddressSpaceAccessOperation*) SOPC_SLinkedList_PopHead(operations->opList);
     }
