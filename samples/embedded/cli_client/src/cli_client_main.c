@@ -511,7 +511,6 @@ static bool Server_WriteSingleNode(const SOPC_NodeId* pNid, SOPC_DataValue* pDv,
         if (status != SOPC_STATUS_OK)
         {
             LOG_WARNING("ServiceAsync failed with code  (%d)", status);
-            SOPC_Free(request);
         }
         else
         {
