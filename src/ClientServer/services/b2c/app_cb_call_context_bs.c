@@ -115,7 +115,6 @@ SOPC_CallContextCopy* SOPC_CallContext_CreateCurrentCopy(void)
                 OpcUa_ApplicationDescription* appDescCopy = NULL;
                 SOPC_ReturnStatus status =
                     SOPC_EncodeableObject_Create(&OpcUa_ApplicationDescription_EncodeableType, (void**) &appDescCopy);
-                SOPC_UNUSED_RESULT(status);
                 copy->secureChannelConfigIdx = currentCtx.secureChannelConfigIdx;
                 copy->endpointConfigIdx = currentCtx.endpointConfigIdx;
                 copy->msgSecurityMode = currentCtx.msgSecurityMode;
@@ -172,13 +171,8 @@ void SOPC_CallContext_FreeCopy(SOPC_CallContextCopy* cc)
 {
     if (NULL != cc && cc->isCopy)
     {
-        int32_t refCount = SOPC_Atomic_Int_Get(cc->refCopyCount);
-        if (refCount > 1)
-        {
-            // Decrease reference counter
-            SOPC_Atomic_Int_Add(cc->refCopyCount, -1);
-        }
-        else
+        int32_t prevRefCount = SOPC_Atomic_Int_Add(cc->refCopyCount, -1);
+        if (prevRefCount <= 1)
         {
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             SOPC_Free(cc->refCopyCount);
