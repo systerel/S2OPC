@@ -97,19 +97,16 @@ SOPC_CallContextCopy* SOPC_CallContext_CreateCurrentCopy(void)
     // Allocate a fresh current copy or retrieve existing one
     SOPC_CallContextCopy* freshCurrentCopy =
         (NULL != currentCopyCtx) ? currentCopyCtx : SOPC_Calloc(1, sizeof(*freshCurrentCopy));
-    if (NULL != copy && NULL != freshCurrentCopy)
+    bool success = (NULL != copy) && (NULL != freshCurrentCopy);
+    if (success)
     {
         // If no current copy exists yet, create a new dedicated one
         if (NULL == currentCopyCtx)
         {
             copy->isCopy = true;
             copy->refCopyCount = SOPC_Calloc(1, sizeof(int32_t));
-            if (NULL == copy->refCopyCount)
-            {
-                SOPC_Free(copy);
-                copy = NULL;
-            }
-            else
+            success = (NULL != copy->refCopyCount);
+            if (success)
             {
                 // One for currentCopyCtx and one for the returned copy
                 // Note: atomic not needed here as copy is not yet shared
@@ -157,10 +154,16 @@ SOPC_CallContextCopy* SOPC_CallContext_CreateCurrentCopy(void)
             SOPC_Atomic_Int_Add(copy->refCopyCount, 1);
         }
     }
-    else
+    if (!success)
     {
         SOPC_Free(copy);
-        SOPC_Free(freshCurrentCopy);
+        copy = NULL;
+        // Deallocate fresh current copy if it was newly created
+        if (freshCurrentCopy != currentCopyCtx)
+        {
+            SOPC_Free(freshCurrentCopy);
+            freshCurrentCopy = NULL;
+        }
     }
     return copy;
 }
