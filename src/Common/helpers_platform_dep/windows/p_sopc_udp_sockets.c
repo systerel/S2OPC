@@ -37,6 +37,10 @@
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "Ws2_32.lib")
 
+#ifdef __MINGW32__
+#define IP_UNICAST_IF IPV6_UNICAST_IF
+#endif
+
 #define WORKING_BUFFER_SIZE 15000
 
 static bool gInitialized = false;
