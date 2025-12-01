@@ -1288,7 +1288,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
         statusMutex = SOPC_Mutex_Unlock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
-        if (isSynchronous && NULL != reqCtx)
+        if ((SOPC_STATUS_OK != status || isSynchronous) && NULL != reqCtx)
         {
             SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
         }

@@ -262,7 +262,9 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
  *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment.
  *
  * \param userContext  User defined context that will be provided with the corresponding response in
- *                     ::SOPC_LocalServiceAsyncResp_Fct
+ *                     ::SOPC_LocalServiceAsyncResp_Fct (it shall not be freed until then).
+ *                     In case this function returned an error status,
+ *                     its memory management should be handled by the caller immediately.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the client is not running.
