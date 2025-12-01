@@ -28,12 +28,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <iphlpapi.h>
 #include <mswsock.h>
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+#pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "Ws2_32.lib")
+
+#define WORKING_BUFFER_SIZE 15000
 
 static bool gInitialized = false;
 static WSADATA wsaData;
@@ -119,6 +123,75 @@ static void* get_ai_addr(const SOPC_Socket_AddressInfo* addr)
     return (void*) addr->addrInfo.ai_addr;
 }
 
+/**
+ * \brief Convert WCHAR* to char*
+ * \return 0 in case of failure
+ */
+static int PwcharToChar(PWCHAR pw, char* buffer, int bufferSize)
+{
+    return WideCharToMultiByte(CP_UTF8, 0, pw, -1, buffer, bufferSize, NULL, NULL);
+}
+
+/**
+ * \brief Retrieve interfaceIndex (ULONG) from interfaceName (CString)
+ */
+static ULONG ItfNameToIndex(const char* interfaceName)
+{
+    ULONG itfIndex = 0;
+    ULONG outBufLen = WORKING_BUFFER_SIZE;
+    PIP_ADAPTER_ADDRESSES pAddresses = (IP_ADAPTER_ADDRESSES*) SOPC_Calloc(1, outBufLen);
+    if (pAddresses == NULL)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "UDP sock (ItfNameToIndex): Failed to retrieve Interface Index. Out of memory: "
+                               "WORKING_BUFFER_SIZE (current = %d)",
+                               WORKING_BUFFER_SIZE);
+        return 0;
+    }
+    DWORD retGetAddr = GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_PREFIX, NULL, pAddresses, &outBufLen);
+    if (retGetAddr == NO_ERROR)
+    {
+        PIP_ADAPTER_ADDRESSES pCurrAddresses = pAddresses;
+        while (pCurrAddresses)
+        {
+            size_t itfNameLength = wcslen(pCurrAddresses->FriendlyName);
+            char* itfName = SOPC_Calloc(itfNameLength + 1, sizeof(*itfName));
+            int ret = PwcharToChar(pCurrAddresses->FriendlyName, itfName, (int) itfNameLength + 1);
+            if (ret != 0 && 0 == strcmp(itfName, interfaceName))
+            {
+                itfIndex = pCurrAddresses->IfIndex;
+                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock (ItfNameToIndex): itfIndex found: %lu",
+                                       itfIndex);
+            }
+            pCurrAddresses = pCurrAddresses->Next;
+            SOPC_Free(itfName);
+        }
+    }
+    else if (retGetAddr == ERROR_BUFFER_OVERFLOW)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "UDP sock (ItfNameToIndex): Failed to retrieve Interface Index (ERROR_BUFFER_OVERFLOW). "
+                               "Increase WORKING_BUFFER_SIZE (current = %d).",
+                               WORKING_BUFFER_SIZE);
+        itfIndex = 0;
+    }
+    SOPC_Free(pAddresses);
+    pAddresses = NULL;
+    return itfIndex;
+}
+
+static bool IsMulticastAddr(const SOPC_Socket_AddressInfo* addr)
+{
+    struct sockaddr_in* sockAddr = (struct sockaddr_in*) get_ai_addr(addr);
+    if (addr->addrInfo.ai_family == AF_INET)
+    {
+        // IPV4: first address byte indicates if this is a multicast address
+        const uint32_t ip = htonl(sockAddr->sin_addr.s_addr);
+        return ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
+    }
+    return false;
+}
+
 static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo* addr,
                                                    const char* interfaceName,
                                                    bool setReuseAddr,
@@ -141,7 +214,7 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
     int setOptStatus = -1;
 
     socketImpl->sock = socket(addr->addrInfo.ai_family, addr->addrInfo.ai_socktype, addr->addrInfo.ai_protocol);
-    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock: socket => %llu ", (unsigned long long) socketImpl->sock);
+    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock: socket => %llu", (unsigned long long) socketImpl->sock);
 
     if (INVALID_SOCKET == socketImpl->sock)
     {
@@ -157,7 +230,7 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
         setOptStatus = setsockopt(socketImpl->sock, SOL_SOCKET, SO_REUSEADDR, (const char*) &trueInt, sizeof(int));
         if (setOptStatus < 0)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: setsockopt (SO_REUSEADDR) failed with error: %ld",
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: setsockopt (SO_REUSEADDR) failed with error: %i",
                                    setOptStatus);
             status = SOPC_STATUS_NOK;
         }
@@ -169,8 +242,29 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
         setOptStatus = ioctlsocket(socketImpl->sock, FIONBIO, &iMode);
         if (setOptStatus != NO_ERROR)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: ioctlsocket failed with error: %ld",
-                                   setOptStatus);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: ioctlsocket failed with error: %i", setOptStatus);
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    /* WARNING: NOT TESTED */
+    if (SOPC_STATUS_OK == status && NULL != interfaceName)
+    {
+        // Check if it is a multicast or unicast in order to configure the appropriate sock option.
+        bool isMC = IsMulticastAddr(addr);
+        // Retreive interface Index
+        ULONG itfIndex = ItfNameToIndex(interfaceName);
+        DWORD Itf = htonl(itfIndex);
+
+        // Set sock option: interface
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "UDP sock: setsockopt(%llu, IPPROTO_IP, %s, %lu)",
+                               (unsigned long long) socketImpl->sock, isMC ? "IP_MULTICAST_IF" : "IP_UNICAST_IF",
+                               itfIndex);
+        setOptStatus =
+            setsockopt(socketImpl->sock, IPPROTO_IP, isMC ? IP_MULTICAST_IF : IP_UNICAST_IF, (char*) &Itf, sizeof(Itf));
+        if (setOptStatus < 0)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "IPPROTO_IP Failed, itfIndex = %lu", itfIndex);
             status = SOPC_STATUS_NOK;
         }
     }
@@ -187,7 +281,7 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
     return status;
 }
 
-/* WARNING: interfaceName must be and ipv4 address or NULL */
+/* WARNING: interfaceName is NOT TESTED */
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* listenAddress,
                                                   const char* interfaceName,
                                                   bool setReuseAddr,
@@ -196,21 +290,13 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
 {
     SOPC_ReturnStatus status =
         SOPC_UDP_Socket_CreateNew(listenAddress, interfaceName, setReuseAddr, setNonBlocking, sock);
-
     if (SOPC_STATUS_OK == status)
     {
         int res = SOCKET_ERROR;
         struct sockaddr_in* listenAddr = (struct sockaddr_in*) get_ai_addr(listenAddress);
 
         // Note: only add membership if socket is a Multicast address
-        bool isMC = false;
-        if (listenAddress->addrInfo.ai_family == AF_INET)
-        {
-            // IPV4: first address byte indicates if this is a multicast address
-            const uint32_t ip = htonl(listenAddr->sin_addr.s_addr);
-            isMC = ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
-        }
-
+        bool isMC = IsMulticastAddr(listenAddress);
         if (isMC)
         {
             // Bind with INADDR_ANY and the right port, then specify the multicast address
@@ -229,33 +315,28 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
                                    localif.sin_addr.S_un.S_un_b.s_b2, localif.sin_addr.S_un.S_un_b.s_b1,
                                    (int) htons(localif.sin_port));
 
-            // Add membership (listen addr) and interfaceName addr, if != NULL
+            // Add membership
             struct ip_mreq mreq;
             if (interfaceName != NULL)
             {
-                struct in_addr interfaceAddr;
-                int resInet = inet_pton(AF_INET, interfaceName, &interfaceAddr);
-                if (resInet <= 0)
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "UDP sock: Failed to inet_pton on socket %d  (%s)",
-                                           (int) (*sock)->sock, gai_strerrorA(WSAGetLastError()));
-                }
-                else
-                {
-                    mreq.imr_interface = interfaceAddr;
-                }
+                // Retreive interface Index
+                ULONG itfIndex = ItfNameToIndex(interfaceName);
+                mreq.imr_interface.s_addr = htonl(itfIndex);
             }
             else
             {
+                // The default IPv4 multicast interface is used.
                 mreq.imr_interface.s_addr = htonl(INADDR_ANY);
             }
 
             mreq.imr_multiaddr.s_addr = listenAddr->sin_addr.s_addr;
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON,
-                                   "UDP sock: setsockopt(%d, IPPROTO_IP, IP_ADD_MEMBERSHIP, (%s / %d.%d.%d.%d:%d))",
-                                   (int) (*sock)->sock, interfaceName, listenAddr->sin_addr.S_un.S_un_b.s_b1,
-                                   listenAddr->sin_addr.S_un.S_un_b.s_b2, listenAddr->sin_addr.S_un.S_un_b.s_b3,
-                                   listenAddr->sin_addr.S_un.S_un_b.s_b4, htons(listenAddr->sin_port));
+            SOPC_Logger_TraceDebug(
+                SOPC_LOG_MODULE_COMMON,
+                "UDP sock: setsockopt(%d, IPPROTO_IP, IP_ADD_MEMBERSHIP, (%s(idx:%u) / %d.%d.%d.%d:%d))",
+                (int) (*sock)->sock, interfaceName, ntohl(mreq.imr_interface.s_addr),
+                listenAddr->sin_addr.S_un.S_un_b.s_b1, listenAddr->sin_addr.S_un.S_un_b.s_b2,
+                listenAddr->sin_addr.S_un.S_un_b.s_b3, listenAddr->sin_addr.S_un.S_un_b.s_b4,
+                htons(listenAddr->sin_port));
             res = setsockopt((*sock)->sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*) &mreq, sizeof(mreq));
         }
         else // Bind directly with unicast addr
@@ -277,7 +358,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
     return status;
 }
 
-/* WARNING: interfaceName is NOT USED */
+/* WARNING: interfaceName is NOT TESTED */
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress,
                                                const char* interfaceName,
                                                bool setNonBlocking,
