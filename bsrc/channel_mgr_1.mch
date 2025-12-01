@@ -298,10 +298,13 @@ OPERATIONS
         p_config_idx : t_channel_config_idx
     THEN
         s_cli_channel_disconnecting := s_cli_channel_disconnecting - {p_config_idx} ||
-        p_close_ctx :(p_close_ctx : t_application_context_i &
-            (p_config_idx : dom(a_cli_channel_closing_ctx) =>
-                p_close_ctx = a_cli_channel_closing_ctx (p_config_idx)) &
-            (not (p_config_idx : dom(a_cli_channel_closing_ctx)) =>
+        p_close_ctx, a_cli_channel_closing_ctx
+        :(p_close_ctx : t_application_context_i &
+          a_cli_channel_closing_ctx : t_channel_config_idx +-> t_application_context_i &
+          a_cli_channel_closing_ctx = {p_config_idx} <<| a_cli_channel_closing_ctx$0 &
+            (p_config_idx : dom(a_cli_channel_closing_ctx$0) =>
+                p_close_ctx = a_cli_channel_closing_ctx$0 (p_config_idx)) &
+            (not (p_config_idx : dom(a_cli_channel_closing_ctx$0)) =>
                 p_close_ctx = c_no_application_context))
     END
     ;

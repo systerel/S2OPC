@@ -272,7 +272,8 @@ OPERATIONS
     p_close_ctx <-- remove_cli_channel_disconnecting(p_config_idx) =
     BEGIN
         s_cli_channel_disconnecting_i(p_config_idx) := FALSE;
-        p_close_ctx := a_cli_channel_closing_ctx_i (p_config_idx)
+        p_close_ctx := a_cli_channel_closing_ctx_i (p_config_idx);
+        a_cli_channel_closing_ctx_i (p_config_idx) := c_no_application_context
     END
     ;
 

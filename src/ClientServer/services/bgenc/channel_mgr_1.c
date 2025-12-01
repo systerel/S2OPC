@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_1.c
 
- Date                 : 30/09/2025 13:03:13
+ Date                 : 01/12/2025 16:06:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -332,6 +332,7 @@ void channel_mgr_1__remove_cli_channel_disconnecting(
    constants__t_application_context_i * const channel_mgr_1__p_close_ctx) {
    channel_mgr_1__s_cli_channel_disconnecting_i[channel_mgr_1__p_config_idx] = false;
    *channel_mgr_1__p_close_ctx = channel_mgr_1__a_cli_channel_closing_ctx_i[channel_mgr_1__p_config_idx];
+   channel_mgr_1__a_cli_channel_closing_ctx_i[channel_mgr_1__p_config_idx] = constants__c_no_application_context;
 }
 
 void channel_mgr_1__reset_config(
