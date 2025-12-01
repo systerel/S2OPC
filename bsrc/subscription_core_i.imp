@@ -492,6 +492,7 @@ LOCAL_OPERATIONS
     END
     ;
 
+    /* (INIT) Iterate on the session defined priorities */
     p_continue <-- local_init_iter_session_seq_priority (p_session) =
     PRE
         p_session : t_session_i &
@@ -503,6 +504,7 @@ LOCAL_OPERATIONS
     END
     ;
 
+    /* (CONTINUE) Iterate on the session defined priorities: returns priority index */
     p_continue, p_prio_idx <-- local_continue_iter_session_seq_priority =
     PRE
         next_idx_iter_prio /= 0
@@ -517,18 +519,23 @@ LOCAL_OPERATIONS
     END
     ;
 
+    /* (INIT) Iterate on the session subscriptions with same priority (index)*/
     local_init_iter_subscription_priority(p_prio_idx) =
     PRE
         p_prio_idx : t_prio_idx_i &
         p_prio_idx : t_prio_idx
     THEN
+        /* Number of subscriptions in priority */
         nb_subs_iter_sub   := a_session_priority_nb_subs     (session_iter_prio)(p_prio_idx) ||
+        /* Minimum subscription index for the given priority */
         min_idx_iter_sub   := a_session_priority_min_sub_idx (session_iter_prio)(p_prio_idx) ||
+        /* Next subscription index (memorized) to iterated for the given priority */
         next_idx_iter_sub  := a_session_priority_next_sub_idx(session_iter_prio)(p_prio_idx) ||
         idx_iter_sub       := a_session_priority_next_sub_idx(session_iter_prio)(p_prio_idx)
     END
     ;
 
+    /* (CONTINUE) Iterate on the session subscriptions with same priority: returns subscription */
     p_continue, p_subscription <-- local_continue_iter_subscription_priority =
     PRE
         idx_iter_sub : t_sub_idx &
@@ -541,14 +548,18 @@ LOCAL_OPERATIONS
          :(p_continue : BOOL &
            p_subscription : t_subscription_i &
            p_subscription : t_subscription   &
+
            idx_iter_sub   : t_sub_idx        &
            a_session_priority_next_sub_idx : t_session --> (t_priority +-> t_sub_idx) &
 
+           p_subscription = a_session_seq_subscription (session_iter_prio)(idx_iter_sub$0) &
+           /* Iterate on the subscription index to return (until first returned reached) */
            idx_iter_sub = min_idx_iter_sub + ( (idx_iter_sub$0 - min_idx_iter_sub + 1) mod nb_subs_iter_sub ) &
            p_continue   = bool(idx_iter_sub /= next_idx_iter_sub) &
            (p_continue = TRUE
             =>
             a_session_priority_next_sub_idx = a_session_priority_next_sub_idx$0) &
+            /* When iterator reached the last element to return: increment the memorized next subscription index (compared to INIT) */
            (p_continue = FALSE
             =>
             a_session_priority_next_sub_idx = a_session_priority_next_sub_idx$0 <+
@@ -2114,7 +2125,7 @@ OPERATIONS
             WHILE l_continue_pub = TRUE DO
                 l_continue_pub, l_req_exp_time, l_req_handle, l_req_ctx, l_resp_msg
                 <-- continue_pop_head_iter_publish_request (l_publish_queue);
-                /* Generates BadNoSubscription since only 1 subscription per session (no other subscription possibly opened) */
+                /* Generates BadNoSubscription responses */
                 generate_internal_send_publish_response_event (p_session, l_resp_msg, l_req_handle, l_req_ctx, e_sc_bad_no_subscription)
             INVARIANT
                 l_continue_pub = bool(a_publish_responses~[{l_publish_queue}] /= {})

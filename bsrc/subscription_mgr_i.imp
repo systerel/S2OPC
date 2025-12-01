@@ -1673,6 +1673,7 @@ OPERATIONS
                 <-- receive_publish_request (l_subscription, p_resp_msg);
                 async_resp_msg := bool(async_resp_msg = TRUE & l_async_resp_msg = TRUE)
             INVARIANT
+                /* TODO: model iteration on session subscriptions */
                 0=0
             VARIANT
                 0
@@ -2081,6 +2082,7 @@ OPERATIONS
                     close_subscription (l_sub)
                 END
             INVARIANT
+                /* TODO: model iteration on session subscriptions */
                 0=0
             VARIANT
                 0

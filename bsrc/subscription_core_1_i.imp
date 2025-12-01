@@ -165,8 +165,8 @@ INVARIANT
     a_SeqNum                  = s_subscription <| a_SeqNum_i |> t_sub_seq_num                  &
 
     a_publishRequestQueue_i      : t_session_i --> t_publishReqQueue_i                    &
-    dom(a_publishRequestQueue)   = ran(a_subscription_session)                            &
-    a_publishRequestQueue        = ran(a_subscription_session) <| a_publishRequestQueue_i |> t_publishReqQueue &
+    ran(a_subscription_session)  <: dom(a_publishRequestQueue)                            &
+    a_publishRequestQueue        = t_session <| a_publishRequestQueue_i |> t_publishReqQueue &
 
     a_notifRepublishQueue_i      : t_subscription_i --> t_notifRepublishQueue_i                &
     dom(a_notifRepublishQueue)   = s_subscription                                              &
@@ -400,6 +400,7 @@ OPERATIONS
                         l_int_continue := 0
                     END
                 INVARIANT
+                    /* TODO: model to iterate on session priorities to find priority index for insertion of new priority  */
                     0=0
                 VARIANT
                     l_prio_idx + l_int_continue
@@ -420,6 +421,7 @@ OPERATIONS
 
                 l_idx := l_idx - 1
             INVARIANT
+                 /* TODO: model iteration to shift subscription indexes for each session priority higher than the one inserted */
                 0=0
             VARIANT
                 l_idx
@@ -444,6 +446,7 @@ OPERATIONS
                 a_session_subscription_idx_i(p_session)(l_sub) := l_sub_idx_it;
                 l_sub_idx_it := l_sub_idx_it - 1
             INVARIANT
+                /* TODO: model iteration to shift subscriptions after the new one in session subscription sequence */
                 0=0
             VARIANT
                 l_sub_idx_it
@@ -520,6 +523,8 @@ OPERATIONS
             END;
             l_prio_idx_it := l_prio_idx_it + 1
         INVARIANT
+            /* TODO1: model iteration to shift subscription indexes for each session priority higher than the one deleted */
+            /* TODO2: model shift of index priority for each session priority higher than the one deleted when the subscription was the last of its priority */
             0=0
         VARIANT
             l_nb_prio - l_prio_idx_it
@@ -555,6 +560,7 @@ OPERATIONS
             a_session_subscription_idx_i(l_session)(l_sub) := l_sub_idx;
             l_sub_idx := l_sub_idx + 1
         INVARIANT
+            /* TODO: model iteration to shift subscriptions after the one deleted in session subscription sequence */
             0=0
         VARIANT
             l_nb_subs - l_sub_idx

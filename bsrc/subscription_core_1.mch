@@ -100,7 +100,7 @@ DEFINITIONS
     /* (Session) Implementation variables */
 
     /* Note: kept on subscription for now since 1 subs / session + no transfer. Otherwise could be cleared on session close ! */
-    a_publishRequestQueue :  t_session_i --> t_publishReqQueue &
+    a_publishRequestQueue :  t_session +-> t_publishReqQueue &
     a_notifRepublishQueue : s_subscription --> t_notifRepublishQueue
 
 ABSTRACT_VARIABLES
@@ -275,7 +275,6 @@ OPERATIONS
         p_subscription /: s_subscription &
         p_session : t_session_i &
         p_session : t_session &
-        p_session /: ran(a_subscription_session) &
         p_state : t_subscriptionState_i &
         p_state : t_subscriptionState & /* e_subscriptionState_normal on creation */
         p_firstMsgSent : BOOL & /* FALSE on creation */

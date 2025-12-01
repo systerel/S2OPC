@@ -237,7 +237,7 @@ DEFINITIONS
 
     /* Note: kept on subscription for now since 1 subs / session + no transfer. Otherwise could be cleared on session close ! */
     s_publishReqQueue <: t_publishReqQueue &
-    a_publishRequestQueue :  t_session_i --> s_publishReqQueue &
+    a_publishRequestQueue :  t_session +-> s_publishReqQueue &
     a_notifRepublishQueue : s_subscription --> t_notifRepublishQueue &
     notification_republish_iter_queue : t_notifRepublishQueue &
     s_to_iterate_sub_seq_num <: t_sub_seq_num &
@@ -530,7 +530,6 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : t_session &
-        p_session /: ran(a_subscription_session) & /* session is not part of any subscription (=> 1 subscription / session) */
         p_revPublishInterval : t_opcua_duration_i &
         p_revLifetimeCount : t_counter &
         p_revLifetimeCount > 0 &
@@ -573,7 +572,8 @@ OPERATIONS
                     /* Transition #1 + #3 */
                     (   StatusCode_service = e_sc_ok &
                         subscription : t_subscription - s_subscription$0 &
-                        s_subscription = s_subscription$0 \/ {subscription}
+                        s_subscription = s_subscription$0 \/ {subscription} &
+                        a_subscription_session (subscription) = p_session
                     ) or
                     /* Transition #1 + #2 */
                     /* to deal with indeterminated timer creation for a_publishTimer */
@@ -1697,6 +1697,7 @@ OPERATIONS
 
     p_continue, p_subscription <-- continue_iter_subscription_session =
     PRE
+        /* TODO: model of global iterator (sub-iterators modelized in implem) */
         0=0
     THEN
         p_continue,
