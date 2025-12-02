@@ -408,7 +408,7 @@ OPERATIONS
     END
     ;
 
-    client_set_NonceServer(p_session, p_resp_msg) =
+    bres <-- client_set_NonceServer(p_session, p_resp_msg) =
     PRE
         p_session : t_session_i &
         p_session : t_session   &
@@ -417,10 +417,13 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_create_resp
     THEN
+        bres,
         a_NonceServer
-        :(a_NonceServer : t_session +-> t_Nonce &
-            {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
-            p_session : dom(a_NonceServer)
+        :(bres : BOOL &
+          (bres = TRUE =>
+           a_NonceServer : t_session +-> t_Nonce &
+           {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
+           p_session : dom(a_NonceServer))
         )
     END
     ;
@@ -583,6 +586,7 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_activate_resp
     THEN
+        /* TODO: new ServerNonce shall be stored to make possible future activations (different user / SC) */
         valid :: BOOL
     END
     ;

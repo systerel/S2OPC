@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 01/12/2025 11:08:53
+ Date                 : 02/12/2025 10:39:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -500,7 +500,8 @@ void session_core__client_create_session_resp_sm(
          }
          else {
             session_core_1__client_set_NonceServer(session_core__session,
-               session_core__create_resp_msg);
+               session_core__create_resp_msg,
+               session_core__bret);
          }
       }
       if (*session_core__bret == true) {
@@ -539,7 +540,7 @@ void session_core__l_client_user_activate_session_req_sm(
       constants__t_SignatureData_i session_core__l_user_token_signature;
       constants__t_session_application_context_i session_core__l_app_context;
       
-      *session_core__p_ret = constants_statuscodes_bs__c_StatusCode_indet;
+      *session_core__p_ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
       *session_core__p_session_token = constants__c_session_token_indet;
       session_core_1__client_get_token_from_session(session_core__p_session,
          session_core__p_session_token);
@@ -722,7 +723,7 @@ void session_core__allocate_authenticated_user(
       t_bool session_core__l_dom;
       constants__t_Nonce_i session_core__l_server_nonce;
       
-      *session_core__p_sc_valid_user = constants_statuscodes_bs__c_StatusCode_indet;
+      *session_core__p_sc_valid_user = constants_statuscodes_bs__e_sc_bad_unexpected_error;
       *session_core__p_max_attempts = false;
       *session_core__p_user = constants__c_user_indet;
       channel_mgr__get_channel_info(session_core__p_channel,

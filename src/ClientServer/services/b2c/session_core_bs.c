@@ -55,7 +55,9 @@
 #include "util_b2c.h"
 #include "util_user.h"
 
-#define LENGTH_NONCE 32
+#define MIN_LENGTH_NONCE 32
+#define MAX_LENGTH_NONCE 128
+#define NONCE_LENGTH_DEFAULT MIN_LENGTH_NONCE
 
 typedef struct ServerSessionData
 {
@@ -367,17 +369,24 @@ void session_core_bs__server_is_valid_session_token(const constants__t_session_t
 }
 
 void session_core_bs__client_set_NonceServer(const constants__t_session_i session_core_bs__p_session,
-                                             const constants__t_msg_i session_core_bs__p_resp_msg)
+                                             const constants__t_msg_i session_core_bs__p_resp_msg,
+                                             t_bool* const session_core_bs__bres)
 {
     SOPC_ASSERT(constants__c_session_indet != session_core_bs__p_session);
-
+    *session_core_bs__bres = false;
     const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__p_resp_msg;
+    if (pResp->ServerNonce.Length < MIN_LENGTH_NONCE || pResp->ServerNonce.Length > MAX_LENGTH_NONCE)
+    {
+        /* From specification: "This number shall have a length between 32 and 128 bytes inclusive" */
+        return;
+    }
     // Shallow copy of server nonce
     clientSessionDataArray[session_core_bs__p_session].nonceServer = pResp->ServerNonce;
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     // Remove nonce content from create session resp message
     SOPC_ByteString_Initialize((SOPC_ByteString*) &pResp->ServerNonce);
     SOPC_GCC_DIAGNOSTIC_RESTORE
+    *session_core_bs__bres = true;
 }
 
 void session_core_bs__client_set_session_token(const constants__t_session_i session_core_bs__session,
@@ -642,7 +651,7 @@ void session_core_bs__server_create_session_req_do_crypto(
     /* If security policy is not None, generate the signature */
     if (SOPC_STATUS_OK == status && strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI) != 0)
     {
-        if (pReq->ClientNonce.Length < LENGTH_NONCE)
+        if (pReq->ClientNonce.Length < MIN_LENGTH_NONCE || pReq->ClientNonce.Length > MAX_LENGTH_NONCE)
         {
             *session_core_bs__status = constants_statuscodes_bs__e_sc_bad_nonce_invalid;
             return;
@@ -1121,9 +1130,9 @@ void session_core_bs__client_create_session_req_do_crypto(
 
             /* Ask the CryptoProvider for LENGTH_NONCE random bytes */
             SOPC_ByteString_Clear(pNonce);
-            pNonce->Length = LENGTH_NONCE;
+            pNonce->Length = NONCE_LENGTH_DEFAULT;
 
-            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, LENGTH_NONCE, &pNonce->Data);
+            status = SOPC_CryptoProvider_GenerateRandomBytes(pProvider, NONCE_LENGTH_DEFAULT, &pNonce->Data);
             if (SOPC_STATUS_OK != status)
                 /* TODO: Should we clean half allocated things? */
                 return;
@@ -1374,9 +1383,10 @@ void session_core_bs__client_create_session_check_crypto(
         return;
     }
 
-    /* TODO: Verify that the server certificate in the Response is the same as the one stored with the SecureChannel */
+    /* Note: server certificate in the Response is the same as the one stored with the SecureChannel (see
+     * create_session_resp_check_server_certificate) */
 
-    if (pResp->ServerNonce.Length < LENGTH_NONCE ||
+    if (pResp->ServerNonce.Length < MIN_LENGTH_NONCE || pResp->ServerNonce.Length > MAX_LENGTH_NONCE ||
         SOPC_ByteString_Copy(&pSession->nonceServer, &pResp->ServerNonce) != SOPC_STATUS_OK)
     {
         return;
@@ -1729,7 +1739,7 @@ void session_core_bs__server_set_fresh_nonce(
 
     /* Ask the CryptoProvider for LENGTH_NONCE random bytes */
     SOPC_ByteString_Clear(pNonce);
-    pNonce->Length = LENGTH_NONCE;
+    pNonce->Length = NONCE_LENGTH_DEFAULT;
 
     provider = SOPC_CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
 
