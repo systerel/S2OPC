@@ -673,7 +673,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
         {
             res = sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx];
         }
-        if (SOPC_STATUS_OK == status && NULL == res)
+        const bool connectionAlreadyExists = (NULL != res);
+        if (SOPC_STATUS_OK == status && !connectionAlreadyExists)
         {
             status = SOPC_ClientHelperInternal_CreateClientConnection(secConnConfig, true, &res);
             if (SOPC_STATUS_OK == status)
@@ -711,8 +712,9 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             }
         }
 
-        if (SOPC_STATUS_OK != status)
+        if (SOPC_STATUS_OK != status && !connectionAlreadyExists)
         {
+            // Clean created connection only if it was created in this function call
             SOPC_ClientHelperInternal_ClearClientConnection(res);
         }
         mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
@@ -834,6 +836,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
         status = SOPC_ClientHelperInternal_MayFinalizeSecureConnection(pConfig, secConnConfig);
     }
 
+    const bool connectionAlreadyExists = (NULL != res);
+
     if (SOPC_STATUS_OK == status && NULL != res)
     {
         if (res->isDiscovery)
@@ -849,7 +853,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
         }
     }
 
-    if (SOPC_STATUS_OK == status && NULL == res)
+    if (SOPC_STATUS_OK == status && !connectionAlreadyExists)
     {
         status = SOPC_ClientHelperInternal_CreateClientConnection(secConnConfig, false, &res);
         if (SOPC_STATUS_OK == status)
@@ -916,8 +920,9 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
     {
         *secureConnection = res;
     }
-    else
+    else if (!connectionAlreadyExists)
     {
+        // Only clear connection if it was created in this function call
         SOPC_ClientHelperInternal_ClearClientConnection(res);
     }
 

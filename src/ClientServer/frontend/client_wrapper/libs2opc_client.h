@@ -201,6 +201,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_C
  * \brief Establishes the connection in a blocking way (synchronously).
  *
  * \warning A single connection can be established for a given secure connection \p secConnConfig .
+ *          ::SOPC_ClientHelper_Disconnect shall be called prior to a new call for same \p secConnConfig value.
  *
  * \param secConnConfig          The secure connection configuration to establish
  * \param connectEventCb         Callback called on connection event, it is only used in case of further
