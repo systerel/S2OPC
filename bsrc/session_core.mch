@@ -438,11 +438,13 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_activate_resp
     THEN
+        /* Note: same cases have same post-conditions */
         IF a_state(session) = e_session_created
         THEN
             IF session : dom(a_channel) &
                a_channel(session) = channel // current channel is the channel associated to the current session
             THEN
+                /* Case 1: keep same channel and set user */
                 CHOICE
                     a_state(session) := e_session_userActivated ||
                     a_user_server(session) := user ||
@@ -465,8 +467,8 @@ OPERATIONS
             IF session : dom(a_channel) &
                a_channel(session) = channel // current channel is the channel associated to the current session
             THEN
+                /* Case 1: keep same channel and set (change) user */
                 CHOICE
-                    /* Case 1: keep same channel and change user */
                     a_state(session) := e_session_userActivated ||
                     a_user_server(session) := user ||
                     a_session_roles :(
@@ -483,26 +485,26 @@ OPERATIONS
             ELSIF session : dom(a_user_server) &
                   a_user_server(session) = user // user provided in activate request is the user associated to the current session
             THEN
-                    CHOICE
-                        /* Case 2: keep same user and change channel */
-                        a_channel(session) := channel         ||
-                        a_state(session) := e_session_userActivated ||
-                        a_user_server :(
-                            a_user_server : t_session +-> t_user &
-                            {session} <<| a_user_server = {session} <<| a_user_server$0 &
-                            session : dom(a_user_server))||
-                        a_session_roles :(
-                            a_session_roles : t_session +-> t_sessionRoles &
-                            {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
-                        a_NonceServer :(
-                            a_NonceServer : t_session +-> t_Nonce &
-                            {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                            session : dom(a_NonceServer)) ||
-                        ret := e_sc_ok
-                    OR
-                        ret := e_sc_bad_application_signature_invalid
-                        // sends response with error
-                    END
+                /* Case 2: keep same user and change channel */
+                CHOICE
+                    a_channel(session) := channel         ||
+                    a_state(session) := e_session_userActivated ||
+                    a_user_server :(
+                        a_user_server : t_session +-> t_user &
+                        {session} <<| a_user_server = {session} <<| a_user_server$0 &
+                        session : dom(a_user_server))||
+                    a_session_roles :(
+                        a_session_roles : t_session +-> t_sessionRoles &
+                        {session} <<| a_session_roles = {session} <<| a_session_roles$0) ||
+                    a_NonceServer :(
+                        a_NonceServer : t_session +-> t_Nonce &
+                        {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                        session : dom(a_NonceServer)) ||
+                    ret := e_sc_ok
+                OR
+                    ret := e_sc_bad_application_signature_invalid
+                    // sends response with error
+                END
             ELSE
                 ret := e_sc_bad_invalid_state
             END
@@ -511,7 +513,7 @@ OPERATIONS
             IF session : dom(a_user_server) &
                a_user_server(session) = user
             THEN
-                /* ScActivateReq */
+                /* Case 2: keep same user and change channel */
                 CHOICE
                     a_channel(session) := channel         ||
                     a_state(session) := e_session_userActivated ||
