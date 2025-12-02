@@ -42,6 +42,7 @@ set(S2OPC_CLIENTSERVER_INTERNAL_INCLUDES
   "${S2OPC_ROOT_PATH}/src/ClientServer/services/bgenc"
   "${S2OPC_ROOT_PATH}/src/ClientServer/sockets"
   "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/server_wrapper/alarm_conditions/internal"
+  "${CMAKE_CURRENT_SOURCE_DIR}/unit_tests/helpers"
   )
 
 # Get the helpers for unit and validation tests
@@ -838,10 +839,15 @@ endif()
 
 if(ENABLE_FUZZING)
   set(FUZZING_PATH "unit_tests/fuzzing")
+  set(FUZZ_DECODE_SOURCES
+    "${FUZZING_PATH}/fuzz_decoder.c"
+    "unit_tests/helpers/custom_types.c"
+    "unit_tests/helpers/custom2_types.c"
+  )
 
   s2opc_fuzzer(server_request_fuzzer "${FUZZING_PATH}/fuzz_server_request.c" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
   s2opc_fuzzer(parse_tcp_uri_fuzzer "${FUZZING_PATH}/fuzz_parse_tcp_uri.c" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
-  s2opc_fuzzer(decode_fuzzer "${FUZZING_PATH}/fuzz_decoder.c" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
+  s2opc_fuzzer(decode_fuzzer "${FUZZ_DECODE_SOURCES}" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
 endif(ENABLE_FUZZING)
 
 ### Push server tests ###

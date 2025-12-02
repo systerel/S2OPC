@@ -21,6 +21,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "custom2_types.h"
+#include "custom_types.h"
 #include "sopc_assert.h"
 #include "sopc_buffer.h"
 #include "sopc_encodeabletype.h"
@@ -28,19 +30,63 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
+typedef struct Fuzzing_Group
+{
+    SOPC_EncodeableType** types;
+    size_t size;
+} Fuzzing_Group;
+
+static Fuzzing_Group g_fuzzGroups[3];
+static size_t g_nbFuzzGroups = 0;
+
+/* classify encodeables types into groups */
+static void Fuzz_InitGroups(void)
+{
+    static int initialized = 0;
+    if (initialized)
+        return;
+
+    initialized = 1;
+
+    g_fuzzGroups[0].types = sopc_KnownEncodeableTypes;
+    g_fuzzGroups[0].size = SOPC_TypeInternalIndex_SIZE;
+
+    g_fuzzGroups[1].types = sopc_Custom_KnownEncodeableTypes;
+    g_fuzzGroups[1].size = SOPC_Custom_TypeInternalIndex_SIZE;
+
+    g_fuzzGroups[2].types = sopc_Custom2_KnownEncodeableTypes;
+    g_fuzzGroups[2].size = SOPC_Custom2_TypeInternalIndex_SIZE;
+
+    g_nbFuzzGroups = 3;
+}
+
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 {
-    if ((len <= 1) || ((2 * len) > UINT32_MAX))
+    if ((len <= 2) || ((2 * len) > UINT32_MAX))
     {
         return 0;
     }
 
     SOPC_Helper_Endianness_Check();
 
-    const size_t type_index = buf[0] % SOPC_TypeInternalIndex_SIZE;
+    Fuzz_InitGroups();
+
+    /* select a fuzzing group */
+    uint8_t group = buf[0];
+    size_t group_index = group % g_nbFuzzGroups;
+    Fuzzing_Group* grp = &g_fuzzGroups[group_index];
+
+    if (grp->size == 0 || grp->types == NULL)
+    {
+        return 0;
+    }
+
+    /* select  a specific encodeable type */
+    uint8_t typeSel = buf[1];
+    size_t type_index = typeSel % grp->size;
 
     /* get an encodeable type by looking in encodeableType array */
-    SOPC_EncodeableType* type = sopc_KnownEncodeableTypes[type_index];
+    SOPC_EncodeableType* type = grp->types[type_index];
 
     void* pValue = SOPC_Calloc(1, type->AllocationSize);
     if (NULL == pValue)
@@ -51,13 +97,13 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     SOPC_EncodeableObject_Initialize(type, pValue);
 
     /* create a buffer using remaining data */
-    SOPC_Buffer* buffer = SOPC_Buffer_Attach((uint8_t*) &buf[1], (uint32_t) len - 1);
+    SOPC_Buffer* buffer = SOPC_Buffer_Attach((uint8_t*) &buf[2], (uint32_t) len - 2);
 
     SOPC_ReturnStatus status = SOPC_EncodeableObject_Decode(type, pValue, buffer, 0);
     /*  encode if decode was successful */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Buffer* result_buffer = SOPC_Buffer_CreateResizable((uint32_t) len - 1, (uint32_t)(2 * len));
+        SOPC_Buffer* result_buffer = SOPC_Buffer_CreateResizable((uint32_t) len - 2, (uint32_t)(2 * len));
         if (NULL == result_buffer)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -88,7 +134,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
                     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
                     /* encode again */
-                    SOPC_Buffer* result_buffer2 = SOPC_Buffer_CreateResizable((uint32_t) len - 1, (uint32_t)(2 * len));
+                    SOPC_Buffer* result_buffer2 = SOPC_Buffer_CreateResizable((uint32_t) len - 2, (uint32_t)(2 * len));
                     if (NULL == result_buffer2)
                     {
                         status = SOPC_STATUS_OUT_OF_MEMORY;
