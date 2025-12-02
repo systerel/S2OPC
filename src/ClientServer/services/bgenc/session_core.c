@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 02/12/2025 10:39:44
+ Date                 : 02/12/2025 13:08:52
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -387,6 +387,8 @@ void session_core__l_server_create_session_req_and_resp_sm(
       t_bool session_core__l_valid_session_token;
       t_bool session_core__l_valid_server_cert;
       
+      *session_core__p_service_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+      *session_core__nsession = constants__c_session_indet;
       session_core_1__create_session(session_core__p_session,
          session_core__p_channel,
          constants__e_session_created);
@@ -417,6 +419,8 @@ void session_core__l_server_create_session_req_and_resp_sm(
          else {
             *session_core__p_service_ret = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
          }
+      }
+      if (*session_core__p_service_ret != constants_statuscodes_bs__e_sc_ok) {
          *session_core__nsession = constants__c_session_indet;
          session_core_1__set_session_state_closed(session_core__p_session,
             constants_statuscodes_bs__e_sc_bad_session_id_invalid);

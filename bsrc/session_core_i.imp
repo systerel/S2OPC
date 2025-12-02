@@ -118,29 +118,24 @@ LOCAL_OPERATIONS
                 l_nsession_token : t_session_token_i &
                 l_nsession_token : t_session_token - dom(a_server_token)
             THEN
+                p_service_ret := e_sc_ok                               ||
                 nsession := p_session                                  ||
                 a_server_user_auth_attempts(p_session) := 0            ||
                 a_channel(p_session) := p_channel                      || // associate current channel
                 a_server_token := a_server_token <+ {l_nsession_token |-> p_session} ||
-                p_service_ret, a_state, a_NonceServer :(
-                    p_service_ret : t_StatusCode_i &
-                    a_state = a_state$0 <+ {p_session |-> e_session_created} &
+                a_state := a_state <+ {p_session |-> e_session_created} ||
+                a_NonceServer :(
                     a_NonceServer : t_session +-> t_Nonce &
                     dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating}) &
-
-                    p_service_ret : {e_sc_bad_unexpected_error, e_sc_bad_nonce_invalid, e_sc_bad_certificate_uri_invalid,
-                                     e_sc_bad_invalid_argument, e_sc_ok, e_sc_bad_out_of_memory} &
-                    (p_service_ret = e_sc_ok =>
-                        {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
-                        p_session : dom(a_NonceServer)) &
-                    (p_service_ret /= e_sc_ok =>
-                        a_NonceServer = a_NonceServer$0)
+                    {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
+                    p_session : dom(a_NonceServer)
                 )
             END
         OR
             nsession := c_session_indet ||
-            p_service_ret :: {e_sc_bad_too_many_sessions, e_sc_bad_security_checks_failed} ||
-
+            p_service_ret :: {e_sc_bad_too_many_sessions, e_sc_bad_security_checks_failed,
+                              e_sc_bad_unexpected_error, e_sc_bad_nonce_invalid, e_sc_bad_certificate_uri_invalid,
+                              e_sc_bad_invalid_argument, e_sc_ok, e_sc_bad_out_of_memory} ||
             s_session                   := s_session - {p_session}                     ||
             a_state                     := {p_session} <<| a_state                     ||
             a_channel                   := {p_session} <<| a_channel                   ||
@@ -873,6 +868,8 @@ OPERATIONS
         l_valid_session_token,
         l_valid_server_cert
     IN
+        p_service_ret := e_sc_bad_unexpected_error;
+        nsession := c_session_indet;
         create_session(p_session, p_channel, e_session_created);
         l_channel_config_idx <-- get_channel_info (p_channel);
         l_valid_server_cert <-- create_session_req_check_client_certificate (create_req_msg, l_channel_config_idx);
@@ -888,7 +885,11 @@ OPERATIONS
                 p_service_ret := e_sc_bad_too_many_sessions
             ELSE
                 p_service_ret := e_sc_bad_security_checks_failed
-            END;
+            END
+        END
+        ;
+        IF p_service_ret /= e_sc_ok
+        THEN
             nsession := c_session_indet;
             set_session_state_closed (p_session, e_sc_bad_session_id_invalid)
         END

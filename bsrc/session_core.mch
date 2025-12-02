@@ -242,26 +242,39 @@ OPERATIONS
                 l_nsession : t_session_i &
                 l_nsession : t_session - s_session
             THEN
-                s_session := s_session \/ {l_nsession} || // add new session to active sessions
-                nsession := l_nsession ||
-
                 ANY l_nsession_token WHERE
                     l_nsession_token : t_session_token_i &
                     l_nsession_token : t_session_token - dom(a_server_token)
                 THEN
-                    a_state(l_nsession)   := e_session_created            || // add new session to created sessions
-                    a_channel(l_nsession) := channel                      || // associate current channel
-                    a_server_token := a_server_token <+ {l_nsession_token |-> l_nsession} ||
-
-                    service_ret, a_NonceServer :(
+                    nsession, service_ret,
+                    s_session,
+                    a_state, a_channel, a_server_token,
+                    a_NonceServer :(
+                        nsession : t_session_i &
                         service_ret : t_StatusCode_i &
+                        s_session <: t_session &
+                        a_state : s_session --> t_sessionState &
+                        a_channel : s_session +-> t_channel &
+                        a_server_token : t_session_token >+> s_session &
                         a_NonceServer : t_session +-> t_Nonce &
-
+                        {l_nsession} <<| a_state = {l_nsession} <<| a_state$0 &
+                        {l_nsession} <<| a_channel = {l_nsession} <<| a_channel$0 &
+                        a_server_token |>> {l_nsession} = a_server_token$0 |>> {l_nsession} &
                         service_ret : {e_sc_bad_unexpected_error, e_sc_bad_nonce_invalid, e_sc_bad_certificate_uri_invalid,
                                          e_sc_bad_invalid_argument, e_sc_ok, e_sc_bad_out_of_memory} &
                         (service_ret = e_sc_ok =>
+                            nsession = l_nsession &
+                            s_session = s_session \/ {l_nsession} & // add new session to active sessions
+                            a_state = a_state$0 <+ {l_nsession |-> e_session_created} & // add new session to created sessions
+                            a_channel = a_channel$0 <+ {l_nsession |-> channel} & // associate current channel
+                            a_server_token = a_server_token$0 <+ {l_nsession_token |-> l_nsession} &
                             {l_nsession} <<| a_NonceServer = {l_nsession} <<| a_NonceServer$0) &
                         (service_ret /= e_sc_ok =>
+                            nsession = c_session_indet &
+                            s_session = s_session$0 &
+                            a_state = a_state$0 &
+                            a_channel = a_channel$0 &
+                            a_server_token = a_server_token$0 &
                             a_NonceServer = a_NonceServer$0)
                     )
                 END
