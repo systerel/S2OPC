@@ -61,7 +61,6 @@ PROMOTES
     server_session_timeout_start_timer,
     server_session_timeout_evaluation,
     server_session_timeout_msg_received,
-    set_session_user_client,
     get_session_user_client,
     get_session_user_server,
     session_has_user_server,

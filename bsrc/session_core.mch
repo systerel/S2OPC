@@ -890,19 +890,6 @@ OPERATIONS
     END
     ;
 
-    set_session_user_client (session, p_user_token) =
-    PRE
-        session      : t_session_i        &
-        session      : t_session          &
-        session      : s_client_session   &
-        a_state(session) = e_session_init &
-        p_user_token : t_user_token_i     &
-        p_user_token : t_user_token
-    THEN
-        a_user_client (session) := p_user_token
-    END
-    ;
-
     p_user_token <-- get_session_user_client (session) =
     PRE
         session : t_session_i &
