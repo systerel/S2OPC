@@ -48,6 +48,11 @@
 #include "sopc_threads.h"
 #include "sopc_udp_sockets.h"
 
+// No cpu affinity
+#ifndef SOPC_PUBSUB_CPU_AFFINITY
+#define SOPC_PUBSUB_CPU_AFFINITY (-1)
+#endif
+
 /* Transport context. One per connection */
 typedef struct SOPC_PubScheduler_TransportCtx SOPC_PubScheduler_TransportCtx;
 
@@ -1026,14 +1031,14 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
     if (SOPC_STATUS_OK == resultSOPC)
     {
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.quit, false);
-        if (0 == threadPriority)
+        if (0 == threadPriority && -1 == SOPC_PUBSUB_CPU_AFFINITY)
         {
             resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.thPublisher, &thread_start_publish, NULL, "Publisher");
         }
         else
         {
             resultSOPC = SOPC_Thread_CreatePrioritized(&pubSchedulerCtx.thPublisher, &thread_start_publish, NULL,
-                                                       threadPriority, "Publisher");
+                                                       threadPriority, SOPC_PUBSUB_CPU_AFFINITY, "Publisher");
         }
         if (SOPC_STATUS_OK == resultSOPC)
         {
@@ -1126,7 +1131,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         status = SOPC_MQTT_Create_Client(&pubSchedulerCtx.transport[index].mqttClient);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Not enougth space to allocate mqttClient");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Not enough space to allocate mqttClient");
             return false;
         }
         status = SOPC_MQTT_InitializeAndConnect_Client(

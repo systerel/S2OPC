@@ -253,10 +253,10 @@ void suite_test_raw_sockets(int* index)
     char** nodeRes = SOPC_Calloc(1, sizeof(*nodeRes));
     char** portRes = SOPC_Calloc(1, sizeof(*portRes));
 
-    SOPC_ReturnStatus status = SOPC_Thread_CreatePrioritized(&p0, (void*) cb_server_tcp, NULL, 60, "TCP_Server");
+    SOPC_ReturnStatus status = SOPC_Thread_CreatePrioritized(&p0, (void*) cb_server_tcp, NULL, 60, -1, "TCP_Server");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_Thread_CreatePrioritized(&p1, (void*) cb_client_tcp, NULL, 60, "TCP_Client");
+    status = SOPC_Thread_CreatePrioritized(&p1, (void*) cb_client_tcp, NULL, 60, -1, "TCP_Client");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Thread_Join(&p0);
@@ -289,20 +289,21 @@ void suite_test_udp_sockets(int* index)
     SOPC_Thread p2 = SOPC_INVALID_THREAD;
     SOPC_Thread p3 = SOPC_INVALID_THREAD;
 
-    SOPC_ReturnStatus status = SOPC_Thread_CreatePrioritized(&p0, (void*) cb_receiver_udp, NULL, 60, "UDP_Receiver");
+    SOPC_ReturnStatus status =
+        SOPC_Thread_CreatePrioritized(&p0, (void*) cb_receiver_udp, NULL, 60, -1, "UDP_Receiver");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_Thread_CreatePrioritized(&p1, (void*) cb_sender_udp, NULL, 60, "UDP_Sender");
+    status = SOPC_Thread_CreatePrioritized(&p1, (void*) cb_sender_udp, NULL, 60, -1, "UDP_Sender");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Thread_Join(&p0);
     SOPC_Thread_Join(&p1);
     PRINT("Test 1 : ok\n");
 
-    status = SOPC_Thread_CreatePrioritized(&p2, (void*) cb_multicast_receiver, NULL, 60, "Multicast_Receiver");
+    status = SOPC_Thread_CreatePrioritized(&p2, (void*) cb_multicast_receiver, NULL, 60, -1, "Multicast_Receiver");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_Thread_CreatePrioritized(&p3, (void*) cb_multicast_sender, NULL, 60, "Multicast_Sender");
+    status = SOPC_Thread_CreatePrioritized(&p3, (void*) cb_multicast_sender, NULL, 60, -1, "Multicast_Sender");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Thread_Join(&p2);

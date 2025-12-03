@@ -98,15 +98,17 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
     {
         return SOPC_STATUS_NOK;
     }
-    return SOPC_Thread_CreatePrioritized(thread, startFct, startArgs, priority / 2, taskName);
+    return SOPC_Thread_CreatePrioritized(thread, startFct, startArgs, priority / 2, taskName, -1);
 }
 
 SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
+                                                int cpuAffinity,
                                                 const char* taskName)
 {
+    SOPC_UNUSED_ARG(cpuAffinity);
     if (NULL == thread || NULL == startFct)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;

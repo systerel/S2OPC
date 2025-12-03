@@ -74,27 +74,41 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
                                      const char* taskName);
 
 /**
- * \brief Function to create a high priority thread
+ * \brief Function to create a thread with an optional priority and CPU affinity.
  *
- * \note Only supported under Linux for now.
+ * \note The CPU affinity parameter is only supported on Linux and Windows for now.
 
- * See SOPC_Thread_Create.
  * This function creates a thread with specific priority, which usually requires administrative privileges.
  * It should only be used to create threads that require to be woken up at regular but small intervals (< 1ms).
  * Note that this interface does not specify the 'order' of priorities regarding the value. (typically on Zephyr,
  * lower values are the highest priorities, whereas on Linux, this is the contrary).
  *
- * \param thread    Return parameter for the created thread
- * \param startFct  Function called at thread start
- * \param startArgs Arguments of the start function
- * \param priority  Priority of the thread (range depends on implementation) :
- *                      Linux: 1 .. 99,
- *                      FreeRTOS: 1 .. configMAX_PRIORITIES
- *                      ZEPHYR: 1  .. CONFIG_NUM_COOP_PRIORITIES + CONFIG_NUM_PREEMPT_PRIORITIES.
- *                        Note that this is a simple offset of (CONFIG_NUM_COOP_PRIORITIES + 1) regarding
- *                        the Zephyr native priorities. This is required to ensure consistency with S2OPC interface.
- *                        In prj.conf, the priorities configured MUST take into account this offset.
- * \param taskName  Name of the created thread
+ * \param thread      Return parameter for the created thread
+ * \param startFct    Function called at thread start
+ * \param startArgs   Arguments of the start function
+ * \param priority    Priority of the thread (range depends on implementation) :
+ *                        The value 0 means "no specific priority" and lets the
+ *                        operating system choose the default priority for the thread.
+ *                        Windows(Win32/Win64): The following priority values are accepted :
+ *                              -15 -> Idle priority
+ *                              -2  -> Lowest priority
+ *                              -1  -> Below normal
+ *                               0  -> No priority
+ *                               1  -> Above normal
+ *                               2  -> Highest priority
+ *                               15 -> Time-critical priority
+ *                               Any other value is not supported and will be rejected.
+ *                               Note : On Windows, if setting the priority fails, the thread
+ *                               is still created and runs with the default priority.
+ *                        Linux: 1 .. 99,
+ *                        FreeRTOS: 1 .. configMAX_PRIORITIES
+ *                        ZEPHYR: 1  .. CONFIG_NUM_COOP_PRIORITIES + CONFIG_NUM_PREEMPT_PRIORITIES.
+ *                          Note that this is a simple offset of (CONFIG_NUM_COOP_PRIORITIES + 1) regarding
+ *                          the Zephyr native priorities. This is required to ensure consistency with S2OPC interface.
+ *                          In prj.conf, the priorities configured MUST take into account this offset.
+ * \param cpuAffinity CPU affinity of the created task. Give a negative value if you don't want to set this parameter.
+ *                    Available on Windows and Linux OS.
+ * \param taskName    Name of the created thread
  *
  * \note            The created thread must be joined using ::SOPC_Thread_Join to ensure context deletion.
  * \return          SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
@@ -104,6 +118,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
+                                                int cpuAffinity,
                                                 const char* taskName);
 
 /**

@@ -17,7 +17,9 @@
  * under the License.
  */
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
 #include <winerror.h>
 
 #include "p_sopc_threads.h"
@@ -190,21 +192,15 @@ static DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
     return 0;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
-                                     void* (*startFct)(void*),
-                                     void* startArgs,
-                                     const char* taskName)
+static inline SOPC_ReturnStatus create_thread(SOPC_Thread_Impl* threadImpl,
+                                              void* (*startFct)(void*),
+                                              void* startArgs,
+                                              const char* taskName,
+                                              int cpuAffinity)
 {
-    if (NULL == thread || NULL == startFct)
+    if (NULL == threadImpl || NULL == startFct)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    SOPC_Thread_Impl* threadImpl = SOPC_Calloc(1, sizeof(*threadImpl));
-
-    if (SOPC_INVALID_THREAD == threadImpl)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -219,10 +215,15 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
                                       &threadId);
     if (NULL == threadImpl->thread)
     {
-        status = SOPC_STATUS_NOK;
+        DWORD err = GetLastError();
+        fprintf(stderr, "Error cannot create thread: %lu\n", err);
+        return SOPC_STATUS_NOK;
     }
     else
     {
+        /* Thread successfully created */
+        status = SOPC_STATUS_OK;
+
         /* API is available starting from Windows 10 */
         /* We need to check if the API is available at execution time */
         HMODULE kernel32 = LoadLibraryW(L"kernel32");
@@ -260,7 +261,41 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
         {
             status = SOPC_STATUS_OK;
         }
+
+        if (SOPC_STATUS_OK == status && cpuAffinity >= 0)
+        {
+            DWORD_PTR mask = ((DWORD_PTR) 1) << cpuAffinity;
+
+            /* SetThreadAffinityMask calls can fail. It is not a sufficient reason to stop processing. */
+            DWORD_PTR resMask = SetThreadAffinityMask(threadImpl->thread, mask);
+            if (0 == resMask)
+            {
+                DWORD err = GetLastError();
+                fprintf(stderr, "Error cannnot set affinity with error %lu\n", err);
+            }
+        }
     }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
+                                     void* (*startFct)(void*),
+                                     void* startArgs,
+                                     const char* taskName)
+{
+    if (NULL == thread || NULL == startFct)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_Thread_Impl* threadImpl = SOPC_Calloc(1, sizeof(*threadImpl));
+    if (SOPC_INVALID_THREAD == threadImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    SOPC_ReturnStatus status = create_thread(threadImpl, startFct, startArgs, taskName, -1);
+
     if (SOPC_STATUS_OK == status)
     {
         *thread = threadImpl;
@@ -269,19 +304,94 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
     {
         SOPC_Free(threadImpl);
     }
-
     return status;
+}
+
+// Set the priority level on Windows
+static SOPC_ReturnStatus SOPC_Win_Priority(int priority, int* winPriority)
+{
+    if (NULL == winPriority)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    switch (priority)
+    {
+    case -15:
+        *winPriority = THREAD_PRIORITY_IDLE;
+        break;
+    case -1:
+        *winPriority = THREAD_PRIORITY_BELOW_NORMAL;
+        break;
+    case -2:
+        *winPriority = THREAD_PRIORITY_LOWEST;
+        break;
+    case 1:
+        *winPriority = THREAD_PRIORITY_ABOVE_NORMAL;
+        break;
+    case 2:
+        *winPriority = THREAD_PRIORITY_HIGHEST;
+        break;
+    case 15:
+        *winPriority = THREAD_PRIORITY_TIME_CRITICAL;
+        break;
+    default:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
+                                                int cpuAffinity,
                                                 const char* taskName)
 {
-    // Windows doesn't support SCHED_FIFO or real time priority in a simple manner
-    SOPC_UNUSED_ARG(priority);
-    return SOPC_Thread_Create(thread, startFct, startArgs, taskName);
+    if (NULL == thread || NULL == startFct)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_Thread_Impl* threadImpl = SOPC_Calloc(1, sizeof(*threadImpl));
+    if (SOPC_INVALID_THREAD == threadImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    SOPC_ReturnStatus status = create_thread(threadImpl, startFct, startArgs, taskName, cpuAffinity);
+    if (SOPC_STATUS_OK == status && priority != 0)
+    {
+        int winPrio = 0;
+        status = SOPC_Win_Priority(priority, &winPrio);
+        if (SOPC_STATUS_OK == status)
+        {
+            int ret = SetThreadPriority(threadImpl->thread, winPrio);
+            if (0 == ret)
+            {
+                DWORD err = GetLastError();
+                fprintf(stderr, "Error Could not set thread priority: %d\nwith error :%lu\n", winPrio, err);
+            }
+        }
+        else
+        {
+            fprintf(stderr, "Error invalid priority value: %d\n", priority);
+
+            /* The thread is created regardless of priority setting failures.*/
+            /* If setting the priority fails, the thread remains valid with the default priority.*/
+            status = SOPC_STATUS_OK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *thread = threadImpl;
+    }
+    else
+    {
+        SOPC_Free(threadImpl);
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread)

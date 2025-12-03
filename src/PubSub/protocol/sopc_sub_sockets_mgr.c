@@ -31,6 +31,11 @@
 // Default time for socket set timeout if no timeout event is provided
 #define DEFAULT_SOCKET_SET_TIMEOUT_MS 500
 
+// No cpu affinity
+#ifndef SOPC_PUBSUB_CPU_AFFINITY
+#define SOPC_PUBSUB_CPU_AFFINITY (-1)
+#endif
+
 static struct
 {
     int32_t initDone;
@@ -186,15 +191,16 @@ static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void* sockContextArray,
     receptionThread.stopFlag = 0;
 
     SOPC_ReturnStatus threadReturnStatus = SOPC_STATUS_OK;
-    if (0 == threadPriority)
+    if (0 == threadPriority && -1 == SOPC_PUBSUB_CPU_AFFINITY)
     {
         threadReturnStatus =
             SOPC_Thread_Create(&receptionThread.thread, SOPC_Sub_SocketsMgr_ThreadLoop, NULL, "SubSocketMgr");
     }
     else
     {
-        threadReturnStatus = SOPC_Thread_CreatePrioritized(&receptionThread.thread, SOPC_Sub_SocketsMgr_ThreadLoop,
-                                                           NULL, threadPriority, "SubSocketMgr");
+        threadReturnStatus =
+            SOPC_Thread_CreatePrioritized(&receptionThread.thread, SOPC_Sub_SocketsMgr_ThreadLoop, NULL, threadPriority,
+                                          SOPC_PUBSUB_CPU_AFFINITY, "SubSocketMgr");
     }
     if (threadReturnStatus != SOPC_STATUS_OK)
     {

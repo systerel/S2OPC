@@ -269,7 +269,8 @@ static inline SOPC_ReturnStatus create_thread(pthread_t* thread,
                                               pthread_attr_t* attr,
                                               void* (*startFct)(void*),
                                               void* startArgs,
-                                              const char* taskName)
+                                              const char* taskName,
+                                              int cpuAffinity)
 {
     int ret = pthread_create(thread, attr, startFct, startArgs);
 
@@ -296,6 +297,20 @@ static inline SOPC_ReturnStatus create_thread(pthread_t* thread,
         {
             fprintf(stderr, "Error during set name \"%s\" to thread: %d\n", taskName, ret);
         }
+
+        if (cpuAffinity >= 0)
+        {
+            cpu_set_t cpuset;
+            CPU_ZERO(&cpuset);
+            CPU_SET((size_t) cpuAffinity, &cpuset);
+
+            /* pthread_setname_np calls can fail. It is not a sufficient reason to stop processing. */
+            ret = pthread_setaffinity_np(*thread, sizeof(cpu_set_t), &cpuset);
+            if (0 != ret)
+            {
+                fprintf(stderr, "Error during set affinity \"%d\" to thread: %d\n", cpuAffinity, ret);
+            }
+        }
     }
 
     return status;
@@ -318,7 +333,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    SOPC_ReturnStatus status = create_thread(&threadImpl->thread, NULL, startFct, startArgs, taskName);
+    SOPC_ReturnStatus status = create_thread(&threadImpl->thread, NULL, startFct, startArgs, taskName, -1);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -336,9 +351,10 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
+                                                int cpuAffinity,
                                                 const char* taskName)
 {
-    if (NULL == thread || NULL == startFct || priority < 1 || priority > 99)
+    if (NULL == thread || NULL == startFct || priority < 0 || priority > 99)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -350,45 +366,51 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    /* Initialize scheduling policy and priority */
-    pthread_attr_t attr;
-    int ret = pthread_attr_init(&attr);
-    if (0 != ret)
-    {
-        fprintf(stderr, "Could not initialize pthread attributes: %d\n", ret);
-    }
-    if (0 == ret)
-    {
-        ret = pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
-        if (0 != ret)
-        {
-            fprintf(stderr, "Could not unset scheduler inheritance in thread creation attributes: %d\n", ret);
-        }
-    }
-    if (0 == ret)
-    {
-        ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-        if (0 != ret)
-        {
-            fprintf(stderr, "Could not set thread scheduling policy: %d\n", ret);
-        }
-    }
-    if (0 == ret)
-    {
-        struct sched_param scp;
-        scp.sched_priority = priority;
-        ret = pthread_attr_setschedparam(&attr, &scp);
-        if (0 != ret)
-        {
-            fprintf(stderr, "Could not set thread priority: %d\n", ret);
-        }
-    }
-
-    /* Create thread with created attributes */
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (0 == ret)
+    if (priority == 0)
     {
-        status = create_thread(&threadImpl->thread, &attr, startFct, startArgs, taskName);
+        status = create_thread(&threadImpl->thread, NULL, startFct, startArgs, taskName, cpuAffinity);
+    }
+    else
+    {
+        /* Initialize scheduling policy and priority */
+        pthread_attr_t attr;
+        int ret = pthread_attr_init(&attr);
+        if (0 != ret)
+        {
+            fprintf(stderr, "Could not initialize pthread attributes: %d\n", ret);
+        }
+        if (0 == ret)
+        {
+            ret = pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+            if (0 != ret)
+            {
+                fprintf(stderr, "Could not unset scheduler inheritance in thread creation attributes: %d\n", ret);
+            }
+        }
+        if (0 == ret)
+        {
+            ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+            if (0 != ret)
+            {
+                fprintf(stderr, "Could not set thread scheduling policy: %d\n", ret);
+            }
+        }
+        if (0 == ret)
+        {
+            struct sched_param scp;
+            scp.sched_priority = priority;
+            ret = pthread_attr_setschedparam(&attr, &scp);
+            if (0 != ret)
+            {
+                fprintf(stderr, "Could not set thread priority: %d\n", ret);
+            }
+        }
+
+        if (0 == ret)
+        {
+            status = create_thread(&threadImpl->thread, &attr, startFct, startArgs, taskName, cpuAffinity);
+        }
     }
 
     if (SOPC_STATUS_OK == status)

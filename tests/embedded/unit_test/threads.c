@@ -81,7 +81,7 @@ void suite_test_thread_mutexes(int* index)
 
     SOPC_Thread p1 = SOPC_INVALID_THREAD;
     int count = 2;
-    status = SOPC_Thread_CreatePrioritized(&p1, (void*) test_thread_fct, &count, 40, "Test_Thread1");
+    status = SOPC_Thread_CreatePrioritized(&p1, (void*) test_thread_fct, &count, 40, -1, "Test_Thread1");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     PRINT("Test6 : ok\n");
 
@@ -97,9 +97,9 @@ void suite_test_thread_mutexes(int* index)
     SOPC_Thread p3 = SOPC_INVALID_THREAD, p4 = SOPC_INVALID_THREAD;
     int count3 = 2;
     int count4 = 2;
-    status = SOPC_Thread_CreatePrioritized(&p3, (void*) test_thread_fct, &count3, 40, "Test_Thread2");
+    status = SOPC_Thread_CreatePrioritized(&p3, (void*) test_thread_fct, &count3, 40, -1, "Test_Thread2");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    status = SOPC_Thread_CreatePrioritized(&p4, (void*) test_thread_fct, &count4, 40, "Test_Thread3");
+    status = SOPC_Thread_CreatePrioritized(&p4, (void*) test_thread_fct, &count4, 40, -1, "Test_Thread3");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_Thread_Join(&p3);
     SOPC_Thread_Join(&p4);
@@ -109,9 +109,9 @@ void suite_test_thread_mutexes(int* index)
     SOPC_Mutex mut = SOPC_INVALID_MUTEX;
     status = SOPC_Mutex_Initialization(&mut);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    status = SOPC_Thread_CreatePrioritized(&p5, (void*) test_thread_fct_mutexes, &mut, 40, "Test_Thread4");
+    status = SOPC_Thread_CreatePrioritized(&p5, (void*) test_thread_fct_mutexes, &mut, 40, -1, "Test_Thread4");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    status = SOPC_Thread_CreatePrioritized(&p6, (void*) test_thread_fct_mutexes, &mut, 40, "Test_Thread5");
+    status = SOPC_Thread_CreatePrioritized(&p6, (void*) test_thread_fct_mutexes, &mut, 40, -1, "Test_Thread5");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_Thread_Join(&p5);
     SOPC_Thread_Join(&p6);

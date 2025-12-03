@@ -425,8 +425,10 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
+                                                int cpuAffinity,
                                                 const char* taskName)
 {
+    SOPC_UNUSED_ARG(cpuAffinity);
     // No specific limit on priorites on ZEPHYR.
     if (priority <= 0 || priority > CONFIG_NUM_PREEMPT_PRIORITIES + CONFIG_NUM_COOP_PRIORITIES)
     {

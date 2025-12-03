@@ -265,8 +265,10 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
+                                                int cpuAffinity,
                                                 const char* taskName)
 {
+    SOPC_UNUSED_ARG(cpuAffinity);
     if (priority < 1 || priority > configMAX_PRIORITIES)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
