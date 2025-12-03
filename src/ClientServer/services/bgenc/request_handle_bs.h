@@ -21,7 +21,7 @@
 
  File Name            : request_handle_bs.h
 
- Date                 : 04/08/2022 14:53:44
+ Date                 : 03/12/2025 14:19:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -67,6 +67,9 @@ extern void request_handle_bs__client_validate_response_request_handle(
    const constants__t_client_request_handle_i request_handle_bs__req_handle,
    const constants__t_msg_type_i request_handle_bs__resp_typ,
    t_bool * const request_handle_bs__ret);
+extern void request_handle_bs__continue_channel_req_handle_it(
+   t_bool * const request_handle_bs__continue,
+   constants__t_client_request_handle_i * const request_handle_bs__req_handle);
 extern void request_handle_bs__get_req_handle_app_context(
    const constants__t_client_request_handle_i request_handle_bs__req_handle,
    t_bool * const request_handle_bs__is_applicative,
@@ -80,6 +83,9 @@ extern void request_handle_bs__get_req_handle_req_typ(
 extern void request_handle_bs__get_req_handle_resp_typ(
    const constants__t_client_request_handle_i request_handle_bs__req_handle,
    constants__t_msg_type_i * const request_handle_bs__resp_typ);
+extern void request_handle_bs__init_channel_req_handle_it(
+   const constants__t_channel_i request_handle_bs__channel,
+   t_bool * const request_handle_bs__continue);
 extern void request_handle_bs__is_valid_req_handle(
    const constants__t_client_request_handle_i request_handle_bs__req_handle,
    t_bool * const request_handle_bs__ret);

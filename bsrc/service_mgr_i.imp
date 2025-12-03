@@ -444,7 +444,25 @@ LOCAL_OPERATIONS
             req_handle :(req_handle : t_client_request_handle_i & req_handle : t_client_request_handle)
         END
     END
+    ;
 
+    l_client_snd_msg_failure (channel, request_handle, error_status) =
+    PRE
+        channel  : t_channel_i &
+        channel  : t_channel &
+        request_handle : t_client_request_handle_i &
+        error_status : t_StatusCode_i
+    THEN
+        IF request_handle : s_client_request_handle &
+           channel = a_client_request_channel (request_handle)
+        THEN
+            s_client_request_handle := s_client_request_handle - {request_handle} ||
+            a_client_request_type := {request_handle} <<| a_client_request_type ||
+            a_client_request_resp_type := {request_handle} <<| a_client_request_resp_type ||
+            a_client_request_context := {request_handle} <<| a_client_request_context ||
+            a_client_request_channel := {request_handle} <<| a_client_request_channel
+        END
+    END
 
 OPERATIONS
 
@@ -1023,6 +1041,63 @@ OPERATIONS
         END;
         buffer_out := l_buffer;
         req_handle := l_req_handle
+    END
+    ;
+
+    l_client_snd_msg_failure (channel, request_handle, error_status) =
+    VAR
+        l_valid_req_handle,
+        l_req_handle_channel,
+        l_req_typ,
+        l_is_applicative,
+        l_app_context,
+        l_exp_resp_msg_typ,
+        l_exp_resp_msg_class,
+        l_trigger_app_treatment,
+        l_bres,
+        l_session
+    IN
+        l_trigger_app_treatment := FALSE;
+        l_valid_req_handle <-- is_valid_req_handle (request_handle);
+        l_req_handle_channel <-- get_req_handle_channel (request_handle);
+        IF l_valid_req_handle = TRUE &
+            l_req_handle_channel = channel
+        THEN
+            l_exp_resp_msg_typ <-- get_req_handle_resp_typ (request_handle);
+            l_exp_resp_msg_class <-- l_get_msg_service_class (l_exp_resp_msg_typ);
+            CASE l_exp_resp_msg_class OF
+                EITHER e_msg_session_treatment_class THEN
+                    /* It was session treatment sending which failed */
+                    l_bres, l_session <-- client_validate_session_service_resp (channel, request_handle);
+                    IF l_bres = TRUE
+                    THEN
+                        /* Close session since state is now invalid (req message not sent) */
+                        client_close_session (l_session, e_sc_bad_request_interrupted)
+                    END
+                OR e_msg_session_service_class THEN
+                    /* It is linked to a session, we shall not trigger applicative treatment if the session is closed. */
+                    l_trigger_app_treatment <-- client_validate_session_service_req_failed (channel, request_handle)
+                OR e_msg_discovery_service_class THEN
+                    /* Not linked to as session and it has already been verified it is on  a connected channel. */
+                    l_trigger_app_treatment := TRUE
+                ELSE /* INCLUDES e_msg_service_fault_class => unexpected response type */
+                    l_trigger_app_treatment := FALSE
+                END
+            END
+            ;
+            IF l_trigger_app_treatment = TRUE
+            THEN
+                /*It means it's application request and we have an app context that can be used*/
+                l_is_applicative, l_app_context <-- get_req_handle_app_context (request_handle);
+                l_req_typ <-- get_req_handle_req_typ (request_handle);
+                IF l_is_applicative = TRUE
+                THEN
+                    cli_snd_failure (l_req_typ, l_app_context, error_status)
+                END
+            END
+            ;
+            client_remove_req_handle (request_handle)
+        END
     END
     ;
 
@@ -1686,58 +1761,35 @@ OPERATIONS
     ;
 
     client_snd_msg_failure (channel, request_handle, error_status) =
+    BEGIN
+        l_client_snd_msg_failure (channel, request_handle, error_status)
+    END
+    ;
+
+    client_snd_all_msg_failure (channel, error_status) =
     VAR
-        l_valid_req_handle,
-        l_req_handle_channel,
-        l_req_typ,
-        l_is_applicative,
-        l_app_context,
-        l_exp_resp_msg_typ,
-        l_exp_resp_msg_class,
-        l_trigger_app_treatment,
-        l_bres,
-        l_session
+        l_continue,
+        l_request_handle
     IN
-        l_trigger_app_treatment := FALSE;
-        l_valid_req_handle <-- is_valid_req_handle (request_handle);
-        l_req_handle_channel <-- get_req_handle_channel (request_handle);
-        IF l_valid_req_handle = TRUE &
-            l_req_handle_channel = channel
+        l_continue <-- init_channel_req_handle_it (channel);
+        IF l_continue = TRUE
         THEN
-            l_exp_resp_msg_typ <-- get_req_handle_resp_typ (request_handle);
-            l_exp_resp_msg_class <-- l_get_msg_service_class (l_exp_resp_msg_typ);
-            CASE l_exp_resp_msg_class OF
-                EITHER e_msg_session_treatment_class THEN
-                    /* It was session treatment sending which failed */
-                    l_bres, l_session <-- client_validate_session_service_resp (channel, request_handle);
-                    IF l_bres = TRUE
-                    THEN
-                        /* Close session since state is now invalid (req message not sent) */
-                        client_close_session (l_session, e_sc_bad_request_interrupted)
-                    END
-                OR e_msg_session_service_class THEN
-                    /* It is linked to a session, we shall not trigger applicative treatment if the session is closed. */
-                    l_trigger_app_treatment <-- client_validate_session_service_req_failed (channel, request_handle)
-                OR e_msg_discovery_service_class THEN
-                    /* Not linked to as session and it has already been verified it is on  a connected channel. */
-                    l_trigger_app_treatment := TRUE
-                ELSE /* INCLUDES e_msg_service_fault_class => unexpected response type */
-                    l_trigger_app_treatment := FALSE
-                END
+            WHILE l_continue = TRUE
+            DO
+                l_continue, l_request_handle <-- continue_channel_req_handle_it;
+                l_client_snd_msg_failure (channel, l_request_handle, error_status)
+            INVARIANT
+                a_channel_it : t_channel_i &
+                a_channel_request_handle_to_iterate <: s_client_request_handle &
+                a_channel_request_handle_iterated <: t_client_request_handle &
+
+                a_channel_it = channel &
+                l_request_handle : a_client_request_channel~[{channel}] &
+                l_continue = bool(a_channel_request_handle_to_iterate /= {}) &
+                a_channel_request_handle_to_iterate /\ a_channel_request_handle_iterated = {}
+            VARIANT
+                card(a_channel_request_handle_to_iterate)
             END
-            ;
-            IF l_trigger_app_treatment = TRUE
-            THEN
-                /*It means it's application request and we have an app context that can be used*/
-                l_is_applicative, l_app_context <-- get_req_handle_app_context (request_handle);
-                l_req_typ <-- get_req_handle_req_typ (request_handle);
-                IF l_is_applicative = TRUE
-                THEN
-                    cli_snd_failure (l_req_typ, l_app_context, error_status)
-                END
-            END
-            ;
-            client_remove_req_handle (request_handle)
         END
     END
     ;

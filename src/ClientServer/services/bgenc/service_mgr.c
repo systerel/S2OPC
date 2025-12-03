@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 24/11/2025 17:28:55
+ Date                 : 03/12/2025 14:19:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -902,6 +902,73 @@ void service_mgr__local_client_discovery_service_request(
       }
       *service_mgr__buffer_out = service_mgr__l_buffer;
       *service_mgr__req_handle = service_mgr__l_req_handle;
+   }
+}
+
+void service_mgr__l_client_snd_msg_failure(
+   const constants__t_channel_i service_mgr__channel,
+   const constants__t_client_request_handle_i service_mgr__request_handle,
+   const constants_statuscodes_bs__t_StatusCode_i service_mgr__error_status) {
+   {
+      t_bool service_mgr__l_valid_req_handle;
+      constants__t_channel_i service_mgr__l_req_handle_channel;
+      constants__t_msg_type_i service_mgr__l_req_typ;
+      t_bool service_mgr__l_is_applicative;
+      constants__t_application_context_i service_mgr__l_app_context;
+      constants__t_msg_type_i service_mgr__l_exp_resp_msg_typ;
+      constants__t_msg_service_class_i service_mgr__l_exp_resp_msg_class;
+      t_bool service_mgr__l_trigger_app_treatment;
+      t_bool service_mgr__l_bres;
+      constants__t_session_i service_mgr__l_session;
+      
+      service_mgr__l_trigger_app_treatment = false;
+      request_handle_bs__is_valid_req_handle(service_mgr__request_handle,
+         &service_mgr__l_valid_req_handle);
+      request_handle_bs__get_req_handle_channel(service_mgr__request_handle,
+         &service_mgr__l_req_handle_channel);
+      if ((service_mgr__l_valid_req_handle == true) &&
+         (service_mgr__l_req_handle_channel == service_mgr__channel)) {
+         request_handle_bs__get_req_handle_resp_typ(service_mgr__request_handle,
+            &service_mgr__l_exp_resp_msg_typ);
+         service_mgr__l_get_msg_service_class(service_mgr__l_exp_resp_msg_typ,
+            &service_mgr__l_exp_resp_msg_class);
+         switch (service_mgr__l_exp_resp_msg_class) {
+         case constants__e_msg_session_treatment_class:
+            session_mgr__client_validate_session_service_resp(service_mgr__channel,
+               service_mgr__request_handle,
+               &service_mgr__l_bres,
+               &service_mgr__l_session);
+            if (service_mgr__l_bres == true) {
+               session_mgr__client_close_session(service_mgr__l_session,
+                  constants_statuscodes_bs__e_sc_bad_request_interrupted);
+            }
+            break;
+         case constants__e_msg_session_service_class:
+            session_mgr__client_validate_session_service_req_failed(service_mgr__channel,
+               service_mgr__request_handle,
+               &service_mgr__l_trigger_app_treatment);
+            break;
+         case constants__e_msg_discovery_service_class:
+            service_mgr__l_trigger_app_treatment = true;
+            break;
+         default:
+            service_mgr__l_trigger_app_treatment = false;
+            break;
+         }
+         if (service_mgr__l_trigger_app_treatment == true) {
+            request_handle_bs__get_req_handle_app_context(service_mgr__request_handle,
+               &service_mgr__l_is_applicative,
+               &service_mgr__l_app_context);
+            request_handle_bs__get_req_handle_req_typ(service_mgr__request_handle,
+               &service_mgr__l_req_typ);
+            if (service_mgr__l_is_applicative == true) {
+               service_response_cb_bs__cli_snd_failure(service_mgr__l_req_typ,
+                  service_mgr__l_app_context,
+                  service_mgr__error_status);
+            }
+         }
+         request_handle_bs__client_remove_req_handle(service_mgr__request_handle);
+      }
    }
 }
 
@@ -1853,65 +1920,28 @@ void service_mgr__client_snd_msg_failure(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_client_request_handle_i service_mgr__request_handle,
    const constants_statuscodes_bs__t_StatusCode_i service_mgr__error_status) {
+   service_mgr__l_client_snd_msg_failure(service_mgr__channel,
+      service_mgr__request_handle,
+      service_mgr__error_status);
+}
+
+void service_mgr__client_snd_all_msg_failure(
+   const constants__t_channel_i service_mgr__channel,
+   const constants_statuscodes_bs__t_StatusCode_i service_mgr__error_status) {
    {
-      t_bool service_mgr__l_valid_req_handle;
-      constants__t_channel_i service_mgr__l_req_handle_channel;
-      constants__t_msg_type_i service_mgr__l_req_typ;
-      t_bool service_mgr__l_is_applicative;
-      constants__t_application_context_i service_mgr__l_app_context;
-      constants__t_msg_type_i service_mgr__l_exp_resp_msg_typ;
-      constants__t_msg_service_class_i service_mgr__l_exp_resp_msg_class;
-      t_bool service_mgr__l_trigger_app_treatment;
-      t_bool service_mgr__l_bres;
-      constants__t_session_i service_mgr__l_session;
+      t_bool service_mgr__l_continue;
+      constants__t_client_request_handle_i service_mgr__l_request_handle;
       
-      service_mgr__l_trigger_app_treatment = false;
-      request_handle_bs__is_valid_req_handle(service_mgr__request_handle,
-         &service_mgr__l_valid_req_handle);
-      request_handle_bs__get_req_handle_channel(service_mgr__request_handle,
-         &service_mgr__l_req_handle_channel);
-      if ((service_mgr__l_valid_req_handle == true) &&
-         (service_mgr__l_req_handle_channel == service_mgr__channel)) {
-         request_handle_bs__get_req_handle_resp_typ(service_mgr__request_handle,
-            &service_mgr__l_exp_resp_msg_typ);
-         service_mgr__l_get_msg_service_class(service_mgr__l_exp_resp_msg_typ,
-            &service_mgr__l_exp_resp_msg_class);
-         switch (service_mgr__l_exp_resp_msg_class) {
-         case constants__e_msg_session_treatment_class:
-            session_mgr__client_validate_session_service_resp(service_mgr__channel,
-               service_mgr__request_handle,
-               &service_mgr__l_bres,
-               &service_mgr__l_session);
-            if (service_mgr__l_bres == true) {
-               session_mgr__client_close_session(service_mgr__l_session,
-                  constants_statuscodes_bs__e_sc_bad_request_interrupted);
-            }
-            break;
-         case constants__e_msg_session_service_class:
-            session_mgr__client_validate_session_service_req_failed(service_mgr__channel,
-               service_mgr__request_handle,
-               &service_mgr__l_trigger_app_treatment);
-            break;
-         case constants__e_msg_discovery_service_class:
-            service_mgr__l_trigger_app_treatment = true;
-            break;
-         default:
-            service_mgr__l_trigger_app_treatment = false;
-            break;
+      request_handle_bs__init_channel_req_handle_it(service_mgr__channel,
+         &service_mgr__l_continue);
+      if (service_mgr__l_continue == true) {
+         while (service_mgr__l_continue == true) {
+            request_handle_bs__continue_channel_req_handle_it(&service_mgr__l_continue,
+               &service_mgr__l_request_handle);
+            service_mgr__l_client_snd_msg_failure(service_mgr__channel,
+               service_mgr__l_request_handle,
+               service_mgr__error_status);
          }
-         if (service_mgr__l_trigger_app_treatment == true) {
-            request_handle_bs__get_req_handle_app_context(service_mgr__request_handle,
-               &service_mgr__l_is_applicative,
-               &service_mgr__l_app_context);
-            request_handle_bs__get_req_handle_req_typ(service_mgr__request_handle,
-               &service_mgr__l_req_typ);
-            if (service_mgr__l_is_applicative == true) {
-               service_response_cb_bs__cli_snd_failure(service_mgr__l_req_typ,
-                  service_mgr__l_app_context,
-                  service_mgr__error_status);
-            }
-         }
-         request_handle_bs__client_remove_req_handle(service_mgr__request_handle);
       }
    }
 }

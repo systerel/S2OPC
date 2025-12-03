@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 20/11/2025 15:07:31
+ Date                 : 03/12/2025 14:19:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -139,6 +139,10 @@ extern void service_mgr__encode_session_service_resp(
 extern void service_mgr__get_response_type(
    const constants__t_msg_type_i service_mgr__req_msg_typ,
    constants__t_msg_type_i * const service_mgr__resp_msg_typ);
+extern void service_mgr__l_client_snd_msg_failure(
+   const constants__t_channel_i service_mgr__channel,
+   const constants__t_client_request_handle_i service_mgr__request_handle,
+   const constants_statuscodes_bs__t_StatusCode_i service_mgr__error_status);
 extern void service_mgr__l_get_msg_service_class(
    const constants__t_msg_type_i service_mgr__msg_typ,
    constants__t_msg_service_class_i * const service_mgr__service_class);
@@ -254,6 +258,9 @@ extern void service_mgr__client_service_request(
    constants__t_channel_i * const service_mgr__channel,
    constants__t_byte_buffer_i * const service_mgr__buffer_out,
    constants__t_client_request_handle_i * const service_mgr__req_handle);
+extern void service_mgr__client_snd_all_msg_failure(
+   const constants__t_channel_i service_mgr__channel,
+   const constants_statuscodes_bs__t_StatusCode_i service_mgr__error_status);
 extern void service_mgr__client_snd_msg_failure(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_client_request_handle_i service_mgr__request_handle,

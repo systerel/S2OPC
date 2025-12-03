@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_services_api.h"
 
@@ -40,6 +41,10 @@ typedef struct
 static uint32_t cpt = 0;
 static SOPC_Internal_RequestContext client_requests_context[SOPC_MAX_PENDING_REQUESTS + 1];
 static constants__t_channel_i client_requests_channel[SOPC_MAX_PENDING_REQUESTS + 1];
+
+static uint32_t it_start = 0;
+static uint32_t it_current = 0;
+static constants__t_channel_i it_channel = constants__c_channel_indet;
 
 /*------------------------
    INITIALISATION Clause
@@ -137,6 +142,63 @@ void request_handle_bs__get_req_handle_req_typ(const constants__t_client_request
                                                constants__t_msg_type_i* const request_handle_bs__req_typ)
 {
     *request_handle_bs__req_typ = client_requests_context[request_handle_bs__req_handle].request;
+}
+
+void request_handle_bs__continue_channel_req_handle_it(
+    t_bool* const request_handle_bs__continue,
+    constants__t_client_request_handle_i* const request_handle_bs__req_handle)
+{
+    SOPC_ASSERT(it_channel != constants__c_channel_indet);
+    *request_handle_bs__req_handle = it_current;
+    // Search for the next matching request handle, stop when reaching the start index again
+    do
+    {
+        it_current = (it_current + 1) % (SOPC_MAX_PENDING_REQUESTS + 1);
+    } while (it_current != it_start && (client_requests_channel[it_current] != it_channel));
+
+    if (it_current != it_start)
+    {
+        *request_handle_bs__continue = true;
+    }
+    else
+    {
+        // no more match: reset iterator
+        *request_handle_bs__continue = false;
+        it_channel = constants__c_channel_indet;
+        it_start = 0;
+        it_current = 0;
+    }
+}
+
+void request_handle_bs__init_channel_req_handle_it(const constants__t_channel_i request_handle_bs__channel,
+                                                   t_bool* const request_handle_bs__continue)
+{
+    // Note: use (cpt + 1) to avoid to start by returning the last added (+1 should lead to the first inserted)
+    it_start = (cpt + 1) % (SOPC_MAX_PENDING_REQUESTS + 1);
+    it_current = it_start;
+    it_channel = client_requests_channel[it_current];
+    // If first request handle does not match the channel, search for the first one
+    if (it_channel != request_handle_bs__channel)
+    {
+        // Search for the first matching request handle, stop when reaching the start index again
+        do
+        {
+            it_current = (it_current + 1) % (SOPC_MAX_PENDING_REQUESTS + 1);
+            it_channel = client_requests_channel[it_current];
+        } while (it_current != it_start && (it_channel != request_handle_bs__channel));
+    }
+    if (it_channel == request_handle_bs__channel)
+    {
+        *request_handle_bs__continue = true;
+    }
+    else
+    {
+        // no match: reset iterator
+        *request_handle_bs__continue = false;
+        it_channel = constants__c_channel_indet;
+        it_start = 0;
+        it_current = 0;
+    }
 }
 
 void request_handle_bs__get_req_handle_app_context(

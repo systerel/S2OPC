@@ -513,6 +513,16 @@ OPERATIONS
     END
     ;
 
+    client_snd_all_msg_failure (channel, error_status) =
+    PRE
+        channel  : t_channel_i &
+        channel  : t_channel &
+        error_status : t_StatusCode_i
+    THEN
+        skip
+    END
+    ;
+
     server_evaluate_session_timeout (session) =
     PRE
         session : t_session_i

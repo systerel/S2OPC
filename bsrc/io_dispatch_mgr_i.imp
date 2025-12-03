@@ -700,6 +700,7 @@ OPERATIONS
                 l_channel_config_idx, l_reverse_endpoint_config_idx <-- get_all_channel_info (channel);
                 ASSERT l_channel_config_idx : t_channel_config_idx
                 THEN
+                    client_snd_all_msg_failure (channel, e_sc_bad_secure_channel_closed);
                     // Updates associated sessions states
                     client_secure_channel_lost_session_sm (channel, l_channel_config_idx)
                     // TODO: manage a reconnection mechanism in case of ORPHANED session:

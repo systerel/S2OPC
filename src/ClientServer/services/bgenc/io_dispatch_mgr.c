@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 30/09/2025 14:54:36
+ Date                 : 03/12/2025 14:19:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -797,6 +797,8 @@ void io_dispatch_mgr__secure_channel_lost(
             channel_mgr__get_all_channel_info(io_dispatch_mgr__channel,
                &io_dispatch_mgr__l_channel_config_idx,
                &io_dispatch_mgr__l_reverse_endpoint_config_idx);
+            service_mgr__client_snd_all_msg_failure(io_dispatch_mgr__channel,
+               constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
             service_mgr__client_secure_channel_lost_session_sm(io_dispatch_mgr__channel,
                io_dispatch_mgr__l_channel_config_idx);
          }

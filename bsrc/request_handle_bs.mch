@@ -28,7 +28,10 @@ ABSTRACT_VARIABLES
     a_client_request_type,
     a_client_request_resp_type,
     a_client_request_channel,
-    a_client_request_context
+    a_client_request_context,
+    a_channel_it,
+    a_channel_request_handle_to_iterate,
+    a_channel_request_handle_iterated
 
 INVARIANT
     s_client_request_handle <: t_client_request_handle &
@@ -36,14 +39,24 @@ INVARIANT
     a_client_request_type : s_client_request_handle --> s_service_reqs &
     a_client_request_resp_type : s_client_request_handle --> s_service_resps &
     a_client_request_channel : s_client_request_handle --> t_channel &
-    a_client_request_context : s_client_request_handle --> t_application_context_i
+    a_client_request_context : s_client_request_handle --> t_application_context_i &
+
+    /* Iterator used to clear the request handles associated to a channel */
+    a_channel_it : t_channel_i &
+    a_channel_request_handle_to_iterate <: s_client_request_handle &
+    a_channel_request_handle_iterated <: t_client_request_handle /* iterated will be removed (during iteration) */
 
 INITIALISATION
     s_client_request_handle :: {{}} ||
     a_client_request_type :: {{}} ||
     a_client_request_resp_type :: {{}} ||
     a_client_request_channel :: {{}} ||
-    a_client_request_context :: {{}}
+    a_client_request_context :: {{}} ||
+
+    a_channel_it := c_channel_indet              ||
+    a_channel_request_handle_to_iterate :: {{}}  ||
+    a_channel_request_handle_iterated :: {{}}
+
 
 OPERATIONS
 
@@ -185,6 +198,42 @@ OPERATIONS
         request_id : t_request_context_i
     THEN
         request_handle :: t_client_request_handle_i
+    END
+    ;
+
+    /* Iterator on request handle for a given channel */
+
+    continue <-- init_channel_req_handle_it (channel) =
+    PRE
+        channel : t_channel_i &
+        channel : t_channel
+    THEN
+        continue,
+        a_channel_it,
+        a_channel_request_handle_to_iterate,
+        a_channel_request_handle_iterated
+        :(continue : BOOL &
+          a_channel_it = channel &
+          a_channel_request_handle_to_iterate = a_client_request_channel~[{channel}] &
+          a_channel_request_handle_iterated = {} &
+          continue = bool(a_channel_request_handle_to_iterate /= {})
+        )
+    END
+    ;
+
+    continue, req_handle <-- continue_channel_req_handle_it =
+    PRE
+        a_channel_request_handle_to_iterate /= {}
+    THEN
+        ANY l_req_handle WHERE
+            l_req_handle : t_client_request_handle_i &
+            l_req_handle : a_channel_request_handle_to_iterate
+        THEN
+            continue := bool(a_channel_request_handle_to_iterate /= {l_req_handle}) ||
+            req_handle := l_req_handle ||
+            a_channel_request_handle_to_iterate := a_channel_request_handle_to_iterate - {l_req_handle} ||
+            a_channel_request_handle_iterated := a_channel_request_handle_iterated \/ {l_req_handle}
+        END
     END
 
 END
