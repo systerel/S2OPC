@@ -1698,9 +1698,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             uint32_t cliId = pSM->iCliId;
             if (SE_SND_REQUEST_FAILED == event)
             {
-                pSM->state = stClosingSession;
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "Applicative message could not be sent, closing the connection.");
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "Applicative message could not be sent, closing the connection.");
 
                 if (NULL != pSM->pCbkGenericEvent)
                 {
