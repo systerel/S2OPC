@@ -233,7 +233,6 @@ OPERATIONS
         msg = c_msg_out &
         c_msg_out : t_msg &
         p_user_token : t_user_token_i &
-        p_user_token : t_user_token &
         a_msg_out_type = e_msg_session_activate_req
     THEN
         /* TODO: add relation on p_user_token ? => need to retrieve after write ? */

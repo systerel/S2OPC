@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 02/12/2025 13:08:52
+ Date                 : 08/12/2025 17:15:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -693,6 +693,8 @@ void session_core__client_sc_activate_session_req_sm(
    constants__t_session_token_i * const session_core__session_token) {
    {
       constants__t_user_token_i session_core__l_user_token;
+      t_bool session_core__l_res;
+      constants__t_user_token_i session_core__l_user_token_copy;
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
       
       session_core_1__client_get_token_from_session(session_core__session,
@@ -703,8 +705,11 @@ void session_core__client_sc_activate_session_req_sm(
          &session_core__l_channel_config_idx);
       msg_session_bs__write_activate_req_msg_locales(session_core__activate_req_msg,
          session_core__l_channel_config_idx);
+      constants__get_copy_UserToken(session_core__l_user_token,
+         &session_core__l_res,
+         &session_core__l_user_token_copy);
       msg_session_bs__write_activate_msg_user(session_core__activate_req_msg,
-         session_core__l_user_token);
+         session_core__l_user_token_copy);
       session_core_1__reset_session_orphaned(session_core__session);
       session_core_1__set_session_channel(session_core__session,
          session_core__channel);

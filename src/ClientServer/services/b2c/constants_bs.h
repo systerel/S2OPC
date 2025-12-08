@@ -334,6 +334,9 @@ extern void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__
 extern void constants_bs__get_copy_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in,
                                                   t_bool* const constants_bs__p_alloc,
                                                   constants_bs__t_ExpandedNodeId_i* const constants_bs__p_out);
+extern void constants_bs__get_copy_UserToken(const constants_bs__t_user_token_i constants_bs__p_in,
+                                             t_bool* const constants_bs__p_alloc,
+                                             constants_bs__t_user_token_i* const constants_bs__p_out);
 extern void constants_bs__get_reverse_cast_t_NamespaceIdx(const constants_bs__t_NamespaceIdx constants_bs__p_nsIndex,
                                                           t_entier4* const constants_bs__p_nsIndexNat);
 extern void constants_bs__get_reverse_cast_t_subscription(

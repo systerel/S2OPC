@@ -1073,13 +1073,20 @@ OPERATIONS
     session_token <-- client_sc_activate_session_req_sm (session, channel, activate_req_msg) =
     VAR
         l_user_token,
+        l_res,
+        l_user_token_copy,
         l_channel_config_idx
     IN
         session_token <-- client_get_token_from_session (session);
         l_user_token <-- get_session_user_client (session);
         l_channel_config_idx <-- get_channel_info (channel);
         write_activate_req_msg_locales(activate_req_msg, l_channel_config_idx);
-        write_activate_msg_user(activate_req_msg, l_user_token);
+        l_res, l_user_token_copy <-- get_copy_UserToken(l_user_token);
+        /* Note: l_res is ignored but it is ok because NULL is well managed by write_activate_msg_user:
+         * - error log trace is generated
+         * - session activate will fail in server because it is missing
+         */
+        write_activate_msg_user(activate_req_msg, l_user_token_copy);
         reset_session_orphaned(session);
         set_session_channel(session, channel);
         set_session_state(session, e_session_scActivating)

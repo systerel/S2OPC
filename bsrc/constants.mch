@@ -1690,6 +1690,20 @@ OPERATIONS
     END
     ;
 
+    p_alloc, p_out <-- get_copy_UserToken(p_in) =
+    PRE
+        p_in : t_user_token_i &
+        p_in : t_user_token
+    THEN
+        p_alloc,
+        p_out
+        :(p_alloc : BOOL &
+          p_out : t_user_token_i &
+          (p_alloc = FALSE => p_out = c_user_token_indet) &
+          (p_alloc = TRUE => p_out = p_in))
+    END
+    ;
+
     free_ExpandedNodeId(p_in) =
     PRE
         p_in : t_ExpandedNodeId_i &
