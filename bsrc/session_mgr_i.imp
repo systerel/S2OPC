@@ -29,7 +29,8 @@ SEES
     message_out_bs,
     channel_mgr,
     request_handle_bs,
-    app_cb_call_context_bs
+    app_cb_call_context_bs,
+    service_response_cb_bs
 
 IMPORTS
     session_core,
@@ -56,6 +57,15 @@ PROMOTES
     clear_audit_info
 
 LOCAL_OPERATIONS
+
+    local_client_remove_all_request_handles (session) =
+    PRE
+        session : t_session_i &
+        session : s_session
+    THEN
+        a_cli_pending_requests := a_cli_pending_requests |>> {session}
+    END
+    ;
 
     local_client_close_session (session, sc_reason) =
     PRE
@@ -194,9 +204,60 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
+    local_client_remove_all_request_handles (session) =
+    VAR
+        l_continue,
+        l_request_handle,
+        l_is_valid_req_handle,
+        l_is_applicative,
+        l_app_context,
+        l_req_typ,
+        l_session
+    IN
+        l_continue <-- init_session_req_handle_it (session);
+        IF l_continue = TRUE
+        THEN
+            WHILE l_continue = TRUE
+            DO
+                l_continue, l_request_handle <-- continue_and_remove_session_req_handle_it;
+                /* Note 1: we generate snd_failure now as they will not be generated in l_client_snd_msg_failure
+                 *         since l_trigger_app_treatment will be false due to closed session.
+                 *          Moreover we want to return back the context to application before session closed event.
+                 *
+                 * Note 2: we do not remove the request handles from the channel.
+                 *         Those will be removed when SC layer will return them or channel is closed.
+                 */
+                l_is_valid_req_handle <-- is_valid_req_handle (l_request_handle);
+                IF l_is_valid_req_handle = TRUE
+                THEN
+                    l_is_applicative, l_app_context <-- get_req_handle_app_context (l_request_handle);
+                    l_req_typ <-- get_req_handle_req_typ (l_request_handle);
+                    IF l_is_applicative = TRUE
+                    THEN
+                        cli_snd_failure (l_req_typ, l_app_context, e_sc_bad_session_closed)
+                    END
+                END
+            INVARIANT
+                a_cli_pending_requests : t_client_request_handle +-> t_session &
+
+                a_session_request_handle_it : t_session_i &
+                a_session_request_handle_to_iterate <: t_client_request_handle &
+                a_session_request_handle_iterated <: t_client_request_handle &
+
+                a_session_request_handle_it = session &
+                l_request_handle : a_cli_pending_requests~[{session}] &
+                l_continue = bool(a_session_request_handle_to_iterate /= {}) &
+                a_session_request_handle_to_iterate /\ a_session_request_handle_iterated = {}
+            VARIANT
+                card(a_session_request_handle_to_iterate)
+            END
+        END
+    END
+    ;
+
     local_client_close_session (session, sc_reason) =
     BEGIN
-        client_remove_all_request_handles (session);
+        local_client_remove_all_request_handles (session);
         client_close_session_sm (session, sc_reason)
     END;
 
@@ -399,7 +460,7 @@ OPERATIONS
                     THEN
                         l_session_channel <-- get_session_channel (session);
                         IF l_session_channel = channel THEN
-                            client_remove_all_request_handles (session);
+                            local_client_remove_all_request_handles (session);
                             client_close_session_resp_sm (channel, session, resp_msg);
                             l_bret := TRUE;
                             l_status_reason := e_sc_ok

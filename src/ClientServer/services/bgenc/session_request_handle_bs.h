@@ -21,7 +21,7 @@
 
  File Name            : session_request_handle_bs.h
 
- Date                 : 04/08/2022 14:53:47
+ Date                 : 09/12/2025 19:16:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,7 +56,11 @@ extern void session_request_handle_bs__client_add_session_request_handle(
 extern void session_request_handle_bs__client_get_session_and_remove_request_handle(
    const constants__t_client_request_handle_i session_request_handle_bs__req_handle,
    constants__t_session_i * const session_request_handle_bs__session);
-extern void session_request_handle_bs__client_remove_all_request_handles(
-   const constants__t_session_i session_request_handle_bs__session);
+extern void session_request_handle_bs__continue_and_remove_session_req_handle_it(
+   t_bool * const session_request_handle_bs__continue,
+   constants__t_client_request_handle_i * const session_request_handle_bs__req_handle);
+extern void session_request_handle_bs__init_session_req_handle_it(
+   const constants__t_session_i session_request_handle_bs__session,
+   t_bool * const session_request_handle_bs__continue);
 
 #endif

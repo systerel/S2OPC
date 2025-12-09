@@ -36,6 +36,10 @@ static constants__t_session_i client_requests[SOPC_MAX_PENDING_REQUESTS + 1];
 /* Store number of pending requests remaining for session */
 static uint32_t session_pending_requests_nb[SOPC_MAX_SESSIONS + 1];
 
+/* Iterator variables */
+static uint32_t it_current = 0;
+static constants__t_session_i it_session = constants__c_session_indet;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -81,17 +85,39 @@ void session_request_handle_bs__client_get_session_and_remove_request_handle(
     }
 }
 
-void session_request_handle_bs__client_remove_all_request_handles(
-    const constants__t_session_i session_request_handle_bs__session)
+void session_request_handle_bs__continue_and_remove_session_req_handle_it(
+    t_bool* const session_request_handle_bs__continue,
+    constants__t_client_request_handle_i* const session_request_handle_bs__req_handle)
 {
-    SOPC_ASSERT(session_request_handle_bs__session != constants__c_session_indet);
-    for (uint32_t idx = 1;
-         idx <= SOPC_MAX_PENDING_REQUESTS && session_pending_requests_nb[session_request_handle_bs__session] > 0; idx++)
+    SOPC_ASSERT(it_session != constants__c_session_indet);
+    SOPC_ASSERT(session_pending_requests_nb[it_session] > 0);
+    *session_request_handle_bs__req_handle = constants__c_client_request_handle_indet;
+    bool found = false;
+    for (uint32_t idx = it_current; idx <= SOPC_MAX_PENDING_REQUESTS && !found; idx++)
     {
-        if (client_requests[idx] == session_request_handle_bs__session)
+        if (client_requests[idx] == it_session)
         {
             client_requests[idx] = constants__c_session_indet;
-            session_pending_requests_nb[session_request_handle_bs__session]--;
+            session_pending_requests_nb[it_session]--;
+
+            found = true;
+            *session_request_handle_bs__req_handle = idx;
+            it_current = idx + 1;
         }
+    }
+    *session_request_handle_bs__continue = session_pending_requests_nb[it_session] > 0;
+}
+
+void session_request_handle_bs__init_session_req_handle_it(
+    const constants__t_session_i session_request_handle_bs__session,
+    t_bool* const session_request_handle_bs__continue)
+{
+    *session_request_handle_bs__continue = false;
+    SOPC_ASSERT(session_request_handle_bs__session != constants__c_session_indet);
+    if (session_pending_requests_nb[session_request_handle_bs__session] > 0)
+    {
+        *session_request_handle_bs__continue = true;
+        it_current = 1;
+        it_session = session_request_handle_bs__session;
     }
 }

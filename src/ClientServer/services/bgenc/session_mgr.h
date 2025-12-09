@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 26/11/2025 10:52:17
+ Date                 : 09/12/2025 19:16:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -52,6 +52,7 @@
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
+#include "service_response_cb_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -93,6 +94,8 @@ extern void session_mgr__local_client_close_session_if_needed(
    const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason);
 extern void session_mgr__local_client_close_sessions_on_SC_final_connection_failure(
    const constants__t_channel_config_idx_i session_mgr__channel_config_idx);
+extern void session_mgr__local_client_remove_all_request_handles(
+   const constants__t_session_i session_mgr__session);
 extern void session_mgr__local_client_validate_and_drop_session_req_session_handle(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_client_request_handle_i session_mgr__req_handle,

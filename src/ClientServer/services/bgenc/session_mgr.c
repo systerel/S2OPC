@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 26/11/2025 10:52:17
+ Date                 : 09/12/2025 19:16:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -41,10 +41,45 @@ void session_mgr__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+void session_mgr__local_client_remove_all_request_handles(
+   const constants__t_session_i session_mgr__session) {
+   {
+      t_bool session_mgr__l_continue;
+      constants__t_client_request_handle_i session_mgr__l_request_handle;
+      t_bool session_mgr__l_is_valid_req_handle;
+      t_bool session_mgr__l_is_applicative;
+      constants__t_application_context_i session_mgr__l_app_context;
+      constants__t_msg_type_i session_mgr__l_req_typ;
+      
+      session_request_handle_bs__init_session_req_handle_it(session_mgr__session,
+         &session_mgr__l_continue);
+      if (session_mgr__l_continue == true) {
+         while (session_mgr__l_continue == true) {
+            session_request_handle_bs__continue_and_remove_session_req_handle_it(&session_mgr__l_continue,
+               &session_mgr__l_request_handle);
+            request_handle_bs__is_valid_req_handle(session_mgr__l_request_handle,
+               &session_mgr__l_is_valid_req_handle);
+            if (session_mgr__l_is_valid_req_handle == true) {
+               request_handle_bs__get_req_handle_app_context(session_mgr__l_request_handle,
+                  &session_mgr__l_is_applicative,
+                  &session_mgr__l_app_context);
+               request_handle_bs__get_req_handle_req_typ(session_mgr__l_request_handle,
+                  &session_mgr__l_req_typ);
+               if (session_mgr__l_is_applicative == true) {
+                  service_response_cb_bs__cli_snd_failure(session_mgr__l_req_typ,
+                     session_mgr__l_app_context,
+                     constants_statuscodes_bs__e_sc_bad_session_closed);
+               }
+            }
+         }
+      }
+   }
+}
+
 void session_mgr__local_client_close_session(
    const constants__t_session_i session_mgr__session,
    const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason) {
-   session_request_handle_bs__client_remove_all_request_handles(session_mgr__session);
+   session_mgr__local_client_remove_all_request_handles(session_mgr__session);
    session_core__client_close_session_sm(session_mgr__session,
       session_mgr__sc_reason);
 }
@@ -279,7 +314,7 @@ void session_mgr__client_receive_session_resp(
                session_core__get_session_channel(*session_mgr__session,
                   &session_mgr__l_session_channel);
                if (session_mgr__l_session_channel == session_mgr__channel) {
-                  session_request_handle_bs__client_remove_all_request_handles(*session_mgr__session);
+                  session_mgr__local_client_remove_all_request_handles(*session_mgr__session);
                   session_core__client_close_session_resp_sm(session_mgr__channel,
                      *session_mgr__session,
                      session_mgr__resp_msg);

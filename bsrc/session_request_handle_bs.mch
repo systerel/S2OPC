@@ -25,13 +25,25 @@ SEES
     request_handle_bs
 
 ABSTRACT_VARIABLES
-    a_cli_pending_requests
+    a_cli_pending_requests,
+
+    a_session_request_handle_it,
+    a_session_request_handle_to_iterate,
+    a_session_request_handle_iterated
 
 INVARIANT
-    a_cli_pending_requests : t_client_request_handle +-> t_session
+    a_cli_pending_requests : t_client_request_handle +-> t_session &
+
+    /* Iterator used to clear the request handles associated to a session */
+    a_session_request_handle_it : t_session_i &
+    a_session_request_handle_to_iterate <: t_client_request_handle &
+    a_session_request_handle_iterated <: t_client_request_handle /* iterated will be removed (during iteration) */
 
 INITIALISATION
-    a_cli_pending_requests :: {}
+    a_cli_pending_requests :: {} ||
+    a_session_request_handle_it := c_session_indet ||
+    a_session_request_handle_to_iterate :: {} ||
+    a_session_request_handle_iterated:: {}
 
 OPERATIONS
 
@@ -61,12 +73,40 @@ OPERATIONS
     END
     ;
 
-    client_remove_all_request_handles (session) =
+    /* Iterator on request handle for a given session */
+
+    continue <-- init_session_req_handle_it (session) =
     PRE
         session : t_session_i &
         session : s_session
     THEN
-        a_cli_pending_requests := a_cli_pending_requests |>> {session}
+        continue,
+        a_session_request_handle_it,
+        a_session_request_handle_to_iterate,
+        a_session_request_handle_iterated
+        :(continue : BOOL &
+          a_session_request_handle_it = session &
+          a_session_request_handle_to_iterate = a_cli_pending_requests~[{session}] &
+          a_session_request_handle_iterated = {} &
+          continue = bool(a_session_request_handle_to_iterate /= {})
+        )
+    END
+    ;
+
+    continue, req_handle <-- continue_and_remove_session_req_handle_it =
+    PRE
+        a_session_request_handle_to_iterate /= {}
+    THEN
+        ANY l_req_handle WHERE
+            l_req_handle : t_client_request_handle_i &
+            l_req_handle : a_session_request_handle_to_iterate
+        THEN
+            continue := bool(a_session_request_handle_to_iterate /= {l_req_handle}) ||
+            req_handle := l_req_handle ||
+            a_session_request_handle_to_iterate := a_session_request_handle_to_iterate - {l_req_handle} ||
+            a_session_request_handle_iterated := a_session_request_handle_iterated \/ {l_req_handle} ||
+            a_cli_pending_requests := a_cli_pending_requests - {l_req_handle |-> a_session_request_handle_it}
+        END
     END
 
 END
