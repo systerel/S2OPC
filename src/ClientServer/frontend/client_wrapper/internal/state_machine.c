@@ -1434,7 +1434,6 @@ static bool LockedStaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine*
 
 static bool StaMac_GiveAuthorization_SendRequestFailed(SOPC_StaMac_Machine* pSM,
                                                        SOPC_App_Com_Event event,
-                                                       SOPC_ReturnStatus failureStatus,
                                                        SOPC_EncodeableType* pEncType)
 {
     bool authorization = false;
@@ -1444,8 +1443,8 @@ static bool StaMac_GiveAuthorization_SendRequestFailed(SOPC_StaMac_Machine* pSM,
     switch (event)
     {
     case SE_SND_REQUEST_FAILED:
-        // We only treat a send request failed event if it concerns a timed out publish request
-        if (&OpcUa_PublishRequest_EncodeableType == pEncType && SOPC_STATUS_TIMEOUT == failureStatus)
+        // We only treat a send request failed event if it concerns a publish request
+        if (&OpcUa_PublishRequest_EncodeableType == pEncType)
         {
             authorization = true;
         }
@@ -1618,8 +1617,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             if (SE_SND_REQUEST_FAILED == event)
             {
                 SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Dispatching event SE_SND_REQUEST_FAILED");
-                processingAuthorization =
-                    StaMac_GiveAuthorization_SendRequestFailed(pSM, event, (SOPC_ReturnStatus) arg, pEncType);
+                processingAuthorization = StaMac_GiveAuthorization_SendRequestFailed(pSM, event, pEncType);
             }
 
             /* Process message if authorization has been given, else go to stError */
