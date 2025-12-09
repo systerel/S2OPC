@@ -570,7 +570,6 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
 
     if (SOPC_STATUS_OK != status)
     {
-        pSM->state = stError;
         SOPC_Free(pReqCtx);
     }
 
@@ -610,10 +609,6 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
             if (SOPC_STATUS_OK == status)
             {
                 pSM->state = stCreatingSubscr;
-            }
-            else
-            {
-                pSM->state = stError;
             }
         }
         else
@@ -767,10 +762,6 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM, uint3
         if (SOPC_STATUS_OK == status)
         {
             pSM->state = stDeletingSubscr;
-        }
-        else
-        {
-            pSM->state = stError;
         }
     }
     else
