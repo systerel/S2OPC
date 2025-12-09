@@ -1432,30 +1432,6 @@ static bool LockedStaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine*
     return authorization;
 }
 
-static bool StaMac_GiveAuthorization_SendRequestFailed(SOPC_StaMac_Machine* pSM,
-                                                       SOPC_App_Com_Event event,
-                                                       SOPC_EncodeableType* pEncType)
-{
-    bool authorization = false;
-
-    SOPC_UNUSED_ARG(pSM);
-
-    switch (event)
-    {
-    case SE_SND_REQUEST_FAILED:
-        // We only treat a send request failed event if it concerns a publish request
-        if (&OpcUa_PublishRequest_EncodeableType == pEncType)
-        {
-            authorization = true;
-        }
-        break;
-    default:
-        break;
-    }
-
-    return authorization;
-}
-
 static const char* SOPC_ClientAppComEvent_ToString(SOPC_App_Com_Event event)
 {
     switch (event)
@@ -1617,7 +1593,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             if (SE_SND_REQUEST_FAILED == event)
             {
                 SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Dispatching event SE_SND_REQUEST_FAILED");
-                processingAuthorization = StaMac_GiveAuthorization_SendRequestFailed(pSM, event, pEncType);
+                processingAuthorization = true;
             }
 
             /* Process message if authorization has been given, else go to stError */
@@ -2476,8 +2452,29 @@ static void LockedStaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM
         }
         else
         {
+            switch (pSM->state)
+            {
+            case stActivated:
+            case stClosingSession:
+            case stClosingChannel:
+                /* Note: the PublishRequest case is excluded by previous conditional branch */
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "Unexpected SendRequestFailed for request type: %s", pEncType->TypeName);
+                break;
+            case stCreatingSubscr:
+            case stCreatingMonIt:
+            case stDeletingMonIt:
+            case stDeletingSubscr:
+                /* Current action failed, return to activated state (operation will fail or timeout) */
+                pSM->state = stActivated;
+                break;
             /* else go into error mode */
-            pSM->state = stError;
+            case stInit:
+            case stActivating:
+            default:
+                pSM->state = stError;
+                break;
+            }
         }
     }
 }
