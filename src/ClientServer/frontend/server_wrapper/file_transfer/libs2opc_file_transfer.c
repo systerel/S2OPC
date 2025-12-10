@@ -1510,6 +1510,7 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
     SOPC_Variant* pVariant = SOPC_Variant_Create();
     if (NULL == pVariant)
     {
+        SOPC_Free(data);
 #ifdef FILE_TRANSFER_LOG
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "FileTransfer:Method_Read: Unable to create output variant. status = %d", status);
