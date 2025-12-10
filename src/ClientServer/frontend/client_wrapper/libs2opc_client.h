@@ -272,10 +272,6 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
  *
  * \note The provided \p request memory is managed by the function after this call (even in case of error)
  *       and shall not be accessed nor freed after call.
- *
- * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
- *          and prior to call ::SOPC_ClientConfigHelper_Clear.
- *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureConnection,
                                                  void* request,
@@ -611,10 +607,6 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SyncService(const SOPC_ClientHe
  *
  * \note The provided \p subOrMIrequest memory is managed by the function after this call (even in case of error)
  *       and shall not be accessed nor freed after call.
- *
- * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
- *          and prior to call ::SOPC_ClientConfigHelper_Clear.
- *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_Subscription_AsyncService(const SOPC_ClientHelper_Subscription* subscription,
                                                               void* subOrMIrequest,
