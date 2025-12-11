@@ -1632,18 +1632,25 @@ OPERATIONS
                     IF ret /= e_sc_ok
                     THEN
                         l_channel := c_channel_indet;
-                        client_remove_req_handle (l_req_handle);
-                        client_close_session (session, ret)
+                        client_remove_req_handle (l_req_handle)
                     END
                 END
             ELSE
                 ret := e_sc_bad_out_of_memory
-            END;
+            END
+            ;
             dealloc_msg_header_out (l_msg_header);
             dealloc_msg_out (l_req_msg)
         ELSE
             ret := e_sc_bad_out_of_memory
-        END;
+        END
+        ;
+        IF ret /= e_sc_ok
+        THEN
+            // Close the session as close session request failed
+            client_close_session (session, ret)
+        END
+        ;
         channel := l_channel;
         buffer_out := l_buffer;
         req_handle := l_req_handle

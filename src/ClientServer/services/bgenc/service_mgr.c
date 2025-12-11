@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 10/12/2025 10:43:10
+ Date                 : 11/12/2025 10:25:21
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1746,8 +1746,6 @@ void service_mgr__client_service_close_session(
                if (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
                   service_mgr__l_channel = constants__c_channel_indet;
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                  session_mgr__client_close_session(service_mgr__session,
-                     *service_mgr__ret);
                }
             }
          }
@@ -1759,6 +1757,10 @@ void service_mgr__client_service_close_session(
       }
       else {
          *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+      }
+      if (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
+         session_mgr__client_close_session(service_mgr__session,
+            *service_mgr__ret);
       }
       *service_mgr__channel = service_mgr__l_channel;
       *service_mgr__buffer_out = service_mgr__l_buffer;
