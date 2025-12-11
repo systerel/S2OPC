@@ -39,6 +39,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_missing_c99.h"
 #include "sopc_pki_stack.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_secure_channels_audit.h"
@@ -83,7 +84,7 @@ static constants__t_session_application_context_i session_client_app_context[SOP
 
 static uint32_t session_expiration_timer[SOPC_MAX_SESSIONS + 1];
 static uint64_t session_RevisedSessionTimeout[SOPC_MAX_SESSIONS + 1];
-static SOPC_TimeReference server_session_latest_msg_receveived[SOPC_MAX_SESSIONS + 1];
+static SOPC_TimeReference server_session_latest_msg_received[SOPC_MAX_SESSIONS + 1];
 
 /*------------------------
    INITIALISATION Clause
@@ -112,7 +113,7 @@ void session_core_bs__INITIALISATION(void)
            sizeof(constants__t_session_application_context_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_expiration_timer, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
     memset(session_RevisedSessionTimeout, (int) 0, sizeof(uint64_t) * (SOPC_MAX_SESSIONS + 1));
-    memset(server_session_latest_msg_receveived, (int) 0, sizeof(SOPC_TimeReference) * (SOPC_MAX_SESSIONS + 1));
+    memset(server_session_latest_msg_received, (int) 0, sizeof(SOPC_TimeReference) * (SOPC_MAX_SESSIONS + 1));
 }
 
 /*--------------------
@@ -1608,43 +1609,52 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
     {
         session_expiration_timer[session_core_bs__session] = 0; // Do not keep reference on timer that expired
         current = SOPC_TimeReference_GetCurrent();
-        latestMsg = server_session_latest_msg_receveived[session_core_bs__session];
-        if (current >= latestMsg)
+        latestMsg = server_session_latest_msg_received[session_core_bs__session];
+        // Check for overflow: if current value is strictly less than latestMsg, an overflow should have occurred
+        bool trWentBackward = current < latestMsg;
+        elapsedSinceLatestMsg = current - latestMsg;
+        if (trWentBackward || elapsedSinceLatestMsg < session_RevisedSessionTimeout[session_core_bs__session])
         {
-            elapsedSinceLatestMsg = current - latestMsg;
-            if (elapsedSinceLatestMsg < session_RevisedSessionTimeout[session_core_bs__session])
+            // Session is not expired
+            // Re-activate timer for next verification
+            event.eltId = session_core_bs__session;
+            event.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
+            event.params = (uintptr_t) NULL;
+            event.auxParam = 0;
+            // Note: next timer is not revised session timeout but revised timeout - latest msg received
+            // time
+            uint64_t nextTimeout = session_RevisedSessionTimeout[session_core_bs__session] - elapsedSinceLatestMsg;
+            if (trWentBackward)
             {
-                // Session is not expired
-                // Re-activate timer for next verification
-                event.eltId = session_core_bs__session;
-                event.event = TIMER_SE_EVAL_SESSION_TIMEOUT;
-                event.params = (uintptr_t) NULL;
-                event.auxParam = 0;
-                // Note: next timer is not revised session timeout but revised timeout - latest msg received
-                // time
-                timerId = SOPC_EventTimer_Create(
-                    SOPC_Services_GetEventHandler(), event,
-                    session_RevisedSessionTimeout[session_core_bs__session] - elapsedSinceLatestMsg);
-                session_expiration_timer[session_core_bs__session] = timerId;
-                if (0 == timerId)
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "Services: session=%" PRIu32 " expiration timer renew failed",
-                                           session_core_bs__session);
-                }
-                else
-                {
-                    /* Mark session as not expired */
-                    *session_core_bs__expired = false;
-                }
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "Session timeout evaluation: sessionId=%" PRIu32
+                                         " time reference going backward detected currentTime=%" PRIu64
+                                         " latestMsgTime=%" PRIu64
+                                         ". Session timeout reset with current time as new latest time reference.\n",
+                                         session_core_bs__session, current, latestMsg);
+                // In case of overflow, set next timeout to revised session timeout
+                nextTimeout = session_RevisedSessionTimeout[session_core_bs__session];
+                server_session_latest_msg_received[session_core_bs__session] = current;
+            }
+            timerId = SOPC_EventTimer_Create(SOPC_Services_GetEventHandler(), event, nextTimeout);
+            session_expiration_timer[session_core_bs__session] = timerId;
+            if (0 == timerId)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Services: session=%" PRIu32 " expiration timer renew failed",
+                                       session_core_bs__session);
+            }
+            else
+            {
+                /* Mark session as not expired */
+                *session_core_bs__expired = false;
             }
         }
-        if (*session_core_bs__expired != false)
-        {
-            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Services: session=%" PRIu32 " expired on timeout evaluation",
-                                   session_core_bs__session);
-        }
+    }
+    if (*session_core_bs__expired != false)
+    {
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Services: session=%" PRIu32 " expired on timeout evaluation", session_core_bs__session);
     }
 }
 
@@ -1652,7 +1662,7 @@ void session_core_bs__server_session_timeout_msg_received(const constants__t_ses
 {
     if (constants__c_session_indet != session_core_bs__session)
     {
-        server_session_latest_msg_receveived[session_core_bs__session] = SOPC_TimeReference_GetCurrent();
+        server_session_latest_msg_received[session_core_bs__session] = SOPC_TimeReference_GetCurrent();
     }
 }
 
@@ -1702,7 +1712,7 @@ void session_core_bs__server_session_timeout_stop_timer(const constants__t_sessi
         SOPC_EventTimer_Cancel(session_expiration_timer[session_core_bs__session]);
         session_expiration_timer[session_core_bs__session] = 0;
         session_RevisedSessionTimeout[session_core_bs__session] = 0;
-        server_session_latest_msg_receveived[session_core_bs__session] = 0;
+        server_session_latest_msg_received[session_core_bs__session] = 0;
     }
 }
 
