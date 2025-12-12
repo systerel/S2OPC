@@ -169,15 +169,22 @@ class StatusCode(NamedMembers):
     GoodEntryInserted = 0x00A20000  # The data or event was successfully inserted into the historical database.
     GoodEntryReplaced = 0x00A30000  # The data or event field was successfully replaced in the historical database.
     GoodNoData = 0x00A50000  # No data exists for the requested time range or event filter.
-    GoodMoreData = 0x00A60000  # The data or event field was successfully replaced in the historical database.
+    GoodMoreData = 0x00A60000  # More data is available in the time range beyond the number of values requested.
     GoodCommunicationEvent = 0x00A70000  # The communication layer has raised an event.
     GoodShutdownEvent = 0x00A80000  # The system is shutting down.
     GoodCallAgain = 0x00A90000  # The operation is not finished and needs to be called again.
     GoodNonCriticalTimeout = 0x00AA0000  # A non-critical timeout occurred.
-    GoodDataIgnored = 0x00D90000  # The request pecifies fields which are not valid for the EventType or cannot be saved by the historian.
+    GoodDataIgnored = 0x00D90000  # The request specifies fields which are not valid for the EventType or cannot be saved by the historian.
     GoodEdited = 0x00DC0000  # The value does not come from the real source and has been edited by the server.
     GoodPostActionFailed = 0x00DD0000  # There was an error in execution of these post-actions.
+    GoodRetransmissionQueueNotSupported = 0x00DF0000  # The Server does not support retransmission queue and acknowledgement of sequence numbers is not available.
     GoodDependentValueChanged = 0x00E00000  # A dependent value has been changed but the change has not been applied to the device.
+    GoodPasswordChangeRequired = 0x00EF0000  # The log-on for the user succeeded but the user is required to change the password.
+    GoodCascadeInitializationRequest = 0x04020000  # The value source supports cascade handshaking and is requesting initialization of a cascade primary.
+    GoodCascadeNotInvited = 0x04030000  # The value source supports cascade handshaking, however, the source’s current state does not allow for cascade.
+    GoodFaultStateActive = 0x04070000  # There is a fault state condition active in the value source.
+    GoodInitiateFaultState = 0x04080000  # A fault state condition is being requested of the destination.
+    GoodCascade = 0x04090000  # The value is accurate, and the signal source supports cascade handshaking.
     UncertainReferenceOutOfServer = 0x406C0000  # One of the references to follow in the relative path references to a node in the address space in another server.
     UncertainNoCommunicationLastUsableValue = 0x408F0000  # Communication to the data source has failed. The variable value is the last value that had a good quality.
     UncertainLastUsableValue = 0x40900000  # Whatever was updating this value has stopped doing so.
@@ -185,11 +192,15 @@ class StatusCode(NamedMembers):
     UncertainInitialValue = 0x40920000  # The value is an initial value for a variable that normally receives its value from another variable.
     UncertainSensorNotAccurate = 0x40930000  # The value is at one of the sensor limits.
     UncertainEngineeringUnitsExceeded = 0x40940000  # The value is outside of the range of values defined for this parameter.
-    UncertainSubNormal = 0x40950000  # The value is derived from multiple sources and has less than the required number of Good sources.
-    UncertainDataSubNormal = 0x40A40000  # The value is derived from multiple values and has less than the required number of Good values.
+    UncertainSubNormal = 0x40950000  # The data value is derived from multiple sources and has less than the required number of Good sources.
+    UncertainDataSubNormal = 0x40A40000  # The aggregate value is derived from multiple values and has less than the required number of Good values.
     UncertainReferenceNotDeleted = 0x40BC0000  # The server was not able to delete all target references.
     UncertainNotAllNodesAvailable = 0x40C00000  # The list of references may not be complete because the underlying system is not available.
     UncertainDominantValueChanged = 0x40DE0000  # The related EngineeringUnit has been changed but the Variable Value is still provided based on the previous unit.
+    UncertainTransducerInManual = 0x42080000  # The value may not be accurate because the transducer is in manual mode.
+    UncertainSimulatedValue = 0x42090000  # The value is simulated.
+    UncertainSensorCalibration = 0x420A0000  # The value may not be accurate due to a sensor calibration fault.
+    UncertainConfigurationError = 0x420F0000  # The value may not be accurate due to a configuration issue.
     BadUnexpectedError = 0x80010000  # An unexpected error occurred.
     BadInternalError = 0x80020000  # An internal error occurred as a result of a programming or configuration error.
     BadOutOfMemory = 0x80030000  # Not enough memory to complete the operation.
@@ -204,20 +215,20 @@ class StatusCode(NamedMembers):
     BadShutdown = 0x800C0000  # The operation was cancelled because the application is shutting down.
     BadServerNotConnected = 0x800D0000  # The operation could not complete because the client is not connected to the server.
     BadServerHalted = 0x800E0000  # The server has stopped and cannot process any requests.
-    BadNothingToDo = 0x800F0000  # There was nothing to do because the client passed a list of operations with no elements.
+    BadNothingToDo = 0x800F0000  # No processing could be done because there was nothing to do.
     BadTooManyOperations = 0x80100000  # The request could not be processed because it specified too many operations.
     BadDataTypeIdUnknown = 0x80110000  # The extension object cannot be (de)serialized because the data type id is not recognized.
     BadCertificateInvalid = 0x80120000  # The certificate provided as a parameter is not valid.
     BadSecurityChecksFailed = 0x80130000  # An error occurred verifying security.
-    BadCertificateTimeInvalid = 0x80140000  # The Certificate has expired or is not yet valid.
-    BadCertificateIssuerTimeInvalid = 0x80150000  # An Issuer Certificate has expired or is not yet valid.
-    BadCertificateHostNameInvalid = 0x80160000  # The HostName used to connect to a Server does not match a HostName in the Certificate.
-    BadCertificateUriInvalid = 0x80170000  # The URI specified in the ApplicationDescription does not match the URI in the Certificate.
-    BadCertificateUseNotAllowed = 0x80180000  # The Certificate may not be used for the requested operation.
-    BadCertificateIssuerUseNotAllowed = 0x80190000  # The Issuer Certificate may not be used for the requested operation.
-    BadCertificateUntrusted = 0x801A0000  # The Certificate is not trusted.
-    BadCertificateRevocationUnknown = 0x801B0000  # It was not possible to determine if the Certificate has been revoked.
-    BadCertificateIssuerRevocationUnknown = 0x801C0000  # It was not possible to determine if the Issuer Certificate has been revoked.
+    BadCertificateTimeInvalid = 0x80140000  # The certificate has expired or is not yet valid.
+    BadCertificateIssuerTimeInvalid = 0x80150000  # An issuer certificate has expired or is not yet valid.
+    BadCertificateHostNameInvalid = 0x80160000  # The HostName used to connect to a server does not match a HostName in the certificate.
+    BadCertificateUriInvalid = 0x80170000  # The URI specified in the ApplicationDescription does not match the URI in the certificate.
+    BadCertificateUseNotAllowed = 0x80180000  # The certificate may not be used for the requested operation.
+    BadCertificateIssuerUseNotAllowed = 0x80190000  # The issuer certificate may not be used for the requested operation.
+    BadCertificateUntrusted = 0x801A0000  # The certificate is not trusted.
+    BadCertificateRevocationUnknown = 0x801B0000  # It was not possible to determine if the certificate has been revoked.
+    BadCertificateIssuerRevocationUnknown = 0x801C0000  # It was not possible to determine if the issuer certificate has been revoked.
     BadCertificateRevoked = 0x801D0000  # The certificate has been revoked.
     BadCertificateIssuerRevoked = 0x801E0000  # The issuer certificate has been revoked.
     BadUserAccessDenied = 0x801F0000  # User does not have permission to perform the requested operation.
@@ -235,7 +246,7 @@ class StatusCode(NamedMembers):
     BadRequestCancelledByClient = 0x802C0000  # The request was cancelled by the client.
     BadNoCommunication = 0x80310000  # Communication with the data source is defined, but not established, and there is no last known value available.
     BadWaitingForInitialData = 0x80320000  # Waiting for the server to obtain values from the underlying data source.
-    BadNodeIdInvalid = 0x80330000  # The syntax of the node id is not valid.
+    BadNodeIdInvalid = 0x80330000  # The syntax the node id is not valid or refers to a node that is not valid for the operation.
     BadNodeIdUnknown = 0x80340000  # The node id refers to a node that does not exist in the server address space.
     BadAttributeIdInvalid = 0x80350000  # The attribute is not supported for the specified Node.
     BadIndexRangeInvalid = 0x80360000  # The syntax of the index range parameter is invalid.
@@ -260,16 +271,16 @@ class StatusCode(NamedMembers):
     BadFilterOperandInvalid = 0x80490000  # The operand used in a content filter is not valid.
     BadContinuationPointInvalid = 0x804A0000  # The continuation point provide is longer valid.
     BadNoContinuationPoints = 0x804B0000  # The operation could not be processed because all continuation points have been allocated.
-    BadReferenceTypeIdInvalid = 0x804C0000  # The operation could not be processed because all continuation points have been allocated.
+    BadReferenceTypeIdInvalid = 0x804C0000  # The reference type id does not refer to a valid reference type node.
     BadBrowseDirectionInvalid = 0x804D0000  # The browse direction is not valid.
     BadNodeNotInView = 0x804E0000  # The node is not part of the view.
     BadServerUriInvalid = 0x804F0000  # The ServerUri is not a valid URI.
     BadServerNameMissing = 0x80500000  # No ServerName was specified.
     BadDiscoveryUrlMissing = 0x80510000  # No DiscoveryUrl was specified.
-    BadSempahoreFileMissing = 0x80520000  # The semaphore file specified by the client is not valid.
+    BadSemaphoreFileMissing = 0x80520000  # The semaphore file specified by the client is not valid.
     BadRequestTypeInvalid = 0x80530000  # The security token request type is not valid.
-    BadSecurityModeRejected = 0x80540000  # The security mode does not meet the requirements set by the Server.
-    BadSecurityPolicyRejected = 0x80550000  # The security policy does not meet the requirements set by the Server.
+    BadSecurityModeRejected = 0x80540000  # The security mode does not meet the requirements set by the server.
+    BadSecurityPolicyRejected = 0x80550000  # The security policy does not meet the requirements set by the server.
     BadTooManySessions = 0x80560000  # The server has reached its maximum number of sessions.
     BadUserSignatureInvalid = 0x80570000  # The user token signature is missing or invalid.
     BadApplicationSignatureInvalid = 0x80580000  # The signature generated with the client certificate is missing or invalid.
@@ -296,23 +307,23 @@ class StatusCode(NamedMembers):
     BadMaxAgeInvalid = 0x80700000  # The max age parameter is invalid.
     BadHistoryOperationInvalid = 0x80710000  # The history details parameter is not valid.
     BadHistoryOperationUnsupported = 0x80720000  # The server does not support the requested operation.
-    BadWriteNotSupported = 0x80730000  # The server not does support writing the combination of value, status and timestamps provided.
+    BadWriteNotSupported = 0x80730000  # The server does not support writing the combination of value, status and timestamps provided.
     BadTypeMismatch = 0x80740000  # The value supplied for the attribute is not of the same type as the attribute's value.
     BadMethodInvalid = 0x80750000  # The method id does not refer to a method for the specified object.
     BadArgumentsMissing = 0x80760000  # The client did not specify all of the input arguments for the method.
-    BadTooManySubscriptions = 0x80770000  # The server has reached its  maximum number of subscriptions.
+    BadTooManySubscriptions = 0x80770000  # The server has reached its maximum number of subscriptions.
     BadTooManyPublishRequests = 0x80780000  # The server has reached the maximum number of queued publish requests.
     BadNoSubscription = 0x80790000  # There is no subscription available for this session.
     BadSequenceNumberUnknown = 0x807A0000  # The sequence number is unknown to the server.
     BadMessageNotAvailable = 0x807B0000  # The requested notification message is no longer available.
-    BadInsufficientClientProfile = 0x807C0000  # The Client of the current Session does not support one or more Profiles that are necessary for the Subscription.
+    BadInsufficientClientProfile = 0x807C0000  # The client of the current session does not support one or more Profiles that are necessary for the subscription.
     BadTcpServerTooBusy = 0x807D0000  # The server cannot process the request because it is too busy.
     BadTcpMessageTypeInvalid = 0x807E0000  # The type of the message specified in the header invalid.
     BadTcpSecureChannelUnknown = 0x807F0000  # The SecureChannelId and/or TokenId are not currently in use.
-    BadTcpMessageTooLarge = 0x80800000  # The size of the message specified in the header is too large.
+    BadTcpMessageTooLarge = 0x80800000  # The size of the message chunk specified in the header is too large.
     BadTcpNotEnoughResources = 0x80810000  # There are not enough resources to process the request.
     BadTcpInternalError = 0x80820000  # An internal error occurred.
-    BadTcpEndpointUrlInvalid = 0x80830000  # The Server does not recognize the QueryString specified.
+    BadTcpEndpointUrlInvalid = 0x80830000  # The server does not recognize the QueryString specified.
     BadRequestInterrupted = 0x80840000  # The request could not be sent because of a network interruption.
     BadRequestTimeout = 0x80850000  # Timeout occurred while processing the request.
     BadSecureChannelClosed = 0x80860000  # The secure channel has been closed.
@@ -332,6 +343,7 @@ class StatusCode(NamedMembers):
     BadDataLost = 0x809D0000  # Data is missing due to collection started/stopped/lost.
     BadEntryExists = 0x809F0000  # The data or event was not successfully inserted because a matching entry exists.
     BadNoEntryExists = 0x80A00000  # The data or event was not successfully updated because no matching entry exists.
+    BadTimestampNotSupported = 0x80A10000  # The Client requested history using a TimestampsToReturn the Server does not support.
     BadInvalidArgument = 0x80AB0000  # One or more arguments are invalid.
     BadConnectionRejected = 0x80AC0000  # Could not establish a network connection to remote server.
     BadDisconnect = 0x80AD0000  # The server has disconnected from the client.
@@ -346,17 +358,17 @@ class StatusCode(NamedMembers):
     BadSyntaxError = 0x80B60000  # A value had an invalid syntax.
     BadMaxConnectionsReached = 0x80B70000  # The operation could not be finished because all available connections are in use.
     BadRequestTooLarge = 0x80B80000  # The request message size exceeds limits set by the server.
-    BadResponseTooLarge = 0x80B90000  # The response message size exceeds limits set by the client.
+    BadResponseTooLarge = 0x80B90000  # The response message size exceeds limits set by the client or server.
     BadEventNotAcknowledgeable = 0x80BB0000  # The event cannot be acknowledged.
     BadInvalidTimestampArgument = 0x80BD0000  # The defined timestamp to return was invalid.
     BadProtocolVersionUnsupported = 0x80BE0000  # The applications do not have compatible protocol versions.
     BadStateNotActive = 0x80BF0000  # The sub-state machine is not currently active.
-    BadFilterOperatorInvalid = 0x80C10000  # An unregognized operator was provided in a filter.
+    BadFilterOperatorInvalid = 0x80C10000  # An unrecognized operator was provided in a filter.
     BadFilterOperatorUnsupported = 0x80C20000  # A valid operator was provided, but the server does not provide support for this filter operator.
     BadFilterOperandCountMismatch = 0x80C30000  # The number of operands provided for the filter operator was less then expected for the operand provided.
     BadFilterElementInvalid = 0x80C40000  # The referenced element is not a valid element in the content filter.
     BadFilterLiteralInvalid = 0x80C50000  # The referenced literal is not a valid value.
-    BadIdentityChangeNotSupported = 0x80C60000  # The Server does not support changing the user identity assigned to the session.
+    BadIdentityChangeNotSupported = 0x80C60000  # The server does not support changing the user identity assigned to the session.
     BadNotTypeDefinition = 0x80C80000  # The provided Nodeid was not a type definition nodeid.
     BadViewTimestampInvalid = 0x80C90000  # The view timestamp is not available or not supported.
     BadViewParameterMismatch = 0x80CA0000  # The view parameters are not consistent with each other.
@@ -379,8 +391,27 @@ class StatusCode(NamedMembers):
     BadRequestNotAllowed = 0x80E40000  # The request was rejected by the server because it did not meet the criteria set by the server.
     BadTooManyArguments = 0x80E50000  # Too many arguments were provided.
     BadSecurityModeInsufficient = 0x80E60000  # The operation is not permitted over the current secure channel.
+    BadDataSetIdInvalid = 0x80E70000  # The DataSet specified for the DataSetWriter creation is invalid.
+    BadTransactionPending = 0x80E80000  # The operation is not allowed because a transaction is in progress.
+    BadLocked = 0x80E90000  # The requested operation is not allowed, because the Node is locked by a different application.
+    BadIndexRangeDataMismatch = 0x80EA0000  # The written data does not match the IndexRange specified.
+    BadRequiresLock = 0x80EC0000  # The requested operation is not allowed, because the Node is not locked by the application.
+    BadLocaleNotSupported = 0x80ED0000  # The locale in the requested write operation is not supported.
+    BadServerTooBusy = 0x80EE0000  # The Server does not have the resources to process the request at this time.
+    BadNoValue = 0x80F00000  # The variable has no default value and no initial value.
+    BadTransactionFailed = 0x80F10000  # The operation failed and all changes which were part of the transaction are rolled back.
     BadCertificateChainIncomplete = 0x810D0000  # The certificate chain is incomplete.
-    BadLicenseNotAvailable = 0x81100000  # The UA Server does not have a license which is required to operate in general or to perform a service or operation.
+    BadLicenseNotAvailable = 0x81100000  # The server does not have a license which is required to operate in general or to perform a service or operation.
+    BadNotExecutable = 0x81110000  # The executable attribute does not allow the execution of the method.
+    BadNumericOverflow = 0x81120000  # The number was not accepted because of a numeric overflow.
+    BadRequestNotComplete = 0x81130000  # The request has not been processed by the server yet.
+    BadCertificatePolicyCheckFailed = 0x81140000  # The certificate does not meet the requirements of the security policy.
+    BadAlreadyExists = 0x81150000  # An equivalent rule already exists.
+    BadEdited_OutOfRange = 0x81190000  # It is delivered with a Variable value when Variable has changed but the value is not legal.
+    BadInitialValue_OutOfRange = 0x811A0000  # It is delivered with a Variable value when a source Variable has changed but the value is not legal.
+    BadOutOfRange_DominantValueChanged = 0x811B0000  # It is delivered with a dependent Variable value when a dominant Variable has changed and the value is not legal.
+    BadTicketRequired = 0x811F0000  # The device identity needs a ticket before it can be accepted.
+    BadTicketInvalid = 0x81200000  # The device identity needs a ticket before it can be accepted.
 
     @staticmethod
     def isGoodStatus(status : StatusCode) -> bool:
@@ -921,11 +952,11 @@ cdef class _AsyncRequestHandler:
         self._dResponseContext = None
         self._dServiceException = None
 
-    cdef Response _send_generic_request(self, isLocalService: bool, SOPC_ClientConnection* connection, request: _Request, bWaitResponse: bool):
+    cdef Response _send_generic_request(self, isLocalService: bool, SOPC_ClientConnection* connection, request: _Request, bWaitResponse: bool, timeout :float | None):
         """
         Sends a `request` on this `connection`.
         If `isLocalService` is set, this function will use the server's local services
-        When `bWaitResponse`, waits for the response and returns it.
+        When `bWaitResponse`, waits for the response and returns it. In this case, if `timeout` is defined and reached, then returns None.
         Otherwise, returns the `AsyncResponse`, and the response will be available through `get_response` (on AsyncResponse returned).
         """
         request._timestampSent = time.time()
@@ -940,7 +971,7 @@ cdef class _AsyncRequestHandler:
         if status != SOPC_ReturnStatus.SOPC_STATUS_OK:
             raise SOPC_Failure('ServiceAsync failed to send request.', status)
         if bWaitResponse:
-            return self._wait_for_response(request)
+            return self._wait_for_response(request, timeout)
         else:
             return AsyncResponse(self)
 
@@ -973,14 +1004,15 @@ cdef class _AsyncRequestHandler:
             request: _Request = _Request.new_read_request(list(readNids), attributes=list(readAttrs))
             reqHandler = _AsyncRequestHandler()
             reqHandlerCtx[request._requestContext] = reqHandler
-            readDatavalues = reqHandler._send_generic_request(isLocalService, connection, request, True)
+            readDatavalues = reqHandler._send_generic_request(isLocalService, connection, request, True, None)
             for (i, _, _), dv in zip(missingTypesInfo, readDatavalues.results):
                 assert dv.variantType != SOPC_BuiltinId.SOPC_Null_Id, 'Automatic type detection failed, null type read.'
                 sopc_types[i] = dv.variantType
         return sopc_types
 
-    def _wait_for_response(self, request: _Request) -> (Response | None):
-        request._eventResponseReceived.wait()
+    def _wait_for_response(self, request: _Request, timeout :float | None) -> (Response | None):
+        # If the timeout is reached, _dServiceException and _dResponseContext are not set (= None), so we jump directly to return None.
+        request._eventResponseReceived.wait(timeout)
         if self._dServiceException is not None: # Service failed
             raise self._dServiceException
         if self._dResponseContext is not None:
@@ -1246,7 +1278,7 @@ class PyS2OPC_Server(PyS2OPC):
     # --- Local services implementation --- #
 
     @staticmethod
-    def read_nodes(nodeIds: list[str], attributes: list[AttributeId]=[], bWaitResponse: bool=True) -> (Response):
+    def read_nodes(nodeIds: list[str], attributes: list[AttributeId]=[], bWaitResponse: bool=True, timeout: float | None=None) -> (Response | None):
         """
         Requests to execute the OPC UA Read service locally and returns the Read response content.
         See `ReadResponse` for result content.
@@ -1259,14 +1291,17 @@ class PyS2OPC_Server(PyS2OPC):
             bWaitResponse: True, wait the response and returns a `ReadResponse`.
                            Otherwise return an `AsyncResponse` to retrieve it later
                            (see `AsyncResponse.get_response`).
+            timeout: A float in seconds (None, by default)
+                     In the case of a synchronous call (bWaitResponse=True), sets a timeout period to wait for a response.
+                     If the timeout is reached, None is returned.
         """
         request: _Request = _Request.new_read_request(nodeIds, attributes=attributes)
         ReqHandler = _AsyncRequestHandler()
         PyS2OPC_Server._req_handler[request._requestContext] = ReqHandler
-        return ReqHandler._send_generic_request(True, NULL, request, bWaitResponse)
+        return ReqHandler._send_generic_request(True, NULL, request, bWaitResponse, timeout)
 
     @staticmethod
-    def write_nodes(nodeIds: list[str], datavalues: list[DataValue], attributes: list[AttributeId]=[], bWaitResponse :bool=True) -> (Response):
+    def write_nodes(nodeIds: list[str], datavalues: list[DataValue], attributes: list[AttributeId]=[], bWaitResponse :bool=True, timeout: float | None=None) -> (Response | None):
         """
         Requests to execute the OPC UA Write service locally and returns the Write response content.
         See `WriteResponse` for result content.
@@ -1280,6 +1315,9 @@ class PyS2OPC_Server(PyS2OPC):
             bWaitResponse: True, wait the response and returns a `WriteResponse`.
                            Otherwise return an `AsyncResponse` to retrieve it later
                            (see `AsyncResponse.get_response`).
+            timeout: A float in seconds (None, by default)
+                     In the case of a synchronous call (bWaitResponse=True), sets a timeout period to wait for a response.
+                     If the timeout is reached, None is returned.
         """
         for dv in datavalues:
             # Unset timestamp server since it is not writable in servers (it will lead to write failure)
@@ -1287,10 +1325,10 @@ class PyS2OPC_Server(PyS2OPC):
         request: _Request = _Request.new_write_request(nodeIds, datavalues, attributes=attributes)
         ReqHandler = _AsyncRequestHandler()
         PyS2OPC_Server._req_handler[request._requestContext] = ReqHandler
-        return ReqHandler._send_generic_request(True, NULL, request, bWaitResponse)
+        return ReqHandler._send_generic_request(True, NULL, request, bWaitResponse, timeout)
 
     @staticmethod
-    def browse_nodes(nodeIds: list[str], maxReferencesPerNode: int = 1000, bWaitResponse: bool=True) -> (Response):
+    def browse_nodes(nodeIds: list[str], maxReferencesPerNode: int = 1000, bWaitResponse: bool=True, timeout: float | None=None) -> (Response | None):
         """
         Requests to execute the OPC UA Browse service locally and returns the Browse response content.
         See `BrowseResponse` for result content.
@@ -1302,11 +1340,14 @@ class PyS2OPC_Server(PyS2OPC):
             bWaitResponse: True, wait the response and returns a `BrowseResponse`.
                            Otherwise return an `AsyncResponse` to retrieve it later
                            (see `AsyncResponse.get_response`).
+            timeout: A float in seconds (None, by default)
+                     In the case of a synchronous call (bWaitResponse=True), sets a timeout period to wait for a response.
+                     If the timeout is reached, None is returned.
         """
         request: _Request = _Request.new_browse_request(nodeIds, maxReferencesPerNode)
         ReqHandler = _AsyncRequestHandler()
         PyS2OPC_Server._req_handler[request._requestContext] = ReqHandler
-        return ReqHandler._send_generic_request(True, NULL, request, bWaitResponse)
+        return ReqHandler._send_generic_request(True, NULL, request, bWaitResponse, timeout)
 
 # --- Types ---
 
@@ -2394,7 +2435,7 @@ class BaseClientConnectionHandler:
             return status == SOPC_ReturnStatus.SOPC_STATUS_OK
         return False
 
-    def read_nodes(self, nodeIds: list[str], attributes: list[AttributeId] = [], bWaitResponse: bool=True) -> (Response):
+    def read_nodes(self, nodeIds: list[str], attributes: list[AttributeId] = [], bWaitResponse: bool=True, timeout: float | None=None) -> (Response | None):
         """
         Requests to execute the OPC UA Read service on server and returns the Read response content.
         See `ReadResponse` for result content.
@@ -2407,15 +2448,18 @@ class BaseClientConnectionHandler:
             bWaitResponse: True, wait the response and returns a `ReadResponse`.
                            Otherwise return an `AsyncResponse` to retrieve it later
                            (see `AsyncResponse.get_response`).
+            timeout: A float in seconds (None, by default)
+                     In the case of a synchronous call (bWaitResponse=True), sets a timeout period to wait for a response.
+                     If the timeout is reached, None is returned.
         """
         self._checkConnection()
         request: _Request = _Request.new_read_request(nodeIds, attributes=attributes)
         ReqHandler = _AsyncRequestHandler()
         BaseClientConnectionHandler._req_handler[request._requestContext] = ReqHandler
         c_cliConHandler: _C_BaseClientConnectionHandler = self._c_cliConHandler
-        return ReqHandler._send_generic_request(False, c_cliConHandler._secureConnection, request, bWaitResponse)
+        return ReqHandler._send_generic_request(False, c_cliConHandler._secureConnection, request, bWaitResponse, timeout)
 
-    def write_nodes(self, nodeIds: list[str], datavalues: list[DataValue], attributes: list[AttributeId]=[], types=[], bWaitResponse: bool = True, autoTypeWithRead : bool =True) -> (Response):
+    def write_nodes(self, nodeIds: list[str], datavalues: list[DataValue], attributes: list[AttributeId]=[], types=[], bWaitResponse: bool = True, timeout: float | None=None, autoTypeWithRead : bool =True) -> (Response | None):
         """
         Requests to execute the OPC UA Write service on server and returns the Write response content.
         See `WriteResponse` for result content.
@@ -2429,6 +2473,9 @@ class BaseClientConnectionHandler:
             bWaitResponse: True, wait the response and returns a `WriteResponse`.
                            Otherwise return an `AsyncResponse` to retrieve it later
                            (see `AsyncResponse.get_response`).
+            timeout: A float in seconds (None, by default)
+                     In the case of a synchronous call (bWaitResponse=True), sets a timeout period to wait for a response.
+                     If the timeout is reached, None is returned.
 
         Note 1: if the data values are not typed, an attempt to read the values first will be done.
                 If some types are still missing afterward an assertion will be raised.
@@ -2445,9 +2492,9 @@ class BaseClientConnectionHandler:
         request: _Request = _Request.new_write_request(nodeIds, datavalues, attributes=attributes, types=types)
         reqHandler = _AsyncRequestHandler()
         BaseClientConnectionHandler._req_handler[request._requestContext] = reqHandler
-        return reqHandler._send_generic_request(False, c_cliConHandler._secureConnection, request, bWaitResponse)
+        return reqHandler._send_generic_request(False, c_cliConHandler._secureConnection, request, bWaitResponse, timeout)
 
-    def browse_nodes(self, nodeIds: list[str], maxReferencesPerNode: int = 1000, bWaitResponse: bool=True) -> (Response):
+    def browse_nodes(self, nodeIds: list[str], maxReferencesPerNode: int = 1000, bWaitResponse: bool=True, timeout: float | None=None) -> (Response | None):
         """
         Requests to execute the OPC UA Browse service on server and returns the Browse response content.
         See `BrowseResponse` for result content.
@@ -2459,15 +2506,18 @@ class BaseClientConnectionHandler:
             bWaitResponse: True, wait the response and returns a `BrowseResponse`.
                            Otherwise return an `AsyncResponse` to retrieve it later
                            (see `AsyncResponse.get_response`).
+            timeout: A float in seconds (None, by default)
+                     In the case of a synchronous call (bWaitResponse=True), sets a timeout period to wait for a response.
+                     If the timeout is reached, None is returned.
         """
         self._checkConnection()
         request: _Request = _Request.new_browse_request(nodeIds, maxReferencesPerNode)
         ReqHandler = _AsyncRequestHandler()
         BaseClientConnectionHandler._req_handler[request._requestContext] = ReqHandler
         c_cliConHandler: _C_BaseClientConnectionHandler = self._c_cliConHandler
-        return ReqHandler._send_generic_request(False, c_cliConHandler._secureConnection, request, bWaitResponse)
+        return ReqHandler._send_generic_request(False, c_cliConHandler._secureConnection, request, bWaitResponse, timeout)
 
-    def call_method(self, objectNodeId: str, methodNodeId: str, inputArgList: list[Variant] = [], bWaitResponse: bool=True) -> (Response):
+    def call_method(self, objectNodeId: str, methodNodeId: str, inputArgList: list[Variant] = [], bWaitResponse: bool=True, timeout: float | None=None) -> (Response | None):
         """
         Requests to execute the OPC UA CallMethod service on server and returns the Call response content.
         See `CallResponse` for result content.
@@ -2482,6 +2532,9 @@ class BaseClientConnectionHandler:
             bWaitResponse: True, wait the response and returns a `BrowseResponse`.
                            Otherwise return an `AsyncResponse` to retrieve it later
                            (see `AsyncResponse.get_response`).
+            timeout: A float in seconds (None, by default)
+                     In the case of a synchronous call (bWaitResponse=True), sets a timeout period to wait for a response.
+                     If the timeout is reached, None is returned.
 
         Note : For more information on ["NodeId concept"](#nodeid-concept).
         """
@@ -2490,7 +2543,7 @@ class BaseClientConnectionHandler:
         ReqHandler = _AsyncRequestHandler()
         BaseClientConnectionHandler._req_handler[request._requestContext] = ReqHandler
         c_cliConHandler: _C_BaseClientConnectionHandler = self._c_cliConHandler
-        return ReqHandler._send_generic_request(False, c_cliConHandler._secureConnection, request, bWaitResponse)
+        return ReqHandler._send_generic_request(False, c_cliConHandler._secureConnection, request, bWaitResponse, timeout)
 
     def create_subscription(self,
                             requestedPublishingInterval: float = 500,
