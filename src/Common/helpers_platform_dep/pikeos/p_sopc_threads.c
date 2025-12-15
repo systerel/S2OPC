@@ -25,6 +25,7 @@
 
 #include "p_sopc_threads.h"
 #include "sopc_assert.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
@@ -98,7 +99,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
     {
         return SOPC_STATUS_NOK;
     }
-    return SOPC_Thread_CreatePrioritized(thread, startFct, startArgs, priority / 2, taskName, -1);
+    return SOPC_Thread_CreatePrioritized(thread, startFct, startArgs, priority / 2, -1, taskName);
 }
 
 SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
