@@ -54,7 +54,7 @@ class NamedMembers:
         """
         if cls._dCodeNames is None:
             cls._dCodeNames = {getattr(cls, name): name for name in dir(cls) if not name.startswith('get_') and not name.startswith('_')}
-        return cls._dCodeNames[memberId]
+        return cls._dCodeNames.get(memberId, hex(memberId))
 
     @classmethod
     def get_both_from_id(cls, memberId):
