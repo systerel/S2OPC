@@ -18,6 +18,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
@@ -166,6 +167,14 @@ static bool SOPC_ServerConfigHelper_CheckConfig(void)
             for (uint8_t k = 0; k < sp->nbOfUserTokenPolicies; k++)
             {
                 OpcUa_UserTokenPolicy* utp = &sp->userTokenPolicies[k];
+                // Enforce server certificate is provided if user token policy needs it
+                // (X509: for user token signature
+                //  or UserName: for password encryption)
+                if (utp->SecurityPolicyUri.Length > 0 &&
+                    0 != strcmp(SOPC_SecurityPolicy_None_URI, SOPC_String_GetRawCString(&utp->SecurityPolicyUri)))
+                {
+                    hasSecurity = true;
+                }
                 if (OpcUa_UserTokenType_UserName == utp->TokenType)
                 {
                     // Note that SOPC_SecurityConfig_AddUserTokenPolicy already warns when used with None security SC
