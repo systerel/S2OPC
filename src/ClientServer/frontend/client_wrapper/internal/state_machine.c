@@ -2049,7 +2049,7 @@ static void LockedStaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM,
         subCtx->bAckSubscr = true;
         SOPC_SLinkedList_Append(subCtx->pListAckSeqNum, 0, (uintptr_t) pNotifMsg->SequenceNumber);
     }
-    else
+    else if (0 != pPubResp->SubscriptionId)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "Subscription with SubscriptionId %" PRIu32 "could not be found in configuration.",
