@@ -254,7 +254,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
     uint32_t nbEndpointDescription = 0;
     SOPC_SecurityPolicy* tabSecurityPolicy = NULL;
     OpcUa_EndpointDescription* currentConfig_EndpointDescription = NULL;
-    bool userTokenEncryptionNeeded = false;
+    bool userTokenServerCertNeeded = false;
     SOPC_SerializedCertificate* serverCertificate = NULL;
 
     SOPC_String_Initialize(&configEndPointURL);
@@ -350,13 +350,13 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     if (!isCreateSessionResponse)
                     {
                         for (uint8_t userTokenIndex = 0;
-                             !userTokenEncryptionNeeded && userTokenIndex < currentSecurityPolicy.nbOfUserTokenPolicies;
+                             !userTokenServerCertNeeded && userTokenIndex < currentSecurityPolicy.nbOfUserTokenPolicies;
                              userTokenIndex++)
                         {
                             if (currentSecurityPolicy.userTokenPolicies[userTokenIndex].SecurityPolicyUri.Length > 0)
                             {
-                                // If SecurityPolicyURI != None, this token should need encryption
-                                userTokenEncryptionNeeded =
+                                // If SecurityPolicyURI != None, this token should need encryption or server certificate
+                                userTokenServerCertNeeded =
                                     (0 != strcmp(SOPC_SecurityPolicy_None_URI,
                                                  SOPC_String_GetRawCString(
                                                      &currentSecurityPolicy.userTokenPolicies[userTokenIndex]
@@ -364,9 +364,19 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                             }
                         }
                         // Set serverCertificate in case it is needed for a user token policy
-                        if (userTokenEncryptionNeeded)
+                        if (userTokenServerCertNeeded)
                         {
-                            SOPC_SetServerCertificate(serverCertificate, &newEndPointDescription->ServerCertificate);
+                            if (serverCertificate != NULL)
+                            {
+                                SOPC_SetServerCertificate(serverCertificate,
+                                                          &newEndPointDescription->ServerCertificate);
+                            }
+                            else
+                            {
+                                SOPC_Logger_TraceError(
+                                    SOPC_LOG_MODULE_CLIENTSERVER,
+                                    "Server certificate is NULL while it is needed for user token encryption");
+                            }
                         }
                         // Set ApplicationDescription
                         SOPC_SetServerApplicationDescription(sopcEndpointConfig, preferredLocales,
