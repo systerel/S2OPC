@@ -255,6 +255,7 @@ option(S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE "Use external callback for Histor
 option(S2OPC_NODE_DELETE_CHILD_NODES "Make DeleteNodes service recursively delete new orphans child nodes" ON)
 option(S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES "Make DeleteNodes service delete child nodes with Organizes hierarchical references" ON)
 option(S2OPC_EVENT_MANAGEMENT "Make OPC UA Events available" OFF)
+option(S2OPC_HAS_AUDITING "Activates OPC UA Auditing (limited to security audit event types)" OFF)
 
 # option to load static security data for embedded systems without filesystems
 option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)

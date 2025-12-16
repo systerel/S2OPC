@@ -117,6 +117,7 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
     - DeleteNodes service
       If compiled with S2OPC_NODE_DELETE_CHILD_NODES (option set by default), the child nodes of the deleted node will be recursively deleted. The DeleteNodes permission on child nodes will not be considered: only the permission on root node will be considered.
       If compiled with S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES (option set by default), Organizes reference will be considered when regarding for child nodes.
+  - Only if compiled with S2OPC_HAS_AUDITING set to 1: limited Auditing support (audit security event types)
   - Python wrapper PyS2OPC for a server: see  `src/ClientServer/frontend/pys2opc/README.md`
 
 ### Current status
@@ -131,6 +132,7 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - method call
   - add nodes (variable, object and method nodes) if library compiled with S2OPC_NODE_MANAGEMENT set to 1
   - history read (ReadRaw only), if library compiled with S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE set to 1
+  - auditing (limited to audit security event types), if library compiled with S2OPC_HAS_AUDITING set to 1
 - Server local services: read, write, browse and discovery services
 - Server address space modification:
   - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control
@@ -140,7 +142,7 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - Subscription events monitored items management with limited filtering features (where clause empty or 1 simple OfType element)
 - Server role-based security:
   - Role mechanism with the following limitations. 
-    Permissions managed: Read, Write, Call, AddNodes, DeleteNodes, ReceiveEvents. 
+    Permissions managed: Read, Write, ReadHistory, Call, AddNodes, DeleteNodes, ReceiveEvents. 
     Supported role mapping criterias: anonymous, username, authenticated user.
 - Client instantiation: multiple secure channel instances and session instances
 - Client subscription service: management of subscriptions with monitored items
@@ -289,38 +291,46 @@ To build S2OPC libraries and tests with default configuration on current stable 
 - Paths to external libraries source directory: MbedTLS, Expat (optional: needed for XML parsing features only), Check (optional: needed for S2OPC unit tests), Paho (optional: needed for S2OPC PubSub MQTT). Set the  MBEDTLS_DIR, EXPAT_DIR, CHECK_DIR and PAHO_DIR variables.
 - Visual Studio version to use and type of build (Release, Debug, etc.). Set the VS_VERSION and CONFIG variables.
 
-By setting environment variables S2OPC_NANO_PROFILE, S2OPC_EVENT_MANAGEMENT, S2OPC_HAS_AUDITING, S2OPC_NODE_MANAGEMENT, S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE, S2OPC_CLIENTSERVER_ONLY, WARNINGS_AS_ERRORS, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES, WITH_PYS2OPC, PYS2OPC_VERSION and PYS2OPC_WHEEL_NAME it is possible to customize S2OPC build.
+The generated project file S2OPC*.sln can then be imported in Visual Studio environment.
+
+## Customize S2OPC scope build
+
+By setting environment variables it is possible to customize S2OPC build:
 - S2OPC_NANO_PROFILE (OFF by default): if set to ON, it excludes the features out of the OPC UA server nano scope (excluded services: subscription, monitored items and method calls services)
+- S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates AddNodes / DeleteNodes services
+- S2OPC_NODE_ADD_OPTIONAL (OFF by default): if set ON, enables optional child nodes to be added when adding a node (only mandatory otherwise).
+- S2OPC_NODE_INTERNAL_ADD_CHILD_NODES (ON by default): if set ON, enables recursive add of child nodes for server local add nodes.
+- S2OPC_NODE_ADD_INVERSE_TYPEDEF  (ON by default): if set ON, enables addition of 'HasTypeDefinition' inverse reference from type node to child node.
+- S2OPC_NODE_DISABLE_CHECK_UNIQUENESS_BROWSENAME (OFF by default): if set ON, disables check of uniqueness of BrowseName among its parent's references.
+- S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE (OFF by default): if set ON, uses external callback for implementing HistoryRead service, which is the only one supported for the moment.
+- S2OPC_NODE_DELETE_CHILD_NODES (ON by default): if set ON, makes DeleteNodes service recursively delete new orphans child nodes from the removed nodes.
 - S2OPC_EVENT_MANAGEMENT (OFF by default): if set to ON, activates OPC UA Events
-- S2OPC_HAS_AUDITING (OFF by default)
-- S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service (variable node only without child nodes generation, no NodeId generation, simplified checks on types) and DeleteNodes services
-- S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE (OFF by default): if set to ON, activates the external treatment for HistoryRead service, which is the only one supported for the moment
-- S2OPC_CLIENTSERVER_ONLY (OFF by default): if set to ON, Only build the common library and client server libraries, tests, and samples (effectively excludes pubsub).
+- S2OPC_HAS_AUDITING (OFF by default): if set to ON, activates OPC UA Auditing (limited to security audit event types). It requires S2OPC_EVENT_MANAGEMENT set.
+- S2OPC_CLIENTSERVER_ONLY (OFF by default): if set to ON, Only build the common library and client server libraries, tests and samples (effectively excludes pubsub).
+- S2OPC_PUBSUB_ONLY (OFF by default): if set to ON, only build the common library and the PubSub library, tests and samples (effectively excludes client/server).
 - WARNINGS_AS_ERRORS (ON by default): if set to OFF, Do not treat warnings as errors when building.
-- BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
-- ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
+- BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON on Windows)
+- ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary on Windows)
 - ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,
 etc.)
 - WITH_PYS2OPC (OFF by default): if set to ON, it builds the Python binding wheel for S2OPC and PYS2OPC_WHEEL_NAME variable shall also be set to define the wheel file name. PYS2OPC_VERSION and PYS2OPC_WHEEL_NAME can be defined to name the PyS2OPC wheel.
-
-The generated project file S2OPC*.sln can then be imported in Visual Studio environment.
 
 For more information, or to compile the master branch on its latest commit, please refer to the [wiki](https://gitlab.com/systerel/S2OPC/wikis/compilation).
 
 ## Hints to build S2OPC on other platforms or without CMake
 
-
 If CMake is not available or you want to use another tool for compilation you will have to manually configure the sources to compile.
 Here are a few hints on how to manage to build without CMake:
 - S2OPC libraries sources files (*.c and *.h) are all in src/ sub-directories
 - Only one of the dependent platform directory shall be kept for the build : src/Common/helpers_platform_dep/<platform> (linux, windows, etc.)
+- Only one of the crypto library directory shall be kept for the build : src/Common/crypto/lib_dep/<crypto_lib> (mbedtls, cylone, nocrypto, etc.)
 - src/Common/configuration/sopc_common_build_info.h provides build-specific information that must be filled in by build procedure:
   - When using CMake, the sopc_common_build_info.c is automatically generated with relevant content.
   - When using any other toolchain, the template provided in file sopc_common_build_info.c_ may be used.
     In that case the template should be copied into a valid .c file to be taken into account (depends on toolchain configuration).
 - A s2opc_common_export.h file is expected to be found in the included directories.
   This file shall export several MACRO symbols including S2OPC_COMMON_EXPORT and S2OPC_COMMON_NO_EXPORT.
-  - When using CMake, this file is automaatically generated depending on the host target.
+  - When using CMake, this file is automatically generated depending on the host target.
   - When using any other toolchain, the template provided in file s2opc_common_export.h_
     for each src/Common/helpers_platform_dep/<platform> directory may be renamed to  s2opc_common_export.h.
     This however may require adaptation for specific toolchains.
