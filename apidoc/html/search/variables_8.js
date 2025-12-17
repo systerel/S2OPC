@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['handle_0',['handle',['../structSOPC__Mutex__Impl.html#a3f04de4f48c0acb5a14b391a6579ae59',1,'SOPC_Mutex_Impl']]],
+  ['handlelockcounter_1',['handleLockCounter',['../structSOPC__Condition__Impl.html#a6bd2e190806bcbacc9d7760b98a2ad31',1,'SOPC_Condition_Impl']]],
+  ['hascurrentmsgrequestid_2',['hasCurrentMsgRequestId',['../structSOPC__SecureConnection__ChunkMgrCtx.html#a37a75a1737e0d46f2795c9e6e64eafbe',1,'SOPC_SecureConnection_ChunkMgrCtx']]],
+  ['hasdiscoveryendpoint_3',['hasDiscoveryEndpoint',['../structSOPC__Endpoint__Config.html#a6a48b38bd6c1bea9b9937654b42adf32',1,'SOPC_Endpoint_Config']]],
+  ['hasextrapaddingsize_4',['hasExtraPaddingSize',['../structSOPC__SecureConnection.html#abb402cd5dacac51f59d885762954a86f',1,'SOPC_SecureConnection']]],
+  ['hassubtype_5',['hasSubtype',['../structSOPC__AddressSpaceTypeInfo.html#a28d4b1931dc4f37b46a288d71519f88c',1,'SOPC_AddressSpaceTypeInfo']]],
+  ['headerlayouturi_6',['headerlayouturi',['../struct__OpcUa__WriterGroupDataType.html#a97d8a54bfb6dcb5f2a20426c3eb9ffb1',1,'_OpcUa_WriterGroupDataType::HeaderLayoutUri'],['../struct__OpcUa__DataSetReaderDataType.html#a015290d19bdfd6cc907b1f51b621658b',1,'_OpcUa_DataSetReaderDataType::HeaderLayoutUri']]],
+  ['high_7',['High',['../struct__OpcUa__Range.html#a333e5a0617e89d76106ef6bbf8a820e6',1,'_OpcUa_Range']]],
+  ['historizing_8',['historizing',['../struct__OpcUa__VariableNode.html#a466b5d20f61a20f8869a8f2823b85e12',1,'_OpcUa_VariableNode::Historizing'],['../struct__OpcUa__VariableAttributes.html#af3ccf3b901d954e24fdfd3af9f1508fe',1,'_OpcUa_VariableAttributes::Historizing']]],
+  ['history_5fread_5fit_5f_5frreqs_5fi_9',['history_read_it__rreqs_i',['../history__read__it_8h.html#a440589c05af3fde653444c40303f901b',1,'history_read_it.h']]],
+  ['historydata_10',['HistoryData',['../struct__OpcUa__HistoryReadResult.html#a0c9b31101c574174dd57d036f70e08e7',1,'_OpcUa_HistoryReadResult']]],
+  ['historyreadcount_11',['HistoryReadCount',['../struct__OpcUa__SessionDiagnosticsDataType.html#aa7df9c4ff47c30227564b5439dd74be7',1,'_OpcUa_SessionDiagnosticsDataType']]],
+  ['historyreaddetails_12',['HistoryReadDetails',['../struct__OpcUa__HistoryReadRequest.html#aaee39ce389c21e5715a7779efb29c6c9',1,'_OpcUa_HistoryReadRequest']]],
+  ['historyupdatecount_13',['HistoryUpdateCount',['../struct__OpcUa__SessionDiagnosticsDataType.html#a788dbcced3a99fa80d5120ed611ddae4',1,'_OpcUa_SessionDiagnosticsDataType']]],
+  ['historyupdatedetails_14',['HistoryUpdateDetails',['../struct__OpcUa__HistoryUpdateRequest.html#abacce88b53903e1d304a7735fbebc95c',1,'_OpcUa_HistoryUpdateRequest']]],
+  ['hour_15',['hour',['../structSOPC__tm.html#ace4b0195691fb7acb3199e469ac61d9a',1,'SOPC_tm']]]
+];
