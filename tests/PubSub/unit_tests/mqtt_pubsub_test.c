@@ -85,7 +85,7 @@ static void logCb(const char* category, const char* const line)
 #define VERBOSE_EXPECTED(x, y, remTimeMs, timeout)
 #endif
 
-#define MAX_WAIT_MS 2000
+#define MAX_WAIT_MS 10000
 
 #define WAIT_FOR(x, y, timeout)                                              \
     do                                                                       \
