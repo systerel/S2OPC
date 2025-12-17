@@ -675,6 +675,8 @@ windows-appveyor:
   script:
     - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds | grep "created"'
   rules:
+    - if: "$CI_COMMIT_TAG" # Appveyor does not support tag, we already ran it on tag branch
+      when: never
     - if:
         "$ALL_BUILDS != null || $WINDOWS_TEST != null && $WINDOWS_ARTIFACTS == null || $CI_COMMIT_TAG || \
         $CI_COMMIT_BRANCH == 'master' && $ALL_TESTS == null && \
