@@ -129,7 +129,7 @@ generation: &gen
     paths:
       - "pre-build.log"
     when: always
-    expire_in: "1 week"
+    expire_in: never
   rules:
     - if: "$NO_GEN == null && \
         $WINDOWS_TEST == null && \
@@ -154,7 +154,7 @@ proof_obligations:
       - "pre-build.log"
       - "po_status.log"
     when: always
-    expire_in: "30 days"
+    expire_in: never
   rules:
     - if: "$GEN_PROOF_OBLIGATIONS != null"
       when: always
@@ -198,7 +198,7 @@ check_commit_validity:
       - "*.log"
       - "install_linux64/"
       - "build/" # Required by tests / coverage
-    expire_in: "1 week"
+    expire_in: never
     when: always
 
 # Used by "normal" pipeline
@@ -240,7 +240,7 @@ build-linux-faulty-packet:
       - "build_faulty/bin/server_public"
       - "build_faulty/bin/server_private"
       - "build_faulty/bin/user_public"
-    expire_in: "30 days"
+    expire_in: never
   rules:
     - if: "$ALL_BUILDS != null"
       when: on_success
@@ -330,7 +330,7 @@ build-win64: &build_win64
     paths:
       - "$BUILD_DIR/bin"
       - "install_win64/"
-    expire_in: "1 week"
+    expire_in: never
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always # run even if previous job in pipeline failed
@@ -346,7 +346,7 @@ build-win32:
     paths:
       - "$BUILD_DIR/bin/"
       - "install_win32/"
-    expire_in: "1 week"
+    expire_in: never
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always # run even if previous job in pipeline failed
@@ -377,7 +377,7 @@ build-rpi:
       - "$BUILD_DIR/lib"
       - "*.log"
       - "install_rpi/"
-    expire_in: "1 week"
+    expire_in: never
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always # run even if previous job in pipeline failed
@@ -414,7 +414,7 @@ build-zephyr:
     name: "bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
       - "build_zephyr/"
-    expire_in: "1 week"
+    expire_in: never
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
@@ -435,7 +435,7 @@ build-freertos:
     paths:
       - "build_freertos/"
     when: always
-    expire_in: "1 week"
+    expire_in: never
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
@@ -519,7 +519,7 @@ test-check:
       - "clang_tidy.log"
       - "build-analyzer/analyzer-report"
     when: on_failure
-    expire_in: "1 week"
+    expire_in: never
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && \
         $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
@@ -547,7 +547,7 @@ test-check:
       - "build/**/*.*.gcda" # coverage analysis
       - "build/**/*.*.gcno" # coverage analysis
     when: always
-    expire_in: "1 week"
+    expire_in: never
 # Common rules defined by test-unit job below
 
 # Test unit for ALL_TESTS variable (add dynamic configuration)
@@ -602,7 +602,7 @@ test-unit-all-builds:
       - "**/*.*.gcda" # coverage analysis
       - "**/*.*.gcno" # coverage analysis
     when: always
-    expire_in: "1 week"
+    expire_in: never
 
 # Test uactt for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
@@ -643,7 +643,7 @@ test-faulty-packets:
       - "build_faulty/bin/**/*.log"
       - "/tmp/browse_packets.txt"
       - "tests/ClientServer/scripts/*.tap"
-    expire_in: "30 days"
+    expire_in: never
   rules:
     - if: "$ALL_BUILDS != null"
       when: on_success
@@ -697,7 +697,7 @@ windows-appveyor-artifacts:
     name: "windows-artifacts-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
       - "*.zip"
-    expire_in: "1 week"
+    expire_in: never
 
 ###
 # Analysis jobs
@@ -712,7 +712,7 @@ coverage-analysis:
     name: "coverage-report-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
       - "report"
-    expire_in: "1 week"
+    expire_in: never
   rules:
     - if: "$WITH_COVERAGE != null"
 
@@ -756,7 +756,7 @@ pages:
   artifacts:
     paths:
       - public
-    expire_in: 30 days
+    expire_in: never
 
 check_doc:
   <<: *build_linux
@@ -771,7 +771,7 @@ check_doc:
     name: "check_doc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
       - "$BUILD_DIR/doc.log"
-    expire_in: "1 week"
+    expire_in: never
     when: on_failure
   rules:
     - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
