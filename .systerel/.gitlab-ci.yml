@@ -824,19 +824,21 @@ pages:
 check_doc:
   <<: *build_linux
   stage: doc
+  dependencies: [] # No dependency
   script:
+    - ./build.sh
     - cd $BUILD_DIR
     - cmake --build . --target doc &> doc.log
     - test $(grep -c 'warning:' doc.log) -eq 0
   variables:
-    <<: *build_linux_variables
+    <<: [*build_linux_variables, *nominal_build_variables]
   artifacts:
-    name: 'check_doc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    name: "check_doc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - '$BUILD_DIR/doc.log'
-    expire_in: '1 week'
+      - "$BUILD_DIR/doc.log"
+    expire_in: "1 week"
     when: on_failure
   rules:
-   - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
-     when: on_success
+    - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
+      when: on_success
 
