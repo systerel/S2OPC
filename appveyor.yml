@@ -3,7 +3,7 @@ environment:
     MOSQUITTO_VERSION: 2.0.22
     MOSQUITTO_URL: https://mosquitto.org/files/binary/win64/mosquitto-%MOSQUITTO_VERSION%-install-windows-x64.exe
     matrix:
-        - PYTHON: "C:\\Python39-x64"
+        - PYTHON: "C:\\Python313-x64"
 image:
     - Visual Studio 2022
 
@@ -15,7 +15,7 @@ install:
     # Check that we have the expected version and architecture for Python
     - "pip --version"
     - "python.exe -m pip install -U pip setuptools build wheel"
-    - "pip install wexpect==4.0.0 cryptography pycparser six==1.11.0 asn1crypto==0.23.0 click cython python_dateutil==2.6.1 argparse==1.4.0 pytz==2017.2 idna==2.6 lxml"
+    - "pip install wexpect==4.0.0 cryptography pycparser six==1.11.0 asn1crypto==0.23.0 click cython python_dateutil==2.6.1 argparse==1.4.0 pytz==2025.2 idna==2.6 lxml"
     - set FREEOPCUA_DIR_NAME=python-opcua-0.98.13
     - "appveyor.exe DownloadFile https://github.com/FreeOpcUa/python-opcua/archive/refs/tags/0.98.13.zip -FileName %FREEOPCUA_DIR_NAME%.zip"
     - "unzip %FREEOPCUA_DIR_NAME%.zip"
@@ -70,7 +70,7 @@ test_script:
     - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%;%MBEDTLS_INSTALL_DIR%;%PAHO_INSTALL_DIR%
     - set AUTOPXD2_DIR_NAME=python-autopxd2-2.3.0
     - set PYS2OPC_VERSION=pys2opc-1.7.0
-    - set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp39-cp39-win_amd64.whl
+    - set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp313-cp313-win_amd64.whl
     - set VS_VERSION="Visual Studio 17 2022"
     - set S2OPC_CLIENTSERVER_ONLY=off
     - set S2OPC_EVENT_MANAGEMENT=on
