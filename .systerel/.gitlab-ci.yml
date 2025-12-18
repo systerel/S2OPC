@@ -221,11 +221,11 @@ hil-test:
 
 .build-linux: &build_linux
   stage: build
-  image: docker.aix.systerel.fr/c838/build@sha256:2fdc121cf7c346c7e46e40fd05fc52ecaf759867b5d0b3ffaab809cbf89f0247 # digest of build:1.53
+  image: docker.aix.systerel.fr/c838/build@sha256:c2f0c85d47bbe5f66d75bb1f4591ec8e5d8f7580aa7e86410823eaa77ac0fbe1 # digest of build:1.54
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR || exit 1'
   variables: &build_linux_variables
-    DOCKER_DIGEST: 'sha256:2fdc121cf7c346c7e46e40fd05fc52ecaf759867b5d0b3ffaab809cbf89f0247'
+    DOCKER_DIGEST: 'sha256:c2f0c85d47bbe5f66d75bb1f4591ec8e5d8f7580aa7e86410823eaa77ac0fbe1'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
@@ -554,7 +554,7 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
+  image: docker.aix.systerel.fr/c838/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # digest of test:2.17
   script:
     - './.set-bin-root.sh'
     - './test-all.sh'
@@ -651,7 +651,7 @@ test-uactt:
 
 test-faulty-packets :
   stage: test-others
-  image: docker.aix.systerel.fr/c838/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
+  image: docker.aix.systerel.fr/c838/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # digest of test:2.17
   needs : [build-linux-faulty-packet]
   script:
     - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin
@@ -784,7 +784,7 @@ test-pikeos:
 
 coverage-analysis:
   stage: analyses
-  image: docker.aix.systerel.fr/c838/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
+  image: docker.aix.systerel.fr/c838/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # digest of test:2.17
   script:
     - ./.gen_coverage.sh
   artifacts:

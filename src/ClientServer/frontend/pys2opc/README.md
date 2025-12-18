@@ -4,7 +4,7 @@ See https://gitlab.com/systerel/S2OPC/ for more information.
 
 # Dependencies
 
-- Python >= 3.9
+- Python >= 3.10
 - gcc (tested with 13.3.0)
 - s2opc libraries and its dependencies
 - Cython = 3.0.10

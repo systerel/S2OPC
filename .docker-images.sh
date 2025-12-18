@@ -20,11 +20,11 @@
 # Define the docker images used in S2OPC
 
 # Public images (registry.gitlab.com/systerel/s2opc)
-BUILD_DIGEST=registry.gitlab.com/systerel/s2opc/build@sha256:2fdc121cf7c346c7e46e40fd05fc52ecaf759867b5d0b3ffaab809cbf89f0247 # build:1.53
+BUILD_DIGEST=registry.gitlab.com/systerel/s2opc/build@sha256:c2f0c85d47bbe5f66d75bb1f4591ec8e5d8f7580aa7e86410823eaa77ac0fbe1 # build:1.54
 MINGW_DIGEST=registry.gitlab.com/systerel/s2opc/mingw_build@sha256:d158e52c51d2f97d4bd13bcc93ebbe5793025c0032dd7e6116bdf9293fc790bf # mingw_build:1.15
 RPI_DIGEST=registry.gitlab.com/systerel/s2opc/rpi-build@sha256:070b1ca58667ee5908902ba3eb03e5fa05993d3a86d2c8ddeb6f7f41ed62609c # rpi_build:1.9
 CHECK_DIGEST=registry.gitlab.com/systerel/s2opc/check@sha256:8be8c50cd484989c987b6c28ded2e03f30e81ec27bb53e41cecde8cdc3bb86c8 # check 1.22
-TEST_DIGEST=registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # test:2.16
+TEST_DIGEST=registry.gitlab.com/systerel/s2opc/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # test:2.17
 ZEPHYR_DIGEST=registry.gitlab.com/systerel/s2opc/zephyr_build@sha256:a3361ba6c51ce52026650d6ed5b9344db7d99343b803fc4eaf4c9c4d39f14536 # zephyr_build:v4.1.0
 FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:d3da42d15ae8e1973d388cd09e75fc3dfb316763d6fd10115d0fe790e3c81346 # freertos_build:v1.2.2 (FreeRTOS for STM32-H723ZG only for CI purpose)
 SONARQUBE_DIGEST=registry.gitlab.com/systerel/s2opc/sonarqube@sha256:4baaa859d74163e40467c5fa630ad205a83a4190b7fe472d32f071619a31ca5e #registry.gitlab.com/systerel/s2opc/sonarqube:1.0
