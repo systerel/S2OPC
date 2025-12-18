@@ -1325,7 +1325,7 @@ def generate_definition_ext_obj(obj):
            )
 
 def parse_xml_datetime(val):
-    dt = re.match('''^
+    dt = re.match(r'''^
       (?P<year>-?([1-9][0-9]{3,}|0[0-9]{3})) - (?P<month>[0-1][0-9]) - (?P<day>[0-3][0-9])
       T (?P<hour>[0-2][0-9]) : (?P<minute>[0-5][0-9]) : (?P<second>[0-5][0-9])
       (?P<sec_frac>\.[0-9]{1,})?
