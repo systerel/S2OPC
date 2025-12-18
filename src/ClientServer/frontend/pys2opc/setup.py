@@ -45,10 +45,10 @@ setup(
     long_description=open('./README.md').read(),
     url='https://gitlab.com/systerel/S2OPC/',
     keywords='OPC OPC-UA S2OPC',
+    license=' Apache-2.0',
     classifiers=[
         'Programming Language :: Python :: 3',
         'Programming Language :: C',
-        'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Development Status :: 4 - Beta',
     ],
