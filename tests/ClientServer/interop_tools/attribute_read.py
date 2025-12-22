@@ -18,7 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from opcua.ua import QualifiedName, LocalizedText
+from opcua.ua import QualifiedName, LocalizedText, NodeClass
 from common import variantInfoList
 
 def attribute_read_tests(client, logger):
@@ -56,8 +56,8 @@ def attribute_read_tests(client, logger):
         print('display_name: ', display_name)
 
         # check node class
-        class_name = node.get_node_class()
-        logger.add_test('Read Test - node class for Node {}'.format(nid), str("NodeClass.Variable")==str(class_name))
+        node_class = node.get_node_class()
+        logger.add_test('Read Test - node class for Node {}'.format(nid), NodeClass.Variable == node_class)
 
         # TODO: check data type
         #data_type = node.get_data_type()
