@@ -74,7 +74,7 @@ static int hexlify(const unsigned char* src, char* dst, size_t n)
 static size_t sopc_strnlen(const char* src, size_t maxLen)
 {
     const void* p = memchr(src, '\0', maxLen);
-    return p ? (size_t)((const char*) p - src) : maxLen;
+    return (NULL != p) ? (size_t)((const char*) p - src) : maxLen;
 }
 
 // You should allocate strlen(src)/2 in dst. n is strlen(dst)
@@ -281,7 +281,7 @@ static int mbedtls_base64_decode(unsigned char** dst, size_t* olen, const unsign
     }
     *p++ = '\0'; // Null-terminate the output buffer
     *olen = (size_t)(p - pBuffer);
-    /* check that lenght is the expected one */
+    /* check that length is the expected one */
     SOPC_ASSERT(*olen == expectedLen);
 
     *dst = pBuffer; // Assign the allocated buffer to the output pointer
@@ -295,7 +295,11 @@ SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* pInput, unsigned char** p
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    size_t inputLen = sopc_strnlen(pInput, (size_t) SOPC_DEFAULT_MAX_STRING_LENGTH);
+    size_t inputLen = sopc_strnlen(pInput, (size_t) SOPC_DEFAULT_MAX_STRING_LENGTH + 1);
+    if (inputLen == 0 || inputLen == (SOPC_DEFAULT_MAX_STRING_LENGTH + 1))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     int ret = mbedtls_base64_decode(ppOut, pOutLen, (const unsigned char*) pInput, inputLen);
     if (ret != 0)
     {
