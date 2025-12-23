@@ -217,25 +217,26 @@ struct parse_context_t
 
 static bool parse(XML_Parser parser, FILE* fd)
 {
-    const size_t BUF_SIZE = 65365;
-    char* buf = SOPC_Malloc(BUF_SIZE);
     if (NULL == fd)
     {
         LOG("Error: no input file provided");
         return false;
     }
+    const size_t BUF_SIZE = 65365;
+    char* buf = SOPC_Malloc(BUF_SIZE);
+    bool res = (NULL != buf);
 
-    while (!feof(fd))
+    while (!feof(fd) && res)
     {
         size_t r = fread(buf, sizeof(char), BUF_SIZE, fd);
 
         if ((0 == r) && (ferror(fd) != 0))
         {
             LOGF("Error while reading input file: %s", strerror(errno));
-            return false;
+            res = false;
         }
 
-        if (XML_Parse(parser, buf, (int) r, 0) != XML_STATUS_OK)
+        if (res && XML_Parse(parser, buf, (int) r, 0) != XML_STATUS_OK)
         {
             const enum XML_Error parser_error = XML_GetErrorCode(parser);
 
@@ -248,20 +249,18 @@ static bool parse(XML_Parser parser, FILE* fd)
             // else, the error comes from one of the callbacks, that log an error
             // themselves.
 
-            SOPC_Free(buf);
-            return false;
+            res = false;
         }
     }
 
     // Tell the parser that we are at the end of the file
-    if (XML_Parse(parser, "", 0, 1) != XML_STATUS_OK)
+    if (res && XML_Parse(parser, "", 0, 1) != XML_STATUS_OK)
     {
-        SOPC_Free(buf);
-        return false;
+        res = false;
     }
 
     SOPC_Free(buf);
-    return true;
+    return res;
 }
 
 static bool parse_signed64_value(const char* data, int64_t* dest)

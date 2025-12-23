@@ -142,20 +142,22 @@ static SOPC_ReturnStatus set_default_password_hash(user_password** up,
 
 static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
     const size_t BUF_SIZE = 65365;
     char* buf = SOPC_Malloc(BUF_SIZE);
+    status = (NULL != buf) ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
 
-    while (!feof(fd))
+    while (!feof(fd) && SOPC_STATUS_OK == status)
     {
         size_t r = fread(buf, sizeof(char), BUF_SIZE, fd);
 
         if ((0 == r) && (ferror(fd) != 0))
         {
             LOGF("Error while reading input file: %s", strerror(errno));
-            return SOPC_STATUS_NOK;
+            status = SOPC_STATUS_WOULD_BLOCK;
         }
 
-        if (XML_STATUS_OK != XML_Parse(parser, buf, (int) r, 0))
+        if (SOPC_STATUS_OK == status && XML_Parse(parser, buf, (int) r, 0) != XML_STATUS_OK)
         {
             const enum XML_Error parser_error = XML_GetErrorCode(parser);
 
@@ -168,20 +170,18 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
             // else, the error comes from one of the callbacks, that log an error
             // themselves.
 
-            SOPC_Free(buf);
-            return SOPC_STATUS_NOK;
+            status = SOPC_STATUS_NOK;
         }
     }
 
     // Tell the parser that we are at the end of the file
-    if (XML_STATUS_OK != XML_Parse(parser, "", 0, 1))
+    if (SOPC_STATUS_OK == status && XML_Parse(parser, "", 0, 1) != XML_STATUS_OK)
     {
-        SOPC_Free(buf);
-        return SOPC_STATUS_NOK;
+        status = SOPC_STATUS_NOK;
     }
 
     SOPC_Free(buf);
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 static bool end_anonymous(struct parse_context_t* ctx)
