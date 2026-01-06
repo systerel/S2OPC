@@ -859,19 +859,18 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefToNode(SOPC_AddressSpace* add
     SOPC_ASSERT(NULL != refs);
     if (*nbRefs > 0 && (uint64_t) *nbRefs < SIZE_MAX)
     {
-        OpcUa_ReferenceNode* newRefs = SOPC_Calloc(((size_t) *nbRefs) + 1, sizeof(*newRefs));
+        // Resize reference list (+1)
+        OpcUa_ReferenceNode* newRefs =
+            SOPC_Realloc(*refs, ((size_t) *nbRefs) * sizeof(*newRefs), (((size_t) *nbRefs) + 1) * sizeof(*newRefs));
         if (NULL == newRefs)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            // Copy old references
-            void* to = memcpy(newRefs, *refs, ((size_t) *nbRefs) * sizeof(*newRefs));
-            SOPC_ASSERT(to == newRefs);
-            SOPC_Free(*refs);
             *refs = newRefs;
         }
+
         if (SOPC_STATUS_OK == status)
         {
             // Add hierarchical reference to new child
