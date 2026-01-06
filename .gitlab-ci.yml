@@ -171,7 +171,7 @@ check_commit_signature:
 
 check_commit_validity:
   stage: doc
-  image: cicirello/pyaction@sha256:1e61034d26988094c92b629bf1d5f2027bc0659a347f31653ae405a7b05f97ae # digest of cicirello/pyaction:v4.25.0
+  image: cicirello/pyaction@sha256:517e2da3470e3c6d97f37cf429255c46f3b4c43116a9f04e8cf448a008a4f31b # digest of cicirello/pyaction:3.14.2
   needs: []
   script:
     # Unnecessary for R-O access on public project: ${CI_JOB_TOKEN}
@@ -692,10 +692,10 @@ test-faulty-packets:
 
 windows-appveyor:
   stage: build-others
-  image: cicirello/pyaction@sha256:1e61034d26988094c92b629bf1d5f2027bc0659a347f31653ae405a7b05f97ae # digest of cicirello/pyaction:v4.25.0
+  image: cicirello/pyaction@sha256:517e2da3470e3c6d97f37cf429255c46f3b4c43116a9f04e8cf448a008a4f31b # digest of cicirello/pyaction:3.14.2
   needs: []
   script:
-    - 'curl -k -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds | grep "created"'
+    - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds | grep "created"'
   rules:
     - if: "$CI_COMMIT_TAG" # Appveyor does not support tag, we already ran it on tag branch
       when: never
