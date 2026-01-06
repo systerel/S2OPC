@@ -589,7 +589,7 @@ test-unit-all-builds:
 
 .test-uactt: &test_uactt
   <<: *test_linux
-  image: com.systerel.fr:5000/c838/uactt-linux@sha256:a0ae7d8858cf7da2a5cb02631807a6181f3511cc6c59498a2f2d4d92d95c048f # uactt-linux:1.8
+  image: com.systerel.fr:5000/c838/uactt-linux@sha256:8c85eccb42cb856c4795ba367a93f28959295fecc36cd1318aaf89ff27b0db59 # uactt-linux:1.10
   script:
     - ulimit -n 1024
     - "cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh"
@@ -619,7 +619,7 @@ test-uactt-all-tests:
 test-uactt:
   <<: *test_uactt
   variables:
-    <<: *nominal_test_variables
+    <<: [*nominal_test_variables, *nominal_build_variables]
     LINUX_UACTT: 1
   rules:
     - if: "$NO_TESTS != null || $WINDOWS_TEST != null || \
@@ -776,3 +776,4 @@ check_doc:
   rules:
     - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
       when: on_success
+
