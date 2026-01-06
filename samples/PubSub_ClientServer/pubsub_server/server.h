@@ -77,7 +77,7 @@ struct publisherDsmIdentifier Server_PubFilteringDataSetMessage_Requested(void);
 bool Server_Trigger_FilteringDsmEmission(struct publisherDsmIdentifier pubDsmId);
 /* Interacting with the Sub module */
 
-SOPC_Array* Server_GetConfigurationPaths(void); /* Returns an array of char* */
+char* Server_GetConfigurationPath(void);
 void Server_SetSubStatusAsync(SOPC_PubSubState state);
 void Server_SetSubStatusSync(SOPC_PubSubState state);
 

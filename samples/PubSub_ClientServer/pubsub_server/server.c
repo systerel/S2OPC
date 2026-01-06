@@ -74,8 +74,9 @@ static struct publisherDsmIdentifier pubFilteringDsmId = {.pubId = {.type = SOPC
                                                           .enableEmission = false};
 
 static SOPC_AddressSpace* address_space = NULL;
-static uint8_t lastPubSubCommand = 0;
-static char* lastPubSubConfigPath = NULL;
+static uint8_t latestPubSubCommand = 0;
+static SOPC_Mutex* pubSubConfigPathMutex = NULL;
+static char* latestPubSubConfigPath = NULL;
 
 typedef enum PublisherMethodStatus
 {
@@ -451,6 +452,18 @@ SOPC_ReturnStatus Server_CreateServerConfig(void)
     if (SOPC_STATUS_OK == status)
     {
         status = Server_InitDefaultCallMethodService();
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pubSubConfigPathMutex = SOPC_Calloc(1, sizeof(*pubSubConfigPathMutex));
+        if (NULL == pubSubConfigPathMutex)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Mutex_Initialization(pubSubConfigPathMutex);
     }
 
     return status;
@@ -830,11 +843,15 @@ void Server_StopAndClear(void)
     }
     SOPC_ServerConfigHelper_Clear();
 
-    if (NULL != lastPubSubConfigPath)
+    if (NULL != pubSubConfigPathMutex)
     {
-        SOPC_Free(lastPubSubConfigPath);
-        lastPubSubConfigPath = NULL;
+        SOPC_Mutex_Lock(pubSubConfigPathMutex);
+        SOPC_Free(latestPubSubConfigPath);
+        latestPubSubConfigPath = NULL;
+        SOPC_Mutex_Unlock(pubSubConfigPathMutex);
     }
+    SOPC_Mutex_Clear(pubSubConfigPathMutex);
+    SOPC_Free(pubSubConfigPathMutex);
 }
 
 static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
@@ -1010,38 +1027,44 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
 
     if (0 == cmpConfig)
     {
-        if (NULL != lastPubSubConfigPath)
+        status = SOPC_Mutex_Lock(pubSubConfigPathMutex);
+        if (SOPC_STATUS_OK == status && NULL != latestPubSubConfigPath)
         {
-            SOPC_Free(lastPubSubConfigPath);
+            SOPC_Free(latestPubSubConfigPath);
         }
-
         /* Its status code must be good, its type String, and be a single value */
         /* TODO: be compatible with multiple values */
         SOPC_DataValue* dv = &pwv->Value;
-        if ((dv->Status & SOPC_GoodStatusOppositeMask) != 0)
+        if (SOPC_STATUS_OK == status && (dv->Status & SOPC_GoodStatusOppositeMask) != 0)
         {
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Status Code not Good, ignoring Configuration path");
-            return;
+            status = SOPC_STATUS_INVALID_STATE;
         }
 
         SOPC_Variant* variant = &dv->Value;
-        if (variant->BuiltInTypeId != SOPC_String_Id)
+        if (SOPC_STATUS_OK == status && variant->BuiltInTypeId != SOPC_String_Id)
         {
             SOPC_Logger_TraceWarning(
                 SOPC_LOG_MODULE_PUBSUB,
                 "Configuration path value is of invalid type. Expected String, actual type id is %d",
                 variant->BuiltInTypeId);
-            return;
+            status = SOPC_STATUS_INVALID_STATE;
         }
-        if (variant->ArrayType != SOPC_VariantArrayType_SingleValue)
+        if (SOPC_STATUS_OK == status && variant->ArrayType != SOPC_VariantArrayType_SingleValue)
         {
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
                                      "Configuration path must be a single value, not an array nor a matrix");
-            return;
+            status = SOPC_STATUS_INVALID_STATE;
         }
 
         /* Actual command processing */
-        lastPubSubConfigPath = SOPC_String_GetCString(&variant->Value.String);
+        latestPubSubConfigPath = SOPC_String_GetCString(&variant->Value.String);
+        SOPC_Mutex_Unlock(pubSubConfigPathMutex);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            return;
+        }
     }
 
     if (0 == cmpCommand)
@@ -1071,7 +1094,7 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
 
         /* Actual command processing */
         uint8_t command = variant->Value.Byte;
-        if (lastPubSubCommand == 1)
+        if (latestPubSubCommand == 1)
         {
             SOPC_Atomic_Int_Set(&pubSubStopRequested, true);
             SOPC_Atomic_Int_Set(&pubSubStartRequested, false);
@@ -1080,27 +1103,20 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
         {
             SOPC_Atomic_Int_Set(&pubSubStartRequested, true);
         }
-        lastPubSubCommand = command;
+        latestPubSubCommand = command;
     }
 }
 
-SOPC_Array* Server_GetConfigurationPaths(void)
+char* Server_GetConfigurationPath(void)
 {
-    SOPC_Array* array = SOPC_Array_Create(sizeof(char*), 1, NULL);
-
-    bool ok = false;
-    if (NULL != array)
+    char* result = NULL;
+    SOPC_Mutex_Lock(pubSubConfigPathMutex);
+    if (NULL != latestPubSubConfigPath)
     {
-        ok = SOPC_Array_Append(array, lastPubSubConfigPath);
+        result = SOPC_strdup(latestPubSubConfigPath);
     }
-
-    if (!ok)
-    {
-        SOPC_Array_Delete(array);
-        array = NULL;
-    }
-
-    return array;
+    SOPC_Mutex_Unlock(pubSubConfigPathMutex);
+    return result;
 }
 
 static void Server_SetSubStatus(bool sync, SOPC_PubSubState state)

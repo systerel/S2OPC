@@ -148,15 +148,13 @@ SOPC_ReturnStatus PubSub_Configure(void)
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "PubSub static configuration loaded");
 #else
     /* PubSub Configuration */
-    SOPC_Array* configBuffers = Server_GetConfigurationPaths();
-    if (NULL == configBuffers || SOPC_Array_Size(configBuffers) != 1)
+    char* configBuffer = Server_GetConfigurationPath();
+    if (NULL == configBuffer)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Multiple configuration paths");
-        SOPC_Array_Delete(configBuffers);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "No configuration path");
         return SOPC_STATUS_NOK;
     }
 
-    char* configBuffer = SOPC_Array_Get(configBuffers, char*, 0);
     FILE* fd = SOPC_FileSystem_fmemopen((void*) configBuffer, strlen(configBuffer), "r");
     SOPC_PubSubConfiguration* pPubSubConfig = NULL;
 
@@ -349,7 +347,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
     {
         PubSub_SaveConfiguration(configBuffer);
     }
-    SOPC_Array_Delete(configBuffers);
+    SOPC_Free(configBuffer);
 #endif
 
     return status;
