@@ -32,7 +32,7 @@ SONARQUBE_DIGEST=registry.gitlab.com/systerel/s2opc/sonarqube@sha256:4baaa859d74
 # Private images
 GEN_DIGEST=docker.aix.systerel.fr/c838/gen@sha256:e7c7f0427d49d162c66410e05eb04a5859ec5e87a04d2ee82bbf25772acf7adf # docker.aix.systerel.fr/c838/gen:1.4
 UACTT_WIN_DIGEST=com.systerel.fr:5000/c838/uactt-win@sha256:98b4488aa85310d1e668af8f42be4973e2e7494fe9f44adbaf81896f794db794 # com.systerel.fr:5000/c838/uactt-win:2.3
-UACTT_LINUX_DIGEST=com.systerel.fr:5000/c838/uactt-linux@sha256:a0ae7d8858cf7da2a5cb02631807a6181f3511cc6c59498a2f2d4d92d95c048f # com.systerel.fr:5000/c838/uactt-linux:1.8
+UACTT_LINUX_DIGEST=com.systerel.fr:5000/c838/uactt-linux@sha256:5ea2f8d50193f4dd28b07b94603cfc1b2b1117774850b5ec886453e105055a6c # com.systerel.fr:5000/c838/uactt-linux:1.9
 NETWORK_FUZZING_DIGEST=docker.aix.systerel.fr/c838/opcua-network-fuzzer@sha256:35e40ba847bdfe5f3e7112f465adb2c70d1f0694521f6ba8d018c55f651ef205 # docker.aix.systerel.fr/c838/opcua-network-fuzzer:3.3
 PIKEOS_DIGEST=docker.aix.systerel.fr/c838/pikeos@sha256:3d5dcbab75b0c98a8d27d1cfa239bfa43b5b87bc1bbaca2a7c8a5bfe2adc5aeb # docker.aix.systerel.fr/c838/pikeos:1.2.1
 CYBERWATCH_DIGEST=docker.aix.systerel.fr/c838/cyberwatch@sha256:003b648857636b08825c6214c7ae86390e7c958a6814f15ee4c170c737347292 # docker.aix.systerel.fr/c838/cyberwatch:3.0
