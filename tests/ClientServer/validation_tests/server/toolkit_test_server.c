@@ -42,12 +42,11 @@
 #include "toolkit_demo_server_methods.h"
 
 #ifdef WITH_STATIC_SECURITY_DATA
+#include "common_static_security_data.h"
 #else
 // Default certificate paths
-
 static char* default_server_cert = "server_public/server_2k_cert.der";
 static char* default_key_cert = "server_private/encrypted_server_2k_key.pem";
-
 #endif // WITH_STATIC_SECURITY_DATA
 
 #define SOPC_PKI_PATH "./S2OPC_UACTT_PKI"

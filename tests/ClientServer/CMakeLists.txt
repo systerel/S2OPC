@@ -348,7 +348,9 @@ endif()
 if (WITH_STATIC_SECURITY_DATA)
   target_compile_definitions(toolkit_test_client PRIVATE "WITH_STATIC_SECURITY_DATA")
   # Reuse data of test server
-  target_include_directories(toolkit_test_client PRIVATE "validation_tests/server")
+  target_include_directories(toolkit_test_client PRIVATE
+                             "validation_tests/server"
+                             "${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert")
 endif()
 
 
@@ -487,7 +489,8 @@ add_dependencies(${TOOLKIT_TEST_SERVER} make-server-address-space)
 target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
 target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE
   ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
-  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server")
+  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server"
+  "${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert")
 target_compile_options(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_DEFINITIONS})
 if (expat_FOUND)
@@ -496,6 +499,8 @@ endif()
 
 if (WITH_STATIC_SECURITY_DATA)
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_STATIC_SECURITY_DATA")
+  target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE
+                             "${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert")
 endif()
 
 
@@ -514,7 +519,8 @@ if (NOT S2OPC_NANO_PROFILE)
   target_link_libraries(test_server_sks PRIVATE s2opc_clientserver-loader-embedded)
   target_include_directories(test_server_sks PRIVATE
     ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
-    "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server")
+    "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server"
+    "${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert")
   target_compile_options(test_server_sks PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(test_server_sks PRIVATE ${S2OPC_DEFINITIONS})
   if (expat_FOUND)

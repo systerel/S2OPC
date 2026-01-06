@@ -67,7 +67,6 @@ static const char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
 #define CLI_KEY_PATH "./client_private/encrypted_client_2k_key.pem"
 
 #ifdef WITH_STATIC_SECURITY_DATA
-#include "client_static_security_data.h"
 #include "common_static_security_data.h"
 #else
 // PKI path

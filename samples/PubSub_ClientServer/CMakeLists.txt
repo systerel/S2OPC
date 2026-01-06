@@ -73,7 +73,8 @@ if (WITH_STATIC_SECURITY_DATA)
   #include static data headers from tests
   target_include_directories(pubsub_server PRIVATE
                                            ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server
-                                           ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client)
+                                           ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client
+                                           "${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert")
 endif()
 
 
