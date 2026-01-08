@@ -396,7 +396,7 @@ static bool PubSub_SKS_Start(void)
     if (sksOK)
     {
         sksOK = SOPC_PubSubSKS_AddTasks(g_skScheduler, builder, g_skProvider,
-                                        PUBSUB_SCHEDULER_FIRST_MSPERIOD); // Start with 3s
+                                        PUBSUB_SCHEDULER_FIRST_MSPERIOD); // Start with 500ms
     }
 
     if (!sksOK)

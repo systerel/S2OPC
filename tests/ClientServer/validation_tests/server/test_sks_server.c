@@ -69,7 +69,7 @@ static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
 /* SKS Constants */
 // Period to init the scheduler is 1s
-#define SKS_SCHEDULER_INIT_MSPERIOD 1000
+#define SKS_SCHEDULER_INIT_MSPERIOD 500
 // Key Lifetime is 5s
 #define SKS_KEYLIFETIME 5000
 // Number of keys generated randomly

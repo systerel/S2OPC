@@ -51,7 +51,7 @@
 
 /* SKS Constants */
 // Period to init the scheduler is 1s
-#define SKS_SCHEDULER_INIT_MSPERIOD 1000
+#define SKS_SCHEDULER_INIT_MSPERIOD 500
 // Key Lifetime is 10s
 #define SKS_KEYLIFETIME 10000
 // Number of keys generated randomly
