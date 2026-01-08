@@ -164,21 +164,22 @@ bool SOPC_PubSubSKS_CreateManagersFromConfig(const SOPC_PubSubConfiguration* pub
     bool result = true;
 
     // Process publisher connections
-    for (uint32_t i = 0; i < SOPC_PubSubConfiguration_Nb_PubConnection(pubSubConfig); i++)
+    for (uint32_t i = 0; result && i < SOPC_PubSubConfiguration_Nb_PubConnection(pubSubConfig); i++)
     {
         const SOPC_PubSubConnection* pubConnection = SOPC_PubSubConfiguration_Get_PubConnection_At(pubSubConfig, i);
 
         // Check writer groups
-        for (uint16_t j = 0; j < SOPC_PubSubConnection_Nb_WriterGroup(pubConnection); j++)
+        for (uint16_t j = 0; result && j < SOPC_PubSubConnection_Nb_WriterGroup(pubConnection); j++)
         {
             const SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(pubConnection, j);
             const char* securityGroupId = SOPC_WriterGroup_Get_SecurityGroupId(group);
+            const SOPC_SecurityMode_Type secuMode = SOPC_WriterGroup_Get_SecurityMode(group);
 
-            if (NULL == securityGroupId && SOPC_SecurityMode_None != SOPC_WriterGroup_Get_SecurityMode(group))
+            if (NULL == securityGroupId && SOPC_SecurityMode_None != secuMode)
             {
                 result = false;
             }
-            else if (NULL != securityGroupId && result)
+            else if (SOPC_SecurityMode_None != secuMode)
             {
                 // Ensure the security group id is added to the SKManager
                 result = mayAddSecurityGroupId(securityGroupId);
@@ -187,21 +188,22 @@ bool SOPC_PubSubSKS_CreateManagersFromConfig(const SOPC_PubSubConfiguration* pub
     }
 
     // Process subscriber connections
-    for (uint32_t i = 0; i < SOPC_PubSubConfiguration_Nb_SubConnection(pubSubConfig); i++)
+    for (uint32_t i = 0; result && i < SOPC_PubSubConfiguration_Nb_SubConnection(pubSubConfig); i++)
     {
         const SOPC_PubSubConnection* subConnection = SOPC_PubSubConfiguration_Get_SubConnection_At(pubSubConfig, i);
 
         // Check reader groups
-        for (uint16_t j = 0; j < SOPC_PubSubConnection_Nb_ReaderGroup(subConnection); j++)
+        for (uint16_t j = 0; result && j < SOPC_PubSubConnection_Nb_ReaderGroup(subConnection); j++)
         {
             const SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(subConnection, j);
             const char* securityGroupId = SOPC_ReaderGroup_Get_SecurityGroupId(group);
+            const SOPC_SecurityMode_Type secuMode = SOPC_ReaderGroup_Get_SecurityMode(group);
 
-            if (NULL == securityGroupId && SOPC_SecurityMode_None != SOPC_ReaderGroup_Get_SecurityMode(group))
+            if (NULL == securityGroupId && SOPC_SecurityMode_None != secuMode)
             {
                 result = false;
             }
-            else if (NULL != securityGroupId && result)
+            else if (SOPC_SecurityMode_None != secuMode)
             {
                 // Ensure the security group id is added to the SKManager
                 result = mayAddSecurityGroupId(securityGroupId);
