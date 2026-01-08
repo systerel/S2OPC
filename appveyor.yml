@@ -1,5 +1,4 @@
 environment:
-
     MOSQUITTO_VERSION: 2.0.22
     MOSQUITTO_URL: https://mosquitto.org/files/binary/win64/mosquitto-%MOSQUITTO_VERSION%-install-windows-x64.exe
     matrix:
@@ -127,9 +126,9 @@ test_script:
         .\build_s2opc.bat
     # Tests Client/Server
     - cd %ROOT_DIR%\build\tests\ClientServer
-    - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V -E pys2opc_test_role_permissions.py"
+    - "ctest --output-on-failure -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V -E pys2opc_test_role_permissions.py"
     - cd %ROOT_DIR%\build\samples\ClientServer
-    - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
+    - "ctest --output-on-failure -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
     # Start mosquitto for PubSub tests
     - ps: Stop-Process -Name mosquitto -Force # There is already a mosquitto running, but with an incorrect configuration (assumption: started from the installation exe file durint mosquitto installation).
     - cd %ROOT_DIR%\build\tests\PubSub
@@ -149,7 +148,7 @@ test_script:
     - ps: Start-Process mosquitto -ArgumentList "-c", ".\..\..\bin\mosquitto.conf" -NoNewWindow -PassThru
     - ps: ps
     # Tests PubSub
-    - "ctest -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
+    - "ctest --output-on-failure -T test -C %CONFIG% --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -V"
     - ps: Stop-Process -Name mosquitto -Force
 
     - |-
@@ -194,21 +193,21 @@ test_script:
 build: off
 
 artifacts:
-  - path: build\bin
-    name: Binaries
-    type: zip
-  - path: build\lib
-    name: Libraries
-    type: zip
-  - path: build_dll
-    name: DLL_build
-    type: zip
+    - path: build\bin
+      name: Binaries
+      type: zip
+    - path: build\lib
+      name: Libraries
+      type: zip
+    - path: build_dll
+      name: DLL_build
+      type: zip
 
 on_failure:
-  - ps: |-
-      Stop-Process -Name mosquitto -Force
-      Compress-Archive -DestinationPath "build.zip" -Path $Env:APPVEYOR_BUILD_FOLDER\build
-      Push-AppveyorArtifact "build.zip" -FileName "build.zip" -DeploymentName to-publish
+    - ps: |-
+          Stop-Process -Name mosquitto -Force
+          Compress-Archive -DestinationPath "build.zip" -Path $Env:APPVEYOR_BUILD_FOLDER\build
+          Push-AppveyorArtifact "build.zip" -FileName "build.zip" -DeploymentName to-publish
 
 # Note: uncomment for CI debug with RDP
 #on_finish:

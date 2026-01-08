@@ -153,11 +153,11 @@ if [ -z $S2OPC_PUBSUB_ONLY ]; then
        EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$AUDIT_TAP_FILES
    fi
    if [ "$PYS2OPC_LIB_IS_PRESENT" == "0" ]; then
-       ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -E 'pys2opc*'
+       ctest --output-on-failure -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536 -E 'pys2opc*'
        CTEST_RET1=$?
    else
        EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$PYS2OPC_TAP_FILES
-       ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
+       ctest --output-on-failure -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
        CTEST_RET1=$?
        mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
    fi
@@ -177,7 +177,7 @@ if [ -z $S2OPC_PUBSUB_ONLY ]; then
     fi
 
     cd "${CLIENTSERVER_SAMPLE_DIR}"
-    ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
+    ctest --output-on-failure -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
     CTEST_RET3=$?
 else
    CTEST_RET1=0
@@ -214,7 +214,7 @@ if [ -z $S2OPC_CLIENTSERVER_ONLY ]; then
           EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$'\n'$PUBSUB_CLIENTSERVER_DYNAMIC_ONLY_TAP_FILES
        fi
    fi
-   ctest -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
+   ctest --output-on-failure -T test --no-compress-output --test-output-size-passed 65536 --test-output-size-failed 65536
    CTEST_RET2=$?
    kill $MOSQUITTO_PID
 else
