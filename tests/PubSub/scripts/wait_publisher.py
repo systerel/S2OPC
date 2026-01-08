@@ -32,6 +32,10 @@ DEFAULT_PUB_URL = 'opc.udp://232.1.2.100:4840'
 DEFAULT_SUB_SERVER_URL = 'opc.tcp://localhost:4843'
 INADDR_ANY = "0.0.0.0"
 
+def log(msg):
+    print(msg)
+    sys.stdout.flush()
+
 def wait_server(url, timeout):
     assert url != None
     # Parse url to find the endpoint IP, connects while not TIMEOUT
@@ -43,6 +47,7 @@ def wait_server(url, timeout):
         try:
             sock.connect((pr.hostname, pr.port))
             sock.close()
+            log('Checked server with endpoint %s started OK' % url)
             return True
         except ConnectionError:
             time.sleep(0.1)
@@ -68,6 +73,7 @@ def wait_publisher(url, timeout):
 
             data = sock.recv(4096)
             sock.close()
+            log('Checked publisher with URL %s started OK' % url)
             return True
         except OSError:
             time.sleep(0.1)
