@@ -60,11 +60,7 @@ SKS_NB_GENERATED_KEYS = 2
 SKS_SECURITY_GROUP_ID = "1"
 
 # PublishingInterval (seconds) of XML default configuration
-STATIC_CONF_PUB_INTERVAL = 1.2
 DYN_CONF_PUB_INTERVAL = 1.0
-
-# Time to sleep in order to receive Keys and pubsub message
-DYNAMIC_CONF_SKS_INTERVAL = 0.8
 
 PUBLISHER_METHOD_NOT_TRIGGERED = 0
 PUBLISHER_METHOD_IN_PROGRESS = 1
@@ -1640,6 +1636,9 @@ def testPubSubStaticConf(logger):
 
     pubsubserver = PubSubServer(DEFAULT_URL, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_PUBLISHER, NID_ACYCLIC_SEND, NID_ACYCLIC_SEND_STATUS, NID_DSM_FILTERING, NID_DSM_FILTERING_STATUS)
 
+    def lSubBoolIsFalse():return False == pubsubserver.getValue(NID_SUB_BOOL)
+    def lSubBoolIsTrue():return True == pubsubserver.getValue(NID_SUB_BOOL)
+
     defaultXml2Restore = False
 
     try:
@@ -1656,9 +1655,12 @@ def testPubSubStaticConf(logger):
         helpTestSetValue(pubsubserver, NID_PUB_UINT, 8500, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
 
-        sleep(STATIC_CONF_PUB_INTERVAL)
+        waitForEvent(lSubBoolIsFalse)
 
         logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+
+        waitForEvent(lambda: 8500 == pubsubserver.getValue(NID_SUB_UINT))
+
         logger.add_test('Subscriber uint is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT))
         logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
 
@@ -1668,9 +1670,12 @@ def testPubSubStaticConf(logger):
         helpTestSetValue(pubsubserver, NID_PUB_UINT, 5800, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, -30, logger)
 
-        sleep(STATIC_CONF_PUB_INTERVAL)
+        waitForEvent(lSubBoolIsTrue)
 
         logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
+
+        waitForEvent(lambda: 5800 == pubsubserver.getValue(NID_SUB_UINT))
+
         logger.add_test('Subscriber uint is changed', 5800 == pubsubserver.getValue(NID_SUB_UINT))
         logger.add_test('Subscriber int is changed', -30 == pubsubserver.getValue(NID_SUB_INT))
 
@@ -1687,11 +1692,14 @@ def testPubSubStaticConf(logger):
         helpTestSetValue(pubsubserver, NID_PUB_UINT, 7777, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, 123654, logger)
 
-        sleep(STATIC_CONF_PUB_INTERVAL)
+        waitForEvent(lSubBoolIsFalse)
 
-        logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
-        logger.add_test('Subscriber uint is changed', 5800 == pubsubserver.getValue(NID_SUB_UINT))
-        logger.add_test('Subscriber int is changed', -30 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber bool is not changed', True == pubsubserver.getValue(NID_SUB_BOOL))
+
+        waitForEvent(lambda: 5800 != pubsubserver.getValue(NID_SUB_UINT))
+
+        logger.add_test('Subscriber uint is not changed', 5800 == pubsubserver.getValue(NID_SUB_UINT))
+        logger.add_test('Subscriber int is not changed', -30 == pubsubserver.getValue(NID_SUB_INT))
 
         #
         # TC 3 : Pub-Sub server is restarted => Subscriber variables changed
@@ -1701,9 +1709,12 @@ def testPubSubStaticConf(logger):
         pubsubserver.start()
         logger.add_test('PubSub Module is started' , pubsubserver.isStart())
 
-        sleep(STATIC_CONF_PUB_INTERVAL)
+        waitForEvent(lSubBoolIsFalse)
 
         logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+
+        waitForEvent(lambda: 7777 == pubsubserver.getValue(NID_SUB_UINT))
+
         logger.add_test('Subscriber uint is changed', 7777 == pubsubserver.getValue(NID_SUB_UINT))
         logger.add_test('Subscriber int is changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
@@ -1719,9 +1730,12 @@ def testPubSubStaticConf(logger):
         helpTestSetValue(pubsubserver, NID_PUB_UINT, 1245, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, 9874, logger)
 
-        sleep(STATIC_CONF_PUB_INTERVAL)
+        waitForEvent(lSubBoolIsTrue)
 
         logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
+
+        waitForEvent(lambda: 1245 == pubsubserver.getValue(NID_SUB_UINT))
+
         logger.add_test('Subscriber uint is changed', 1245 == pubsubserver.getValue(NID_SUB_UINT))
         logger.add_test('Subscriber int is changed', 9874 == pubsubserver.getValue(NID_SUB_INT))
 
