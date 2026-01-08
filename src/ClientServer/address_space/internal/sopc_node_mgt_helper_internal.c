@@ -905,25 +905,66 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefToNode(SOPC_AddressSpace* add
     }
     return status;
 }
+static void NodeMgtHelperInternal_RemoveRefAtIndex(int32_t* nbRefs, OpcUa_ReferenceNode** refs, int32_t indexReference)
+{
+    SOPC_ASSERT(nbRefs != NULL && *nbRefs > 0 && (uint64_t) *nbRefs < SIZE_MAX);
+    SOPC_ASSERT(refs != NULL && (*refs) != NULL);
+    SOPC_ASSERT(indexReference >= 0 && indexReference < *nbRefs);
 
+    // Clear reference
+    (*nbRefs)--;
+    OpcUa_ReferenceNode_Clear(&((*refs)[indexReference]));
+
+    // If the reference to be deleted is not the last one,
+    // copy the last reference from the list of references into the cell that has just been freed up (at
+    // indexReference).
+    if ((*nbRefs) != indexReference)
+    {
+        memcpy((*refs + (size_t) indexReference), (*refs + (size_t) *nbRefs), sizeof(OpcUa_ReferenceNode));
+    }
+
+    // Release last memory block from the reference list
+    OpcUa_ReferenceNode* newRefs =
+        SOPC_Realloc(*refs, ((size_t) *nbRefs + 1) * sizeof(*newRefs), (((size_t) *nbRefs)) * sizeof(*newRefs));
+    if (NULL != newRefs)
+    {
+        *refs = newRefs;
+    }
+    else
+    {
+        // If reallocation failed, *refs remain valid.
+        SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "NodeMgtHelperInternal_RemoveRefInTargetNode: reference deleted but memory not released");
+    }
+    return;
+}
+
+/**
+ * \brief Remove the last reference of targetNodeId, return true if successful, false otherwise
+ */
 bool SOPC_NodeMgtHelperInternal_RemoveLastRefInTargetNode(SOPC_AddressSpace* addSpace, const SOPC_NodeId* targetNodeId)
 {
     // Rollback reference added in parent
+    SOPC_ASSERT(NULL != addSpace && NULL != targetNodeId);
     bool found = false;
-    SOPC_AddressSpace_Node* parentNode = SOPC_AddressSpace_Get_Node(addSpace, targetNodeId, &found);
-    SOPC_ASSERT(found && NULL != parentNode);
-    int32_t* nbRefs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, parentNode);
+    SOPC_AddressSpace_Node* targetNode = SOPC_AddressSpace_Get_Node(addSpace, targetNodeId, &found);
+    SOPC_ASSERT(found && NULL != targetNode);
+    int32_t* nbRefs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, targetNode);
     SOPC_ASSERT(NULL != nbRefs);
-    if (*nbRefs < 1)
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(addSpace, targetNode);
+    SOPC_ASSERT(NULL != refs);
+    if (*nbRefs > 0 && (uint64_t) *nbRefs < SIZE_MAX)
     {
-        return false;
+        NodeMgtHelperInternal_RemoveRefAtIndex(nbRefs, refs, (*nbRefs) - 1);
+        return true;
     }
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(addSpace, parentNode);
-    *nbRefs -= 1;
-    OpcUa_ReferenceNode_Clear(&((*refs)[*nbRefs]));
-    return true;
+    return false;
 }
 
+/**
+ * \brief Remove the reference at \p indexReference of targetNodeId, return true if successful, false otherwise
+ */
 bool SOPC_NodeMgtHelperInternal_RemoveRefAtIndex(SOPC_AddressSpace* addSpace,
                                                  SOPC_AddressSpace_Node* node,
                                                  int32_t indexReference)
@@ -933,17 +974,9 @@ bool SOPC_NodeMgtHelperInternal_RemoveRefAtIndex(SOPC_AddressSpace* addSpace,
     SOPC_ASSERT(NULL != nbRefs);
     OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(addSpace, node);
     SOPC_ASSERT(NULL != refs);
-    if (*nbRefs > 0 && (uint64_t) *nbRefs < SIZE_MAX)
+    if (*nbRefs > 0 && (uint64_t) *nbRefs < SIZE_MAX && indexReference >= 0 && indexReference < *nbRefs)
     {
-        SOPC_ASSERT(indexReference < *nbRefs);
-        OpcUa_ReferenceNode* newRefs = SOPC_Calloc(((size_t) *nbRefs) - 1, sizeof(OpcUa_ReferenceNode));
-        memcpy(newRefs, *refs, ((size_t) indexReference) * sizeof(OpcUa_ReferenceNode));
-        memcpy(newRefs + (size_t) indexReference, *refs + (size_t) indexReference + 1,
-               ((size_t)(*nbRefs - indexReference - 1)) * sizeof(OpcUa_ReferenceNode));
-        OpcUa_ReferenceNode_Clear(&((*refs)[indexReference]));
-        SOPC_Free(*refs);
-        *refs = newRefs;
-        (*nbRefs)--;
+        NodeMgtHelperInternal_RemoveRefAtIndex(nbRefs, refs, indexReference);
         return true;
     }
     return false;
