@@ -66,7 +66,7 @@ static SOPC_Variant varArrJSON[NB_VARS_JSON] = {SOPC_VARIANT_BOOL(true),
                                                 SOPC_VARIANT_DOUBLE(NAN),
                                                 SOPC_VARIANT_STRING(gSampleText)};
 
-static const uint8_t encoded_network_msg_json[ENCODED_DATA_SIZE_JSON] =
+static const uint8_t encoded_network_msg_json[ENCODED_DATA_SIZE_JSON] __attribute__((nonstring)) =
     "{"
     "\"MessageId\":\"42-0\","
     "\"MessageType\":\"ua-data\","
