@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 project(S2OPC_Samples LANGUAGES C)
 
 if(NOT S2OPC_PUBSUB_ONLY)

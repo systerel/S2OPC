@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 project(S2OPC VERSION 1.7.0)
 
 if(NOT S2OPC_COMMON_DEFS_SET)

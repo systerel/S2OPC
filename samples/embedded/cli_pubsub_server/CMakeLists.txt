@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 
 # Demo CLI-PubSub-Server
 set(SAMPLE_PROJECT_NAME S2OPC_CLI_PubSub_Server)
@@ -8,10 +8,7 @@ include(../platform_dep/CMake/CMakeLists.txt)
 
 project (${SAMPLE_PROJECT_NAME} LANGUAGES C)
 
-if(POLICY CMP0148)
-  cmake_policy(SET CMP0148 OLD)
-endif()
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 ######################################################
 # Generate test_address_space.c from s2opc_pubsub_embedded_nodeset.xml

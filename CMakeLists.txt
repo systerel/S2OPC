@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 project(S2OPC_Sources_Tests LANGUAGES C)
 
 # include common definitions here to share it with sources and tests
