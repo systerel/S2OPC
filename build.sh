@@ -77,7 +77,10 @@ echo "Build the library and tests with CMake" | tee -a "$CURDIR/build.log"
 if [ -f "$BUILD_DIR/CMakeCache.txt" ]; then
     echo "- CMake already configured" | tee -a "$CURDIR/build.log"
 else
-    echo "- Run CMake -B ./$BUILD_DIR" | tee -a "$CURDIR/build.log"
+    echo "- Generate ./$BUILD_DIR directory" | tee -a "$CURDIR/build.log"
+    mkdir -p $BUILD_DIR || exit 1
+    cd $BUILD_DIR  > /dev/null || exit 1
+    echo "- Run CMake" | tee -a "$CURDIR/build.log"
     append_cmake_option S2OPC_NANO_PROFILE
     append_cmake_option S2OPC_NODE_MANAGEMENT
     append_cmake_option S2OPC_NODE_ADD_OPTIONAL
@@ -124,8 +127,9 @@ else
     append_cmake_option WITH_GCC_STATIC_ANALYSIS
     # append_cmake_option doesn't permit to handle multiple variables because of multiple evaluations of quotes
 
-    echo "cmake -B $BUILD_DIR $CMAKE_OPTIONS -DCMAKE_C_FLAGS=\"$CMAKE_C_FLAGS\" ." >> "$CURDIR/build.log"
-    cmake -B $BUILD_DIR $CMAKE_OPTIONS -DCMAKE_C_FLAGS="$CMAKE_C_FLAGS" . >> "$CURDIR/build.log"
+    echo "cmake $CMAKE_OPTIONS -DCMAKE_C_FLAGS=\"$CMAKE_C_FLAGS\" .." >> "$CURDIR/build.log"
+    cmake $CMAKE_OPTIONS -DCMAKE_C_FLAGS="$CMAKE_C_FLAGS" .. >> "$CURDIR/build.log"
+    cd - > /dev/null || exit 1
 fi
 if [[ $? != 0 ]]; then
     echo "Error: build configuration failed" | tee -a "$CURDIR/build.log"
