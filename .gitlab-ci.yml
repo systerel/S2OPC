@@ -202,7 +202,7 @@ check_commit_validity:
     when: always
 
 # Used by "normal" pipeline
-build-linux64-ASan:
+build-linux64-ASan: &build_linux64_ASan
   <<: *build_linux
   variables:
     <<: [*build_linux_variables, *nominal_build_variables]
@@ -216,6 +216,24 @@ build-linux64-ASan:
         $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null  && \
         $WITH_SONAR == null" # avoid ASAN build in most of nightly builds
       when: on_success
+
+# Build only S2OPC libs and toolkit_test_server for UACTT tests
+# Note1: toolkit_test_server builds client/server libs, only pubsub lib missing explicitely
+# Note2: toolkit_test_server needs XML data copied by check_helpers
+build-linux64-ASan-light:
+  <<: *build_linux64_ASan
+  script:
+    - "cmake -B $BUILD_DIR . && cmake --build $BUILD_DIR -j$(nproc) --target toolkit_test_server s2opc_pubsub || exit $?"
+  artifacts:
+    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty"
+    paths:
+      - "*.log"
+      - "build/*.cmake"
+      - "build/src"
+      - "build/bin"
+      - "build/lib"
+    expire_in: "1 week"
+    when: on_success
 
 build-linux-faulty-packet:
   <<: *build_linux
@@ -277,7 +295,7 @@ build-with_no_crypto:
   artifacts:
 
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
-build-linux64-pys2opc-all-tests:
+build-linux64-pys2opc-all-tests: &build_linux64_pys2opc_all_tests
   <<: *build_linux
   variables:
     <<: [*build_linux_variables, *all-tests_build_variables] # add pys2opc
@@ -290,6 +308,24 @@ build-linux64-pys2opc-all-tests:
     - if: "$ALL_TESTS != null || $WITH_COVERAGE == null && $NO_ASAN != null && \
         $WITH_SONAR == null" # if ASAN is deactivated build PyS2OPC by default (except for coverage)
       when: on_success
+
+# Build only S2OPC libs and toolkit_test_server for UACTT tests
+# Note1: toolkit_test_server builds client/server libs, only pubsub lib missing explicitely
+# Note2: toolkit_test_server needs XML data copied by check_helpers
+build-linux64-pys2opc-all-tests-light:
+  <<: *build_linux64_pys2opc_all_tests
+  script:
+    - "cmake -B $BUILD_DIR . && cmake --build $BUILD_DIR -j$(nproc) --target toolkit_test_server s2opc_pubsub || exit $?"
+  artifacts:
+    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty"
+    paths:
+      - "*.log"
+      - "build/*.cmake"
+      - "build/src"
+      - "build/bin"
+      - "build/lib"
+    expire_in: "1 week"
+    when: on_success
 
 # Used by nightly last build to obtain all PyS2OPC wheels
 build-linux64-pys2opc-all-wheels:
@@ -469,7 +505,7 @@ build-freertos:
 test-build-from-export:
   <<: *build_linux
   stage: test
-  needs: [build-linux64-ASan]
+  needs: [build-linux64-ASan-light]
   script:
     - "mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build"
     - "cp ${CI_PROJECT_DIR}/samples/ClientServer/CMakeLists.example.txt ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/CMakeLists.txt"
@@ -590,6 +626,7 @@ test-unit-all-tests:
 # Test unit for (NOT ALL_TESTS && NOT ALL_BUILDS) variables
 test-unit:
   <<: *test_unit
+  needs: [build-linux64-ASan]
   variables:
     <<: [*nominal_build_variables, *nominal_test_variables]
   rules: # repeat .test-linux variables exception since overwritten here
@@ -603,6 +640,7 @@ test-unit:
 # Test unit for (ALL_BUILDS && NOT ALL_TESTS) variables
 test-unit-all-builds:
   <<: *test_unit
+  needs: [build-linux64-static-conf]
   variables:
     <<: [*nominal_test_variables, *all-builds_build_variables]
   rules:
@@ -614,7 +652,7 @@ test-unit-all-builds:
   image: com.systerel.fr:5000/c838/uactt-linux@sha256:8c85eccb42cb856c4795ba367a93f28959295fecc36cd1318aaf89ff27b0db59 # uactt-linux:1.10
   timeout: 1h                   # set job timeout to 1 hour
   variables:
-     RUNNER_SCRIPT_TIMEOUT: 50m # only allow script to run for 50 minutes (10 minutes remains to upload artifacts)  
+     RUNNER_SCRIPT_TIMEOUT: 50m # only allow script to run for 50 minutes (10 minutes remains to upload artifacts)
   script:
     - ulimit -n 1024
     - "cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh"
@@ -632,6 +670,7 @@ test-unit-all-builds:
 # Test uactt for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
   <<: *test_uactt
+  needs: [build-linux64-pys2opc-all-tests-light]
   variables:
     LINUX_UACTT: 1
     TEST_PASSWORD_PRIVATE_KEY: password
@@ -643,6 +682,7 @@ test-uactt-all-tests:
 # Test uactt for NOT ALL_TESTS variable
 test-uactt:
   <<: *test_uactt
+  needs: [build-linux64-ASan-light]
   variables:
     <<: *nominal_test_variables
     LINUX_UACTT: 1
