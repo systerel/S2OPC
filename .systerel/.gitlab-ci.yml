@@ -223,7 +223,7 @@ hil-test:
   stage: build
   image: docker.aix.systerel.fr/c838/build@sha256:c2f0c85d47bbe5f66d75bb1f4591ec8e5d8f7580aa7e86410823eaa77ac0fbe1 # digest of build:1.54
   script:
-    - &build_command_line './build.sh && cd $BUILD_DIR || exit 1'
+    - &build_command_line './build.sh || exit 1'
   variables: &build_linux_variables
     DOCKER_DIGEST: 'sha256:c2f0c85d47bbe5f66d75bb1f4591ec8e5d8f7580aa7e86410823eaa77ac0fbe1'
     BUILD_DIR: build
@@ -471,7 +471,7 @@ test-build-from-export:
   stage: test
   needs: [build-linux64-ASan]
   script:
-    - 'mkdir -p -p ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build'
+    - 'mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build'
     - 'cp ${CI_PROJECT_DIR}/samples/ClientServer/CMakeLists.example.txt ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/CMakeLists.txt'
     - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build'
     - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
@@ -813,12 +813,9 @@ pages:
   variables:
     <<: *build_linux_variables
   script:
-    - mkdir $BUILD_DIR
-    - cd $BUILD_DIR
-    # PyS2OPC relies on subscriptions
-    - cmake -DS2OPC_NODE_MANAGEMENT=yes -DS2OPC_EVENT_MANAGEMENT=yes -DS2OPC_HAS_AUDITING=yes -DS2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE=yes -DWITH_PYS2OPC=yes ..
-    - cmake --build . --target doc
-    - mv apidoc/html ../public/
+    - cmake -B $BUILD_DIR -DS2OPC_NODE_MANAGEMENT=yes -DS2OPC_EVENT_MANAGEMENT=yes -DS2OPC_HAS_AUDITING=yes -DS2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE=yes -DWITH_PYS2OPC=yes .
+    - cmake --build $BUILD_DIR --target doc
+    - mv $BUILD_DIR/apidoc/html ../public/
   artifacts:
     paths:
     - public
@@ -830,15 +827,14 @@ check_doc:
   dependencies: [] # No dependency
   script:
     - ./build.sh
-    - cd $BUILD_DIR
-    - cmake --build . --target doc &> doc.log
+    - cmake --build $BUILD_DIR --target doc &> doc.log
     - test $(grep -c 'warning:' doc.log) -eq 0
   variables:
     <<: [*build_linux_variables, *nominal_build_variables]
   artifacts:
     name: "check_doc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
-      - "$BUILD_DIR/doc.log"
+      - "doc.log"
     expire_in: "1 week"
     when: on_failure
   rules:
