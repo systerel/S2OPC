@@ -611,7 +611,7 @@ test-unit-all-builds:
 
 .test-uactt: &test_uactt
   <<: *test_linux
-  image: com.systerel.fr:5000/c838/uactt-linux@sha256:5ea2f8d50193f4dd28b07b94603cfc1b2b1117774850b5ec886453e105055a6c # uactt-linux:1.9
+  image: com.systerel.fr:5000/c838/uactt-linux@sha256:8c85eccb42cb856c4795ba367a93f28959295fecc36cd1318aaf89ff27b0db59 # uactt-linux:1.10
   script:
     - ulimit -n 1024
     - "cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh"
