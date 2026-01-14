@@ -300,32 +300,28 @@ OPERATIONS
         a_channel(session) = channel &
         a_state(session) = e_session_creating &
         session_token : t_session_token_i &
+        session_token : t_session_token &
         create_resp_msg : t_msg_i &
         create_resp_msg = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_create_resp
     THEN
         // Note: session does not have associated token due to state guaranteed by PRE
-        IF session_token : t_session_token
-        THEN
-            CHOICE
-                a_state(session) := e_session_created        ||
-                a_client_token(session) := session_token     ||
-                bret := TRUE                                 ||
-                a_NonceServer, a_NonceClient :(
-                    a_NonceServer : s_session +-> t_Nonce &
-                    {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
-                    session : dom(a_NonceServer) &
+        CHOICE
+            a_state(session) := e_session_created        ||
+            a_client_token(session) := session_token     ||
+            bret := TRUE                                 ||
+            a_NonceServer, a_NonceClient :(
+                a_NonceServer : s_session +-> t_Nonce &
+                {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                session : dom(a_NonceServer) &
 
-                    a_NonceClient : s_session +-> t_Nonce &
-                    (a_SecurityPolicy(channel) /= e_secpol_None => a_NonceClient = {session} <<| a_NonceClient$0) &
-                    (a_SecurityPolicy(channel)  = e_secpol_None => a_NonceClient = a_NonceClient$0)
-                )
-            OR
-                // Constraints on message content not verified
-                bret := FALSE
-            END
-        ELSE
+                a_NonceClient : s_session +-> t_Nonce &
+                (a_SecurityPolicy(channel) /= e_secpol_None => a_NonceClient = {session} <<| a_NonceClient$0) &
+                (a_SecurityPolicy(channel)  = e_secpol_None => a_NonceClient = a_NonceClient$0)
+            )
+        OR
+            // Constraints on message content not verified
             bret := FALSE
         END
     END

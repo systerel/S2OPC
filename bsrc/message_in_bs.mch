@@ -257,7 +257,7 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_create_resp
     THEN
-        session_token :: t_session_token_i
+        session_token :( session_token : t_session_token_i & session_token : t_session_token)
     END
     ;
 

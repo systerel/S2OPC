@@ -468,7 +468,6 @@ void session_core__client_create_session_resp_sm(
       t_bool session_core__l_valid_user_secu_properties;
       t_bool session_core__l_endpoints_bres;
       t_bool session_core__l_valid_server_cert;
-      t_bool session_core__l_valid_session_token;
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
       constants__t_SecurityPolicy session_core__l_secpol;
       
@@ -486,12 +485,9 @@ void session_core__client_create_session_resp_sm(
          session_core__l_channel_config_idx,
          session_core__create_resp_msg,
          &session_core__l_valid_user_secu_properties);
-      session_core_1__client_is_valid_session_token(session_core__session_token,
-         &session_core__l_valid_session_token);
-      *session_core__bret = ((((session_core__l_valid_server_cert == true) &&
+      *session_core__bret = (((session_core__l_valid_server_cert == true) &&
          (session_core__l_endpoints_bres == true)) &&
-         (session_core__l_valid_user_secu_properties == true)) &&
-         (session_core__l_valid_session_token == true));
+         (session_core__l_valid_user_secu_properties == true));
       if (*session_core__bret == true) {
          if (session_core__l_secpol != constants__e_secpol_None) {
             session_core_1__client_create_session_check_crypto(session_core__session,

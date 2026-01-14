@@ -69,7 +69,7 @@ typedef struct ServerSessionData
 
 typedef struct ClientSessionData
 {
-    SOPC_NodeId sessionToken; /* IMPORTANT NOTE: on server side token (numeric value) <=> session index */
+    SOPC_NodeId sessionToken;
     SOPC_ByteString nonceServer;
     SOPC_ByteString nonceClient;           /* TODO: remove ? => no need to be store if returned directly */
     constants__t_user_token_i user_client; /* TODO: remove user management */
@@ -406,13 +406,6 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
             SOPC_NodeId_Clear(sessionToken);
         }
     }
-}
-
-void session_core_bs__client_is_valid_session_token(const constants__t_session_token_i session_core_bs__token,
-                                                    t_bool* const session_core_bs__ret)
-{
-    *session_core_bs__ret = (session_core_bs__token != constants__c_session_token_indet &&
-                             SOPC_IdentifierType_Numeric == session_core_bs__token->IdentifierType);
 }
 
 void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session,

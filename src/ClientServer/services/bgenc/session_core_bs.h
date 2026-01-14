@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 02/12/2025 10:40:04
+ Date                 : 14/01/2026 14:28:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -98,9 +98,6 @@ extern void session_core_bs__client_gen_create_session_internal_event(
 extern void session_core_bs__client_get_token_from_session(
    const constants__t_session_i session_core_bs__session,
    constants__t_session_token_i * const session_core_bs__session_token);
-extern void session_core_bs__client_is_valid_session_token(
-   const constants__t_session_token_i session_core_bs__p_session_token,
-   t_bool * const session_core_bs__ret);
 extern void session_core_bs__client_set_NonceServer(
    const constants__t_session_i session_core_bs__p_session,
    const constants__t_msg_i session_core_bs__p_resp_msg,

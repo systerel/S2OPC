@@ -683,14 +683,6 @@ OPERATIONS
     END
     ;
 
-    ret <-- client_is_valid_session_token(p_session_token) =
-    PRE
-        p_session_token : t_session_token_i
-    THEN
-        ret := bool(p_session_token : t_session_token)
-    END
-    ;
-
     valid, signature <-- client_activate_session_req_do_crypto(session, channel_config_idx, server_nonce) =
     PRE
         session : t_session_i &

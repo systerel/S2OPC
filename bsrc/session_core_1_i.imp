@@ -71,7 +71,6 @@ PROMOTES
     get_session_user_secu_client,
     client_get_token_from_session,
     client_set_session_token,
-    client_is_valid_session_token,
     client_activate_session_req_do_crypto,
     client_create_session_req_do_crypto,
     get_NonceClient,
