@@ -684,7 +684,7 @@ test-uactt:
   <<: *test_uactt
   needs: [build-linux64-ASan-light]
   variables:
-    <<: *nominal_test_variables
+    <<: [*nominal_test_variables, *nominal_build_variables]
     LINUX_UACTT: 1
   rules:
     - if: "$NO_TESTS != null || $WINDOWS_TEST != null || \
@@ -842,3 +842,4 @@ check_doc:
   rules:
     - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event'"
       when: on_success
+
