@@ -508,7 +508,7 @@ function(s2opc_embed_address_space c_file_name xml_uanodeset_path)
   add_custom_command(
     OUTPUT ${c_file_name}
     DEPENDS ${xml_uanodeset_path}
-    COMMAND ${PYTHON_EXECUTABLE} ${S2OPC_ROOT_PATH}/scripts/generate-s2opc-address-space.py ${xml_uanodeset_path} ${c_file_name} ${const_addspace}
+    COMMAND ${Python3_EXECUTABLE} ${S2OPC_ROOT_PATH}/scripts/generate-s2opc-address-space.py ${xml_uanodeset_path} ${c_file_name} ${const_addspace}
     COMMENT "Generating address space ${c_file_name}"
     VERBATIM
     )

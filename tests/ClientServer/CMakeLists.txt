@@ -57,7 +57,7 @@ function(s2opc_unit_test target_name)
 
   foreach(arg ${ARGN})
     if("${arg}" STREQUAL "GENERATE_TAP")
-      set(test_cmd "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py" "${test_cmd}")
+      set(test_cmd "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py" "${test_cmd}")
     else()
       message(FATAL_ERROR "Unknown parameter for s2opc_unit_test: ${arg}")
     endif()
@@ -150,8 +150,8 @@ target_compile_definitions(check_helpers PRIVATE ${S2OPC_DEFINITIONS})
 add_test(NAME "unit:ask_password"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/ask_password_tests.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/ask_password_tests.py"
   )
 set_tests_properties("unit:ask_password" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ask_password.tap")
 
@@ -636,8 +636,8 @@ function(s2opc_validation_test target_name bin_name)
   add_test(NAME "validation::${target_name}"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
   "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${ARGV2}"
   $<TARGET_FILE:${bin_name}> ${TOOLKIT_TEST_SERVER} ${ARGV3})
@@ -648,9 +648,9 @@ function(s2opc_validation_test_demo_alarms target_name)
   add_test(NAME "validation::${target_name}"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 1
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 1
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_server_alarms>
   "--server-cmd" $<TARGET_FILE:toolkit_demo_server_alarms>
   $<TARGET_FILE:toolkit_test_client_alarms> toolkit_demo_server_alarms ${ARGN})
@@ -677,7 +677,7 @@ if (NOT WIN32 AND expat_FOUND)
   add_test(NAME "validation::check_file_transfer"
           WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
           COMMAND
-          "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+          "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
           "--server-wd" $<TARGET_FILE_DIR:toolkit_test_server_file_transfer>
           "--server-cmd" $<TARGET_FILE:toolkit_test_server_file_transfer>
           "./check_file_transfer")
@@ -691,10 +691,10 @@ function(s2opc_custom_server_validation_test server_target name)
   add_test(NAME "${test_name}"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${server_target}>
     "--server-cmd" "$<TARGET_FILE:${server_target}> ${no_ext_name}"
-    "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/${name})
+    "${Python3_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/${name})
 endfunction()
 
 function(s2opc_server_validation_test name)
@@ -707,9 +707,9 @@ function(s2opc_client_validation_test name)
   add_test(NAME "${test_name}"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" "${CMAKE_CURRENT_SOURCE_DIR}/interop_tools"
-    "--server-cmd" "${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/server.py 25000"
+    "--server-cmd" "${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/server.py 25000"
     "./${name}")
   set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${name}.tap")
 endfunction()
@@ -720,7 +720,7 @@ function(s2opc_client_self_validation_test name)
   add_test(NAME "${test_name}"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
     "./${name}")
@@ -740,8 +740,8 @@ function(s2opc_sc_level_test name server_key_size)
   add_test(NAME "${test_name}"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:test_secure_channels_server>
     "--server-cmd" "$<TARGET_FILE:test_secure_channels_server> ${server_key_size}"
     "--wait-server"
@@ -792,15 +792,15 @@ ${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/samples/ClientServer/pys2opc/client"
       add_test(NAME "${test_name}"
         WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
         COMMAND
-        "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+        "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
         "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
         "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${no_ext_name}"
-        "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/${name}"
+        "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/${name}"
         )
     else()
       add_test(NAME "${test_name}"
         WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-        COMMAND "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/${name}"
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/${name}"
         )
     endif()
     # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
@@ -824,11 +824,11 @@ ${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/samples/ClientServer/pys2opc/client"
   add_test(NAME "validation::pys2opc_test_role_permissions.py"
     WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-    "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/pys2opc_test_role_permissions.py"
+    "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/pys2opc_test_role_permissions.py"
   )
   set_tests_properties("validation::pys2opc_test_role_permissions.py" PROPERTIES ENVIRONMENT "${env_role}")
 
@@ -888,12 +888,12 @@ if(NOT S2OPC_CRYPTO_CYCLONE AND UNIX AND expat_FOUND AND NOT S2OPC_NANO_PROFILE)
     add_test(NAME "${test_name}"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" ${nb_password}
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" ${nb_password}
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
     "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/${python_script_scenario}" ${input_csr})
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/${python_script_scenario}" ${input_csr})
     set_tests_properties("${test_name}" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${scenario_name}.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
   endfunction()
 

@@ -42,7 +42,7 @@ function(s2opc_unit_test target_name)
 
   foreach(arg ${ARGN})
     if("${arg}" STREQUAL "GENERATE_TAP")
-      set(test_cmd "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py" "${test_cmd}")
+      set(test_cmd "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py" "${test_cmd}")
     else()
       message(FATAL_ERROR "Unknown parameter for s2opc_unit_test: ${arg}")
     endif()
@@ -60,7 +60,7 @@ function(s2opc_pubsub_server_validation_test name pubsub_server_name static_flag
   if(NOT S2OPC_NANO_PROFILE)
     # Note: use absolute path for scripts to allow ctest to be run from another path
     set(command
-      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+      "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
       --sks-cmd $<TARGET_FILE:${sks_name}>
       --sks-url "opc.tcp://localhost:${sks_port}"
       "--publisher-cmd" $<TARGET_FILE:${pubsub_server_name}>)
@@ -74,7 +74,7 @@ function(s2opc_pubsub_server_validation_test name pubsub_server_name static_flag
         --sub-config "config_sub_server.xml")
     endif()
     list(APPEND command
-      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}.py" "--tap" "${name}.tap" ${static_flag})
+      "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tools/${name}.py" "--tap" "${name}.tap" ${static_flag})
     add_test(NAME "${test_name}"
       WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
       COMMAND ${command})
@@ -191,8 +191,8 @@ target_link_libraries(udp_multi_sub_test PRIVATE s2opc_pubsub)
 add_test(NAME "validation::ll_pub_sub_test"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
   "--publisher-cmd" $<TARGET_FILE:udp_pub_test>
   $<TARGET_FILE:udp_sub_test>)
 set_tests_properties("validation::ll_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_pub_sub_test.tap")
@@ -200,8 +200,8 @@ set_tests_properties("validation::ll_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TA
 add_test(NAME "validation::ll_pub_sub_conf_test"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
   "--publisher-cmd" $<TARGET_FILE:udp_pub_conf_test>
   $<TARGET_FILE:udp_sub_test>)
 set_tests_properties("validation::ll_pub_sub_conf_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_pub_sub_conf_test.tap")
@@ -209,8 +209,8 @@ set_tests_properties("validation::ll_pub_sub_conf_test" PROPERTIES ENVIRONMENT "
 add_test(NAME "validation::ll_pub_sub_xml_test"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
   "--publisher-cmd" $<TARGET_FILE:udp_pub_xml_test>
   $<TARGET_FILE:sub_scheduler_conf_test>)
 set_tests_properties("validation::ll_pub_sub_xml_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_pub_sub_xml_test.tap")
@@ -218,8 +218,8 @@ set_tests_properties("validation::ll_pub_sub_xml_test" PROPERTIES ENVIRONMENT "C
 add_test(NAME "validation::pubsub_scheduler_udp"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
   "--publisher-cmd" $<TARGET_FILE:pub_scheduler_test>
   $<TARGET_FILE:sub_scheduler_conf_test>)
 set_tests_properties("validation::pubsub_scheduler_udp" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_scheduler_udp.tap")
@@ -228,8 +228,8 @@ if(NOT WIN32) # No PubSub Ethernet implementation for windows
   add_test(NAME "validation::pubsub_sched_ethernet_ROOT_required"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
     "--no-wait-pub-message"
     "--publisher-cmd" "$<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_eth.xml"
     $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_eth.xml)
@@ -238,8 +238,8 @@ if(NOT WIN32) # No PubSub Ethernet implementation for windows
   add_test(NAME "validation::pubsub_sched_ethernet_with_recv_itf"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
     "--no-wait-pub-message"
     "--publisher-cmd" "$<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_eth.xml"
     $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_eth2.xml)
@@ -248,15 +248,15 @@ if(NOT WIN32) # No PubSub Ethernet implementation for windows
   add_test(NAME "validation::pubsub_sched_ethernet_pub_config_err"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
     $<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_eth_err.xml)
   set_tests_properties("validation::pubsub_sched_ethernet_pub_config_err" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_sched_ethernet_pub_config_err.tap;CK_EXP_RET_CODE=255")
 
   add_test(NAME "validation::pubsub_sched_ethernet_sub_config_err"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
     "--no-wait-pub-message"
     "--publisher-cmd" "$<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_eth.xml"
     $<TARGET_FILE:sub_scheduler_conf_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_sub_eth_err.xml)
@@ -267,15 +267,15 @@ endif()
 add_test(NAME "validation::pubsub_sign_failure_callback"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
   $<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_scheduler_security.xml)
 set_tests_properties("validation::pubsub_sign_failure_callback" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=pubsub_sign_failure_callback.tap;CK_EXP_RET_CODE=125")
 
 add_test(NAME "validation::ll_multi_pub_sub_test"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
   "--publisher-cmd" $<TARGET_FILE:udp_multi_pub_test>
   $<TARGET_FILE:udp_multi_sub_test>)
 set_tests_properties("validation::ll_multi_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_multi_pub_sub_test.tap")
@@ -296,8 +296,8 @@ if(NOT S2OPC_PUBSUB_ONLY)
   add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_no_keys"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
     "--sks-cmd" $<TARGET_FILE:test_server_sks>
     "--sks-url" "opc.tcp://localhost:4841"
     "--kill-publisher"
@@ -309,8 +309,8 @@ if(NOT S2OPC_PUBSUB_ONLY)
   add_test(NAME "validation::pubsub_check_sign_failure_callback_sub_unexpected_keys"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
     "--sks-cmd" $<TARGET_FILE:test_server_sks>
     "--sks-url" "opc.tcp://localhost:4841"
     "--kill-publisher"
@@ -332,8 +332,8 @@ if(UNIX)
   add_test(NAME "interop::open62541_pub"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
     "--publisher-cmd" "${S2OPC_ROOT_PATH}/tests/PubSub/bin_interop/open62541_pub"
     $<TARGET_FILE:interop_sub_test>)
   set_tests_properties("interop::open62541_pub" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_pub_test.tap")
@@ -341,8 +341,8 @@ if(UNIX)
   add_test(NAME "interop::open62541_sub"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
     "--publisher-cmd" "$<TARGET_FILE:pub_scheduler_test> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/config_pub_interop.xml"
     "${CMAKE_CURRENT_SOURCE_DIR}/bin_interop/open62541_sub")
   set_tests_properties("interop::open62541_sub" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_sub_test.tap")
@@ -350,8 +350,8 @@ if(UNIX)
   add_test(NAME "interop::open62541_pub_encrypted"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
   "--publisher-cmd" "${S2OPC_ROOT_PATH}/tests/PubSub/bin_interop/open62541_pub_encrypted"
   $<TARGET_FILE:interop_sub_test> "encrypted")
   set_tests_properties("interop::open62541_pub_encrypted" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_pub_encrypted_interop.tap")
@@ -362,7 +362,7 @@ if(UNIX)
     add_test(NAME "validation::cli_self_test"
       WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
       COMMAND
-      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/validation_tools/cli_autotest.py")
+      "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/validation_tools/cli_autotest.py")
     set_tests_properties("validation::cli_self_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=cli_self_test.tap")
   endif()
 

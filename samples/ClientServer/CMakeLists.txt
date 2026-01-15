@@ -350,9 +350,9 @@ if (expat_FOUND)
   add_test(NAME "validation::s2opc_write"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
     "$<TARGET_FILE:s2opc_write>" -u user1 -n "ns=1;i=1008" -t 3 42)
@@ -362,9 +362,9 @@ if (expat_FOUND)
   add_test(NAME "validation::s2opc_write_X509"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
   "$<TARGET_FILE:s2opc_write>" --user_policy_id=X509_Basic256Sha256 --user_cert=user_public/user_2k_cert.der --user_key=user_private/encrypted_user_2k_key.pem -n "ns=1;i=1008" -t 3 42)
@@ -374,9 +374,9 @@ if (expat_FOUND)
   add_test(NAME "validation::s2opc_wrapper_write"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
   "$<TARGET_FILE:s2opc_wrapper_write>" "ns=1;i=1008" 42)
@@ -387,9 +387,9 @@ set_tests_properties("validation::s2opc_wrapper_write" PROPERTIES ENVIRONMENT "C
   add_test(NAME "validation::s2opc_read"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
     "$<TARGET_FILE:s2opc_read>" -a 1 -n "ns=1;s=Array_Boolean_097")
@@ -399,9 +399,9 @@ set_tests_properties("validation::s2opc_wrapper_write" PROPERTIES ENVIRONMENT "C
   add_test(NAME "validation::s2opc_read_X509"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
   "$<TARGET_FILE:s2opc_read>" --user_policy_id=X509_Basic256Sha256 --user_cert=user_public/user_4k_cert.der --user_key=user_private/encrypted_user_4k_key.pem -a 1 -n "ns=1;s=Array_Boolean_097")
@@ -411,9 +411,9 @@ set_tests_properties("validation::s2opc_wrapper_write" PROPERTIES ENVIRONMENT "C
   add_test(NAME "validation::s2opc_wrapper_read"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
-  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
   "$<TARGET_FILE:s2opc_wrapper_read>" "ns=1;i=1008" "ns=1;s=Array_Boolean_097")
@@ -424,9 +424,9 @@ set_tests_properties("validation::s2opc_wrapper_read" PROPERTIES ENVIRONMENT "CK
   add_test(NAME "validation::s2opc_browse"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
     "$<TARGET_FILE:s2opc_browse>" -n "ns=1;i=20002")
@@ -436,9 +436,9 @@ set_tests_properties("validation::s2opc_wrapper_read" PROPERTIES ENVIRONMENT "CK
   add_test(NAME "validation::s2opc_wrapper_browse"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
     "$<TARGET_FILE:s2opc_wrapper_browse>" "ns=1;i=20002")
@@ -449,9 +449,9 @@ set_tests_properties("validation::s2opc_wrapper_read" PROPERTIES ENVIRONMENT "CK
   add_test(NAME "validation::s2opc_discovery"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
     "$<TARGET_FILE:s2opc_discovery>" --none)
@@ -461,9 +461,9 @@ set_tests_properties("validation::s2opc_wrapper_read" PROPERTIES ENVIRONMENT "CK
   add_test(NAME "validation::s2opc_wrapper_get_endpoints"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
     "$<TARGET_FILE:s2opc_wrapper_get_endpoints>")
@@ -474,9 +474,9 @@ set_tests_properties("validation::s2opc_wrapper_read" PROPERTIES ENVIRONMENT "CK
   add_test(NAME "validation::s2opc_wrapper_subscribe"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+    "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
     "$<TARGET_FILE:s2opc_wrapper_subscribe>" "ns=1;i=1012" "i=2258")
@@ -506,10 +506,10 @@ if(WITH_PYS2OPC)
     add_test(NAME "${test_name}"
       WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
       COMMAND
-      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
-      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-      "--server-cmd" "${PYTHON_EXECUTABLE} ${PYS2OPC_TEST_PATH}/server/server.py --config-path ./S2OPC_Server_Demo_Config.xml --users-path ./S2OPC_UACTT_Users.xml"
-      "${PYTHON_EXECUTABLE}" "${PYS2OPC_TEST_PATH}/client/${name}"
+      "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+      "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+      "--server-cmd" "${Python3_EXECUTABLE} ${PYS2OPC_TEST_PATH}/server/server.py --config-path ./S2OPC_Server_Demo_Config.xml --users-path ./S2OPC_UACTT_Users.xml"
+      "${Python3_EXECUTABLE}" "${PYS2OPC_TEST_PATH}/client/${name}"
       )
     # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
     set(new_env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}"

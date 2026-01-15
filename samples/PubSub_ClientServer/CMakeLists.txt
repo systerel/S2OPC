@@ -31,7 +31,7 @@ function(pubsub_embed_config c_file_name xml_file_path)
   add_custom_command(
         OUTPUT ${c_file_name}
         DEPENDS ${xml_file_path}
-        COMMAND ${PYTHON_EXECUTABLE} ${S2OPC_ROOT_PATH}/scripts/generate-s2opc_pubsub-static-config.py ${xml_file_path} ${c_file_name}
+        COMMAND ${Python3_EXECUTABLE} ${S2OPC_ROOT_PATH}/scripts/generate-s2opc_pubsub-static-config.py ${xml_file_path} ${c_file_name}
         COMMENT "Generating pubsub config ${var_name}"
         VERBATIM
     )
