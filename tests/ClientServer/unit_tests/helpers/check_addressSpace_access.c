@@ -37,9 +37,9 @@
 #if 0 != S2OPC_NODE_MANAGEMENT
 START_TEST(test_read_attribute)
 {
-    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
-    ck_assert_ptr_nonnull(address_space);
-    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
     const char* nodeIdString = "i=85";
     SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
@@ -61,16 +61,16 @@ START_TEST(test_read_attribute)
     SOPC_NodeId_Clear(nodeId);
     SOPC_Free(nodeId);
     SOPC_Free(actualResult);
-    SOPC_AddressSpace_Delete(address_space);
+    SOPC_AddressSpace_Delete(addressSpace);
     SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 END_TEST
 
 START_TEST(test_read_value)
 {
-    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
-    ck_assert_ptr_nonnull(address_space);
-    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
     const char* nodeIdString = "i=11511";
     SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
@@ -85,16 +85,16 @@ START_TEST(test_read_value)
     SOPC_Free(outValue);
     SOPC_NodeId_Clear(nodeId);
     SOPC_Free(nodeId);
-    SOPC_AddressSpace_Delete(address_space);
+    SOPC_AddressSpace_Delete(addressSpace);
     SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 END_TEST
 
 START_TEST(test_write_value)
 {
-    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
-    ck_assert_ptr_nonnull(address_space);
-    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
     const char* nodeIdString = "i=2735";
     SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
@@ -131,16 +131,16 @@ START_TEST(test_write_value)
     SOPC_Free(nodeId);
     SOPC_Variant_Clear(writeValue);
     SOPC_Free(writeValue);
-    SOPC_AddressSpace_Delete(address_space);
+    SOPC_AddressSpace_Delete(addressSpace);
     SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 END_TEST
 
 START_TEST(test_add_variable_node)
 {
-    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
-    ck_assert_ptr_nonnull(address_space);
-    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
 
     SOPC_ExpandedNodeId parentNodeId;
@@ -165,8 +165,8 @@ START_TEST(test_add_variable_node)
 
     OpcUa_VariableAttributes varAttributes;
     OpcUa_VariableAttributes_Initialize(&varAttributes);
-    varAttributes.SpecifiedAttributes =
-        OpcUa_NodeAttributesMask_DataType | OpcUa_NodeAttributesMask_AccessLevel | OpcUa_NodeAttributesMask_Value | OpcUa_NodeAttributesMask_DisplayName;
+    varAttributes.SpecifiedAttributes = OpcUa_NodeAttributesMask_DataType | OpcUa_NodeAttributesMask_AccessLevel |
+                                        OpcUa_NodeAttributesMask_Value | OpcUa_NodeAttributesMask_DisplayName;
     varAttributes.AccessLevel = 1;
     SOPC_Variant_Initialize(&varAttributes.Value);
     varAttributes.Value.BuiltInTypeId = SOPC_Boolean_Id;
@@ -178,13 +178,12 @@ START_TEST(test_add_variable_node)
     SOPC_String name;
     SOPC_String_Initialize(&name);
     status = SOPC_String_AttachFromCstring(&name, "TestDisplayName");
-    ck_assert_int_eq(SOPC_STATUS_OK, status);    
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_LocalizedText displayName;
     SOPC_LocalizedText_Initialize(&displayName);
     displayName.defaultText = name;
     varAttributes.DisplayName = displayName;
-    
 
     const SOPC_NodeId HasComponentType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
     SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_AddVariableNode(
@@ -199,13 +198,14 @@ START_TEST(test_add_variable_node)
     ck_assert(variantValue);
     SOPC_Variant* outValueAttribute = NULL;
 
-    statusCode = SOPC_AddressSpaceAccess_ReadAttribute(addSpaceAccess, nodeId, SOPC_AttributeId_DisplayName, &outValueAttribute);
+    statusCode =
+        SOPC_AddressSpaceAccess_ReadAttribute(addSpaceAccess, nodeId, SOPC_AttributeId_DisplayName, &outValueAttribute);
     ck_assert_uint_eq(SOPC_GoodGenericStatus, statusCode);
     ck_assert_ptr_nonnull(outValueAttribute);
     ck_assert_ptr_nonnull(outValueAttribute->Value.LocalizedText);
     SOPC_String* defaultText = &outValueAttribute->Value.LocalizedText->defaultText;
     ck_assert_ptr_nonnull(defaultText);
-    
+
     char* actualResult = SOPC_String_GetCString(defaultText);
     ck_assert_ptr_nonnull(actualResult);
     ck_assert_str_eq("TestDisplayName", actualResult);
@@ -221,16 +221,16 @@ START_TEST(test_add_variable_node)
     SOPC_Free(nodeId);
     SOPC_NodeId_Clear(tmpNodeId);
     SOPC_Free(tmpNodeId);
-    SOPC_AddressSpace_Delete(address_space);
+    SOPC_AddressSpace_Delete(addressSpace);
     SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 END_TEST
 
 START_TEST(test_add_object_node)
 {
-    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
-    ck_assert_ptr_nonnull(address_space);
-    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
 
     SOPC_ExpandedNodeId parentNodeId;
@@ -269,8 +269,8 @@ START_TEST(test_add_object_node)
     objAttributes.encodeableType = &OpcUa_ObjectNode_EncodeableType;
     objAttributes.DisplayName = displayName;
 
-    SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_AddObjectNode(addSpaceAccess, &parentNodeId, &OrganizesType,
-                                                                       nodeId, &browseName, &objAttributes, &typeDefId, false);
+    SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_AddObjectNode(
+        addSpaceAccess, &parentNodeId, &OrganizesType, nodeId, &browseName, &objAttributes, &typeDefId, false);
     ck_assert_uint_eq(SOPC_GoodGenericStatus, statusCode);
 
     SOPC_Variant* outValue = NULL;
@@ -291,16 +291,16 @@ START_TEST(test_add_object_node)
     SOPC_NodeId_Clear(tmpNodeId);
     SOPC_Free(tmpNodeId);
     SOPC_Free(actualResult);
-    SOPC_AddressSpace_Delete(address_space);
+    SOPC_AddressSpace_Delete(addressSpace);
     SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 END_TEST
 
 START_TEST(test_translate_browse_path)
 {
-    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
-    ck_assert_ptr_nonnull(address_space);
-    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
 
     const char* nodeIdString = "i=86";
@@ -332,7 +332,7 @@ START_TEST(test_translate_browse_path)
     SOPC_NodeId_Clear(startNodeId);
     SOPC_Free(startNodeId);
     SOPC_Free(actualResult);
-    SOPC_AddressSpace_Delete(address_space);
+    SOPC_AddressSpace_Delete(addressSpace);
     SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
     OpcUa_RelativePath_Clear(&path);
 }
@@ -340,9 +340,9 @@ END_TEST
 
 START_TEST(test_browse_node)
 {
-    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
-    ck_assert_ptr_nonnull(address_space);
-    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
 
     const char* nodeIdString = "i=86";
@@ -368,16 +368,16 @@ START_TEST(test_browse_node)
     SOPC_NodeId_Clear(nodeId);
     SOPC_Free(nodeId);
     SOPC_Free(firstRefNodeId);
-    SOPC_AddressSpace_Delete(address_space);
+    SOPC_AddressSpace_Delete(addressSpace);
     SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 END_TEST
 
 START_TEST(test_delete_child_nodes)
 {
-    SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
-    ck_assert_ptr_nonnull(address_space);
-    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space, false);
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
     ck_assert_ptr_nonnull(addSpaceAccess);
 
     const char* nodeToDelete = "ns=1;s=AnalogItemArrayInt32";
@@ -392,20 +392,20 @@ START_TEST(test_delete_child_nodes)
     const SOPC_NodeId referencesType = SOPC_NODEID_NS0_NUMERIC(OpcUaId_References);
     OpcUa_ReferenceDescription* references = NULL;
     int32_t nbOfReferences = 0;
-    statusCode = SOPC_AddressSpaceAccess_BrowseNode(
-        addSpaceAccess, nodeId, OpcUa_BrowseDirection_Both, &referencesType, true, 0, 0, &references, &nbOfReferences);
+    statusCode = SOPC_AddressSpaceAccess_BrowseNode(addSpaceAccess, nodeId, OpcUa_BrowseDirection_Both, &referencesType,
+                                                    true, 0, 0, &references, &nbOfReferences);
     ck_assert_uint_eq(OpcUa_BadNodeIdUnknown, statusCode);
     ck_assert(NULL == references);
     ck_assert_int_eq(nbOfReferences, 0);
 
     // Try to browse the child node -> ok
     SOPC_NodeId* childNodeId = SOPC_NodeId_FromCString(childOfNodeToDelete);
-    statusCode = SOPC_AddressSpaceAccess_BrowseNode(
-        addSpaceAccess, childNodeId, OpcUa_BrowseDirection_Both, &referencesType, true, 0, 0, &references, &nbOfReferences);
+    statusCode = SOPC_AddressSpaceAccess_BrowseNode(addSpaceAccess, childNodeId, OpcUa_BrowseDirection_Both,
+                                                    &referencesType, true, 0, 0, &references, &nbOfReferences);
     ck_assert_uint_eq(SOPC_GoodGenericStatus, statusCode);
     ck_assert_ptr_nonnull(references);
-    ck_assert_int_eq(nbOfReferences, 1); // We used TargetDeleteReference so we deleted the reference to its parent, it remains 
-                                         // only the reference to its type.
+    ck_assert_int_eq(nbOfReferences, 1); // We used TargetDeleteReference so we deleted the reference to its parent, it
+                                         // remains only the reference to its type.
     SOPC_Clear_Array(&nbOfReferences, (void**) &references, sizeof(*references), OpcUa_ReferenceDescription_Clear);
     SOPC_Free(references);
 
@@ -414,7 +414,95 @@ START_TEST(test_delete_child_nodes)
     SOPC_NodeId_Clear(childNodeId);
     SOPC_Free(childNodeId);
 
-    SOPC_AddressSpace_Delete(address_space);
+    SOPC_AddressSpace_Delete(addressSpace);
+    SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
+}
+END_TEST
+
+START_TEST(test_add_method_node)
+{
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
+    ck_assert_ptr_nonnull(addSpaceAccess);
+
+    SOPC_ExpandedNodeId parentNodeId;
+    SOPC_ExpandedNodeId_Initialize(&parentNodeId);
+    SOPC_NodeId* tmpNodeId = SOPC_NodeId_FromCString("i=2268");
+    ck_assert_ptr_nonnull(tmpNodeId);
+    parentNodeId.NodeId = *tmpNodeId;
+
+    const SOPC_NodeId refToParentTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasComponent);
+
+    SOPC_NodeId* newNodeId = SOPC_NodeId_FromCString("i=12039");
+    ck_assert_ptr_nonnull(newNodeId);
+
+    SOPC_QualifiedName browseName;
+    SOPC_QualifiedName_Initialize(&browseName);
+    browseName.NamespaceIndex = 1;
+    SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&browseName.Name, "ExampleNewNode");
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    OpcUa_MethodAttributes metAttributes;
+    OpcUa_MethodAttributes_Initialize(&metAttributes);
+    metAttributes.SpecifiedAttributes = OpcUa_NodeAttributesMask_DisplayName | OpcUa_NodeAttributesMask_Description |
+                                        OpcUa_AttributeWriteMask_Executable;
+
+    SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_AddMethodNode(
+        addSpaceAccess, &parentNodeId, &refToParentTypeId, newNodeId, &browseName, &metAttributes);
+    ck_assert_uint_eq(SOPC_GoodGenericStatus, statusCode);
+
+    OpcUa_MethodAttributes_Clear(&metAttributes);
+    SOPC_NodeId_Clear(newNodeId);
+    SOPC_Free(newNodeId);
+    SOPC_NodeId_Clear(tmpNodeId);
+    SOPC_Free(tmpNodeId);
+    SOPC_AddressSpace_Delete(addressSpace);
+    SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
+}
+END_TEST
+
+START_TEST(test_get_fresh_node_id) {
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+
+    uint16_t nbOfNS = 0;
+    SOPC_Variant* nsArrayValue = NULL;
+    bool foundNode = false;
+    static const SOPC_NodeId SOPC_NSARRAY_NID = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_NamespaceArray);
+
+    // The function SOPC_AddressSpace_GetFreshNodeId in sopc_address_space_access.c (used by SOPC_AddressSpaceAccess_GetFreshNodeId) needs to be given a SOPC_AddressSpace with the attribute MaxNsNumId initialized.
+    // The SOPC_AddressSpace_MaxNsNumId_Initialize function requires the number of namespaces as a parameter. 
+    // To obtain this number, the length of the array obtained from the node "NamespaceArray" is used.
+    SOPC_AddressSpace_Node* node = SOPC_AddressSpace_Get_Node(addressSpace, &SOPC_NSARRAY_NID, &foundNode);
+    ck_assert(foundNode);
+    ck_assert_ptr_nonnull(node);
+    nsArrayValue = SOPC_AddressSpace_Get_Value(addressSpace, node);
+    ck_assert_ptr_nonnull(nsArrayValue);
+    ck_assert_uint_eq(SOPC_VariantArrayType_Array, nsArrayValue->ArrayType);
+    nbOfNS = (uint16_t) nsArrayValue->Value.Array.Length;
+
+    SOPC_ReturnStatus returnStatus = SOPC_AddressSpace_MaxNsNumId_Initialize(addressSpace, nbOfNS);
+    ck_assert_int_eq(SOPC_STATUS_OK, returnStatus);
+    
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
+    ck_assert_ptr_nonnull(addSpaceAccess);
+
+    uint16_t nsIndex = 0;
+    SOPC_NodeId freshNodeId;
+
+    SOPC_StatusCode statusCode = SOPC_AddressSpaceAccess_GetFreshNodeId(addSpaceAccess, nsIndex, &freshNodeId);
+    ck_assert_uint_eq(SOPC_GoodGenericStatus, statusCode);
+    uint32_t newId = freshNodeId.Data.Numeric;
+
+    // The function returns the id number 24245. 
+    // As of now, in the file s2opc_base_nodeset_origin.xml, 24244 is indeed the biggest nodeId. 
+    // Which means that any number above would be a new and unique id.
+    const uint32_t biggestNodeId = 24244;
+    ck_assert_uint_gt(newId, biggestNodeId);
+
+    SOPC_AddressSpace_Node_Clear(addressSpace, node);
+    SOPC_AddressSpace_Delete(addressSpace);
     SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
 }
 END_TEST
@@ -437,6 +525,8 @@ Suite* tests_make_suite_address_space_access(void)
     tcase_add_test(tc_nominal_use, test_translate_browse_path);
     tcase_add_test(tc_nominal_use, test_browse_node);
     tcase_add_test(tc_nominal_use, test_delete_child_nodes);
+    tcase_add_test(tc_nominal_use, test_add_method_node);
+    tcase_add_test(tc_nominal_use, test_get_fresh_node_id);
 #endif
     suite_add_tcase(s, tc_nominal_use);
 
