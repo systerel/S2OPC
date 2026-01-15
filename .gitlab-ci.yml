@@ -223,7 +223,7 @@ build-linux64-ASan: &build_linux64_ASan
 build-linux64-ASan-light:
   <<: *build_linux64_ASan
   script:
-    - "cmake -B $BUILD_DIR . && cmake --build $BUILD_DIR -j$(nproc) --target toolkit_test_server s2opc_pubsub || exit $?"
+      - ./build.sh --target toolkit_test_server s2opc_pubsub || exit $?
   artifacts:
     name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty"
     paths:
@@ -315,7 +315,7 @@ build-linux64-pys2opc-all-tests: &build_linux64_pys2opc_all_tests
 build-linux64-pys2opc-all-tests-light:
   <<: *build_linux64_pys2opc_all_tests
   script:
-    - "cmake -B $BUILD_DIR . && cmake --build $BUILD_DIR -j$(nproc) --target toolkit_test_server s2opc_pubsub || exit $?"
+      - ./build.sh --target toolkit_test_server s2opc_pubsub || exit $?
   artifacts:
     name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty"
     paths:
