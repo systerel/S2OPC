@@ -328,9 +328,9 @@ build-linux64-pys2opc-all-wheels:
     - "mkdir wheels"
     - "export ENABLE_SAMPLES=0 && export ENABLE_TESTING=0 && export CMAKE_BUILD_TYPE=Debug"
     - "./build.sh && cp build/lib/pys2opc*.whl wheels/ && ./clean.sh || exit $?"
-    - "PYS2OPC_WHEEL_NAME=pys2opc-1.7.0-cp310-cp310-linux_x86_64.whl PYTHON_EXECUTABLE=/usr/local/bin/python3.10 ./build.sh && cp build/lib/pys2opc*.whl wheels/ && ./clean.sh || exit $?"
-    - "PYS2OPC_WHEEL_NAME=pys2opc-1.7.0-cp311-cp311-linux_x86_64.whl PYTHON_EXECUTABLE=/usr/local/bin/python3.11 ./build.sh && cp build/lib/pys2opc*.whl wheels/ && ./clean.sh || exit $?"
-    - "PYS2OPC_WHEEL_NAME=pys2opc-1.7.0-cp312-cp312-linux_x86_64.whl PYTHON_EXECUTABLE=/usr/local/bin/python3.12 ./build.sh && cp build/lib/pys2opc*.whl wheels/ && ./clean.sh || exit $?"
+    - "PYS2OPC_WHEEL_NAME=pys2opc-1.7.0-cp310-cp310-linux_x86_64.whl Python3_EXECUTABLE=/usr/local/bin/python3.10 ./build.sh && cp build/lib/pys2opc*.whl wheels/ && ./clean.sh || exit $?"
+    - "PYS2OPC_WHEEL_NAME=pys2opc-1.7.0-cp311-cp311-linux_x86_64.whl Python3_EXECUTABLE=/usr/local/bin/python3.11 ./build.sh && cp build/lib/pys2opc*.whl wheels/ && ./clean.sh || exit $?"
+    - "PYS2OPC_WHEEL_NAME=pys2opc-1.7.0-cp312-cp312-linux_x86_64.whl Python3_EXECUTABLE=/usr/local/bin/python3.12 ./build.sh && cp build/lib/pys2opc*.whl wheels/ && ./clean.sh || exit $?"
   rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
     - if: "$ALL_PYS2OPC_WHEELS != null"
       when: on_success

@@ -115,7 +115,7 @@ else
     append_cmake_option MbedTLS_DIR
     append_cmake_option BUILD_SHARED_LIBS
     append_cmake_option CMAKE_INSTALL_PREFIX
-    append_cmake_option PYTHON_EXECUTABLE
+    append_cmake_option Python3_EXECUTABLE
     append_cmake_option WITH_ASAN
     append_cmake_option WITH_UBSAN
     append_cmake_option WITH_TSAN

@@ -27,12 +27,12 @@ if(WITH_PYS2OPC)
 
   # Check requirements : autopxd + cython
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c "import autopxd"
+    COMMAND "${Python3_EXECUTABLE}" -c "import autopxd"
     RESULT_VARIABLE EXIT_CODE_AUTOPXD
     OUTPUT_QUIET
   )
   execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c "import cython"
+    COMMAND "${Python3_EXECUTABLE}" -c "import cython"
     RESULT_VARIABLE EXIT_CODE_CYTHON
     OUTPUT_QUIET
   )
