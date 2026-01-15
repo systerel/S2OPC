@@ -34,17 +34,33 @@ function _help() {
     echo "$1 build S2OPC"
     echo "Usage: $1 [-h] [--jobs <NPROC>]"
     echo "    --jobs <NPROC>  : Change number of CPUs used for make, default to nproc"
+    echo "    --target : Targets to build with CMake"
     echo "    -h : print this help and exit"
 }
 
 NPROC=
 
-while [[ "$#" -gt 0 ]] ; do
-PARAM=$1
-shift
-[[ "${PARAM-}" =~ "-h(elp)?" ]] && _help "$0" && exit 0
-[[ "${PARAM-}" == "--jobs" ]] && NPROC="$1" && shift && continue
-echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
+targets=()  # Array to store targets
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --target)
+      shift
+      while [[ $# -gt 0 && $1 != -* ]]; do  # While no new flag
+        targets+=("$1")
+        shift
+      done
+      ;;
+    --jobs)
+      shift
+      NPROC="$1"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 127
+      ;;
+  esac
 done
 
 [[ -z $NPROC ]] && export NPROC="$(nproc)" && echo "Using default jobs : cmake -j $NPROC"
@@ -136,8 +152,14 @@ if [[ $? != 0 ]]; then
     exit 1
 fi
 
-echo "- Run cmake --build $BUILD_DIR -j $NPROC" | tee -a "$CURDIR/build.log"
-cmake --build $BUILD_DIR -j $NPROC >> "$CURDIR/build.log"
+if [[ ${#targets[@]} -gt 0 ]]; then
+    echo "- Run cmake --build $BUILD_DIR -j $NPROC --target ${targets[@]}" | tee -a "$CURDIR/build.log"
+    cmake --build $BUILD_DIR -j $NPROC --target "${targets[@]}" >> "$CURDIR/build.log"
+else
+    echo "- Run cmake --build $BUILD_DIR -j $NPROC" | tee -a "$CURDIR/build.log"
+    cmake --build $BUILD_DIR -j $NPROC >> "$CURDIR/build.log"
+fi
+
 if [[ $? != 0 ]]; then
     echo "Error: build failed" | tee -a "$CURDIR/build.log"
     exit 1
