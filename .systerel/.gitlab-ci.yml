@@ -815,7 +815,7 @@ pages:
   script:
     - cmake -B $BUILD_DIR -DS2OPC_NODE_MANAGEMENT=yes -DS2OPC_EVENT_MANAGEMENT=yes -DS2OPC_HAS_AUDITING=yes -DS2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE=yes -DWITH_PYS2OPC=yes .
     - cmake --build $BUILD_DIR --target doc
-    - mv $BUILD_DIR/apidoc/html ../public/
+    - mv $BUILD_DIR/apidoc/html ./public/
   artifacts:
     paths:
     - public
