@@ -390,6 +390,20 @@ OPERATIONS
     END
     ;
 
+    /*
+     * Asynchronous operation to close a subscription.
+     * Note: only used when iterating on session subscription to close
+     *       as it is necessary to do it asynchronously after the iteration ended.
+     */
+    bres <-- internal_server_close_subscription (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : t_subscription
+    THEN
+        bres :: BOOL
+    END
+    ;
+
     /* CLEAR OPERATIONS */
 
 

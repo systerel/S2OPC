@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 26/11/2025 15:42:44
+ Date                 : 15/01/2026 14:05:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -177,6 +177,9 @@ extern void subscription_mgr__local_treat_create_monitored_items(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void subscription_mgr__internal_server_close_subscription(
+   const constants__t_subscription_i subscription_mgr__p_subscription,
+   t_bool * const subscription_mgr__bres);
 extern void subscription_mgr__server_subscription_data_changed(
    const constants__t_WriteValuePointer_i subscription_mgr__p_old_write_value_pointer,
    const constants__t_WriteValuePointer_i subscription_mgr__p_new_write_value_pointer);

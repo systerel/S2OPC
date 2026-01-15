@@ -388,11 +388,27 @@ static void onServiceEvent(SOPC_EventHandler* handler,
             (constants_statuscodes_bs__t_StatusCode_i) msg_data->bStatusCode, &bres);
         SOPC_Free(msg_data);
 
-        if (bres == false)
+        if (!bres)
         {
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32 " treatment failed", id);
+        }
+        break;
+    case SE_TO_SE_SERVER_ASYNC_CLOSE_SUBSCRIPTION:
+        /* Server side only:
+           id = subscription id
+         */
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: SE_TO_SE_SERVER_ASYNC_CLOSE_SUBSCRIPTION subscription=%" PRIu32, id);
+
+        io_dispatch_mgr__internal_server_close_subscription((constants__t_subscription_i) id, &bres);
+
+        if (!bres)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "ServicesMgr: SE_TO_SE_SERVER_ASYNC_CLOSE_SUBSCRIPTION subscription=%" PRIu32 " treatment failed", id);
         }
         break;
     case TIMER_SE_EVAL_SESSION_TIMEOUT:

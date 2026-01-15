@@ -34,7 +34,8 @@ IMPORTS
     app_cb_call_context_bs
 
 PROMOTES
-    internal_server_inactive_session_prio_event
+    internal_server_inactive_session_prio_event,
+    internal_server_close_subscription
 
 
 LOCAL_OPERATIONS

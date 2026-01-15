@@ -42,6 +42,18 @@ OPERATIONS
     END
     ;
 
+    /*
+     * Generates an internal event to close asynchronously the subscription
+     */
+    async_close_subscription (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : t_subscription
+    THEN
+        skip
+    END
+    ;
+
     p_bres, p_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_nid) =
     PRE
         p_nid : t_NodeId_i &

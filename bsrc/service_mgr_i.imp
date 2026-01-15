@@ -89,7 +89,8 @@ PROMOTES
     server_subscription_event_triggered,
     server_subscription_data_changed,
     server_subscription_node_changed,
-    server_subscription_publish_timeout
+    server_subscription_publish_timeout,
+    internal_server_close_subscription
 
 DEFINITIONS
 

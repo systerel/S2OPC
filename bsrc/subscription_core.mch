@@ -682,6 +682,18 @@ OPERATIONS
     END
     ;
 
+    /*
+     * Generates an internal event to close asynchronously the subscription
+     */
+    async_close_subscription (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : s_subscription
+    THEN
+        skip
+    END
+    ;
+
     is_valid_seq_num <-- subscription_ack_notif_msg (p_sub, p_seq_num) =
     PRE
         p_sub : t_subscription_i &

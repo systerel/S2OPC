@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_bs.h
 
- Date                 : 04/08/2022 14:53:48
+ Date                 : 15/01/2026 14:05:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,6 +49,8 @@ extern void subscription_core_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void subscription_core_bs__async_close_subscription(
+   const constants__t_subscription_i subscription_core_bs__p_subscription);
 extern void subscription_core_bs__compute_create_subscription_revised_params(
    const constants__t_opcua_duration_i subscription_core_bs__p_reqPublishInterval,
    const t_entier4 subscription_core_bs__p_reqLifetimeCount,

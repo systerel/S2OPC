@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 04/11/2025 11:03:36
+ Date                 : 15/01/2026 14:05:43
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -85,6 +85,7 @@ extern void subscription_core__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define subscription_core__async_close_subscription subscription_core_bs__async_close_subscription
 #define subscription_core__clear_iter_monitored_item monitored_item_queue_it_bs__clear_iter_monitored_item
 #define subscription_core__clear_notif_republish_iterator notification_republish_queue_it_bs__clear_notif_republish_iterator
 #define subscription_core__compute_create_subscription_revised_params subscription_core_bs__compute_create_subscription_revised_params

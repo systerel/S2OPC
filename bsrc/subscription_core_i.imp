@@ -58,6 +58,7 @@ PROMOTES
     /* subscription_core_bs */
     compute_create_subscription_revised_params,
     get_nodeToMonitoredItemQueue,
+    async_close_subscription,
     /* monitored_item_pointer_bs*/
     is_notification_triggered,
     getall_monitoredItemPointer,
@@ -2141,6 +2142,10 @@ OPERATIONS
     END
     ;
 
+    /* Iterator on all subscriptions of a session (iterating on each priority existing)
+     *
+     * IMPORTANT NOTE: the subscriptions SHALL NOT be added or deleted during iteration.
+     */
     p_continue <-- init_iter_subscription_session (p_session) =
     VAR
         l_prio_idx
@@ -2154,6 +2159,9 @@ OPERATIONS
     END
     ;
 
+    /*
+     * IMPORTANT NOTE: the subscriptions SHALL NOT be added or deleted during iteration.
+     */
     p_continue, p_subscription <-- continue_iter_subscription_session =
     VAR
         l_prio_idx

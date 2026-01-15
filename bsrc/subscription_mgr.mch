@@ -315,6 +315,15 @@ OPERATIONS
     END
     ;
 
+    bres <-- internal_server_close_subscription (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : t_subscription
+    THEN
+        bres :: BOOL
+    END
+    ;
+
     subscription_mgr_UNINITIALISATION =
     BEGIN
         skip

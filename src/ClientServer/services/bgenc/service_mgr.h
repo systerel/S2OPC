@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 03/12/2025 14:19:13
+ Date                 : 15/01/2026 14:05:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -91,6 +91,7 @@ extern void service_mgr__INITIALISATION(void);
 #define service_mgr__forget_msg_out message_out_bs__forget_msg_out
 #define service_mgr__get_local_user session_mgr__get_local_user
 #define service_mgr__get_session_user_server session_mgr__get_session_user_server
+#define service_mgr__internal_server_close_subscription subscription_mgr__internal_server_close_subscription
 #define service_mgr__is_valid_request_context message_in_bs__is_valid_request_context
 #define service_mgr__is_valid_session session_mgr__is_valid_session
 #define service_mgr__is_valid_subscription subscription_mgr__is_valid_subscription

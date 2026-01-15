@@ -102,9 +102,12 @@ typedef enum SOPC_Services_Event
     SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO, /**< Server side only:<BR/>
                                                  Provides an asynchronous publish response to be sent.<BR/>
                                                  id = session id<BR/>
-                                                 params = (SOPC_Internal_AsyncSendMsgData*)<BR/>
+                                                 params = (SOPC_Internal_AsyncSendMsgData*)
                                                */
-
+    SE_TO_SE_SERVER_ASYNC_CLOSE_SUBSCRIPTION, /**< Server side only:<BR/>
+                                                   Requests to close a subscription asynchronously.<BR/>
+                                                   id = subscription id
+                                               */
     /* Timer to services events */
     TIMER_SE_EVAL_SESSION_TIMEOUT,  /**< Server side only:<BR/>
                                        Evaluates if the session has been used during session timeout

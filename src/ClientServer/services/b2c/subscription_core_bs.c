@@ -61,6 +61,13 @@ void subscription_core_bs__subscription_core_bs_UNINITIALISATION(void)
     nodeIdToMonitoredItemQueue = NULL;
 }
 
+void subscription_core_bs__async_close_subscription(
+    const constants__t_subscription_i subscription_core_bs__p_subscription)
+{
+    SOPC_EventHandler_PostAsNext(SOPC_Services_GetEventHandler(), SE_TO_SE_SERVER_ASYNC_CLOSE_SUBSCRIPTION,
+                                 (uint32_t) subscription_core_bs__p_subscription, (uintptr_t) NULL, (uintptr_t) NULL);
+}
+
 /*--------------------
    OPERATIONS Clause
   --------------------*/

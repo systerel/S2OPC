@@ -2079,7 +2079,7 @@ OPERATIONS
                        Only other option is to keep the user waiting for
                        potential new session for transfer (but OPC UA spec does not state that)
                      */
-                    close_subscription (l_sub)
+                    async_close_subscription (l_sub)
                 END
             INVARIANT
                 /* TODO: model iteration on session subscriptions */
@@ -2087,6 +2087,16 @@ OPERATIONS
             VARIANT
                 0
             END
+        END
+    END
+    ;
+
+    bres <-- internal_server_close_subscription (p_subscription) =
+    BEGIN
+        bres <-- is_valid_subscription (p_subscription);
+        IF bres = TRUE
+        THEN
+            close_subscription (p_subscription)
         END
     END
     ;
