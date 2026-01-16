@@ -27,7 +27,7 @@ class CompressorRecipe(ConanFile):
     def requirements(self):
         self.requires("binutils/2.36.1@Systerel+S2OPC/default")
         self.requires("expat/2.7.3@Systerel+S2OPC/default")
-        self.requires("gcc/13.3.0@Systerel+S2OPC/default")
+        self.requires("gcc/15.2.0@Systerel+S2OPC/default")
         self.requires("make/4.3")
         self.requires("mbedtls/3.6.5@Systerel+S2OPC/default")
         self.requires("paho-mqtt-c/1.3.4")
@@ -38,4 +38,4 @@ class CompressorRecipe(ConanFile):
         self.requires("zlib/1.2.13",override=True) #Sub-depency of gcc, binutils, doxygen, mbedtls and openssl
         self.requires("isl/0.24",override=True) #Sub-depency of gcc
         self.requires("openssl/3.2.0",override=True) #Sub-depency of paho-mqtt-c and cmake
-        self.requires("cmake/3.23.5@Systerel+S2OPC/default")
+        self.requires("cmake/3.31.9@Systerel+S2OPC/default")
