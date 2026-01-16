@@ -47,3 +47,4 @@ the legal rights to contribute.
 * Cinthya Kouamou <cinthya.kouamou.kouamou@systerel.fr>
 * Florian Antheunis <florian.antheunis@systerel.fr>
 * Theo Pirouelle <theo.pirouelle@systerel.fr>
+* Bas Mevissen <floss@basmevissen.nl>
