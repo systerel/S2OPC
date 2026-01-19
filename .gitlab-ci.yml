@@ -226,7 +226,7 @@ build-linux64-ASan-light:
   script:
       - ./build.sh --target toolkit_test_server s2opc_pubsub || exit $?
   artifacts:
-    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty"
+    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_light"
     paths:
       - "*.log"
       - "build/*.cmake"
@@ -318,7 +318,7 @@ build-linux64-pys2opc-all-tests-light:
   script:
       - ./build.sh --target toolkit_test_server s2opc_pubsub || exit $?
   artifacts:
-    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_faulty"
+    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_light"
     paths:
       - "*.log"
       - "build/*.cmake"
