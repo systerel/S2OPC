@@ -206,6 +206,7 @@ build-linux64-ASan: &build_linux64_ASan
   <<: *build_linux
   variables:
     <<: [*build_linux_variables, *nominal_build_variables]
+    BUILD_SHARED_LIBS: 1
     WITH_ASAN: 1
     WITH_UBSAN: 1
   needs: []
