@@ -34,7 +34,6 @@
 <UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd" LastModified="2022-03-29T00:00:00Z">
   <NamespaceUris>
     <Uri>urn:S2OPC:localhost</Uri>
-    <Uri>https://www.systerel.fr/S2OPC/demo/data/origin</Uri>
   </NamespaceUris>
   <Models>
     <Model ModelUri="http://opcfoundation.org/UA/" XmlSchemaUri="http://opcfoundation.org/UA/2008/02/Types.xsd" Version="1.04.11" PublicationDate="2022-03-29T00:00:00Z" />
@@ -12593,7 +12592,6 @@
       <uax:ListOfString>
         <uax:String>http://opcfoundation.org/UA/</uax:String>
         <uax:String>urn:S2OPC:localhost</uax:String>
-        <uax:String>https://www.systerel.fr/S2OPC/demo/data/origin</uax:String>
       </uax:ListOfString>
     </Value>
   </UAVariable>

@@ -36,9 +36,6 @@
   </NamespaceUris>
   <Models>
     <Model ModelUri="http://opcfoundation.org/UA/" XmlSchemaUri="http://opcfoundation.org/UA/2008/02/Types.xsd" Version="1.04.11" PublicationDate="2022-03-29T00:00:00Z" />
-    <Model ModelUri="https://www.systerel.fr/S2OPC/TestFT" Version="1.0.0" PublicationDate="2021-09-01T00:00:00Z">
-      <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.04.11" PublicationDate="2019-05-01T00:00:00Z" />
-    </Model>
   </Models>
   <Aliases>
     <Alias Alias="Boolean">i=1</Alias>
