@@ -36,6 +36,10 @@
 static SOPC_NodeId ByteString_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ByteString);
 static SOPC_NodeId Byte_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Byte);
 static SOPC_NodeId Null_Type = SOPC_NS0_NUMERIC_NODEID(0);
+static SOPC_NodeId RefreshEndEvent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_RefreshEndEventType);
+static SOPC_NodeId RefreshRequiredEvent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_RefreshRequiredEventType);
+static SOPC_NodeId RefreshStartEventType_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_RefreshStartEventType);
+
 static SOPC_NodeId HasComponent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasComponent);
 static SOPC_NodeId HasProperty_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasProperty);
 static SOPC_NodeId HierarchicalReferences_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HierarchicalReferences);
@@ -52,6 +56,10 @@ static SOPC_NodeId RolePermissionType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_R
 const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId = &ByteString_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId = &Byte_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId = &Null_Type;
+const constants_bs__t_NodeId_i constants_bs__c_RefreshEndEventType_NodeId = &RefreshEndEvent_Type;
+const constants_bs__t_NodeId_i constants_bs__c_RefreshRequiredEventType_NodeId = &RefreshRequiredEvent_Type;
+const constants_bs__t_NodeId_i constants_bs__c_RefreshStartEventType_NodeId = &RefreshStartEventType_Type;
+
 const constants_bs__t_NodeId_i constants_bs__c_HasComponentType_NodeId = &HasComponent_Type;
 const constants_bs__t_NodeId_i constants_bs__c_HasPropertyType_NodeId = &HasProperty_Type;
 const constants_bs__t_NodeId_i constants_bs__c_HierarchicalReferences_Type_NodeId = &HierarchicalReferences_Type;

@@ -154,6 +154,9 @@ CONCRETE_CONSTANTS
     c_NamespaceMetadataType_NodeId,
     c_Server_Namespaces_NodeId,
     c_RolePermissionType_NodeId,
+    c_RefreshStartEventType_NodeId,
+    c_RefreshEndEventType_NodeId,
+    c_RefreshRequiredEventType_NodeId,
 
     c_NamespaceUri_QualifiedName,
     c_DefaultRolePermissions_QualifiedName,
@@ -533,6 +536,64 @@ PROPERTIES
     c_RolePermissionType_NodeId /= c_Server_NamespaceArray_NodeId &
     c_RolePermissionType_NodeId /= c_NamespaceMetadataType_NodeId &
     c_RolePermissionType_NodeId /= c_Server_Namespaces_NodeId &
+
+    c_RefreshStartEventType_NodeId : t_NodeId_i &
+    c_RefreshStartEventType_NodeId : t_NodeId &
+
+    c_RefreshStartEventType_NodeId /= c_Null_Type_NodeId &
+    c_RefreshStartEventType_NodeId /= c_ByteString_Type_NodeId &
+    c_RefreshStartEventType_NodeId /= c_Byte_Type_NodeId &
+    c_RefreshStartEventType_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_RefreshStartEventType_NodeId /= c_Server_NodeId &
+    c_RefreshStartEventType_NodeId /= c_BaseEventType_NodeId &
+    c_RefreshStartEventType_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
+    c_RefreshStartEventType_NodeId /= c_RoleType_NodeId &
+    c_RefreshStartEventType_NodeId /= c_HasComponentType_NodeId &
+    c_RefreshStartEventType_NodeId /= c_HasPropertyType_NodeId &
+    c_RefreshStartEventType_NodeId /= c_Server_NamespaceArray_NodeId &
+    c_RefreshStartEventType_NodeId /= c_NamespaceMetadataType_NodeId &
+    c_RefreshStartEventType_NodeId /= c_Server_Namespaces_NodeId &
+    c_RefreshStartEventType_NodeId /= c_RolePermissionType_NodeId &
+
+
+    c_RefreshEndEventType_NodeId : t_NodeId_i &
+    c_RefreshEndEventType_NodeId : t_NodeId &
+
+    c_RefreshEndEventType_NodeId /= c_Null_Type_NodeId &
+    c_RefreshEndEventType_NodeId /= c_ByteString_Type_NodeId &
+    c_RefreshEndEventType_NodeId /= c_Byte_Type_NodeId &
+    c_RefreshEndEventType_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_RefreshEndEventType_NodeId /= c_Server_NodeId &
+    c_RefreshEndEventType_NodeId /= c_BaseEventType_NodeId &
+    c_RefreshEndEventType_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
+    c_RefreshEndEventType_NodeId /= c_RoleType_NodeId &
+    c_RefreshEndEventType_NodeId /= c_HasComponentType_NodeId &
+    c_RefreshEndEventType_NodeId /= c_HasPropertyType_NodeId &
+    c_RefreshEndEventType_NodeId /= c_Server_NamespaceArray_NodeId &
+    c_RefreshEndEventType_NodeId /= c_NamespaceMetadataType_NodeId &
+    c_RefreshEndEventType_NodeId /= c_Server_Namespaces_NodeId &
+    c_RefreshEndEventType_NodeId /= c_RolePermissionType_NodeId &
+    c_RefreshEndEventType_NodeId /= c_RefreshStartEventType_NodeId &
+
+    c_RefreshRequiredEventType_NodeId : t_NodeId_i &
+    c_RefreshRequiredEventType_NodeId : t_NodeId &
+
+    c_RefreshRequiredEventType_NodeId /= c_Null_Type_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_ByteString_Type_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_Byte_Type_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_Server_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_BaseEventType_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_Server_ServerCapabilities_RoleSet_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_RoleType_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_HasComponentType_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_HasPropertyType_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_Server_NamespaceArray_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_NamespaceMetadataType_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_Server_Namespaces_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_RolePermissionType_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_RefreshStartEventType_NodeId &
+    c_RefreshRequiredEventType_NodeId /= c_RefreshEndEventType_NodeId &
 
     t_byte_buffer <: t_byte_buffer_i &
     c_byte_buffer_indet : t_byte_buffer_i &

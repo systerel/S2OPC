@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 08/12/2025 17:14:59
+ Date                 : 20/01/2026 18:00:28
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -501,6 +501,9 @@ typedef enum {
 #define constants__c_PermissionType_none constants_bs__c_PermissionType_none
 #define constants__c_QualifiedName_indet constants_bs__c_QualifiedName_indet
 #define constants__c_Reference_indet constants_bs__c_Reference_indet
+#define constants__c_RefreshEndEventType_NodeId constants_bs__c_RefreshEndEventType_NodeId
+#define constants__c_RefreshRequiredEventType_NodeId constants_bs__c_RefreshRequiredEventType_NodeId
+#define constants__c_RefreshStartEventType_NodeId constants_bs__c_RefreshStartEventType_NodeId
 #define constants__c_RegisteredServer2Info_indet constants_bs__c_RegisteredServer2Info_indet
 #define constants__c_RegisteredServer_indet constants_bs__c_RegisteredServer_indet
 #define constants__c_RelativePathElt_indet constants_bs__c_RelativePathElt_indet

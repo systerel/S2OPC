@@ -88,6 +88,27 @@ OPERATIONS
             ELSE
                 l_isEventTypeRetained <-- is_transitive_subtype(l_eventTypeId, l_whereOfTypeId)
             END
+            ;
+            /* From part 9 §4.5:
+            To ensure a Client is always informed, the three special EventTypes
+            (RefreshEndEventType, RefreshStartEventType, RefreshRequiredEventType)
+            ignore the Event content filtering associated with a Subscription
+            and will always be delivered to the Client.
+            */
+            IF l_isEventTypeRetained = FALSE
+            THEN
+                l_isEventTypeRetained <-- is_NodeId_equal(l_eventTypeId, c_RefreshStartEventType_NodeId)
+            END
+            ;
+            IF l_isEventTypeRetained = FALSE
+            THEN
+                l_isEventTypeRetained <-- is_NodeId_equal(l_eventTypeId, c_RefreshEndEventType_NodeId)
+            END
+            ;
+            IF l_isEventTypeRetained = FALSE
+            THEN
+                l_isEventTypeRetained <-- is_NodeId_equal(l_eventTypeId, c_RefreshRequiredEventType_NodeId)
+            END
         END
         ;
         notifTriggered := l_isEventTypeRetained

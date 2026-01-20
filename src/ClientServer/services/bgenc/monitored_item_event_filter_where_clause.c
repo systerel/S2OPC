@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_event_filter_where_clause.c
 
- Date                 : 10/04/2024 15:55:21
+ Date                 : 20/01/2026 18:00:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -105,6 +105,21 @@ void monitored_item_event_filter_where_clause__evaluate_where_clause(
          else {
             address_space_itf__is_transitive_subtype(monitored_item_event_filter_where_clause__l_eventTypeId,
                monitored_item_event_filter_where_clause__l_whereOfTypeId,
+               &monitored_item_event_filter_where_clause__l_isEventTypeRetained);
+         }
+         if (monitored_item_event_filter_where_clause__l_isEventTypeRetained == false) {
+            address_space_itf__is_NodeId_equal(monitored_item_event_filter_where_clause__l_eventTypeId,
+               constants__c_RefreshStartEventType_NodeId,
+               &monitored_item_event_filter_where_clause__l_isEventTypeRetained);
+         }
+         if (monitored_item_event_filter_where_clause__l_isEventTypeRetained == false) {
+            address_space_itf__is_NodeId_equal(monitored_item_event_filter_where_clause__l_eventTypeId,
+               constants__c_RefreshEndEventType_NodeId,
+               &monitored_item_event_filter_where_clause__l_isEventTypeRetained);
+         }
+         if (monitored_item_event_filter_where_clause__l_isEventTypeRetained == false) {
+            address_space_itf__is_NodeId_equal(monitored_item_event_filter_where_clause__l_eventTypeId,
+               constants__c_RefreshRequiredEventType_NodeId,
                &monitored_item_event_filter_where_clause__l_isEventTypeRetained);
          }
       }
