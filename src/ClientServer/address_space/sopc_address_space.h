@@ -228,6 +228,7 @@ SOPC_ReturnStatus SOPC_AddressSpace_MaxNsNumId_Initialize(SOPC_AddressSpace* add
  *        Increment this Id and check that it is not used.
  *        If not, try again in limit of ::SOPC_FRESH_NODEID_MAX_RETRIES.
  *        Finally, set the new maxNumId for selected \p ns
+ *        It should be used after call to ::SOPC_AddressSpace_MaxNsNumId_Initialize
  *
  * \warning \p ns value should be less or equal to the maximum NS index in address space,
  *          using a value greater than the number of addresspace namespaces
