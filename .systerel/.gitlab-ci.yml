@@ -247,6 +247,7 @@ build-linux64-ASan:
     WITH_ASAN: 1
     WITH_UBSAN: 1
     BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
+    CMAKE_BUILD_RPATH_USE_ORIGIN: 'true' # set a relative path in binaries RPATH for shared libraries
   needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$HIL_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \

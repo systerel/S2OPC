@@ -206,9 +206,10 @@ build-linux64-ASan: &build_linux64_ASan
   <<: *build_linux
   variables:
     <<: [*build_linux_variables, *nominal_build_variables]
-    BUILD_SHARED_LIBS: 1
     WITH_ASAN: 1
     WITH_UBSAN: 1
+    BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
+    CMAKE_BUILD_RPATH_USE_ORIGIN: 'true' # set a relative path in binaries RPATH for shared libraries
   needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
@@ -300,6 +301,8 @@ build-linux64-pys2opc-all-tests: &build_linux64_pys2opc_all_tests
   <<: *build_linux
   variables:
     <<: [*build_linux_variables, *all-tests_build_variables] # add pys2opc
+    BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
+    CMAKE_BUILD_RPATH_USE_ORIGIN: 'true' # set a relative path in binaries RPATH for shared libraries
   needs: []
   script: # build and install shared libs, then build static libs and binaries
     - "ENABLE_SAMPLES=0 ENABLE_TESTING=0 BUILD_SHARED_LIBS=1 ./build.sh && cmake --build $BUILD_DIR --target install || exit $?"

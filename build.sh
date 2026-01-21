@@ -110,6 +110,7 @@ else
     append_cmake_option S2OPC_HAS_AUDITING
     append_cmake_option CMAKE_TOOLCHAIN_FILE
     append_cmake_option CMAKE_PREFIX_PATH
+    append_cmake_option CMAKE_BUILD_RPATH_USE_ORIGIN
     append_cmake_option expat_DIR
     append_cmake_option MbedTLS_DIR
     append_cmake_option BUILD_SHARED_LIBS
