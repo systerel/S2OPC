@@ -33,23 +33,26 @@ tools like `gdb`). From the cloned directory, run:
 
 ```
 # Only the check docker has Clang
-./.check-in-docker.sh "
-
 # the fuzzing one
+./.check-in-docker.sh "
 mkdir -p build.san
 cd build.san
 CC=clang CFLAGS=-fsanitize=fuzzer-no-link cmake -DENABLE_FUZZING=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_ASAN=1 -DWITH_UBSAN=1 ..
 make -j$(nproc) fuzzers
 cd ..
+"
 
 # the coverage one
+./.check-in-docker.sh "
 mkdir -p build.cov
 cd build.san
 CC=clang cmake -DENABLE_FUZZING=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_CLANG_SOURCE_COVERAGE=1 ..
 make -j$(nproc) fuzzers
 cd ..
+"
 
 # the debug one
+./.check-in-docker.sh "
 mkdir -p build.dbg
 cd build.dbg
 CC=clang cmake -DENABLE_FUZZING=ON -DCMAKE_BUILD_TYPE=Debug ..
@@ -64,8 +67,7 @@ somewhere.
 We can now run a fuzzing test by running (assuming a 4-CPU machine)
 
 ```
-./build.san/bin/server_request_fuzzer -jobs=4 -workers=4 \
-  /path/to/S2OPC-fuzzing-data/server_request
+./build.san/bin/server_request_fuzzer -jobs=4 -workers=4 path/to/S2OPC-fuzzing-data/server_request
 ```
 
 The workers will report their progress into separate log files, and write any
@@ -129,9 +131,9 @@ Most of this section has been written from the online documentation of [OSS-Fuzz
 - Fetch back the new corpus.
 
 
-## Configure S²OPC
+## Configure S2OPC
 
-This work is done in the S²OPC repository.
+This work is done in the S2OPC repository.
 
 - Identify functions to be tested.
   The fuzzer calls the function `int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)`.
@@ -148,7 +150,7 @@ This work is done in the S²OPC repository.
   But `/tmp/` is writable.
 - Build a corpus: identify different base inputs that are valid inputs for the fuzzed functions.
   These inputs are just files.
-- Important: the corpus may not reside on the S²OPC repository,
+- Important: the corpus may not reside on the S2OPC repository,
   but in the configuration phase of OSS-Fuzz, the `build.sh` script must be able to access them.
   So it may reside in another git.
 
@@ -181,6 +183,8 @@ This is done in the OSS-Fuzz repository, in `projects/s2opc`.
 
 
 ## Testing/Running/Coverage locally
+
+### Overview
 
 The OSS' `infra/helper.py` script can do a lot of interesting things.
 First, it builds the required docker image and the fuzzers (see [the already mentioned guide](https://github.com/google/oss-fuzz/blob/master/docs/new_project_guide.md#testing-locally)).
@@ -235,13 +239,79 @@ python infra/helper.py coverage --fuzz-target parse_tcp_uri_fuzzer --corpus-dir 
 ```
 The latter starts a server on `localhost:8008` by default.
 
+### Step-by-step local testing procedure
+
+The following steps describe how to run fuzzing tests locally with OSS-Fuzz for S2OPc project
+
+- Clone the OSS-Fuzz repository
+```bash
+git clone https://github.com/google/oss-fuzz.git
+cd oss-fuzz
+```
+- Verify that the project s2opc exists.
+```bash
+ls projects/s2opc
+```
+The project folder will contain the files `build.sh`, `Dockerfile` and `project.yaml`.
+To launch the fuzzing tests locally for a specific branch that hasn't been merged yet to the master, you need to modify the Dockerfile:
+
+  - Modify the Dockerfile: Edit `oss-fuzz/projects/s2opc/Dockerfile`
+  ```dockerfile
+    # Comment this line:
+    # RUN git clone --depth 1 https://gitlab.com/systerel/S2OPC
+
+    # Add this line instead:
+    RUN git clone --depth 1 --branch <branch_name> https://gitlab.com/systerel/S2OPC.git
+  ```
+- Build the project's Docker images:
+```bash
+python3 infra/helper.py build_image s2opc
+```
+- Build and run fuzzers
+```bash
+# Build fuzzers
+python3 infra/helper.py build_fuzzers --sanitizer address s2opc
+
+# Verify builds work correctly
+python3 infra/helper.py check_build s2opc
+
+# After this step, the list of available fuzz targets will be displayed in the terminal(e.g. parse_tcp_uri_fuzzer, sub_fuzzer, decode_fuzzer, server_request_fuzzer)
+
+# Run a specific fuzzer
+python3 infra/helper.py run_fuzzer --corpus-dir=<path-to-corpus-dir> s2opc <fuzz_target>
+
+# Example with decode_fuzzer
+python3 infra/helper.py run_fuzzer --corpus-dir=~/S2OPC-fuzzing-data/decode s2opc decode_fuzzer
+```
+- Generate and view code coverage report
+
+Note: To generate a coverage report, make sure to delete any previous `build` directories in the `oss-fuzz` repository before proceeding.
+```bash
+# Build with coverage sanitizer
+python3 infra/helper.py build_fuzzers --sanitizer coverage s2opc
+
+# Generate the coverage report
+python3 infra/helper.py coverage s2opc --fuzz-target=<fuzz-target> --corpus-dir=<path-to-corpus-dir>
+
+# Example with decode_fuzzer
+python3 infra/helper.py coverage s2opc --fuzz-target=decode_fuzzer --corpus-dir=~/S2OPC-fuzzing-data/decode
+```
+Once the command completes, open the URL printed in the terminal in your browser to view the coverage report.
+
 
 ## Fetch the new corpus
 
 As the fuzzer explores new test case, it expands the input corpus.
-We can [get it](https://github.com/google/oss-fuzz/blob/master/docs/corpora.md).
+We can [get it](https://google.github.io/oss-fuzz/advanced-topics/corpora/).
 It can then be merged to reduce its size, and added to our own corpus.
 It requires a Google account that is mentioned in our `project.yaml`.
 
 
 [modeline]: # ( vim: set syntax=markdown spell spelllang=en: )
+
+## More information
+
+The following links give valuable information about OSS Fuzzer(ClusterFuzzLite) :
+
+- https://github.com/google/oss-fuzz
+- https://google.github.io/clusterfuzzlite
