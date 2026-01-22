@@ -6351,6 +6351,10 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(SOPC_Variant* dest,
 static const SOPC_NodeId* SOPC_ExtensionObject_Get_DataType(SOPC_ExtensionObject* extObj, SOPC_NodeId* outNodeId)
 {
     SOPC_ASSERT(NULL != outNodeId);
+    if (extObj == NULL)
+    {
+        return NULL;
+    }
     if (extObj->Encoding == SOPC_ExtObjBodyEncoding_Object && NULL != extObj->Body.Object.ObjType)
     {
         SOPC_ASSERT(NULL == extObj->Body.Object.ObjType->NamespaceUri &&

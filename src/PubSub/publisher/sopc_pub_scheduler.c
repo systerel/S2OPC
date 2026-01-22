@@ -800,6 +800,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
 static void send_keepAlive_message(MessageCtx* context)
 {
+    SOPC_ASSERT(NULL != context);
     SOPC_PubSub_SecurityType* security = context->security;
     SOPC_Dataset_LL_NetworkMessage* message = context->messageKeepAlive;
     SOPC_WriterGroup* group = context->group;
@@ -885,6 +886,7 @@ static void* thread_start_publish(void* arg)
         SOPC_HighRes_TimeReference_GetTime(now);
 
         MessageCtx* context = MessageCtxArray_FindMostExpired();
+        SOPC_ASSERT(NULL != context);
         /* Check if message has expired and need to be reschedule and eventually sent */
         if (SOPC_HighRes_TimeReference_IsExpired(context->next_timeout, now))
         {

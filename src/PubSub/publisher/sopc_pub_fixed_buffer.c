@@ -345,6 +345,7 @@ SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ct
     {
         SOPC_PubFixedBuffer_DataSetField_Position* dsfPos =
             SOPC_PubFixedBuffer_Get_DataSetField_Position_At(preencode, i);
+        SOPC_ASSERT(dsfPos != NULL);
         const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetField_Get_Variant(dsfPos->dataSetField);
         status = SOPC_Buffer_SetPosition(updatedBuffer, dsfPos->position);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
