@@ -23,6 +23,9 @@
 
 #include "custom2_types.h"
 #include "custom_types.h"
+#include "fx_ac_types.h"
+#include "fx_cm_types.h"
+#include "fx_data_types.h"
 #include "sopc_assert.h"
 #include "sopc_buffer.h"
 #include "sopc_encodeabletype.h"
@@ -36,7 +39,7 @@ typedef struct Fuzzing_Group
     size_t size;
 } Fuzzing_Group;
 
-static Fuzzing_Group g_fuzzGroups[3];
+static Fuzzing_Group g_fuzzGroups[6];
 static size_t g_nbFuzzGroups = 0;
 
 /* classify encodeables types into groups */
@@ -57,7 +60,16 @@ static void Fuzz_InitGroups(void)
     g_fuzzGroups[2].types = sopc_Custom2_KnownEncodeableTypes;
     g_fuzzGroups[2].size = SOPC_Custom2_TypeInternalIndex_SIZE;
 
-    g_nbFuzzGroups = 3;
+    g_fuzzGroups[3].types = sopc_FX_Data_KnownEncodeableTypes;
+    g_fuzzGroups[3].size = SOPC_FX_Data_TypeInternalIndex_SIZE;
+
+    g_fuzzGroups[4].types = sopc_FX_AC_KnownEncodeableTypes;
+    g_fuzzGroups[4].size = SOPC_FX_AC_TypeInternalIndex_SIZE;
+
+    g_fuzzGroups[5].types = sopc_FX_CM_KnownEncodeableTypes;
+    g_fuzzGroups[5].size = SOPC_FX_CM_TypeInternalIndex_SIZE;
+
+    g_nbFuzzGroups = 6;
 }
 
 int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)

@@ -43,6 +43,7 @@ set(S2OPC_CLIENTSERVER_INTERNAL_INCLUDES
   "${S2OPC_ROOT_PATH}/src/ClientServer/sockets"
   "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/server_wrapper/alarm_conditions/internal"
   "${CMAKE_CURRENT_SOURCE_DIR}/unit_tests/helpers"
+  "${CMAKE_CURRENT_SOURCE_DIR}/unit_tests/fuzzing/data_fx"
   )
 
 # Get the helpers for unit and validation tests
@@ -843,6 +844,9 @@ if(ENABLE_FUZZING)
     "${FUZZING_PATH}/fuzz_decoder.c"
     "unit_tests/helpers/custom_types.c"
     "unit_tests/helpers/custom2_types.c"
+    "${FUZZING_PATH}/data_fx/fx_ac_types.c"
+    "${FUZZING_PATH}/data_fx/fx_cm_types.c"
+    "${FUZZING_PATH}/data_fx/fx_data_types.c"
   )
 
   s2opc_fuzzer(server_request_fuzzer "${FUZZING_PATH}/fuzz_server_request.c" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
