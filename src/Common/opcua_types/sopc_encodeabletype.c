@@ -539,6 +539,48 @@ static const void* const* retrieveConstAddressPtr(const void* pValue, const SOPC
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 
+/**
+ * \brief Initialize ONLY the selected union field
+ */
+static SOPC_ReturnStatus EncodeableObject_InternalInitializeUnionField(SOPC_EncodeableType* type,
+                                                                       void* pValue,
+                                                                       const int32_t indexSwitchField)
+{
+    // Check the index of selected field
+    if (indexSwitchField >= type->NoOfFields || indexSwitchField <= 0)
+    {
+        return SOPC_STATUS_ENCODING_ERROR;
+    }
+    const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[indexSwitchField];
+    bool validDesc = checkEncodeableTypeDescIsValid(desc);
+    if (!validDesc)
+    {
+        return SOPC_STATUS_NOT_SUPPORTED;
+    }
+    void* pField = (char*) pValue + desc->offset;
+    SOPC_EncodeableObject_PfnInitialize* initFunction = getPfnInitialize(type, desc);
+    initFunction(pField);
+    return SOPC_STATUS_OK;
+}
+
+/**
+ * \brief Retrieve the size (max) of the union structure and initialize it to 0
+ */
+static SOPC_ReturnStatus SOPC_EncodeableObject_InternalInitializeUnion(SOPC_EncodeableType* type, void* pValue)
+{
+    const SOPC_EncodeableType_FieldDescriptor* descSwitchField = &type->Fields[0];
+    bool validDesc = checkEncodeableTypeDescIsValid(descSwitchField);
+    if (!validDesc)
+    {
+        return SOPC_STATUS_NOT_SUPPORTED;
+    }
+
+    void* pSwitchField = (char*) pValue + descSwitchField->offset;
+    size_t unionStructSize = type->AllocationSize - sizeof(SOPC_EncodeableType*);
+    memset(pSwitchField, 0, unionStructSize);
+    return SOPC_STATUS_OK;
+}
+
 static SOPC_ReturnStatus SOPC_EncodeableObject_InternalInitialize(SOPC_EncodeableType* type, void* pValue)
 {
     SOPC_ASSERT(type != NULL);
@@ -546,6 +588,13 @@ static SOPC_ReturnStatus SOPC_EncodeableObject_InternalInitialize(SOPC_Encodeabl
 
     // The first field of all non-builtin OPC UA type instances is its encodeable type
     *((SOPC_EncodeableType**) pValue) = type;
+
+    /* Initialize Union */
+    if (SOPC_STRUCT_TYPE_UNION == type->StructType)
+    {
+        // Initialize the entire union structure to 0 (=> SwitchField = 0, Value = 0)
+        return SOPC_EncodeableObject_InternalInitializeUnion(type, pValue);
+    }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -613,11 +662,50 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
     return;
 }
 
+static void SOPC_EncodeableObject_ClearUnion(SOPC_EncodeableType* type, void* pValue)
+{
+    // 1. Decode the switch field
+    const SOPC_EncodeableType_FieldDescriptor* descSwitchField = &type->Fields[0];
+    bool validDesc = checkEncodeableTypeDescIsValid(descSwitchField);
+    if (!validDesc)
+    {
+        return;
+    }
+    void* pSwitchField = (char*) pValue + descSwitchField->offset;
+    const int32_t indexSwitchField = (const int32_t) * (uint32_t*) pSwitchField;
+    // Check the index of selected field
+    if (indexSwitchField >= type->NoOfFields || indexSwitchField <= 0)
+    {
+        return;
+    }
+
+    // 2. Clear the selected union field
+    const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[indexSwitchField];
+    validDesc = checkEncodeableTypeDescIsValid(desc);
+    if (!validDesc)
+    {
+        return;
+    }
+    void* pField = (char*) pValue + desc->offset;
+    SOPC_EncodeableObject_PfnClear* clearFunction = getPfnClear(type, desc);
+    clearFunction(pField);
+
+    // 3. Clear the switch field
+    SOPC_UInt32_ClearAux(pSwitchField);
+}
+
 void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
 {
     SOPC_ASSERT(type != NULL);
     if (NULL == pValue)
     {
+        return;
+    }
+
+    /* Clear Union*/
+    if (SOPC_STRUCT_TYPE_UNION == type->StructType)
+    {
+        SOPC_EncodeableObject_ClearUnion(type, pValue);
         return;
     }
 
@@ -754,11 +842,11 @@ static SOPC_ReturnStatus EncodeableObject_EncodeMaskOptFields(SOPC_EncodeableTyp
                 if (*pFieldPointer != NULL) // Is an optional field available
                 {
                     *encodingMask = *encodingMask + (0x1u << indexOptional);
-                    if (desc->isArrayLength)
-                    {
-                        // Jump over the Array field (if Arraylength is available, Array is also available)
-                        i++;
-                    }
+                }
+                if (desc->isArrayLength)
+                {
+                    // Jump over the Array field (Arraylength field also marks for Array field).
+                    i++;
                 }
                 indexOptional++;
             }
@@ -880,6 +968,11 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
             if (!desc->isToEncode || isOptAndNotAvailable)
             {
                 // Skip this field
+                if (desc->isArrayLength)
+                {
+                    // Skip also array field
+                    i++;
+                }
             }
             else if (desc->isArrayLength)
             {
@@ -933,6 +1026,30 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
 }
 
 /**
+ * \brief Retrieve the number of optional fields on a encodeable \p type.
+ */
+static uint32_t EncodeableObject_RetrieveNumberOfOptionalField(SOPC_EncodeableType* type)
+{
+    uint32_t nbOfOptField = 0;
+    bool validDesc = true;
+    for (int32_t i = 0; validDesc && i < type->NoOfFields; ++i)
+    {
+        const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        validDesc = checkEncodeableTypeDescIsValid(desc);
+        if (desc->isOptional) // Optional field
+        {
+            nbOfOptField++;
+        }
+        if (desc->isArrayLength)
+        {
+            // Skip the array field (already marked with the array length field).
+            i++;
+        }
+    }
+    return validDesc ? nbOfOptField : 0;
+}
+
+/**
  * \brief Allocate optional fields available (= defined by encoding mask).
  *        Refer to OPC UA part 6, 5.2.7.
  */
@@ -949,6 +1066,21 @@ static SOPC_ReturnStatus EncodeableObject_AllocateOptFields(SOPC_EncodeableType*
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_UInt32_Read(&encodingMask, buf, nestedStructLevel);
+        if (SOPC_STATUS_OK == status)
+        {
+            // Check if unassigned bits of the encoding mask are not 0.
+            uint32_t nbOfOptField = EncodeableObject_RetrieveNumberOfOptionalField(type);
+            uint32_t encodingMaskMax = ((0x1u << nbOfOptField) - 1); // 2^nbOfOptField - 1
+            if (encodingMask > encodingMaskMax)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_COMMON,
+                    "Decode Optional Fields structure: Unassigned bits of the EncodingMask are not 0 (Type: %s). "
+                    "Expected max EncodingMask value: 0x%08" PRIX32 ", effective EncodingMask value: 0x%08" PRIX32 "",
+                    type->TypeName, encodingMaskMax, encodingMask);
+                status = SOPC_STATUS_ENCODING_ERROR;
+            }
+        }
     }
 
     // Allocation of available optional fields.
@@ -1011,13 +1143,11 @@ static SOPC_ReturnStatus EncodeableObject_DecodeUnion(SOPC_EncodeableType* type,
     if (SOPC_STATUS_OK == status)
     {
         const int32_t indexSwitchField = (const int32_t) * (uint32_t*) pSwitchField;
-        // Check and Set the index of selected field
-        if (indexSwitchField >= type->NoOfFields)
+        // Initialize the selected union field before decoding it.
+        status = EncodeableObject_InternalInitializeUnionField(type, pValue, indexSwitchField);
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_STATUS_ENCODING_ERROR;
-        }
-        if (SOPC_STATUS_OK == status && indexSwitchField > 0)
-        {
+            // Decode selected union field
             desc = &type->Fields[indexSwitchField];
             validDesc = checkEncodeableTypeDescIsValid(desc);
             if (!validDesc)
