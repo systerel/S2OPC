@@ -291,39 +291,42 @@ TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr,
 {
     uint16_t wCurrentSlotId = UINT16_MAX;
     TaskHandle_t taskHandle = 0;
-    if ((ptr != NULL) && (ptr->list != NULL) && (pCurrentSlotId != NULL))
+    if (pCurrentSlotId != NULL)
     {
-        wCurrentSlotId = *pCurrentSlotId;
-        if (wCurrentSlotId == UINT16_MAX)
+        if ((ptr != NULL) && (ptr->list != NULL))
         {
-            wCurrentSlotId = ptr->firstValid;
-        }
+            wCurrentSlotId = *pCurrentSlotId;
+            if (wCurrentSlotId == UINT16_MAX)
+            {
+                wCurrentSlotId = ptr->firstValid;
+            }
 
-        if (wCurrentSlotId < ptr->wMaxWaitingTasks)
-        {
-            taskHandle = ptr->list[wCurrentSlotId].value;
-            if (pOutValue != NULL)
+            if (wCurrentSlotId < ptr->wMaxWaitingTasks)
             {
-                *pOutValue = ptr->list[wCurrentSlotId].infosField1;
+                taskHandle = ptr->list[wCurrentSlotId].value;
+                if (pOutValue != NULL)
+                {
+                    *pOutValue = ptr->list[wCurrentSlotId].infosField1;
+                }
+                if (pOutValue2 != NULL)
+                {
+                    *pOutValue2 = ptr->list[wCurrentSlotId].infosField2;
+                }
+                if (ppOutContext != NULL)
+                {
+                    *ppOutContext = ptr->list[wCurrentSlotId].pContext;
+                }
+                wCurrentSlotId = ptr->list[wCurrentSlotId].nxId;
             }
-            if (pOutValue2 != NULL)
+            else
             {
-                *pOutValue2 = ptr->list[wCurrentSlotId].infosField2;
+                taskHandle = 0;
+                wCurrentSlotId = UINT16_MAX;
             }
-            if (ppOutContext != NULL)
-            {
-                *ppOutContext = ptr->list[wCurrentSlotId].pContext;
-            }
-            wCurrentSlotId = ptr->list[wCurrentSlotId].nxId;
         }
-        else
-        {
-            taskHandle = 0;
-            wCurrentSlotId = UINT16_MAX;
-        }
+        *pCurrentSlotId = wCurrentSlotId;
     }
 
-    *pCurrentSlotId = wCurrentSlotId;
     return taskHandle;
 }
 
@@ -331,27 +334,30 @@ void* P_UTILS_LIST_ParseContextElt(tUtilsList* ptr, uint16_t* pCurrentSlotId)
 {
     uint16_t wCurrentSlotId = UINT16_MAX;
     void* pContext = 0;
-    if ((ptr != NULL) && (ptr->list != NULL) && (pCurrentSlotId != NULL))
+    if (pCurrentSlotId != NULL)
     {
-        wCurrentSlotId = *pCurrentSlotId;
-        if (wCurrentSlotId == UINT16_MAX)
+        if ((ptr != NULL) && (ptr->list != NULL))
         {
-            wCurrentSlotId = ptr->firstValid;
-        }
+            wCurrentSlotId = *pCurrentSlotId;
+            if (wCurrentSlotId == UINT16_MAX)
+            {
+                wCurrentSlotId = ptr->firstValid;
+            }
 
-        if (wCurrentSlotId < ptr->wMaxWaitingTasks)
-        {
-            pContext = ptr->list[wCurrentSlotId].pContext;
-            wCurrentSlotId = ptr->list[wCurrentSlotId].nxId;
+            if (wCurrentSlotId < ptr->wMaxWaitingTasks)
+            {
+                pContext = ptr->list[wCurrentSlotId].pContext;
+                wCurrentSlotId = ptr->list[wCurrentSlotId].nxId;
+            }
+            else
+            {
+                wCurrentSlotId = UINT16_MAX;
+                pContext = 0;
+            }
         }
-        else
-        {
-            wCurrentSlotId = UINT16_MAX;
-            pContext = 0;
-        }
+        *pCurrentSlotId = wCurrentSlotId;
     }
 
-    *pCurrentSlotId = wCurrentSlotId;
     return pContext;
 }
 

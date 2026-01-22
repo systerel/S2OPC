@@ -66,7 +66,8 @@ SOPC_ReturnStatus P_UTILS_LIST_AddElt(tUtilsList* ptr,
 /** \brief Enumerate and parse elements of the list.
  *
  * Continue the enumeration from \p pCurrentSlotId and updates it to the index of the next non empty element.
- * \p pCurrentSlotId can be set to UINT16_MAX to initiate the enumerator.
+ * \p pCurrentSlotId can be set to UINT16_MAX to initiate the enumerator. \p pCurrentSlotuId SHOULD NOT be NULL
+ * otherwise function return NULL and leaves \p pCurrentSlotId unchanged.
  * Returns NULL and sets \p pCurrentSlotId to UINT16_MAX when enumeration is finished.
  */
 TaskHandle_t P_UTILS_LIST_ParseValueElt(tUtilsList* ptr,
