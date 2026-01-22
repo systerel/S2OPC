@@ -119,8 +119,8 @@ typedef struct _OpcUa_FX_CM_AssetVerificationConfDataType
      *  for giving a copy of the header to application.
      */
     OpcUa_FX_CM_NodeIdentifier AssetToVerify;
-    OpcUa_FX_Data_AssetVerificationModeEnum VerificationMode;
-    OpcUa_FX_Data_AssetVerificationResultEnum ExpectedVerificationResult;
+    int32_t VerificationMode;
+    int32_t ExpectedVerificationResult;
     int32_t NoOfExpectedVerificationVariables;
     OpcUa_FX_CM_NodeIdentifierValuePair* ExpectedVerificationVariables;
     int32_t NoOfExpectedAdditionalVerificationVariables;
@@ -164,29 +164,6 @@ typedef struct _OpcUa_FX_CM_AutomationComponentConfigurationConfDataType
 void OpcUa_FX_CM_AutomationComponentConfigurationConfDataType_Initialize(void* pValue);
 
 void OpcUa_FX_CM_AutomationComponentConfigurationConfDataType_Clear(void* pValue);
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_FX_CM_CommunicationFlowConfigurationConfDataType
-/*============================================================================
- * The FX_CM_CommunicationFlowConfigurationConfDataType structure.
- *===========================================================================*/
-extern SOPC_EncodeableType OpcUa_FX_CM_CommunicationFlowConfigurationConfDataType_EncodeableType;
-
-typedef struct _OpcUa_FX_CM_CommunicationFlowConfigurationConfDataType
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    SOPC_String BrowseName;
-    int32_t* NoOfFlowProperties;
-    OpcUa_KeyValuePair* FlowProperties;
-} OpcUa_FX_CM_CommunicationFlowConfigurationConfDataType;
-
-void OpcUa_FX_CM_CommunicationFlowConfigurationConfDataType_Initialize(void* pValue);
-
-void OpcUa_FX_CM_CommunicationFlowConfigurationConfDataType_Clear(void* pValue);
 
 #endif
 
@@ -280,9 +257,6 @@ typedef struct _OpcUa_FX_CM_PubSubCommunicationFlowConfigurationConfDataType
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    SOPC_String BrowseName;
-    int32_t* NoOfFlowProperties;
-    OpcUa_KeyValuePair* FlowProperties;
     OpcUa_FX_CM_AddressSelectionDataType* Address;
     SOPC_String* TransportProfileUri;
     int32_t* NoOfTransportProfileUriSelection;
@@ -300,9 +274,9 @@ typedef struct _OpcUa_FX_CM_PubSubCommunicationFlowConfigurationConfDataType
     int32_t* NoOfQosSelection;
     OpcUa_FX_CM_CommunicationFlowQosDataType* QosSelection;
     SOPC_Boolean* QosModify;
-    OpcUa_MessageSecurityMode* SecurityMode;
+    int32_t* SecurityMode;
     int32_t* NoOfSecurityModeSelection;
-    OpcUa_MessageSecurityMode* SecurityModeSelection;
+    int32_t* SecurityModeSelection;
     SOPC_Boolean* SecurityModeModify;
     SOPC_String* SecurityGroupId;
     int32_t* NoOfSecurityGroupIdSelection;
@@ -330,10 +304,8 @@ typedef struct _OpcUa_FX_CM_PortableRelativePathElement
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_PortableNodeId ReferenceTypeId;
     SOPC_Boolean IsInverse;
     SOPC_Boolean IncludeSubtypes;
-    OpcUa_PortableQualifiedName TargetName;
 } OpcUa_FX_CM_PortableRelativePathElement;
 
 void OpcUa_FX_CM_PortableRelativePathElement_Initialize(void* pValue);
@@ -379,7 +351,6 @@ typedef struct _OpcUa_FX_CM_PortableNodeIdentifier
     uint32_t SwitchField;
     union
     {
-        OpcUa_PortableNodeId Node;
         SOPC_String Alias;
         OpcUa_FX_CM_PortableRelativePath IdentifierBrowsePath;
     } Value;
@@ -425,11 +396,8 @@ typedef struct _OpcUa_FX_CM_PubSubCommunicationModelConfigurationDataType
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_PubSubConfiguration2DataType PubSubConfiguration;
     int32_t NoOfTranslationTable;
     OpcUa_FX_CM_NodeIdTranslationDataType* TranslationTable;
-    int32_t NoOfConfigurationReferences;
-    OpcUa_PubSubConfigurationRefDataType* ConfigurationReferences;
 } OpcUa_FX_CM_PubSubCommunicationModelConfigurationDataType;
 
 void OpcUa_FX_CM_PubSubCommunicationModelConfigurationDataType_Initialize(void* pValue);
@@ -470,7 +438,6 @@ typedef struct _OpcUa_FX_CM_ConnectionEndpointConfigurationConfDataType
     SOPC_String* PreconfiguredPublishedDataSet;
     OpcUa_PublishedDataSetDataType* PublishedDataSetData;
     SOPC_String* PreconfiguredSubscribedDataSet;
-    OpcUa_StandaloneSubscribedDataSetDataType* SubscribedDataSetData;
     int32_t* NoOfExpectedVerificationVariables;
     OpcUa_FX_CM_NodeIdentifierValuePair* ExpectedVerificationVariables;
     int32_t* NoOfControlGroups;
@@ -533,9 +500,9 @@ typedef struct _OpcUa_FX_CM_ServerAddressConfDataType
     int32_t* NoOfAddressSelection;
     SOPC_String* AddressSelection;
     SOPC_Boolean* AddressModify;
-    OpcUa_MessageSecurityMode SecurityMode;
+    int32_t SecurityMode;
     int32_t* NoOfSecurityModeSelection;
-    OpcUa_MessageSecurityMode* SecurityModeSelection;
+    int32_t* SecurityModeSelection;
     SOPC_Boolean* SecurityModeModify;
     SOPC_String SecurityPolicyUri;
     int32_t* NoOfSecurityPolicyUriSelection;
@@ -582,10 +549,6 @@ typedef struct _OpcUa_FX_CM_SecurityKeyServerAddressConfDataType
     SOPC_String* ServerUriSelection;
     SOPC_Boolean* ServerUriModify;
     SOPC_Boolean UsePushModel;
-    int32_t* NoOfSecurityGroups;
-    OpcUa_SecurityGroupDataType* SecurityGroups;
-    int32_t* NoOfPubSubKeyPushTargets;
-    OpcUa_PubSubKeyPushTargetDataType* PubSubKeyPushTargets;
     int32_t* NoOfSksProperties;
     OpcUa_KeyValuePair* SksProperties;
 } OpcUa_FX_CM_SecurityKeyServerAddressConfDataType;
@@ -693,7 +656,6 @@ typedef struct _OpcUa_FX_CM_PortableKeyValuePair
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_PortableQualifiedName Key;
     SOPC_Variant Value;
 } OpcUa_FX_CM_PortableKeyValuePair;
 
@@ -764,7 +726,7 @@ typedef struct _OpcUa_FX_CM_ServerAddressDataType
      *  for giving a copy of the header to application.
      */
     SOPC_String Address;
-    OpcUa_MessageSecurityMode SecurityMode;
+    int32_t SecurityMode;
     SOPC_String SecurityPolicyUri;
     SOPC_String ServerUri;
 } OpcUa_FX_CM_ServerAddressDataType;
@@ -796,9 +758,6 @@ typedef enum _SOPC_FX_CM_TypeInternalIndex
 #endif
 #ifndef OPCUA_EXCLUDE_FX_CM_AutomationComponentConfigurationConfDataType
     SOPC_TypeInternalIndex_FX_CM_AutomationComponentConfigurationConfDataType,
-#endif
-#ifndef OPCUA_EXCLUDE_FX_CM_CommunicationFlowConfigurationConfDataType
-    SOPC_TypeInternalIndex_FX_CM_CommunicationFlowConfigurationConfDataType,
 #endif
 #ifndef OPCUA_EXCLUDE_FX_CM_CommunicationFlowQosDataType
     SOPC_TypeInternalIndex_FX_CM_CommunicationFlowQosDataType,

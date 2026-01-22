@@ -457,16 +457,6 @@ void OpcUa_FX_Data_PubSubCommunicationConfigurationDataType_Clear(void* pValue)
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FX_Data_PubSubCommunicationConfigurationDataType_Fields[] = {
     {
-        false,                                                          // isOptional
-        false,                                                          // isBuiltIn
-        false,                                                          // isArrayLength
-        true,                                                           // isToEncode
-        false,                                                          // isSameNs
-        (uint16_t) SOPC_OPCUA_NS_INDEX,                                 // nsIndex
-        (uint32_t) SOPC_TypeInternalIndex_PubSubConfiguration2DataType, // typeIndex
-        (uint32_t) offsetof(OpcUa_FX_Data_PubSubCommunicationConfigurationDataType, PubSubConfiguration) // offset
-    },
-    {
         false,                          // isOptional
         true,                           // isBuiltIn
         false,                          // isArrayLength
@@ -479,23 +469,13 @@ static const SOPC_EncodeableType_FieldDescriptor FX_Data_PubSubCommunicationConf
     {
         false,                          // isOptional
         true,                           // isBuiltIn
-        true,                           // isArrayLength
+        false,                          // isArrayLength
         true,                           // isToEncode
         true,                           // isSameNs
         (uint16_t) SOPC_OPCUA_NS_INDEX, // nsIndex
         (uint32_t) SOPC_Int32_Id,       // typeIndex
         (uint32_t) offsetof(OpcUa_FX_Data_PubSubCommunicationConfigurationDataType,
                             NoOfConfigurationReferences) // offset
-    },
-    {
-        false,                                                            // isOptional
-        false,                                                            // isBuiltIn
-        false,                                                            // isArrayLength
-        true,                                                             // isToEncode
-        false,                                                            // isSameNs
-        (uint16_t) SOPC_OPCUA_NS_INDEX,                                   // nsIndex
-        (uint32_t) SOPC_TypeInternalIndex_PubSubConfigurationRefDataType, // typeIndex
-        (uint32_t) offsetof(OpcUa_FX_Data_PubSubCommunicationConfigurationDataType, ConfigurationReferences) // offset
     },
 };
 
@@ -590,27 +570,6 @@ static const SOPC_EncodeableType_FieldDescriptor FX_Data_PubSubCommunicationConf
         (uint16_t) SOPC_OPCUA_NS_INDEX, // nsIndex
         (uint32_t) SOPC_Int32_Id,       // typeIndex
         (uint32_t) offsetof(OpcUa_FX_Data_PubSubCommunicationConfigurationResultDataType,
-                            NoOfConfigurationValues) // offset
-    },
-    {
-        false,                                                              // isOptional
-        false,                                                              // isBuiltIn
-        false,                                                              // isArrayLength
-        true,                                                               // isToEncode
-        false,                                                              // isSameNs
-        (uint16_t) SOPC_OPCUA_NS_INDEX,                                     // nsIndex
-        (uint32_t) SOPC_TypeInternalIndex_PubSubConfigurationValueDataType, // typeIndex
-        (uint32_t) offsetof(OpcUa_FX_Data_PubSubCommunicationConfigurationResultDataType, ConfigurationValues) // offset
-    },
-    {
-        false,                          // isOptional
-        true,                           // isBuiltIn
-        true,                           // isArrayLength
-        true,                           // isToEncode
-        true,                           // isSameNs
-        (uint16_t) SOPC_OPCUA_NS_INDEX, // nsIndex
-        (uint32_t) SOPC_Int32_Id,       // typeIndex
-        (uint32_t) offsetof(OpcUa_FX_Data_PubSubCommunicationConfigurationResultDataType,
                             NoOfConfigurationObjects) // offset
     },
     {
@@ -668,16 +627,6 @@ void OpcUa_FX_Data_PubSubCommunicationLinkConfigurationDataType_Clear(void* pVal
  *===========================================================================*/
 static const SOPC_EncodeableType_FieldDescriptor FX_Data_PubSubCommunicationLinkConfigurationDataType_Fields[] = {
     {
-        false,                                                            // isOptional
-        false,                                                            // isBuiltIn
-        false,                                                            // isArrayLength
-        true,                                                             // isToEncode
-        false,                                                            // isSameNs
-        (uint16_t) SOPC_OPCUA_NS_INDEX,                                   // nsIndex
-        (uint32_t) SOPC_TypeInternalIndex_PubSubConfigurationRefDataType, // typeIndex
-        (uint32_t) offsetof(OpcUa_FX_Data_PubSubCommunicationLinkConfigurationDataType, DataSetReaderRef) // offset
-    },
-    {
         false,                                                          // isOptional
         false,                                                          // isBuiltIn
         false,                                                          // isArrayLength
@@ -687,16 +636,6 @@ static const SOPC_EncodeableType_FieldDescriptor FX_Data_PubSubCommunicationLink
         (uint32_t) SOPC_TypeInternalIndex_ConfigurationVersionDataType, // typeIndex
         (uint32_t) offsetof(OpcUa_FX_Data_PubSubCommunicationLinkConfigurationDataType,
                             ExpectedSubscribedDataSetVersion) // offset
-    },
-    {
-        false,                                                            // isOptional
-        false,                                                            // isBuiltIn
-        false,                                                            // isArrayLength
-        true,                                                             // isToEncode
-        false,                                                            // isSameNs
-        (uint16_t) SOPC_OPCUA_NS_INDEX,                                   // nsIndex
-        (uint32_t) SOPC_TypeInternalIndex_PubSubConfigurationRefDataType, // typeIndex
-        (uint32_t) offsetof(OpcUa_FX_Data_PubSubCommunicationLinkConfigurationDataType, DataSetWriterRef) // offset
     },
     {
         false,                                                          // isOptional
@@ -1171,26 +1110,6 @@ static const SOPC_EncodeableType_FieldDescriptor FX_Data_RelatedEndpointDataType
         (uint16_t) SOPC_OPCUA_NS_INDEX,                                     // nsIndex
         (uint32_t) SOPC_String_Id,                                          // typeIndex
         (uint32_t) offsetof(OpcUa_FX_Data_RelatedEndpointDataType, Address) // offset
-    },
-    {
-        false,                                                                                 // isOptional
-        true,                                                                                  // isBuiltIn
-        true,                                                                                  // isArrayLength
-        true,                                                                                  // isToEncode
-        true,                                                                                  // isSameNs
-        (uint16_t) SOPC_OPCUA_NS_INDEX,                                                        // nsIndex
-        (uint32_t) SOPC_Int32_Id,                                                              // typeIndex
-        (uint32_t) offsetof(OpcUa_FX_Data_RelatedEndpointDataType, NoOfConnectionEndpointPath) // offset
-    },
-    {
-        false,                                                                             // isOptional
-        false,                                                                             // isBuiltIn
-        false,                                                                             // isArrayLength
-        true,                                                                              // isToEncode
-        false,                                                                             // isSameNs
-        (uint16_t) SOPC_OPCUA_NS_INDEX,                                                    // nsIndex
-        (uint32_t) SOPC_TypeInternalIndex_PortableQualifiedName,                           // typeIndex
-        (uint32_t) offsetof(OpcUa_FX_Data_RelatedEndpointDataType, ConnectionEndpointPath) // offset
     },
     {
         false,                                                                             // isOptional

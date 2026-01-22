@@ -139,10 +139,8 @@ typedef struct _OpcUa_FX_Data_PubSubCommunicationConfigurationDataType
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_PubSubConfiguration2DataType PubSubConfiguration;
     SOPC_Boolean RequireCompleteUpdate;
     int32_t NoOfConfigurationReferences;
-    OpcUa_PubSubConfigurationRefDataType* ConfigurationReferences;
 } OpcUa_FX_Data_PubSubCommunicationConfigurationDataType;
 
 void OpcUa_FX_Data_PubSubCommunicationConfigurationDataType_Initialize(void* pValue);
@@ -167,8 +165,6 @@ typedef struct _OpcUa_FX_Data_PubSubCommunicationConfigurationResultDataType
     SOPC_Boolean ChangesApplied;
     int32_t NoOfReferenceResults;
     SOPC_StatusCode* ReferenceResults;
-    int32_t NoOfConfigurationValues;
-    OpcUa_PubSubConfigurationValueDataType* ConfigurationValues;
     int32_t NoOfConfigurationObjects;
     SOPC_NodeId* ConfigurationObjects;
 } OpcUa_FX_Data_PubSubCommunicationConfigurationResultDataType;
@@ -191,9 +187,7 @@ typedef struct _OpcUa_FX_Data_PubSubCommunicationLinkConfigurationDataType
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_PubSubConfigurationRefDataType DataSetReaderRef;
     OpcUa_ConfigurationVersionDataType ExpectedSubscribedDataSetVersion;
-    OpcUa_PubSubConfigurationRefDataType DataSetWriterRef;
     OpcUa_ConfigurationVersionDataType ExpectedPublishedDataSetVersion;
 } OpcUa_FX_Data_PubSubCommunicationLinkConfigurationDataType;
 
@@ -306,8 +300,6 @@ typedef struct _OpcUa_FX_Data_RelatedEndpointDataType
      *  for giving a copy of the header to application.
      */
     SOPC_String Address;
-    int32_t NoOfConnectionEndpointPath;
-    OpcUa_PortableQualifiedName* ConnectionEndpointPath;
     SOPC_String ConnectionEndpointName;
 } OpcUa_FX_Data_RelatedEndpointDataType;
 
