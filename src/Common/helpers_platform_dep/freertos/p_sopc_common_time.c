@@ -58,7 +58,7 @@ void vApplicationTickHook(void)
 void setInitialDateToBuildTime(void)
 {
     // Get today date numerics values
-    struct tm today = {};
+    struct tm today = {0};
     static char buffer[12] = {0};
 
     // Initial date set to build value, always "MMM DD YYYY",
@@ -172,7 +172,7 @@ uint64_t P_SOPC_COMMON_TIME_get_tick(void)
 void P_SOPC_COMMON_TIME_SetDateOffset(int64_t nbSecOffset)
 {
     /* Critical section required if running on a 32 or 16 bit processor. */
-    const uint64_t increment = ((int64_t) nbSecOffset) * configTICK_RATE_HZ;
+    const uint64_t increment = (uint64_t)(((int64_t) nbSecOffset) * configTICK_RATE_HZ);
     portENTER_CRITICAL();
     gGlobalTimeReference += increment;
     portEXIT_CRITICAL();

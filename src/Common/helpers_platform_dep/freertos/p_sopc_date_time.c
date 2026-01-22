@@ -72,7 +72,7 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
         return INT64_MAX;
     }
 
-    datetime += currentTimeFrac100NS;
+    datetime += (int64_t) currentTimeFrac100NS;
     return datetime;
 }
 
