@@ -304,12 +304,10 @@ build-with_no_crypto:
   artifacts:
 
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
-build-linux64-pys2opc-all-tests: &build_linux64_pys2opc_all_tests
+build-linux64-pys2opc-all-tests:
   <<: *build_linux
   variables:
     <<: [*build_linux_variables, *all-tests_build_variables] # add pys2opc
-    BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
-    CMAKE_BUILD_RPATH_USE_ORIGIN: 'true' # set a relative path in binaries RPATH for shared libraries
   needs: []
   script: # build and install shared libs, then build static libs and binaries
     - "ENABLE_SAMPLES=0 ENABLE_TESTING=0 BUILD_SHARED_LIBS=1 ./build.sh && cmake --build $BUILD_DIR --target install || exit $?"
@@ -319,24 +317,6 @@ build-linux64-pys2opc-all-tests: &build_linux64_pys2opc_all_tests
     - if: "$ALL_TESTS != null || $WITH_COVERAGE == null && $NO_ASAN != null && \
         $WITH_SONAR == null" # if ASAN is deactivated build PyS2OPC by default (except for coverage)
       when: on_success
-
-# Build only S2OPC libs and toolkit_test_server for UACTT tests
-# Note1: toolkit_test_server builds client/server libs, only pubsub lib missing explicitely
-# Note2: toolkit_test_server needs XML data copied by check_helpers
-build-linux64-pys2opc-all-tests-light:
-  <<: *build_linux64_pys2opc_all_tests
-  script:
-      - ./build.sh --target toolkit_test_server s2opc_pubsub || exit $?
-  artifacts:
-    name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_light"
-    paths:
-      - "*.log"
-      - "build/*.cmake"
-      - "build/src"
-      - "build/bin"
-      - "build/lib"
-    expire_in: "1 week"
-    when: on_success
 
 # Used by nightly last build to obtain all PyS2OPC wheels
 build-linux64-pys2opc-all-wheels:
@@ -681,7 +661,6 @@ test-unit-all-builds:
 # Test uactt for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
   <<: *test_uactt
-  needs: [build-linux64-pys2opc-all-tests-light]
   variables:
     LINUX_UACTT: 1
     TEST_PASSWORD_PRIVATE_KEY: password
