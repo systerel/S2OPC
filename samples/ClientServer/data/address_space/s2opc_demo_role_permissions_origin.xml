@@ -260,7 +260,7 @@
       </ExtensionObject>
     </Value>
   </UAVariable>
-  <!-- Definiton of the role-related references nodes of the NamespaceMetadataType NS0 -->
+  <!-- Definition of the role-related references nodes of the NamespaceMetadataType NS0 -->
   <UAVariable NodeId="i=16134" BrowseName="DefaultRolePermissions" DataType="i=96" ValueRank="1" ArrayDimensions="0" AccessLevel="1">
     <DisplayName>DefaultRolePermissions</DisplayName>
     <References>
@@ -291,7 +291,7 @@
             <RoleId>
               <Identifier>i=15680</Identifier> <!-- Operator -->
             </RoleId>
-            <Permissions>2081</Permissions> <!-- Browse + Read + ReceiveEvents -->
+            <Permissions>6177</Permissions> <!-- Browse + Read + Call+ ReceiveEvents -->
           </Body>
         </ExtensionObject>
         <!-- 3rd RolePermission -->
