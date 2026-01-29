@@ -259,6 +259,46 @@ const SOPC_ByteString* SOPC_Event_GetEventId(const SOPC_Event* pEvent)
     return SOPC_InternalEvent_GetEventId(pEvent);
 }
 
+static char* SOPC_InternalVarToString(const SOPC_Variant* var)
+{
+    SOPC_ASSERT(NULL != var);
+    SOPC_ASSERT(var->ArrayType == SOPC_VariantArrayType_SingleValue);
+    SOPC_Buffer* buf = SOPC_Buffer_Create(200);
+    SOPC_ReturnStatus dumpSt = SOPC_Variant_Dump(buf, var);
+    if (SOPC_STATUS_OK == dumpSt)
+    {
+        dumpSt = SOPC_Buffer_Write(buf, (const uint8_t*) "", 1);
+    }
+    char* result = NULL;
+    if (SOPC_STATUS_OK == dumpSt)
+    {
+        result = (char*) buf->data;
+        buf->data = NULL;
+    }
+    SOPC_Buffer_Delete(buf);
+    return result;
+}
+
+static char* SOPC_InternalByteStringToString(SOPC_ByteString* bs)
+{
+    SOPC_Variant bsVar = {.ArrayType = SOPC_VariantArrayType_SingleValue,
+                          .BuiltInTypeId = SOPC_ByteString_Id,
+                          .DoNotClear = true,
+                          .Value.Bstring = *bs};
+
+    return SOPC_InternalVarToString(&bsVar);
+}
+
+char* SOPC_Event_GetCstringEventId(const SOPC_Event* pEvent)
+{
+    SOPC_ByteString* eventId = SOPC_InternalEvent_GetEventId(pEvent);
+    if (NULL == eventId)
+    {
+        return NULL;
+    }
+    return SOPC_InternalByteStringToString(eventId);
+}
+
 SOPC_ReturnStatus SOPC_Event_SetEventId(SOPC_Event* pEvent, const SOPC_ByteString* pEventId)
 {
     if (NULL == pEvent || NULL == pEvent->qnPathToEventVar || NULL == pEventId || pEventId->Length <= 0)

@@ -89,6 +89,16 @@ const SOPC_NodeId* SOPC_Event_GetEventTypeId(const SOPC_Event* pEvent);
 const SOPC_ByteString* SOPC_Event_GetEventId(const SOPC_Event* pEvent);
 
 /**
+ * \brief Get the EventId as a C-string for the given event.
+ *        The returned string shall be freed by the caller.
+ *
+ * \param pEvent pointer to the event from which EventId shall be retrieved
+ *
+ * \return the eventId as a newly allocated C-string or NULL in case of error
+ */
+char* SOPC_Event_GetCstringEventId(const SOPC_Event* pEvent);
+
+/**
  * \brief Sets the given EventId for the given event
  *
  * \note Events created using ::SOPC_EventManager_CreateEventInstance have
