@@ -1348,8 +1348,14 @@ static int cmd_demo_quit(WordList* pList)
         SOPC_SubScheduler_Stop();
         gSubStarted = false;
     }
-    SOPC_ServerHelper_StopServer();
-    LOG_WARNING("Server manually stopped!\n");
-
+    SOPC_ReturnStatus status = SOPC_ServerHelper_StopServer();
+    if (SOPC_STATUS_OK == status)
+    {
+        LOG_WARNING("Server manually stopped!\n");
+    }
+    else
+    {
+        LOG_ERROR("Server stop failed!\n");
+    }
     return 0;
 }
