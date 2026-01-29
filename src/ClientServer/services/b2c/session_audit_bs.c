@@ -97,11 +97,12 @@ static SOPC_DateTime actionTimeStamp = 0;
 /********************/
 /* LOCAL FUNCTIONS  */
 /********************/
+
 /*********************************************************************************/
 static void set_UserIdentityToken(SOPC_Event* const event, const SOPC_ExtensionObject* token)
 {
     SOPC_ASSERT(NULL != token);
-    SOPC_ReturnStatus res;
+    SOPC_ReturnStatus res = SOPC_STATUS_NOK;
 
     SOPC_Variant var;
     SOPC_Variant_Initialize(&var);
@@ -125,7 +126,19 @@ static void set_UserIdentityToken(SOPC_Event* const event, const SOPC_ExtensionO
         }
     }
 
-    SOPC_Event_SetVariableFromStrPath(event, "0:UserIdentityToken", &var);
+    if (SOPC_STATUS_OK == res)
+    {
+        res = SOPC_Event_SetVariableFromStrPath(event, "0:UserIdentityToken", &var);
+    }
+    else
+    {
+        char* eventIdStr = SOPC_Event_GetCstringEventId(event);
+        SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "Audit Session set_UserIdentityToken: Failed to determine UserIdentityToken variable for event %s",
+            eventIdStr);
+        SOPC_Free(eventIdStr);
+    }
     SOPC_Variant_Clear(&var);
 }
 
@@ -174,7 +187,16 @@ static void copy_SignedSoftwareCertificates(SOPC_Event* const event,
     var.Value.Array.Content.ExtObjectArr = obj;
     if (SOPC_STATUS_OK == copyStatus)
     {
-        SOPC_Event_SetVariableFromStrPath(event, attrName, &var);
+        SOPC_ReturnStatus status = SOPC_Event_SetVariableFromStrPath(event, attrName, &var);
+        if (SOPC_STATUS_OK != status)
+        {
+            char* eventIdStr = SOPC_Event_GetCstringEventId(event);
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Audit Session copy_SignedSoftwareCertificates: Failed to set %s variable for event %s", attrName,
+                eventIdStr);
+            SOPC_Free(eventIdStr);
+        }
     }
 
     SOPC_Variant_Clear(&var);
@@ -280,7 +302,8 @@ static SOPC_Event* prepare_session_event(const SOPC_NodeId* eventType)
     if (SOPC_Audit_HasOption(SOPC_Audit_Options_AuditSession) && NULL != eventType)
     {
         // Create the event object
-        SOPC_ServerHelper_CreateEvent(eventType, &event);
+        SOPC_ReturnStatus status = SOPC_ServerHelper_CreateEvent(eventType, &event);
+        SOPC_UNUSED_RESULT(status); // event will be NULL if not SOPC_STATUS_OK
     }
 
     return event;
