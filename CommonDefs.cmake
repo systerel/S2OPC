@@ -411,7 +411,7 @@ if(WITH_UBSAN)
 endif()
 
 if(WITH_COVERAGE)
-  list(APPEND S2OPC_COMPILER_FLAGS --coverage)
+  list(APPEND S2OPC_COMPILER_FLAGS --coverage -fprofile-update=atomic)
   list(APPEND S2OPC_LINK_LIBRARIES gcov)
 endif()
 
