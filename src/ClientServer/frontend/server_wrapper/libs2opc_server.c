@@ -490,12 +490,19 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (!SOPC_ServerInternal_IsConfiguring())
+    bool isConfiguring = SOPC_ServerInternal_IsConfiguring();
+    bool isStopped = SOPC_ServerInternal_IsStopped();
+    if (!isConfiguring && !isStopped)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
     sopc_server_helper_config.stoppedCb = stoppedCb;
-    SOPC_ReturnStatus status = SOPC_HelperInternal_FinalizeToolkitConfiguration();
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (isConfiguring)
+    {
+        // Finalize the configuration if the server is in configuring phase
+        status = SOPC_HelperInternal_FinalizeToolkitConfiguration();
+    }
     // Set started stated prior to call OpenEndpoints to ensure event callback is already active
     if (SOPC_STATUS_OK == status && !SOPC_ServerInternal_SetStartedState())
     {

@@ -393,7 +393,8 @@ bool SOPC_ServerInternal_SetStartedState(void)
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
         SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
-        res = SOPC_SERVER_STATE_CONFIGURED == sopc_server_helper_config.state;
+        res = (SOPC_SERVER_STATE_CONFIGURED == sopc_server_helper_config.state ||
+               SOPC_SERVER_STATE_STOPPED == sopc_server_helper_config.state);
         if (res)
         {
             sopc_server_helper_config.state = SOPC_SERVER_STATE_STARTED;
