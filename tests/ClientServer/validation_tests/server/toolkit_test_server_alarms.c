@@ -863,7 +863,6 @@ static void SOPC_LooperEventHandler_UpdateEqtSensors(SOPC_EventHandler* handler,
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to update sensors values (service failure)");
         }
-        (void) SOPC_EncodeableObject_Clear(measureWriteReqCopy.encodeableType, &measureWriteReqCopy);
         (void) SOPC_EncodeableObject_Delete(resp->encodeableType, (void**) &resp);
     }
     else
@@ -874,6 +873,7 @@ static void SOPC_LooperEventHandler_UpdateEqtSensors(SOPC_EventHandler* handler,
             (void) SOPC_EncodeableObject_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &wr);
         }
     }
+    (void) SOPC_EncodeableObject_Clear(measureWriteReqCopy.encodeableType, &measureWriteReqCopy);
 }
 
 // Looper thread in charge of updating variables and alarms
