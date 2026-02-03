@@ -57,7 +57,7 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
             .serverAllEndpointsClosed = false,
         },
     .serverStoppedStatus = SOPC_STATUS_OK,
-    .stoppedCb = NULL,
+    .userStoppedCb = NULL,
     .configuredSecondsTillShutdown = SOPC_DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,
     .configuredCurrentTimeRefreshIntervalMs = SOPC_DEFAULT_CURRENT_TIME_REFRESH_PERIOD_MS,
     .currentTimeRefreshTimerId = 0,
@@ -397,6 +397,12 @@ bool SOPC_ServerInternal_SetStartedState(void)
                SOPC_SERVER_STATE_STOPPED == sopc_server_helper_config.state);
         if (res)
         {
+            // Reset sync server stop data
+            SOPC_Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
+            sopc_server_helper_config.syncServeStopData.serverRequestedToStop = false;
+            sopc_server_helper_config.syncServeStopData.serverAllEndpointsClosed = false;
+            SOPC_Mutex_Unlock(&sopc_server_helper_config.syncLocalServiceMutex);
+
             sopc_server_helper_config.state = SOPC_SERVER_STATE_STARTED;
         }
         SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
@@ -428,6 +434,9 @@ void SOPC_ServerInternal_SetStoppedState(void)
     {
         SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         sopc_server_helper_config.state = SOPC_SERVER_STATE_STOPPED;
+        // Stop the current time update timer (in case it was not already stopped)
+        SOPC_EventTimer_Cancel(sopc_server_helper_config.currentTimeRefreshTimerId);
+        sopc_server_helper_config.currentTimeRefreshTimerId = 0;
         SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
     }
 }
@@ -523,6 +532,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void)
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     // Data used only when server is running with synchronous Serve function
+    memset(&sopc_server_helper_config.syncServeStopData, 0, sizeof(sopc_server_helper_config.syncServeStopData));
     mutStatus = SOPC_Condition_Init(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     mutStatus = SOPC_Mutex_Initialization(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
@@ -547,9 +557,13 @@ void SOPC_ServerConfigHelper_Clear(void)
         return;
     }
 
-    SOPC_ASSERT(
-        SOPC_ServerInternal_IsConfigClearable() &&
-        "Server is not yet stopped, check SOPC_ServerHelper_StopServer was called and stop callback call awaited.");
+    // If server is started, stop it first
+    if (SOPC_ServerInternal_IsStarted())
+    {
+        SOPC_ServerHelper_StopServer();
+    }
+
+    SOPC_ASSERT(SOPC_ServerInternal_IsConfigClearable() && "Server is not yet stopped or in unexpected state");
 
     SOPC_CommonHelper_SetServerComEvent(NULL);
 
@@ -573,6 +587,7 @@ void SOPC_ServerConfigHelper_Clear(void)
     // Data used only when server is running with synchronous Serve function
     SOPC_Condition_Clear(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
     SOPC_Mutex_Clear(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    memset(&sopc_server_helper_config.syncServeStopData, 0, sizeof(sopc_server_helper_config.syncServeStopData));
 
     if (NULL != sopc_server_helper_config.buildInfo)
     {

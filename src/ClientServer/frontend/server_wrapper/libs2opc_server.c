@@ -430,6 +430,7 @@ static void SOPC_HelperInternal_ShutdownPhaseServer(void)
 {
     // Stop the current time update timer
     SOPC_EventTimer_Cancel(sopc_server_helper_config.currentTimeRefreshTimerId);
+    sopc_server_helper_config.currentTimeRefreshTimerId = 0;
 
     // The OPC UA server indicates it will shutdown during a few seconds and then actually stop
 
@@ -490,13 +491,17 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    else if (&SOPC_ServerInternal_SyncServerStoppedCb == stoppedCb) // Used for internal call from Serve() only
+    {
+        stoppedCb = NULL; // No user defined callback in this case
+    }
     bool isConfiguring = SOPC_ServerInternal_IsConfiguring();
     bool isStopped = SOPC_ServerInternal_IsStopped();
     if (!isConfiguring && !isStopped)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    sopc_server_helper_config.stoppedCb = stoppedCb;
+    sopc_server_helper_config.userStoppedCb = stoppedCb;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (isConfiguring)
     {
@@ -544,7 +549,7 @@ void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus 
     {
         // Server is considered stopped when no client connection possible anymore
         SOPC_UNUSED_RESULT(SOPC_ServerInternal_SetStoppedState());
-        sopc_server_helper_config.stoppedCb(sopc_server_helper_config.serverStoppedStatus);
+        SOPC_ServerInternal_SyncServerStoppedCb(sopc_server_helper_config.serverStoppedStatus);
     }
 }
 
@@ -566,14 +571,20 @@ static void SOPC_HelperInternal_SyncServerAsyncStop(bool allEndpointsAlreadyClos
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
-// server stopped callback used by ::SOPC_ServerHelper_Serve
-static void SOPC_HelperInternal_SyncServerStoppedCb(SOPC_ReturnStatus stopStatus)
+// server stopped callback used for synchronous stop
+void SOPC_ServerInternal_SyncServerStoppedCb(SOPC_ReturnStatus stopStatus)
 {
     if (SOPC_STATUS_OK != stopStatus)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Endpoint closed with error status: %d", stopStatus);
     }
     SOPC_HelperInternal_SyncServerAsyncStop(true);
+
+    // Call the user defined callback when server is stopped (if applicable)
+    if (NULL != sopc_server_helper_config.userStoppedCb)
+    {
+        sopc_server_helper_config.userStoppedCb(stopStatus);
+    }
 }
 
 #ifdef S2OPC_HAS_AUDITING
@@ -653,6 +664,24 @@ SOPC_ReturnStatus SOPC_ServerInternal_TriggerAuditEvent(SOPC_Event* event)
 }
 #endif // S2OPC_HAS_AUDITING
 
+static void SOPC_ServerInternal_SynchShutdown(void)
+{
+    // Shutdown phase
+    SOPC_HelperInternal_ShutdownPhaseServer();
+    // Closing endpoints
+    SOPC_HelperInternal_ActualShutdownServer();
+
+    // Wait for all endpoints to close
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    while (SOPC_STATUS_OK == mutStatus && !sopc_server_helper_config.syncServeStopData.serverAllEndpointsClosed)
+    {
+        mutStatus = SOPC_Mutex_UnlockAndWaitCond(&sopc_server_helper_config.syncServeStopData.serverStoppedCond,
+                                                 &sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    }
+    mutStatus = SOPC_Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    SOPC_UNUSED_RESULT(mutStatus);
+}
+
 SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
 {
     if (!SOPC_ServerInternal_SetStoppingState())
@@ -660,18 +689,16 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
         return SOPC_STATUS_INVALID_STATE;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (&SOPC_HelperInternal_SyncServerStoppedCb == sopc_server_helper_config.stoppedCb)
+    if (NULL == sopc_server_helper_config.userStoppedCb)
     {
-        // Since server is running synchronously with ::SOPC_ServerHelper_Serve, stop request is asynchronous
+        // Since server is running synchronously with ::SOPC_ServerHelper_Serve,
+        // stop request is asynchronous here and synchronous in Serve function
         SOPC_HelperInternal_SyncServerAsyncStop(false);
     }
     else
     {
-        // since server was started using ::SOPC_ServerHelper_StartServer we shall shutdown in synchronous way
-        SOPC_HelperInternal_ShutdownPhaseServer();
-        SOPC_HelperInternal_ActualShutdownServer();
-
-        // then the stopped callback will be called when server actually stopped
+        // Since server was started using ::SOPC_ServerHelper_StartServer we shall shutdown in synchronous way here
+        SOPC_ServerInternal_SynchShutdown();
     }
 
     return status;
@@ -679,7 +706,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void)
 
 SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
 {
-    SOPC_ReturnStatus status = SOPC_ServerHelper_StartServer(SOPC_HelperInternal_SyncServerStoppedCb);
+    SOPC_ReturnStatus status = SOPC_ServerHelper_StartServer(SOPC_ServerInternal_SyncServerStoppedCb);
     // If failed to start return immediately
     if (SOPC_STATUS_OK != status)
     {
@@ -733,19 +760,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
             SOPC_UNUSED_RESULT(SOPC_ServerInternal_SetStoppingState());
         }
 
-        // Shutdown phase
-        SOPC_HelperInternal_ShutdownPhaseServer();
-        // Closing endpoints
-        SOPC_HelperInternal_ActualShutdownServer();
-
-        // Wait for all endpoints to close
-        status = SOPC_Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
-        while (SOPC_STATUS_OK == status && !sopc_server_helper_config.syncServeStopData.serverAllEndpointsClosed)
-        {
-            status = SOPC_Mutex_UnlockAndWaitCond(&sopc_server_helper_config.syncServeStopData.serverStoppedCond,
-                                                  &sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
-        }
-        status = SOPC_Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+        SOPC_ServerInternal_SynchShutdown();
     }
 
     return status;

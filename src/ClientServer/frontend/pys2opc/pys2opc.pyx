@@ -1242,14 +1242,11 @@ class PyS2OPC_Server(PyS2OPC):
     def stop_serve() -> SOPC_ReturnStatus:
         """
         Stop the server (in a blocking way during shutdown phase).
-        Then wait for `_callback_stop_server` before return, to avoid clearing the server too early.
 
         Note: Server stops after 5 seconds for shutdown phase to indicate shutdown in ServerState node
         """
         with nogil:
             status = SOPC_ServerHelper_StopServer()
-        while PyS2OPC_Server._serving: # wait for _callback_stop_server
-            time.sleep(0.1)
         return status
 
     @staticmethod

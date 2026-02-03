@@ -115,7 +115,7 @@ typedef struct SOPC_ServerHelper_Config
     } syncServeStopData;
 
     // Server stopped notification callback record
-    SOPC_ServerStopped_Fct* stoppedCb;
+    SOPC_ServerStopped_Fct* userStoppedCb;
     // Server stopped notification callback data
     SOPC_ReturnStatus serverStoppedStatus;
 
@@ -192,6 +192,9 @@ bool SOPC_ServerInternal_SetStoppingState(void);
 
 // Set server state as stopped
 void SOPC_ServerInternal_SetStoppedState(void);
+
+// Called when server is stopped to signal stop to waiting condition variable
+void SOPC_ServerInternal_SyncServerStoppedCb(SOPC_ReturnStatus stopStatus);
 
 // Get password to decrypt server private key from internal callback
 bool SOPC_ServerInternal_GetKeyPassword(char** outPassword);
