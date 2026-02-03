@@ -89,21 +89,22 @@ bool SOPC_ServerInternal_LocalServiceAsync(SOPC_LocalServiceAsyncResp_Fct* async
 {
     SOPC_ASSERT(NULL != request);
     SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(userCtx, SE_LOCAL_SERVICE_RESPONSE);
+    bool res = false;
     if (NULL != ctx)
     {
         ctx->eventCtx.localService.customAsyncRespCb = asyncRespCb;
         ctx->eventCtx.localService.isHelperInternal = true;
         ctx->eventCtx.localService.internalErrorMsg = errorMsg;
-        SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
-                                                    (uintptr_t) ctx);
-        return true;
+        res = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
+                                                          (uintptr_t) ctx);
     }
-    else
+    if (!res)
     {
+        SOPC_Free(ctx);
         SOPC_ReturnStatus status = SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) request, &request);
         SOPC_UNUSED_RESULT(status);
-        return false;
     }
+    return res;
 }
 
 bool SOPC_ServerInternal_GetKeyPassword(char** outPassword)
@@ -803,8 +804,9 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
         ctx->eventCtx.localService.customAsyncRespCb = NULL;
 
         // Send request
-        SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
-                                                    (uintptr_t) ctx);
+        bool res = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
+                                                               (uintptr_t) ctx);
+        SOPC_UNUSED_RESULT(res); // guaranteed by server started and managed by timeout in worst case scenario
 
         // Wait until response received or error status (timeout)
         while (SOPC_STATUS_OK == status && NULL == sopc_server_helper_config.syncResp)
@@ -857,8 +859,13 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsyncCustom(SOPC_LocalServiceAsy
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
     ctx->eventCtx.localService.customAsyncRespCb = asyncRespCb;
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request, (uintptr_t) ctx);
-
+    bool res = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
+                                                           (uintptr_t) ctx);
+    if (!res)
+    {
+        SOPC_Free(ctx);
+        return SOPC_STATUS_INVALID_STATE;
+    }
     return SOPC_STATUS_OK;
 }
 

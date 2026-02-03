@@ -74,8 +74,10 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfig
  * \param requestContext     A context value, it will be provided with corresponding response
  *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
+ *
+ * \return                    true if the event has been successfully enqueued, false if server is not configured
  */
-void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
+bool SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext);
 
@@ -92,8 +94,10 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
  * \param optMonitoredItemId  (optional) The monitored item Id for which the event is triggered or 0.
  *
  * Note: the provided event and its content is automatically deallocated by the toolkit
+ *
+ * \return                    true if the event has been successfully enqueued, false if server is not configured
  */
-void SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
+bool SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
                                      SOPC_Event* event,
                                      SOPC_SessionId optSessionId,
                                      uint32_t optSubscriptionId,

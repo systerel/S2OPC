@@ -33,7 +33,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_async_api.h"
-#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 
 static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
                                          uint32_t IdOrStatus,
@@ -600,6 +600,18 @@ void SOPC_ServerConfigHelper_Clear(void)
     SOPC_Free(sopc_server_helper_config.endpointClosed);
     SOPC_Atomic_Int_Set(&sopc_server_helper_config.initialized, (int32_t) false);
     SOPC_Mutex_Clear(&sopc_server_helper_config.stateMutex);
+
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    if (NULL != pConfig)
+    {
+        SOPC_ServerConfig_Clear(&pConfig->serverConfig);
+    }
+    // Restore unconfigured state in toolkit (no more address space defined => local services deactivated)
+    SOPC_ReturnStatus status = SOPC_ToolkitServer_UnConfigure();
+    SOPC_ASSERT(SOPC_STATUS_OK == status); // TMP => log or ignore
+    // Remove all endpoint configurations from toolkit to be able to add new ones later
+    status = SOPC_ToolkitServer_RemoveAllEndpointsConfig();
+    SOPC_ASSERT(SOPC_STATUS_OK == status); // TMP => log or ignore
 }
 
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword)

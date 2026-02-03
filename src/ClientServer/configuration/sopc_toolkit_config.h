@@ -68,6 +68,13 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct);
 SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void);
 
 /**
+ *  \brief  Indicates whether the toolkit server configuration is configured
+ *
+ *  \return true if the toolkit server configuration is configured, false otherwise
+ */
+bool SOPC_ToolkitServer_IsConfigured(void);
+
+/**
  *  \brief  Clear the stack configuration
  *
  * \note This function and ::SOPC_Toolkit_Initialize function are not thread-safe and shall be called in the same

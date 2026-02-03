@@ -32,29 +32,55 @@
 
 void SOPC_ToolkitServer_AsyncOpenEndpoint(SOPC_EndpointConfigIdx endpointConfigIdx)
 {
+    if (!SOPC_ToolkitServer_IsConfigured())
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_ToolkitServer_AsyncOpenEndpoint: toolkit server is not configured");
+        return;
+    }
     // TODO: check valid config and return bool
     SOPC_Services_EnqueueEvent(APP_TO_SE_OPEN_ENDPOINT, endpointConfigIdx, (uintptr_t) NULL, 0);
 }
 
 void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfigIdx)
 {
+    if (!SOPC_ToolkitServer_IsConfigured())
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_ToolkitServer_AsyncCloseEndpoint: toolkit server is not configured");
+        return;
+    }
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_ENDPOINT, endpointConfigIdx, (uintptr_t) NULL, 0);
 }
 
-void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
+bool SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext)
 {
+    if (!SOPC_ToolkitServer_IsConfigured())
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_ToolkitServer_AsyncLocalServiceRequest: toolkit server is not configured");
+        return false;
+    }
     SOPC_Services_EnqueueEvent(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConfigIdx, (uintptr_t) requestStruct,
                                requestContext);
+    return true;
 }
 
-void SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
+bool SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
                                      SOPC_Event* event,
                                      SOPC_SessionId optSessionId,
                                      uint32_t optSubscriptionId,
                                      uint32_t optMonitoredItemId)
 {
+    if (!SOPC_ToolkitServer_IsConfigured())
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_ToolkitServer_TriggerEvent: toolkit server is not configured");
+        return false;
+    }
+
     SOPC_ASSERT(NULL != notifierNodeId);
     SOPC_ASSERT(NULL != event);
     SOPC_Internal_EventContext* eventCtx = SOPC_Calloc(1, sizeof(*eventCtx));
@@ -66,15 +92,31 @@ void SOPC_ToolkitServer_TriggerEvent(const SOPC_NodeId* notifierNodeId,
     eventCtx->optSubscriptionId = optSubscriptionId;
     eventCtx->optMonitoredItemId = optMonitoredItemId;
     SOPC_Services_EnqueueEvent(APP_TO_SE_TRIGGER_EVENT, 0, (uintptr_t) eventCtx, 0);
+
+    return true;
 }
 
 void SOPC_ToolkitServer_AsyncReEvalSecureChannels(bool ownCert)
 {
+    if (!SOPC_ToolkitServer_IsConfigured())
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_ToolkitServer_AsyncReEvalSecureChannels: toolkit server is not configured");
+        return;
+    }
+
     SOPC_Services_EnqueueEvent(APP_TO_SE_REEVALUATE_SCS, 0, (uintptr_t) true, (uintptr_t) ownCert);
 }
 
 void SOPC_ToolkitServer_AsyncReEvalUserCertSessions(void)
 {
+    if (!SOPC_ToolkitServer_IsConfigured())
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_ToolkitServer_AsyncReEvalUserCertSessions: toolkit server is not configured");
+        return;
+    }
+
     SOPC_Services_EnqueueEvent(APP_TO_SE_EVAL_USR_CRT_SESSIONS, 0, (uintptr_t) NULL, (uintptr_t) NULL);
 }
 

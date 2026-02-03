@@ -106,4 +106,42 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
  */
 const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx);
 
+/**
+ *  \brief Set the given Address Space for the current toolkit server
+ *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call).
+ *  Note: only one address space can be set, further call will be refused.
+ *
+ *  \param addressSpace  The address space definition
+ *
+ *  \return SOPC_STATUS_OK if configuration succeeded,
+ *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized, already
+ *  configured or address space is already set, SOPC_STATUS_NOK otherwise
+ */
+SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
+
+/**
+ *  \brief  Define toolkit configuration as not configured anymore and unlock its state
+ *          until SOPC_ToolkitServer_Configured is called again,
+ *          any further call to server services will fail until a new configuration is done.
+ *
+ *  \warning Server SHALL be stopped prior to call this function
+ *           (i.e. all endpoints closed and no client connection possible).
+ *
+ *  \return SOPC_STATUS_OK if initialization succeeded,
+ *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized or already
+ *  configured,
+ *  SOPC_STATUS_INVALID_PARAMETERS if server configuration is defined but no address space is set
+ */
+SOPC_ReturnStatus SOPC_ToolkitServer_UnConfigure(void);
+
+/**
+ *  \brief Remove all the endpoint configurations previously defined on server side
+ *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call
+ *   or after ::SOPC_ToolkitServer_UnConfigure).
+ *
+ *  \return SOPC_STATUS_OK if endpoint configurations removal succeeded,
+ *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized or already configured.
+ */
+SOPC_ReturnStatus SOPC_ToolkitServer_RemoveAllEndpointsConfig(void);
+
 #endif /* SOPC_TOOLKIT_CONFIG_INTERNAL_H_ */

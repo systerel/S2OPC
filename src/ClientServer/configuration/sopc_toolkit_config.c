@@ -268,6 +268,18 @@ SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
     return status;
 }
 
+bool SOPC_ToolkitServer_IsConfigured(void)
+{
+    bool res = false;
+    if (tConfig.initDone)
+    {
+        SOPC_Mutex_Lock(&tConfig.mut);
+        res = tConfig.serverConfigLocked;
+        SOPC_Mutex_Unlock(&tConfig.mut);
+    }
+    return res;
+}
+
 static void SOPC_ToolkitServer_ClearScConfig_WithoutLock(uint32_t serverScConfigIdxWithoutOffset)
 {
     SOPC_SecureChannel_Config* scConfig = tConfig.serverScConfigs[serverScConfigIdxWithoutOffset];
@@ -653,8 +665,8 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
 static void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
 {
     SOPC_ASSERT(NULL != addressSpace);
-    address_space_bs__nodes = addressSpace;
     sopc_addressSpace_configured = true;
+    address_space_bs__nodes = addressSpace;
 }
 
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
@@ -714,4 +726,40 @@ void SOPC_ToolkitClient_ClearAllSCs(void)
     memset(tConfig.scConfigs, 0, sizeof(tConfig.scConfigs));
     tConfig.scConfigIdxMax = 0;
     SOPC_Mutex_Unlock(&tConfig.mut);
+}
+
+SOPC_ReturnStatus SOPC_ToolkitServer_UnConfigure(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    if (tConfig.initDone)
+    {
+        SOPC_Mutex_Lock(&tConfig.mut);
+        if (tConfig.serverConfigLocked)
+        {
+            sopc_appAddressSpaceNotificationCallback = NULL;
+            address_space_bs__nodes = NULL;
+            sopc_addressSpace_configured = false;
+            tConfig.serverConfigLocked = false;
+            status = SOPC_STATUS_OK;
+        }
+        SOPC_Mutex_Unlock(&tConfig.mut);
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_ToolkitServer_RemoveAllEndpointsConfig(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    if (tConfig.initDone)
+    {
+        SOPC_Mutex_Lock(&tConfig.mut);
+        if (!tConfig.serverConfigLocked)
+        {
+            tConfig.epConfigIdxMax = 0;
+            memset(tConfig.epConfigs, 0, sizeof(tConfig.epConfigs));
+            status = SOPC_STATUS_OK;
+        }
+        SOPC_Mutex_Unlock(&tConfig.mut);
+    }
+    return status;
 }
