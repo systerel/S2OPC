@@ -1521,11 +1521,17 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
 
         if (status == SOPC_STATUS_OK)
         {
-            signaturePosition = buffer->length - signatureSize;
-
-            status = SOPC_CryptoProvider_AsymmetricVerify(scConnection->cryptoProvider, buffer->data, signaturePosition,
-                                                          publicKey, &(buffer->data[signaturePosition]), signatureSize,
-                                                          errorReason);
+            if (buffer->length < signatureSize)
+            {
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
+            else
+            {
+                signaturePosition = buffer->length - signatureSize;
+                status = SOPC_CryptoProvider_AsymmetricVerify(
+                    scConnection->cryptoProvider, buffer->data, signaturePosition, publicKey,
+                    &(buffer->data[signaturePosition]), signatureSize, errorReason);
+            }
         }
 
         SOPC_KeyManager_AsymmetricKey_Free(publicKey);
@@ -1551,10 +1557,17 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
 
         if (status == SOPC_STATUS_OK)
         {
-            signaturePosition = buffer->length - signatureSize;
-            status = SOPC_CryptoProvider_SymmetricVerify(scConnection->cryptoProvider, buffer->data, signaturePosition,
-                                                         receiverKeySet->signKey, &(buffer->data[signaturePosition]),
-                                                         signatureSize);
+            if (buffer->length < signatureSize)
+            {
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
+            else
+            {
+                signaturePosition = buffer->length - signatureSize;
+                status = SOPC_CryptoProvider_SymmetricVerify(scConnection->cryptoProvider, buffer->data,
+                                                             signaturePosition, receiverKeySet->signKey,
+                                                             &(buffer->data[signaturePosition]), signatureSize);
+            }
         }
     }
 
