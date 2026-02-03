@@ -1211,11 +1211,6 @@ int main(int argc, char* argv[])
             }
             status = SOPC_ServerHelper_StopServer();
 
-            while (SOPC_STATUS_OK == status && false == SOPC_Atomic_Int_Get(&atomicStopped))
-            {
-                SOPC_Sleep(UPDATE_STOP_TIMEOUT_MS);
-            }
-
             if (activateAlarms)
             {
                 Test_Server_ClearAlarms();

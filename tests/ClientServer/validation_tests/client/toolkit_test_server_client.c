@@ -39,7 +39,6 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
-#include "sopc_threads.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 #ifdef WITH_EXPAT
@@ -81,15 +80,8 @@
 // use max buffer size for 1 chunk and encoded size of a ReadValueId / DataValue which is 18 bytes in this test
 #define NB_READ_VALUES ((SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE / 18) + 1)
 
-static int32_t endpointClosed = false;
-
 static const char* node_id_str = "ns=1;i=1012";
 static const uint64_t write_value = 12;
-
-// Sleep timeout in milliseconds
-static const uint32_t sleepTimeout = 500;
-
-#define SHUTDOWN_PHASE_IN_SECONDS 5
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -101,7 +93,6 @@ static const uint32_t sleepTimeout = 500;
 static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
 {
     SOPC_UNUSED_ARG(status);
-    SOPC_Atomic_Int_Set(&endpointClosed, true);
 }
 
 /**
@@ -715,12 +706,9 @@ START_TEST(test_server_client)
 
     /* Asynchronous request to close the endpoint */
     SOPC_ReturnStatus stopStatus = SOPC_ServerHelper_StopServer();
-
-    /* Wait until endpoint is closed or stop server signal */
-    while (SOPC_STATUS_OK == stopStatus && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
+    if (SOPC_STATUS_OK != stopStatus)
     {
-        // Retrieve received messages on socket
-        SOPC_Sleep(sleepTimeout);
+        printf("<Test_Server_Client: server stop status unexpected: %d\n", stopStatus);
     }
 
     /* Clear the server wrapper layer */

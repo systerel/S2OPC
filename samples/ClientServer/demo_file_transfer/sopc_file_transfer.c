@@ -1183,14 +1183,6 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
 void SOPC_FileTransfer_Clear(void)
 {
     SOPC_UNUSED_RESULT(SOPC_ServerHelper_StopServer());
-    const uint32_t sleepTimeout = 500;
-    uint32_t loopCpt = 0;
-    uint32_t loopTimeout = 5000; // 5 seconds
-    while (!get_stopped_flag() && loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-    }
     SOPC_ServerConfigHelper_Clear();
 
     SOPC_Dict_Delete(g_objectId_to_file);

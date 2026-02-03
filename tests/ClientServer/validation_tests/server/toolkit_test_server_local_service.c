@@ -63,7 +63,6 @@
 #define NB_OF_CHILD_DIALOG_CONDITION NB_OF_REFERENCES_DIALOG_CONDITION - 2
 #define NB_OF_REFERENCE_DIALOG_COND_TYPE_ENABLED_STATE 3
 
-static int32_t endpointClosed = false;
 static int32_t nonRegWriteResponses = 0;
 
 static uint32_t cptReadResps = 0;
@@ -82,7 +81,6 @@ static const SOPC_QualifiedName EnabledStateQName = SOPC_QUALIFIED_NAME(0, "Enab
 static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
 {
     SOPC_UNUSED_ARG(status);
-    SOPC_Atomic_Int_Set(&endpointClosed, true);
 }
 
 static void SOPC_LocalServiceDefaultWriteAddRespCallback(SOPC_EncodeableType* encType,
@@ -1507,22 +1505,6 @@ int main(int argc, char* argv[])
 
     // Asynchronous request to stop the server
     SOPC_ReturnStatus stopStatus = SOPC_ServerHelper_StopServer();
-
-    // Wait until endpoint is closed
-    loopCpt = 0;
-    loopTimeout = 1000;
-    while (SOPC_STATUS_OK == stopStatus && SOPC_Atomic_Int_Get(&endpointClosed) == false &&
-           loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        // Retrieve received messages on socket
-        SOPC_Sleep(sleepTimeout);
-    }
-
-    if (loopCpt * sleepTimeout > loopTimeout)
-    {
-        stopStatus = SOPC_STATUS_TIMEOUT;
-    }
 
     // Clear the toolkit configuration and stop toolkit threads
     bool areNodeReleased = SOPC_AddressSpace_AreNodesReleasable(address_space);

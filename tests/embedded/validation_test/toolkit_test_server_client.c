@@ -40,7 +40,6 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
-#include "sopc_threads.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
@@ -59,13 +58,8 @@ static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
 #define TEST_SERVER_XML_ADDRESS_SPACE "TEST_SERVER_XML_ADDRESS_SPACE"
 
-static int32_t endpointClosed = false;
-
 static const char* node_id_str = "ns=1;s=PubInt16";
 static const uint16_t write_value = 12;
-
-// Sleep timeout in milliseconds
-static const uint32_t sleepTimeout = 500;
 
 #define SHUTDOWN_PHASE_IN_SECONDS 5
 
@@ -104,7 +98,6 @@ static void log_UserCallback(const char* timestampUtc,
 static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
 {
     SOPC_UNUSED_ARG(status);
-    SOPC_Atomic_Int_Set(&endpointClosed, true);
 }
 
 /*---------------------------------------------------------------------------
@@ -695,13 +688,6 @@ void suite_test_server_client(int* index)
 
     /* Asynchronous request to close the endpoint */
     SOPC_ReturnStatus stopStatus = SOPC_ServerHelper_StopServer();
-
-    /* Wait until endpoint is closed or stop server signal */
-    while (SOPC_STATUS_OK == stopStatus && SOPC_Atomic_Int_Get(&endpointClosed) == 0)
-    {
-        // Retrieve received messages on socket
-        SOPC_Sleep(sleepTimeout);
-    }
 
     /* Clear the server wrapper layer */
     SOPC_ServerConfigHelper_Clear();

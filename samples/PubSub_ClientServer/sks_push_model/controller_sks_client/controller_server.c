@@ -38,7 +38,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
 #include "sopc_pub_scheduler.h"
-#include "sopc_threads.h"
+
 #include "xml_expat/sopc_uanodeset_loader.h"
 
 #include "libs2opc_common_config.h"
@@ -136,14 +136,6 @@ bool Server_IsRunning(void)
 void Server_StopAndClear(void)
 {
     SOPC_UNUSED_RESULT(SOPC_ServerHelper_StopServer());
-
-    uint32_t loopCpt = 0;
-    uint32_t loopTimeout = 5000; // 5 seconds
-    while (Server_IsRunning() && loopCpt * SLEEP_TIMEOUT <= loopTimeout)
-    {
-        loopCpt++;
-        SOPC_Sleep(SLEEP_TIMEOUT);
-    }
     SOPC_ServerConfigHelper_Clear();
 }
 
