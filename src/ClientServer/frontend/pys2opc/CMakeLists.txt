@@ -112,7 +112,7 @@ if(WITH_PYS2OPC)
   set_target_properties(pys2opc PROPERTIES PREFIX "")
   set(PYS2OPC_LINK_LIBRARIES s2opc_clientserver)
   if(WIN32)
-    list(APPEND PYS2OPC_LINK_LIBRARIES ${PYTHON_LIBRARY})
+    list(APPEND PYS2OPC_LINK_LIBRARIES Python3::Python)
     set_target_properties(
       pys2opc
       PROPERTIES
