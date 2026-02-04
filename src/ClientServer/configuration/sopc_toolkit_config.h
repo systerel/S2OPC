@@ -63,7 +63,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct);
  *  \return SOPC_STATUS_OK if initialization succeeded,
  *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized or already
  *  configured,
- *  SOPC_STATUS_INVALID_PARAMETERS if server configuration is defined but no address space is set
+ *  SOPC_STATUS_INVALID_PARAMETERS if server configuration is defined but no address space is set,
+ *  SOPC_STATUS_TIMEOUT if timeout to check configuration is used by other layers occurred (still ongoing).
  */
 SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void);
 

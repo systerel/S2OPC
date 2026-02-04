@@ -57,6 +57,11 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void);
 /**
  * \brief Clears the S2OPC Server frontend configuration
  *        It shall be done before a call to ::SOPC_CommonHelper_Clear
+ *
+ * \note It is possible to use this function to clear only the server configuration
+ *       and allow to reconfigure it. For now in this latter case,
+ *       the sessions/subscriptions that are not closed will only be closed
+ *       on their respective timeout.
  */
 void SOPC_ServerConfigHelper_Clear(void);
 

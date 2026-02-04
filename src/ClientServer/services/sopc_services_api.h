@@ -117,7 +117,14 @@ typedef enum SOPC_Services_Event
                                        subscription.<BR/>
                                        id = subscription id */
 
-    /* App to Services events : server side */
+    /* App to Services events : server side (partial: see others) */
+    APP_TO_SE_SERVER_CONFIGURED,     /**< Server side only:<BR/>
+                                         Notifies that the server configuration is configured and locked
+                                        (or will be unlocked).<BR/>
+                                         All server related events are ignored until this event with active flag is
+                                         received.<BR/>
+                                         params = (bool) active flag
+                                      */
     APP_TO_SE_OPEN_ENDPOINT,         /**< Server side only:<BR/>
                                           Requests to open a new endpoint listening for secure channel
                                           connections.<BR/>
@@ -190,14 +197,15 @@ typedef enum SOPC_Services_Event
                                            auxParam = (bool) flag indicating if it concerns application certificate/key update
                                            (true), otherwise the PKI trust list update (false).
                                       */
-    APP_TO_SE_EVAL_USR_CRT_SESSIONS,  /**< Server side only:<BR/>
-                                           Re-evaluates X509IdentityToken certificates for all active sessions.
-                                           If an user certificate is not valid or trusted anymore,
-                                           the associated session is closed.<BR/>
-                                       */
-    APP_TO_SE_UNINITIALIZE_SERVICES,  /**< Server and client sides:<BR/>
-                                           Calls io_dispatch_mgr__UNINITIALISATION() function.
+    /* App to Services events : others */
+    APP_TO_SE_EVAL_USR_CRT_SESSIONS, /**< Server side only:<BR/>
+                                          Re-evaluates X509IdentityToken certificates for all active sessions.
+                                          If an user certificate is not valid or trusted anymore,
+                                          the associated session is closed.<BR/>
                                       */
+    APP_TO_SE_UNINITIALIZE_SERVICES, /**< Server and client sides:<BR/>
+                                          Calls io_dispatch_mgr__UNINITIALISATION() function.
+                                     */
 } SOPC_Services_Event;
 
 /* API to enqueue an event for services */

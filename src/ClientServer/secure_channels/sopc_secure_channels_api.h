@@ -84,6 +84,14 @@ typedef enum
                              auxParam = (bool) flag indicating if it concerns application certificate/key update (true),
                              otherwise the PKI trust list update (false).
                           */
+
+    SE_TO_SCS_SERVER_CONFIGURED, /**< Server side only:<br/>
+                                    Notifies that the server configuration is configured and locked
+                                    (or will be unlocked).<br/>
+                                    All server related events are ignored until this event with active
+                                    flag is received.<br/>
+                                    params = (bool) active flag
+                                 */
 } SOPC_SecureChannels_InputEvent;
 
 /**

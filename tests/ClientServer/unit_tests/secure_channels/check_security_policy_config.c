@@ -33,7 +33,7 @@
 
 #include "sopc_common.h"
 #include "sopc_macros.h"
-#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 
 #define NB_SECU_POLICY_CONFIGS 1
 
@@ -118,7 +118,7 @@ static SOPC_ReturnStatus check_security_combination(char* securityPolicy,
         ck_assert_int_ne(epConfigIdx, 0);
 
         // Security check function is included in the following function :
-        status = SOPC_ToolkitServer_Configured();
+        status = SOPC_ToolkitServer_SecurityCheck();
     }
 
     SOPC_String_Clear(&pSecurityPolicy->securityPolicy);

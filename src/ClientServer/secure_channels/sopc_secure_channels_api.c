@@ -25,11 +25,19 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_chunks_mgr.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_secure_connection_state_mgr.h"
 #include "sopc_secure_listener_state_mgr.h"
 #include "sopc_sockets_api.h"
+#include "sopc_toolkit_config_internal.h"
+
+/**
+ * \brief Indicates whether the server configuration is locked (configured) or not.
+ *        When unlocked, ignore the server related events until it is locked again.
+ */
+static bool isServerConfigurationLocked = false;
 
 void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
                                          int32_t event,
@@ -157,14 +165,51 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
                                       uintptr_t auxParam)
 {
     SOPC_UNUSED_ARG(handler);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     SOPC_SecureChannels_InputEvent scEvent = (SOPC_SecureChannels_InputEvent) event;
     switch (scEvent)
     {
     /* Services events: */
+    /* Config -> SC layer */
+    case SE_TO_SCS_SERVER_CONFIGURED:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "OnInputEvent: SE_TO_SCS_SERVER_CONFIGURED active=%" PRIuPTR, params);
+        if (isServerConfigurationLocked == (bool) params)
+        {
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "SecureChannels: SE_TO_SCS_SERVER_CONFIGURED IGNORED: received with same lock state=%s",
+                ((bool) params) ? "locked" : "unlocked");
+        }
+        else
+        {
+            status = SOPC_ToolkitServer_UsingLockedConfig((bool) params);
+            if (SOPC_STATUS_OK == status)
+            {
+                isServerConfigurationLocked = (bool) params;
+            }
+            else
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "SecureChannels: SE_TO_SCS_SERVER_CONFIGURED FAILED: error in setting server config as used: %s",
+                    ((bool) params) ? "locked" : "unlocked");
+            }
+        }
+        break;
     /* Services manager -> SC listener state manager */
     case EP_OPEN:
     case EP_CLOSE:
+        if (!isServerConfigurationLocked)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "SecureChannels: %s IGNORED: server configuration is not locked (configured)",
+                                   EP_OPEN == scEvent ? "EP_OPEN" : "EP_CLOSE");
+            break; // Ignore the event
+        }
+        SOPC_SecureListenerStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
+        break;
     case REVERSE_EP_OPEN:
     case REVERSE_EP_CLOSE:
         SOPC_SecureListenerStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
@@ -206,6 +251,7 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
     case SC_SERVICE_SND_ERR:
     case SC_DISCONNECTED_ACK:
     case SCS_REEVALUATE_SCS:
+    case SE_TO_SCS_SERVER_CONFIGURED:
         status = SOPC_EventHandler_Post(secureChannelsInputEventHandler, (int32_t) scEvent, id, params, auxParam);
         break;
     default:

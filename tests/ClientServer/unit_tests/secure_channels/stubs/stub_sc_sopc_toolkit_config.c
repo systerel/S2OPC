@@ -401,6 +401,12 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
+SOPC_ReturnStatus SOPC_ToolkitServer_UsingLockedConfig(bool activate)
+{
+    SOPC_UNUSED_ARG(activate);
+    return SOPC_STATUS_OK;
+}
+
 void SOPC_ClientConfig_Initialize(SOPC_Client_Config* config)
 {
     memset(config, 0, sizeof(*config));

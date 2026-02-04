@@ -107,7 +107,7 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
 const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx);
 
 /**
- *  \brief Set the given Address Space for the current toolkit server
+ *  \brief Sets the given Address Space for the current toolkit server
  *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call).
  *  Note: only one address space can be set, further call will be refused.
  *
@@ -120,7 +120,23 @@ const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigI
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 
 /**
- *  \brief  Define toolkit configuration as not configured anymore and unlock its state
+ * \brief Defines whether the locked server configuration is currently used by services/secure channel layers.
+ *        When the services/secure channel layer receives the associated event
+ *        (APP_TO_SE_SERVER_CONFIGURED and derived one for SC),
+ *        it calls this function to inform the configuration layer.
+ *
+ * \param activate  true to inform that locked configuration is used
+ *                  (APP_TO_SE_SERVER_CONFIGURED received with flag set),
+ *                  false to inform that locked configuration is not used anymore
+ *                  (APP_TO_SE_SERVER_CONFIGURED received unset)
+ *
+ *  \return SOPC_STATUS_OK if operation succeeded,
+ *          SOPC_STATUS_INVALID_STATE if config cannot be used/unused in current state.
+ */
+SOPC_ReturnStatus SOPC_ToolkitServer_UsingLockedConfig(bool activate);
+
+/**
+ *  \brief  Defines toolkit configuration as not configured anymore and unlock its state
  *          until SOPC_ToolkitServer_Configured is called again,
  *          any further call to server services will fail until a new configuration is done.
  *
@@ -130,12 +146,13 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
  *  \return SOPC_STATUS_OK if initialization succeeded,
  *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized or already
  *  configured,
- *  SOPC_STATUS_INVALID_PARAMETERS if server configuration is defined but no address space is set
+ *  SOPC_STATUS_INVALID_PARAMETERS if server configuration is defined but no address space is set,
+ *  any other error if it is not possible to synchronize the Services layer to unconfigure the server.
  */
 SOPC_ReturnStatus SOPC_ToolkitServer_UnConfigure(void);
 
 /**
- *  \brief Remove all the endpoint configurations previously defined on server side
+ *  \brief Removes all the endpoint configurations previously defined on server side
  *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call
  *   or after ::SOPC_ToolkitServer_UnConfigure).
  *
@@ -143,5 +160,12 @@ SOPC_ReturnStatus SOPC_ToolkitServer_UnConfigure(void);
  *  SOPC_STATUS_INVALID_STATE if toolkit is not initialized or already configured.
  */
 SOPC_ReturnStatus SOPC_ToolkitServer_RemoveAllEndpointsConfig(void);
+
+/**
+ * \brief Checks if the server security configuration is consistent (for tests only)
+ *
+ *  \return SOPC_STATUS_OK if security configuration is consistent.
+ */
+SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void);
 
 #endif /* SOPC_TOOLKIT_CONFIG_INTERNAL_H_ */

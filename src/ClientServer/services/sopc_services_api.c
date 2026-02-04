@@ -44,6 +44,12 @@
 #include "toolkit_header_init.h"
 #include "util_b2c.h"
 
+/**
+ * \brief Indicates whether the server configuration is locked (configured) or not.
+ *        When unlocked, ignore the server related events until it is locked again.
+ */
+static bool isServerConfigurationLocked = false;
+
 static SOPC_Looper* servicesLooper = NULL;
 static SOPC_EventHandler* secureChannelsEventHandler = NULL;
 static SOPC_EventHandler* servicesEventHandler = NULL;
@@ -224,6 +230,153 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
     }
 }
 
+static void SOPC_Array_Free_WriteDataChanged(void* data)
+{
+    SOPC_WriteDataChanged* writeDataChanged = (SOPC_WriteDataChanged*) data;
+    OpcUa_WriteValue_Clear(writeDataChanged->oldValue);
+    SOPC_Free(writeDataChanged->oldValue);
+    OpcUa_WriteValue_Clear(writeDataChanged->newValue);
+    SOPC_Free(writeDataChanged->newValue);
+}
+
+static void SOPC_Array_Free_NodeChanged(void* data)
+{
+    SOPC_NodeChanged* nodeChanged = (SOPC_NodeChanged*) data;
+    SOPC_NodeId_Clear(nodeChanged->nodeId);
+    SOPC_Free(nodeChanged->nodeId);
+}
+
+static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(id);
+    SOPC_UNUSED_ARG(auxParam);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool treatEvent = false;
+    switch (event)
+    {
+    case APP_TO_SE_SERVER_CONFIGURED:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: APP_TO_SE_SERVER_CONFIGURED active=%" PRIuPTR, params);
+        if (isServerConfigurationLocked == (bool) params)
+        {
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "ServicesMgr: APP_TO_SE_SERVER_CONFIGURED IGNORED: received with same lock state=%s",
+                ((bool) params) ? "locked" : "unlocked");
+        }
+        else
+        {
+            status = SOPC_ToolkitServer_UsingLockedConfig((bool) params);
+            if (SOPC_STATUS_OK == status)
+            {
+                isServerConfigurationLocked = (bool) params;
+                // Forward to SC layer
+                status = SOPC_SecureChannels_EnqueueEvent(SE_TO_SCS_SERVER_CONFIGURED, 0, (uintptr_t) params, 0);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "ServicesMgr: APP_TO_SE_SERVER_CONFIGURED FAILED: error in setting "
+                                       "server config as used: %s",
+                                       ((bool) params) ? "locked" : "unlocked");
+            }
+        }
+        break;
+    case SE_TO_SE_SERVER_DATA_CHANGED:
+    case SE_TO_SE_SERVER_NODE_CHANGED:
+    case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
+        if (!isServerConfigurationLocked)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "filterServerEvents: %s IGNORED: server configuration is not locked (configured)",
+                                   SE_TO_SE_SERVER_DATA_CHANGED == event   ? "SE_TO_SE_SERVER_DATA_CHANGED"
+                                   : SE_TO_SE_SERVER_NODE_CHANGED == event ? "SE_TO_SE_SERVER_NODE_CHANGED"
+                                   : SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO == event
+                                       ? "SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO"
+                                       : "SE_TO_SE_SERVER_UNKNOWN");
+        }
+        else
+        {
+            treatEvent = true;
+        }
+        break;
+    /* Note: subscription/session closure and timers are related to the server side
+             but do not use the server configuration.  Moreover those are necessary to terminate
+             the opened sessions / subscriptions in case of Server clear only
+             since those are not automatically closed for now in this case.
+    case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
+    case SE_TO_SE_SERVER_ASYNC_CLOSE_SUBSCRIPTION:
+    case TIMER_SE_EVAL_SESSION_TIMEOUT:
+    case TIMER_SE_PUBLISH_CYCLE_TIMEOUT:
+    */
+    case APP_TO_SE_OPEN_ENDPOINT:
+    case APP_TO_SE_CLOSE_ENDPOINT:
+    case APP_TO_SE_LOCAL_SERVICE_REQUEST:
+    case APP_TO_SE_TRIGGER_EVENT:
+    case APP_TO_SE_EVAL_USR_CRT_SESSIONS:
+        if (!isServerConfigurationLocked)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "filterServerEvents: %s IGNORED: server configuration is not locked (configured)",
+                                   APP_TO_SE_OPEN_ENDPOINT == event           ? "APP_TO_SE_OPEN_ENDPOINT"
+                                   : APP_TO_SE_CLOSE_ENDPOINT == event        ? "APP_TO_SE_CLOSE_ENDPOINT"
+                                   : APP_TO_SE_LOCAL_SERVICE_REQUEST == event ? "APP_TO_SE_LOCAL_SERVICE_REQUEST"
+                                   : APP_TO_SE_TRIGGER_EVENT == event         ? "APP_TO_SE_TRIGGER_EVENT"
+                                                                              : "APP_TO_SE_EVAL_USR_CRT_SESSIONS");
+        }
+        else
+        {
+            treatEvent = true;
+        }
+        break;
+    default:
+        treatEvent = true;
+        break;
+    }
+    SOPC_Internal_EventContext* eventContext = NULL;
+    SOPC_Internal_AsyncSendMsgData* msg_data = NULL;
+    if (!treatEvent)
+    {
+        // Clear provided data
+        switch (event)
+        {
+        case SE_TO_SE_SERVER_DATA_CHANGED:
+            SOPC_Array_Set_Free_Func((SOPC_Array*) params, &SOPC_Array_Free_WriteDataChanged);
+            SOPC_Array_Delete((SOPC_Array*) params);
+            break;
+        case SE_TO_SE_SERVER_NODE_CHANGED:
+            SOPC_Array_Set_Free_Func((SOPC_Array*) params, &SOPC_Array_Free_NodeChanged);
+            SOPC_Array_Delete((SOPC_Array*) params);
+            break;
+        case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
+            msg_data = (SOPC_Internal_AsyncSendMsgData*) params;
+            SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) msg_data->msgToSend, (void**) &msg_data->msgToSend);
+            SOPC_Free(msg_data);
+            break;
+        case APP_TO_SE_EVAL_USR_CRT_SESSIONS:
+            break; // Nothing to clear
+        case APP_TO_SE_OPEN_ENDPOINT:
+        case APP_TO_SE_CLOSE_ENDPOINT:
+            break; // Nothing to clear
+        case APP_TO_SE_LOCAL_SERVICE_REQUEST:
+            SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) params, (void**) &params);
+            break;
+        case APP_TO_SE_TRIGGER_EVENT:
+            // params =  (SOPC_Internal_EventContext*)
+            eventContext = (SOPC_Internal_EventContext*) params;
+            SOPC_ASSERT(NULL != eventContext);
+            SOPC_NodeId_Clear(&eventContext->notifierNodeId);
+            SOPC_Event_Delete(&eventContext->event);
+            SOPC_Free(eventContext);
+            break;
+        default:
+            break;
+        }
+    }
+    return treatEvent;
+}
+
 static void onServiceEvent(SOPC_EventHandler* handler,
                            int32_t scEvent,
                            uint32_t id,
@@ -254,6 +407,12 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     SOPC_Internal_DiscoveryContext* discoveryContext = NULL;
     SOPC_Internal_EventContext* eventContext = NULL;
     SOPC_DateTime currentTime = 0;
+
+    bool treatEvent = filterServerEvents(event, id, params, auxParam);
+    if (!treatEvent)
+    {
+        return;
+    }
 
     switch (event)
     {
@@ -428,6 +587,9 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         break;
 
     /* App to Services events */
+    case APP_TO_SE_SERVER_CONFIGURED:
+        /* Already managed in filterServerEvents */
+        break;
     case APP_TO_SE_OPEN_ENDPOINT:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_OPEN_ENDPOINT epCfgIdx=%" PRIu32,
                                id);

@@ -215,6 +215,8 @@ int main(int argc, char* argv[])
         status = SOPC_ToolkitServer_Configured();
         SOPC_ASSERT(SOPC_STATUS_OK == status);
 
+        SOPC_SecureChannels_EnqueueEvent(SE_TO_SCS_SERVER_CONFIGURED, 0, (uintptr_t) true, 0);
+
         SOPC_SecureChannels_EnqueueEvent(EP_OPEN, epConfigIdx, (uintptr_t) NULL, 0);
 
         printf("<Stub_Server: Opening endpoint connection listener ...\n");

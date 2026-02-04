@@ -53,7 +53,10 @@
 static struct
 {
     uint8_t initDone;
+    SOPC_Condition serverConfigCond;
     uint8_t serverConfigLocked;
+    uint8_t serverConfigUsedCounter;
+
     SOPC_Mutex mut;
     /* Specific client */
     SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
@@ -68,10 +71,15 @@ static struct
 } // Any change in values below shall be also done in SOPC_Toolkit_Clear
 tConfig = {.initDone = false,
            .serverConfigLocked = false,
+           .serverConfigUsedCounter = 0,
            .scConfigIdxMax = 0,
            .reverseEpConfigIdxMax = 0,
            .serverScLastConfigIdx = 0,
            .epConfigIdxMax = 0};
+
+// Total number of layers using locked server configuration (SecureChannels + Services)
+#define SOPC_NB_LAYERS_USING_SERVER_CONFIG 2
+#define SOPC_CHANGE_CONFIG_LOCK_STATE_TIMEOUT_MS 1000
 
 SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 {
@@ -99,6 +107,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         else
         {
             SOPC_Mutex_Initialization(&tConfig.mut);
+            SOPC_Condition_Init(&tConfig.serverConfigCond);
             SOPC_Mutex_Lock(&tConfig.mut);
             // Note: check again the flag to avoid possible concurrency issue detection by static analysis.
             //       Nevertheless this function shall never be called concurrently since the mutex is created during
@@ -189,7 +198,7 @@ static SOPC_ReturnStatus SOPC_SecurityCheck_UserCredentialsEncrypted(const SOPC_
     return status;
 }
 
-static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
+SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
 {
     SOPC_Endpoint_Config* pEpConfig;
     SOPC_SecurityPolicy* pSecurityPolicy;
@@ -247,7 +256,8 @@ SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     if (tConfig.initDone)
     {
-        SOPC_Mutex_Lock(&tConfig.mut);
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&tConfig.mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         if (!tConfig.serverConfigLocked)
         {
             // Check an address space is defined in case a endpoint configuration exists
@@ -263,7 +273,20 @@ SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
                 status = SOPC_STATUS_INVALID_PARAMETERS;
             }
         }
-        SOPC_Mutex_Unlock(&tConfig.mut);
+        // Notify services layer that server configuration is configured and locked
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Services_EnqueueEvent(APP_TO_SE_SERVER_CONFIGURED, 0, (uintptr_t) true, 0);
+        }
+        // Wait configured is set in all layers before returning
+        while (SOPC_STATUS_OK == mutStatus && tConfig.serverConfigUsedCounter < SOPC_NB_LAYERS_USING_SERVER_CONFIG)
+        {
+            mutStatus = SOPC_Mutex_UnlockAndTimedWaitCond(&tConfig.serverConfigCond, &tConfig.mut,
+                                                          SOPC_CHANGE_CONFIG_LOCK_STATE_TIMEOUT_MS);
+        }
+        status = mutStatus;
+        mutStatus = SOPC_Mutex_Unlock(&tConfig.mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
     return status;
 }
@@ -342,6 +365,7 @@ void SOPC_Toolkit_Clear(void)
             tConfig.epConfigIdxMax = 0;
         }
         SOPC_Mutex_Unlock(&tConfig.mut);
+        SOPC_Condition_Clear(&tConfig.serverConfigCond);
         SOPC_Mutex_Clear(&tConfig.mut);
     }
     SOPC_Common_Clear();
@@ -665,8 +689,8 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
 static void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
 {
     SOPC_ASSERT(NULL != addressSpace);
-    sopc_addressSpace_configured = true;
     address_space_bs__nodes = addressSpace;
+    sopc_addressSpace_configured = true;
 }
 
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
@@ -728,21 +752,69 @@ void SOPC_ToolkitClient_ClearAllSCs(void)
     SOPC_Mutex_Unlock(&tConfig.mut);
 }
 
+SOPC_ReturnStatus SOPC_ToolkitServer_UsingLockedConfig(bool activate)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    if (tConfig.initDone)
+    {
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&tConfig.mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        if (tConfig.serverConfigLocked)
+        {
+            if (activate)
+            {
+                tConfig.serverConfigUsedCounter++;
+                status = SOPC_STATUS_OK;
+            }
+            else if (tConfig.serverConfigUsedCounter > 0)
+            {
+                tConfig.serverConfigUsedCounter--;
+                status = SOPC_STATUS_OK;
+            }
+            // Signal to waiting threads that condition criteria has changed
+            mutStatus = SOPC_Condition_SignalAll(&tConfig.serverConfigCond);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        }
+        mutStatus = SOPC_Mutex_Unlock(&tConfig.mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_ToolkitServer_UnConfigure(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     if (tConfig.initDone)
     {
-        SOPC_Mutex_Lock(&tConfig.mut);
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&tConfig.mut);
         if (tConfig.serverConfigLocked)
         {
-            sopc_appAddressSpaceNotificationCallback = NULL;
-            address_space_bs__nodes = NULL;
-            sopc_addressSpace_configured = false;
-            tConfig.serverConfigLocked = false;
-            status = SOPC_STATUS_OK;
+            // Notify services layer that server configuration will become unlocked
+            SOPC_Services_EnqueueEvent(APP_TO_SE_SERVER_CONFIGURED, 0, (uintptr_t) false, 0);
+
+            // Wait for services layer and secure channels to "release" the server configuration
+            while (SOPC_STATUS_OK == mutStatus && tConfig.serverConfigUsedCounter > 0)
+            {
+                mutStatus = SOPC_Mutex_UnlockAndTimedWaitCond(&tConfig.serverConfigCond, &tConfig.mut,
+                                                              SOPC_CHANGE_CONFIG_LOCK_STATE_TIMEOUT_MS);
+            }
+            if (SOPC_STATUS_TIMEOUT == mutStatus)
+            {
+                // Timeout reached, cannot unconfigure
+                status = SOPC_STATUS_WOULD_BLOCK;
+            }
+            else
+            {
+                // Clear the server configuration
+                sopc_appAddressSpaceNotificationCallback = NULL;
+                address_space_bs__nodes = NULL;
+                sopc_addressSpace_configured = false;
+                tConfig.serverConfigLocked = false;
+                status = SOPC_STATUS_OK;
+            }
+            mutStatus = SOPC_Mutex_Unlock(&tConfig.mut);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
-        SOPC_Mutex_Unlock(&tConfig.mut);
     }
     return status;
 }
