@@ -582,7 +582,7 @@ test-check:
   <<: *test_linux
   tags:
     - ipv6
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # digest of test:2.17
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:08b50767ee50105a015f50483c458f9b4770f46dcf8862c841839f469b24a350 # digest of test:2.18
   script:
     - "./.set-bin-root.sh"
     - "./test-all.sh"
@@ -690,7 +690,7 @@ test-uactt:
 
 test-faulty-packets:
   stage: test-others
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # digest of test:2.17
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:08b50767ee50105a015f50483c458f9b4770f46dcf8862c841839f469b24a350 # digest of test:2.18
   needs: [build-linux-faulty-packet]
   script:
     - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin
@@ -764,7 +764,7 @@ windows-appveyor-artifacts:
 
 coverage-analysis:
   stage: analyses
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # digest of test:2.17
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:08b50767ee50105a015f50483c458f9b4770f46dcf8862c841839f469b24a350 # digest of test:2.18
   script:
     - ./.gen_coverage.sh
   artifacts:

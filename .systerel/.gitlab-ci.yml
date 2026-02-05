@@ -555,7 +555,7 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # digest of test:2.17
+  image: docker.aix.systerel.fr/c838/test@sha256:08b50767ee50105a015f50483c458f9b4770f46dcf8862c841839f469b24a350 # digest of test:2.18
   script:
     - './.set-bin-root.sh'
     - './test-all.sh'
@@ -655,7 +655,7 @@ test-uactt:
 
 test-faulty-packets :
   stage: test-others
-  image: docker.aix.systerel.fr/c838/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # digest of test:2.17
+  image: docker.aix.systerel.fr/c838/test@sha256:08b50767ee50105a015f50483c458f9b4770f46dcf8862c841839f469b24a350 # digest of test:2.18
   needs : [build-linux-faulty-packet]
   script:
     - ./tests/ClientServer/scripts/faulty_packet_tester_launcher.sh build_faulty/bin
@@ -788,7 +788,7 @@ test-pikeos:
 
 coverage-analysis:
   stage: analyses
-  image: docker.aix.systerel.fr/c838/test@sha256:3012dedca1b6fdb11109a1798fbfef03c84244071312254af45aafab41340f73 # digest of test:2.17
+  image: docker.aix.systerel.fr/c838/test@sha256:08b50767ee50105a015f50483c458f9b4770f46dcf8862c841839f469b24a350 # digest of test:2.18
   script:
     - ./.gen_coverage.sh
   artifacts:
