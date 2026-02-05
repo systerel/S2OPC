@@ -33,6 +33,8 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
+#include "libs2opc_client.h"
+#include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
@@ -43,6 +45,14 @@
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+
+#define CLIENT_APPLICATION_NAME "S2OPC_TestClient"
+
+// Client XML configuration
+#define CLIENT_XML_CONFIG "S2OPC_Client_Wrapper_Config.xml"
+
+// Server XML configurations
+#define SERVER_XML_CONFIG "S2OPC_Server_UACTT_Config.xml"
 
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
@@ -56,7 +66,138 @@ const uint8_t NB_SERVER_CONFIG = 2;
 // Number of restart with server restart only cycle (server stop, server start)
 const uint8_t NB_SERVER_RESTART = 2;
 
-uint8_t nbServerConfigCountCount = 0;
+uint8_t nbServerConfigCount = 0;
+
+// Number of restart with server restart only cycle (client disconnect, client connect)
+const uint8_t NB_CLIENT_RECONNECT = 2;
+
+uint8_t nbClientConfigCount = 0;
+
+/*---------------------------------------------------------------------------
+ *                             Client configuration
+ *---------------------------------------------------------------------------*/
+
+static void SOPC_ClientConnectionEventCb(SOPC_ClientConnection* config,
+                                         SOPC_ClientConnectionEvent event,
+                                         SOPC_StatusCode status)
+{
+    SOPC_UNUSED_ARG(config);
+    SOPC_UNUSED_ARG(event);
+    SOPC_UNUSED_ARG(status);
+    SOPC_ASSERT(false);
+}
+
+static const char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
+
+/*
+ * Default client configuration loader (without XML configuration)
+ */
+static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
+                                                        SOPC_SecureConnection_Config*** secureConnConfigArray)
+{
+    // Define client application configuration
+    SOPC_ReturnStatus status = SOPC_ClientConfigHelper_SetPreferredLocaleIds(
+        (sizeof(preferred_locale_ids) / sizeof(preferred_locale_ids[0]) - 1), preferred_locale_ids);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientConfigHelper_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_APPLICATION_URI,
+                                                                   CLIENT_APPLICATION_NAME, NULL,
+                                                                   OpcUa_ApplicationType_Client);
+    }
+
+    // Configure the secure channel connection to use and retrieve channel configuration index
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_SecureConnection_Config* secureConnConfig1 = SOPC_ClientConfigHelper_CreateSecureConnection(
+            "1", DEFAULT_ENDPOINT_URL, OpcUa_MessageSecurityMode_None, SOPC_SecurityPolicy_None);
+
+        if (secureConnConfig1 == NULL)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientConfigHelper_GetSecureConnectionConfigs(nbSecConnCfgs, secureConnConfigArray);
+    }
+
+    return status;
+}
+
+static bool SOPC_GetClientUserSecuAdminPassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                                char** outUserName,
+                                                char** outPassword)
+{
+    SOPC_UNUSED_ARG(secConnConfig);
+    const char* user1 = "user1";
+    char* userName = SOPC_Calloc(strlen(user1) + 1, sizeof(*userName));
+    if (NULL == userName)
+    {
+        return false;
+    }
+    memcpy(userName, user1, strlen(user1) + 1);
+    bool res = SOPC_TestHelper_AskPassWithContext_FromEnv(user1, outPassword);
+    if (!res)
+    {
+        SOPC_Free(userName);
+        return false;
+    }
+    *outUserName = userName;
+    return true;
+}
+
+static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
+                                                        SOPC_SecureConnection_Config*** secureConnConfigArray)
+{
+    /* Retrieve XML configuration file path from environment variables TEST_CLIENT_XML_CONFIG,
+     *
+     * In case of success returns the file path otherwise load default configuration.
+     */
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const char* xml_client_config_path = NULL;
+
+    if (nbClientConfigCount == 2)
+    {
+        xml_client_config_path = CLIENT_XML_CONFIG;
+    }
+
+    if (NULL != xml_client_config_path)
+    {
+        status = SOPC_ClientConfigHelper_ConfigureFromXML(xml_client_config_path, NULL, nbSecConnCfgs,
+                                                          secureConnConfigArray);
+    }
+
+    // Set callback necessary to retrieve client key password (from environment variable)
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    }
+
+    // Set callback necessary to retrieve user password (from environment variable)
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(&SOPC_GetClientUserSecuAdminPassword);
+    }
+
+    if (SOPC_STATUS_OK == status && NULL == xml_client_config_path)
+    {
+        status = Client_SetDefaultConfiguration(nbSecConnCfgs, secureConnConfigArray);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        printf(">>Test_Client_Restart: Client configured\n");
+    }
+    else
+    {
+        printf(">>Test_Client_Restart: Client configuration failed\n");
+    }
+
+    return status;
+}
 
 /* ---------------------------------------------------------------------------
  *                          Manage server stop phase
@@ -170,7 +311,7 @@ static SOPC_ReturnStatus Common_Initialize(const char* logDirPath)
     }
     else
     {
-        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_logs/";
+        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_restart_logs/";
     }
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
 
@@ -351,9 +492,9 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
     // Define a callback to retrieve the server key password (from environment variable)
     status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
 
-    if (SOPC_STATUS_OK == status && nbServerConfigCountCount == 2)
+    if (SOPC_STATUS_OK == status && nbServerConfigCount == 2)
     {
-        xml_server_config_path = getenv("TEST_SERVER_XML_CONFIG");
+        xml_server_config_path = SERVER_XML_CONFIG;
         xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
         xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
     }
@@ -420,6 +561,10 @@ int main(int argc, char* argv[])
      * DEBUG traces generated in ./toolkit_server_<argv[1]>_logs/ */
     char* logDirPath = Server_ConfigLogPath(argc, argv);
 
+    /* Client secure channel configurations */
+    SOPC_SecureConnection_Config** secureConnConfigArray = NULL;
+    size_t nbSecConnCfgs = 0;
+
     /* Make a full config (common + server) 2 times*/
     uint8_t nbFullConfigCount = 0;
     while (nbFullConfigCount < NB_FULL_CONFIG)
@@ -438,24 +583,50 @@ int main(int argc, char* argv[])
         }
 
         /* Make a server config only 2 times */
-        nbServerConfigCountCount = 0;
-        while (SOPC_STATUS_OK == status && nbServerConfigCountCount < NB_SERVER_CONFIG)
+        nbServerConfigCount = 0;
+        while (SOPC_STATUS_OK == status && nbServerConfigCount < NB_SERVER_CONFIG)
         {
-            nbServerConfigCountCount++;
+            nbServerConfigCount++;
+
+            /* Only configure the client the first time server is configured,
+               second time do not reconfigure */
+            if (nbServerConfigCount % NB_SERVER_CONFIG != 0)
+            {
+                nbClientConfigCount++;
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_ClientConfigHelper_Initialize();
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        printf("<Test_Server_Restart: CLIENT initialized #%" PRIu8 ".%" PRIu8 "\n", nbFullConfigCount,
+                               nbClientConfigCount);
+                    }
+                    else
+                    {
+                        printf("<Test_Server_Restart: Failed CLIENT initialization #%" PRIu8 ".%" PRIu8 "\n",
+                               nbFullConfigCount, nbClientConfigCount);
+                    }
+                }
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = Client_LoadClientConfiguration(&nbSecConnCfgs, &secureConnConfigArray);
+                }
+            }
 
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_ServerConfigHelper_Initialize();
-            }
-            if (SOPC_STATUS_OK != status)
-            {
-                printf("<Test_Server_Restart: Failed SERVER initializing #%" PRIu8 ".%" PRIu8 "\n", nbFullConfigCount,
-                       nbServerConfigCountCount);
-            }
-            else
-            {
-                printf("<Test_Server_Restart: SERVER initialized #%" PRIu8 ".%" PRIu8 "\n", nbFullConfigCount,
-                       nbServerConfigCountCount);
+                if (SOPC_STATUS_OK != status)
+                {
+                    printf("<Test_Server_Restart: Failed SERVER initializing #%" PRIu8 ".%" PRIu8 "\n",
+                           nbFullConfigCount, nbServerConfigCount);
+                }
+                else
+                {
+                    printf("<Test_Server_Restart: SERVER initialized #%" PRIu8 ".%" PRIu8 "\n", nbFullConfigCount,
+                           nbServerConfigCount);
+                }
             }
 
             if (SOPC_STATUS_OK == status)
@@ -504,21 +675,58 @@ int main(int argc, char* argv[])
                 nbRestartCountRem++;
                 if (SOPC_STATUS_OK == status)
                 {
-                    /* Run the server until error or stop server signal detected (Ctrl-C) */
+                    /* Run the server until error, stop server signal detected (Ctrl-C) or StopServer called */
                     status = SOPC_ServerHelper_StartServer(&SOPC_ServerStopped_Cb);
-
                     if (SOPC_STATUS_OK == status)
                     {
-                        printf("<Test_Server_Restart: Server STARTED #%" PRIu8 ".%" PRIu8 ".%" PRIu8 "\n",
-                               nbFullConfigCount, nbServerConfigCountCount, nbRestartCountRem);
                         SOPC_Atomic_Int_Set(&atomicStopped, false);
-                        SOPC_Sleep(UPDATE_STOP_TIMEOUT_MS);
+                        printf("<Test_Server_Restart: Server STARTED #%" PRIu8 ".%" PRIu8 ".%" PRIu8 "\n",
+                               nbFullConfigCount, nbServerConfigCount, nbRestartCountRem);
                     }
                     else
                     {
                         printf("<Test_Server_Restart: Failed to START server #%" PRIu8 ".%" PRIu8 ".%" PRIu8 "\n",
-                               nbFullConfigCount, nbServerConfigCountCount, nbRestartCountRem);
+                               nbFullConfigCount, nbServerConfigCount, nbRestartCountRem);
                     }
+
+                    uint8_t nbReConnectCountRem = 0;
+                    while (nbReConnectCountRem < NB_CLIENT_RECONNECT)
+                    {
+                        SOPC_ClientConnection* secureConnection = NULL;
+                        status = SOPC_ClientHelper_Connect(secureConnConfigArray[0], &SOPC_ClientConnectionEventCb,
+                                                           &secureConnection);
+                        if (SOPC_STATUS_OK == status)
+                        {
+                            printf("<Test_Server_Restart: Client CONNECTED #%" PRIu8 ".%" PRIu8 ".%" PRIu8 ".%" PRIu8
+                                   "\n",
+                                   nbFullConfigCount, nbServerConfigCount, nbRestartCountRem, nbReConnectCountRem);
+                            SOPC_Sleep(UPDATE_STOP_TIMEOUT_MS);
+                        }
+                        else
+                        {
+                            printf("<Test_Server_Restart: Failed to CONNECT client #%" PRIu8 ".%" PRIu8 ".%" PRIu8
+                                   ".%" PRIu8 "\n",
+                                   nbFullConfigCount, nbServerConfigCount, nbRestartCountRem, nbReConnectCountRem);
+                        }
+                        if (SOPC_STATUS_OK == status)
+                        {
+                            status = SOPC_ClientHelper_Disconnect(&secureConnection);
+                            if (SOPC_STATUS_OK == status)
+                            {
+                                printf("<Test_Server_Restart: Client DISCONNECTED #%" PRIu8 ".%" PRIu8 ".%" PRIu8
+                                       ".%" PRIu8 "\n",
+                                       nbFullConfigCount, nbServerConfigCount, nbRestartCountRem, nbReConnectCountRem);
+                            }
+                            else
+                            {
+                                printf("<Test_Server_Restart: Failed to DISCONNECT client #%" PRIu8 ".%" PRIu8
+                                       ".%" PRIu8 ".%" PRIu8 "\n",
+                                       nbFullConfigCount, nbServerConfigCount, nbRestartCountRem, nbReConnectCountRem);
+                            }
+                        }
+                        nbReConnectCountRem++;
+                    }
+
                     if (SOPC_STATUS_OK == status)
                     {
                         status = SOPC_ServerHelper_StopServer();
@@ -527,12 +735,12 @@ int main(int argc, char* argv[])
                     if (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&atomicStopped) == true)
                     {
                         printf("<Test_Server_Restart: Server STOPPED #%" PRIu8 ".%" PRIu8 ".%" PRIu8 "\n",
-                               nbFullConfigCount, nbServerConfigCountCount, nbRestartCountRem);
+                               nbFullConfigCount, nbServerConfigCount, nbRestartCountRem);
                     }
                     else
                     {
                         printf("<Test_Server_Restart: Failed to STOP server #%" PRIu8 ".%" PRIu8 ".%" PRIu8 "\n",
-                               nbFullConfigCount, nbServerConfigCountCount, nbRestartCountRem);
+                               nbFullConfigCount, nbServerConfigCount, nbRestartCountRem);
                     }
                 }
                 else
@@ -543,11 +751,16 @@ int main(int argc, char* argv[])
                         logDirPath);
                 }
             }
-
+            /* Only clear the client at the end of the second time server is cleared
+             * as we do not reconfigure client for the second time */
+            if (nbServerConfigCount % NB_SERVER_CONFIG == 0)
+            {
+                SOPC_ClientConfigHelper_Clear();
+            }
             /* Clear the server library (stop all library threads) and server configuration */
             SOPC_ServerConfigHelper_Clear();
             printf("<Test_Server_Restart: SERVER clearing #%" PRIu8 ".%" PRIu8 "\n", nbFullConfigCount,
-                   nbServerConfigCountCount);
+                   nbServerConfigCount);
         }
         SOPC_CommonHelper_Clear();
         printf("<Test_Server_Restart: COMMON clearing #%" PRIu8 "\n", nbFullConfigCount);
