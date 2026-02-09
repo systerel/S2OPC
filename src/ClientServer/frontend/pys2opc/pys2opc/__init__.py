@@ -47,7 +47,7 @@ and receive notifications through `pys2opc.BaseClientConnectionHandler.on_datach
 >>> with PyS2OPC_Client.initialize():
 >>>     configs = PyS2OPC_Client.load_client_configuration_from_file('client_config.xml')
 >>>     with PyS2OPC_Client.connect(configs["read"]) as connection:
->>>         ReadReponse = connection.read_nodes(nodeIds=NODES_TO_READ)
+>>>         ReadResponse = connection.read_nodes(nodeIds=NODES_TO_READ)
 
 *client_config.xml* extract: connection example with id = "read"
 ```
@@ -64,7 +64,7 @@ Server is mainly configured by XML files: the first for the server endpoints con
 which specifies security parameter, session and users parameters,
 the next file is the NodeSet describing the structure and content of the address space,
 the last file to define allowed users and their authorization (read, write, ..).
-The configuration function migh also register callback to be notified on server (see `BaseAddressSpaceHandler`).
+The configuration function might also register callback to be notified on server (see `BaseAddressSpaceHandler`).
 
 For more details on XML server endpoint configuration file, see [s2opc_clientserver_config.xsd](https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd?ref_type=heads).
 For more details on XML address space configuration file, see [UANodeSet.xsd](https://github.com/OPCFoundation/UA-Nodeset/blob/v1.04/Schema/UANodeSet.xsd).
@@ -112,7 +112,7 @@ In the `with` statement, the application code can be started alongside the S2OPC
   </UAVariable>
 ```
 
-*user_config.xml* extract: user authorizatoin configuration example
+*user_config.xml* extract: user authorization configuration example
 ```
   <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
     <!-- "me" pwd=1234 has all right accesses. -->

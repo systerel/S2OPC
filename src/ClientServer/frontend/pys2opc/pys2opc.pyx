@@ -2378,6 +2378,8 @@ class BaseClientConnectionHandler:
 
     An exception `ClientConnectionFailure` might be raised when calling OPC UA services
     if the connection with the server has been lost which might be verified using `BaseClientConnectionHandler.connected`.
+    Note: without using the "with" statement, `BaseClientConnectionHandler.disconnect` SHALL be called
+          to allow a possible reconnection on the same configuration with `PyS2OPC_Client.connect` function.
     """
 
     # Global class variable #
@@ -2426,6 +2428,9 @@ class BaseClientConnectionHandler:
         """
         Disconnect the current connection.
         Return True if the connection was established and disconnection succeeded, False otherwise.
+
+        Note: `disconnect` SHALL be called on the connection that raised an exception ClientConnectionFailure
+              to allow a possible reconnection on the same configuration with `PyS2OPC_Client.connect` function.
         """
         c_cliConHandler: _C_BaseClientConnectionHandler = self._c_cliConHandler
         if NULL != c_cliConHandler._secureConnection:
@@ -2830,7 +2835,9 @@ class PyS2OPC_Client(PyS2OPC):
                                     and overrides at least overrides the `BaseClientConnectionHandler.on_datachanged` callback for subscription.
             sc_lifetime: Requested lifetime in millisecond for the secure channel.
 
-        It can be optionally used in a `with` statement, which automatically disconnects the connection. See `BaseClientConnectionHandler`
+        It can be optionally used in a `with` statement, which automatically disconnects the connection.
+        Otherwise the `BaseClientConnectionHandler.disconnect` shall be called to allow any further reconnection
+        with same configuration. See `BaseClientConnectionHandler`
         """
         if sc_lifetime > UINT32_MAX:
             raise ValueError("sc_lifetime is too large (must be less than UINT32_MAX)")
