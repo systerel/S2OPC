@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 09/12/2025 19:16:18
+ Date                 : 09/02/2026 16:37:29
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -347,6 +347,26 @@ void session_mgr__client_receive_session_resp(
       else if (session_mgr__l_session_state != constants__e_session_closed) {
          session_mgr__local_client_close_session(*session_mgr__session,
             session_mgr__l_resp_status);
+      }
+      else {
+         ;
+      }
+   }
+}
+
+void session_mgr__client_receive_session_resp_decode_failed(
+   const constants__t_client_request_handle_i session_mgr__req_handle) {
+   {
+      constants__t_session_i session_mgr__l_session;
+      constants__t_sessionState_i session_mgr__l_session_state;
+      
+      session_request_handle_bs__client_get_session_and_remove_request_handle(session_mgr__req_handle,
+         &session_mgr__l_session);
+      session_core__get_session_state_or_closed(session_mgr__l_session,
+         &session_mgr__l_session_state);
+      if (session_mgr__l_session_state != constants__e_session_closed) {
+         session_mgr__local_client_close_session(session_mgr__l_session,
+            constants_statuscodes_bs__e_sc_bad_decoding_error);
       }
       else {
          ;

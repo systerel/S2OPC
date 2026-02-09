@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 09/12/2025 19:16:18
+ Date                 : 09/02/2026 16:37:29
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -147,6 +147,8 @@ extern void session_mgr__client_receive_session_resp(
    const constants__t_msg_header_i session_mgr__resp_header,
    const constants__t_msg_i session_mgr__resp_msg,
    constants__t_session_i * const session_mgr__session);
+extern void session_mgr__client_receive_session_resp_decode_failed(
+   const constants__t_client_request_handle_i session_mgr__req_handle);
 extern void session_mgr__client_sc_activate_session_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_client_request_handle_i session_mgr__req_handle,

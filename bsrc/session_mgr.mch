@@ -64,6 +64,16 @@ OPERATIONS
     END
     ;
 
+    client_receive_session_resp_decode_failed (req_handle) =
+    PRE
+        req_handle : t_client_request_handle_i &
+        req_handle : s_client_request_handle &
+        a_msg_in_type : s_session_treatment_resps
+    THEN
+        skip /* Closes the session */
+    END
+    ;
+
     session, service_ret, security_failed <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
     PRE
         channel : t_channel_i &

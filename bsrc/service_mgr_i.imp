@@ -1212,6 +1212,8 @@ OPERATIONS
                     l_session <-- client_receive_session_resp (channel, l_request_handle, resp_typ, l_resp_msg_header, l_resp_msg);
                     /* resp message not used anymore => deallocate */
                     dealloc_msg_in (l_resp_msg)
+                ELSE
+                    client_receive_session_resp_decode_failed (l_request_handle)
                 END; /* DECODE RESP CHECK */
                 client_remove_req_handle (l_request_handle)
             END; /* VALID RESP HEADER CHECK */
@@ -1267,7 +1269,8 @@ OPERATIONS
         l_is_applicative_response,
         l_is_valid_session_resp,
         l_session,
-        l_resp_msg
+        l_resp_msg,
+        l_req_typ
     IN
         valid_resp := FALSE;
         l_valid_resp_header, l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
@@ -1282,13 +1285,18 @@ OPERATIONS
                 IF l_is_valid_session_resp = TRUE
                 THEN
                     valid_resp, l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
-                    IF valid_resp = TRUE &
-                       l_is_applicative_response = TRUE
+                    IF l_is_applicative_response = TRUE
                     THEN
-                        copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
-                        /* For services on session IN response messages is provided to applicative */
-                        cli_service_response (l_session, l_resp_msg, l_user_app_context);
-                        forget_msg_in (l_resp_msg)
+                        IF valid_resp = TRUE
+                        THEN
+                            copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
+                            /* For services on session IN response messages is provided to applicative */
+                            cli_service_response (l_session, l_resp_msg, l_user_app_context);
+                            forget_msg_in (l_resp_msg)
+                        ELSE
+                            l_req_typ <-- get_req_handle_req_typ (l_request_handle);
+                            cli_snd_failure (l_req_typ, l_user_app_context, e_sc_bad_decoding_error)
+                        END
                     END /* DECODE RESP CHECK */
                 END; /* VALID REQ HANDLE ASSOCIATED TO A VALID SESSION */
                 client_remove_req_handle (l_request_handle)
@@ -1362,7 +1370,8 @@ OPERATIONS
         l_validated_req_handle,
         l_is_applicative_response,
         l_user_app_context,
-        l_resp_msg
+        l_resp_msg,
+        l_req_typ
     IN
         valid_resp := FALSE;
         l_valid_resp_header, l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
@@ -1374,13 +1383,18 @@ OPERATIONS
             THEN
                 l_is_applicative_response, l_user_app_context <-- get_req_handle_app_context (l_request_handle);
                 valid_resp, l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
-                IF valid_resp = TRUE &
-                   l_is_applicative_response = TRUE
+                IF l_is_applicative_response = TRUE
                 THEN
-                    copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
-                    /* For services on session IN response messages is provided to applicative */
-                    cli_service_response (c_session_indet, l_resp_msg, l_user_app_context);
-                    forget_msg_in (l_resp_msg)
+                    IF valid_resp = TRUE
+                    THEN
+                        copy_msg_resp_header_into_msg (l_resp_msg_header, l_resp_msg);
+                        /* For services on session IN response messages is provided to applicative */
+                        cli_service_response (c_session_indet, l_resp_msg, l_user_app_context);
+                        forget_msg_in (l_resp_msg)
+                    ELSE
+                        l_req_typ <-- get_req_handle_req_typ (l_request_handle);
+                        cli_snd_failure (l_req_typ, l_user_app_context, e_sc_bad_decoding_error)
+                    END
                 END; /* DECODE RESP CHECK */
                 client_remove_req_handle (l_request_handle)
             END; /* VALID REQ HANDLE */

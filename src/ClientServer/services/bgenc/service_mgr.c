@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 11/12/2025 10:25:21
+ Date                 : 09/02/2026 16:37:25
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1128,6 +1128,9 @@ void service_mgr__client_receive_session_treatment_resp(
                   &service_mgr__l_session);
                message_in_bs__dealloc_msg_in(service_mgr__l_resp_msg);
             }
+            else {
+               session_mgr__client_receive_session_resp_decode_failed(service_mgr__l_request_handle);
+            }
             request_handle_bs__client_remove_req_handle(service_mgr__l_request_handle);
          }
          message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
@@ -1217,6 +1220,7 @@ void service_mgr__client_receive_session_service_resp(
       t_bool service_mgr__l_is_valid_session_resp;
       constants__t_session_i service_mgr__l_session;
       constants__t_msg_i service_mgr__l_resp_msg;
+      constants__t_msg_type_i service_mgr__l_req_typ;
       
       *service_mgr__valid_resp = false;
       message_in_bs__decode_msg_header(false,
@@ -1243,14 +1247,22 @@ void service_mgr__client_receive_session_service_resp(
                   service_mgr__msg_buffer,
                   service_mgr__valid_resp,
                   &service_mgr__l_resp_msg);
-               if ((*service_mgr__valid_resp == true) &&
-                  (service_mgr__l_is_applicative_response == true)) {
-                  message_in_bs__copy_msg_resp_header_into_msg(service_mgr__l_resp_msg_header,
-                     service_mgr__l_resp_msg);
-                  service_response_cb_bs__cli_service_response(service_mgr__l_session,
-                     service_mgr__l_resp_msg,
-                     service_mgr__l_user_app_context);
-                  message_in_bs__forget_msg_in(service_mgr__l_resp_msg);
+               if (service_mgr__l_is_applicative_response == true) {
+                  if (*service_mgr__valid_resp == true) {
+                     message_in_bs__copy_msg_resp_header_into_msg(service_mgr__l_resp_msg_header,
+                        service_mgr__l_resp_msg);
+                     service_response_cb_bs__cli_service_response(service_mgr__l_session,
+                        service_mgr__l_resp_msg,
+                        service_mgr__l_user_app_context);
+                     message_in_bs__forget_msg_in(service_mgr__l_resp_msg);
+                  }
+                  else {
+                     request_handle_bs__get_req_handle_req_typ(service_mgr__l_request_handle,
+                        &service_mgr__l_req_typ);
+                     service_response_cb_bs__cli_snd_failure(service_mgr__l_req_typ,
+                        service_mgr__l_user_app_context,
+                        constants_statuscodes_bs__e_sc_bad_decoding_error);
+                  }
                }
             }
             request_handle_bs__client_remove_req_handle(service_mgr__l_request_handle);
@@ -1353,6 +1365,7 @@ void service_mgr__client_receive_discovery_service_resp(
       t_bool service_mgr__l_is_applicative_response;
       constants__t_application_context_i service_mgr__l_user_app_context;
       constants__t_msg_i service_mgr__l_resp_msg;
+      constants__t_msg_type_i service_mgr__l_req_typ;
       
       *service_mgr__valid_resp = false;
       message_in_bs__decode_msg_header(false,
@@ -1374,14 +1387,22 @@ void service_mgr__client_receive_discovery_service_resp(
                service_mgr__msg_buffer,
                service_mgr__valid_resp,
                &service_mgr__l_resp_msg);
-            if ((*service_mgr__valid_resp == true) &&
-               (service_mgr__l_is_applicative_response == true)) {
-               message_in_bs__copy_msg_resp_header_into_msg(service_mgr__l_resp_msg_header,
-                  service_mgr__l_resp_msg);
-               service_response_cb_bs__cli_service_response(constants__c_session_indet,
-                  service_mgr__l_resp_msg,
-                  service_mgr__l_user_app_context);
-               message_in_bs__forget_msg_in(service_mgr__l_resp_msg);
+            if (service_mgr__l_is_applicative_response == true) {
+               if (*service_mgr__valid_resp == true) {
+                  message_in_bs__copy_msg_resp_header_into_msg(service_mgr__l_resp_msg_header,
+                     service_mgr__l_resp_msg);
+                  service_response_cb_bs__cli_service_response(constants__c_session_indet,
+                     service_mgr__l_resp_msg,
+                     service_mgr__l_user_app_context);
+                  message_in_bs__forget_msg_in(service_mgr__l_resp_msg);
+               }
+               else {
+                  request_handle_bs__get_req_handle_req_typ(service_mgr__l_request_handle,
+                     &service_mgr__l_req_typ);
+                  service_response_cb_bs__cli_snd_failure(service_mgr__l_req_typ,
+                     service_mgr__l_user_app_context,
+                     constants_statuscodes_bs__e_sc_bad_decoding_error);
+               }
             }
             request_handle_bs__client_remove_req_handle(service_mgr__l_request_handle);
          }

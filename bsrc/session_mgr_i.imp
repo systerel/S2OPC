@@ -497,6 +497,23 @@ OPERATIONS
     END
     ;
 
+    client_receive_session_resp_decode_failed (req_handle) =
+    VAR
+        l_session,
+        l_session_state
+    IN
+        l_session <-- client_get_session_and_remove_request_handle (req_handle);
+        l_session_state <-- get_session_state_or_closed (l_session);
+        IF l_session_state /= e_session_closed
+        THEN
+            /* Bad service code returned, close the session */
+            local_client_close_session (l_session, e_sc_bad_decoding_error)
+        ELSE
+            // Session is closed
+            skip
+        END
+    END;
+
     session, service_ret, security_failed <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
     VAR
         l_valid_session,
