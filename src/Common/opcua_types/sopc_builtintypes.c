@@ -30,6 +30,7 @@
 #include "sopc_date_time.h"
 #include "sopc_hash.h"
 #include "sopc_helper_encode.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -4761,7 +4762,10 @@ void SOPC_Variant_Print(const SOPC_Variant* pvar)
         s = NULL;
         break;
     case SOPC_StatusCode_Id:
-        SOPC_CONSOLE_PRINTF("StatusCode\n  Value: %" PRIX32 "\n", pvar->Value.Status);
+        s = SOPC_StatusCodeToStringAlloc(pvar->Value.Status);
+        SOPC_CONSOLE_PRINTF("StatusCode\n  Value: %s\n", s);
+        SOPC_Free(s);
+        s = NULL;
         break;
     case SOPC_DateTime_Id:
         s = SOPC_Time_GetString(pvar->Value.Date, true, false);
@@ -4912,9 +4916,10 @@ SOPC_ReturnStatus SOPC_Variant_Dump(SOPC_Buffer* buf, const SOPC_Variant* varian
             break;
         case SOPC_StatusCode_Id:
         {
-            char sId[11];
-            snprintf(sId, 11, "0x%08X", (unsigned) variant->Value.Status);
-            SOPC_Buffer_PrintCString(buf, sId);
+            s = SOPC_StatusCodeToStringAlloc(variant->Value.Status);
+            SOPC_Buffer_PrintCString(buf, s);
+            SOPC_Free(s);
+            s = NULL;
             break;
         }
         case SOPC_DateTime_Id:
