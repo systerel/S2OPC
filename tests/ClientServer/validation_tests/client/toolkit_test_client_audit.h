@@ -42,7 +42,7 @@ static const Test_ExpectedValue Audit_OpenSCEvent_None[] = {
     {"0:SecurityMode", "1"},
     {"0:RequestedLifetime", "60000"},
     {"0:SecureChannelId", "*1"},
-    {"0:StatusCodeId", "0x00000000"},
+    {"0:StatusCodeId", "OpcUa_Good"}, // 0x00000000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "true"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -64,7 +64,7 @@ static const Test_ExpectedValue Audit_OpenSCEvent_User[] = {
     {"0:SecurityMode", "3"},
     {"0:RequestedLifetime", "*"},
     {"0:SecureChannelId", "*1"},
-    {"0:StatusCodeId", "0x00000000"},
+    {"0:StatusCodeId", "OpcUa_Good"}, // 0x00000000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "true"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -86,7 +86,7 @@ static const Test_ExpectedValue Audit_CertificateInvalidEvent_Fail[] = {
 #endif
     // Certificate thumbprint is provided instead of certificate as in this case we only have the receiver thumbprint
     {"0:Certificate", "CDDBA5D672C60CDEF94ADCB69C025719959281E0"},
-    {"0:StatusCodeId", "0x80120000"}, // BadCertificateInvalid
+    {"0:StatusCodeId", "OpcUa_BadCertificateInvalid"}, // 0x80120000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "false"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -109,7 +109,7 @@ static const Test_ExpectedValue Audit_OpenSCEvent_Fail[] = {
     {"0:SecurityMode", "0"},      // SecurityMode not kept in this case
     {"0:RequestedLifetime", "0"}, // RequestedLifetime not kept in this case
     {"0:SecureChannelId", "*1"},
-    {"0:StatusCodeId", "0x80120000"}, // BadCertificateInvalid
+    {"0:StatusCodeId", "OpcUa_BadCertificateInvalid"}, // 0x80120000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "false"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -125,7 +125,7 @@ static const Test_ExpectedValue Audit_OpenSCEvent_Fail[] = {
 
 static const Test_ExpectedValue Audit_CreateSessionNoSecu_Ok[] = {
     {"0:SourceName", "Session/CreateSession"},
-    {"0:StatusCodeId", "0x00000000"},
+    {"0:StatusCodeId", "OpcUa_Good"}, // 0x00000000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "true"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -146,7 +146,7 @@ static const Test_ExpectedValue Audit_CreateSessionNoSecu_Ok[] = {
 
 static const Test_ExpectedValue Audit_CreateSession_Ok[] = {
     {"0:SourceName", "Session/CreateSession"},
-    {"0:StatusCodeId", "0x00000000"},
+    {"0:StatusCodeId", "OpcUa_Good"}, // 0x00000000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "true"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -167,7 +167,7 @@ static const Test_ExpectedValue Audit_CreateSession_Ok[] = {
 
 static const Test_ExpectedValue Audit_ActivateSessionAnon_Ok[] = {
     {"0:SourceName", "Session/ActivateSession"},
-    {"0:StatusCodeId", "0x00000000"},
+    {"0:StatusCodeId", "OpcUa_Good"}, // 0x00000000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "true"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -187,7 +187,7 @@ static const Test_ExpectedValue Audit_ActivateSessionAnon_Ok[] = {
 
 static const Test_ExpectedValue Audit_ActivateSessionUser1_Ok[] = {
     {"0:SourceName", "Session/ActivateSession"},
-    {"0:StatusCodeId", "0x00000000"},
+    {"0:StatusCodeId", "OpcUa_Good"}, // 0x00000000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "true"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -207,7 +207,7 @@ static const Test_ExpectedValue Audit_ActivateSessionUser1_Ok[] = {
 
 static const Test_ExpectedValue Audit_CloseSessionUser1_Ok[] = {
     {"0:SourceName", "Session/CloseSession"},
-    {"0:StatusCodeId", "0x00000000"},
+    {"0:StatusCodeId", "OpcUa_Good"}, // 0x00000000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "true"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -222,7 +222,7 @@ static const Test_ExpectedValue Audit_CloseSessionUser1_Ok[] = {
 
 static const Test_ExpectedValue Audit_CloseSessionAnon_Ok[] = {
     {"0:SourceName", "Session/CloseSession"},
-    {"0:StatusCodeId", "0x00000000"},
+    {"0:StatusCodeId", "OpcUa_Good"}, // 0x00000000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "true"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -239,7 +239,7 @@ static const Test_ExpectedValue Audit_CloseSessionAnon_Ok[] = {
 
 static const Test_ExpectedValue Audit_CloseSession_Terminated_OnSCclosed[] = {
     {"0:SourceName", "Session/Terminated"},
-    {"0:StatusCodeId", "0x80860000"},
+    {"0:StatusCodeId", "OpcUa_BadSecureChannelClosed"}, // 0x80860000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "false"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -257,7 +257,7 @@ static const Test_ExpectedValue Audit_CloseSession_Terminated_OnSCclosed[] = {
 static const Test_ExpectedValue Audit_SCClose_Ok[] = {
     {"0:SourceName", "SecureChannel/CloseSecureChannel"},
     {"0:SecureChannelId", "*1"},
-    {"0:StatusCodeId", "0x80860000"},
+    {"0:StatusCodeId", "OpcUa_BadSecureChannelClosed"}, // 0x80860000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "true"},
     {"0:ServerId", "urn:S2OPC:localhost"},
@@ -286,7 +286,7 @@ static const Test_ExpectedValue* audit_User1_BadServerCertificate[] = {Audit_Cer
 
 static const Test_ExpectedValue Audit_ActivateSession_BadUserPass[] = {
     {"0:SourceName", "Session/ActivateSession"},
-    {"0:StatusCodeId", "0x80210000"}, // OpcUa_BadIdentityTokenRejected
+    {"0:StatusCodeId", "OpcUa_BadIdentityTokenRejected"}, // 0x80210000
     {"0:ActionTimeStamp", TEST_ANY_DATE},
     {"0:Status", "false"}, // Status is Failed!
     {"0:ServerId", "urn:S2OPC:localhost"},
