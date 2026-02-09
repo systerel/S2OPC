@@ -148,6 +148,7 @@ proof_obligations:
   script:
     - ./.pre-build-ext.sh POs
     - cat po_status.log
+  timeout: 2h
   artifacts:
     name: "bpos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
