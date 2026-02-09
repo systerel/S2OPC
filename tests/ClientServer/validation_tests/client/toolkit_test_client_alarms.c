@@ -39,6 +39,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -298,7 +299,8 @@ static void SOPC_MonitoredAlarm_Event_Cb(SOPC_MonitoredAlarmsGroup* group,
             {
                 // Non acked. Acknowledge.
                 SOPC_StatusCode opcua_status = SOPC_MonitoredAlarmCall_Acknowledge(alarmCond, NULL);
-                printf("Called Acknowledge method. Return status of the method: 0x%08" PRIX32 "\n", opcua_status);
+                printf("Called Acknowledge method. Return status of the method: %s\n",
+                       SOPC_StatusCodeToString(opcua_status));
             }
             else
             {
@@ -318,7 +320,8 @@ static void SOPC_MonitoredAlarm_Event_Cb(SOPC_MonitoredAlarmsGroup* group,
             {
                 // Non acked. Acknowledge.
                 SOPC_StatusCode opcua_status = SOPC_MonitoredAlarmCall_Acknowledge(alarmCond, NULL);
-                printf("Called Acknowledge method. Return status of the method: 0x%08" PRIX32 "\n", opcua_status);
+                printf("Called Acknowledge method. Return status of the method: %s\n",
+                       SOPC_StatusCodeToString(opcua_status));
             }
             else
             {
@@ -327,7 +330,8 @@ static void SOPC_MonitoredAlarm_Event_Cb(SOPC_MonitoredAlarmsGroup* group,
                 {
                     // Acked but non confirmed. Confirm.
                     SOPC_StatusCode opcua_status = SOPC_MonitoredAlarmCall_Confirm(alarmCond, NULL);
-                    printf("Called Confirm method. Return status of the method: 0x%08" PRIX32 "\n", opcua_status);
+                    printf("Called Confirm method. Return status of the method: %s\n",
+                           SOPC_StatusCodeToString(opcua_status));
                 }
                 else
                 {
@@ -352,7 +356,7 @@ static void SOPC_MonitoredAlarm_Event_Cb(SOPC_MonitoredAlarmsGroup* group,
         if (enabledState)
         {
             SOPC_StatusCode opcua_status = SOPC_MonitoredAlarmCall_Enable(alarmCond, false);
-            printf("Status of Disabling method: 0x%08" PRIX32 "\n", opcua_status);
+            printf("Status of Disabling method: %s\n", SOPC_StatusCodeToString(opcua_status));
             if (SOPC_IsGoodStatus(opcua_status))
             {
                 printf("New alarm disabled.\n");
@@ -465,7 +469,7 @@ int main(int argc, char** argv)
         // Start with a refresh
         SOPC_CONSOLE_PRINTF("MonitoredAlarms group created. Refreshing.\n");
         SOPC_StatusCode sc = SOPC_MonitoredAlarmCall_Refresh(MAGroup);
-        printf("Status of Refreshing: 0x%08" PRIX32 "\n", sc);
+        printf("Status of Refreshing: %s\n", SOPC_StatusCodeToString(sc));
         startTests = true;
     }
 
@@ -534,7 +538,7 @@ int main(int argc, char** argv)
         {
             SOPC_CONSOLE_PRINTF("TC 2 Part 1 Success. %d alarms disabled.\n", nbrOfDisabledAlarmsExpected);
             SOPC_StatusCode sc = SOPC_MonitoredAlarmCall_Refresh(MAGroup);
-            printf("Status of Refreshing after disabling all alarms: 0x%08" PRIX32 "\n", sc);
+            printf("Status of Refreshing after disabling all alarms: %s\n", SOPC_StatusCodeToString(sc));
             if (!SOPC_IsGoodStatus(sc))
             {
                 SOPC_CONSOLE_PRINTF("TC 2 Part 2 Failed at refreshing alarms.\n");

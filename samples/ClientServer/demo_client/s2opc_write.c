@@ -26,6 +26,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
 #include "sopc_date_time.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
@@ -456,6 +457,6 @@ static void PrintWriteResponse(OpcUa_WriteResponse* pResp)
         {
             exitStatus = 4;
         }
-        printf("  StatusCode: 0x%08X\n", pResp->Results[i]);
+        printf("  StatusCode: %s\n", SOPC_StatusCodeToString(pResp->Results[i]));
     }
 }

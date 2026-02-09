@@ -37,6 +37,7 @@
 
 #include "sopc_askpass.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -55,7 +56,8 @@ static void ClientConnectionEvent(SOPC_ClientConnection* config,
     SOPC_UNUSED_ARG(config);
 
     // We do not expect events since we use synchronous connection / disconnection, only for degraded case
-    printf("ClientConnectionEvent: Unexpected connection event %d with status 0x%08" PRIX32 "\n", event, status);
+    printf("ClientConnectionEvent: Unexpected connection event %d with status %s\n", event,
+           SOPC_StatusCodeToString(status));
 }
 
 static void PrintReadResponse(char* const* nodeIds, OpcUa_ReadResponse* pResp)
@@ -67,7 +69,7 @@ static void PrintReadResponse(char* const* nodeIds, OpcUa_ReadResponse* pResp)
         printf("Read node \"%s\" value:\n", nodeIds[i]);
 
         pVal = &pResp->Results[i];
-        printf("StatusCode: 0x%08" PRIX32 "\n", pVal->Status);
+        printf("StatusCode: %s\n", SOPC_StatusCodeToString(pVal->Status));
         SOPC_Variant_Print(&(pVal->Value));
         printf("\n");
     }

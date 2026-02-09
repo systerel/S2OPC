@@ -37,6 +37,7 @@
 
 #include "sopc_askpass.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -158,7 +159,7 @@ int main(int argc, char* const argv[])
         {
             OpcUa_BrowseResult* result = &browseResponse->Results[0];
 
-            printf("status: 0x%08" PRIX32 ", nbOfReferences: %" PRIi32 "\n", result->StatusCode,
+            printf("status: %s, nbOfReferences: %" PRIi32 "\n", SOPC_StatusCodeToString(result->StatusCode),
                    result->NoOfReferences);
             if (SOPC_IsGoodStatus(result->StatusCode))
             {

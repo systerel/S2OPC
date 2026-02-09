@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "sopc_address_space.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_mem_alloc.h"
 #include "testlib_read_response.h"
 
@@ -82,7 +83,7 @@ bool test_read_request_response(const OpcUa_ReadResponse* pReadResp, SOPC_Status
 
     /* Check the service StatusCode */
     if (verbose > 0)
-        printf("Service status code: %" PRIX32 " (should be %d)\n", statusCode, SOPC_STATUS_OK);
+        printf("Service status code: %s (should be OK)\n", SOPC_StatusCodeToString(statusCode));
     bTestOk = SOPC_STATUS_OK == statusCode;
 
     /* Creates a Request */
@@ -95,7 +96,8 @@ bool test_read_request_response(const OpcUa_ReadResponse* pReadResp, SOPC_Status
         for (i = 0; i < pReadResp->NoOfResults; ++i)
         {
             /* Note: Status is a B-StatusCode */
-            printf("pReadResp->Results[%" PRIi32 "].Status: 0x%08" PRIX32 "\n", i, pReadResp->Results[i].Status);
+            printf("pReadResp->Results[%" PRIi32 "].Status: %s\n", i,
+                   SOPC_StatusCodeToString(pReadResp->Results[i].Status));
             SOPC_Variant_Print(&pReadResp->Results[i].Value);
         }
     }

@@ -35,6 +35,7 @@
 #include "sopc_common_constants.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -325,7 +326,8 @@ static SOPC_ReturnStatus client_send_read_req_test(SOPC_ClientConnection* secure
         }
         else
         {
-            printf("Read failed with status: 0x%08" PRIX32 "\n", readResponse->ResponseHeader.ServiceResult);
+            printf("Read failed with status: %s\n",
+                   SOPC_StatusCodeToString(readResponse->ResponseHeader.ServiceResult));
 
             status = SOPC_STATUS_NOK;
         }

@@ -33,6 +33,7 @@
 
 #include "libs2opc_request_builder.h"
 #include "opcua_statuscodes.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_mem_alloc.h"
 
 extern SOPC_AddressSpace* address_space_bs__nodes;
@@ -412,10 +413,10 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, const OpcUa_Rea
                    ")\n+ Expected "
                    "value:\n",
                    i, i, status, cmp);
-            printf("Value status = 0x%X\n", pWriteReq->NodesToWrite[i].Value.Status);
+            printf("Value status = %s\n", SOPC_StatusCodeToString(pWriteReq->NodesToWrite[i].Value.Status));
             SOPC_Variant_Print(&pWriteReq->NodesToWrite[i].Value.Value);
             printf("+ Read value:\n");
-            printf("Value status = 0x%X\n", pReadResp->Results[i].Status);
+            printf("Value status = %s\n", SOPC_StatusCodeToString(pReadResp->Results[i].Status));
             SOPC_Variant_Print(&pReadResp->Results[i].Value);
             bVerif = false;
         }

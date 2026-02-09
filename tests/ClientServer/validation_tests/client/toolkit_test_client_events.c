@@ -34,6 +34,7 @@
 #include "sopc_assert.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -603,8 +604,8 @@ static SOPC_ReturnStatus check_monitored_items(OpcUa_CreateMonitoredItemsRespons
                         printf(
                             ">>Test_Client_Toolkit_Events: "
                             "filterResult->WhereClauseResult.ElementResults[%" PRIi32 "].OperandStatusCodes[%" PRIi32
-                            "] result unexpected: 0x%08" PRIX32 "\n",
-                            i, j, contentFilterElt->OperandStatusCodes[j]);
+                            "] result unexpected: %s\n",
+                            i, j, SOPC_StatusCodeToString(contentFilterElt->OperandStatusCodes[j]));
                         filterStatus = SOPC_STATUS_NOK;
                     }
                 }
@@ -627,8 +628,9 @@ static SOPC_ReturnStatus check_monitored_items(OpcUa_CreateMonitoredItemsRespons
                         printf(
                             ">>Test_Client_Toolkit_Events: "
                             "CreateMonitoredItemsResponse[0].FilterResult.SelectClauseResult[%" PRIi32
-                            "] result unexpected: 0x%08" PRIX32 " (expected: 0x%08" PRIX32 ")\n",
-                            i, filterResult->SelectClauseResults[i], selectClausesResult[i]);
+                            "] result unexpected: %s (expected: %s)\n",
+                            i, SOPC_StatusCodeToString(filterResult->SelectClauseResults[i]),
+                            SOPC_StatusCodeToString(selectClausesResult[i]));
                         filterStatus = SOPC_STATUS_NOK;
                     }
                 }
@@ -683,8 +685,9 @@ static SOPC_ReturnStatus check_monitored_items_index_ranges(OpcUa_CreateMonitore
                         printf(
                             ">>Test_Client_Toolkit_Events: "
                             "CreateMonitoredItemsResponse[0].FilterResult.SelectClauseResult[%" PRIi32
-                            "] result unexpected: 0x%08" PRIX32 " (expected: 0x%08" PRIX32 ")\n",
-                            i, filterResult->SelectClauseResults[i], selectClausesIndexRangeResult[i]);
+                            "] result unexpected: %s (expected: %s)\n",
+                            i, SOPC_StatusCodeToString(filterResult->SelectClauseResults[i]),
+                            SOPC_StatusCodeToString(selectClausesIndexRangeResult[i]));
                         filterStatus = SOPC_STATUS_NOK;
                     }
                 }
@@ -714,9 +717,8 @@ static SOPC_ReturnStatus check_monitored_items_special_cases(OpcUa_CreateMonitor
         {
             if (expectSuccess && !SOPC_IsGoodStatus(createMonItResp->Results[0].StatusCode))
             {
-                printf(">>Test_Client_Toolkit_Events: CreateMonitoredItemsResponse[%" PRIi32
-                       "] result not good: 0x%08" PRIX32 "\n",
-                       0, createMonItResp->Results[0].StatusCode);
+                printf(">>Test_Client_Toolkit_Events: CreateMonitoredItemsResponse[%" PRIi32 "] result not good: %s\n",
+                       0, SOPC_StatusCodeToString(createMonItResp->Results[0].StatusCode));
                 status = SOPC_STATUS_NOK;
             }
             else if (!expectSuccess)
@@ -726,8 +728,8 @@ static SOPC_ReturnStatus check_monitored_items_special_cases(OpcUa_CreateMonitor
                 {
                     printf(">>Test_Client_Toolkit_Events: CreateMonitoredItemsResponse[%" PRIi32
                            "] result not bad or unexpected code: "
-                           "0x%08" PRIX32 "\n",
-                           0, createMonItResp->Results[0].StatusCode);
+                           "%s\n",
+                           0, SOPC_StatusCodeToString(createMonItResp->Results[0].StatusCode));
                 }
             }
             else

@@ -31,6 +31,7 @@
 #include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -125,8 +126,8 @@ static void SOPC_LocalServiceDefaultWriteAddRespCallback(SOPC_EncodeableType* en
     }
     else if (encType == &OpcUa_ServiceFault_EncodeableType)
     {
-        printf("<Test_Server_Local_Service ERROR: unexpected ServiceFault with status 0x%08" PRIX32 "\n ",
-               ((OpcUa_ServiceFault*) response)->ResponseHeader.ServiceResult);
+        printf("<Test_Server_Local_Service ERROR: unexpected ServiceFault with status %s\n ",
+               SOPC_StatusCodeToString(((OpcUa_ServiceFault*) response)->ResponseHeader.ServiceResult));
         test_results_set_service_result(false);
     }
     else
@@ -159,8 +160,8 @@ static void SOPC_LocalServiceReadRespCallback(SOPC_EncodeableType* encType, void
     }
     else if (encType == &OpcUa_ServiceFault_EncodeableType)
     {
-        printf("<Test_Server_Local_Service ERROR: unexpected ServiceFault with status 0x%08" PRIX32 "\n ",
-               ((OpcUa_ServiceFault*) response)->ResponseHeader.ServiceResult);
+        printf("<Test_Server_Local_Service ERROR: unexpected ServiceFault with status %s\n ",
+               SOPC_StatusCodeToString(((OpcUa_ServiceFault*) response)->ResponseHeader.ServiceResult));
         test_results_set_service_result(false);
     }
     else
@@ -790,8 +791,8 @@ static SOPC_ReturnStatus BrowseOneNode(const SOPC_NodeId* nodeId, OpcUa_BrowseRe
         }
         else
         {
-            printf("<Test_Server_Local_Service: BrowseOneNode: Unexpected BROWSE service result :  0x%08x",
-                   browseResponse->ResponseHeader.ServiceResult);
+            printf("<Test_Server_Local_Service: BrowseOneNode: Unexpected BROWSE service result :  %s",
+                   SOPC_StatusCodeToString(browseResponse->ResponseHeader.ServiceResult));
             status = SOPC_STATUS_NOK;
         }
     }
@@ -996,8 +997,8 @@ static SOPC_ReturnStatus check_references_added_node(const SOPC_NodeId* nodeId, 
     }
     else
     {
-        printf("<Test_Server_Local_Service: check_references_added_node: Unexpected BROWSE result : 0x%08x\n",
-               result->StatusCode);
+        printf("<Test_Server_Local_Service: check_references_added_node: Unexpected BROWSE result : %s\n",
+               SOPC_StatusCodeToString(result->StatusCode));
         status = SOPC_STATUS_NOK;
     }
     // Free memory

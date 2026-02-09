@@ -57,6 +57,8 @@
 #include "sopc_assert.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_hash.h"
+#include "sopc_helper_askpass.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -199,7 +201,7 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
     uintptr_t userCtx = SOPC_ClientHelper_Subscription_GetUserParam(subscription);
     SOPC_UNUSED_ARG(userCtx);
 
-    DEBUG_PRINT("Notif CB status = 0x%08X, notif = %p, userCtx=%p \n", (unsigned) status, notification,
+    DEBUG_PRINT("Notif CB status = %s, notif = %p, userCtx=%p \n", SOPC_StatusCodeToString(status), notification,
                 (void*) userCtx);
 
     if (!SOPC_IsGoodStatus(status))
@@ -420,8 +422,8 @@ static SOPC_ReturnStatus check_mi_resp_header(OpcUa_CreateMonitoredItemsResponse
             if (!SOPC_IsGoodStatus(createMonItResp->Results[0].StatusCode))
             {
                 SOPC_CONSOLE_PRINTF(">>Test_Client_Toolkit_Audit: CreateMonitoredItemsResponse[%" PRIi32
-                                    "] result not good: 0x%08" PRIX32 "\n",
-                                    0, createMonItResp->Results[0].StatusCode);
+                                    "] result not good: %s\n",
+                                    0, SOPC_StatusCodeToString(createMonItResp->Results[0].StatusCode));
                 status = SOPC_STATUS_NOK;
             }
         }
@@ -436,9 +438,8 @@ static SOPC_ReturnStatus check_mi_resp_header(OpcUa_CreateMonitoredItemsResponse
     }
     else
     {
-        SOPC_CONSOLE_PRINTF(
-            ">>Test_Client_Toolkit_Audit: CreateMonitoredItemsResponse global result not good: 0x%08" PRIX32 "\n",
-            createMonItResp->ResponseHeader.ServiceResult);
+        SOPC_CONSOLE_PRINTF(">>Test_Client_Toolkit_Audit: CreateMonitoredItemsResponse global result not good: %s\n",
+                            SOPC_StatusCodeToString(createMonItResp->ResponseHeader.ServiceResult));
     }
     return status;
 }

@@ -37,6 +37,7 @@
 
 #include "sopc_askpass.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
@@ -89,7 +90,8 @@ static void ClientConnectionEvent(SOPC_ClientConnection* config,
     SOPC_UNUSED_ARG(config);
 
     // We do not expect events since we use synchronous connection / disconnection, only for degraded case
-    printf("ClientConnectionEvent: Unexpected connection event %d with status 0x%08" PRIX32 "\n", event, status);
+    printf("ClientConnectionEvent: Unexpected connection event %d with status %s\n", event,
+           SOPC_StatusCodeToString(status));
 }
 
 static void SubscriptionNotification_Cb(const SOPC_ClientHelper_Subscription* subscription,
@@ -108,7 +110,7 @@ static void SubscriptionNotification_Cb(const SOPC_ClientHelper_Subscription* su
         {
             printf("Value change notification for node %s:\n", (char*) monitoredItemCtxArray[i]);
             SOPC_Variant_Print(&notifs->MonitoredItems[i].Value.Value);
-            printf("Value statuscode: 0x%08" PRIX32, notifs->MonitoredItems[i].Value.Status);
+            printf("Value statuscode: %s", SOPC_StatusCodeToString(notifs->MonitoredItems[i].Value.Status));
             printf("\n\n");
         }
     }
@@ -265,8 +267,8 @@ int main(int argc, char* const argv[])
                 }
                 else
                 {
-                    printf("Creation of monitored item for node %s: failed with StatusCode: 0x%08" PRIX32 "\n",
-                           argv[i + 1], createMIresp.Results[i].StatusCode);
+                    printf("Creation of monitored item for node %s: failed with StatusCode: %s\n", argv[i + 1],
+                           SOPC_StatusCodeToString(createMIresp.Results[i].StatusCode));
                 }
             }
             if (!oneSucceeded)
@@ -336,8 +338,8 @@ int main(int argc, char* const argv[])
             {
                 if (!SOPC_IsGoodStatus(deleteMIresp.Results[i]))
                 {
-                    printf("Deletion of monitored item for node %s: failed with StatusCode: 0x%08" PRIX32 "\n",
-                           argv[i + 1], deleteMIresp.Results[i]);
+                    printf("Deletion of monitored item for node %s: failed with StatusCode: %s\n", argv[i + 1],
+                           SOPC_StatusCodeToString(deleteMIresp.Results[i]));
                 }
             }
         }

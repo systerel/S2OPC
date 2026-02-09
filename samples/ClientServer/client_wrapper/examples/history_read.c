@@ -36,6 +36,7 @@
 
 #include "sopc_askpass.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 

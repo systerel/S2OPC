@@ -35,6 +35,7 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -211,7 +212,8 @@ static SOPC_ReturnStatus clear_mi(SOPC_ClientHelper_Subscription* sub, uint32_t 
             if (!SOPC_IsGoodStatus(deleteMIresp.Results[0]))
             {
                 status = SOPC_STATUS_NOK;
-                printf("Deletion of monitored item failed with StatusCode: 0x%08" PRIX32 "\n", deleteMIresp.Results[0]);
+                printf("Deletion of monitored item failed with StatusCode: %s\n",
+                       SOPC_StatusCodeToString(deleteMIresp.Results[0]));
             }
             else
             {
@@ -255,8 +257,8 @@ static uint32_t create_mi(SOPC_ClientHelper_Subscription* sub, char* const* node
             }
             else
             {
-                printf("Creation of monitored item failed with StatusCode: 0x%08" PRIX32 "\n",
-                       createMIresp.Results[0].StatusCode);
+                printf("Creation of monitored item failed with StatusCode: %s\n",
+                       SOPC_StatusCodeToString(createMIresp.Results[0].StatusCode));
             }
         }
     }

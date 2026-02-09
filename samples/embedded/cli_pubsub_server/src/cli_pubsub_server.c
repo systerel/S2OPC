@@ -56,6 +56,7 @@
 #include "sopc_crypto_profiles_lib_itf.h"
 #include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -343,7 +344,7 @@ static void serverWriteEvent(const SOPC_CallContext* callCtxPtr,
     }
     else
     {
-        LOG_WARNING("Client write failed on server. returned code 0x%08X", (unsigned int) writeStatus);
+        LOG_WARNING("Client write failed on server. returned code %s", SOPC_StatusCodeToString(writeStatus));
     }
 }
 
@@ -371,8 +372,8 @@ static void localServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* re
             const SOPC_StatusCode status = writeResp->Results[i];
             if (status != 0)
             {
-                LOG_WARNING("Internal data update[%d/%d] failed with code 0x%08X", (int) i,
-                            (int) writeResp->NoOfResults, (unsigned int) status);
+                LOG_WARNING("Internal data update[%d/%d] failed with code %s", (int) i, (int) writeResp->NoOfResults,
+                            SOPC_StatusCodeToString(status));
             }
         }
     }

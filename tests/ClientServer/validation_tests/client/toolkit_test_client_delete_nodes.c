@@ -41,6 +41,7 @@
 #include "sopc_common.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
@@ -322,7 +323,7 @@ static SOPC_ReturnStatus client_add_node_variable(SOPC_ClientConnection* secureC
         SOPC_ASSERT(NULL != addNodesResp);
         if (!SOPC_IsGoodStatus(addNodesResp->ResponseHeader.ServiceResult))
         {
-            printf("Bad status code returned. Status: 0x%08" PRIX32 "\n", addNodesResp->ResponseHeader.ServiceResult);
+            printf("Bad status code returned. Status: %s\n", SOPC_StatusCodeToString(addNodesResp->ResponseHeader.ServiceResult));
             status = SOPC_STATUS_NOK;
         }
         else

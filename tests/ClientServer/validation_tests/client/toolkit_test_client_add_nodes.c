@@ -41,6 +41,7 @@
 #include "sopc_common.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config.h"
@@ -760,10 +761,10 @@ static SOPC_ReturnStatus add_node_without_nodeId(SOPC_ClientConnection* secureCo
             addNodesResp->Results[0].StatusCode || addNodesResp->Results[1].StatusCode ||
             addNodesResp->Results[2].StatusCode)
         {
-            printf("addNodesResp->ResponseHeader.ServiceResult = 0x%08x\n", addNodesResp->ResponseHeader.ServiceResult);
-            printf("addNodesResp->Results[0].StatusCode (Obj) = 0x%08x\n", addNodesResp->Results[0].StatusCode);
-            printf("addNodesResp->Results[1].StatusCode (Var) = 0x%08x\n", addNodesResp->Results[1].StatusCode);
-            printf("addNodesResp->Results[2].StatusCode (Met)= 0x%08x\n", addNodesResp->Results[2].StatusCode);
+            printf("addNodesResp->ResponseHeader.ServiceResult = %s\n", SOPC_StatusCodeToString(addNodesResp->ResponseHeader.ServiceResult));
+            printf("addNodesResp->Results[0].StatusCode (Obj) = %s\n", SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode));
+            printf("addNodesResp->Results[1].StatusCode (Var) = %s\n", SOPC_StatusCodeToString(addNodesResp->Results[1].StatusCode));
+            printf("addNodesResp->Results[2].StatusCode (Met)= %s\n", SOPC_StatusCodeToString(addNodesResp->Results[2].StatusCode));
             status = SOPC_STATUS_NOK;
         }
         SOPC_ReturnStatus delStatus =
@@ -896,7 +897,7 @@ int main(void)
         /* Check status code of response is OpcUa_BadBrowseNameInvalid and delete */
         if (NULL != addNodesResp && OpcUa_BadBrowseNameInvalid == addNodesResp->Results[0].StatusCode)
         {
-            printf("[Test 1] BrowseName invalid: SUCCESS (StatusCode=0x%08x)\n", addNodesResp->Results[0].StatusCode);
+            printf("[Test 1] BrowseName invalid: SUCCESS (StatusCode=%s)\n", SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode));
         }
         else
         {
@@ -914,8 +915,8 @@ int main(void)
         if (NULL != addNodesResp && (OpcUa_BadBrowseNameDuplicated == addNodesResp->Results[0].StatusCode ||
                                      OpcUa_BadBrowseNameDuplicated == addNodesResp->Results[1].StatusCode))
         {
-            printf("[Test 2] BrowseName duplicated: SUCCESS (StatusCode[0]=0x%08x, StatusCode[1]=0x%08x)\n",
-                   addNodesResp->Results[0].StatusCode, addNodesResp->Results[1].StatusCode);
+            printf("[Test 2] BrowseName duplicated: SUCCESS (StatusCode[0]=%s, StatusCode[1]=%s)\n",
+                   SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode), SOPC_StatusCodeToString(addNodesResp->Results[1].StatusCode));
         }
         else
         {
@@ -934,8 +935,8 @@ int main(void)
         /* Check status code of response is OpcUa_BadReferenceNotAllowed and delete. */
         if (NULL != addNodesResp && OpcUa_BadReferenceNotAllowed == addNodesResp->Results[0].StatusCode)
         {
-            printf("[Test 3] Invalid reference type: SUCCESS (StatusCode=0x%08x)\n",
-                   addNodesResp->Results[0].StatusCode);
+            printf("[Test 3] Invalid reference type: SUCCESS (StatusCode=%s)\n",
+                   SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode));
         }
         else
         {
@@ -954,8 +955,8 @@ int main(void)
         /* Check status code of response is OpcUa_BadReferenceNotAllowed and delete. */
         if (NULL != addNodesResp && OpcUa_BadReferenceNotAllowed == addNodesResp->Results[0].StatusCode)
         {
-            printf("[Test 4] Method node without HasComponent: SUCCESS (StatusCode=0x%08x)\n",
-                   addNodesResp->Results[0].StatusCode);
+            printf("[Test 4] Method node without HasComponent: SUCCESS (StatusCode=%s)\n",
+                   SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode));
         }
         else
         {
@@ -974,8 +975,8 @@ int main(void)
         /* Check status code of response is OpcUa_BadReferenceNotAllowed and delete. */
         if (NULL != addNodesResp && OpcUa_BadReferenceNotAllowed == addNodesResp->Results[0].StatusCode)
         {
-            printf("[Test 5] Invalid reference type to parent: SUCCESS (StatusCode=0x%08x)\n",
-                   addNodesResp->Results[0].StatusCode);
+            printf("[Test 5] Invalid reference type to parent: SUCCESS (StatusCode=%s)\n",
+                   SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode));
         }
         else
         {
@@ -1020,8 +1021,8 @@ int main(void)
                                                                   &reqNodeId, &browseName, &typeDefinition);
         if (NULL != addNodesResp && OpcUa_BadNodeIdRejected == addNodesResp->Results[0].StatusCode)
         {
-            printf("[Test 8] Add variable with non-existing namespace index: SUCCESS (StatusCode=0x%08x)\n",
-                   addNodesResp->Results[0].StatusCode);
+            printf("[Test 8] Add variable with non-existing namespace index: SUCCESS (StatusCode=%s)\n",
+                   SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode));
         }
         else
         {

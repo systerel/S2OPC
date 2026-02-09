@@ -24,6 +24,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
 #include "sopc_date_time.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 #include "sopc_toolkit_async_api.h"
@@ -309,7 +310,7 @@ static void PrintBrowseResponse(OpcUa_BrowseResponse* pResp)
         pBwse = &pResp->Results[i];
         if (SOPC_GoodGenericStatus != pBwse->StatusCode)
         {
-            printf("# Error: Browse result %i has status code %i.\n", i, pBwse->StatusCode);
+            printf("# Error: Browse result %i has status code %s.\n", i, SOPC_StatusCodeToString(pBwse->StatusCode));
         }
         else
         {

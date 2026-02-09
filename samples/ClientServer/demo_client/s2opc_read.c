@@ -25,6 +25,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
 #include "sopc_date_time.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 #include "sopc_toolkit_async_api.h"
@@ -350,7 +351,7 @@ static void PrintReadResponse(OpcUa_ReadResponse* pResp)
         sNid = NULL;
 
         pVal = &pResp->Results[i];
-        printf("StatusCode: 0x%08X\n", pVal->Status);
+        printf("StatusCode: %s\n", SOPC_StatusCodeToString(pVal->Status));
         SOPC_Variant_Print(&(pVal->Value));
     }
 }

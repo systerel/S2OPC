@@ -31,6 +31,7 @@
 #include "sopc_atomic.h"
 #include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -863,8 +864,8 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
     if ((opStatus & SOPC_GoodStatusOppositeMask) != 0)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                 "Received address space event which status code is not good: 0x%08X. Ignored",
-                                 (unsigned int) opStatus);
+                                 "Received address space event which status code is not good: %s. Ignored",
+                                 SOPC_StatusCodeToString(opStatus));
         return;
     }
 
