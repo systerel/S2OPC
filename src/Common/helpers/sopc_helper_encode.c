@@ -132,6 +132,8 @@ static const unsigned char base64_dec_map[128] = {
 /*
  * Encode a buffer into base64 format
  */
+// Note: olen is the size of the output buffer necessary including the null terminator,
+//       and the output buffer is null-terminated.
 static int mbedtls_base64_encode(unsigned char* dst, size_t dlen, size_t* olen, const unsigned char* src, size_t slen)
 {
     size_t i, n;
@@ -196,6 +198,7 @@ static int mbedtls_base64_encode(unsigned char* dst, size_t dlen, size_t* olen, 
     return (0);
 }
 
+// Note: olen is the size of the output buffer including the null terminator, and the output buffer is null-terminated.
 static int mbedtls_base64_decode(unsigned char** dst, size_t* olen, const unsigned char* src, size_t slen)
 {
     size_t i, n, expectedLen = 0;
@@ -308,6 +311,11 @@ SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* pInput, unsigned char** p
         *pOutLen = 0;
         return SOPC_STATUS_NOK;
     }
+    else if (*pOutLen > 0)
+    {
+        *pOutLen = *pOutLen - 1; // Exclude the null terminator for the final output length
+    }
+
     return SOPC_STATUS_OK;
 }
 
@@ -344,7 +352,10 @@ SOPC_ReturnStatus SOPC_HelperEncode_Base64(const SOPC_Byte* pInput, size_t input
         *pOutLen = 0;
         return SOPC_STATUS_NOK;
     }
-
+    else if (*pOutLen > 0)
+    {
+        *pOutLen = *pOutLen - 1; // Exclude the null terminator for the final output length
+    }
     return SOPC_STATUS_OK;
 }
 

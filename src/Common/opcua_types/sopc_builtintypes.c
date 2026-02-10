@@ -2002,7 +2002,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     }
                     if (SOPC_STATUS_OK == status && bsOut != NULL && bsOutLen > 0)
                     {
-                        SOPC_ASSERT(bsOut[bsOutLen - 1] == '\0' && maxSize > (size_t) res);
+                        SOPC_ASSERT(bsOut[bsOutLen] == '\0' && maxSize > (size_t) res);
                         res += snprintf(&result[res], maxSize - (size_t) res, "b=%s", bsOut);
                         SOPC_ASSERT(res >= 0 && maxSize > (size_t) res);
                     }

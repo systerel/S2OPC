@@ -32,8 +32,8 @@
  * \param[out] ppOut       A valid pointer poiting to NULL. It will be set to the buffer containing the newly decoded
  * data. The allocated buffer must be freed by the caller.
  *
- * \param pOutLen    A valid pointer. On success, it is set to the exact size
- *                    of the decoded binary data stored in \p ppOut.
+ * \param pOutLen    A valid pointer. On success, it is set to size of the decoded binary data stored in \p ppOut
+ *                   (excluding NULL terminating char).
  *
  * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  */
@@ -49,7 +49,7 @@ SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* pInput, unsigned char** p
  * null-terminated base64 C string. The allocated buffer must be freed by the caller.
  *
  * \param[out] pOutLen    A valid pointer. In case of success, the content is set to the size of
- *                        \p ppOut computed during the function execution (including NULL terminating char).
+ *                        \p ppOut computed during the function execution (excluding NULL terminating char).
  *
  * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  */
