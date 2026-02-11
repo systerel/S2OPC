@@ -21,7 +21,7 @@
 
  File Name            : session_role_identity_node.c
 
- Date                 : 07/10/2024 09:52:11
+ Date                 : 17/02/2026 11:17:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -89,36 +89,6 @@ void session_role_identity_node__l_check_ref_isForward_and_RefTypeProperty(
    }
 }
 
-void session_role_identity_node__l_ref_get_node(
-   const constants__t_Reference_i session_role_identity_node__p_ref,
-   constants__t_Node_i * const session_role_identity_node__p_node,
-   constants__t_NodeId_i * const session_role_identity_node__p_nodeId) {
-   {
-      constants__t_ExpandedNodeId_i session_role_identity_node__l_ref_target;
-      t_bool session_role_identity_node__l_local_server;
-      constants__t_NodeId_i session_role_identity_node__l_ref_target_NodeId;
-      t_bool session_role_identity_node__l_isvalid;
-      constants__t_Node_i session_role_identity_node__l_ref_target_Node;
-      
-      *session_role_identity_node__p_node = constants__c_Node_indet;
-      *session_role_identity_node__p_nodeId = constants__c_NodeId_indet;
-      address_space_itf__get_Reference_TargetNode(session_role_identity_node__p_ref,
-         &session_role_identity_node__l_ref_target);
-      constants__getall_conv_ExpandedNodeId_NodeId(session_role_identity_node__l_ref_target,
-         &session_role_identity_node__l_local_server,
-         &session_role_identity_node__l_ref_target_NodeId);
-      if (session_role_identity_node__l_local_server == true) {
-         address_space_itf__readall_AddressSpace_Node(session_role_identity_node__l_ref_target_NodeId,
-            &session_role_identity_node__l_isvalid,
-            &session_role_identity_node__l_ref_target_Node);
-         if (session_role_identity_node__l_isvalid == true) {
-            *session_role_identity_node__p_node = session_role_identity_node__l_ref_target_Node;
-            *session_role_identity_node__p_nodeId = session_role_identity_node__l_ref_target_NodeId;
-         }
-      }
-   }
-}
-
 void session_role_identity_node__ref_maybe_get_Identity(
    const constants__t_Reference_i session_role_identity_node__p_ref,
    constants__t_Node_i * const session_role_identity_node__p_maybe_node_Identity,
@@ -133,14 +103,17 @@ void session_role_identity_node__ref_maybe_get_Identity(
       session_role_identity_node__l_check_ref_isForward_and_RefTypeProperty(session_role_identity_node__p_ref,
          &session_role_identity_node__l_bres);
       if (session_role_identity_node__l_bres == true) {
-         session_role_identity_node__l_ref_get_node(session_role_identity_node__p_ref,
+         address_space_itf__getall_Reference_Node(session_role_identity_node__p_ref,
+            &session_role_identity_node__l_bres,
             &session_role_identity_node__l_maybe_identity_node,
             &session_role_identity_node__l_maybe_identity_nodeId);
-         session_role_identity_node__l_check_node_NodeClass_and_BrowseName(session_role_identity_node__l_maybe_identity_node,
-            &session_role_identity_node__l_bres);
          if (session_role_identity_node__l_bres == true) {
-            *session_role_identity_node__p_maybe_node_Identity = session_role_identity_node__l_maybe_identity_node;
-            *session_role_identity_node__p_maybe_nodeId_Identity = session_role_identity_node__l_maybe_identity_nodeId;
+            session_role_identity_node__l_check_node_NodeClass_and_BrowseName(session_role_identity_node__l_maybe_identity_node,
+               &session_role_identity_node__l_bres);
+            if (session_role_identity_node__l_bres == true) {
+               *session_role_identity_node__p_maybe_node_Identity = session_role_identity_node__l_maybe_identity_node;
+               *session_role_identity_node__p_maybe_nodeId_Identity = session_role_identity_node__l_maybe_identity_nodeId;
+            }
          }
       }
    }

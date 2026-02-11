@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.h
 
- Date                 : 29/08/2025 12:49:55
+ Date                 : 17/02/2026 11:16:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -80,6 +80,7 @@ extern void service_add_nodes_1__INITIALISATION(void);
 #define service_add_nodes_1__get_conv_Variant_ValueRank call_method_mgr__get_conv_Variant_ValueRank
 #define service_add_nodes_1__get_user_authorization call_method_mgr__get_user_authorization
 #define service_add_nodes_1__get_user_roles call_method_mgr__get_user_roles
+#define service_add_nodes_1__getall_Reference_Node call_method_mgr__getall_Reference_Node
 #define service_add_nodes_1__has_access_level_executable call_method_mgr__has_access_level_executable
 #define service_add_nodes_1__has_access_level_histRead call_method_mgr__has_access_level_histRead
 #define service_add_nodes_1__is_AddressSpace_constant call_method_mgr__is_AddressSpace_constant
@@ -89,7 +90,7 @@ extern void service_add_nodes_1__INITIALISATION(void);
 #define service_add_nodes_1__is_mandatory_attribute call_method_mgr__is_mandatory_attribute
 #define service_add_nodes_1__is_transitive_subtype call_method_mgr__is_transitive_subtype
 #define service_add_nodes_1__is_valid_ReferenceTypeId call_method_mgr__is_valid_ReferenceTypeId
-#define service_add_nodes_1__read_AddressSpace_Identities_value call_method_mgr__read_AddressSpace_Identities_value
+#define service_add_nodes_1__read_AddressSpace_Raw_Node_Value_only call_method_mgr__read_AddressSpace_Raw_Node_Value_only
 #define service_add_nodes_1__read_AddressSpace_clear_value call_method_mgr__read_AddressSpace_clear_value
 #define service_add_nodes_1__read_AddressSpace_free_variant call_method_mgr__read_AddressSpace_free_variant
 #define service_add_nodes_1__read_Node_Attribute call_method_mgr__read_Node_Attribute

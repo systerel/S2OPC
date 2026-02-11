@@ -21,7 +21,7 @@
 
  File Name            : namespaces_default_role_permissions.c
 
- Date                 : 31/10/2024 15:35:57
+ Date                 : 17/02/2026 11:16:55
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -41,33 +41,6 @@ void namespaces_default_role_permissions__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void namespaces_default_role_permissions__l_ref_get_node(
-   const constants__t_Reference_i namespaces_default_role_permissions__p_ref,
-   constants__t_Node_i * const namespaces_default_role_permissions__p_node) {
-   {
-      constants__t_ExpandedNodeId_i namespaces_default_role_permissions__l_ref_target;
-      t_bool namespaces_default_role_permissions__l_local_server;
-      constants__t_NodeId_i namespaces_default_role_permissions__l_ref_target_NodeId;
-      t_bool namespaces_default_role_permissions__l_isvalid;
-      constants__t_Node_i namespaces_default_role_permissions__l_ref_target_Node;
-      
-      *namespaces_default_role_permissions__p_node = constants__c_Node_indet;
-      address_space_bs__get_Reference_TargetNode(namespaces_default_role_permissions__p_ref,
-         &namespaces_default_role_permissions__l_ref_target);
-      constants__getall_conv_ExpandedNodeId_NodeId(namespaces_default_role_permissions__l_ref_target,
-         &namespaces_default_role_permissions__l_local_server,
-         &namespaces_default_role_permissions__l_ref_target_NodeId);
-      if (namespaces_default_role_permissions__l_local_server == true) {
-         address_space_bs__readall_AddressSpace_Node(namespaces_default_role_permissions__l_ref_target_NodeId,
-            &namespaces_default_role_permissions__l_isvalid,
-            &namespaces_default_role_permissions__l_ref_target_Node);
-         if (namespaces_default_role_permissions__l_isvalid == true) {
-            *namespaces_default_role_permissions__p_node = namespaces_default_role_permissions__l_ref_target_Node;
-         }
-      }
-   }
-}
-
 void namespaces_default_role_permissions__l_node_check_NodeClass_and_TypeDef(
    const constants__t_Node_i namespaces_default_role_permissions__p_node,
    t_bool * const namespaces_default_role_permissions__p_bres) {
@@ -109,6 +82,7 @@ void namespaces_default_role_permissions__get_DefaultRolePermissions(
       constants__t_RolePermissionTypes_i namespaces_default_role_permissions__l_maybe_val_DefaultRolePermissions;
       t_bool namespaces_default_role_permissions__l_bValidRef;
       constants__t_Node_i namespaces_default_role_permissions__l_ref_target_Node;
+      constants__t_NodeId_i namespaces_default_role_permissions__l_ref_target_NodeId;
       t_bool namespaces_default_role_permissions__l_bValidNode;
       
       *namespaces_default_role_permissions__p_val_DefaultRolePermissions = constants__c_RolePermissionTypes_indet;
@@ -128,9 +102,11 @@ void namespaces_default_role_permissions__get_DefaultRolePermissions(
             constants__c_HasComponentType_NodeId,
             &namespaces_default_role_permissions__l_bValidRef);
          if (namespaces_default_role_permissions__l_bValidRef == true) {
-            namespaces_default_role_permissions__l_ref_get_node(namespaces_default_role_permissions__l_ref,
-               &namespaces_default_role_permissions__l_ref_target_Node);
-            if (namespaces_default_role_permissions__l_ref_target_Node != constants__c_Node_indet) {
+            namespace_default_role_permissions__getall_namespace_Reference_Node(namespaces_default_role_permissions__l_ref,
+               &namespaces_default_role_permissions__l_bValidNode,
+               &namespaces_default_role_permissions__l_ref_target_Node,
+               &namespaces_default_role_permissions__l_ref_target_NodeId);
+            if (namespaces_default_role_permissions__l_bValidNode == true) {
                namespaces_default_role_permissions__l_node_check_NodeClass_and_TypeDef(namespaces_default_role_permissions__l_ref_target_Node,
                   &namespaces_default_role_permissions__l_bValidNode);
             }

@@ -21,7 +21,7 @@
 
  File Name            : session_role_identity_node.h
 
- Date                 : 11/09/2024 10:08:08
+ Date                 : 17/02/2026 11:17:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -55,10 +55,6 @@ extern void session_role_identity_node__l_check_node_NodeClass_and_BrowseName(
 extern void session_role_identity_node__l_check_ref_isForward_and_RefTypeProperty(
    const constants__t_Reference_i session_role_identity_node__p_ref,
    t_bool * const session_role_identity_node__p_bres);
-extern void session_role_identity_node__l_ref_get_node(
-   const constants__t_Reference_i session_role_identity_node__p_ref,
-   constants__t_Node_i * const session_role_identity_node__p_node,
-   constants__t_NodeId_i * const session_role_identity_node__p_nodeId);
 
 /*--------------------
    OPERATIONS Clause

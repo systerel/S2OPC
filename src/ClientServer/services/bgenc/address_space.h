@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 06/11/2025 17:51:43
+ Date                 : 17/02/2026 11:16:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -154,13 +154,18 @@ extern void address_space__check_nodeId_isValid(
    const constants__t_NodeId_i address_space__nodeid,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__statusCode,
    constants__t_Node_i * const address_space__node);
+extern void address_space__getall_Reference_Node(
+   const constants__t_Reference_i address_space__p_ref,
+   t_bool * const address_space__p_valid,
+   constants__t_Node_i * const address_space__p_node,
+   constants__t_NodeId_i * const address_space__p_nodeId);
 extern void address_space__is_mandatory_attribute(
    const constants__t_NodeClass_i address_space__p_ncl,
    const constants__t_AttributeId_i address_space__p_aid,
    t_bool * const address_space__bres);
-extern void address_space__read_AddressSpace_Identities_value(
-   const constants__t_Node_i address_space__p_identities_node,
-   const constants__t_NodeId_i address_space__p_identities_nid,
+extern void address_space__read_AddressSpace_Raw_Node_Value_only(
+   const constants__t_Node_i address_space__p_node,
+   const constants__t_NodeId_i address_space__p_nid,
    constants__t_Variant_i * const address_space__p_val,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__p_sc);
 extern void address_space__read_Node_Attribute(

@@ -24,7 +24,8 @@ REFINES
     namespace_default_role_permissions
 
 PROMOTES
-    delete_rolePermissions
+    delete_rolePermissions,
+    getall_namespace_Reference_Node
 
 IMPORTS
     namespace_metadata_refs_it,

@@ -51,5 +51,26 @@ OPERATIONS
                 p_maybe_val_NamespaceUri = a_Value(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))) &
             (p_ref /: dom(a_ref_namespaceUri) => p_maybe_val_NamespaceUri = c_Variant_indet))
     END
+    ;
+
+    /* Same implementation than getall_Reference_Node operation in address_space_i (cannot be accessed here) */
+    p_valid, p_node, p_nodeId <-- getall_namespace_Reference_Node(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_valid,
+        p_node,
+        p_nodeId :(p_valid : BOOL &
+                   p_node : t_Node_i &
+                   p_nodeId : t_NodeId_i &
+                   (p_valid = TRUE =>
+                       p_nodeId = conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) &
+                       p_node |-> p_nodeId : a_NodeId &
+                       p_node : s_Node) &
+                   (p_valid = FALSE =>
+                       p_nodeId = c_NodeId_indet &
+                       p_node = c_Node_indet))
+    END
 
 END

@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 05/11/2025 13:42:10
+ Date                 : 17/02/2026 11:16:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -593,22 +593,30 @@ void address_space__read_AddressSpace_Attribute_value(
    }
 }
 
-void address_space__read_AddressSpace_Identities_value(
-   const constants__t_Node_i address_space__p_identities_node,
-   const constants__t_NodeId_i address_space__p_identities_nid,
+void address_space__read_AddressSpace_Raw_Node_Value_only(
+   const constants__t_Node_i address_space__p_node,
+   const constants__t_NodeId_i address_space__p_nid,
    constants__t_Variant_i * const address_space__p_val,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__p_sc) {
    {
+      constants__t_NodeClass_i address_space__l_nodeClass;
       constants__t_RawStatusCode address_space__l_val_sc;
       constants__t_Timestamp address_space__l_val_ts_src;
       
-      address_space_authorization__read_AddressSpace_Raw_Node_Value_value(address_space__p_identities_node,
-         address_space__p_identities_nid,
-         constants__e_aid_Value,
-         address_space__p_sc,
-         address_space__p_val,
-         &address_space__l_val_sc,
-         &address_space__l_val_ts_src);
+      *address_space__p_val = constants__c_Variant_indet;
+      *address_space__p_sc = constants_statuscodes_bs__e_sc_bad_node_class_invalid;
+      address_space_authorization__get_NodeClass(address_space__p_node,
+         &address_space__l_nodeClass);
+      if ((address_space__l_nodeClass == constants__e_ncl_Variable) ||
+         (address_space__l_nodeClass == constants__e_ncl_VariableType)) {
+         address_space_authorization__read_AddressSpace_Raw_Node_Value_value(address_space__p_node,
+            address_space__p_nid,
+            constants__e_aid_Value,
+            address_space__p_sc,
+            address_space__p_val,
+            &address_space__l_val_sc,
+            &address_space__l_val_ts_src);
+      }
    }
 }
 
@@ -791,6 +799,37 @@ void address_space__addNode_AddressSpace(
       }
       else {
          *address_space__sc_addnode = constants_statuscodes_bs__e_sc_bad_node_attributes_invalid;
+      }
+   }
+}
+
+void address_space__getall_Reference_Node(
+   const constants__t_Reference_i address_space__p_ref,
+   t_bool * const address_space__p_valid,
+   constants__t_Node_i * const address_space__p_node,
+   constants__t_NodeId_i * const address_space__p_nodeId) {
+   {
+      constants__t_ExpandedNodeId_i address_space__l_ref_target;
+      t_bool address_space__l_local_server;
+      constants__t_NodeId_i address_space__l_ref_target_NodeId;
+      constants__t_Node_i address_space__l_ref_target_Node;
+      
+      *address_space__p_valid = false;
+      *address_space__p_node = constants__c_Node_indet;
+      *address_space__p_nodeId = constants__c_NodeId_indet;
+      address_space_authorization__get_Reference_TargetNode(address_space__p_ref,
+         &address_space__l_ref_target);
+      constants__getall_conv_ExpandedNodeId_NodeId(address_space__l_ref_target,
+         &address_space__l_local_server,
+         &address_space__l_ref_target_NodeId);
+      if (address_space__l_local_server == true) {
+         address_space_authorization__readall_AddressSpace_Node(address_space__l_ref_target_NodeId,
+            address_space__p_valid,
+            &address_space__l_ref_target_Node);
+         if (*address_space__p_valid == true) {
+            *address_space__p_node = address_space__l_ref_target_Node;
+            *address_space__p_nodeId = address_space__l_ref_target_NodeId;
+         }
       }
    }
 }

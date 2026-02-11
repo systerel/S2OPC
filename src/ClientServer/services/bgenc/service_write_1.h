@@ -21,7 +21,7 @@
 
  File Name            : service_write_1.h
 
- Date                 : 29/08/2025 12:50:00
+ Date                 : 17/02/2026 11:17:00
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -89,6 +89,7 @@ extern void service_write_1__INITIALISATION(void);
 #define service_write_1__get_conv_Variant_ValueRank address_space__get_conv_Variant_ValueRank
 #define service_write_1__get_user_authorization address_space__get_user_authorization
 #define service_write_1__get_user_roles address_space__get_user_roles
+#define service_write_1__getall_Reference_Node address_space__getall_Reference_Node
 #define service_write_1__has_access_level_executable address_space__has_access_level_executable
 #define service_write_1__has_access_level_histRead address_space__has_access_level_histRead
 #define service_write_1__is_AddressSpace_constant address_space__is_AddressSpace_constant
@@ -98,7 +99,7 @@ extern void service_write_1__INITIALISATION(void);
 #define service_write_1__is_mandatory_attribute address_space__is_mandatory_attribute
 #define service_write_1__is_transitive_subtype address_space__is_transitive_subtype
 #define service_write_1__is_valid_ReferenceTypeId address_space__is_valid_ReferenceTypeId
-#define service_write_1__read_AddressSpace_Identities_value address_space__read_AddressSpace_Identities_value
+#define service_write_1__read_AddressSpace_Raw_Node_Value_only address_space__read_AddressSpace_Raw_Node_Value_only
 #define service_write_1__read_AddressSpace_clear_value address_space__read_AddressSpace_clear_value
 #define service_write_1__read_AddressSpace_free_variant address_space__read_AddressSpace_free_variant
 #define service_write_1__read_Node_Attribute address_space__read_Node_Attribute

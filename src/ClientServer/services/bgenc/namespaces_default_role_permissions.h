@@ -21,7 +21,7 @@
 
  File Name            : namespaces_default_role_permissions.h
 
- Date                 : 31/10/2024 15:35:57
+ Date                 : 17/02/2026 11:16:55
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -63,9 +63,6 @@ extern void namespaces_default_role_permissions__INITIALISATION(void);
 extern void namespaces_default_role_permissions__l_node_check_NodeClass_and_TypeDef(
    const constants__t_Node_i namespaces_default_role_permissions__p_node,
    t_bool * const namespaces_default_role_permissions__p_bres);
-extern void namespaces_default_role_permissions__l_ref_get_node(
-   const constants__t_Reference_i namespaces_default_role_permissions__p_ref,
-   constants__t_Node_i * const namespaces_default_role_permissions__p_node);
 
 /*--------------------
    OPERATIONS Clause

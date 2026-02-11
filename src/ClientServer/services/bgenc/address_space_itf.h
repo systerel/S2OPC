@@ -21,7 +21,7 @@
 
  File Name            : address_space_itf.h
 
- Date                 : 29/08/2025 12:49:41
+ Date                 : 17/02/2026 11:16:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -76,6 +76,7 @@ extern void address_space_itf__INITIALISATION(void);
 #define address_space_itf__get_conv_Variant_ValueRank service_delete_nodes__get_conv_Variant_ValueRank
 #define address_space_itf__get_user_authorization service_delete_nodes__get_user_authorization
 #define address_space_itf__get_user_roles service_delete_nodes__get_user_roles
+#define address_space_itf__getall_Reference_Node service_delete_nodes__getall_Reference_Node
 #define address_space_itf__has_access_level_executable service_delete_nodes__has_access_level_executable
 #define address_space_itf__has_access_level_histRead service_delete_nodes__has_access_level_histRead
 #define address_space_itf__is_AddressSpace_constant service_delete_nodes__is_AddressSpace_constant
@@ -85,7 +86,7 @@ extern void address_space_itf__INITIALISATION(void);
 #define address_space_itf__is_mandatory_attribute service_delete_nodes__is_mandatory_attribute
 #define address_space_itf__is_transitive_subtype service_delete_nodes__is_transitive_subtype
 #define address_space_itf__is_valid_ReferenceTypeId service_delete_nodes__is_valid_ReferenceTypeId
-#define address_space_itf__read_AddressSpace_Identities_value service_delete_nodes__read_AddressSpace_Identities_value
+#define address_space_itf__read_AddressSpace_Raw_Node_Value_only service_delete_nodes__read_AddressSpace_Raw_Node_Value_only
 #define address_space_itf__read_AddressSpace_clear_value service_delete_nodes__read_AddressSpace_clear_value
 #define address_space_itf__read_AddressSpace_free_variant service_delete_nodes__read_AddressSpace_free_variant
 #define address_space_itf__read_Node_Attribute service_delete_nodes__read_Node_Attribute

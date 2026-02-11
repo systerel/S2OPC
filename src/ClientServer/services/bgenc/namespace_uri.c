@@ -21,7 +21,7 @@
 
  File Name            : namespace_uri.c
 
- Date                 : 17/10/2024 16:34:13
+ Date                 : 17/02/2026 11:16:55
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -41,17 +41,18 @@ void namespace_uri__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void namespace_uri__l_ref_get_node(
+void namespace_uri__l_getall_namespace_Reference_Node(
    const constants__t_Reference_i namespace_uri__p_ref,
+   t_bool * const namespace_uri__p_valid,
    constants__t_Node_i * const namespace_uri__p_node,
    constants__t_NodeId_i * const namespace_uri__p_nodeId) {
    {
       constants__t_ExpandedNodeId_i namespace_uri__l_ref_target;
       t_bool namespace_uri__l_local_server;
       constants__t_NodeId_i namespace_uri__l_ref_target_NodeId;
-      t_bool namespace_uri__l_isvalid;
       constants__t_Node_i namespace_uri__l_ref_target_Node;
       
+      *namespace_uri__p_valid = false;
       *namespace_uri__p_node = constants__c_Node_indet;
       *namespace_uri__p_nodeId = constants__c_NodeId_indet;
       address_space_bs__get_Reference_TargetNode(namespace_uri__p_ref,
@@ -61,9 +62,9 @@ void namespace_uri__l_ref_get_node(
          &namespace_uri__l_ref_target_NodeId);
       if (namespace_uri__l_local_server == true) {
          address_space_bs__readall_AddressSpace_Node(namespace_uri__l_ref_target_NodeId,
-            &namespace_uri__l_isvalid,
+            namespace_uri__p_valid,
             &namespace_uri__l_ref_target_Node);
-         if (namespace_uri__l_isvalid == true) {
+         if (*namespace_uri__p_valid == true) {
             *namespace_uri__p_node = namespace_uri__l_ref_target_Node;
             *namespace_uri__p_nodeId = namespace_uri__l_ref_target_NodeId;
          }
@@ -75,6 +76,7 @@ void namespace_uri__ref_maybe_get_NamespaceUri(
    const constants__t_Reference_i namespace_uri__p_ref,
    constants__t_Variant_i * const namespace_uri__p_maybe_val_NamespaceUri) {
    {
+      t_bool namespace_uri__l_valid;
       constants__t_Node_i namespace_uri__l_ref_target_Node;
       constants__t_NodeId_i namespace_uri__l_ref_target_NodeId;
       constants__t_NodeClass_i namespace_uri__l_NodeClass;
@@ -87,10 +89,11 @@ void namespace_uri__ref_maybe_get_NamespaceUri(
       
       *namespace_uri__p_maybe_val_NamespaceUri = constants__c_Variant_indet;
       namespace_uri__l_NodeClass = constants__c_NodeClass_indet;
-      namespace_uri__l_ref_get_node(namespace_uri__p_ref,
+      namespace_uri__l_getall_namespace_Reference_Node(namespace_uri__p_ref,
+         &namespace_uri__l_valid,
          &namespace_uri__l_ref_target_Node,
          &namespace_uri__l_ref_target_NodeId);
-      if (namespace_uri__l_ref_target_Node != constants__c_Node_indet) {
+      if (namespace_uri__l_valid == true) {
          address_space_bs__get_NodeClass(namespace_uri__l_ref_target_Node,
             &namespace_uri__l_NodeClass);
       }
@@ -112,5 +115,16 @@ void namespace_uri__ref_maybe_get_NamespaceUri(
          }
       }
    }
+}
+
+void namespace_uri__getall_namespace_Reference_Node(
+   const constants__t_Reference_i namespace_uri__p_ref,
+   t_bool * const namespace_uri__p_valid,
+   constants__t_Node_i * const namespace_uri__p_node,
+   constants__t_NodeId_i * const namespace_uri__p_nodeId) {
+   namespace_uri__l_getall_namespace_Reference_Node(namespace_uri__p_ref,
+      namespace_uri__p_valid,
+      namespace_uri__p_node,
+      namespace_uri__p_nodeId);
 }
 

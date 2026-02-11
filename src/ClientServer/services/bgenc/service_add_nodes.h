@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes.h
 
- Date                 : 29/08/2025 12:49:56
+ Date                 : 17/02/2026 11:16:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -80,6 +80,7 @@ extern void service_add_nodes__INITIALISATION(void);
 #define service_add_nodes__get_conv_Variant_ValueRank service_add_nodes_1__get_conv_Variant_ValueRank
 #define service_add_nodes__get_user_authorization service_add_nodes_1__get_user_authorization
 #define service_add_nodes__get_user_roles service_add_nodes_1__get_user_roles
+#define service_add_nodes__getall_Reference_Node service_add_nodes_1__getall_Reference_Node
 #define service_add_nodes__has_access_level_executable service_add_nodes_1__has_access_level_executable
 #define service_add_nodes__has_access_level_histRead service_add_nodes_1__has_access_level_histRead
 #define service_add_nodes__is_AddressSpace_constant service_add_nodes_1__is_AddressSpace_constant
@@ -89,7 +90,7 @@ extern void service_add_nodes__INITIALISATION(void);
 #define service_add_nodes__is_mandatory_attribute service_add_nodes_1__is_mandatory_attribute
 #define service_add_nodes__is_transitive_subtype service_add_nodes_1__is_transitive_subtype
 #define service_add_nodes__is_valid_ReferenceTypeId service_add_nodes_1__is_valid_ReferenceTypeId
-#define service_add_nodes__read_AddressSpace_Identities_value service_add_nodes_1__read_AddressSpace_Identities_value
+#define service_add_nodes__read_AddressSpace_Raw_Node_Value_only service_add_nodes_1__read_AddressSpace_Raw_Node_Value_only
 #define service_add_nodes__read_AddressSpace_clear_value service_add_nodes_1__read_AddressSpace_clear_value
 #define service_add_nodes__read_AddressSpace_free_variant service_add_nodes_1__read_AddressSpace_free_variant
 #define service_add_nodes__read_Node_Attribute service_add_nodes_1__read_Node_Attribute

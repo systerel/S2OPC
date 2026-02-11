@@ -978,6 +978,26 @@ DEFINITIONS
     END
     ;
 
+    p_valid, p_node, p_nodeId <-- getall_Reference_Node(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_valid,
+        p_node,
+        p_nodeId :(p_valid : BOOL &
+                   p_node : t_Node_i &
+                   p_nodeId : t_NodeId_i &
+                   (p_valid = TRUE =>
+                       p_nodeId = conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) &
+                       p_node |-> p_nodeId : a_NodeId &
+                       p_node : s_Node) &
+                   (p_valid = FALSE =>
+                       p_nodeId = c_NodeId_indet &
+                       p_node = c_Node_indet))
+    END
+    ;
+
     /* Promoted */
     sc <-- get_Value_StatusCode(p_user, node) =
     PRE
@@ -991,25 +1011,25 @@ DEFINITIONS
     END
     ;
 
-    /* Local read of Identities values of the address space. */
-    p_val, p_sc <-- read_AddressSpace_Identities_value(p_identities_node, p_identities_nid) =
+    /* Local read of Node value of the address space for internal usage with shallow copy only. */
+    p_val, p_sc <-- read_AddressSpace_Raw_Node_Value_only(p_node, p_nid) =
     PRE
-        p_identities_node : t_Node_i &
-        p_identities_node : s_Node &
-        p_identities_nid : t_NodeId_i &
-        p_identities_nid : t_NodeId &
-        p_identities_nid = a_NodeId(p_identities_node) &
-        /* TODO: unprovable because missing TODO postcondition in caller */
-        a_BrowseName(p_identities_node) = c_Identities_QualifiedName &
-        a_NodeClass(p_identities_node) = e_ncl_Variable
+        p_node : t_Node_i &
+        p_node : s_Node &
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId &
+        p_nid = a_NodeId(p_node)
     THEN
         p_val,
         p_sc : (
           p_sc : t_StatusCode_i &
           p_sc : t_StatusCode &
           p_val : t_Variant_i &
-          (p_val = a_Value(p_identities_node) & p_sc = e_sc_ok or
-          p_val = c_Variant_indet & p_sc = e_sc_bad_out_of_memory))
+          (a_NodeClass(p_node) = e_ncl_Variable or a_NodeClass(p_node) = e_ncl_VariableType =>
+            (p_val = a_Value(p_node) & p_sc = e_sc_ok or
+             p_val = c_Variant_indet & p_sc = e_sc_bad_out_of_memory)) &
+          (not(a_NodeClass(p_node) = e_ncl_Variable or a_NodeClass(p_node) = e_ncl_VariableType) =>
+             p_val = c_Variant_indet & p_sc = e_sc_bad_node_class_invalid))
     END
     ;
 

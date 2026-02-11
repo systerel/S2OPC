@@ -28,38 +28,46 @@ SEES
     address_space_bs
 
 LOCAL_OPERATIONS
-    // Get the node targetted by the ref
-    p_node, p_nodeId <-- l_ref_get_node(p_ref) =
+
+    // Get the node targeted by the ref
+    p_valid, p_node, p_nodeId <-- l_getall_namespace_Reference_Node(p_ref) =
     PRE
         p_ref : t_Reference_i &
         p_ref : t_Reference
     THEN
+        p_valid,
         p_node,
-        p_nodeId :(p_node : t_Node_i &
+        p_nodeId :(p_valid : BOOL &
+                   p_node : t_Node_i &
                    p_nodeId : t_NodeId_i &
-                   (p_nodeId : t_NodeId => p_node |-> p_nodeId : a_NodeId &
-                                           p_nodeId = conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))) &
-                   (p_nodeId = c_NodeId_indet => p_node = c_Node_indet))
+                   (p_valid = TRUE =>
+                       p_nodeId = conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)) &
+                       p_node |-> p_nodeId : a_NodeId &
+                       p_node : s_Node) &
+                   (p_valid = FALSE =>
+                       p_nodeId = c_NodeId_indet &
+                       p_node = c_Node_indet))
     END
 
 OPERATIONS
     /* LOCAL OPERATIONS    */
-    p_node, p_nodeId <-- l_ref_get_node(p_ref) =
+
+    p_valid, p_node, p_nodeId <-- l_getall_namespace_Reference_Node(p_ref) =
     VAR
         l_ref_target,
         l_local_server,
         l_ref_target_NodeId,
-        l_isvalid,
         l_ref_target_Node
     IN
+        p_valid := FALSE;
         p_node := c_Node_indet;
         p_nodeId := c_NodeId_indet;
         l_ref_target <-- get_Reference_TargetNode(p_ref);
         l_local_server, l_ref_target_NodeId <-- getall_conv_ExpandedNodeId_NodeId(l_ref_target);
         IF l_local_server = TRUE
         THEN
-            l_isvalid, l_ref_target_Node <-- readall_AddressSpace_Node(l_ref_target_NodeId);
-            IF l_isvalid = TRUE
+            p_valid, l_ref_target_Node <-- readall_AddressSpace_Node(l_ref_target_NodeId);
+            IF p_valid = TRUE
             THEN
                 p_node := l_ref_target_Node;
                 p_nodeId := l_ref_target_NodeId
@@ -71,6 +79,7 @@ OPERATIONS
     /* OPERATION OF THE MODULE */
     p_maybe_val_NamespaceUri <-- ref_maybe_get_NamespaceUri(p_ref) =
     VAR
+        l_valid,
         l_ref_target_Node,
         l_ref_target_NodeId,
         l_NodeClass,
@@ -83,8 +92,8 @@ OPERATIONS
     IN
         p_maybe_val_NamespaceUri := c_Variant_indet;
         l_NodeClass := c_NodeClass_indet;
-        l_ref_target_Node, l_ref_target_NodeId <-- l_ref_get_node(p_ref);
-        IF l_ref_target_Node /= c_Node_indet
+        l_valid, l_ref_target_Node, l_ref_target_NodeId <-- l_getall_namespace_Reference_Node(p_ref);
+        IF l_valid = TRUE
         THEN
             l_NodeClass <-- get_NodeClass(l_ref_target_Node)
         END
@@ -98,6 +107,12 @@ OPERATIONS
                 p_maybe_val_NamespaceUri := l_val
             END
         END
+    END
+    ;
+
+    p_valid, p_node, p_nodeId <-- getall_namespace_Reference_Node(p_ref) =
+    BEGIN
+        p_valid, p_node, p_nodeId <-- l_getall_namespace_Reference_Node(p_ref)
     END
 
 END

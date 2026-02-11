@@ -21,7 +21,7 @@
 
  File Name            : namespace_default_role_permissions_value.h
 
- Date                 : 01/10/2024 10:37:49
+ Date                 : 17/02/2026 11:16:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -45,6 +45,7 @@
   --------------*/
 #include "address_space_bs.h"
 #include "constants.h"
+#include "namespace_uri.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -56,14 +57,6 @@ extern void namespace_default_role_permissions_value__INITIALISATION(void);
   -------------------------------*/
 #define namespace_default_role_permissions_value__delete_rolePermissions namespace_default_role_permissions_value_bs__delete_rolePermissions
 #define namespace_default_role_permissions_value__get_conv_Variant_RolePermissionTypes namespace_default_role_permissions_value_bs__get_conv_Variant_RolePermissionTypes
-
-/*--------------------------
-   LOCAL_OPERATIONS Clause
-  --------------------------*/
-extern void namespace_default_role_permissions_value__l_ref_get_node(
-   const constants__t_Reference_i namespace_default_role_permissions_value__p_ref,
-   constants__t_Node_i * const namespace_default_role_permissions_value__p_node,
-   constants__t_NodeId_i * const namespace_default_role_permissions_value__p_nodeId);
 
 /*--------------------
    OPERATIONS Clause

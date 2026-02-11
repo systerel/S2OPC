@@ -21,7 +21,7 @@
 
  File Name            : session_role_eval.c
 
- Date                 : 30/09/2024 14:56:17
+ Date                 : 17/02/2026 11:17:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -147,7 +147,7 @@ void session_role_eval__role_eval_user(
          &session_role_eval__l_identities_node);
       if ((session_role_eval__l_identities_node != constants__c_Node_indet) &&
          (session_role_eval__l_identities_nodeId != constants__c_NodeId_indet)) {
-         address_space_itf__read_AddressSpace_Identities_value(session_role_eval__l_identities_node,
+         address_space_itf__read_AddressSpace_Raw_Node_Value_only(session_role_eval__l_identities_node,
             session_role_eval__l_identities_nodeId,
             &session_role_eval__l_val,
             &session_role_eval__l_sc);

@@ -21,7 +21,7 @@
 
  File Name            : namespace_uri.h
 
- Date                 : 01/10/2024 10:37:50
+ Date                 : 17/02/2026 11:16:55
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,14 +49,20 @@ extern void namespace_uri__INITIALISATION(void);
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
-extern void namespace_uri__l_ref_get_node(
+extern void namespace_uri__l_getall_namespace_Reference_Node(
    const constants__t_Reference_i namespace_uri__p_ref,
+   t_bool * const namespace_uri__p_valid,
    constants__t_Node_i * const namespace_uri__p_node,
    constants__t_NodeId_i * const namespace_uri__p_nodeId);
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void namespace_uri__getall_namespace_Reference_Node(
+   const constants__t_Reference_i namespace_uri__p_ref,
+   t_bool * const namespace_uri__p_valid,
+   constants__t_Node_i * const namespace_uri__p_node,
+   constants__t_NodeId_i * const namespace_uri__p_nodeId);
 extern void namespace_uri__ref_maybe_get_NamespaceUri(
    const constants__t_Reference_i namespace_uri__p_ref,
    constants__t_Variant_i * const namespace_uri__p_maybe_val_NamespaceUri);

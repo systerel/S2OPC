@@ -74,7 +74,7 @@ LOCAL_OPERATIONS
     p_bres <-- l_check_node_NodeClass_and_TypeDef(p_node) =
     PRE
         p_node : t_Node_i &
-        p_node : t_Node
+        p_node : s_Node
     THEN
         p_bres := bool(a_NodeClass(p_node) = e_ncl_Object & conv_ExpandedNodeId_NodeId(Ref_HasTypeDefinition(p_node)) = c_RoleType_NodeId)
     END
@@ -194,7 +194,7 @@ OPERATIONS
         IF l_identities_node /= c_Node_indet & l_identities_nodeId /= c_NodeId_indet THEN
             // Get the value of the variable using a local read service.
             l_val, l_sc
-                <-- read_AddressSpace_Identities_value(l_identities_node, l_identities_nodeId)
+                <-- read_AddressSpace_Raw_Node_Value_only(l_identities_node, l_identities_nodeId)
         END
         ;
         IF l_sc = e_sc_ok
