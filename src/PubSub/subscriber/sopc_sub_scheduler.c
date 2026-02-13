@@ -914,19 +914,23 @@ static void SOPC_Sub_TimeoutCheck(void* param)
                 if (ctx->pubId.type == SOPC_UInteger_PublisherId)
                 {
                     SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                             "# Timeout on Sub (pubId=%" PRIu64 ", writerId=%" PRIu16 ")",
-                                             ctx->pubId.data.uint, ctx->writerId);
+                                             "# Timeout on Sub (pubId=%" PRIu64 ", groupId=%" PRIu16
+                                             ", writerId=%" PRIu16 ")",
+                                             ctx->pubId.data.uint, ctx->groupId, ctx->writerId);
                 }
                 else if (ctx->pubId.type == SOPC_String_PublisherId)
                 {
                     SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                             "# Timeout on Sub (pubId=%s, writerId=%" PRIu16 ")",
-                                             SOPC_String_GetRawCString(&ctx->pubId.data.string), ctx->writerId);
+                                             "# Timeout on Sub (pubId=%s, groupId=%" PRIu16 ", writerId=%" PRIu16 ")",
+                                             SOPC_String_GetRawCString(&ctx->pubId.data.string), ctx->groupId,
+                                             ctx->writerId);
                 }
                 else
                 {
                     SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                             "# Timeout on Sub (pubId=<NULL>, writerId=%" PRIu16 ")", ctx->writerId);
+                                             "# Timeout on Sub (pubId=<NULL>, groupId=%" PRIu16 ", writerId=%" PRIu16
+                                             ")",
+                                             ctx->groupId, ctx->writerId);
                 }
                 SOPC_SubScheduler_UpdateDsmState(ctx, SOPC_PubSubState_Error);
             }

@@ -699,6 +699,10 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
                         // "The sequence number is reset to 1 after the key and SecurityTokenId
                         //  are updated in the Publisher."
                         pubSchedulerCtx.sequenceNumber = 1;
+                        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB,
+                                               "Reset sequence number because key and securityTokenId are updated in "
+                                               "the Publisher. Previous securityTokenId %d, new securityTokenId %d",
+                                               prevTokenId, security->groupKeys->tokenId);
                     }
                     security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
                     pubSchedulerCtx.sequenceNumber++;
