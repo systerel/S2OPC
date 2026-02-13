@@ -1217,6 +1217,7 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
                                   "# Error: Subscriber cannot retrieve Security Keys for Publisher %" PRIu64
                                   " and token %" PRIu32 ". \n",
                                   pubId.data.uint, tokenId);
+            security = NULL;
         }
     }
     else if (tokenId < readerCtx->security.groupKeys->tokenId && SOPC_PUBSUB_SKS_CURRENT_TOKENID != tokenId)
