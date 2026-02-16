@@ -1624,6 +1624,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag in complex value: %s for BuiltInId type %d", name,
                            ctx->current_value_type);
             XML_StopParser(helperCtx->parser, 0);
+            clear_complex_value_context(&ctx->complex_value_ctx);
             return;
         }
 
@@ -3098,6 +3099,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
             LOG_XML_ERRORF(ctx->helper_ctx.parser, "Unexpected end tag in complex value: %s for BuiltInId type %d",
                            name, ctx->current_value_type);
             XML_StopParser(ctx->helper_ctx.parser, 0);
+            clear_complex_value_context(&ctx->complex_value_ctx);
             return;
         }
 
