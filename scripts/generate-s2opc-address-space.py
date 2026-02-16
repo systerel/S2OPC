@@ -109,9 +109,11 @@ UA_VALUE_RANGE_TAG = UA_TYPES_NS + 'Range'
 UA_VALUE_LOW_TAG = UA_TYPES_NS + 'Low'
 UA_VALUE_HIGH_TAG = UA_TYPES_NS + 'High'
 # RolePermissionType structure tags
+UA_VALUE_ROLE_PERMISSION_TYPE_TAG = UA_TYPES_NS + 'RolePermissionType'
 UA_VALUE_ROLEID_TAG = UA_TYPES_NS + 'RoleId'
 UA_VALUE_PERMISSIONS_TAG = UA_TYPES_NS + 'Permissions'
 # IdentityMappingRuleType structure tags
+UA_VALUE_IDENTITY_MAPPING_RULE_TYPE_TAG = UA_TYPES_NS + 'IdentityMappingRuleType'
 UA_VALUE_CRITERIA_TYPE_TAG = UA_TYPES_NS + 'CriteriaType'
 UA_VALUE_CRITERIA_TAG = UA_TYPES_NS + 'Criteria'
 
@@ -814,8 +816,12 @@ def parse_range_body(n):
     return Range(low.text, high.text)
 
 def parse_role_permission_type_body(n):
-    roleid = n.find(UA_VALUE_ROLEID_TAG)
-    permissions = n.find(UA_VALUE_PERMISSIONS_TAG)
+    role_perm_typ = n.find(UA_VALUE_ROLE_PERMISSION_TYPE_TAG)
+    if role_perm_typ is None:
+        raise ParseError('RolePermissionType object without RolePermissionType tag')
+    
+    roleid = role_perm_typ.find(UA_VALUE_ROLEID_TAG)
+    permissions = role_perm_typ.find(UA_VALUE_PERMISSIONS_TAG)
 
     if roleid is None:
         raise ParseError('RolePermission without RoleId tag')
@@ -833,8 +839,12 @@ def parse_role_permission_type_body(n):
     return ValueRolePermissionType(roleid_nodeid, permissions.text)
 
 def parse_identity_mapping_rule_type_body(n):
-    criteria = n.find(UA_VALUE_CRITERIA_TAG)
-    criteria_type = n.find(UA_VALUE_CRITERIA_TYPE_TAG)
+    id_mapping_rule_typ = n.find(UA_VALUE_IDENTITY_MAPPING_RULE_TYPE_TAG)
+    if id_mapping_rule_typ is None:
+        raise ParseError('IdentityMappingRuleType object without IdentityMappingRuleType tag')
+    
+    criteria = id_mapping_rule_typ.find(UA_VALUE_CRITERIA_TAG)
+    criteria_type = id_mapping_rule_typ.find(UA_VALUE_CRITERIA_TYPE_TAG)
 
     if criteria is None:
         raise ParseError('Identity without Criteria tag')

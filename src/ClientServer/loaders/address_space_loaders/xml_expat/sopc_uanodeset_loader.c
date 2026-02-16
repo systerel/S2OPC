@@ -295,13 +295,20 @@ static parse_complex_value_tag_t complex_value_ext_obj_range_tags[] = {
     END_COMPLEX_VALUE_TAG};
 
 static parse_complex_value_tag_t complex_value_ext_obj_role_permission_type_tags[] = {
-    {"RoleId", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_NODE_ID_TAGS, false, NULL, NULL, NULL},
-    {"Permissions", false, NULL, false, NULL, NULL, NULL},
+    {"RolePermissionType", false,
+     (parse_complex_value_tag_t[]){
+         {"RoleId", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_NODE_ID_TAGS, false, NULL, NULL, NULL},
+         {"Permissions", false, NULL, false, NULL, NULL, NULL},
+         END_COMPLEX_VALUE_TAG},
+     false, NULL, NULL, NULL},
     END_COMPLEX_VALUE_TAG};
 
 static parse_complex_value_tag_t complex_value_ext_obj_identity_mapping_rule_type_tags[] = {
-    {"CriteriaType", false, NULL, false, NULL, NULL, NULL},
-    {"Criteria", false, NULL, false, NULL, NULL, NULL}, // string
+    {"IdentityMappingRuleType", false,
+     (parse_complex_value_tag_t[]){{"CriteriaType", false, NULL, false, NULL, NULL, NULL},
+                                   {"Criteria", false, NULL, false, NULL, NULL, NULL}, // string
+                                   END_COMPLEX_VALUE_TAG},
+     false, NULL, NULL, NULL},
     END_COMPLEX_VALUE_TAG};
 
 /*
@@ -2034,13 +2041,19 @@ static bool set_variant_value_extobj_role_permission_type(OpcUa_RolePermissionTy
                                                           parse_complex_value_tag_array_t bodyChildsTagContext)
 {
     // Parse
+    parse_complex_value_tag_t* rolePermissionTagIdTagCtx = NULL;
+    bool rolePermissionType_tag_ok = complex_value_tag_from_tag_name_no_namespace(
+        "RolePermissionType", bodyChildsTagContext, &rolePermissionTagIdTagCtx);
+    SOPC_ASSERT(rolePermissionType_tag_ok);
+
     parse_complex_value_tag_t* roleIdTagCtx = NULL;
-    bool roleId_tag_ok = complex_value_tag_from_tag_name_no_namespace("RoleId", bodyChildsTagContext, &roleIdTagCtx);
+    bool roleId_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("RoleId", rolePermissionTagIdTagCtx->childs, &roleIdTagCtx);
     SOPC_ASSERT(roleId_tag_ok);
 
     parse_complex_value_tag_t* permissionsTagCtx = NULL;
-    bool permissions_tag_ok =
-        complex_value_tag_from_tag_name_no_namespace("Permissions", bodyChildsTagContext, &permissionsTagCtx);
+    bool permissions_tag_ok = complex_value_tag_from_tag_name_no_namespace(
+        "Permissions", rolePermissionTagIdTagCtx->childs, &permissionsTagCtx);
     SOPC_ASSERT(permissions_tag_ok);
 
     // Fill the rolePermissions object with the parsed elements
@@ -2086,14 +2099,19 @@ static bool set_variant_value_extobj_identity_mapping_rule_type(OpcUa_IdentityMa
                                                                 parse_complex_value_tag_array_t bodyChildsTagContext)
 {
     // Parse
+    parse_complex_value_tag_t* identityMappingRuleTypeTagIdTagCtx = NULL;
+    bool identityMappingRuleType_tag_ok = complex_value_tag_from_tag_name_no_namespace(
+        "IdentityMappingRuleType", bodyChildsTagContext, &identityMappingRuleTypeTagIdTagCtx);
+    SOPC_ASSERT(identityMappingRuleType_tag_ok);
+
     parse_complex_value_tag_t* criteriaTypeTagCtx = NULL;
-    bool criteriaType_tag_ok =
-        complex_value_tag_from_tag_name_no_namespace("CriteriaType", bodyChildsTagContext, &criteriaTypeTagCtx);
+    bool criteriaType_tag_ok = complex_value_tag_from_tag_name_no_namespace(
+        "CriteriaType", identityMappingRuleTypeTagIdTagCtx->childs, &criteriaTypeTagCtx);
     SOPC_ASSERT(criteriaType_tag_ok);
 
     parse_complex_value_tag_t* criteriaTagCtx = NULL;
-    bool criteria_tag_ok =
-        complex_value_tag_from_tag_name_no_namespace("Criteria", bodyChildsTagContext, &criteriaTagCtx);
+    bool criteria_tag_ok = complex_value_tag_from_tag_name_no_namespace(
+        "Criteria", identityMappingRuleTypeTagIdTagCtx->childs, &criteriaTagCtx);
     SOPC_ASSERT(criteria_tag_ok);
 
     SOPC_ASSERT(!criteriaTypeTagCtx->is_array);
