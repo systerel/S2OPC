@@ -165,8 +165,10 @@
             <Identifier>i=15728</Identifier> <!-- OpcUaId_IdentityMappingRuleType_Encoding_DefaultXml -->
           </TypeId>
           <Body>
-            <CriteriaType>5</CriteriaType> <!-- Anonymous -->
-            <Criteria>NULL</Criteria>
+            <IdentityMappingRuleType>
+              <CriteriaType>5</CriteriaType> <!-- Anonymous -->
+              <Criteria>NULL</Criteria>
+            </IdentityMappingRuleType>
           </Body>
         </ExtensionObject>
         <!-- 2nd mapping rule -->
@@ -175,8 +177,10 @@
             <Identifier>i=15728</Identifier>
           </TypeId>
           <Body>
-            <CriteriaType>6</CriteriaType> <!-- Authenticated user -->
-            <Criteria>NULL</Criteria>
+            <IdentityMappingRuleType>
+              <CriteriaType>6</CriteriaType> <!-- Authenticated user -->
+              <Criteria>NULL</Criteria>
+            </IdentityMappingRuleType>
           </Body>
         </ExtensionObject>
       </ListOfExtensionObject>
@@ -202,8 +206,10 @@
           <Identifier>i=15728</Identifier>
         </TypeId>
         <Body>
-          <CriteriaType>6</CriteriaType> <!-- Authenticated user -->
-          <Criteria>NULL</Criteria>
+          <IdentityMappingRuleType>
+            <CriteriaType>6</CriteriaType> <!-- Authenticated user -->
+            <Criteria>NULL</Criteria>
+          </IdentityMappingRuleType>
         </Body>
       </ExtensionObject>
     </Value>
@@ -228,8 +234,10 @@
           <Identifier>i=15728</Identifier>
         </TypeId>
         <Body>
-          <CriteriaType>1</CriteriaType> <!-- Username -->
-          <Criteria>me</Criteria>
+          <IdentityMappingRuleType>
+            <CriteriaType>1</CriteriaType> <!-- Username -->
+            <Criteria>me</Criteria>
+          </IdentityMappingRuleType>
         </Body>
       </ExtensionObject>
     </Value>
@@ -254,8 +262,10 @@
           <Identifier>i=15728</Identifier>
         </TypeId>
         <Body>
-          <CriteriaType>1</CriteriaType> <!-- Username -->
-          <Criteria>secuAdmin</Criteria>
+          <IdentityMappingRuleType>
+            <CriteriaType>1</CriteriaType> <!-- Username -->
+            <Criteria>secuAdmin</Criteria>
+          </IdentityMappingRuleType>
         </Body>
       </ExtensionObject>
     </Value>
@@ -276,10 +286,12 @@
             <Identifier>i=16126</Identifier> <!-- OpcUaId_RolePermissionType_Encoding_DefaultXml -->
           </TypeId>
           <Body>
-            <RoleId>
-              <Identifier>i=15668</Identifier> <!-- Observer -->
-            </RoleId>
-            <Permissions>2081</Permissions> <!-- Browse + Read + ReceiveEvents -->
+            <RolePermissionType>
+              <RoleId>
+                <Identifier>i=15668</Identifier> <!-- Observer -->
+              </RoleId>
+              <Permissions>2081</Permissions> <!-- Browse + Read + ReceiveEvents -->
+            </RolePermissionType>
           </Body>
         </ExtensionObject>
         <!-- 2nd RolePermission -->
@@ -288,10 +300,12 @@
             <Identifier>i=16126</Identifier>
           </TypeId>
           <Body>
-            <RoleId>
-              <Identifier>i=15680</Identifier> <!-- Operator -->
-            </RoleId>
-            <Permissions>6177</Permissions> <!-- Browse + Read + Call+ ReceiveEvents -->
+            <RolePermissionType>
+              <RoleId>
+                <Identifier>i=15680</Identifier> <!-- Operator -->
+              </RoleId>
+              <Permissions>6177</Permissions> <!-- Browse + Read + Call+ ReceiveEvents -->
+            </RolePermissionType>
           </Body>
         </ExtensionObject>
         <!-- 3rd RolePermission -->
@@ -300,10 +314,12 @@
             <Identifier>i=16126</Identifier>
           </TypeId>
           <Body>
-            <RoleId>
-              <Identifier>i=15716</Identifier> <!-- ConfigureAdmin -->
-            </RoleId>
-            <Permissions>2081</Permissions> <!-- Browse + Read + ReceiveEvents -->
+            <RolePermissionType>
+              <RoleId>
+                <Identifier>i=15716</Identifier> <!-- ConfigureAdmin -->
+              </RoleId>
+              <Permissions>2081</Permissions> <!-- Browse + Read + ReceiveEvents -->
+            </RolePermissionType>
           </Body>
         </ExtensionObject>
         <!-- 4th RolePermission -->
@@ -312,10 +328,12 @@
             <Identifier>i=16126</Identifier>
           </TypeId>
           <Body>
-            <RoleId>
-              <Identifier>i=15704</Identifier> <!-- SecurityAdmin -->
-            </RoleId>
-            <Permissions>6177</Permissions> <!-- Browse + Read + Call + ReceiveEvents -->
+            <RolePermissionType>
+              <RoleId>
+                <Identifier>i=15704</Identifier> <!-- SecurityAdmin -->
+              </RoleId>
+              <Permissions>6177</Permissions> <!-- Browse + Read + Call + ReceiveEvents -->
+            </RolePermissionType>
           </Body>
         </ExtensionObject>
       </ListOfExtensionObject>

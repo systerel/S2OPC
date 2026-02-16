@@ -113,10 +113,12 @@
             <Identifier>i=16126</Identifier> <!-- OpcUaId_RolePermissionType_Encoding_DefaultXml -->
           </TypeId>
           <Body>
-            <RoleId>
-              <Identifier>i=15668</Identifier> <!-- Observer -->
-            </RoleId>
-            <Permissions>32</Permissions> <!-- Read -->
+            <RolePermissionType>
+              <RoleId>
+                <Identifier>i=15668</Identifier> <!-- Observer -->
+              </RoleId>
+              <Permissions>32</Permissions> <!-- Read -->
+            </RolePermissionType>
           </Body>
         </ExtensionObject>
       </ListOfExtensionObject>

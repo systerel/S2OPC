@@ -53,10 +53,12 @@
             <Identifier>i=16126</Identifier> <!-- OpcUaId_RolePermissionType_Encoding_DefaultXml -->
           </TypeId>
           <Body>
-            <RoleId>
-              <Identifier>i=15668</Identifier> <!-- Observer -->
-            </RoleId>
-            <Permissions>2145</Permissions> <!-- Browse + Read + Write + ReceiveEvents -->
+            <RolePermissionType>
+              <RoleId>
+                <Identifier>i=15668</Identifier> <!-- Observer -->
+              </RoleId>
+              <Permissions>2145</Permissions> <!-- Browse + Read + Write + ReceiveEvents -->
+            </RolePermissionType>
           </Body>
         </ExtensionObject>
         <!-- 2nd RolePermission -->
@@ -65,10 +67,12 @@
             <Identifier>i=16126</Identifier>
           </TypeId>
           <Body>
-            <RoleId>
-              <Identifier>i=15704</Identifier> <!-- SecurityAdmin -->
-            </RoleId>
-            <Permissions>6177</Permissions> <!-- Browse + Read + Call + ReceiveEvents -->
+            <RolePermissionType>
+              <RoleId>
+                <Identifier>i=15704</Identifier> <!-- SecurityAdmin -->
+              </RoleId>
+              <Permissions>6177</Permissions> <!-- Browse + Read + Call + ReceiveEvents -->
+            </RolePermissionType>
           </Body>
         </ExtensionObject>
       </ListOfExtensionObject>

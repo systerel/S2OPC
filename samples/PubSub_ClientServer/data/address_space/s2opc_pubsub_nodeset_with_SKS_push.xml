@@ -49614,10 +49614,12 @@
             <uax:Identifier>i=16126</uax:Identifier>
           </uax:TypeId>
           <uax:Body>
-            <uax:RoleId>
-              <uax:Identifier>i=15668</uax:Identifier>
-            </uax:RoleId>
-            <uax:Permissions>2081</uax:Permissions>
+            <uax:RolePermissionType>
+              <uax:RoleId>
+                <uax:Identifier>i=15668</uax:Identifier>
+              </uax:RoleId>
+              <uax:Permissions>2081</uax:Permissions>
+            </uax:RolePermissionType>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -49625,10 +49627,12 @@
             <uax:Identifier>i=16126</uax:Identifier>
           </uax:TypeId>
           <uax:Body>
-            <uax:RoleId>
-              <uax:Identifier>i=15680</uax:Identifier>
-            </uax:RoleId>
-            <uax:Permissions>6177</uax:Permissions>
+            <uax:RolePermissionType>
+              <uax:RoleId>
+                <uax:Identifier>i=15680</uax:Identifier>
+              </uax:RoleId>
+              <uax:Permissions>6177</uax:Permissions>
+            </uax:RolePermissionType>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -49636,10 +49640,12 @@
             <uax:Identifier>i=16126</uax:Identifier>
           </uax:TypeId>
           <uax:Body>
-            <uax:RoleId>
-              <uax:Identifier>i=15716</uax:Identifier>
-            </uax:RoleId>
-            <uax:Permissions>2081</uax:Permissions>
+            <uax:RolePermissionType>
+              <uax:RoleId>
+                <uax:Identifier>i=15716</uax:Identifier>
+              </uax:RoleId>
+              <uax:Permissions>2081</uax:Permissions>
+            </uax:RolePermissionType>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -49647,10 +49653,12 @@
             <uax:Identifier>i=16126</uax:Identifier>
           </uax:TypeId>
           <uax:Body>
-            <uax:RoleId>
-              <uax:Identifier>i=15704</uax:Identifier>
-            </uax:RoleId>
-            <uax:Permissions>6177</uax:Permissions>
+            <uax:RolePermissionType>
+              <uax:RoleId>
+                <uax:Identifier>i=15704</uax:Identifier>
+              </uax:RoleId>
+              <uax:Permissions>6177</uax:Permissions>
+            </uax:RolePermissionType>
           </uax:Body>
         </uax:ExtensionObject>
       </uax:ListOfExtensionObject>
@@ -49669,8 +49677,10 @@
             <uax:Identifier>i=15728</uax:Identifier>
           </uax:TypeId>
           <uax:Body>
-            <uax:CriteriaType>5</uax:CriteriaType>
-            <uax:Criteria>NULL</uax:Criteria>
+            <uax:IdentityMappingRuleType>
+              <uax:CriteriaType>5</uax:CriteriaType>
+              <uax:Criteria>NULL</uax:Criteria>
+            </uax:IdentityMappingRuleType>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -49678,8 +49688,10 @@
             <uax:Identifier>i=15728</uax:Identifier>
           </uax:TypeId>
           <uax:Body>
-            <uax:CriteriaType>6</uax:CriteriaType>
-            <uax:Criteria>NULL</uax:Criteria>
+            <uax:IdentityMappingRuleType>
+              <uax:CriteriaType>6</uax:CriteriaType>
+              <uax:Criteria>NULL</uax:Criteria>
+            </uax:IdentityMappingRuleType>
           </uax:Body>
         </uax:ExtensionObject>
       </uax:ListOfExtensionObject>
@@ -49697,8 +49709,10 @@
           <uax:Identifier>i=15728</uax:Identifier>
         </uax:TypeId>
         <uax:Body>
-          <uax:CriteriaType>6</uax:CriteriaType>
-          <uax:Criteria>NULL</uax:Criteria>
+          <uax:IdentityMappingRuleType>
+            <uax:CriteriaType>6</uax:CriteriaType>
+            <uax:Criteria>NULL</uax:Criteria>
+          </uax:IdentityMappingRuleType>
         </uax:Body>
       </uax:ExtensionObject>
     </Value>
@@ -49715,8 +49729,10 @@
           <uax:Identifier>i=15728</uax:Identifier>
         </uax:TypeId>
         <uax:Body>
-          <uax:CriteriaType>1</uax:CriteriaType>
-          <uax:Criteria>secuAdmin</uax:Criteria>
+          <uax:IdentityMappingRuleType>
+            <uax:CriteriaType>1</uax:CriteriaType>
+            <uax:Criteria>secuAdmin</uax:Criteria>
+          </uax:IdentityMappingRuleType>
         </uax:Body>
       </uax:ExtensionObject>
     </Value>
@@ -49733,8 +49749,10 @@
           <uax:Identifier>i=15728</uax:Identifier>
         </uax:TypeId>
         <uax:Body>
-          <uax:CriteriaType>1</uax:CriteriaType>
-          <uax:Criteria>me</uax:Criteria>
+          <uax:IdentityMappingRuleType>
+            <uax:CriteriaType>1</uax:CriteriaType>
+            <uax:Criteria>me</uax:Criteria>
+          </uax:IdentityMappingRuleType>
         </uax:Body>
       </uax:ExtensionObject>
     </Value>
@@ -49868,10 +49886,12 @@
             <uax:Identifier>i=16126</uax:Identifier>
           </uax:TypeId>
           <uax:Body>
-            <uax:RoleId>
-              <uax:Identifier>i=15668</uax:Identifier>
-            </uax:RoleId>
-            <uax:Permissions>2145</uax:Permissions>
+            <uax:RolePermissionType>
+              <uax:RoleId>
+                <uax:Identifier>i=15668</uax:Identifier>
+              </uax:RoleId>
+              <uax:Permissions>2145</uax:Permissions>
+            </uax:RolePermissionType>
           </uax:Body>
         </uax:ExtensionObject>
         <uax:ExtensionObject>
@@ -49879,10 +49899,12 @@
             <uax:Identifier>i=16126</uax:Identifier>
           </uax:TypeId>
           <uax:Body>
-            <uax:RoleId>
-              <uax:Identifier>i=15704</uax:Identifier>
-            </uax:RoleId>
-            <uax:Permissions>6177</uax:Permissions>
+            <uax:RolePermissionType>
+              <uax:RoleId>
+                <uax:Identifier>i=15704</uax:Identifier>
+              </uax:RoleId>
+              <uax:Permissions>6177</uax:Permissions>
+            </uax:RolePermissionType>
           </uax:Body>
         </uax:ExtensionObject>
       </uax:ListOfExtensionObject>

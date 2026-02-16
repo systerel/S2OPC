@@ -819,7 +819,7 @@ def parse_role_permission_type_body(n):
     role_perm_typ = n.find(UA_VALUE_ROLE_PERMISSION_TYPE_TAG)
     if role_perm_typ is None:
         raise ParseError('RolePermissionType object without RolePermissionType tag')
-    
+
     roleid = role_perm_typ.find(UA_VALUE_ROLEID_TAG)
     permissions = role_perm_typ.find(UA_VALUE_PERMISSIONS_TAG)
 
@@ -842,7 +842,7 @@ def parse_identity_mapping_rule_type_body(n):
     id_mapping_rule_typ = n.find(UA_VALUE_IDENTITY_MAPPING_RULE_TYPE_TAG)
     if id_mapping_rule_typ is None:
         raise ParseError('IdentityMappingRuleType object without IdentityMappingRuleType tag')
-    
+
     criteria = id_mapping_rule_typ.find(UA_VALUE_CRITERIA_TAG)
     criteria_type = id_mapping_rule_typ.find(UA_VALUE_CRITERIA_TYPE_TAG)
 
