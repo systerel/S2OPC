@@ -1,5 +1,0 @@
-[
-	{"command" :"sleep", "target": "server2","args" :[10]},
-	{"command" :"write","target":"server2","args" :["info"]},
-	{"command" :"read","target":"server2","args" :["2", "opc.tcp://192.168.42.100:4841"]}
-]
