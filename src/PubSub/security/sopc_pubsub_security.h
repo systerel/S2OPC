@@ -47,18 +47,34 @@ typedef struct SOPC_PubSub_SecurityType
     bool sequenceNumberSet;
 } SOPC_PubSub_SecurityType;
 
+typedef enum SOPC_PubSub_SecurityStatus
+{
+    SOPC_PUBSUB_STATUS_SECURITY_OK,
+    SOPC_PUBSUB_STATUS_SECURITY_INVALID_PARAMETERS,
+    SOPC_PUBSUB_STATUS_SECURITY_NO_KEYS,
+    SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_OLDER,
+    SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_NEWER,
+    SOPC_PUBSUB_STATUS_SECURITY_OLD_TOKEN_ID,
+    SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_PUBLISHER,
+    SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_WRITER_GROUP,
+    SOPC_PUBSUB_STATUS_SECURITY_NOK
+} SOPC_PubSub_SecurityStatus;
+
 /**
  * \brief Callback function to retrieve a security context from a security tokenId, publisher id and a writer group
  *
  * \param tokenId token id to identify the group keys
  * \param pub_id publisher id
  * \param writerGroupId writer group id
+ * \param security[out] a pointer to SOPC_PubSub_SecurityType object in case of success or NULL otherwise. The given
+ * pointer shall NOT be NULL. The memory pointed is shared and shall not be freed by the caller.
  *
- * \return a SOPC_PubSub_SecurityType object or NULL is not found
+ * \return SOPC_PubSub_SecurityStatus
  */
-typedef SOPC_PubSub_SecurityType* SOPC_UADP_GetSecurity_Func(uint32_t tokenId,
-                                                             SOPC_Conf_PublisherId pub_id,
-                                                             uint16_t writerGroupId);
+typedef SOPC_PubSub_SecurityStatus SOPC_UADP_GetSecurity_Func(uint32_t tokenId,
+                                                              SOPC_Conf_PublisherId pub_id,
+                                                              uint16_t writerGroupId,
+                                                              SOPC_PubSub_SecurityType** security);
 
 /**
  * \brief clear a SOPC_PubSub_SecurityType object

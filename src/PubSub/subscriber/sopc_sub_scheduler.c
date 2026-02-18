@@ -70,11 +70,13 @@ static void SOPC_SubScheduler_Add_Security_Ctx(const SOPC_ReaderGroup* group);
  * \param tokenId tokenId of a received message
  * \param pubCtx a context related to a Publisher found in the Subscriber security context
  * \param writerGroupId writer group id of a received message
- * \return security data or NULL if not found
+ * \param security[out] a pointer to security data or NULL in wrong case.
+ * \return SOPC_PubSub_SecurityStatus
  */
-static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t tokenId,
-                                                                      const SOPC_Conf_PublisherId pubId,
-                                                                      uint16_t writerGroupId);
+static SOPC_PubSub_SecurityStatus SOPC_SubScheduler_Get_Security_Infos(uint32_t tokenId,
+                                                                       const SOPC_Conf_PublisherId pubId,
+                                                                       uint16_t writerGroupId,
+                                                                       SOPC_PubSub_SecurityType** security);
 
 /**
  * Structure to link a key (publisher, writer group) to a security configuration:
@@ -332,10 +334,11 @@ static void SOPC_SubScheduler_UpdateDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, 
             // Update dsm context
             ctx->dataSetMessageSequenceNumberSet = false;
             ctx->dataSetMessageSequenceNumber = 0;
+            SOPC_PubSub_SecurityType* security = NULL;
             // Update Security SN if security is managed
-            SOPC_PubSub_SecurityType* security =
-                SOPC_SubScheduler_Get_Security_Infos(SOPC_PUBSUB_SKS_CURRENT_TOKENID, ctx->pubId, ctx->groupId);
-            if (NULL != security)
+            SOPC_PubSub_SecurityStatus status = SOPC_SubScheduler_Get_Security_Infos(
+                SOPC_PUBSUB_SKS_CURRENT_TOKENID, ctx->pubId, ctx->groupId, &security);
+            if (SOPC_PUBSUB_STATUS_SECURITY_OK == status && NULL != security)
             {
                 security->sequenceNumber = 0;
                 security->sequenceNumberSet = false;
@@ -1172,65 +1175,86 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ct
     return NULL;
 }
 
-static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t tokenId,
-                                                                      const SOPC_Conf_PublisherId pubId,
-                                                                      uint16_t writerGroupId)
+static SOPC_PubSub_SecurityStatus SOPC_SubScheduler_Get_Security_Infos(uint32_t tokenId,
+                                                                       const SOPC_Conf_PublisherId pubId,
+                                                                       uint16_t writerGroupId,
+                                                                       SOPC_PubSub_SecurityType** security)
 {
+    if (security == NULL || *security != NULL)
+    {
+        return SOPC_PUBSUB_STATUS_SECURITY_INVALID_PARAMETERS;
+    }
     SOPC_SubScheduler_Security_Pub_Ctx* pubCtx = SOPC_SubScheduler_Get_Security_Pub_Ctx(pubId);
     if (NULL == pubCtx)
     {
         // no security context associated to this publisher
         // bad configuration or message not for this subscriber
-        return NULL;
+        return SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_PUBLISHER;
     }
     SOPC_SubScheduler_Security_Reader_Ctx* readerCtx = SOPC_SubScheduler_Pub_Ctx_Get_Reader_Ctx(pubCtx, writerGroupId);
     if (NULL == readerCtx)
     {
         // no security context associated to this writer group
         // bad configuration or message not for this subscriber
-        return NULL;
+        return SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_WRITER_GROUP;
     }
 
-    /* Check the validity of the request.
+    SOPC_PubSub_SecurityStatus status = SOPC_PUBSUB_STATUS_SECURITY_OK;
 
-     */
-    SOPC_PubSub_SecurityType* security = NULL;
+    /* Check the validity of the request. */
 
     /* Keys is not set or new token id used by this publisher */
     if (NULL == readerCtx->security.groupKeys || tokenId > readerCtx->security.groupKeys->tokenId)
     {
         SOPC_PubSubSKS_Keys* keys = SOPC_PubSubSKS_GetSecurityKeys(readerCtx->security.securityGroupId, tokenId);
-        security = &readerCtx->security;
         if (NULL != keys && tokenId == keys->tokenId)
         {
-            SOPC_PubSubSKS_Keys_Delete(security->groupKeys);
-            SOPC_Free(security->groupKeys);
-            security->groupKeys = keys;
-            security->sequenceNumber = 0;
-            security->sequenceNumberSet = false;
+            SOPC_PubSubSKS_Keys_Delete(readerCtx->security.groupKeys);
+            SOPC_Free(readerCtx->security.groupKeys);
+            readerCtx->security.groupKeys = keys;
+            readerCtx->security.sequenceNumber = 0;
+            readerCtx->security.sequenceNumberSet = false;
         }
         else
         {
+            if (NULL == keys)
+            {
+                status = SOPC_PUBSUB_STATUS_SECURITY_NO_KEYS;
+            }
+            else if (keys->tokenId < tokenId)
+            {
+                // SKS send keys are older than message keys.
+                status = SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_OLDER;
+            }
+            else // keys->tokenId > tokenId
+            {
+                // SKS send newer keys than message keys.
+                status = SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_NEWER;
+            }
             SOPC_PubSubSKS_Keys_Delete(keys);
             SOPC_Free(keys);
             SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB,
                                   "# Error: Subscriber cannot retrieve Security Keys for Publisher %" PRIu64
                                   " and token %" PRIu32 ". \n",
                                   pubId.data.uint, tokenId);
-            security = NULL;
         }
     }
     else if (tokenId < readerCtx->security.groupKeys->tokenId && SOPC_PUBSUB_SKS_CURRENT_TOKENID != tokenId)
     {
-        // this token id is not too old and is not current token id (0 value). The message is not managed
-        security = NULL;
+        // this token id is too old and is not current token id (0 value). The message is not managed
+        status = SOPC_PUBSUB_STATUS_SECURITY_OLD_TOKEN_ID;
     }
     else
     {
         // this token is still used
-        security = &readerCtx->security;
     }
-    return security;
+
+    if (SOPC_PUBSUB_STATUS_SECURITY_OK == status)
+    {
+        *security = &readerCtx->security;
+    }
+
+    return status;
 }
 
 static void SOPC_SubScheduler_Add_Security_Ctx(const SOPC_ReaderGroup* group)

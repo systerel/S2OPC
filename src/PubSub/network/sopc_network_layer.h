@@ -69,6 +69,7 @@ typedef enum
     SOPC_UADP_NetworkMessage_Error_Read_Alloc_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_Security_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_SecurityConf_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_SecurityGetValidKeys_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_SecuritySign_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_SecuritySignSize_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_SecurityNonce_Failed,

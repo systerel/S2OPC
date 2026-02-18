@@ -338,21 +338,25 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
     return result;
 }
 
-static SOPC_PubSub_SecurityType* retrieve_security_info(uint32_t tokenId,
-                                                        const SOPC_Conf_PublisherId pubId,
-                                                        uint16_t writerGroupId)
+static SOPC_PubSub_SecurityStatus retrieve_security_info(uint32_t tokenId,
+                                                         const SOPC_Conf_PublisherId pubId,
+                                                         uint16_t writerGroupId,
+                                                         SOPC_PubSub_SecurityType** security)
 {
     SOPC_UNUSED_ARG(tokenId);
     SOPC_UNUSED_ARG(pubId);
     SOPC_UNUSED_ARG(writerGroupId);
+    SOPC_ASSERT(security != NULL);
+    SOPC_ASSERT(*security == NULL);
 
     if (SECU_NONE == gSubSecuMode)
     {
-        return NULL;
+        return SOPC_PUBSUB_STATUS_SECURITY_NOK;
     }
     else
     {
-        return &gSubSecurityType;
+        *security = &gSubSecurityType;
+        return SOPC_PUBSUB_STATUS_SECURITY_OK;
     }
 }
 

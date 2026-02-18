@@ -1760,6 +1760,8 @@ static inline SOPC_NetworkMessage_Error_Code Decode_SecurityHeader(SOPC_Buffer* 
     uint8_t securityFooterEnabled = false;
     uint8_t securityResetEnabled = false;
     SOPC_PubSub_SecurityType* security = NULL;
+    SOPC_PubSub_SecurityStatus securityStatus = SOPC_PUBSUB_STATUS_SECURITY_OK;
+    bool callSignFailCallback = false;
 
     if (NULL == getSecurity_Func || 0 == group_id || !conf->PublisherIdFlag)
     {
@@ -1795,12 +1797,24 @@ static inline SOPC_NetworkMessage_Error_Code Decode_SecurityHeader(SOPC_Buffer* 
     if (SOPC_STATUS_OK == status)
     {
         /* TODO: maybe this message is encrypted but we are not in the right group to decrypt it */
-        security = getSecurity_Func(
+        securityStatus = getSecurity_Func(
             securityTokenId, SOPC_Helper_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)),
-            group_id);
+            group_id, &security);
+
+        // Call the signing fail callback only if an issue happen when attempting to get key from SKS
+        if (SOPC_PUBSUB_STATUS_SECURITY_NO_KEYS == securityStatus ||
+            SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_OLDER == securityStatus ||
+            SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_NEWER == securityStatus ||
+            SOPC_PUBSUB_STATUS_SECURITY_OLD_TOKEN_ID == securityStatus)
+        {
+            set_status_default(&status, &code, SOPC_UADP_NetworkMessage_Error_Read_SecurityGetValidKeys_Failed);
+            callSignFailCallback = true;
+        }
+
         // Checked the security configuration of subscriber
-        if (NULL == security ||
-            !Network_Check_ReceivedSecurityMode(security->mode, securitySignedEnabled, securityEncryptedEnabled))
+        // Security can be dereferenced here because getSecurity_Func return OK
+        else if (SOPC_PUBSUB_STATUS_SECURITY_OK != securityStatus ||
+                 !Network_Check_ReceivedSecurityMode(security->mode, securitySignedEnabled, securityEncryptedEnabled))
         {
             set_status_default(&status, &code, SOPC_UADP_NetworkMessage_Error_Read_SecurityConf_Failed);
         }
@@ -1813,8 +1827,11 @@ static inline SOPC_NetworkMessage_Error_Code Decode_SecurityHeader(SOPC_Buffer* 
             if (securitySignedEnabled && !SOPC_PubSub_Security_Verify(security, buffer, payload_position))
             {
                 set_status_default(&status, &code, SOPC_UADP_NetworkMessage_Error_Read_SecuritySign_Failed);
+                callSignFailCallback = true;
             }
-
+        }
+        if (callSignFailCallback)
+        {
             // Call the SubSignatureCheckFailed callback if set
             if (SOPC_STATUS_OK != status && connection != NULL)
             {
@@ -2012,11 +2029,18 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
         // SecurityHeader is disable: check that subscriber expected security mode is NONE
         if (NULL != readerConf->pGetSecurity_Func && SOPC_STATUS_OK == status) // if NULL, security mode is None
         {
-            SOPC_PubSub_SecurityType* security = readerConf->pGetSecurity_Func(
+            SOPC_PubSub_SecurityType* security = NULL;
+            SOPC_PubSub_SecurityStatus securityStatus = readerConf->pGetSecurity_Func(
                 SOPC_PUBSUB_SKS_CURRENT_TOKENID,
-                SOPC_Helper_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), group_id);
-            // if security is NULL, there is no reader configured with security sign or encrypt/sign
-            if (NULL != security && !Network_Check_ReceivedSecurityMode(security->mode, false, false))
+                SOPC_Helper_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), group_id,
+                &security);
+
+            // If there is a security context for the writer group and publisher then the reader is configured for sign
+            // or encrypt/sign
+            if (SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_WRITER_GROUP != securityStatus &&
+                SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_PUBLISHER != securityStatus &&
+                (SOPC_PUBSUB_STATUS_SECURITY_OK == securityStatus && security != NULL &&
+                 !Network_Check_ReceivedSecurityMode(security->mode, false, false)))
             {
                 set_status_default(&status, &code, SOPC_UADP_NetworkMessage_Error_Read_SecurityNone_Failed);
             }
