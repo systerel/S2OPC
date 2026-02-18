@@ -105,6 +105,18 @@ OPERATIONS
         skip
     END;
 
+    // Note: only used for session event notification callback and not for audit for now
+    server_notify_session_inactive (session, oper_ret_code) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        oper_ret_code : t_StatusCode_i &
+        oper_ret_code : t_StatusCode
+    THEN
+        skip
+    END
+    ;
+
     server_notify_session_closed(session, oper_ret_code) =
     PRE
         session : t_session_i &

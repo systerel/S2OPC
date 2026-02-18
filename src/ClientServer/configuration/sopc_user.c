@@ -140,38 +140,70 @@ SOPC_User* SOPC_User_CreateCertificate(SOPC_ByteString* certificateData)
 
 const SOPC_String* SOPC_User_GetUsername(const SOPC_User* user)
 {
-    SOPC_ASSERT(SOPC_User_IsUsername(user));
-    return &user->data.username;
+    if (SOPC_User_IsUsername(user))
+    {
+        return &user->data.username;
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 bool SOPC_User_IsUsername(const SOPC_User* user)
 {
-    SOPC_ASSERT(NULL != user);
-    return USER_USERNAME == user->type;
+    if (NULL != user)
+    {
+        return USER_USERNAME == user->type;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 const SOPC_ByteString* SOPC_User_GetCertificate(const SOPC_User* user)
 {
-    SOPC_ASSERT(SOPC_User_IsCertificate(user));
-    return &user->data.certificate.der;
+    if (SOPC_User_IsCertificate(user))
+    {
+        return &user->data.certificate.der;
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 const SOPC_String* SOPC_User_GetCertificate_Thumbprint(const SOPC_User* user)
 {
-    SOPC_ASSERT(SOPC_User_IsCertificate(user));
-    return &user->data.certificate.thumbprint;
+    if (SOPC_User_IsCertificate(user))
+    {
+        return &user->data.certificate.thumbprint;
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 bool SOPC_User_IsCertificate(const SOPC_User* user)
 {
-    SOPC_ASSERT(NULL != user);
-    return USER_CERTIFICATE == user->type;
+    if (NULL != user)
+    {
+        return USER_CERTIFICATE == user->type;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
 {
-    SOPC_ASSERT(NULL != left);
-    SOPC_ASSERT(NULL != right);
+    if (NULL == left || NULL == right)
+    {
+        return left == right;
+    }
 
     bool sameCert = false;
 

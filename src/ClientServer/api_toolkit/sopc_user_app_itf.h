@@ -504,16 +504,37 @@ typedef enum _SOPC_App_Com_Event
 /* Server only interfaces */
 
 /**
- * \brief Server address space access/modification notifications to applicative code
+ * \brief Server address space / internal state change events to be received by applicative code
  */
 typedef enum _SOPC_App_AddSpace_Event
 {
     /* Server application events */
-    AS_WRITE_EVENT = 0x800, /**< Server side only:<BR/>
-                             *   Notifies a write operation on the server address space.<br/>
-                             *   opParam = (OpcUa_WriteValue*) single write value operation<br/>
-                             *   opStatus = status of the write operation
-                             */
+    AS_WRITE_EVENT = 0x800,      /**< Server side only:<BR/>
+                                  *   Notifies a write operation on the server address space.<br/>
+                                  *   opParam = (OpcUa_WriteValue*) single write value operation<br/>
+                                  *   opStatus = status of the write operation
+                                  */
+    AS_SESSION_CREATION = 0x801, /**< Server side only:<br/>
+                                  *   Notifies the session creation by the server for a client session.<br/>
+                                  *   opParam = (SOPC_SessionId) internal session id<br/>
+                                  *   opStatus = SOPC_GoodGeneric
+                                  */
+    AS_SESSION_ACTIVATION,       /**< Server side only:<br/>
+                                  *   Notifies the session activation by the server for a client session.<br/>
+                                  *   opParam = (SOPC_SessionId) internal session id<br/>
+                                  *   opStatus = SOPC_GoodGeneric for a successful session activation, Bad status otherwise
+      )                           */
+    AS_SESSION_INACTIVE,         /**< Server side only:<br/>
+                                  *   Notifies the session deactivation (orphaned) by the server for a client session.<br/>
+                                  *   opParam = (SOPC_SessionId) internal session id<br/>
+                                  *   opStatus = Bad status indicating the reason
+                                  *   (e.g. BadSecureChannelClosed, BadIdentityTokenRejected, etc.)
+                                  */
+    AS_SESSION_CLOSURE,          /**< Server side only:<br/>
+                                  *   Notifies the session closure by the server for a client session.<br/>
+                                  *   opParam = (SOPC_SessionId) internal session id<br/>
+                                  *   opStatus = SOPC_GoodGeneric for a successful session closure, Bad status otherwise
+                                  */
 } SOPC_App_AddSpace_Event;
 
 /**
@@ -522,11 +543,11 @@ typedef enum _SOPC_App_AddSpace_Event
 typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event, uint32_t IdOrStatus, void* param, uintptr_t appContext);
 
 /**
- * \brief Toolkit address space notification events callback type
+ * \brief Toolkit address space notification events or server internal state change events type
  */
 typedef void SOPC_AddressSpaceNotif_Fct(const SOPC_CallContext* callCtxPtr,
                                         SOPC_App_AddSpace_Event event,
-                                        void* opParam,
+                                        uintptr_t opParam,
                                         SOPC_StatusCode opStatus);
 
 /**

@@ -47,6 +47,7 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .externalHistoryReadCb = NULL,
     .externalHistoryReadContext = 0,
     .writeNotifCb = NULL,
+    .sessionNotifCb = NULL,
     .asyncRespCb = NULL,
     .localServiceListReqCtxList = NULL,
     .syncLocalServiceId = 0,
@@ -493,14 +494,41 @@ static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
 
 static void SOPC_ServerHelper_AddressSpaceNotifCb(const SOPC_CallContext* callCtxPtr,
                                                   SOPC_App_AddSpace_Event event,
-                                                  void* opParam,
+                                                  uintptr_t opParam,
                                                   SOPC_StatusCode opStatus)
 {
-    if (AS_WRITE_EVENT != event || NULL == sopc_server_helper_config.writeNotifCb)
+    SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
+    SOPC_WriteNotif_Fct* writeNotifCb = sopc_server_helper_config.writeNotifCb;
+    SOPC_SessionEventNotif_Fct* sessionNotifCb = sopc_server_helper_config.sessionNotifCb;
+    SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+    if (AS_WRITE_EVENT == event)
     {
-        return;
+        if (NULL == writeNotifCb)
+        {
+            return;
+        }
+        else
+        {
+            writeNotifCb(callCtxPtr, (OpcUa_WriteValue*) opParam, opStatus);
+        }
     }
-    sopc_server_helper_config.writeNotifCb(callCtxPtr, (OpcUa_WriteValue*) opParam, opStatus);
+    else if (AS_SESSION_CREATION == event || AS_SESSION_ACTIVATION == event || AS_SESSION_INACTIVE == event ||
+             AS_SESSION_CLOSURE == event)
+    {
+        if (NULL == sessionNotifCb)
+        {
+            return;
+        }
+        else
+        {
+            sessionNotifCb(callCtxPtr, (SOPC_ServerSessionEvent) event, (SOPC_SessionId) opParam, opStatus);
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Received unexpected notification event: %d",
+                                 (int) event);
+    }
 }
 
 SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void)
@@ -716,6 +744,20 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetWriteNotifCallback(SOPC_WriteNotif_
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     sopc_server_helper_config.writeNotifCb = writeNotifCb;
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetSessionEventNotifCallback(SOPC_SessionEventNotif_Fct* sessionEventNotifCb)
+{
+    if (!SOPC_ServerInternal_IsConfiguring())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == sessionEventNotifCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    sopc_server_helper_config.sessionNotifCb = sessionEventNotifCb;
     return SOPC_STATUS_OK;
 }
 

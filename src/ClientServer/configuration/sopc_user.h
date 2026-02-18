@@ -69,7 +69,7 @@ SOPC_User* SOPC_User_CreateCertificate(SOPC_ByteString* certificateData);
 
 /**
  * \brief Returns a reference to the internal storage of the username.
- *        The user must be a user with a username.
+ *        The user must be a user with a username, otherwise NULL is returned.
  */
 const SOPC_String* SOPC_User_GetUsername(const SOPC_User* user);
 
@@ -78,20 +78,20 @@ bool SOPC_User_IsUsername(const SOPC_User* user);
 
 /**
  * \brief Returns a reference to the internal storage of the DER certificate.
- *        The user shall be a user with a certificate.
+ *        The user shall be a user with a certificate, otherwise NULL is returned.
  */
 const SOPC_ByteString* SOPC_User_GetCertificate(const SOPC_User* user);
 
 /**
  * \brief Returns a reference to the internal storage of the thumbprint certificate (SHA1 hexadecimal format).
- *        The user shall be a user with a certificate.
+ *        The user shall be a user with a certificate, otherwise NULL is returned.
  */
 const SOPC_String* SOPC_User_GetCertificate_Thumbprint(const SOPC_User* user);
 
 /** \brief Returns true if the type of the user is certificate */
 bool SOPC_User_IsCertificate(const SOPC_User* user);
 
-/** \brief Returns true if the users are the same type and content (if applicable) */
+/** \brief Returns true if the users are the same type and content (if applicable) or if both are NULL */
 bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right);
 
 /** \brief User deletion, should not be called on local and anonymous users. */

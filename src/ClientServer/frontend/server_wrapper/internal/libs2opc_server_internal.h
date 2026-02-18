@@ -84,6 +84,8 @@ typedef struct SOPC_ServerHelper_Config
     uintptr_t externalHistoryReadContext;
     // Application write notification callback record
     SOPC_WriteNotif_Fct* writeNotifCb;
+    // Application session event notification callback record
+    SOPC_SessionEventNotif_Fct* sessionNotifCb;
     // Application node availability for CreateMonitoreItem callback
     SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb;
     // Application asynchronous local service response callback record

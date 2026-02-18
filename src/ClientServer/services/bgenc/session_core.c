@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 08/12/2025 17:15:10
+ Date                 : 19/02/2026 14:48:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -865,6 +865,8 @@ void session_core__l_server_secure_channel_lost_session_sm(
          session_core_1__reset_session_channel(session_core__p_session);
          session_core_1__set_session_state(session_core__p_session,
             constants__e_session_scOrphaned);
+         session_audit_bs__server_notify_session_inactive(session_core__p_session,
+            constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
       }
       else {
          session_audit_bs__server_notify_session_closed(session_core__p_session,

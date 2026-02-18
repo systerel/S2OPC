@@ -246,6 +246,62 @@ typedef void SOPC_WriteNotif_Fct(const SOPC_CallContext* callCtxPtr,
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb);
 
 /**
+ *  \brief Type of server session event that occurred
+ */
+typedef enum
+{
+    SESSION_CREATION = 0x801, /*< Notifies the session creation success or failure by the server for a client.<br/>
+                               *  opStatus = SOPC_GoodGeneric for a successful session creation, Bad status otherwise
+                               */
+    SESSION_ACTIVATION,       /*< Notifies the session activation success or failure by the server for a client.<br/>
+                               *  opStatus = SOPC_GoodGeneric for a successful session activation, Bad status otherwise
+                               */
+    SESSION_INACTIVE,         /*< Notifies the session deactivation (orphaned) by the server for a client.<br/>
+                               *  opStatus = Bad status indicating the reason of inactivation
+                               *  (e.g. BadSecureChannelClosed, BadIdentityTokenRejected, etc.)
+                               */
+    SESSION_CLOSURE           /*< Notifies the session closure by the server for a client.<br/>
+                               *  opStatus = SOPC_GoodGeneric for a requested successful session closure,
+                                             Bad status otherwise (i.e. session timeout, etc.)
+                               */
+} SOPC_ServerSessionEvent;
+
+/**
+ * \brief Type of callback to provide to receive session event notification.
+ *
+ * \param callCtxPtr   Context provided by server, see getters available (::SOPC_CallContext_GetUser, etc.)
+ * \param sessionEvent The session event that occurred
+ * \param id           The session id of the session that triggered the event (or 0 if not applicable)
+ * \param opStatus     The operation status code for the operation that triggered the event
+ *
+ *
+ *
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call (other instance of write notification, local service sync/async response, etc.).
+ */
+typedef void SOPC_SessionEventNotif_Fct(const SOPC_CallContext* callCtxPtr,
+                                        SOPC_ServerSessionEvent sessionEvent,
+                                        SOPC_SessionId id,
+                                        SOPC_StatusCode opStatus);
+
+/**
+ * \brief Defines the session event notification callback to be used.
+ *
+ * This is optional but if used it shall be defined before starting server.
+ *
+ * \param sessionEventNotifCb  The session event notification callback to be used
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p sessionEventNotifCb is
+ * invalid or SOPC_STATUS_INVALID_STATE if the configuration is not possible (toolkit not initialized, server already
+ * started).
+ *
+ * \warning The callback function shall not do anything blocking or long treatment since it will block any other
+ *          callback call (other instance of session event notification,
+ *                         write notification, local service sync/async response, etc.).
+ */
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetSessionEventNotifCallback(SOPC_SessionEventNotif_Fct* sessionEventNotifCb);
+
+/**
  * \brief Type of the callback called by CreateMonitoredItem service when a NodeId is not already part of server
  *        address space, the callback result indicates if it shall be considered known by server
  *        (and might exist later using AddNode service).

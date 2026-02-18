@@ -1237,7 +1237,8 @@ OPERATIONS
         IF l_state = e_session_userActivated
         THEN
             reset_session_channel (p_session);
-            set_session_state (p_session, e_session_scOrphaned)
+            set_session_state (p_session, e_session_scOrphaned);
+            server_notify_session_inactive (p_session, e_sc_bad_secure_channel_closed)
         ELSE
             /* may generate audit event */
             server_notify_session_closed(p_session, e_sc_bad_secure_channel_closed);

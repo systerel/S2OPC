@@ -21,7 +21,7 @@
 
  File Name            : session_audit_bs.h
 
- Date                 : 29/09/2025 13:30:26
+ Date                 : 19/02/2026 14:48:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -65,6 +65,9 @@ extern void session_audit_bs__server_notify_session_create(
    const constants__t_channel_config_idx_i session_audit_bs__p_channel_config,
    const constants__t_msg_i session_audit_bs__req_msg,
    const constants__t_msg_i session_audit_bs__resp_msg,
+   const constants__t_session_i session_audit_bs__session,
+   const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code);
+extern void session_audit_bs__server_notify_session_inactive(
    const constants__t_session_i session_audit_bs__session,
    const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code);
 extern void session_audit_bs__set_no_req_audit_info(

@@ -681,6 +681,7 @@ static bool checkExpectedEvent(const EventContent* evt, const Test_ExpectedValue
         SOPC_CONSOLE_PRINTF("Missing expected clause(s) not found in '%s'\n", context);
         SOPC_Dict_ForEach(remainingFieldsToFind, print_missingClause, (uintptr_t) NULL);
         result = false;
+        exit(1);
     }
     SOPC_Dict_Delete(remainingFieldsToFind);
     return result;

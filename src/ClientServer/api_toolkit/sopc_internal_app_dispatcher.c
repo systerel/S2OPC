@@ -148,7 +148,6 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
                                        uintptr_t auxParam)
 {
     SOPC_UNUSED_ARG(handler);
-    SOPC_UNUSED_ARG(id);
     void* params = (void*) uintParams; // Always used as a pointer content here
     OpcUa_WriteValue* wv = NULL;
     SOPC_CallContext* cc = (SOPC_CallContext*) auxParam;
@@ -188,7 +187,7 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
                 }
             }
 
-            addSpaceFct(cc, asEvent, params, (SOPC_StatusCode) initialAuxParam);
+            addSpaceFct(cc, asEvent, (uintptr_t) params, (SOPC_StatusCode) initialAuxParam);
 
             if (NULL != params)
             {
@@ -197,12 +196,17 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
             }
             break;
         }
+        case AS_SESSION_CREATION:
+        case AS_SESSION_ACTIVATION:
+        case AS_SESSION_INACTIVE:
+        case AS_SESSION_CLOSURE:
+            addSpaceFct(cc, asEvent, (uintptr_t) id, (SOPC_StatusCode) initialAuxParam);
+            break;
         default:
             SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "App: UNKOWN AS EVENT");
             break;
         }
     }
-
     SOPC_CallContext_FreeCopy(cc);
 }
 

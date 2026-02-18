@@ -31,6 +31,7 @@
 #include "sopc_event.h"
 #include "sopc_event_helpers.h"
 #include "sopc_helper_string.h"
+#include "sopc_internal_app_dispatcher.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_secure_channels_internal_ctx.h"
@@ -69,7 +70,99 @@
 #define SOPC_AUDIT_SEVERITY_CLOSE_SESSION_FAILURE 10
 #endif
 
+// Functions used to manage the session event notification (also activated without audit)
+static void server_session_event_notif(const constants__t_session_i session_core_bs__session,
+                                       const constants__t_sessionState_i session_core_bs__state,
+                                       const constants_statuscodes_bs__t_StatusCode_i session_core_bs__sc_reason)
+{
+    SOPC_CallContextCopy* ccc = NULL;
+    SOPC_StatusCode scReason = SOPC_GoodGenericStatus;
+    SOPC_ReturnStatus enqStatus = SOPC_STATUS_OK;
+
+    if (session_core_bs__sc_reason != constants_statuscodes_bs__c_StatusCode_indet)
+    {
+        util_status_code__B_to_C(session_core_bs__sc_reason, &scReason);
+    }
+    ccc = SOPC_CallContext_CreateCurrentCopy();
+
+    switch (session_core_bs__state)
+    {
+    case constants__e_session_closed:
+        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_CLOSURE, session_core_bs__session,
+                                                             (uintptr_t) NULL, scReason);
+        break;
+    case constants__e_session_created:
+        // Missing failure cases
+        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_CREATION, session_core_bs__session,
+                                                             (uintptr_t) NULL, scReason);
+        break;
+    case constants__e_session_userActivated:
+        // Missing failure cases
+        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_ACTIVATION, session_core_bs__session,
+                                                             (uintptr_t) NULL, scReason);
+        break;
+    case constants__e_session_scOrphaned:
+        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_INACTIVE, session_core_bs__session,
+                                                             (uintptr_t) NULL, scReason);
+        break;
+    case constants__e_session_closing:
+        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_CLOSURE, session_core_bs__session,
+                                                             (uintptr_t) session_core_bs__state, scReason);
+        break;
+    default:
+        enqStatus = SOPC_STATUS_NOK;
+        SOPC_ASSERT(false); // unexpected state, should be guaranteed by B model
+        break;
+    }
+    if (SOPC_STATUS_OK != enqStatus)
+    {
+        SOPC_CallContext_FreeCopy(ccc);
+    }
+}
+
+static void common_server_notify_session_create(
+    const constants__t_channel_config_idx_i session_audit_bs__p_channel_config,
+    const constants__t_msg_i session_audit_bs__req_msg,
+    const constants__t_msg_i session_audit_bs__resp_msg,
+    const constants__t_session_i session_audit_bs__session,
+    const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
+{
+    SOPC_UNUSED_ARG(session_audit_bs__p_channel_config);
+    SOPC_UNUSED_ARG(session_audit_bs__req_msg);
+    SOPC_UNUSED_ARG(session_audit_bs__resp_msg);
+    server_session_event_notif(session_audit_bs__session, constants__e_session_created,
+                               session_audit_bs__oper_ret_code);
+}
+
+static void common_server_notify_session_activate(
+    const constants__t_channel_config_idx_i session_audit_bs__p_channel_config,
+    const constants__t_msg_i session_audit_bs__req_msg,
+    const constants__t_session_i session_audit_bs__session,
+    const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
+{
+    SOPC_UNUSED_ARG(session_audit_bs__p_channel_config);
+    SOPC_UNUSED_ARG(session_audit_bs__req_msg);
+    server_session_event_notif(session_audit_bs__session, constants__e_session_userActivated,
+                               session_audit_bs__oper_ret_code);
+}
+
+static void common_server_notify_session_closed(
+    const constants__t_session_i session_audit_bs__session,
+    const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
+{
+    server_session_event_notif(session_audit_bs__session, constants__e_session_closed, session_audit_bs__oper_ret_code);
+}
+
+void session_audit_bs__server_notify_session_inactive(
+    const constants__t_session_i session_audit_bs__session,
+    const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
+{
+    server_session_event_notif(session_audit_bs__session, constants__e_session_scOrphaned,
+                               session_audit_bs__oper_ret_code);
+}
+
 #if S2OPC_HAS_AUDITING
+
 /*------------------------
    LOCAL VARIABLES
   ------------------------*/
@@ -368,6 +461,10 @@ void session_audit_bs__server_notify_session_create(
     const constants__t_session_i session_audit_bs__session,
     const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
 {
+    common_server_notify_session_create(session_audit_bs__p_channel_config, session_audit_bs__req_msg,
+                                        session_audit_bs__resp_msg, session_audit_bs__session,
+                                        session_audit_bs__oper_ret_code);
+
     // Retrieve Session contexts
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_Event* event = prepare_session_event(&auditCreateSessionEvent_Type);
@@ -456,6 +553,10 @@ void session_audit_bs__server_notify_session_activate(
     const constants__t_session_i session_audit_bs__session,
     const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
 {
+    // Generate session event that will borrow the userIdentityToken (moved into CallContext)
+    common_server_notify_session_activate(session_audit_bs__p_channel_config, session_audit_bs__req_msg,
+                                          session_audit_bs__session, session_audit_bs__oper_ret_code);
+
     // Retrieve Session contexts
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_Event* event = prepare_session_event(&auditActivateSessionEvent_Type);
@@ -517,6 +618,9 @@ void session_audit_bs__server_notify_session_closed(
     const constants__t_session_i session_audit_bs__session,
     const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
 {
+    // Manage session events notification
+    common_server_notify_session_closed(session_audit_bs__session, session_audit_bs__oper_ret_code);
+
     // Retrieve Session contexts
     const SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_Event* event = prepare_session_event(&auditSessionEvent_Type);
@@ -619,18 +723,15 @@ void session_audit_bs__server_notify_session_activate(
     const constants__t_session_i session_audit_bs__session,
     const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
 {
-    SOPC_UNUSED_ARG(session_audit_bs__p_channel_config);
-    SOPC_UNUSED_ARG(session_audit_bs__req_msg);
-    SOPC_UNUSED_ARG(session_audit_bs__session);
-    SOPC_UNUSED_ARG(session_audit_bs__oper_ret_code);
+    common_server_notify_session_activate(session_audit_bs__p_channel_config, session_audit_bs__req_msg,
+                                          session_audit_bs__session, session_audit_bs__oper_ret_code);
 }
 
 void session_audit_bs__server_notify_session_closed(
     const constants__t_session_i session_audit_bs__session,
     const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
 {
-    SOPC_UNUSED_ARG(session_audit_bs__session);
-    SOPC_UNUSED_ARG(session_audit_bs__oper_ret_code);
+    common_server_notify_session_closed(session_audit_bs__session, session_audit_bs__oper_ret_code);
 }
 
 void session_audit_bs__server_notify_session_create(
@@ -640,11 +741,9 @@ void session_audit_bs__server_notify_session_create(
     const constants__t_session_i session_audit_bs__session,
     const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
 {
-    SOPC_UNUSED_ARG(session_audit_bs__p_channel_config);
-    SOPC_UNUSED_ARG(session_audit_bs__req_msg);
-    SOPC_UNUSED_ARG(session_audit_bs__resp_msg);
-    SOPC_UNUSED_ARG(session_audit_bs__session);
-    SOPC_UNUSED_ARG(session_audit_bs__oper_ret_code);
+    common_server_notify_session_create(session_audit_bs__p_channel_config, session_audit_bs__req_msg,
+                                        session_audit_bs__resp_msg, session_audit_bs__session,
+                                        session_audit_bs__oper_ret_code);
 }
 
 void session_audit_bs__set_no_req_audit_info(const constants__t_channel_config_idx_i session_audit_bs__p_channel_config)

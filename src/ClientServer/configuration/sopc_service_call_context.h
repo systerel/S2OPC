@@ -45,6 +45,11 @@ typedef struct SOPC_CallContext SOPC_CallContext;
  */
 uint32_t SOPC_CallContext_GetSessionId(const SOPC_CallContext* callContextPtr);
 
+/** \brief Returns the session name that called the service
+ *         Name is defined by client on CreateSession, otherwise default name is set by server.
+ */
+const char* SOPC_CallContext_GetSessionName(const SOPC_CallContext* callContextPtr);
+
 /** \brief Returns the user that called the service */
 const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr);
 
@@ -63,6 +68,13 @@ const OpcUa_ApplicationDescription* SOPC_CallContext_GetClientApplicationDesc(co
 
 /** \brief Returns the (read-only) client certificate thumbprint of the connection used to call the service */
 const char* SOPC_CallContext_GetClientCertThumbprint(const SOPC_CallContext* callContextPtr);
+
+/** \brief Returns the (read-only) client <IP/HOTSNAME>:<port> of the connection used to call the service
+ *         if available, NULL otherwise.
+ *
+ *  \note ::SOPC_Helper_URI_SplitUri might be used to split the returned string into separated IP/HOSTNAME and port.
+ */
+const char* SOPC_CallContext_GetClientIpPort(const SOPC_CallContext* callContextPtr);
 
 /** \brief Get direct access to the address space.
  *         AddressSpace is only available during a method call and shall not be kept

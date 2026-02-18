@@ -1079,6 +1079,24 @@ static SOPC_StatusCode Test_OverwriteClientRequestCallback(const SOPC_CallContex
     return SOPC_GoodGenericStatus;
 }
 
+static void Test_SessionEventCallback(const SOPC_CallContext* callCtxPtr,
+                                      SOPC_ServerSessionEvent sessionEvent,
+                                      SOPC_SessionId id,
+                                      SOPC_StatusCode opStatus)
+{
+    const OpcUa_ApplicationDescription* appDesc = SOPC_CallContext_GetClientApplicationDesc(callCtxPtr);
+    const SOPC_User* user = SOPC_CallContext_GetUser(callCtxPtr);
+
+    printf("Session event %s for session id=%" PRIu32 " with status=0x%" PRIx32 " and client %s with user %s\n",
+           SESSION_CREATION == sessionEvent     ? "SESSION_CREATION"
+           : SESSION_ACTIVATION == sessionEvent ? "SESSION_ACTIVATION"
+           : SESSION_INACTIVE == sessionEvent   ? "SESSION_INACTIVE"
+           : SESSION_CLOSURE == sessionEvent    ? "SESSION_CLOSURE"
+                                                : "INVALID SESSION STATE",
+           id, opStatus, NULL == appDesc ? "???" : SOPC_String_GetRawCString(&appDesc->ApplicationName.defaultText),
+           NULL == user ? "???" : SOPC_String_GetRawCString(SOPC_User_GetUsername(user)));
+}
+
 /*---------------------------------------------------------------------------
  *                             Server main function
  *---------------------------------------------------------------------------*/
@@ -1178,6 +1196,12 @@ int main(int argc, char* argv[])
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Failed to configure the overwrite client request callback");
         }
+    }
+
+    /* Define session events callback */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerConfigHelper_SetSessionEventNotifCallback(Test_SessionEventCallback);
     }
 
     /* Initialize the Alarm and Condition module */

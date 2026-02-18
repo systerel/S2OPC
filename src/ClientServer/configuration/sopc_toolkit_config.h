@@ -97,9 +97,10 @@ void SOPC_Toolkit_Clear(void);
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 
 /**
- *  \brief Set the given Address Space modification notification callback
- *  for the current toolkit server
- *  (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call).
+ *  \brief Set the given Address Space notification
+ *         or server internal state notification events callback
+ *         for the current toolkit server
+ *         (::SOPC_Toolkit_Initialize required and prior to ::SOPC_ToolkitServer_Configured call).
  *
  *  Note: only one callback can be set, further call will be refused.
  *
