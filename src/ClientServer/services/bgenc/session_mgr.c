@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 09/02/2026 16:37:29
+ Date                 : 09/03/2026 16:16:21
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -400,6 +400,7 @@ void session_mgr__server_receive_session_req(
       constants__t_ApplicationDescription_i session_mgr__l_client_app_desc;
       constants__t_CertThumbprint_i session_mgr__l_client_cert_tb;
       
+      session_mgr__l_user = constants__c_user_indet;
       *session_mgr__security_failed = false;
       *session_mgr__session = constants__c_session_indet;
       *session_mgr__service_ret = constants_statuscodes_bs__c_StatusCode_indet;
@@ -438,6 +439,14 @@ void session_mgr__server_receive_session_req(
                   session_core__may_close_unactivated_session();
                }
             }
+            session_core__get_server_session_client_app_desc(*session_mgr__session,
+               &session_mgr__l_client_app_desc);
+            session_core__get_server_session_client_cert_tb(*session_mgr__session,
+               &session_mgr__l_client_cert_tb);
+            app_cb_call_context_bs__set_app_call_context_session(*session_mgr__session,
+               session_mgr__l_client_app_desc,
+               session_mgr__l_client_cert_tb,
+               session_mgr__l_user);
          }
          else if (session_mgr__l_has_user_token_policy_available == false) {
             *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_service_unsupported;
@@ -481,9 +490,6 @@ void session_mgr__server_receive_session_req(
                         session_mgr__req_msg,
                         session_mgr__resp_msg,
                         session_mgr__service_ret);
-                     if (*session_mgr__service_ret != constants_statuscodes_bs__e_sc_ok) {
-                        session_core__deallocate_user(session_mgr__l_user);
-                     }
                   }
                   else if (*session_mgr__security_failed == true) {
                      session_core__server_close_session_sm(*session_mgr__session,
@@ -502,6 +508,14 @@ void session_mgr__server_receive_session_req(
                   constants_statuscodes_bs__e_sc_bad_invalid_state);
                *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_invalid_state;
             }
+            session_core__get_server_session_client_app_desc(*session_mgr__session,
+               &session_mgr__l_client_app_desc);
+            session_core__get_server_session_client_cert_tb(*session_mgr__session,
+               &session_mgr__l_client_cert_tb);
+            app_cb_call_context_bs__set_app_call_context_session(*session_mgr__session,
+               session_mgr__l_client_app_desc,
+               session_mgr__l_client_cert_tb,
+               session_mgr__l_user);
          }
          else {
             *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_session_id_invalid;
@@ -510,6 +524,9 @@ void session_mgr__server_receive_session_req(
             session_mgr__req_msg,
             *session_mgr__session,
             *session_mgr__service_ret);
+         if (*session_mgr__service_ret != constants_statuscodes_bs__e_sc_ok) {
+            session_core__deallocate_user(session_mgr__l_user);
+         }
          break;
       case constants__e_msg_session_close_req:
          session_core__server_get_session_from_token(session_mgr__session_token,
@@ -525,15 +542,15 @@ void session_mgr__server_receive_session_req(
                if (session_mgr__l_session_state != constants__e_session_created) {
                   session_core__get_session_user_server(*session_mgr__session,
                      &session_mgr__l_user);
-                  session_core__get_server_session_client_app_desc(*session_mgr__session,
-                     &session_mgr__l_client_app_desc);
-                  session_core__get_server_session_client_cert_tb(*session_mgr__session,
-                     &session_mgr__l_client_cert_tb);
-                  app_cb_call_context_bs__set_app_call_context_session(*session_mgr__session,
-                     session_mgr__l_client_app_desc,
-                     session_mgr__l_client_cert_tb,
-                     session_mgr__l_user);
                }
+               session_core__get_server_session_client_app_desc(*session_mgr__session,
+                  &session_mgr__l_client_app_desc);
+               session_core__get_server_session_client_cert_tb(*session_mgr__session,
+                  &session_mgr__l_client_cert_tb);
+               app_cb_call_context_bs__set_app_call_context_session(*session_mgr__session,
+                  session_mgr__l_client_app_desc,
+                  session_mgr__l_client_cert_tb,
+                  session_mgr__l_user);
                session_core__get_session_channel(*session_mgr__session,
                   &session_mgr__l_session_channel);
                if (session_mgr__l_session_channel == session_mgr__channel) {
@@ -565,6 +582,7 @@ void session_mgr__server_receive_session_req(
          *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_service_unsupported;
          break;
       }
+      app_cb_call_context_bs__clear_app_call_context();
    }
 }
 

@@ -532,6 +532,7 @@ OPERATIONS
         l_client_app_desc,
         l_client_cert_tb
     IN
+        l_user := c_user_indet;
         security_failed := FALSE; /* Only evaluated in case of user authentication attempt */
         session := c_session_indet;
         service_ret := c_StatusCode_indet;
@@ -565,6 +566,10 @@ OPERATIONS
                             may_close_unactivated_session
                         END
                     END
+                    ;
+                    l_client_app_desc <-- get_server_session_client_app_desc (session);
+                    l_client_cert_tb <-- get_server_session_client_cert_tb (session);
+                    set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_user)
                 ELSIF l_has_user_token_policy_available = FALSE
                 THEN
                     service_ret := e_sc_bad_service_unsupported
@@ -591,12 +596,7 @@ OPERATIONS
                             IF service_ret = e_sc_ok
                             THEN
                                 // TODO: differentiate sc_activate from user_activate directly here
-                                service_ret <-- server_activate_session_req_and_resp_sm (channel, session, l_user, req_msg, resp_msg);
-                                /* User is allocated but stored nowhere; hence it must be freed */
-                                IF service_ret /= e_sc_ok
-                                THEN
-                                    deallocate_user (l_user)
-                                END
+                                service_ret <-- server_activate_session_req_and_resp_sm (channel, session, l_user, req_msg, resp_msg)
                             ELSIF security_failed = TRUE
                             THEN
                                 /* Close session as counter measure for repeated user authentication failures */
@@ -605,7 +605,8 @@ OPERATIONS
                         ELSE
                             // invalid user token type
                             service_ret := e_sc_bad_identity_token_invalid
-                        END;
+                        END
+                        ;
                         IF service_ret = e_sc_ok
                         THEN
                             server_session_timeout_msg_received (session)
@@ -615,11 +616,21 @@ OPERATIONS
                         server_close_session_sm (session, e_sc_bad_invalid_state);
                         service_ret := e_sc_bad_invalid_state
                     END
+                    ;
+                    l_client_app_desc <-- get_server_session_client_app_desc (session);
+                    l_client_cert_tb <-- get_server_session_client_cert_tb (session);
+                    set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_user)
                 ELSE
                     // session token was not correct
                     service_ret := e_sc_bad_session_id_invalid
-                END;
-                server_notify_session_activate(l_channel_config_idx, req_msg, session, service_ret)
+                END
+                ;
+                server_notify_session_activate(l_channel_config_idx, req_msg, session, service_ret);
+                /* User is allocated but stored nowhere; hence it must be freed */
+                IF service_ret /= e_sc_ok
+                THEN
+                    deallocate_user (l_user)
+                END
             OR e_msg_session_close_req THEN
                 // SESSION CLOSE REQUEST
                 // TODO: add a local operation for rest
@@ -635,12 +646,12 @@ OPERATIONS
                         IF l_session_state /= e_session_created
                         THEN
                             /* Set the user context for Audit event generation (only if activated session) */
-                            l_user <-- get_session_user_server (session);
-                            l_client_app_desc <-- get_server_session_client_app_desc (session);
-                            l_client_cert_tb <-- get_server_session_client_cert_tb (session);
-                            set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_user)
+                            l_user <-- get_session_user_server (session)
                         END
                         ;
+                        l_client_app_desc <-- get_server_session_client_app_desc (session);
+                        l_client_cert_tb <-- get_server_session_client_cert_tb (session);
+                        set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_user);
                         l_session_channel <-- get_session_channel (session);
                         IF l_session_channel = channel
                         THEN
@@ -666,6 +677,8 @@ OPERATIONS
                 service_ret := e_sc_bad_service_unsupported
             END
         END
+        ;
+        clear_app_call_context
     END
     ;
 

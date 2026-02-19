@@ -53,6 +53,10 @@ void app_cb_call_context_bs__set_app_call_context_channel_config(
     const constants__t_channel_config_idx_i app_cb_call_context_bs__p_channel_config,
     const constants__t_endpoint_config_idx_i app_cb_call_context_bs__p_endpoint_config)
 {
+    // Ensure the not up to date copy is freed before updating the current context
+    SOPC_CallContext_FreeCopy(currentCopyCtx);
+    currentCopyCtx = NULL;
+
     SOPC_SecureChannel_Config* scConfigPtr =
         SOPC_ToolkitServer_GetSecureChannelConfig(app_cb_call_context_bs__p_channel_config);
     if (NULL != scConfigPtr)
@@ -82,7 +86,10 @@ void app_cb_call_context_bs__set_app_call_context_session(
     currentCtx.sessionId = app_cb_call_context_bs__p_session;
     currentCtx.clientAppDescription = app_cb_call_context_bs__p_cliAppDesc;
     currentCtx.clientCertThumbprint = app_cb_call_context_bs__p_cliCertTb;
-    currentCtx.user = SOPC_UserWithAuthorization_GetUser(app_cb_call_context_bs__p_user);
+    if (NULL != app_cb_call_context_bs__p_user)
+    {
+        currentCtx.user = SOPC_UserWithAuthorization_GetUser(app_cb_call_context_bs__p_user);
+    }
 }
 
 const SOPC_CallContext* SOPC_CallContext_GetCurrent(void)

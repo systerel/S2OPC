@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 19/02/2026 14:48:36
+ Date                 : 03/03/2026 16:36:38
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -858,6 +858,9 @@ void session_core__l_server_secure_channel_lost_session_sm(
    const constants__t_session_i session_core__p_session) {
    {
       constants__t_sessionState_i session_core__l_state;
+      constants__t_ApplicationDescription_i session_core__l_client_app_desc;
+      constants__t_CertThumbprint_i session_core__l_client_cert_tb;
+      constants__t_user_i session_core__l_user;
       
       session_core_1__get_session_state(session_core__p_session,
          &session_core__l_state);
@@ -865,8 +868,19 @@ void session_core__l_server_secure_channel_lost_session_sm(
          session_core_1__reset_session_channel(session_core__p_session);
          session_core_1__set_session_state(session_core__p_session,
             constants__e_session_scOrphaned);
+         session_core_1__get_server_session_client_app_desc(session_core__p_session,
+            &session_core__l_client_app_desc);
+         session_core_1__get_server_session_client_cert_tb(session_core__p_session,
+            &session_core__l_client_cert_tb);
+         session_core_1__get_session_user_server(session_core__p_session,
+            &session_core__l_user);
+         app_cb_call_context_bs__set_app_call_context_session(session_core__p_session,
+            session_core__l_client_app_desc,
+            session_core__l_client_cert_tb,
+            session_core__l_user);
          session_audit_bs__server_notify_session_inactive(session_core__p_session,
             constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
+         app_cb_call_context_bs__clear_app_call_context();
       }
       else {
          session_audit_bs__server_notify_session_closed(session_core__p_session,

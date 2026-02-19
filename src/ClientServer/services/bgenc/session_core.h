@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 02/12/2025 13:28:49
+ Date                 : 19/02/2026 16:51:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,6 +49,7 @@
 /*--------------
    SEES Clause
   --------------*/
+#include "app_cb_call_context_bs.h"
 #include "channel_mgr.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"

@@ -33,7 +33,8 @@ SEES
     message_out_bs,
     channel_mgr,
     request_handle_bs,
-    time_reference_bs
+    time_reference_bs,
+    app_cb_call_context_bs
 
 IMPORTS
     session_roles,
@@ -1231,14 +1232,22 @@ OPERATIONS
 
     l_server_secure_channel_lost_session_sm(p_session) =
     VAR
-        l_state
+        l_state,
+        l_client_app_desc,
+        l_client_cert_tb,
+        l_user
     IN
         l_state <-- get_session_state (p_session);
         IF l_state = e_session_userActivated
         THEN
             reset_session_channel (p_session);
             set_session_state (p_session, e_session_scOrphaned);
-            server_notify_session_inactive (p_session, e_sc_bad_secure_channel_closed)
+            l_client_app_desc <-- get_server_session_client_app_desc (p_session);
+            l_client_cert_tb <-- get_server_session_client_cert_tb (p_session);
+            l_user <-- get_session_user_server (p_session);
+            set_app_call_context_session (p_session, l_client_app_desc, l_client_cert_tb, l_user);
+            server_notify_session_inactive (p_session, e_sc_bad_secure_channel_closed);
+            clear_app_call_context
         ELSE
             /* may generate audit event */
             server_notify_session_closed(p_session, e_sc_bad_secure_channel_closed);

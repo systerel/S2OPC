@@ -26,7 +26,9 @@ SEES
     constants
 OPERATIONS
 
-    /* For now only set on received message treatment and used only for server service request treatment */
+   /* For now only set on received message treatment and used only for server service request treatment
+    * IMPORTANT NOTE: each set_app_call_context_ should lead to a clear_app_call_context
+    */
     set_app_call_context_channel_config(p_channel_config, p_endpoint_config) =
     PRE
         p_channel_config : t_channel_config_idx_i &
@@ -37,15 +39,16 @@ OPERATIONS
     END
     ;
 
-    /* For now only set on server service request on activated session treatment */
+    /* For now set on server service request on session treatment
+     * IMPORTANT NOTE: each set_app_call_context_ should lead to a clear_app_call_context
+     */
     set_app_call_context_session(p_session, p_cliAppDesc, p_cliCertTb, p_user) =
     PRE
         p_session : t_session_i &
         p_session : t_session   &
         p_cliAppDesc : t_ApplicationDescription_i &
         p_cliCertTb  : t_CertThumbprint_i &
-        p_user    : t_user_i    &
-        p_user    : t_user
+        p_user    : t_user_i
     THEN
         skip
     END

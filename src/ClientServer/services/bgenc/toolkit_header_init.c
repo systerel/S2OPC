@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 24/11/2025 17:29:19
+ Date                 : 19/02/2026 16:51:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -309,10 +309,10 @@ void INITIALISATION(void) {
    user_authentication_bs__INITIALISATION();
    user_authentication__INITIALISATION();
    session_audit_bs__INITIALISATION();
+   app_cb_call_context_bs__INITIALISATION();
    session_core__INITIALISATION();
    session_mgr_it__INITIALISATION();
    session_request_handle_bs__INITIALISATION();
-   app_cb_call_context_bs__INITIALISATION();
    session_mgr__INITIALISATION();
    msg_read_request_bs__INITIALISATION();
    msg_read_request__INITIALISATION();
