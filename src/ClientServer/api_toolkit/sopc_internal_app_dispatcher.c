@@ -25,9 +25,9 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_toolkit_config_internal.h"
 
 SOPC_ComEvent_Fct* sopc_appEventCallback = NULL;
-SOPC_AddressSpaceNotif_Fct* sopc_appAddressSpaceNotificationCallback = NULL;
 
 SOPC_Looper* sopc_appLooper = NULL;
 SOPC_EventHandler* appComEventHandler = NULL;
@@ -160,46 +160,47 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
     }
 
     SOPC_App_AddSpace_Event asEvent = (SOPC_App_AddSpace_Event) event;
+    SOPC_AddressSpaceNotif_Fct* addSpaceFct = SOPC_ToolkitServer_GetAddSpaceNotifCb();
 
-    switch (asEvent)
+    if (NULL != addSpaceFct)
     {
-    case AS_WRITE_EVENT:
-    {
-        wv = (OpcUa_WriteValue*) params;
-        if (wv != NULL)
+        switch (asEvent)
         {
-            char* nodeId = SOPC_NodeId_ToCString(&wv->NodeId);
-
-            if (nodeId != NULL)
+        case AS_WRITE_EVENT:
+        {
+            wv = (OpcUa_WriteValue*) params;
+            if (wv != NULL)
             {
-                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "App: AS_WRITE_EVENT on NodeId: %s, AttributeId: %" PRIu32
-                                       ", Write status: %" PRIX32,
-                                       nodeId, wv->AttributeId, (SOPC_StatusCode) initialAuxParam);
-                SOPC_Free(nodeId);
+                char* nodeId = SOPC_NodeId_ToCString(&wv->NodeId);
+
+                if (nodeId != NULL)
+                {
+                    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "App: AS_WRITE_EVENT on NodeId: %s, AttributeId: %" PRIu32
+                                           ", Write status: %" PRIX32,
+                                           nodeId, wv->AttributeId, (SOPC_StatusCode) initialAuxParam);
+                    SOPC_Free(nodeId);
+                }
+                else
+                {
+                    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "App: AS_WRITE_EVENT (WriteValue or NodeId string invalid)");
+                }
             }
-            else
+
+            addSpaceFct(cc, asEvent, params, (SOPC_StatusCode) initialAuxParam);
+
+            if (NULL != params)
             {
-                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "App: AS_WRITE_EVENT (WriteValue or NodeId string invalid)");
+                OpcUa_WriteValue_Clear((OpcUa_WriteValue*) params);
+                SOPC_Free(params);
             }
+            break;
         }
-
-        if (NULL != sopc_appAddressSpaceNotificationCallback)
-        {
-            sopc_appAddressSpaceNotificationCallback(cc, asEvent, params, (SOPC_StatusCode) initialAuxParam);
+        default:
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "App: UNKOWN AS EVENT");
+            break;
         }
-
-        if (NULL != params)
-        {
-            OpcUa_WriteValue_Clear((OpcUa_WriteValue*) params);
-            SOPC_Free(params);
-        }
-        break;
-    }
-    default:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "App: UNKOWN AS EVENT");
-        break;
     }
 
     SOPC_CallContext_FreeCopy(cc);

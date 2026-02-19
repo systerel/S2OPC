@@ -68,6 +68,9 @@ static struct
     SOPC_Endpoint_Config* epConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1]; // index 0 reserved
     SOPC_SecureChannelConfigIdx serverScLastConfigIdx;
     SOPC_EndpointConfigIdx epConfigIdxMax;
+
+    SOPC_AddressSpaceNotif_Fct* appAddSpaceNotifCb;
+
 } // Any change in values below shall be also done in SOPC_Toolkit_Clear
 tConfig = {.initDone = false,
            .serverConfigLocked = false,
@@ -75,7 +78,8 @@ tConfig = {.initDone = false,
            .scConfigIdxMax = 0,
            .reverseEpConfigIdxMax = 0,
            .serverScLastConfigIdx = 0,
-           .epConfigIdxMax = 0};
+           .epConfigIdxMax = 0,
+           .appAddSpaceNotifCb = NULL};
 
 // Total number of layers using locked server configuration (SecureChannels + Services)
 #define SOPC_NB_LAYERS_USING_SERVER_CONFIG 2
@@ -352,10 +356,10 @@ void SOPC_Toolkit_Clear(void)
         if (tConfig.initDone)
         {
             SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
-            sopc_appEventCallback = NULL;
-            sopc_appAddressSpaceNotificationCallback = NULL;
+            tConfig.appAddSpaceNotifCb = NULL;
             address_space_bs__nodes = NULL;
             sopc_addressSpace_configured = false;
+            sopc_appEventCallback = NULL;
             // Reset values to init value
             tConfig.initDone = false;
             tConfig.serverConfigLocked = false;
@@ -722,10 +726,10 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
         if (tConfig.initDone)
         {
             SOPC_Mutex_Lock(&tConfig.mut);
-            if (!tConfig.serverConfigLocked && sopc_appAddressSpaceNotificationCallback == NULL)
+            if (!tConfig.serverConfigLocked && tConfig.appAddSpaceNotifCb == NULL)
             {
                 status = SOPC_STATUS_OK;
-                sopc_appAddressSpaceNotificationCallback = pAddSpaceNotifFct;
+                tConfig.appAddSpaceNotifCb = pAddSpaceNotifFct;
             }
             SOPC_Mutex_Unlock(&tConfig.mut);
         }
@@ -806,7 +810,7 @@ SOPC_ReturnStatus SOPC_ToolkitServer_UnConfigure(void)
             else
             {
                 // Clear the server configuration
-                sopc_appAddressSpaceNotificationCallback = NULL;
+                tConfig.appAddSpaceNotifCb = NULL;
                 address_space_bs__nodes = NULL;
                 sopc_addressSpace_configured = false;
                 tConfig.serverConfigLocked = false;
@@ -834,4 +838,16 @@ SOPC_ReturnStatus SOPC_ToolkitServer_RemoveAllEndpointsConfig(void)
         SOPC_Mutex_Unlock(&tConfig.mut);
     }
     return status;
+}
+
+SOPC_AddressSpaceNotif_Fct* SOPC_ToolkitServer_GetAddSpaceNotifCb(void)
+{
+    SOPC_AddressSpaceNotif_Fct* result = NULL;
+    if (tConfig.initDone)
+    {
+        SOPC_Mutex_Lock(&tConfig.mut);
+        result = tConfig.appAddSpaceNotifCb;
+        SOPC_Mutex_Unlock(&tConfig.mut);
+    }
+    return result;
 }

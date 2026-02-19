@@ -168,4 +168,11 @@ SOPC_ReturnStatus SOPC_ToolkitServer_RemoveAllEndpointsConfig(void);
  */
 SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void);
 
+/**
+ * \brief return the callback for server address space notifications
+ *
+ * \return the callback for server address space notifications if available, NULL otherwise
+ */
+SOPC_AddressSpaceNotif_Fct* SOPC_ToolkitServer_GetAddSpaceNotifCb(void);
+
 #endif /* SOPC_TOOLKIT_CONFIG_INTERNAL_H_ */
