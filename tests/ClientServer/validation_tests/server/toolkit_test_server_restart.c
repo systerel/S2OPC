@@ -36,6 +36,7 @@
 #include "libs2opc_client.h"
 #include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
+#include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
@@ -260,6 +261,55 @@ static void Demo_WriteNotificationCallback(const SOPC_CallContext* callContextPt
         SOPC_String_GetRawCString(&SOPC_CallContext_GetClientApplicationDesc(callContextPtr)->ApplicationUri),
         SOPC_CallContext_GetClientCertThumbprint(callContextPtr));
     SOPC_Free(sNodeId);
+}
+
+/*---------------------------------------------------------------------------
+ *                      Manager server local reads
+ * --------------------------------------------------------------------------*/
+
+static SOPC_Thread g_async_local_services_thread = SOPC_INVALID_THREAD;
+
+static void SOPC_LocalServiceAsyncResp(SOPC_EncodeableType* encType, void* response, uintptr_t appContext)
+{
+    SOPC_Free((uintptr_t*) appContext); // Deallocate empty context
+    if (NULL != encType && NULL != response)
+    {
+        if (encType == &OpcUa_ReadResponse_EncodeableType)
+        {
+            OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
+            if (SOPC_IsGoodStatus(readResp->ResponseHeader.ServiceResult) && 1 == readResp->NoOfResults)
+            {
+                printf("Received local read response with value:\n");
+                SOPC_Variant_Print(&(readResp->Results[0].Value));
+            }
+        }
+    }
+}
+
+static void* AsyncReadThread(void* args)
+{
+    SOPC_UNUSED_ARG(args);
+    while (0 == stopRequested && false == SOPC_Atomic_Int_Get(&atomicStopped))
+    {
+        OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Both);
+        uintptr_t* emptyContext = SOPC_Calloc(1, sizeof(uintptr_t)); // Just to check deallocation is always done
+        if (NULL != readReq)
+        {
+            SOPC_ReturnStatus st =
+                SOPC_ReadRequest_SetReadValueFromStrings(readReq, 0, "i=2258", SOPC_AttributeId_Value, NULL);
+            if (SOPC_STATUS_OK == st)
+            {
+                st = SOPC_ServerHelper_LocalServiceAsync(readReq, (uintptr_t) emptyContext);
+            }
+            if (SOPC_STATUS_OK != st)
+            {
+                SOPC_Free(emptyContext);
+                st = SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &readReq);
+            }
+        }
+        SOPC_Sleep(UPDATE_STOP_TIMEOUT_MS);
+    }
+    return NULL;
 }
 
 /*---------------------------------------------------------------------------
@@ -561,6 +611,9 @@ int main(int argc, char* argv[])
      * DEBUG traces generated in ./toolkit_server_<argv[1]>_logs/ */
     char* logDirPath = Server_ConfigLogPath(argc, argv);
 
+    /* Start a dedicated thread to do local services */
+    status = SOPC_Thread_Create(&g_async_local_services_thread, &AsyncReadThread, NULL, "AsyncLocalServices");
+
     /* Client secure channel configurations */
     SOPC_SecureConnection_Config** secureConnConfigArray = NULL;
     size_t nbSecConnCfgs = 0;
@@ -638,6 +691,17 @@ int main(int argc, char* argv[])
             if (SOPC_STATUS_OK == status)
             {
                 status = Server_InitDefaultCallMethodService();
+            }
+
+            /* Define local service asynchronous response callback */
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(&SOPC_LocalServiceAsyncResp);
+                if (SOPC_STATUS_OK != status)
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "Failed to configure the local service asynchronous response callback");
+                }
             }
 
             /* Define address space write notification callback */
