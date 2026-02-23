@@ -48,3 +48,4 @@ the legal rights to contribute.
 * Florian Antheunis <florian.antheunis@systerel.fr>
 * Theo Pirouelle <theo.pirouelle@systerel.fr>
 * Bas Mevissen <floss@basmevissen.nl>
+* Chafik AKRICH <chafik.akrich@systerel.fr>
