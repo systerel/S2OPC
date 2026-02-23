@@ -772,7 +772,7 @@ void SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(SOPC_AlarmCon
     {
         SOPC_Free(tbpReq);
         SOPC_Free(tbpCtx);
-        SOPC_Free(varPathArr);
+        SOPC_Free((void*) varPathArr);
         return;
     }
     _SOPC_InternalTBP_FillTBP_Ctx fillCtx = {
