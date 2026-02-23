@@ -182,10 +182,6 @@ static struct
     // One per connection
     SOPC_PubScheduler_TransportCtx* transport;
 
-    //  SOPC_KeyBunch_Keys *keys;
-    // A strictly monotonically increasing sequence number for a SecurityTokenId and PublisherId combination.
-    uint32_t sequenceNumber;
-
     SOPC_Thread thPublisher;
 
 } pubSchedulerCtx = {.isStarted = false,
@@ -197,7 +193,6 @@ static struct
                      .messages.length = 0,
                      .messages.current = 0,
                      .messages.array = NULL,
-                     .sequenceNumber = 1,
                      .thPublisher = SOPC_INVALID_THREAD};
 
 /* This callback implements the main loop of the publisher which fetches data to publish, encode them and send them.
@@ -462,6 +457,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     {
         context->security->mode = SOPC_WriterGroup_Get_SecurityMode(group);
         context->security->groupKeys = NULL;
+        context->security->sequenceNumber = 0;
         context->security->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
         if (NULL == context->security->provider)
         {
@@ -540,6 +536,70 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
         result = result + SOPC_PubSubConnection_Nb_WriterGroup(connection);
     }
     return result;
+}
+
+static void updateSecurityGroup(SOPC_PubSub_SecurityType* security, const SOPC_WriterGroup* group)
+{
+    if (NULL == security)
+    {
+        return;
+    }
+
+    uint32_t prevTokenId = 0;
+    // Update keys
+    if (NULL != security->groupKeys)
+    {
+        prevTokenId = security->groupKeys->tokenId;
+        SOPC_PubSubSKS_Keys_Delete(security->groupKeys);
+        SOPC_Free(security->groupKeys);
+    }
+    security->groupKeys =
+        SOPC_PubSubSKS_GetSecurityKeys(SOPC_WriterGroup_Get_SecurityGroupId(group), SOPC_PUBSUB_SKS_CURRENT_TOKENID);
+    // Update Nonce Random part
+    if (NULL != security->groupKeys)
+    {
+        security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
+        if (NULL != security->msgNonceRandom)
+        {
+            if (security->groupKeys->tokenId != prevTokenId)
+            {
+                // Spec v1.05 part 14 section 7.2.4.4.3.2:
+                // "The sequence number is reset to 1 after the key and SecurityTokenId
+                //  are updated in the Publisher."
+                security->sequenceNumber = 0;
+                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB,
+                                       "Reset sequence number because key and securityTokenId are updated in "
+                                       "the Publisher. Previous securityTokenId %d, new securityTokenId %d",
+                                       prevTokenId, security->groupKeys->tokenId);
+            }
+            else
+            {
+                security->sequenceNumber++;
+            }
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher failed to generate NONCE");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher failed to get security keys");
+
+        // Signature failure will only occurs when keys are not available here
+        const SOPC_PubSubConnection* connection = SOPC_WriterGroup_Get_Connection(group);
+        SOPC_Pub_SignatureFailed* cb = SOPC_PubSubConfiguration_Get_PubSignatureFailed_Callback(connection);
+        if (cb != NULL)
+        {
+            // Extract pubId, securityGroupId, and connection from the group
+            const SOPC_Conf_PublisherId* pubId = NULL;
+            if (connection != NULL)
+            {
+                pubId = SOPC_PubSubConnection_Get_PublisherId(connection);
+            }
+            cb(group, pubId, SOPC_WriterGroup_Get_SecurityGroupId(group));
+        }
+    }
 }
 
 static void MessageCtx_send_publish_message(MessageCtx* context)
@@ -677,59 +737,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     {
         if (NULL != security)
         {
-            uint32_t prevTokenId = 0;
-            // Update keys
-            if (NULL != security->groupKeys)
-            {
-                prevTokenId = security->groupKeys->tokenId;
-                SOPC_PubSubSKS_Keys_Delete(security->groupKeys);
-                SOPC_Free(security->groupKeys);
-            }
-            security->groupKeys = SOPC_PubSubSKS_GetSecurityKeys(SOPC_WriterGroup_Get_SecurityGroupId(group),
-                                                                 SOPC_PUBSUB_SKS_CURRENT_TOKENID);
-            // Update Nonce Random part
-            if (NULL != security->groupKeys)
-            {
-                security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
-                if (NULL != security->msgNonceRandom)
-                {
-                    if (security->groupKeys->tokenId != prevTokenId)
-                    {
-                        // Spec v1.05 part 14 section 7.2.4.4.3.2:
-                        // "The sequence number is reset to 1 after the key and SecurityTokenId
-                        //  are updated in the Publisher."
-                        pubSchedulerCtx.sequenceNumber = 1;
-                        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB,
-                                               "Reset sequence number because key and securityTokenId are updated in "
-                                               "the Publisher. Previous securityTokenId %d, new securityTokenId %d",
-                                               prevTokenId, security->groupKeys->tokenId);
-                    }
-                    security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
-                    pubSchedulerCtx.sequenceNumber++;
-                }
-                else
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher failed to generate NONCE");
-                }
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher failed to get security keys");
-
-                // Signature failure will only occurs when keys are not available here
-                const SOPC_PubSubConnection* connection = SOPC_WriterGroup_Get_Connection(group);
-                SOPC_Pub_SignatureFailed* cb = SOPC_PubSubConfiguration_Get_PubSignatureFailed_Callback(connection);
-                if (cb != NULL)
-                {
-                    // Extract pubId, securityGroupId, and connection from the group
-                    const SOPC_Conf_PublisherId* pubId = NULL;
-                    if (connection != NULL)
-                    {
-                        pubId = SOPC_PubSubConnection_Get_PublisherId(connection);
-                    }
-                    cb(group, pubId, SOPC_WriterGroup_Get_SecurityGroupId(group));
-                }
-            }
+            updateSecurityGroup(security, group);
         }
 
         // Encode with the configured message format
@@ -823,10 +831,7 @@ static void send_keepAlive_message(MessageCtx* context)
 
     if (NULL != security)
     {
-        security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
-        SOPC_ASSERT(NULL != security->msgNonceRandom);
-        security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
-        pubSchedulerCtx.sequenceNumber++;
+        updateSecurityGroup(security, group);
     }
     SOPC_Buffer* buffer = NULL;
     SOPC_Buffer* buffer_payload = NULL;
