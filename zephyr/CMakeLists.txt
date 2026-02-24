@@ -59,6 +59,8 @@ zephyr_include_directories(
     ${S2OPC_SRC}/ClientServer/frontend/client_wrapper/alarm_conditions
     ${S2OPC_SRC}/ClientServer/frontend/common_wrapper
     ${S2OPC_SRC}/ClientServer/frontend/common_wrapper/internal
+    ${S2OPC_SRC}/ClientServer/frontend/common_wrapper/certificate_management
+    ${S2OPC_SRC}/ClientServer/frontend/common_wrapper/certificate_management/internal
     ${S2OPC_SRC}/ClientServer/frontend/server_wrapper
     ${S2OPC_SRC}/ClientServer/frontend/server_wrapper/internal
     ${S2OPC_SRC}/ClientServer/frontend/server_wrapper/alarm_conditions

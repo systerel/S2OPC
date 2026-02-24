@@ -38,6 +38,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_missing_c99.h"
 #include "sopc_pki_stack.h"
 #include "sopc_pki_struct_lib_internal.h"
 #include "sopc_trustlist.h"
@@ -83,7 +84,8 @@ OpcUa_TrustListDataType* SOPC_TrustList_DecodeTrustListData(SOPC_ByteString* tru
         SOPC_EncodeableObject_DecodeFromByteString(pTrustList->encodeableType, trustListData, pTrustList);
     if (SOPC_STATUS_OK != status)
     {
-        printf("TrustList:%s:Decode: function failed\n", pTrustList->encodeableType->TypeName);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Decode: function failed\n",
+                               pTrustList->encodeableType->TypeName);
         SOPC_EncodeableObject_Delete(pTrustList->encodeableType, (void**) &pTrustList);
     }
 
@@ -101,7 +103,8 @@ SOPC_ReturnStatus SOPC_TrustList_EncodeTrustListData(OpcUa_TrustListDataType* tr
         SOPC_EncodeableObject_EncodeToByteString(trustList->encodeableType, trustList, trustListData);
     if (SOPC_STATUS_OK != status)
     {
-        printf("TrustList:%s:Encode: function failed\n", trustList->encodeableType->TypeName);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Encode: function failed\n",
+                               trustList->encodeableType->TypeName);
     }
 
     return status;
@@ -1232,7 +1235,7 @@ SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustLis
     char** pThumbprints = NULL;
     uint32_t length = 0;
     SOPC_PKIProvider* pTmpPKI = NULL;
-    SOPC_ReturnStatus statusCode = SOPC_GoodGenericStatus;
+    SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool bIncludeExistingList = false;
 
