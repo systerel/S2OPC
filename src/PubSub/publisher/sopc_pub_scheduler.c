@@ -30,6 +30,7 @@
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -115,7 +116,8 @@ typedef struct MessageCtx
     SOPC_Dataset_NetworkMessage* messageKeepAlive;
     SOPC_Array* dataSetMessageCtx;
     SOPC_PubScheduler_TransportCtx* transport;
-    SOPC_PubSub_SecurityType* security;
+    SOPC_PubSub_SecurityType*
+        security; /* Access directly the security group stored in pubScheduler context array securityGroups */
     SOPC_HighRes_TimeReference* next_timeout; /**< Next expiration absolute date */
     uint64_t publishingIntervalUs;
     int32_t publishingOffsetUs; /**< Negative = not used */
@@ -176,6 +178,9 @@ static struct
     uint32_t nbConnection;
     MessageCtx_Array messages;
 
+    /* Array of SecurityGroup */
+    SOPC_Array* securityGroups;
+
     // Global Transport context
 
     // keep transport context to clear them when stop.
@@ -193,6 +198,7 @@ static struct
                      .messages.length = 0,
                      .messages.current = 0,
                      .messages.array = NULL,
+                     .securityGroups = NULL,
                      .thPublisher = SOPC_INVALID_THREAD};
 
 /* This callback implements the main loop of the publisher which fetches data to publish, encode them and send them.
@@ -237,6 +243,9 @@ static void SOPC_PubScheduler_Context_Clear(bool isPubThreadStarted)
     /* Destroy messages and messages array */
     MessageCtx_Array_Clear();
 
+    /* Destroy security context array */
+    SOPC_Array_Delete(pubSchedulerCtx.securityGroups);
+
     /* Destroy transport context */
     if (pubSchedulerCtx.transport != NULL)
     {
@@ -260,9 +269,6 @@ static void SOPC_PubScheduler_Context_Clear(bool isPubThreadStarted)
     pubSchedulerCtx.nbConnection = 0;
     pubSchedulerCtx.config = NULL;
     pubSchedulerCtx.sourceConfig = NULL;
-    // TODO SOPC_KeyBunch_Keys_Delete(pubSchedulerCtx.keys);
-    /* Don't reset the sequenceNumber on Stop(). But for now, there is no other place to reset it */
-    // pubSchedulerCtx.sequenceNumber = 1;
 }
 
 static bool MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config)
@@ -296,9 +302,6 @@ static void MessageCtx_Array_Clear(void)
             arr[i].message = NULL;
             SOPC_Dataset_LL_NetworkMessage_Delete(arr[i].messageKeepAlive);
             arr[i].messageKeepAlive = NULL;
-            SOPC_PubSub_Security_Clear(arr[i].security);
-            SOPC_Free(arr[i].security);
-            arr[i].security = NULL;
             SOPC_HighRes_TimeReference_Delete(&arr[i].next_timeout);
             SOPC_Array_Delete(arr[i].dataSetMessageCtx);
             arr[i].dataSetMessageCtx = NULL;
@@ -320,6 +323,31 @@ static void clear_dataSetMessageCtx_array(void* context)
 {
     SOPC_DataSetMessageCtx_t* dataSetMessageCtx = (SOPC_DataSetMessageCtx_t*) context;
     SOPC_PubSourceVariable_SourceVariableCtx_Delete(&dataSetMessageCtx->sourceVariables);
+}
+
+/* Retrieve the pointer to the securityGroup stored in the array if found */
+static SOPC_PubSub_SecurityType* findSecurityGroupWithId(const char* securityGroupId)
+{
+    if (NULL == securityGroupId)
+    {
+        return NULL;
+    }
+    size_t nbSecurityGroups = SOPC_Array_Size(pubSchedulerCtx.securityGroups);
+    SOPC_PubSub_SecurityType* securityGroup = NULL;
+    bool find = false;
+    for (size_t k = 0; k < nbSecurityGroups && !find; k++)
+    {
+        SOPC_PubSub_SecurityType* secuGroup =
+            (SOPC_PubSub_SecurityType*) SOPC_Array_Get_Ptr(pubSchedulerCtx.securityGroups, k);
+        int comp = strcmp(securityGroupId, secuGroup->securityGroupId);
+        if (!comp)
+        {
+            // find SecurityGroup
+            find = true;
+            securityGroup = secuGroup;
+        }
+    }
+    return securityGroup;
 }
 
 static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
@@ -376,11 +404,6 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         context->dataSetMessageCtx =
             SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, clear_dataSetMessageCtx_array);
         result = (NULL != context->dataSetMessageCtx);
-        if (result && (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode))
-        {
-            context->security = SOPC_Calloc(1, sizeof(SOPC_PubSub_SecurityType));
-            result = (NULL != context->security);
-        }
     }
 
     /* If publisher is acyclic we don't need to compute publishing interval */
@@ -455,15 +478,10 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     /* Fill in security context */
     if (result && (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode))
     {
-        context->security->mode = SOPC_WriterGroup_Get_SecurityMode(group);
-        context->security->groupKeys = NULL;
-        context->security->sequenceNumber = 0;
-        context->security->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
-        if (NULL == context->security->provider)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher: cannot create security provider");
-            result = false; /* TODO: it should be possible to avoid this variable and the partial frees when false */
-        }
+        const char* securityGroupId = SOPC_WriterGroup_Get_SecurityGroupId(group);
+        context->security = findSecurityGroupWithId(securityGroupId);
+        // Security group shall already be initialize and fill.
+        SOPC_ASSERT(NULL != context->security);
     }
 
     const SOPC_WriterGroup_Options* writerGroupOptions = SOPC_WriterGroup_Get_Options(group);
@@ -493,9 +511,6 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
         context->message = NULL;
         SOPC_HighRes_TimeReference_Delete(&context->next_timeout);
-        SOPC_PubSub_Security_Clear(context->security);
-        SOPC_Free(context->security);
-        context->security = NULL;
         SOPC_Array_Delete(context->dataSetMessageCtx);
         context->dataSetMessageCtx = NULL;
     }
@@ -506,6 +521,92 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         pubSchedulerCtx.messages.current++;
     }
     return result;
+}
+
+static void SecurityGroup_Clear(void* securityGroup)
+{
+    SOPC_PubSub_Security_Clear(securityGroup);
+}
+
+static bool securityGroup_Initialize(SOPC_PubSub_SecurityType* securityGroup, const SOPC_WriterGroup* group)
+{
+    if (NULL == securityGroup)
+    {
+        return false;
+    }
+    bool res = true;
+    securityGroup->mode = SOPC_WriterGroup_Get_SecurityMode(group);
+    securityGroup->groupKeys = NULL;
+    securityGroup->sequenceNumber = 0;
+    securityGroup->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
+    securityGroup->securityGroupId = NULL;
+
+    if (NULL == securityGroup->provider)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher: cannot create security provider");
+        res = false; /* TODO: it should be possible to avoid this variable and the partial frees when false */
+    }
+    if (res)
+    {
+        const char* securityGroupId = SOPC_WriterGroup_Get_SecurityGroupId(group);
+        securityGroup->securityGroupId = SOPC_strdup(securityGroupId);
+        if (NULL == securityGroup->securityGroupId)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher: cannot duplicate securityGroupId");
+            res = false;
+        }
+    }
+    if (!res)
+    {
+        SOPC_CryptoProvider_Free(securityGroup->provider);
+        SOPC_Free(securityGroup->securityGroupId);
+    }
+    return res;
+}
+
+static bool securityGroups_Initialize_Array(const SOPC_PubSubConfiguration* config, const uint32_t nbConnection)
+{
+    bool res = true;
+    SOPC_PubSub_SecurityType securityGroup;
+    pubSchedulerCtx.securityGroups = SOPC_Array_Create(sizeof(SOPC_PubSub_SecurityType), 0, SecurityGroup_Clear);
+    for (uint32_t i = 0; i < nbConnection && res; i++)
+    {
+        SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
+        const uint16_t nbWriterGroup = SOPC_PubSubConnection_Nb_WriterGroup(connection);
+        for (uint16_t j = 0; j < nbWriterGroup; j++)
+        {
+            SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
+            SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
+            if (smode == SOPC_SecurityMode_Sign || smode == SOPC_SecurityMode_SignAndEncrypt)
+            {
+                const char* securityGroupId = SOPC_WriterGroup_Get_SecurityGroupId(group);
+                if (NULL == securityGroupId)
+                {
+                    res = false;
+                    uint16_t writerId = SOPC_WriterGroup_Get_Id(group);
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                           "No securityGroupId configured for writer group %" PRIu16
+                                           " with security mode set to %s\n",
+                                           writerId, smode == SOPC_SecurityMode_Sign ? "sign" : "signAndEncrypt");
+                }
+                else
+                {
+                    // Compare with all already existing securityGroup to avoid duplication
+                    SOPC_PubSub_SecurityType* security = findSecurityGroupWithId(securityGroupId);
+                    if (security == NULL)
+                    {
+                        // Initialize securityGroup and append to array
+                        res = securityGroup_Initialize(&securityGroup, group);
+                        if (res)
+                        {
+                            res = SOPC_Array_Append(pubSchedulerCtx.securityGroups, securityGroup);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return res;
 }
 
 static MessageCtx* MessageCtxArray_FindMostExpired(void)
@@ -540,7 +641,7 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
 
 static void updateSecurityGroup(SOPC_PubSub_SecurityType* security, const SOPC_WriterGroup* group)
 {
-    if (NULL == security)
+    if (NULL == security || NULL == group)
     {
         return;
     }
@@ -566,7 +667,7 @@ static void updateSecurityGroup(SOPC_PubSub_SecurityType* security, const SOPC_W
                 // Spec v1.05 part 14 section 7.2.4.4.3.2:
                 // "The sequence number is reset to 1 after the key and SecurityTokenId
                 //  are updated in the Publisher."
-                security->sequenceNumber = 0;
+                security->sequenceNumber = 1;
                 SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB,
                                        "Reset sequence number because key and securityTokenId are updated in "
                                        "the Publisher. Previous securityTokenId %d, new securityTokenId %d",
@@ -1002,6 +1103,13 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         }
     }
 
+    if (SOPC_STATUS_OK == resultSOPC)
+    {
+        if (!securityGroups_Initialize_Array(config, nbConnection))
+        {
+            resultSOPC = SOPC_STATUS_NOK;
+        }
+    }
     if (SOPC_STATUS_OK == resultSOPC)
     {
         pubSchedulerCtx.transport = SOPC_Calloc(nbConnection, sizeof(SOPC_PubScheduler_TransportCtx));
