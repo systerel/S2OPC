@@ -82,6 +82,12 @@ endif()
 set(S2OPC_WRAPPERS_SRC
     "${COMMONWRAPPER_PATH}/libs2opc_common_config.c"
     "${COMMONWRAPPER_PATH}/libs2opc_common_monitoring.c"
+    "${COMMONWRAPPER_PATH}/certificate_management/internal/sopc_certificate_group.c"
+    "${COMMONWRAPPER_PATH}/certificate_management/internal/sopc_push_server_config.c"
+    "${COMMONWRAPPER_PATH}/certificate_management/internal/sopc_push_server_config_meth.c"
+    "${COMMONWRAPPER_PATH}/certificate_management/internal/sopc_trustlist.c"
+    "${COMMONWRAPPER_PATH}/certificate_management/internal/sopc_trustlist_internal_helper.c"
+    "${COMMONWRAPPER_PATH}/certificate_management/internal/sopc_trustlist_meth.c"
     "${HELPERWRAPPER_PATH}/libs2opc_request_builder.c"
     "${CLIENTWRAPPER_PATH}/libs2opc_client.c"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config.c"
@@ -105,6 +111,9 @@ set(S2OPC_ALARMCOND_SRC
 
 list(APPEND WRAPPERS_INCLUDE_FILES
     "${COMMONWRAPPER_PATH}/libs2opc_common_config.h"
+    "${COMMONWRAPPER_PATH}/certificate_management/sopc_certificate_group_itf.h"
+    "${COMMONWRAPPER_PATH}/certificate_management/sopc_push_server_config_itf.h"
+    "${COMMONWRAPPER_PATH}/certificate_management/sopc_trustlist_itf.h"
     "${HELPERWRAPPER_PATH}/libs2opc_request_builder.h"
     "${CLIENTWRAPPER_PATH}/libs2opc_client.h"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h"
@@ -147,6 +156,7 @@ target_include_directories(s2opc_clientserver
   PUBLIC
   "$<BUILD_INTERFACE:${S2OPC_CLIENTSERVER_PUBLIC_INCLUDES}>" # when building (quotes needed to interpret list correclty)
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${COMMONWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${HELPERWRAPPER_PATH}>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${COMMONWRAPPER_PATH}/certificate_management>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}/file_transfer>"
