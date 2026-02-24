@@ -82,29 +82,76 @@ static SOPC_HelperConfigInternal_Ctx* SOPC_HelperConfigInternalCtx_Create(uintpt
     return ctx;
 }
 
+static SOPC_ReturnStatus SOPC_ServerInternal_InternalLocalServiceAsync(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
+                                                                       void* request,
+                                                                       uintptr_t userCtx,
+                                                                       bool isInternal,
+                                                                       const char* errorMsg)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool sendResult = false;
+    SOPC_HelperConfigInternal_Ctx* ctx = NULL;
+    if (!SOPC_ServerInternal_IsStarted())
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    else if (NULL == request)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        ctx = SOPC_HelperConfigInternalCtx_Create(userCtx, SE_LOCAL_SERVICE_RESPONSE);
+        status = (NULL == ctx) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Store the context in the list of pending local service requests (to manage unanswered requests on clear)
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        uintptr_t addedCtx =
+            SOPC_SLinkedList_Append(sopc_server_helper_config.localServiceListReqCtxList, 0, (uintptr_t) ctx);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        if ((SOPC_HelperConfigInternal_Ctx*) addedCtx != ctx)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            ctx->eventCtx.localService.customAsyncRespCb = asyncRespCb;
+            ctx->eventCtx.localService.isHelperInternal = isInternal;
+            ctx->eventCtx.localService.internalErrorMsg = errorMsg;
+            sendResult = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0],
+                                                                     request, (uintptr_t) ctx);
+            status = sendResult ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
+            if (!sendResult)
+            {
+                SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
+                SOPC_SLinkedList_RemoveFromValuePtr(sopc_server_helper_config.localServiceListReqCtxList,
+                                                    (uintptr_t) ctx);
+                SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+            }
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(ctx);
+    }
+    return status;
+}
+
 bool SOPC_ServerInternal_LocalServiceAsync(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
                                            void* request,
                                            uintptr_t userCtx,
                                            const char* errorMsg)
 {
-    SOPC_ASSERT(NULL != request);
-    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(userCtx, SE_LOCAL_SERVICE_RESPONSE);
-    bool res = false;
-    if (NULL != ctx)
+    SOPC_ReturnStatus status =
+        SOPC_ServerInternal_InternalLocalServiceAsync(asyncRespCb, request, userCtx, true, errorMsg);
+    if (SOPC_STATUS_OK != status)
     {
-        ctx->eventCtx.localService.customAsyncRespCb = asyncRespCb;
-        ctx->eventCtx.localService.isHelperInternal = true;
-        ctx->eventCtx.localService.internalErrorMsg = errorMsg;
-        res = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
-                                                          (uintptr_t) ctx);
+        SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) request, &request);
+        SOPC_UNUSED_RESULT(delStatus);
     }
-    if (!res)
-    {
-        SOPC_Free(ctx);
-        SOPC_ReturnStatus status = SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) request, &request);
-        SOPC_UNUSED_RESULT(status);
-    }
-    return res;
+    return (SOPC_STATUS_OK == status);
 }
 
 bool SOPC_ServerInternal_GetKeyPassword(char** outPassword)
@@ -127,7 +174,7 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
     // Helper internal call to internal services are always using asynchronous way
     SOPC_ASSERT(!ls->isHelperInternal);
     SOPC_Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
-    // Chech synchronous response id is the one expected
+    // Check synchronous response id is the one expected
     if (ls->syncId != sopc_server_helper_config.syncLocalServiceId)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -779,11 +826,22 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     }
     // Allocate local service helper context
     SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
-
     if (NULL == ctx)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
+    // Store the context in the list of pending local service requests (to manage unanswered requests on clear)
+    SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
+    uintptr_t addedCtx =
+        SOPC_SLinkedList_Append(sopc_server_helper_config.localServiceListReqCtxList, 0, (uintptr_t) ctx);
+    SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+    if ((SOPC_HelperConfigInternal_Ctx*) addedCtx != ctx)
+    {
+        SOPC_Free(ctx);
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    bool sendResult = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     SOPC_Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
@@ -804,9 +862,9 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
         ctx->eventCtx.localService.customAsyncRespCb = NULL;
 
         // Send request
-        bool res = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
-                                                               (uintptr_t) ctx);
-        SOPC_UNUSED_RESULT(res); // guaranteed by server started and managed by timeout in worst case scenario
+        sendResult = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
+                                                                 (uintptr_t) ctx);
+        status = sendResult ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
         // Wait until response received or error status (timeout)
         while (SOPC_STATUS_OK == status && NULL == sopc_server_helper_config.syncResp)
@@ -821,7 +879,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
             // Set response output
             *response = sopc_server_helper_config.syncResp;
         }
-        else if (NULL != sopc_server_helper_config.syncResp)
+        else if (sendResult && NULL != sopc_server_helper_config.syncResp)
         {
             // This is possible timeout occurred during response reception, in this case we might ignore timeout
             if (SOPC_STATUS_TIMEOUT == status)
@@ -842,6 +900,16 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
         sopc_server_helper_config.syncLocalServiceId++;
     }
     SOPC_Mutex_Unlock(&sopc_server_helper_config.syncLocalServiceMutex);
+
+    // Degraded case: manage unsent message and context cleanup
+    if (!sendResult)
+    {
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_SLinkedList_RemoveFromValuePtr(sopc_server_helper_config.localServiceListReqCtxList, (uintptr_t) ctx);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        SOPC_Free(ctx);
+        return SOPC_STATUS_INVALID_STATE;
+    }
     return status;
 }
 
@@ -849,24 +917,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsyncCustom(SOPC_LocalServiceAsy
                                                             void* request,
                                                             uintptr_t userContext)
 {
-    if (!SOPC_ServerInternal_IsStarted())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(userContext, SE_LOCAL_SERVICE_RESPONSE);
-    if (NULL == ctx)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-    ctx->eventCtx.localService.customAsyncRespCb = asyncRespCb;
-    bool res = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
-                                                           (uintptr_t) ctx);
-    if (!res)
-    {
-        SOPC_Free(ctx);
-        return SOPC_STATUS_INVALID_STATE;
-    }
-    return SOPC_STATUS_OK;
+    return SOPC_ServerInternal_InternalLocalServiceAsync(asyncRespCb, request, userContext, false, NULL);
 }
 
 SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t userContext)

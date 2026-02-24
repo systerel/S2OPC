@@ -95,6 +95,9 @@ typedef struct SOPC_ServerHelper_Config
                                  ::SOPC_ServerConfigHelper_SetKeyCertPairFromPath
                                  or ::SOPC_ServerConfigHelper_ConfigureFromXML.
                                  The callback allows to retrieve the password for decryption */
+    // Asynchronous local service response management
+    SOPC_SLinkedList* localServiceListReqCtxList; /* List of yet-to-be-answered local requests, value is a
+                                                  ::SOPC_HelperConfigInternal_Ctx* */
 
     // Synchronous local service response management
     SOPC_Condition syncLocalServiceCond;

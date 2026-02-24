@@ -48,6 +48,7 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .externalHistoryReadContext = 0,
     .writeNotifCb = NULL,
     .asyncRespCb = NULL,
+    .localServiceListReqCtxList = NULL,
     .syncLocalServiceId = 0,
     .syncCalled = false,
     .syncResp = NULL,
@@ -471,6 +472,10 @@ static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
     case SE_LOCAL_SERVICE_RESPONSE:
         ctx = (SOPC_HelperConfigInternal_Ctx*) helperContext;
         SOPC_ASSERT(event == ctx->event);
+        // remove context from waiting list
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_SLinkedList_RemoveFromValuePtr(sopc_server_helper_config.localServiceListReqCtxList, helperContext);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
         if (ctx->eventCtx.localService.isSyncCall)
         {
             SOPC_ServerInternal_SyncLocalServiceCb(*(SOPC_EncodeableType**) param, param, ctx);
@@ -516,6 +521,11 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void)
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
     sopc_server_helper_config = sopc_server_helper_config_default;
+    sopc_server_helper_config.localServiceListReqCtxList = SOPC_SLinkedList_Create(0);
+    if (NULL == sopc_server_helper_config.localServiceListReqCtxList)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
     // We only do copies in helper config
     pConfig->serverConfig.freeCstringsFlag = true;
@@ -550,6 +560,19 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void)
     return status;
 }
 
+static void SOPC_LocalServiceListReqCtxList_EltFree(uint32_t id, uintptr_t val)
+{
+    SOPC_UNUSED_ARG(id);
+    SOPC_HelperConfigInternal_Ctx* ctx = (SOPC_HelperConfigInternal_Ctx*) val;
+    // Note: in case of synchronous local service call,
+    //       no callback need to be called and simply freeing the context is sufficient
+    if (!ctx->eventCtx.localService.isSyncCall)
+    {
+        SOPC_ServerInternal_AsyncLocalServiceCb(NULL, NULL, (SOPC_HelperConfigInternal_Ctx*) val);
+    }
+    SOPC_Free((SOPC_HelperConfigInternal_Ctx*) val);
+}
+
 void SOPC_ServerConfigHelper_Clear(void)
 {
     if (!SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
@@ -579,9 +602,15 @@ void SOPC_ServerConfigHelper_Clear(void)
     // Ensures event callback will not be executed after this point, or will return immediately
     SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
     sopc_server_helper_config.state = SOPC_SERVER_STATE_INITIALIZING;
-    SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
-
     SOPC_CommonHelper_SetServerComEvent(NULL);
+
+    // As the SetServerComEvent is not set anymore, we will never receive other responses with applicative context.
+    // Manage potential non received async response for local services with the request context queue
+    // and return them to application
+    SOPC_SLinkedList_Apply(sopc_server_helper_config.localServiceListReqCtxList,
+                           SOPC_LocalServiceListReqCtxList_EltFree);
+    SOPC_SLinkedList_Delete(sopc_server_helper_config.localServiceListReqCtxList);
+    SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
 
     if (SOPC_STATUS_OK != status)
     {

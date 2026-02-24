@@ -295,6 +295,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(SOPC_Cre
  * \brief Type of callback to provide to receive asynchronous local service response.
  *
  * \param type         The ::SOPC_EncodeableType of the provided \p response
+ *                     or NULL in case of request delivery failure
  * \param response     An asynchronous response to a local service request sent using
  *                     ::SOPC_ServerHelper_LocalServiceAsync (see authorized requests).
  *                     Response will be a pointer to one of the following types:
@@ -310,6 +311,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(SOPC_Cre
  *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
  *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
+ *                     In case of request delivery failure the response is NULL and only the userContext is provided.
  *
  *                     The provided response is deallocated by caller after call,
  *                     it means response or response content shall be moved or copied if necessary.
