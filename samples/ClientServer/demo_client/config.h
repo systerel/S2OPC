@@ -83,7 +83,7 @@ extern struct argparse_option CONN_OPTIONS[16];
 
 /* For register server service only */
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost:product"
 #define GATEWAY_SERVER_URI ""
 
 /**

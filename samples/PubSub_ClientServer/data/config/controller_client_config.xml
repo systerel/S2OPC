@@ -11,7 +11,7 @@
     </ApplicationCertificates>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:localhost"/>
-      <ProductURI uri="urn:S2OPC:localhost"/>
+      <ProductURI uri="urn:S2OPC:localhost:product"/>
       <ApplicationName text="S2OPC Client for SKS push" locale="en-US"/>
     </ApplicationDescription>
     <Connections>

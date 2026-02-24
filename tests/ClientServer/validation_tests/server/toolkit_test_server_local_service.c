@@ -57,7 +57,7 @@
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost:product"
 
 #define NB_OF_REFERENCES_DIALOG_CONDITION 31
 #define NB_OF_CHILD_DIALOG_CONDITION NB_OF_REFERENCES_DIALOG_CONDITION - 2

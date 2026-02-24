@@ -57,7 +57,7 @@
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost:product"
 #define DEFAULT_APPLICATION_NAME "Test_Client_S2OPC"
 
 #define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_SignAndEncrypt

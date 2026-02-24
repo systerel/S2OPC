@@ -40,7 +40,7 @@
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4843"
 #define PKI_PATH "./S2OPC_Demo_PKI"
 #define APPLICATION_URI "urn:S2OPC:localhost"
-#define PRODUCT_URI "urn:S2OPC:localhost"
+#define PRODUCT_URI "urn:S2OPC:localhost:product"
 #define SERVER_DESCRIPTION "S2OPC Server + PubSub"
 #define CLIENT_DESCRIPTION "S2OPC Client for SKS"
 #define ADDRESS_SPACE_PATH "./s2opc_pubsub_nodeset.xml"

@@ -51,8 +51,8 @@
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost:product"
+#define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2:product"
 #define DEFAULT_APPLICATION_NAME "Test_Client_S2OPC"
 
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};

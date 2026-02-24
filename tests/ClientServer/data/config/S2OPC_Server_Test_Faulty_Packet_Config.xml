@@ -7,7 +7,7 @@
     </Locales>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:localhost"/>
-      <ProductURI uri="urn:S2OPC:localhost"/>
+      <ProductURI uri="urn:S2OPC:localhost:product"/>
       <ApplicationName text="S2OPC toolkit server example" locale="en-US"/>
       <ApplicationName text="S2OPC toolkit: exemple de serveur" locale="fr-FR"/>
       <ApplicationType type="DiscoveryServer"/>

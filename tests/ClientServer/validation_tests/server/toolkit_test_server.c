@@ -61,7 +61,7 @@ static char* default_key_cert = "server_private/encrypted_server_2k_key.pem";
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost:product"
 
 #define DEFAULT_CLIENT_REVERSE_ENDPOINT_URL "opc.tcp://localhost:4844"
 

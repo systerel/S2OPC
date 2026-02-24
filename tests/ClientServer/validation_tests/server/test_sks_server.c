@@ -63,7 +63,7 @@ static char* default_key_cert = "server_private/encrypted_server_2k_key.pem";
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost:product"
 
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 

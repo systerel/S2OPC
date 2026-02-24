@@ -12,7 +12,7 @@
     </ApplicationCertificates>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:localhost"/>
-      <ProductURI uri="urn:S2OPC:localhost"/>
+      <ProductURI uri="urn:S2OPC:localhost:product"/>
       <ApplicationName text="S2OPC toolkit client example" locale="en-US"/>
     </ApplicationDescription>
     <Connections>

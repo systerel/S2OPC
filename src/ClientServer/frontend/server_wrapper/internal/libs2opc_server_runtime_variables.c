@@ -582,7 +582,7 @@ static bool set_server_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVa
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 7);
     return values != NULL &&
-           set_server_server_array_value(&values[0], &vars->serverConfig->serverDescription.ProductUri) &&
+           set_server_server_array_value(&values[0], &vars->serverConfig->serverDescription.ApplicationUri) &&
            set_server_service_level_value(&values[1], vars->service_level) &&
            set_write_value_bool(&values[2], OpcUaId_Server_Auditing, vars->auditing) &&
            set_write_value_bool(&values[3], OpcUaId_Server_ServerDiagnostics_EnabledFlag, false) &&

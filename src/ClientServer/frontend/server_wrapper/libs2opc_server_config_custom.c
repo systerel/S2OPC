@@ -440,7 +440,7 @@ bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint)
 
 // Check that NamespaceArray array has at least 2 values (+ type), and precisely:
 // - NamespaceArray[0] = OPC UA ("http://opcfoundation.org/UA/")
-// - NamespaceArray[1] = ProductURI (= ApplicationURI)
+// - NamespaceArray[1] = ApplicationURI
 static SOPC_ReturnStatus check_opcua_values_nsArray(SOPC_Variant* nsArray_value)
 {
     SOPC_ASSERT(NULL != nsArray_value);
@@ -477,16 +477,16 @@ static SOPC_ReturnStatus check_opcua_values_nsArray(SOPC_Variant* nsArray_value)
                 {
                     // Second value
                     const SOPC_String* value1 = &nsArray_value->Value.Array.Content.StringArr[1];
-                    status = SOPC_String_Compare(&config->serverConfig.serverDescription.ProductUri, value1, false,
+                    status = SOPC_String_Compare(&config->serverConfig.serverDescription.ApplicationUri, value1, false,
                                                  &comparison);
                     if (SOPC_STATUS_OK != status || 0 != comparison)
                     {
                         SOPC_Logger_TraceError(
                             SOPC_LOG_MODULE_CLIENTSERVER,
-                            "Second value of node 'NamespaceArray': %s is not equal to ProductURI (which is "
-                            "also ApplicationURI): %s. Server will stop.",
+                            "Second value of node 'NamespaceArray': %s is not equal to ApplicationUri: %s. Server will "
+                            "stop.",
                             SOPC_String_GetRawCString(value1),
-                            SOPC_String_GetRawCString(&config->serverConfig.serverDescription.ProductUri));
+                            SOPC_String_GetRawCString(&config->serverConfig.serverDescription.ApplicationUri));
                         status = SOPC_STATUS_NOK;
                     }
                 }
@@ -515,7 +515,7 @@ static SOPC_ReturnStatus check_opcua_values_nsArray(SOPC_Variant* nsArray_value)
     return status;
 }
 
-// Check that the URI of the ServerArray with index 0 is identical to ProductURI (= ApplicationURI)
+// Check that the URI of the ServerArray with index 0 is identical to ApplicationURI.
 static SOPC_ReturnStatus check_opcua_values_serverArray(SOPC_Variant* serverArray_value)
 {
     SOPC_ASSERT(NULL != serverArray_value);
@@ -537,16 +537,15 @@ static SOPC_ReturnStatus check_opcua_values_serverArray(SOPC_Variant* serverArra
             {
                 int32_t comparison = -1;
                 const SOPC_String* value0 = &serverArray_value->Value.Array.Content.StringArr[0];
-                status =
-                    SOPC_String_Compare(&config->serverConfig.serverDescription.ProductUri, value0, false, &comparison);
+                status = SOPC_String_Compare(&config->serverConfig.serverDescription.ApplicationUri, value0, false,
+                                             &comparison);
                 if (SOPC_STATUS_OK != status || 0 != comparison)
                 {
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_CLIENTSERVER,
-                        "First value of node 'ServerArray': %s is not equal to ProductURI (which is "
-                        "also ApplicationURI): %s. Server will stop.",
+                        "First value of node 'ServerArray': %s is not equal to ApplicationUri: %s. Server will stop.",
                         SOPC_String_GetRawCString(value0),
-                        SOPC_String_GetRawCString(&config->serverConfig.serverDescription.ProductUri));
+                        SOPC_String_GetRawCString(&config->serverConfig.serverDescription.ApplicationUri));
                     status = SOPC_STATUS_NOK;
                 }
             }

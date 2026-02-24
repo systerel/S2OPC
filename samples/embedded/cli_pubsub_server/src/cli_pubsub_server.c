@@ -89,7 +89,7 @@ static void log_UserCallback(const char* timestampUtc,
 #define ASYNCH_CONTEXT_PARAM 0x12345678u
 #define ASYNCH_CONTEXT_CACHE_SYNC 0x12345679u
 #define APPLICATION_URI "urn:S2OPC:localhost"
-#define PRODUCT_URI "urn:S2OPC:localhost"
+#define PRODUCT_URI "urn:S2OPC:localhost:product"
 #define SERVER_DESCRIPTION "S2OPC PubSub+Server demo Server"
 #define LOCALE_ID "en-US"
 static const char* g_localesArray[2] = {LOCALE_ID, NULL};

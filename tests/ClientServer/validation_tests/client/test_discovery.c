@@ -33,7 +33,7 @@
 #define REQ_SECURITY_POLICY SOPC_SecurityPolicy_None
 
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost:product"
 #define GATEWAY_SERVER_URI ""
 
 /* Event handlers of the Discovery */

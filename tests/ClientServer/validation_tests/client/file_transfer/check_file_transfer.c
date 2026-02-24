@@ -36,7 +36,7 @@
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
-#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost:product"
 #define DEFAULT_APPLICATION_NAME "Client_Check_File_Transfer_S2OPC"
 
 #define BIN_READ_FILE_PATH "./ft_data/bin_file.a"
