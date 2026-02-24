@@ -160,7 +160,8 @@ typedef struct _SOPC_AlarmCondition SOPC_AlarmCondition;
  *                           (it might be the SourceCondition itself or its HasEventSource parent)
  * \param conditionNode      the NodeId of the node representing the AlarmCondition in address space
  * \param conditionInst      the event instance that contains inital data for the AlarmCondition fields,
- *                           it shall not be used anymore by caller after a successful call.
+ *                           it shall not be used anymore by caller after a successful call
+ *                           (memory is managed by the server).
  * \param[out] outAlarmCond  the alarm condition instance created on successful call.
  *
  * \warning The server shall be started, thus ::SOPC_Server_Start or :: SOPC_Server_Serve shall have been called

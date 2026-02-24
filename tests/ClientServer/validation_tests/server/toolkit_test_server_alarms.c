@@ -601,11 +601,19 @@ static SOPC_ReturnStatus SOPC_EquipmentsWithAlarm_Initialize(size_t nbEqt, SOPC_
             {
                 status =
                     SOPC_AlarmCondition_CreateFromEvent(&eqt->eqtId, &sensor->lowAlarmId, lowAlarmEvent, &lowAlarm);
+                if (SOPC_STATUS_OK == status)
+                {
+                    lowAlarmEvent = NULL; // It shall not be used anymore after a successful call
+                }
             }
             if (SOPC_STATUS_OK == status)
             {
                 status =
                     SOPC_AlarmCondition_CreateFromEvent(&eqt->eqtId, &sensor->highAlarmId, highAlarmEvent, &highAlarm);
+                if (SOPC_STATUS_OK == status)
+                {
+                    highAlarmEvent = NULL; // It shall not be used anymore after a successful call
+                }
             }
 
             // Configure the alarms behavior on Activation (=> Acknowledgeable)
