@@ -525,6 +525,8 @@ if (expat_FOUND)
     ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
   target_compile_options(toolkit_test_server_restart PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_restart PRIVATE ${S2OPC_DEFINITIONS})
+
+  s2opc_unit_test(toolkit_test_server_restart)
 endif()
 
 # Test server SKS
