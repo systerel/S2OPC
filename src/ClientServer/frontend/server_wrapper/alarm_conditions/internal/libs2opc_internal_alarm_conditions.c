@@ -279,65 +279,69 @@ static void SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct(SOPC_EncodeableT
     bool postToLooper = false;
     bool moveRespToParams = false;
     uintptr_t params = (uintptr_t) NULL;
+    bool res = true;
 
     if (!SOPC_InternalAlarmConditionMgr_IsInit())
     {
-        return;
+        res = false;
     }
 
-    if (&OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType == type)
+    if (res)
     {
-        postToLooper = true;
-        moveRespToParams = true;
-        libEvt = SOPC_AC_EVT_TBP_RESP;
-    }
-    else if (&OpcUa_WriteResponse_EncodeableType == type)
-    {
-        libEvt = SOPC_AC_EVT_WRITE_RESP;
-        OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
-        if (SOPC_IsGoodStatus(writeResp->ResponseHeader.ServiceResult))
-        {
-            for (int32_t i = 0; i < writeResp->NoOfResults; i++)
-            {
-                if (!SOPC_IsGoodStatus(writeResp->Results[i]))
-                {
-                    postToLooper = true;
-                    moveRespToParams = true;
-                }
-            }
-        }
-        else
+        if (&OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType == type)
         {
             postToLooper = true;
             moveRespToParams = true;
+            libEvt = SOPC_AC_EVT_TBP_RESP;
         }
-        // postToLooper == moveRespToParams == FALSE => all write succeeded, no need to do anything
-    }
-    else
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Unexpected local service response type %s with status code 0x%08" PRIX32
-                               ". Error message is: %s",
-                               (NULL != type ? type->TypeName : "<NULL>"),
-                               (NULL != response ? ((OpcUa_ResponseHeader*) response)->ServiceResult : 0),
-                               helperCtx->eventCtx.localService.internalErrorMsg);
-    }
-    if (postToLooper && moveRespToParams)
-    {
-        SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(type, (void**) &params);
-        if (SOPC_STATUS_OK == status)
+        else if (&OpcUa_WriteResponse_EncodeableType == type)
         {
-            status = SOPC_EncodeableObject_Move((void*) params, response);
+            libEvt = SOPC_AC_EVT_WRITE_RESP;
+            OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
+            if (SOPC_IsGoodStatus(writeResp->ResponseHeader.ServiceResult))
+            {
+                for (int32_t i = 0; i < writeResp->NoOfResults; i++)
+                {
+                    if (!SOPC_IsGoodStatus(writeResp->Results[i]))
+                    {
+                        postToLooper = true;
+                        moveRespToParams = true;
+                    }
+                }
+            }
+            else
+            {
+                postToLooper = true;
+                moveRespToParams = true;
+            }
+            // postToLooper == moveRespToParams == FALSE => all write succeeded, no need to do anything
         }
-        if (SOPC_STATUS_OK != status)
+        else
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Unexpected local service write response copy failure %d", status);
-
-            postToLooper = false;
+                                   "Unexpected local service response type %s with status code 0x%08" PRIX32
+                                   ". Error message is: %s",
+                                   (NULL != type ? type->TypeName : "<NULL>"),
+                                   (NULL != response ? ((OpcUa_ResponseHeader*) response)->ServiceResult : 0),
+                                   helperCtx->eventCtx.localService.internalErrorMsg);
         }
+        if (postToLooper && moveRespToParams)
+        {
+            SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(type, (void**) &params);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_EncodeableObject_Move((void*) params, response);
+            }
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Unexpected local service write response copy failure %d", status);
+
+                postToLooper = false;
+            }
+        }
+        res = postToLooper;
     }
-    bool res = postToLooper;
     if (postToLooper)
     {
         res = SOPC_InternalAlarmConditionMgr_IsInit();
