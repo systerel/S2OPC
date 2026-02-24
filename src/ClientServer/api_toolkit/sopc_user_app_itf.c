@@ -272,6 +272,15 @@ const char* SOPC_CallContext_GetClientCertThumbprint(const SOPC_CallContext* cal
     return callContextPtr->clientCertThumbprint;
 }
 
+const char* SOPC_CallContext_GetClientIpPort(const SOPC_CallContext* callContextPtr)
+{
+    if (NULL == callContextPtr || NULL == callContextPtr->clientPeerInfo)
+    {
+        return NULL;
+    }
+    return callContextPtr->clientPeerInfo;
+}
+
 SOPC_AddressSpaceAccess* SOPC_CallContext_GetAddressSpaceAccess(const SOPC_CallContext* callContextPtr)
 {
     if (NULL == callContextPtr)

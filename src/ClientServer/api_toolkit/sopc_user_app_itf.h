@@ -74,6 +74,7 @@ typedef struct SOPC_SecureChannel_Config
     uint32_t requestedLifetime;                /**< Requested Secure channel lifetime */
     OpcUa_MessageSecurityMode msgSecurityMode; /**< Requested Security Mode */
 
+    char* clientPeerInfo;  /**< IP/HOST:PORT of client when available */
     char* clientAuditInfo; /**< Alternative audit entry information on client when audit entry is not provided */
 
     uintptr_t internalProtocolData; /**< Internal use only: used to store internal protocol data (set only during
@@ -504,37 +505,37 @@ typedef enum _SOPC_App_Com_Event
 /* Server only interfaces */
 
 /**
- * \brief Server address space / internal state change events to be received by applicative code
+ * \brief Server address space access / internal state change events to be received by applicative code
  */
 typedef enum _SOPC_App_AddSpace_Event
 {
     /* Server application events */
-    AS_WRITE_EVENT = 0x800,      /**< Server side only:<BR/>
-                                  *   Notifies a write operation on the server address space.<br/>
-                                  *   opParam = (OpcUa_WriteValue*) single write value operation<br/>
-                                  *   opStatus = status of the write operation
-                                  */
-    AS_SESSION_CREATION = 0x801, /**< Server side only:<br/>
-                                  *   Notifies the session creation by the server for a client session.<br/>
-                                  *   opParam = (SOPC_SessionId) internal session id<br/>
-                                  *   opStatus = SOPC_GoodGeneric
-                                  */
-    AS_SESSION_ACTIVATION,       /**< Server side only:<br/>
-                                  *   Notifies the session activation by the server for a client session.<br/>
-                                  *   opParam = (SOPC_SessionId) internal session id<br/>
-                                  *   opStatus = SOPC_GoodGeneric for a successful session activation, Bad status otherwise
-      )                           */
-    AS_SESSION_INACTIVE,         /**< Server side only:<br/>
-                                  *   Notifies the session deactivation (orphaned) by the server for a client session.<br/>
-                                  *   opParam = (SOPC_SessionId) internal session id<br/>
-                                  *   opStatus = Bad status indicating the reason
-                                  *   (e.g. BadSecureChannelClosed, BadIdentityTokenRejected, etc.)
-                                  */
-    AS_SESSION_CLOSURE,          /**< Server side only:<br/>
-                                  *   Notifies the session closure by the server for a client session.<br/>
-                                  *   opParam = (SOPC_SessionId) internal session id<br/>
-                                  *   opStatus = SOPC_GoodGeneric for a successful session closure, Bad status otherwise
-                                  */
+    AS_WRITE_EVENT = 0x800, /**< Server side only:<BR/>
+                             *   Notifies a write operation on the server address space.<br/>
+                             *   opParam = (OpcUa_WriteValue*) single write value operation<br/>
+                             *   opStatus = status of the write operation
+                             */
+    AS_SESSION_CREATION,    /**< Server side only:<br/>
+                             *   Notifies the session creation by the server for a client session.<br/>
+                             *   opParam = (SOPC_SessionId) internal session id<br/>
+                             *   opStatus = SOPC_GoodGeneric
+                             */
+    AS_SESSION_ACTIVATION,  /**< Server side only:<br/>
+                             *   Notifies the session activation by the server for a client session.<br/>
+                             *   opParam = (SOPC_SessionId) internal session id<br/>
+                             *   opStatus = SOPC_GoodGeneric for a successful session activation, Bad status otherwise
+                             */
+    AS_SESSION_INACTIVE,    /**< Server side only:<br/>
+                             *   Notifies the session deactivation (orphaned) by the server for a client session.<br/>
+                             *   opParam = (SOPC_SessionId) internal session id<br/>
+                             *   opStatus = Bad status indicating the reason
+                             *   (e.g. BadSecureChannelClosed, BadIdentityTokenRejected, etc.)
+                             */
+    AS_SESSION_CLOSURE,     /**< Server side only:<br/>
+                             *   Notifies the session closure by the server for a client session.<br/>
+                             *   opParam = (SOPC_SessionId) internal session id<br/>
+                             *   opStatus = SOPC_GoodGeneric for a successful session closure, Bad status otherwise
+                             */
 } SOPC_App_AddSpace_Event;
 
 /**

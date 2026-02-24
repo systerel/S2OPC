@@ -33,6 +33,7 @@ struct SOPC_CallContext
     uint32_t endpointConfigIdx;      // Only valid for server side (type ::SOPC_EndpointConfigIdx)
     OpcUa_MessageSecurityMode msgSecurityMode;
     const char* secuPolicyUri;
+    char* clientPeerInfo;
     const OpcUa_ApplicationDescription* clientAppDescription;
     char* clientCertThumbprint;
     SOPC_SessionId sessionId;

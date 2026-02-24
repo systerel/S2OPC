@@ -538,13 +538,13 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                         char* newPeerInfo = NULL;
                         char* subjectPeerInfo = NULL;
                         uint32_t len = 0;
-                        SOPC_ReturnStatus statusPeerInfo =
+                        SOPC_ReturnStatus statusClientAuditInfo =
                             SOPC_KeyManager_Certificate_GetSubjectName(cert, &subjectPeerInfo, &len);
-                        if (SOPC_STATUS_OK == statusPeerInfo && len > 0 && subjectPeerInfo != NULL)
+                        if (SOPC_STATUS_OK == statusClientAuditInfo && len > 0 && subjectPeerInfo != NULL)
                         {
-                            statusPeerInfo =
+                            statusClientAuditInfo =
                                 SOPC_StrConcat(scConnection->altClientAuditInfo, subjectPeerInfo, &newPeerInfo);
-                            if (SOPC_STATUS_OK == statusPeerInfo)
+                            if (SOPC_STATUS_OK == statusClientAuditInfo)
                             {
                                 SOPC_Free(scConnection->altClientAuditInfo);
                                 scConnection->altClientAuditInfo = newPeerInfo;

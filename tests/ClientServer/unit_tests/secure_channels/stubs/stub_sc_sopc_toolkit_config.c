@@ -143,6 +143,7 @@ static void SOPC_ToolkitServer_ClearScConfig_WithoutLock(uint32_t serverScConfig
         // => only client certificate / client info was specifically allocated
         // Exceptional case: configuration added internally and shall be freed on clear call
         SOPC_KeyCertPair_Delete(&scConfig->peerAppCert);
+        SOPC_Free(scConfig->clientPeerInfo);
         SOPC_Free(scConfig->clientAuditInfo);
         SOPC_Free(scConfig);
         tConfig.serverScConfigs[serverScConfigIdxWithoutOffset] = NULL;

@@ -91,7 +91,19 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx, char* peerInfo)
             result = false;
         }
 
+        // Initialize peer info context (for server side)
+        scConnection->peerInfo = SOPC_strdup(peerInfo);
+        if (NULL != scConnection->peerInfo)
+        {
+            size_t peerInfoLen = strlen(scConnection->peerInfo);
+            if (peerInfoLen > 0)
+            {
+                // Remove the last character '-' which is added for audit info purpose only
+                scConnection->peerInfo[peerInfoLen - 1] = '\0';
+            }
+        }
         // Initialize alternative client audit info context (for server side)
+        // Note: duplicate peer info for now, but it might be enriched on OPN with subject name for audit
         scConnection->altClientAuditInfo = peerInfo;
 
         // Initialize state
@@ -197,6 +209,10 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
                 SOPC_SecretBuffer_DeleteClear(scConnection->clientNonce);
                 scConnection->clientNonce = NULL;
             }
+
+            // Clear peer info context
+            SOPC_Free(scConnection->peerInfo);
+            scConnection->peerInfo = NULL;
 
             // Clear alternative client audit info context
             SOPC_Free(scConnection->altClientAuditInfo);
@@ -1951,6 +1967,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             nconfig->reqSecuPolicyUri = scConnection->serverAsymmSecuInfo.securityPolicyUri;
             nconfig->requestedLifetime = opnReq->RequestedLifetime;
             nconfig->url = epConfig->endpointURL;
+            nconfig->clientPeerInfo = SOPC_strdup(scConnection->peerInfo);
             nconfig->clientAuditInfo = SOPC_strdup(scConnection->altClientAuditInfo);
             // Set maximum send message size
             nconfig->internalProtocolData = scConnection->tcpMsgProperties.sendMaxMessageSize;

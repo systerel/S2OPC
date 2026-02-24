@@ -63,6 +63,7 @@ void app_cb_call_context_bs__set_app_call_context_channel_config(
     {
         currentCtx.msgSecurityMode = scConfigPtr->msgSecurityMode;
         currentCtx.secuPolicyUri = scConfigPtr->reqSecuPolicyUri;
+        currentCtx.clientPeerInfo = scConfigPtr->clientPeerInfo;
     }
 
     if (constants__c_endpoint_config_idx_indet == app_cb_call_context_bs__p_endpoint_config)
@@ -126,6 +127,7 @@ SOPC_CallContextCopy* SOPC_CallContext_CreateCurrentCopy(void)
                 copy->endpointConfigIdx = currentCtx.endpointConfigIdx;
                 copy->msgSecurityMode = currentCtx.msgSecurityMode;
                 copy->secuPolicyUri = SOPC_strdup(currentCtx.secuPolicyUri);
+                copy->clientPeerInfo = SOPC_strdup(currentCtx.clientPeerInfo);
                 copy->sessionId = currentCtx.sessionId;
 
                 if (SOPC_STATUS_OK == status)
@@ -184,6 +186,7 @@ void SOPC_CallContext_FreeCopy(SOPC_CallContextCopy* cc)
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             SOPC_Free(cc->refCopyCount);
             SOPC_Free((char*) cc->secuPolicyUri);
+            SOPC_Free((char*) cc->clientPeerInfo);
             SOPC_EncodeableObject_Delete(&OpcUa_ApplicationDescription_EncodeableType,
                                          (void**) &cc->clientAppDescription);
             SOPC_Free((char*) cc->clientCertThumbprint);
