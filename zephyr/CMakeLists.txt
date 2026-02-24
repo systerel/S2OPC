@@ -65,6 +65,7 @@ zephyr_include_directories(
     ${S2OPC_SRC}/ClientServer/frontend/server_wrapper/internal
     ${S2OPC_SRC}/ClientServer/frontend/server_wrapper/alarm_conditions
     ${S2OPC_SRC}/ClientServer/frontend/server_wrapper/alarm_conditions/internal
+    ${S2OPC_SRC}/ClientServer/frontend/server_wrapper/file_transfer
     ${S2OPC_SRC}/Common/helpers
     ${S2OPC_SRC}/Common/helpers_platform_dep
     ${S2OPC_SRC}/Common/helpers_platform_dep/zephyr
