@@ -302,7 +302,7 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
         }
         break;
     /* Note: subscription/session closure and timers are related to the server side
-             but do not use the server configuration.  Moreover those are necessary to terminate
+             but do not use the server configuration. Moreover those are necessary to terminate
              the opened sessions / subscriptions in case of Server clear only
              since those are not automatically closed for now in this case.
     case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
@@ -361,6 +361,8 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
             break; // Nothing to clear
         case APP_TO_SE_LOCAL_SERVICE_REQUEST:
             SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) params, (void**) &params);
+            // Note: the response context is not returned to application,
+            // this is managed in server wrapper by using the waiting request context list
             break;
         case APP_TO_SE_TRIGGER_EVENT:
             // params =  (SOPC_Internal_EventContext*)

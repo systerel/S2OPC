@@ -139,7 +139,8 @@ typedef enum SOPC_Services_Event
                                         and user considered)<BR/>
                                         id = endpoint description config index<BR/>
                                         params = (OpcUa_<MessageStruct>*) OPC UA message payload structure (header
-                                        ignored)<BR/> auxParam = user application session context
+                                        ignored)<BR/>
+                                        auxParam = user application session context
                                       */
     APP_TO_SE_TRIGGER_EVENT,         /**< Server side only:<BR/>
                                         Trigger the provided event from the given node notifier with possibly subscription
