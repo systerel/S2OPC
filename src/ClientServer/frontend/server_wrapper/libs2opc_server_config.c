@@ -565,12 +565,31 @@ void SOPC_ServerConfigHelper_Clear(void)
 
     SOPC_ASSERT(SOPC_ServerInternal_IsConfigClearable() && "Server is not yet stopped or in unexpected state");
 
-    SOPC_CommonHelper_SetServerComEvent(NULL);
+    // Restore unconfigured state in toolkit (no more address space defined => local services deactivated)
+    // Note: it shall be done prior to removing any configuration from low level layer
+    SOPC_ReturnStatus status = SOPC_ToolkitServer_UnConfigure();
+    if (SOPC_STATUS_OK == status)
+    {
+        // Remove all endpoint configurations from toolkit to be able to add new ones later
+        status = SOPC_ToolkitServer_RemoveAllEndpointsConfig();
+    }
+    // TODO: in the future we should manage to close all sessions / subscriptions here
+    //       (only done in complete services layer clearing for now) => will be closed on their respective timeout
 
     // Ensures event callback will not be executed after this point, or will return immediately
     SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
     sopc_server_helper_config.state = SOPC_SERVER_STATE_INITIALIZING;
     SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+
+    SOPC_CommonHelper_SetServerComEvent(NULL);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Error during toolkit server unconfiguration in server wrapper clear: %d. "
+                               "New initialization will not be possible and will fail !",
+                               status);
+    }
 
     // Clear endpoints since not stored in S2OPC config anymore in wrapper:
     for (int i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
@@ -605,23 +624,6 @@ void SOPC_ServerConfigHelper_Clear(void)
     if (NULL != pConfig)
     {
         SOPC_ServerConfig_Clear(&pConfig->serverConfig);
-    }
-    // Restore unconfigured state in toolkit (no more address space defined => local services deactivated)
-    SOPC_ReturnStatus status = SOPC_ToolkitServer_UnConfigure();
-    if (SOPC_STATUS_OK == status)
-    {
-        // Remove all endpoint configurations from toolkit to be able to add new ones later
-        status = SOPC_ToolkitServer_RemoveAllEndpointsConfig();
-    }
-    // TODO: in the future we should manage to close all sessions / subscriptions here
-    //       (only done in complete services layer clearing for now) => will be closed on their respective timeout
-
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Error during toolkit server unconfiguration in server wrapper clear: %d. "
-                               "New initialization will not be possible and will fail !",
-                               status);
     }
 }
 
