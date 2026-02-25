@@ -55,7 +55,8 @@ DEFINITIONS
     a_client_to_create,
     a_client_app_context,
     a_server_client_app_desc,
-    a_server_client_cert_tb;
+    a_server_client_cert_tb,
+    a_server_session_name;
 
     d_typing ==
     s_session                   <: t_session                             &
@@ -80,7 +81,8 @@ DEFINITIONS
     a_client_to_create           : t_session +-> t_channel_config_idx_i  &
     a_client_app_context         : t_session +-> t_session_application_context_i &
     a_server_client_app_desc     : t_session +-> t_ApplicationDescription &
-    a_server_client_cert_tb      : t_session +-> t_CertThumbprint
+    a_server_client_cert_tb      : t_session +-> t_CertThumbprint &
+    a_server_session_name        : t_session +-> t_SessionName
 
 ABSTRACT_VARIABLES
     d_variables
@@ -113,7 +115,8 @@ INITIALISATION
     a_client_to_create           := {} ||
     a_client_app_context         := {} ||
     a_server_client_app_desc     := {} ||
-    a_server_client_cert_tb      := {}
+    a_server_client_cert_tb      := {} ||
+    a_server_session_name        := {}
 
 OPERATIONS
 
@@ -1007,14 +1010,15 @@ OPERATIONS
     END
     ;
 
-    set_server_client_create_session_info (p_session, p_cliAppDesc, p_cliCertTb) =
+    set_server_client_create_session_info (p_session, p_cliAppDesc, p_cliCertTb, p_sessionName) =
     PRE
         p_session    : t_session_i &
         p_session    : t_session &
         p_cliAppDesc : t_ApplicationDescription_i &
-        p_cliCertTb  : t_CertThumbprint_i
+        p_cliCertTb  : t_CertThumbprint_i &
+        p_sessionName : t_SessionName_i
     THEN
-        a_server_client_app_desc, a_server_client_cert_tb
+        a_server_client_app_desc, a_server_client_cert_tb, a_server_session_name
         :(a_server_client_app_desc     : t_session +-> t_ApplicationDescription &
           a_server_client_cert_tb      : t_session +-> t_CertThumbprint &
           (p_cliAppDesc : t_ApplicationDescription =>
@@ -1024,7 +1028,11 @@ OPERATIONS
           (p_cliCertTb : t_CertThumbprint =>
               a_server_client_cert_tb = a_server_client_cert_tb$0 \/ {p_session |-> p_cliCertTb}) &
           (p_cliCertTb /: t_CertThumbprint =>
-              a_server_client_cert_tb = a_server_client_cert_tb$0)
+              a_server_client_cert_tb = a_server_client_cert_tb$0) &
+          (p_sessionName : t_SessionName =>
+              a_server_session_name =  a_server_session_name$0 \/ {p_session |-> p_sessionName}) &
+          (p_sessionName /: t_SessionName =>
+              {p_session} <<| a_server_session_name = a_server_session_name$0)
         )
     END
     ;
@@ -1065,6 +1073,15 @@ OPERATIONS
                       (p_session /: dom(a_server_client_cert_tb) =>
                          p_cliCertTb = c_CertThumbprint_indet)
                      )
+    END
+    ;
+
+    p_sessionName <-- get_server_session_name(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_sessionName :(p_sessionName : t_SessionName_i & p_sessionName = a_server_session_name(p_session))
     END
     ;
 

@@ -39,7 +39,8 @@ ABSTRACT_VARIABLES
     a_server_user_auth_attempts,
     a_server_client_locales,
     a_server_client_app_desc,
-    a_server_client_cert_tb
+    a_server_client_cert_tb,
+    a_server_session_name
 
 INVARIANT
     a_session_roles    : t_session +-> t_sessionRoles         &
@@ -55,7 +56,8 @@ INVARIANT
     a_server_user_auth_attempts : t_session +-> NAT           &
     a_server_client_locales : t_session +-> t_LocaleIds       &
     a_server_client_app_desc : t_session +-> t_ApplicationDescription &
-    a_server_client_cert_tb : t_session +-> t_CertThumbprint
+    a_server_client_cert_tb : t_session +-> t_CertThumbprint &
+    a_server_session_name : t_session +-> t_SessionName
 
 INITIALISATION
     a_session_roles    := {} ||
@@ -69,7 +71,8 @@ INITIALISATION
     a_server_user_auth_attempts := {} ||
     a_server_client_locales := {} ||
     a_server_client_app_desc := {} ||
-    a_server_client_cert_tb := {}
+    a_server_client_cert_tb := {} ||
+    a_server_session_name := {}
 
 OPERATIONS
 
@@ -388,6 +391,26 @@ OPERATIONS
     END
     ;
 
+    set_server_session_name(p_session, p_sessionName) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session &
+        p_sessionName : t_SessionName_i &
+        p_sessionName : t_SessionName
+    THEN
+        a_server_session_name(p_session) := p_sessionName
+    END
+    ;
+
+    p_sessionName <-- get_server_session_name(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_sessionName :(p_sessionName : t_SessionName_i & p_sessionName = a_server_session_name(p_session))
+    END
+    ;
+
     p_roles <-- reset_server_session_roles(p_session) =
     PRE
         p_session            : t_session_i &
@@ -421,19 +444,20 @@ OPERATIONS
     END
     ;
 
-    p_cliAppDesc, p_certTb <-- reset_server_client_create_session_info(p_session) =
+    p_cliAppDesc, p_certTb, p_sessionName <-- reset_server_client_create_session_info(p_session) =
     PRE
         p_session            : t_session_i &
         p_session            : t_session
     THEN
         /* Retrieve recorded client app desc and certificate thumbprint and remove them from relations */
-        p_cliAppDesc, p_certTb,
-        a_server_client_app_desc, a_server_client_cert_tb
+        p_cliAppDesc, p_certTb, p_sessionName,
+        a_server_client_app_desc, a_server_client_cert_tb, a_server_session_name
         :(p_cliAppDesc : t_ApplicationDescription_i &
           p_certTb : t_CertThumbprint_i &
+          p_sessionName : t_SessionName_i &
           a_server_client_app_desc : t_session +-> t_ApplicationDescription &
           a_server_client_cert_tb : t_session +-> t_CertThumbprint &
-
+          a_server_session_name : t_session +-> t_SessionName &
           (p_session : dom(a_server_client_app_desc) =>
                 p_cliAppDesc = a_server_client_app_desc$0(p_session)) &
           (p_session /: dom(a_server_client_app_desc) =>
@@ -442,8 +466,13 @@ OPERATIONS
                 p_certTb = a_server_client_cert_tb$0(p_session)) &
           (p_session /: dom(a_server_client_cert_tb) =>
                 p_certTb = c_CertThumbprint_indet) &
+          (p_session : dom(a_server_session_name) =>
+                p_sessionName = a_server_session_name$0(p_session)) &
+          (p_session /: dom(a_server_session_name) =>
+                p_sessionName = c_SessionName_indet) &
           a_server_client_app_desc = {p_session} <<| a_server_client_app_desc$0 &
-          a_server_client_cert_tb = {p_session} <<| a_server_client_cert_tb$0
+          a_server_client_cert_tb = {p_session} <<| a_server_client_cert_tb$0 &
+          a_server_session_name = {p_session} <<| a_server_session_name$0
         )
     END
     ;

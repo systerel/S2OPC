@@ -755,5 +755,14 @@ OPERATIONS
         /* Record TimeReference of the latest received message */
         skip
     END
+    ;
+
+    p_genSessionName <-- gen_server_session_name (session) =
+    PRE
+        session : t_session_i &
+        session : t_session
+    THEN
+        p_genSessionName :(p_genSessionName : t_SessionName_i & p_genSessionName : t_SessionName)
+    END
 
 END

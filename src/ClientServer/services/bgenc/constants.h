@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 20/01/2026 18:00:28
+ Date                 : 25/02/2026 11:31:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -87,6 +87,7 @@
 #define constants__t_ServerCapabilities constants_bs__t_ServerCapabilities
 #define constants__t_ServerUri constants_bs__t_ServerUri
 #define constants__t_ServerUris constants_bs__t_ServerUris
+#define constants__t_SessionName_i constants_bs__t_SessionName_i
 #define constants__t_SignatureData_i constants_bs__t_SignatureData_i
 #define constants__t_Timestamp constants_bs__t_Timestamp
 #define constants__t_Variant_i constants_bs__t_Variant_i
@@ -401,6 +402,7 @@ typedef enum {
 #define constants__t_ServerCapabilities_max constants_bs__t_ServerCapabilities_max
 #define constants__t_ServerUri_max constants_bs__t_ServerUri_max
 #define constants__t_ServerUris_max constants_bs__t_ServerUris_max
+#define constants__t_SessionName_i_max constants_bs__t_SessionName_i_max
 #define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
 #define constants__t_Timestamp_max constants_bs__t_Timestamp_max
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
@@ -517,6 +519,7 @@ typedef enum {
 #define constants__c_Server_Nano_Extended constants_bs__c_Server_Nano_Extended
 #define constants__c_Server_NodeId constants_bs__c_Server_NodeId
 #define constants__c_Server_ServerCapabilities_RoleSet_NodeId constants_bs__c_Server_ServerCapabilities_RoleSet_NodeId
+#define constants__c_SessionName_indet constants_bs__c_SessionName_indet
 #define constants__c_SignatureData_indet constants_bs__c_SignatureData_indet
 #define constants__c_Timestamp_null constants_bs__c_Timestamp_null
 #define constants__c_Variant_indet constants_bs__c_Variant_indet
@@ -610,6 +613,7 @@ extern void constants__INITIALISATION(void);
 #define constants__free_CertThumbprint constants_bs__free_CertThumbprint
 #define constants__free_ExpandedNodeId constants_bs__free_ExpandedNodeId
 #define constants__free_LocaleIds constants_bs__free_LocaleIds
+#define constants__free_SessionName constants_bs__free_SessionName
 #define constants__free_roles constants_bs__free_roles
 #define constants__get_CurrentTimestamp constants_bs__get_CurrentTimestamp
 #define constants__get_NodeId_NamespaceIndex constants_bs__get_NodeId_NamespaceIndex

@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.h
 
- Date                 : 01/12/2025 11:08:53
+ Date                 : 25/02/2026 11:31:40
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -55,6 +55,7 @@ extern constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[co
 extern constants__t_ApplicationDescription_i session_core_2__a_server_client_app_desc_i[constants__t_session_i_max+1];
 extern constants__t_CertThumbprint_i session_core_2__a_server_client_cert_tb_i[constants__t_session_i_max+1];
 extern constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
+extern constants__t_SessionName_i session_core_2__a_server_session_name_i[constants__t_session_i_max+1];
 extern t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
 extern constants__t_timeref_i session_core_2__a_session_init_time_i[constants__t_session_i_max+1];
 extern constants__t_sessionRoles_i session_core_2__a_session_roles_i[constants__t_session_i_max+1];
@@ -87,6 +88,9 @@ extern void session_core_2__get_server_session_client_app_desc(
 extern void session_core_2__get_server_session_client_cert_tb(
    const constants__t_session_i session_core_2__p_session,
    constants__t_CertThumbprint_i * const session_core_2__p_cliCertTb);
+extern void session_core_2__get_server_session_name(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_SessionName_i * const session_core_2__p_sessionName);
 extern void session_core_2__get_server_session_preferred_locales(
    const constants__t_session_i session_core_2__p_session,
    constants__t_LocaleIds_i * const session_core_2__p_localeIds);
@@ -125,7 +129,8 @@ extern void session_core_2__remove_session(
 extern void session_core_2__reset_server_client_create_session_info(
    const constants__t_session_i session_core_2__p_session,
    constants__t_ApplicationDescription_i * const session_core_2__p_cliAppDesc,
-   constants__t_CertThumbprint_i * const session_core_2__p_certTb);
+   constants__t_CertThumbprint_i * const session_core_2__p_certTb,
+   constants__t_SessionName_i * const session_core_2__p_sessionName);
 extern void session_core_2__reset_server_session_preferred_locales(
    const constants__t_session_i session_core_2__p_session,
    constants__t_LocaleIds_i * const session_core_2__p_localeIds);
@@ -149,6 +154,9 @@ extern void session_core_2__set_server_session_client_app_desc(
 extern void session_core_2__set_server_session_client_cert_tb(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_CertThumbprint_i session_core_2__p_cliCertTb);
+extern void session_core_2__set_server_session_name(
+   const constants__t_session_i session_core_2__p_session,
+   const constants__t_SessionName_i session_core_2__p_sessionName);
 extern void session_core_2__set_server_session_preferred_locales(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_LocaleIds_i session_core_2__p_localesIds);

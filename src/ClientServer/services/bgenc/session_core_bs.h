@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 19/02/2026 14:48:53
+ Date                 : 25/02/2026 11:31:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -114,6 +114,9 @@ extern void session_core_bs__drop_NonceClient(
    const constants__t_session_i session_core_bs__p_session);
 extern void session_core_bs__drop_user_server(
    const constants__t_session_i session_core_bs__p_session);
+extern void session_core_bs__gen_server_session_name(
+   const constants__t_session_i session_core_bs__session,
+   constants__t_SessionName_i * const session_core_bs__p_genSessionName);
 extern void session_core_bs__get_NonceClient(
    const constants__t_session_i session_core_bs__p_session,
    constants__t_Nonce_i * const session_core_bs__nonce);

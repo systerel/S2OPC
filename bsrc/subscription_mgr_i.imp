@@ -964,6 +964,7 @@ OPERATIONS
         l_user,
         l_client_app_desc,
         l_client_cert_tb,
+        l_session_name,
         l_valid_user_access,
         l_locales,
         l_nid,
@@ -1002,7 +1003,8 @@ OPERATIONS
                 l_client_app_desc <-- get_server_session_client_app_desc(l_session);
                 l_client_cert_tb <-- get_server_session_client_cert_tb(l_session);
                 /* Temporarily set the session context for the authorization callback */
-                set_app_call_context_session (l_session, l_client_app_desc, l_client_cert_tb, l_user);
+                l_session_name <-- get_server_session_name (l_session);
+                set_app_call_context_session (l_session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user);
                 // Check user access
                 l_valid_user_access <-- get_event_user_authorization(p_event, l_user, l_roles);
                 /* Clear the session context */
@@ -1053,6 +1055,7 @@ OPERATIONS
         l_user,
         l_client_app_desc,
         l_client_cert_tb,
+        l_session_name,
         l_valid_user_access,
         l_locales,
         l_nid,
@@ -1086,7 +1089,8 @@ OPERATIONS
                 l_client_app_desc <-- get_server_session_client_app_desc(l_session);
                 l_client_cert_tb <-- get_server_session_client_cert_tb(l_session);
                 /* Temporarily set the session context for the authorization callback */
-                set_app_call_context_session (l_session, l_client_app_desc, l_client_cert_tb, l_user);
+                l_session_name <-- get_server_session_name (l_session);
+                set_app_call_context_session (l_session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user);
                 /* TODO: when user access right property will be modifiable previous user right shall be
                 checked to notify a user access denied status when it is newly denied for the user
                 */

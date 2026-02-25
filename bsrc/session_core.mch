@@ -1016,6 +1016,16 @@ OPERATIONS
     END
     ;
 
+
+    p_sessionName <-- get_server_session_name(p_session) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : t_session
+    THEN
+        p_sessionName :: t_SessionName_i
+    END
+    ;
+
     p_has_channel_to_close, p_channel_to_close <-- find_channel_to_close =
     BEGIN
         p_has_channel_to_close,

@@ -324,6 +324,16 @@ void constants_bs__free_roles(const constants_bs__t_sessionRoles_i constants_bs_
     SOPC_SLinkedList_Delete(constants_bs__p_in);
 }
 
+void constants_bs__free_SessionName(const constants_bs__t_SessionName_i constants_bs__p_in)
+{
+    if (NULL != constants_bs__p_in)
+    {
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        SOPC_Free((char*) constants_bs__p_in);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+    }
+}
+
 void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in)
 {
     SOPC_ASSERT(constants_bs__c_LocaleIds_indet != constants_bs__p_in);

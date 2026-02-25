@@ -97,7 +97,8 @@ PROMOTES
     client_gen_activate_orphaned_session_internal_event,
     client_gen_activate_user_session_internal_event,
     get_server_session_client_app_desc,
-    get_server_session_client_cert_tb
+    get_server_session_client_cert_tb,
+    get_server_session_name
 
 INVARIANT
     s_session = dom(a_state)
@@ -183,11 +184,13 @@ OPERATIONS
     l_reset_server_client_create_session_info(p_session) =
     VAR
         l_cli_app_desc,
-        l_cli_cert_tb
+        l_cli_cert_tb,
+        l_sessionName
     IN
-        l_cli_app_desc, l_cli_cert_tb <-- reset_server_client_create_session_info(p_session);
+        l_cli_app_desc, l_cli_cert_tb, l_sessionName <-- reset_server_client_create_session_info(p_session);
         free_ApplicationDescription (l_cli_app_desc);
-        free_CertThumbprint (l_cli_cert_tb)
+        free_CertThumbprint (l_cli_cert_tb);
+        free_SessionName (l_sessionName)
     END
     ;
 
@@ -344,8 +347,10 @@ OPERATIONS
     END
     ;
 
-    set_server_client_create_session_info (p_session, p_cliAppDesc, p_cliCertTb) =
-    BEGIN
+    set_server_client_create_session_info (p_session, p_cliAppDesc, p_cliCertTb, p_sessionName) =
+    VAR
+        l_sessionName
+    IN
         IF p_cliAppDesc /= c_ApplicationDescription_indet
         THEN
             set_server_session_client_app_desc (p_session, p_cliAppDesc)
@@ -354,6 +359,18 @@ OPERATIONS
         IF p_cliCertTb /= c_CertThumbprint_indet
         THEN
             set_server_session_client_cert_tb (p_session, p_cliCertTb)
+        END
+        ;
+        IF p_sessionName /= c_SessionName_indet
+        THEN
+            l_sessionName := p_sessionName
+        ELSE
+            l_sessionName <-- gen_server_session_name (p_session)
+        END
+        ;
+        IF l_sessionName /= c_SessionName_indet
+        THEN
+            set_server_session_name(p_session, l_sessionName)
         END
     END
     ;

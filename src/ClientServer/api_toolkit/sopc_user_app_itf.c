@@ -218,6 +218,15 @@ SOPC_SessionId SOPC_CallContext_GetSessionId(const SOPC_CallContext* callContext
     return callContextPtr->sessionId;
 }
 
+const char* SOPC_CallContext_GetSessionName(const SOPC_CallContext* callContextPtr)
+{
+    if (NULL == callContextPtr)
+    {
+        return NULL;
+    }
+    return callContextPtr->sessionName;
+}
+
 const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr)
 {
     if (NULL == callContextPtr)

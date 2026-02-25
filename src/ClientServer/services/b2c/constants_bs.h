@@ -102,6 +102,7 @@ typedef SOPC_Variant* constants_bs__t_RolePermissionTypes_i;
 typedef SOPC_ServerCapabilities_Internal constants_bs__t_ServerCapabilities;
 typedef SOPC_String* constants_bs__t_ServerUri;
 typedef SOPC_String* constants_bs__t_ServerUris;
+typedef char* constants_bs__t_SessionName_i;
 typedef OpcUa_SignatureData* constants_bs__t_SignatureData_i;
 typedef SOPC_Value_Timestamp constants_bs__t_Timestamp;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
@@ -225,6 +226,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Server_Namespaces_NodeId;
 #endif
 extern const constants_bs__t_NodeId_i constants_bs__c_Server_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_Server_ServerCapabilities_RoleSet_NodeId;
+#define constants_bs__c_SessionName_indet NULL
 #define constants_bs__c_SignatureData_indet NULL
 #define constants_bs__c_Timestamp_null \
     (SOPC_Value_Timestamp) { 0, 0 }
@@ -310,6 +312,7 @@ extern void constants_bs__free_ApplicationDescription(
 extern void constants_bs__free_CertThumbprint(const constants_bs__t_CertThumbprint_i constants_bs__p_in);
 extern void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in);
 extern void constants_bs__free_roles(const constants_bs__t_sessionRoles_i constants_bs__p_in);
+extern void constants_bs__free_SessionName(const constants_bs__t_SessionName_i constants_bs__p_in);
 extern void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in);
 extern void constants_bs__get_CurrentTimestamp(constants_bs__t_Timestamp* const constants_bs__p_currentTs);
 extern void constants_bs__get_NodeId_NamespaceIndex(const constants_bs__t_NodeId_i constants_bs__p_nodeId,

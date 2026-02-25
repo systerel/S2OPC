@@ -39,15 +39,17 @@ OPERATIONS
     END
     ;
 
+
     /* For now set on server service request on session treatment
      * IMPORTANT NOTE: each set_app_call_context_ should lead to a clear_app_call_context
      */
-    set_app_call_context_session(p_session, p_cliAppDesc, p_cliCertTb, p_user) =
+    set_app_call_context_session(p_session, p_cliAppDesc, p_cliCertTb, p_sessionName, p_user) =
     PRE
         p_session : t_session_i &
         p_session : t_session   &
         p_cliAppDesc : t_ApplicationDescription_i &
         p_cliCertTb  : t_CertThumbprint_i &
+        p_sessionName : t_SessionName_i &
         p_user    : t_user_i
     THEN
         skip

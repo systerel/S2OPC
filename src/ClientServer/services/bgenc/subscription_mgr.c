@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 02/03/2026 17:28:01
+ Date                 : 03/03/2026 16:13:03
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -356,6 +356,7 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_event_sele
       constants__t_user_i subscription_mgr__l_user;
       constants__t_ApplicationDescription_i subscription_mgr__l_client_app_desc;
       constants__t_CertThumbprint_i subscription_mgr__l_client_cert_tb;
+      constants__t_SessionName_i subscription_mgr__l_session_name;
       t_bool subscription_mgr__l_valid_user_access;
       constants__t_LocaleIds_i subscription_mgr__l_locales;
       constants__t_NodeId_i subscription_mgr__l_nid;
@@ -406,9 +407,12 @@ void subscription_mgr__local_create_notification_on_monitored_item_if_event_sele
             &subscription_mgr__l_client_app_desc);
          session_mgr__get_server_session_client_cert_tb(subscription_mgr__l_session,
             &subscription_mgr__l_client_cert_tb);
+         session_mgr__get_server_session_name(subscription_mgr__l_session,
+            &subscription_mgr__l_session_name);
          app_cb_call_context_bs__set_app_call_context_session(subscription_mgr__l_session,
             subscription_mgr__l_client_app_desc,
             subscription_mgr__l_client_cert_tb,
+            subscription_mgr__l_session_name,
             subscription_mgr__l_user);
          subscription_core__get_event_user_authorization(subscription_mgr__p_event,
             subscription_mgr__l_user,
@@ -473,6 +477,7 @@ void subscription_mgr__local_create_notification_on_monitored_items_if_data_chan
       constants__t_user_i subscription_mgr__l_user;
       constants__t_ApplicationDescription_i subscription_mgr__l_client_app_desc;
       constants__t_CertThumbprint_i subscription_mgr__l_client_cert_tb;
+      constants__t_SessionName_i subscription_mgr__l_session_name;
       t_bool subscription_mgr__l_valid_user_access;
       constants__t_LocaleIds_i subscription_mgr__l_locales;
       constants__t_NodeId_i subscription_mgr__l_nid;
@@ -509,9 +514,12 @@ void subscription_mgr__local_create_notification_on_monitored_items_if_data_chan
                &subscription_mgr__l_client_app_desc);
             session_mgr__get_server_session_client_cert_tb(subscription_mgr__l_session,
                &subscription_mgr__l_client_cert_tb);
+            session_mgr__get_server_session_name(subscription_mgr__l_session,
+               &subscription_mgr__l_session_name);
             app_cb_call_context_bs__set_app_call_context_session(subscription_mgr__l_session,
                subscription_mgr__l_client_app_desc,
                subscription_mgr__l_client_cert_tb,
+               subscription_mgr__l_session_name,
                subscription_mgr__l_user);
             session_mgr__get_session_roles(subscription_mgr__l_session,
                &subscription_mgr__l_roles);

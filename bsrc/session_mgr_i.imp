@@ -48,6 +48,7 @@ PROMOTES
     get_server_session_preferred_locales,
     get_server_session_client_app_desc,
     get_server_session_client_cert_tb,
+    get_server_session_name,
     find_channel_to_close,
     getall_valid_session_channel,
     allocate_x509_token_from_user,
@@ -530,7 +531,8 @@ OPERATIONS
         l_user,
         l_user_token_signature,
         l_client_app_desc,
-        l_client_cert_tb
+        l_client_cert_tb,
+        l_session_name
     IN
         l_user := c_user_indet;
         security_failed := FALSE; /* Only evaluated in case of user authentication attempt */
@@ -569,7 +571,8 @@ OPERATIONS
                     ;
                     l_client_app_desc <-- get_server_session_client_app_desc (session);
                     l_client_cert_tb <-- get_server_session_client_cert_tb (session);
-                    set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_user)
+                    l_session_name <-- get_server_session_name (session);
+                    set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user)
                 ELSIF l_has_user_token_policy_available = FALSE
                 THEN
                     service_ret := e_sc_bad_service_unsupported
@@ -619,7 +622,8 @@ OPERATIONS
                     ;
                     l_client_app_desc <-- get_server_session_client_app_desc (session);
                     l_client_cert_tb <-- get_server_session_client_cert_tb (session);
-                    set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_user)
+                    l_session_name <-- get_server_session_name (session);
+                    set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user)
                 ELSE
                     // session token was not correct
                     service_ret := e_sc_bad_session_id_invalid
@@ -651,7 +655,8 @@ OPERATIONS
                         ;
                         l_client_app_desc <-- get_server_session_client_app_desc (session);
                         l_client_cert_tb <-- get_server_session_client_cert_tb (session);
-                        set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_user);
+                        l_session_name <-- get_server_session_name (session);
+                        set_app_call_context_session (session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user);
                         l_session_channel <-- get_session_channel (session);
                         IF l_session_channel = channel
                         THEN
@@ -752,7 +757,8 @@ OPERATIONS
         l_session_channel,
         l_user,
         l_client_app_desc,
-        l_client_cert_tb
+        l_client_cert_tb,
+        l_session_name
     IN
         l_session <-- server_get_session_from_token (session_token);
         l_valid_session <-- is_valid_session (l_session);
@@ -773,7 +779,8 @@ OPERATIONS
                     l_client_app_desc <-- get_server_session_client_app_desc (l_session);
                     l_client_cert_tb <-- get_server_session_client_cert_tb (l_session);
                     l_user <-- get_session_user_server (l_session);
-                    set_app_call_context_session (l_session, l_client_app_desc, l_client_cert_tb, l_user);
+                    l_session_name <-- get_server_session_name (l_session);
+                    set_app_call_context_session (l_session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user);
                     server_session_timeout_msg_received (l_session)
                 END
             ELSE

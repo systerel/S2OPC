@@ -1244,6 +1244,24 @@ void session_core_bs__client_create_session_set_user_token_secu_properties(
     }
 }
 
+void session_core_bs__gen_server_session_name(const constants__t_session_i session_core_bs__session,
+                                              constants__t_SessionName_i* const session_core_bs__p_genSessionName)
+{
+    const size_t resultSize = strlen("S2OPC_Session_") + 10 + 1; // "S2OPC_Session_" + SessionId + '\0'
+    char* result = SOPC_Calloc(resultSize, sizeof(char*));
+    *session_core_bs__p_genSessionName = result;
+    if (result != NULL)
+    {
+        // Generate a Session name Session_<SessionId>
+        int res = snprintf(result, resultSize, "S2OPC_Session_%" PRIu32, session_core_bs__session);
+        if (res < 0)
+        {
+            SOPC_Free(result);
+            *session_core_bs__p_genSessionName = NULL;
+        }
+    }
+}
+
 void session_core_bs__get_NonceClient(const constants__t_session_i session_core_bs__p_session,
                                       constants__t_Nonce_i* const session_core_bs__nonce)
 {

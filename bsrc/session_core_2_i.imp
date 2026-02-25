@@ -43,7 +43,8 @@ CONCRETE_VARIABLES
     a_server_user_auth_attempts_i,
     a_server_client_locales_i,
     a_server_client_app_desc_i,
-    a_server_client_cert_tb_i
+    a_server_client_cert_tb_i,
+    a_server_session_name_i
 
 INVARIANT
     a_session_roles_i      : t_session_i --> t_sessionRoles_i                        &
@@ -61,6 +62,7 @@ INVARIANT
     a_server_client_locales_i : t_session_i --> t_LocaleIds_i                        &
     a_server_client_app_desc_i : t_session_i --> t_ApplicationDescription_i          &
     a_server_client_cert_tb_i  : t_session_i --> t_CertThumbprint_i                  &
+    a_server_session_name_i    : t_session_i --> t_SessionName_i                     &
     a_state             <: a_state_i                                                 &
     a_state              = a_state_i |>> {e_session_closed}                          &
     a_session_roles      = t_session <| a_session_roles_i |> t_sessionRoles          &
@@ -72,7 +74,8 @@ INVARIANT
     a_server_user_auth_attempts <: t_session <| a_server_user_auth_attempts_i         &
     a_server_client_locales <: t_session <| a_server_client_locales_i                 &
     a_server_client_app_desc = t_session <| a_server_client_app_desc_i |> t_ApplicationDescription &
-    a_server_client_cert_tb = t_session <| a_server_client_cert_tb_i |> t_CertThumbprint
+    a_server_client_cert_tb = t_session <| a_server_client_cert_tb_i |> t_CertThumbprint &
+    a_server_session_name = t_session <| a_server_session_name_i |> t_SessionName
 
 INITIALISATION
     a_session_roles_i := t_session_i * {c_sessionRoles_indet};
@@ -87,7 +90,8 @@ INITIALISATION
     a_server_user_auth_attempts_i := t_session_i * {0};
     a_server_client_locales_i := t_session_i * {c_LocaleIds_empty};
     a_server_client_app_desc_i := t_session_i * {c_ApplicationDescription_indet};
-    a_server_client_cert_tb_i := t_session_i * {c_CertThumbprint_indet}
+    a_server_client_cert_tb_i := t_session_i * {c_CertThumbprint_indet};
+    a_server_session_name_i := t_session_i * {c_SessionName_indet}
 
 OPERATIONS
 
@@ -288,6 +292,18 @@ OPERATIONS
     END
     ;
 
+    set_server_session_name(p_session, p_sessionName) =
+    BEGIN
+        a_server_session_name_i(p_session) := p_sessionName
+    END
+    ;
+
+    p_sessionName <-- get_server_session_name(p_session) =
+    BEGIN
+        p_sessionName := a_server_session_name_i(p_session)
+    END
+    ;
+
     p_roles <-- reset_server_session_roles(p_session) =
     VAR
         l_old_roles
@@ -314,12 +330,14 @@ OPERATIONS
     END
     ;
 
-    p_cliAppDesc, p_certTb <-- reset_server_client_create_session_info(p_session) =
+    p_cliAppDesc, p_certTb, p_sessionName <-- reset_server_client_create_session_info(p_session) =
     BEGIN
         p_cliAppDesc := a_server_client_app_desc_i(p_session);
         a_server_client_app_desc_i(p_session) := c_ApplicationDescription_indet;
         p_certTb := a_server_client_cert_tb_i(p_session);
-        a_server_client_cert_tb_i(p_session) := c_CertThumbprint_indet
+        a_server_client_cert_tb_i(p_session) := c_CertThumbprint_indet;
+        p_sessionName := a_server_session_name_i(p_session);
+        a_server_session_name_i(p_session) := c_SessionName_indet
     END
     ;
 

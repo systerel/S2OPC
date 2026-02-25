@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 03/03/2026 16:36:38
+ Date                 : 03/03/2026 16:43:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -287,6 +287,7 @@ void session_core__l_server_write_create_session_resp(
       t_bool session_core__l_set_cert;
       constants__t_ApplicationDescription_i session_core__l_cli_app_desc;
       constants__t_CertThumbprint_i session_core__l_cli_cert_tb;
+      constants__t_SessionName_i session_core__l_session_name;
       t_bool session_core__l_bret;
       
       session_core__l_set_cert = false;
@@ -358,9 +359,12 @@ void session_core__l_server_write_create_session_resp(
                   &session_core__l_cli_app_desc);
                msg_session_bs__get_create_session_req_client_certificate_tb(session_core__create_req_msg,
                   &session_core__l_cli_cert_tb);
+               msg_session_bs__get_creates_session_req_session_name(session_core__create_req_msg,
+                  &session_core__l_session_name);
                session_core_1__set_server_client_create_session_info(session_core__p_session,
                   session_core__l_cli_app_desc,
-                  session_core__l_cli_cert_tb);
+                  session_core__l_cli_cert_tb,
+                  session_core__l_session_name);
             }
             if (session_core__l_bret == false) {
                *session_core__p_service_ret = constants_statuscodes_bs__e_sc_bad_unexpected_error;
@@ -860,6 +864,7 @@ void session_core__l_server_secure_channel_lost_session_sm(
       constants__t_sessionState_i session_core__l_state;
       constants__t_ApplicationDescription_i session_core__l_client_app_desc;
       constants__t_CertThumbprint_i session_core__l_client_cert_tb;
+      constants__t_SessionName_i session_core__l_session_name;
       constants__t_user_i session_core__l_user;
       
       session_core_1__get_session_state(session_core__p_session,
@@ -872,11 +877,14 @@ void session_core__l_server_secure_channel_lost_session_sm(
             &session_core__l_client_app_desc);
          session_core_1__get_server_session_client_cert_tb(session_core__p_session,
             &session_core__l_client_cert_tb);
+         session_core_1__get_server_session_name(session_core__p_session,
+            &session_core__l_session_name);
          session_core_1__get_session_user_server(session_core__p_session,
             &session_core__l_user);
          app_cb_call_context_bs__set_app_call_context_session(session_core__p_session,
             session_core__l_client_app_desc,
             session_core__l_client_cert_tb,
+            session_core__l_session_name,
             session_core__l_user);
          session_audit_bs__server_notify_session_inactive(session_core__p_session,
             constants_statuscodes_bs__e_sc_bad_secure_channel_closed);

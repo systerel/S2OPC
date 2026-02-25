@@ -36,6 +36,7 @@ struct SOPC_CallContext
     char* clientPeerInfo;
     const OpcUa_ApplicationDescription* clientAppDescription;
     char* clientCertThumbprint;
+    char* sessionName;
     SOPC_SessionId sessionId;
     const SOPC_User* user;
 

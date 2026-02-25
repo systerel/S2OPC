@@ -82,11 +82,13 @@ void app_cb_call_context_bs__set_app_call_context_session(
     const constants__t_session_i app_cb_call_context_bs__p_session,
     const constants__t_ApplicationDescription_i app_cb_call_context_bs__p_cliAppDesc,
     const constants__t_CertThumbprint_i app_cb_call_context_bs__p_cliCertTb,
+    const constants__t_SessionName_i app_cb_call_context_bs__p_sessionName,
     const constants__t_user_i app_cb_call_context_bs__p_user)
 {
     currentCtx.sessionId = app_cb_call_context_bs__p_session;
     currentCtx.clientAppDescription = app_cb_call_context_bs__p_cliAppDesc;
     currentCtx.clientCertThumbprint = app_cb_call_context_bs__p_cliCertTb;
+    currentCtx.sessionName = app_cb_call_context_bs__p_sessionName;
     if (NULL != app_cb_call_context_bs__p_user)
     {
         currentCtx.user = SOPC_UserWithAuthorization_GetUser(app_cb_call_context_bs__p_user);
@@ -145,6 +147,7 @@ SOPC_CallContextCopy* SOPC_CallContext_CreateCurrentCopy(void)
                     SOPC_EncodeableObject_Delete(&OpcUa_ApplicationDescription_EncodeableType, (void**) &appDescCopy);
                 }
                 copy->clientCertThumbprint = SOPC_strdup(currentCtx.clientCertThumbprint);
+                copy->sessionName = SOPC_strdup(currentCtx.sessionName);
                 copy->user = SOPC_User_Copy(currentCtx.user);
                 // Duplicate content for currentCopyCtx
                 *freshCurrentCopy = *copy;
@@ -186,10 +189,11 @@ void SOPC_CallContext_FreeCopy(SOPC_CallContextCopy* cc)
             SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             SOPC_Free(cc->refCopyCount);
             SOPC_Free((char*) cc->secuPolicyUri);
-            SOPC_Free((char*) cc->clientPeerInfo);
+            SOPC_Free(cc->clientPeerInfo);
             SOPC_EncodeableObject_Delete(&OpcUa_ApplicationDescription_EncodeableType,
                                          (void**) &cc->clientAppDescription);
-            SOPC_Free((char*) cc->clientCertThumbprint);
+            SOPC_Free(cc->clientCertThumbprint);
+            SOPC_Free(cc->sessionName);
             SOPC_User_Free((SOPC_User**) &cc->user);
             SOPC_GCC_DIAGNOSTIC_RESTORE
         }

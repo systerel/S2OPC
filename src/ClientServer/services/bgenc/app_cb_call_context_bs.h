@@ -21,7 +21,7 @@
 
  File Name            : app_cb_call_context_bs.h
 
- Date                 : 28/10/2025 14:54:34
+ Date                 : 25/02/2026 11:31:46
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,6 +56,7 @@ extern void app_cb_call_context_bs__set_app_call_context_session(
    const constants__t_session_i app_cb_call_context_bs__p_session,
    const constants__t_ApplicationDescription_i app_cb_call_context_bs__p_cliAppDesc,
    const constants__t_CertThumbprint_i app_cb_call_context_bs__p_cliCertTb,
+   const constants__t_SessionName_i app_cb_call_context_bs__p_sessionName,
    const constants__t_user_i app_cb_call_context_bs__p_user);
 
 #endif

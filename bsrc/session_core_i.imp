@@ -68,6 +68,7 @@ PROMOTES
     get_server_session_preferred_locales,
     get_server_session_client_app_desc,
     get_server_session_client_cert_tb,
+    get_server_session_name,
     deallocate_user,
     get_local_user,
     has_user_token_policy_available,
@@ -790,6 +791,7 @@ OPERATIONS
         l_set_cert,
         l_cli_app_desc,
         l_cli_cert_tb,
+        l_session_name,
         l_bret
     IN
         l_set_cert := FALSE;
@@ -846,7 +848,8 @@ OPERATIONS
                 IF l_bret = TRUE THEN
                     l_cli_app_desc <-- get_create_session_req_client_desc_copy(create_req_msg);
                     l_cli_cert_tb <-- get_create_session_req_client_certificate_tb(create_req_msg);
-                    set_server_client_create_session_info (p_session, l_cli_app_desc, l_cli_cert_tb)
+                    l_session_name <-- get_creates_session_req_session_name(create_req_msg);
+                    set_server_client_create_session_info (p_session, l_cli_app_desc, l_cli_cert_tb, l_session_name)
                 END
                 ;
                 IF l_bret = FALSE THEN
@@ -1235,6 +1238,7 @@ OPERATIONS
         l_state,
         l_client_app_desc,
         l_client_cert_tb,
+        l_session_name,
         l_user
     IN
         l_state <-- get_session_state (p_session);
@@ -1244,8 +1248,9 @@ OPERATIONS
             set_session_state (p_session, e_session_scOrphaned);
             l_client_app_desc <-- get_server_session_client_app_desc (p_session);
             l_client_cert_tb <-- get_server_session_client_cert_tb (p_session);
+            l_session_name <-- get_server_session_name (p_session);
             l_user <-- get_session_user_server (p_session);
-            set_app_call_context_session (p_session, l_client_app_desc, l_client_cert_tb, l_user);
+            set_app_call_context_session (p_session, l_client_app_desc, l_client_cert_tb, l_session_name, l_user);
             server_notify_session_inactive (p_session, e_sc_bad_secure_channel_closed);
             clear_app_call_context
         ELSE

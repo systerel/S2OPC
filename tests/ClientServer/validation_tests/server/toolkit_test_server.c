@@ -1087,15 +1087,16 @@ static void Test_SessionEventCallback(const SOPC_CallContext* callCtxPtr,
     const char* peerInfo = SOPC_CallContext_GetClientIpPort(callCtxPtr);
     const OpcUa_ApplicationDescription* appDesc = SOPC_CallContext_GetClientApplicationDesc(callCtxPtr);
     const SOPC_User* user = SOPC_CallContext_GetUser(callCtxPtr);
+    const char* sessionName = SOPC_CallContext_GetSessionName(callCtxPtr);
 
-    printf("Session event %s for session id=%" PRIu32 " with status=0x%" PRIx32
+    printf("Session event %s for session name=%s id=%" PRIu32 " with status=0x%" PRIx32
            " and client %s using application %s with user %s\n",
            SESSION_CREATION == sessionEvent     ? "SESSION_CREATION"
            : SESSION_ACTIVATION == sessionEvent ? "SESSION_ACTIVATION"
            : SESSION_INACTIVE == sessionEvent   ? "SESSION_INACTIVE"
            : SESSION_CLOSURE == sessionEvent    ? "SESSION_CLOSURE"
                                                 : "INVALID SESSION STATE",
-           id, opStatus, NULL == peerInfo ? "???" : peerInfo,
+           sessionName, id, opStatus, NULL == peerInfo ? "???" : peerInfo,
            NULL == appDesc ? "???" : SOPC_String_GetRawCString(&appDesc->ApplicationName.defaultText),
            NULL == user ? "???" : SOPC_String_GetRawCString(SOPC_User_GetUsername(user)));
 }

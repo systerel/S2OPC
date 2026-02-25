@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 19/02/2026 14:48:36
+ Date                 : 25/02/2026 11:31:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -81,6 +81,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__get_channel_nb_sessions session_core_2__get_channel_nb_sessions
 #define session_core_1__get_server_session_client_app_desc session_core_2__get_server_session_client_app_desc
 #define session_core_1__get_server_session_client_cert_tb session_core_2__get_server_session_client_cert_tb
+#define session_core_1__get_server_session_name session_core_2__get_server_session_name
 #define session_core_1__get_server_session_preferred_locales session_core_2__get_server_session_preferred_locales
 #define session_core_1__get_session_app_context session_core_bs__get_session_app_context
 #define session_core_1__get_session_channel session_core_2__get_session_channel
@@ -157,7 +158,8 @@ extern void session_core_1__is_auto_close_session_active(
 extern void session_core_1__set_server_client_create_session_info(
    const constants__t_session_i session_core_1__p_session,
    const constants__t_ApplicationDescription_i session_core_1__p_cliAppDesc,
-   const constants__t_CertThumbprint_i session_core_1__p_cliCertTb);
+   const constants__t_CertThumbprint_i session_core_1__p_cliCertTb,
+   const constants__t_SessionName_i session_core_1__p_sessionName);
 extern void session_core_1__set_server_session_preferred_locales_or_indet(
    const constants__t_session_i session_core_1__p_session,
    const constants__t_LocaleIds_i session_core_1__p_localesIds);

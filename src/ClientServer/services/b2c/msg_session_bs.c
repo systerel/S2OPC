@@ -83,6 +83,21 @@ void msg_session_bs__get_create_session_req_client_desc_copy(
     }
 }
 
+void msg_session_bs__get_creates_session_req_session_name(
+    const constants__t_msg_i msg_session_bs__p_req_msg,
+    constants__t_SessionName_i* const msg_session_bs__p_sessionName)
+{
+    *msg_session_bs__p_sessionName = constants__c_SessionName_indet;
+    OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) msg_session_bs__p_req_msg;
+    if (pReq->SessionName.Length > 0)
+    {
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        *msg_session_bs__p_sessionName = (char*) SOPC_String_GetRawCString(&pReq->SessionName);
+        SOPC_String_Initialize(&pReq->SessionName);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+    }
+}
+
 void msg_session_bs__write_activate_msg_user(const constants__t_msg_i msg_session_bs__msg,
                                              const constants__t_user_token_i msg_session_bs__p_user_token)
 {

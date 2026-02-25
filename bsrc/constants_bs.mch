@@ -108,6 +108,7 @@ SETS
     t_MdnsDiscoveryConfig_i;
     t_RegisteredServer2Info_i;
     t_DataTypeDefinition_i;
+    t_SessionName_i;
     t_ServerUri;
     t_ServerUris;
     t_ServerCapabilities;
@@ -247,6 +248,7 @@ CONCRETE_CONSTANTS
     c_MdnsDiscoveryConfig_indet,
     c_RegisteredServer2Info_indet,
     c_DataTypeDefinition_indet,
+    c_SessionName_indet,
     c_ServerUri_empty,
     c_registerServer2_expiration_time
 
@@ -330,6 +332,7 @@ ABSTRACT_CONSTANTS
     t_MdnsDiscoveryConfig,
     t_RegisteredServer2Info,
     t_DataTypeDefinition,
+    t_SessionName,
 
     conv_AccessLevel_CurrentRead,
     conv_AccessLevel_HistRead,
@@ -850,6 +853,9 @@ PROPERTIES
     c_DataTypeDefinition_indet : t_DataTypeDefinition_i &
     t_DataTypeDefinition = t_DataTypeDefinition_i - {c_DataTypeDefinition_indet} &
 
+    c_SessionName_indet : t_SessionName_i &
+    t_SessionName = t_SessionName_i - {c_SessionName_indet} &
+
     c_ServerUri_empty : t_ServerUri &
 
     c_registerServer2_expiration_time : NAT &
@@ -1200,6 +1206,15 @@ OPERATIONS
     free_CertThumbprint(p_in) =
     PRE
         p_in : t_CertThumbprint_i
+    THEN
+        skip
+    END
+    ;
+
+
+    free_SessionName(p_in) =
+    PRE
+        p_in : t_SessionName_i
     THEN
         skip
     END

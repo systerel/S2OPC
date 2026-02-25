@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 01/12/2025 10:31:54
+ Date                 : 25/02/2026 11:31:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -91,12 +91,15 @@ void session_core_1__l_reset_server_client_create_session_info(
    {
       constants__t_ApplicationDescription_i session_core_1__l_cli_app_desc;
       constants__t_CertThumbprint_i session_core_1__l_cli_cert_tb;
+      constants__t_SessionName_i session_core_1__l_sessionName;
       
       session_core_2__reset_server_client_create_session_info(session_core_1__p_session,
          &session_core_1__l_cli_app_desc,
-         &session_core_1__l_cli_cert_tb);
+         &session_core_1__l_cli_cert_tb,
+         &session_core_1__l_sessionName);
       constants__free_ApplicationDescription(session_core_1__l_cli_app_desc);
       constants__free_CertThumbprint(session_core_1__l_cli_cert_tb);
+      constants__free_SessionName(session_core_1__l_sessionName);
    }
 }
 
@@ -254,14 +257,30 @@ void session_core_1__set_session_state_closed(
 void session_core_1__set_server_client_create_session_info(
    const constants__t_session_i session_core_1__p_session,
    const constants__t_ApplicationDescription_i session_core_1__p_cliAppDesc,
-   const constants__t_CertThumbprint_i session_core_1__p_cliCertTb) {
-   if (session_core_1__p_cliAppDesc != constants__c_ApplicationDescription_indet) {
-      session_core_2__set_server_session_client_app_desc(session_core_1__p_session,
-         session_core_1__p_cliAppDesc);
-   }
-   if (session_core_1__p_cliCertTb != constants__c_CertThumbprint_indet) {
-      session_core_2__set_server_session_client_cert_tb(session_core_1__p_session,
-         session_core_1__p_cliCertTb);
+   const constants__t_CertThumbprint_i session_core_1__p_cliCertTb,
+   const constants__t_SessionName_i session_core_1__p_sessionName) {
+   {
+      constants__t_SessionName_i session_core_1__l_sessionName;
+      
+      if (session_core_1__p_cliAppDesc != constants__c_ApplicationDescription_indet) {
+         session_core_2__set_server_session_client_app_desc(session_core_1__p_session,
+            session_core_1__p_cliAppDesc);
+      }
+      if (session_core_1__p_cliCertTb != constants__c_CertThumbprint_indet) {
+         session_core_2__set_server_session_client_cert_tb(session_core_1__p_session,
+            session_core_1__p_cliCertTb);
+      }
+      if (session_core_1__p_sessionName != constants__c_SessionName_indet) {
+         session_core_1__l_sessionName = session_core_1__p_sessionName;
+      }
+      else {
+         session_core_bs__gen_server_session_name(session_core_1__p_session,
+            &session_core_1__l_sessionName);
+      }
+      if (session_core_1__l_sessionName != constants__c_SessionName_indet) {
+         session_core_2__set_server_session_name(session_core_1__p_session,
+            session_core_1__l_sessionName);
+      }
    }
 }
 
