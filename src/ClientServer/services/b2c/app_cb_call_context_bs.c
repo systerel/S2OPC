@@ -42,8 +42,22 @@ void app_cb_call_context_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+
+static void SOPC_CallContext_FreeCurrent(void)
+{
+    // Only frees memory managed by the current context itself
+    // i.e. only the temporary user used for failed activation
+    if (NULL != currentCtx.failedActivationUserToken)
+    {
+        SOPC_ExtensionObject_Clear(currentCtx.failedActivationUserToken);
+        SOPC_Free(currentCtx.failedActivationUserToken);
+        currentCtx.failedActivationUserToken = NULL;
+    }
+}
+
 void app_cb_call_context_bs__clear_app_call_context(void)
 {
+    SOPC_CallContext_FreeCurrent();
     memset(&currentCtx, 0, sizeof(currentCtx));
     SOPC_CallContext_FreeCopy(currentCopyCtx);
     currentCopyCtx = NULL;
@@ -100,6 +114,20 @@ const SOPC_CallContext* SOPC_CallContext_GetCurrent(void)
     return &currentCtx;
 }
 
+void SOPC_CallContext_SetFailedActivationUserToken(SOPC_ExtensionObject* failedActivationUserToken)
+{
+    if (NULL != failedActivationUserToken && NULL == currentCtx.failedActivationUserToken)
+    {
+        currentCtx.failedActivationUserToken = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+        if (NULL != currentCtx.failedActivationUserToken)
+        {
+            *currentCtx.failedActivationUserToken = *failedActivationUserToken;
+            SOPC_ExtensionObject_Initialize(
+                failedActivationUserToken); // memory has been moved to current context, reset content in argument
+        }
+    }
+}
+
 SOPC_CallContextCopy* SOPC_CallContext_CreateCurrentCopy(void)
 {
     // Allocate new copy to return
@@ -149,6 +177,21 @@ SOPC_CallContextCopy* SOPC_CallContext_CreateCurrentCopy(void)
                 copy->clientCertThumbprint = SOPC_strdup(currentCtx.clientCertThumbprint);
                 copy->sessionName = SOPC_strdup(currentCtx.sessionName);
                 copy->user = SOPC_User_Copy(currentCtx.user);
+                if (NULL != currentCtx.failedActivationUserToken)
+                {
+                    copy->failedActivationUserToken = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+                    if (NULL != copy->failedActivationUserToken)
+                    {
+                        SOPC_ExtensionObject_Initialize(copy->failedActivationUserToken);
+                        status = SOPC_ExtensionObject_Copy(copy->failedActivationUserToken,
+                                                           currentCtx.failedActivationUserToken);
+                        if (SOPC_STATUS_OK != status)
+                        {
+                            SOPC_Free(copy->failedActivationUserToken);
+                            copy->failedActivationUserToken = NULL;
+                        }
+                    }
+                }
                 // Duplicate content for currentCopyCtx
                 *freshCurrentCopy = *copy;
                 currentCopyCtx = freshCurrentCopy;
@@ -195,6 +238,8 @@ void SOPC_CallContext_FreeCopy(SOPC_CallContextCopy* cc)
             SOPC_Free(cc->clientCertThumbprint);
             SOPC_Free(cc->sessionName);
             SOPC_User_Free((SOPC_User**) &cc->user);
+            SOPC_ExtensionObject_Clear(cc->failedActivationUserToken);
+            SOPC_Free(cc->failedActivationUserToken);
             SOPC_GCC_DIAGNOSTIC_RESTORE
         }
         SOPC_Free(cc);

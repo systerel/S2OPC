@@ -53,6 +53,9 @@ const char* SOPC_CallContext_GetSessionName(const SOPC_CallContext* callContextP
 /** \brief Returns the user that called the service */
 const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr);
 
+/** \brief Returns the activation user token that was used to call the service when activation failed */
+const SOPC_ExtensionObject* SOPC_CallContext_GetFailedActivationUserToken(const SOPC_CallContext* callContextPtr);
+
 /** \brief Returns the (read-only) security mode of the connection used to call the service */
 OpcUa_MessageSecurityMode SOPC_CallContext_GetSecurityMode(const SOPC_CallContext* callContextPtr);
 
@@ -69,7 +72,7 @@ const OpcUa_ApplicationDescription* SOPC_CallContext_GetClientApplicationDesc(co
 /** \brief Returns the (read-only) client certificate thumbprint of the connection used to call the service */
 const char* SOPC_CallContext_GetClientCertThumbprint(const SOPC_CallContext* callContextPtr);
 
-/** \brief Returns the (read-only) client <IP/HOTSNAME>:<port> of the connection used to call the service
+/** \brief Returns the (read-only) client "<IP/HOSTNAME>:<port>" of the connection used to call the service
  *         if available, NULL otherwise.
  *
  *  \note ::SOPC_Helper_URI_SplitUri might be used to split the returned string into separated IP/HOSTNAME and port.

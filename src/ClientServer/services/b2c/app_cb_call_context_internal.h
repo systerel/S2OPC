@@ -39,6 +39,7 @@ struct SOPC_CallContext
     char* sessionName;
     SOPC_SessionId sessionId;
     const SOPC_User* user;
+    SOPC_ExtensionObject* failedActivationUserToken;
 
     /* Specific use of call context that is never copied (in ::SOPC_CallContext_CreateCurrentCopy) */
     SOPC_AddressSpaceAccess* addressSpaceForMethodCall;
@@ -48,6 +49,8 @@ struct SOPC_CallContext
 typedef SOPC_CallContext SOPC_CallContextCopy;
 
 const SOPC_CallContext* SOPC_CallContext_GetCurrent(void);
+
+void SOPC_CallContext_SetFailedActivationUserToken(SOPC_ExtensionObject* failedActivationUserToken);
 
 /*
  * It shall be used only when call context is used asynchronously and or when specific context content is added.

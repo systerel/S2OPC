@@ -141,7 +141,13 @@ static void common_server_notify_session_activate(
     const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
 {
     SOPC_UNUSED_ARG(session_audit_bs__p_channel_config);
-    SOPC_UNUSED_ARG(session_audit_bs__req_msg);
+    const OpcUa_ActivateSessionRequest* pReq = (const OpcUa_ActivateSessionRequest*) session_audit_bs__req_msg;
+    if (constants_statuscodes_bs__e_sc_ok != session_audit_bs__oper_ret_code)
+    {
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        SOPC_CallContext_SetFailedActivationUserToken((SOPC_ExtensionObject*) &pReq->UserIdentityToken);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+    }
     server_session_event_notif(session_audit_bs__session, constants__e_session_userActivated,
                                session_audit_bs__oper_ret_code);
 }
@@ -553,21 +559,25 @@ void session_audit_bs__server_notify_session_activate(
     const constants__t_session_i session_audit_bs__session,
     const constants_statuscodes_bs__t_StatusCode_i session_audit_bs__oper_ret_code)
 {
-    // Generate session event that will borrow the userIdentityToken (moved into CallContext)
-    common_server_notify_session_activate(session_audit_bs__p_channel_config, session_audit_bs__req_msg,
-                                          session_audit_bs__session, session_audit_bs__oper_ret_code);
-
     // Retrieve Session contexts
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_Event* event = prepare_session_event(&auditActivateSessionEvent_Type);
 
     // Note: sessionId can be NULL!
-    if (NULL == session_audit_bs__req_msg || NULL == pConfig || NULL == event)
+    if (NULL == pConfig || NULL == event)
     {
+        common_server_notify_session_activate(session_audit_bs__p_channel_config, session_audit_bs__req_msg,
+                                              session_audit_bs__session, session_audit_bs__oper_ret_code);
         return;
-    }
-
+    } // otherwise first copy the user identity token for audit prior to moving it to CallContext for session event
     const OpcUa_ActivateSessionRequest* pReq = (const OpcUa_ActivateSessionRequest*) session_audit_bs__req_msg;
+    char* clientUserId = getClientUserIdFromUserToken(&pReq->UserIdentityToken);
+    // UserIdentityToken : UserIdentityToken
+    set_UserIdentityToken(event, &pReq->UserIdentityToken);
+
+    // Generate session event that will borrow the userIdentityToken (moved into CallContext)
+    common_server_notify_session_activate(session_audit_bs__p_channel_config, session_audit_bs__req_msg,
+                                          session_audit_bs__session, session_audit_bs__oper_ret_code);
 
     SOPC_StatusCode statusRet;
     util_status_code__B_to_C(session_audit_bs__oper_ret_code, &statusRet);
@@ -578,7 +588,6 @@ void session_audit_bs__server_notify_session_activate(
     const char* message = (isOk ? "Activate session successful" : "Activate session failed");
     const uint16_t severity =
         (isOk ? SOPC_AUDIT_SEVERITY_ACTIVATE_SESSION_SUCCESS : SOPC_AUDIT_SEVERITY_ACTIVATE_SESSION_FAILURE);
-    char* clientUserId = getClientUserIdFromUserToken(&pReq->UserIdentityToken);
     const SOPC_NodeId* sessionId = get_SessionNid(session_audit_bs__session);
 
     SOPC_EventsHelpers_SetBaseEventType(event, "Session/ActivateSession", message, severity);
@@ -597,9 +606,6 @@ void session_audit_bs__server_notify_session_activate(
     // ClientSoftwareCertificates : SignedSoftwareCertificate[]
     copy_SignedSoftwareCertificates(event, "0:ClientSoftwareCertificates", pReq->NoOfClientSoftwareCertificates,
                                     pReq->ClientSoftwareCertificates);
-
-    // UserIdentityToken : UserIdentityToken
-    set_UserIdentityToken(event, &pReq->UserIdentityToken);
 
     // SecureChannelId : String
     SOPC_SecureChannel_Config* scConfigPtr =

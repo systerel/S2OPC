@@ -236,6 +236,15 @@ const SOPC_User* SOPC_CallContext_GetUser(const SOPC_CallContext* callContextPtr
     return callContextPtr->user;
 }
 
+const SOPC_ExtensionObject* SOPC_CallContext_GetFailedActivationUserToken(const SOPC_CallContext* callContextPtr)
+{
+    if (NULL == callContextPtr)
+    {
+        return NULL;
+    }
+    return callContextPtr->failedActivationUserToken;
+}
+
 OpcUa_MessageSecurityMode SOPC_CallContext_GetSecurityMode(const SOPC_CallContext* callContextPtr)
 {
     if (NULL == callContextPtr)

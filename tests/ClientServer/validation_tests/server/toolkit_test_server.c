@@ -1079,6 +1079,56 @@ static SOPC_StatusCode Test_OverwriteClientRequestCallback(const SOPC_CallContex
     return SOPC_GoodGenericStatus;
 }
 
+static char* getSubjectName(int32_t certLen, SOPC_Byte* certData)
+{
+    if (certLen <= 0 || NULL == certData)
+    {
+        return NULL;
+    }
+    char* result = NULL;
+    SOPC_CertificateList* pCrtUser = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(certData, (uint32_t) certLen, &pCrtUser);
+    if (SOPC_STATUS_OK == status)
+    {
+        uint32_t len;
+        char* subject = NULL;
+        status = SOPC_KeyManager_Certificate_GetSubjectName(pCrtUser, &subject, &len);
+        if (SOPC_STATUS_OK == status)
+        {
+            result = subject;
+            subject = NULL;
+        }
+        SOPC_Free(subject);
+    }
+    SOPC_KeyManager_Certificate_Free(pCrtUser);
+    return result;
+}
+
+static char* getClientUserIdFromUserToken(const SOPC_ExtensionObject* token)
+{
+    if (NULL == token)
+    {
+        return NULL;
+    }
+
+    char* result = NULL;
+
+    if (SOPC_ExtObjBodyEncoding_Object == token->Encoding &&
+        &OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
+    {
+        OpcUa_UserNameIdentityToken* userToken = (OpcUa_UserNameIdentityToken*) (token->Body.Object.Value);
+        result = SOPC_String_GetCString(&userToken->UserName);
+    }
+    else if (SOPC_ExtObjBodyEncoding_Object == token->Encoding &&
+             &OpcUa_X509IdentityToken_EncodeableType == token->Body.Object.ObjType)
+    {
+        OpcUa_X509IdentityToken* pX509Token = (OpcUa_X509IdentityToken*) (token->Body.Object.Value);
+        result = getSubjectName(pX509Token->CertificateData.Length, pX509Token->CertificateData.Data);
+    }
+
+    return result;
+}
+
 static void Test_SessionEventCallback(const SOPC_CallContext* callCtxPtr,
                                       SOPC_ServerSessionEvent sessionEvent,
                                       SOPC_SessionId id,
@@ -1088,6 +1138,7 @@ static void Test_SessionEventCallback(const SOPC_CallContext* callCtxPtr,
     const OpcUa_ApplicationDescription* appDesc = SOPC_CallContext_GetClientApplicationDesc(callCtxPtr);
     const SOPC_User* user = SOPC_CallContext_GetUser(callCtxPtr);
     const char* sessionName = SOPC_CallContext_GetSessionName(callCtxPtr);
+    char* failedUserId = getClientUserIdFromUserToken(SOPC_CallContext_GetFailedActivationUserToken(callCtxPtr));
 
     printf("Session event %s for session name=%s id=%" PRIu32 " with status=0x%" PRIx32
            " and client %s using application %s with user %s\n",
@@ -1098,7 +1149,10 @@ static void Test_SessionEventCallback(const SOPC_CallContext* callCtxPtr,
                                                 : "INVALID SESSION STATE",
            sessionName, id, opStatus, NULL == peerInfo ? "???" : peerInfo,
            NULL == appDesc ? "???" : SOPC_String_GetRawCString(&appDesc->ApplicationName.defaultText),
-           NULL == user ? "???" : SOPC_String_GetRawCString(SOPC_User_GetUsername(user)));
+           NULL != user           ? SOPC_String_GetRawCString(SOPC_User_GetUsername(user))
+           : NULL != failedUserId ? failedUserId
+                                  : "???");
+    SOPC_Free(failedUserId);
 }
 
 /*---------------------------------------------------------------------------
