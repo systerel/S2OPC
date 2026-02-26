@@ -58,6 +58,26 @@ static const SOPC_QualifiedName TestObject_Counter_BrowseName = SOPC_QUALIFIED_N
 
 static const SOPC_QualifiedName TestObject_BrowseName = SOPC_QUALIFIED_NAME(0, "TestObject");
 
+SOPC_StatusCode SOPC_Method_Func_CloseSessions(const SOPC_CallContext* callContextPtr,
+                                               const SOPC_NodeId* objectId,
+                                               uint32_t nbInputArgs,
+                                               const SOPC_Variant* inputArgs,
+                                               uint32_t* nbOutputArgs,
+                                               SOPC_Variant** outputArgs,
+                                               void* param)
+{
+    SOPC_UNUSED_ARG(objectId);
+    SOPC_UNUSED_ARG(nbInputArgs);
+    SOPC_UNUSED_ARG(inputArgs);
+    SOPC_UNUSED_ARG(nbOutputArgs);
+    SOPC_UNUSED_ARG(outputArgs);
+    SOPC_UNUSED_ARG(param);
+
+    uint32_t sessionId = SOPC_CallContext_GetSessionId(callContextPtr);
+    SOPC_ServerHelper_CloseSessions(sessionId);
+    return SOPC_GoodGenericStatus;
+}
+
 SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextPtr,
                                             const SOPC_NodeId* objectId,
                                             uint32_t nbInputArgs,
@@ -903,19 +923,36 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     }
 
     /* Add methods implementation in the method call manager used */
-    /* No input, no output */
-    sNodeId = "ns=1;s=MethodNoArg";
+    /* Close sessions */
+    sNodeId = "ns=1;s=MethodCloseSessions";
     methodId = SOPC_NodeId_FromCString(sNodeId);
     if (NULL != methodId)
     {
-        methodFunc = &SOPC_Method_Func_IncCounter;
-        status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, no output", NULL);
+        methodFunc = &SOPC_Method_Func_CloseSessions;
+        status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "Close server sessions", NULL);
         SOPC_NodeId_Clear(methodId);
         SOPC_Free(methodId);
     }
     else
     {
         status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        /* No input, no output */
+        sNodeId = "ns=1;s=MethodNoArg";
+        methodId = SOPC_NodeId_FromCString(sNodeId);
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_IncCounter;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, no output", NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {

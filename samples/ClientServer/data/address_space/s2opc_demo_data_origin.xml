@@ -1973,6 +1973,13 @@
       <uax:UInt32>0</uax:UInt32>
     </Value>
   </UAVariable>
+  <UAMethod NodeId="ns=1;s=MethodCloseSessions" BrowseName="CloseOtherSessions" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>CloseOtherSessions</DisplayName>
+    <Description>CloseOtherSessions</Description>
+    <References>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
+    </References>
+  </UAMethod>
   <UAMethod NodeId="ns=1;s=MethodNoArg" BrowseName="MethodNoArg" ParentNodeId="ns=1;s=TestObject">
     <DisplayName>IncrementCounter</DisplayName>
     <Description>IncrementCounter</Description>

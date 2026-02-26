@@ -28,6 +28,15 @@
  *                    Demo Methods for Call service definition
  *---------------------------------------------------------------------------*/
 
+/* \brief Closes all server sessions except the current one */
+SOPC_StatusCode SOPC_Method_Func_CloseSessions(const SOPC_CallContext* callContextPtr,
+                                               const SOPC_NodeId* objectId,
+                                               uint32_t nbInputArgs,
+                                               const SOPC_Variant* inputArgs,
+                                               uint32_t* nbOutputArgs,
+                                               SOPC_Variant** outputArgs,
+                                               void* param);
+
 /* \brief Increments the AddressSpace Variable value "ns=1;s=TestObject_Counter" */
 SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextPtr,
                                             const SOPC_NodeId* objectId,
