@@ -45,7 +45,7 @@ cd ..
 # the coverage one
 ./.check-in-docker.sh "
 mkdir -p build.cov
-cd build.san
+cd build.cov
 CC=clang cmake -DENABLE_FUZZING=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_CLANG_SOURCE_COVERAGE=1 ..
 make -j$(nproc) fuzzers
 cd ..
@@ -302,7 +302,7 @@ Once the command completes, open the URL printed in the terminal in your browser
 ## Fetch the new corpus
 
 As the fuzzer explores new test case, it expands the input corpus.
-We can [get it](https://google.github.io/oss-fuzz/advanced-topics/corpora/).
+We can [get it](https://console.cloud.google.com/storage/browser/s2opc-backup.clusterfuzz-external.appspot.com/corpus/libFuzzer).
 It can then be merged to reduce its size, and added to our own corpus.
 It requires a Google account that is mentioned in our `project.yaml`.
 
