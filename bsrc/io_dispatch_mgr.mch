@@ -267,6 +267,14 @@ OPERATIONS
     END
     ;
 
+    server_close_sessions (exceptSession) =
+    PRE
+        exceptSession : t_session_i
+    THEN
+        skip
+    END
+    ;
+
     internal_client_create_session (session, channel_config_idx) =
     PRE
         session : t_session_i &

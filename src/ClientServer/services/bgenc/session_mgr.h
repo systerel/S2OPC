@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 09/03/2026 16:23:14
+ Date                 : 09/03/2026 16:29:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -77,6 +77,7 @@ extern void session_mgr__INITIALISATION(void);
 #define session_mgr__getall_valid_session_channel session_core__getall_valid_session_channel
 #define session_mgr__is_valid_session session_core__is_valid_session
 #define session_mgr__is_valid_user_x509_authentication session_core__is_valid_user_x509_authentication
+#define session_mgr__server_close_sessions session_core__server_close_sessions
 #define session_mgr__server_secure_channel_lost_session_sm session_core__server_secure_channel_lost_session_sm
 #define session_mgr__session_has_user_server session_core__session_has_user_server
 #define session_mgr__set_request_audit_info session_core__set_request_audit_info

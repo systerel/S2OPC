@@ -207,6 +207,10 @@ typedef enum SOPC_Services_Event
     APP_TO_SE_UNINITIALIZE_SERVICES, /**< Server and client sides:<BR/>
                                           Calls io_dispatch_mgr__UNINITIALISATION() function.
                                      */
+    APP_TO_SE_CLOSE_SERVER_SESSIONS, /**< Server side only:<BR/>
+                                          Requests to close all server sessions except the one provided (optional)<BR/>
+                                          id = session id of the session to keep open, or 0 to close all sessions.<BR/>
+                                      */
 } SOPC_Services_Event;
 
 /* API to enqueue an event for services */

@@ -447,6 +447,14 @@ OPERATIONS
     END
     ;
 
+    server_close_sessions (exceptSession) =
+    PRE
+        exceptSession : t_session_i
+    THEN
+        skip
+    END
+    ;
+
     ret <-- session_has_user_server(p_session) =
     PRE
         p_session : t_session_i &

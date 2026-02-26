@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 03/03/2026 16:43:02
+ Date                 : 03/03/2026 16:49:01
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -926,6 +926,36 @@ void session_core__server_secure_channel_lost_session_sm(
          }
       }
       session_audit_bs__clear_audit_info();
+   }
+}
+
+void session_core__server_close_sessions(
+   const constants__t_session_i session_core__exceptSession) {
+   {
+      t_bool session_core__l_continue;
+      constants__t_session_i session_core__l_session;
+      t_bool session_core__l_is_client_session;
+      t_bool session_core__l_valid_session;
+      
+      session_core_it__init_iter_session(&session_core__l_continue);
+      if (session_core__l_continue == true) {
+         while (session_core__l_continue == true) {
+            session_core_it__continue_iter_session(&session_core__l_continue,
+               &session_core__l_session);
+            session_core_1__is_client_session(session_core__l_session,
+               &session_core__l_is_client_session);
+            session_core_1__is_valid_session(session_core__l_session,
+               &session_core__l_valid_session);
+            if (((session_core__l_valid_session == true) &&
+               (session_core__l_session != session_core__exceptSession)) &&
+               (session_core__l_is_client_session == false)) {
+               session_audit_bs__server_notify_session_closed(session_core__l_session,
+                  constants_statuscodes_bs__e_sc_bad_session_closed);
+               session_core_1__set_session_state_closed(session_core__l_session,
+                  constants_statuscodes_bs__e_sc_bad_session_closed);
+            }
+         }
+      }
    }
 }
 

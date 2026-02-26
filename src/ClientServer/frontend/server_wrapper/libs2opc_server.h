@@ -240,4 +240,19 @@ SOPC_ReturnStatus SOPC_ServerHelper_TriggerEvent(const SOPC_NodeId* notifierNode
                                                  uint32_t optSubscriptionId,
                                                  uint32_t optMonitoredItemId);
 
+/**
+ * \brief Closes all server sessions except the one specified.
+ *        All other sessions opened by peer clients are closed by the server.
+ *
+ * \param exceptSessionId  Session Id of the session to keep open, or 0 to close all sessions.
+ *                         It might have been obtained during a method call with SOPC_CallContext_GetSessionId()
+ *                         or during session creation/activation with
+ *                         ::SESSION_CREATION/::SESSION_ACTIVATION notification events
+ *                         (see ::SOPC_ServerConfigHelper_SetSessionEventNotifCallback).
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_INVALID_STATE otherwise.
+ */
+SOPC_ReturnStatus SOPC_ServerHelper_CloseSessions(SOPC_SessionId exceptSessionId);
+
 #endif

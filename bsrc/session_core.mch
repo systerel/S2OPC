@@ -92,7 +92,16 @@ DEFINITIONS
     a_user_client        := {session} <<| a_user_client        || // If session had a user, remove this relation
     a_NonceServer        := {session} <<| a_NonceServer        || // If session had a server nonce, remove it
     a_NonceClient        := {session} <<| a_NonceClient        || // If session had a client nonce, remove it
-    a_session_roles      := {session} <<| a_session_roles         // If session had a role, remove this relation
+    a_session_roles      := {session} <<| a_session_roles;         // If session had a role, remove this relation
+
+    d_close_server_sessions (exceptSession) ==
+    s_session            := s_session /\ (s_client_session \/ {exceptSession})                     || // If session is not client or exceptSession remove it
+    a_state              := (s_session /\ (s_client_session \/ {exceptSession})) <| a_state        || // If sessions had a state, remove this relation
+    a_channel            := (s_session /\ (s_client_session \/ {exceptSession})) <| a_channel      || // If sessions had a channel, remove this relation
+    a_server_token       := a_server_token |> (s_session /\ {exceptSession})                       || // If sessions had a token, remove this relation
+    a_user_server        := (s_session /\ {exceptSession}) <| a_user_server                        || // If sessions had a user, remove this relation
+    a_NonceServer        := (s_session /\ (s_client_session \/ {exceptSession})) <| a_NonceServer  || // If sessions had a server nonce, remove it
+    a_session_roles      := (s_session /\ {exceptSession}) <| a_session_roles                         // If sessions had a role, remove this relation
 
 ABSTRACT_VARIABLES
     d_variables
@@ -629,6 +638,15 @@ OPERATIONS
             a_NonceClient                := inactive_sessions <<| a_NonceClient                                         ||
             a_session_roles              := inactive_sessions <<| a_session_roles
         END
+    END
+    ;
+
+
+    server_close_sessions (exceptSession) =
+    PRE
+        exceptSession : t_session_i
+    THEN
+        d_close_server_sessions (exceptSession)
     END
     ;
 

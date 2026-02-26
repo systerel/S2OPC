@@ -128,6 +128,16 @@ void SOPC_ToolkitServer_AsyncReEvalSecureChannels(bool ownCert);
  */
 void SOPC_ToolkitServer_AsyncReEvalUserCertSessions(void);
 
+/**
+ * \brief Closes all server sessions except the one provided (optional)
+ *
+ * \param exceptSessionId  Session Id of the session to keep open, or 0 to close all sessions.
+ *                         It might have been obtained during a method call with SOPC_CallContext_GetSessionId()
+ *                         or during session creation/activation with
+ *                         ::AS_SESSION_CREATION/::AS_SESSION_ACTIVATION event.
+ */
+void SOPC_ToolkitServer_AsyncCloseSessions(SOPC_SessionId exceptSessionId);
+
 typedef struct SOPC_EndpointConnectionCfg
 {
     SOPC_ReverseEndpointConfigIdx

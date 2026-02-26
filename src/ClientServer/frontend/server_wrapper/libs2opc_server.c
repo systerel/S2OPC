@@ -978,3 +978,13 @@ SOPC_ReturnStatus SOPC_ServerHelper_TriggerEvent(const SOPC_NodeId* notifierNode
 
     return status;
 }
+
+SOPC_ReturnStatus SOPC_ServerHelper_CloseSessions(SOPC_SessionId exceptSessionId)
+{
+    if (!SOPC_ServerInternal_IsStarted())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    SOPC_ToolkitServer_AsyncCloseSessions(exceptSessionId);
+    return SOPC_STATUS_OK;
+}

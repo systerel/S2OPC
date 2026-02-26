@@ -41,6 +41,7 @@ PROMOTES
     is_valid_session,
     client_secure_channel_lost_session_sm,
     server_secure_channel_lost_session_sm,
+    server_close_sessions,
     session_has_user_server,
     get_session_user_server,
     get_session_roles,

@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 03/03/2026 14:59:03
+ Date                 : 03/03/2026 16:20:07
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -63,6 +63,7 @@ extern void io_dispatch_mgr__INITIALISATION(void);
 #define io_dispatch_mgr__clear_server_configuration_context service_mgr__clear_server_configuration_context
 #define io_dispatch_mgr__internal_server_close_subscription service_mgr__internal_server_close_subscription
 #define io_dispatch_mgr__internal_server_inactive_session_prio_event service_mgr__internal_server_inactive_session_prio_event
+#define io_dispatch_mgr__server_close_sessions service_mgr__server_close_sessions
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

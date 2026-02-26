@@ -36,8 +36,8 @@ IMPORTS
 PROMOTES
     internal_server_inactive_session_prio_event,
     internal_server_close_subscription,
-    clear_server_configuration_context
-
+    clear_server_configuration_context,
+    server_close_sessions
 
 LOCAL_OPERATIONS
 

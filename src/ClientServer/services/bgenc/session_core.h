@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 25/02/2026 11:31:40
+ Date                 : 26/02/2026 14:58:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -237,6 +237,8 @@ extern void session_core__server_close_session_req_and_resp_sm(
 extern void session_core__server_close_session_sm(
    const constants__t_session_i session_core__session,
    const constants_statuscodes_bs__t_StatusCode_i session_core__sc_reason);
+extern void session_core__server_close_sessions(
+   const constants__t_session_i session_core__exceptSession);
 extern void session_core__server_create_session_req_and_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_msg_i session_core__create_req_msg,

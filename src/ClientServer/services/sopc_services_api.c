@@ -876,6 +876,10 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_UNINITIALIZE_SERVICES");
         io_dispatch_mgr__UNINITIALISATION();
         break;
+    case APP_TO_SE_CLOSE_SERVER_SESSIONS:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_CLOSE_SERVER_SESSIONS");
+        io_dispatch_mgr__server_close_sessions((SOPC_SessionId) id);
+        break;
     default:
         SOPC_ASSERT(false);
     }

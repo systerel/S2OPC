@@ -120,6 +120,18 @@ void SOPC_ToolkitServer_AsyncReEvalUserCertSessions(void)
     SOPC_Services_EnqueueEvent(APP_TO_SE_EVAL_USR_CRT_SESSIONS, 0, (uintptr_t) NULL, (uintptr_t) NULL);
 }
 
+void SOPC_ToolkitServer_AsyncCloseSessions(SOPC_SessionId exceptSessionId)
+{
+    if (!SOPC_ToolkitServer_IsConfigured())
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_ToolkitServer_AsyncCloseSessions: toolkit server is not configured");
+        return;
+    }
+
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SERVER_SESSIONS, exceptSessionId, 0, 0);
+}
+
 SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(SOPC_SecureChannelConfigIdx secureChannelConfigIdx)
 {
     SOPC_ASSERT(0 != secureChannelConfigIdx && "Invalid secure connection configuration index 0");

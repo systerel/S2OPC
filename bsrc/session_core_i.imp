@@ -1332,6 +1332,37 @@ OPERATIONS
     END
     ;
 
+    server_close_sessions (exceptSession) =
+    VAR
+        l_continue,
+        l_session,
+        l_is_client_session,
+        l_valid_session
+    IN
+        l_continue <-- init_iter_session;
+        IF  l_continue = TRUE THEN /* only for proving */
+            WHILE l_continue = TRUE DO
+                l_continue, l_session <-- continue_iter_session;
+                l_is_client_session <-- is_client_session(l_session);
+                l_valid_session <-- is_valid_session(l_session);
+                IF l_valid_session = TRUE & l_session /= exceptSession & l_is_client_session = FALSE
+                THEN
+                    /* may generate audit event */
+                    server_notify_session_closed(l_session, e_sc_bad_session_closed);
+                    set_session_state_closed (l_session, e_sc_bad_session_closed)
+                END
+            INVARIANT
+                sessions_to_iterate <: t_session &
+                sessions_iterated   <: t_session &
+                sessions_to_iterate /\ sessions_iterated = {} &
+                sessions_to_iterate \/ sessions_iterated = t_session
+            VARIANT
+                card(sessions_to_iterate)
+            END
+        END
+    END
+    ;
+
     ret, channel, session_token <-- client_close_session_req_sm (session, close_req_msg) =
     VAR
         l_is_connected_channel
