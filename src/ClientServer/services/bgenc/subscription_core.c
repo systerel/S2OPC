@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 02/03/2026 17:28:00
+ Date                 : 03/03/2026 16:24:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1945,6 +1945,17 @@ void subscription_core__allocate_new_session_publish_queue(
          subscription_core_1__set_session_publishRequestQueue(subscription_core__p_session,
             subscription_core__l_publishReqQueue);
       }
+   }
+}
+
+void subscription_core__clear_session_publish_queue(
+   const constants__t_session_i subscription_core__p_session) {
+   {
+      constants__t_publishReqQueue_i subscription_core__l_publish_queue;
+      
+      subscription_core_1__get_session_publishRequestQueue(subscription_core__p_session,
+         &subscription_core__l_publish_queue);
+      publish_request_queue_bs__clear_publish_queue(subscription_core__l_publish_queue);
    }
 }
 

@@ -2060,8 +2060,16 @@ OPERATIONS
             IF l_nb_sub /= 0
             THEN
                 /* SC is not valid anymore for the session
-                => clear PublishRequests: requests are not valid anymore on another SC */
-                deallocate_publish_queue_and_gen_no_sub_responses (p_session, FALSE)
+                    => clear PublishRequests: requests are not valid anymore on another SC */
+                IF p_newSessionState = e_session_closed
+                THEN
+                    /* Session closed, deallocate the queue as it will never be reused */
+                    deallocate_publish_queue_and_gen_no_sub_responses (p_session, FALSE)
+                ELSE
+                    /* Session not closed, only clear the queue as it can be reactivated */
+                    clear_session_publish_queue (p_session)
+                END
+
             END
             ;
             l_continue <-- init_iter_subscription_session (p_session);

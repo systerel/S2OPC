@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 03/03/2026 16:13:03
+ Date                 : 03/03/2026 16:24:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1687,8 +1687,13 @@ void subscription_mgr__server_subscription_session_inactive(
          subscription_core__get_card_session_seq_subscription(subscription_mgr__p_session,
             &subscription_mgr__l_nb_sub);
          if (subscription_mgr__l_nb_sub != 0) {
-            subscription_core__deallocate_publish_queue_and_gen_no_sub_responses(subscription_mgr__p_session,
-               false);
+            if (subscription_mgr__p_newSessionState == constants__e_session_closed) {
+               subscription_core__deallocate_publish_queue_and_gen_no_sub_responses(subscription_mgr__p_session,
+                  false);
+            }
+            else {
+               subscription_core__clear_session_publish_queue(subscription_mgr__p_session);
+            }
          }
          subscription_core__init_iter_subscription_session(subscription_mgr__p_session,
             &subscription_mgr__l_continue);

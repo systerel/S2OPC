@@ -2106,6 +2106,15 @@ OPERATIONS
     END
     ;
 
+    clear_session_publish_queue (p_session) =
+    VAR
+        l_publish_queue
+    IN
+        l_publish_queue <-- get_session_publishRequestQueue (p_session);
+        clear_publish_queue (l_publish_queue)
+    END
+    ;
+
     deallocate_publish_queue_and_gen_no_sub_responses (p_session, p_send_no_sub_resp) =
     VAR
         l_publish_queue,

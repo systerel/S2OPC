@@ -94,8 +94,9 @@ typedef enum SOPC_Services_Event
                                    */
 
     SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO, /**< Server side only:<BR/>
-                                                 Notifies that an activated session is not active anymore (closed or
-                                                 orphaned), used to update subscription state.<BR/>
+                                                 Notifies that an activated session is not active anymore (orphaned)
+                                                 or definitively closed (from active or orphaned previous state),
+                                                 used to update subscription state.<BR/>
                                                  id = session id<BR/>
                                                  auxParam = (int32_t) session state
                                                */

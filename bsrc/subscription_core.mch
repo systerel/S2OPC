@@ -1681,6 +1681,15 @@ OPERATIONS
     END
     ;
 
+    clear_session_publish_queue (p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        a_publish_responses := a_publish_responses |>> {a_publishRequestQueue (p_session)}
+    END
+    ;
+
     deallocate_publish_queue_and_gen_no_sub_responses (p_session, p_send_no_sub_resp) =
     PRE
         p_session : t_session_i &

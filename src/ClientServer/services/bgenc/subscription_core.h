@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 02/03/2026 17:28:00
+ Date                 : 03/03/2026 16:24:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -183,6 +183,8 @@ extern void subscription_core__allocate_new_session_publish_queue(
    t_bool * const subscription_core__bres);
 extern void subscription_core__clear_monitored_item_notifications(
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer);
+extern void subscription_core__clear_session_publish_queue(
+   const constants__t_session_i subscription_core__p_session);
 extern void subscription_core__close_subscription(
    const constants__t_subscription_i subscription_core__p_subscription);
 extern void subscription_core__compute_create_monitored_item_revised_params(
