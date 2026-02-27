@@ -2799,7 +2799,7 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
     {
         SOPC_StatusCode detailedStatus = SOPC_GoodGenericStatus;
         SOPC_StatusCode tcpStatus = SOPC_GoodGenericStatus;
-        uint32_t requestHandle;
+        uint32_t requestHandle = 0;
         OpcUa_RequestHeader* reqHeader = NULL;
 
         if (!SC_ServerTransition_ScInit_To_ScConnecting(scConnection, msg, &requestHandle, &reqHeader, &detailedStatus,
