@@ -152,18 +152,12 @@ list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<VERSION_GREATER:${CMAKE_C_C
 # Add security hardening compilation options
 option(SECURITY_HARDENING "Harden compilation options" OFF)
 if (SECURITY_HARDENING)
-  list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-Wimplicit-fallthrough -Wl,-z,nodlopen -Wl,-z,noexecstack -fcf-protection=full -fstack-clash-protection -fstack-protector-strong -Wl,-z,relro -fno-delete-null-pointer-checks -fno-strict-overflow -fno-strict-aliasing -fexceptions>)
+  list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-fhardened -Wimplicit-fallthrough -Wl,-z,nodlopen -Wl,-z,noexecstack -fno-delete-null-pointer-checks -fno-strict-overflow -fno-strict-aliasing -fexceptions>)
   # Add some security hardening flags not supported with GCC < 13
-  list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<VERSION_GREATER:${CMAKE_C_COMPILER_VERSION},13>>:-fharden-compares -fharden-conditional-branches -fstrict-flex-arrays=3 -ftrivial-auto-var-init=zero>)
-  
-  # Set GNU definitions for security hardening
-  if (DEFINED IS_GNU AND ${CMAKE_C_COMPILER_VERSION} VERSION_GREATER "13")
-    # Set GNU definitions for security hardening not supported with GCC < 13
-    list(APPEND S2OPC_DEFINITIONS $<${IS_GNU}:_FORTIFY_SOURCE=3 _GLIBCXX_ASSERTIONS>)
-  else()
-    list(APPEND S2OPC_DEFINITIONS $<${IS_GNU}:_FORTIFY_SOURCE=2 _GLIBCXX_ASSERTIONS>)
-  endif()
-  
+  list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<VERSION_GREATER:${CMAKE_C_COMPILER_VERSION},13>>:-fharden-compares -fharden-conditional-branches -fstrict-flex-arrays=3>)
+  # Add some security hardening flags not supported with GCC < 14
+  list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<VERSION_GREATER:${CMAKE_C_COMPILER_VERSION},14>>:-fharden-control-flow-redundancy>)
+
   # Force symbol stripping (only available for GNU compatible compilers)
   list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-s>)
   list(APPEND S2OPC_LINKER_FLAGS $<${IS_GNU}:-s>)
