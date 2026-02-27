@@ -187,6 +187,7 @@ typedef void SOPC_ExternalHistoryRawRead_Fct(const OpcUa_ReadRawModifiedDetails*
 /**
  * \brief Defines the callback to retrieve raw history data from external history server.
  *
+ * The callback is only called upon receipt of external requests.
  * This is optional but if used it shall be defined before starting server.
  * The S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE compilation flag shall be defined
  * to implement this service and set the callback.
@@ -225,6 +226,7 @@ typedef void SOPC_WriteNotif_Fct(const SOPC_CallContext* callCtxPtr,
 /**
  * \brief Defines the write notification callback to be used.
  *
+ * The callback is only called upon receipt of external requests.
  * This is optional but if used it shall be defined before starting server.
  *
  * \param writeNotifCb  The write notification callback to be used
@@ -271,6 +273,7 @@ typedef bool SOPC_CreateMI_NodeAvail_Fct(const SOPC_NodeId* nodeId,
  * \brief Defines the callback called by CreateMonitoredItem service when a NodeId is not already part of server.
  *        The callback result indicates if it shall be considered known by server (see ::SOPC_CreateMI_NodeAvail_Fct).
  *
+ * The callback is only called upon receipt of external requests.
  * This is optional but if used it shall be defined before starting server.
  *
  * \param nodeAvailCb  The MonitoredItem node availability callback to be used by server
@@ -409,7 +412,8 @@ typedef SOPC_StatusCode SOPC_OverwriteSessionRequest_Fct(const SOPC_CallContext*
 /**
  * \brief Defines the overwrite service request callback to be used.
  *
- * This shall be defined before starting the server
+ * The callback is only called upon receipt of external requests.
+ * This is optional but if used it shall be defined before starting server.
  *
  * \param overwriteReqCb  The overwrite service request callback to be used
  *
