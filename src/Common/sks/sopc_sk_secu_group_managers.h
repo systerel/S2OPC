@@ -28,7 +28,7 @@
  * To define a security group manager, ::SOPC_SK_SecurityGroup_Managers_Init and ::SOPC_SK_SecurityGroup_SetSkManager
  * shall be called.
  *
- * The Publisher and Subscriber schedulers will then automatically call ::SOPC_PubSubSKS_GetSecurityKeys.
+ * The Publisher and Subscriber schedulers will then automatically call ::SOPC_PubSubSKS_GetUpdateSecurityKeys.
  */
 
 #ifndef SOPC_SK_SECU_GROUP_MANAGERS_H_

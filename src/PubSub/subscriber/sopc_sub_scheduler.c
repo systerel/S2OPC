@@ -338,6 +338,7 @@ static void SOPC_SubScheduler_UpdateDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, 
             // Update Security SN if security is managed
             SOPC_PubSub_SecurityStatus status = SOPC_SubScheduler_Get_Security_Infos(
                 SOPC_PUBSUB_SKS_CURRENT_TOKENID, ctx->pubId, ctx->groupId, &security);
+            // Force reset of Security SN when we keep the same current keys
             if (SOPC_PUBSUB_STATUS_SECURITY_OK == status && NULL != security)
             {
                 security->sequenceNumber = 0;

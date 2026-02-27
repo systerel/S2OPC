@@ -24,7 +24,7 @@
  * To define a security keys manager(s) ::SOPC_PubSubSKS_Init and ::SOPC_PubSubSKS_AddSkManager shall be called.
  * Each security group in configuration shall have its own ::SOPC_SKManager.
  *
- * The Publisher and Subscriber schedulers will then automatically call ::SOPC_PubSubSKS_GetSecurityKeys.
+ * The Publisher and Subscriber schedulers will then automatically call ::SOPC_PubSubSKS_GetUpdateSecurityKeys.
  */
 
 #ifndef SOPC_PUBSUB_SKS_H_
@@ -34,7 +34,6 @@
 #include "sopc_secret_buffer.h"
 #include "sopc_sk_builder.h"
 #include "sopc_sk_scheduler.h"
-#include "sopc_sk_secu_group_managers.h"
 
 // To requested current token in getSecurityKey
 #define SOPC_PUBSUB_SKS_CURRENT_TOKENID SOPC_SK_MANAGER_CURRENT_TOKEN_ID
@@ -49,6 +48,19 @@ typedef struct SOPC_PubSubSKS_Keys
     SOPC_SecretBuffer* encryptKey;
     SOPC_SecretBuffer* keyNonce;
 } SOPC_PubSubSKS_Keys;
+
+typedef enum SOPC_PubSub_SecurityStatus
+{
+    SOPC_PUBSUB_STATUS_SECURITY_OK = 0xA00,
+    SOPC_PUBSUB_STATUS_SECURITY_INVALID_PARAMETERS,
+    SOPC_PUBSUB_STATUS_SECURITY_NO_KEYS,
+    SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_OLDER,
+    SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_NEWER,
+    SOPC_PUBSUB_STATUS_SECURITY_OLD_TOKEN_ID,
+    SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_PUBLISHER,
+    SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_WRITER_GROUP,
+    SOPC_PUBSUB_STATUS_SECURITY_NOK
+} SOPC_PubSub_SecurityStatus;
 
 /**
  * \brief Initialise the PubSubSKS module
@@ -90,6 +102,9 @@ bool SOPC_PubSubSKS_CreateManagersFromConfig(const SOPC_PubSubConfiguration* pub
 bool SOPC_PubSubSKS_AddSkManager(SOPC_SKManager* skm);
 
 /**
+ * \deprecated This function has been renamed ::SOPC_PubSubSKS_GetUpdateSecurityKeys.
+ *             It is deprecated since version 1.7.2 and will be removed in version 1.7.3.
+ *
  * \brief Return security key from a security group id.
  *        This function is automatically called by Publisher and Subscriber schedulers.
  *
@@ -99,6 +114,20 @@ bool SOPC_PubSubSKS_AddSkManager(SOPC_SKManager* skm);
  *
  */
 SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupId, uint32_t tokenId);
+
+/**  \brief Update security keys if required security group is available otherwise keep security group.
+ *
+ * \param securityGroupId a Group Id with security
+ * \param tokenId token id of the requested keys. Current token is requested with ::SOPC_PUBSUB_SKS_CURRENT_TOKENID
+ * \param securityGroup [in/out] Pointer to a group of keys to update if required is available. Old keys will be freed
+ * by this function.
+ *
+ * \return SOPC_PUBSUB_STATUS_SECURITY_OK in case the keys are updated or the required security group is the one in
+ * use.
+ */
+SOPC_PubSub_SecurityStatus SOPC_PubSubSKS_GetUpdateSecurityKeys(const char* securityGroupId,
+                                                                uint32_t tokenId,
+                                                                SOPC_PubSubSKS_Keys** securityGroup);
 
 /**
  * \brief Clear a SOPC_PubSubSKS_Keys

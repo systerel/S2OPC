@@ -59,7 +59,15 @@ bool SOPC_PubSubSKS_AddSkManager(SOPC_SKManager* skm)
 
 SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupid, uint32_t tokenId)
 {
-    // result
+    SOPC_PubSubSKS_Keys* returnedKeys = NULL;
+    SOPC_PubSubSKS_GetUpdateSecurityKeys(securityGroupid, tokenId, &returnedKeys);
+    return returnedKeys;
+}
+
+SOPC_PubSub_SecurityStatus SOPC_PubSubSKS_GetUpdateSecurityKeys(const char* securityGroupId,
+                                                                uint32_t tokenId,
+                                                                SOPC_PubSubSKS_Keys** securityGroup)
+{
     SOPC_PubSubSKS_Keys* returnedKeys = NULL;
 
     // Get keys from manager
@@ -69,42 +77,72 @@ SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupid,
     uint32_t NbKeys = 0;
     uint64_t TimeToNextKey = 0;
     uint64_t KeyLifetime = 0;
-    SOPC_SKManager* skm = SOPC_SK_SecurityGroup_GetSkManager(securityGroupid);
+    SOPC_SKManager* skm = SOPC_SK_SecurityGroup_GetSkManager(securityGroupId);
+    SOPC_PubSub_SecurityStatus secuStatus = SOPC_PUBSUB_STATUS_SECURITY_OK;
 
-    if (NULL == skm)
+    // Invalid arguments
+    if (NULL == skm || NULL == securityGroup)
     {
-        return NULL;
+        return SOPC_PUBSUB_STATUS_SECURITY_INVALID_PARAMETERS;
     }
 
     SOPC_ReturnStatus status =
         SOPC_SKManager_GetKeys(skm, tokenId, SOPC_PUBSUB_SKS_MAX_TOKEN_PER_CALL, &SecurityPolicyUri, &FirstTokenId,
                                &Keys, &NbKeys, &TimeToNextKey, &KeyLifetime);
 
-    /** Fill Outputs **/
-
-    // Initialize returned keys if GetKeys returned valid Keys corresponding to requested token
-    SOPC_ByteString* byteString = NULL;
-    if (SOPC_STATUS_OK == status && 0 < NbKeys &&
-        (SOPC_PUBSUB_SKS_CURRENT_TOKENID == tokenId || tokenId == FirstTokenId))
+    if (SOPC_STATUS_OK != status)
     {
-        byteString = &Keys[0];
-        if ((32 + 32 + 4) == byteString->Length)
-        {
-            returnedKeys = SOPC_Calloc(1, sizeof(SOPC_PubSubSKS_Keys));
-        }
+        // SKmanager fail to get keys
+        secuStatus = SOPC_PUBSUB_STATUS_SECURITY_NOK;
     }
-
-    if (NULL != returnedKeys)
+    else if (NbKeys <= 0)
     {
-        returnedKeys->tokenId = FirstTokenId;
-        returnedKeys->signingKey = SOPC_SecretBuffer_NewFromExposedBuffer(byteString->Data, 32);
-        returnedKeys->encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(&(byteString->Data[32]), 32);
-        returnedKeys->keyNonce = SOPC_SecretBuffer_NewFromExposedBuffer(&(byteString->Data[64]), 4);
-        if (NULL == returnedKeys->signingKey || NULL == returnedKeys->encryptKey || NULL == returnedKeys->keyNonce)
+        // No keys available from SK Manager
+        secuStatus = SOPC_PUBSUB_STATUS_SECURITY_NO_KEYS;
+    }
+    else
+    {
+        /** Check if received keys are different from the one in use */
+        if (*securityGroup == NULL || (*securityGroup)->tokenId != FirstTokenId)
         {
-            SOPC_PubSubSKS_Keys_Delete(returnedKeys);
-            SOPC_Free(returnedKeys);
-            returnedKeys = NULL;
+            /** Fill Outputs **/
+
+            // Initialize returned keys if GetKeys returned valid Keys corresponding to requested token
+            SOPC_ByteString* byteString = NULL;
+            if ((SOPC_PUBSUB_SKS_CURRENT_TOKENID == tokenId || tokenId == FirstTokenId))
+            {
+                byteString = &Keys[0];
+                if ((32 + 32 + 4) == byteString->Length)
+                {
+                    returnedKeys = SOPC_Calloc(1, sizeof(SOPC_PubSubSKS_Keys));
+                }
+                secuStatus = NULL != returnedKeys ? SOPC_PUBSUB_STATUS_SECURITY_OK : SOPC_PUBSUB_STATUS_SECURITY_NOK;
+            }
+            else if (FirstTokenId < tokenId)
+            {
+                secuStatus = SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_OLDER;
+            }
+            else // FirstTokenId > tokenId
+            {
+                // Received Keys are newer than the one required
+                secuStatus = SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_NEWER;
+            }
+
+            if (NULL != returnedKeys)
+            {
+                returnedKeys->tokenId = FirstTokenId;
+                returnedKeys->signingKey = SOPC_SecretBuffer_NewFromExposedBuffer(byteString->Data, 32);
+                returnedKeys->encryptKey = SOPC_SecretBuffer_NewFromExposedBuffer(&(byteString->Data[32]), 32);
+                returnedKeys->keyNonce = SOPC_SecretBuffer_NewFromExposedBuffer(&(byteString->Data[64]), 4);
+                if (NULL == returnedKeys->signingKey || NULL == returnedKeys->encryptKey ||
+                    NULL == returnedKeys->keyNonce)
+                {
+                    SOPC_PubSubSKS_Keys_Delete(returnedKeys);
+                    SOPC_Free(returnedKeys);
+                    returnedKeys = NULL;
+                    secuStatus = SOPC_PUBSUB_STATUS_SECURITY_NOK;
+                }
+            }
         }
     }
 
@@ -116,7 +154,17 @@ SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupid,
     }
     SOPC_Free(Keys);
 
-    return returnedKeys;
+    /** Update the key with new one */
+    if (NULL != returnedKeys)
+    {
+        if (*securityGroup != NULL)
+        {
+            SOPC_PubSubSKS_Keys_Delete(*securityGroup);
+            SOPC_Free(*securityGroup);
+        }
+        (*securityGroup) = returnedKeys;
+    }
+    return secuStatus;
 }
 
 void SOPC_PubSubSKS_Keys_Delete(SOPC_PubSubSKS_Keys* keys)

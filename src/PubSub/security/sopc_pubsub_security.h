@@ -47,19 +47,6 @@ typedef struct SOPC_PubSub_SecurityType
     bool sequenceNumberSet;
 } SOPC_PubSub_SecurityType;
 
-typedef enum SOPC_PubSub_SecurityStatus
-{
-    SOPC_PUBSUB_STATUS_SECURITY_OK,
-    SOPC_PUBSUB_STATUS_SECURITY_INVALID_PARAMETERS,
-    SOPC_PUBSUB_STATUS_SECURITY_NO_KEYS,
-    SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_OLDER,
-    SOPC_PUBSUB_STATUS_SECURITY_SKS_KEYS_NEWER,
-    SOPC_PUBSUB_STATUS_SECURITY_OLD_TOKEN_ID,
-    SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_PUBLISHER,
-    SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_WRITER_GROUP,
-    SOPC_PUBSUB_STATUS_SECURITY_NOK
-} SOPC_PubSub_SecurityStatus;
-
 /**
  * \brief Callback function to retrieve a security context from a security tokenId, publisher id and a writer group
  *

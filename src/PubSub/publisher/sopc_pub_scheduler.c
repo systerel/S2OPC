@@ -646,17 +646,18 @@ static void SecurityGroup_Update(SOPC_PubSub_SecurityType* security, const SOPC_
     }
 
     uint32_t prevTokenId = 0;
-    // Update keys
+    // Keep track of previous securityTokenId to check if sequence number need to be reset
     if (NULL != security->groupKeys)
     {
         prevTokenId = security->groupKeys->tokenId;
-        SOPC_PubSubSKS_Keys_Delete(security->groupKeys);
-        SOPC_Free(security->groupKeys);
     }
-    security->groupKeys =
-        SOPC_PubSubSKS_GetSecurityKeys(SOPC_WriterGroup_Get_SecurityGroupId(group), SOPC_PUBSUB_SKS_CURRENT_TOKENID);
+
+    // Update key if new one is available
+    SOPC_PubSub_SecurityStatus secuStatus = SOPC_PubSubSKS_GetUpdateSecurityKeys(
+        SOPC_WriterGroup_Get_SecurityGroupId(group), SOPC_PUBSUB_SKS_CURRENT_TOKENID, &security->groupKeys);
+
     // Update Nonce Random part
-    if (NULL != security->groupKeys)
+    if (secuStatus == SOPC_PUBSUB_STATUS_SECURITY_OK && NULL != security->groupKeys)
     {
         security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
         if (NULL != security->msgNonceRandom)
@@ -684,7 +685,8 @@ static void SecurityGroup_Update(SOPC_PubSub_SecurityType* security, const SOPC_
     }
     else
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher failed to get security keys");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher failed to get security keys with status 0x%X",
+                               secuStatus);
 
         // Signature failure will only occurs when keys are not available here
         const SOPC_PubSubConnection* connection = SOPC_WriterGroup_Get_Connection(group);

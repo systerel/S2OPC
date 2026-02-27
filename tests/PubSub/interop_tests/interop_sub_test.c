@@ -46,6 +46,7 @@
 #include "sopc_reader_layer.h"
 #include "sopc_sk_manager.h"
 #include "sopc_sk_provider.h"
+#include "sopc_sk_secu_group_managers.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_threads.h"
 #include "sopc_udp_sockets.h"
@@ -87,7 +88,9 @@ SOPC_PubSub_SecurityType gSubSecurityType;
 
 static void set_subscriber_security_info(const char* securityGroupId)
 {
-    gSubSecurityType.groupKeys = SOPC_PubSubSKS_GetSecurityKeys(securityGroupId, 0);
+    SOPC_PubSub_SecurityStatus status =
+        SOPC_PubSubSKS_GetUpdateSecurityKeys(securityGroupId, 0, &gSubSecurityType.groupKeys);
+    SOPC_ASSERT(status == SOPC_PUBSUB_STATUS_SECURITY_OK);
     gSubSecurityType.mode = SOPC_SecurityMode_SignAndEncrypt;
     gSubSecurityType.provider = SOPC_CryptoProvider_CreatePubSub(SOPC_SecurityPolicy_PubSub_Aes256_URI);
 }
