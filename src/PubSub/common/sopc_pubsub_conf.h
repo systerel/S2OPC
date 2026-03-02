@@ -217,6 +217,13 @@ void SOPC_PubSubConfiguration_Set_FatalError_Callback(SOPC_PubSubConnection* con
                                                       SOPC_PubSub_OnFatalError* callback);
 SOPC_PubSub_OnFatalError* SOPC_PubSubConfiguration_Get_FatalError_Callback(SOPC_PubSubConnection* connection);
 
+/**
+ * \brief callback to notify Subscriber signature check failure. The callback is called if keys are not available or
+ * signature check fail.
+ *
+ * \param group Reader group of the NetworkMessage being decode
+ * \param securityGroupId Security group id to identify security group associated to the reader group.
+ */
 typedef void SOPC_Sub_SignatureCheckFailed(const SOPC_ReaderGroup* group, const char* securityGroupId);
 
 void SOPC_PubSubConfiguration_Set_SubSignatureCheckFailed_Callback(SOPC_PubSubConnection* connection,
