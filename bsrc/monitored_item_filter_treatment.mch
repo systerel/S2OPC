@@ -37,10 +37,8 @@ INITIALISATION
 
 OPERATIONS
 
-    statusCode, filterCtx, filterResult, isEvent <-- check_monitored_item_filter_valid_and_fill_result (p_endpoint_idx, p_nid, p_aid, p_filter, p_value) =
+    statusCode, filterCtx, filterResult, isEvent <-- check_monitored_item_filter_valid_and_fill_result (p_nid, p_aid, p_filter, p_value) =
     PRE
-        p_endpoint_idx : t_endpoint_config_idx_i &
-        p_endpoint_idx : t_endpoint_config_idx &
         p_nid : t_NodeId_i &
         p_nid : t_NodeId &
         p_aid : t_AttributeId_i &

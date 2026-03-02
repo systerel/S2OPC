@@ -39,7 +39,7 @@ PROMOTES
 
 OPERATIONS
 
-    statusCode, filterCtx, filterResult, isEvent <-- check_monitored_item_filter_valid_and_fill_result (p_endpoint_idx, p_nid, p_aid, p_filter, p_value) =
+    statusCode, filterCtx, filterResult, isEvent <-- check_monitored_item_filter_valid_and_fill_result (p_nid, p_aid, p_filter, p_value) =
     VAR
         l_bres_presentNode,
         l_node
@@ -58,7 +58,7 @@ OPERATIONS
                     statusCode, filterCtx <-- check_monitored_item_data_filter_valid (l_node, p_filter)
                 ELSE
                     /* Check filter validity regarding where clause and select clauses */
-                    statusCode, filterCtx, filterResult <-- check_monitored_item_event_filter_valid (p_endpoint_idx, p_aid, p_filter, p_value);
+                    statusCode, filterCtx, filterResult <-- check_monitored_item_event_filter_valid (p_aid, p_filter, p_value);
                     isEvent := TRUE
                 END
             ELSE

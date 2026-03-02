@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_filter_treatment.c
 
- Date                 : 08/04/2024 12:58:41
+ Date                 : 02/03/2026 17:27:48
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -42,7 +42,6 @@ void monitored_item_filter_treatment__INITIALISATION(void) {
    OPERATIONS Clause
   --------------------*/
 void monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill_result(
-   const constants__t_endpoint_config_idx_i monitored_item_filter_treatment__p_endpoint_idx,
    const constants__t_NodeId_i monitored_item_filter_treatment__p_nid,
    const constants__t_AttributeId_i monitored_item_filter_treatment__p_aid,
    const constants__t_monitoringFilter_i monitored_item_filter_treatment__p_filter,
@@ -70,8 +69,7 @@ void monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill
                   monitored_item_filter_treatment__filterCtx);
             }
             else {
-               monitored_item_event_filter_treatment__check_monitored_item_event_filter_valid(monitored_item_filter_treatment__p_endpoint_idx,
-                  monitored_item_filter_treatment__p_aid,
+               monitored_item_event_filter_treatment__check_monitored_item_event_filter_valid(monitored_item_filter_treatment__p_aid,
                   monitored_item_filter_treatment__p_filter,
                   monitored_item_filter_treatment__p_value,
                   monitored_item_filter_treatment__statusCode,

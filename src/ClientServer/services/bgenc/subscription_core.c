@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 04/11/2025 13:35:05
+ Date                 : 02/03/2026 17:28:00
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1091,7 +1091,6 @@ void subscription_core__compute_create_monitored_item_revised_params(
 }
 
 void subscription_core__create_monitored_item(
-   const constants__t_endpoint_config_idx_i subscription_core__p_endpoint_idx,
    const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_NodeId_i subscription_core__p_nid,
    const constants__t_AttributeId_i subscription_core__p_aid,
@@ -1122,8 +1121,7 @@ void subscription_core__create_monitored_item(
       
       *subscription_core__monitoredItemPointer = constants__c_monitoredItemPointer_indet;
       *subscription_core__monitoredItemId = constants__c_monitoredItemId_indet;
-      monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill_result(subscription_core__p_endpoint_idx,
-         subscription_core__p_nid,
+      monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill_result(subscription_core__p_nid,
          subscription_core__p_aid,
          subscription_core__p_filter,
          subscription_core__p_value,
@@ -1227,7 +1225,6 @@ void subscription_core__create_monitored_item(
 }
 
 void subscription_core__modify_monitored_item(
-   const constants__t_endpoint_config_idx_i subscription_core__p_endpoint_idx,
    const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_monitoredItemId_i subscription_core__p_mi_id,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
@@ -1278,8 +1275,7 @@ void subscription_core__modify_monitored_item(
             subscription_core__p_revQueueSize);
          subscription_core__l_isExpectedSubId = (subscription_core__p_subscription == subscription_core__l_subscription);
          if (subscription_core__l_isExpectedSubId == true) {
-            monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill_result(subscription_core__p_endpoint_idx,
-               subscription_core__l_nid,
+            monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill_result(subscription_core__l_nid,
                subscription_core__l_aid,
                subscription_core__p_filter,
                constants__c_Variant_indet,

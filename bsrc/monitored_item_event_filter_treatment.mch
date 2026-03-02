@@ -26,10 +26,8 @@ SEES
 
 OPERATIONS
 
-    statusCode, filterCtx, filterResult <-- check_monitored_item_event_filter_valid (p_endpoint_idx, p_aid, p_filter, p_value) =
+    statusCode, filterCtx, filterResult <-- check_monitored_item_event_filter_valid (p_aid, p_filter, p_value) =
     PRE
-        p_endpoint_idx : t_endpoint_config_idx_i &
-        p_endpoint_idx : t_endpoint_config_idx &
         p_aid = e_aid_EventNotifier &
         p_filter : t_monitoringFilter_i &
         p_filter : t_monitoringFilter &

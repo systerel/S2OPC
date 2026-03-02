@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_event_filter_treatment_bs.h
 
- Date                 : 30/01/2025 17:22:05
+ Date                 : 02/03/2026 17:28:07
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -50,7 +50,6 @@ extern void monitored_item_event_filter_treatment_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void monitored_item_event_filter_treatment_bs__check_events_supported(
-   const constants__t_endpoint_config_idx_i monitored_item_event_filter_treatment_bs__p_endpoint_idx,
    constants_statuscodes_bs__t_StatusCode_i * const monitored_item_event_filter_treatment_bs__scEventsSupported);
 extern void monitored_item_event_filter_treatment_bs__check_is_event_notifier(
    const constants__t_Variant_i monitored_item_event_filter_treatment_bs__p_value,

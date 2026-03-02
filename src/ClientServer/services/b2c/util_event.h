@@ -29,9 +29,7 @@
 #include "monitored_item_pointer_impl.h"
 #include "sopc_types.h"
 
-extern const SOPC_Server_Event_Types* initEventTypes;
-
-bool init_event_types(SOPC_EndpointConfigIdx epIdx);
+const SOPC_Server_Event_Types* util_event__get_event_types(void);
 
 bool util_event__alloc_event_field_list(uint32_t clientHandle,
                                         int32_t nbSelectClauses,

@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_event_filter_treatment.c
 
- Date                 : 04/02/2025 17:23:56
+ Date                 : 02/03/2026 17:27:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -42,7 +42,6 @@ void monitored_item_event_filter_treatment__INITIALISATION(void) {
    OPERATIONS Clause
   --------------------*/
 void monitored_item_event_filter_treatment__check_monitored_item_event_filter_valid(
-   const constants__t_endpoint_config_idx_i monitored_item_event_filter_treatment__p_endpoint_idx,
    const constants__t_AttributeId_i monitored_item_event_filter_treatment__p_aid,
    const constants__t_monitoringFilter_i monitored_item_event_filter_treatment__p_filter,
    const constants__t_Variant_i monitored_item_event_filter_treatment__p_value,
@@ -69,8 +68,7 @@ void monitored_item_event_filter_treatment__check_monitored_item_event_filter_va
       monitored_item_event_filter_treatment__l_oneInvalidSelectClause = false;
       monitored_item_event_filter_treatment__l_WhereClauseSc = constants_statuscodes_bs__e_sc_ok;
       monitored_item_event_filter_treatment__l_StatusCode = constants_statuscodes_bs__e_sc_ok;
-      monitored_item_event_filter_treatment_bs__check_events_supported(monitored_item_event_filter_treatment__p_endpoint_idx,
-         &monitored_item_event_filter_treatment__l_StatusCode);
+      monitored_item_event_filter_treatment_bs__check_events_supported(&monitored_item_event_filter_treatment__l_StatusCode);
       if ((monitored_item_event_filter_treatment__l_StatusCode == constants_statuscodes_bs__e_sc_ok) &&
          (monitored_item_event_filter_treatment__p_value != constants__c_Variant_indet)) {
          monitored_item_event_filter_treatment_bs__check_is_event_notifier(monitored_item_event_filter_treatment__p_value,

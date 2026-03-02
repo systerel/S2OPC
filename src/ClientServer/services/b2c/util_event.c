@@ -29,26 +29,25 @@
 #include "util_b2c.h"
 #include "util_variant.h"
 
-const SOPC_Server_Event_Types* initEventTypes = NULL;
-
 static const SOPC_NodeId EventQueueOverflowTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_EventQueueOverflowEventType);
 static const SOPC_NodeId ServerId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server);
 static const SOPC_NodeId BaseEventTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 
 static const SOPC_Event* queueOverflowEvent = NULL;
 
-bool init_event_types(SOPC_EndpointConfigIdx epIdx)
+const SOPC_Server_Event_Types* util_event__get_event_types(void)
 {
-    if (NULL == initEventTypes)
+    // Use first EP as all are pointing to the same server configuration
+    SOPC_Endpoint_Config* endpointConfig = SOPC_ToolkitServer_GetEndpointConfig(1);
+    if (NULL != endpointConfig && NULL != endpointConfig->serverConfigPtr)
     {
-        SOPC_Endpoint_Config* endpointConfig = SOPC_ToolkitServer_GetEndpointConfig(epIdx);
-        SOPC_ASSERT(NULL != endpointConfig && NULL != endpointConfig->serverConfigPtr);
         SOPC_Server_Config* serverConfig = endpointConfig->serverConfigPtr;
-        initEventTypes = serverConfig->eventTypes;
+        return serverConfig->eventTypes;
     }
-    // It should not be NULL when EventNotifier attribute is supported (necessary to reach this point).
-    // But since it is only guaranteed to be initialized when using server wrapper we still have to check it.
-    return NULL != initEventTypes;
+    else
+    {
+        return NULL;
+    }
 }
 
 bool util_event__alloc_event_field_list(uint32_t clientHandle,
@@ -230,14 +229,14 @@ bool util_event__alloc_and_fill_event_field_list(const SOPC_InternalMonitoredIte
 
 static SOPC_Event* create_queueOverflowEvent(void)
 {
-    SOPC_ASSERT(NULL != initEventTypes);
     if (NULL == queueOverflowEvent)
     {
-        SOPC_Event* QOfEvent = SOPC_EventManager_CreateEventInstance(initEventTypes, &EventQueueOverflowTypeId);
+        SOPC_Event* QOfEvent =
+            SOPC_EventManager_CreateEventInstance(util_event__get_event_types(), &EventQueueOverflowTypeId);
         if (NULL == QOfEvent)
         {
             // Impossible to instantiate the event type
-            return false;
+            return NULL;
         }
         /**
          * From part 5 (v1.05) §6.4.34:

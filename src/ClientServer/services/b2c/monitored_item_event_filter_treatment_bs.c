@@ -63,10 +63,9 @@ static void free_filter_ctx(SOPC_InternalMonitoredItemFilterCtx* filterCtx)
 }
 
 void monitored_item_event_filter_treatment_bs__check_events_supported(
-    const constants__t_endpoint_config_idx_i monitored_item_event_filter_treatment_bs__p_endpoint_idx,
     constants_statuscodes_bs__t_StatusCode_i* const monitored_item_event_filter_treatment_bs__scEventsSupported)
 {
-    bool eventTypesSupported = init_event_types(monitored_item_event_filter_treatment_bs__p_endpoint_idx);
+    bool eventTypesSupported = (util_event__get_event_types() != NULL);
     if (eventTypesSupported)
     {
         *monitored_item_event_filter_treatment_bs__scEventsSupported = constants_statuscodes_bs__e_sc_ok;
@@ -255,7 +254,7 @@ void monitored_item_event_filter_treatment_bs__check_select_clause_and_fill_ctx(
         // Check the event type id is a known type and browse path is valid for the given type
         // Note: if AddNodes is implemented/allowed for EventTypes (i.e. ObjectTypes) it might be evaluated
         // when event is triggered
-        status = SOPC_EventManager_HasEventTypeAndBrowsePath(initEventTypes,
+        status = SOPC_EventManager_HasEventTypeAndBrowsePath(util_event__get_event_types(),
                                                              (const SOPC_NodeId*) &selectClause->TypeDefinitionId,
                                                              selectClause->NoOfBrowsePath, selectClause->BrowsePath);
     }
@@ -276,7 +275,7 @@ void monitored_item_event_filter_treatment_bs__check_select_clause_and_fill_ctx(
         // Check index range might be applicable for the event DataType / ValueRank
         if (SOPC_STATUS_OK == status)
         {
-            exampleEvent = SOPC_EventManager_CreateEventInstance(initEventTypes,
+            exampleEvent = SOPC_EventManager_CreateEventInstance(util_event__get_event_types(),
                                                                  (const SOPC_NodeId*) &selectClause->TypeDefinitionId);
             status = (NULL == exampleEvent ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
         }
@@ -315,7 +314,8 @@ void monitored_item_event_filter_treatment_bs__check_select_clause_and_fill_ctx(
         if (SOPC_STATUS_INVALID_PARAMETERS != status || selectClause->NoOfBrowsePath <= 0)
         {
             badResultStatus = OpcUa_BadTypeDefinitionInvalid;
-            if (SOPC_EventManager_HasEventType(initEventTypes, (const SOPC_NodeId*) &selectClause->TypeDefinitionId))
+            if (SOPC_EventManager_HasEventType(util_event__get_event_types(),
+                                               (const SOPC_NodeId*) &selectClause->TypeDefinitionId))
             {
                 // StatusCode may seems unadapted but the associated description in part 4 (v1.05) table 149 is the
                 // following: The browsePath is specified but it will never exist in any Event.
@@ -429,7 +429,7 @@ void monitored_item_event_filter_treatment_bs__check_where_elt_and_fill_ctx(
             // Check the event type id is a known type
             // Note: if AddNodes is implemented/allowed for EventTypes (i.e. ObjectTypes) it might be evaluated
             // when event is triggered
-            result = SOPC_EventManager_HasEventType(initEventTypes, operandNodeId);
+            result = SOPC_EventManager_HasEventType(util_event__get_event_types(), operandNodeId);
         }
         if (result)
         {

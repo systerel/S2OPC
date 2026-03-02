@@ -436,11 +436,9 @@ LOCAL_OPERATIONS
     END
     ;
 
-    fill_response_subscription_modify_monitored_items (p_endpoint_idx, p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_modify_monitored_items (p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     PRE
         ModifyMonitoredItemResp_Allocated = TRUE &
-        p_endpoint_idx : t_endpoint_config_idx_i &
-        p_endpoint_idx : t_endpoint_config_idx &
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
         p_tsToReturn : t_TimestampsToReturn_i &
@@ -900,8 +898,7 @@ OPERATIONS
                         l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_aid, l_queueSize);
                         l_sc, l_monitoredItemPointer, l_monitoredItemId, l_filterResult
                            <-- create_monitored_item
-                           (l_endpoint_config_idx,
-                            p_subscription,
+                           (p_subscription,
                             l_nid,
                             l_aid,
                             l_indexRange,
@@ -1258,7 +1255,7 @@ OPERATIONS
     END
     ;
 
-    fill_response_subscription_modify_monitored_items (p_endpoint_idx, p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_modify_monitored_items (p_subscription, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     VAR
         l_continue,
         l_index,
@@ -1285,7 +1282,7 @@ OPERATIONS
             IF l_bres = TRUE
             THEN
                 l_sc, l_filterResult, l_revSamplingItv, l_revQueueSize
-                  <-- modify_monitored_item (p_endpoint_idx, p_subscription, l_id, p_tsToReturn, l_clientHandle, l_filter, l_discardOldest, l_queueSize)
+                  <-- modify_monitored_item (p_subscription, l_id, p_tsToReturn, l_clientHandle, l_filter, l_discardOldest, l_queueSize)
             END
             ;
             setall_msg_modify_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_revSamplingItv, l_revQueueSize, l_filterResult)
@@ -1767,7 +1764,6 @@ OPERATIONS
         l_sc,
         l_subscription,
         l_valid_subscription,
-        l_endpoint_config_idx,
         l_timestampToRet,
         l_nb_monitored_items,
         l_bres
@@ -1776,16 +1772,14 @@ OPERATIONS
         IF l_sc = e_sc_ok
         THEN
             l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
-            l_endpoint_config_idx <-- session_get_endpoint_config(p_session);
-            l_bres <-- is_valid_endpoint_config_idx (l_endpoint_config_idx);
-            IF l_valid_subscription = TRUE & l_bres = TRUE
+            IF l_valid_subscription = TRUE
             THEN
                 reset_subscription_LifetimeCounter (l_subscription);
                 l_bres <-- alloc_msg_modify_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
                     fill_response_subscription_modify_monitored_items
-                      (l_endpoint_config_idx, l_subscription, l_timestampToRet, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                      (l_subscription, l_timestampToRet, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory

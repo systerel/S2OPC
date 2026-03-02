@@ -143,11 +143,8 @@ OPERATIONS
 
     /* Create/Modify MI filter check operations */
 
-    scEventsSupported <-- check_events_supported (p_endpoint_idx) =
-    PRE
-        p_endpoint_idx : t_endpoint_config_idx_i &
-        p_endpoint_idx : t_endpoint_config_idx
-    THEN
+    scEventsSupported <-- check_events_supported =
+    BEGIN
         scEventsSupported
         :(scEventsSupported : t_StatusCode_i &
           (c_eventsSupport = TRUE => scEventsSupported = e_sc_ok) &

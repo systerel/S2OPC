@@ -38,7 +38,7 @@ PROMOTES
 
 OPERATIONS
 
-    statusCode, filterCtx , filterResult <-- check_monitored_item_event_filter_valid (p_endpoint_idx, p_aid, p_filter, p_value) =
+    statusCode, filterCtx , filterResult <-- check_monitored_item_event_filter_valid (p_aid, p_filter, p_value) =
     VAR
         l_StatusCode,
         l_filterCtx,
@@ -60,7 +60,7 @@ OPERATIONS
         l_WhereClauseSc := e_sc_ok;
         l_StatusCode := e_sc_ok;
 
-        l_StatusCode <-- check_events_supported(p_endpoint_idx);
+        l_StatusCode <-- check_events_supported;
 
         IF l_StatusCode = e_sc_ok & p_value /= c_Variant_indet
         THEN

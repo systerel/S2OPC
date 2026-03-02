@@ -850,8 +850,7 @@ OPERATIONS
     ;
 
     StatusCode_service, monitoredItemPointer, monitoredItemId, filterResult <-- create_monitored_item
-       (p_endpoint_idx,
-        p_subscription,
+       (p_subscription,
         p_nid,
         p_aid,
         p_indexRange,
@@ -866,8 +865,6 @@ OPERATIONS
         p_discardOldest,
         p_queueSize) =
     PRE
-        p_endpoint_idx : t_endpoint_config_idx_i &
-        p_endpoint_idx : t_endpoint_config_idx &
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
         p_nid : t_NodeId_i &
@@ -956,10 +953,8 @@ OPERATIONS
     ;
 
     p_sc, p_filterResult, p_revSamplingItv, p_revQueueSize
-      <-- modify_monitored_item (p_endpoint_idx, p_subscription, p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
+      <-- modify_monitored_item (p_subscription, p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
     PRE
-        p_endpoint_idx : t_endpoint_config_idx_i &
-        p_endpoint_idx : t_endpoint_config_idx &
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
         p_mi_id : t_monitoredItemId_i &

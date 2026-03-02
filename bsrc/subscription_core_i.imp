@@ -1457,8 +1457,7 @@ OPERATIONS
     ;
 
     StatusCode_service, monitoredItemPointer, monitoredItemId, filterResult <-- create_monitored_item
-       (p_endpoint_idx,
-        p_subscription,
+       (p_subscription,
         p_nid,
         p_aid,
         p_indexRange,
@@ -1485,7 +1484,7 @@ OPERATIONS
         monitoredItemPointer := c_monitoredItemPointer_indet;
         monitoredItemId := c_monitoredItemId_indet;
         /* Check constraints on node for MI filter */
-        StatusCode_service, l_filterCtx, filterResult, l_isEvent <-- check_monitored_item_filter_valid_and_fill_result (p_endpoint_idx, p_nid, p_aid, p_filter, p_value);
+        StatusCode_service, l_filterCtx, filterResult, l_isEvent <-- check_monitored_item_filter_valid_and_fill_result (p_nid, p_aid, p_filter, p_value);
         /* Create monitored item */
         IF StatusCode_service = e_sc_ok
         THEN
@@ -1575,7 +1574,7 @@ OPERATIONS
     ;
 
     p_sc, p_filterResult, p_revSamplingItv, p_revQueueSize
-      <-- modify_monitored_item (p_endpoint_idx, p_subscription, p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
+      <-- modify_monitored_item (p_subscription, p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
     VAR
         bres,
         l_monitoredItemPointer,
@@ -1614,7 +1613,7 @@ OPERATIONS
             IF l_isExpectedSubId = TRUE
             THEN
                 /* Check constraints on node for MI filter */
-                p_sc, l_filterCtx, p_filterResult, l_isEvent  <-- check_monitored_item_filter_valid_and_fill_result (p_endpoint_idx, l_nid, l_aid, p_filter, c_Variant_indet)
+                p_sc, l_filterCtx, p_filterResult, l_isEvent  <-- check_monitored_item_filter_valid_and_fill_result (l_nid, l_aid, p_filter, c_Variant_indet)
             END
             ;
             IF l_isExpectedSubId = TRUE & p_sc = e_sc_ok

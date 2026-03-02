@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 15/01/2026 14:05:44
+ Date                 : 02/03/2026 17:28:01
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -261,8 +261,7 @@ void subscription_mgr__local_treat_create_monitored_item_index(
                      subscription_mgr__l_queueSize,
                      &subscription_mgr__l_revSamplingItv,
                      &subscription_mgr__l_revQueueSize);
-                  subscription_core__create_monitored_item(subscription_mgr__l_endpoint_config_idx,
-                     subscription_mgr__p_subscription,
+                  subscription_core__create_monitored_item(subscription_mgr__p_subscription,
                      subscription_mgr__l_nid,
                      subscription_mgr__l_aid,
                      subscription_mgr__l_indexRange,
@@ -699,7 +698,6 @@ void subscription_mgr__create_notification_on_monitored_items_if_node_changed(
 }
 
 void subscription_mgr__fill_response_subscription_modify_monitored_items(
-   const constants__t_endpoint_config_idx_i subscription_mgr__p_endpoint_idx,
    const constants__t_subscription_i subscription_mgr__p_subscription,
    const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
    const constants__t_msg_i subscription_mgr__p_req_msg,
@@ -739,8 +737,7 @@ void subscription_mgr__fill_response_subscription_modify_monitored_items(
             &subscription_mgr__l_discardOldest,
             &subscription_mgr__l_queueSize);
          if (subscription_mgr__l_bres == true) {
-            subscription_core__modify_monitored_item(subscription_mgr__p_endpoint_idx,
-               subscription_mgr__p_subscription,
+            subscription_core__modify_monitored_item(subscription_mgr__p_subscription,
                subscription_mgr__l_id,
                subscription_mgr__p_tsToReturn,
                subscription_mgr__l_clientHandle,
@@ -1328,7 +1325,6 @@ void subscription_mgr__treat_subscription_modify_monitored_items_req(
       constants_statuscodes_bs__t_StatusCode_i subscription_mgr__l_sc;
       constants__t_subscription_i subscription_mgr__l_subscription;
       t_bool subscription_mgr__l_valid_subscription;
-      constants__t_endpoint_config_idx_i subscription_mgr__l_endpoint_config_idx;
       constants__t_TimestampsToReturn_i subscription_mgr__l_timestampToRet;
       t_entier4 subscription_mgr__l_nb_monitored_items;
       t_bool subscription_mgr__l_bres;
@@ -1342,19 +1338,13 @@ void subscription_mgr__treat_subscription_modify_monitored_items_req(
          subscription_core__is_valid_subscription_on_session(subscription_mgr__p_session,
             subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
-         session_mgr__session_get_endpoint_config(subscription_mgr__p_session,
-            &subscription_mgr__l_endpoint_config_idx);
-         channel_mgr__is_valid_endpoint_config_idx(subscription_mgr__l_endpoint_config_idx,
-            &subscription_mgr__l_bres);
-         if ((subscription_mgr__l_valid_subscription == true) &&
-            (subscription_mgr__l_bres == true)) {
+         if (subscription_mgr__l_valid_subscription == true) {
             subscription_core__reset_subscription_LifetimeCounter(subscription_mgr__l_subscription);
             msg_subscription_monitored_item__alloc_msg_modify_monitored_items_resp_results(subscription_mgr__p_resp_msg,
                subscription_mgr__l_nb_monitored_items,
                &subscription_mgr__l_bres);
             if (subscription_mgr__l_bres == true) {
-               subscription_mgr__fill_response_subscription_modify_monitored_items(subscription_mgr__l_endpoint_config_idx,
-                  subscription_mgr__l_subscription,
+               subscription_mgr__fill_response_subscription_modify_monitored_items(subscription_mgr__l_subscription,
                   subscription_mgr__l_timestampToRet,
                   subscription_mgr__p_req_msg,
                   subscription_mgr__p_resp_msg,
