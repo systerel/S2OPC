@@ -57,6 +57,8 @@
 
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
+static const SOPC_NodeId serverCurrentTimeNodeId = SOPC_NODEID_NS0_NUMERIC(2258);
+
 /* ---------------------------------------------------------------------------
  *                          Manage server restart cycles
  * ---------------------------------------------------------------------------*/
@@ -89,6 +91,110 @@ static void SOPC_ClientConnectionEventCb(SOPC_ClientConnection* config,
 }
 
 static const char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
+
+/* Event management global variables and functions */
+#if S2OPC_EVENT_MANAGEMENT
+/* Notifier used for generated events in the test */
+static const SOPC_NodeId serverObjectId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server);
+/* Use a non-base event type to generate events */
+static const SOPC_NodeId conditionTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ConditionType);
+
+/* Simple subscription callback printing 1st notification element */
+static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subscription* subscription,
+                                                    SOPC_StatusCode status,
+                                                    SOPC_EncodeableType* notificationType,
+                                                    uint32_t nbNotifElts,
+                                                    const void* notification,
+                                                    uintptr_t* monitoredItemCtxArray)
+{
+    SOPC_UNUSED_ARG(subscription);
+    SOPC_UNUSED_ARG(monitoredItemCtxArray);
+    if (SOPC_IsGoodStatus(status) && nbNotifElts > 0)
+    {
+        if (&OpcUa_EventNotificationList_EncodeableType == notificationType)
+        {
+            const OpcUa_EventNotificationList* eventList = (const OpcUa_EventNotificationList*) notification;
+            printf("Received event notification:\n");
+            if (eventList->NoOfEvents > 0 && eventList->Events[0].NoOfEventFields > 0)
+            {
+                SOPC_Variant_Print(&(eventList->Events[0].EventFields[0]));
+            }
+        }
+        else if (&OpcUa_DataChangeNotification_EncodeableType == notificationType)
+        {
+            const OpcUa_DataChangeNotification* dataChangeList = (const OpcUa_DataChangeNotification*) notification;
+            printf("Received data change notification:\n");
+            if (dataChangeList->NoOfMonitoredItems > 0)
+            {
+                SOPC_Variant_Print(&(dataChangeList->MonitoredItems[0].Value.Value));
+            }
+        }
+    }
+}
+
+static void create_monitored_item_event_and_data(const SOPC_ClientHelper_Subscription* subscription)
+{
+    OpcUa_CreateMonitoredItemsRequest* createMonItReq =
+        SOPC_CreateMonitoredItemsRequest_Create(0, 2, OpcUa_TimestampsToReturn_Both);
+    if (NULL == createMonItReq)
+    {
+        return;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    // [0] Set the event monitored item to create
+    status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(createMonItReq, 0, &serverObjectId,
+                                                                 SOPC_AttributeId_EventNotifier, NULL);
+
+    OpcUa_EventFilter* eventFilter = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        size_t nbWhereClauseElts = 0;
+        eventFilter = SOPC_MonitoredItem_CreateEventFilter(1, nbWhereClauseElts);
+    }
+
+    if (NULL != eventFilter)
+    {
+        SOPC_QualifiedName messagePath = SOPC_QUALIFIED_NAME(0, "Message");
+        status = SOPC_EventFilter_SetSelectClause(eventFilter, 0, &conditionTypeId, 1, &messagePath,
+                                                  SOPC_AttributeId_Value, NULL);
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        static const uint32_t queueSizeRequested = 1;
+        SOPC_ExtensionObject* extObj = SOPC_MonitoredItem_EventFilter(eventFilter);
+        SOPC_ASSERT(NULL != extObj);
+        status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
+            createMonItReq, 0, OpcUa_MonitoringMode_Reporting, 0, -1, extObj, queueSizeRequested, true);
+    }
+
+    // [1] Set the data monitored item to create
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(createMonItReq, 1, &serverCurrentTimeNodeId,
+                                                                     SOPC_AttributeId_Value, NULL);
+    }
+
+    // Create the monitored items
+    OpcUa_CreateMonitoredItemsResponse createMonItResp;
+    OpcUa_CreateMonitoredItemsResponse_Initialize(&createMonItResp);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_Subscription_CreateMonitoredItems(subscription, createMonItReq, 0, &createMonItResp);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_ASSERT(createMonItResp.NoOfResults == 2 && SOPC_IsGoodStatus(createMonItResp.Results[0].StatusCode) &&
+                        SOPC_IsGoodStatus(createMonItResp.Results[1].StatusCode));
+        }
+    }
+    OpcUa_CreateMonitoredItemsResponse_Clear(&createMonItResp);
+}
+#endif
 
 /*
  * Default client configuration loader (without XML configuration)
@@ -296,7 +402,7 @@ static void* AsyncReadThread(void* args)
         if (NULL != readReq)
         {
             SOPC_ReturnStatus st =
-                SOPC_ReadRequest_SetReadValueFromStrings(readReq, 0, "i=2258", SOPC_AttributeId_Value, NULL);
+                SOPC_ReadRequest_SetReadValue(readReq, 0, &serverCurrentTimeNodeId, SOPC_AttributeId_Value, NULL);
             if (SOPC_STATUS_OK == st)
             {
                 st = SOPC_ServerHelper_LocalServiceAsync(readReq, (uintptr_t) emptyContext);
@@ -307,6 +413,18 @@ static void* AsyncReadThread(void* args)
                 st = SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &readReq);
             }
         }
+#if S2OPC_EVENT_MANAGEMENT
+        // Generate an event
+        SOPC_Event* event = NULL;
+        SOPC_ReturnStatus eventStatus = SOPC_ServerHelper_CreateEvent(&conditionTypeId, &event);
+        if (SOPC_STATUS_OK == eventStatus)
+        {
+            SOPC_LocalizedText lt = SOPC_LOCALIZED_TEXT("en-US", "EVENT GENERATED BY SERVER");
+            eventStatus = SOPC_Event_SetMessage(event, &lt);
+            SOPC_ASSERT(SOPC_STATUS_OK == eventStatus);
+            eventStatus = SOPC_ServerHelper_TriggerEvent(&serverObjectId, event, 0, 0, 0);
+        }
+#endif
         SOPC_Sleep(UPDATE_STOP_TIMEOUT_MS);
     }
     return NULL;
@@ -772,6 +890,22 @@ int main(int argc, char* argv[])
                                    ".%" PRIu8 "\n",
                                    nbFullConfigCount, nbServerConfigCount, nbRestartCountRem, nbReConnectCountRem);
                         }
+#if S2OPC_EVENT_MANAGEMENT
+                        // Create a subscription to receive events
+                        if (SOPC_STATUS_OK == status)
+                        {
+                            OpcUa_CreateSubscriptionRequest* createSubParams =
+                                SOPC_CreateSubscriptionRequest_CreateDefault();
+
+                            const SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelper_CreateSubscription(
+                                secureConnection, createSubParams, SOPC_Client_SubscriptionNotification_Cb, 0);
+                            if (SOPC_STATUS_OK == status)
+                            {
+                                create_monitored_item_event_and_data(subscription);
+                            }
+                            SOPC_Sleep(UPDATE_STOP_TIMEOUT_MS);
+                        }
+#endif
                         if (SOPC_STATUS_OK == status)
                         {
                             status = SOPC_ClientHelper_Disconnect(&secureConnection);
