@@ -125,7 +125,8 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
  *                  (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
  *
  * \param userContext  User defined context that will be provided with the corresponding response in
- *                     ::SOPC_LocalServiceAsyncResp_Fct
+ *                     ::SOPC_LocalServiceAsyncResp_Fct. When allocated, its memory management is up to the caller
+ *                     and shall be managed in the ::SOPC_LocalServiceAsyncResp_Fct callback to avoid memory leak.
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE if the server is not running.
  *
