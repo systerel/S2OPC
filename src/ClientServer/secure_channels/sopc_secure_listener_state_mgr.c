@@ -36,6 +36,7 @@
 #include "sopc_secure_connection_state_mgr_internal.h"
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config_internal.h"
+#include "sopc_helper_string.h"
 
 #include "opcua_statuscodes.h"
 
@@ -684,7 +685,8 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                     // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
                     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
                     // Notify Sockets layer to create the listener
-                    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, eltId, (uintptr_t) epConfig->endpointURL,
+                    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, eltId,
+                                              (uintptr_t) SOPC_strdup(epConfig->endpointURL),
                                               SOPC_LISTENER_LISTEN_ALL_INTERFACES);
                     SOPC_GCC_DIAGNOSTIC_RESTORE
                 }
@@ -746,7 +748,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                 // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
                 SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
                 // Notify Sockets layer to create the listener
-                SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, eltId, (uintptr_t) reverseEndpointURL,
+                SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, eltId, (uintptr_t) SOPC_strdup(reverseEndpointURL),
                                           SOPC_LISTENER_LISTEN_ALL_INTERFACES);
                 SOPC_GCC_DIAGNOSTIC_RESTORE
             }

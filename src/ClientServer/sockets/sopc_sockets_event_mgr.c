@@ -545,10 +545,11 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
                                (char*) params, auxParam ? "true" : "false");
         /*
         id = endpoint description config index,
-        params = (const char*) URI,
+        params = (char*) URI,
         auxParms = (bool) listenAllInterfaces
         */
         socketElt = SOPC_SocketsEventMgr_CreateServerSocket((const char*) params, (bool) auxParam);
+        SOPC_Free((void*) params);
         if (NULL != socketElt)
         {
             socketElt->connectionId = eltId;
@@ -586,9 +587,10 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
                                "SocketEvent: SOCKET_CREATE_CONNECTION scIdx=%" PRIu32 " URI=%s", eltId, (char*) params);
         /*
         id = secure channel connection index,
-        params = (const char*) URI
+        params = (char*) URI
         */
         socketElt = SOPC_SocketsEventMgr_CreateClientSocket((const char*) params);
+        SOPC_Free((void*) params);
         if (NULL != socketElt)
         {
             socketElt->connectionId = eltId;

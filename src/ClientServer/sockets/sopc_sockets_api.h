@@ -41,7 +41,7 @@ typedef enum
                                    configuration index, provided URI data and listening all network interfaces
                                    depending on flag value.<br/>
                                    id = endpoint description config index <br/>
-                                   params = (const char*) URI <br/>
+                                   params = (char*) URI <br/>
                                    auxParam = (bool) listenAllInterfaces
                                  */
     SOCKET_ACCEPTED_CONNECTION,   /**<
@@ -54,7 +54,7 @@ typedef enum
                                  Requests to create a new socket for the given secure channel connection index
                                  and with provided URI data<br/>
                                  id = secure channel connection index <br/>
-                                 params = (const char*) URI
+                                 params = (char*) URI
                                */
     SOCKET_CLOSE,             /**<
                                  Requests to close the socket and clear the data for the given socket index<br/>

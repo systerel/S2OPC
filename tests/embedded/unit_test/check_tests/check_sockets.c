@@ -157,7 +157,8 @@ void suite_test_check_sockets(int* index)
 
     // const URI is not modified but generic API cannot guarantee it
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, endpointDescConfigId, (uintptr_t) uri, (uint32_t) true);
+    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, endpointDescConfigId, (uintptr_t) SOPC_strdup(uri),
+                              (uint32_t) true);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     SOPC_Free(expect_event(SOCKET_LISTENER_OPENED, endpointDescConfigId));
@@ -166,7 +167,8 @@ void suite_test_check_sockets(int* index)
     // Create client connection
     // const URI is not modified but generic API cannot guarantee it
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CONNECTION, clientSecureChannelConnectionId, (uintptr_t) uri, 0);
+    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CONNECTION, clientSecureChannelConnectionId, (uintptr_t) SOPC_strdup(uri),
+                              0);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /*

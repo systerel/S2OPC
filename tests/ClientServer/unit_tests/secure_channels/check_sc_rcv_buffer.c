@@ -140,14 +140,19 @@ static void establishSC(void)
 
     ck_assert(socketEvent != NULL);
 
-    res = strcmp(sEndpointUrl, (char*) socketEvent->params);
-    if (res != 0)
+    if (NULL != socketEvent)
     {
-        status = SOPC_STATUS_NOK;
-        printf("SC_Rcv_Buffer: Unexpected SOCKET_CREATE_CONNECTION params\n");
+        ck_assert_ptr_nonnull((void*) socketEvent->params);
+        res = strcmp(sEndpointUrl, (char*) socketEvent->params);
+        if (res != 0)
+        {
+            status = SOPC_STATUS_NOK;
+            printf("SC_Rcv_Buffer: Unexpected SOCKET_CREATE_CONNECTION params\n");
+        }
+        SOPC_Free((void*) socketEvent->params);
+        SOPC_Free(socketEvent);
+        socketEvent = NULL;
     }
-    SOPC_Free(socketEvent);
-    socketEvent = NULL;
     ck_assert(SOPC_STATUS_OK == status);
 
     // Simulate events from socket
@@ -343,7 +348,8 @@ START_TEST(test_unexpected_opn_resp_msg)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     printf(
-        "SC_Rcv_Buffer: Simulate unexpected OPN resp message received on socket (valid SC ID / token / SN / req Id)\n");
+        "SC_Rcv_Buffer: Simulate unexpected OPN resp message received on socket (valid SC ID / token / SN / req "
+        "Id)\n");
 
     // Simulate OPN resp msg received on connected SC (valid SC ID / token / SN / req Id)
     // SC id = 833084066 / tokenId = 1778696511 / SN = 2 / requestId = 2 received on socket
@@ -476,8 +482,8 @@ START_TEST(test_unexpected_receive_too_many_intermediate_chunks)
     const uint8_t nb_intermediate_chunks = SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS;
     simulate_N_chunks('C', 2, nb_intermediate_chunks, false);
 
-    // Since MAX_NB_CHUNKS intermediate chunks were received no more chunks can be received and message is incomplete
-    // SC will be closed
+    // Since MAX_NB_CHUNKS intermediate chunks were received no more chunks can be received and message is
+    // incomplete SC will be closed
 
     SOPC_ReturnStatus status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpMessageTooLarge);
     ck_assert(SOPC_STATUS_OK == status);
@@ -669,8 +675,8 @@ START_TEST(test_expected_forced_send_err)
                                      newPendingRequestHandle);
 
     // Check first message is a partial chunk of maxSendingBufferSize length
-    socketEvent =
-        Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0); // Note: socket is still scConfigIdx (copy of config)
+    socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx,
+                                              0); // Note: socket is still scConfigIdx (copy of config)
     ck_assert_ptr_nonnull(socketEvent);
     ck_assert_ptr_nonnull((void*) socketEvent->params);
 
@@ -689,7 +695,8 @@ START_TEST(test_expected_forced_send_err)
     SOPC_StatusCode errorStatus;
     status = SOPC_UInt32_Read(&errorStatus, buffer, 0);
     ck_assert(SOPC_STATUS_OK == status);
-    ck_assert_uint_eq(errorStatus, OpcUa_BadTcpMessageTooLarge); // Tcp error level (initial status code not authorized)
+    ck_assert_uint_eq(errorStatus,
+                      OpcUa_BadTcpMessageTooLarge); // Tcp error level (initial status code not authorized)
 
     SOPC_Buffer_Delete(buffer);
     SOPC_Free(socketEvent);

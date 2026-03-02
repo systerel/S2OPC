@@ -244,15 +244,19 @@ static void establishSC(void)
                                               0); // scConfigIdx == scIdx since there is only 1 SC
 
     ck_assert(socketEvent != NULL);
-
-    res = strcmp(sEndpointUrl, (char*) socketEvent->params);
-    if (res != 0)
+    if (NULL != socketEvent)
     {
-        printf("SC_Rcv_Buffer: Unexpected SOCKET_CREATE_CONNECTION params\n");
-        ck_assert(false);
+        ck_assert_ptr_nonnull((void*) socketEvent->params);
+        res = strcmp(sEndpointUrl, (char*) socketEvent->params);
+        if (res != 0)
+        {
+            printf("SC_Rcv_Buffer: Unexpected SOCKET_CREATE_CONNECTION params\n");
+            ck_assert(false);
+        }
+        SOPC_Free((void*) socketEvent->params);
+        SOPC_Free(socketEvent);
+        socketEvent = NULL;
     }
-    SOPC_Free(socketEvent);
-    socketEvent = NULL;
 
     // Simulate event from socket
     SOPC_EventHandler_Post(socketsEventHandler, SOCKET_CREATED, scConfigIdx, (uintptr_t) NULL, scConfigIdx);
