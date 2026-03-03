@@ -307,10 +307,11 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
             treatEvent = true;
         }
         break;
-    /* Note: subscription/session closure and timers are related to the server side
-             but do not use the server configuration. Moreover those are necessary to terminate
-             the opened sessions / subscriptions in case of Server clear only
-             since those are not automatically closed for now in this case.
+    /* Note: since sessions are now closed by SOPC_HelperInternal_ActualShutdownServer on Stop
+             and clear_server_configuration_context on clear, all
+             sessions / subscriptions  should be terminated when configuration has been cleared.
+             But avoid inhibiting timeout and closing operations of sessions/subscriptions
+             as those do not use the configuration at all.
     case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
     case SE_TO_SE_SERVER_ASYNC_CLOSE_SUBSCRIPTION:
     case TIMER_SE_EVAL_SESSION_TIMEOUT:

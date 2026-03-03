@@ -1871,9 +1871,10 @@ OPERATIONS
     clear_server_configuration_context =
     BEGIN
         // Note: we cannot call subscription UNINIT because id does need an INIT if server is reconfigured.
-        //       But this is not necessary because closing the sessions will also close the subscriptions
         // subscription_mgr_UNINITIALISATION;
-        // session_mgr_UNINITIALISATION; // NOK => both CLIENT and SERVER (TODO: FINALIZED in future commit managing close server sessions)
+        // session_mgr_UNINITIALISATION; => both CLIENT and SERVER but we only want server sessions here
+        // => Use close server sessions instead and closing the sessions will also close the subscriptions
+        server_close_sessions (c_session_indet);
 
         service_set_view_UNINITIALISATION; // OK: B implementation only
         service_set_discovery_server_UNINITIALISATION (TRUE); // OK: clear only is set to avoid needing new INIT

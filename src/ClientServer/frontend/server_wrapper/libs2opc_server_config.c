@@ -624,8 +624,6 @@ void SOPC_ServerConfigHelper_Clear(void)
         // Remove all endpoint configurations from toolkit to be able to add new ones later
         status = SOPC_ToolkitServer_RemoveAllEndpointsConfig();
     }
-    // TODO: in the future we should manage to close all sessions / subscriptions here
-    //       (only done in complete services layer clearing for now) => will be closed on their respective timeout
 
     // Ensures event callback will not be executed after this point, or will return immediately
     SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);

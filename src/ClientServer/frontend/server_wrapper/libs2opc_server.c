@@ -531,6 +531,7 @@ static void SOPC_HelperInternal_ActualShutdownServer(void)
     {
         SOPC_ToolkitServer_AsyncCloseEndpoint(sopc_server_helper_config.endpointIndexes[i]);
     }
+    SOPC_ToolkitServer_AsyncCloseSessions(0);
 }
 
 SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedCb)

@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 09/03/2026 15:13:31
+ Date                 : 09/03/2026 16:32:16
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -2042,6 +2042,7 @@ void service_mgr__internal_server_inactive_session_prio_event(
 }
 
 void service_mgr__clear_server_configuration_context(void) {
+   session_mgr__server_close_sessions(constants__c_session_indet);
    service_set_view__service_set_view_UNINITIALISATION();
    service_set_discovery_server__service_set_discovery_server_UNINITIALISATION(true);
    address_space_itf__address_space_UNINITIALISATION();
