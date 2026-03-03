@@ -203,13 +203,13 @@ static struct
 
 /* This callback implements the main loop of the publisher which fetches data to publish, encode them and send them.
  * It computes when it should wake up and sleeps until then (if not past) */
-static void* thread_start_publish(void* arg);
+static void* Thread_Start_Publish(void* arg);
 
 /**
  * Sends a publish message
  * /param context The message context to send
  */
-static void MessageCtx_send_publish_message(MessageCtx* context);
+static void MessageCtx_Send_Publish_Message(MessageCtx* context);
 
 /**
  * @brief Initialize dataSetField with empty variants from WriterGroup information. This function is intended to be used
@@ -221,14 +221,14 @@ static void MessageCtx_send_publish_message(MessageCtx* context);
  *
  * @return SOPC_ReturnStatus SOPC_STATUS_OK if success, SOPC_STATUS_NOK otherwise
  */
-static SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_NetworkMessage* message,
+static SOPC_ReturnStatus Initialize_DataSetField_From_WriterGroup(SOPC_Dataset_NetworkMessage* message,
                                                                   const SOPC_WriterGroup* group);
 
 /**
  * @brief Send keep alive message for acyclic publisher
  *
  */
-static void send_keepAlive_message(MessageCtx* context);
+static void Send_KeepAlive_Message(MessageCtx* context);
 
 // Clear pub scheduler context
 static void SOPC_PubScheduler_Context_Clear(bool isPubThreadStarted)
@@ -319,14 +319,14 @@ static void MessageCtx_Array_Clear(void)
     }
 }
 
-static void clear_dataSetMessageCtx_array(void* context)
+static void Clear_DataSetMessageCtx_Array(void* context)
 {
     SOPC_DataSetMessageCtx_t* dataSetMessageCtx = (SOPC_DataSetMessageCtx_t*) context;
     SOPC_PubSourceVariable_SourceVariableCtx_Delete(&dataSetMessageCtx->sourceVariables);
 }
 
 /* Retrieve the pointer to the securityGroup stored in the array if found */
-static SOPC_PubSub_SecurityType* findSecurityGroupWithId(const char* securityGroupId)
+static SOPC_PubSub_SecurityType* SecurityGroup_FindWithId(const char* securityGroupId)
 {
     if (NULL == securityGroupId)
     {
@@ -402,7 +402,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         context->nbOfDsmActive = 0;
         SOPC_HighRes_TimeReference_Copy(context->next_timeout, tRef);
         context->dataSetMessageCtx =
-            SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, clear_dataSetMessageCtx_array);
+            SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, Clear_DataSetMessageCtx_Array);
         result = (NULL != context->dataSetMessageCtx);
     }
 
@@ -479,7 +479,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     if (result && (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode))
     {
         const char* securityGroupId = SOPC_WriterGroup_Get_SecurityGroupId(group);
-        context->security = findSecurityGroupWithId(securityGroupId);
+        context->security = SecurityGroup_FindWithId(securityGroupId);
         // Security group shall already be initialize and fill.
         SOPC_ASSERT(NULL != context->security);
     }
@@ -496,7 +496,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         else
         {
             // Initialise dataSetFields with empty values
-            status = initialize_DataSetField_from_WriterGroup(context->message, group);
+            status = Initialize_DataSetField_From_WriterGroup(context->message, group);
             result = (SOPC_STATUS_OK == status);
             if (result)
             {
@@ -528,7 +528,7 @@ static void SecurityGroup_Clear(void* securityGroup)
     SOPC_PubSub_Security_Clear(securityGroup);
 }
 
-static bool securityGroup_Initialize(SOPC_PubSub_SecurityType* securityGroup, const SOPC_WriterGroup* group)
+static bool SecurityGroup_Initialize(SOPC_PubSub_SecurityType* securityGroup, const SOPC_WriterGroup* group)
 {
     if (NULL == securityGroup)
     {
@@ -564,7 +564,7 @@ static bool securityGroup_Initialize(SOPC_PubSub_SecurityType* securityGroup, co
     return res;
 }
 
-static bool securityGroups_Initialize_Array(const SOPC_PubSubConfiguration* config, const uint32_t nbConnection)
+static bool SecurityGroups_Initialize_Array(const SOPC_PubSubConfiguration* config, const uint32_t nbConnection)
 {
     bool res = true;
     SOPC_PubSub_SecurityType securityGroup;
@@ -592,11 +592,11 @@ static bool securityGroups_Initialize_Array(const SOPC_PubSubConfiguration* conf
                 else
                 {
                     // Compare with all already existing securityGroup to avoid duplication
-                    SOPC_PubSub_SecurityType* security = findSecurityGroupWithId(securityGroupId);
+                    SOPC_PubSub_SecurityType* security = SecurityGroup_FindWithId(securityGroupId);
                     if (security == NULL)
                     {
                         // Initialize securityGroup and append to array
-                        res = securityGroup_Initialize(&securityGroup, group);
+                        res = SecurityGroup_Initialize(&securityGroup, group);
                         if (res)
                         {
                             res = SOPC_Array_Append(pubSchedulerCtx.securityGroups, securityGroup);
@@ -639,7 +639,8 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
     return result;
 }
 
-static void updateSecurityGroup(SOPC_PubSub_SecurityType* security, const SOPC_WriterGroup* group)
+/** Update the security group from the SKS if needed and prepare it for signing and encryption process */
+static void SecurityGroup_Update(SOPC_PubSub_SecurityType* security, const SOPC_WriterGroup* group)
 {
     if (NULL == security || NULL == group)
     {
@@ -703,7 +704,7 @@ static void updateSecurityGroup(SOPC_PubSub_SecurityType* security, const SOPC_W
     }
 }
 
-static void MessageCtx_send_publish_message(MessageCtx* context)
+static void MessageCtx_Send_Publish_Message(MessageCtx* context)
 {
     /* Steps to send a message
      * - retrieve the NetworkMessage
@@ -838,7 +839,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     {
         if (NULL != security)
         {
-            updateSecurityGroup(security, group);
+            SecurityGroup_Update(security, group);
         }
 
         // Encode with the configured message format
@@ -911,7 +912,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     }
 }
 
-static void send_keepAlive_message(MessageCtx* context)
+static void Send_KeepAlive_Message(MessageCtx* context)
 {
     SOPC_ASSERT(NULL != context);
     SOPC_PubSub_SecurityType* security = context->security;
@@ -932,7 +933,7 @@ static void send_keepAlive_message(MessageCtx* context)
 
     if (NULL != security)
     {
-        updateSecurityGroup(security, group);
+        SecurityGroup_Update(security, group);
     }
     SOPC_Buffer* buffer = NULL;
     SOPC_Buffer* buffer_payload = NULL;
@@ -976,7 +977,7 @@ static void send_keepAlive_message(MessageCtx* context)
     SOPC_Buffer_Delete(buffer);
 }
 
-static void* thread_start_publish(void* arg)
+static void* Thread_Start_Publish(void* arg)
 {
     SOPC_UNUSED_ARG(arg);
 
@@ -1010,14 +1011,14 @@ static void* thread_start_publish(void* arg)
                 offset = -1;
                 if (context->nbOfDsmActive > 0)
                 {
-                    send_keepAlive_message(context);
+                    Send_KeepAlive_Message(context);
                 }
             }
             else
             {
                 if (context->nbOfDsmActive > 0)
                 {
-                    MessageCtx_send_publish_message(context);
+                    MessageCtx_Send_Publish_Message(context);
                 }
             }
 
@@ -1105,7 +1106,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
 
     if (SOPC_STATUS_OK == resultSOPC)
     {
-        if (!securityGroups_Initialize_Array(config, nbConnection))
+        if (!SecurityGroups_Initialize_Array(config, nbConnection))
         {
             resultSOPC = SOPC_STATUS_NOK;
         }
@@ -1152,11 +1153,11 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.quit, false);
         if (0 == threadPriority && -1 == SOPC_PUBSUB_CPU_AFFINITY)
         {
-            resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.thPublisher, &thread_start_publish, NULL, "Publisher");
+            resultSOPC = SOPC_Thread_Create(&pubSchedulerCtx.thPublisher, &Thread_Start_Publish, NULL, "Publisher");
         }
         else
         {
-            resultSOPC = SOPC_Thread_CreatePrioritized(&pubSchedulerCtx.thPublisher, &thread_start_publish, NULL,
+            resultSOPC = SOPC_Thread_CreatePrioritized(&pubSchedulerCtx.thPublisher, &Thread_Start_Publish, NULL,
                                                        threadPriority, SOPC_PUBSUB_CPU_AFFINITY, "Publisher");
         }
         if (SOPC_STATUS_OK == resultSOPC)
@@ -1473,7 +1474,7 @@ bool SOPC_PubScheduler_AcyclicSend(SOPC_Conf_PublisherId* publisherId, uint16_t 
     SOPC_HighRes_TimeReference_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
     if (ctx->nbOfDsmActive > 0)
     {
-        MessageCtx_send_publish_message(ctx);
+        MessageCtx_Send_Publish_Message(ctx);
     }
     status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.sendingLock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -1494,7 +1495,7 @@ SOPC_ReturnStatus SOPC_PubScheduler_Disable_DataSetMessage(SOPC_Conf_PublisherId
     return SOPC_PubScheduler_Set_EnableEmission_DataSetMessage(pubId, writerGroupId, dataSetWriterId, false);
 }
 
-SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_NetworkMessage* networkMessage,
+SOPC_ReturnStatus Initialize_DataSetField_From_WriterGroup(SOPC_Dataset_LL_NetworkMessage* networkMessage,
                                                            const SOPC_WriterGroup* group)
 {
     if (NULL == networkMessage || NULL == group)
