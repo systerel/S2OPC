@@ -209,8 +209,11 @@ OPERATIONS
     END
     ;
 
-    service_register_server2_UNINITIALISATION =
-    BEGIN
+    service_register_server2_UNINITIALISATION (clearOnly) =
+    PRE
+        /* Flag to indicate if we want to do only clear or fully deallocate */
+        clearOnly : BOOL
+    THEN
         skip
     END
     ;

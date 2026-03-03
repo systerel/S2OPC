@@ -487,9 +487,9 @@ OPERATIONS
     END
     ;
 
-    service_set_discovery_server_UNINITIALISATION =
+    service_set_discovery_server_UNINITIALISATION (clearOnly) =
     BEGIN
-        service_register_server2_UNINITIALISATION
+        service_register_server2_UNINITIALISATION (clearOnly)
     END
 
 END

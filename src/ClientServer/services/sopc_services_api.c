@@ -251,25 +251,27 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
     SOPC_UNUSED_ARG(id);
     SOPC_UNUSED_ARG(auxParam);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool bParam = false;
     bool treatEvent = false;
     switch (event)
     {
     case APP_TO_SE_SERVER_CONFIGURED:
+        bParam = (bool) params;
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: APP_TO_SE_SERVER_CONFIGURED active=%" PRIuPTR, params);
-        if (isServerConfigurationLocked == (bool) params)
+        if (isServerConfigurationLocked == bParam)
         {
             SOPC_Logger_TraceWarning(
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "ServicesMgr: APP_TO_SE_SERVER_CONFIGURED IGNORED: received with same lock state=%s",
-                ((bool) params) ? "locked" : "unlocked");
+                bParam ? "locked" : "unlocked");
         }
         else
         {
-            status = SOPC_ToolkitServer_UsingLockedConfig((bool) params);
+            status = SOPC_ToolkitServer_UsingLockedConfig(bParam);
             if (SOPC_STATUS_OK == status)
             {
-                isServerConfigurationLocked = (bool) params;
+                isServerConfigurationLocked = bParam;
                 // Forward to SC layer
                 status = SOPC_SecureChannels_EnqueueEvent(SE_TO_SCS_SERVER_CONFIGURED, 0, (uintptr_t) params, 0);
                 SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -279,7 +281,12 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "ServicesMgr: APP_TO_SE_SERVER_CONFIGURED FAILED: error in setting "
                                        "server config as used: %s",
-                                       ((bool) params) ? "locked" : "unlocked");
+                                       bParam ? "locked" : "unlocked");
+            }
+            if (!isServerConfigurationLocked)
+            {
+                // Clear server context in B model if configuration is unlocked (not configured anymore)
+                io_dispatch_mgr__clear_server_configuration_context();
             }
         }
         break;

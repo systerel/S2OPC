@@ -49,6 +49,14 @@ OPERATIONS
     END
     ;
 
+    clear_default_role_permissions =
+    BEGIN
+        init_default_role_permissions_bs := FALSE ||
+        a_default_role_permissions_bs :: {{}} ||
+        nbr_default_role_permissions_bs := 0
+    END
+    ;
+
     p_res <-- is_default_role_permissions_initialized =
     BEGIN
         p_res := bool(init_default_role_permissions_bs = TRUE)

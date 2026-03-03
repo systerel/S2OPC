@@ -136,7 +136,8 @@ OPERATIONS
     /* Operations on set */
     reset_registered_server2_set =
     BEGIN
-        d_init_set
+        d_init_set ||
+        d_init_set_it
     END
     ;
 
@@ -253,7 +254,8 @@ OPERATIONS
 
     service_register_server2_set_bs_UNINITIALISATION =
     BEGIN
-        skip
+        d_init_set ||
+        d_init_set_it
     END
 
 END

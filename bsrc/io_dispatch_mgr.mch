@@ -415,13 +415,18 @@ OPERATIONS
         bres :: BOOL // indicates if close client channel process is engaged (=> p_close_ctx ownership to B model)
     END;
 
-    // TODO: add close all sessions / subscriptions
-
     bres <-- close_all_active_connections (p_clientOnly) =
     PRE
         p_clientOnly : BOOL
     THEN
         bres :: BOOL // indicates if active connection will be closed
+    END
+    ;
+
+    /* Clear server configuration associated context */
+    clear_server_configuration_context =
+    BEGIN
+        skip
     END
     ;
 

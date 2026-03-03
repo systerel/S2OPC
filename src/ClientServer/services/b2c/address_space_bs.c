@@ -48,8 +48,9 @@
 #include "util_b2c.h"
 #include "util_variant.h"
 
-bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
+
+static bool sopc_addressSpace_configured = false;
 
 #define GENERATED_NODE_NAMESPACE_INDEX 1
 
@@ -57,12 +58,17 @@ SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
 static bool is_inputArgument(const OpcUa_VariableNode* node);
 
-void SOPC_AddressSpace_Check_Configured(void)
+void SOPC_AddressSpace_SetConfigured(SOPC_AddressSpace* addressSpace)
 {
-    if (sopc_addressSpace_configured)
-    {
-        SOPC_ASSERT(NULL != address_space_bs__nodes);
-    }
+    SOPC_ASSERT(NULL != addressSpace);
+    address_space_bs__nodes = addressSpace;
+    sopc_addressSpace_configured = true;
+}
+
+bool SOPC_AddressSpace_Check_Configured(void)
+{
+    SOPC_ASSERT(!sopc_addressSpace_configured || NULL != address_space_bs__nodes);
+    return sopc_addressSpace_configured;
 }
 
 /*------------------------
@@ -76,7 +82,11 @@ void address_space_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-void address_space_bs__address_space_bs_UNINITIALISATION(void) {}
+void address_space_bs__address_space_bs_UNINITIALISATION(void)
+{
+    address_space_bs__nodes = NULL;
+    sopc_addressSpace_configured = false;
+}
 
 static void generate_notifs_after_address_space_access(SOPC_AddressSpaceAccessOperations* operations)
 {

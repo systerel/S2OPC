@@ -103,9 +103,13 @@ OPERATIONS
     END
     ;
 
-    service_register_server2_offline_bs_UNINITIALISATION =
-    BEGIN
-        skip
+    service_register_server2_offline_bs_UNINITIALISATION (clearOnly) =
+    PRE
+        /* Flag to indicate if we want to do only clear or fully deallocate */
+        clearOnly : BOOL
+    THEN
+        s_RegisteredServer2_offline :( s_RegisteredServer2_offline <: NAT & s_RegisteredServer2_offline = {}) ||
+        d_init_set_it
     END
 
 END

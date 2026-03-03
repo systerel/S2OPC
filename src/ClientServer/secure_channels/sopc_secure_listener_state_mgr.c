@@ -36,7 +36,6 @@
 #include "sopc_secure_connection_state_mgr_internal.h"
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config_internal.h"
-#include "sopc_helper_string.h"
 
 #include "opcua_statuscodes.h"
 

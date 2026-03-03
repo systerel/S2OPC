@@ -265,10 +265,9 @@ SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
         if (!tConfig.serverConfigLocked)
         {
             // Check an address space is defined in case a endpoint configuration exists
-            if (tConfig.epConfigIdxMax > 0 && sopc_addressSpace_configured)
+            if (tConfig.epConfigIdxMax > 0 && SOPC_AddressSpace_Check_Configured())
             {
                 tConfig.serverConfigLocked = true;
-                SOPC_AddressSpace_Check_Configured();
                 status = SOPC_ToolkitServer_SecurityCheck();
             }
             else
@@ -357,8 +356,6 @@ void SOPC_Toolkit_Clear(void)
         {
             SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
             tConfig.appAddSpaceNotifCb = NULL;
-            address_space_bs__nodes = NULL;
-            sopc_addressSpace_configured = false;
             sopc_appEventCallback = NULL;
             // Reset values to init value
             tConfig.initDone = false;
@@ -367,6 +364,8 @@ void SOPC_Toolkit_Clear(void)
             tConfig.reverseEpConfigIdxMax = 0;
             tConfig.serverScLastConfigIdx = 0;
             tConfig.epConfigIdxMax = 0;
+            // Note: done by APP_TO_SE_UNINITIALIZE_SERVICES event/ io_dispatch_mgr__UNINITIALISATION operation
+            // address_space_bs__nodes = NULL;
         }
         SOPC_Mutex_Unlock(&tConfig.mut);
         SOPC_Condition_Clear(&tConfig.serverConfigCond);
@@ -690,13 +689,6 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
     return res;
 }
 
-static void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
-{
-    SOPC_ASSERT(NULL != addressSpace);
-    address_space_bs__nodes = addressSpace;
-    sopc_addressSpace_configured = true;
-}
-
 SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -706,10 +698,10 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* ad
         if (tConfig.initDone)
         {
             SOPC_Mutex_Lock(&tConfig.mut);
-            if (!tConfig.serverConfigLocked && !sopc_addressSpace_configured)
+            if (!tConfig.serverConfigLocked && !SOPC_AddressSpace_Check_Configured())
             {
                 status = SOPC_STATUS_OK;
-                SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(addressSpace);
+                SOPC_AddressSpace_SetConfigured(addressSpace);
             }
             SOPC_Mutex_Unlock(&tConfig.mut);
         }
@@ -811,10 +803,10 @@ SOPC_ReturnStatus SOPC_ToolkitServer_UnConfigure(void)
             {
                 // Clear the server configuration
                 tConfig.appAddSpaceNotifCb = NULL;
-                address_space_bs__nodes = NULL;
-                sopc_addressSpace_configured = false;
                 tConfig.serverConfigLocked = false;
                 status = SOPC_STATUS_OK;
+                // Note: done by clear_server_configuration_context operation
+                // address_space_bs__nodes = NULL;
             }
             mutStatus = SOPC_Mutex_Unlock(&tConfig.mut);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);

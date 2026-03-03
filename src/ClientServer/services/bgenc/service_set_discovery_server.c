@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.c
 
- Date                 : 11/07/2025 13:24:32
+ Date                 : 03/03/2026 14:59:11
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -388,7 +388,8 @@ void service_set_discovery_server__treat_find_servers_request(
    }
 }
 
-void service_set_discovery_server__service_set_discovery_server_UNINITIALISATION(void) {
-   service_register_server2__service_register_server2_UNINITIALISATION();
+void service_set_discovery_server__service_set_discovery_server_UNINITIALISATION(
+   const t_bool service_set_discovery_server__clearOnly) {
+   service_register_server2__service_register_server2_UNINITIALISATION(service_set_discovery_server__clearOnly);
 }
 

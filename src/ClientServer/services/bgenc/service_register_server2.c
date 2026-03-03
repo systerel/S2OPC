@@ -21,7 +21,7 @@
 
  File Name            : service_register_server2.c
 
- Date                 : 08/08/2025 09:20:39
+ Date                 : 03/03/2026 14:59:11
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -173,8 +173,14 @@ void service_register_server2__remove_expired_registration(void) {
    }
 }
 
-void service_register_server2__service_register_server2_UNINITIALISATION(void) {
-   service_register_server2_set_bs__service_register_server2_set_bs_UNINITIALISATION();
-   service_register_server2_offline_bs__service_register_server2_offline_bs_UNINITIALISATION();
+void service_register_server2__service_register_server2_UNINITIALISATION(
+   const t_bool service_register_server2__clearOnly) {
+   if (service_register_server2__clearOnly == true) {
+      service_register_server2_set_bs__reset_registered_server2_set();
+   }
+   else {
+      service_register_server2_set_bs__service_register_server2_set_bs_UNINITIALISATION();
+   }
+   service_register_server2_offline_bs__service_register_server2_offline_bs_UNINITIALISATION(service_register_server2__clearOnly);
 }
 

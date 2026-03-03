@@ -21,7 +21,7 @@
 
  File Name            : service_register_server2_offline_bs.h
 
- Date                 : 04/07/2025 08:41:26
+ Date                 : 03/03/2026 14:59:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,6 +56,7 @@ extern void service_register_server2_offline_bs__continue_iter_registered_server
 extern void service_register_server2_offline_bs__init_iter_registered_server2_offline_set(
    t_bool * const service_register_server2_offline_bs__continue);
 extern void service_register_server2_offline_bs__reset_registered_server2_offline_set(void);
-extern void service_register_server2_offline_bs__service_register_server2_offline_bs_UNINITIALISATION(void);
+extern void service_register_server2_offline_bs__service_register_server2_offline_bs_UNINITIALISATION(
+   const t_bool service_register_server2_offline_bs__clearOnly);
 
 #endif

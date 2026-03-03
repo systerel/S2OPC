@@ -31,12 +31,11 @@
 #include "sopc_address_space.h"
 #include "sopc_types.h"
 
-/* Attributes, and references */
+/* Address space configured in B model */
 extern SOPC_AddressSpace* address_space_bs__nodes;
 
-/* Address space configured */
-extern bool sopc_addressSpace_configured;
+void SOPC_AddressSpace_SetConfigured(SOPC_AddressSpace* addressSpace);
 
-void SOPC_AddressSpace_Check_Configured(void);
+bool SOPC_AddressSpace_Check_Configured(void);
 
 #endif /* ADDRESS_SPACE_IMPL_H_ */

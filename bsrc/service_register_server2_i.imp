@@ -239,10 +239,16 @@ OPERATIONS
     END
     ;
 
-    service_register_server2_UNINITIALISATION =
+    service_register_server2_UNINITIALISATION (clearOnly) =
     BEGIN
-        service_register_server2_set_bs_UNINITIALISATION;
-        service_register_server2_offline_bs_UNINITIALISATION
+        IF clearOnly = TRUE
+        THEN
+            reset_registered_server2_set
+        ELSE
+            service_register_server2_set_bs_UNINITIALISATION
+        END
+        ;
+        service_register_server2_offline_bs_UNINITIALISATION (clearOnly)
     END
 
 END

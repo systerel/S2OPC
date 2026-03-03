@@ -74,8 +74,11 @@ OPERATIONS
     END
     ;
 
-    service_set_discovery_server_UNINITIALISATION =
-    BEGIN
+    service_set_discovery_server_UNINITIALISATION (clearOnly) =
+    PRE
+        /* Flag to indicate if we want to do only clear or fully deallocate */
+        clearOnly : BOOL
+    THEN
         skip
     END
     ;

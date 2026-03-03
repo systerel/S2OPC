@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 15/01/2026 14:05:37
+ Date                 : 03/03/2026 14:59:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -200,6 +200,7 @@ extern void service_mgr__treat_session_service_req(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void service_mgr__clear_server_configuration_context(void);
 extern void service_mgr__client_discovery_service_request(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,

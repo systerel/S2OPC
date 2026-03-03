@@ -93,12 +93,21 @@ void service_register_server2_offline_bs__reset_registered_server2_offline_set(v
     SOPC_SLinkedList_Clear(registeredServer2OfflineList);
 }
 
-void service_register_server2_offline_bs__service_register_server2_offline_bs_UNINITIALISATION(void)
+void service_register_server2_offline_bs__service_register_server2_offline_bs_UNINITIALISATION(
+    const t_bool service_register_server2_offline_bs__clearOnly)
 {
     if (NULL != registeredServer2OfflineList)
     {
         SOPC_SLinkedList_Apply(registeredServer2OfflineList, freeRecord);
     }
-    SOPC_SLinkedList_Delete(registeredServer2OfflineList);
-    registeredServer2OfflineList = NULL;
+    if (service_register_server2_offline_bs__clearOnly)
+    {
+        SOPC_SLinkedList_Clear(registeredServer2OfflineList);
+    }
+    else
+    {
+        SOPC_SLinkedList_Delete(registeredServer2OfflineList);
+        registeredServer2OfflineList = NULL;
+    }
+    registeredServer2OfflineListIt = NULL;
 }

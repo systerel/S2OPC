@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.h
 
- Date                 : 13/02/2023 17:19:37
+ Date                 : 03/03/2026 14:59:11
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -99,7 +99,8 @@ extern void service_set_discovery_server__local_set_servers_to_return(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void service_set_discovery_server__service_set_discovery_server_UNINITIALISATION(void);
+extern void service_set_discovery_server__service_set_discovery_server_UNINITIALISATION(
+   const t_bool service_set_discovery_server__clearOnly);
 extern void service_set_discovery_server__treat_find_servers_on_network_request(
    const constants__t_msg_i service_set_discovery_server__req_msg,
    const constants__t_msg_i service_set_discovery_server__resp_msg,

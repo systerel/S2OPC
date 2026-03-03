@@ -21,7 +21,7 @@
 
  File Name            : service_register_server2.h
 
- Date                 : 03/07/2025 14:07:29
+ Date                 : 03/03/2026 14:59:11
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -91,6 +91,7 @@ extern void service_register_server2__register_server2_create(
 extern void service_register_server2__register_server2_remove(
    const constants__t_RegisteredServer_i service_register_server2__p_registered_server);
 extern void service_register_server2__remove_expired_registration(void);
-extern void service_register_server2__service_register_server2_UNINITIALISATION(void);
+extern void service_register_server2__service_register_server2_UNINITIALISATION(
+   const t_bool service_register_server2__clearOnly);
 
 #endif

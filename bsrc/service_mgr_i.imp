@@ -1866,12 +1866,27 @@ OPERATIONS
     END
     ;
 
+    /* Do a partial version of service_mgr_UNINITIALISATION */
+    clear_server_configuration_context =
+    BEGIN
+        // Note: we cannot call subscription UNINIT because id does need an INIT if server is reconfigured.
+        //       But this is not necessary because closing the sessions will also close the subscriptions
+        // subscription_mgr_UNINITIALISATION;
+        // session_mgr_UNINITIALISATION; // NOK => both CLIENT and SERVER (TODO: FINALIZED in future commit managing close server sessions)
+
+        service_set_view_UNINITIALISATION; // OK: B implementation only
+        service_set_discovery_server_UNINITIALISATION (TRUE); // OK: clear only is set to avoid needing new INIT
+        // service_mgr_bs_UNINITIALISATION; NOK: CLIENT SIDE ONLY
+        address_space_UNINITIALISATION // OK: do not need an INIT: address_space_bs is configured from outside and DRP are configure at runtime
+    END
+    ;
+
     service_mgr_UNINITIALISATION =
     BEGIN
         subscription_mgr_UNINITIALISATION;
         session_mgr_UNINITIALISATION;
         service_set_view_UNINITIALISATION;
-        service_set_discovery_server_UNINITIALISATION;
+        service_set_discovery_server_UNINITIALISATION (FALSE);
         service_mgr_bs_UNINITIALISATION;
         address_space_UNINITIALISATION
     END

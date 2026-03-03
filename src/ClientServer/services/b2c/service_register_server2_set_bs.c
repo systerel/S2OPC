@@ -178,6 +178,7 @@ void service_register_server2_set_bs__reset_registered_server2_set(void)
 {
     SOPC_SLinkedList_Apply(registeredServer2List, freeRecord);
     SOPC_SLinkedList_Clear(registeredServer2List);
+    registeredServer2ListIt = NULL;
     resetTime.timestamp = SOPC_Time_GetCurrentTimeUTC();
 }
 

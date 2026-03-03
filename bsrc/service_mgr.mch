@@ -878,6 +878,12 @@ OPERATIONS
     END
     ;
 
+    clear_server_configuration_context =
+    BEGIN
+        skip
+    END
+    ;
+
     /* Promotions */
 
     p_user <-- get_session_user_server (session) =

@@ -21,7 +21,7 @@
 
  File Name            : default_role_permissions_array_bs.h
 
- Date                 : 02/12/2024 16:45:16
+ Date                 : 03/03/2026 14:59:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -54,6 +54,7 @@ extern void default_role_permissions_array_bs__add_DefaultRolePermissions_at_idx
    const constants__t_NamespaceIdx default_role_permissions_array_bs__p_idx,
    const constants__t_RolePermissionTypes_i default_role_permissions_array_bs__p_DefaultRolePermissions);
 extern void default_role_permissions_array_bs__address_space_default_role_permissions_array_bs_UNINITIALISATION(void);
+extern void default_role_permissions_array_bs__clear_default_role_permissions(void);
 extern void default_role_permissions_array_bs__get_DefaultRolePermissions_at_idx(
    const constants__t_NamespaceIdx default_role_permissions_array_bs__p_idx,
    constants__t_RolePermissionTypes_i * const default_role_permissions_array_bs__p_DefaultRolePermissions);
