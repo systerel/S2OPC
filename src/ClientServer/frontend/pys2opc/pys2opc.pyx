@@ -1392,7 +1392,7 @@ class BrowseResult:
         continuationPoint: whether the browse is incomplete (continuationPoint not empty) or not.
         references: list of outgoing `pys2opc.Reference`s.
     """
-    def __init__(self, statusCode: SOPC_ReturnStatus, continuationPoint: bytes, references: list[Reference]):
+    def __init__(self, statusCode: SOPC_StatusCode, continuationPoint: bytes, references: list[Reference]):
         self.status = statusCode
         self.continuationPoint = continuationPoint
         self.references = references
