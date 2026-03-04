@@ -136,7 +136,7 @@ static void Demo_WriteNotificationCallback(const SOPC_CallContext* callContextPt
     SOPC_Free(sNodeId);
 }
 
-#ifdef S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
+#if S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
 /*
  * Server callback definition for external history read
  */
@@ -277,7 +277,7 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
 
     SOPC_Audit_Configuration* pAuditCfg = NULL;
-#ifdef S2OPC_HAS_AUDITING
+#if S2OPC_HAS_AUDITING
     // Initialize the toolkit library and define the log configuration
     SOPC_Audit_Configuration auditCfg;
     auditCfg.auditEntryPath = logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath;
@@ -1145,7 +1145,7 @@ int main(int argc, char* argv[])
         status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
 
-#ifdef S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
+#if S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE
     /* Define history read external callback */
     if (SOPC_STATUS_OK == status)
     {

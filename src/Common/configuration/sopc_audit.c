@@ -21,12 +21,13 @@
 
 #include <stddef.h>
 
+#include "sopc_common_constants.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
-#ifdef S2OPC_HAS_AUDITING
+#if S2OPC_HAS_AUDITING
 
 /** Content of internal configuration. */
 typedef struct Audit_Configuration_Internal

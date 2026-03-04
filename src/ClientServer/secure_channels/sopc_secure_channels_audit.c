@@ -35,7 +35,7 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
 
-#ifdef S2OPC_HAS_AUDITING
+#if S2OPC_HAS_AUDITING
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_server.h"

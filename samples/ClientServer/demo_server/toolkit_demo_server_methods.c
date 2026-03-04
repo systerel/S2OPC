@@ -35,7 +35,6 @@
 
 static const SOPC_NodeId TestObject = SOPC_NODEID_STRING(1, "TestObject");
 
-static const SOPC_NodeId EventInstNodeId = SOPC_NODEID_STRING(1, "EventInstance_NodeId_Example");
 static const SOPC_NodeId TestObject_HelloNextArg = SOPC_NODEID_STRING(1, "TestObject_HelloNextArg");
 
 static const SOPC_NodeId TestObject_Counter = SOPC_NODEID_STRING(1, "TestObject_Counter");
@@ -49,7 +48,8 @@ static const SOPC_NodeId BaseObject_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseO
 static const SOPC_NodeId BaseVariable_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseVariableType);
 static const SOPC_NodeId HasSubtype = SOPC_NODEID_NS0_NUMERIC(OpcUaId_HasSubtype);
 
-#ifdef S2OPC_EVENT_MANAGEMENT
+#if S2OPC_EVENT_MANAGEMENT
+static const SOPC_NodeId EventInstNodeId = SOPC_NODEID_STRING(1, "EventInstance_NodeId_Example");
 static const SOPC_NodeId BaseEvent_Type = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 static const SOPC_NodeId Null_Type = SOPC_NODEID_NS0_NUMERIC(0);
 #endif
@@ -609,7 +609,7 @@ SOPC_StatusCode SOPC_Method_Func_AddNodes(const SOPC_CallContext* callContextPtr
     return sc;
 }
 
-#ifdef S2OPC_EVENT_MANAGEMENT
+#if S2OPC_EVENT_MANAGEMENT
 
 static void forEachEventVar(const char* qnPath,
                             SOPC_Variant* var,
@@ -1005,7 +1005,7 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
         }
     }
 
-#ifdef S2OPC_EVENT_MANAGEMENT
+#if S2OPC_EVENT_MANAGEMENT
     if (SOPC_STATUS_OK == status)
     {
         sNodeId = "ns=1;s=GenEventMethod";

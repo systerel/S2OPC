@@ -37,7 +37,7 @@ typedef struct SOPC_Audit_Certificate_Error_Context
     char* invalidHostname;
 } SOPC_Audit_Certificate_Error_Context;
 
-#ifdef S2OPC_HAS_AUDITING
+#if S2OPC_HAS_AUDITING
 
 /**
  * \brief Trigger a security event (OpenSecureChannelEvent_Type) for OpenSecuredChannel event.

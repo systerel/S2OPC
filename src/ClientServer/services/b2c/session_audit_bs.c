@@ -69,7 +69,7 @@
 #define SOPC_AUDIT_SEVERITY_CLOSE_SESSION_FAILURE 10
 #endif
 
-#ifdef S2OPC_HAS_AUDITING
+#if S2OPC_HAS_AUDITING
 /*------------------------
    LOCAL VARIABLES
   ------------------------*/

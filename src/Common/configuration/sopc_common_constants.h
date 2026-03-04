@@ -34,6 +34,13 @@
 
 #include "sopc_protocol_constants.h"
 
+/** @brief Auditing management services activation for servers
+ *  Note: it shall be set in Common library as a common module is necessary for logging traces
+ */
+#ifndef S2OPC_HAS_AUDITING
+#define S2OPC_HAS_AUDITING false
+#endif
+
 /** \brief Configuration structure of message and types encoding limits **/
 typedef struct SOPC_Common_EncodingConstants
 {

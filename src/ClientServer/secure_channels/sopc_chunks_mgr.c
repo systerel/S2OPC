@@ -343,7 +343,7 @@ static void set_certificate_context(SOPC_Audit_Certificate_Error_Context* contex
     SOPC_UNUSED_ARG(message);
     context->opcua_error_code = errorStatus;
 
-#ifdef S2OPC_HAS_AUDITING
+#if S2OPC_HAS_AUDITING
     context->message = message;
 #endif
     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

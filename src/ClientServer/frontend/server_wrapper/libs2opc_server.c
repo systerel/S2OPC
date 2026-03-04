@@ -635,7 +635,7 @@ void SOPC_ServerInternal_SyncServerStoppedCb(SOPC_ReturnStatus stopStatus)
     }
 }
 
-#ifdef S2OPC_HAS_AUDITING
+#if S2OPC_HAS_AUDITING
 
 /** Constants used for audit. */
 static const SOPC_NodeId ServerObject_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server);
