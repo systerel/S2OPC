@@ -413,10 +413,11 @@ static void readyToReceive(void* sockContext, SOPC_Socket sock)
     SOPC_Buffer_SetPosition(buffer, 0);
 }
 
-static void tick(void* tickCtx)
+static uint32_t tick(void* tickCtx)
 {
     SOPC_ASSERT(CTX_VALUE == (uintptr_t) tickCtx);
     // printf("tick !\n");
+    return UINT32_MAX;
 }
 
 int main(int argc, char** argv)

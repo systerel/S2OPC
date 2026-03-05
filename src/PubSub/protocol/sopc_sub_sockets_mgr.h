@@ -23,11 +23,13 @@
 #include "sopc_raw_sockets.h"
 
 typedef void SOPC_ReadyToReceive(void* sockContext, SOPC_Socket sock);
-typedef void SOPC_Sub_Sockets_Timeout_Cb(void* ctx);
+typedef uint32_t SOPC_Sub_Sockets_Timeout_Cb(void* ctx);
 
 typedef struct SOPC_Sub_Sockets_Timeout
 {
-    /** User-defined callback. Will be called each time \p period_us has elapsed. */
+    /** User-defined callback. Will be called cyclicly for the smaller period between \p period_us or the returned
+     * value of the callback.
+     */
     SOPC_Sub_Sockets_Timeout_Cb* callback;
     /** User-defined context (provided on call to \p callback) */
     void* pContext;

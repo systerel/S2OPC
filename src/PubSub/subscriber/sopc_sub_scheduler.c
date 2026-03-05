@@ -897,10 +897,11 @@ void SOPC_SubScheduler_Stop(void)
  * check if some DSM are in timeout.
  * @param param Not used.
  */
-static void SOPC_Sub_TimeoutCheck(void* param)
+static uint32_t SOPC_Sub_TimeoutCheck(void* param)
 {
     SOPC_UNUSED_ARG(param);
     SOPC_HighRes_TimeReference* now = SOPC_HighRes_TimeReference_Create();
+    uint32_t nextMinTimeout = UINT32_MAX;
 
     const size_t nbCtx = SOPC_Array_Size(schedulerCtx.writerCtx);
     for (size_t i = 0; i < nbCtx && schedulerCtx.state == SOPC_PubSubState_Operational; i++)
@@ -937,9 +938,18 @@ static void SOPC_Sub_TimeoutCheck(void* param)
                 }
                 SOPC_SubScheduler_UpdateDsmState(ctx, SOPC_PubSubState_Error);
             }
+            else
+            {
+                // Check if this the smaller period of time to reach next timeout, then update next timeout evaluation.
+                if (delta_us < UINT32_MAX && (uint32_t) delta_us < nextMinTimeout)
+                {
+                    nextMinTimeout = (uint32_t) delta_us;
+                }
+            }
         }
     }
     SOPC_HighRes_TimeReference_Delete(&now);
+    return nextMinTimeout;
 }
 
 /*

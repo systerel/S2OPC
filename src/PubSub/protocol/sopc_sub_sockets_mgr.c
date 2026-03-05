@@ -61,10 +61,14 @@ static struct
                      .timeout.period_ms = 0,
                      .thread = SOPC_INVALID_THREAD};
 
+/**
+ * \brief Treat reception message event on configured socket and trigger evaluation timeout callback when next potential
+ * timeout happened. The function loop until ::SOPC_SocketsNetworkEventMgr_LoopThreadStop is called.
+ */
 static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
 {
     SOPC_UNUSED_ARG(nullData);
-    SOPC_TimeReference lastTick = SOPC_TimeReference_GetCurrent();
+    SOPC_TimeReference lastTimeoutEvaluation = SOPC_TimeReference_GetCurrent();
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Starting SOPC_Sub_SocketsMgr_ThreadLoop with %d sockets",
                           receptionThread.nbSockets);
 
@@ -72,9 +76,14 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
     SOPC_SocketSet* writeSet = SOPC_SocketSet_Create();
     SOPC_SocketSet* exceptSet = SOPC_SocketSet_Create();
 
+    /* The first evaluation of timeout is done for the smaller timeout period. */
+    uint32_t waitMessageTimeoutMs = receptionThread.timeout.period_ms;
+    uint32_t nextPossibleTimeout = receptionThread.timeout.period_ms;
+
     while (SOPC_Atomic_Int_Get(&receptionThread.stopFlag) == false)
     {
-        bool isTimeout = false;
+        bool isTimeoutEvaluated = false;
+
         /*
          * This thread reads from all sockets in a socketSet.
          * However, in the case of specific protocols, there may be no sockets to read from
@@ -97,7 +106,7 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
             }
 
             // Returns number of ready descriptor or -1 in case of error
-            nbReady = SOPC_Socket_WaitSocketEvents(readSet, writeSet, exceptSet, receptionThread.timeout.period_ms);
+            nbReady = SOPC_Socket_WaitSocketEvents(readSet, writeSet, exceptSet, waitMessageTimeoutMs);
 
             if (nbReady < 0)
             {
@@ -108,19 +117,24 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
             }
             else if (nbReady == 0)
             {
-                isTimeout = true;
+                isTimeoutEvaluated = true;
             }
             else
             {
-                // Evaluate if tick shall be called regarding time elapsed since last call
+                // Evaluate if timeout evaluation shall be called regarding time elapsed since last call
                 SOPC_TimeReference now = SOPC_TimeReference_GetCurrent();
-                if (now - lastTick >= receptionThread.timeout.period_ms)
+                if (now - lastTimeoutEvaluation >= waitMessageTimeoutMs)
                 {
-                    isTimeout = true;
+                    isTimeoutEvaluated = true;
                 }
-
+                else
+                {
+                    // Compute the rest of time until next timeout evaluation
+                    waitMessageTimeoutMs = waitMessageTimeoutMs - ((uint32_t)(now - lastTimeoutEvaluation));
+                }
                 for (uint16_t i = 0; i < receptionThread.nbSockets; i++)
                 {
+                    // Message received
                     if (SOPC_SocketSet_IsPresent(receptionThread.socketArray[i], readSet) != false)
                     {
                         if (receptionThread.pCallback != NULL)
@@ -140,13 +154,19 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
         else
         {
             // No socket to read.
-            SOPC_Sleep(receptionThread.timeout.period_ms);
-            isTimeout = true;
+            SOPC_Sleep(waitMessageTimeoutMs);
+            isTimeoutEvaluated = true;
         }
-        if (isTimeout && NULL != receptionThread.timeout.callback)
+        if (isTimeoutEvaluated && NULL != receptionThread.timeout.callback)
         {
-            lastTick = SOPC_TimeReference_GetCurrent();
-            (*receptionThread.timeout.callback)(receptionThread.timeout.pContext);
+            // Evaluate if timeout occur and get the next smaller period with potential timeout.
+            lastTimeoutEvaluation = SOPC_TimeReference_GetCurrent();
+            waitMessageTimeoutMs = receptionThread.timeout.period_ms;
+            nextPossibleTimeout = (*receptionThread.timeout.callback)(receptionThread.timeout.pContext);
+            if (nextPossibleTimeout < waitMessageTimeoutMs)
+            {
+                waitMessageTimeoutMs = nextPossibleTimeout;
+            }
         }
     }
 
