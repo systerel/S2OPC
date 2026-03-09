@@ -807,7 +807,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
     bool requestSentToServices = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     subscriptionCtx* subCtx = NULL;
-    if (NULL == pSM || NULL == req || 0 >= req->NoOfItemsToCreate || NULL == pAppCtx)
+    if (NULL == pSM || NULL == req || 0 >= req->NoOfItemsToCreate || NULL == pAppCtx || NULL != pAppCtx->req)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -908,10 +908,6 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
                                              SOPC_REQUEST_TYPE_SUBSCRIPTION);
             requestSentToServices = (SOPC_STATUS_OK == status);
         }
-        else
-        {
-            SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
-        }
 
         if (SOPC_STATUS_OK == status)
         {
@@ -925,6 +921,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
     if (!requestSentToServices && NULL != req)
     {
         SOPC_EncodeableObject_Delete(req->encodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
     }
 
     return status;
@@ -939,7 +936,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     subscriptionCtx* subCtx = NULL;
 
-    if (NULL == pSM || NULL == req || 0 >= req->NoOfMonitoredItemIds || NULL == outAppCtx)
+    if (NULL == pSM || NULL == req || 0 >= req->NoOfMonitoredItemIds || NULL == outAppCtx || NULL != outAppCtx->req)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1015,10 +1012,6 @@ SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
                                              SOPC_REQUEST_TYPE_SUBSCRIPTION);
             requestSentToServices = (SOPC_STATUS_OK == status);
         }
-        else
-        {
-            SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
-        }
 
         if (SOPC_STATUS_OK == status)
         {
@@ -1032,6 +1025,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
     if (!requestSentToServices && NULL != req)
     {
         SOPC_EncodeableObject_Delete(req->encodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
     }
 
     return status;
@@ -1583,7 +1577,6 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             /* Authorize processing of send request failed if it is a timeout of PublishRequest */
             if (SE_SND_REQUEST_FAILED == event)
             {
-                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Dispatching event SE_SND_REQUEST_FAILED");
                 processingAuthorization = true;
             }
 
@@ -2427,6 +2420,8 @@ static void LockedStaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM
     {
         SOPC_EncodeableType* pEncType = (SOPC_EncodeableType*) pParam;
 
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Dispatching event SE_SND_REQUEST_FAILED (%s)",
+                              pEncType->TypeName);
         /* We only process PublishRequest send failed for timeout reason
          * (checked in StaMac_GiveAuthorization_SendRequestFailed) */
         if (&OpcUa_PublishRequest_EncodeableType == pEncType)
@@ -2441,6 +2436,19 @@ static void LockedStaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM
                                          "Unexpected number of PublishResponse received.");
             }
         }
+        else if (&OpcUa_CreateMonitoredItemsRequest_EncodeableType == pEncType)
+        {
+            SOPC_CreateMonitoredItems_Ctx* MIappCtx = (SOPC_CreateMonitoredItems_Ctx*) appCtx;
+            OpcUa_CreateMonitoredItemsRequest* pMonItReq = MIappCtx->req;
+            SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pMonItReq);
+        }
+        else if (&OpcUa_DeleteMonitoredItemsRequest_EncodeableType == pEncType)
+        {
+            SOPC_DeleteMonitoredItems_Ctx* MIappCtx = (SOPC_DeleteMonitoredItems_Ctx*) appCtx;
+            OpcUa_DeleteMonitoredItemsRequest* pMonItReq = MIappCtx->req;
+            SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &pMonItReq);
+        }
+        // Note: CreateSubscription and DeleteSubscription do not require specific cleanup as no context is allocated
         else
         {
             switch (pSM->state)
