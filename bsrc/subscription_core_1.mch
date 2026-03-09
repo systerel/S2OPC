@@ -624,13 +624,21 @@ OPERATIONS
     END
     ;
 
-    p_publishReqQueue <-- get_session_publishRequestQueue (p_session) =
+    p_bres, p_publishReqQueue <-- get_session_publishRequestQueue (p_session) =
     PRE
         p_session : t_session_i &
         p_session : ran(a_subscription_session)
     THEN
-        p_publishReqQueue :(p_publishReqQueue : t_publishReqQueue_i &
-                            p_publishReqQueue = a_publishRequestQueue(p_session))
+        p_bres, p_publishReqQueue
+        :(p_bres : BOOL &
+          p_publishReqQueue : t_publishReqQueue_i &
+          (p_session : dom(a_publishRequestQueue) =>
+              p_bres = TRUE &
+              p_publishReqQueue = a_publishRequestQueue(p_session)) &
+          (p_session : dom(a_publishRequestQueue) =>
+              p_bres = FALSE &
+              p_publishReqQueue = c_publishReqQueue_indet)
+        )
     END
     ;
 

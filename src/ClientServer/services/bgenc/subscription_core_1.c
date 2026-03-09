@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_1.c
 
- Date                 : 12/03/2026 14:42:57
+ Date                 : 19/03/2026 09:09:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -731,8 +731,10 @@ void subscription_core_1__set_session_publishRequestQueue(
 
 void subscription_core_1__get_session_publishRequestQueue(
    const constants__t_session_i subscription_core_1__p_session,
+   t_bool * const subscription_core_1__p_bres,
    constants__t_publishReqQueue_i * const subscription_core_1__p_publishReqQueue) {
    *subscription_core_1__p_publishReqQueue = subscription_core_1__a_publishRequestQueue_i[subscription_core_1__p_session];
+   *subscription_core_1__p_bres = (constants__c_publishReqQueue_indet != *subscription_core_1__p_publishReqQueue);
 }
 
 void subscription_core_1__get_subscription_notifRepublishQueue(

@@ -735,26 +735,29 @@ OPERATIONS
         l_is_expired
     IN
         p_validPubReqQueued := FALSE;
-        l_pubReqQueue <-- get_session_publishRequestQueue (p_session);
-        l_continue <-- init_iter_publish_request (l_pubReqQueue);
-        l_is_expired := TRUE;
-        WHILE l_continue = TRUE & l_is_expired = TRUE DO
-            l_continue, l_req_exp_time, l_req_handle, l_req_ctx, l_resp_msg
-              <-- continue_pop_head_iter_publish_request (l_pubReqQueue);
-            l_is_expired <-- is_request_expired (l_req_exp_time);
-            IF l_is_expired = TRUE
-            THEN
-                generate_internal_send_publish_response_event (p_session, l_resp_msg, l_req_handle, l_req_ctx, e_sc_bad_timeout)
-            ELSE
-                /* Next publish request is a valid (non expired) one, prepend it for next pop on queue */
-                p_validPubReqQueued <-- prepend_publish_request_to_queue
-                  (l_pubReqQueue, p_session, l_req_exp_time, l_req_handle, l_req_ctx, l_resp_msg)
-            END
-        INVARIANT
-            l_continue = bool(a_publish_responses~[{l_pubReqQueue}] /= {})
+        l_continue, l_pubReqQueue <-- get_session_publishRequestQueue (p_session);
+        IF l_continue = TRUE
+        THEN
+            l_continue <-- init_iter_publish_request (l_pubReqQueue);
+            l_is_expired := TRUE;
+            WHILE l_continue = TRUE & l_is_expired = TRUE DO
+                l_continue, l_req_exp_time, l_req_handle, l_req_ctx, l_resp_msg
+                <-- continue_pop_head_iter_publish_request (l_pubReqQueue);
+                l_is_expired <-- is_request_expired (l_req_exp_time);
+                IF l_is_expired = TRUE
+                THEN
+                    generate_internal_send_publish_response_event (p_session, l_resp_msg, l_req_handle, l_req_ctx, e_sc_bad_timeout)
+                ELSE
+                    /* Next publish request is a valid (non expired) one, prepend it for next pop on queue */
+                    p_validPubReqQueued <-- prepend_publish_request_to_queue
+                    (l_pubReqQueue, p_session, l_req_exp_time, l_req_handle, l_req_ctx, l_resp_msg)
+                END
+            INVARIANT
+                l_continue = bool(a_publish_responses~[{l_pubReqQueue}] /= {})
 
-        VARIANT
-            card(a_publish_responses~[{l_pubReqQueue}])
+            VARIANT
+                card(a_publish_responses~[{l_pubReqQueue}])
+            END
         END
     END
     ;
@@ -1426,25 +1429,29 @@ OPERATIONS
         l_old_req_ctx,
         l_old_resp_msg
     IN
-        StatusCode_service := e_sc_ok;
+        StatusCode_service := e_sc_bad_internal_error;
         async_resp_msg := TRUE;
-        l_PublishingReqQueue <-- get_session_publishRequestQueue (p_session);
-        l_nb_pub_reqs <-- get_nb_publish_requests (l_PublishingReqQueue);
-        IF l_nb_pub_reqs = k_n_publishRequestPerSession_max
+        l_bres, l_PublishingReqQueue <-- get_session_publishRequestQueue (p_session);
+        IF l_bres = TRUE
         THEN
-            l_old_session,
-            l_old_resp_msg,
-            l_old_req_handle,
-            l_old_req_ctx <-- discard_oldest_publish_request (l_PublishingReqQueue);
-            generate_internal_send_publish_response_event
-            (l_old_session, l_old_resp_msg, l_old_req_handle, l_old_req_ctx, e_sc_bad_too_many_publish_requests)
-        END;
-        l_bres <-- append_publish_request_to_queue
-        (l_PublishingReqQueue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
-        IF l_bres = FALSE
-        THEN
-            StatusCode_service := e_sc_bad_too_many_publish_requests;
-            async_resp_msg := FALSE
+            StatusCode_service := e_sc_ok;
+            l_nb_pub_reqs <-- get_nb_publish_requests (l_PublishingReqQueue);
+            IF l_nb_pub_reqs = k_n_publishRequestPerSession_max
+            THEN
+                l_old_session,
+                l_old_resp_msg,
+                l_old_req_handle,
+                l_old_req_ctx <-- discard_oldest_publish_request (l_PublishingReqQueue);
+                generate_internal_send_publish_response_event
+                (l_old_session, l_old_resp_msg, l_old_req_handle, l_old_req_ctx, e_sc_bad_too_many_publish_requests)
+            END;
+            l_bres <-- append_publish_request_to_queue
+            (l_PublishingReqQueue, p_session, p_req_exp_time, p_req_handle, p_req_ctx, p_resp_msg);
+            IF l_bres = FALSE
+            THEN
+                StatusCode_service := e_sc_bad_too_many_publish_requests;
+                async_resp_msg := FALSE
+            END
         END
     END
     ;
@@ -1783,6 +1790,7 @@ OPERATIONS
     VAR
         l_bres,
         l_State,
+        l_pubQueueValid,
         l_PublishingReqQueue,
         l_PublishingEnabled,
         l_nb_avail_data_notifs,
@@ -1810,7 +1818,7 @@ OPERATIONS
 
         /* Retrieve state variables */
         l_State <-- get_subscription_state (p_subscription);
-        l_PublishingReqQueue <-- get_session_publishRequestQueue (p_session);
+        l_pubQueueValid, l_PublishingReqQueue <-- get_session_publishRequestQueue (p_session);
         l_PublishingEnabled <-- get_subscription_PublishingEnabled (p_subscription);
         l_nb_avail_data_notifs, l_nb_avail_event_notifs <-- local_subscription_nb_available_notifications (p_subscription);
         l_max_configured_notifications <-- get_subscription_MaxNotifsPerPublish (p_subscription);
@@ -1820,7 +1828,8 @@ OPERATIONS
         l_notifRepublishQueue <-- get_subscription_notifRepublishQueue (p_subscription);
 
         /* #6 transition */
-        IF l_State = e_subscriptionState_normal &
+        IF l_pubQueueValid = TRUE &
+            l_State = e_subscriptionState_normal &
             p_validPublishReqQueued = TRUE &
             l_PublishingEnabled = TRUE &
             l_NotificationAvailable = TRUE
@@ -1839,7 +1848,8 @@ OPERATIONS
                                      p_msg_sc)
 
         /* #7 transition */
-        ELSIF l_State = e_subscriptionState_normal &
+        ELSIF l_pubQueueValid = TRUE &
+              l_State = e_subscriptionState_normal &
               p_validPublishReqQueued = TRUE &
               l_MessageSent = FALSE &
               (l_PublishingEnabled = FALSE or
@@ -1886,7 +1896,8 @@ OPERATIONS
         THEN
             skip /* Nothing to do: lifetime already checked */
         /* #14 transition */
-        ELSIF l_State = e_subscriptionState_keepAlive &
+        ELSIF l_pubQueueValid = TRUE &
+              l_State = e_subscriptionState_keepAlive &
               l_PublishingEnabled = TRUE &
               l_NotificationAvailable = TRUE &
               p_validPublishReqQueued = TRUE
@@ -1907,7 +1918,8 @@ OPERATIONS
                                      p_msg_sc)
 
         /* #15 transition */
-        ELSIF l_State = e_subscriptionState_keepAlive &
+        ELSIF l_pubQueueValid = TRUE &
+              l_State = e_subscriptionState_keepAlive &
               p_validPublishReqQueued = TRUE &
               l_KeepAliveCounter <= 1 &
               (l_PublishingEnabled = FALSE
@@ -1960,6 +1972,7 @@ OPERATIONS
       <-- server_subscription_core_publish_timeout_return_moreNotifs (p_session, p_subscription) =
     VAR
         l_req_exp_time,
+        l_pubQueueValid,
         l_PublishingReqQueue,
         l_nb_avail_data_notifs,
         l_nb_avail_event_notifs,
@@ -1975,18 +1988,19 @@ OPERATIONS
     IN
         p_moreNotifs := FALSE;
         p_msg_to_send := TRUE;
-        l_PublishingReqQueue <-- get_session_publishRequestQueue (p_session);
+
+        l_pubQueueValid, l_PublishingReqQueue <-- get_session_publishRequestQueue (p_session);
         l_nb_avail_data_notifs, l_nb_avail_event_notifs <-- local_subscription_nb_available_notifications (p_subscription);
         l_max_configured_notifications <-- get_subscription_MaxNotifsPerPublish (p_subscription);
         l_notifRepublishQueue <-- get_subscription_notifRepublishQueue (p_subscription);
 
-        /* retrieve a valid publish response */
+        /* retrieve a valid publish response (l_pubQueueValid = TRUE guaranteed by PRE)*/
         l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
-          <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
+        <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
 
         d_send_notification_msg (p_subscription, p_publish_resp_msg, l_notifRepublishQueue,
-                                 l_nb_avail_data_notifs, l_nb_avail_event_notifs, p_moreNotifs,
-                                 p_msg_sc)
+            l_nb_avail_data_notifs, l_nb_avail_event_notifs, p_moreNotifs,
+            p_msg_sc)
     END
     ;
 
@@ -2108,15 +2122,20 @@ OPERATIONS
 
     clear_session_publish_queue (p_session) =
     VAR
+        l_valid_pub_queue,
         l_publish_queue
     IN
-        l_publish_queue <-- get_session_publishRequestQueue (p_session);
-        clear_publish_queue (l_publish_queue)
+        l_valid_pub_queue, l_publish_queue <-- get_session_publishRequestQueue (p_session);
+        IF l_valid_pub_queue = TRUE
+        THEN
+            clear_publish_queue (l_publish_queue)
+        END
     END
     ;
 
     deallocate_publish_queue_and_gen_no_sub_responses (p_session, p_send_no_sub_resp) =
     VAR
+        l_valid_pub_queue,
         l_publish_queue,
         l_req_exp_time,
         l_req_handle,
@@ -2125,27 +2144,30 @@ OPERATIONS
         l_continue_pub
 
     IN
-        l_publish_queue <-- get_session_publishRequestQueue (p_session);
-        IF p_send_no_sub_resp = TRUE
+        l_valid_pub_queue,l_publish_queue <-- get_session_publishRequestQueue (p_session);
+        IF l_valid_pub_queue = TRUE
         THEN
-            /* Clearing queue create asynchronous publish response sending indicating Bad_NoSubscription */
-            l_continue_pub <-- init_iter_publish_request (l_publish_queue);
-            WHILE l_continue_pub = TRUE DO
-                l_continue_pub, l_req_exp_time, l_req_handle, l_req_ctx, l_resp_msg
-                <-- continue_pop_head_iter_publish_request (l_publish_queue);
-                /* Generates BadNoSubscription responses */
-                generate_internal_send_publish_response_event (p_session, l_resp_msg, l_req_handle, l_req_ctx, e_sc_bad_no_subscription)
-            INVARIANT
-                l_continue_pub = bool(a_publish_responses~[{l_publish_queue}] /= {})
+            IF p_send_no_sub_resp = TRUE
+            THEN
+                /* Clearing queue create asynchronous publish response sending indicating Bad_NoSubscription */
+                l_continue_pub <-- init_iter_publish_request (l_publish_queue);
+                WHILE l_continue_pub = TRUE DO
+                    l_continue_pub, l_req_exp_time, l_req_handle, l_req_ctx, l_resp_msg
+                    <-- continue_pop_head_iter_publish_request (l_publish_queue);
+                    /* Generates BadNoSubscription responses */
+                    generate_internal_send_publish_response_event (p_session, l_resp_msg, l_req_handle, l_req_ctx, e_sc_bad_no_subscription)
+                INVARIANT
+                    l_continue_pub = bool(a_publish_responses~[{l_publish_queue}] /= {})
 
-            VARIANT
-                card(a_publish_responses~[{l_publish_queue}])
+                VARIANT
+                    card(a_publish_responses~[{l_publish_queue}])
+                END
             END
+            ;
+            /* Deallocate publish queue */
+            clear_and_deallocate_publish_queue (l_publish_queue);
+            reset_session_publishRequestQueue (p_session)
         END
-        ;
-        /* Deallocate publish queue */
-        clear_and_deallocate_publish_queue (l_publish_queue);
-        reset_session_publishRequestQueue (p_session)
     END
     ;
 

@@ -165,7 +165,7 @@ INVARIANT
     a_SeqNum                  = s_subscription <| a_SeqNum_i |> t_sub_seq_num                  &
 
     a_publishRequestQueue_i      : t_session_i --> t_publishReqQueue_i                    &
-    ran(a_subscription_session)  <: dom(a_publishRequestQueue)                            &
+    dom(a_publishRequestQueue)   <: ran(a_subscription_session)                           &
     a_publishRequestQueue        = t_session <| a_publishRequestQueue_i |> t_publishReqQueue &
 
     a_notifRepublishQueue_i      : t_subscription_i --> t_notifRepublishQueue_i                &
@@ -735,9 +735,10 @@ OPERATIONS
     END
     ;
 
-    p_publishReqQueue <-- get_session_publishRequestQueue (p_session) =
+    p_bres, p_publishReqQueue <-- get_session_publishRequestQueue (p_session) =
     BEGIN
-        p_publishReqQueue := a_publishRequestQueue_i(p_session)
+        p_publishReqQueue := a_publishRequestQueue_i(p_session);
+        p_bres := bool(c_publishReqQueue_indet /= p_publishReqQueue)
     END
     ;
 

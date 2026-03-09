@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_1.h
 
- Date                 : 27/08/2025 16:32:00
+ Date                 : 09/03/2026 17:46:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -133,6 +133,7 @@ extern void subscription_core_1__get_session_priority_next_sub_idx(
    t_entier4 * const subscription_core_1__p_next_idx_sub);
 extern void subscription_core_1__get_session_publishRequestQueue(
    const constants__t_session_i subscription_core_1__p_session,
+   t_bool * const subscription_core_1__p_bres,
    constants__t_publishReqQueue_i * const subscription_core_1__p_publishReqQueue);
 extern void subscription_core_1__get_session_seq_subscription(
    const constants__t_session_i subscription_core_1__p_session,

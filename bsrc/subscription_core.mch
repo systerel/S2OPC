@@ -1088,12 +1088,17 @@ OPERATIONS
         p_session : t_session_i &
         p_session : ran(a_subscription_session)
     THEN
-        ANY l_PublishingReqQueued, l_new_publish_responses WHERE
-            d_check_for_valid_publish_req_queue(p_session, l_PublishingReqQueued, l_new_publish_responses)
+        IF p_session : dom(a_publishRequestQueue)
         THEN
-            validPublishReqQueued := l_PublishingReqQueued ||
-            p_validPublishingReqQueued := l_PublishingReqQueued ||
-            a_publish_responses := l_new_publish_responses
+            ANY l_PublishingReqQueued, l_new_publish_responses WHERE
+                d_check_for_valid_publish_req_queue(p_session, l_PublishingReqQueued, l_new_publish_responses)
+            THEN
+                validPublishReqQueued := l_PublishingReqQueued ||
+                p_validPublishingReqQueued := l_PublishingReqQueued ||
+                a_publish_responses := l_new_publish_responses
+            END
+        ELSE
+            p_validPublishingReqQueued := FALSE
         END
     END
     ;
@@ -1109,34 +1114,42 @@ OPERATIONS
         p_session : t_session_i &
         p_session = a_subscription_session(p_subscription)
     THEN
-        /* #27 transition */
-        ANY l_PublishingReqQueued, l_new_publish_responses WHERE
-            d_check_for_valid_publish_req_queue(p_session, l_PublishingReqQueued, l_new_publish_responses)
+        IF p_session : dom(a_publishRequestQueue)
         THEN
-            a_publish_responses := l_new_publish_responses ||
-            validPublishReqQueued := l_PublishingReqQueued ||
-            p_validPubReqQueued := l_PublishingReqQueued ||
-            IF l_PublishingReqQueued = FALSE
+            /* #27 transition */
+            ANY l_PublishingReqQueued, l_new_publish_responses WHERE
+                d_check_for_valid_publish_req_queue(p_session, l_PublishingReqQueued, l_new_publish_responses)
             THEN
-                IF a_LifetimeCounter (p_subscription) > 1
+                a_publish_responses := l_new_publish_responses ||
+                validPublishReqQueued := l_PublishingReqQueued ||
+                p_validPubReqQueued := l_PublishingReqQueued ||
+                IF l_PublishingReqQueued = FALSE
                 THEN
-                    /* Decrements lifetime counter */
-                    a_LifetimeCounter (p_subscription) := a_LifetimeCounter (p_subscription) - 1 ||
+                    IF a_LifetimeCounter (p_subscription) > 1
+                    THEN
+                        /* Decrements lifetime counter */
+                        a_LifetimeCounter (p_subscription) := a_LifetimeCounter (p_subscription) - 1 ||
+                        p_close_sub := FALSE ||
+                        d_publish_timeout_no_msg_sent
+                    ELSE
+                        /* Lifetime counter expired => send issueStateChanged and close subscription */
+                        a_LifetimeCounter (p_subscription) := 0 ||
+                        /* How to send a status state changed as stated in OpcUa part 4 if no publish request available ?*/
+                        /*d_dequeue_publish_req (p_subscription, ...) ||
+                        d_publish_timeout_state_changed_msg_sent */
+                        p_close_sub := TRUE ||
+                        d_publish_timeout_no_msg_sent
+                    END
+                ELSE
                     p_close_sub := FALSE ||
                     d_publish_timeout_no_msg_sent
-                ELSE
-                    /* Lifetime counter expired => send issueStateChanged and close subscription */
-                    a_LifetimeCounter (p_subscription) := 0 ||
-                    /* How to send a status state changed as stated in OpcUa part 4 if no publish request available ?*/
-                    /*d_dequeue_publish_req (p_subscription, ...) ||
-                     d_publish_timeout_state_changed_msg_sent */
-                    p_close_sub := TRUE ||
-                    d_publish_timeout_no_msg_sent
                 END
-            ELSE
-                p_close_sub := FALSE ||
-                d_publish_timeout_no_msg_sent
             END
+        ELSE
+            /* Unexpected case */
+            p_validPubReqQueued := FALSE ||
+            p_close_sub := TRUE ||
+            d_publish_timeout_no_msg_sent
         END
     END
     ;
@@ -1148,6 +1161,7 @@ OPERATIONS
         p_subscription : s_subscription &
         p_session : t_session_i &
         p_session = a_subscription_session(p_subscription) &
+        p_session : dom(a_publishRequestQueue) & /* Guaranteed by previous call to server_subscription_core_publish_timeout_check_lifetime */
         p_validPublishReqQueued : BOOL &
         p_validPublishReqQueued = validPublishReqQueued
     THEN
@@ -1287,6 +1301,7 @@ OPERATIONS
         p_subscription : s_subscription &
         p_session : t_session_i &
         p_session = a_subscription_session(p_subscription) &
+        p_session : dom(a_publishRequestQueue) & /* Guaranteed by previous call to server_subscription_core_publish_timeout_check_lifetime */
         p_subscription : a_MoreNotifications &
         a_subscription_state (p_subscription) = e_subscriptionState_normal &
         a_monitored_item_notification_queue[a_monitoredItemSubs~[{p_subscription}]] /= {} &
