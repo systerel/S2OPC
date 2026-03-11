@@ -397,21 +397,25 @@ static void* AsyncReadThread(void* args)
     SOPC_UNUSED_ARG(args);
     while (0 == stopRequested && false == SOPC_Atomic_Int_Get(&atomicStopped))
     {
+        SOPC_ReturnStatus status = SOPC_STATUS_OK;
         OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Both);
         uintptr_t* emptyContext = SOPC_Calloc(1, sizeof(uintptr_t)); // Just to check deallocation is always done
-        if (NULL != readReq)
+        if (NULL != readReq && NULL != emptyContext)
         {
-            SOPC_ReturnStatus st =
-                SOPC_ReadRequest_SetReadValue(readReq, 0, &serverCurrentTimeNodeId, SOPC_AttributeId_Value, NULL);
-            if (SOPC_STATUS_OK == st)
+            status = SOPC_ReadRequest_SetReadValue(readReq, 0, &serverCurrentTimeNodeId, SOPC_AttributeId_Value, NULL);
+            if (SOPC_STATUS_OK == status)
             {
-                st = SOPC_ServerHelper_LocalServiceAsync(readReq, (uintptr_t) emptyContext);
+                status = SOPC_ServerHelper_LocalServiceAsync(readReq, (uintptr_t) emptyContext);
             }
-            if (SOPC_STATUS_OK != st)
-            {
-                SOPC_Free(emptyContext);
-                st = SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &readReq);
-            }
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(emptyContext);
+            status = SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &readReq);
         }
 #if S2OPC_EVENT_MANAGEMENT
         // Generate an event
@@ -558,37 +562,27 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
 
 static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
     SOPC_UserAuthentication_Manager* authenticationManager = NULL;
 
     /* Create an user authorization manager which allow all rights to any user.
      * i.e.: UserAccessLevel right == AccessLevel right for any user for a given node of address space */
     authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
-    if (NULL == authorizationManager)
+    authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
+    if (NULL == authorizationManager || NULL == authenticationManager)
     {
         printf("<Test_Server_Restart: Failed to create the user authorization manager\n");
+        SOPC_Free(authorizationManager);
+        SOPC_Free(authenticationManager);
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
-    }
+    SOPC_ReturnStatus status = SOPC_ServerConfigHelper_SetUserAuthenticationManager(authenticationManager);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    status = SOPC_ServerConfigHelper_SetUserAuthorizationManager(authorizationManager);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_ServerConfigHelper_SetUserAuthenticationManager(authenticationManager);
-        SOPC_ServerConfigHelper_SetUserAuthorizationManager(authorizationManager);
-    }
-    else
-    {
-        /* clear */
-        SOPC_UserAuthorization_FreeManager(&authorizationManager);
-        printf("<Test_Server_Restart: Failed to create the user authentication manager: %d\n", status);
-    }
-
-    return status;
+    return SOPC_STATUS_OK;
 }
 
 /*------------------------------

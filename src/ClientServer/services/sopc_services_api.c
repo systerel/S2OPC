@@ -297,11 +297,10 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "filterServerEvents: %s IGNORED: server configuration is not locked (configured)",
-                                   SE_TO_SE_SERVER_DATA_CHANGED == event   ? "SE_TO_SE_SERVER_DATA_CHANGED"
-                                   : SE_TO_SE_SERVER_NODE_CHANGED == event ? "SE_TO_SE_SERVER_NODE_CHANGED"
-                                   : SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO == event
-                                       ? "SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO"
-                                       : "SE_TO_SE_SERVER_UNKNOWN");
+                                   SE_TO_SE_SERVER_DATA_CHANGED == event ? "SE_TO_SE_SERVER_DATA_CHANGED"
+                                   : SE_TO_SE_SERVER_NODE_CHANGED == event
+                                       ? "SE_TO_SE_SERVER_NODE_CHANGED"
+                                       : "SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO");
         }
         else
         {
