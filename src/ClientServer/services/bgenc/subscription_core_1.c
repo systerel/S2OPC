@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_1.c
 
- Date                 : 27/08/2025 16:32:00
+ Date                 : 12/03/2026 14:42:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -478,7 +478,9 @@ void subscription_core_1__delete_subscription(
       t_entier4 subscription_core_1__l_sub_prio_idx;
       t_entier4 subscription_core_1__l_prio_idx_it;
       t_entier4 subscription_core_1__l_nb_prio;
+      t_entier4 subscription_core_1__l_min_sub_idx;
       t_entier4 subscription_core_1__l_nb_sub_prio;
+      t_entier4 subscription_core_1__l_max_sub_idx;
       t_entier4 subscription_core_1__l_sub_idx_next;
       t_entier4 subscription_core_1__l_sub_idx_del;
       t_entier4 subscription_core_1__l_sub_idx;
@@ -505,7 +507,11 @@ void subscription_core_1__delete_subscription(
       subscription_core_1__l_nb_subs = subscription_core_1__a_session_nb_subscriptions_i[subscription_core_1__l_session];
       subscription_core_1__l_sub_prio_idx = subscription_core_1__a_session_priority_idx_i[subscription_core_1__l_session][subscription_core_1__l_priority];
       subscription_core_1__l_nb_prio = subscription_core_1__a_session_nb_priorities_i[subscription_core_1__l_session];
+      subscription_core_1__l_min_sub_idx = subscription_core_1__a_session_priority_min_sub_idx_i[subscription_core_1__l_session][subscription_core_1__l_sub_prio_idx];
       subscription_core_1__l_nb_sub_prio = subscription_core_1__a_session_priority_nb_subs_i[subscription_core_1__l_session][subscription_core_1__l_sub_prio_idx];
+      subscription_core_1__l_max_sub_idx = (subscription_core_1__l_min_sub_idx +
+         subscription_core_1__l_nb_sub_prio) -
+         1;
       subscription_core_1__l_sub_idx_next = subscription_core_1__a_session_priority_next_sub_idx_i[subscription_core_1__l_session][subscription_core_1__l_sub_prio_idx];
       subscription_core_1__l_sub_idx_del = subscription_core_1__a_session_subscription_idx_i[subscription_core_1__l_session][subscription_core_1__p_subscription];
       subscription_core_1__l_prio_idx_it = subscription_core_1__l_sub_prio_idx;
@@ -546,7 +552,7 @@ void subscription_core_1__delete_subscription(
          subscription_core_1__a_session_priority_nb_subs_i[subscription_core_1__l_session][subscription_core_1__l_sub_prio_idx] = subscription_core_1__l_nb_sub_prio -
             1;
          if ((subscription_core_1__l_sub_idx_del < subscription_core_1__l_sub_idx_next) ||
-            (subscription_core_1__l_sub_idx_next == subscription_core_1__l_nb_sub_prio)) {
+            (subscription_core_1__l_sub_idx_next == subscription_core_1__l_max_sub_idx)) {
             subscription_core_1__a_session_priority_next_sub_idx_i[subscription_core_1__l_session][subscription_core_1__l_sub_prio_idx] = subscription_core_1__l_sub_idx_next -
                1;
          }

@@ -1197,7 +1197,6 @@ OPERATIONS
                                                               p_priority) =
     VAR
         l_bres,
-        l_newPublishQueue,
         l_bres_repub,
         l_newRepublishQueue,
         l_bres_monitored,

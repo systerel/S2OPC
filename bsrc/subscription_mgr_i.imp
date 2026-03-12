@@ -1921,8 +1921,6 @@ OPERATIONS
     VAR
         l_nid,
         l_aid,
-        l_nid_valid,
-        l_node,
         l_monitoredItemQueue,
         l_bres
     IN

@@ -326,7 +326,6 @@ OPERATIONS
         p_timerId) =
     VAR
         l_prio_idx,
-        l_prio_nb_subs,
         l_nb_prio,
         l_idx,
         l_int_continue,
@@ -471,7 +470,9 @@ OPERATIONS
         l_sub_prio_idx,
         l_prio_idx_it,
         l_nb_prio,
+        l_min_sub_idx,
         l_nb_sub_prio,
+        l_max_sub_idx,
         l_sub_idx_next,
         l_sub_idx_del,
         l_sub_idx,
@@ -501,7 +502,9 @@ OPERATIONS
         l_nb_subs  := a_session_nb_subscriptions_i(l_session);
         l_sub_prio_idx     := a_session_priority_idx_i(l_session)(l_priority);
         l_nb_prio      := a_session_nb_priorities_i(l_session);
+        l_min_sub_idx  := a_session_priority_min_sub_idx_i(l_session)(l_sub_prio_idx);
         l_nb_sub_prio  := a_session_priority_nb_subs_i(l_session)(l_sub_prio_idx);
+        l_max_sub_idx  := l_min_sub_idx + l_nb_sub_prio - 1;
         l_sub_idx_next := a_session_priority_next_sub_idx_i(l_session)(l_sub_prio_idx);
         l_sub_idx_del  := a_session_subscription_idx_i(l_session)(p_subscription);
 
@@ -544,7 +547,7 @@ OPERATIONS
             // subscription priority remains for other subscription(s)
             a_session_priority_nb_subs_i(l_session)(l_sub_prio_idx) := l_nb_sub_prio - 1;
             // sub next index in prio shall be shifted if deleted sub index preceded the next index or the next index was the last one
-            IF l_sub_idx_del < l_sub_idx_next or l_sub_idx_next = l_nb_sub_prio
+            IF l_sub_idx_del < l_sub_idx_next or l_sub_idx_next = l_max_sub_idx
             THEN
                 a_session_priority_next_sub_idx_i(l_session)(l_sub_prio_idx) := l_sub_idx_next - 1
             END
