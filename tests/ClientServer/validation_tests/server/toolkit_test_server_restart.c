@@ -23,10 +23,8 @@
 #include <string.h>
 
 #include "opcua_identifiers.h"
-#include "opcua_statuscodes.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
-#include "sopc_common_constants.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -589,6 +587,14 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
  * Address space configuration :
  *------------------------------*/
 
+// Note: we need those variable to could backup the inital values
+//       in case of restart with const addspace (otherwise nodes are copied on creation)
+extern SOPC_Variant SOPC_Embedded_VariableVariant[];
+extern const uint32_t SOPC_Embedded_VariableVariant_nb;
+extern const bool sopc_embedded_is_const_addspace;
+
+static SOPC_Variant* initAddspaceBackup = NULL;
+
 static SOPC_ReturnStatus Server_SetDefaultAddressSpace(void)
 {
     /* Load embedded default server address space:
@@ -602,6 +608,29 @@ static SOPC_ReturnStatus Server_SetDefaultAddressSpace(void)
     SOPC_AddressSpace* addSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
     status = (NULL != addSpace) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
+    if (SOPC_STATUS_OK == status && sopc_embedded_is_const_addspace)
+    {
+        if (NULL == initAddspaceBackup)
+        {
+            // Backup for possible next init
+            initAddspaceBackup = SOPC_Calloc(SOPC_Embedded_VariableVariant_nb, sizeof(*initAddspaceBackup));
+            SOPC_ASSERT(NULL != initAddspaceBackup);
+            for (uint32_t i = 0; i < SOPC_Embedded_VariableVariant_nb; i++)
+            {
+                status = SOPC_Variant_Copy(&initAddspaceBackup[i], &SOPC_Embedded_VariableVariant[i]);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+            }
+        }
+        else
+        {
+            // Restore from backup if already done
+            for (uint32_t i = 0; i < SOPC_Embedded_VariableVariant_nb; i++)
+            {
+                status = SOPC_Variant_Copy(&SOPC_Embedded_VariableVariant[i], &initAddspaceBackup[i]);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+            }
+        }
+    }
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_SetAddressSpace(addSpace);
@@ -962,6 +991,16 @@ int main(int argc, char* argv[])
     {
         printf("<Test_Server_Restart: Terminating with error status, see logs in %s directory for details.\n",
                logDirPath);
+    }
+
+    // Free the addspace init backup if needed
+    if (NULL != initAddspaceBackup)
+    {
+        for (uint32_t i = 0; i < SOPC_Embedded_VariableVariant_nb; i++)
+        {
+            SOPC_Variant_Clear(&initAddspaceBackup[i]);
+        }
+        SOPC_Free(initAddspaceBackup);
     }
 
     // Free the string containing log path
