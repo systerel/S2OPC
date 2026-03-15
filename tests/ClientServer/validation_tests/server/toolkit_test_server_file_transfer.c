@@ -75,7 +75,7 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 /* Close file CallBack */
 static void(UserCloseCallback)(const char* tmp_file_path)
 {
-    char* fileName = strstr(tmp_file_path, ITEM_1_FILE_NAME);
+    const char* fileName = strstr(tmp_file_path, ITEM_1_FILE_NAME);
     if (NULL != fileName)
     {
         fileName = ITEM_1_FILE_NAME;
