@@ -349,15 +349,11 @@ static SOPC_PubSub_SecurityStatus retrieve_security_info(uint32_t tokenId,
     SOPC_ASSERT(security != NULL);
     SOPC_ASSERT(*security == NULL);
 
-    if (SECU_NONE == gSubSecuMode)
-    {
-        return SOPC_PUBSUB_STATUS_SECURITY_NOK;
-    }
-    else
+    if (SECU_NONE != gSubSecuMode)
     {
         *security = &gSubSecurityType;
-        return SOPC_PUBSUB_STATUS_SECURITY_OK;
     }
+    return SOPC_PUBSUB_STATUS_SECURITY_OK;
 }
 
 static void readyToReceive(void* sockContext, SOPC_Socket sock)

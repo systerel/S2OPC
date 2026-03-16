@@ -2037,10 +2037,10 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
 
             // If there is a security context for the writer group and publisher then the reader is configured for sign
             // or encrypt/sign
-            if (SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_WRITER_GROUP != securityStatus &&
-                SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_PUBLISHER != securityStatus &&
-                (SOPC_PUBSUB_STATUS_SECURITY_OK == securityStatus && security != NULL &&
-                 !Network_Check_ReceivedSecurityMode(security->mode, false, false)))
+            if ((SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_WRITER_GROUP != securityStatus &&
+                 SOPC_PUBSUB_STATUS_SECURITY_NO_CONTEXT_PUBLISHER != securityStatus &&
+                 SOPC_PUBSUB_STATUS_SECURITY_OK != securityStatus) ||
+                (security != NULL && !Network_Check_ReceivedSecurityMode(security->mode, false, false)))
             {
                 set_status_default(&status, &code, SOPC_UADP_NetworkMessage_Error_Read_SecurityNone_Failed);
             }
