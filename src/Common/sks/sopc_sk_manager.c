@@ -354,10 +354,14 @@ static SOPC_ReturnStatus SOPC_SKManager_GetKeys_Default(SOPC_SKManager* skm,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     /* Check Parameter */
-    if (NULL == skm || NULL == skm->data || NULL == SecurityPolicyUri || NULL == FirstTokenId || NULL == Keys ||
-        NULL == NbToken || NULL == TimeToNextKey || NULL == KeyLifetime || 0 == NbRequestedToken)
+    if (NULL == skm || NULL == skm->data || NULL == FirstTokenId || NULL == Keys || NULL == NbToken ||
+        NULL == TimeToNextKey || NULL == KeyLifetime)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else if (NULL != SecurityPolicyUri)
+    {
+        *SecurityPolicyUri = NULL;
     }
 
     SOPC_SKManager_DefaultData* data = (SOPC_SKManager_DefaultData*) skm->data;
@@ -373,7 +377,6 @@ static SOPC_ReturnStatus SOPC_SKManager_GetKeys_Default(SOPC_SKManager* skm,
     {
         /* Return empty if no keys are managed */
         SOPC_Mutex_Unlock(&data->mutex);
-        *SecurityPolicyUri = NULL;
         *FirstTokenId = 0;
         *Keys = NULL;
         *NbToken = 0;
@@ -420,7 +423,7 @@ static SOPC_ReturnStatus SOPC_SKManager_GetKeys_Default(SOPC_SKManager* skm,
     }
 
     // Copy SecurityPolicyUri
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != SecurityPolicyUri)
     {
         *SecurityPolicyUri = SOPC_String_Create();
         if (NULL != *SecurityPolicyUri)
@@ -474,8 +477,11 @@ static SOPC_ReturnStatus SOPC_SKManager_GetKeys_Default(SOPC_SKManager* skm,
 
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_String_Delete(*SecurityPolicyUri);
-        *SecurityPolicyUri = NULL;
+        if (NULL != SecurityPolicyUri)
+        {
+            SOPC_String_Delete(*SecurityPolicyUri);
+            *SecurityPolicyUri = NULL;
+        }
 
         for (size_t i = 0; i < *NbToken; i++)
         {

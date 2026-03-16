@@ -86,9 +86,29 @@ SOPC_PubSub_SecurityStatus SOPC_PubSubSKS_GetUpdateSecurityKeys(const char* secu
         return SOPC_PUBSUB_STATUS_SECURITY_INVALID_PARAMETERS;
     }
 
-    SOPC_ReturnStatus status =
-        SOPC_SKManager_GetKeys(skm, tokenId, SOPC_PUBSUB_SKS_MAX_TOKEN_PER_CALL, &SecurityPolicyUri, &FirstTokenId,
-                               &Keys, &NbKeys, &TimeToNextKey, &KeyLifetime);
+    // First check if the SG token id is not already the one requested (still current one or still the one requested)
+    if (*securityGroup != NULL && (SOPC_PUBSUB_SKS_CURRENT_TOKENID == tokenId || (*securityGroup)->tokenId == tokenId))
+    {
+        // Ask for 0 keys only to know if the token id requested is available
+        SOPC_ReturnStatus status =
+            SOPC_SKManager_GetKeys(skm, tokenId, 0, NULL, &FirstTokenId, &Keys, &NbKeys, &TimeToNextKey, &KeyLifetime);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            // SKmanager fail to get keys
+            return SOPC_PUBSUB_STATUS_SECURITY_NOK;
+        }
+        else if ((*securityGroup)->tokenId == FirstTokenId)
+        {
+            // the token id that will be returned is the same as SG current token id
+            // => nothing to do, SG already has the requested and up to date token
+            return SOPC_PUBSUB_STATUS_SECURITY_OK;
+        }
+    }
+
+    // If there is an available key to update in our SG, ask for this key (one key needed)
+    SOPC_ReturnStatus status = SOPC_SKManager_GetKeys(skm, tokenId, 1, &SecurityPolicyUri, &FirstTokenId, &Keys,
+                                                      &NbKeys, &TimeToNextKey, &KeyLifetime);
 
     if (SOPC_STATUS_OK != status)
     {
