@@ -19,6 +19,7 @@
 
 #include <errno.h>
 #include <inttypes.h>
+#include <string.h>
 
 #include "opcua_statuscodes.h"
 #include "sopc_array.h"
@@ -26,6 +27,7 @@
 #include "sopc_atomic.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_dataset_layer.h"
+#include "sopc_enums.h"
 #include "sopc_eth_sockets.h"
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
@@ -535,11 +537,9 @@ static bool SecurityGroup_Initialize(SOPC_PubSub_SecurityType* securityGroup, co
         return false;
     }
     bool res = true;
+    memset(securityGroup, 0, sizeof(*securityGroup));
     securityGroup->mode = SOPC_WriterGroup_Get_SecurityMode(group);
-    securityGroup->groupKeys = NULL;
-    securityGroup->sequenceNumber = 0;
     securityGroup->provider = SOPC_CryptoProvider_CreatePubSub(SOPC_PUBSUB_SECURITY_POLICY);
-    securityGroup->securityGroupId = NULL;
 
     if (NULL == securityGroup->provider)
     {
@@ -573,7 +573,7 @@ static bool SecurityGroups_Initialize_Array(const SOPC_PubSubConfiguration* conf
     {
         SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
         const uint16_t nbWriterGroup = SOPC_PubSubConnection_Nb_WriterGroup(connection);
-        for (uint16_t j = 0; j < nbWriterGroup; j++)
+        for (uint16_t j = 0; j < nbWriterGroup && res; j++)
         {
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
             SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
@@ -1098,18 +1098,12 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
     {
         pubSchedulerCtx.config = config;
         pubSchedulerCtx.sourceConfig = sourceConfig;
-        if (!MessageCtx_Array_Initialize(config))
-        {
-            resultSOPC = SOPC_STATUS_NOK;
-        }
+        resultSOPC = MessageCtx_Array_Initialize(config) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
 
     if (SOPC_STATUS_OK == resultSOPC)
     {
-        if (!SecurityGroups_Initialize_Array(config, nbConnection))
-        {
-            resultSOPC = SOPC_STATUS_NOK;
-        }
+        resultSOPC = SecurityGroups_Initialize_Array(config, nbConnection) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
     if (SOPC_STATUS_OK == resultSOPC)
     {
@@ -1495,8 +1489,8 @@ SOPC_ReturnStatus SOPC_PubScheduler_Disable_DataSetMessage(SOPC_Conf_PublisherId
     return SOPC_PubScheduler_Set_EnableEmission_DataSetMessage(pubId, writerGroupId, dataSetWriterId, false);
 }
 
-SOPC_ReturnStatus Initialize_DataSetField_From_WriterGroup(SOPC_Dataset_LL_NetworkMessage* networkMessage,
-                                                           const SOPC_WriterGroup* group)
+static SOPC_ReturnStatus Initialize_DataSetField_From_WriterGroup(SOPC_Dataset_LL_NetworkMessage* networkMessage,
+                                                                  const SOPC_WriterGroup* group)
 {
     if (NULL == networkMessage || NULL == group)
     {
