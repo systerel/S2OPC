@@ -29,7 +29,6 @@
 #include "sopc_push_server_config_meth.h"
 
 #include "opcua_statuscodes.h"
-#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"

@@ -25,7 +25,6 @@
 #ifndef SOPC_TRUSTLIST_ITF_
 #define SOPC_TRUSTLIST_ITF_
 
-#include "sopc_builtintypes.h"
 #include "sopc_call_method_manager.h"
 #include "sopc_pki_stack.h"
 

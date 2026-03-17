@@ -27,7 +27,6 @@
 #define SOPC_PUSH_SERVER_CONFIG_ITF_
 
 #include "sopc_certificate_group_itf.h"
-#include "sopc_key_manager.h"
 
 /**
  * \brief Structure to gather the ServerConfiguration object configuration data

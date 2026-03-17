@@ -25,8 +25,6 @@
 
 #include <string.h>
 
-#include "sopc_assert.h"
-#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 
 #include "sopc_push_server_config.h"

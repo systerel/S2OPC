@@ -26,22 +26,20 @@
 #include <string.h>
 
 #include "opcua_statuscodes.h"
+#include "sopc_address_space_access.h"
 #include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
-#include "sopc_helper_encode.h"
-#include "sopc_key_cert_pair.h"
+#include "sopc_key_manager.h"
 #include "sopc_key_manager_lib_itf.h"
 #include "sopc_logger.h"
-#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_missing_c99.h"
 #include "sopc_pki_stack.h"
 #include "sopc_pki_struct_lib_internal.h"
-#include "sopc_trustlist.h"
 #include "sopc_trustlist_internal_helper.h"
 
 /*---------------------------------------------------------------------------
@@ -1409,7 +1407,7 @@ void Trustlist_WriteVarSize(const SOPC_TrustListContext* pTrustList, SOPC_Addres
     if (!SOPC_IsGoodStatus(stCode))
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "TrustList:%s:SizeVariable: unable to write the size %" PRId64,
+                                 "TrustList:%s:SizeVariable: unable to write the size %" PRIu64,
                                  pTrustList->cStrObjectId, dv.Value.Value.Uint64);
     }
 }

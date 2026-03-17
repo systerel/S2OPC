@@ -32,10 +32,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#include "sopc_address_space.h"
-#include "sopc_mutexes.h"
-#include "sopc_toolkit_config_constants.h"
-#include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
 /**

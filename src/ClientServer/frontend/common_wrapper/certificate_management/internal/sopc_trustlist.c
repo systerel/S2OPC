@@ -25,13 +25,10 @@
 
 #include <string.h>
 
-#include "sopc_assert.h"
-#include "sopc_helper_string.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_pki_struct_lib_internal.h"
 #include "sopc_service_call_context.h"
 
 #include "sopc_trustlist.h"
