@@ -29,8 +29,6 @@
 #include "sopc_dataset_layer.h"
 #include "sopc_enums.h"
 #include "sopc_eth_sockets.h"
-#include "sopc_event_handler.h"
-#include "sopc_event_timer_manager.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
@@ -571,19 +569,19 @@ static bool SecurityGroups_Initialize_Array(const SOPC_PubSubConfiguration* conf
     pubSchedulerCtx.securityGroups = SOPC_Array_Create(sizeof(SOPC_PubSub_SecurityType), 0, SecurityGroup_Clear);
     for (uint32_t i = 0; i < nbConnection && res; i++)
     {
-        SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
+        const SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
         const uint16_t nbWriterGroup = SOPC_PubSubConnection_Nb_WriterGroup(connection);
         for (uint16_t j = 0; j < nbWriterGroup && res; j++)
         {
-            SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
-            SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
+            const SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
+            const SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
             if (smode == SOPC_SecurityMode_Sign || smode == SOPC_SecurityMode_SignAndEncrypt)
             {
                 const char* securityGroupId = SOPC_WriterGroup_Get_SecurityGroupId(group);
                 if (NULL == securityGroupId)
                 {
                     res = false;
-                    uint16_t writerId = SOPC_WriterGroup_Get_Id(group);
+                    const uint16_t writerId = SOPC_WriterGroup_Get_Id(group);
                     SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
                                            "No securityGroupId configured for writer group %" PRIu16
                                            " with security mode set to %s\n",
@@ -592,7 +590,7 @@ static bool SecurityGroups_Initialize_Array(const SOPC_PubSubConfiguration* conf
                 else
                 {
                     // Compare with all already existing securityGroup to avoid duplication
-                    SOPC_PubSub_SecurityType* security = SecurityGroup_FindWithId(securityGroupId);
+                    const SOPC_PubSub_SecurityType* security = SecurityGroup_FindWithId(securityGroupId);
                     if (security == NULL)
                     {
                         // Initialize securityGroup and append to array
