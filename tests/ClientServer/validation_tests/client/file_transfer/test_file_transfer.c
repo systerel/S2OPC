@@ -41,20 +41,12 @@
 #include "sopc_pki_stack.h"
 #include "sopc_threads.h"
 
-#define INVALID_FILE_HANDLE 0x0u
-#define INVALID_POSITION 0xFFFFFFFFFFFFFFFFu
-#define READ_MASK 0x01u
-#define WRITE_MASK 0x02u
-
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define DEFAULT_APPLICATION_NAME "Test_Client_S2OPC"
 
-#define ITEM1_VAR_SIZE_ID "ns=1;i=15479"
-#define ITEM1_OPEN_COUNT_ID "ns=1;i=15482"
-#define ITEM1_USER_WRITABLE_ID "ns=1;i=15481"
-#define ITEM1_WRITABLE_ID "ns=1;i=15480"
+#define ITEM1_SELECTED true
 
 static int32_t connectionClosed = false;
 SOPC_Boolean booleanNotification = false;
@@ -65,8 +57,6 @@ static SOPC_ClientConnection* gConnection = NULL;
 /*---------------------------------------------------------------------------
  *                          Client initialization
  *---------------------------------------------------------------------------*/
-
-// static OpcUa_GetEndpointsResponse* expectedEndpoints = NULL;
 
 // Callback for unexpected connection events
 static void client_ConnectionEventCallback(SOPC_ClientConnection* config,
@@ -88,12 +78,10 @@ static SOPC_SecureConnection_Config* client_create_configuration(void)
 
     status = SOPC_ClientConfigHelper_SetPreferredLocaleIds(2, (const char*[]){"fr-FR", "en-US"});
 
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ClientConfigHelper_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
-                                                                   DEFAULT_APPLICATION_NAME, "fr-FR",
-                                                                   OpcUa_ApplicationType_Client);
-    }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    status = SOPC_ClientConfigHelper_SetApplicationDescription(
+        DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI, DEFAULT_APPLICATION_NAME, "fr-FR", OpcUa_ApplicationType_Client);
 
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -188,10 +176,10 @@ START_TEST(test_file_transfer_method)
     uint16_t* pOpenCountItem1 = &readValOpenCountItem1.Value.Value.Uint16;
 
     // Method write input parameters:
-    SOPC_ByteString dataToWrite;
-    SOPC_ByteString_Initialize(&dataToWrite);
+    SOPC_ByteString dataToWrite_ABCDString;
+    SOPC_ByteString_Initialize(&dataToWrite_ABCDString);
     uint8_t ABCDString[4] = {0x41, 0x42, 0x43, 0x44};
-    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&dataToWrite, ABCDString, 4);
+    SOPC_ReturnStatus status = SOPC_ByteString_CopyFromBytes(&dataToWrite_ABCDString, ABCDString, 4);
     ck_assert_int_eq(status, SOPC_STATUS_OK);
     SOPC_ByteString dataToCompare;
     SOPC_ByteString_Initialize(&dataToCompare);
@@ -212,10 +200,10 @@ START_TEST(test_file_transfer_method)
     uint64_t getPositionItem1 = 0;
     uint32_t fileHandleItem1 = 0;
 
-    // S2OPC CallRequest and CallResult structure for item 1 and 2:
+    // S2OPC CallRequest and CallResult structure for item 1:
     OpcUa_CallResponse* callResponseItem1 = NULL;
 
-    // Fonctional test: PHASE 3: declaration variables:
+    // Functional test: PHASE 3: declaration variables:
     SOPC_DataValue readValClient;
     SOPC_DataValue writeValClient;
     SOPC_DataValue_Initialize(&readValClient);
@@ -242,25 +230,23 @@ START_TEST(test_file_transfer_method)
     log_config.logLevel = SOPC_LOG_LEVEL_DEBUG;
     log_config.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_file_transfer_logs/";
     status = SOPC_CommonHelper_Initialize(&log_config, NULL);
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
 
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_SecureConnection_Config* clientCfg = client_create_configuration();
+    SOPC_SecureConnection_Config* clientCfg = client_create_configuration();
 
-        // Connect client to server
-        status = SOPC_ClientHelper_Connect(clientCfg, client_ConnectionEventCallback, &gConnection);
-        ck_assert_int_eq(status, SOPC_STATUS_OK);
-    }
+    // Connect client to server
+    status = SOPC_ClientHelper_Connect(clientCfg, client_ConnectionEventCallback, &gConnection);
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
 
     SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: PHASE 0:\n");
 
     // TC_SOPC_FileTransfer_001:
     // Verify default values of item1's PreloadFile type after FileTransfer API initialization.
 
-    get_read_response(ITEM1_VAR_SIZE_ID, &readValSizeItem1);
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
-    get_read_response(ITEM1_WRITABLE_ID, &readValWritableItem1);
-    get_read_response(ITEM1_USER_WRITABLE_ID, &readValUserWritableItem1);
+    get_read_response(NODEID_VAR_SIZE_ITEM1, &readValSizeItem1);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
+    get_read_response(NODEID_VAR_WRITABLE_ITEM1, &readValWritableItem1);
+    get_read_response(NODEID_VAR_USER_WRITABLE_ITEM1, &readValUserWritableItem1);
 
     ck_assert("TC_SOPC_FileTransfer_001" && 0 == *pSizeItem1 && 0 == *pOpenCountItem1);
     ck_assert("TC_SOPC_FileTransfer_001" && false == *pUserWritableItem1 && false == *pWritableItem1);
@@ -269,20 +255,23 @@ START_TEST(test_file_transfer_method)
     // Test case where the Read method is called before opening the file.
     nbOfBytesToRead = 100;
     fileHandleItem1 = 1500;
-    SOPC_TEST_FileTransfer_ReadMethod(gConnection, true, &callResponseItem1, fileHandleItem1, nbOfBytesToRead);
+    SOPC_TEST_FileTransfer_ReadMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                      nbOfBytesToRead);
     ck_assert_int_eq(OpcUa_BadInvalidArgument, callResponseItem1->Results[0].StatusCode);
     ck_assert_ptr_null(callResponseItem1->Results[0].OutputArguments);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_003:
     // Test case where the Write method is called before opening the file.
-    SOPC_TEST_FileTransfer_WriteMethod(gConnection, true, &callResponseItem1, fileHandleItem1, &dataToWrite);
-    ck_assert(OpcUa_BadInvalidArgument == callResponseItem1->Results[0].StatusCode);
+    SOPC_TEST_FileTransfer_WriteMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                       &dataToWrite_ABCDString);
+    ck_assert_int_eq(OpcUa_BadInvalidArgument, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_004:
     // Test case where the GetPosition method is called before opening the file.
-    uint64_t pos = SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    uint64_t pos =
+        SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_int_eq(OpcUa_BadInvalidArgument, callResponseItem1->Results[0].StatusCode);
     ck_assert_ptr_null(callResponseItem1->Results[0].OutputArguments);
     ck_assert_uint_eq(INVALID_POSITION, pos);
@@ -291,23 +280,24 @@ START_TEST(test_file_transfer_method)
     // TC_SOPC_FileTransfer_005:
     // Test case where the SetPosition method is called before opening the file.
     setPositionItem1 = 650;
-    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1, setPositionItem1);
+    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                             setPositionItem1);
     ck_assert_int_eq(OpcUa_BadInvalidArgument, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_006:
     // Test case where the Close method is called before opening the file.
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_int_eq(OpcUa_BadInvalidArgument, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_007:
     // Use the Open method with an invalid mode (bits 4 to 7 are reserved for future use).
     mode = 16;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
     ck_assert_int_eq(OpcUa_BadInvalidArgument, callResponseItem1->Results[0].StatusCode);
-    ck_assert(INVALID_FILE_HANDLE == fileHandleItem1);
+    ck_assert_int_eq(INVALID_FILE_HANDLE, fileHandleItem1);
     ck_assert_uint_eq(0, *pOpenCountItem1);
     ck_assert_int_eq(0, fileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
@@ -316,10 +306,10 @@ START_TEST(test_file_transfer_method)
     // Use the Open method with an invalid mode:
     // bit number 2 of mode parameter (EraseExisting) can only be activated if the file opened in write mode.
     mode = 4;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
     ck_assert_int_eq(OpcUa_BadInvalidArgument, callResponseItem1->Results[0].StatusCode);
-    ck_assert(INVALID_FILE_HANDLE == fileHandleItem1);
+    ck_assert_int_eq(INVALID_FILE_HANDLE, fileHandleItem1);
     ck_assert_uint_eq(0, *pOpenCountItem1);
     ck_assert_int_eq(0, fileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
@@ -327,111 +317,115 @@ START_TEST(test_file_transfer_method)
     // TC_SOPC_FileTransfer_009:
     // Test to open a file in write mode when it is already open in read mode.
     mode = 1;
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
+    ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     uint32_t tmpFileHandle = fileHandleItem1;
     mode = 2; // try to open a second time with write mode
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
     ck_assert_int_eq(OpcUa_BadNotWritable, callResponseItem1->Results[0].StatusCode);
     ck_assert_int_eq(INVALID_FILE_HANDLE, fileHandleItem1);
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
     ck_assert_uint_eq(1, *pOpenCountItem1);
     ck_assert_int_eq(0, fileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, tmpFileHandle);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, tmpFileHandle);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_010:
     // Test to open a file in read mode when it is already open in write mode.
     mode = 2;
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     tmpFileHandle = fileHandleItem1;
     mode = 1;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
     ck_assert_int_eq(OpcUa_BadNotReadable, callResponseItem1->Results[0].StatusCode);
     ck_assert_int_eq(1, *pOpenCountItem1);
     ck_assert_int_eq(0, fileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, tmpFileHandle);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, tmpFileHandle);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_011:
     // Test to open the file in read mode to then try to write in it.
-
-    // need to send again ABCD String into data to avoid double free
-    SOPC_ByteString_CopyFromBytes(&dataToWrite, ABCDString, 4);
-    ck_assert_int_eq(status, SOPC_STATUS_OK);
     mode = 1;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    SOPC_TEST_FileTransfer_WriteMethod(gConnection, true, &callResponseItem1, fileHandleItem1, &dataToWrite);
+    SOPC_TEST_FileTransfer_WriteMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                       &dataToWrite_ABCDString);
     ck_assert_int_eq(OpcUa_BadInvalidState, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_012:
-    // Test to open the file in read mode to then try to write in it.
+    // Test to open the file in write mode to then try to read in it.
     mode = 2;
     nbOfBytesToRead = 100;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    SOPC_TEST_FileTransfer_ReadMethod(gConnection, true, &callResponseItem1, fileHandleItem1, nbOfBytesToRead);
+    SOPC_TEST_FileTransfer_ReadMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                      nbOfBytesToRead);
     ck_assert_int_eq(OpcUa_BadInvalidState, callResponseItem1->Results[0].StatusCode);
     ck_assert_ptr_null(callResponseItem1->Results[0].OutputArguments);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "<Test_File_Transfer: PHASE 1:\n");
 
     // TC_SOPC_FileTransfer_013:
-    // Test:
-    //      - The possibility of opening a file twice in read mode,
-    //      - The fact that the OpenCount value is only updated once,
-    //      - The fileHandle is a random value.
+    // Test the limitation of only one simultaneous opening per file (see libs2opc_file_transfer.h)
+
     mode = 1;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, false, &callResponseItem1, mode);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
+    ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
+    ck_assert_uint_ne(INVALID_FILE_HANDLE, fileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
+
+    uint32_t tmpFileHandleItem1 = 0;
 
     mode = 1; // try to open a second time
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
+    tmpFileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
+    ck_assert_int_eq(OpcUa_BadNotSupported, callResponseItem1->Results[0].StatusCode);
     ck_assert_int_eq(1, *pOpenCountItem1);
-    ck_assert_uint_ne(0, fileHandleItem1);
+    ck_assert_uint_eq(INVALID_FILE_HANDLE, tmpFileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    getPositionItem1 =
+        SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     ck_assert_uint_eq(0, getPositionItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_014:
     // Test where the file is opened in read/write mode and the position is at the beginning of a file.
     mode = 3;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    getPositionItem1 =
+        SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     ck_assert_uint_eq(0, getPositionItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
@@ -439,47 +433,65 @@ START_TEST(test_file_transfer_method)
     // TC_SOPC_FileTransfer_015:
     // Verification of the Size variable after writing ABCD inside the file.
     mode = 3;
-    SOPC_ByteString_CopyFromBytes(&dataToWrite, ABCDString, 4);
-    ck_assert_int_eq(status, SOPC_STATUS_OK);
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    get_read_response(ITEM1_VAR_SIZE_ID, &readValSizeItem1);
+    get_read_response(NODEID_VAR_SIZE_ITEM1, &readValSizeItem1);
     ck_assert_uint_eq(0, *pSizeItem1);
 
-    SOPC_TEST_FileTransfer_WriteMethod(gConnection, true, &callResponseItem1, fileHandleItem1, &dataToWrite);
+    SOPC_TEST_FileTransfer_WriteMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                       &dataToWrite_ABCDString);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    get_read_response(ITEM1_VAR_SIZE_ID, &readValSizeItem1);
+    get_read_response(NODEID_VAR_SIZE_ITEM1, &readValSizeItem1);
     ck_assert_uint_eq(4, *pSizeItem1);
 
     // TC_SOPC_FileTransfer_016:
     // Verification that the position is at the end of the file.
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    getPositionItem1 =
+        SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     ck_assert_uint_eq(4, getPositionItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_017:
     // Verification of the Size variable by reading the file.
+    SOPC_ByteString dataToRead;
+    SOPC_ByteString_Initialize(&dataToRead);
+    uint8_t ABString[2] = {0x41, 0x42};
+    status = SOPC_ByteString_CopyFromBytes(&dataToRead, ABString, 2);
+    ck_assert_int_eq(status, SOPC_STATUS_OK);
+
+    setPositionItem1 = 0;
+    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                             setPositionItem1);
+    ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
+    SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
+
     nbOfBytesToRead = 2;
-    SOPC_TEST_FileTransfer_ReadMethod(gConnection, true, &callResponseItem1, fileHandleItem1, nbOfBytesToRead);
+    SOPC_TEST_FileTransfer_ReadMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                      nbOfBytesToRead);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_VariantValue* pVariantOutput = &callResponseItem1->Results[0].OutputArguments->Value;
-    ck_assert_ptr_null(pVariantOutput->Bstring.Data);
+    ck_assert_ptr_nonnull(pVariantOutput->Bstring.Data);
+    ck_assert(SOPC_ByteString_Equal(&pVariantOutput->Bstring, &dataToRead));
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
-    get_read_response(ITEM1_VAR_SIZE_ID, &readValSizeItem1);
+    get_read_response(NODEID_VAR_SIZE_ITEM1, &readValSizeItem1);
     ck_assert_uint_eq(4, *pSizeItem1);
+
+    SOPC_ByteString_Clear(&dataToRead);
 
     // TC_SOPC_FileTransfer_018:
     // Test of SetPosition method.
     setPositionItem1 = 2;
-    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1, setPositionItem1);
+    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                             setPositionItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    getPositionItem1 =
+        SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     ck_assert_uint_eq(2, getPositionItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
@@ -487,7 +499,8 @@ START_TEST(test_file_transfer_method)
     // TC_SOPC_FileTransfer_019:
     // Test case where the Read method is called with an invalid number of bytes to read.
     nbOfBytesToRead = -1;
-    SOPC_TEST_FileTransfer_ReadMethod(gConnection, true, &callResponseItem1, fileHandleItem1, nbOfBytesToRead);
+    SOPC_TEST_FileTransfer_ReadMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                      nbOfBytesToRead);
     ck_assert_int_eq(OpcUa_BadInvalidArgument, callResponseItem1->Results[0].StatusCode);
     ck_assert_ptr_null(callResponseItem1->Results[0].OutputArguments);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
@@ -496,7 +509,8 @@ START_TEST(test_file_transfer_method)
     // Verify that Read mode by reading the last to bytes of the ABCD string.
     // Also test the SetPosition method from TC_SOPC_FileTransfer_018.
     nbOfBytesToRead = 2; // "CD"
-    SOPC_TEST_FileTransfer_ReadMethod(gConnection, true, &callResponseItem1, fileHandleItem1, nbOfBytesToRead);
+    SOPC_TEST_FileTransfer_ReadMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                      nbOfBytesToRead);
     pVariantOutput = &callResponseItem1->Results[0].OutputArguments->Value;
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     ck_assert(SOPC_ByteString_Equal(&pVariantOutput->Bstring, &dataToCompare));
@@ -505,7 +519,8 @@ START_TEST(test_file_transfer_method)
     // TC_SOPC_FileTransfer_021:
     // Replace the C in the ABCD string by E.
     setPositionItem1 = 2;
-    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1, setPositionItem1);
+    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                             setPositionItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
@@ -515,7 +530,7 @@ START_TEST(test_file_transfer_method)
     status = SOPC_ByteString_CopyFromBytes(&toWrite, EString, 1);
     ck_assert_int_eq(status, SOPC_STATUS_OK);
 
-    SOPC_TEST_FileTransfer_WriteMethod(gConnection, true, &callResponseItem1, fileHandleItem1, &toWrite);
+    SOPC_TEST_FileTransfer_WriteMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1, &toWrite);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
@@ -524,7 +539,8 @@ START_TEST(test_file_transfer_method)
     // TC_SOPC_FileTransfer_022:
     // Verify that the character C was correctly replaced by E.
     setPositionItem1 = 2;
-    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1, setPositionItem1);
+    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                             setPositionItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
@@ -533,7 +549,8 @@ START_TEST(test_file_transfer_method)
     ck_assert_int_eq(status, SOPC_STATUS_OK);
 
     nbOfBytesToRead = 1; // "E"
-    SOPC_TEST_FileTransfer_ReadMethod(gConnection, true, &callResponseItem1, fileHandleItem1, nbOfBytesToRead);
+    SOPC_TEST_FileTransfer_ReadMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                      nbOfBytesToRead);
     pVariantOutput = &callResponseItem1->Results[0].OutputArguments->Value;
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     ck_assert(SOPC_ByteString_Equal(&pVariantOutput->Bstring, &dataToCompare));
@@ -541,62 +558,67 @@ START_TEST(test_file_transfer_method)
 
     // TC_SOPC_FileTransfer_023:
     // Verify the value of Size and OpenCount variables.
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
-    get_read_response(ITEM1_VAR_SIZE_ID, &readValSizeItem1);
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
+    get_read_response(NODEID_VAR_SIZE_ITEM1, &readValSizeItem1);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
     ck_assert_uint_eq(4, *pSizeItem1);
     ck_assert_int_eq(0, *pOpenCountItem1);
 
     // TC_SOPC_FileTransfer_024:
     // Verify that the Size variable is not updated after Open method.
     mode = 1;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
-    get_read_response(ITEM1_VAR_SIZE_ID, &readValSizeItem1);
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
+    get_read_response(NODEID_VAR_SIZE_ITEM1, &readValSizeItem1);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
     ck_assert_int_eq(1, *pOpenCountItem1);
     ck_assert_uint_eq(4, *pSizeItem1);
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_025:
     // Check that Size variable has been updated after Write method.
     mode = 3;
-    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, true, &callResponseItem1, mode);
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     setPositionItem1 = 0;
-    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1, setPositionItem1);
+    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                             setPositionItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    getPositionItem1 =
+        SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_uint_eq(0, getPositionItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    SOPC_TEST_FileTransfer_WriteMethod(gConnection, true, &callResponseItem1, fileHandleItem1, &dataWriteItem1);
+    SOPC_TEST_FileTransfer_WriteMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                       &dataWriteItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
-    get_read_response(ITEM1_VAR_SIZE_ID, &readValSizeItem1);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
+    get_read_response(NODEID_VAR_SIZE_ITEM1, &readValSizeItem1);
     ck_assert_uint_ne(0, fileHandleItem1);
     ck_assert_uint_eq(8, *pSizeItem1); // "preload1"
     ck_assert_uint_eq(1, *pOpenCountItem1);
 
     // TC_SOPC_FileTransfer_026:
     // Check that cursor is at the end of the file after Write method.
-    getPositionItem1 = SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    getPositionItem1 =
+        SOPC_TEST_FileTransfer_GetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_uint_eq(8, getPositionItem1);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     // TC_SOPC_FileTransfer_027:
-    // Read the last four characters to the file.
+    // Read the "load" string inside the file.
     setPositionItem1 = 3;
-    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, true, &callResponseItem1, fileHandleItem1, setPositionItem1);
+    SOPC_TEST_FileTransfer_SetPositionMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                             setPositionItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
@@ -605,24 +627,25 @@ START_TEST(test_file_transfer_method)
     SOPC_ByteString_CopyFromBytes(&dataToCompare, loadString, 4);
 
     nbOfBytesToRead = 4;
-    SOPC_TEST_FileTransfer_ReadMethod(gConnection, true, &callResponseItem1, fileHandleItem1, nbOfBytesToRead);
+    SOPC_TEST_FileTransfer_ReadMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                      nbOfBytesToRead);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     pVariantOutput = &callResponseItem1->Results[0].OutputArguments->Value;
     ck_assert(SOPC_ByteString_Equal(&pVariantOutput->Bstring, &dataToCompare));
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    get_read_response(ITEM1_VAR_SIZE_ID, &readValSizeItem1);
+    get_read_response(NODEID_VAR_SIZE_ITEM1, &readValSizeItem1);
     ck_assert_uint_eq(8, *pSizeItem1);
 
-    SOPC_TEST_FileTransfer_CloseMethod(gConnection, true, &callResponseItem1, fileHandleItem1);
+    SOPC_TEST_FileTransfer_CloseMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1);
     ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
     SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
-    get_read_response(ITEM1_OPEN_COUNT_ID, &readValOpenCountItem1);
+    get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
     ck_assert_uint_eq(0, *pOpenCountItem1);
 
     SOPC_ByteString_Clear(&dataWriteItem1);
-    SOPC_ByteString_Clear(&dataToWrite);
+    SOPC_ByteString_Clear(&dataToWrite_ABCDString);
     SOPC_ByteString_Clear(&dataToCompare);
 
     /*---------------------------------------------------------------------------

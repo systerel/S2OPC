@@ -462,7 +462,7 @@ if(NOT WIN32 AND expat_FOUND)
   target_include_directories(toolkit_test_file_transfer PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
   add_dependencies(toolkit_test_file_transfer toolkit_demo_server_file_transfer)
   target_link_libraries(toolkit_test_file_transfer PRIVATE s2opc_clientserver Check::check)
-  target_compile_options(toolkit_test_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno function.
+  target_compile_options(toolkit_test_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_file_transfer PRIVATE ${S2OPC_DEFINITIONS})
 endif()
 
