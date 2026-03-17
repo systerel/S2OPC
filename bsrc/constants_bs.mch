@@ -678,9 +678,8 @@ PROPERTIES
 
     c_PermissionType_none : t_PermissionType_i &
 
-    t_publishReqQueue <: t_publishReqQueue_i &
     c_publishReqQueue_indet : t_publishReqQueue_i &
-    c_publishReqQueue_indet /: t_publishReqQueue &
+    t_publishReqQueue = t_publishReqQueue_i - {c_publishReqQueue_indet} &
 
     t_notifRepublishQueue <: t_notifRepublishQueue_i &
     c_notifRepublishQueue_indet : t_notifRepublishQueue_i &

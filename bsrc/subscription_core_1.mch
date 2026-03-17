@@ -632,12 +632,9 @@ OPERATIONS
         p_bres, p_publishReqQueue
         :(p_bres : BOOL &
           p_publishReqQueue : t_publishReqQueue_i &
-          (p_session : dom(a_publishRequestQueue) =>
-              p_bres = TRUE &
-              p_publishReqQueue = a_publishRequestQueue(p_session)) &
-          (p_session : dom(a_publishRequestQueue) =>
-              p_bres = FALSE &
-              p_publishReqQueue = c_publishReqQueue_indet)
+          p_bres = bool(p_session : dom(a_publishRequestQueue)) &
+          (p_bres = TRUE =>
+              p_publishReqQueue = a_publishRequestQueue(p_session))
         )
     END
     ;
