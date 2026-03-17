@@ -68,6 +68,8 @@ variables:
   S2OPC_EVENT_MANAGEMENT: 1
   S2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE: 1
   S2OPC_HAS_AUDITING: 1
+  # For installation test purpose
+  CMAKE_INSTALL_PREFIX: /tmp/s2opc/install
 
 .nominal_test_variables: &nominal_test_variables
   TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
@@ -492,6 +494,44 @@ test-build-from-export:
     - 'mkdir -p ${CI_PROJECT_DIR}/samples/embedded/build_samples'
     - 'cd ${CI_PROJECT_DIR}/samples/embedded/build_samples'
     - 's2opc_DIR=${CI_PROJECT_DIR}/build cmake ..'
+    - 'cmake --build .'
+  artifacts:
+  rules:
+    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
+           $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
+           $ALL_BUILDS == null && $ALL_TESTS == null && $HIL_TESTS == null && \
+           $SCAN_SBOM == null && $TEST_NETWORK_FUZZ == null"
+      when: on_success
+
+test-build-from-install:
+  <<: *build_linux
+  variables :
+    CMAKE_PREFIX_PATH: /tmp/s2opc/install
+  stage: test
+  needs: [build-linux64-ASan]
+  script:
+    - 'cmake --install build'
+    - 'mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build'
+    - 'sed "s/s2opc_clientserver/s2opc_clientserver s2opc_pubsub s2opc_clientserver-loader-embedded/g" ${CI_PROJECT_DIR}/samples/ClientServer/CMakeLists.example.txt > ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/CMakeLists.txt'
+    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/write_from_export/build'
+    - 'cmake ..'
+    - 'cmake --build .'
+    - 'mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
+    - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
+    - 'cmake ..'
+    - 'cmake --build .'
+    - 'mkdir -p ${CI_PROJECT_DIR}/samples/PubSub/build_samples'
+    - 'cd ${CI_PROJECT_DIR}/samples/PubSub/build_samples'
+    - 'cmake ..'
+    - 'cmake --build .'
+    - 'mkdir -p ${CI_PROJECT_DIR}/samples/PubSub_ClientServer/build_samples'
+    - 'cd ${CI_PROJECT_DIR}/samples/PubSub_ClientServer/build_samples'
+    - 'cmake ..'
+    - 'cmake --build .'
+    - 'mkdir -p ${CI_PROJECT_DIR}/samples/embedded/build_samples'
+    - 'cd ${CI_PROJECT_DIR}/samples/embedded/build_samples'
+    - 'cmake ..'
     - 'cmake --build .'
   artifacts:
   rules:
