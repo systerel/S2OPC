@@ -62,8 +62,8 @@ target_link_libraries(s2opc_pubsub PUBLIC s2opc_common PRIVATE expat::expat ${PA
 
 target_include_directories(s2opc_pubsub
   PUBLIC
-  "$<BUILD_INTERFACE:${S2OPC_PUBSUB_PUBLIC_INCLUDES}>" # when building (quotes needed to interpret list correclty)
-  $<INSTALL_INTERFACE:include/s2opc/pubsub}> # when installed
+  "$<BUILD_INTERFACE:${S2OPC_PUBSUB_PUBLIC_INCLUDES}>" # when building (quotes needed to interpret list correctly)
+  $<INSTALL_INTERFACE:include/s2opc/pubsub> # when installed
   )
 
 ### Installation and export of S2OPC client/server toolkit library ###
