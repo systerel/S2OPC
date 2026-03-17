@@ -92,7 +92,9 @@ static void SOPC_SocketsInternalEventMgr_LogSocketEvent(SOPC_InternalSocket* con
 {
     char* peerHost = NULL;
     char* peerService = NULL;
-    SOPC_SocketAddress_GetNameInfo(connection->addr, &peerHost, &peerService);
+    const SOPC_Socket_Address* dispAddr =
+        (NULL != connection->addr ? connection->addr : (SOPC_Socket_Address*) connection->curConnectAttemptAddr);
+    SOPC_SocketAddress_GetNameInfo(dispAddr, &peerHost, &peerService);
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "%s [%s]:%s with socket socketIdx=%" PRIu32, eventName,
                           (peerHost ? peerHost : "<Unknown Address>"), (peerService ? peerService : "<Unknown port>"),
                           connection->socketIdx);
@@ -332,7 +334,21 @@ static SOPC_InternalSocket* SOPC_SocketsEventMgr_CreateServerSocket(const char* 
                 }
             }
         }
-
+        if (SOPC_STATUS_OK == status)
+        {
+            resultSocket = freeSocket;
+        }
+        else
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Failed creating listening socket on [%s]:%s => address not available or already in use ?",
+                (hostname ? hostname : "<Any>"), (port ? port : "<Unknown port>"));
+            if (freeSocket != NULL)
+            {
+                SOPC_SocketsInternalContext_CloseSocket(freeSocket->socketIdx);
+            }
+        }
         if (port != NULL)
         {
             SOPC_Free(port);
@@ -340,19 +356,6 @@ static SOPC_InternalSocket* SOPC_SocketsEventMgr_CreateServerSocket(const char* 
         if (hostname != NULL)
         {
             SOPC_Free(hostname);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            resultSocket = freeSocket;
-        }
-        else
-        {
-            if (freeSocket != NULL)
-            {
-                SOPC_SocketsInternalEventMgr_LogSocketEvent(freeSocket, "Closed connection on");
-                SOPC_SocketsInternalContext_CloseSocket(freeSocket->socketIdx);
-            }
         }
     }
 
@@ -681,10 +684,19 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
 
         if (!result)
         {
-            SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, (uintptr_t) NULL, eltId);
-            // Definitively close the socket
-            SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Closed connection on");
-            SOPC_SocketsInternalContext_CloseSocket(eltId);
+            if (socketElt->state != SOCKET_STATE_CLOSED)
+            {
+                SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, (uintptr_t) NULL, eltId);
+                // Definitively close the socket
+                SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Closed connection on");
+                SOPC_SocketsInternalContext_CloseSocket(eltId);
+            }
+            else
+            {
+                SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Ignoring SOCKET_WRITE on closed socket socketIdx=%" PRIu32,
+                                       socketElt->socketIdx);
+            }
         }
 
         break;
