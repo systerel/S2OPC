@@ -808,9 +808,9 @@ SOPC_ReturnStatus SOPC_ToolkitServer_UnConfigure(void)
                 // Note: done by clear_server_configuration_context operation
                 // address_space_bs__nodes = NULL;
             }
-            mutStatus = SOPC_Mutex_Unlock(&tConfig.mut);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
+        mutStatus = SOPC_Mutex_Unlock(&tConfig.mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
     return status;
 }
