@@ -115,7 +115,7 @@ bool CertificateGroup_CheckIsApplicationGroup(const SOPC_NodeId* pGroupId);
  * \brief Check the certificate type that belongs to the group.
  *
  * \param pGroupCtx The CertificateGroup context.
- * \param expected  The expected CertificateType.
+ * \param pExpectedCertTypeId  The expected CertificateType.
  *
  * \warning \p pGroupCtx shall be valid (!= NULL)
  *
@@ -209,8 +209,6 @@ SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx
  * \param pGroupCtx A valid pointer to the CertificateGroup context.
  *
  * \warning \p pGroupCtx shall be valid (!= NULL)
- *
- * \return Return SOPC_STATUS_OK if successful.
  */
 void CertificateGroup_DiscardNewKey(SOPC_CertGroupContext* pGroupCtx);
 

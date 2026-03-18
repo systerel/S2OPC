@@ -185,9 +185,9 @@ void TrustList_RemoveFromNodeId(const SOPC_NodeId* pObjectId);
  * \note If the period \c SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS has elapsed then the trustlist is closed when calling
  *       ::TrustList_GetFromNodeId )
  *
- * \param pTrustList The TrustList context.
+ * \param pContext The TrustList context.
  *
- * \warning \p pTrustList shall be valid (!= NULL)
+ * \warning \p pContext shall be valid (!= NULL)
  */
 void TrustList_StartActivityTimeout(SOPC_TrustListContext* pContext);
 
@@ -197,9 +197,9 @@ void TrustList_StartActivityTimeout(SOPC_TrustListContext* pContext);
  * \note If the period \c SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS has elapsed then the trustlist is closed when calling
  *       ::TrustList_GetFromNodeId )
  *
- * \param pTrustList The TrustList context.
+ * \param pContext The TrustList context.
  *
- * \warning \p pTrustList shall be valid (!= NULL)
+ * \warning \p pContext shall be valid (!= NULL)
  */
 void TrustList_ResetActivityTimeout(SOPC_TrustListContext* pContext);
 
@@ -378,7 +378,7 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList);
  *        The trustList part read (trusted certs/CRL, issuers certs/CRL) depends on the OpeningMask.
  *
  * \param pTrustList The TrustList context.
- * \param length     The length byte to read (!= 0)
+ * \param reqLength     The length byte to read (!= 0)
  * \param[out] pDest A valid byte string to store the result.
  *
  * \warning \p pTrustList shall be valid (!= NULL) and opened in read mode.

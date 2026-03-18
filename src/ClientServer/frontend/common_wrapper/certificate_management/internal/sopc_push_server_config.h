@@ -83,7 +83,7 @@ struct SOPC_PushServerConfig_Config
  *        through the PKI attached to all group (user or application group)
  *
  * \param[out] ppBsCertArray A valid pointer to the newly created ByteString array.
- * \param[out] pLength The length of \p ppThumbprintArray
+ * \param[out] pLengthArray The length of \p ppThumbprintArray
  *
  * \return Return SOPC_GoodGenericStatus if successful.
  */
