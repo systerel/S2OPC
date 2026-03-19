@@ -41,7 +41,7 @@
 #include "sopc_pki_stack.h"
 #include "sopc_pub_scheduler.h"
 
-#include "xml_expat/sopc_uanodeset_loader.h"
+#include "sopc_uanodeset_loader.h"
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_server.h"

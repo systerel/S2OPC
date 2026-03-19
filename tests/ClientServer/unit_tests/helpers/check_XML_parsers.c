@@ -32,9 +32,10 @@
 
 #include "embedded/sopc_addspace_loader.h"
 #ifdef WITH_EXPAT
+#include "sopc_uanodeset_loader.h"
+#include "sopc_users_loader.h"
+// We keep the xml_expat path since we include some private headers (not available through lib export)
 #include "xml_expat/sopc_config_loader.h"
-#include "xml_expat/sopc_uanodeset_loader.h"
-#include "xml_expat/sopc_users_loader.h"
 #endif
 
 #include "opcua_identifiers.h"

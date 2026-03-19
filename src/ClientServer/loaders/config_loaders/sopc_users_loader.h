@@ -22,7 +22,7 @@
 
 #include <stdio.h>
 
-#include "sopc_user_manager_internal.h"
+#include "sopc_user_manager.h"
 
 /* Parse the XML users configuration file and provide resulting user authentication and authorization managers
  *

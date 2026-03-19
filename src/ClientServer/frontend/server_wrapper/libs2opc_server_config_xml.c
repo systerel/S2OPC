@@ -36,9 +36,9 @@
 #include "sopc_pki_stack.h"
 #include "sopc_toolkit_config.h"
 
-#include "xml_expat/sopc_config_loader.h"
-#include "xml_expat/sopc_uanodeset_loader.h"
-#include "xml_expat/sopc_users_loader.h"
+#include "sopc_config_loader.h"
+#include "sopc_uanodeset_loader.h"
+#include "sopc_users_loader.h"
 
 static FILE* SOPC_HelperInternal_OpenFileFromPath(const char* filename)
 {

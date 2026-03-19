@@ -52,7 +52,7 @@ set(S2OPC_CLIENTSERVER_PRIVATE_INCLUDES
 
 # define S2OPC wrappers source files
 
-set(XML_LOADERS_PATH "loaders")
+set(XML_LOADERS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/loaders")
 set(COMMONWRAPPER_PATH "frontend/common_wrapper")
 set(HELPERWRAPPER_PATH "frontend/helper_wrapper")
 set(CLIENTWRAPPER_PATH "frontend/client_wrapper")
@@ -111,6 +111,7 @@ set(S2OPC_ALARMCOND_SRC
 
 list(APPEND WRAPPERS_INCLUDE_FILES
     "${COMMONWRAPPER_PATH}/libs2opc_common_config.h"
+    "${COMMONWRAPPER_PATH}/libs2opc_common_monitoring.h"
     "${COMMONWRAPPER_PATH}/certificate_management/sopc_certificate_group_itf.h"
     "${COMMONWRAPPER_PATH}/certificate_management/sopc_push_server_config_itf.h"
     "${COMMONWRAPPER_PATH}/certificate_management/sopc_trustlist_itf.h"
@@ -130,13 +131,15 @@ set(S2OPC_XML_LOADERS_PUBLIC_INCLUDES "")
 set(S2OPC_XML_LOADERS_PRIVATE_INCLUDES "")
 if(expat_FOUND)
   list(APPEND WRAPPERS_INCLUDE_FILES
-       "${XML_LOADERS_PATH}/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
+       "${XML_LOADERS_PATH}/address_space_loaders/sopc_uanodeset_loader.h"
        "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_loader.h"
-       "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_users_loader.h")
+       "${XML_LOADERS_PATH}/config_loaders/sopc_users_loader.h")
   set(S2OPC_XML_LOADERS_PUBLIC_INCLUDES
+      "${XML_LOADERS_PATH}/address_space_loaders/xml_expat"
       "${CMAKE_CURRENT_SOURCE_DIR}/loaders/address_space_loaders"
       "${CMAKE_CURRENT_SOURCE_DIR}/loaders/config_loaders")
   set(S2OPC_XML_LOADERS_PRIVATE_INCLUDES
+      "${XML_LOADERS_PATH}/config_loaders/xml_expat"
       "${CMAKE_CURRENT_SOURCE_DIR}/loaders/helpers")
 endif()
 

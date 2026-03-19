@@ -32,7 +32,7 @@
 #include "sopc_macros.h"
 #include "sopc_user_app_itf.h"
 
-#include "xml_expat/sopc_config_loader.h"
+#include "sopc_config_loader.h"
 
 static FILE* SOPC_HelperInternal_OpenFileFromPath(const char* filename)
 {

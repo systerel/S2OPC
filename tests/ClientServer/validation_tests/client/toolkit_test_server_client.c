@@ -42,7 +42,7 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 #ifdef WITH_EXPAT
-#include "xml_expat/sopc_uanodeset_loader.h"
+#include "sopc_uanodeset_loader.h"
 #endif
 
 #include "opcua_identifiers.h"
