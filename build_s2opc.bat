@@ -53,8 +53,8 @@
 @IF not %ERRORLEVEL% == 0 exit /B
 @
 @REM VisualStudio version used for compilation: >= VS2017 necessary for S2OPC C99 compatibility
-@IF NOT DEFINED VS_VERSION (set VS_VERSION="Visual Studio 17 2022")
-@IF NOT DEFINED CONFIG (set CONFIG="Release")
+@IF NOT DEFINED VS_VERSION (set VS_VERSION="Visual Studio 18 2026")
+@IF NOT DEFINED CONFIG (set CONFIG=Release)
 @IF NOT "%WITH_ASAN%" == "off" IF NOT "%CONFIG%" == "Debug" (echo ERROR: cannot compile WITH_ASAN="on" without CONFIG="Debug". & goto :EXIT_FAIL)
 @
 @REM Comment if ENABLED_TESTING=off or if already built

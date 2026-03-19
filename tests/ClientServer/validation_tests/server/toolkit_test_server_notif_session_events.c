@@ -374,7 +374,12 @@ int main(int argc, char* argv[])
             SOPC_CONSOLE_PRINTF("\n=========== TC 1: Normal 'None' connection (Success case) ===========\n");
             // launch a test.
             set_expected_session_events_test(&session_AnonOK[0], sizeof(session_AnonOK) / sizeof(*session_AnonOK));
-            int ret = system("./s2opc_read --none -n i=2259 -a 13");
+            int ret = 0;
+#ifdef _WIN32
+            ret = system("s2opc_read --none -n i=2259 -a 13");
+#else
+            ret = system("./s2opc_read --none -n i=2259 -a 13");
+#endif
             SOPC_ASSERT(ret == 0);
 
             status = check_session_events_test(2000);
@@ -383,7 +388,12 @@ int main(int argc, char* argv[])
             SOPC_CONSOLE_PRINTF("\n=========== TC 2: connection with user/pass (Success case) ===========\n");
             // launch a test.
             set_expected_session_events_test(&session_UserOK[0], sizeof(session_UserOK) / sizeof(*session_UserOK));
+#ifdef _WIN32
+            ret = system(
+                "cmd /C \"set TEST_USERNAME=user1&& set TEST_PASSWORD_USER=password&& s2opc_wrapper_connect 2\"");
+#else
             ret = system("TEST_USERNAME=user1 TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 2");
+#endif
             SOPC_ASSERT(ret == 0);
 
             status = check_session_events_test(2000);
@@ -392,7 +402,12 @@ int main(int argc, char* argv[])
             SOPC_CONSOLE_PRINTF("\n=========== TC 3: connection with bad user (ActivateSession failed) ===========\n");
             // launch a test.
             set_expected_session_events_test(&session_UserNOK[0], sizeof(session_UserNOK) / sizeof(*session_UserNOK));
+#ifdef _WIN32
+            ret = system(
+                "cmd /C \"set TEST_USERNAME=unknownUser&& set TEST_PASSWORD_USER=password&& s2opc_wrapper_connect 2\"");
+#else
             ret = system("TEST_USERNAME=unknownUser TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 2");
+#endif
             SOPC_ASSERT(ret != 0);
 
             status = check_session_events_test(2000);
@@ -401,7 +416,12 @@ int main(int argc, char* argv[])
             SOPC_CONSOLE_PRINTF("\n=========== TC 4: connection with bad pass (ActivateSession failed) ===========\n");
             // launch a test.
             set_expected_session_events_test(&session_PwdNOK[0], sizeof(session_UserNOK) / sizeof(*session_UserNOK));
+#ifdef _WIN32
+            ret = system(
+                "cmd /C \"set TEST_USERNAME=user1&& set TEST_PASSWORD_USER=PASSword&& s2opc_wrapper_connect 2\"");
+#else
             ret = system("TEST_USERNAME=user1 TEST_PASSWORD_USER=PASSword ./s2opc_wrapper_connect 2");
+#endif
             SOPC_ASSERT(ret != 0);
 
             status = check_session_events_test(2000);

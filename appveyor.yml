@@ -73,6 +73,7 @@ test_script:
     - set VS_VERSION="Visual Studio 17 2022"
     - set S2OPC_CLIENTSERVER_ONLY=off
     - set S2OPC_EVENT_MANAGEMENT=on
+    - set S2OPC_HAS_AUDITING=on
     - set ENABLE_SAMPLES=on
     - set TEST_PASSWORD_PRIVATE_KEY=password
     - set TEST_PASSWORD_CACERT=S2OPC
