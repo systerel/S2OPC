@@ -623,3 +623,14 @@ if(ENABLE_FUZZING)
 
   add_custom_target(fuzzers)
 endif(ENABLE_FUZZING)
+
+## Options for developpers
+
+# Generate the compile commands used by clangd extension by default
+# Note for usage it is better to do locally:
+# $ ln -sf build/compile_commands.json .
+if(NOT DEFINED CMAKE_EXPORT_COMPILE_COMMANDS OR
+   CMAKE_EXPORT_COMPILE_COMMANDS STREQUAL "")
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL
+        "Export compilation commands into compile_commands.json" FORCE)
+endif()
