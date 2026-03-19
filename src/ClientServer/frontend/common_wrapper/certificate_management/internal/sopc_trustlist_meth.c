@@ -558,15 +558,12 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
         return OpcUa_BadInvalidState;
     }
     /* Finally remove the certificate with its thumbprint */
-    statusCode = TrustList_RemoveCert(pTrustList, (const SOPC_String*) &inputArgs[0].Value.Bstring,
-                                      inputArgs[1].Value.Boolean, &bIsRemove, &bIsIssuer);
+    statusCode = TrustList_RemoveCert(pTrustList, &inputArgs[0].Value.Bstring, inputArgs[1].Value.Boolean, &bIsRemove,
+                                      &bIsIssuer);
     SOPC_UNUSED_ARG(bIsIssuer);
-    if (SOPC_IsGoodStatus(statusCode))
+    if (SOPC_IsGoodStatus(statusCode) && !bIsRemove)
     {
-        if (!bIsRemove)
-        {
-            statusCode = OpcUa_BadInvalidArgument;
-        }
+        statusCode = OpcUa_BadInvalidArgument;
     }
     /* Export the update (certificate files) */
     if (SOPC_IsGoodStatus(statusCode))
@@ -746,7 +743,7 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadInvalidState;
     }
     /* Finally decode the TrustList */
-    status = TrustList_Decode(pTrustList, (const SOPC_ByteString*) &inputArgs[1].Value.Bstring);
+    status = TrustList_Decode(pTrustList, &inputArgs[1].Value.Bstring);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Write: failed to decode the trustList",

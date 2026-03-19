@@ -287,7 +287,7 @@ static void sopc_trustlist_activity_timeout_cb(SOPC_EventHandler* pHandler,
 }
 
 /* Insert a new objectId key and TrustList context value */
-bool trustlist_register_ctx_from_node_id(const SOPC_NodeId* pObjectId, SOPC_TrustListContext* pContext)
+static bool trustlist_register_ctx_from_node_id(const SOPC_NodeId* pObjectId, SOPC_TrustListContext* pContext)
 {
     if (NULL == gObjIdToTrustList || NULL == pObjectId || NULL == pContext)
     {
@@ -334,7 +334,7 @@ SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Ty
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    TrustList_NodeIds* pNodeIds = NULL;
+    const TrustList_NodeIds* pNodeIds = NULL;
     if (SOPC_TRUSTLIST_GROUP_APP == groupType)
     {
         pNodeIds = &gAppNodeIds;
@@ -361,7 +361,6 @@ SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Ty
 
     *ppConfig = pCfg;
     return SOPC_STATUS_OK;
-    ;
 }
 
 SOPC_ReturnStatus SOPC_TrustList_GetTOFUConfiguration(const SOPC_TrustList_Type groupType,
@@ -578,22 +577,19 @@ SOPC_TrustListContext* TrustList_GetFromNodeId(const SOPC_NodeId* pObjectId,
     }
     else
     {
-        if (bCheckActivityTimeout)
+        /* Check the elapsed period and close the TrustList if necessary */
+        if (bCheckActivityTimeout && 1 == SOPC_Atomic_Int_Get(&pCtx->eventMgr.timeoutElapsed))
         {
-            /* Check the elapsed period and close the TrustList if necessary */
-            if (1 == SOPC_Atomic_Int_Get(&pCtx->eventMgr.timeoutElapsed))
+            /* Close the TrustList */
+            SOPC_AddressSpaceAccess* pAddSpAccess = NULL;
+            if (NULL != callContextPtr)
             {
-                /* Close the TrustList */
-                SOPC_AddressSpaceAccess* pAddSpAccess = NULL;
-                if (NULL != callContextPtr)
-                {
-                    pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
-                }
-                TrustList_Reset(pCtx, pAddSpAccess);
-                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                         "TrustList:%s: activity timeout period elapsed (TrustList has been closed)",
-                                         pCtx->cStrObjectId);
+                pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
             }
+            TrustList_Reset(pCtx, pAddSpAccess);
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "TrustList:%s: activity timeout period elapsed (TrustList has been closed)",
+                                     pCtx->cStrObjectId);
         }
     }
     return pCtx;

@@ -263,7 +263,8 @@ void SOPC_PushServerConfig_DeleteConfiguration(SOPC_PushServerConfig_Config** pp
     *ppConfig = NULL;
 }
 
-SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* pCfg, SOPC_MethodCallManager* pMcm)
+SOPC_ReturnStatus SOPC_PushServerConfig_Configure(const SOPC_PushServerConfig_Config* pCfg,
+                                                  SOPC_MethodCallManager* pMcm)
 {
     /* The API is not initialized or already configured */
     if (!gServerContext.bIsInit || gServerContext.bIsConfigured)
@@ -278,8 +279,8 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* 
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    PushServerConfig_NodeIds* pTypeIds = &gTypeNodeIds;
-    PushServerConfig_NodeIds* pIds = pCfg->pIds;
+    const PushServerConfig_NodeIds* pTypeIds = &gTypeNodeIds;
+    const PushServerConfig_NodeIds* pIds = pCfg->pIds;
     if (NULL == pIds->pServerConfigurationId || NULL == pIds->pApplyChangesId ||
         NULL == pIds->pCreateSigningRequestId || NULL == pIds->pGetRejectedListId ||
         NULL == pIds->pUpdateCertificateId || NULL == pIds->pAppGroupId)
@@ -380,7 +381,7 @@ SOPC_StatusCode PushServer_GetRejectedList(SOPC_ByteString** ppBsCertArray, uint
     uint32_t lenApp = 0;
     uint32_t lenUsr = 0;
     uint32_t idx = 0;
-    SOPC_CertGroupContext* pGroupCtx = NULL;
+    const SOPC_CertGroupContext* pGroupCtx = NULL;
     bool bFound = false;
     SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
     /* Retrieve the application group */
@@ -476,7 +477,7 @@ SOPC_StatusCode PushServer_ExportRejectedList(void)
     }
 
     SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
-    SOPC_CertGroupContext* pGroupCtx = NULL;
+    const SOPC_CertGroupContext* pGroupCtx = NULL;
     bool bFound = false;
     /* Retrieve the application group */
     pGroupCtx = CertificateGroup_GetFromNodeId(gServerContext.pAppGroupId, &bFound);

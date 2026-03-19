@@ -38,6 +38,7 @@
 #include "sopc_macros.h"
 #include "sopc_pki_struct_lib_internal.h"
 #include "sopc_toolkit_config_internal.h"
+#include "sopc_trustlist.h"
 
 /*---------------------------------------------------------------------------
  *                             Global variables
@@ -208,7 +209,7 @@ static SOPC_ReturnStatus certificate_group_write_file(const char* filePath, cons
 #endif /* SOPC_HAS_FILESYSTEM  */
 
 /* Insert a new objectId key and CertificateGroup context value */
-bool cert_group_register_ctx_from_node_id(const SOPC_NodeId* pObjectId, SOPC_CertGroupContext* pContext)
+static bool cert_group_register_ctx_from_node_id(const SOPC_NodeId* pObjectId, SOPC_CertGroupContext* pContext)
 {
     if (NULL == gObjIdToCertGroup || NULL == pObjectId || NULL == pContext)
     {
@@ -495,13 +496,10 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
         status = !res ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }
 
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK != status && NULL != pCertGroup)
     {
-        if (NULL != pCertGroup)
-        {
-            TrustList_RemoveFromNodeId(pCertGroup->pTrustListId);
-            cert_group_delete_context(&pCertGroup);
-        }
+        TrustList_RemoveFromNodeId(pCertGroup->pTrustListId);
+        cert_group_delete_context(&pCertGroup);
     }
     return status;
 }
@@ -713,12 +711,9 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
         /* Exchange the data */
         for (size_t idx = 0; idx < DNSArrayLen; idx++)
         {
-            if (0 != match)
+            if (0 != match && endpointHostNameLen == strlen(pDNSArray[idx]))
             {
-                if (endpointHostNameLen == strlen(pDNSArray[idx]))
-                {
-                    match = SOPC_strncmp_ignore_case(pEndPointHostName, pDNSArray[idx], endpointHostNameLen);
-                }
+                match = SOPC_strncmp_ignore_case(pEndPointHostName, pDNSArray[idx], endpointHostNameLen);
             }
             DNSToUse[idx] = pDNSArray[idx];
         }
@@ -748,12 +743,9 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
     {
         pKey = bRegeneratePrivateKey ? pNewKey : pCurKey;
         status = SOPC_KeyManager_CSR_ToDER(pNewCSR, pKey, &pCSR_DER, &CSR_DERLen);
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status && INT32_MAX < CSR_DERLen)
         {
-            if (INT32_MAX < CSR_DERLen)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -902,8 +894,7 @@ SOPC_StatusCode CertificateGroup_GetRejectedList(const SOPC_CertGroupContext* pG
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "CertificateGroup:%s: unable to get the rejected list",
                                pGroupCtx->cStrId);
-        uint32_t idx = 0;
-        for (idx = 0; idx < lenArray && NULL != pBsCertArray; idx++)
+        for (uint32_t idx = 0; idx < lenArray && NULL != pBsCertArray; idx++)
         {
             SOPC_ByteString_Clear(&pBsCertArray[idx]);
         }
@@ -1157,6 +1148,14 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
             {
                 SOPC_SecretBuffer_Unexpose(pRawNewKey, pSerNewKey);
             }
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            stCode = OpcUa_BadInternalError;
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "PushSrvCfg:Method_UpdateCertificate:CertificateGroup: %s KeyCertPair internal update failed",
+                pGroupCtx->cStrId);
         }
     }
     /* Clear */

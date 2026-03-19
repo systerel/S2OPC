@@ -61,7 +61,7 @@
 /*---------------------------------------------------------------------------
  *                       Public Trustlist helper functions
  *---------------------------------------------------------------------------*/
-OpcUa_TrustListDataType* SOPC_TrustList_DecodeTrustListData(SOPC_ByteString* trustListData)
+OpcUa_TrustListDataType* SOPC_TrustList_DecodeTrustListData(const SOPC_ByteString* trustListData)
 {
     // Check parameter
     SOPC_ASSERT(trustListData != NULL);
@@ -90,7 +90,8 @@ OpcUa_TrustListDataType* SOPC_TrustList_DecodeTrustListData(SOPC_ByteString* tru
     return pTrustList;
 }
 
-SOPC_ReturnStatus SOPC_TrustList_EncodeTrustListData(OpcUa_TrustListDataType* trustList, SOPC_ByteString* trustListData)
+SOPC_ReturnStatus SOPC_TrustList_EncodeTrustListData(const OpcUa_TrustListDataType* trustList,
+                                                     SOPC_ByteString* trustListData)
 {
     // Check parameters
     SOPC_ASSERT(trustList != NULL);
@@ -119,7 +120,7 @@ SOPC_ReturnStatus trustList_write_bs_array_to_cert_list(SOPC_ByteString* pArray,
 
     SOPC_CertificateList* pCert = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ByteString* pBsCert = NULL;
+    const SOPC_ByteString* pBsCert = NULL;
 
     for (uint32_t idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
     {
@@ -144,7 +145,7 @@ SOPC_ReturnStatus trustList_write_bs_array_to_crl_list(SOPC_ByteString* pArray, 
 
     SOPC_CRLList* pCrl = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ByteString* pBsCert = NULL;
+    const SOPC_ByteString* pBsCert = NULL;
 
     for (uint32_t idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
     {
@@ -186,37 +187,24 @@ SOPC_ReturnStatus trustlist_attach_certs_to_raw_arrays(const SOPC_TrLst_Mask spe
     *pLenIssuerCertArray = 0;
     *pLenIssuerCrlArray = 0;
 
-    if (specifiedLists & SOPC_TL_MASK_TRUSTED_CERTS)
+    if (specifiedLists & SOPC_TL_MASK_TRUSTED_CERTS && NULL != pTrustedCerts)
     {
-        if (NULL != pTrustedCerts)
-        {
-            status = SOPC_KeyManager_CertificateList_AttachToSerializedArray(pTrustedCerts, pRawTrustedCertArray,
-                                                                             pLenTrustedCertArray);
-        }
+        status = SOPC_KeyManager_CertificateList_AttachToSerializedArray(pTrustedCerts, pRawTrustedCertArray,
+                                                                         pLenTrustedCertArray);
     }
-    if ((SOPC_STATUS_OK == status) && (specifiedLists & SOPC_TL_MASK_TRUSTED_CRLS))
+    if ((SOPC_STATUS_OK == status) && (specifiedLists & SOPC_TL_MASK_TRUSTED_CRLS) && NULL != pTrustedCrls)
     {
-        if (NULL != pTrustedCrls)
-        {
-            status =
-                SOPC_KeyManager_CRLList_AttachToSerializedArray(pTrustedCrls, pRawTrustedCrlArray, pLenTrustedCrlArray);
-        }
+        status =
+            SOPC_KeyManager_CRLList_AttachToSerializedArray(pTrustedCrls, pRawTrustedCrlArray, pLenTrustedCrlArray);
     }
-    if ((SOPC_STATUS_OK == status) && (specifiedLists & SOPC_TL_MASK_ISSUER_CERTS))
+    if ((SOPC_STATUS_OK == status) && (specifiedLists & SOPC_TL_MASK_ISSUER_CERTS) && NULL != pIssuerCerts)
     {
-        if (NULL != pIssuerCerts)
-        {
-            status = SOPC_KeyManager_CertificateList_AttachToSerializedArray(pIssuerCerts, pRawIssuerCertArray,
-                                                                             pLenIssuerCertArray);
-        }
+        status = SOPC_KeyManager_CertificateList_AttachToSerializedArray(pIssuerCerts, pRawIssuerCertArray,
+                                                                         pLenIssuerCertArray);
     }
-    if ((SOPC_STATUS_OK == status) && (specifiedLists & SOPC_TL_MASK_ISSUER_CRLS))
+    if ((SOPC_STATUS_OK == status) && (specifiedLists & SOPC_TL_MASK_ISSUER_CRLS) && NULL != pIssuerCrls)
     {
-        if (NULL != pIssuerCrls)
-        {
-            status =
-                SOPC_KeyManager_CRLList_AttachToSerializedArray(pIssuerCrls, pRawIssuerCrlArray, pLenIssuerCrlArray);
-        }
+        status = SOPC_KeyManager_CRLList_AttachToSerializedArray(pIssuerCrls, pRawIssuerCrlArray, pLenIssuerCrlArray);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -285,12 +273,9 @@ SOPC_ReturnStatus trustlist_attach_raw_array_to_bs_array(const void* pGenArray,
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         /* Check before casting */
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status && INT32_MAX < pRawBuffer->length)
         {
-            if (INT32_MAX < pRawBuffer->length)
-            {
-                status = SOPC_STATUS_INVALID_STATE;
-            }
+            status = SOPC_STATUS_INVALID_STATE;
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -617,7 +602,7 @@ SOPC_ReturnStatus TrustList_SetPosition(SOPC_TrustListContext* pTrustList, uint6
 uint32_t TrustList_GetHandle(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
-    return (uint32_t) pTrustList->opnCtx.handle;
+    return pTrustList->opnCtx.handle;
 }
 
 /* Get the TrustList position */
@@ -843,7 +828,7 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
         pTrustListDataType.NoOfIssuerCrls = (int32_t) nbIssuerCrls;
 
         /* Create the buffer which holding the Ua Binary encoded stream containing the TrustListDataType instance */
-        pBufferTrustListDataType = SOPC_Buffer_Create((uint32_t) lenBuffer);
+        pBufferTrustListDataType = SOPC_Buffer_Create(lenBuffer);
         if (NULL == pBufferTrustListDataType)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1355,13 +1340,10 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
     SOPC_ASSERT(NULL != pTrustList);
     SOPC_ASSERT(NULL != pTrustList->pPKI);
 
-    if (!bForcePush)
+    if (!bForcePush && SOPC_TL_MASK_NONE == pTrustList->opnCtx.specifiedLists)
     {
         /* No fields are provided => Do nothing */
-        if (SOPC_TL_MASK_NONE == pTrustList->opnCtx.specifiedLists)
-        {
-            return SOPC_STATUS_OK;
-        }
+        return SOPC_STATUS_OK;
     }
     bool bNotIncludeExitingFile = SOPC_TL_MASK_ALL == pTrustList->opnCtx.specifiedLists || bEraseExiting;
     SOPC_ReturnStatus status = SOPC_PKIProvider_WriteToStore(pTrustList->pPKI, bNotIncludeExitingFile);

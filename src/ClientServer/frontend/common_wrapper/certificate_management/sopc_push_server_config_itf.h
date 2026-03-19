@@ -100,7 +100,8 @@ void SOPC_PushServerConfig_DeleteConfiguration(SOPC_PushServerConfig_Config** pp
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* pCfg, SOPC_MethodCallManager* pMcm);
+SOPC_ReturnStatus SOPC_PushServerConfig_Configure(const SOPC_PushServerConfig_Config* pCfg,
+                                                  SOPC_MethodCallManager* pMcm);
 
 /**
  * \brief Clear the whole API (CertificateGroup and TrustList).

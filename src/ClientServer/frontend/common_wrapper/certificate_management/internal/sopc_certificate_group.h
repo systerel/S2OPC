@@ -28,9 +28,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_certificate_group_itf.h"
 #include "sopc_key_cert_pair.h"
-#include "sopc_key_manager.h"
 #include "sopc_toolkit_config.h"
-#include "sopc_trustlist.h"
 
 #define SOPC_CERT_GRP_MIN_KEY_SIZE 2048
 #define SOPC_CERT_GRP_MIN_MD_ALG "SHA256"
