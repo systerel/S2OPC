@@ -247,7 +247,7 @@ Prerequisites:
 - GCC (tested with GCC version 15.2.0)
 - [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 3.6.5 compiled with CMake) or [CycloneCRYPTO](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/Compilation-of-CycloneCRYPTO-(Linux)) (tested with patched version 2.4.4)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
-- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.7.4 compiled with CMake)
+- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.7.5 compiled with CMake)
 - Python3 (tested with version 3.13.11, >= 3.10 for PyS2OPC compatibility)
 - [Paho](https://github.com/eclipse/paho.mqtt.c) only needed for PubSub with MQTT (tested with version 1.3.4 compiled with CMake)
 
@@ -282,7 +282,7 @@ Prerequisites:
 - CMake (tested with CMake version 3.16.2 and 3.22.2)
 - Python3 (tested with Python version >= 3.10)
 - [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 3.6.5 compiled with CMake)
-- [expat](https://libexpat.github.io/) (tested with expat version 2.7.4 compiled with CMake)
+- [expat](https://libexpat.github.io/) (tested with expat version 2.7.5 compiled with CMake)
 - [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14 compiled with CMake)
 - Python3 (tested with version 3.13.6, >= 3.10 for PyS2OPC compatibility)
 - [Paho](https://github.com/eclipse/paho.mqtt.c) only needed for PubSub with MQTT (tested with version 1.3.15 compiled with CMake)

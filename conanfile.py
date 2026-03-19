@@ -26,7 +26,7 @@ class CompressorRecipe(ConanFile):
 
     def requirements(self):
         self.requires("binutils/2.36.1@Systerel+S2OPC/default")
-        self.requires("expat/2.7.4@Systerel+S2OPC/default")
+        self.requires("expat/2.7.5@Systerel+S2OPC/default")
         self.requires("gcc/15.2.0@Systerel+S2OPC/default")
         self.requires("make/4.3")
         self.requires("mbedtls/3.6.5@Systerel+S2OPC/default")
