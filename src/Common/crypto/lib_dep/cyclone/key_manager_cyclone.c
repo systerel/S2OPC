@@ -41,10 +41,13 @@
 #include "pkix/pem_decrypt.h"
 #include "pkix/pem_export.h"
 #include "pkix/pem_import.h"
+#include "pkix/pem_key_export.h"
+#include "pkix/pem_key_import.h"
 #include "pkix/pkcs8_key_parse.h"
 #include "pkix/x509_cert_parse.h"
 #include "pkix/x509_cert_validate.h"
 #include "pkix/x509_crl_parse.h"
+#include "pkix/x509_csr_create.h"
 #include "pkix/x509_key_format.h"
 #include "pkix/x509_key_parse.h"
 #include "pkix/x509_sign_verify.h"
@@ -84,7 +87,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
 
     if (is_public)
     {
-        errLib = pemImportRsaPublicKey((const char_t*) buffer, (size_t) lenBuf, &key->pubKey);
+        errLib = pemImportRsaPublicKey(&key->pubKey, (const char_t*) buffer, (size_t) lenBuf);
 
         if (0 != errLib) // The buffer is probably in DER format...
         {
@@ -97,13 +100,13 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
             // If no error, continue...
             if (0 == errLib)
             {
-                errLib = x509ImportRsaPublicKey(&publicKeyInfo, &key->pubKey);
+                errLib = x509ImportRsaPublicKey(&key->pubKey, &publicKeyInfo);
             }
         }
     }
     else // Key is private
     {
-        errLib = pemImportRsaPrivateKey((const char_t*) buffer, (size_t) lenBuf, NULL, &key->privKey);
+        errLib = pemImportRsaPrivateKey(&key->privKey, (const char_t*) buffer, (size_t) lenBuf, NULL);
 
         if (0 != errLib) // The buffer is probably in DER format...
         {
@@ -117,7 +120,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
             {
                 privateKeyInfo.oid.value = RSA_ENCRYPTION_OID;
                 privateKeyInfo.oid.length = sizeof(RSA_ENCRYPTION_OID);
-                errLib = pkcs8ImportRsaPrivateKey(&privateKeyInfo, &key->privKey);
+                errLib = pkcs8ImportRsaPrivateKey(&key->privKey, &privateKeyInfo);
             }
 
             // Clear private key info
@@ -296,7 +299,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
         // so we first export the key to PEM, then we do PEM to DER.
         char_t* bufferPEM = SOPC_Malloc((2 * lenDest) * sizeof(char_t));
         size_t writtenPEM;
-        errLib = pemExportRsaPublicKey(&pKey->pubKey, bufferPEM, &writtenPEM);
+        errLib = pemExportRsaPublicKey(&pKey->pubKey, bufferPEM, &writtenPEM, PEM_PUBLIC_KEY_FORMAT_DEFAULT);
         if (0 == errLib)
         {
             errLib = pemDecodeFile(bufferPEM, writtenPEM, "PUBLIC KEY", buffer, &lengthWritten, NULL, NULL);
@@ -434,7 +437,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
     {
         /* Allocate and fill the public key of the cert */
         rsaInitPublicKey(&pCertNew->pubKey);
-        errLib = x509ImportRsaPublicKey(&pCertNew->crt.tbsCert.subjectPublicKeyInfo, &pCertNew->pubKey);
+        errLib = x509ImportRsaPublicKey(&pCertNew->pubKey, &pCertNew->crt.tbsCert.subjectPublicKeyInfo);
         if (0 != errLib)
         {
             status = SOPC_STATUS_NOK;

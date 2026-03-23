@@ -68,7 +68,7 @@ static error_t CyclonePrngRead(void* context, uint8_t* output, size_t length)
     return errLib;
 }
 
-const PrngAlgo CyclonePrng = {NULL, 0, NULL, NULL, NULL, (PrngAlgoRead) CyclonePrngRead, NULL};
+const PrngAlgo CyclonePrng = {NULL, 0, NULL, NULL, NULL, (PrngAlgoGenerate) CyclonePrngRead, NULL};
 
 static SOPC_ReturnStatus generic_SymmCrypt(SOPC_SecurityPolicy_ID policyId,
                                            const uint8_t* pInput,
