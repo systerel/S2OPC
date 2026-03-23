@@ -28,11 +28,14 @@
 #include "sopc_push_server_config.h"
 #include "sopc_push_server_config_meth.h"
 
+#include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config.h"
+
+static const SOPC_NodeId Null_NodeId = SOPC_NODEID_NS0_NUMERIC(0);
 
 SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* callContextPtr,
                                                     const SOPC_NodeId* objectId,
@@ -86,7 +89,14 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
         return OpcUa_BadInvalidArgument;
     }
     /* Retrieve the Certificate Group  */
-    pGroupCtx = CertificateGroup_GetFromNodeId(inputArgs[0].Value.NodeId, &bFound);
+    SOPC_NodeId* pCertificateGroupId = inputArgs[0].Value.NodeId;
+    bool isNullId = SOPC_NodeId_Equal(&Null_NodeId, pCertificateGroupId);
+    if (isNullId)
+    {
+        // If null the DefaultApplicationGroup is used
+        pCertificateGroupId->Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup;
+    }
+    pGroupCtx = CertificateGroup_GetFromNodeId(pCertificateGroupId, &bFound);
     if (NULL == pGroupCtx && !bFound)
     {
         return OpcUa_BadInvalidArgument;
@@ -204,7 +214,7 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
     SOPC_CertGroupContext* pGroupCtx = NULL;
     SOPC_Variant* pVariant = NULL;
     /* Input variables */
-    const SOPC_NodeId* pCertificateGroupId = NULL;
+    SOPC_NodeId* pCertificateGroupId = NULL;
     const SOPC_NodeId* pCertificateTypeId = NULL;
     const SOPC_String* pSubjectName = NULL;
     SOPC_Boolean bRegeneratePrivateKey = false;
@@ -241,6 +251,12 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
         return OpcUa_BadInvalidArgument;
     }
     /* Retrieve the Certificate Group  */
+    bool isNullId = SOPC_NodeId_Equal(&Null_NodeId, pCertificateGroupId);
+    if (isNullId)
+    {
+        // If null the DefaultApplicationGroup is used
+        pCertificateGroupId->Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup;
+    }
     pGroupCtx = CertificateGroup_GetFromNodeId(pCertificateGroupId, &bFound);
     if (NULL == pGroupCtx && !bFound)
     {
