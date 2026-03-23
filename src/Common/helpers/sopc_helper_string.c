@@ -145,6 +145,31 @@ int SOPC_strcmp_ignore_case_alt_end(const char* s1, const char* s2, char endChar
     return res;
 }
 
+void SOPC_strtrim(const char** start, size_t* len)
+{
+    if (start == NULL || *start == NULL || len == NULL)
+    {
+        return;
+    }
+
+    const char* s = *start;
+    size_t l = *len;
+
+    while (l > 0 && isspace((unsigned char) *s))
+    {
+        s++;
+        l--;
+    }
+
+    while (l > 0 && isspace((unsigned char) s[l - 1]))
+    {
+        l--;
+    }
+
+    *start = s;
+    *len = l;
+}
+
 SOPC_ReturnStatus SOPC_strtouint8_t(const char* sz, uint8_t* n, int base, char cEnd)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;

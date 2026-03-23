@@ -595,6 +595,7 @@ static void crt_verifycrl_and_check_revocation(const SOPC_CertificateList* child
     }
     else
     {
+        // No valid CRL found
         *failure_reasons |= PKI_CYCLONE_X509_BADCRL_NOT_TRUSTED;
     }
 }

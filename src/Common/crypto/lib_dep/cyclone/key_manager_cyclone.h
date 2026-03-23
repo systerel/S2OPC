@@ -31,6 +31,9 @@
 #include "sopc_enums.h"
 
 #include "pkix/x509_common.h"
+#include "rng/yarrow.h"
+
+extern YarrowContext yarrowContext;
 
 /**
  * \brief   The asymmetric key representation.

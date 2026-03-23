@@ -18,6 +18,7 @@
  */
 
 #include <assert.h>
+#include <ctype.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,6 +38,7 @@
 
 #include "key_manager_cyclone.h"
 
+#include "core/crypto.h"
 #include "pkc/rsa.h"
 #include "pkix/pem_decrypt.h"
 #include "pkix/pem_export.h"
@@ -51,8 +53,17 @@
 #include "pkix/x509_key_format.h"
 #include "pkix/x509_key_parse.h"
 #include "pkix/x509_sign_verify.h"
+#include "rng/yarrow.h"
 
+#ifndef X509_MAX_SUBJECT_ALT_NAMES
+#define X509_MAX_SUBJECT_ALT_NAMES 4u
+#endif
+
+#define SOPC_RSA_EXPONENT 65537u
 #define SOPC_KEY_MANAGER_SHA1_SIZE 20
+#define SOPC_CSR_DER_MAX_SIZE 8192u
+
+YarrowContext yarrowContext;
 
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API
@@ -210,13 +221,54 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
 
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC_AsymmetricKey** ppKey)
 {
-    SOPC_UNUSED_ARG(RSAKeySize);
-    SOPC_UNUSED_ARG(ppKey);
+    if (NULL == ppKey || 0 == RSAKeySize)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
-    // It requires to implement a _weak_func of CycloneCRYPTO which is not easily implementable.
+    *ppKey = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Buffer* seed = NULL;
 
-    return SOPC_STATUS_NOK;
+    SOPC_AsymmetricKey* pKey = SOPC_Calloc(1, sizeof(SOPC_AsymmetricKey));
+    if (NULL == pKey)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    pKey->isBorrowedFromCert = false;
+    rsaInitPrivateKey(&pKey->privKey);
+    rsaInitPublicKey(&pKey->pubKey);
+
+    error_t err = yarrowInit(&yarrowContext);
+    if (NO_ERROR == err)
+    {
+        seed = SOPC_Buffer_Create(32);
+        status = SOPC_GetRandom(seed, 32);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // SOPC_GetRandom returned good status : seed != NULL
+        SOPC_ASSERT(NULL != seed);
+        err = yarrowSeed(&yarrowContext, seed->data, seed->length);
+    }
+    if (NO_ERROR == err)
+    {
+        err = rsaGenerateKeyPair(YARROW_PRNG_ALGO, &yarrowContext, (size_t) RSAKeySize, SOPC_RSA_EXPONENT,
+                                 &pKey->privKey, &pKey->pubKey);
+    }
+
+    if (NO_ERROR != err || SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_AsymmetricKey_Free(pKey);
+        status = SOPC_STATUS_NOK;
+    }
+    yarrowDeinit(&yarrowContext);
+    memset(seed->data, 0, seed->length);
+    SOPC_Buffer_Delete(seed);
+
+    *ppKey = pKey;
+    return (status == SOPC_STATUS_OK) ? status : SOPC_STATUS_NOK;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_CertificateList* pCert,
@@ -329,6 +381,112 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
     return status;
 }
 
+#if SOPC_HAS_FILESYSTEM
+static SOPC_ReturnStatus sopc_write_pem_file(const char* filePath, const char* pem, size_t pemLen)
+{
+    if (NULL == filePath || NULL == pem || 0 == pemLen)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    FILE* fp = fopen(filePath, "wb");
+    if (NULL == fp)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    size_t nbWritten = fwrite(pem, 1, pemLen, fp);
+    fclose(fp);
+
+    if (nbWritten != pemLen)
+    {
+        int err = remove(filePath);
+        if (0 != err)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "KeyManager: removing partially written PEM file '%s' failed.", filePath);
+        }
+        return SOPC_STATUS_NOK;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pKey,
+                                                          const bool bIsPublic,
+                                                          const char* filePath,
+                                                          const char* pwd,
+                                                          const uint32_t pwdLen)
+{
+    if (NULL == pKey || NULL == filePath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (NULL == pwd && 0 != pwdLen)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (NULL != pwd && (0 == pwdLen || '\0' != pwd[pwdLen] || bIsPublic))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* The Cyclone library does not support encryption for PEM private keys. */
+    if (NULL != pwd)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    error_t errLib = NO_ERROR;
+    size_t pemLen = 0;
+    char_t* pem = NULL;
+
+    if (bIsPublic)
+    {
+        errLib = pemExportRsaPublicKey(&pKey->pubKey, NULL, &pemLen, PEM_PUBLIC_KEY_FORMAT_RFC7468);
+    }
+    else
+    {
+        errLib = pemExportRsaPrivateKey(&pKey->privKey, NULL, &pemLen, PEM_PRIVATE_KEY_FORMAT_PKCS1);
+    }
+
+    if (NO_ERROR != errLib || 0 == pemLen)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    pem = SOPC_Calloc(pemLen, sizeof(char_t));
+    if (NULL == pem)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (bIsPublic)
+    {
+        errLib = pemExportRsaPublicKey(&pKey->pubKey, pem, &pemLen, PEM_PUBLIC_KEY_FORMAT_RFC7468);
+    }
+    else
+    {
+        errLib = pemExportRsaPrivateKey(&pKey->privKey, pem, &pemLen, PEM_PRIVATE_KEY_FORMAT_PKCS1);
+    }
+
+    if (NO_ERROR != errLib)
+    {
+        memset(pem, 0, pemLen);
+        SOPC_Free(pem);
+        return SOPC_STATUS_NOK;
+    }
+
+    SOPC_ReturnStatus status = sopc_write_pem_file(filePath, pem, pemLen);
+
+    memset(pem, 0, pemLen);
+    SOPC_Free(pem);
+
+    return (status == SOPC_STATUS_OK) ? status : SOPC_STATUS_NOK;
+}
+#else
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pKey,
                                                           const bool bIsPublic,
                                                           const char* filePath,
@@ -340,11 +498,9 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pK
     SOPC_UNUSED_ARG(filePath);
     SOPC_UNUSED_ARG(pwd);
     SOPC_UNUSED_ARG(pwdLen);
-
-    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
-
-    return SOPC_STATUS_NOK;
+    return SOPC_STATUS_NOT_SUPPORTED;
 }
+#endif /* SOPC_HAS_FILESYSTEM */
 
 SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(const SOPC_AsymmetricKey* pKey,
                                                                         bool is_public,
@@ -813,30 +969,134 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
     return SOPC_STATUS_OK;
 }
 
+static SOPC_ReturnStatus SOPC_AppendSubjectField(char* buffer,
+                                                 uint32_t maxLen,
+                                                 uint32_t* pPos,
+                                                 const char* prefix,
+                                                 const X509String* field)
+{
+    SOPC_ASSERT(NULL != buffer);
+    SOPC_ASSERT(NULL != pPos);
+    SOPC_ASSERT(NULL != prefix);
+    SOPC_ASSERT(NULL != field);
+
+    if (field->length == 0 || NULL == field->value)
+    {
+        return SOPC_STATUS_OK;
+    }
+
+    int written =
+        snprintf(buffer + *pPos, maxLen - *pPos, "%s=%.*s", prefix, (int) field->length, (const char*) field->value);
+
+    if (written < 0 || (uint32_t) written >= (maxLen - *pPos))
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    *pPos += (uint32_t) written;
+
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(const SOPC_CertificateList* pCert,
                                                              char** ppSubjectName,
                                                              uint32_t* pSubjectNameLen)
 {
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(ppSubjectName);
-    SOPC_UNUSED_ARG(pSubjectNameLen);
+    SOPC_ASSERT(NULL != pCert);
+    SOPC_ASSERT(NULL != ppSubjectName);
+    SOPC_ASSERT(NULL != pSubjectNameLen);
 
-    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
+    *ppSubjectName = NULL;
+    *pSubjectNameLen = 0;
 
-    return SOPC_STATUS_NOK;
+    const X509Name* subject = &pCert->crt.tbsCert.subject;
+
+    const uint32_t maxLen = 1024;
+    char* subjectName = SOPC_Calloc(maxLen, sizeof(char));
+    if (NULL == subjectName)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    uint32_t pos = 0;
+
+    SOPC_ReturnStatus status = SOPC_AppendSubjectField(subjectName, maxLen, &pos, "C", &subject->countryName);
+    if (SOPC_STATUS_OK == status)
+        status = SOPC_AppendSubjectField(subjectName, maxLen, &pos, ", ST", &subject->stateOrProvinceName);
+    if (SOPC_STATUS_OK == status)
+        status = SOPC_AppendSubjectField(subjectName, maxLen, &pos, ", L", &subject->localityName);
+    if (SOPC_STATUS_OK == status)
+        status = SOPC_AppendSubjectField(subjectName, maxLen, &pos, ", O", &subject->organizationName);
+    if (SOPC_STATUS_OK == status)
+        status = SOPC_AppendSubjectField(subjectName, maxLen, &pos, ", OU", &subject->organizationalUnitName);
+    if (SOPC_STATUS_OK == status)
+        status = SOPC_AppendSubjectField(subjectName, maxLen, &pos, ", CN", &subject->commonName);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(subjectName);
+        return SOPC_STATUS_NOK;
+    }
+
+    *ppSubjectName = subjectName;
+    *pSubjectNameLen = pos;
+
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsNames(const SOPC_CertificateList* pCert,
                                                              char*** ppDnsNameArray,
                                                              uint32_t* pArrayLength)
 {
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(ppDnsNameArray);
-    SOPC_UNUSED_ARG(pArrayLength);
+    SOPC_ASSERT(NULL != pCert);
+    SOPC_ASSERT(NULL != ppDnsNameArray);
+    SOPC_ASSERT(NULL != pArrayLength);
 
-    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
+    *ppDnsNameArray = NULL;
+    *pArrayLength = 0;
 
-    return SOPC_STATUS_NOK;
+    uint32_t arrayLength = 0;
+    char** dnsNameArray = NULL;
+
+    // Count the number of alternate DNS entries
+    for (int i = 0; i < X509_MAX_SUBJECT_ALT_NAMES; i++)
+    {
+        if (X509_GENERAL_NAME_TYPE_DNS == pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].type)
+        {
+            arrayLength++;
+        }
+    }
+
+    // Check for alternate DNS entries
+    if (arrayLength > 0)
+    {
+        // Create an array to store them
+        dnsNameArray = SOPC_Calloc(arrayLength, sizeof(char*));
+        if (NULL == dnsNameArray)
+        {
+            return SOPC_STATUS_OUT_OF_MEMORY;
+        }
+
+        // Loop through and fill the array
+        arrayLength = 0;
+        for (int i = 0; i < X509_MAX_SUBJECT_ALT_NAMES; i++)
+        {
+            if (X509_GENERAL_NAME_TYPE_DNS == pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].type)
+            {
+                uint32_t len = (uint32_t) pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].length;
+                dnsNameArray[arrayLength] = SOPC_Malloc((size_t) len + 1);
+                strncpy(dnsNameArray[arrayLength], pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].value,
+                        len);
+                dnsNameArray[arrayLength][len] = '\0';
+                arrayLength++;
+            }
+        }
+    }
+
+    *ppDnsNameArray = dnsNameArray;
+    *pArrayLength = arrayLength;
+
+    return SOPC_STATUS_OK;
 }
 
 /* Creates a new string. Later have to free the result */
@@ -1392,13 +1652,74 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_AttachToSerializedArray(const 
                                                                           SOPC_SerializedCertificate** pSerializedArray,
                                                                           uint32_t* pLenArray)
 {
-    SOPC_UNUSED_ARG(pCerts);
-    SOPC_UNUSED_ARG(pSerializedArray);
-    SOPC_UNUSED_ARG(pLenArray);
+    if (NULL == pCerts || NULL == pSerializedArray || NULL == pLenArray)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
+    *pSerializedArray = NULL;
+    *pLenArray = 0;
+    SOPC_SerializedCertificate* pArray = NULL;
+    size_t listLen = 0;
+    uint32_t nbCert = 0;
+    SOPC_Buffer* pBuffer = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCerts, &listLen);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_NOK;
+    /* Check before cast */
+    if (UINT32_MAX < listLen)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    nbCert = (uint32_t) listLen;
+    pArray = SOPC_Calloc(nbCert, sizeof(SOPC_SerializedCertificate));
+    if (NULL == pArray)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    const SOPC_CertificateList* crt = pCerts;
+    uint32_t idx = 0;
+
+    for (idx = 0; idx < nbCert && SOPC_STATUS_OK == status && NULL != crt; idx++)
+    {
+        pBuffer = (SOPC_Buffer*) &pArray[idx];
+
+        if (NULL == crt->raw || NULL == crt->raw->data)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            pBuffer->position = 0;
+            pBuffer->length = crt->raw->length;
+            pBuffer->initial_size = crt->raw->length;
+            pBuffer->current_size = crt->raw->length;
+            pBuffer->maximum_size = crt->raw->length;
+            pBuffer->data = crt->raw->data; // Attach data
+        }
+        crt = crt->next;
+    }
+    /* Check the length */
+    if (SOPC_STATUS_OK == status && nbCert != idx)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    /* Clear in case of error */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(pArray);
+        pArray = NULL;
+        nbCert = 0;
+    }
+    *pSerializedArray = pArray;
+    *pLenArray = nbCert;
+    return status;
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -1636,19 +1957,191 @@ SOPC_ReturnStatus SOPC_KeyManager_CRLList_AttachToSerializedArray(const SOPC_CRL
                                                                   SOPC_SerializedCRL** pSerializedArray,
                                                                   uint32_t* pLenArray)
 {
-    SOPC_UNUSED_ARG(pCRLs);
-    SOPC_UNUSED_ARG(pSerializedArray);
-    SOPC_UNUSED_ARG(pLenArray);
+    if (NULL == pCRLs || NULL == pSerializedArray || NULL == pLenArray)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
+    *pSerializedArray = NULL;
+    *pLenArray = 0;
+    size_t listLen = 0;
+    uint32_t nbCrl = 0;
+    SOPC_Buffer* pBuffer = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_CRL_GetListLength(pCRLs, &listLen);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* Check before cast */
+    if (UINT32_MAX < listLen)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    nbCrl = (uint32_t) listLen;
+    SOPC_SerializedCRL* pArray = SOPC_Calloc(nbCrl, sizeof(SOPC_SerializedCRL));
+    if (NULL == pArray)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
-    return SOPC_STATUS_NOK;
+    const SOPC_CRLList* crl = pCRLs;
+    uint32_t idx = 0;
+
+    for (idx = 0; idx < nbCrl && SOPC_STATUS_OK == status && NULL != crl; idx++)
+    {
+        pBuffer = (SOPC_Buffer*) &pArray[idx];
+        if (NULL == crl->raw || NULL == crl->raw->data)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            pBuffer->position = 0;
+            pBuffer->length = crl->raw->length;
+            pBuffer->initial_size = crl->raw->length;
+            pBuffer->current_size = crl->raw->length;
+            pBuffer->maximum_size = crl->raw->length;
+            pBuffer->data = crl->raw->data; // Attach data
+        }
+        crl = crl->next;
+    }
+
+    /* Check the length */
+    if (SOPC_STATUS_OK == status && nbCrl != idx)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    /* Clear in case of error */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(pArray);
+        pArray = NULL;
+        nbCrl = 0;
+    }
+    *pSerializedArray = pArray;
+    *pLenArray = nbCrl;
+    return status;
 }
 
 /* ------------------------------------------------------------------------------------------------
  * Certificate Signing request API
  * ------------------------------------------------------------------------------------------------
  */
+
+static void sopc_set_x509_string(X509String* dest, const char* value, size_t len)
+{
+    if (NULL == dest)
+    {
+        return;
+    }
+
+    dest->value = value;
+    dest->length = len;
+}
+
+static SOPC_ReturnStatus sopc_parse_subject_name(const char* subjectName, X509Name* name)
+{
+    if (NULL == subjectName || NULL == name)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    memset(name, 0, sizeof(*name));
+
+    const char* p = subjectName;
+
+    while (*p != '\0')
+    {
+        while (*p == ',' || *p == '/' || isspace((unsigned char) *p))
+        {
+            p++;
+        }
+
+        if (*p == '\0')
+        {
+            break;
+        }
+
+        const char* tokenStart = p;
+        while (*p != '\0' && *p != ',' && *p != '/')
+        {
+            p++;
+        }
+
+        const char* tokenEnd = p;
+        while (tokenEnd > tokenStart && isspace((unsigned char) tokenEnd[-1]))
+        {
+            tokenEnd--;
+        }
+
+        const char* eq = tokenStart;
+        while (eq < tokenEnd && *eq != '=')
+        {
+            eq++;
+        }
+
+        if (eq == tokenEnd)
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+
+        const char* key = tokenStart;
+        size_t keyLen = (size_t)(eq - tokenStart);
+        SOPC_strtrim(&key, &keyLen);
+
+        const char* val = eq + 1;
+        size_t valLen = (size_t)(tokenEnd - val);
+        SOPC_strtrim(&val, &valLen);
+
+        if (0 == valLen || 0 == keyLen)
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+
+        if (keyLen == 2 && 0 == SOPC_strncmp_ignore_case(key, "CN", 2))
+        {
+            sopc_set_x509_string(&name->commonName, val, valLen);
+        }
+        else if (keyLen == 1 && 0 == SOPC_strncmp_ignore_case(key, "O", 1))
+        {
+            sopc_set_x509_string(&name->organizationName, val, valLen);
+        }
+        else if (keyLen == 2 && 0 == SOPC_strncmp_ignore_case(key, "OU", 2))
+        {
+            sopc_set_x509_string(&name->organizationalUnitName, val, valLen);
+        }
+        else if (keyLen == 1 && 0 == SOPC_strncmp_ignore_case(key, "C", 1))
+        {
+            sopc_set_x509_string(&name->countryName, val, valLen);
+        }
+        else if (keyLen == 1 && 0 == SOPC_strncmp_ignore_case(key, "L", 1))
+        {
+            sopc_set_x509_string(&name->localityName, val, valLen);
+        }
+        else if (keyLen == 2 && 0 == SOPC_strncmp_ignore_case(key, "ST", 2))
+        {
+            sopc_set_x509_string(&name->stateOrProvinceName, val, valLen);
+        }
+    }
+
+    if (NULL == name->commonName.value || 0 == name->commonName.length)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+static void sopc_set_rsa_sha256_signature_oid(X509SignAlgoId* algo)
+{
+    static const uint8_t OID_SHA256_WITH_RSA[] = {0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0B};
+
+    SOPC_ASSERT(NULL != algo);
+
+    memset(algo, 0, sizeof(*algo));
+    algo->oid.value = OID_SHA256_WITH_RSA;
+    algo->oid.length = sizeof(OID_SHA256_WITH_RSA);
+}
 
 SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
                                              const bool bIsServer,
@@ -1658,17 +2151,178 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
                                              uint32_t arrayLength,
                                              SOPC_CSR** ppCSR)
 {
-    SOPC_UNUSED_ARG(subjectName);
-    SOPC_UNUSED_ARG(bIsServer);
-    SOPC_UNUSED_ARG(mdType);
-    SOPC_UNUSED_ARG(uri);
-    SOPC_UNUSED_ARG(pDnsArray);
-    SOPC_UNUSED_ARG(arrayLength);
-    SOPC_UNUSED_ARG(ppCSR);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_CSR* pCSR = NULL;
 
-    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
+    if (NULL == subjectName || NULL == mdType || NULL == ppCSR)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (arrayLength > 0 && NULL == pDnsArray)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (((NULL != uri) ? 1u : 0u) + arrayLength > X509_MAX_SUBJECT_ALT_NAMES)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_NOK;
+    *ppCSR = NULL;
+    pCSR = SOPC_Calloc(1, sizeof(SOPC_CSR));
+    if (NULL == pCSR)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    memset(&pCSR->csr, 0, sizeof(pCSR->csr));
+
+    /* CSR v1 */
+    pCSR->csr.certReqInfo.version = X509_VERSION_1;
+
+    /* Subject */
+    status = sopc_parse_subject_name(subjectName, &pCSR->csr.certReqInfo.subject);
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Signature algorithm */
+        sopc_set_rsa_sha256_signature_oid(&pCSR->csr.signatureAlgo);
+
+        /* Extensions */
+        X509Extensions* ext = &pCSR->csr.certReqInfo.attributes.extensionReq;
+        memset(ext, 0, sizeof(*ext));
+
+        /* Basic constraints : a client/server CSR can't be CA */
+        ext->basicConstraints.critical = true;
+        ext->basicConstraints.cA = false;
+        ext->basicConstraints.pathLenConstraint = 0;
+
+        /* Key usage */
+        ext->keyUsage.critical = true;
+        ext->keyUsage.bitmap = X509_KEY_USAGE_DIGITAL_SIGNATURE | X509_KEY_USAGE_NON_REPUDIATION |
+                               X509_KEY_USAGE_KEY_ENCIPHERMENT | X509_KEY_USAGE_DATA_ENCIPHERMENT;
+
+        /* Extended key usage */
+        ext->extKeyUsage.critical = false;
+        ext->extKeyUsage.bitmap = bIsServer ? X509_EXT_KEY_USAGE_SERVER_AUTH : X509_EXT_KEY_USAGE_CLIENT_AUTH;
+
+        /* SubjectAltName */
+        if (NULL != uri || arrayLength > 0)
+        {
+            uint32_t sanIdx = 0;
+            ext->subjectAltName.critical = false;
+
+            if (NULL != uri)
+            {
+                ext->subjectAltName.generalNames[sanIdx].type = X509_GENERAL_NAME_TYPE_URI;
+                ext->subjectAltName.generalNames[sanIdx].value = uri;
+                ext->subjectAltName.generalNames[sanIdx].length = strlen(uri);
+                sanIdx++;
+            }
+
+            for (uint32_t i = 0; i < arrayLength && SOPC_STATUS_OK == status; ++i)
+            {
+                if (NULL == pDnsArray[i])
+                {
+                    status = SOPC_STATUS_INVALID_PARAMETERS;
+                }
+                else
+                {
+                    ext->subjectAltName.generalNames[sanIdx].type = X509_GENERAL_NAME_TYPE_DNS;
+                    ext->subjectAltName.generalNames[sanIdx].value = pDnsArray[i];
+                    ext->subjectAltName.generalNames[sanIdx].length = strlen(pDnsArray[i]);
+                    sanIdx++;
+                }
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                ext->subjectAltName.numGeneralNames = sanIdx;
+            }
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            /* subjectPublicKeyInfo will be filled in ToDER function */
+            memset(&pCSR->csr.certReqInfo.subjectPublicKeyInfo, 0, sizeof(pCSR->csr.certReqInfo.subjectPublicKeyInfo));
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *ppCSR = pCSR;
+    }
+    else
+    {
+        SOPC_Free(pCSR);
+    }
+
+    return status;
+}
+
+// Convert RsaPublicKey into X509SubjectPublicKeyInfo
+static SOPC_ReturnStatus sopc_fill_subject_public_key_info_rsa(X509SubjectPublicKeyInfo* pSpki,
+                                                               const RsaPublicKey* pPub,
+                                                               uint8_t** ppModulus,
+                                                               uint8_t** ppExponent)
+{
+    static const uint8_t OID_RSA_ENCRYPTION[] = {0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01};
+
+    if (NULL == pSpki || NULL == pPub || NULL == ppModulus || NULL == ppExponent)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    size_t modulusLen = 0;
+    size_t exponentLen = 0;
+
+    *ppModulus = NULL;
+    *ppExponent = NULL;
+    memset(pSpki, 0, sizeof(*pSpki));
+
+    modulusLen = mpiGetByteLength(&pPub->n);
+    exponentLen = mpiGetByteLength(&pPub->e);
+
+    if (0 == modulusLen || 0 == exponentLen)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    *ppModulus = SOPC_Malloc(modulusLen);
+    *ppExponent = SOPC_Malloc(exponentLen);
+
+    if (NULL == *ppModulus || NULL == *ppExponent)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Export MPI integers to big-endian format */
+        if (NO_ERROR != mpiExport(&pPub->n, *ppModulus, modulusLen, MPI_FORMAT_BIG_ENDIAN) ||
+            NO_ERROR != mpiExport(&pPub->e, *ppExponent, exponentLen, MPI_FORMAT_BIG_ENDIAN))
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Fill SPKI */
+        pSpki->oid.value = OID_RSA_ENCRYPTION;
+        pSpki->oid.length = sizeof(OID_RSA_ENCRYPTION);
+        pSpki->rsaPublicKey.n.value = *ppModulus;
+        pSpki->rsaPublicKey.n.length = modulusLen;
+        pSpki->rsaPublicKey.e.value = *ppExponent;
+        pSpki->rsaPublicKey.e.length = exponentLen;
+    }
+    else
+    {
+        SOPC_Free(*ppModulus);
+        SOPC_Free(*ppExponent);
+        *ppModulus = NULL;
+        *ppExponent = NULL;
+    }
+
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR,
@@ -1676,19 +2330,75 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR,
                                             uint8_t** ppDest,
                                             uint32_t* pLenAllocated)
 {
-    SOPC_UNUSED_ARG(pCSR);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(ppDest);
-    SOPC_UNUSED_ARG(pLenAllocated);
+    size_t written = 0;
+    uint8_t* pOut = NULL;
+    uint8_t* modulus = NULL;
+    uint8_t* exponent = NULL;
+    RsaPrivateKey* pRsaPriv = NULL;
+    RsaPublicKey* pRsaPub = NULL;
+    const PrngAlgo* prngAlgo = NULL;
+    void* prngContext = NULL;
 
-    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
+    if (NULL == pCSR || NULL == pKey || NULL == ppDest || NULL == pLenAllocated)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_NOK;
+    *ppDest = NULL;
+    *pLenAllocated = 0;
+
+    pRsaPriv = &pKey->privKey;
+    pRsaPub = &pKey->pubKey;
+
+    if (0 == mpiGetBitLength(&pRsaPub->n) || 0 == mpiGetBitLength(&pRsaPub->e))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = sopc_fill_subject_public_key_info_rsa(&pCSR->csr.certReqInfo.subjectPublicKeyInfo,
+                                                                     pRsaPub, &modulus, &exponent);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pOut = SOPC_Malloc(SOPC_CSR_DER_MAX_SIZE);
+        if (NULL == pOut)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        error_t err = x509CreateCsr(prngAlgo, prngContext, &pCSR->csr.certReqInfo, pRsaPub, &pCSR->csr.signatureAlgo,
+                                    pRsaPriv, pOut, &written);
+        if (NO_ERROR != err || written > UINT32_MAX)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *ppDest = pOut;
+        *pLenAllocated = (uint32_t) written;
+    }
+    else
+    {
+        SOPC_Free(pOut);
+    }
+
+    SOPC_Free(modulus);
+    SOPC_Free(exponent);
+
+    return status;
 }
 
 void SOPC_KeyManager_CSR_Free(SOPC_CSR* pCSR)
 {
-    SOPC_UNUSED_ARG(pCSR);
-
-    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
+    if (NULL == pCSR)
+    {
+        return;
+    }
+    memset(&pCSR->csr, 0, sizeof(pCSR->csr));
+    SOPC_Free(pCSR);
 }

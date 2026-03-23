@@ -67,6 +67,17 @@ int SOPC_strcmp_ignore_case(const char* s1, const char* s2);
 int SOPC_strcmp_ignore_case_alt_end(const char* s1, const char* s2, char endCharacter);
 
 /**
+ * \brief Trim beginning and ending whitespace from a string. Updates \p start and \p len to exclude
+ * beginning and ending whitespace characters. The original string is not modified.
+ *
+ * In case of error (invalid arguments) input are unchanged.
+ *
+ * \param[in,out] start A non null pointer to the string start, updated after trimming.
+ * \param[in,out] len   A non null pointer to the string length, updated after trimming.
+ */
+void SOPC_strtrim(const char** start, size_t* len);
+
+/**
  * \brief      Read a uint8_t from the string with strtoul.
  *
  * \param sz   A pointer to the CString containing the number.

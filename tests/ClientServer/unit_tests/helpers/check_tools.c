@@ -1367,6 +1367,77 @@ START_TEST(test_strcmp_ignore_case_alt_end)
 }
 END_TEST
 
+START_TEST(test_strtrim)
+{
+    const char str1[] = "  abc";
+    const char str2[] = "abc  ";
+    const char str3[] = "  abc  ";
+    const char str4[] = "abc";
+    const char str5[] = "ab c";
+    const char str6[] = "  abc  ";
+
+    const char* start = NULL;
+    size_t len = 0;
+
+    // Spaces at beginning only
+    start = str1;
+    len = strlen(str1);
+    SOPC_strtrim(&start, &len);
+    ck_assert_ptr_eq(start, str1 + 2);
+    ck_assert_uint_eq(len, 3);
+    ck_assert_int_eq(0, strncmp(start, "abc", len));
+
+    // Spaces at end only
+    start = str2;
+    len = strlen(str2);
+    SOPC_strtrim(&start, &len);
+    ck_assert_ptr_eq(start, str2);
+    ck_assert_uint_eq(len, 3);
+    ck_assert_int_eq(0, strncmp(start, "abc", len));
+
+    // Spaces at beginning and end
+    start = str3;
+    len = strlen(str3);
+    SOPC_strtrim(&start, &len);
+    ck_assert_ptr_eq(start, str3 + 2);
+    ck_assert_uint_eq(len, 3);
+    ck_assert_int_eq(0, strncmp(start, "abc", len));
+
+    // No spaces
+    start = str4;
+    len = strlen(str4);
+    SOPC_strtrim(&start, &len);
+    ck_assert_ptr_eq(start, str4);
+    ck_assert_uint_eq(len, 3);
+    ck_assert_int_eq(0, strncmp(start, "abc", len));
+
+    // Space in the middle should NOT be removed
+    start = str5;
+    len = strlen(str5);
+    SOPC_strtrim(&start, &len);
+    ck_assert_ptr_eq(start, str5);
+    ck_assert_uint_eq(len, 4);
+    ck_assert_int_eq(0, strncmp(start, "ab c", len));
+
+    // NULL start pointer: should do nothing
+    len = 42;
+    SOPC_strtrim(NULL, &len);
+    ck_assert_uint_eq(len, 42);
+
+    // NULL string pointer: should do nothing
+    start = NULL;
+    len = 42;
+    SOPC_strtrim(&start, &len);
+    ck_assert_ptr_eq(start, NULL);
+    ck_assert_uint_eq(len, 42);
+
+    // NULL len pointer: should do nothing
+    start = str6;
+    SOPC_strtrim(&start, NULL);
+    ck_assert_ptr_eq(start, str6);
+}
+END_TEST
+
 static void uri_free(SOPC_UriType* type, char** hostname, char** port)
 {
     SOPC_Free(*hostname);
@@ -5142,6 +5213,7 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_basetools, test_strncmp_ignore_case);
     tcase_add_test(tc_basetools, test_strcmp_ignore_case);
     tcase_add_test(tc_basetools, test_strcmp_ignore_case_alt_end);
+    tcase_add_test(tc_basetools, test_strtrim);
     tcase_add_test(tc_basetools, test_helper_uri);
     tcase_add_test(tc_basetools, test_strtouint);
     tcase_add_test(tc_basetools, test_strtouint2);
