@@ -48,7 +48,7 @@ set(S2OPC_CLIENTSERVER_INTERNAL_INCLUDES
 
 # Get the helpers for unit and validation tests
 set(S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES ${S2OPC_ROOT_PATH}/tests/ClientServer/helpers)
-file(GLOB S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES "${S2OPC_ROOT_PATH}/tests/ClientServer/helpers/*.c")
+file(GLOB S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES CONFIGURE_DEPENDS "${S2OPC_ROOT_PATH}/tests/ClientServer/helpers/*.c")
 
 enable_testing()
 
@@ -101,7 +101,7 @@ add_custom_target(make-server-address-space DEPENDS ${TEST_SERVER_ADDRESS_SPACE_
 
 # Helpers tests
 
-file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/check_*.c")
+file(GLOB INTERNAL_TESTS_SRCS CONFIGURE_DEPENDS "unit_tests/helpers/check_*.c")
 add_executable(check_helpers ${INTERNAL_TESTS_SRCS}
                              unit_tests/helpers/custom_types.c
                              unit_tests/helpers/custom2_types.c
@@ -158,7 +158,7 @@ add_test(NAME "unit:ask_password"
 set_tests_properties("unit:ask_password" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ask_password.tap")
 
 # SKS tests
-file(GLOB INTERNAL_TESTS_SKS_SRCS "unit_tests/sks/*.c")
+file(GLOB INTERNAL_TESTS_SKS_SRCS CONFIGURE_DEPENDS "unit_tests/sks/*.c")
 add_executable(check_sks ${INTERNAL_TESTS_SKS_SRCS})
 target_include_directories(check_sks PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
 target_compile_options(check_sks PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -184,11 +184,11 @@ target_link_libraries(check_security_policy_config PRIVATE Check::check s2opc_cl
 s2opc_unit_test(check_security_policy_config)
 
 # Secure channels (stubbed on services side) tests
-file(GLOB SECURE_CHANNELS_SRC "${S2OPC_ROOT_PATH}/src/ClientServer/configuration/sopc_ieee_check.c"
+file(GLOB SECURE_CHANNELS_SRC CONFIGURE_DEPENDS "${S2OPC_ROOT_PATH}/src/ClientServer/configuration/sopc_ieee_check.c"
   "${S2OPC_ROOT_PATH}/src/ClientServer/secure_channels/*.c")
 
 # Secure channels tests: tests on received buffer
-file(GLOB SECURE_CHANNELS_BUFFER_TEST
+file(GLOB SECURE_CHANNELS_BUFFER_TEST CONFIGURE_DEPENDS
   "unit_tests/secure_channels/event_recorder.c"
   "unit_tests/secure_channels/check_sc_rcv_buffer.c"
   "unit_tests/secure_channels/check_sc_rcv_helpers.c"
@@ -208,7 +208,7 @@ target_include_directories(check_sc_rcv_buffer PRIVATE "unit_tests/secure_channe
 s2opc_unit_test(check_sc_rcv_buffer)
 
 # Secure channels tests: tests on received encrypted buffer
-file(GLOB SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST
+file(GLOB SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST CONFIGURE_DEPENDS
   "unit_tests/secure_channels/event_recorder.c"
   "unit_tests/secure_channels/check_sc_rcv_helpers.c"
   "unit_tests/secure_channels/check_sc_rcv_encrypted_buffer.c"
@@ -236,16 +236,16 @@ add_custom_command(
 s2opc_unit_test(check_sc_rcv_encrypted_buffer)
 
 # Sockets (stubbed on services side) tests
-file(GLOB SOCKETS_SRC "${S2OPC_ROOT_PATH}/src/ClientServer/sockets/*.c")
+file(GLOB SOCKETS_SRC CONFIGURE_DEPENDS "${S2OPC_ROOT_PATH}/src/ClientServer/sockets/*.c")
 
-file(GLOB SECURE_CHANNELS_CLIENT_TEST
+file(GLOB SECURE_CHANNELS_CLIENT_TEST CONFIGURE_DEPENDS
   "unit_tests/secure_channels/event_helpers.c"
   "unit_tests/secure_channels/event_recorder.c"
   "unit_tests/secure_channels/test_secure_channels_client.c"
   "unit_tests/secure_channels/stubs/stub_sc_sopc_toolkit_config.c"
   "unit_tests/secure_channels/stubs/stub_sc_sopc_services_api.c")
 
-file(GLOB SECURE_CHANNELS_SERVER_TEST
+file(GLOB SECURE_CHANNELS_SERVER_TEST CONFIGURE_DEPENDS
   "unit_tests/secure_channels/event_helpers.c"
   "unit_tests/secure_channels/event_recorder.c"
   "unit_tests/secure_channels/test_secure_channels_server.c"

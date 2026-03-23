@@ -24,7 +24,7 @@ s2opc_gen_build_info(${CMAKE_CURRENT_SOURCE_DIR}/configuration/sopc_toolkit_buil
 ## C99 compliant source code ##
 
 # Define non-platform dependent source files
-file(GLOB_RECURSE S2OPC_CLIENTSERVER_SRCS
+file(GLOB_RECURSE S2OPC_CLIENTSERVER_SRCS CONFIGURE_DEPENDS
     "address_space/*.c"
     "api_toolkit/*.c"
     "configuration/*.c"
@@ -177,7 +177,7 @@ target_include_directories(s2opc_clientserver
 
 ### Installation and export of S2OPC client/server toolkit library ###
 foreach(dir ${S2OPC_CLIENTSERVER_PUBLIC_INCLUDES})
-    file(GLOB temp_files "${dir}/*.h")
+    file(GLOB temp_files CONFIGURE_DEPENDS "${dir}/*.h")
     list(APPEND S2OPC_CLIENTSERVER_INCLUDE_FILES ${temp_files})
 endforeach()
 list(APPEND S2OPC_CLIENTSERVER_INCLUDE_FILES "${WRAPPERS_INCLUDE_FILES}")
