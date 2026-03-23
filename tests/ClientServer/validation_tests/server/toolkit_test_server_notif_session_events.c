@@ -270,7 +270,7 @@ static void Test_SessionEventCallback(const SOPC_CallContext* callCtxPtr,
         !checkBothNullOrEqual(expectedEvent->appName, SOPC_String_GetRawCString(&appDesc->ApplicationName.defaultText)))
     {
         printf("Received session event with application name=%s while expecting application name=%s\n",
-               NULL == appDesc ? "<NULL>" : SOPC_String_GetRawCString(&appDesc->ApplicationName.defaultText),
+               SOPC_String_GetRawCString(&appDesc->ApplicationName.defaultText),
                NULL == expectedEvent->appName ? "<NULL>" : expectedEvent->appName);
         failure = true;
     }
