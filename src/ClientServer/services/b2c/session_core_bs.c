@@ -1248,7 +1248,7 @@ void session_core_bs__gen_server_session_name(const constants__t_session_i sessi
                                               constants__t_SessionName_i* const session_core_bs__p_genSessionName)
 {
     const size_t resultSize = strlen("S2OPC_Session_") + 10 + 1; // "S2OPC_Session_" + SessionId + '\0'
-    char* result = SOPC_Calloc(resultSize, sizeof(char*));
+    char* result = SOPC_Calloc(resultSize, sizeof(*result));
     *session_core_bs__p_genSessionName = result;
     if (result != NULL)
     {
