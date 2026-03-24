@@ -223,11 +223,11 @@ hil-test:
 
 .build-linux: &build_linux
   stage: build
-  image: docker.aix.systerel.fr/c838/build@sha256:25759ec87656afbe473d90370476a2937256f41b9be9322c55ce821ea7c322d6 # digest of build:1.57
+  image: docker.aix.systerel.fr/c838/build@sha256:df591c37d38a482b42b5f38087f3fab9a3ee3c8c65a4ae9e9a9c6fd88efd585d # digest of build:1.58
   script:
     - &build_command_line './build.sh || exit 1'
   variables: &build_linux_variables
-    DOCKER_DIGEST: 'sha256:25759ec87656afbe473d90370476a2937256f41b9be9322c55ce821ea7c322d6'
+    DOCKER_DIGEST: 'sha256:df591c37d38a482b42b5f38087f3fab9a3ee3c8c65a4ae9e9a9c6fd88efd585d'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
@@ -553,7 +553,7 @@ test-build-from-install:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/check@sha256:8be8c50cd484989c987b6c28ded2e03f30e81ec27bb53e41cecde8cdc3bb86c8 # digest of check:1.22
+  image: docker.aix.systerel.fr/c838/check@sha256:5499ced25393e01e87390b3ec97983e3c29204c6a4066bf479b6ed890439373e # digest of check:1.23
   needs: []
   script:
     - ./.check-code.sh

@@ -246,7 +246,7 @@ Prerequisites:
 - Make (tested with GNU Make version 4.3)
 - CMake (>= 3.12, tested with CMake version 3.31.9)
 - GCC (tested with GCC version 15.2.0)
-- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 3.6.5 compiled with CMake) or [CycloneCRYPTO](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/Compilation-of-CycloneCRYPTO-(Linux)) (tested with patched version 2.4.4)
+- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 3.6.5 compiled with CMake) or [CycloneCRYPTO](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/Compilation-of-CycloneCRYPTO-(Linux)) (tested with version 2.6.0)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
 - [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.7.5 compiled with CMake)
 - Python3 (tested with version 3.13.11, >= 3.10 for PyS2OPC compatibility)
