@@ -35,7 +35,9 @@
  *                                  Node ids
  *---------------------------------------------------------------------------*/
 
-static const SOPC_NodeId gGroupIdInvalid = {0};
+static const SOPC_NodeId gGroupIdInvalid = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                            .Namespace = 1,
+                                            .Data.Numeric = 999999};
 static const SOPC_NodeId gGroupIdEmpty = {0};
 static const SOPC_NodeId gCertificateTypeIdInvalid = {0};
 
