@@ -30,6 +30,8 @@ class CompressorRecipe(ConanFile):
         self.requires("gcc/15.2.0@Systerel+S2OPC/default")
         self.requires("make/4.3")
         self.requires("mbedtls/3.6.5@Systerel+S2OPC/default")
+        self.requires("cyclone-common/2.6.0@Systerel+S2OPC/default")
+        self.requires("cyclone-crypto/2.6.0@Systerel+S2OPC/default")
         self.requires("paho-mqtt-c/1.3.4")
         self.requires("libcheck/0.14.0@Systerel+S2OPC/default")
         self.requires("doxygen/1.12.0@Systerel+S2OPC/default")
