@@ -144,6 +144,7 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - Role mechanism with the following limitations. 
     Permissions managed: Read, Write, ReadHistory, Call, AddNodes, DeleteNodes, ReceiveEvents. 
     Supported role mapping criterias: anonymous, username, authenticated user.
+- Server and Client support for OPC UA Alarms & Conditions (AlarmConditionType)
 - Client instantiation: multiple secure channel instances and session instances
 - Client subscription service: management of subscriptions with monitored items
 - Client services requests: any discovery service or service on session request. Some request builders are provided, requests are only forwarded to server (no functional behavior).
