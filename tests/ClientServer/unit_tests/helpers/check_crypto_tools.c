@@ -73,7 +73,6 @@ START_TEST(test_crypto_get_app_uri)
 }
 END_TEST
 
-#ifndef S2OPC_CRYPTO_CYCLONE
 START_TEST(test_crypto_gen_rsa_export_import)
 {
     /* Generate a new RSA key*/
@@ -171,8 +170,13 @@ START_TEST(test_crypto_gen_rsa_export_import_encrypted)
     /* Export and encrypt the new key */
     size_t pwdLen = strlen(PASSWORD);
     ck_assert(pwdLen < UINT32_MAX);
+#ifndef S2OPC_CRYPTO_CYCLONE
     status = SOPC_KeyManager_AsymmetricKey_ToPEMFile(pGenKey, false, "./crypto_tools_encrypted_gen_key.pem", PASSWORD,
                                                      (uint32_t) pwdLen);
+#else
+    /* The Cyclone library does not support encryption for PEM private keys. */
+    status = SOPC_KeyManager_AsymmetricKey_ToPEMFile(pGenKey, false, "./crypto_tools_encrypted_gen_key.pem", NULL, 0);
+#endif
     ck_assert(SOPC_STATUS_OK == status);
     /* Import and decrypt the new key */
     SOPC_SerializedAsymmetricKey* pSerDecKey = NULL;
@@ -195,63 +199,6 @@ START_TEST(test_crypto_gen_rsa_export_import_encrypted)
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerDecKey);
 }
 END_TEST
-
-START_TEST(test_gen_csr)
-{
-    /* The purpose of this test is to generate a CSR file and verify manually
-       its content though an external tool like openssl :
-       > openssl req -inform der -in <csr_der> -out <csr_pem> -outform pem (convert DER to PEM)
-       > openssl req -text -in <csr_pem> -noout -verify (to verify manually the content)
-    */
-    SOPC_AsymmetricKey* pKey = NULL;
-    SOPC_CertificateList* pCert = NULL;
-    char** pDNSNames = NULL;
-    uint32_t DNSLen = 0;
-    char* subjectName = NULL;
-    uint32_t subjectNameLen = 0;
-    SOPC_CSR* pCSR = NULL;
-    uint8_t* pDER = NULL;
-    uint32_t pLen = 0;
-    size_t pwdLen = strlen(PASSWORD);
-    ck_assert_uint_gt(UINT32_MAX, pwdLen);
-    SOPC_ReturnStatus status =
-        SOPC_KeyManager_AsymmetricKey_CreateFromFile(CSR_KEY_PATH, &pKey, PASSWORD, (uint32_t) pwdLen);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./server_public/server_2k_cert.der", &pCert);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_Certificate_GetSanDnsNames(pCert, &pDNSNames, &DNSLen);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert_ptr_nonnull(pDNSNames);
-    ck_assert_uint_eq(1, DNSLen);
-    int match = memcmp(pDNSNames[0], CSR_SAN_DNS, strlen(CSR_SAN_DNS));
-    ck_assert_int_eq(0, match);
-    status = SOPC_KeyManager_Certificate_GetSubjectName(pCert, &subjectName, &subjectNameLen);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert_ptr_nonnull(subjectName);
-    ck_assert_int_eq('\0', subjectName[subjectNameLen]);
-    match = memcmp(subjectName, CSR_SUBJECT_NAME, subjectNameLen);
-    ck_assert_int_eq(0, match);
-    status = SOPC_KeyManager_CSR_Create(subjectName, true, CSR_MD, CSR_SAN_URI, pDNSNames, DNSLen, &pCSR);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CSR_ToDER(pCSR, pKey, &pDER, &pLen);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-
-    FILE* fp = NULL;
-    fp = fopen(CSR_PATH, "wb");
-    ck_assert_ptr_nonnull(fp);
-    size_t nb_written = fwrite(pDER, 1, pLen, fp);
-    fclose(fp);
-    ck_assert(pLen == nb_written);
-
-    SOPC_Free(pDNSNames[0]);
-    SOPC_Free(pDNSNames);
-
-    SOPC_KeyManager_AsymmetricKey_Free(pKey);
-    SOPC_KeyManager_Certificate_Free(pCert);
-    SOPC_KeyManager_CSR_Free(pCSR);
-    SOPC_Free(subjectName);
-    SOPC_Free(pDER);
-}
 
 START_TEST(test_crypto_check_cert_list_to_array)
 {
@@ -327,7 +274,103 @@ START_TEST(test_crypto_check_crl_list_to_array)
     SOPC_Free(pCrlArray);
 }
 END_TEST
-#endif
+
+START_TEST(test_gen_csr)
+{
+    /* The purpose of this test is to generate a CSR file and verify manually
+       its content though an external tool like openssl :
+       > openssl req -inform der -in <csr_der> -out <csr_pem> -outform pem (convert DER to PEM)
+       > openssl req -text -in <csr_pem> -noout -verify (to verify manually the content)
+    */
+    SOPC_AsymmetricKey* pKey = NULL;
+    SOPC_CertificateList* pCert = NULL;
+    char** pDNSNames = NULL;
+    uint32_t DNSLen = 0;
+    char* subjectName = NULL;
+    uint32_t subjectNameLen = 0;
+    SOPC_CSR* pCSR = NULL;
+    uint8_t* pDER = NULL;
+    uint32_t pLen = 0;
+    size_t pwdLen = strlen(PASSWORD);
+    ck_assert_uint_gt(UINT32_MAX, pwdLen);
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_AsymmetricKey_CreateFromFile(CSR_KEY_PATH, &pKey, PASSWORD, (uint32_t) pwdLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./server_public/server_2k_cert.der", &pCert);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_GetSanDnsNames(pCert, &pDNSNames, &DNSLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pDNSNames);
+    ck_assert_uint_eq(1, DNSLen);
+    int match = memcmp(pDNSNames[0], CSR_SAN_DNS, strlen(CSR_SAN_DNS));
+    ck_assert_int_eq(0, match);
+    status = SOPC_KeyManager_Certificate_GetSubjectName(pCert, &subjectName, &subjectNameLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(subjectName);
+    ck_assert_int_eq('\0', subjectName[subjectNameLen]);
+    match = memcmp(subjectName, CSR_SUBJECT_NAME, subjectNameLen);
+    ck_assert_int_eq(0, match);
+    status = SOPC_KeyManager_CSR_Create(subjectName, true, CSR_MD, CSR_SAN_URI, pDNSNames, DNSLen, &pCSR);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CSR_ToDER(pCSR, pKey, &pDER, &pLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    FILE* fp = NULL;
+    fp = fopen(CSR_PATH, "wb");
+    ck_assert_ptr_nonnull(fp);
+    size_t nb_written = fwrite(pDER, 1, pLen, fp);
+    fclose(fp);
+    ck_assert(pLen == nb_written);
+
+    SOPC_Free(pDNSNames[0]);
+    SOPC_Free(pDNSNames);
+
+    SOPC_KeyManager_AsymmetricKey_Free(pKey);
+    SOPC_KeyManager_Certificate_Free(pCert);
+    SOPC_KeyManager_CSR_Free(pCSR);
+    SOPC_Free(subjectName);
+    SOPC_Free(pDER);
+}
+
+START_TEST(test_subject_name)
+{
+    SOPC_AsymmetricKey* pKey = NULL;
+    SOPC_CertificateList* pCert = NULL;
+    char** pDNSNames = NULL;
+    uint32_t DNSLen = 0;
+    char* subjectName = NULL;
+    uint32_t subjectNameLen = 0;
+    SOPC_CSR* pCSR = NULL;
+    uint8_t* pDER = NULL;
+    size_t pwdLen = strlen(PASSWORD);
+    ck_assert_uint_gt(UINT32_MAX, pwdLen);
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_AsymmetricKey_CreateFromFile(CSR_KEY_PATH, &pKey, PASSWORD, (uint32_t) pwdLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./server_public/server_2k_cert.der", &pCert);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_GetSanDnsNames(pCert, &pDNSNames, &DNSLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pDNSNames);
+    ck_assert_uint_eq(1, DNSLen);
+    int match = memcmp(pDNSNames[0], CSR_SAN_DNS, strlen(CSR_SAN_DNS));
+    ck_assert_int_eq(0, match);
+    status = SOPC_KeyManager_Certificate_GetSubjectName(pCert, &subjectName, &subjectNameLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(subjectName);
+    ck_assert_int_eq('\0', subjectName[subjectNameLen]);
+    match = memcmp(subjectName, CSR_SUBJECT_NAME, subjectNameLen);
+    ck_assert_int_eq(0, match);
+
+    SOPC_Free(pDNSNames[0]);
+    SOPC_Free(pDNSNames);
+
+    SOPC_KeyManager_AsymmetricKey_Free(pKey);
+    SOPC_KeyManager_Certificate_Free(pCert);
+    SOPC_KeyManager_CSR_Free(pCSR);
+    SOPC_Free(subjectName);
+    SOPC_Free(pDER);
+}
 
 static void SOPC_KeyCertPairUpdateCallback(uintptr_t updateParam)
 {
@@ -485,29 +528,31 @@ Suite* tests_make_suite_crypto_tools(void)
 {
     Suite* s = suite_create("Crypto tools test");
 
-#ifndef S2OPC_CRYPTO_CYCLONE
-    TCase *tc_gen_rsa = NULL, *tc_gen_csr = NULL, *tc_check_crypto_list_to_array = NULL;
+    TCase *tc_gen_rsa = NULL, *tc_check_crypto_list_to_array = NULL;
     tc_gen_rsa = tcase_create("Generate RSA keys");
-    tc_gen_csr = tcase_create("Generate CSR");
     tc_check_crypto_list_to_array = tcase_create("Check crypto list to serialized array");
-
     suite_add_tcase(s, tc_gen_rsa);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_public);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_encrypted);
+#ifndef S2OPC_CRYPTO_CYCLONE
     tcase_set_timeout(tc_gen_rsa, 10);
-    suite_add_tcase(s, tc_gen_csr);
-    tcase_add_test(tc_gen_csr, test_gen_csr);
+#else
+    // The genRSA function in Cyclone uses a placeholder, which can increase execution time.
+    tcase_set_timeout(tc_gen_rsa, 60);
+#endif
     suite_add_tcase(s, tc_check_crypto_list_to_array);
     tcase_add_test(tc_check_crypto_list_to_array, test_crypto_check_cert_list_to_array);
     tcase_add_test(tc_check_crypto_list_to_array, test_crypto_check_crl_list_to_array);
-#endif
 
-    TCase *tc_check_app_uri = NULL, *tc_key_pair = NULL, *tc_cert_list_check_crl = NULL;
+    TCase *tc_check_app_uri = NULL, *tc_key_pair = NULL, *tc_cert_list_check_crl = NULL, *tc_check_subject_name = NULL,
+          *tc_gen_csr = NULL;
 
     tc_check_app_uri = tcase_create("Check application URI");
     tc_key_pair = tcase_create("Update Key / Cert pair");
     tc_cert_list_check_crl = tcase_create("Check cert list without CRL");
+    tc_check_subject_name = tcase_create("Check subject name of a certificate");
+    tc_gen_csr = tcase_create("Generate CSR");
 
     suite_add_tcase(s, tc_check_app_uri);
     tcase_add_test(tc_check_app_uri, test_crypto_check_app_uri);
@@ -517,6 +562,10 @@ Suite* tests_make_suite_crypto_tools(void)
     tcase_add_test(tc_key_pair, test_key_pair_bytes);
     suite_add_tcase(s, tc_cert_list_check_crl);
     tcase_add_test(tc_key_pair, test_cert_list_check_crl);
+    suite_add_tcase(s, tc_check_subject_name);
+    tcase_add_test(tc_check_subject_name, test_subject_name);
+    suite_add_tcase(s, tc_gen_csr);
+    tcase_add_test(tc_gen_csr, test_gen_csr);
 
     return s;
 }
