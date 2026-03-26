@@ -644,13 +644,31 @@ START_TEST(test_file_transfer_method)
     get_read_response(NODEID_VAR_OPEN_COUNT_ITEM1, &readValOpenCountItem1);
     ck_assert_uint_eq(0, *pOpenCountItem1);
 
-    SOPC_ByteString_Clear(&dataWriteItem1);
-    SOPC_ByteString_Clear(&dataToWrite_ABCDString);
-    SOPC_ByteString_Clear(&dataToCompare);
+    // TC_SOPC_FileTransfer_028:
+    // Test that the content of previous file is locally saved.
+    // Note: According to the OPC UA norm, whether the file is locally saved or not is server specific.
+    //       For this demo server, the file is automatically saved.
+    mode = 1;
+    fileHandleItem1 = SOPC_TEST_FileTransfer_OpenMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, mode);
+    ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
+    SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
+
+    nbOfBytesToRead = 8;
+    SOPC_TEST_FileTransfer_ReadMethod(gConnection, ITEM1_SELECTED, &callResponseItem1, fileHandleItem1,
+                                      nbOfBytesToRead);
+    ck_assert_int_eq(SOPC_GoodGenericStatus, callResponseItem1->Results[0].StatusCode);
+    pVariantOutput = &callResponseItem1->Results[0].OutputArguments->Value;
+    ck_assert(
+        SOPC_ByteString_Equal(&pVariantOutput->Bstring, &dataWriteItem1)); // "preload1" content of last opened file
+    SOPC_EncodeableObject_Delete(callResponseItem1->encodeableType, (void**) &callResponseItem1);
 
     /*---------------------------------------------------------------------------
      *        Clear the client toolkit library & FileTransfer API
      *---------------------------------------------------------------------------*/
+    SOPC_ByteString_Clear(&dataWriteItem1);
+    SOPC_ByteString_Clear(&dataToWrite_ABCDString);
+    SOPC_ByteString_Clear(&dataToCompare);
+
     SOPC_ClientHelper_Disconnect(&gConnection);
     SOPC_FileTransfer_Clear();
     SOPC_ClientConfigHelper_Clear();
