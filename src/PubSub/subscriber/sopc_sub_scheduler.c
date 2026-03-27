@@ -155,11 +155,11 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
  * If already initialized, ignore the initialization.
  *
  * @param pubId PublisherId attach to a networkMessage
- * @param timeoutInterval Message Receive timeout between two dataSetMessage
+ * @param timeoutIntervalMs Message Receive timeout between two dataSetMessage
  * @param reader DataSetReader attached to a dataSetMessage
  */
 static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId,
-                                              uint32_t timeoutInterval,
+                                              double timeoutIntervalMs,
                                               const SOPC_DataSetReader* reader);
 
 /**
@@ -208,7 +208,7 @@ typedef struct SOPC_SubScheduler_Writer_Ctx
     bool dataSetMessageSequenceNumberSet;
     uint16_t dataSetMessageSequenceNumber;
     SOPC_HighRes_TimeReference* timeout;
-    uint32_t timeoutInterval;
+    double timeoutIntervalMs;
     SOPC_PubSubState connectionMode;
     SOPC_TargetVariableCtx* targetVariable;
 } SOPC_SubScheduler_Writer_Ctx;
@@ -291,8 +291,8 @@ static struct
      * (only when received is newer regarding part 14 definition)*/
     SOPC_SubscriberDataSetMessageSNGap_Func* dsmSnGapCallback;
 
-    /* Minimum timeout over all Subscriber DSM */
-    uint32_t minTimeoutSub;
+    /* Minimum timeout over all Subscriber DSM. This is used as a sleep parameter which has millisecond resolution */
+    uint32_t minTimeoutSubMs;
 
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
@@ -316,7 +316,7 @@ static struct
                   .securityCtx = NULL,
                   .writerCtx = NULL,
                   .dsmSnGapCallback = NULL,
-                  .minTimeoutSub = 0};
+                  .minTimeoutSubMs = 0};
 
 // Update the state of a single DSM
 static void SOPC_SubScheduler_UpdateDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new)
@@ -576,7 +576,7 @@ static void uninit_sub_scheduler_ctx(void)
     SOPC_Array_Delete(schedulerCtx.writerCtx);
     schedulerCtx.writerCtx = NULL;
     schedulerCtx.dsmSnGapCallback = NULL;
-    schedulerCtx.minTimeoutSub = 0;
+    schedulerCtx.minTimeoutSubMs = 0;
 }
 
 // Free Arrays of SOPC_SubScheduler_Writer_Ctx
@@ -790,17 +790,17 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                     {
                         SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, r_i);
                         const double timeout = SOPC_DataSetReader_Get_ReceiveTimeout(reader);
-                        SOPC_SubScheduler_Init_Writer_Ctx(dsmPubId, (uint32_t) timeout, reader);
+                        SOPC_SubScheduler_Init_Writer_Ctx(dsmPubId, timeout, reader);
                         minTimeout = (timeout < minTimeout ? timeout : minTimeout);
                     }
                 }
                 if (minTimeout > 1)
                 {
-                    schedulerCtx.minTimeoutSub = (uint32_t)(minTimeout);
+                    schedulerCtx.minTimeoutSubMs = (uint32_t)(minTimeout);
                 }
                 else
                 {
-                    schedulerCtx.minTimeoutSub = 1;
+                    schedulerCtx.minTimeoutSubMs = 1;
                 }
             }
         }
@@ -902,7 +902,7 @@ static uint32_t SOPC_Sub_TimeoutCheck(void* param)
 {
     SOPC_UNUSED_ARG(param);
     SOPC_HighRes_TimeReference* now = SOPC_HighRes_TimeReference_Create();
-    uint32_t nextMinTimeout = UINT32_MAX;
+    uint32_t nextMinTimeoutMs = UINT32_MAX;
 
     const size_t nbCtx = SOPC_Array_Size(schedulerCtx.writerCtx);
     for (size_t i = 0; i < nbCtx && schedulerCtx.state == SOPC_PubSubState_Operational; i++)
@@ -941,16 +941,17 @@ static uint32_t SOPC_Sub_TimeoutCheck(void* param)
             }
             else
             {
+                int64_t delta_ms = delta_us / 1000;
                 // Check if this the smaller period of time to reach next timeout, then update next timeout evaluation.
-                if (delta_us < UINT32_MAX && (uint32_t) delta_us < nextMinTimeout)
+                if (delta_ms < UINT32_MAX && (uint32_t) delta_ms < nextMinTimeoutMs)
                 {
-                    nextMinTimeout = (uint32_t) delta_us;
+                    nextMinTimeoutMs = (uint32_t) delta_ms;
                 }
             }
         }
     }
     SOPC_HighRes_TimeReference_Delete(&now);
-    return nextMinTimeout;
+    return nextMinTimeoutMs;
 }
 
 /*
@@ -988,7 +989,7 @@ static bool SOPC_SubScheduler_Start_Sockets(int threadPriority)
 
     SOPC_ASSERT(nb_socket == sockIdx);
     SOPC_Sub_Sockets_Timeout timeout = {
-        .callback = &SOPC_Sub_TimeoutCheck, .pContext = NULL, .period_ms = schedulerCtx.minTimeoutSub};
+        .callback = &SOPC_Sub_TimeoutCheck, .pContext = NULL, .period_ms = schedulerCtx.minTimeoutSubMs};
     SOPC_Sub_SocketsMgr_Initialize((void*) schedulerCtx.transport, sizeof(*schedulerCtx.transport),
                                    schedulerCtx.sockArray, nb_socket, on_socket_message_received, &timeout,
                                    threadPriority);
@@ -1016,7 +1017,7 @@ static void SOPC_SubScheduler_CtxEth_Clear(SOPC_SubScheduler_TransportCtx* ctx)
 }
 
 static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId,
-                                              uint32_t timeoutInterval,
+                                              double timeoutIntervalMs,
                                               const SOPC_DataSetReader* reader)
 {
     SOPC_ASSERT(NULL != pubId);
@@ -1039,8 +1040,6 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
     if (!found)
     {
         SOPC_SubScheduler_Writer_Ctx ctx;
-        // set at least 1ms of interval
-        timeoutInterval = (timeoutInterval != 0) ? timeoutInterval : 1;
 
         ctx.pubId = *pubId;
         ctx.writerId = writerId;
@@ -1049,7 +1048,7 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
         ctx.dataSetMessageSequenceNumber = 0;
         ctx.connectionMode = SOPC_PubSubState_Disabled;
         ctx.timeout = NULL; // Initially null to allow distinction between "timeout" and "NoCommunication"
-        ctx.timeoutInterval = timeoutInterval;
+        ctx.timeoutIntervalMs = timeoutIntervalMs;
         ctx.targetVariable = SOPC_SubTargetVariable_TargetVariablesCtx_Create(reader);
         SOPC_ASSERT(NULL != ctx.targetVariable);
         bool res = SOPC_Array_Append(schedulerCtx.writerCtx, ctx);
@@ -1146,7 +1145,7 @@ static void SOPC_UpdateDSMTimeout(const SOPC_Conf_PublisherId* pubId, const uint
         // Create or restart timeout
         SOPC_HighRes_TimeReference* now = SOPC_HighRes_TimeReference_Create();
         SOPC_ASSERT(NULL != now);
-        SOPC_HighRes_TimeReference_AddSynchedDuration(now, ((uint64_t) ctx->timeoutInterval * 1000), -1);
+        SOPC_HighRes_TimeReference_AddSynchedDuration(now, (uint64_t) ctx->timeoutIntervalMs * 1000, -1);
         if (NULL == ctx->timeout)
         {
             ctx->timeout = SOPC_HighRes_TimeReference_Create();

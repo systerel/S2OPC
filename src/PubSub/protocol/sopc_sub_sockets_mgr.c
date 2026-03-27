@@ -165,7 +165,15 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
             nextPossibleTimeout = (*receptionThread.timeout.callback)(receptionThread.timeout.pContext);
             if (nextPossibleTimeout < waitMessageTimeoutMs)
             {
-                waitMessageTimeoutMs = nextPossibleTimeout;
+                if (nextPossibleTimeout < 1)
+                {
+                    // Wait at least 1 ms to avoid infinite wait
+                    waitMessageTimeoutMs = 1;
+                }
+                else
+                {
+                    waitMessageTimeoutMs = nextPossibleTimeout;
+                }
             }
         }
     }
