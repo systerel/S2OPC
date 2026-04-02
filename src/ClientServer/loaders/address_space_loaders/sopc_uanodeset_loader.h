@@ -23,6 +23,11 @@
 #include <stdio.h>
 #include "sopc_address_space.h"
 
+/** @brief Maximum buffer size in bytes used by the XML parser to store the file content */
+#ifndef SOPC_NODESET_XML_MAX_BUFFER_SIZE
+#define SOPC_NODESET_XML_MAX_BUFFER_SIZE 65536
+#endif
+
 SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd);
 
 #endif /* SOPC_NODESET_LOADER_H_ */

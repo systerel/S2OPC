@@ -93,7 +93,7 @@ struct parse_context_t
 static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
-    const size_t BUF_SIZE = 65365;
+    const size_t BUF_SIZE = SOPC_SERVER_CONFIG_XML_MAX_BUFFER_SIZE;
     char* buf = SOPC_Malloc(BUF_SIZE);
     status = (NULL != buf) ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
 

@@ -24,6 +24,11 @@
 
 #include "sopc_user_app_itf.h"
 
+/** @brief Maximum buffer size in bytes used by the XML parser to store the file content */
+#ifndef SOPC_SERVER_CONFIG_XML_MAX_BUFFER_SIZE
+#define SOPC_SERVER_CONFIG_XML_MAX_BUFFER_SIZE 4096
+#endif
+
 /* Parse the XML configuration file (both client and server configurations if present)
  *
  * \param fd           Path to XML file compliant with s2opc_clientserver_config.xsd schema
