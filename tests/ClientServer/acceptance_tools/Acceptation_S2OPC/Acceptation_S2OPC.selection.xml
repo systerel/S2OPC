@@ -329,6 +329,39 @@
      <TestCase name="Err-001.js"/>
     </TestCases>
    </ConformanceUnit>
+   <ConformanceUnit name="Monitor Items 10">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="004.js"/>
+     <TestCase name="Err-001.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Monitor Items 100">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="Err-001.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Monitor Items 500">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="Err-001.js"/>
+    </TestCases>
+   </ConformanceUnit>
+   <ConformanceUnit name="Monitor Items 5000">
+    <TestCases>
+     <TestCase name="001.js"/>
+     <TestCase name="002.js"/>
+     <TestCase name="003.js"/>
+     <TestCase name="Err-001.js"/>
+    </TestCases>
+   </ConformanceUnit>
    <ConformanceUnit name="Monitor QueueSize_1">
     <TestCases>
      <TestCase name="001.js"/>
