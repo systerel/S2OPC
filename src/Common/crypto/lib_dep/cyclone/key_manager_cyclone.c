@@ -219,12 +219,40 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
     return status;
 }
 
+/*****************************************************************************
+ * CI test definitions consistency check
+ *****************************************************************************/
+
+#if defined(__GNUC__) || defined(__clang__)
+#ifdef CYCLONE_CI_TEST_ONLY_RSA
+/* Message if S2OPC_CYCLONE_CI_TEST_ONLY_RSA is enabled */
+#ifdef S2OPC_CYCLONE_CI_TEST_ONLY_RSA
+#pragma message "WARNING: S2OPC_CYCLONE_CI_TEST_ONLY_RSA is enabled."
+#pragma message "THIS CONFIGURATION MUST ONLY BE USED FOR CI TESTS ! DO NOT USE IN PRODUCTION !"
+#else
+#pragma message "WARNING: CYCLONE_CI_TEST_ONLY_RSA is enabled."
+#pragma message \
+    "But SOPC_KeyManager_AsymmetricKey_GenRSA will not be functional without S2OPC_CYCLONE_CI_TEST_ONLY_RSA."
+#endif
+#endif
+#endif
+
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC_AsymmetricKey** ppKey)
 {
     if (NULL == ppKey || 0 == RSAKeySize)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    // Ensure we do not use placeholder cyclone RSA generation in production
+#ifdef CYCLONE_CI_TEST_ONLY_RSA
+/* If CYCLONE_CI_TEST_ONLY_RSA is enabled in Cyclone library,
+ * S2OPC_CYCLONE_CI_TEST_ONLY_RSA SHALL also be defined.
+ */
+#ifndef S2OPC_CYCLONE_CI_TEST_ONLY_RSA
+    return SOPC_STATUS_NOT_SUPPORTED;
+#endif
+#endif
 
     *ppKey = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;

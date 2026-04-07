@@ -59,9 +59,11 @@
 # 1. Ensures job failure when intermediate script line fails
 # (see gitlab issues #25394 and #383355)
 # 2. Ensure isolated network are used for each job
+# 3. Activate Cyclone RSA generation placeholder for CI
 variables:
   FF_ENABLE_BASH_EXIT_CODE_CHECK: "true"
   FF_NETWORK_PER_BUILD: "true"
+  S2OPC_CYCLONE_CI_TEST_ONLY_RSA: 1
 
 .nominal_build_variables: &nominal_build_variables
   S2OPC_NODE_MANAGEMENT: 1
@@ -223,11 +225,11 @@ hil-test:
 
 .build-linux: &build_linux
   stage: build
-  image: docker.aix.systerel.fr/c838/build@sha256:df591c37d38a482b42b5f38087f3fab9a3ee3c8c65a4ae9e9a9c6fd88efd585d # digest of build:1.58
+  image: docker.aix.systerel.fr/c838/build@sha256:0c1fdb136b737f449cc63e63e11f653fca45695055293b4b9514342b70836264 # digest of build:1.59
   script:
     - &build_command_line './build.sh || exit 1'
   variables: &build_linux_variables
-    DOCKER_DIGEST: 'sha256:df591c37d38a482b42b5f38087f3fab9a3ee3c8c65a4ae9e9a9c6fd88efd585d'
+    DOCKER_DIGEST: 'sha256:0c1fdb136b737f449cc63e63e11f653fca45695055293b4b9514342b70836264'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'

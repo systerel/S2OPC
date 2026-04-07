@@ -100,9 +100,11 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
  * \param[out] ppKey A handle to the generated key. This object must be freed with a call to
  *                   ::SOPC_KeyManager_AsymmetricKey_Free
  *
- * \warning          On Linux with Cyclone, this function is a placeholder. It must be used for testing purposes only.
- *                   The implementation comes from
- *                   https://github.com/dananjayavr/cyclone_crypto_rsa_sha_signature/blob/master/README.md
+ * \warning          On native platform with Cyclone, this function is not implemented by default.
+ *                   In our Linux docker build image a placeholder is implemented in Cyclone library.
+ *                   It shall be used for testing purposes only.
+ *                   The placeholder implementation is based on:
+ *                   https://github.com/dananjayavr/cyclone_crypto_rsa_sha_signature/blob/master/README.md#about-check_probable_primec
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */

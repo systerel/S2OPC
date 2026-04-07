@@ -78,6 +78,10 @@ endif()
 # Choose crypto option
 option(S2OPC_CRYPTO_MBEDTLS "Use MbedTLS" ON)
 option(S2OPC_CRYPTO_CYCLONE "Use CycloneCRYPTO" OFF)
+# This option shall never be set for other purpose than CI tests,
+# the RSA placeholder is not meant for using the generated keys in the real world.
+# On embedded target the RSA might be implemented and might allow RSA generation used.
+option(S2OPC_CYCLONE_CI_TEST_ONLY_RSA "Use CycloneCRYPTO with a RSA placeholder for CI tests ONLY" OFF)
 
 set(S2OPC_CRYPTO_LIB "nocrypto")
 if(S2OPC_CRYPTO_CYCLONE)
@@ -478,8 +482,9 @@ list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_DELETE_ORGANIZES_CHILD_NODES
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_EVENT_MANAGEMENT}>:S2OPC_EVENT_MANAGEMENT>)
 # Add S2OPC_HAS_AUDITING to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_HAS_AUDITING}>:S2OPC_HAS_AUDITING>)
-# Add S2OPC_CRYPTO_CYCLONE to compilation definition if option activated (for tests since implementation is incomplete)
+# Add S2OPC_CRYPTO_CYCLONE to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_CRYPTO_CYCLONE}>:S2OPC_CRYPTO_CYCLONE>)
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_CYCLONE_CI_TEST_ONLY_RSA}>:S2OPC_CYCLONE_CI_TEST_ONLY_RSA>)
 
 # Check Auditing/Events dependancy
 if (${S2OPC_HAS_AUDITING})

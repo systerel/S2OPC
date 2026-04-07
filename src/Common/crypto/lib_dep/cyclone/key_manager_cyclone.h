@@ -31,9 +31,14 @@
 #include "sopc_enums.h"
 
 #include "pkix/x509_common.h"
-#include "rng/yarrow.h"
 
+#if defined(__GNUC__) || defined(__clang__)
+#ifdef CYCLONE_CI_TEST_ONLY_RSA
+#include "rng/yarrow.h"
+// Only necessary for the placeholder RSA implementation
 extern YarrowContext yarrowContext;
+#endif
+#endif
 
 /**
  * \brief   The asymmetric key representation.
