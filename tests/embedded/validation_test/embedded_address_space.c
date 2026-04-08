@@ -46,7 +46,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "BaseDataType"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "BaseDataType"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 8,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -108,7 +108,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Number"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Number"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 4,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -146,7 +146,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Integer"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Integer"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -172,7 +172,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "UInteger"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "UInteger"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 4,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -210,7 +210,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Enumeration"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Enumeration"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 3,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -242,7 +242,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Boolean"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Boolean"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -264,7 +264,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Byte"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Byte"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -286,7 +286,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Int16"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Int16"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -308,7 +308,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "UInt16"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "UInt16"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -330,7 +330,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "UInt32"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "UInt32"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -352,7 +352,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Double"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Double"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -378,7 +378,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "String"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "String"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -404,7 +404,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "DateTime"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "DateTime"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -430,7 +430,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "StatusCode"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "StatusCode"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -452,7 +452,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "LocalizedText"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "LocalizedText"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -474,7 +474,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Structure"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Structure"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 4,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -512,7 +512,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "References"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "References"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -538,7 +538,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "NonHierarchicalReferences"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "NonHierarchicalReferences"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 4,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -576,7 +576,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "HierarchicalReferences"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "HierarchicalReferences"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 3,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -608,7 +608,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "HasChild"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "HasChild"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 3,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -640,7 +640,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Organizes"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Organizes"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -662,7 +662,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "HasModellingRule"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "HasModellingRule"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -684,7 +684,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "HasEncoding"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "HasEncoding"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -706,7 +706,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "HasTypeDefinition"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "HasTypeDefinition"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -728,7 +728,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Aggregates"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Aggregates"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 3,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -760,7 +760,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "HasSubtype"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "HasSubtype"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -782,7 +782,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "HasProperty"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "HasProperty"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -804,7 +804,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ReferenceType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "HasComponent"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "HasComponent"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -826,7 +826,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ObjectType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "BaseObjectType"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "BaseObjectType"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 3,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -858,7 +858,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ObjectType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "FolderType"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "FolderType"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -880,7 +880,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_VariableType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "BaseVariableType"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "BaseVariableType"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -909,7 +909,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_VariableType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "BaseDataVariableType"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "BaseDataVariableType"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -934,7 +934,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_VariableType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "PropertyType"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "PropertyType"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -959,7 +959,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ObjectType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "DataTypeEncodingType"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "DataTypeEncodingType"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -981,7 +981,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_ObjectType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ModellingRuleType"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ModellingRuleType"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1007,7 +1007,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "NamingRule"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "NamingRule"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1036,7 +1036,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Mandatory"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Mandatory"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1062,7 +1062,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "NamingRule"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "NamingRule"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1087,7 +1087,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Optional"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Optional"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1113,7 +1113,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "NamingRule"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "NamingRule"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1138,7 +1138,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "OptionalPlaceholder"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "OptionalPlaceholder"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1191,7 +1191,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MandatoryPlaceholder"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MandatoryPlaceholder"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1244,7 +1244,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Root"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Root"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 4,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1282,7 +1282,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Objects"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Objects"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 4,
                   .References =
                       (const OpcUa_ReferenceNode[]){{
@@ -1321,7 +1321,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Types"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Types"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 7,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1377,7 +1377,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Views"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Views"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1399,7 +1399,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ObjectTypes"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ObjectTypes"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1425,7 +1425,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "VariableTypes"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "VariableTypes"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1451,7 +1451,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "DataTypes"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "DataTypes"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1477,7 +1477,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ReferenceTypes"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ReferenceTypes"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1503,7 +1503,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "EventTypes"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "EventTypes"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1525,7 +1525,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Server"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Server"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 9,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1593,7 +1593,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ServerArray"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ServerArray"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1618,7 +1618,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "NamespaceArray"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "NamespaceArray"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1643,7 +1643,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ServerStatus"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ServerStatus"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 6,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1696,7 +1696,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "StartTime"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "StartTime"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1721,7 +1721,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "CurrentTime"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "CurrentTime"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1746,7 +1746,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "State"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "State"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1771,7 +1771,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "BuildInfo"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "BuildInfo"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 6,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -1824,7 +1824,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ProductUri"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ProductUri"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1849,7 +1849,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ManufacturerName"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ManufacturerName"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1874,7 +1874,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ProductName"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ProductName"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1899,7 +1899,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "SoftwareVersion"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "SoftwareVersion"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1924,7 +1924,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "BuildNumber"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "BuildNumber"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1949,7 +1949,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "BuildDate"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "BuildDate"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1974,7 +1974,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "SecondsTillShutdown"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "SecondsTillShutdown"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -1999,7 +1999,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ShutdownReason"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ShutdownReason"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2024,7 +2024,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ServiceLevel"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ServiceLevel"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2049,7 +2049,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Auditing"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Auditing"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2074,7 +2074,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ServerCapabilities"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ServerCapabilities"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 13,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -2166,7 +2166,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ServerProfileArray"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ServerProfileArray"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2191,7 +2191,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "LocaleIdArray"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "LocaleIdArray"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2216,7 +2216,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MinSupportedSampleRate"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MinSupportedSampleRate"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2241,7 +2241,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxBrowseContinuationPoints"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxBrowseContinuationPoints"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2266,7 +2266,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxQueryContinuationPoints"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxQueryContinuationPoints"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2291,7 +2291,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxHistoryContinuationPoints"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxHistoryContinuationPoints"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2316,7 +2316,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "SoftwareCertificates"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "SoftwareCertificates"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2341,7 +2341,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxArrayLength"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxArrayLength"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2366,7 +2366,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxStringLength"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxStringLength"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2391,7 +2391,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxByteStringLength"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxByteStringLength"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2416,7 +2416,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "OperationLimits"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "OperationLimits"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 7,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -2472,7 +2472,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxNodesPerRead"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxNodesPerRead"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2497,7 +2497,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxNodesPerWrite"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxNodesPerWrite"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2522,7 +2522,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxNodesPerBrowse"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxNodesPerBrowse"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2547,7 +2547,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxNodesPerRegisterNodes"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxNodesPerRegisterNodes"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2572,7 +2572,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxNodesPerTranslateBrowsePathsToNodeIds"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxNodesPerTranslateBrowsePathsToNodeIds"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2597,7 +2597,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxNodesPerNodeManagement"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxNodesPerNodeManagement"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2622,7 +2622,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "MaxMonitoredItemsPerCall"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "MaxMonitoredItemsPerCall"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2647,7 +2647,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ModellingRules"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ModellingRules"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 5,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -2691,7 +2691,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "AggregateFunctions"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "AggregateFunctions"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2713,7 +2713,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ServerDiagnostics"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ServerDiagnostics"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2735,7 +2735,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "EnabledFlag"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "EnabledFlag"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2760,7 +2760,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "VendorServerInfo"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "VendorServerInfo"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 0,
                   .References = NULL,
                   .EventNotifier = 0,
@@ -2775,7 +2775,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ServerRedundancy"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ServerRedundancy"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2797,7 +2797,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "RedundancySupport"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "RedundancySupport"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2822,7 +2822,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "InterfaceTypes"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "InterfaceTypes"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2844,7 +2844,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Duration"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Duration"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2866,7 +2866,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "UtcTime"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "UtcTime"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2888,7 +2888,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "LocaleId"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "LocaleId"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -2910,7 +2910,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "SignedSoftwareCertificate"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "SignedSoftwareCertificate"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 4,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -2949,7 +2949,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                  (
                                      OpcUa_StructureField[]){{&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("CertificateData"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(15),
                                                               -1,
                                                               0,
@@ -2958,7 +2958,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("Signature"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(15),
                                                               -1,
                                                               0,
@@ -2977,7 +2977,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "BuildInfo"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "BuildInfo"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 4,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -3016,7 +3016,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                  (
                                      OpcUa_StructureField[]){{&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("ProductUri"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(12),
                                                               -1,
                                                               0,
@@ -3025,7 +3025,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("ManufacturerName"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(12),
                                                               -1,
                                                               0,
@@ -3034,7 +3034,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("ProductName"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(12),
                                                               -1,
                                                               0,
@@ -3043,7 +3043,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("SoftwareVersion"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(12),
                                                               -1,
                                                               0,
@@ -3052,7 +3052,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("BuildNumber"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(12),
                                                               -1,
                                                               0,
@@ -3061,7 +3061,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("BuildDate"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(294),
                                                               -1,
                                                               0,
@@ -3080,7 +3080,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "RedundancySupport"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "RedundancySupport"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -3102,33 +3102,33 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                                         (OpcUa_EnumField[]){
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              0,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("None")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              1,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Cold")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              2,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Warm")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              3,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Hot")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              4,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Transparent")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              5,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("HotAndMirrored")}}}},
                                               &OpcUa_EnumDefinition_EncodeableType}},
               }}},
@@ -3142,7 +3142,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "EnumStrings"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "EnumStrings"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3167,7 +3167,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ServerState"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ServerState"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 2,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -3189,43 +3189,43 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                                         (OpcUa_EnumField[]){
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              0,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Running")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              1,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Failed")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              2,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("NoConfiguration")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              3,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Suspended")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              4,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Shutdown")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              5,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Test")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              6,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("CommunicationFault")},
                                                                             {&OpcUa_EnumField_EncodeableType,
                                                                              7,
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
-                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
+                                                                             {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                                              SOPC_STRING("Unknown")}}}},
                                               &OpcUa_EnumDefinition_EncodeableType}},
               }}},
@@ -3239,7 +3239,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Variable,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "EnumStrings"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "EnumStrings"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3264,7 +3264,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_DataType,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "ServerStatusDataType"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "ServerStatusDataType"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 4,
                   .References = (const OpcUa_ReferenceNode[]){{
                                                                   &OpcUa_ReferenceNode_EncodeableType,
@@ -3303,7 +3303,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                  (
                                      OpcUa_StructureField[]){{&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("StartTime"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(294),
                                                               -1,
                                                               0,
@@ -3312,7 +3312,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("CurrentTime"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(294),
                                                               -1,
                                                               0,
@@ -3321,7 +3321,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("State"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(852),
                                                               -1,
                                                               0,
@@ -3330,7 +3330,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("BuildInfo"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(338),
                                                               -1,
                                                               0,
@@ -3339,7 +3339,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("SecondsTillShutdown"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(7),
                                                               -1,
                                                               0,
@@ -3348,7 +3348,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                                                               false},
                                                              {&OpcUa_StructureField_EncodeableType,
                                                               SOPC_STRING("ShutdownReason"),
-                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                                                              {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                                                               SOPC_NODEID_NS0_NUMERIC(21),
                                                               -1,
                                                               0,
@@ -3367,7 +3367,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Default Binary"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Default Binary"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3389,7 +3389,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Default Binary"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Default Binary"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3411,7 +3411,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Default Binary"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Default Binary"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3433,7 +3433,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Default XML"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Default XML"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3455,7 +3455,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Default XML"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Default XML"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3477,7 +3477,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Default XML"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Default XML"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3499,7 +3499,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Default JSON"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Default JSON"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3521,7 +3521,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Default JSON"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Default JSON"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
@@ -3543,7 +3543,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                   .NodeClass = OpcUa_NodeClass_Object,
                   .BrowseName = SOPC_QUALIFIED_NAME(0, "Default JSON"),
                   .DisplayName = SOPC_LOCALIZED_TEXT("", "Default JSON"),
-                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL},
+                  .Description = {SOPC_STRING_NULL, SOPC_STRING_NULL, NULL},
                   .NoOfReferences = 1,
                   .References =
                       (const OpcUa_ReferenceNode[]){
