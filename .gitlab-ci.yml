@@ -432,12 +432,12 @@ build-rpi:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always # run even if previous job in pipeline failed
 
-# Used by coverity, also starts the analysis
 build-linux64-coverity:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/coverity@sha256:00c26504f3603510996ff846e88e02c7f4d01113ea9eaa2e4ac5337536b56116 # digest of coverity:1.13
   needs: []
   script: |-
+    python3 .systerel/patch-generate-empty-address-space.py scripts/generate-s2opc-address-space.py
     mkdir build
     cd build
     cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DS2OPC_NODE_MANAGEMENT=1 -DS2OPC_EVENT_MANAGEMENT=1 -DS2OPC_HAS_AUDITING=1 -DS2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE=1 ..
