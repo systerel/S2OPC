@@ -195,6 +195,7 @@ check_commit_validity:
     CMAKE_INSTALL_PREFIX: "../install_linux64"
     DOCKER_DIGEST: "sha256:0c1fdb136b737f449cc63e63e11f653fca45695055293b4b9514342b70836264"
     BUILD_DIR: build
+    CMAKE_C_FLAGS: "-DSOPC_REQUEST_TIMEOUT_MS=30000" # increase timeout for CI tests
   artifacts:
     name: "bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}"
     paths:
