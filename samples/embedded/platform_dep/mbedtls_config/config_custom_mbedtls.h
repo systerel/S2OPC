@@ -31,21 +31,33 @@
 #define MBEDTLS_HEAP_SIZE (64 * 1024)
 #endif
 
-// Use MBEDTLS_HEAP_SECTION to install heaps in a dedicated memory region.
-// E.G for DTCM section (exists in STM32)
-// #define MBEDTLS_HEAP_SECTION __dtcm_data_section
+/*
+ * Use MBEDTLS_HEAP_SECTION to install heaps in a dedicated memory region.
+ * Example for DTCM section (exists on STM32):
+ * #define MBEDTLS_HEAP_SECTION __dtcm_data_section
+ */
+#ifndef MBEDTLS_HEAP_SECTION
 #define MBEDTLS_HEAP_SECTION
+#endif
 
 #undef MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
 
 #define MBEDTLS_CIPHER_MODE_CTR
 
-#define MBEDTLS_PKCS1_V21
+#define MBEDTLS_OID_C
+#define MBEDTLS_MD_C
+#define MBEDTLS_BIGNUM_C
+#define MBEDTLS_RSA_C
+#define MBEDTLS_PK_C
+#define MBEDTLS_PK_PARSE_C
 #define MBEDTLS_PK_WRITE_C
 #define MBEDTLS_ASN1_WRITE_C
-#define MBEDTLS_BIGNUM_C
+#define MBEDTLS_PKCS1_V15
+#define MBEDTLS_PKCS1_V21
 
+#define MBEDTLS_X509_USE_C
+#define MBEDTLS_X509_CRT_PARSE_C
 #define MBEDTLS_X509_CRL_PARSE_C
 #define MBEDTLS_X509_CHECK_KEY_USAGE
 #define MBEDTLS_X509_CHECK_EXTENDED_KEY_USAGE

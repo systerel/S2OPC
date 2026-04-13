@@ -7,14 +7,17 @@ cmake_minimum_required(VERSION 3.12)
 # Demo CLI-PubSub-Server
 set(SAMPLE_PTF_DEP ${CMAKE_CURRENT_LIST_DIR}/../../platform_dep)
 
-# Handle ZEPHYR case for sample build
-set(ZEPHYR_BASE_EXIST $ENV{ZEPHYR_BASE})
-if(ZEPHYR_BASE_EXIST)
-  include(../platform_dep/zephyr/CMakeLists.txt)
+# Handle ZEPHYR case for sample build.
+# west build -b <board> defines BOARD as a CMake variable, while some older
+# scripts still rely on the environment.
+if((DEFINED BOARD AND NOT "${BOARD}" STREQUAL "") OR
+   (DEFINED ENV{BOARD} AND NOT "$ENV{BOARD}" STREQUAL "") OR
+   DEFINED ENV{ZEPHYR_BASE})
+  include(${CMAKE_CURRENT_LIST_DIR}/../zephyr/CMakeLists.txt)
   return()
 endif()
 
-project (${SAMPLE_PROJECT_NAME} LANGUAGES C)
+project(${SAMPLE_PROJECT_NAME} LANGUAGES C)
 
 if(NOT S2OPC_COMMON_DEFS_SET)
   include(../../../CommonDefs.cmake)
@@ -47,10 +50,10 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-FILE(GLOB samples_src CONFIGURE_DEPENDS
+file(GLOB samples_src
   ${SAMPLE_SRC_DIR}/src/*.c
   ${SAMPLE_PTF_DEP}/${PLATFORM_DIR}/src/*.c
-  )
+)
 
 add_executable(${SAMPLE_PROJECT_NAME} ${samples_src})
 
@@ -61,7 +64,7 @@ target_include_directories(${SAMPLE_PROJECT_NAME} PRIVATE
       ${SAMPLE_PTF_DEP}/include
       ${SAMPLE_PTF_DEP}/${PLATFORM_DIR}/src
       ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert)
-if (WITH_STATIC_SECURITY_DATA)
+if(WITH_STATIC_SECURITY_DATA)
   target_compile_definitions(${SAMPLE_PROJECT_NAME} PRIVATE "WITH_STATIC_SECURITY_DATA")
 endif()
 

@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.12)
 
 # Demo CLI-PubSub-Server
 set(SAMPLE_PROJECT_NAME S2OPC_CLI_PubSub_Server)
-SET(SAMPLE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(SAMPLE_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(../platform_dep/CMake/CMakeLists.txt)
 
-project (${SAMPLE_PROJECT_NAME} LANGUAGES C)
+if(NOT S2OPC_SAMPLE_ZEPHYR)
+  project(${SAMPLE_PROJECT_NAME} LANGUAGES C)
+endif()
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 

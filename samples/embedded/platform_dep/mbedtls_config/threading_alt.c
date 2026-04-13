@@ -19,27 +19,29 @@
 
 #include "threading_alt.h"
 
-// Must be included first
-#include "config_custom_mbedtls.h"
-
+#include <mbedtls/build_info.h>
 #include <mbedtls/memory_buffer_alloc.h>
 #include <mbedtls/threading.h>
 
-// Place MBEDTLS HEAP into a different RAM section
-#ifdef CONFIG_SOPC_ALLOC_SECTION
-__attribute__((section(CONFIG_SOPC_ALLOC_SECTION)))
-#endif
-static unsigned char _mbedtls_heap[MBEDTLS_HEAP_SIZE];
-
-#ifdef CONFIG_MBEDTLS_USER_CONFIG_FILE
-#include CONFIG_MBEDTLS_USER_CONFIG_FILE
+#ifndef MBEDTLS_HEAP_SIZE
+#error "MBEDTLS_HEAP_SIZE must be defined by the active Mbed TLS configuration"
 #endif
 
 #ifndef MBEDTLS_HEAP_SECTION
 #define MBEDTLS_HEAP_SECTION
 #endif
 
-// Place MBEDTLS HEAP into a different RAM section
+/*
+ * Place the private Mbed TLS heap in the requested memory section.
+ * MBEDTLS_HEAP_SIZE / MBEDTLS_HEAP_SECTION are provided by the active
+ * config-mbedtls.h + config_custom_mbedtls.h combination. Keep the legacy
+ * CONFIG_SOPC_ALLOC_SECTION fallback for existing applications.
+ */
+#if defined(CONFIG_SOPC_ALLOC_SECTION)
+#undef MBEDTLS_HEAP_SECTION
+#define MBEDTLS_HEAP_SECTION __attribute__((section(CONFIG_SOPC_ALLOC_SECTION)))
+#endif
+
 MBEDTLS_HEAP_SECTION static unsigned char _mbedtls_heap[MBEDTLS_HEAP_SIZE];
 
 static void mutex_init(mbedtls_threading_mutex_t* pMutex)
