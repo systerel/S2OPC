@@ -19,7 +19,15 @@
 
 #include "threading_alt.h"
 
-#include <mbedtls/build_info.h>
+#if defined(__has_include)
+#  if __has_include(<mbedtls/build_info.h>)
+#    include <mbedtls/build_info.h>
+#  else
+#    include <mbedtls/config.h>
+#  endif
+#else
+#  include <mbedtls/config.h>
+#endif
 #include <mbedtls/memory_buffer_alloc.h>
 #include <mbedtls/threading.h>
 
