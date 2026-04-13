@@ -533,9 +533,10 @@ static void crt_verifycrl_and_check_revocation(const SOPC_CertificateList* child
 
     // Find the CRL of parent and check if it is correctly signed
     SOPC_CRLList* parent_crl = crl;
-    bool bFound = false;
-    while (!bFound && NULL != parent_crl)
+    bool bFoundAtLeastOnce = false;
+    while (NULL != parent_crl)
     {
+        bool bFound = false;
         /* This Cyclone function:
          * - returns error if parent does not have the extension CRL_SIGN
          * - checks the validity of the CRL (thisUpdate, nextUpdate)
@@ -552,48 +553,48 @@ static void crt_verifycrl_and_check_revocation(const SOPC_CertificateList* child
             *failure_reasons |= PKI_CYCLONE_X509_BADCRL_EXPIRED;
         }
 
-        // If it's not parent's CRL, iterate on the next candidate.
-        if (!bFound)
+        if (bFound)
         {
-            parent_crl = parent_crl->next;
-        }
-    }
-
-    if (bFound)
-    {
-        // Check if md and pk algos of the signature of the CRL suits the profile. */
-        X509SignatureAlgo signAlgo = {0};
-        const HashAlgo* hashAlgo = NULL;
-        errLib = x509GetSignHashAlgo(&parent_crl->crl.signatureAlgo, &signAlgo, &hashAlgo);
-        if (0 == errLib)
-        {
-            if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
+            // Check if md and pk algos of the signature of the CRL suits the profile. */
+            X509SignatureAlgo signAlgo = {0};
+            const HashAlgo* hashAlgo = NULL;
+            errLib = x509GetSignHashAlgo(&parent_crl->crl.signatureAlgo, &signAlgo, &hashAlgo);
+            if (0 == errLib)
             {
-                if (X509_SIGN_ALGO_RSA != signAlgo && X509_SIGN_ALGO_RSA_PSS != signAlgo)
+                if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
                 {
-                    *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
+                    if (X509_SIGN_ALGO_RSA != signAlgo && X509_SIGN_ALGO_RSA_PSS != signAlgo)
+                    {
+                        *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
+                    }
+                }
+
+                bool bMatch = checkMdAllowed(hashAlgo, pProfile);
+                if (!bMatch) // If the hash algo is not an allowed md.
+                {
+                    *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_MD;
                 }
             }
-
-            bool bMatch = checkMdAllowed(hashAlgo, pProfile);
-            if (!bMatch) // If the hash algo is not an allowed md.
+            else
             {
-                *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_MD;
+                *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
+            }
+
+            // Check if the certificate is not revoked in the parent CRL
+            errLib = x509CheckRevokedCertificate(&child->crt, &parent_crl->crl);
+            if (ERROR_CERTIFICATE_REVOKED == errLib)
+            {
+                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
             }
         }
-        else
-        {
-            *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
-        }
 
-        // Check if the certificate is not revoked in the parent CRL
-        errLib = x509CheckRevokedCertificate(&child->crt, &parent_crl->crl);
-        if (ERROR_CERTIFICATE_REVOKED == errLib)
-        {
-            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
-        }
+        bFoundAtLeastOnce = bFound | bFoundAtLeastOnce;
+
+        // Check next CRL
+        parent_crl = parent_crl->next;
     }
-    else
+
+    if (!bFoundAtLeastOnce)
     {
         // No valid CRL found
         *failure_reasons |= PKI_CYCLONE_X509_BADCRL_NOT_TRUSTED;
