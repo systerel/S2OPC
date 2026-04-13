@@ -115,7 +115,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadValue(const SOPC_AddressSpaceAccess*
  * \return SOPC_GoodGenericStatus in case of success, otherwise:
  *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL, incoherent parameters)
  *         - OpcUa_BadNodeIdUnknown: if provided \p nodeId is not present in AddressSpace
- *         - OpcUa_BadWriteNotSupported: if status code and/or timestamp provided but are read-only in AddressSpace
+ *         - OpcUa_BadWriteNotSupported: if status code and/or timestamp provided but access level is read only
+ *                                       (not applicable in case of constant address space: see note)
  *         - OpcUa_BadNotImplemented: if the requested attribute is not implemented
  *                                    (it might also be invalid for concerned node in this case)
  *         - OpcUa_BadOutOfMemory: if an allocation failed during write operation
@@ -125,6 +126,10 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadValue(const SOPC_AddressSpaceAccess*
  *
  * \warning No typechecking is implemented in this operation for now (value write will succeed),
  *          it is responsibility of caller to check the Value complies with the Variable DataType.
+ *
+ * \note In particular case of constant address space, or "read-only nodes", only the Value attribute is modifiable.
+ *       In this latter case, the optional parameters are inhibited and a warning trace is logged
+ *       when status/timestamp is set with a custom value (different from Good / 0).
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addSpaceAccess,
                                                    const SOPC_NodeId* nodeId,

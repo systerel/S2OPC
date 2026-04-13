@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <inttypes.h>
 #include <string.h>
 
 #include "sopc_address_space_access_internal.h"
@@ -24,11 +25,14 @@
 #include "sopc_address_space_utils_internal.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
+#include "sopc_builtintypes.h"
 #include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_helper_statuscodes.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_missing_c99.h"
 #include "sopc_node_mgt_helper_internal.h"
 #include "sopc_toolkit_config_constants.h"
 
@@ -479,36 +483,66 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addS
 
     if (NULL != optStatus)
     {
-        bool res = SOPC_AddressSpace_Set_StatusCode(addSpaceAccess->addSpaceRef, node, *optStatus);
-        if (!res)
+        if (!SOPC_AddressSpace_AreReadOnlyNodes(addSpaceAccess->addSpaceRef))
         {
-            return OpcUa_BadWriteNotSupported;
+            bool res = SOPC_AddressSpace_Set_StatusCode(addSpaceAccess->addSpaceRef, node, *optStatus);
+            if (!res)
+            {
+                return OpcUa_BadWriteNotSupported;
+            }
         }
+        else if (SOPC_GoodGenericStatus != optStatus)
+        {
+            char* statusStr = SOPC_StatusCodeToStringAlloc(*optStatus);
+            char* nodeIdStr = SOPC_NodeId_ToCString(nodeId);
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "AddressSpaceAccess_WriteValue: StatusCode %s write on NodeId=%s inhibited due to "
+                                     "constant metadata in address space.",
+                                     statusStr, nodeIdStr);
+            SOPC_Free(nodeIdStr);
+            SOPC_Free(statusStr);
+        } // else: ignore since Good is already default value for constant address space
     }
 
     if (NULL != optSourceTimestamp)
     {
-        SOPC_Value_Timestamp newSourceTs;
-        newSourceTs.timestamp = *optSourceTimestamp;
-        if (NULL != optSourcePicoSeconds)
+        if (!SOPC_AddressSpace_AreReadOnlyNodes(addSpaceAccess->addSpaceRef))
         {
-            newSourceTs.picoSeconds = *optSourcePicoSeconds;
+            SOPC_Value_Timestamp newSourceTs;
+            newSourceTs.timestamp = *optSourceTimestamp;
+            if (NULL != optSourcePicoSeconds)
+            {
+                newSourceTs.picoSeconds = *optSourcePicoSeconds;
+            }
+            else
+            {
+                newSourceTs.picoSeconds = 0;
+            }
+            // If both defined to 0, set current time as source
+            if (0 == newSourceTs.timestamp && 0 == newSourceTs.picoSeconds)
+            {
+                newSourceTs.timestamp = SOPC_Time_GetCurrentTimeUTC();
+            }
+            bool res = SOPC_AddressSpace_Set_SourceTs(addSpaceAccess->addSpaceRef, node, newSourceTs);
+            if (!res)
+            {
+                // Note: no need to restore StatusCode, if address space was read only it shall have failed when setting
+                // it.
+                return OpcUa_BadWriteNotSupported;
+            }
         }
-        else
+        else if (*optSourceTimestamp != 0 || *optSourcePicoSeconds != 0)
         {
-            newSourceTs.picoSeconds = 0;
-        }
-        // If both defined to 0, set current time as source
-        if (0 == newSourceTs.timestamp && 0 == newSourceTs.picoSeconds)
-        {
-            newSourceTs.timestamp = SOPC_Time_GetCurrentTimeUTC();
-        }
-        bool res = SOPC_AddressSpace_Set_SourceTs(addSpaceAccess->addSpaceRef, node, newSourceTs);
-        if (!res)
-        {
-            // Note: no need to restore StatusCode, if address space was read only it shall have failed when setting it.
-            return OpcUa_BadWriteNotSupported;
-        }
+            char* nodeIdStr = SOPC_NodeId_ToCString(nodeId);
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "AddressSpaceAccess_WriteValue: TimeStamp %" PRIi64
+                                     " write on NodeId=%s inhibited due to "
+                                     "constant metadata in address space.",
+                                     *optSourceTimestamp, nodeIdStr);
+            SOPC_Free(nodeIdStr);
+
+        } // else: ignore since current TS is not really set by caller
+          //       (only asking for current TS which will be returned at runtime)
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
