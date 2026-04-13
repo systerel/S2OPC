@@ -21,6 +21,14 @@
 # Checks license is present as expected in the header of the source code files
 # of the project.
 
+# Build a set of git-tracked files for fast lookup
+GIT_TRACKED_FILES=$(git ls-files)
+
+# Helper: check if a file is tracked by git
+is_git_tracked() {
+    echo "$GIT_TRACKED_FILES" | grep -qxF "$1"
+}
+
 # Create temporary files
 # Helper script holds the head | diff, so that its compatible with find | xargs
 HELPER_SCRIPT=$(mktemp)
@@ -151,6 +159,17 @@ echo '# Licensed to Systerel under one or more contributor license
 # under the License.
 ' > $HEADER_DEFS
 
+# Helper: filter a list of files (NUL-separated on stdin) to only git-tracked ones
+filter_tracked() {
+    while IFS= read -r -d '' file; do
+        # Strip leading ./ for comparison with git ls-files output
+        normalized="${file#./}"
+        if echo "$GIT_TRACKED_FILES" | grep -qxF "$normalized"; then
+            printf '%s\0' "$file"
+        fi
+    done
+}
+
 # Do the finds
 err=0
 # Exclude some files
@@ -173,20 +192,20 @@ for f in $exclusions; do
     mv $f $f"_"
 done
 
-find src tests -name "*.[hc]" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+find src tests -name "*.[hc]" -print0 | filter_tracked | xargs -0 -r -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
 
 for f in $exclusions; do
     mv $f"_" $f
 done
 
-find bsrc -maxdepth 1 -name "*.[im]??" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
-find bsrc -maxdepth 1 -name "*.pmm" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
-find bsrc -maxdepth 1 -name "*.ref" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
-find . -name "*.py" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_PY || { echo 'Expected header:' ; cat $HEADER_PY ; err=1 ; }
-find . -name "*.sh" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_SH || { echo 'Expected header:' ; cat $HEADER_SH ; err=1 ; }
-find . -type f -name "make-*" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_SH || { echo 'Expected header:' ; cat $HEADER_SH ; err=1 ; }
-find . -name "*.xsl" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_XSL || { echo 'Expected header:' ; cat $HEADER_XSL ; err=1 ; }
-find . -name "*.defs" -print0 | xargs -0 -n 1 $HELPER_SCRIPT $HEADER_DEFS || { echo 'Expected header: '; cat $HEADER_DEFS ; err=1 ; }
+find bsrc -maxdepth 1 -name "*.[im]??" -print0 | filter_tracked | xargs -0 -r -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+find bsrc -maxdepth 1 -name "*.pmm" -print0 | filter_tracked | xargs -0 -r -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+find bsrc -maxdepth 1 -name "*.ref" -print0 | filter_tracked | xargs -0 -r -n 1 $HELPER_SCRIPT $HEADER_C || { echo 'Expected header:' ; cat $HEADER_C ; err=1 ; }
+find . -name "*.py"   -print0 | filter_tracked | xargs -0 -r -n 1 $HELPER_SCRIPT $HEADER_PY   || { echo 'Expected header:' ; cat $HEADER_PY  ; err=1 ; }
+find . -name "*.sh"   -print0 | filter_tracked | xargs -0 -r -n 1 $HELPER_SCRIPT $HEADER_SH   || { echo 'Expected header:' ; cat $HEADER_SH  ; err=1 ; }
+find . -type f -name "make-*" -print0 | filter_tracked | xargs -0 -r -n 1 $HELPER_SCRIPT $HEADER_SH  || { echo 'Expected header:' ; cat $HEADER_SH  ; err=1 ; }
+find . -name "*.xsl"  -print0 | filter_tracked | xargs -0 -r -n 1 $HELPER_SCRIPT $HEADER_XSL  || { echo 'Expected header:' ; cat $HEADER_XSL ; err=1 ; }
+find . -name "*.defs" -print0 | filter_tracked | xargs -0 -r -n 1 $HELPER_SCRIPT $HEADER_DEFS || { echo 'Expected header: '; cat $HEADER_DEFS ; err=1 ; }
 diff -q LICENSE src/ClientServer/frontend/pys2opc/LICENSE || { echo 'src/ClientServer/frontend/pys2opc/LICENSE is not up-to-date with expected LICENSE: '; cat LICENSE ; err=1 ; }
 diff -q NOTICE src/ClientServer/frontend/pys2opc/NOTICE || { echo 'src/ClientServer/frontend/pys2opc/NOTICE is not up-to-date with expected NOTICE: '; cat NOTICE ; err=1 ; }
 
