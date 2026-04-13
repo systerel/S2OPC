@@ -28,15 +28,17 @@
 #else
 #  include <mbedtls/config.h>
 #endif
-#include <mbedtls/memory_buffer_alloc.h>
-#include <mbedtls/threading.h>
 
-#ifndef MBEDTLS_HEAP_SIZE
-#error "MBEDTLS_HEAP_SIZE must be defined by the active Mbed TLS configuration"
+#if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
+#include <mbedtls/memory_buffer_alloc.h>
 #endif
 
-#ifndef MBEDTLS_HEAP_SECTION
-#define MBEDTLS_HEAP_SECTION
+#if defined(MBEDTLS_THREADING_C) && defined(MBEDTLS_THREADING_ALT)
+#include <mbedtls/threading.h>
+#endif
+
+#if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C) && !defined(MBEDTLS_HEAP_SIZE)
+#define MBEDTLS_HEAP_SIZE (64U * 1024U)
 #endif
 
 /*
@@ -50,8 +52,12 @@
 #define MBEDTLS_HEAP_SECTION __attribute__((section(CONFIG_SOPC_ALLOC_SECTION)))
 #endif
 
+#if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
 MBEDTLS_HEAP_SECTION static unsigned char _mbedtls_heap[MBEDTLS_HEAP_SIZE];
+#endif
 
+
+#if defined(MBEDTLS_THREADING_C) && defined(MBEDTLS_THREADING_ALT)
 static void mutex_init(mbedtls_threading_mutex_t* pMutex)
 {
     SOPC_Mutex_Initialization(pMutex);
@@ -73,9 +79,14 @@ static int mutex_unlock(mbedtls_threading_mutex_t* pMutex)
     int res_lock = SOPC_Mutex_Unlock(pMutex);
     return (int) res_lock;
 }
+#endif
 
 void tls_threading_initialize(void)
 {
+    #if defined(MBEDTLS_THREADING_C) && defined(MBEDTLS_THREADING_ALT)
     mbedtls_threading_set_alt(mutex_init, mutex_free, mutex_lock, mutex_unlock);
+    #endif
+    #if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
     mbedtls_memory_buffer_alloc_init(_mbedtls_heap, sizeof(_mbedtls_heap));
+    #endif
 }
