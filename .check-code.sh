@@ -37,6 +37,9 @@ DEMO=samples
 EXITCODE=0
 LOGPATH=$(pwd)/pre-build-check.log
 
+# Array to collect all failure reasons
+FAILURES=()
+
 # Redirect all output and errors to log file
 echo "Pre-build-check log" > $LOGPATH
 
@@ -46,14 +49,20 @@ ifs_save=$IFS
 IFS=$'\n'
 LIST_CONTRIB=(`git log --format="%an <%ae>" | sort -u`)
 
+MISSING_CONTRIBS=()
 for contrib in ${LIST_CONTRIB[*]}
 do
     grep $contrib Contributors.md &> /dev/null
     if [[ $? != 0 ]]; then
         echo "ERROR: contributor not declared: $contrib" | tee -a $LOGPATH
+        MISSING_CONTRIBS+=("$contrib")
         EXITCODE=1
     fi
 done
+
+if [[ ${#MISSING_CONTRIBS[@]} -gt 0 ]]; then
+    FAILURES+=("Contributors not declared in Contributors.md: ${MISSING_CONTRIBS[*]}")
+fi
 
 IFS=$ifs_save
 
@@ -79,7 +88,11 @@ do
 		CHECK_CERT_RULE_ABSENCE_FAILED=true
 	fi
 done
-$CHECK_CERT_RULE_ABSENCE_FAILED && EXITCODE=1 && echo "ERROR: checking absence of functions or headers: $CHECK_CERT_RULE_ABSENCE" | tee -a $LOGPATH
+if $CHECK_CERT_RULE_ABSENCE_FAILED; then
+    EXITCODE=1
+    FAILURES+=("Forbidden CERT functions/headers found in sources: $CHECK_CERT_RULE_ABSENCE")
+    echo "ERROR: checking absence of functions or headers: $CHECK_CERT_RULE_ABSENCE" | tee -a $LOGPATH
+fi
 
 CHECK_DIRECT_ABSENCE_FAILED=false
 CHECK_DIRECT_ABSENCE="(printf)"
@@ -102,7 +115,11 @@ do
 	fi
 done
 
-$CHECK_DIRECT_ABSENCE_FAILED && EXITCODE=1 && echo "ERROR: checking absence of functions or headers: $CHECK_DIRECT_ABSENCE" | tee -a $LOGPATH
+if $CHECK_DIRECT_ABSENCE_FAILED; then
+    EXITCODE=1
+    FAILURES+=("Forbidden direct functions found in sources: $CHECK_DIRECT_ABSENCE")
+    echo "ERROR: checking absence of functions or headers: $CHECK_DIRECT_ABSENCE" | tee -a $LOGPATH
+fi
 
 #### Additionnal check for function, where we want to ensure that there is no false detection due to common wording.
 CHECK_ABSENCE='(\bassert *[\(])'
@@ -113,6 +130,7 @@ if [[ $? != 0 ]]; then
     echo "ERROR: checking absence of functions: $CHECK_ABSENCE" | tee -a $LOGPATH
     find $CSRC -name "*.c" -or -name "*.h" | xargs grep -nE "$CHECK_ABSENCE" | tee -a $LOGPATH
     EXITCODE=1
+    FAILURES+=("Forbidden 'assert()' calls found in sources")
 fi
 
 CHECK_STD_MEM_ALLOC_ABSENCE="(\bfree\b\(|\bmalloc\b\(|\bcalloc\b\(|\brealloc\b\(|=.*\bfree\b|=.*\bmalloc\b|=.*\bcalloc\b|=.*\brealloc\b)"
@@ -120,21 +138,24 @@ EXCLUDE_STD_MEM_IMPLEM="*\/p_sopc_mem_alloc.c"
 
 find $CSRC -not -path $EXCLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
 if [[ $? != 0 ]]; then
-    echo "ERROR: checking absence of std library use for memory allocation in tookit" | tee -a $LOGPATH
+    echo "ERROR: checking absence of std library use for memory allocation in toolkit" | tee -a $LOGPATH
     find $CSRC -not -path $EXCLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
     EXITCODE=1
+    FAILURES+=("Standard memory allocation functions (malloc/free/...) used in toolkit sources")
 fi
 find $TST -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
 if [[ $? != 0 ]]; then
     echo "ERROR: checking absence of std library use for memory allocation in tests" | tee -a $LOGPATH
     find $TST -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
     EXITCODE=1
+    FAILURES+=("Standard memory allocation functions (malloc/free/...) used in test sources")
 fi
 find $DEMO -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
 if [[ $? != 0 ]]; then
-    echo "ERROR: checking absence of std library use for memory allocation in tests" | tee -a $LOGPATH
+    echo "ERROR: checking absence of std library use for memory allocation in samples" | tee -a $LOGPATH
     find $DEMO -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
     EXITCODE=1
+    FAILURES+=("Standard memory allocation functions (malloc/free/...) used in sample sources")
 fi
 
 #### Clang static analyzer ####
@@ -175,14 +196,15 @@ if [[ $? != 0 ]]; then
     # Note: for default checks the scan-build tool can be use to build the project (scan-build ./build.sh).
     #       It generates an HTML report providing diagnostics of the warning
     EXITCODE=1
+    FAILURES+=("clang-tidy reported violations for CERT rules: $CERT_RULES (see $CLANG_TIDY_LOG)")
 else
     \rm $CLANG_TIDY_LOG
 fi
 
 # Remove static analysis build since it is not necessary anymore
 if [[ $STATIC_ANALYSIS_STATUS != 0 ]]; then
-    # Do not remove in case of analysis failure
     EXITCODE=1
+    FAILURES+=("Clang static analyzer reported errors (build-analyzer directory preserved for inspection)")
 else
     rm -fr build-analyzer
 fi
@@ -199,12 +221,7 @@ else
     echo "ERROR: C source code code formatting not done or not committed" | tee -a $LOGPATH
     git diff | tee -a $LOGPATH
     EXITCODE=1
-fi
-
-if [[ $EXITCODE -eq 0 ]]; then
-    echo "Completed with SUCCESS" | tee -a $LOGPATH
-else
-    echo "Completed with ERRORS" | tee -a $LOGPATH
+    FAILURES+=("clang-format found unformatted or uncommitted files: $ALREADY_FORMAT")
 fi
 
 #### Check license in files ####
@@ -215,14 +232,25 @@ echo "License in files verification" | tee -a $LOGPATH
 if [[ $? != 0 ]]; then
     echo "ERROR: license in files verification failed, see $LOGPATH" | tee -a $LOGPATH
     EXITCODE=1
+    FAILURES+=("License header missing or invalid in one or more files (see $LOGPATH)")
 fi
 
-#### Check final result:
+#### Final summary ####
 
+echo "" | tee -a $LOGPATH
+echo "======================================" | tee -a $LOGPATH
 if [[ $EXITCODE -eq 0 ]]; then
-    echo "Completed with SUCCESS" | tee -a $LOGPATH
+    echo "  Pre-build check: COMPLETED WITH SUCCESS" | tee -a $LOGPATH
 else
-    echo "Completed with ERRORS, see $LOGPATH" | tee -a $LOGPATH
+    echo "  Pre-build check: COMPLETED WITH ERRORS" | tee -a $LOGPATH
+    echo "  ${#FAILURES[@]} check(s) failed:" | tee -a $LOGPATH
+    echo "" | tee -a $LOGPATH
+    for i in "${!FAILURES[@]}"; do
+        echo "  [$(( i + 1 ))] ${FAILURES[$i]}" | tee -a $LOGPATH
+    done
+    echo "" | tee -a $LOGPATH
+    echo "  Full details available in: $LOGPATH" | tee -a $LOGPATH
 fi
+echo "======================================" | tee -a $LOGPATH
 
 exit $EXITCODE
