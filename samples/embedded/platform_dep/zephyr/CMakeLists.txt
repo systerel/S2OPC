@@ -61,7 +61,10 @@ add_compile_definitions(
   BUILD_BUILD_DATE=__DATE__" "__TIME__
 )
 
+set(mbedtls_config ${CMAKE_CURRENT_LIST_DIR}/../mbedtls_config)
+
 set(common_include_dirs
+  ${mbedtls_config}
   ${CMAKE_CURRENT_LIST_DIR}/../include
   ${CMAKE_CURRENT_LIST_DIR}/src
   ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -76,8 +79,6 @@ file(GLOB app_sources
 )
 
 if("${CONFIG_SOPC_CRYPTO_LIB_NAME}" STREQUAL "mbedtls")
-  set(mbedtls_config ${CMAKE_CURRENT_LIST_DIR}/../mbedtls_config)
-
   if(EXISTS "${ZEPHYR_BASE}/../modules/mbedtls/configs/config-mbedtls.h")
     set(ZEPHYR_MBEDTLS_CONFIG_DIR "${ZEPHYR_BASE}/../modules/mbedtls/configs")
   elseif(EXISTS "${ZEPHYR_BASE}/modules/mbedtls/configs/config-mbedtls.h")
@@ -88,10 +89,7 @@ if("${CONFIG_SOPC_CRYPTO_LIB_NAME}" STREQUAL "mbedtls")
     message(FATAL_ERROR "config-mbedtls.h introuvable")
   endif()
 
-  zephyr_include_directories(
-    ${mbedtls_config}
-    ${ZEPHYR_MBEDTLS_CONFIG_DIR}
-  )
+  zephyr_include_directories(${ZEPHYR_MBEDTLS_CONFIG_DIR})
 
   if(EXISTS "${ZEPHYR_BASE}/../modules/mbedtls/include")
     zephyr_include_directories("${ZEPHYR_BASE}/../modules/mbedtls/include")
