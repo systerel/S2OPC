@@ -84,7 +84,7 @@ bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
  *
  * @param pubIdLeft publisherId to compare, must NOT be NULL
  * @param pubIdRight publisherId to compare, must NOT be NULL
- * @param comp [OUT] true if their type and value are equal, false otherwise. Must NOT be NULL
+ * @param[out] comp true if their type and value are equal, false otherwise. Must NOT be NULL
  * @return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
  * SOPC_STATUS_NOK in case of unexpected issue
  */
