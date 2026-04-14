@@ -20,13 +20,13 @@
 #include "threading_alt.h"
 
 #if defined(__has_include)
-#  if __has_include(<mbedtls/build_info.h>)
-#    include <mbedtls/build_info.h>
-#  else
-#    include <mbedtls/config.h>
-#  endif
+#if __has_include(<mbedtls/build_info.h>)
+#include <mbedtls/build_info.h>
 #else
-#  include <mbedtls/config.h>
+#include <mbedtls/config.h>
+#endif
+#else
+#include <mbedtls/config.h>
 #endif
 
 #if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
@@ -56,7 +56,6 @@
 MBEDTLS_HEAP_SECTION static unsigned char _mbedtls_heap[MBEDTLS_HEAP_SIZE];
 #endif
 
-
 #if defined(MBEDTLS_THREADING_C) && defined(MBEDTLS_THREADING_ALT)
 static void mutex_init(mbedtls_threading_mutex_t* pMutex)
 {
@@ -83,10 +82,10 @@ static int mutex_unlock(mbedtls_threading_mutex_t* pMutex)
 
 void tls_threading_initialize(void)
 {
-    #if defined(MBEDTLS_THREADING_C) && defined(MBEDTLS_THREADING_ALT)
+#if defined(MBEDTLS_THREADING_C) && defined(MBEDTLS_THREADING_ALT)
     mbedtls_threading_set_alt(mutex_init, mutex_free, mutex_lock, mutex_unlock);
-    #endif
-    #if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
+#endif
+#if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
     mbedtls_memory_buffer_alloc_init(_mbedtls_heap, sizeof(_mbedtls_heap));
-    #endif
+#endif
 }
