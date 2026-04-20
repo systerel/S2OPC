@@ -537,7 +537,7 @@ if (expat_FOUND)
   target_compile_options(toolkit_test_server_restart PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_restart PRIVATE ${S2OPC_DEFINITIONS})
 
-  s2opc_unit_test(toolkit_test_server_restart)
+  s2opc_unit_test(toolkit_test_server_restart GENERATE_TAP)
 
   add_executable(toolkit_test_server_notif_session_events
     "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/toolkit_test_server_notif_session_events.c"
@@ -548,7 +548,7 @@ if (expat_FOUND)
   target_compile_options(toolkit_test_server_notif_session_events PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(toolkit_test_server_notif_session_events PRIVATE ${S2OPC_DEFINITIONS})
 
-  s2opc_unit_test(toolkit_test_server_notif_session_events)
+  s2opc_unit_test(toolkit_test_server_notif_session_events GENERATE_TAP)
 endif()
 
 # Test server SKS
