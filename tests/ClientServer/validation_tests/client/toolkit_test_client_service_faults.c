@@ -25,13 +25,10 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_pki_stack.h"
 
-#include "test_results.h"
-
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
-#include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_threads.h"
 #include "sopc_toolkit_async_api.h"

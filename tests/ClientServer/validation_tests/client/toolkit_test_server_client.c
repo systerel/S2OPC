@@ -31,7 +31,6 @@
 #include "libs2opc_server_config_custom.h"
 
 #include "sopc_assert.h"
-#include "sopc_atomic.h"
 #include "sopc_common_constants.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
@@ -39,8 +38,6 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
-#include "sopc_toolkit_async_api.h"
-#include "sopc_toolkit_config.h"
 #ifdef WITH_EXPAT
 #include "sopc_uanodeset_loader.h"
 #endif
@@ -48,9 +45,6 @@
 #include "opcua_identifiers.h"
 
 #include "embedded/sopc_addspace_loader.h"
-
-#include "test_results.h"
-#include "testlib_read_response.h"
 
 #define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
 
