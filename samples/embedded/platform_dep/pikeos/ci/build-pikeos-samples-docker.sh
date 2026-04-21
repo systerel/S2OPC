@@ -27,15 +27,16 @@ function _help() {
     echo "$1 [--no-tests] [--no-samples] [help]"
     echo "Build the library, samples and test in a context where PikeOS projects are well configured."
     echo ""
-    echo "      help            show this help"
-    echo "      --no-tests      Don't compile unit tests"
-    echo "      --no-samples    Don't compile samples"
+    echo "      help                      show this help"
+    echo "      --no-tests                Don't compile unit tests"
+    echo "      --no-samples              Don't compile samples"
+    echo "      --no-pikeos-integration   Don't compile pikeos integration"
 
 }
 
 BUILD_SAMPLES=true
 BUILD_TESTS=true
-
+PIKEOS_INTEGRATION=true
 while [[ $# -gt 0 ]]; do
     case $1 in
         -- )
@@ -45,6 +46,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-samples )
             BUILD_SAMPLES=false
+            ;;
+        --no-pikeos-integration )
+            PIKEOS_INTEGRATION=false
             ;;
         h| help| -h| --help )
             _help $0
@@ -116,9 +120,11 @@ fi
 
 build_app
 
-if [ "${BUILD_SAMPLES}" = "true" ]; then
-    build_pikeos "cli_pubsub_server" && build_pikeos "cli_client"
-fi
-if [ "${BUILD_TESTS}"  = "true" ]; then
-    build_pikeos "unit_test"
+if [ "${PIKEOS_INTEGRATION}" = "true" ]; then
+    if [ "${BUILD_SAMPLES}" = "true" ]; then
+        build_pikeos "cli_pubsub_server" && build_pikeos "cli_client"
+    fi
+    if [ "${BUILD_TESTS}"  = "true" ]; then
+        build_pikeos "unit_test"
+    fi
 fi

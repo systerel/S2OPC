@@ -433,7 +433,7 @@ build-pikeos:
   needs: []
   variables:
     # default value to change when PikeOS licence is back
-    BUILD_PIKEOS_OPTIONS : '--no-tests --no-samples'
+    BUILD_PIKEOS_OPTIONS : '--no-pikeos-integration'
   script:
     - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh $BUILD_PIKEOS_OPTIONS'
   artifacts:
