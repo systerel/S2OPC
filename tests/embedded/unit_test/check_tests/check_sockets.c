@@ -29,6 +29,7 @@
 #include "sopc_buffer.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"

@@ -576,7 +576,7 @@ void suite_test_server_client(int* index)
     log_config.logSysConfig.userSystemLogConfig.doLog = (SOPC_Log_UserDoLog*) &log_UserCallback;
 
     // Initialize the toolkit library and define the log configuration
-    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config);
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config, NULL);
     PRINT("status = %d\n", status);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     if (SOPC_STATUS_OK == status)
@@ -687,7 +687,7 @@ void suite_test_server_client(int* index)
     SOPC_ClientConfigHelper_Clear();
 
     /* Asynchronous request to close the endpoint */
-    SOPC_ReturnStatus stopStatus = SOPC_ServerHelper_StopServer();
+    SOPC_ServerHelper_StopServer();
 
     /* Clear the server wrapper layer */
     SOPC_ServerConfigHelper_Clear();

@@ -30,6 +30,7 @@
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_sks.h"
+#include "sopc_sk_secu_group_managers.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_threads.h"
 
@@ -269,7 +270,7 @@ void suite_test_publisher_subscriber(int* index)
     P4_prio_t myPriority = 0;
     SOPC_ASSERT(P4_E_OK == p4_thread_get_priority(P4_THREAD_MYSELF, &myPriority));
     int threadPrio = myPriority / 2;
-    bool res = SOPC_PubScheduler_Start(config, sourceConfig, threadPrio);
+    res = SOPC_PubScheduler_Start(config, sourceConfig, threadPrio);
     if (res)
     {
         PRINT("Pub scheduler start\n");

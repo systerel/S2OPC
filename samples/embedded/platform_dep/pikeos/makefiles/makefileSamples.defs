@@ -24,7 +24,7 @@ S2OPC_CLI_PUBSUB_SERVER_DIR = ${S2OPC_PRJ_DIR}/samples/embedded/cli_pubsub_serve
 
 S2OPC_CLI_CLIENT_DIR = ${S2OPC_PRJ_DIR}/samples/embedded/cli_client
 
-CPPFLAGS += -I${S2OPC_PRJ_DIR}/samples/embedded/platform_dep/include -DWITH_USER_ASSERT=1 -DSOPC_PIKEOS=1
+CPPFLAGS += -I${S2OPC_PRJ_DIR}/samples/embedded/platform_dep/include -I${S2OPC_PRJ_DIR}/samples/ClientServer/data/cert -DWITH_USER_ASSERT=1 -DSOPC_PIKEOS=1
 
 S2OPC_SAMPLES_PLATFORMDEP_PIKEOS_OBJ = $(patsubst %.c,%,${wildcard $(S2OPC_SAMPLES_PLATFORMDEP_PIKEOS_DIR)/*.c})
 
