@@ -45,13 +45,17 @@ typedef struct _SOPC_AddressSpaceAccess SOPC_AddressSpaceAccess;
  * \param addSpaceAccess  The AddressSpace Access used for read operation
  * \param nodeId          The NodeId of a node in the AddressSpace
  * \param attribId        The AttributeId to read in the node
- * \param[out] outValue   The pointer in which the Variant containing the read result will be returned
+ * \param[out] outValue   The pointer in which the Variant containing the read result will be returned.
+ *   - It must be pointing to NULL as input parameter.
+ *   - After use, the returned value shall be cleared (SOPC_Variant_Clear) and freed (SOPC_Free) by caller.
  *
  * \return SOPC_GoodGenericStatus in case of success with an allocated \p outValue, otherwise:
  *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
  *         - OpcUa_BadNodeIdUnknown: if provided \p nodeId is not present in AddressSpace
  *         - OpcUa_BadNotImplemented: if the requested attribute is not implemented
  *                                    (it might also be invalid for concerned node in this case)
+ *         - OpcUa_BadDataUnavailable: if the requested \p attribId is not present (typical case of an optional
+ *                                     or unallocated AttributeId)
  *         - OpcUa_BadOutOfMemory: if Variant allocation failed
  *
  * \warning The following attributes are not supported and will lead to return an OpcUa_BadNotImplemented status:
@@ -78,6 +82,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
  * \param optNumRange        (Optional) The numeric range to use to read value, it shall be NULL if no range requested.
  * \param[out] outDataValue  The pointer in which the DataValue containing the read Value result will be returned.
  *                           It contains the Value as a Variant and the associated StatusCode and Source Timestamp.
+ *   - It must be pointing to NULL as input parameter.
+ *   - After use, the returned value shall be cleared (SOPC_DataValue_Clear) and freed (SOPC_Free) by caller.
  *
  * \return SOPC_GoodGenericStatus in case of success with an allocated \p outValue, otherwise:
  *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL except if optional)

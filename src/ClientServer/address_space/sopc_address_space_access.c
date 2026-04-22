@@ -228,7 +228,10 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
         return OpcUa_BadAttributeIdInvalid;
     }
 
+    SOPC_StatusCode status = SOPC_GoodGenericStatus;
     SOPC_Variant* val = NULL;
+    uint32_t* pArrayDimension = NULL;
+
     switch (attribId)
     {
     case SOPC_AttributeId_NodeId:
@@ -237,6 +240,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
                                                     true);
         break;
     case SOPC_AttributeId_NodeClass:
+        // Note: SOPC_AddressSpace_Get_NodeClass never return NULL
         val = util_variant__new_Variant_from_NodeClass(
             *SOPC_AddressSpace_Get_NodeClass(addSpaceAccess->addSpaceRef, node));
         break;
@@ -260,6 +264,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
             util_variant__new_Variant_from_uint32(*SOPC_AddressSpace_Get_WriteMask(addSpaceAccess->addSpaceRef, node));
         break;
     case SOPC_AttributeId_UserWriteMask:
+        // Note: SOPC_AddressSpace_Get_UserWriteMask never returns NULL
         val = util_variant__new_Variant_from_uint32(
             *SOPC_AddressSpace_Get_UserWriteMask(addSpaceAccess->addSpaceRef, node));
         break;
@@ -280,8 +285,15 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
         val = util_variant__new_Variant_from_int32(*SOPC_AddressSpace_Get_ValueRank(addSpaceAccess->addSpaceRef, node));
         break;
     case SOPC_AttributeId_ArrayDimensions:
-        val = util_variant__new_Variant_from_uint32(
-            *SOPC_AddressSpace_Get_ArrayDimensions(addSpaceAccess->addSpaceRef, node));
+        pArrayDimension = SOPC_AddressSpace_Get_ArrayDimensions(addSpaceAccess->addSpaceRef, node);
+        if (NULL == pArrayDimension)
+        {
+            status = OpcUa_BadDataUnavailable;
+        }
+        else
+        {
+            val = util_variant__new_Variant_from_uint32(*pArrayDimension);
+        }
         break;
     case SOPC_AttributeId_AccessLevel:
         val = util_variant__new_Variant_from_Byte(SOPC_AddressSpace_Get_AccessLevel(addSpaceAccess->addSpaceRef, node));
@@ -300,14 +312,17 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
     case SOPC_AttributeId_UserAccessLevel:
     case SOPC_AttributeId_UserExecutable:
     default:
-        return OpcUa_BadNotImplemented;
+        status = OpcUa_BadNotImplemented;
     }
-    *outValue = val;
-    if (NULL == val)
+    if (SOPC_IsGoodStatus(status))
     {
-        return OpcUa_BadOutOfMemory;
+        *outValue = val;
+        if (NULL == val)
+        {
+            status = OpcUa_BadOutOfMemory;
+        }
     }
-    return SOPC_GoodGenericStatus;
+    return status;
 }
 
 SOPC_StatusCode SOPC_AddressSpaceAccess_ReadValue(const SOPC_AddressSpaceAccess* addSpaceAccess,
