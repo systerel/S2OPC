@@ -531,7 +531,7 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addS
                 return OpcUa_BadWriteNotSupported;
             }
         }
-        else if (*optSourceTimestamp != 0 || *optSourcePicoSeconds != 0)
+        else if (*optSourceTimestamp != 0 || (NULL != optSourcePicoSeconds && *optSourcePicoSeconds != 0))
         {
             char* nodeIdStr = SOPC_NodeId_ToCString(nodeId);
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
