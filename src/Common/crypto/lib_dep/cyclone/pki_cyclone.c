@@ -1123,6 +1123,33 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
         failure_reasons = (failure_reasons | (uint32_t) PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED);
     }
 
+    if (pPKI->suppressValidityPeriod)
+    {
+        /* Ignore certificate only if the failure reason is "expired"
+         * For Cyclone, PKI_CYCLONE_X509_BADCERT_EXPIRED could means "expired" or "not valid yet"
+         * Ignore the CRL if the reason is "expired" too
+         *
+         * We decided to accept the CRL even if its validity period is invalid.
+         * A Mantis ticket has been opened to determine the appropriate behavior
+         * for the general case :
+         * https://mantis.opcfoundation.org/view.php?id=11196
+         */
+        uint32_t ignored_reasons =
+            (uint32_t) PKI_CYCLONE_X509_BADCERT_EXPIRED | (uint32_t) PKI_CYCLONE_X509_BADCRL_EXPIRED;
+
+        uint32_t remaining_reasons = failure_reasons & ~ignored_reasons;
+
+        if (0 == remaining_reasons && 0 != failure_reasons)
+        {
+            *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                     "> PKI validation ignored expiration error code %" PRIX32
+                                     " for certificate thumbprint %s",
+                                     *error, thumbprint);
+            failure_reasons = 0;
+        }
+    }
+
     if (0 != failure_reasons)
     {
         *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);

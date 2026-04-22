@@ -739,6 +739,33 @@ static SOPC_ReturnStatus sopc_validate_certificate(
         ret = -1;
         failure_reasons = (failure_reasons | (uint32_t) MBEDTLS_X509_BADCERT_NOT_TRUSTED);
     }
+
+    if (pPKI->suppressValidityPeriod)
+    {
+        /* We decided to accept the CRL even if its validity period is invalid.
+         * A Mantis ticket has been opened to determine the appropriate behavior
+         * for the general case :
+         * https://mantis.opcfoundation.org/view.php?id=11196
+         */
+        uint32_t ignored_reasons = (uint32_t) MBEDTLS_X509_BADCERT_EXPIRED | (uint32_t) MBEDTLS_X509_BADCERT_FUTURE |
+                                   (uint32_t) MBEDTLS_X509_BADCRL_EXPIRED | (uint32_t) MBEDTLS_X509_BADCRL_FUTURE;
+
+        uint32_t remaining_reasons = failure_reasons & ~ignored_reasons;
+
+        /* Ignore certificate and crl only if the failure reason is about time validity */
+        if (0 == remaining_reasons && 0 != failure_reasons)
+        {
+            *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                     "> PKI validation ignored time validity error 0x%" PRIX32 " mapped to 0x%" PRIX32
+                                     " for certificate thumbprint %s",
+                                     failure_reasons, *error, thumbprint);
+
+            failure_reasons = 0;
+            ret = 0;
+        }
+    }
+
     if (0 != ret)
     {
         *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);

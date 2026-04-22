@@ -497,4 +497,22 @@ SOPC_ReturnStatus SOPC_PKIProvider_SetUpdateCb(SOPC_PKIProvider* pPKI,
  */
 void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI);
 
+/**
+ * \brief Suppress or unsuppress verification of the validity period during certificate validation. When suppressed,
+ * certificates and their associated certification chain are accepted even if their validity period has expired or is
+ * not yet valid. This also applies to the associated CRLs.
+ *
+ * \param pPKI The PKI used to validate certificates for which validity period check suppression will be applied
+ * \param isValidityPeriodCheckSuppressed If true, validity period verification is suppressed. Otherwise the
+ *                                        verification will occur.
+ *
+ * \return  SOPC_STATUS_OK on success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p pPKI is NULL
+ *
+ * \warning Disabling validity period verification significantly reduces validation security level.
+ *          This option shall only be used for testing or in controlled environments where the
+ *          security implications are fully understood.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_SuppressValidityPeriodCheck(SOPC_PKIProvider* pPKI,
+                                                               bool isValidityPeriodCheckSuppressed);
+
 #endif /* SOPC_PKI_STACK_H_ */

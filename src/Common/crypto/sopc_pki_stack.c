@@ -1446,6 +1446,7 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
     pPKI->pUpdateCb = NULL;
     pPKI->updateCbParam = 0;
     pPKI->isPermissive = true;
+    pPKI->suppressValidityPeriod = false;
     *ppPKI = pPKI;
     return SOPC_STATUS_OK;
 #endif
@@ -2283,6 +2284,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         pPKI->pUpdateCb = NULL;
         pPKI->updateCbParam = 0;
         pPKI->isPermissive = false;
+        pPKI->suppressValidityPeriod = false;
         *ppPKI = pPKI;
     }
     else
@@ -2301,4 +2303,23 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
 
     return status;
 #endif
+}
+
+SOPC_ReturnStatus SOPC_PKIProvider_SuppressValidityPeriodCheck(SOPC_PKIProvider* pPKI,
+                                                               bool isValidityPeriodCheckSuppressed)
+{
+    if (NULL == pPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    pPKI->suppressValidityPeriod = isValidityPeriodCheckSuppressed;
+
+    mutStatus = SOPC_Mutex_Unlock(&pPKI->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    return SOPC_STATUS_OK;
 }

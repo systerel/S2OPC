@@ -58,6 +58,7 @@ struct SOPC_PKIProvider
     SOPC_PKIProviderUpdateCb* pUpdateCb;  /*!< Pointer to update callback */
     uintptr_t updateCbParam;              /*!< User defined parameter for the update callback */
     bool isPermissive;                    /*!< Define whatever the PKI is permissive (without security)*/
+    bool suppressValidityPeriod;          /*!< Suppress the validity period check in the certificate chain.*/
 };
 
 /**
