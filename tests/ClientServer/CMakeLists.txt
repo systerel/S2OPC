@@ -315,6 +315,21 @@ if (expat_FOUND)
 endif()
 s2opc_unit_test(toolkit_test_server_client)
 
+# Client/Server expired certificate test
+add_executable(toolkit_test_server_client_expired_cert
+  "validation_tests/client/toolkit_test_server_client_expired_cert.c"
+  ${TEST_LIGHT_ADDRESS_SPACE_C}
+  ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+add_dependencies(toolkit_test_server_client_expired_cert make-light-address-space)
+target_link_libraries(toolkit_test_server_client_expired_cert PRIVATE
+  s2opc_clientserver
+  s2opc_clientserver-loader-embedded
+  Check::check)
+target_include_directories(toolkit_test_server_client_expired_cert PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
+target_compile_options(toolkit_test_server_client_expired_cert PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_server_client_expired_cert PRIVATE ${S2OPC_DEFINITIONS})
+s2opc_unit_test(toolkit_test_server_client_expired_cert)
+
 # Server running local services
 add_executable(toolkit_test_server_local_service "validation_tests/server/toolkit_test_server_local_service.c"
   "validation_tests/client/wrap_read.c"
