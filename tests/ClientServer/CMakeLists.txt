@@ -329,6 +329,49 @@ target_include_directories(toolkit_test_server_client_expired_cert PRIVATE ${S2O
 target_compile_options(toolkit_test_server_client_expired_cert PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_server_client_expired_cert PRIVATE ${S2OPC_DEFINITIONS})
 s2opc_unit_test(toolkit_test_server_client_expired_cert)
+add_custom_command(
+    TARGET toolkit_test_server_client_expired_cert POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_private
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_public
+    COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI
+    COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted
+    COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/certs
+    COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/crl
+    COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/issuers
+    COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/issuers/certs
+    COMMAND ${CMAKE_COMMAND} -E make_directory  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/issuers/crl
+
+    # Add S2OPC application test certs in S2OPC_Tests_Expired_Certs_PKI
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/certs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/crl/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/cacrl_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/crl/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/ca_test_cert_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/certs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/ca_test_crl_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/crl/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/ca_for_crl_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/certs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/crl_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/crl/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/int_ca_cert_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/issuers/certs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/int_ca_crl_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/issuers/crl/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/root_ca_cert_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/certs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/root_ca_crl_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/crl/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/root_ca_crl_not_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/crl/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/encrypted_client_4k_key_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/client_4k_cert_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/client_key_by_ca_cert_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/client_cert_by_ca_cert_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/client_key_by_int_cert_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/client_cert_by_int_cert_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/client_4k_key_for_crl_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/client_4k_cert_for_crl_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/client_4k_key_expired_for_crl_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/client_4k_cert_expired_for_crl_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/self-signed/ca_selfsigned_pathLen0key_expired.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/self-signed/ca_selfsigned_pathLen0_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/self-signed/ca_selfsigned_pathLen0key_expired_caFalse.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_private/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/self-signed/ca_selfsigned_pathLen0_expired_caFalse.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_expired_client_certs/client_public/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/self-signed/ca_selfsigned_pathLen0_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/certs/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/self-signed/ca_selfsigned_pathLen0_expired_caFalse.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/certs/
+)
 
 # Server running local services
 add_executable(toolkit_test_server_local_service "validation_tests/server/toolkit_test_server_local_service.c"

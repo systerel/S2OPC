@@ -1,0 +1,15 @@
+This directory contains all the client certificates, CAs and CRLs used by the 'toolkit_test_server_client_expired_cert' binary.
+It is used to validate the behavior of S2OPC when handling expired certificates under different scenarios:
+	- Expired client certificate
+	- Expired CA (root or intermediate)
+	- Self-signed certificates (CA=true / CA=false depending on backend support)
+	- Expired CRLs
+
+To generate expired certificates, follow this approach:
+	1. Set a very short validity period in the .cnf file (e.g. 1 day)
+	2. Change your system date to the past (e.g. 2 days earlier)
+	3. Generate the certificate (CA or client) using the generate_certs.sh script
+	4. Restore the correct system date
+→ The certificate is now considered expired and can be used for testing.
+
+To generate expired CRLs, you can follow the same approach as for expired certificates, but use the generate_selfsigned_cert.sh instead.
