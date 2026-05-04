@@ -1086,8 +1086,6 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(const SOPC_Certific
     return status;
 }
 
-#if MBEDTLS_CAN_RESOLVE_HOSTNAME
-
 static void sopc_free_c_string_from_ptr(void* data)
 {
     if (NULL != data)
@@ -1188,21 +1186,6 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsNames(const SOPC_Certific
 
     return status;
 }
-#else
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsName(const SOPC_CertificateList* pCert,
-                                                            char*** ppDnsNameArray,
-                                                            uint32_t* pArrayLength)
-{
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(ppDnsNameArray);
-    SOPC_UNUSED_ARG(pArrayLength);
-    /* Not implemented in version prior to 2.28.0 */
-    SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                           "mbedtls_x509_parse_subject_alt_name is not implemented in version %d.%d.%d of MbedTLS",
-                           MBEDTLS_VERSION_MAJOR, MBEDTLS_VERSION_MINOR, MBEDTLS_VERSION_PATCH);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-#endif /* MBEDTLS_CAN_RESOLVE_HOSTNAME */
 
 /* Creates a new string: free the result */
 static char* get_raw_sha1(const mbedtls_x509_buf* raw)

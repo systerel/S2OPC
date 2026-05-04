@@ -400,7 +400,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pTo
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-#if MBEDTLS_CAN_RESOLVE_HOSTNAME
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
     if (NULL == thumbprint)
@@ -487,14 +486,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pTo
     SOPC_Free(pHostName);
     SOPC_Free(pPort);
     SOPC_Free(thumbprint);
-#else
-    /* Not implemented in version prior to 2.28.0 */
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
-                             "> PKI validation skipped as mbedtls_x509_parse_subject_alt_name is not implemented in "
-                             "version %d.%d.%d of MbedTLS",
-                             MBEDTLS_VERSION_MAJOR, MBEDTLS_VERSION_MINOR, MBEDTLS_VERSION_PATCH);
-#endif
+
     return status;
 }
 
