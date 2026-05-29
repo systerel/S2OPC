@@ -66,14 +66,15 @@
 #if S2OPC_CRYPTO_MBEDTLS
 #include "entropy_poll.h"
 #include "sopc_mbedtls_config.h"
+#include "threading_alt.h"
 
 #if defined SDK_PROVIDER_NXP
 #include "mbedtls/entropy.h"
 
 #elif defined SDK_PROVIDER_STM
+#include "entropy_poll.h"
 #include "mbedtls.h"
 #include "mbedtls/entropy.h"
-#include "mbedtls/entropy_poll.h"
 #else
 #error "Unsuported or Undefined SDK provider"
 #endif // SDK_PROVIDER
@@ -229,9 +230,11 @@ void SOPC_Platform_Setup(void)
 #endif // SDK_PROVIDER
     PRINTF("************************************************\n");
 
+#if S2OPC_CRYPTO_MBEDTLS
     PRINTF(" Initializing MbedTLS\n");
     //    MX_MBEDTLS_Init(); / Already done by generated main
-
+    tls_threading_initialize();
+#endif
     PRINTF(" Call command \"help\" to get help about usage of this sample \n");
 }
 
