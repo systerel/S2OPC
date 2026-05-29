@@ -134,11 +134,11 @@ C_OPT_CPU="-mcpu=${BOARD_CPU} -mfpu=${BOARD_FPU} -mfloat-abi=hard -mthumb"
 C_OPT_CSTD="-std=gnu11 "
 C_OPT_SPECS="--specs=nano.specs "
 C_OPT_F="-ffunction-sections -fdata-sections -fstack-usage"
-C_DEFS="-DUSE_HAL_DRIVER -D${BOARD_HAL} "
+C_DEFS="-DUSE_HAL_DRIVER -D${BOARD_HAL}"
 C_DEFS+=" -DSOPC_MAX_SESSION_SUBSCRIPTIONS=3 -DSOPC_MAX_SECURE_CONNECTIONS=6 -DSOPC_MAX_SOCKETS=10 -DSOPC_MAX_SESSIONS=5"
-[ $OPT_CRYPTO = "mbedtls" ] && C_DEFS+=" -DMBEDTLS_CONFIG_FILE=\"mbedtls_config.h\""
 C_DEFS+=" -D_RETARGETABLE_LOCKING=1" # Necessary since configuration differs in newlib.h
-C_INCS="-I../Core/Inc -I../Drivers/${BOARD_HAL_Driver}_HAL_Driver/Inc -I../Drivers/${BOARD_HAL_Driver}_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/${BOARD_HAL_Driver}/Include"
+[ $OPT_CRYPTO = "mbedtls" ] && C_DEFS+=" -DS2OPC_CRYPTO_MBEDTLS=1"
+C_INCS="-I../Core/Inc -I../Drivers/${BOARD_HAL_Driver}_HAL_Driver/Inc -I../Drivers/${BOARD_HAL_Driver}_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/${BOARD_HAL_Driver}/Include -I../Drivers/CMSIS/RTOS2/Include"
 C_INCS+=" -I../Drivers/CMSIS/Include -I../Core/Src/sopc/sample_inc -I../LWIP/App -I../LWIP/Target -I../Middlewares/Third_Party/LwIP/src/include"
 C_INCS+=" -I../Middlewares/Third_Party/LwIP/system -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2"
 C_INCS+=" -I../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F -I../Drivers/BSP/Components/${BOARD_LAN} -I../Middlewares/Third_Party/LwIP/src/include/netif/ppp"
@@ -147,7 +147,7 @@ C_INCS+=" -I../Middlewares/Third_Party/LwIP/src/include/lwip/priv -I../Middlewar
 C_INCS+=" -I../Middlewares/Third_Party/LwIP/src/include/compat/posix -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/arpa"
 C_INCS+=" -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/net -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/sys"
 C_INCS+=" -I../Middlewares/Third_Party/LwIP/src/include/compat/stdc -I../Middlewares/Third_Party/LwIP/system/arch"
-[ $OPT_CRYPTO = "mbedtls" ] && C_INCS+=" -I../MBEDTLS/App -I../Middlewares/Third_Party/mbedTLS/include/mbedtls -I../Middlewares/Third_Party/mbedTLS/include"
+[ $OPT_CRYPTO = "mbedtls" ] && C_INCS+=" -I../Middlewares/Third_Party/mbedTLS/include/mbedtls -I../Middlewares/Third_Party/mbedTLS/include -I../Middlewares/Third_Party/mbedTLS/library"
 C_DEFS+=" -include../Core/Src/sopc/sample_inc/${BOARD}.h "
 
 function build_c_file() {

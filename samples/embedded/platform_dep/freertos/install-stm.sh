@@ -85,35 +85,30 @@ sed -i 's/^.*USER CODE BEGIN 5.*$/  extern void sopc_main_entry\(void *\); sopc_
 # unix2dos.exe ${FILE-} >/dev/null 2>/dev/null  ## Only used to avoid EOL issue if needed on Windows
 echo "[II] Main entry patched to call S2OPC code"
 
-# Patch freertos hooks
-FILE=${FREERTOS_CORE_DIR-}/Src/freertos.c 
-sed -i 's/\bvApplicationTickHook\b/__vApplicationTickHook__/g' ${FILE-}
-echo "[II] FreeRTOS hooks patched for 'vApplicationTickHook'"
-sed -i 's/\bvApplicationStackOverflowHook\b/__vApplicationStackOverflowHook__/g'  ${FILE-}
-# unix2dos.exe ${FILE-} >/dev/null 2>/dev/null  ## Only used to avoid EOL issue if needed on Windows
-echo "[II] FreeRTOS hooks patched for 'vApplicationStackOverflowHook'"
-
 if [ ${OPT_CRYPTO} == "mbedtls" ]; then
-
-    # Patch mbedtls_hardware_poll
-    # Patch:
-    # -      memset(&(Output[index * 4]), (int)randomValue, 4);
-    # +      memcpy(&(Output[index * 4]), &(int)randomValue, 4);
-    FILE=${FREERTOS_CORE_DIR-}/../MBEDTLS/Target/hardware_rng.c
-    sed -i 's/memset\((&(Output\[index[^,]*, *\)(int)\(randomValue\)/memcpy\1\&\2/g' ${FILE-}
-    # unix2dos.exe ${FILE-} >/dev/null 2>/dev/null  ## Only used to avoid EOL issue if needed on Windows
-    echo "[II] '`basename ${FILE-}`' bug patched for 'mbedtls_hardware_poll'"
-
+    # install Mbedtls version 3.6.6 if not already installed
+    if [ ! -d "${FREERTOS_CORE_DIR}/../Middlewares/Third_Party/mbedTLS" ]; then
+        version=3.6.6
+        archiveSha256=8fb65fae8dcae5840f793c0a334860a411f884cc537ea290ce1c52bb64ca007a
+        wget https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${version}/mbedtls-${version}.tar.bz2 -O mbedtls-${version}.tar.bz2
+        # check sha of received archive
+        echo "${archiveSha256} mbedtls-${version}.tar.bz2" | sha256sum --status --check || exit 1
+        tar xvjf mbedtls-${version}.tar.bz2
+        mkdir ${FREERTOS_CORE_DIR-}/../Middlewares/Third_Party/mbedTLS
+        # Only keep library code
+        cp -r mbedtls-${version}/include mbedtls-${version}/library ${FREERTOS_CORE_DIR-}/../Middlewares/Third_Party/mbedTLS
+        rm -r mbedtls-${version}.tar.bz2 mbedtls-${version}
+        echo "[II] Mbedtls ${version} installed"
+    fi
+    # Specific target
+    cp -r ${S2OPC_SAMPLE-}/platform_dep/freertos/st/* ${SRC_DIR-}/sample_src
+    echo "[II] Mbedtls Target specific implementation installed"
 fi
 
 if [ ${OPT_CRYPTO} != "mbedtls" ]; then
-    FILE=${FREERTOS_CORE_DIR-}/Src/main.c
-    sed -i 's/^[ \t]*#include[ \t]*"mbedtls\.h"/\/\/&/' ${FILE-}
-    sed -i 's/^[ \t]*MX_MBEDTLS_Init();/\/\/&/' ${FILE-}
     rm -rf ${FREERTOS_CORE_DIR}/../MBEDTLS ${FREERTOS_CORE_DIR}/../Middlewares/Third_Party/mbedTLS
-    echo "[II] '`basename ${FILE-}`' patched to remove mbedtls"
+    echo "[II] Remove MbedTLS source"
 fi
-
 
 # Patch ETH MAC filter
 # Replace 
@@ -129,31 +124,4 @@ sed -i 's/^\( *ETH_MACDMAConfig(heth); *\)$/\1 extern void SOPC_ETH_MAC_Filter_C
 ! grep -q '^ *ETH_MACDMAConfig(heth); *extern void' ${FILE-} && echo "[II] '`basename ${FILE-}`' patched failed for 'ETH MAC filter'"  && exit 1
 unix2dos.exe ${FILE-} >/dev/null 2>/dev/null
 echo "[II] '`basename ${FILE-}`' patched for 'ETH MAC filter'"
-
-
-# mbedtls_sha512_finish_ret's output parameter is declared as a 64-byte buffer, but sice we're using SHA-384, we know that the
-# output fits in 48 bytes. This is correct C, but GCC warns about it. https://github.com/Mbed-TLS/mbedtls/pull/4493
-SSL_TLS_C=${FREERTOS_CORE_DIR-}/../Middlewares/Third_Party/mbedTLS/library/ssl_tls.c
-if [ ${OPT_CRYPTO} == "mbedtls" ]; then
-echo "[II] '`basename ${SSL_TLS_C-}`' patched for 'mbedtls_sha512_finish_ret'"
-sed -i '/^[[:space:]]*mbedtls_sha512_finish_ret( &sha512, padbuf );[[:space:]]*$/c\
-#pragma GCC diagnostic push\
-#pragma GCC diagnostic ignored "-Wstringop-overflow"\
-    mbedtls_sha512_finish_ret( &sha512, padbuf );\
-#pragma GCC diagnostic pop' ${SSL_TLS_C}
-fi
-
-# Patches below are not used anymore since this is in USER BEGIN/END tags (not lost when regenerating code from STMCube Ide)
-# This is kept for traceability of updates in environments
-
-#sed -i 's/configUSE_TICK_HOOK *0/configUSE_TICK_HOOK 1/g' ${FREERTOS_CORE_DIR-}/Inc/FreeRTOSConfig.h 
-#echo "[II] Patched configUSE_TICK_HOOK for FreeRTOS options"
-
-# Patch LWIP_RAM_HEAP_POINTER for LwIP opts (https://github.com/STMicroelectronics/STM32CubeF4/issues/123)
-# now useless since MEM_LIBC_MALLOC is used and no more LWIP specific Malloc exists
-# f=$(find $(dirname ${FREERTOS_CORE_DIR-}) -name 'lwipopts.h')
-#! [ -f "$f" ] && echo "could not find 'lwipopts.h'" && exit 20
-#sed -i 's/^\( *#define LWIP_RAM_HEAP_POINTER\)/\/\/\1/g' "${f-}]f"
-#echo "[II] LWIP_RAM_HEAP_POINTER patched in LwIP_opts"
-
 

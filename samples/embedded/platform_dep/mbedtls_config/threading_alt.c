@@ -19,6 +19,9 @@
 
 #include "threading_alt.h"
 
+// Must be included first
+#include "config_custom_mbedtls.h"
+
 #if defined(__has_include)
 #if __has_include(<mbedtls/build_info.h>)
 #include <mbedtls/build_info.h>

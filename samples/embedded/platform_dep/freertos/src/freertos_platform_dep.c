@@ -72,8 +72,6 @@
 #include "mbedtls/entropy.h"
 
 #elif defined SDK_PROVIDER_STM
-#include "entropy_poll.h"
-#include "mbedtls.h"
 #include "mbedtls/entropy.h"
 #else
 #error "Unsuported or Undefined SDK provider"
