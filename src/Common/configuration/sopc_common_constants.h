@@ -97,8 +97,8 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #define SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS 5
 #endif /* SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS */
 
-/** \brief Maximum message length accepted in reception (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
- *  Note: if 0 is chosen SOPC_RECEIVE_MAX_NB_CHUNKS shall not be 0.
+/** \brief Maximum message length accepted in reception (must be >= SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE), 0 means no
+ * limit. Note: if 0 is chosen SOPC_RECEIVE_MAX_NB_CHUNKS shall not be 0.
  * */
 #ifndef SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH
 #define SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE* SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS
@@ -111,7 +111,7 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #define SOPC_DEFAULT_SEND_MAX_NB_CHUNKS 12
 #endif /* SOPC_DEFAULT_SEND_MAX_NB_CHUNKS */
 
-/** \brief Maximum message length sent (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
+/** \brief Maximum message length sent (must be >= SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
  *  Note: if 0 is chosen SOPC_SEND_MAX_NB_CHUNKS shall not be 0.
  * */
 #ifndef SOPC_DEFAULT_SEND_MAX_MESSAGE_LENGTH
