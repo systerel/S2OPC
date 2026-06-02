@@ -63,6 +63,8 @@ BIN_PATH=
 BOARD=
 APP=
 
+[[ $# -lt 2 ]] && _help &&  exit 1
+
 [[ $1 == --* ]] || { export BOARD=$1; shift;}
 [[ $1 == --* ]] || { export APP=$1; shift;}
 

@@ -26,17 +26,20 @@ function _help() {
     echo "Usage: $1 [--help] [-it] [-a <APPLICATION>] [-b <BOARD>] [--ip <IP_ADDRESS>] -- [any options to pass to build script]"
     echo "    -it : Start the docker in interactive mode rather than building the sample"
     echo "    -a <APPLICATION> : Select the application to build, following values accepected [cli_client| cli_pubsub_server]"
-    echo "    -b <BOARD> : Select the target board, in the case of this demo only nucleo_h723zg is supported"
+    echo "    -b <BOARD> : Select the target board, in the case of this demo only NUCLEO-H723ZG is supported"
     echo "    --ip <IP_ADDRESS> : Configure the IP_ADDRESS of the ethernet interface"
+    echo "    --nocrypto : Use nocrypto library instead of MbedTLS"
     echo "Example:"
-    echo "     $1 -- --nocrypto"
+    echo "     $1 --nocrypto"
 }
-GET_APP=
-GET_BOARD=
+GET_APP=cli_pubsub_server # Set a default application
+GET_BOARD=NUCLEO-H723ZG # Set a default board
 OPT_ADD=
 OPT_IT=
+OPT_CRYPTO=
 OPT_IP_ADDRESS=
 OPT_EXEC=/sopc/samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh
+
 while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
 shift
@@ -45,6 +48,7 @@ shift
 [[ ${PARAM} == "-b" ]] && GET_BOARD=$1 && shift && continue
 [[ ${PARAM} == "-a" ]] && GET_APP=$1 && shift && continue
 [[ ${PARAM} == "--ip" ]] && OPT_IP_ADDRESS="--ip $1" && shift && continue
+[[ ${PARAM} == "--nocrypto" ]] && OPT_CRYPTO="--nocrypto" && continue
 [[ "${PARAM-}" == "--" ]] && OPT_ADD="-- $*" && break
 echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
 done
@@ -55,7 +59,7 @@ cd ../../../..
 SOPC_DIR=`pwd`
 
 echo "SOPC_DIR=${SOPC_DIR-}"
-[[ $GET_BOARD != nucleo_h723zg ]] && echo "Only board nucleo_h723zg is supported currently"
+[[ $GET_BOARD != NUCLEO-H723ZG ]] && echo "Only board NUCLEO-H723ZG is supported currently" && exit 1
 [[ -z "${SOPC_DIR-}" ]] && echo 'SOPC_DIR must be set!' && exit 1
 ! [[ -d  "${SOPC_DIR-}/src/Common" ]] && echo 'SOPC_DIR is invalid!' && exit 1
 
@@ -65,7 +69,7 @@ echo "Using image FREERTOS_DIGEST=${FREERTOS_DIGEST-}"
 rm -rf ${SOPC_DIR}/build_freertos/* 2> /dev/null
 mkdir -p ${SOPC_DIR}/build_freertos && chmod 777 ${SOPC_DIR}/build_freertos || exit 2
 
-docker run --rm ${OPT_IT} -v ${SOPC_DIR}:/sopc -u root ${FREERTOS_DIGEST} ${OPT_EXEC} ${OPT_IP_ADDRESS} ${OPT_ADD}
+docker run --rm ${OPT_IT} -v ${SOPC_DIR}:/sopc -u root ${FREERTOS_DIGEST} ${OPT_EXEC} ${GET_BOARD} ${GET_APP} ${OPT_CRYPTO} ${OPT_IP_ADDRESS} ${OPT_ADD}
 
 #Conversion .elf to .bin
 [[ -z ${OPT_IT} ]] && ! [[ -z ${GET_APP} ]] && ! [[ -z ${GET_BOARD} ]] && \
