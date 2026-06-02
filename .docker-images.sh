@@ -26,7 +26,7 @@ RPI_DIGEST=registry.gitlab.com/systerel/s2opc/rpi-build@sha256:070b1ca58667ee590
 CHECK_DIGEST=registry.gitlab.com/systerel/s2opc/check@sha256:c3a99ad388043fa77a33d93bb61be11969511af6ced23929c16527eb6046e444 # check:2.0
 TEST_DIGEST=registry.gitlab.com/systerel/s2opc/test@sha256:d6ca3821754b8f5f74d7fe426e35e7709e1ce772b5f05c9f2e28efd2f4ee3189  # test:2.19
 ZEPHYR_DIGEST=registry.gitlab.com/systerel/s2opc/zephyr_build@sha256:a3361ba6c51ce52026650d6ed5b9344db7d99343b803fc4eaf4c9c4d39f14536 # zephyr_build:v4.1.0
-FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:d3da42d15ae8e1973d388cd09e75fc3dfb316763d6fd10115d0fe790e3c81346 # freertos_build:v1.2.2 (FreeRTOS for STM32-H723ZG only for CI purpose)
+FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build@sha256:ad8181bffbfe2b05af21143fa768b202da63b61bdc8208909be664c660d796b3 # freertos_build:v1.2.3 (FreeRTOS for STM32-H723ZG only for CI purpose)
 SONARQUBE_DIGEST=registry.gitlab.com/systerel/s2opc/sonarqube@sha256:b3ff9482ea22887a6923ddbac82592ff4ad9a4cf44dc7e29df2c9588a5405417 #registry.gitlab.com/systerel/s2opc/sonarqube:2.0
 MUSL_DIGEST=registry.gitlab.com/systerel/s2opc/build-musl@sha256:c4aebefcbd437cb1259e947ed99beb61848ee6dcd13052c8485278dbb3f7c431 # build-musl:v3.0
 

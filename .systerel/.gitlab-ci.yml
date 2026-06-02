@@ -184,8 +184,8 @@ hil-build-zephyr:
 hil-build-freertos:
   stage: hil-build
   needs: []
-  image: # digest of freertos_build :v1.2.2
-    name: docker.aix.systerel.fr/c838/freertos_build@sha256:d3da42d15ae8e1973d388cd09e75fc3dfb316763d6fd10115d0fe790e3c81346
+  image: # digest of freertos_build :v1.2.3
+    name: docker.aix.systerel.fr/c838/freertos_build@sha256:ad8181bffbfe2b05af21143fa768b202da63b61bdc8208909be664c660d796b3
     entrypoint: ['']
   script:
     - cd .systerel/HIL_tests
@@ -407,7 +407,7 @@ build-zephyr:
 
 build-freertos:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/freertos_build@sha256:d3da42d15ae8e1973d388cd09e75fc3dfb316763d6fd10115d0fe790e3c81346 # freertos_build:v1.2.2
+  image: docker.aix.systerel.fr/c838/freertos_build@sha256:ad8181bffbfe2b05af21143fa768b202da63b61bdc8208909be664c660d796b3 # freertos_build:v1.2.3
   needs: []
   script:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh NUCLEO-H723ZG cli_client'

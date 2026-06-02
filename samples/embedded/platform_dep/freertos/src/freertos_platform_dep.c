@@ -103,12 +103,13 @@
  * Variables
  ******************************************************************************/
 #if defined SDK_PROVIDER_STM
-#define HEAP_REGION2_SIZE (128 * 1024)
-#define HEAP_REGION2_BASE 0x20000000
+// Place part of the S2OPC heap in dtcmram
+#define HEAP_REGION2_SIZE (64 * 1024)
+__attribute__((section(".data_dtcmram"))) static uint8_t dtcmHeap[HEAP_REGION2_SIZE];
 
 static uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 
-HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_SIZE}, // DTCM RAM
+HeapRegion_t board_heap5_regions[] = {{dtcmHeap, HEAP_REGION2_SIZE}, // DTCM RAM
                                       {ucHeap, configTOTAL_HEAP_SIZE},
                                       {NULL, 0}};
 
