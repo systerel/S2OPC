@@ -95,6 +95,9 @@
 #endif
 #define MBEDTLS_HEAP_SIZE (42 * 1024)
 
+// FreeRTOS specific configuration
+#define configHEAP_5_REGIONS board_heap5_regions
+
 // Board-Specific configuration
 
 #define BOARD_TYPE "NUCLEO_H723ZG"
