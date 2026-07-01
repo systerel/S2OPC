@@ -517,6 +517,93 @@ static bool checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile
     return bMatch;
 }
 
+static bool crt_cert_issuer_matches_ca_subject(const X509CertificateInfo* pCert, const X509CertificateInfo* pCa)
+{
+    SOPC_ASSERT(NULL != pCert);
+    SOPC_ASSERT(NULL != pCa);
+
+    return x509CompareName(pCert->tbsCert.issuer.raw.value, pCert->tbsCert.issuer.raw.length,
+                           pCa->tbsCert.subject.raw.value, pCa->tbsCert.subject.raw.length);
+}
+
+static bool crt_crl_issuer_matches_ca_subject(const X509CrlInfo* pCrl, const X509CertificateInfo* pCa)
+{
+    SOPC_ASSERT(NULL != pCrl);
+    SOPC_ASSERT(NULL != pCa);
+
+    return x509CompareName(pCrl->tbsCertList.issuer.raw.value, pCrl->tbsCertList.issuer.raw.length,
+                           pCa->tbsCert.subject.raw.value, pCa->tbsCert.subject.raw.length);
+}
+
+static bool crt_verify_crl_signature(const X509CrlInfo* pCrl, const X509CertificateInfo* pCa)
+{
+    SOPC_ASSERT(NULL != pCrl);
+    SOPC_ASSERT(NULL != pCa);
+
+    const X509Extensions* pExtensions = &pCa->tbsCert.extensions;
+    bool bSignatureValid = false;
+
+    if (0 != pExtensions->keyUsage.bitmap)
+    {
+        if (0 == (pExtensions->keyUsage.bitmap & X509_KEY_USAGE_CRL_SIGN))
+        {
+            return false;
+        }
+    }
+
+    error_t errLib = x509VerifySignature(&pCrl->tbsCertList.raw, &pCrl->signatureAlgo,
+                                         &pCa->tbsCert.subjectPublicKeyInfo, &pCrl->signatureValue);
+    if (0 == errLib)
+    {
+        bSignatureValid = true;
+    }
+
+    return bSignatureValid;
+}
+
+static void crt_check_crl_profile_and_revocation(const SOPC_CertificateList* pChild,
+                                                 const SOPC_CRLList* pCrl,
+                                                 const SOPC_PKI_ChainProfile* pProfile,
+                                                 uint32_t* pFailureReasons)
+{
+    SOPC_ASSERT(NULL != pChild);
+    SOPC_ASSERT(NULL != pCrl);
+    SOPC_ASSERT(NULL != pProfile);
+    SOPC_ASSERT(NULL != pFailureReasons);
+
+    // Check if md and pk algos of the signature of the CRL suits the profile
+    X509SignatureAlgo signAlgo = {0};
+    const HashAlgo* pHashAlgo = NULL;
+    error_t errLib = x509GetSignHashAlgo(&pCrl->crl.signatureAlgo, &signAlgo, &pHashAlgo);
+    if (0 == errLib)
+    {
+        if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
+        {
+            if (X509_SIGN_ALGO_RSA != signAlgo && X509_SIGN_ALGO_RSA_PSS != signAlgo)
+            {
+                *pFailureReasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
+            }
+        }
+
+        bool bMatch = checkMdAllowed(pHashAlgo, pProfile);
+        if (!bMatch) // If the hash algo is not an allowed md
+        {
+            *pFailureReasons |= PKI_CYCLONE_X509_BADCRL_BAD_MD;
+        }
+    }
+    else
+    {
+        *pFailureReasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
+    }
+
+    // Check if the certificate is not revoked in the issuer CRL
+    errLib = x509CheckRevokedCertificate(&pChild->crt, &pCrl->crl);
+    if (ERROR_CERTIFICATE_REVOKED == errLib)
+    {
+        *pFailureReasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
+    }
+}
+
 static void crt_verifycrl_and_check_revocation(const SOPC_CertificateList* child,
                                                const SOPC_CertificateList* parent,
                                                SOPC_CRLList* crl,
@@ -530,74 +617,78 @@ static void crt_verifycrl_and_check_revocation(const SOPC_CertificateList* child
 
     // Initialize at state "error"
     error_t errLib = 1;
-
-    // Find the CRL of parent and check if it is correctly signed
-    SOPC_CRLList* parent_crl = crl;
+    SOPC_CRLList* pParentCrl = crl;
     bool bFoundAtLeastOnce = false;
-    while (NULL != parent_crl)
+    // Find the CRL of parent and check if it is correctly signed
+    while (NULL != pParentCrl)
     {
-        bool bFound = false;
-        /* This Cyclone function:
-         * - returns error if parent does not have the extension CRL_SIGN
-         * - checks the validity of the CRL (thisUpdate, nextUpdate)
-         * - returns 0 if parent is the issuer of the CRL and the signature is good
-         */
-        errLib = x509ValidateCrl(&parent_crl->crl, &parent->crt);
-        if (0 == errLib)
+        /* According to the x509ValidateCrl implementation, Cyclone may return ERROR_CRL_EXPIRED before verifying
+         * issuer/subject match. Ensure the CRL issuer is the expected one before evaluating it. */
+        if (crt_crl_issuer_matches_ca_subject(&pParentCrl->crl, &parent->crt))
         {
-            bFound = true;
-        }
-        else if (ERROR_CERTIFICATE_EXPIRED == errLib)
-        {
-            bFound = true;
-            *failure_reasons |= PKI_CYCLONE_X509_BADCRL_EXPIRED;
-        }
-
-        if (bFound)
-        {
-            // Check if md and pk algos of the signature of the CRL suits the profile. */
-            X509SignatureAlgo signAlgo = {0};
-            const HashAlgo* hashAlgo = NULL;
-            errLib = x509GetSignHashAlgo(&parent_crl->crl.signatureAlgo, &signAlgo, &hashAlgo);
+            bool bFound = false;
+            /* This Cyclone function:
+             * - returns error if parent does not have the extension CRL_SIGN
+             * - checks the validity of the CRL (thisUpdate, nextUpdate)
+             * - returns 0 if parent is the issuer of the CRL and the signature is good
+             */
+            errLib = x509ValidateCrl(&pParentCrl->crl, &parent->crt);
             if (0 == errLib)
             {
-                if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
+                bFound = true;
+            }
+            else if (ERROR_CRL_EXPIRED == errLib)
+            {
+                /* Cyclone may return ERROR_CRL_EXPIRED before verifying the signature. Check it explicitly. */
+                if (crt_verify_crl_signature(&pParentCrl->crl, &parent->crt))
                 {
-                    if (X509_SIGN_ALGO_RSA != signAlgo && X509_SIGN_ALGO_RSA_PSS != signAlgo)
-                    {
-                        *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
-                    }
-                }
-
-                bool bMatch = checkMdAllowed(hashAlgo, pProfile);
-                if (!bMatch) // If the hash algo is not an allowed md.
-                {
-                    *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_MD;
+                    bFound = true;
+                    // Keep the expired flag even if other non-expired CRL instances are present (mbedtls behavior)
+                    *failure_reasons |= PKI_CYCLONE_X509_BADCRL_EXPIRED;
                 }
             }
-            else
+
+            if (bFound)
             {
-                *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
+                crt_check_crl_profile_and_revocation(child, pParentCrl, pProfile, failure_reasons);
             }
 
-            // Check if the certificate is not revoked in the parent CRL
-            errLib = x509CheckRevokedCertificate(&child->crt, &parent_crl->crl);
-            if (ERROR_CERTIFICATE_REVOKED == errLib)
-            {
-                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
-            }
+            bFoundAtLeastOnce = bFound | bFoundAtLeastOnce;
         }
 
-        bFoundAtLeastOnce = bFound | bFoundAtLeastOnce;
-
-        // Check next CRL
-        parent_crl = parent_crl->next;
+        pParentCrl = pParentCrl->next;
     }
 
     if (!bFoundAtLeastOnce)
     {
         // No valid CRL found
         *failure_reasons |= PKI_CYCLONE_X509_BADCRL_NOT_TRUSTED;
+    }
+}
+
+// Defined below, necessary in crt_find_parent_in to evaluate multiple instances of same parent
+static bool crt_check_validity(const X509CertificateInfo* crt);
+
+/* Set a validity window around the current time on parsed DateTime fields only.
+ * Used on a shallow copy of a certificate so x509ValidateCertificate can verify issuer and
+ * signature after ERROR_CERTIFICATE_EXPIRED. tbsCert.raw is unchanged so the signature check
+ * remains valid.
+ */
+static void crt_validity_set_around_current_time(X509Validity* pValidity)
+{
+    SOPC_ASSERT(NULL != pValidity);
+    static const time_t DAY_IN_SECS = 86400;
+
+    time_t currentTime = getCurrentUnixTime();
+    DateTime notBefore = {0};
+    DateTime notAfter = {0};
+
+    if (0 != currentTime)
+    {
+        convertUnixTimeToDate(currentTime - DAY_IN_SECS, &notBefore);
+        convertUnixTimeToDate(currentTime + DAY_IN_SECS, &notAfter);
+        pValidity->notBefore = notBefore;
+        pValidity->notAfter = notAfter;
     }
 }
 
@@ -612,40 +703,61 @@ static void crt_find_parent_in(const SOPC_CertificateList* child,
 {
     // No asserts here since they are in crt_find_parent and the two functions work together
 
-    SOPC_CertificateList* parent = parentCandidates;
-    bool bFound = false;
+    SOPC_CertificateList* pParent = parentCandidates;
+    SOPC_CertificateList* pMaybeParent = NULL;
+    SOPC_CertificateList* pParentFound = NULL;
     error_t errLib = 1;
 
-    while (!bFound && NULL != parent)
+    while (NULL != pParent && NULL == pParentFound)
     {
-        /* This Cyclone function :
-         * - checks the validity of child ;
-         * - checks if parent is the parent of child ;
-         * - verifies the signature ;
-         * Returns 0 if all is ok.
-         */
-        errLib = x509ValidateCertificate(&child->crt, &parent->crt, 0);
-        if (0 == errLib)
+        /* According to the x509ValidateCertificate implementation, Cyclone may return ERROR_CERTIFICATE_EXPIRED
+         * before verifying issuer/subject match. Ensure the candidate is the expected issuer first. */
+        if (crt_cert_issuer_matches_ca_subject(&child->crt, &pParent->crt))
         {
-            bFound = true;
-        }
-        else if (ERROR_CERTIFICATE_EXPIRED == errLib)
-        {
-            bFound = true;
-            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
+            /* This Cyclone function :
+             * - checks the validity of child ;
+             * - checks if parent is the parent of child ;
+             * - verifies the signature ;
+             * Returns 0 if all is ok.
+             */
+            errLib = x509ValidateCertificate(&child->crt, &pParent->crt, 0);
+            if (ERROR_CERTIFICATE_EXPIRED == errLib)
+            {
+                X509CertificateInfo childForValidation = child->crt;
+                /* Child certificate is expired: record it but still verify issuer/signature on a
+                 * shallow copy with a patched validity window (Cyclone checks child time first). */
+                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
+                crt_validity_set_around_current_time(&childForValidation.tbsCert.validity);
+                /* According to the x509ValidateCertificate implementation, Cyclone may return ERROR_CERTIFICATE_EXPIRED
+                 * before verifying issuer/subject match. Ensure the issuer is correct without this error */
+                errLib = x509ValidateCertificate(&childForValidation, &pParent->crt, 0);
+            }
+            if (0 == errLib)
+            {
+                bool bIsValid = crt_check_validity(&pParent->crt);
+                if (bIsValid)
+                {
+                    pParentFound = pParent;
+                }
+                else
+                {
+                    /* Store a matching issuer as fallback in case another non-expired instance exists. */
+                    if (NULL == pMaybeParent)
+                    {
+                        pMaybeParent = pParent;
+                    }
+                }
+            }
         }
 
-        // If it's not the parent, iterate on the next candidate.
-        if (!bFound)
-        {
-            parent = parent->next;
-        }
+        pParent = pParent->next;
     }
 
-    if (bFound)
+    if (NULL == pParentFound)
     {
-        *ppParent = parent;
+        pParentFound = pMaybeParent;
     }
+    *ppParent = pParentFound;
 }
 
 /* Find the parent of child in the chain rootCA first, then up the leafAndIntCA chain if not found. */
