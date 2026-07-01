@@ -766,7 +766,7 @@ static void crt_find_parent(const SOPC_CertificateList* child,
                             SOPC_CertificateList* rootCA,
                             uint32_t* failure_reasons,
                             SOPC_CertificateList** ppParent,
-                            bool* parent_is_trusted)
+                            bool* parent_isRoot)
 {
     // Make sure the container of the potential parent is not null, and empty.
     SOPC_ASSERT(NULL != ppParent);
@@ -776,13 +776,13 @@ static void crt_find_parent(const SOPC_CertificateList* child,
     SOPC_ASSERT(NULL != failure_reasons);
 
     // Find a parent in rootCA
-    *parent_is_trusted = true;
+    *parent_isRoot = true;
     crt_find_parent_in(child, rootCA, failure_reasons, ppParent);
 
     // If no parent has been found, search up the initial leaf chain
     if (NULL == *ppParent)
     {
-        *parent_is_trusted = false;
+        *parent_isRoot = false;
         crt_find_parent_in(child, leafAndIntCA, failure_reasons, ppParent);
     }
 }
@@ -890,15 +890,15 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
     SOPC_CertificateList* leafAndIntCA = pToValidate;
     SOPC_CertificateList* parent = NULL;
     uint32_t failure_reason_on_certificate = 0;
-    bool parent_is_trusted = false;
-    bool leafAndIntCA_is_trusted = false;
+    bool parent_isRoot = false;
+    bool leafAndIntCA_isRoot = false;
 
     /**
      * While:
      * 1) The validation on the previous certificate of the chain went ok
      * 2) The new certificate of the chain is not trusted
      */
-    while (0 == failure_reason_on_certificate && !leafAndIntCA_is_trusted)
+    while (0 == failure_reason_on_certificate && !leafAndIntCA_isRoot)
     {
         // Verify with profile
         crt_verify_profile_in_chain(leafAndIntCA, pProfile, &failure_reason_on_certificate);
@@ -909,8 +909,7 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
         // Find a parent in trusted CA first or in the pToValidate chain.
         // This function will also verify the signature if a parent is found,
         // and check time-validity of leafAndIntCA.
-        crt_find_parent(leafAndIntCA, pToValidate, trust_list, &failure_reason_on_certificate, &parent,
-                        &parent_is_trusted);
+        crt_find_parent(leafAndIntCA, pToValidate, trust_list, &failure_reason_on_certificate, &parent, &parent_isRoot);
         if (NULL == parent)
         {
             failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
@@ -929,10 +928,10 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
         // Iterate.
         leafAndIntCA = parent;
         parent = NULL;
-        leafAndIntCA_is_trusted = parent_is_trusted;
+        leafAndIntCA_isRoot = parent_isRoot;
     }
 
-    if (leafAndIntCA_is_trusted)
+    if (leafAndIntCA_isRoot)
     {
         // In this case, the last certificate of the chain has not been verified. Verify it here.
         // Verify with profile
