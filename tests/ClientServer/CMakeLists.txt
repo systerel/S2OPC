@@ -618,6 +618,70 @@ function(make_pki target_exe pki_name)
     )
 endfunction()
 
+function(make_expired_in_pki_test target_exe)
+  set(PKI_NAME expired_in_pki_test)
+  set(PKI_SRC ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/${PKI_NAME})
+  add_custom_command(
+    TARGET ${target_exe} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PKI_SRC}/trusted ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/trusted
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PKI_SRC}/issuers ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/issuers
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case1.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case2.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case3.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case4.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case5.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_expired_case7.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case1.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case1b.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case2.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case2b.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case3.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case4.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case4b.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    )
+endfunction()
+
+make_expired_in_pki_test(check_helpers)
+
+function(make_signature_pki_test target_exe)
+  set(PKI_NAME signature_pki_test)
+  set(PKI_SRC ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/${PKI_NAME})
+  add_custom_command(
+    TARGET ${target_exe} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PKI_SRC}/trusted ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/trusted
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PKI_SRC}/issuers ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/issuers
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case3.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case4.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case5_bad_sig.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case5_valid.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case1.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case6.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    )
+endfunction()
+
+make_signature_pki_test(check_helpers)
+
+function(make_revocation_pki_test target_exe)
+  set(PKI_NAME revocation_pki_test)
+  set(PKI_SRC ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/${PKI_NAME})
+  add_custom_command(
+    TARGET ${target_exe} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PKI_SRC}/trusted ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/trusted
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PKI_SRC}/issuers ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/issuers
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case1_revoked.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case1_valid.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_case2.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case1_revoked.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case1_valid.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_int_case3.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    )
+endfunction()
+
+make_revocation_pki_test(check_helpers)
+
 add_custom_command(
   TARGET ${TOOLKIT_TEST_SERVER} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/client_private
@@ -674,7 +738,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/user_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/user_public/
   )
 
-make_pki("toolkit_test_server" "S2OPC_Demo_PKI")
+make_pki(${TOOLKIT_TEST_SERVER} "S2OPC_Demo_PKI")
 
 # Test discovery server
 

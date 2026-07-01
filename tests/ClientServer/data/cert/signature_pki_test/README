@@ -1,0 +1,28 @@
+PKI store and certificates for trusted-certificate signature validation tests (check_pki.c).
+
+## Single-tier CA cases (Root → Leaf)
+
+| Case | trusted/certs | trusted/crl | Certificate validated | Expected |
+|------|---------------|-------------|----------------------|----------|
+| 1 | ca_selfsigned_bad_sig.der | — | same self-signed cert | UseNotAllowed |
+| 2 | ca_root_bad_sig.der | ca_root_crl_valid.der | leaf_case3.der | Untrusted |
+| 3 | ca_root_valid.der | ca_root_crl_bad_sig.der | leaf_case4.der | RevocationUnknown |
+| 5 | ca_case5_root_valid.der | ca_case5_crl_valid.der | leaf_case5_bad_sig.der | Untrusted |
+| 5 bis | ca_case5_root_valid.der | ca_case5_crl_valid.der | leaf_case5_valid.der | Accepted |
+| 6 | ca_case6_root_no_key_sign_usage.der | ca_case6_crl_valid.der | leaf_case6.der | Untrusted |
+
+## Intermediate CA chains (Root → Intermediate → Leaf)
+
+| Case | trusted/certs | trusted/crl | Certificate validated | Expected |
+|------|---------------|-------------|----------------------|----------|
+| int-1 | ca_int_case1_root.der, ca_int_case1_inter_bad_sig.der (corrupted signature) | ca_int_case1_root_crl.der, ca_int_case1_inter_crl.der | leaf_int_case1.der | Untrusted |
+
+Regeneration (requires Python 3 and the `cryptography` package).
+Certificate generation logic is shared via `../scripts/pki_gen/` (see `../scripts/README.md`).
+
+```bash
+cd tests/ClientServer/data/cert/signature_pki_test
+python3 generate_certs.py
+```
+
+Tests load the full store with `SOPC_PKIProvider_CreateFromStore("./signature_pki_test")`.

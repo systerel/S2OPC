@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 #include "check_helpers.h"
+#include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
 #include "sopc_mem_alloc.h"
@@ -970,10 +971,450 @@ START_TEST(functional_test_pki_without_revocation_list)
 }
 END_TEST
 
+#define EXPIRED_IN_PKI_TEST_STORE "./expired_in_pki_test"
+#define EXPIRED_IN_PKI_TEST_DIR "./expired_in_pki_test/"
+#define EXPIRED_IN_PKI_TRUSTED_CERTS EXPIRED_IN_PKI_TEST_DIR "trusted/certs/"
+
+static SOPC_ReturnStatus expired_in_pki_test_create_profile(SOPC_PKI_Profile** ppProfile)
+{
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, ppProfile);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ProfileSetUsageFromType(*ppProfile, SOPC_PKI_TYPE_SERVER_APP);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus expired_in_pki_test_validate(const char* leafCertPath, uint32_t* pValidationError)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_CertificateList* pLeaf = NULL;
+    SOPC_ReturnStatus status = expired_in_pki_test_create_profile(&pProfile);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_CreateFromStore(EXPIRED_IN_PKI_TEST_STORE, &pPKI);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(leafCertPath, &pLeaf);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ValidateCertificate(pPKI, pLeaf, pProfile, pValidationError, NULL);
+    }
+    SOPC_KeyManager_Certificate_Free(pLeaf);
+    SOPC_PKIProvider_DeleteProfile(&pProfile);
+    SOPC_PKIProvider_Free(&pPKI);
+    return status;
+}
+
+START_TEST(expired_in_pki_store_loads_all_trusted_material)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_CertificateList* pTrustedCerts = NULL;
+    SOPC_CRLList* pTrustedCrls = NULL;
+    SOPC_CertificateList* pIssuerCerts = NULL;
+    SOPC_CRLList* pIssuerCrls = NULL;
+    size_t nbCerts = 0;
+    size_t nbCrls = 0;
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CreateFromStore(EXPIRED_IN_PKI_TEST_STORE, &pPKI);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pTrustedCerts, &pTrustedCrls, &pIssuerCerts, &pIssuerCrls);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pIssuerCerts);
+    ck_assert_ptr_nonnull(pIssuerCrls);
+    size_t nbIssuerCerts = 0;
+    size_t nbIssuerCrls = 0;
+    status = SOPC_KeyManager_Certificate_GetListLength(pIssuerCerts, &nbIssuerCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_GetListLength(pIssuerCrls, &nbIssuerCrls);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(1, nbIssuerCerts);
+    ck_assert_uint_eq(1, nbIssuerCrls);
+    status = SOPC_KeyManager_Certificate_GetListLength(pTrustedCerts, &nbCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_GetListLength(pTrustedCrls, &nbCrls);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(22, nbCerts);
+    ck_assert_uint_eq(23, nbCrls);
+
+    SOPC_KeyManager_Certificate_Free(pTrustedCerts);
+    SOPC_KeyManager_CRL_Free(pTrustedCrls);
+    SOPC_KeyManager_Certificate_Free(pIssuerCerts);
+    SOPC_KeyManager_CRL_Free(pIssuerCrls);
+    SOPC_PKIProvider_Free(&pPKI);
+}
+END_TEST
+
+START_TEST(expired_in_pki_case1_valid_ca_accepted)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_case1.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_case2_expired_ca_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_case2.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_TimeInvalid, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_case3_expired_and_valid_ca_accepted)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_case3.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_case4_expired_crl_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_case4.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_case5_expired_revoked_crl_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_case5.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_selfsigned_expired_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        expired_in_pki_test_validate(EXPIRED_IN_PKI_TRUSTED_CERTS "ca_selfsigned_expired.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_TimeInvalid, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_case7_expired_leaf_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_expired_case7.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_TimeInvalid, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_int_case1_valid_chain_accepted)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_int_case1.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_int_case1b_issuer_intermediate_accepted)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_int_case1b.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_int_case2_expired_intermediate_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_int_case2.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_TimeInvalid, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_int_case2b_expired_root_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_int_case2b.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_TimeInvalid, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_int_case3_expired_and_valid_intermediate_accepted)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_int_case3.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_int_case4_expired_intermediate_crl_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_int_case4.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, validationError);
+}
+END_TEST
+
+START_TEST(expired_in_pki_int_case4b_expired_root_crl_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        expired_in_pki_test_validate(EXPIRED_IN_PKI_TEST_DIR "leaf_int_case4b.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, validationError);
+}
+END_TEST
+
+#define SIGNATURE_PKI_TEST_STORE "./signature_pki_test"
+#define SIGNATURE_PKI_TEST_DIR "./signature_pki_test/"
+#define SIGNATURE_PKI_TRUSTED_CERTS SIGNATURE_PKI_TEST_DIR "trusted/certs/"
+
+static SOPC_ReturnStatus signature_pki_test_create_profile(SOPC_PKI_Profile** ppProfile)
+{
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, ppProfile);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ProfileSetUsageFromType(*ppProfile, SOPC_PKI_TYPE_SERVER_APP);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus signature_pki_test_validate(const char* certPath, uint32_t* pValidationError)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_CertificateList* pCert = NULL;
+    SOPC_ReturnStatus status = signature_pki_test_create_profile(&pProfile);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_CreateFromStore(SIGNATURE_PKI_TEST_STORE, &pPKI);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(certPath, &pCert);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCert, pProfile, pValidationError, NULL);
+    }
+    SOPC_KeyManager_Certificate_Free(pCert);
+    SOPC_PKIProvider_DeleteProfile(&pProfile);
+    SOPC_PKIProvider_Free(&pPKI);
+    return status;
+}
+
+START_TEST(signature_pki_selfsigned_bad_signature_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        signature_pki_test_validate(SIGNATURE_PKI_TRUSTED_CERTS "ca_selfsigned_bad_sig.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_UseNotAllowed, validationError);
+}
+END_TEST
+
+START_TEST(signature_pki_root_bad_signature_rejects_leaf)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = signature_pki_test_validate(SIGNATURE_PKI_TEST_DIR "leaf_case3.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, validationError);
+}
+END_TEST
+
+START_TEST(signature_pki_root_crl_bad_signature_rejects_leaf)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = signature_pki_test_validate(SIGNATURE_PKI_TEST_DIR "leaf_case4.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, validationError);
+}
+END_TEST
+
+START_TEST(signature_pki_leaf_bad_signature_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        signature_pki_test_validate(SIGNATURE_PKI_TEST_DIR "leaf_case5_bad_sig.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, validationError);
+}
+END_TEST
+
+START_TEST(signature_pki_leaf_bad_signature_valid_control)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        signature_pki_test_validate(SIGNATURE_PKI_TEST_DIR "leaf_case5_valid.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, validationError);
+}
+END_TEST
+
+START_TEST(signature_pki_int_case1_intermediate_bad_signature_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        signature_pki_test_validate(SIGNATURE_PKI_TEST_DIR "leaf_int_case1.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, validationError);
+}
+END_TEST
+
+START_TEST(signature_pki_root_no_key_cert_sign_rejects_leaf)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = signature_pki_test_validate(SIGNATURE_PKI_TEST_DIR "leaf_case6.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, validationError);
+}
+END_TEST
+
+#define REVOCATION_PKI_TEST_STORE "./revocation_pki_test"
+#define REVOCATION_PKI_TEST_DIR "./revocation_pki_test/"
+
+static SOPC_ReturnStatus revocation_pki_test_create_profile(SOPC_PKI_Profile** ppProfile)
+{
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, ppProfile);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ProfileSetUsageFromType(*ppProfile, SOPC_PKI_TYPE_SERVER_APP);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus revocation_pki_test_validate(const char* leafCertPath, uint32_t* pValidationError)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_CertificateList* pLeaf = NULL;
+    SOPC_ReturnStatus status = revocation_pki_test_create_profile(&pProfile);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_CreateFromStore(REVOCATION_PKI_TEST_STORE, &pPKI);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(leafCertPath, &pLeaf);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ValidateCertificate(pPKI, pLeaf, pProfile, pValidationError, NULL);
+    }
+    SOPC_KeyManager_Certificate_Free(pLeaf);
+    SOPC_PKIProvider_DeleteProfile(&pProfile);
+    SOPC_PKIProvider_Free(&pPKI);
+    return status;
+}
+
+START_TEST(revocation_pki_store_loads_all_trusted_material)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_CertificateList* pTrustedCerts = NULL;
+    SOPC_CRLList* pTrustedCrls = NULL;
+    SOPC_CertificateList* pIssuerCerts = NULL;
+    SOPC_CRLList* pIssuerCrls = NULL;
+    size_t nbCerts = 0;
+    size_t nbCrls = 0;
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CreateFromStore(REVOCATION_PKI_TEST_STORE, &pPKI);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pTrustedCerts, &pTrustedCrls, &pIssuerCerts, &pIssuerCrls);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_null(pIssuerCerts);
+    ck_assert_ptr_null(pIssuerCrls);
+    status = SOPC_KeyManager_Certificate_GetListLength(pTrustedCerts, &nbCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_GetListLength(pTrustedCrls, &nbCrls);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(6, nbCerts);
+    ck_assert_uint_eq(6, nbCrls);
+
+    SOPC_KeyManager_Certificate_Free(pTrustedCerts);
+    SOPC_KeyManager_CRL_Free(pTrustedCrls);
+    SOPC_PKIProvider_Free(&pPKI);
+}
+END_TEST
+
+START_TEST(revocation_pki_case1_revoked_leaf_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        revocation_pki_test_validate(REVOCATION_PKI_TEST_DIR "leaf_case1_revoked.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Revoked, validationError);
+}
+END_TEST
+
+START_TEST(revocation_pki_case1_bis_valid_leaf_accepted)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        revocation_pki_test_validate(REVOCATION_PKI_TEST_DIR "leaf_case1_valid.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, validationError);
+}
+END_TEST
+
+START_TEST(revocation_pki_case2_valid_leaf_accepted)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = revocation_pki_test_validate(REVOCATION_PKI_TEST_DIR "leaf_case2.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, validationError);
+}
+END_TEST
+
+START_TEST(revocation_pki_int_case1_revoked_leaf_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        revocation_pki_test_validate(REVOCATION_PKI_TEST_DIR "leaf_int_case1_revoked.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Revoked, validationError);
+}
+END_TEST
+
+START_TEST(revocation_pki_int_case1_bis_valid_leaf_accepted)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        revocation_pki_test_validate(REVOCATION_PKI_TEST_DIR "leaf_int_case1_valid.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, validationError);
+}
+END_TEST
+
+START_TEST(revocation_pki_int_case3_revoked_intermediate_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status =
+        revocation_pki_test_validate(REVOCATION_PKI_TEST_DIR "leaf_int_case3.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Revoked, validationError);
+}
+END_TEST
+
 Suite* tests_make_suite_pki(void)
 {
     Suite* s;
-    TCase *invalid, *certificate_properties, *functional;
+    TCase *invalid, *certificate_properties, *functional, *expired, *bad_signature, *revocation;
 
     s = suite_create("PKI API test");
     invalid = tcase_create("invalid");
@@ -1006,6 +1447,44 @@ Suite* tests_make_suite_pki(void)
     tcase_add_test(functional, functional_test_remove_cert);
     tcase_add_test(functional, functional_test_pki_without_revocation_list);
     suite_add_tcase(s, functional);
+
+    expired = tcase_create("expired");
+    tcase_add_test(expired, expired_in_pki_store_loads_all_trusted_material);
+    tcase_add_test(expired, expired_in_pki_case1_valid_ca_accepted);
+    tcase_add_test(expired, expired_in_pki_case2_expired_ca_rejected);
+    tcase_add_test(expired, expired_in_pki_case3_expired_and_valid_ca_accepted);
+    tcase_add_test(expired, expired_in_pki_case4_expired_crl_rejected);
+    tcase_add_test(expired, expired_in_pki_case5_expired_revoked_crl_rejected);
+    tcase_add_test(expired, expired_in_pki_selfsigned_expired_rejected);
+    tcase_add_test(expired, expired_in_pki_case7_expired_leaf_rejected);
+    tcase_add_test(expired, expired_in_pki_int_case1_valid_chain_accepted);
+    tcase_add_test(expired, expired_in_pki_int_case1b_issuer_intermediate_accepted);
+    tcase_add_test(expired, expired_in_pki_int_case2_expired_intermediate_rejected);
+    tcase_add_test(expired, expired_in_pki_int_case2b_expired_root_rejected);
+    tcase_add_test(expired, expired_in_pki_int_case3_expired_and_valid_intermediate_accepted);
+    tcase_add_test(expired, expired_in_pki_int_case4_expired_intermediate_crl_rejected);
+    tcase_add_test(expired, expired_in_pki_int_case4b_expired_root_crl_rejected);
+    suite_add_tcase(s, expired);
+
+    bad_signature = tcase_create("bad signature");
+    tcase_add_test(bad_signature, signature_pki_selfsigned_bad_signature_rejected);
+    tcase_add_test(bad_signature, signature_pki_root_bad_signature_rejects_leaf);
+    tcase_add_test(bad_signature, signature_pki_root_crl_bad_signature_rejects_leaf);
+    tcase_add_test(bad_signature, signature_pki_leaf_bad_signature_rejected);
+    tcase_add_test(bad_signature, signature_pki_leaf_bad_signature_valid_control);
+    tcase_add_test(bad_signature, signature_pki_int_case1_intermediate_bad_signature_rejected);
+    tcase_add_test(bad_signature, signature_pki_root_no_key_cert_sign_rejects_leaf);
+    suite_add_tcase(s, bad_signature);
+
+    revocation = tcase_create("revocation");
+    tcase_add_test(revocation, revocation_pki_store_loads_all_trusted_material);
+    tcase_add_test(revocation, revocation_pki_case1_revoked_leaf_rejected);
+    tcase_add_test(revocation, revocation_pki_case1_bis_valid_leaf_accepted);
+    tcase_add_test(revocation, revocation_pki_case2_valid_leaf_accepted);
+    tcase_add_test(revocation, revocation_pki_int_case1_revoked_leaf_rejected);
+    tcase_add_test(revocation, revocation_pki_int_case1_bis_valid_leaf_accepted);
+    tcase_add_test(revocation, revocation_pki_int_case3_revoked_intermediate_rejected);
+    suite_add_tcase(s, revocation);
 
     return s;
 }

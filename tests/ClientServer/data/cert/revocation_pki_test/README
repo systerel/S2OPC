@@ -1,0 +1,32 @@
+PKI store and leaf certificates for certificate revocation validation unit tests (check_pki.c).
+
+The store layout matches a standard S2OPC PKI directory. Leaf certificates are kept
+outside trusted/ and supplied at validation time.
+
+## Single-tier CA cases (Root → Leaf)
+
+| Case | trusted/certs | trusted/crl | Certificate validated | Expected |
+|------|---------------|-------------|----------------------|----------|
+| 1 | ca_case1_valid.der | ca_case1_crl_revoked.der | leaf_case1_revoked.der | Revoked |
+| 1 bis | ca_case1_valid.der | ca_case1_crl_revoked.der | leaf_case1_valid.der | Accepted |
+| 2 | ca_case2_valid.der | ca_case2_crl_valid.der | leaf_case2.der | Accepted |
+
+## Intermediate CA chains (Root → Intermediate → Leaf)
+
+| Case | trusted/certs | trusted/crl | Certificate validated | Expected |
+|------|---------------|-------------|----------------------|----------|
+| int-1 | ca_int_case1_root.der, ca_int_case1_inter.der | ca_int_case1_root_crl.der, ca_int_case1_inter_crl.der (lists revoked leaf serial) | leaf_int_case1_revoked.der | Revoked |
+| int-1 bis | ca_int_case1_root.der, ca_int_case1_inter.der | ca_int_case1_root_crl.der, ca_int_case1_inter_crl.der (lists revoked leaf serial) | leaf_int_case1_valid.der | Accepted |
+| int-3 | ca_int_case3_root.der, ca_int_case3_inter.der | ca_int_case3_root_crl.der (lists intermediate serial), ca_int_case3_inter_crl.der | leaf_int_case3.der | Revoked |
+
+Regeneration (requires Python 3 and the `cryptography` package).
+Certificate generation logic is shared via `../scripts/pki_gen/` (see `../scripts/README.md`).
+
+```bash
+cd tests/ClientServer/data/cert/revocation_pki_test
+python3 generate_certs.py
+```
+
+Do not commit private keys. DER files are committed so tests do not depend on generation at build time.
+
+Tests load the full store with `SOPC_PKIProvider_CreateFromStore("./revocation_pki_test")`.
