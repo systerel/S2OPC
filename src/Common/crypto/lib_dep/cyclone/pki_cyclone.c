@@ -517,6 +517,52 @@ static bool checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile
     return bMatch;
 }
 
+/** \brief Check a DER signature AlgorithmIdentifier against the chain profile.
+ *
+ * It might add ORs PKI_CYCLONE BAD_PK / BAD_MD flags (cert or CRL variant).
+ * Other bits in \p pFailureReasons are preserved.
+ *
+ * \param[in] pSignAlgo Parsed signature AlgorithmIdentifier (cert or CRL).
+ * \param[in] pProfile Chain profile (PK and MD constraints).
+ * \param[in] bForCrl true for CRL signature checks, false for certificate signature checks.
+ * \param[in,out] pFailureReasons Accumulated validation failure bitmask.
+ */
+static void crt_check_sign_algo_profile(const X509SignAlgoId* pSignAlgo,
+                                        const SOPC_PKI_ChainProfile* pProfile,
+                                        bool bForCrl,
+                                        uint32_t* pFailureReasons)
+{
+    SOPC_ASSERT(NULL != pSignAlgo);
+    SOPC_ASSERT(NULL != pProfile);
+    SOPC_ASSERT(NULL != pFailureReasons);
+
+    const uint32_t bad_md_flag = bForCrl ? PKI_CYCLONE_X509_BADCRL_BAD_MD : PKI_CYCLONE_X509_BADCERT_BAD_MD;
+    const uint32_t bad_pk_flag = bForCrl ? PKI_CYCLONE_X509_BADCRL_BAD_PK : PKI_CYCLONE_X509_BADCERT_BAD_PK;
+
+    X509SignatureAlgo signAlgo = {0};
+    const HashAlgo* pHashAlgo = NULL;
+    error_t errLib = x509GetSignHashAlgo(pSignAlgo, &signAlgo, &pHashAlgo);
+    if (0 == errLib)
+    {
+        if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
+        {
+            if (X509_SIGN_ALGO_RSA != signAlgo && X509_SIGN_ALGO_RSA_PSS != signAlgo)
+            {
+                *pFailureReasons |= bad_pk_flag;
+            }
+        }
+
+        if (!checkMdAllowed(pHashAlgo, pProfile))
+        {
+            *pFailureReasons |= bad_md_flag;
+        }
+    }
+    else
+    {
+        *pFailureReasons |= bad_pk_flag;
+    }
+}
+
 static bool crt_cert_issuer_matches_ca_subject(const X509CertificateInfo* pCert, const X509CertificateInfo* pCa)
 {
     SOPC_ASSERT(NULL != pCert);
@@ -571,33 +617,10 @@ static void crt_check_crl_profile_and_revocation(const SOPC_CertificateList* pCh
     SOPC_ASSERT(NULL != pProfile);
     SOPC_ASSERT(NULL != pFailureReasons);
 
-    // Check if md and pk algos of the signature of the CRL suits the profile
-    X509SignatureAlgo signAlgo = {0};
-    const HashAlgo* pHashAlgo = NULL;
-    error_t errLib = x509GetSignHashAlgo(&pCrl->crl.signatureAlgo, &signAlgo, &pHashAlgo);
-    if (0 == errLib)
-    {
-        if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
-        {
-            if (X509_SIGN_ALGO_RSA != signAlgo && X509_SIGN_ALGO_RSA_PSS != signAlgo)
-            {
-                *pFailureReasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
-            }
-        }
-
-        bool bMatch = checkMdAllowed(pHashAlgo, pProfile);
-        if (!bMatch) // If the hash algo is not an allowed md
-        {
-            *pFailureReasons |= PKI_CYCLONE_X509_BADCRL_BAD_MD;
-        }
-    }
-    else
-    {
-        *pFailureReasons |= PKI_CYCLONE_X509_BADCRL_BAD_PK;
-    }
+    crt_check_sign_algo_profile(&pCrl->crl.signatureAlgo, pProfile, true, pFailureReasons);
 
     // Check if the certificate is not revoked in the issuer CRL
-    errLib = x509CheckRevokedCertificate(&pChild->crt, &pCrl->crl);
+    error_t errLib = x509CheckRevokedCertificate(&pChild->crt, &pCrl->crl);
     if (ERROR_CERTIFICATE_REVOKED == errLib)
     {
         *pFailureReasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
@@ -789,7 +812,7 @@ static void crt_find_parent(const SOPC_CertificateList* child,
 
 /* Some verifications on the certificate with the profile:
  * - key type and size
- * - md and pk signature algos
+ * - md and pk signature algos (via crt_check_sign_algo_profile)
  * The result of the verification process is stored in failure_reasons.
  */
 static void crt_verify_profile_in_chain(const SOPC_CertificateList* pToValidate,
@@ -822,30 +845,7 @@ static void crt_verify_profile_in_chain(const SOPC_CertificateList* pToValidate,
         }
     }
 
-    /* 2) Check if md and pk algos of the signature of the cert suits to the profile. */
-    X509SignatureAlgo signAlgo = {0};
-    const HashAlgo* hashAlgo = NULL;
-    error_t errLib = x509GetSignHashAlgo(&pToValidate->crt.signatureAlgo, &signAlgo, &hashAlgo);
-    if (0 == errLib)
-    {
-        if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
-        {
-            if (X509_SIGN_ALGO_RSA != signAlgo && X509_SIGN_ALGO_RSA_PSS != signAlgo)
-            {
-                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
-            }
-        }
-
-        bool bMatch = checkMdAllowed(hashAlgo, pProfile);
-        if (!bMatch) // If the hash algo is not an allowed md.
-        {
-            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_MD;
-        }
-    }
-    else
-    {
-        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
-    }
+    crt_check_sign_algo_profile(&pToValidate->crt.signatureAlgo, pProfile, false, failure_reasons);
 }
 
 static void crt_check_trusted(SOPC_CheckTrusted* checkTrusted, const SOPC_CertificateList* crt)
@@ -936,6 +936,18 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
         // In this case, the last certificate of the chain has not been verified. Verify it here.
         // Verify with profile
         crt_verify_profile_in_chain(leafAndIntCA, pProfile, &failure_reason_on_certificate);
+
+        // Validates it (only expiration should occur at this level)
+        int errLib = x509ValidateCertificate(&leafAndIntCA->crt, &leafAndIntCA->crt, 0);
+        if (ERROR_CERTIFICATE_EXPIRED == errLib)
+        {
+            failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
+        }
+        else if (0 != errLib)
+        {
+            failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
+        }
+
         // Check if trusted
         crt_check_trusted(checkTrusted, leafAndIntCA);
     }
@@ -1000,7 +1012,7 @@ static void crt_verify_self_signed(const SOPC_CertificateList* pToValidate,
     crt_verify_profile_in_chain(pToValidate, pProfile, failure_reasons);
 
     // If the certificate is CA (and self-signed), verify it has the keyUsage keyCertSign
-    if (1 == pToValidate->crt.tbsCert.extensions.basicConstraints.cA)
+    if (pToValidate->crt.tbsCert.extensions.basicConstraints.cA)
     {
         const X509Extensions* extensions = &pToValidate->crt.tbsCert.extensions;
         if (0 != extensions->keyUsage.bitmap)
@@ -1016,6 +1028,7 @@ static void crt_verify_self_signed(const SOPC_CertificateList* pToValidate,
     }
 
     // Check validity
+    // Note: we cannot call x509ValidateCertificate instead as it will refuse non-CA self-signed (we managed above)
     bool bIsValid = crt_check_validity(&pToValidate->crt);
     if (!bIsValid)
     {
