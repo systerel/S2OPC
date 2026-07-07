@@ -82,8 +82,21 @@ echo "[II] Headers copied to ${SRC_DIR}/sample_inc"
 # Patch main entry
 FILE=${FREERTOS_CORE_DIR-}/Src/main.c 
 sed -i 's/^.*USER CODE BEGIN 5.*$/  extern void sopc_main_entry\(void *\); sopc_main_entry\(NULL\);/g' ${FILE-} || exit 3
+! grep -q '^. extern void sopc_main_entry(void \*); sopc_main_entry(NULL);' ${FILE-} && echo "[EE] '`basename ${FILE-}`' patched failed for main entry to call S2OPC code" && exit 3 
 # unix2dos.exe ${FILE-} >/dev/null 2>/dev/null  ## Only used to avoid EOL issue if needed on Windows
 echo "[II] Main entry patched to call S2OPC code"
+
+# Patch Ethernet module to handle correctly DMA and Cache synchronization
+FILE=${FREERTOS_CORE_DIR-}/../LWIP/Target/ethernetif.c
+sed -z -E -i 's#pbuf_ref\(p\);[[:space:]]*(do[[:space:]]*\{[[:space:]]*if[[:space:]]*\([[:space:]]*HAL_ETH_Transmit_IT\([[:space:]]*&heth,[[:space:]]*&tx_config[[:space:]]*\)[[:space:]]*==[[:space:]]*HAL_OK[[:space:]]*\))#pbuf_ref(p);\
+  /* USER CODE BEGIN 1 */\
+  /* ETH_CODE: Clean D cache before DMA */\
+  SCB_CleanDCache_by_Addr(tx_config.TxBuffer->buffer, tx_config.TxBuffer->len);\
+  /* USER CODE END 1 */\
+\1#g'  ${FILE-} || exit 4
+! grep -q 'SCB_CleanDCache_by_Addr(tx_config.TxBuffer->buffer, tx_config.TxBuffer->len);' ${FILE-}  && echo "[EE] '`basename ${FILE-}`' patched failed for  LWIP TX buffer DMA"  && exit 1
+echo "[II] LWIP TX buffer DMA synchronization patch"
+
 
 if [ ${OPT_CRYPTO} == "mbedtls" ]; then
     # install Mbedtls version 3.6.6 if not already installed
@@ -121,7 +134,7 @@ tr -d '\r' <${FILE-}.crlf >${FILE-}
 rm -f ${FILE-}.crlf
 res=false
 sed -i 's/^\( *ETH_MACDMAConfig(heth); *\)$/\1 extern void SOPC_ETH_MAC_Filter_Config(ETH_HandleTypeDef*); SOPC_ETH_MAC_Filter_Config(heth);/g' ${FILE-} 
-! grep -q '^ *ETH_MACDMAConfig(heth); *extern void' ${FILE-} && echo "[II] '`basename ${FILE-}`' patched failed for 'ETH MAC filter'"  && exit 1
+! grep -q '^ *ETH_MACDMAConfig(heth); *extern void' ${FILE-} && echo "[EE] '`basename ${FILE-}`' patched failed for 'ETH MAC filter'"  && exit 1
 unix2dos.exe ${FILE-} >/dev/null 2>/dev/null
 echo "[II] '`basename ${FILE-}`' patched for 'ETH MAC filter'"
 
