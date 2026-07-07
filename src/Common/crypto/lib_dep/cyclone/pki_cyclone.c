@@ -895,10 +895,10 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
 
     /**
      * While:
-     * 1) The validation on the previous certificate of the chain went ok
-     * 2) The new certificate of the chain is not trusted
+     * 1) The parent certificate in the chain is found
+     * 2) The parent certificate is not the root certificate
      */
-    while (0 == failure_reason_on_certificate && !leafAndIntCA_isRoot)
+    while (NULL != leafAndIntCA && !leafAndIntCA_isRoot)
     {
         // Verify with profile
         crt_verify_profile_in_chain(leafAndIntCA, pProfile, &failure_reason_on_certificate);
