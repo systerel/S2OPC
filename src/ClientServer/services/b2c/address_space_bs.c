@@ -44,6 +44,7 @@
 #include "sopc_numeric_range.h"
 #include "sopc_service_call_context.h"
 #include "sopc_toolkit_config_internal.h"
+#include "sopc_types.h"
 #include "sopc_user_manager.h"
 #include "util_b2c.h"
 #include "util_variant.h"
@@ -284,10 +285,17 @@ void address_space_bs__addNode_AddressSpace_Variable(
                 &OpcUa_VariableAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
     SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
     bool recursive = S2OPC_NODE_INTERNAL_ADD_CHILD_NODES || !address_space_bs__p_local;
+    // Make a shallow copy to an actual VariableAttributes to manage well generic NodeAttributes that is a subset
+    OpcUa_VariableAttributes tmpVarAttributes;
+    OpcUa_VariableAttributes_Initialize(&tmpVarAttributes);
+    memcpy(&tmpVarAttributes, address_space_bs__p_nodeAttributes->Body.Object.Value,
+           address_space_bs__p_nodeAttributes->Body.Object.ObjType->AllocationSize);
+    // Restore specific encodeable type
+    tmpVarAttributes.encodeableType = &OpcUa_VariableAttributes_EncodeableType;
+
     SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddVariableNode(
         addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
-        address_space_bs__p_browseName,
-        (const OpcUa_VariableAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value,
+        address_space_bs__p_browseName, (const OpcUa_VariableAttributes*) &tmpVarAttributes,
         address_space_bs__p_typeDefId, recursive);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 
@@ -318,11 +326,17 @@ void address_space_bs__addNode_AddressSpace_Object(
 
     SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
     bool recursive = S2OPC_NODE_INTERNAL_ADD_CHILD_NODES || !address_space_bs__p_local;
+    // Make a shallow copy to an actual ObjectAttributes to manage well generic NodeAttributes that is a subset
+    OpcUa_ObjectAttributes tmpObjAttributes;
+    OpcUa_ObjectAttributes_Initialize(&tmpObjAttributes);
+    memcpy(&tmpObjAttributes, address_space_bs__p_nodeAttributes->Body.Object.Value,
+           address_space_bs__p_nodeAttributes->Body.Object.ObjType->AllocationSize);
+    // Restore specific encodeable type
+    tmpObjAttributes.encodeableType = &OpcUa_ObjectAttributes_EncodeableType;
+
     SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddObjectNode(
         addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
-        address_space_bs__p_browseName,
-        (const OpcUa_ObjectAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value,
-        address_space_bs__p_typeDefId, recursive);
+        address_space_bs__p_browseName, &tmpObjAttributes, address_space_bs__p_typeDefId, recursive);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 
     if (SOPC_IsGoodOrUncertainStatus(retCode))
@@ -348,10 +362,17 @@ void address_space_bs__addNode_AddressSpace_Method(
     SOPC_ASSERT(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
                 &OpcUa_MethodAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
     SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, true);
+    // Make a shallow copy to an actual MethodAttributes to manage well generic NodeAttributes that is a subset
+    OpcUa_MethodAttributes tmpMethAttributes;
+    OpcUa_MethodAttributes_Initialize(&tmpMethAttributes);
+    memcpy(&tmpMethAttributes, address_space_bs__p_nodeAttributes->Body.Object.Value,
+           address_space_bs__p_nodeAttributes->Body.Object.ObjType->AllocationSize);
+    // Restore specific encodeable type
+    tmpMethAttributes.encodeableType = &OpcUa_MethodAttributes_EncodeableType;
+
     SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddMethodNode(
         addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
-        address_space_bs__p_browseName,
-        (const OpcUa_MethodAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value);
+        address_space_bs__p_browseName, &tmpMethAttributes);
     util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 
     if (SOPC_IsGoodStatus(retCode))
