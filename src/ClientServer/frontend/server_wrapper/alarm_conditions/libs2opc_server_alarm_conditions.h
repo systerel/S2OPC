@@ -139,8 +139,8 @@ SOPC_ReturnStatus SOPC_ServerAlarmConditionMgr_Initialize(SOPC_MethodCallManager
  * \brief Clears the Alarm & Conditions manager after server stopped.
  *
  * \warning The server shall be stopped otherwise this call is ignored
- * \warning Any previously created alarm condition instance using ::SOPC_ServerAlarmCondition_Create shall not be used
- * after this call, those are deallocated and become invalid.
+ * \warning Any previously created alarm condition instance using ::SOPC_AlarmCondition_CreateFromEvent
+ *          shall not be used after this call, those are deallocated and become invalid.
  */
 void SOPC_ServerAlarmConditionMgr_Clear(void);
 
@@ -701,6 +701,26 @@ SOPC_ReturnStatus SOPC_AlarmCondition_SetConfirmedStateCallback(SOPC_AlarmCondit
                                                                 SOPC_AlarmCondition_StateChanged_Fct* callback,
                                                                 uintptr_t userCbCtx);
 
+/**
+ * \brief Deletes a previously created alarm condition instance.
+ *
+ * Unregisters the instance from the Alarm and Conditions manager and releases
+ * associated resources (including ConditionRefresh cached events). Address-space
+ * condition nodes are not removed.
+ *
+ * \param[in,out] ppAlarmCondition Address of the instance pointer; set to NULL on success
+ *
+ * \warning The server shall be started, thus ::SOPC_Server_Start or ::SOPC_Server_Serve shall have been called
+ * \warning The instance shall not be used after a successful call
+ *
+ * \note After deletion, ::SOPC_AlarmCondition_CreateFromEvent may be called again for the same
+ *       condition NodeId as at the original creation.
+ *
+ * \return SOPC_STATUS_OK if the instance was deleted,
+ *         SOPC_STATUS_INVALID_PARAMETERS if \p ppAlarmCondition or \p *ppAlarmCondition is NULL,
+ *         SOPC_STATUS_INVALID_STATE if the manager is not initialized, the server is not started,
+ *         or the instance is not registered (stale pointer or double delete)
+ */
 SOPC_ReturnStatus SOPC_AlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCondition);
 
 #endif

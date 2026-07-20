@@ -698,3 +698,37 @@ SOPC_ReturnStatus SOPC_AlarmCondition_SetConfirmedStateCallback(SOPC_AlarmCondit
     return SOPC_AlarmCondition_SetStateChangeCallbackFromStrPath(pAlarmCondition, cConfirmedStatePaths.self, callback,
                                                                  userCbCtx);
 }
+
+SOPC_ReturnStatus SOPC_AlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCondition)
+{
+    if (!SOPC_InternalAlarmConditionMgr_IsInit() || !SOPC_ServerInternal_IsStarted())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == ppAlarmCondition || NULL == *ppAlarmCondition)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_AlarmCondition* ac = *ppAlarmCondition;
+    bool registered = false;
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
+    {
+        bool found = false;
+        SOPC_AlarmCondition* live = (SOPC_AlarmCondition*) SOPC_Dict_Get(
+            sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &ac->conditionNode, &found);
+        registered = found && live == ac;
+    }
+    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    if (!registered)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    SOPC_InternalServerAlarmCondition_Delete(ppAlarmCondition);
+    return SOPC_STATUS_OK;
+}

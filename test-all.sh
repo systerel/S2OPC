@@ -146,7 +146,8 @@ AUDIT_TAP_FILES=$'\nclient_server_audit_test.tap'
 EVENT_TAP_FILES=$'\nclient_server_events_test.tap'
 
 ALARMS_TAP_FILES=$'\nclient_server_alarms_test.tap
-client_demo_server_alarms_test.tap'
+client_demo_server_alarms_test.tap
+toolkit_test_server_alarm_condition_delete.tap'
 
 rm -f "${TAP_DIR}"/*.tap
 

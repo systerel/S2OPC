@@ -946,6 +946,19 @@ if(expat_FOUND AND S2OPC_EVENT_MANAGEMENT)
   s2opc_validation_test(client_server_events_test toolkit_test_client_events events)
   s2opc_validation_test_demo_alarms(client_demo_server_alarms_test 2)
   s2opc_validation_test(client_server_alarms_test toolkit_test_client_alarms alarms 4)
+
+  add_executable(toolkit_test_server_alarm_condition_delete
+    "validation_tests/server/toolkit_test_server_alarm_condition_delete.c"
+    ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+  add_dependencies(toolkit_test_server_alarm_condition_delete toolkit_demo_server toolkit_demo_server_alarms)
+  target_link_libraries(toolkit_test_server_alarm_condition_delete PRIVATE s2opc_clientserver)
+  target_include_directories(toolkit_test_server_alarm_condition_delete PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
+  target_compile_options(toolkit_test_server_alarm_condition_delete PRIVATE ${SOPC_COMPILER_FLAGS})
+  target_compile_definitions(toolkit_test_server_alarm_condition_delete PRIVATE ${S2OPC_DEFINITIONS})
+
+  s2opc_unit_test(toolkit_test_server_alarm_condition_delete GENERATE_TAP)
+  set_tests_properties("unit::toolkit_test_server_alarm_condition_delete" PROPERTIES
+    ENVIRONMENT "CK_TAP_LOG_FILE_NAME=toolkit_test_server_alarm_condition_delete.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Alarms_NodeSet.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml;TEST_PASSWORD_PRIVATE_KEY=password")
 endif()
 
 if(expat_FOUND AND S2OPC_HAS_AUDITING)
