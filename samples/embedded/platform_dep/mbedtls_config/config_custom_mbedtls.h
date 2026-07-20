@@ -45,6 +45,9 @@
 
 #define MBEDTLS_CIPHER_MODE_CTR
 
+#define MBEDTLS_BASE64_C
+#define MBEDTLS_PEM_PARSE_C
+
 #define MBEDTLS_OID_C
 #define MBEDTLS_MD_C
 #define MBEDTLS_BIGNUM_C
