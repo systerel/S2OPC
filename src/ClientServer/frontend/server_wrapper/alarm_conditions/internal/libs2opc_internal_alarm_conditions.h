@@ -230,8 +230,18 @@ SOPC_ReturnStatus SOPC_InternalAlarmCondition_SetComment(SOPC_AlarmCondition* pA
                                                          const SOPC_LocalizedText* comment,
                                                          const SOPC_String* userId);
 
-// Delete A&C instance
-void SOPC_ServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond);
+/**
+ * \brief Deletes an A&C instance and related ConditionRefresh state.
+ *
+ * When the instance is registered in g_alarmConditionsDict (pointer identity match),
+ * it is removed from that dictionary first; the dict value-free path releases
+ * resources. Otherwise resources are released directly (e.g. create rollback before
+ * dict insert). In both cases g_refreshEventsDict is cleaned up and ac->mut is
+ * drained so in-flight async TBP/Write callbacks observe the instance as stale.
+ *
+ * \param[in, out] ppAlarmCond Address of the AC pointer; set to NULL on return
+ */
+void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond);
 
 /*
  * Internal functions to manage A&C instances with mutex locked prior to call

@@ -111,6 +111,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_call_method_manager.h"
+#include "sopc_enums.h"
 #include "sopc_event.h"
 
 /**
@@ -163,6 +164,13 @@ typedef struct _SOPC_AlarmCondition SOPC_AlarmCondition;
  *                           it shall not be used anymore by caller after a successful call
  *                           (memory is managed by the server).
  * \param[out] outAlarmCond  the alarm condition instance created on successful call.
+ *
+ * \return SOPC_STATUS_OK creation succeeded,
+ *         SOPC_STATUS_INVALID_STATE if module is not initialized or server not started,
+ *         SOPC_STATUS_INVALID_PARAMETERS if argument is invalid (NULL instance),
+ *         SOPC_STATUS_WOULD_BLOCK if \p conditionNode was already used to create an instance (and was never deleted),
+ *         SOPC_OUT_OF_MEMORY in case allocation failed,
+ *         SOPC_STATUS_NOK if module is not initialized,
  *
  * \warning The server shall be started, thus ::SOPC_Server_Start or :: SOPC_Server_Serve shall have been called
  *
@@ -692,5 +700,7 @@ SOPC_ReturnStatus SOPC_AlarmCondition_SetAckedStateCallback(SOPC_AlarmCondition*
 SOPC_ReturnStatus SOPC_AlarmCondition_SetConfirmedStateCallback(SOPC_AlarmCondition* pAlarmCondition,
                                                                 SOPC_AlarmCondition_StateChanged_Fct* callback,
                                                                 uintptr_t userCbCtx);
+
+SOPC_ReturnStatus SOPC_AlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCondition);
 
 #endif

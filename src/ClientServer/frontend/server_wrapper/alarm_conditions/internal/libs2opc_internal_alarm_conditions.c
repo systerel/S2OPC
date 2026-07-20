@@ -23,29 +23,107 @@
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server_internal.h"
 #include "opcua_identifiers.h"
-#include "opcua_statuscodes.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_event_handler.h"
 #include "sopc_event_manager.h"
-#include "sopc_hash.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_threads.h"
 #include "util_variant.h"
 
+#include <stdint.h>
 #include <string.h>
 
 typedef struct
 {
     SOPC_AlarmCondition* ac;
+    /* Owned copy of ac->conditionNode: used to detect stale async callbacks after AC free/overwrite */
+    SOPC_NodeId conditionNode;
     const char** varPathArr;
 } SOPC_InternalLocalService_Ctx;
 
 #define QN_SRC_TS "0:SourceTimestamp"
+
+/* Tombstones for Dict_Remove */
+static const uintptr_t ALARM_CONDITIONS_DICT_TOMBSTONE = UINTPTR_MAX;
+static const uintptr_t REFRESH_EVENTS_DICT_TOMBSTONE = UINTPTR_MAX;
+
+/**
+ * \brief Frees a local-service async context and its owned resources.
+ * \param[in, out] ppCtx Context pointer; set to NULL on return.
+ */
+static void SOPC_InternalLocalService_Ctx_Delete(SOPC_InternalLocalService_Ctx** ppCtx)
+{
+    if (NULL == ppCtx || NULL == *ppCtx)
+    {
+        return;
+    }
+    SOPC_InternalLocalService_Ctx* ctx = *ppCtx;
+    SOPC_NodeId_Clear(&ctx->conditionNode);
+    SOPC_Free((void*) ctx->varPathArr); /* MSVC 15 considers array is const otherwise */
+    SOPC_Free(ctx);
+    *ppCtx = NULL;
+}
+
+/**
+ * \brief Binds \p ctx to \p ac and stores an owned copy of \p ac->conditionNode.
+ *
+ * The copy is required so async callbacks can detect overwrite/free without
+ * dereferencing a dangling AC pointer (Dict lookup key must outlive \p ac).
+ *
+ * \param[in, out] ctx Async context to update
+ * \param ac Alarm condition instance referenced by the pending local service
+ * \return true on success, false if the NodeId copy failed
+ */
+static bool SOPC_InternalLocalService_Ctx_SetAc(SOPC_InternalLocalService_Ctx* ctx, SOPC_AlarmCondition* ac)
+{
+    SOPC_ASSERT(NULL != ctx);
+    SOPC_ASSERT(NULL != ac);
+    ctx->ac = ac;
+    SOPC_NodeId_Clear(&ctx->conditionNode);
+    SOPC_NodeId_Initialize(&ctx->conditionNode);
+    return (SOPC_STATUS_OK == SOPC_NodeId_Copy(&ctx->conditionNode, &ac->conditionNode));
+}
+
+/**
+ * \brief Locks the AC mutex if \p ctx still refers to the registered instance.
+ *
+ * Compares \p ctx->ac to the value currently stored in g_alarmConditionsDict for
+ * \p ctx->conditionNode (owned copy). Lock order is g_mutex then ac->mut so that
+ * SOPC_InternalServerAlarmCondition_Delete can drain holders of ac->mut safely.
+ *
+ * \param ctx Async context with owned conditionNode and original ac pointer
+ * \param[out] outAc Live AC when returning true; caller must Unlock(\p outAc->mut)
+ * \return true if the AC is still registered and ac->mut is locked, false if stale
+ */
+static bool SOPC_InternalLocalService_TryLockAC(SOPC_InternalLocalService_Ctx* ctx, SOPC_AlarmCondition** outAc)
+{
+    if (NULL == ctx || NULL == outAc || NULL == sopc_alarmConditionConfig.g_alarmConditionsDict)
+    {
+        return false;
+    }
+    *outAc = NULL;
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    bool found = false;
+    SOPC_AlarmCondition* live = (SOPC_AlarmCondition*) SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict,
+                                                                     (uintptr_t) &ctx->conditionNode, &found);
+    if (!found || live != ctx->ac)
+    {
+        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        return false;
+    }
+    mutStatus = SOPC_Mutex_Lock(&live->mut);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    *outAc = live;
+    return true;
+}
 
 const SOPC_InternalTwoStateVariableFieldsPaths cEnabledStatePaths = {
     .self = "0:EnabledState",
@@ -160,9 +238,53 @@ static void SOPC_RefreshEvent_Free(uintptr_t data)
     SOPC_Event_Delete((SOPC_Event**) &data);
 }
 
+/**
+ * \brief Frees alarm condition resources and removes related ConditionRefresh state.
+ *
+ * Does not update g_alarmConditionsDict. Used as the dict value-free path and when
+ * ::SOPC_InternalServerAlarmCondition_Delete finds the instance is not registered.
+ *
+ * \param[in, out] ppAlarmCond Address of the AC pointer; set to NULL on return when non-NULL input.
+ */
+static void SOPC_InternalServerAlarmCondition_FreeInstance(SOPC_AlarmCondition** ppAlarmCond)
+{
+    if (NULL != ppAlarmCond && NULL != *ppAlarmCond)
+    {
+        SOPC_AlarmCondition* pAlarmCond = *ppAlarmCond;
+        if (NULL != sopc_alarmConditionConfig.g_refreshEventsDict)
+        {
+            SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+            SOPC_Dict_Remove(sopc_alarmConditionConfig.g_refreshEventsDict, (uintptr_t) &pAlarmCond->conditionNode);
+            mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        }
+        // Drain any async callback that already passed TryLockAc and holds ac->mut
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pAlarmCond->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        mutStatus = SOPC_Mutex_Unlock(&pAlarmCond->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        SOPC_Mutex_Clear(&pAlarmCond->mut);
+        SOPC_NodeId_Clear(&pAlarmCond->notifierNode);
+        SOPC_NodeId_Clear(&pAlarmCond->conditionNode);
+        SOPC_Event_Delete(&pAlarmCond->data);
+        SOPC_EventIdList_Delete(&pAlarmCond->ackEventIds);
+        SOPC_EventIdList_Delete(&pAlarmCond->confEventIds);
+        SOPC_EventIdList_Delete(&pAlarmCond->globalEventIds);
+        SOPC_Event_Delete(&pAlarmCond->nodeIds);
+        int32_t methodsCount = SOPC_AC_METHOD_COUNT;
+        SOPC_Clear_Array(&methodsCount, (void**) &pAlarmCond->methodIds, sizeof(*pAlarmCond->methodIds),
+                         &SOPC_NodeId_ClearAux);
+        SOPC_Dict_Delete(pAlarmCond->varChangedCbDict);
+        SOPC_Free(pAlarmCond);
+        *ppAlarmCond = NULL;
+    }
+}
+
 static void SOPC_AlarmConditionValue_Free(uintptr_t ac)
 {
-    SOPC_ServerAlarmCondition_Delete((SOPC_AlarmCondition**) &ac);
+    SOPC_InternalServerAlarmCondition_FreeInstance((SOPC_AlarmCondition**) &ac);
 }
 
 char* SOPC_InternalVarToString(const SOPC_Variant* var)
@@ -238,7 +360,8 @@ static void onLibEvt(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, 
     case SOPC_AC_EVT_WRITE_RESP:
         writeResp = (OpcUa_WriteResponse*) params;
         lsCtx = (SOPC_InternalLocalService_Ctx*) auxParam;
-        conditionIdStr = SOPC_NodeId_ToCString(&lsCtx->ac->conditionNode);
+        /* Use owned NodeId copy: AC may already have been freed or overwritten. */
+        conditionIdStr = SOPC_NodeId_ToCString(&lsCtx->conditionNode);
         for (int32_t i = 0; i < writeResp->NoOfResults; i++)
         {
             if (!SOPC_IsGoodStatus(writeResp->Results[i]))
@@ -250,8 +373,7 @@ static void onLibEvt(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, 
             }
         }
         SOPC_Free(conditionIdStr);
-        SOPC_Free((void*) lsCtx->varPathArr); // MSVC 15 considers array is const otherwise
-        SOPC_Free(lsCtx);
+        SOPC_InternalLocalService_Ctx_Delete(&lsCtx);
         SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) params, (void**) &params);
         break;
     case SOPC_AC_EVT_METHOD_CALL_SET_STATE:
@@ -367,11 +489,7 @@ static void SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct(SOPC_EncodeableT
     {
         // In case there is no post delete context (response is automatically deleted after call)
         SOPC_InternalLocalService_Ctx* lsCtx = (SOPC_InternalLocalService_Ctx*) helperCtx->userContext;
-        if (NULL != lsCtx)
-        {
-            SOPC_Free((void*) lsCtx->varPathArr); // MSVC 15 considers array is const otherwise
-            SOPC_Free(lsCtx);
-        }
+        SOPC_InternalLocalService_Ctx_Delete(&lsCtx);
     }
 }
 
@@ -403,6 +521,15 @@ SOPC_ReturnStatus SOPC_ServerAlarmConditionMgr_Initialize(SOPC_MethodCallManager
         sopc_alarmConditionConfig.g_alarmConditionsDict =
             SOPC_NodeId_Dict_Create(false, &SOPC_AlarmConditionValue_Free);
         sopc_alarmConditionConfig.g_refreshEventsDict = SOPC_NodeId_Dict_Create(false, &SOPC_RefreshEvent_Free);
+        // Required for SOPC_Dict_Remove
+        if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
+        {
+            SOPC_Dict_SetTombstoneKey(sopc_alarmConditionConfig.g_alarmConditionsDict, ALARM_CONDITIONS_DICT_TOMBSTONE);
+        }
+        if (NULL != sopc_alarmConditionConfig.g_refreshEventsDict)
+        {
+            SOPC_Dict_SetTombstoneKey(sopc_alarmConditionConfig.g_refreshEventsDict, REFRESH_EVENTS_DICT_TOMBSTONE);
+        }
     }
     if (NULL == sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr ||
         NULL == sopc_alarmConditionConfig.g_alarmConditionsDict ||
@@ -456,25 +583,39 @@ void SOPC_ServerAlarmConditionMgr_Clear(void)
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 }
 
-void SOPC_ServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
+void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
 {
-    if (NULL != ppAlarmCond && NULL != *ppAlarmCond)
+    if (NULL == ppAlarmCond || NULL == *ppAlarmCond)
     {
-        SOPC_AlarmCondition* pAlarmCond = *ppAlarmCond;
-        SOPC_Mutex_Clear(&pAlarmCond->mut);
-        SOPC_NodeId_Clear(&pAlarmCond->notifierNode);
-        SOPC_NodeId_Clear(&pAlarmCond->conditionNode);
-        SOPC_Event_Delete(&pAlarmCond->data);
-        SOPC_EventIdList_Delete(&pAlarmCond->ackEventIds);
-        SOPC_EventIdList_Delete(&pAlarmCond->confEventIds);
-        SOPC_EventIdList_Delete(&pAlarmCond->globalEventIds);
-        SOPC_Event_Delete(&pAlarmCond->nodeIds);
-        int32_t methodsCount = SOPC_AC_METHOD_COUNT;
-        SOPC_Clear_Array(&methodsCount, (void**) &pAlarmCond->methodIds, sizeof(*pAlarmCond->methodIds),
-                         &SOPC_NodeId_ClearAux);
-        SOPC_Dict_Delete(pAlarmCond->varChangedCbDict);
-        SOPC_Free(pAlarmCond);
+        return;
+    }
+
+    SOPC_AlarmCondition* pAlarmCond = *ppAlarmCond;
+    bool freedViaDictRemove = false;
+
+    if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
+    {
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        bool found = false;
+        SOPC_AlarmCondition* live = (SOPC_AlarmCondition*) SOPC_Dict_Get(
+            sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &pAlarmCond->conditionNode, &found);
+        if (found && live == pAlarmCond)
+        {
+            freedViaDictRemove = true;
+            SOPC_Dict_Remove(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &pAlarmCond->conditionNode);
+        }
+        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    }
+
+    if (freedViaDictRemove)
+    {
         *ppAlarmCond = NULL;
+    }
+    else
+    {
+        SOPC_InternalServerAlarmCondition_FreeInstance(ppAlarmCond);
     }
 }
 
@@ -528,18 +669,18 @@ static void SOPC_InternalWrite_InitAlarmCondition_Node_Values(SOPC_AlarmConditio
     mutStatus = SOPC_Mutex_Unlock(&ac->mut);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    tbpCtx->ac = ac;
     tbpCtx->varPathArr = varPathArr;
+    if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
+    {
+        SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
+        return;
+    }
     bool res = SOPC_ServerInternal_LocalServiceAsync(
         &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
         "Failure to treat Write to initialize A&C nodes from event.", false);
     if (!res)
     {
-        // Delete context
-        SOPC_Free(tbpCtx);
-        SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
-        tbpCtx = NULL;
-        varPathArr = NULL;
+        SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
     }
 }
 
@@ -547,6 +688,16 @@ static void SOPC_InternalWrite_InitAlarmCondition_Node_Values(SOPC_AlarmConditio
 
 static void onTranslateBPresp(SOPC_InternalLocalService_Ctx* lsCtx, OpcUa_TranslateBrowsePathsToNodeIdsResponse* resp)
 {
+    SOPC_AlarmCondition* ac = NULL;
+    if (!SOPC_InternalLocalService_TryLockAC(lsCtx, &ac))
+    {
+        /* AC was overwritten or freed while TBP was in flight: drop the stale response. */
+        SOPC_InternalLocalService_Ctx_Delete(&lsCtx);
+        SOPC_EncodeableObject_Delete(resp->encodeableType, (void**) &resp);
+        return;
+    }
+    // else: SOPC_Mutex_Lock(&ac->mut) ongoing due to SOPC_InternalLocalService_TryLockAC
+
     // nodeId array to prepare the write request to initialize the node values
     SOPC_NodeId* nodeIdArr = NULL;
 
@@ -562,11 +713,7 @@ static void onTranslateBPresp(SOPC_InternalLocalService_Ctx* lsCtx, OpcUa_Transl
     nodeIdVar.ArrayType = SOPC_VariantArrayType_SingleValue;
     nodeIdVar.BuiltInTypeId = SOPC_NodeId_Id;
 
-    SOPC_AlarmCondition* ac = lsCtx->ac;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&ac->mut);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    // Retrieve NodeId
     for (int32_t i = 0; NULL != nodeIdArr && i < resp->NoOfResults - SOPC_AC_METHOD_COUNT; i++)
     {
         if (SOPC_IsGoodStatus(resp->Results[i].StatusCode) && resp->Results[i].NoOfTargets > 0 &&
@@ -663,16 +810,16 @@ static void onTranslateBPresp(SOPC_InternalLocalService_Ctx* lsCtx, OpcUa_Transl
         methodIdx++;
     }
     SOPC_InternalMethod_InitAlarmCondition_Methods(g_mcm, ac);
-    mutStatus = SOPC_Mutex_Unlock(&ac->mut);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    /* Schedule follow-up Write while still holding ac->mut (recursive lock inside Write_Init). */
     if (noOfVarNodeIds > SOPC_AC_METHOD_COUNT && NULL != nodeIdArr)
     {
         SOPC_InternalWrite_InitAlarmCondition_Node_Values(
-            lsCtx->ac, noOfVarNodeIds, (size_t) resp->NoOfResults - SOPC_AC_METHOD_COUNT, nodeIdArr, lsCtx->varPathArr);
+            ac, noOfVarNodeIds, (size_t) resp->NoOfResults - SOPC_AC_METHOD_COUNT, nodeIdArr, lsCtx->varPathArr);
     }
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Unlock(&ac->mut);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     SOPC_Free(nodeIdArr);
-    SOPC_Free((void*) lsCtx->varPathArr); // MSVC 15 considers array is const otherwise
-    SOPC_Free(lsCtx);
+    SOPC_InternalLocalService_Ctx_Delete(&lsCtx);
     SOPC_EncodeableObject_Delete(resp->encodeableType, (void**) &resp);
 }
 
@@ -799,26 +946,34 @@ void SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(SOPC_AlarmCon
         SOPC_ASSERT(((int32_t) fillCtx.index + SOPC_AC_METHOD_COUNT) == tbpReq->NoOfBrowsePaths);
         // Fill TBP request for each supported AandC method
         SOPC_InternalTBP_GetAlarmCondition_Method_NodeIds(fillCtx.index, ac, tbpReq);
-        tbpCtx->ac = ac;
         tbpCtx->varPathArr = varPathArr;
-        reqNeedDealloc = false;
-        bool res = SOPC_ServerInternal_LocalServiceAsync(
-            &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, tbpReq, (uintptr_t) tbpCtx,
-            "Failure to treat TBP to initialize A&C nodes from event.", false);
-        if (!res)
+        if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
         {
-            // Delete context
-            SOPC_Free(tbpCtx);
-            SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
-            tbpCtx = NULL;
-            varPathArr = NULL;
+            SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
+            reqNeedDealloc = true;
+        }
+        else
+        {
+            reqNeedDealloc = false;
+            bool res = SOPC_ServerInternal_LocalServiceAsync(
+                &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, tbpReq, (uintptr_t) tbpCtx,
+                "Failure to treat TBP to initialize A&C nodes from event.", false);
+            if (!res)
+            {
+                SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
+                reqNeedDealloc = true;
+            }
         }
     } // else: log error
     if (reqNeedDealloc)
     {
         SOPC_EncodeableObject_Delete(tbpReq->encodeableType, (void**) &tbpReq);
-        SOPC_Free(tbpCtx);
-        SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
+        /* tbpCtx already deleted on SetAc/async failure; only free leftover OOM / empty-path allocs */
+        if (NULL != tbpCtx)
+        {
+            SOPC_Free(tbpCtx);
+            SOPC_Free((void*) varPathArr); /* MSVC 15 considers array is const otherwise */
+        }
     }
 }
 
@@ -985,6 +1140,7 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateVariableNode(SO
             SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
             return SOPC_STATUS_OUT_OF_MEMORY;
         }
+        tbpCtx->varPathArr = varPathArr;
         SOPC_DataValue dv;
         SOPC_DataValue_Initialize(&dv);
         dv.Value = *val;
@@ -996,20 +1152,21 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateVariableNode(SO
         bool res = false;
         if (SOPC_STATUS_OK == status)
         {
-            tbpCtx->ac = ac;
             *varPathArr = varPath;
-            tbpCtx->varPathArr = varPathArr;
-            res = SOPC_ServerInternal_LocalServiceAsync(
-                &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
-                "Failure to treat Write to update value of variable A&C node", false);
+            if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                res = SOPC_ServerInternal_LocalServiceAsync(
+                    &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
+                    "Failure to treat Write to update value of variable A&C node", false);
+            }
         }
         if (!res)
         {
-            // Delete context
-            SOPC_Free(tbpCtx);
-            SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
-            tbpCtx = NULL;
-            varPathArr = NULL;
+            SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
             status = (SOPC_STATUS_OK == status ? SOPC_STATUS_NOK : status);
         }
     }
@@ -1059,6 +1216,7 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateTwoStateVariabl
             SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
             return SOPC_STATUS_OUT_OF_MEMORY;
         }
+        tbpCtx->varPathArr = varPathArr;
         size_t nbWriteIndex = 0;
         SOPC_DataValue dv;
         SOPC_DataValue_Initialize(&dv);
@@ -1089,19 +1247,20 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateTwoStateVariabl
         bool res = false;
         if (SOPC_STATUS_OK == status)
         {
-            tbpCtx->ac = ac;
-            tbpCtx->varPathArr = varPathArr;
-            res = SOPC_ServerInternal_LocalServiceAsync(
-                &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
-                "Failure to treat Write to update TwoState variable A&C nodes", false);
+            if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                res = SOPC_ServerInternal_LocalServiceAsync(
+                    &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
+                    "Failure to treat Write to update TwoState variable A&C nodes", false);
+            }
         }
         if (!res)
         {
-            // Delete context
-            SOPC_Free(tbpCtx);
-            SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
-            tbpCtx = NULL;
-            varPathArr = NULL;
+            SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
             status = (SOPC_STATUS_OK == status ? SOPC_STATUS_NOK : status);
         }
     }

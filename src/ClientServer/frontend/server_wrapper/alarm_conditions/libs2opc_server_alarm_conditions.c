@@ -24,6 +24,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
+#include "sopc_enums.h"
 #include "sopc_event_manager.h"
 #include "sopc_hash.h"
 #include "sopc_helper_string.h"
@@ -74,13 +75,28 @@ SOPC_ReturnStatus SOPC_AlarmCondition_CreateFromEvent(const SOPC_NodeId* notifie
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_AlarmCondition* ac = SOPC_Calloc(1, sizeof(*ac));
-    if (NULL == ac)
+
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    bool bAlreadyExistAC = false;
+    uintptr_t alreadyExistAC =
+        SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) conditionNode, &bAlreadyExistAC);
+    SOPC_UNUSED_RESULT(alreadyExistAC);
+    SOPC_ReturnStatus status = bAlreadyExistAC ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_OK;
+
+    SOPC_AlarmCondition* ac = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        return SOPC_STATUS_OUT_OF_MEMORY;
+        ac = SOPC_Calloc(1, sizeof(*ac));
+        status = (NULL == ac ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
     }
-    // Initialize the AlarmCondition mutex
-    SOPC_ReturnStatus status = SOPC_Mutex_Initialization(&ac->mut);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Initialize the AlarmCondition mutex
+        status = SOPC_Mutex_Initialization(&ac->mut);
+    }
     // Initialize EventId lists for Acknowledge, Confirm and AddComment needed for method calls
     if (SOPC_STATUS_OK == status)
     {
@@ -151,8 +167,11 @@ SOPC_ReturnStatus SOPC_AlarmCondition_CreateFromEvent(const SOPC_NodeId* notifie
     }
     else
     {
-        SOPC_ServerAlarmCondition_Delete(&ac);
+        SOPC_InternalServerAlarmCondition_Delete(&ac);
     }
+    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
     return status;
 }
 
