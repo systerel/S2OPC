@@ -1284,12 +1284,15 @@ OPERATIONS
         l_revSamplingItv,
         l_filterResult
     IN
-        l_revSamplingItv := c_opcua_duration_indet;
-        l_revQueueSize := 0;
-        l_filterResult := c_filterResult_indet;
         l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
         WHILE l_continue = TRUE DO
             l_continue, l_index <-- continue_iter_monitored_item_request;
+            /* Reset per-item outputs before getall/modify. If getall returns bres=FALSE,
+               modify is skipped: a prior EventFilterResult pointer must not be reused in
+               setall (would alias the same heap object in several FilterResult slots). */
+            l_revSamplingItv := c_opcua_duration_indet;
+            l_revQueueSize := 0;
+            l_filterResult := c_filterResult_indet;
             l_bres, l_sc, l_id, l_clientHandle, l_samplingItv, l_filter, l_discardOldest, l_queueSize
               <-- getall_modify_monitored_item_req_params (p_req_msg, l_index);
             IF l_bres = TRUE

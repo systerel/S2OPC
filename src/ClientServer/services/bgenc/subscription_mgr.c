@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 08/07/2026 11:25:13
+ Date                 : 21/07/2026 08:49:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -730,14 +730,14 @@ void subscription_mgr__fill_response_subscription_modify_monitored_items(
       constants__t_opcua_duration_i subscription_mgr__l_revSamplingItv;
       constants__t_filterResult_i subscription_mgr__l_filterResult;
       
-      subscription_mgr__l_revSamplingItv = constants__c_opcua_duration_indet;
-      subscription_mgr__l_revQueueSize = 0;
-      subscription_mgr__l_filterResult = constants__c_filterResult_indet;
       subscription_create_monitored_item_it__init_iter_monitored_item_request(subscription_mgr__p_nb_monitored_items,
          &subscription_mgr__l_continue);
       while (subscription_mgr__l_continue == true) {
          subscription_create_monitored_item_it__continue_iter_monitored_item_request(&subscription_mgr__l_continue,
             &subscription_mgr__l_index);
+         subscription_mgr__l_revSamplingItv = constants__c_opcua_duration_indet;
+         subscription_mgr__l_revQueueSize = 0;
+         subscription_mgr__l_filterResult = constants__c_filterResult_indet;
          msg_subscription_monitored_item__getall_modify_monitored_item_req_params(subscription_mgr__p_req_msg,
             subscription_mgr__l_index,
             &subscription_mgr__l_bres,
