@@ -1287,6 +1287,47 @@ START_TEST(signature_pki_root_no_key_cert_sign_rejects_leaf)
 }
 END_TEST
 
+#define CYCLE_PKI_TEST_STORE "./cycle_pki_test"
+#define CYCLE_PKI_TEST_DIR "./cycle_pki_test/"
+
+static SOPC_ReturnStatus cycle_pki_test_validate(const char* certPath, uint32_t* pValidationError)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_CertificateList* pCert = NULL;
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, &pProfile);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pProfile->chainProfile->bDisableRevocationCheck = true;
+        status = SOPC_PKIProvider_CreateFromStore(CYCLE_PKI_TEST_STORE, &pPKI);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(certPath, &pCert);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCert, pProfile, pValidationError, NULL);
+    }
+    SOPC_KeyManager_Certificate_Free(pCert);
+    SOPC_PKIProvider_DeleteProfile(&pProfile);
+    SOPC_PKIProvider_Free(&pPKI);
+    return status;
+}
+
+START_TEST(cycle_pki_mutual_ca_rejected)
+{
+    uint32_t validationError = 0;
+    SOPC_ReturnStatus status = cycle_pki_test_validate(CYCLE_PKI_TEST_DIR "leaf_cycle.der", &validationError);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, validationError);
+}
+END_TEST
+
 #define REVOCATION_PKI_TEST_STORE "./revocation_pki_test"
 #define REVOCATION_PKI_TEST_DIR "./revocation_pki_test/"
 
@@ -1414,7 +1455,7 @@ END_TEST
 Suite* tests_make_suite_pki(void)
 {
     Suite* s;
-    TCase *invalid, *certificate_properties, *functional, *expired, *bad_signature, *revocation;
+    TCase *invalid, *certificate_properties, *functional, *expired, *bad_signature, *chain_depth, *revocation;
 
     s = suite_create("PKI API test");
     invalid = tcase_create("invalid");
@@ -1475,6 +1516,10 @@ Suite* tests_make_suite_pki(void)
     tcase_add_test(bad_signature, signature_pki_int_case1_intermediate_bad_signature_rejected);
     tcase_add_test(bad_signature, signature_pki_root_no_key_cert_sign_rejects_leaf);
     suite_add_tcase(s, bad_signature);
+
+    chain_depth = tcase_create("chain depth");
+    tcase_add_test(chain_depth, cycle_pki_mutual_ca_rejected);
+    suite_add_tcase(s, chain_depth);
 
     revocation = tcase_create("revocation");
     tcase_add_test(revocation, revocation_pki_store_loads_all_trusted_material);

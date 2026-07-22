@@ -73,6 +73,11 @@ typedef struct
 #define PKI_CYCLONE_X509_BADCRL_BAD_MD 0x200
 #define PKI_CYCLONE_X509_BADCRL_BAD_PK 0x400
 
+// Max untrusted intermediate CAs when walking the chain (trusted root excluded).
+#ifndef PKI_CYCLONE_MAX_INTERMEDIATE_CA
+#define PKI_CYCLONE_MAX_INTERMEDIATE_CA 8U
+#endif
+
 static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_reasons)
 {
     if (0 != (failure_reasons &
@@ -735,7 +740,8 @@ static void crt_find_parent_in(const SOPC_CertificateList* child,
     {
         /* According to the x509ValidateCertificate implementation, Cyclone may return ERROR_CERTIFICATE_EXPIRED
          * before verifying issuer/subject match. Ensure the candidate is the expected issuer first. */
-        if (crt_cert_issuer_matches_ca_subject(&child->crt, &pParent->crt))
+        if ((const SOPC_CertificateList*) pParent != child &&
+            crt_cert_issuer_matches_ca_subject(&child->crt, &pParent->crt))
         {
             /* This Cyclone function :
              * - checks the validity of child ;
@@ -892,13 +898,18 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
     uint32_t failure_reason_on_certificate = 0;
     bool parent_isRoot = false;
     bool leafAndIntCA_isRoot = false;
+    bool chain_depth_exceeded = false;
+    uint32_t intermediate_cnt = 0U;
 
     /**
      * While:
      * 1) The parent certificate in the chain is found
      * 2) The parent certificate is not the root certificate
+     * 3) intermediate_cnt has not exceeded PKI_CYCLONE_MAX_INTERMEDIATE_CA
+     *
+     * The depth cap prevents a cyclic or overlong issuer graph from spinning forever.
      */
-    while (NULL != leafAndIntCA && !leafAndIntCA_isRoot)
+    while (NULL != leafAndIntCA && !leafAndIntCA_isRoot && !chain_depth_exceeded)
     {
         // Verify with profile
         crt_verify_profile_in_chain(leafAndIntCA, pProfile, &failure_reason_on_certificate);
@@ -916,9 +927,19 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
         }
         else
         {
+            if (!parent_isRoot)
+            {
+                intermediate_cnt++;
+                if (intermediate_cnt > PKI_CYCLONE_MAX_INTERMEDIATE_CA)
+                {
+                    failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
+                    chain_depth_exceeded = true;
+                }
+            }
+
             // If a parent has been found, proceed on some checks on its associated CRL
             // and check if the child is not revoked.
-            if (!pProfile->bDisableRevocationCheck)
+            if (!chain_depth_exceeded && !pProfile->bDisableRevocationCheck)
             {
                 crt_verifycrl_and_check_revocation(leafAndIntCA, parent, cert_crl, pProfile,
                                                    &failure_reason_on_certificate);
@@ -926,9 +947,12 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
         }
 
         // Iterate.
-        leafAndIntCA = parent;
-        parent = NULL;
-        leafAndIntCA_isRoot = parent_isRoot;
+        if (!chain_depth_exceeded)
+        {
+            leafAndIntCA = parent;
+            parent = NULL;
+            leafAndIntCA_isRoot = parent_isRoot;
+        }
     }
 
     if (leafAndIntCA_isRoot)

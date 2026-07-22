@@ -1,0 +1,37 @@
+PKI store for cyclic issuer / chain depth limit tests (check_pki.c, suite `chain depth`).
+
+Tests load the store via `SOPC_PKIProvider_CreateFromStore("./cycle_pki_test")`
+with revocation checks disabled.
+
+## Test cases
+
+| Test | Leaf validated | Chain (leaf to issuers) | Expected |
+|------|----------------|-------------------------|----------|
+| `cycle_pki_mutual_ca_rejected` | `leaf_cycle.der` | leaf -> `ca_cycle_a` -> `ca_cycle_b` -> `ca_cycle_a` -> ... (mutual cross-sign, no path to a trusted root) | NOK, Untrusted |
+
+CA A and B cross-sign each other (`ca_cycle_a` names B as issuer and is signed by B; same for B).
+Neither is in the trusted store. `decoy_root.der` is unrelated: it only allows
+`CreateFromStore` to succeed. Chain building must stop at the intermediate depth cap
+instead of looping forever.
+
+Run (from `build/bin` after POST_BUILD copy):
+
+```bash
+CK_FORK=no CK_RUN_SUITE="PKI API test" CK_RUN_CASE="chain depth" ./check_helpers
+```
+
+## Fixture files
+
+| File | Role |
+|------|------|
+| issuers/certs/ca_cycle_a.der | CA A, issuer B, signed by B |
+| issuers/certs/ca_cycle_b.der | CA B, issuer A, signed by A |
+| trusted/certs/decoy_root.der | Unrelated trusted root (PKI store bootstrap only) |
+| leaf_cycle.der | End entity, issuer A, signed by A |
+
+Regeneration (requires Python 3 and the `cryptography` package):
+
+```bash
+cd tests/ClientServer/data/cert/cycle_pki_test
+python3 generate_certs.py
+```

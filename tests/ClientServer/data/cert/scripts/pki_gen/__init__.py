@@ -20,7 +20,14 @@
 
 """Shared library for PKI test certificate generation scripts."""
 
-from pki_gen.builders import build_ca, build_crl, build_intermediate_ca, build_leaf, build_selfsigned
+from pki_gen.builders import (
+    build_ca,
+    build_crl,
+    build_cross_signed_ca,
+    build_intermediate_ca,
+    build_leaf,
+    build_selfsigned,
+)
 from pki_gen.common import (
     EXPIRED_PERIOD_CA,
     EXPIRED_PERIOD_CRL,
@@ -57,6 +64,7 @@ __all__ = [
     "VALID_PERIOD_LEAF",
     "build_ca",
     "build_crl",
+    "build_cross_signed_ca",
     "build_intermediate_ca",
     "build_leaf",
     "build_selfsigned",

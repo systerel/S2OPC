@@ -77,6 +77,23 @@ def build_intermediate_ca(int_key, root_key, root_cert, name, serial, not_before
     return builder.sign(root_key, hashes.SHA256())
 
 
+def build_cross_signed_ca(subject_key, signer_key, issuer_name, subject_name, serial, not_before, not_after):
+    """Build a CA certificate where issuer and signer belong to different key pairs."""
+    public_key = subject_key.public_key()
+    builder = (
+        x509.CertificateBuilder()
+        .subject_name(subject_name)
+        .issuer_name(issuer_name)
+        .public_key(public_key)
+        .serial_number(serial)
+        .not_valid_before(not_before)
+        .not_valid_after(not_after)
+    )
+    for extension in intermediate_ca_extensions(public_key, signer_key.public_key()):
+        builder = builder.add_extension(extension, critical=isinstance(extension, x509.BasicConstraints))
+    return builder.sign(signer_key, hashes.SHA256())
+
+
 def build_leaf(leaf_key, ca_key, ca_cert, name, serial, not_before, not_after):
     public_key = leaf_key.public_key()
     builder = (
