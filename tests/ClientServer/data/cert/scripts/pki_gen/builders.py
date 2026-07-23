@@ -26,7 +26,7 @@ from cryptography.hazmat.primitives import hashes
 from pki_gen.extensions import ca_extensions, leaf_extensions, selfsigned_app_extensions
 
 
-def build_ca(ca_key, name, serial, not_before, not_after, *, key_cert_sign=True):
+def build_ca(ca_key, name, serial, not_before, not_after, *, key_cert_sign=True, path_length=None):
     public_key = ca_key.public_key()
     builder = (
         x509.CertificateBuilder()
@@ -37,14 +37,14 @@ def build_ca(ca_key, name, serial, not_before, not_after, *, key_cert_sign=True)
         .not_valid_before(not_before)
         .not_valid_after(not_after)
     )
-    for extension in ca_extensions(public_key, key_cert_sign=key_cert_sign):
+    for extension in ca_extensions(public_key, key_cert_sign=key_cert_sign, path_length=path_length):
         builder = builder.add_extension(extension, critical=isinstance(extension, x509.BasicConstraints))
     return builder.sign(ca_key, hashes.SHA256())
 
 
-def intermediate_ca_extensions(public_key, issuer_public_key):
+def intermediate_ca_extensions(public_key, issuer_public_key, *, path_length=0):
     return [
-        x509.BasicConstraints(ca=True, path_length=0),
+        x509.BasicConstraints(ca=True, path_length=path_length),
         x509.KeyUsage(
             digital_signature=True,
             key_cert_sign=True,
@@ -61,7 +61,7 @@ def intermediate_ca_extensions(public_key, issuer_public_key):
     ]
 
 
-def build_intermediate_ca(int_key, root_key, root_cert, name, serial, not_before, not_after):
+def build_intermediate_ca(int_key, root_key, root_cert, name, serial, not_before, not_after, *, path_length=0):
     public_key = int_key.public_key()
     builder = (
         x509.CertificateBuilder()
@@ -72,7 +72,7 @@ def build_intermediate_ca(int_key, root_key, root_cert, name, serial, not_before
         .not_valid_before(not_before)
         .not_valid_after(not_after)
     )
-    for extension in intermediate_ca_extensions(public_key, root_key.public_key()):
+    for extension in intermediate_ca_extensions(public_key, root_key.public_key(), path_length=path_length):
         builder = builder.add_extension(extension, critical=isinstance(extension, x509.BasicConstraints))
     return builder.sign(root_key, hashes.SHA256())
 

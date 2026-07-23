@@ -26,6 +26,7 @@
  */
 
 #include <assert.h>
+#include <error.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -726,6 +727,7 @@ static void crt_validity_set_around_current_time(X509Validity* pValidity)
  */
 static void crt_find_parent_in(const SOPC_CertificateList* child,
                                SOPC_CertificateList* parentCandidates,
+                               uint32_t pathLen,
                                uint32_t* failure_reasons,
                                SOPC_CertificateList** ppParent)
 {
@@ -749,7 +751,7 @@ static void crt_find_parent_in(const SOPC_CertificateList* child,
              * - verifies the signature ;
              * Returns 0 if all is ok.
              */
-            errLib = x509ValidateCertificate(&child->crt, &pParent->crt, 0);
+            errLib = x509ValidateCertificate(&child->crt, &pParent->crt, (uint_t) pathLen);
             if (ERROR_CERTIFICATE_EXPIRED == errLib)
             {
                 X509CertificateInfo childForValidation = child->crt;
@@ -759,7 +761,7 @@ static void crt_find_parent_in(const SOPC_CertificateList* child,
                 crt_validity_set_around_current_time(&childForValidation.tbsCert.validity);
                 /* According to the x509ValidateCertificate implementation, Cyclone may return ERROR_CERTIFICATE_EXPIRED
                  * before verifying issuer/subject match. Ensure the issuer is correct without this error */
-                errLib = x509ValidateCertificate(&childForValidation, &pParent->crt, 0);
+                errLib = x509ValidateCertificate(&childForValidation, &pParent->crt, (uint_t) pathLen);
             }
             if (0 == errLib)
             {
@@ -793,6 +795,7 @@ static void crt_find_parent_in(const SOPC_CertificateList* child,
 static void crt_find_parent(const SOPC_CertificateList* child,
                             SOPC_CertificateList* leafAndIntCA,
                             SOPC_CertificateList* rootCA,
+                            uint32_t pathLen,
                             uint32_t* failure_reasons,
                             SOPC_CertificateList** ppParent,
                             bool* parent_isRoot)
@@ -806,13 +809,13 @@ static void crt_find_parent(const SOPC_CertificateList* child,
 
     // Find a parent in rootCA
     *parent_isRoot = true;
-    crt_find_parent_in(child, rootCA, failure_reasons, ppParent);
+    crt_find_parent_in(child, rootCA, pathLen, failure_reasons, ppParent);
 
     // If no parent has been found, search up the initial leaf chain
     if (NULL == *ppParent)
     {
         *parent_isRoot = false;
-        crt_find_parent_in(child, leafAndIntCA, failure_reasons, ppParent);
+        crt_find_parent_in(child, leafAndIntCA, pathLen, failure_reasons, ppParent);
     }
 }
 
@@ -907,6 +910,13 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
      * 2) The parent certificate is not the root certificate
      * 3) intermediate_cnt has not exceeded PKI_CYCLONE_MAX_INTERMEDIATE_CA
      *
+     * intermediate_cnt is also passed as pathLen to x509ValidateCertificate: at each step it
+     * counts non-root issuers already traversed from the leaf, which matches RFC 5280
+     * pathLenConstraint when no self-issued intermediate is present. OPC UA Part 6 only
+     * profiles self-signed certificates (application instance or root CA); RFC 5280
+     * self-issued intermediate link certificates (subject DN equals issuer DN, foreign
+     * signature) are out of scope and need not be excluded from the count here.
+     *
      * The depth cap prevents a cyclic or overlong issuer graph from spinning forever.
      */
     while (NULL != leafAndIntCA && !leafAndIntCA_isRoot && !chain_depth_exceeded)
@@ -920,7 +930,8 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
         // Find a parent in trusted CA first or in the pToValidate chain.
         // This function will also verify the signature if a parent is found,
         // and check time-validity of leafAndIntCA.
-        crt_find_parent(leafAndIntCA, pToValidate, trust_list, &failure_reason_on_certificate, &parent, &parent_isRoot);
+        crt_find_parent(leafAndIntCA, pToValidate, trust_list, intermediate_cnt, &failure_reason_on_certificate,
+                        &parent, &parent_isRoot);
         if (NULL == parent)
         {
             failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
@@ -962,7 +973,7 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
         crt_verify_profile_in_chain(leafAndIntCA, pProfile, &failure_reason_on_certificate);
 
         // Validates it (only expiration should occur at this level)
-        int errLib = x509ValidateCertificate(&leafAndIntCA->crt, &leafAndIntCA->crt, 0);
+        error_t errLib = x509ValidateCertificate(&leafAndIntCA->crt, &leafAndIntCA->crt, 0);
         if (ERROR_CERTIFICATE_EXPIRED == errLib)
         {
             failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_EXPIRED;

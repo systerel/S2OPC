@@ -24,9 +24,9 @@ from cryptography import x509
 from cryptography.x509.oid import ExtendedKeyUsageOID
 
 
-def ca_extensions(public_key, *, key_cert_sign=True):
+def ca_extensions(public_key, *, key_cert_sign=True, path_length=None):
     return [
-        x509.BasicConstraints(ca=True, path_length=None),
+        x509.BasicConstraints(ca=True, path_length=path_length),
         x509.KeyUsage(
             digital_signature=True,
             key_cert_sign=key_cert_sign,

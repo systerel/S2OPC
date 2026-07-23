@@ -1,0 +1,45 @@
+PKI store for pathLenConstraint chain tests (check_pki.c, suite `chain pathlen`).
+
+Tests load the store via `SOPC_PKIProvider_CreateFromStore("./pathlen_pki_test")`
+with revocation checks disabled.
+
+## Test cases
+
+| Test | Leaf validated | Chain (leaf to root) | Expected |
+|------|----------------|----------------------|----------|
+| `pathlen_pki_one_intermediate_accepted` | `leaf_ok.der` | leaf -> `ca_int_ok` -> `root_pathlen1` (pathLen 1) | OK |
+| `pathlen_pki_root_pathlen0_leaf_accepted` | `leaf_ok_pathlen0.der` | leaf -> `root_pathlen0` (pathLen 0, no intermediate) | OK |
+| `pathlen_pki_root_pathlen0_rejected` | `leaf_nok_pathlen0.der` | leaf -> `ca_int_from_root_pathlen0` -> `root_pathlen0` (pathLen 0) | NOK, Untrusted |
+| `pathlen_pki_root_pathlen1_two_intermediates_rejected` | `leaf_nok_pathlen1.der` | leaf -> `ca_int2_ok` -> `ca_int_ok` -> `root_pathlen1` (pathLen 1) | NOK, Untrusted |
+| `pathlen_pki_intermediate_pathlen0_rejected` | `leaf_nok_int_pathlen0.der` | leaf -> `ca_int_from_int_pathLen0` -> `ca_int_pathLen0` (pathLen 0) -> `root_int` | NOK, Untrusted |
+
+Run (from `build/bin` after POST_BUILD copy):
+
+```bash
+CK_FORK=no CK_RUN_SUITE="PKI API test" CK_RUN_CASE="chain pathlen" ./check_helpers
+```
+
+## Fixture files
+
+| File | Role |
+|------|------|
+| trusted/certs/root_pathlen1.der | Root pathLen 1 (cases 1 and 4) |
+| issuers/certs/ca_int_ok.der | First intermediate, no pathLenConstraint |
+| leaf_ok.der | Accepted leaf under root pathLen 1 |
+| issuers/certs/ca_int2_ok.der | Second intermediate (case 4) |
+| leaf_nok_pathlen1.der | Rejected leaf, two intermediates under root pathLen 1 |
+| trusted/certs/root_pathlen0.der | Root pathLen 0 (cases 2 and 3) |
+| issuers/certs/ca_int_from_root_pathlen0.der | Intermediate under root pathLen 0 (case 3) |
+| leaf_ok_pathlen0.der | Accepted leaf signed directly by root pathLen 0 |
+| leaf_nok_pathlen0.der | Rejected leaf, one intermediate under root pathLen 0 |
+| trusted/certs/root_int.der | Root without pathLenConstraint (case 5) |
+| issuers/certs/ca_int_pathLen0.der | Intermediate pathLen 0 |
+| issuers/certs/ca_int_from_int_pathLen0.der | Second intermediate under pathLen 0 CA |
+| leaf_nok_int_pathlen0.der | Rejected leaf, exceeds intermediate pathLen 0 |
+
+Regeneration (requires Python 3 and the `cryptography` package):
+
+```bash
+cd tests/ClientServer/data/cert/pathlen_pki_test
+python3 generate_certs.py
+```

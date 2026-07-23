@@ -46,7 +46,7 @@ scripts/
 
 ```bash
 cd tests/ClientServer/data/cert
-for d in expired_in_pki_test revocation_pki_test signature_pki_test cycle_pki_test; do
+for d in expired_in_pki_test revocation_pki_test signature_pki_test cycle_pki_test pathlen_pki_test; do
   (cd "$d" && python3 generate_certs.py)
 done
 ```

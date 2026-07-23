@@ -677,6 +677,24 @@ endfunction()
 
 make_cycle_pki_test(check_helpers)
 
+function(make_pathlen_pki_test target_exe)
+  set(PKI_NAME pathlen_pki_test)
+  set(PKI_SRC ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/${PKI_NAME})
+  add_custom_command(
+    TARGET ${target_exe} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PKI_SRC}/trusted ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/trusted
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PKI_SRC}/issuers ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/issuers
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_ok.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_ok_pathlen0.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_nok_pathlen0.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_nok_pathlen1.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PKI_SRC}/leaf_nok_int_pathlen0.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PKI_NAME}/
+    )
+endfunction()
+
+make_pathlen_pki_test(check_helpers)
+
 function(make_revocation_pki_test target_exe)
   set(PKI_NAME revocation_pki_test)
   set(PKI_SRC ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/${PKI_NAME})

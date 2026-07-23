@@ -29,7 +29,7 @@ from pathlib import Path
 
 from cryptography import x509
 
-MIGRATED_TESTS = ("expired_in_pki_test", "revocation_pki_test", "signature_pki_test", "cycle_pki_test")
+MIGRATED_TESTS = ("expired_in_pki_test", "revocation_pki_test", "signature_pki_test", "cycle_pki_test", "pathlen_pki_test")
 
 
 # Compatibility shim for cryptography < 42.0 (naive UTC attrs). Drop when >= 42.0
