@@ -23,12 +23,15 @@
  */
 
 #include <inttypes.h>
+#if defined(_MSC_VER)
 #include <string.h>
+
+#include "sopc_assert.h"
+#endif
 
 #include "libs2opc_response_helper.h"
 
 #include "opcua_statuscodes.h"
-#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
@@ -220,80 +223,151 @@ static SOPC_ReturnStatus SOPC_ServiceResponse_CheckCallSubResultCounts(const SOP
     return status;
 }
 
-#define SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTOR_COUNT 16U
+#if defined(_MSC_VER)
+
+#define SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTOR_SLOT_COUNT 16U
 
 static SOPC_ServiceResponse_CountDescriptor
-    SOPC_gServiceResponseCountDescriptors[SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTOR_COUNT];
+    SOPC_gServiceResponseCountDescriptors[SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTOR_SLOT_COUNT];
 static bool SOPC_gServiceResponseCountDescriptorsInitialized = false;
 
-static void SOPC_ServiceResponse_InitCountDescriptors(void)
-{
-    if (SOPC_gServiceResponseCountDescriptorsInitialized)
-    {
-        return;
+#define SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTORS_OPEN                                                    \
+    static void SOPC_ServiceResponse_InitCountDescriptors(void)                                         \
+    {                                                                                                   \
+        if (SOPC_gServiceResponseCountDescriptorsInitialized)                                           \
+        {                                                                                               \
+            return;                                                                                     \
+        }                                                                                               \
+                                                                                                        \
+        /* Note: cannot use a file-scope static const initializer on Windows (MSVC C2099): addresses of \
+         *       static functions are not constant expressions (same constraint as ticket #911). */     \
+        const SOPC_ServiceResponse_CountDescriptor entries[] = {
+#define SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTORS_CLOSE                                                       \
+    ;                                                                                                       \
+    SOPC_ASSERT(sizeof(entries) / sizeof(entries[0]) == SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTOR_SLOT_COUNT); \
+    memcpy(SOPC_gServiceResponseCountDescriptors, entries, sizeof(entries));                                \
+    SOPC_gServiceResponseCountDescriptorsInitialized = true;                                                \
     }
 
-    // Note: cannot be declared statically on Windows (MSVC C2099): addresses of static functions are not constant
-    //       expressions in a file-scope initializer (same constraint as ticket #911 for DLL imported globals).
-    const SOPC_ServiceResponse_CountDescriptor entries[] = {
-        {&OpcUa_ReadRequest_EncodeableType, &OpcUa_ReadResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_ReadRequest, SOPC_ServiceResponse_GetCount_OpcUa_ReadResponse, "Read",
-         NULL},
-        {&OpcUa_WriteRequest_EncodeableType, &OpcUa_WriteResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_WriteRequest, SOPC_ServiceResponse_GetCount_OpcUa_WriteResponse, "Write",
-         NULL},
-        {&OpcUa_BrowseRequest_EncodeableType, &OpcUa_BrowseResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_BrowseRequest, SOPC_ServiceResponse_GetCount_OpcUa_BrowseResponse,
-         "Browse", SOPC_ServiceResponse_CheckBrowseSubResultCounts},
-        {&OpcUa_BrowseNextRequest_EncodeableType, &OpcUa_BrowseNextResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_BrowseNextRequest, SOPC_ServiceResponse_GetCount_OpcUa_BrowseNextResponse,
-         "BrowseNext", NULL},
-        {&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
-         &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_TranslateBrowsePathsToNodeIdsRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_TranslateBrowsePathsToNodeIdsResponse, "TranslateBrowsePathsToNodeIds",
-         NULL},
-        {&OpcUa_CallRequest_EncodeableType, &OpcUa_CallResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_CallRequest, SOPC_ServiceResponse_GetCount_OpcUa_CallResponse, "Call",
-         SOPC_ServiceResponse_CheckCallSubResultCounts},
-        {&OpcUa_HistoryReadRequest_EncodeableType, &OpcUa_HistoryReadResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_HistoryReadRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_HistoryReadResponse, "HistoryRead", NULL},
-        {&OpcUa_AddNodesRequest_EncodeableType, &OpcUa_AddNodesResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_AddNodesRequest, SOPC_ServiceResponse_GetCount_OpcUa_AddNodesResponse,
-         "AddNodes", NULL},
-        {&OpcUa_DeleteNodesRequest_EncodeableType, &OpcUa_DeleteNodesResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_DeleteNodesRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_DeleteNodesResponse, "DeleteNodes", NULL},
-        {&OpcUa_CreateMonitoredItemsRequest_EncodeableType, &OpcUa_CreateMonitoredItemsResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_CreateMonitoredItemsRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_CreateMonitoredItemsResponse, "CreateMonitoredItems", NULL},
-        {&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, &OpcUa_ModifyMonitoredItemsResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_ModifyMonitoredItemsRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_ModifyMonitoredItemsResponse, "ModifyMonitoredItems", NULL},
-        {&OpcUa_SetMonitoringModeRequest_EncodeableType, &OpcUa_SetMonitoringModeResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_SetMonitoringModeRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_SetMonitoringModeResponse, "SetMonitoringMode", NULL},
-        {&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, &OpcUa_DeleteMonitoredItemsResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_DeleteMonitoredItemsRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_DeleteMonitoredItemsResponse, "DeleteMonitoredItems", NULL},
-        {&OpcUa_SetPublishingModeRequest_EncodeableType, &OpcUa_SetPublishingModeResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_SetPublishingModeRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_SetPublishingModeResponse, "SetPublishingMode", NULL},
-        {&OpcUa_TransferSubscriptionsRequest_EncodeableType, &OpcUa_TransferSubscriptionsResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_TransferSubscriptionsRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_TransferSubscriptionsResponse, "TransferSubscriptions", NULL},
-        {&OpcUa_DeleteSubscriptionsRequest_EncodeableType, &OpcUa_DeleteSubscriptionsResponse_EncodeableType,
-         SOPC_ServiceResponse_GetCount_OpcUa_DeleteSubscriptionsRequest,
-         SOPC_ServiceResponse_GetCount_OpcUa_DeleteSubscriptionsResponse, "DeleteSubscriptions", NULL},
-    };
+#define SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTOR_COUNT SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTOR_SLOT_COUNT
 
-    SOPC_ASSERT(sizeof(entries) == sizeof(SOPC_gServiceResponseCountDescriptors));
-    memcpy(SOPC_gServiceResponseCountDescriptors, entries, sizeof(entries));
-    SOPC_gServiceResponseCountDescriptorsInitialized = true;
-}
+#else /* !defined(_MSC_VER) */
 
-static const SOPC_ServiceResponse_CountDescriptor* SOPC_ServiceResponse_FindDescriptor(SOPC_EncodeableType* requestType)
+#define SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTORS_OPEN \
+    static const SOPC_ServiceResponse_CountDescriptor SOPC_gServiceResponseCountDescriptors[] = {
+#define SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTORS_CLOSE \
+    }                                                 \
+    ;                                                 \
+    static void SOPC_ServiceResponse_InitCountDescriptors(void) {}
+
+#define SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTOR_COUNT \
+    (sizeof(SOPC_gServiceResponseCountDescriptors) / sizeof(SOPC_gServiceResponseCountDescriptors[0]))
+
+#endif /* defined(_MSC_VER) */
+
+SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTORS_OPEN{&OpcUa_ReadRequest_EncodeableType,
+                                             &OpcUa_ReadResponse_EncodeableType,
+                                             SOPC_ServiceResponse_GetCount_OpcUa_ReadRequest,
+                                             SOPC_ServiceResponse_GetCount_OpcUa_ReadResponse,
+                                             "Read",
+                                             NULL},
+    {&OpcUa_WriteRequest_EncodeableType,
+     &OpcUa_WriteResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_WriteRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_WriteResponse,
+     "Write",
+     NULL},
+    {&OpcUa_BrowseRequest_EncodeableType,
+     &OpcUa_BrowseResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_BrowseRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_BrowseResponse,
+     "Browse",
+     SOPC_ServiceResponse_CheckBrowseSubResultCounts},
+    {&OpcUa_BrowseNextRequest_EncodeableType,
+     &OpcUa_BrowseNextResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_BrowseNextRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_BrowseNextResponse,
+     "BrowseNext",
+     NULL},
+    {&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
+     &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_TranslateBrowsePathsToNodeIdsRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_TranslateBrowsePathsToNodeIdsResponse,
+     "TranslateBrowsePathsToNodeIds",
+     NULL},
+    {&OpcUa_CallRequest_EncodeableType,
+     &OpcUa_CallResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_CallRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_CallResponse,
+     "Call",
+     SOPC_ServiceResponse_CheckCallSubResultCounts},
+    {&OpcUa_HistoryReadRequest_EncodeableType,
+     &OpcUa_HistoryReadResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_HistoryReadRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_HistoryReadResponse,
+     "HistoryRead",
+     NULL},
+    {&OpcUa_AddNodesRequest_EncodeableType,
+     &OpcUa_AddNodesResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_AddNodesRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_AddNodesResponse,
+     "AddNodes",
+     NULL},
+    {&OpcUa_DeleteNodesRequest_EncodeableType,
+     &OpcUa_DeleteNodesResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_DeleteNodesRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_DeleteNodesResponse,
+     "DeleteNodes",
+     NULL},
+    {&OpcUa_CreateMonitoredItemsRequest_EncodeableType,
+     &OpcUa_CreateMonitoredItemsResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_CreateMonitoredItemsRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_CreateMonitoredItemsResponse,
+     "CreateMonitoredItems",
+     NULL},
+    {&OpcUa_ModifyMonitoredItemsRequest_EncodeableType,
+     &OpcUa_ModifyMonitoredItemsResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_ModifyMonitoredItemsRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_ModifyMonitoredItemsResponse,
+     "ModifyMonitoredItems",
+     NULL},
+    {&OpcUa_SetMonitoringModeRequest_EncodeableType,
+     &OpcUa_SetMonitoringModeResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_SetMonitoringModeRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_SetMonitoringModeResponse,
+     "SetMonitoringMode",
+     NULL},
+    {&OpcUa_DeleteMonitoredItemsRequest_EncodeableType,
+     &OpcUa_DeleteMonitoredItemsResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_DeleteMonitoredItemsRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_DeleteMonitoredItemsResponse,
+     "DeleteMonitoredItems",
+     NULL},
+    {&OpcUa_SetPublishingModeRequest_EncodeableType,
+     &OpcUa_SetPublishingModeResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_SetPublishingModeRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_SetPublishingModeResponse,
+     "SetPublishingMode",
+     NULL},
+    {&OpcUa_TransferSubscriptionsRequest_EncodeableType,
+     &OpcUa_TransferSubscriptionsResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_TransferSubscriptionsRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_TransferSubscriptionsResponse,
+     "TransferSubscriptions",
+     NULL},
+    {&OpcUa_DeleteSubscriptionsRequest_EncodeableType,
+     &OpcUa_DeleteSubscriptionsResponse_EncodeableType,
+     SOPC_ServiceResponse_GetCount_OpcUa_DeleteSubscriptionsRequest,
+     SOPC_ServiceResponse_GetCount_OpcUa_DeleteSubscriptionsResponse,
+     "DeleteSubscriptions",
+     NULL},
+    SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTORS_CLOSE
+
+#undef SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTORS_OPEN
+#undef SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTORS_CLOSE
+
+    static const SOPC_ServiceResponse_CountDescriptor*
+    SOPC_ServiceResponse_FindDescriptor(SOPC_EncodeableType* requestType)
 {
     const SOPC_ServiceResponse_CountDescriptor* result = NULL;
 
