@@ -243,6 +243,7 @@ static bool SOPC_gServiceResponseCountDescriptorsInitialized = false;
          *       static functions are not constant expressions (same constraint as ticket #911). */     \
         const SOPC_ServiceResponse_CountDescriptor entries[] = {
 #define SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTORS_CLOSE                                                       \
+    }                                                                                                       \
     ;                                                                                                       \
     SOPC_ASSERT(sizeof(entries) / sizeof(entries[0]) == SOPC_SERVICE_RESPONSE_COUNT_DESCRIPTOR_SLOT_COUNT); \
     memcpy(SOPC_gServiceResponseCountDescriptors, entries, sizeof(entries));                                \
