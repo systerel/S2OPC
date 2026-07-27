@@ -21,6 +21,7 @@
 
 #include <inttypes.h>
 
+#include "sopc_builtintypes.h"
 #include "sopc_date_time.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -321,8 +322,10 @@ void msg_subscription_publish_bs__setall_notification_msg_monitored_item_data_no
         (OpcUa_DataChangeNotification*) msg_subscription_publish_bs__p_notifMsg->NotificationData->Body.Object.Value;
     dataChangeNotif->MonitoredItems[msg_subscription_publish_bs__p_index - 1].ClientHandle =
         msg_subscription_publish_bs__p_clientHandle;
-    SOPC_DataValue_Copy(&dataChangeNotif->MonitoredItems[msg_subscription_publish_bs__p_index - 1].Value,
-                        &msg_subscription_publish_bs__p_wv_pointer->Value);
+    // Optimization: move DataValue memory (shallow copy + forced init) as it was already a deep copy:
+    dataChangeNotif->MonitoredItems[msg_subscription_publish_bs__p_index - 1].Value =
+        msg_subscription_publish_bs__p_wv_pointer->Value;
+    SOPC_DataValue_Initialize(&msg_subscription_publish_bs__p_wv_pointer->Value);
 
     OpcUa_WriteValue_Clear(msg_subscription_publish_bs__p_wv_pointer);
     SOPC_Free(msg_subscription_publish_bs__p_wv_pointer);
