@@ -52,6 +52,9 @@ SOPC_AddressSpace* address_space_bs__nodes = NULL;
 
 static bool sopc_addressSpace_configured = false;
 
+/* For prev_dataValue in set_Value: its lifetime is a single WriteValue processing, singleton avoid useless alloc */
+static SOPC_DataValue setValueTmpDataValue = {0};
+
 #define GENERATED_NODE_NAMESPACE_INDEX 1
 
 #define InputArguments_BrowseName "InputArguments"
@@ -1195,7 +1198,8 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     SOPC_Variant* convertedValue = NULL;
     const SOPC_Variant* newValue = address_space_bs__variant;
 
-    *address_space_bs__prev_dataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
+    SOPC_ASSERT(SOPC_Null_Id == setValueTmpDataValue.Value.BuiltInTypeId);
+    *address_space_bs__prev_dataValue = &setValueTmpDataValue;
     SOPC_DataValue_Initialize(*address_space_bs__prev_dataValue);
 
     if (address_space_bs__toConvert)
@@ -1233,7 +1237,6 @@ void address_space_bs__set_Value(const constants__t_user_i address_space_bs__p_u
     else
     {
         SOPC_DataValue_Clear(*address_space_bs__prev_dataValue);
-        SOPC_Free(*address_space_bs__prev_dataValue);
         *address_space_bs__prev_dataValue = NULL;
     }
 
@@ -1351,8 +1354,8 @@ void address_space_bs__read_AddressSpace_free_variant(const constants__t_Variant
 
 void address_space_bs__write_AddressSpace_free_dataValue(const constants__t_DataValue_i address_space_bs__data)
 {
+    // Clears setValueTmpDataValue
     SOPC_DataValue_Clear(address_space_bs__data);
-    SOPC_Free(address_space_bs__data);
 }
 
 void address_space_bs__gen_fresh_NodeId(t_bool* const address_space_bs__bres,
