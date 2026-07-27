@@ -64,6 +64,8 @@ Suite* tests_make_suite_circular_queue(void);
 
 Suite* tests_make_suite_circular_queue_autogrow(void);
 
+Suite* tests_make_suite_static_pool(SRunner* sr);
+
 Suite* tests_make_suite_array(void);
 
 Suite* tests_make_suite_event_handler(void);

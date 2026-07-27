@@ -76,6 +76,7 @@ int main(void)
     srunner_add_suite(sr, tests_make_suite_nodeid_hash());
     srunner_add_suite(sr, tests_make_suite_circular_queue());
     srunner_add_suite(sr, tests_make_suite_circular_queue_autogrow());
+    srunner_add_suite(sr, tests_make_suite_static_pool(sr));
     srunner_add_suite(sr, tests_make_suite_array());
     srunner_add_suite(sr, tests_make_suite_event_handler());
     srunner_add_suite(sr, tests_make_suite_common_helper_thread_config());
