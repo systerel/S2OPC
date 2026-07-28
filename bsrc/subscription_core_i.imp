@@ -1767,12 +1767,17 @@ OPERATIONS
             l_lifetimeCounter <-- get_subscription_LifetimeCounter (p_subscription);
             IF l_lifetimeCounter <= 1
             THEN
+                /* LifetimeCounter == 1 => close subscription */
                 p_close_sub := TRUE;
                 log_subscription_transition (p_subscription, l_state, l_state, 27)
             ELSE
+                /* The LifetimeCounter is decremented if PublishingTimer expires
+                   and PublishingReqQueued == FALSE*/
                 decrement_subscription_LifetimeCounter (p_subscription)
             END
-     /* ELSE: Since some valid publishing requests are available nothing to do */
+        ELSE
+            /* The LifetimeCounter is reset if PublishingReqQueued == TRUE. */
+            reset_subscription_LifetimeCounter(p_subscription)
         END
     END
     ;
@@ -1829,8 +1834,6 @@ OPERATIONS
             log_subscription_transition (p_subscription, e_subscriptionState_normal, e_subscriptionState_normal, 6);
             /* Note: same treatment as #14 below ! */
 
-            /* reset lifetime counter */
-            reset_subscription_LifetimeCounter (p_subscription);
             /* retrieve a valid publish response */
             l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
               <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
@@ -1851,8 +1854,6 @@ OPERATIONS
               )
         THEN
             log_subscription_transition (p_subscription, e_subscriptionState_normal, e_subscriptionState_normal, 7);
-            /* reset lifetime counter */
-            reset_subscription_LifetimeCounter (p_subscription);
             /* retrieve a valid publish response */
             l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
               <-- pop_valid_publish_request_queue (l_PublishingReqQueue);
@@ -1900,8 +1901,8 @@ OPERATIONS
             set_subscription_state (p_subscription, e_subscriptionState_normal, 14);
 
             /* Note: same treatment as #7 below ! */
-            /* reset lifetime counter */
-            reset_subscription_LifetimeCounter (p_subscription);
+            /* reset lifetime counter: already done by server_subscription_core_publish_timeout_check_lifetime
+               executed prior to server_subscription_core_publish_timeout */
 
             /* retrieve a valid publish response */
             l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
@@ -1927,6 +1928,9 @@ OPERATIONS
             reset_subscription_KeepAliveCounter (p_subscription);
 
             /* Note: same treatment as #7 below ! */
+            /* reset lifetime counter: already done by server_subscription_core_publish_timeout_check_lifetime
+               executed prior to server_subscription_core_publish_timeout */
+
             /* retrieve a valid publish response */
             l_req_exp_time, p_req_handle, p_req_context, p_publish_resp_msg
               <-- pop_valid_publish_request_queue (l_PublishingReqQueue);

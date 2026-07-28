@@ -1124,9 +1124,8 @@ OPERATIONS
     END
     ;
 
-    /* Transition #27 shall be evaluated prior to other possible transitions since lifeTimeCounter--
-       never done in other transitions
-    */
+    /* Transition #27 shall be evaluated prior to other possible transitions
+       since lifeTimeCounter reset or lifeTimeCounter-- never done in other transitions */
     p_close_sub, p_msg_to_send, p_publish_resp_msg, p_req_handle, p_req_context, p_validPubReqQueued
       <-- server_subscription_core_publish_timeout_check_lifetime (p_session, p_subscription) =
     PRE
@@ -1162,6 +1161,7 @@ OPERATIONS
                         d_publish_timeout_no_msg_sent
                     END
                 ELSE
+                    a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) || /* reset lifetime counter */
                     p_close_sub := FALSE ||
                     d_publish_timeout_no_msg_sent
                 END
@@ -1198,8 +1198,8 @@ OPERATIONS
                l_PublishingEnabled = TRUE &
                l_NotificationAvailable = TRUE
             THEN
-                /* reset lifetime counter */
-                a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
+                /* reset lifetime counter: already done by server_subscription_core_publish_timeout_check_lifetime
+                   executed prior to server_subscription_core_publish_timeout */
                 d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
                 /* return notifications (dequeue notifications) + update MoreNotification variable */
                 d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs,
@@ -1216,8 +1216,8 @@ OPERATIONS
                     l_NotificationAvailable = FALSE)
                   )
             THEN
-                /* reset lifetime counter */
-                a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
+                /* reset lifetime counter: already done by server_subscription_core_publish_timeout_check_lifetime
+                   executed prior to server_subscription_core_publish_timeout */
                 d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
                 d_publish_timeout_keepAlive_msg_sent
 
@@ -1259,8 +1259,8 @@ OPERATIONS
                   p_validPublishReqQueued = TRUE
             THEN
                 a_subscription_state (p_subscription) := e_subscriptionState_normal ||
-                /* reset lifetime counter */
-                a_LifetimeCounter (p_subscription) := a_lifetimeExpCount (p_subscription) ||
+                /* reset lifetime counter: already done by server_subscription_core_publish_timeout_check_lifetime
+                   executed prior to server_subscription_core_publish_timeout */
                 d_dequeue_publish_req (p_subscription, p_publish_resp_msg) ||
                 /* return notifications (dequeue notifications) + update MoreNotification variable */
                 d_publish_timeout_notif_msg_sent_dequeuing_notifications (p_subscription, p_msg_sc, p_moreNotifs,

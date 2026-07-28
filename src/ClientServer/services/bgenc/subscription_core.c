@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 08/07/2026 11:25:12
+ Date                 : 28/07/2026 14:56:01
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1488,6 +1488,9 @@ void subscription_core__server_subscription_core_publish_timeout_check_lifetime(
             subscription_core_1__decrement_subscription_LifetimeCounter(subscription_core__p_subscription);
          }
       }
+      else {
+         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
+      }
    }
 }
 
@@ -1557,7 +1560,6 @@ void subscription_core__server_subscription_core_publish_timeout(
             constants__e_subscriptionState_normal,
             constants__e_subscriptionState_normal,
             6);
-         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          publish_request_queue_bs__pop_valid_publish_request_queue(subscription_core__l_PublishingReqQueue,
             &subscription_core__l_req_exp_time,
             subscription_core__p_req_handle,
@@ -1620,7 +1622,6 @@ void subscription_core__server_subscription_core_publish_timeout(
             constants__e_subscriptionState_normal,
             constants__e_subscriptionState_normal,
             7);
-         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          publish_request_queue_bs__pop_valid_publish_request_queue(subscription_core__l_PublishingReqQueue,
             &subscription_core__l_req_exp_time,
             subscription_core__p_req_handle,
@@ -1671,7 +1672,6 @@ void subscription_core__server_subscription_core_publish_timeout(
          subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_normal,
             14);
-         subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          publish_request_queue_bs__pop_valid_publish_request_queue(subscription_core__l_PublishingReqQueue,
             &subscription_core__l_req_exp_time,
             subscription_core__p_req_handle,
