@@ -18,6 +18,44 @@ security and benchmarks the performance of various kind of requests. The size of
 each request is settable via the command line. The program will keep doing
 measurements until the average time stabilizes enough that it is representative.
 
+## bench_nodeid_dict
+
+Micro-benchmark for `SOPC_NodeId_Dict_Create` lookup performance. It fills a
+dictionary with 500k NodeIds (by default) and measures the time to perform
+millions of lookups. It compares a DJB baseline, the current production hash
+(`SOPC_NodeId_Hash`) and alternative hash functions (native FNV-1a, numeric
+fast-path). The DJB baseline walks the NodeId fields itself rather than calling
+`SOPC_NodeId_Hash`, so the reference column keeps its meaning when the
+production hash changes.
+
+Lookup timings are repeated 5 times; both the median and the best run are
+reported.
+
+Before timing, a validation pass checks:
+- all NodeIds in the key set are distinct
+- hash stability and equal-key consistency for each variant
+- chi-square of the low hash bits over 4096 classes
+- probe-chain simulation (with table saturation detection)
+- hash-value collision count among distinct keys
+- a portable reference hash (canonical FNV-1a on fixed-endian encoding)
+
+Reading the results: the dictionary indexes buckets with
+`(hash + f(i)) & (size - 1)`, so only the low bits of the hash matter. The
+meaningful quality criteria are therefore `chi2/dof` (1.0 means as uniform as a
+random mapping, well above 1 means an unevenly loaded bucket array) and the
+probe statistics. The collision count is a sanity check only: for 500k distinct
+keys an ideal 64-bit hash is expected to produce about 7e-9 colliding pairs, so
+zero collisions is the normal outcome even for a poor hash and cannot be used to
+rank candidates.
+
+Example:
+
+```
+./bench_nodeid_dict
+./bench_nodeid_dict -p numeric
+./bench_nodeid_dict -n 500000 -l 10000000 -p string
+```
+
 ## Putting it all together
 
 ### Generating the address space

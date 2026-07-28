@@ -340,6 +340,11 @@ target_link_libraries(bench_tool PRIVATE s2opc_clientserver)
 target_compile_options(bench_tool PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(bench_tool PRIVATE ${S2OPC_DEFINITIONS})
 
+add_executable(bench_nodeid_dict "benchmarks/bench_nodeid_dict.c")
+target_link_libraries(bench_nodeid_dict PRIVATE s2opc_clientserver)
+target_compile_options(bench_nodeid_dict PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(bench_nodeid_dict PRIVATE ${S2OPC_DEFINITIONS})
+
 # TODO: XML parsing demo: make a unit test / validation test with it instead of demo
 if (expat_FOUND)
   add_executable(s2opc_parse_uanodeset "loaders/s2opc_parse_uanodeset.c")
