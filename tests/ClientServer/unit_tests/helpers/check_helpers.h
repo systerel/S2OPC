@@ -58,6 +58,8 @@ Suite* tests_make_suite_logger(void);
 
 Suite* tests_make_suite_dict(SRunner* sr);
 
+Suite* tests_make_suite_nodeid_hash(void);
+
 Suite* tests_make_suite_array(void);
 
 Suite* tests_make_suite_event_handler(void);

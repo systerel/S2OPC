@@ -73,6 +73,7 @@ int main(void)
     srunner_add_suite(sr, tests_make_suite_timers());
     srunner_add_suite(sr, tests_make_suite_logger());
     srunner_add_suite(sr, tests_make_suite_dict(sr));
+    srunner_add_suite(sr, tests_make_suite_nodeid_hash());
     srunner_add_suite(sr, tests_make_suite_array());
     srunner_add_suite(sr, tests_make_suite_event_handler());
     srunner_add_suite(sr, tests_make_suite_common_helper_thread_config());
