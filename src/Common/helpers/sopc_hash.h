@@ -48,4 +48,31 @@ uint64_t SOPC_DJBHash(const uint8_t* data, size_t len);
  */
 uint64_t SOPC_DJBHash_Step(uint64_t current, const uint8_t* data, size_t len);
 
+/**
+ * \brief Hashes some data using the 64-bit FNV-1a hash.
+ * \param data  The data to hash.
+ * \param len   The length of the data, in bytes.
+ * \return The resulting hash.
+ *
+ * FNV-1a spreads the input over the low bits of the result much better than DJB, which matters
+ * for the hash tables of this toolkit: SOPC_Dict indexes its buckets with the low bits of the
+ * hash only. Prefer it over SOPC_DJBHash for any new dictionary key.
+ *
+ * The returned value is meant for in-process use (bucket selection, equality shortcut). It must
+ * not be persisted nor transmitted: nothing guarantees stability across versions, and hashing
+ * raw structure fields makes the result depend on the ABI.
+ */
+uint64_t SOPC_FNV1aHash(const uint8_t* data, size_t len);
+
+/**
+ * \brief Appends some data to a 64-bit FNV-1a hash.
+ * \param current  The current value of the hash.
+ * \param data     The data to hash.
+ * \param len      The length of the data, in bytes.
+ * \return The resulting hash.
+ *
+ * This interface allows computing a hash over various pieces of data in several calls.
+ */
+uint64_t SOPC_FNV1aHash_Step(uint64_t current, const uint8_t* data, size_t len);
+
 #endif /* SOPC_HASH_H_ */

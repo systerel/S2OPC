@@ -1013,6 +1013,18 @@ SOPC_ReturnStatus SOPC_NodeId_CompareAux(const void* left, const void* right, in
 bool SOPC_NodeId_Equal(const SOPC_NodeId* left, const SOPC_NodeId* right);
 bool SOPC_NodeId_IsNull(const SOPC_NodeId* nodeId);
 
+/**
+ * \brief Computes the hash of a NodeId, as used by the NodeId dictionaries.
+ *
+ * Two NodeIds that are equal for SOPC_NodeId_Equal always hash to the same value. The converse
+ * does not hold: equal hashes must still be confirmed by SOPC_NodeId_Equal.
+ *
+ * \param nodeId     The NodeId to hash, shall not be NULL.
+ * \param[out] hash  The resulting hash.
+ *
+ * \note The value is only meaningful in the running process: it must not be persisted nor
+ *       transmitted, since it depends on the ABI and may change between toolkit versions.
+ */
 void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash);
 
 /** \brief Allocates a C string containing the normalized representation of a NodeId. Must be freed by caller after use
