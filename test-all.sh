@@ -70,6 +70,7 @@ client_server_test.tap
 client_server_test_add_nodes.tap
 client_server_test_delete_nodes.tap
 client_service_faults_test.tap
+client_sub_lifetime_test.tap
 sc_establish_timeout.tap
 sc_renew.tap
 secure_channel_level_None.tap

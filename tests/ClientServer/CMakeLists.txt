@@ -453,6 +453,12 @@ target_compile_options(toolkit_test_client_service_faults PRIVATE ${S2OPC_COMPIL
 target_compile_definitions(toolkit_test_client_service_faults PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(toolkit_test_client_service_faults PRIVATE s2opc_clientserver)
 
+# Non-regression: subscription LifetimeCounter reset on keep-alive / Publish (ticket #1802)
+add_executable(toolkit_test_client_sub_lifetime "validation_tests/client/toolkit_test_client_sub_lifetime.c")
+target_compile_options(toolkit_test_client_sub_lifetime PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_client_sub_lifetime PRIVATE ${S2OPC_DEFINITIONS})
+target_link_libraries(toolkit_test_client_sub_lifetime PRIVATE s2opc_clientserver)
+
 # Client scenario with ReverseConnection faults
 add_executable(toolkit_test_client_rhe_faults "validation_tests/client/toolkit_test_client_rhe_faults.c")
 target_compile_options(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -820,6 +826,7 @@ s2opc_validation_test(client_server_test toolkit_test_client)
 s2opc_validation_test(client_server_test_add_nodes toolkit_test_client_add_nodes)
 s2opc_validation_test(client_server_test_delete_nodes toolkit_test_client_delete_nodes)
 s2opc_validation_test(client_service_faults_test toolkit_test_client_service_faults)
+s2opc_validation_test(client_sub_lifetime_test toolkit_test_client_sub_lifetime)
 s2opc_validation_test(client_RHE_faults_test toolkit_test_client_rhe_faults)
 
 if(expat_FOUND AND S2OPC_EVENT_MANAGEMENT)
