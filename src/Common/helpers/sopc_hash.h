@@ -30,6 +30,8 @@
 
 /**
  * \brief Hashes some data using DJB hash.
+ * \deprecated Deprecated, planned for removal in toolkit version >= 2.1.0.
+ *             Use ::SOPC_FNV1aHash instead.
  * \param data  The data to hash.
  * \param len   The length of the data, in bytes.
  * \return The resulting hash.
@@ -38,6 +40,8 @@ uint64_t SOPC_DJBHash(const uint8_t* data, size_t len);
 
 /**
  * \brief Appends some data to a DJB hash.
+ * \deprecated Deprecated, planned for removal in toolkit version >= 2.1.0.
+ *             Use ::SOPC_FNV1aHash_Step instead.
  * \param current  The current value of the hash.
  * \param data     The data to hash.
  * \param len      The length of the data, in bytes.
@@ -56,7 +60,7 @@ uint64_t SOPC_DJBHash_Step(uint64_t current, const uint8_t* data, size_t len);
  *
  * FNV-1a spreads the input over the low bits of the result much better than DJB, which matters
  * for the hash tables of this toolkit: SOPC_Dict indexes its buckets with the low bits of the
- * hash only. Prefer it over SOPC_DJBHash for any new dictionary key.
+ * hash only. SOPC_DJBHash is deprecated and FNV-1a shall be used for dictionary keys.
  *
  * The returned value is meant for in-process use (bucket selection, equality shortcut). It must
  * not be persisted nor transmitted: nothing guarantees stability across versions, and hashing
