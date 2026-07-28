@@ -76,7 +76,6 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
             SIZE_MAX / sizeof(OpcUa_MonitoredItemNotification) &&
         (uint64_t) msg_subscription_publish_bs__p_nb_event_notifications < SIZE_MAX / sizeof(OpcUa_EventFieldList))
     {
-        notifMsg->PublishTime = SOPC_Time_GetCurrentTimeUTC();
         notifMsg->NoOfNotificationData = 1;
         bool hasData = msg_subscription_publish_bs__p_nb_data_notifications > 0;
         bool hasEvent = msg_subscription_publish_bs__p_nb_event_notifications > 0;
@@ -295,6 +294,7 @@ void msg_subscription_publish_bs__set_notification_message_sequence_number(
     const constants__t_sub_seq_num_i msg_subscription_publish_bs__p_seq_num)
 {
     msg_subscription_publish_bs__p_notifMsg->SequenceNumber = msg_subscription_publish_bs__p_seq_num;
+    msg_subscription_publish_bs__p_notifMsg->PublishTime = SOPC_Time_GetCurrentTimeUTC();
 }
 
 void msg_subscription_publish_bs__set_publish_response_msg(
