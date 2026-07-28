@@ -90,6 +90,7 @@ SETS
     /* A WriteValue of a WriteRequest. */
     t_WriteValue_i;
     t_WriteValuePointer_i; /* (OpcUa_WriteValue*) */
+    t_WriteValuePointerInPool_i; /* (OpcUa_WriteValue*) */
     t_WriteByPassMask_i; /* (SOPC_ByPassWritePermissionMask) */
 
     /* A BrowseValue of a BrowseRequest. */
@@ -424,6 +425,7 @@ CONCRETE_CONSTANTS
     c_ReadValue_indet,
     c_WriteValue_indet,
     c_WriteValuePointer_indet,
+    c_WriteValuePointerInPool_indet,
     c_WriteByPassMask_none,
     c_BrowseValue_indet,
     c_BrowseResultReferences_indet,
@@ -566,6 +568,7 @@ ABSTRACT_CONSTANTS
     t_ReadValue,
     t_WriteValue,
     t_WriteValuePointer,
+    t_WriteValuePointerInPool,
     t_BrowseValue,
     t_BrowseResultReferences,
     t_RefIndex,
@@ -978,9 +981,15 @@ PROPERTIES
     cast_t_WriteValue : NAT +-> t_WriteValue_i &
     cast_t_WriteValue : perm(t_WriteValue) &
 
+    /* This type is allocated in the standard way (no static memory pool) */
     t_WriteValuePointer <: t_WriteValuePointer_i &
     c_WriteValuePointer_indet : t_WriteValuePointer_i &
     c_WriteValuePointer_indet /: t_WriteValuePointer &
+
+    /* This type is allocated in a static memory pool */
+    t_WriteValuePointerInPool <: t_WriteValuePointerInPool_i &
+    c_WriteValuePointerInPool_indet : t_WriteValuePointerInPool_i &
+    c_WriteValuePointerInPool_indet /: t_WriteValuePointerInPool &
 
     c_WriteByPassMask_none : t_WriteByPassMask_i &
 
@@ -1468,7 +1477,6 @@ PROPERTIES
     conv_ValueRank_Variant : t_ValueRank --> t_Variant &
     conv_ArrayDimensions_Variant : t_ArrayDimensions --> t_Variant &
     conv_DataTypeDefinition_Variant : t_DataTypeDefinition --> t_Variant &
-
 
     conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &
     conv_AccessLevel_CurrentRead : t_access_level --> BOOL &

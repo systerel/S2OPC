@@ -353,12 +353,14 @@ OPERATIONS
     END
     ;
 
-    bres <-- internal_server_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
+    internal_server_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     PRE
-        p_old_write_value_pointer : t_WriteValuePointer_i &
-        p_new_write_value_pointer : t_WriteValuePointer_i
+        p_old_write_value_pointer : t_WriteValuePointerInPool_i &
+        p_old_write_value_pointer : t_WriteValuePointerInPool &
+        p_new_write_value_pointer : t_WriteValuePointerInPool_i &
+        p_new_write_value_pointer : t_WriteValuePointerInPool
     THEN
-        bres :: BOOL
+        skip
     END;
 
     internal_server_node_changed (p_node_added, p_nid) =

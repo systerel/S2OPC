@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_pointer_bs.h
 
- Date                 : 27/03/2024 13:26:18
+ Date                 : 28/07/2026 10:04:43
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -88,8 +88,8 @@ extern void monitored_item_pointer_bs__is_event_monitoredItem(
 extern void monitored_item_pointer_bs__is_notification_triggered(
    const constants__t_LocaleIds_i monitored_item_pointer_bs__p_localeIds,
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
-   const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_old_wv_pointer,
-   const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_new_wv_pointer,
+   const constants__t_WriteValuePointerInPool_i monitored_item_pointer_bs__p_old_wv_pointer,
+   const constants__t_WriteValuePointerInPool_i monitored_item_pointer_bs__p_new_wv_pointer,
    t_bool * const monitored_item_pointer_bs__bres);
 extern void monitored_item_pointer_bs__modify_monitored_item_pointer(
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,

@@ -50,7 +50,7 @@ INVARIANT
     nb_data_notifications : NAT &
     nb_data_notifications <= k_n_monitoredItemNotif_max &
     DataNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId &
-    DataNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointer &
+    DataNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointerInPool &
 
     nb_event_notifications : NAT &
     nb_event_notifications  <= k_n_monitoredItemNotif_max &
@@ -204,8 +204,8 @@ OPERATIONS
         p_monitored_item_id : t_monitoredItemId_i &
         p_monitored_item_id : t_monitoredItemId &
         p_clientHandle : t_client_handle_i &
-        p_wv_pointer : t_WriteValuePointer_i &
-        p_wv_pointer : t_WriteValuePointer
+        p_wv_pointer : t_WriteValuePointerInPool_i &
+        p_wv_pointer : t_WriteValuePointerInPool
     THEN
         DataNotification_MonitoredItemId(p_index) := p_monitored_item_id ||
         DataNotification_MonitoredItemNotif(p_index) := p_wv_pointer

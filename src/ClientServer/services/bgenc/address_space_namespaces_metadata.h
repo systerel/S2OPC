@@ -21,9 +21,9 @@
 
  File Name            : address_space_namespaces_metadata.h
 
- Date                 : 07/09/2026 13:17:51
+ Date                 : 19/10/2026 12:53:07
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 

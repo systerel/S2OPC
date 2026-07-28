@@ -469,8 +469,8 @@ void subscription_mgr__local_create_notification_on_monitored_items_if_event_sel
 
 void subscription_mgr__local_create_notification_on_monitored_items_if_data_changed(
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_old_wv_pointer,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_new_wv_pointer) {
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_old_wv_pointer,
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_new_wv_pointer) {
    {
       t_bool subscription_mgr__l_notification_triggered;
       constants__t_monitoredItemId_i subscription_mgr__l_monitoredItemId;
@@ -557,8 +557,8 @@ void subscription_mgr__local_create_notification_on_monitored_items_if_data_chan
 
 void subscription_mgr__create_notification_on_monitored_items_if_data_changed(
    const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_old_wv_pointer,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_new_wv_pointer) {
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_old_wv_pointer,
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_new_wv_pointer) {
    {
       t_bool subscription_mgr__l_continue;
       constants__t_monitoredItemQueueIterator_i subscription_mgr__l_iterator;
@@ -1571,8 +1571,8 @@ void subscription_mgr__server_subscription_event_triggered(
 }
 
 void subscription_mgr__server_subscription_data_changed(
-   const constants__t_WriteValuePointer_i subscription_mgr__p_old_write_value_pointer,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_new_write_value_pointer) {
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_old_write_value_pointer,
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_new_write_value_pointer) {
    {
       constants__t_NodeId_i subscription_mgr__l_nid;
       constants__t_AttributeId_i subscription_mgr__l_aid;

@@ -41,6 +41,7 @@
 #include "io_dispatch_mgr.h"
 #include "toolkit_header_init.h"
 #include "util_b2c.h"
+#include "util_write_value_pool.h"
 
 /**
  * \brief Indicates whether the server configuration is locked (configured) or not.
@@ -246,10 +247,8 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
 static void SOPC_Array_Free_WriteDataChanged(void* data)
 {
     SOPC_WriteDataChanged* writeDataChanged = (SOPC_WriteDataChanged*) data;
-    OpcUa_WriteValue_Clear(writeDataChanged->oldValue);
-    SOPC_Free(writeDataChanged->oldValue);
-    OpcUa_WriteValue_Clear(writeDataChanged->newValue);
-    SOPC_Free(writeDataChanged->newValue);
+    SOPC_WriteValuePool_ClearAndFree(writeDataChanged->oldValue);
+    SOPC_WriteValuePool_ClearAndFree(writeDataChanged->newValue);
 }
 
 static void SOPC_Array_Free_NodeChanged(void* data)
@@ -484,7 +483,6 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_ASSERT((void*) params != NULL);
 
         dataOrNodeChangedArray = (SOPC_Array*) params;
-        bres = true;
         length = SOPC_Array_Size(dataOrNodeChangedArray);
         for (size_t i = 0; i < length; i++)
         {
@@ -493,16 +491,9 @@ static void onServiceEvent(SOPC_EventHandler* handler,
             old_value = writeDataChanged->oldValue;
             new_value = writeDataChanged->newValue;
             /* Note: write values deallocation managed by B model */
-            io_dispatch_mgr__internal_server_data_changed(old_value, new_value, &lbres);
-            bres = bres && lbres;
+            io_dispatch_mgr__internal_server_data_changed(old_value, new_value);
         }
         SOPC_Array_Delete(dataOrNodeChangedArray);
-        if (bres == false)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32 " treatment failed",
-                                   id);
-        }
         break;
     case SE_TO_SE_SERVER_NODE_CHANGED:
         /* Server side only:

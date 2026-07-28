@@ -1363,8 +1363,8 @@ OPERATIONS
         p_monitoredItemPointer : s_monitoredItemPointer &
         p_timestampToReturn : t_TimestampsToReturn_i &
         p_timestampToReturn : t_TimestampsToReturn &
-        p_writeValuePointer : t_WriteValuePointer_i &
-        p_writeValuePointer : t_WriteValuePointer
+        p_writeValuePointer : t_WriteValuePointerInPool_i &
+        p_writeValuePointer : t_WriteValuePointerInPool
     THEN
         /* Note: we cannot be more precise, in case of memory issue it might be unchanged */
         a_notification_queue_notifications :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData)
@@ -1466,10 +1466,10 @@ OPERATIONS
         p_localeIds : t_LocaleIds &
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : t_monitoredItemPointer &
-        p_old_wv_pointer : t_WriteValuePointer_i &
-        p_old_wv_pointer : t_WriteValuePointer &
-        p_new_wv_pointer : t_WriteValuePointer_i &
-        p_new_wv_pointer : t_WriteValuePointer
+        p_old_wv_pointer : t_WriteValuePointerInPool_i &
+        p_old_wv_pointer : t_WriteValuePointerInPool &
+        p_new_wv_pointer : t_WriteValuePointerInPool_i &
+        p_new_wv_pointer : t_WriteValuePointerInPool
     THEN
         bres :: BOOL
     END

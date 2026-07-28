@@ -26,6 +26,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"
+#include "sopc_types.h"
 
 SOPC_ComEvent_Fct* sopc_appEventCallback = NULL;
 

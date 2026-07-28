@@ -21,9 +21,9 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 05/10/2026 12:04:57
+ Date                 : 19/10/2026 12:53:25
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -77,8 +77,8 @@ extern void subscription_mgr__INITIALISATION(void);
   --------------------------*/
 extern void subscription_mgr__create_notification_on_monitored_items_if_data_changed(
    const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_old_wv_pointer,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_new_wv_pointer);
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_old_wv_pointer,
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_new_wv_pointer);
 extern void subscription_mgr__create_notification_on_monitored_items_if_node_changed(
    const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
    const t_bool subscription_mgr__p_added);
@@ -148,8 +148,8 @@ extern void subscription_mgr__local_create_notification_on_monitored_item_if_eve
    const constants__t_monitoredItemId_i subscription_mgr__p_mi_id);
 extern void subscription_mgr__local_create_notification_on_monitored_items_if_data_changed(
    const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_old_wv_pointer,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_new_wv_pointer);
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_old_wv_pointer,
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_new_wv_pointer);
 extern void subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(
    const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
    const constants__t_Event_i subscription_mgr__p_event,
@@ -182,8 +182,8 @@ extern void subscription_mgr__internal_server_close_subscription(
    const constants__t_subscription_i subscription_mgr__p_subscription,
    t_bool * const subscription_mgr__bres);
 extern void subscription_mgr__server_subscription_data_changed(
-   const constants__t_WriteValuePointer_i subscription_mgr__p_old_write_value_pointer,
-   const constants__t_WriteValuePointer_i subscription_mgr__p_new_write_value_pointer);
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_old_write_value_pointer,
+   const constants__t_WriteValuePointerInPool_i subscription_mgr__p_new_write_value_pointer);
 extern void subscription_mgr__server_subscription_event_triggered(
    const constants__t_NodeId_i subscription_mgr__p_notifierId,
    const constants__t_Event_i subscription_mgr__p_event,

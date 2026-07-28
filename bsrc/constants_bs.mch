@@ -36,6 +36,7 @@ SETS
     t_access_level_ex;
 
     t_WriteValuePointer_i;
+    t_WriteValuePointerInPool_i;
     t_WriteByPassMask_i;
     t_BrowseResultReferences_i;
     t_BrowseNodeClassMask_i;
@@ -226,6 +227,7 @@ CONCRETE_CONSTANTS
     c_monitoredItemId_indet,
     c_eventFieldList_indet,
     c_WriteValuePointer_indet,
+    c_WriteValuePointerInPool_indet,
     c_WriteByPassMask_none,
     c_BrowseResultReferences_indet,
     c_BrowseNodeClassMask_indet,
@@ -330,6 +332,7 @@ ABSTRACT_CONSTANTS
     t_monitoredItemId,
     t_eventFieldList,
     t_WriteValuePointer,
+    t_WriteValuePointerInPool,
     t_BrowseResultReferences,
     t_timer_id,
     t_IndexRange,
@@ -824,9 +827,15 @@ PROPERTIES
 
     c_Timestamp_null : t_Timestamp &
 
+    /* This type is allocated in the standard way (no static memory pool) */
     t_WriteValuePointer <: t_WriteValuePointer_i &
     c_WriteValuePointer_indet : t_WriteValuePointer_i &
     c_WriteValuePointer_indet /: t_WriteValuePointer &
+
+    /* This type is allocated in a static memory pool */
+    t_WriteValuePointerInPool <: t_WriteValuePointerInPool_i &
+    c_WriteValuePointerInPool_indet : t_WriteValuePointerInPool_i &
+    c_WriteValuePointerInPool_indet /: t_WriteValuePointerInPool &
 
     c_WriteByPassMask_none : t_WriteByPassMask_i &
 

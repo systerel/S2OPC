@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_element_it.c
 
- Date                 : 16/09/2026 08:15:38
+ Date                 : 19/10/2026 12:53:26
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 

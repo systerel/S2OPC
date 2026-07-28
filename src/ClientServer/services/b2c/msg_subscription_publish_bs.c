@@ -29,6 +29,7 @@
 #include "sopc_services_api_internal.h"
 #include "sopc_types.h"
 #include "util_b2c.h"
+#include "util_write_value_pool.h"
 
 /*--------------
    SEES Clause
@@ -334,8 +335,7 @@ void msg_subscription_publish_bs__setall_notification_msg_monitored_item_data_no
         msg_subscription_publish_bs__p_wv_pointer->Value;
     SOPC_DataValue_Initialize(&msg_subscription_publish_bs__p_wv_pointer->Value);
 
-    OpcUa_WriteValue_Clear(msg_subscription_publish_bs__p_wv_pointer);
-    SOPC_Free(msg_subscription_publish_bs__p_wv_pointer);
+    SOPC_WriteValuePool_ClearAndFree(msg_subscription_publish_bs__p_wv_pointer);
 }
 
 void msg_subscription_publish_bs__setall_notification_msg_monitored_item_event_notif(

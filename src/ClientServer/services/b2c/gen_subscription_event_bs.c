@@ -21,8 +21,8 @@
 
 #include "sopc_array.h"
 #include "sopc_logger.h"
-#include "sopc_mem_alloc.h"
 #include "sopc_types.h"
+#include "util_write_value_pool.h"
 
 /* Limited to a unique call to subscription_core_bs__get_nodeToMonitoredItemQueue which only existence of MI */
 #include "subscription_core_bs.h"
@@ -33,7 +33,8 @@ SOPC_Array* dataChangedEvents = NULL;
    INITIALISATION Clause
   ------------------------*/
 void gen_subscription_event_bs__INITIALISATION(void)
-{ /*Translated from B but an intialisation is not needed from this module.*/
+{
+    SOPC_WriteValuePool_Initialize();
 }
 
 void gen_subscription_event_bs__flush_data_changed_event(void)
@@ -81,10 +82,8 @@ void gen_subscription_event_bs__gen_data_changed_event(
 
     bool res = false;
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
-    OpcUa_WriteValue* newValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
-    OpcUa_WriteValue_Initialize(newValue);
-    OpcUa_WriteValue* oldValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
-    OpcUa_WriteValue_Initialize(oldValue);
+    OpcUa_WriteValue* newValue = SOPC_WriteValuePool_Alloc();
+    OpcUa_WriteValue* oldValue = SOPC_WriteValuePool_Alloc();
 
     if (NULL != oldValue && NULL != newValue)
     {
@@ -132,11 +131,8 @@ void gen_subscription_event_bs__gen_data_changed_event(
     }
     if (!res)
     {
-        // Delete the WriteValues allocated
-        OpcUa_WriteValue_Clear(oldValue);
-        SOPC_Free(oldValue);
-        OpcUa_WriteValue_Clear(newValue);
-        SOPC_Free(newValue);
+        SOPC_WriteValuePool_ClearAndFree(oldValue);
+        SOPC_WriteValuePool_ClearAndFree(newValue);
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "gen_subscription_event_bs__gen_data_changed_event: failed to generate a data "
                                "changed event");

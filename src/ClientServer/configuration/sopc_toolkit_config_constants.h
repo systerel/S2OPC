@@ -269,6 +269,28 @@
 #define SOPC_NODE_MONITORED_ITEM_QUEUE_INITIAL_SIZE 2
 #endif
 
+/** @brief Size of the notification elements static memory pool.
+ *   Note: if the number of simultaneous notification elements is less than this value
+ *         no dynamic allocation is done, otherwise it fallback on classic ::SOPC_Malloc.
+ */
+#ifndef SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE
+#define SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE 5000
+#endif
+
+/** @brief Size of the write values static memory pool.
+ *         Write values are used for internal data change event on each write operation (2 instances)
+ *         and write values instances are present in each data notification element of subscriptions.
+ *   Note 1: Since at least 1 write value per data notification element is present,
+ *           it should be greater than SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE.
+ *           Default value is empirical but manage to treat 2500 simultaneous write operations
+ *           and 5000 notifications elts (2 monitored items on the 2500 changes)
+ *   Note 2: if the number of simultaneous notification elements is less than this value
+ *           no dynamic allocation is done, otherwise it fallback on classic ::SOPC_Malloc.
+ */
+#ifndef SOPC_WRITE_VALUES_POOL_SIZE
+#define SOPC_WRITE_VALUES_POOL_SIZE 2 * SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE
+#endif
+
 /* TRANSLATE BROWSE PATH MANAGEMENT */
 
 /** @brief Maximum number of matches to return for a given relative path

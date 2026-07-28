@@ -729,20 +729,9 @@ OPERATIONS
     END
     ;
 
-    bres <-- internal_server_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
-    VAR
-        l_old_valid_pointer,
-        l_new_valid_pointer
-    IN
-        l_old_valid_pointer <-- write_value_pointer_is_valid (p_old_write_value_pointer);
-        l_new_valid_pointer <-- write_value_pointer_is_valid (p_new_write_value_pointer);
-        IF l_old_valid_pointer = TRUE & l_new_valid_pointer = TRUE
-        THEN
-            server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer);
-            bres := TRUE
-        ELSE
-            bres := FALSE
-        END
+    internal_server_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
+    BEGIN
+        server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer)
     END;
 
     internal_server_node_changed (p_node_added, p_nid) =

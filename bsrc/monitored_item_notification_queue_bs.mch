@@ -40,7 +40,7 @@ INVARIANT
     monitored_item_notification_queue_iter : t_notificationQueue_i &
 
     s_event_notification_queue <: t_notificationQueue &
-    a_notif_conv_data : t_notificationData <-> t_WriteValuePointer &
+    a_notif_conv_data : t_notificationData <-> t_WriteValuePointerInPool &
     a_notif_conv_event : t_notificationData <-> t_eventFieldList
 
 INITIALISATION
@@ -49,7 +49,7 @@ INITIALISATION
     monitored_item_notification_queue_iter := c_notificationQueue_indet ||
 
     s_event_notification_queue :: POW(t_notificationQueue) ||
-    a_notif_conv_data :: t_notificationData <-> t_WriteValuePointer ||
+    a_notif_conv_data :: t_notificationData <-> t_WriteValuePointerInPool ||
     a_notif_conv_event :: t_notificationData <-> t_eventFieldList
 
 OPERATIONS
@@ -178,12 +178,12 @@ OPERATIONS
         CHOICE
             bres := FALSE
         OR
-            ANY l_notif WHERE
-                l_notif : t_WriteValuePointer_i &
-                l_notif : t_WriteValuePointer
+            ANY l_notifValue WHERE
+                l_notifValue : t_WriteValuePointerInPool_i &
+                l_notifValue : t_WriteValuePointerInPool
             THEN
                 bres := TRUE ||
-                a_notification_queue_notifications := a_notification_queue_notifications \/ {p_queue |-> a_notif_conv_data~(l_notif)}
+                a_notification_queue_notifications := a_notification_queue_notifications \/ {p_queue |-> a_notif_conv_data~(l_notifValue)}
             END
         END
     END
@@ -213,8 +213,8 @@ OPERATIONS
         a_monitored_item_notification_queue(p_monitoredItem) = p_queue &
         p_timestampToReturn : t_TimestampsToReturn_i &
         p_timestampToReturn : t_TimestampsToReturn &
-        p_writeValuePointer : t_WriteValuePointer_i &
-        p_writeValuePointer : t_WriteValuePointer &
+        p_writeValuePointer : t_WriteValuePointerInPool_i &
+        p_writeValuePointer : t_WriteValuePointerInPool &
         p_queue /: s_event_notification_queue
     THEN
         bres,
@@ -283,7 +283,7 @@ OPERATIONS
         THEN
             p_continue := bool(a_notification_queue_notifications[{p_queue}] /= {l_notif}) ||
             a_notification_queue_notifications := a_notification_queue_notifications - {p_queue |-> l_notif} ||
-            p_writeValuePointer :(p_writeValuePointer : t_WriteValuePointer_i & p_writeValuePointer = a_notif_conv_data(l_notif))
+            p_writeValuePointer :(p_writeValuePointer : t_WriteValuePointerInPool_i & p_writeValuePointer = a_notif_conv_data(l_notif))
         END
     END
     ;

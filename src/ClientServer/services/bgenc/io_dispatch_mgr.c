@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 12/10/2026 13:07:01
+ Date                 : 19/10/2026 12:53:11
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -831,27 +831,10 @@ void io_dispatch_mgr__internal_server_event_triggered(
 }
 
 void io_dispatch_mgr__internal_server_data_changed(
-   const constants__t_WriteValuePointer_i io_dispatch_mgr__p_old_write_value_pointer,
-   const constants__t_WriteValuePointer_i io_dispatch_mgr__p_new_write_value_pointer,
-   t_bool * const io_dispatch_mgr__bres) {
-   {
-      t_bool io_dispatch_mgr__l_old_valid_pointer;
-      t_bool io_dispatch_mgr__l_new_valid_pointer;
-      
-      write_value_pointer_bs__write_value_pointer_is_valid(io_dispatch_mgr__p_old_write_value_pointer,
-         &io_dispatch_mgr__l_old_valid_pointer);
-      write_value_pointer_bs__write_value_pointer_is_valid(io_dispatch_mgr__p_new_write_value_pointer,
-         &io_dispatch_mgr__l_new_valid_pointer);
-      if (io_dispatch_mgr__l_old_valid_pointer == true &&
-         io_dispatch_mgr__l_new_valid_pointer == true) {
-         service_mgr__server_subscription_data_changed(io_dispatch_mgr__p_old_write_value_pointer,
-            io_dispatch_mgr__p_new_write_value_pointer);
-         *io_dispatch_mgr__bres = true;
-      }
-      else {
-         *io_dispatch_mgr__bres = false;
-      }
-   }
+   const constants__t_WriteValuePointerInPool_i io_dispatch_mgr__p_old_write_value_pointer,
+   const constants__t_WriteValuePointerInPool_i io_dispatch_mgr__p_new_write_value_pointer) {
+   service_mgr__server_subscription_data_changed(io_dispatch_mgr__p_old_write_value_pointer,
+      io_dispatch_mgr__p_new_write_value_pointer);
 }
 
 void io_dispatch_mgr__internal_server_node_changed(

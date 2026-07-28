@@ -38,6 +38,7 @@
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "util_write_value_pool.h"
 
 #include "util_variant.h"
 
@@ -153,8 +154,10 @@ static void SOPC_InternalAddressSpaceAccess_FreeOperation(uint32_t id, uintptr_t
     switch (op->operation)
     {
     case SOPC_ADDSPACE_WRITE:
-        SOPC_EncodeableObject_Delete(&OpcUa_WriteValue_EncodeableType, (void**) &op->param1);
-        SOPC_EncodeableObject_Delete(&OpcUa_WriteValue_EncodeableType, (void**) &op->param2);
+        SOPC_WriteValuePool_ClearAndFree((OpcUa_WriteValue*) op->param1);
+        SOPC_WriteValuePool_ClearAndFree((OpcUa_WriteValue*) op->param2);
+        op->param1 = (uintptr_t) NULL;
+        op->param2 = (uintptr_t) NULL;
         break;
     case SOPC_ADDSPACE_CHANGE_NODE:
         SOPC_NodeId_Clear((SOPC_NodeId*) op->param2);
@@ -416,8 +419,8 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
 
     void* addedOp = NULL;
     SOPC_AddressSpaceAccessOperation* op = SOPC_Calloc(1, sizeof(*op));
-    OpcUa_WriteValue* prevWV = SOPC_Calloc(1, sizeof(*prevWV));
-    OpcUa_WriteValue* newWV = SOPC_Calloc(1, sizeof(*newWV));
+    OpcUa_WriteValue* prevWV = SOPC_WriteValuePool_Alloc();
+    OpcUa_WriteValue* newWV = SOPC_WriteValuePool_Alloc();
     if (NULL == op || NULL == prevWV || NULL == newWV)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -426,8 +429,6 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
     {
         addedOp = (void*) SOPC_SLinkedList_Append(addSpaceAccess->operations->opList, 0, (uintptr_t) op);
         status = (NULL == addedOp ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
-        OpcUa_WriteValue_Initialize(prevWV);
-        OpcUa_WriteValue_Initialize(newWV);
         op->operation = SOPC_ADDSPACE_WRITE;
         op->param1 = (uintptr_t) prevWV;
         op->param2 = (uintptr_t) newWV;
@@ -465,10 +466,8 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
             addSpaceAccess->operations->writeCount--;
         }
         SOPC_Free(op);
-        OpcUa_WriteValue_Clear(prevWV);
-        OpcUa_WriteValue_Clear(newWV);
-        SOPC_Free(prevWV);
-        SOPC_Free(newWV);
+        SOPC_WriteValuePool_ClearAndFree(prevWV);
+        SOPC_WriteValuePool_ClearAndFree(newWV);
     }
     return status;
 }

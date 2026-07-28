@@ -72,4 +72,7 @@ static SOPC_STRONG_INLINE bool is_eventMI(SOPC_InternalMonitoredItem* monitoredI
     return (NULL != monitoredItemPointer->filterCtx && !monitoredItemPointer->filterCtx->isDataFilter);
 }
 
+// Number of total fallback allocation since initialization
+size_t getNotifEltsPoolTotalFallback(void);
+
 #endif /* SOPC_MONITORED_ITEM_POINTER_IMPL_H_ */

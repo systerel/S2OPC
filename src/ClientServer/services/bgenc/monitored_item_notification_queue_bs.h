@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_notification_queue_bs.h
 
- Date                 : 02/04/2024 08:17:18
+ Date                 : 30/07/2026 13:42:46
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -64,7 +64,7 @@ extern void monitored_item_notification_queue_bs__add_monitored_item_data_notifi
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
    const constants__t_TimestampsToReturn_i monitored_item_notification_queue_bs__p_timestampToReturn,
-   const constants__t_WriteValuePointer_i monitored_item_notification_queue_bs__p_writeValuePointer,
+   const constants__t_WriteValuePointerInPool_i monitored_item_notification_queue_bs__p_writeValuePointer,
    t_bool * const monitored_item_notification_queue_bs__bres);
 extern void monitored_item_notification_queue_bs__add_monitored_item_event_notification_to_queue(
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
@@ -86,7 +86,7 @@ extern void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
    t_bool * const monitored_item_notification_queue_bs__p_continue,
-   constants__t_WriteValuePointer_i * const monitored_item_notification_queue_bs__p_writeValuePointer);
+   constants__t_WriteValuePointerInPool_i * const monitored_item_notification_queue_bs__p_writeValuePointer);
 extern void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_event_notification(
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,

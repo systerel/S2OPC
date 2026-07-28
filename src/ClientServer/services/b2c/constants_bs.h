@@ -111,6 +111,7 @@ typedef SOPC_Value_Timestamp constants_bs__t_Timestamp;
 typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef uint8_t constants_bs__t_WriteByPassMask_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
+typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointerInPool_i;
 typedef SOPC_Byte constants_bs__t_access_level;
 typedef uintptr_t constants_bs__t_application_context_i;
 typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;

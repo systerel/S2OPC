@@ -69,6 +69,7 @@ OPERATIONS
     srv_write_notification (write_value_pointer, write_status) =
     PRE
         write_value_pointer : t_WriteValuePointer_i &
+        write_value_pointer : t_WriteValuePointer &
         write_status : t_StatusCode_i &
         write_status : t_StatusCode
     THEN

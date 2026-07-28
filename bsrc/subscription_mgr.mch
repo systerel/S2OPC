@@ -282,10 +282,10 @@ OPERATIONS
 
     server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     PRE
-        p_old_write_value_pointer : t_WriteValuePointer_i &
-        p_old_write_value_pointer : t_WriteValuePointer &
-        p_new_write_value_pointer : t_WriteValuePointer_i &
-        p_new_write_value_pointer : t_WriteValuePointer
+        p_old_write_value_pointer : t_WriteValuePointerInPool_i &
+        p_old_write_value_pointer : t_WriteValuePointerInPool &
+        p_new_write_value_pointer : t_WriteValuePointerInPool_i &
+        p_new_write_value_pointer : t_WriteValuePointerInPool
     THEN
         skip
     END

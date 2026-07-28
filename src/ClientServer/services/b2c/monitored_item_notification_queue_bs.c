@@ -31,8 +31,11 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_static_pool.h"
+#include "sopc_toolkit_config_constants.h"
 #include "util_event.h"
 #include "util_variant.h"
+#include "util_write_value_pool.h"
 
 typedef struct SOPC_InternalNotificationElement
 {
@@ -42,11 +45,21 @@ typedef struct SOPC_InternalNotificationElement
     bool isQueueOverflowEvent;
 } SOPC_InternalNotificationElement;
 
+static SOPC_InternalNotificationElement sopc_notifEltPoolBuffer[SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE];
+static SOPC_StaticPool sopc_notifEltPool;
+
+size_t getNotifEltsPoolTotalFallback(void)
+{
+    return SOPC_StaticPool_GetNbFallbackAllocsStat(&sopc_notifEltPool);
+}
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void monitored_item_notification_queue_bs__INITIALISATION(void)
-{ /*Translated from B but an intialisation is not needed from this module.*/
+{
+    SOPC_StaticPool_Init(&sopc_notifEltPool, sopc_notifEltPoolBuffer, sizeof(SOPC_InternalNotificationElement),
+                         SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE);
 }
 
 /*--------------------
@@ -87,13 +100,41 @@ static void SOPC_InternalNotificationElement_Free(SOPC_InternalNotificationEleme
 {
     if (NULL != notifElt)
     {
-        OpcUa_WriteValue_Clear(notifElt->value);
-        SOPC_Free(notifElt->value);
+        SOPC_WriteValuePool_ClearAndFree(notifElt->value);
+        notifElt->value = NULL;
         SOPC_ReturnStatus status =
             SOPC_EncodeableObject_Delete(&OpcUa_EventFieldList_EncodeableType, (void**) &notifElt->eventValues);
         SOPC_ASSERT(NULL == notifElt->eventValues || SOPC_STATUS_OK == status);
-        SOPC_Free(notifElt);
+        notifElt->eventValues = NULL;
+        SOPC_StaticPool_Free(&sopc_notifEltPool, notifElt);
     }
+}
+
+static SOPC_InternalNotificationElement* SOPC_InternalNotificationElement_Alloc(bool withWriteValue)
+{
+    SOPC_InternalNotificationElement* notifElt = SOPC_StaticPool_Alloc(&sopc_notifEltPool);
+    if (NULL == notifElt)
+    {
+        return NULL;
+    }
+
+    notifElt->monitoredItemPointer = NULL;
+    notifElt->value = NULL;
+    notifElt->eventValues = NULL;
+    notifElt->isQueueOverflowEvent = false;
+
+    if (withWriteValue)
+    {
+        notifElt->value = SOPC_WriteValuePool_Alloc();
+        if (NULL == notifElt->value)
+        {
+            SOPC_StaticPool_Free(&sopc_notifEltPool, notifElt);
+            return NULL;
+        }
+        OpcUa_WriteValue_Initialize(notifElt->value);
+    }
+
+    return notifElt;
 }
 
 static void SOPC_InternalNotificationQueueElement_Free(uintptr_t val)
@@ -268,18 +309,14 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     }
 
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
-    SOPC_InternalNotificationElement* notifElt = SOPC_Calloc(1, sizeof(SOPC_InternalNotificationElement));
-    OpcUa_WriteValue* pNewWriteValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
+    SOPC_InternalNotificationElement* notifElt = SOPC_InternalNotificationElement_Alloc(true);
 
-    if (NULL == pNewWriteValue || NULL == notifElt)
+    if (NULL == notifElt)
     {
-        SOPC_Free(notifElt);
-        SOPC_Free(pNewWriteValue);
         return;
     }
-    OpcUa_WriteValue_Initialize(pNewWriteValue);
+    OpcUa_WriteValue* pNewWriteValue = notifElt->value;
     notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
-    notifElt->value = pNewWriteValue;
 
     if (constants__c_Variant_indet != monitored_item_notification_queue_bs__p_VariantValuePointer)
     {
@@ -317,9 +354,7 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
     }
     else
     {
-        SOPC_Free(notifElt);
-        OpcUa_WriteValue_Clear(pNewWriteValue);
-        SOPC_Free(pNewWriteValue);
+        SOPC_InternalNotificationElement_Free(notifElt);
     }
 }
 
@@ -338,21 +373,19 @@ void monitored_item_notification_queue_bs__add_monitored_item_data_notification_
     *monitored_item_notification_queue_bs__bres = false;
 
     SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
-    SOPC_InternalNotificationElement* notifElt = SOPC_Calloc(1, sizeof(SOPC_InternalNotificationElement));
-    OpcUa_WriteValue* pNewWriteValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
+    SOPC_InternalNotificationElement* notifElt = SOPC_InternalNotificationElement_Alloc(true);
     SOPC_StatusCode valueStatus = monitored_item_notification_queue_bs__p_writeValuePointer->Value.Status;
     constants_statuscodes_bs__t_StatusCode_i readSC = constants_statuscodes_bs__c_StatusCode_indet;
     SOPC_Variant* newValue = &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value;
-    if (NULL == notifElt || NULL == pNewWriteValue)
+    if (NULL == notifElt)
     {
         retStatus = SOPC_STATUS_OUT_OF_MEMORY;
     }
     else
     {
+        OpcUa_WriteValue* pNewWriteValue = notifElt->value;
         retStatus = SOPC_STATUS_OK;
-        OpcUa_WriteValue_Initialize((void*) pNewWriteValue);
         notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
-        notifElt->value = pNewWriteValue;
 
         SOPC_ReturnStatus copyStatus = util_variant__copy_and_apply_locales_and_index_range(
             &pNewWriteValue->Value.Value, newValue, monitored_item_notification_queue_bs__p_localeIds,
@@ -406,9 +439,7 @@ void monitored_item_notification_queue_bs__add_monitored_item_data_notification_
     }
     else
     {
-        SOPC_Free(notifElt);
-        OpcUa_WriteValue_Clear(pNewWriteValue);
-        SOPC_Free(pNewWriteValue);
+        SOPC_InternalNotificationElement_Free(notifElt);
 
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_CLIENTSERVER,
@@ -425,7 +456,7 @@ static bool SOPC_InternalCreateQueueOverflowNotif(SOPC_InternalMonitoredItem* mo
     bool res = false;
     SOPC_ASSERT(!monitoredItemPointer->queueOverflowEventTriggered);
     SOPC_ASSERT(NULL != queueOverflowNotifRes && NULL == *queueOverflowNotifRes);
-    SOPC_InternalNotificationElement* queueOverflowNotif = SOPC_Calloc(1, sizeof(SOPC_InternalNotificationElement));
+    SOPC_InternalNotificationElement* queueOverflowNotif = SOPC_InternalNotificationElement_Alloc(false);
     res = (NULL != queueOverflowNotif);
     if (res)
     {
@@ -441,7 +472,7 @@ static bool SOPC_InternalCreateQueueOverflowNotif(SOPC_InternalMonitoredItem* mo
     }
     else
     {
-        SOPC_Free(queueOverflowNotif);
+        SOPC_InternalNotificationElement_Free(queueOverflowNotif);
     }
     return res;
 }
@@ -550,7 +581,7 @@ void monitored_item_notification_queue_bs__add_monitored_item_event_notification
     SOPC_ASSERT(is_eventMI(monitoredItemPointer));
     *monitored_item_notification_queue_bs__bres = false;
 
-    SOPC_InternalNotificationElement* notifElt = SOPC_Calloc(1, sizeof(SOPC_InternalNotificationElement));
+    SOPC_InternalNotificationElement* notifElt = SOPC_InternalNotificationElement_Alloc(false);
     if (NULL == notifElt)
     {
         return;
@@ -597,7 +628,7 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_data_n
         monitored_item_notification_queue_bs__p_queue, monitored_item_notification_queue_bs__p_continue);
 
     *monitored_item_notification_queue_bs__p_writeValuePointer = notifElt->value;
-    SOPC_Free(notifElt);
+    SOPC_StaticPool_Free(&sopc_notifEltPool, notifElt);
 }
 
 void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_event_notification(
@@ -614,7 +645,7 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_event_
         monitored_item_notification_queue_bs__p_queue, monitored_item_notification_queue_bs__p_continue);
 
     *monitored_item_notification_queue_bs__p_eventFieldList = notifElt->eventValues;
-    SOPC_Free(notifElt);
+    SOPC_StaticPool_Free(&sopc_notifEltPool, notifElt);
 }
 
 void monitored_item_notification_queue_bs__free_first_monitored_item_notification_value(

@@ -256,10 +256,10 @@ OPERATIONS
         p_localeIds : t_LocaleIds &
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : t_monitoredItemPointer &
-        p_old_wv_pointer : t_WriteValuePointer_i &
-        p_old_wv_pointer : t_WriteValuePointer &
-        p_new_wv_pointer : t_WriteValuePointer_i &
-        p_new_wv_pointer : t_WriteValuePointer
+        p_old_wv_pointer : t_WriteValuePointerInPool_i &
+        p_old_wv_pointer : t_WriteValuePointerInPool &
+        p_new_wv_pointer : t_WriteValuePointerInPool_i &
+        p_new_wv_pointer : t_WriteValuePointerInPool
     THEN
         bres :: BOOL
     END

@@ -364,10 +364,10 @@ LOCAL_OPERATIONS
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : s_monitoredItemPointer &
         p_monitoredItemPointer : dom(a_monitored_item_notification_queue) &
-        p_old_wv_pointer : t_WriteValuePointer_i &
-        p_old_wv_pointer : t_WriteValuePointer &
-        p_new_wv_pointer : t_WriteValuePointer_i &
-        p_new_wv_pointer : t_WriteValuePointer
+        p_old_wv_pointer : t_WriteValuePointerInPool_i &
+        p_old_wv_pointer : t_WriteValuePointerInPool &
+        p_new_wv_pointer : t_WriteValuePointerInPool_i &
+        p_new_wv_pointer : t_WriteValuePointerInPool
     THEN
         LET l_MI_notif_queue BE
             l_MI_notif_queue = a_monitored_item_notification_queue(p_monitoredItemPointer)
@@ -385,10 +385,10 @@ LOCAL_OPERATIONS
     PRE
         p_monitoredItemQueue : t_monitoredItemQueue_i &
         p_monitoredItemQueue : s_monitoredItemQueue &
-        p_old_wv_pointer : t_WriteValuePointer_i &
-        p_old_wv_pointer : t_WriteValuePointer &
-        p_new_wv_pointer : t_WriteValuePointer_i &
-        p_new_wv_pointer : t_WriteValuePointer
+        p_old_wv_pointer : t_WriteValuePointerInPool_i &
+        p_old_wv_pointer : t_WriteValuePointerInPool &
+        p_new_wv_pointer : t_WriteValuePointerInPool_i &
+        p_new_wv_pointer : t_WriteValuePointerInPool
     THEN
         LET l_MI_notif_queues BE
             l_MI_notif_queues = a_monitored_item_notification_queue[a_defined_monitored_items[{p_monitoredItemQueue}]]
@@ -399,7 +399,7 @@ LOCAL_OPERATIONS
                 l_MI_notif_queues <| a_notification_queue_notifications$0 <: l_MI_notif_queues <| a_notification_queue_notifications &
                 l_MI_notif_queues <<| a_notification_queue_notifications$0 = l_MI_notif_queues <<| a_notification_queue_notifications)
         END
-        /* Note: if NodeId / AttributeId are represented in t_WriteValuePointer,
+        /* Note: if NodeId / AttributeId are represented in t_WriteValuePointerInPool,
            it is possible to describe first part of criteria to generate notification.
            But other filters will be necessary (index array, ...) */
     END

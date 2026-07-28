@@ -272,7 +272,7 @@ LOCAL_OPERATIONS
               p_next_index : t_monitoredItemNotifIndex &
               p_next_index = p_cur_index + card(l_a_monitored_item_notifications_dequeued) &
               DataNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId &
-              DataNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointer &
+              DataNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointerInPool &
                 dom(DataNotification_MonitoredItemId) = 1..nb_data_notifications &
                 /* Range is the monitored item ids for which notifications are present */
                 ran(DataNotification_MonitoredItemId) =
@@ -310,7 +310,7 @@ LOCAL_OPERATIONS
                 DataNotification_MonitoredItemId,
                 DataNotification_MonitoredItemNotif
                 :(DataNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId &
-                    DataNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointer &
+                    DataNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointerInPool &
                     dom(DataNotification_MonitoredItemId) = 1..nb_data_notifications &
                     /* Range is the monitored item ids for which notifications are present */
                     ran(DataNotification_MonitoredItemId) =

@@ -21,7 +21,7 @@
 
  File Name            : write_value_pointer_bs.h
 
- Date                 : 04/08/2022 14:53:49
+ Date                 : 30/07/2026 15:04:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -53,13 +53,10 @@ extern void write_value_pointer_bs__copy_write_value_pointer_content(
    t_bool * const write_value_pointer_bs__bres,
    constants__t_WriteValuePointer_i * const write_value_pointer_bs__p_write_value_copy);
 extern void write_value_pointer_bs__free_write_value_pointer(
-   const constants__t_WriteValuePointer_i write_value_pointer_bs__p_write_value);
+   const constants__t_WriteValuePointerInPool_i write_value_pointer_bs__p_write_value);
 extern void write_value_pointer_bs__get_write_value_pointer_NodeId_AttributeId(
-   const constants__t_WriteValuePointer_i write_value_pointer_bs__p_write_value,
+   const constants__t_WriteValuePointerInPool_i write_value_pointer_bs__p_write_value,
    constants__t_NodeId_i * const write_value_pointer_bs__p_nid,
    constants__t_AttributeId_i * const write_value_pointer_bs__p_aid);
-extern void write_value_pointer_bs__write_value_pointer_is_valid(
-   const constants__t_WriteValuePointer_i write_value_pointer_bs__p_write_value,
-   t_bool * const write_value_pointer_bs__is_valid);
 
 #endif

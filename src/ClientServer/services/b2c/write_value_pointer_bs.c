@@ -26,6 +26,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 #include "util_b2c.h"
+#include "util_write_value_pool.h"
 #include "write_value_pointer_bs.h"
 
 /*------------------------
@@ -45,14 +46,16 @@ void write_value_pointer_bs__copy_write_value_pointer_content(
 {
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     OpcUa_WriteValue* wv = write_value_pointer_bs__p_write_value;
+    /* Heap, not the WriteValue pool: this copy is handed to the Application
+     * looper (AS_WRITE_EVENT) and freed there. The pool is Services-thread only. */
     OpcUa_WriteValue* writeValueCopy = SOPC_Malloc(sizeof(OpcUa_WriteValue));
-    OpcUa_WriteValue_Initialize((void*) writeValueCopy);
 
     *write_value_pointer_bs__bres = false;
     *write_value_pointer_bs__p_write_value_copy = constants__c_WriteValuePointer_indet;
 
     if (NULL != writeValueCopy)
     {
+        OpcUa_WriteValue_Initialize(writeValueCopy);
         retStatus = SOPC_EncodeableObject_Copy(&OpcUa_WriteValue_EncodeableType, writeValueCopy, wv);
 
         if (SOPC_STATUS_OK == retStatus)
@@ -77,16 +80,8 @@ void write_value_pointer_bs__get_write_value_pointer_NodeId_AttributeId(
     *write_value_pointer_bs__p_aid = util_AttributeId__C_to_B(write_value_pointer_bs__p_write_value->AttributeId);
 }
 
-void write_value_pointer_bs__write_value_pointer_is_valid(
-    const constants__t_WriteValuePointer_i write_value_pointer_bs__p_write_value,
-    t_bool* const write_value_pointer_bs__is_valid)
-{
-    *write_value_pointer_bs__is_valid = write_value_pointer_bs__p_write_value != constants__c_WriteValuePointer_indet;
-}
-
 void write_value_pointer_bs__free_write_value_pointer(
     const constants__t_WriteValuePointer_i write_value_pointer_bs__p_write_value)
 {
-    OpcUa_WriteValue_Clear(write_value_pointer_bs__p_write_value);
-    SOPC_Free(write_value_pointer_bs__p_write_value);
+    SOPC_WriteValuePool_ClearAndFree(write_value_pointer_bs__p_write_value);
 }

@@ -21,9 +21,9 @@
 
  File Name            : subscription_core.h
 
- Date                 : 05/10/2026 12:04:56
+ Date                 : 19/10/2026 12:53:24
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -289,7 +289,7 @@ extern void subscription_core__server_subscription_add_notification_on_value_cha
    const constants__t_LocaleIds_i subscription_core__p_localeIds,
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
-   const constants__t_WriteValuePointer_i subscription_core__p_writeValuePointer);
+   const constants__t_WriteValuePointerInPool_i subscription_core__p_writeValuePointer);
 extern void subscription_core__server_subscription_core_check_valid_publish_req_queue(
    const constants__t_session_i subscription_core__p_session,
    t_bool * const subscription_core__p_validPublishingReqQueued);

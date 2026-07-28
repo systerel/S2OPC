@@ -252,7 +252,7 @@ void subscription_core__local_fill_notification_message_for_data_monitored_item(
       constants__t_notificationQueue_i subscription_core__l_notifQueue;
       t_bool subscription_core__l_continue;
       t_bool subscription_core__l_isEvent;
-      constants__t_WriteValuePointer_i subscription_core__l_writeValuePointer;
+      constants__t_WriteValuePointerInPool_i subscription_core__l_writeValuePointer;
       constants__t_monitoredItemId_i subscription_core__l_monitoredItemId;
       constants__t_subscription_i subscription_core__l_subscription;
       constants__t_NodeId_i subscription_core__l_nid;
@@ -1932,7 +1932,7 @@ void subscription_core__server_subscription_add_notification_on_value_change(
    const constants__t_LocaleIds_i subscription_core__p_localeIds,
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
-   const constants__t_WriteValuePointer_i subscription_core__p_writeValuePointer) {
+   const constants__t_WriteValuePointerInPool_i subscription_core__p_writeValuePointer) {
    {
       t_bool subscription_core__l_bres;
       constants__t_notificationQueue_i subscription_core__l_notif_queue;

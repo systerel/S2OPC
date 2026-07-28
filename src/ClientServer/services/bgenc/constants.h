@@ -21,9 +21,9 @@
 
  File Name            : constants.h
 
- Date                 : 07/09/2026 13:17:54
+ Date                 : 19/10/2026 12:53:10
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -93,6 +93,7 @@
 #define constants__t_Timestamp constants_bs__t_Timestamp
 #define constants__t_Variant_i constants_bs__t_Variant_i
 #define constants__t_WriteByPassMask_i constants_bs__t_WriteByPassMask_i
+#define constants__t_WriteValuePointerInPool_i constants_bs__t_WriteValuePointerInPool_i
 #define constants__t_WriteValuePointer_i constants_bs__t_WriteValuePointer_i
 #define constants__t_access_level constants_bs__t_access_level
 #define constants__t_access_level_ex constants_bs__t_access_level_ex
@@ -412,6 +413,7 @@ typedef enum {
 #define constants__t_Timestamp_max constants_bs__t_Timestamp_max
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
 #define constants__t_WriteByPassMask_i_max constants_bs__t_WriteByPassMask_i_max
+#define constants__t_WriteValuePointerInPool_i_max constants_bs__t_WriteValuePointerInPool_i_max
 #define constants__t_WriteValuePointer_i_max constants_bs__t_WriteValuePointer_i_max
 #define constants__t_access_level_max constants_bs__t_access_level_max
 #define constants__t_access_level_ex_max constants_bs__t_access_level_ex_max
@@ -533,6 +535,7 @@ typedef enum {
 #define constants__c_Timestamp_null constants_bs__c_Timestamp_null
 #define constants__c_Variant_indet constants_bs__c_Variant_indet
 #define constants__c_WriteByPassMask_none constants_bs__c_WriteByPassMask_none
+#define constants__c_WriteValuePointerInPool_indet constants_bs__c_WriteValuePointerInPool_indet
 #define constants__c_WriteValuePointer_indet constants_bs__c_WriteValuePointer_indet
 #define constants__c_browsePath_indet constants_bs__c_browsePath_indet
 #define constants__c_byte_buffer_indet constants_bs__c_byte_buffer_indet
