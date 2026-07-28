@@ -48,7 +48,7 @@ static void SOPC_InternalCreate_SetEventVarNull_Cb(const char* qnPath,
 
 static uint64_t str_hash(const uintptr_t data)
 {
-    return SOPC_DJBHash((const uint8_t*) data, strlen((const char*) data));
+    return SOPC_FNV1aHash((const uint8_t*) data, strlen((const char*) data));
 }
 
 static bool str_equal(const uintptr_t a, const uintptr_t b)

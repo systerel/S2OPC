@@ -616,7 +616,7 @@ static uint64_t str_hash(const uintptr_t str)
         hash_len = 3;
     }
 
-    return SOPC_DJBHash((const uint8_t*) str, hash_len);
+    return SOPC_FNV1aHash((const uint8_t*) str, hash_len);
 }
 
 static bool str_equal(const uintptr_t a, const uintptr_t b)

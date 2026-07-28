@@ -831,7 +831,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 static uint64_t string_hash(const uintptr_t s)
 {
     const SOPC_String* str = (SOPC_String*) s;
-    return SOPC_DJBHash(str->Data, (size_t) str->Length);
+    return SOPC_FNV1aHash(str->Data, (size_t) str->Length);
 }
 
 static bool string_equal(const uintptr_t a, const uintptr_t b)

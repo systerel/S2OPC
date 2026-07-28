@@ -140,7 +140,7 @@ static uint64_t SOPC_Internal_String_Hash(const uintptr_t s)
 {
     SOPC_ASSERT(NULL != (void*) s);
     const SOPC_String* str = (SOPC_String*) s;
-    return SOPC_DJBHash(str->Data, (size_t) str->Length);
+    return SOPC_FNV1aHash(str->Data, (size_t) str->Length);
 }
 
 static bool SOPC_Internal_String_Equal(const uintptr_t a, const uintptr_t b)

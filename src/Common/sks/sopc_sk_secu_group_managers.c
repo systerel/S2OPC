@@ -42,7 +42,7 @@ bool g_init = false;
 static uint64_t str_hash(const uintptr_t data)
 {
     SOPC_ASSERT((void*) data != NULL); // Ensured by SOPC_Dict_Create since empty key is NULL it is always excluded
-    return SOPC_DJBHash((const uint8_t*) data, strlen((const char*) data));
+    return SOPC_FNV1aHash((const uint8_t*) data, strlen((const char*) data));
 }
 
 static bool str_equal(const uintptr_t a, const uintptr_t b)

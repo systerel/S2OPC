@@ -197,7 +197,7 @@ static void LockedStaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMa
  */
 static uint64_t uintptr_hash(const uintptr_t data)
 {
-    return SOPC_DJBHash((const uint8_t*) &data, sizeof(uintptr_t));
+    return SOPC_FNV1aHash((const uint8_t*) &data, sizeof(uintptr_t));
 }
 
 static bool direct_equal(const uintptr_t a, const uintptr_t b)

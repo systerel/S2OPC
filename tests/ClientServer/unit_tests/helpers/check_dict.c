@@ -37,7 +37,7 @@ static uint64_t str_hash(const uintptr_t str)
         hash_len = 3;
     }
 
-    return SOPC_DJBHash((const uint8_t*) str, hash_len);
+    return SOPC_FNV1aHash((const uint8_t*) str, hash_len);
 }
 
 static bool str_equal(const uintptr_t a, const uintptr_t b)
@@ -64,7 +64,7 @@ static void uintptr_t_free(uintptr_t data)
 static uint64_t uintptr_hash(const uintptr_t data)
 {
     uintptr_t val = (uintptr_t) data;
-    return SOPC_DJBHash((const uint8_t*) &val, sizeof(uintptr_t));
+    return SOPC_FNV1aHash((const uint8_t*) &val, sizeof(uintptr_t));
 }
 
 static bool direct_equal(const uintptr_t a, const uintptr_t b)

@@ -461,7 +461,7 @@ static bool handle_equal(const uintptr_t a, const uintptr_t b)
 
 static uint64_t handle_hash(const uintptr_t handle)
 {
-    uint64_t hash = SOPC_DJBHash((const uint8_t*) handle, (size_t) sizeof(SOPC_FileHandle));
+    uint64_t hash = SOPC_FNV1aHash((const uint8_t*) handle, (size_t) sizeof(SOPC_FileHandle));
     return hash;
 }
 
