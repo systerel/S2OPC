@@ -29,6 +29,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/**
+ * \brief Quadratic-probing offset used by SOPC_Dict bucket indexing.
+ * \param hash  Hash value of the key.
+ * \param i     Probe attempt index (0-based).
+ * \return hash + i/2 + i*i/2, the bucket index before masking with (size - 1).
+ */
+#define SOPC_DICT_HASH(hash, i) ((hash) + ((i) / 2) + (((i) * (i)) / 2))
+
 typedef struct _SOPC_Dict SOPC_Dict;
 
 /**

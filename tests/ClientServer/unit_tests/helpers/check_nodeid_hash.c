@@ -27,7 +27,7 @@
  *
  * - The only hard requirement is congruence with SOPC_NodeId_Equal: two NodeIds that compare
  *   equal must hash equal, otherwise a dictionary can hold the same key twice.
- * - The dictionary indexes buckets with (hash + f(i)) & (size - 1), so only the low
+ * - The dictionary indexes buckets with SOPC_DICT_HASH(hash, i) & (size - 1), so only the low
  *   log2(size) bits of the hash are ever used. Hash quality must therefore be judged on the
  *   distribution of those low bits and on the resulting probe chains.
  *
@@ -53,10 +53,8 @@
 #include "check_helpers.h"
 
 #include "sopc_builtintypes.h"
+#include "sopc_dict.h"
 #include "sopc_mem_alloc.h"
-
-/* Probe formula of sopc_dict.c, kept in sync manually (it is a private macro of that module). */
-#define HASH_I(hash, i) ((hash) + ((i) / 2) + (((i) * (i)) / 2))
 
 #define DISTRIB_KEYS 50000u
 
@@ -263,7 +261,7 @@ static void measure_probes(SOPC_NodeId** keys, size_t n_keys, double* avg_probes
 
         for (size_t i = 0; i < table_size; ++i)
         {
-            const size_t idx = (size_t) HASH_I(hash, i) & sizemask;
+            const size_t idx = (size_t) SOPC_DICT_HASH(hash, i) & sizemask;
             if (!occupied[idx])
             {
                 occupied[idx] = true;

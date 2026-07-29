@@ -58,7 +58,6 @@
 #define DEFAULT_DICT_SIZE 500000U
 #define DEFAULT_LOOKUPS 10000000U
 #define WARMUP_LOOKUPS 100000U
-#define HASH_I(hash, i) ((hash) + ((i) / 2) + (((i) * (i)) / 2))
 #define BENCH_REPETITIONS 5U
 
 /* Chi-square classes for the low bits of the hash. With the default 500k keys this leaves about
@@ -673,7 +672,7 @@ static bool compute_probe_stats(const bench_data_t* data,
         bool inserted = false;
         for (size_t i = 0; i < table_size; ++i)
         {
-            size_t idx = (size_t) HASH_I(hash, i) & sizemask;
+            size_t idx = (size_t) SOPC_DICT_HASH(hash, i) & sizemask;
 
             if (!occupied[idx])
             {

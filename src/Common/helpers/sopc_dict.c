@@ -22,8 +22,6 @@
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 
-#define HASH_I(hash, i) (hash + (i / 2) + (i * i / 2))
-
 /* This is a dictionary implemented using quadratic probing (see
  * https://en.wikipedia.org/wiki/Linear_probing) for resolving key conflicts.
  *
@@ -84,7 +82,7 @@ static bool insert_item(SOPC_Dict* d, uint64_t hash, uintptr_t key, uintptr_t va
 {
     for (size_t i = 0; i < d->size; ++i)
     {
-        size_t idx = (size_t) HASH_I(hash, i) & d->sizemask;
+        size_t idx = (size_t) SOPC_DICT_HASH(hash, i) & d->sizemask;
         SOPC_DictBucket* b = &d->buckets[idx];
 
         // Normal insert
@@ -317,7 +315,7 @@ static SOPC_DictBucket* get_internal(const SOPC_Dict* d, const uintptr_t key)
     bool stopOrFound = false;
     for (size_t i = 0; i < d->size && !stopOrFound; ++i)
     {
-        uint64_t idx = HASH_I(hash, i) & d->sizemask;
+        uint64_t idx = SOPC_DICT_HASH(hash, i) & d->sizemask;
         const uintptr_t bucket_key = d->buckets[idx].key;
 
         if (bucket_key == d->empty_key)
