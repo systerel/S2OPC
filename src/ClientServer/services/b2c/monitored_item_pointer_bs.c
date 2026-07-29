@@ -17,23 +17,31 @@
  * under the License.
  */
 
+/**
+ * \file monitored_item_pointer_bs.c
+ * \brief This module manages storage of the information associated with created monitored items.
+ *        A monitored item id is associated to a monitored item information structure pointer
+ *        and a table provide lookup for this association.
+ *
+ * MonitoredItemId to \ref SOPC_InternalMonitoredItem mapping uses a 1-based pointer
+ * table indexed by (id - 1), pre-allocated at init. Freed ids are recycled via
+ * \c monitoredItemIdFreed.
+ */
+
 #include "monitored_item_pointer_bs.h"
 
-#include "address_space_impl.h"
 #include "monitored_item_pointer_impl.h"
 
 #include <inttypes.h>
 #include <math.h>
+#include <stdint.h>
 #include <string.h>
 
-#include "sopc_address_space_utils_internal.h"
 #include "sopc_assert.h"
-#include "sopc_dict.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
-#include "util_b2c.h"
 #include "util_variant.h"
 
 static void SOPC_InternalMonitoredFilter_Free(SOPC_InternalMonitoredItemFilterCtx* filterCtx)
@@ -63,9 +71,8 @@ static void SOPC_InternalMonitoredFilter_Free(SOPC_InternalMonitoredItemFilterCt
     }
 }
 
-static void SOPC_InternalMonitoredItem_Free(uintptr_t data)
+static void SOPC_InternalMonitoredItem_Free(SOPC_InternalMonitoredItem* mi)
 {
-    SOPC_InternalMonitoredItem* mi = (SOPC_InternalMonitoredItem*) data;
     if (NULL != mi)
     {
         SOPC_NumericRange_Delete(mi->indexRange);
@@ -78,27 +85,77 @@ static void SOPC_InternalMonitoredItem_Free(uintptr_t data)
     }
 }
 
-static void SOPC_InternalMonitoredItemId_Free(uintptr_t data)
-{
-    SOPC_UNUSED_ARG(data);
-    // Nothing to do: uintptr_t value
-}
+/* Initial slot count; table is allocated at INITIALISATION (Calloc zeroes slots). */
+#define MI_TABLE_INITIAL_CAPACITY ((size_t) 16)
 
-static uint64_t SOPC_InternalMonitoredItemId_Hash(const uintptr_t data)
-{
-    return (uint64_t) data;
-}
-
-static bool SOPC_InternalMonitoredItemId_Equal(const uintptr_t a, const uintptr_t b)
-{
-    // Compare uintptr_t id values
-    return a == b;
-}
-
-static SOPC_Dict* monitoredItemIdDict = NULL;
+/* MonitoredItemId (1-based) -> pointer table. Slot (id - 1) is NULL when the id
+ * was deleted and is available for reuse (listed in monitoredItemIdFreed).
+ * Capacity is a high-water mark: it never shrinks on delete. */
+static SOPC_InternalMonitoredItem** monitoredItemById = NULL;
+static size_t monitoredItemByIdCapacity = 0;
+/* Ids popped on create, pushed on delete; avoids scanning NULL slots for reuse. */
 static SOPC_SLinkedList* monitoredItemIdFreed = NULL;
 
+/* Highest id ever issued when the freed list is empty. */
 static uint32_t monitoredItemIdMax = 0;
+
+/**
+ * \brief Ensures the MonitoredItemId table can hold \p id (index \p id - 1).
+ * \param id  MonitoredItemId (must not be 0 or UINT32_MAX).
+ * \return \c true on success, \c false on invalid id or allocation failure.
+ *
+ * \warning table never shrinks: capacity tracks max id ever stored.
+ */
+static bool mi_table_ensure(uint32_t id)
+{
+    if (id == 0 || id == UINT32_MAX)
+    {
+        /* 0 is c_monitoredItemId_indet; UINT32_MAX is the id exhaustion sentinel. */
+        return false;
+    }
+    if (id <= monitoredItemByIdCapacity)
+    {
+        return true;
+    }
+    size_t newCap = monitoredItemByIdCapacity;
+    while (newCap < (size_t) id)
+    {
+        if (newCap > SIZE_MAX / 2)
+        {
+            return false;
+        }
+        newCap *= 2;
+    }
+    size_t oldBytes = monitoredItemByIdCapacity * sizeof(SOPC_InternalMonitoredItem*);
+    size_t newBytes = newCap * sizeof(SOPC_InternalMonitoredItem*);
+    SOPC_InternalMonitoredItem** p = SOPC_Realloc(monitoredItemById, oldBytes, newBytes);
+    if (p == NULL)
+    {
+        return false;
+    }
+    memset(p + monitoredItemByIdCapacity, 0,
+           (newCap - monitoredItemByIdCapacity) * sizeof(SOPC_InternalMonitoredItem*));
+    /* New slots must be NULL: mi_table_get treats NULL as "no live item". */
+    monitoredItemById = p;
+    monitoredItemByIdCapacity = newCap;
+    return true;
+}
+
+/**
+ * \brief Looks up a monitored item by MonitoredItemId.
+ * \param id  MonitoredItemId (1-based).
+ * \return The item pointer, or \c NULL if \p id is invalid, out of range, or deleted.
+ */
+static SOPC_InternalMonitoredItem* mi_table_get(uint32_t id)
+{
+    if (id == 0 || id > monitoredItemByIdCapacity)
+    {
+        /* Never issued (id above capacity) or invalid (0). */
+        return NULL;
+    }
+    /* NULL slot: deleted id or not yet reused; getall_monitoredItemId maps to bres=false. */
+    return monitoredItemById[id - 1];
+}
 
 /*------------------------
    INITIALISATION Clause
@@ -107,21 +164,30 @@ void monitored_item_pointer_bs__INITIALISATION(void)
 {
     monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION();
 
-    monitoredItemIdDict = SOPC_Dict_Create(constants_bs__c_monitoredItemId_indet, SOPC_InternalMonitoredItemId_Hash,
-                                           SOPC_InternalMonitoredItemId_Equal, SOPC_InternalMonitoredItemId_Free,
-                                           SOPC_InternalMonitoredItem_Free);
-    SOPC_ASSERT(monitoredItemIdDict != NULL);
     monitoredItemIdFreed = SOPC_SLinkedList_Create(0);
     SOPC_ASSERT(monitoredItemIdFreed != NULL);
+    monitoredItemById = SOPC_Calloc(MI_TABLE_INITIAL_CAPACITY, sizeof(SOPC_InternalMonitoredItem*));
+    SOPC_ASSERT(monitoredItemById != NULL);
+    monitoredItemByIdCapacity = MI_TABLE_INITIAL_CAPACITY;
 }
 
 void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
 {
-    if (monitoredItemIdDict != NULL)
+    if (monitoredItemById != NULL)
     {
-        SOPC_Dict_Delete(monitoredItemIdDict);
-        monitoredItemIdDict = NULL;
+        /* Free live items only; NULL slots are deleted ids (already freed on delete). */
+        for (size_t i = 0; i < monitoredItemByIdCapacity; ++i)
+        {
+            if (monitoredItemById[i] != NULL)
+            {
+                SOPC_InternalMonitoredItem_Free(monitoredItemById[i]);
+                monitoredItemById[i] = NULL;
+            }
+        }
+        SOPC_Free(monitoredItemById);
+        monitoredItemById = NULL;
     }
+    monitoredItemByIdCapacity = 0;
 
     if (monitoredItemIdFreed != NULL)
     {
@@ -198,7 +264,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
                      (NULL == filterCtx || filterCtx->isDataFilter)) ||
                     (constants__e_aid_EventNotifier == monitored_item_pointer_bs__p_aid && !filterCtx->isDataFilter));
 
-        bool dictInsertionOK = false;
+        bool tableInsertionOK = false;
 
         monitItem->subId = monitored_item_pointer_bs__p_subscription;
         monitItem->nid = nid;
@@ -219,8 +285,6 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
             {
                 monitoredItemIdMax++;
                 monitItem->monitoredItemId = monitoredItemIdMax;
-                dictInsertionOK =
-                    SOPC_Dict_Insert(monitoredItemIdDict, (uintptr_t) monitoredItemIdMax, (uintptr_t) monitItem);
             } // else: all Ids already in use
         }
         else
@@ -230,11 +294,21 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
             if (freshId != 0)
             {
                 monitItem->monitoredItemId = freshId;
-                dictInsertionOK = SOPC_Dict_Insert(monitoredItemIdDict, (uintptr_t) freshId, (uintptr_t) monitItem);
             }
         }
 
-        if (!dictInsertionOK)
+        if (monitItem->monitoredItemId != 0)
+        {
+            /* Same path for fresh and reused ids: grow table if needed, then store pointer. */
+            tableInsertionOK = mi_table_ensure(monitItem->monitoredItemId);
+            if (tableInsertionOK)
+            {
+                monitoredItemById[monitItem->monitoredItemId - 1] = monitItem;
+            }
+        }
+        /* monitoredItemId stays 0 when all ids are in use (UINT32_MAX reached). */
+
+        if (!tableInsertionOK)
         {
             retStatus = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -331,16 +405,20 @@ void monitored_item_pointer_bs__delete_monitored_item_pointer(
                                monitItem->monitoredItemId);
     }
 
-    // Reset monitored item associated
-    // (Caution: it frees the monitItem pointer)
-    bool inserted = SOPC_Dict_Insert(monitoredItemIdDict, (uintptr_t) monitItem->monitoredItemId, (uintptr_t) NULL);
-
-    if (!inserted)
+    /* Copy id before free; callers must not dereference monitItem after this call. */
+    uint32_t id = monitItem->monitoredItemId;
+    SOPC_InternalMonitoredItem_Free(monitItem);
+    /* Clear table slot so getall_monitoredItemId rejects this id until reuse. */
+    if (id > 0 && id <= monitoredItemByIdCapacity)
+    {
+        monitoredItemById[id - 1] = NULL;
+    }
+    else
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "monitored_item_pointer_bs__delete_monitored_item_pointer: monitoredItemId %" PRIu32
-                               " cannot be removed from defined set",
-                               monitItem->monitoredItemId);
+                               " out of table range",
+                               id);
     }
 }
 
@@ -371,17 +449,12 @@ void monitored_item_pointer_bs__getall_monitoredItemId(
     *monitored_item_pointer_bs__p_monitoredItemPointer = NULL;
     if (monitored_item_pointer_bs__p_monitoredItemId != constants_bs__c_monitoredItemId_indet)
     {
-        void* miPointer =
-            (void*) SOPC_Dict_Get(monitoredItemIdDict, (uintptr_t) monitored_item_pointer_bs__p_monitoredItemId,
-                                  monitored_item_pointer_bs__bres);
-        if (*monitored_item_pointer_bs__bres && NULL != miPointer)
+        /* Lookup by id for Modify/Delete/SetMonitoringMode (subscription_core). */
+        SOPC_InternalMonitoredItem* mi = mi_table_get(monitored_item_pointer_bs__p_monitoredItemId);
+        if (mi != NULL)
         {
-            *monitored_item_pointer_bs__p_monitoredItemPointer = miPointer;
-        }
-        else
-        {
-            *monitored_item_pointer_bs__bres = false;
-            *monitored_item_pointer_bs__p_monitoredItemPointer = NULL;
+            *monitored_item_pointer_bs__bres = true;
+            *monitored_item_pointer_bs__p_monitoredItemPointer = mi;
         }
     }
 }
