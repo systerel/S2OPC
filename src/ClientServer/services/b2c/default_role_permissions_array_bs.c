@@ -19,6 +19,7 @@
 
 #include "default_role_permissions_array_bs.h"
 #include "sopc_assert.h"
+#include "sopc_builtintypes.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 
@@ -30,7 +31,6 @@
 static bool isInit = false;
 static SOPC_Variant* a_defaultRolePermissions = NULL; // SOPC_Variant[]
 static t_entier4 nbr_of_namespaces = 0;
-static SOPC_Variant variantNull = {0}; // For handling the case no DRP has been found
 void default_role_permissions_array_bs__INITIALISATION(void)
 { /*Translated from B but an intialisation is not needed from this module.*/
 }
@@ -61,6 +61,7 @@ void default_role_permissions_array_bs__add_DefaultRolePermissions_at_idx(
     {
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "DefaultRolePermissions added for NS=%" PRIu16 ".",
                                default_role_permissions_array_bs__p_idx - 1);
+        // Note: due to above-mentioned verification, it cannot be NULL variant
         a_defaultRolePermissions[default_role_permissions_array_bs__p_idx - 1] =
             *default_role_permissions_array_bs__p_DefaultRolePermissions;
     }
@@ -85,6 +86,7 @@ void default_role_permissions_array_bs__get_DefaultRolePermissions_at_idx(
     *default_role_permissions_array_bs__p_DefaultRolePermissions = constants__c_RolePermissionTypes_indet;
     if (default_role_permissions_array_bs__p_idx < nbr_of_namespaces)
     {
+        // TODO: try to avoid that ? In addition I think we never return the result in a message for now.
         // We need to create a variant to have similar behavior than when read_AddressSpace_RolePermissions is
         // used. Thus we create a shallow copy of the variant.
         SOPC_Variant* variant = SOPC_Variant_Create();
@@ -111,11 +113,8 @@ void default_role_permissions_array_bs__has_DefaultRolePermissions_at_idx(
     *default_role_permissions_array_bs__bres = false;
     if (default_role_permissions_array_bs__p_idx < nbr_of_namespaces)
     {
-        int32_t cmp = -1;
-        SOPC_Variant variant = a_defaultRolePermissions[default_role_permissions_array_bs__p_idx];
-        SOPC_ReturnStatus status = SOPC_Variant_Compare(&variantNull, &variant, &cmp);
-        SOPC_ASSERT(SOPC_STATUS_OK == status);
-        *default_role_permissions_array_bs__bres = 0 != cmp;
+        *default_role_permissions_array_bs__bres =
+            (SOPC_Null_Id != a_defaultRolePermissions[default_role_permissions_array_bs__p_idx].BuiltInTypeId);
     }
 }
 
