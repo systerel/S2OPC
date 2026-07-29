@@ -39,9 +39,11 @@
  * ns=1;i=<n> and ns=1;i=<n+8447> shared the same hash and 50000 sequential numeric NodeIds only
  * produced 8610 distinct values.
  *
- * No test compares the hash against a hard-coded expected value: the assertions hold for any
- * correct hash function, so this file stays valid if the mixing function is replaced. The
- * measured quality figures are printed to allow a before/after comparison.
+ * The distribution and avalanche tests do not compare against hard-coded hash values: they
+ * hold for any correct mixing function, and the measured figures are printed to allow a
+ * before/after comparison. Two oracle tests pin FNV-1a correctness: RFC 9923 string vectors
+ * for SOPC_FNV1aHash / SOPC_FNV1aHash_Step, and a field-chain replay that checks
+ * SOPC_NodeId_Hash applies the same primitive in production field order.
  */
 
 #include <check.h>
@@ -54,7 +56,11 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_dict.h"
+#include "sopc_hash.h"
 #include "sopc_mem_alloc.h"
+
+/* RFC 9923 FNV-1a 64-bit offset basis (same value as in sopc_hash.c). */
+#define FNV1A_OFFSET_BASIS 0xcbf29ce484222325ULL
 
 #define DISTRIB_KEYS 50000u
 
@@ -480,6 +486,57 @@ START_TEST(test_nodeid_hash_avalanche)
 }
 END_TEST
 
+/* RFC 9923 appendix test strings and FNV-1a 64-bit string hashes (FNV64svalues). The block
+ * vectors in the RFC include a terminating NUL; SOPC_FNV1aHash takes an explicit length, so
+ * the string vectors are the match. */
+START_TEST(test_fnv1a_rfc9923_vectors)
+{
+    static const uint8_t hello_rfc[] = {'H', 'e', 'l', 'l', 'o', '!', 0x01, 0xFF, 0xED};
+
+    static const struct
+    {
+        const uint8_t* data;
+        size_t len;
+        uint64_t expected;
+    } vectors[] = {
+        {(const uint8_t*) "", 0, 0xcbf29ce484222325ULL},
+        {(const uint8_t*) "a", 1, 0xaf63dc4c8601ec8cULL},
+        {(const uint8_t*) "foobar", 6, 0x85944171f73967e8ULL},
+        {hello_rfc, sizeof(hello_rfc), 0xbd51ea7094ee6fa1ULL},
+    };
+
+    for (size_t i = 0; i < sizeof(vectors) / sizeof(vectors[0]); ++i)
+    {
+        const uint64_t one_shot = SOPC_FNV1aHash(vectors[i].data, vectors[i].len);
+        ck_assert_uint_eq(vectors[i].expected, one_shot);
+
+        uint64_t incremental = FNV1A_OFFSET_BASIS;
+        for (size_t b = 0; b < vectors[i].len; ++b)
+        {
+            incremental = SOPC_FNV1aHash_Step(incremental, &vectors[i].data[b], 1);
+        }
+        ck_assert_uint_eq(one_shot, incremental);
+    }
+}
+END_TEST
+
+/* SOPC_NodeId_Hash chains FNV-1a over native struct fields; replay the same sequence here. */
+START_TEST(test_nodeid_hash_fnv1a_field_chain)
+{
+    SOPC_NodeId* nodeId = nodeid_new("ns=1;i=42");
+
+    uint64_t expected = SOPC_FNV1aHash((const uint8_t*) &nodeId->IdentifierType, sizeof(SOPC_IdentifierType));
+    expected = SOPC_FNV1aHash_Step(expected, (const uint8_t*) &nodeId->Namespace, sizeof(uint16_t));
+    expected = SOPC_FNV1aHash_Step(expected, (const uint8_t*) &nodeId->Data.Numeric, sizeof(uint32_t));
+
+    uint64_t actual = 0;
+    SOPC_NodeId_Hash(nodeId, &actual);
+    ck_assert_uint_eq(expected, actual);
+
+    nodeid_delete(nodeId);
+}
+END_TEST
+
 Suite* tests_make_suite_nodeid_hash(void)
 {
     Suite* s = suite_create("NodeId hash tests");
@@ -489,6 +546,8 @@ Suite* tests_make_suite_nodeid_hash(void)
     tcase_add_test(tc_nodeid_hash, test_nodeid_hash_field_sensitivity);
     tcase_add_test(tc_nodeid_hash, test_nodeid_hash_distribution);
     tcase_add_test(tc_nodeid_hash, test_nodeid_hash_avalanche);
+    tcase_add_test(tc_nodeid_hash, test_fnv1a_rfc9923_vectors);
+    tcase_add_test(tc_nodeid_hash, test_nodeid_hash_fnv1a_field_chain);
     suite_add_tcase(s, tc_nodeid_hash);
 
     return s;
