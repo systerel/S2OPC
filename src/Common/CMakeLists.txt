@@ -56,7 +56,7 @@ elseif(S2OPC_CRYPTO_MBEDTLS)
 endif()
 list(APPEND S2OPC_COMMON_PUBLIC_LINK_LIBRARIES ${MATH_LIB} ${THREAD_LIB} ${SOCK_LIB})
 
-file(GLOB PLATFORM_SRCS "helpers_platform_dep/*.c" "helpers_platform_dep/${PLATFORM_DIR}/*.c")
+file(GLOB PLATFORM_SRCS CONFIGURE_DEPENDS "helpers_platform_dep/*.c" "helpers_platform_dep/${PLATFORM_DIR}/*.c")
 
 # Set specialized compilation flags for platform dependent source files
 if(UNIX)
@@ -79,14 +79,14 @@ set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_DEFINITIONS "SOP
 ## C99 compliant source code ##
 
 # Define non-platform dependent source files
-file(GLOB_RECURSE S2OPC_COMMON_SRCS
+file(GLOB_RECURSE S2OPC_COMMON_SRCS CONFIGURE_DEPENDS
     "configuration/*.c"
     "helpers/*.c"
     "sks/*.c"
     "opcua_types/*.c"
 )
 
-file(GLOB S2OPC_CRYPTO_SRCS
+file(GLOB S2OPC_CRYPTO_SRCS CONFIGURE_DEPENDS
     "crypto/*.c"
     "crypto/lib_dep/${S2OPC_CRYPTO_LIB}/*.c"
 )

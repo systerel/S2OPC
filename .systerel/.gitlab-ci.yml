@@ -164,7 +164,7 @@ generation:
 hil-build-zephyr:
   stage: hil-build
   needs: []
-  image: # digest of zephyr_build v4.1.0
+  image: # digest of zephyr_build v4.2.0
     name: docker.aix.systerel.fr/c838/zephyr_build@sha256:504fd0613b96e99ec16ed23b3fcba1455e8bbede4fe352bfb2b921b04cae5221
     entrypoint: ['']
   script:

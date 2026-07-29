@@ -38,7 +38,7 @@ s2opc_gen_build_info(${CMAKE_CURRENT_SOURCE_DIR}/common/sopc_pubsub_build_info.c
 ## C99 compliant source code ##
 
 #Define non - platform dependent source files
-file(GLOB_RECURSE S2OPC_PUBSUB_SRCS "*.c")
+file(GLOB_RECURSE S2OPC_PUBSUB_SRCS CONFIGURE_DEPENDS "*.c")
 
 #Define S2OPC library includes
 

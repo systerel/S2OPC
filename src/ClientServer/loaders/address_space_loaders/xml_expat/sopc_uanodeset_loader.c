@@ -33,12 +33,10 @@
 #include "sopc_date_time.h"
 #include "sopc_dict.h"
 #include "sopc_encodeabletype.h"
-#include "sopc_encoder.h"
 #include "sopc_hash.h"
 #include "sopc_helper_encode.h"
 #include "sopc_helper_expat.h"
 #include "sopc_helper_string.h"
-#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"
 
@@ -130,7 +128,7 @@ struct parse_context_t
 static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
-    const size_t BUF_SIZE = 65365;
+    const size_t BUF_SIZE = SOPC_NODESET_XML_MAX_BUFFER_SIZE;
     char* buf = SOPC_Malloc(BUF_SIZE);
     status = (NULL != buf) ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
 

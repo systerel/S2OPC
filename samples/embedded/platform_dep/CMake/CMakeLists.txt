@@ -50,7 +50,7 @@ else()
   message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-file(GLOB samples_src
+file(GLOB samples_src CONFIGURE_DEPENDS
   ${SAMPLE_SRC_DIR}/src/*.c
   ${SAMPLE_PTF_DEP}/${PLATFORM_DIR}/src/*.c
 )

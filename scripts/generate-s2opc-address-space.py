@@ -1105,7 +1105,7 @@ def generate_nodeid_pointer(val):
 
 def generate_localized_text(text):
     if text is None:
-        return '{%s, %s}' % (generate_string(None), generate_string(None))
+        return '{%s, %s, NULL}' % (generate_string(None), generate_string(None))
 
     if text.locale is not None:
         # remove linebreaks and whitespaces (should not exist in locale)
