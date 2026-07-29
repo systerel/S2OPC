@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 28/07/2026 14:56:01
+ Date                 : 10/08/2026 08:14:40
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1157,7 +1157,7 @@ void subscription_core__create_monitored_item(
             subscription_core__monitoredItemId);
       }
       if (*subscription_core__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
-         subscription_core_bs__get_nodeToMonitoredItemQueue(subscription_core__p_nid,
+         subscription_core_bs__get_or_create_nodeToMonitoredItemQueue(subscription_core__p_nid,
             &subscription_core__l_bres,
             &subscription_core__l_node_monitIt_queue);
          if (subscription_core__l_bres == true) {

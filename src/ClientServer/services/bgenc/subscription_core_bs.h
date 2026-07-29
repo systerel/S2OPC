@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_bs.h
 
- Date                 : 09/06/2026 12:57:37
+ Date                 : 30/07/2026 14:07:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -71,6 +71,10 @@ extern void subscription_core_bs__get_next_subscription_sequence_number(
    const constants__t_sub_seq_num_i subscription_core_bs__p_prev_seq_num,
    constants__t_sub_seq_num_i * const subscription_core_bs__p_next_seq_num);
 extern void subscription_core_bs__get_nodeToMonitoredItemQueue(
+   const constants__t_NodeId_i subscription_core_bs__p_nid,
+   t_bool * const subscription_core_bs__p_bres,
+   constants__t_monitoredItemQueue_i * const subscription_core_bs__p_monitoredItemQueue);
+extern void subscription_core_bs__get_or_create_nodeToMonitoredItemQueue(
    const constants__t_NodeId_i subscription_core_bs__p_nid,
    t_bool * const subscription_core_bs__p_bres,
    constants__t_monitoredItemQueue_i * const subscription_core_bs__p_monitoredItemQueue);

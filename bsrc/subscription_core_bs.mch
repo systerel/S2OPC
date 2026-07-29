@@ -59,13 +59,37 @@ OPERATIONS
         p_nid : t_NodeId_i &
         p_nid : t_NodeId
     THEN
+        p_bres,
+        p_monitoredItemQueue
+        :(p_bres : BOOL &
+          p_monitoredItemQueue : t_monitoredItemQueue_i &
+          p_bres = bool(p_nid : dom(a_nodeToMonitoredItemQueue)) &
+          (p_bres = TRUE =>
+              p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid)) &
+          (p_bres = FALSE =>
+              /* Queue not yet created for this NodeId */
+              p_monitoredItemQueue = c_monitoredItemQueue_indet)
+        )
+    END
+    ;
+
+    p_bres, p_monitoredItemQueue <-- get_or_create_nodeToMonitoredItemQueue (p_nid) =
+    PRE
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId
+    THEN
         CHOICE
+            /* OOM case */
             p_bres := FALSE ||
             p_monitoredItemQueue := c_monitoredItemQueue_indet
         OR
             p_bres := TRUE ||
-            p_monitoredItemQueue :(p_monitoredItemQueue : t_monitoredItemQueue_i &
-                p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
+            p_monitoredItemQueue,
+            a_nodeToMonitoredItemQueue
+            :(p_monitoredItemQueue : t_monitoredItemQueue_i &
+              /* Might create a new queue / entry */
+              a_nodeToMonitoredItemQueue : t_NodeId --> t_monitoredItemQueue &
+              p_monitoredItemQueue = a_nodeToMonitoredItemQueue(p_nid))
         END
     END
     ;

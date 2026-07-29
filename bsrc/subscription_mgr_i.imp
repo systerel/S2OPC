@@ -1900,6 +1900,7 @@ OPERATIONS
         l_nodeClass,
         l_eventNotifierByte,
         l_bres,
+        l_queue_found,
         l_monitoredItemQueue
     IN
         /* For each MI in queue:
@@ -1922,12 +1923,15 @@ OPERATIONS
             ;
             IF l_bres = TRUE
             THEN
-                l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_notifierId);
-                IF l_bres = TRUE
+                /* Lookup only: do not create an empty NodeId->MI queue.
+                   Keep l_bres as EventNotifier result so Server fan-out still
+                   runs when this notifier has no MI yet. */
+                l_queue_found, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_notifierId);
+                IF l_queue_found = TRUE
                 THEN
                     local_create_notification_on_monitored_items_if_event_selected (l_monitoredItemQueue, p_event, p_session, p_sub_id, p_mi_id)
                 END
-            END  // ELSE: no MI queue (none created)
+            END
         END
         ;
         /* Trigger event for Server node (if not already the notifier node) */
@@ -1938,8 +1942,8 @@ OPERATIONS
             l_nid_valid, l_node <-- readall_AddressSpace_Node (c_Server_NodeId);
             IF l_bres = FALSE & l_nid_valid = TRUE
             THEN
-                l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (c_Server_NodeId);
-                IF l_bres = TRUE
+                l_queue_found, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (c_Server_NodeId);
+                IF l_queue_found = TRUE
                 THEN
                     local_create_notification_on_monitored_items_if_event_selected (l_monitoredItemQueue, p_event, p_session, p_sub_id, p_mi_id)
                 END

@@ -1496,7 +1496,7 @@ OPERATIONS
         END;
         IF StatusCode_service = e_sc_ok
         THEN
-            l_bres, l_node_monitIt_queue <-- get_nodeToMonitoredItemQueue (p_nid);
+            l_bres, l_node_monitIt_queue <-- get_or_create_nodeToMonitoredItemQueue (p_nid);
 
             IF l_bres = TRUE
             THEN

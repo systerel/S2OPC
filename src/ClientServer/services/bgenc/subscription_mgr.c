@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 21/07/2026 08:49:44
+ Date                 : 04/08/2026 18:20:41
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1514,6 +1514,7 @@ void subscription_mgr__server_subscription_event_triggered(
       constants__t_NodeClass_i subscription_mgr__l_nodeClass;
       constants__t_Byte subscription_mgr__l_eventNotifierByte;
       t_bool subscription_mgr__l_bres;
+      t_bool subscription_mgr__l_queue_found;
       constants__t_monitoredItemQueue_i subscription_mgr__l_monitoredItemQueue;
       
       subscription_mgr__l_bres = false;
@@ -1532,9 +1533,9 @@ void subscription_mgr__server_subscription_event_triggered(
          }
          if (subscription_mgr__l_bres == true) {
             subscription_core__get_nodeToMonitoredItemQueue(subscription_mgr__p_notifierId,
-               &subscription_mgr__l_bres,
+               &subscription_mgr__l_queue_found,
                &subscription_mgr__l_monitoredItemQueue);
-            if (subscription_mgr__l_bres == true) {
+            if (subscription_mgr__l_queue_found == true) {
                subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(subscription_mgr__l_monitoredItemQueue,
                   subscription_mgr__p_event,
                   subscription_mgr__p_session,
@@ -1553,9 +1554,9 @@ void subscription_mgr__server_subscription_event_triggered(
          if ((subscription_mgr__l_bres == false) &&
             (subscription_mgr__l_nid_valid == true)) {
             subscription_core__get_nodeToMonitoredItemQueue(constants__c_Server_NodeId,
-               &subscription_mgr__l_bres,
+               &subscription_mgr__l_queue_found,
                &subscription_mgr__l_monitoredItemQueue);
-            if (subscription_mgr__l_bres == true) {
+            if (subscription_mgr__l_queue_found == true) {
                subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(subscription_mgr__l_monitoredItemQueue,
                   subscription_mgr__p_event,
                   subscription_mgr__p_session,
