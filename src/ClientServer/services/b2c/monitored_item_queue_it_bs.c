@@ -21,7 +21,6 @@
 
 #include "sopc_assert.h"
 #include "sopc_macros.h"
-#include "sopc_mem_alloc.h"
 
 /*--------------
    SEES Clause
@@ -31,6 +30,8 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
+static SOPC_SLinkedListIterator gIterator = NULL;
+
 void monitored_item_queue_it_bs__INITIALISATION(void)
 { /*Translated from B but an intialisation is not needed from this module.*/
 }
@@ -46,11 +47,11 @@ void monitored_item_queue_it_bs__continue_iter_monitored_item(
     constants__t_monitoredItemPointer_i* const monitored_item_queue_it_bs__p_monitoredItem)
 {
     SOPC_UNUSED_ARG(monitored_item_queue_it_bs__p_queue);
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_SLinkedListIterator* it = (SOPC_SLinkedListIterator*) monitored_item_queue_it_bs__p_iterator;
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-    *monitored_item_queue_it_bs__p_monitoredItem = (constants__t_monitoredItemPointer_i*) SOPC_SLinkedList_Next(it);
-    *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(it);
+    SOPC_UNUSED_ARG(monitored_item_queue_it_bs__p_iterator);
+    SOPC_ASSERT(NULL != gIterator);
+    *monitored_item_queue_it_bs__p_monitoredItem =
+        (constants__t_monitoredItemPointer_i*) SOPC_SLinkedList_Next(&gIterator);
+    *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(&gIterator);
 }
 
 void monitored_item_queue_it_bs__init_iter_monitored_item(
@@ -58,15 +59,16 @@ void monitored_item_queue_it_bs__init_iter_monitored_item(
     t_bool* const monitored_item_queue_it_bs__continue,
     constants__t_monitoredItemQueueIterator_i* const monitored_item_queue_it_bs__iterator)
 {
-    SOPC_SLinkedListIterator* it = SOPC_Malloc(sizeof(SOPC_SLinkedListIterator));
-    *monitored_item_queue_it_bs__iterator = it;
     *monitored_item_queue_it_bs__continue = false;
-    if (it != NULL && SOPC_SLinkedList_GetLength(monitored_item_queue_it_bs__p_queue) > 0)
+    *monitored_item_queue_it_bs__iterator = constants__c_monitoredItemQueueIterator_indet;
+    SOPC_ASSERT(NULL == gIterator);
+    if (SOPC_SLinkedList_GetLength(monitored_item_queue_it_bs__p_queue) > 0)
     {
-        *it = SOPC_SLinkedList_GetIterator(monitored_item_queue_it_bs__p_queue);
-        if (*monitored_item_queue_it_bs__iterator != NULL)
+        gIterator = SOPC_SLinkedList_GetIterator(monitored_item_queue_it_bs__p_queue);
+        if (gIterator != NULL)
         {
-            *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(it);
+            *monitored_item_queue_it_bs__iterator = &gIterator;
+            *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(&gIterator);
         }
     }
 }
@@ -74,5 +76,6 @@ void monitored_item_queue_it_bs__init_iter_monitored_item(
 void monitored_item_queue_it_bs__clear_iter_monitored_item(
     const constants__t_monitoredItemQueueIterator_i monitored_item_queue_it_bs__p_iterator)
 {
-    SOPC_Free(monitored_item_queue_it_bs__p_iterator);
+    SOPC_UNUSED_ARG(monitored_item_queue_it_bs__p_iterator);
+    gIterator = NULL;
 }
