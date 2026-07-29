@@ -58,7 +58,7 @@ static void SOPC_CallContext_FreeCurrent(void)
 void app_cb_call_context_bs__clear_app_call_context(void)
 {
     SOPC_CallContext_FreeCurrent();
-    memset(&currentCtx, 0, sizeof(currentCtx));
+    memset(&currentCtx, 0, sizeof(SOPC_CallContext));
     SOPC_CallContext_FreeCopy(currentCopyCtx);
     currentCopyCtx = NULL;
 }
@@ -103,6 +103,7 @@ void app_cb_call_context_bs__set_app_call_context_session(
     currentCtx.clientAppDescription = app_cb_call_context_bs__p_cliAppDesc;
     currentCtx.clientCertThumbprint = app_cb_call_context_bs__p_cliCertTb;
     currentCtx.sessionName = app_cb_call_context_bs__p_sessionName;
+    currentCtx.user = NULL;
     if (NULL != app_cb_call_context_bs__p_user)
     {
         currentCtx.user = SOPC_UserWithAuthorization_GetUser(app_cb_call_context_bs__p_user);
