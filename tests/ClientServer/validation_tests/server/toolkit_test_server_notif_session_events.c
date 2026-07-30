@@ -146,6 +146,34 @@ static SOPC_ReturnStatus check_session_events_test(uint32_t maxWait_ms)
                : SOPC_STATUS_NOK;
 }
 
+static SOPC_ReturnStatus run_session_events_test_case(const char* testTitle,
+                                                      const Test_ExpectedEvent** expectedEventsList,
+                                                      size_t nbExpected,
+                                                      const char* command,
+                                                      bool expectedCommandSuccess)
+{
+    SOPC_ASSERT(NULL != testTitle);
+    SOPC_ASSERT(NULL != expectedEventsList);
+    SOPC_ASSERT(NULL != command);
+
+    SOPC_CONSOLE_PRINTF("\n=========== %s ===========\n", testTitle);
+    set_expected_session_events_test(expectedEventsList, nbExpected);
+
+    int ret = system(command);
+    if (expectedCommandSuccess)
+    {
+        SOPC_ASSERT(0 == ret);
+    }
+    else
+    {
+        SOPC_ASSERT(0 != ret);
+    }
+
+    SOPC_ReturnStatus status = check_session_events_test(2000);
+    SOPC_CONSOLE_PRINTF("\n===========> TEST %s\n", (SOPC_STATUS_OK == status) ? "PASSED" : "FAILED");
+    return status;
+}
+
 static char* getClientUserIdFromUserToken(const SOPC_ExtensionObject* token)
 {
     if (NULL == token)
@@ -371,61 +399,59 @@ int main(int argc, char* argv[])
             SOPC_CONSOLE_PRINTF("\n=========== Test setup complete. Starting tests\n");
 
             nbFailures = 0;
-            SOPC_CONSOLE_PRINTF("\n=========== TC 1: Normal 'None' connection (Success case) ===========\n");
-            // launch a test.
-            set_expected_session_events_test(&session_AnonOK[0], sizeof(session_AnonOK) / sizeof(*session_AnonOK));
-            int ret = 0;
 #ifdef _WIN32
-            ret = system("s2opc_read --none -n i=2259 -a 13");
+            const char* cmdTc1 = "s2opc_read --none -n i=2259 -a 13";
+            const char* cmdTc2 =
+                "cmd /C \"set TEST_USERNAME=user1&& set TEST_PASSWORD_USER=password&& s2opc_wrapper_connect 2\"";
+            const char* cmdTc3 =
+                "cmd /C \"set TEST_USERNAME=unknownUser&& set TEST_PASSWORD_USER=password&& s2opc_wrapper_connect 2\"";
+            const char* cmdTc4 =
+                "cmd /C \"set TEST_USERNAME=user1&& set TEST_PASSWORD_USER=PASSword&& s2opc_wrapper_connect 2\"";
 #else
-            ret = system("./s2opc_read --none -n i=2259 -a 13");
+            const char* cmdTc1 = "./s2opc_read --none -n i=2259 -a 13";
+            const char* cmdTc2 = "TEST_USERNAME=user1 TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 2";
+            const char* cmdTc3 = "TEST_USERNAME=unknownUser TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 2";
+            const char* cmdTc4 = "TEST_USERNAME=user1 TEST_PASSWORD_USER=PASSword ./s2opc_wrapper_connect 2";
 #endif
-            SOPC_ASSERT(ret == 0);
 
-            status = check_session_events_test(2000);
-            SOPC_CONSOLE_PRINTF("\n===========> TEST TC1 %s\n", (SOPC_STATUS_OK == status) ? "PASSED" : "FAILED");
+            status = run_session_events_test_case("TC 1: Normal 'None' connection (Success case)", &session_AnonOK[0],
+                                                  sizeof(session_AnonOK) / sizeof(*session_AnonOK), cmdTc1, true);
+            status = run_session_events_test_case("TC 2: connection with user/pass (Success case)", &session_UserOK[0],
+                                                  sizeof(session_UserOK) / sizeof(*session_UserOK), cmdTc2, true);
+            status = run_session_events_test_case("TC 3: connection with bad user (ActivateSession failed)",
+                                                  &session_UserNOK[0],
+                                                  sizeof(session_UserNOK) / sizeof(*session_UserNOK), cmdTc3, false);
+            status = run_session_events_test_case("TC 4: connection with bad pass (ActivateSession failed)",
+                                                  &session_PwdNOK[0],
+                                                  sizeof(session_UserNOK) / sizeof(*session_UserNOK), cmdTc4, false);
 
-            SOPC_CONSOLE_PRINTF("\n=========== TC 2: connection with user/pass (Success case) ===========\n");
-            // launch a test.
-            set_expected_session_events_test(&session_UserOK[0], sizeof(session_UserOK) / sizeof(*session_UserOK));
-#ifdef _WIN32
-            ret = system(
-                "cmd /C \"set TEST_USERNAME=user1&& set TEST_PASSWORD_USER=password&& s2opc_wrapper_connect 2\"");
-#else
-            ret = system("TEST_USERNAME=user1 TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 2");
-#endif
-            SOPC_ASSERT(ret == 0);
-
-            status = check_session_events_test(2000);
-            SOPC_CONSOLE_PRINTF("\n===========> TEST TC2 %s\n", (SOPC_STATUS_OK == status) ? "PASSED" : "FAILED");
-
-            SOPC_CONSOLE_PRINTF("\n=========== TC 3: connection with bad user (ActivateSession failed) ===========\n");
-            // launch a test.
-            set_expected_session_events_test(&session_UserNOK[0], sizeof(session_UserNOK) / sizeof(*session_UserNOK));
-#ifdef _WIN32
-            ret = system(
-                "cmd /C \"set TEST_USERNAME=unknownUser&& set TEST_PASSWORD_USER=password&& s2opc_wrapper_connect 2\"");
-#else
-            ret = system("TEST_USERNAME=unknownUser TEST_PASSWORD_USER=password ./s2opc_wrapper_connect 2");
-#endif
-            SOPC_ASSERT(ret != 0);
-
-            status = check_session_events_test(2000);
-            SOPC_CONSOLE_PRINTF("\n===========> TEST TC3 %s\n", (SOPC_STATUS_OK == status) ? "PASSED" : "FAILED");
-
-            SOPC_CONSOLE_PRINTF("\n=========== TC 4: connection with bad pass (ActivateSession failed) ===========\n");
-            // launch a test.
-            set_expected_session_events_test(&session_PwdNOK[0], sizeof(session_UserNOK) / sizeof(*session_UserNOK));
-#ifdef _WIN32
-            ret = system(
-                "cmd /C \"set TEST_USERNAME=user1&& set TEST_PASSWORD_USER=PASSword&& s2opc_wrapper_connect 2\"");
-#else
-            ret = system("TEST_USERNAME=user1 TEST_PASSWORD_USER=PASSword ./s2opc_wrapper_connect 2");
-#endif
-            SOPC_ASSERT(ret != 0);
-
-            status = check_session_events_test(2000);
-            SOPC_CONSOLE_PRINTF("\n===========> TEST TC4 %s\n", (SOPC_STATUS_OK == status) ? "PASSED" : "FAILED");
+            const uint32_t nbStressRounds = 20;
+            for (uint32_t i = 0; i < nbStressRounds && SOPC_STATUS_OK == status; i++)
+            {
+                SOPC_CONSOLE_PRINTF("\n=========== TC 5: mixed auth/session stress round %" PRIu32 "/%" PRIu32
+                                    " ===========\n",
+                                    i + 1, nbStressRounds);
+                status = run_session_events_test_case("TC5.1: user/pass success", &session_UserOK[0],
+                                                      sizeof(session_UserOK) / sizeof(*session_UserOK), cmdTc2, true);
+                if (SOPC_STATUS_OK == status)
+                {
+                    status =
+                        run_session_events_test_case("TC5.2: anonymous success", &session_AnonOK[0],
+                                                     sizeof(session_AnonOK) / sizeof(*session_AnonOK), cmdTc1, true);
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status =
+                        run_session_events_test_case("TC5.3: unknown user rejected", &session_UserNOK[0],
+                                                     sizeof(session_UserNOK) / sizeof(*session_UserNOK), cmdTc3, false);
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    status =
+                        run_session_events_test_case("TC5.4: bad password rejected", &session_PwdNOK[0],
+                                                     sizeof(session_UserNOK) / sizeof(*session_UserNOK), cmdTc4, false);
+                }
+            }
 
             SOPC_CONSOLE_PRINTF("\n=========== End of tests. Tear down\n");
         }
