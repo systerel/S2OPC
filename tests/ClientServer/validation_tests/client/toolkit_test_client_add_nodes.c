@@ -843,6 +843,74 @@ static OpcUa_AddNodesResponse* add_node_with_non_existing_namespace_index(
 
     return addNodesResp;
 }
+
+/* AddNodesItem whose NodeAttributes is encoded using the generic/abstract "NodeAttributes" type (only the common attributes
+   No helper of libs2opc_request_builder can produce such a request, so the AddNodesItem is filled manually here. */
+static OpcUa_AddNodesResponse* add_node_with_generic_node_attributes(SOPC_ClientConnection* secureConnection,
+                                                                     OpcUa_NodeClass nodeClass,
+                                                                     uint32_t genericAttrsSpecifiedAttributes,
+                                                                     SOPC_ExpandedNodeId* parentNodeId,
+                                                                     SOPC_NodeId* referenceTypeId,
+                                                                     SOPC_ExpandedNodeId* reqNodeId,
+                                                                     SOPC_QualifiedName* browseName,
+                                                                     SOPC_ExpandedNodeId* typeDefinition)
+{
+    OpcUa_AddNodesResponse* addNodesResp = NULL;
+    OpcUa_AddNodesRequest* addNodesReq = SOPC_AddNodesRequest_Create(1);
+    if (NULL == addNodesReq)
+    {
+        return NULL;
+    }
+
+    OpcUa_AddNodesItem* item = &addNodesReq->NodesToAdd[0];
+    item->NodeClass = nodeClass;
+
+    SOPC_ReturnStatus status = SOPC_ExpandedNodeId_Copy(&item->ParentNodeId, parentNodeId);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_NodeId_Copy(&item->ReferenceTypeId, referenceTypeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ExpandedNodeId_Copy(&item->RequestedNewNodeId, reqNodeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_QualifiedName_Copy(&item->BrowseName, browseName);
+    }
+    if (SOPC_STATUS_OK == status && OpcUa_NodeClass_Method != nodeClass)
+    {
+        status = SOPC_ExpandedNodeId_Copy(&item->TypeDefinition, typeDefinition);
+    }
+
+    OpcUa_NodeAttributes* genAttrs = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ExtensionObject_CreateObject(&item->NodeAttributes, &OpcUa_NodeAttributes_EncodeableType,
+                                                   (void**) &genAttrs);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        genAttrs->SpecifiedAttributes = genericAttrsSpecifiedAttributes;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) addNodesReq, (void**) &addNodesResp);
+    }
+    else
+    {
+        SOPC_ReturnStatus delStatus =
+            SOPC_EncodeableObject_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+    }
+
+    // Clear data set
+    SOPC_ExpandedNodeId_Clear(reqNodeId);
+    SOPC_QualifiedName_Clear(browseName);
+
+    return addNodesResp;
+}
 #endif
 #endif
 #endif
@@ -1027,6 +1095,113 @@ int main(void)
         else
         {
             printf("[Test 8] Add variable with non-existing namespace index: FAILURE\n");
+            status = SOPC_STATUS_NOK;
+        }
+        if (NULL != addNodesResp)
+        {
+            del_status = SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
+            SOPC_ASSERT(SOPC_STATUS_OK == del_status);
+        }
+
+        /* 9. Add a Variable with NodeAttributes encoded as the generic NodeAttributes type:
+         * not managed (class-specific attributes are left to their default values) but must not crash. */
+        parentNodeId.NodeId.Data.Numeric = OpcUaId_ObjectsFolder;
+        referenceTypeId.Data.Numeric = OpcUaId_HasComponent;
+        typeDefinition.NodeId.Data.Numeric = OpcUaId_BaseDataVariableType;
+        reqNodeId.NodeId.Namespace = 1;
+        reqNodeId.NodeId.IdentifierType = SOPC_IdentifierType_String;
+        status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId_GenericAttrsVariable");
+        if (SOPC_STATUS_OK == status)
+        {
+            browseName.NamespaceIndex = 1;
+            status = SOPC_String_AttachFromCstring(&browseName.Name, "BrowseName_GenericAttrsVariable");
+        }
+        addNodesResp = NULL;
+        if (SOPC_STATUS_OK == status)
+        {
+            addNodesResp = add_node_with_generic_node_attributes(secureConnection, OpcUa_NodeClass_Variable, 0,
+                                                                  &parentNodeId, &referenceTypeId, &reqNodeId,
+                                                                  &browseName, &typeDefinition);
+        }
+        if (NULL != addNodesResp && SOPC_IsGoodStatus(addNodesResp->Results[0].StatusCode))
+        {
+            printf("[Test 9] Add Variable with generic NodeAttributes: SUCCESS (StatusCode=%s)\n",
+                   SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode));
+        }
+        else
+        {
+            printf("[Test 9] Add Variable with generic NodeAttributes: FAILURE\n");
+            status = SOPC_STATUS_NOK;
+        }
+        if (NULL != addNodesResp)
+        {
+            del_status = SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
+            SOPC_ASSERT(SOPC_STATUS_OK == del_status);
+        }
+
+        /* 10. Add an Object with NodeAttributes encoded as the generic NodeAttributes type,
+         * additionally specifying the (Object-specific) EventNotifier attribute: not managed but must not crash. */
+        parentNodeId.NodeId.Data.Numeric = OpcUaId_ObjectsFolder;
+        referenceTypeId.Data.Numeric = OpcUaId_Organizes;
+        typeDefinition.NodeId.Data.Numeric = OpcUaId_BaseObjectType;
+        reqNodeId.NodeId.Namespace = 1;
+        reqNodeId.NodeId.IdentifierType = SOPC_IdentifierType_String;
+        status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId_GenericAttrsObject");
+        if (SOPC_STATUS_OK == status)
+        {
+            browseName.NamespaceIndex = 1;
+            status = SOPC_String_AttachFromCstring(&browseName.Name, "BrowseName_GenericAttrsObject");
+        }
+        addNodesResp = NULL;
+        if (SOPC_STATUS_OK == status)
+        {
+            addNodesResp = add_node_with_generic_node_attributes(
+                secureConnection, OpcUa_NodeClass_Object, OpcUa_NodeAttributesMask_EventNotifier, &parentNodeId,
+                &referenceTypeId, &reqNodeId, &browseName, &typeDefinition);
+        }
+        if (NULL != addNodesResp && SOPC_IsGoodStatus(addNodesResp->Results[0].StatusCode))
+        {
+            printf("[Test 10] Add Object with generic NodeAttributes: SUCCESS (StatusCode=%s)\n",
+                   SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode));
+        }
+        else
+        {
+            printf("[Test 10] Add Object with generic NodeAttributes: FAILURE\n");
+            status = SOPC_STATUS_NOK;
+        }
+        if (NULL != addNodesResp)
+        {
+            del_status = SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
+            SOPC_ASSERT(SOPC_STATUS_OK == del_status);
+        }
+
+        /* 11. Add a Method with NodeAttributes encoded as the generic NodeAttributes type:
+         * not managed (class-specific attributes are left to their default values) but must not crash. */
+        parentNodeId.NodeId.Data.Numeric = OpcUaId_ObjectsFolder;
+        referenceTypeId.Data.Numeric = OpcUaId_HasComponent;
+        reqNodeId.NodeId.Namespace = 1;
+        reqNodeId.NodeId.IdentifierType = SOPC_IdentifierType_String;
+        status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId_GenericAttrsMethod");
+        if (SOPC_STATUS_OK == status)
+        {
+            browseName.NamespaceIndex = 1;
+            status = SOPC_String_AttachFromCstring(&browseName.Name, "BrowseName_GenericAttrsMethod");
+        }
+        addNodesResp = NULL;
+        if (SOPC_STATUS_OK == status)
+        {
+            addNodesResp = add_node_with_generic_node_attributes(secureConnection, OpcUa_NodeClass_Method, 0,
+                                                                  &parentNodeId, &referenceTypeId, &reqNodeId,
+                                                                  &browseName, &typeDefinition);
+        }
+        if (NULL != addNodesResp && SOPC_IsGoodStatus(addNodesResp->Results[0].StatusCode))
+        {
+            printf("[Test 11] Add Method with generic NodeAttributes: SUCCESS (StatusCode=%s)\n",
+                   SOPC_StatusCodeToString(addNodesResp->Results[0].StatusCode));
+        }
+        else
+        {
+            printf("[Test 11] Add Method with generic NodeAttributes: FAILURE\n");
             status = SOPC_STATUS_NOK;
         }
         if (NULL != addNodesResp)
