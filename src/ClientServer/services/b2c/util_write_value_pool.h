@@ -45,8 +45,8 @@
 void SOPC_WriteValuePool_Initialize(void);
 
 /**
- * \brief Allocates one zero-initialized ::OpcUa_WriteValue from the pool.
- * \return A zeroed WriteValue, or NULL on fallback OOM.
+ * \brief Allocates one ::OpcUa_WriteValue from the pool, initialized as by ::OpcUa_WriteValue_Initialize.
+ * \return An initialized WriteValue, or NULL on fallback OOM.
  */
 OpcUa_WriteValue* SOPC_WriteValuePool_Alloc(void);
 
@@ -61,5 +61,27 @@ void SOPC_WriteValuePool_ClearAndFree(OpcUa_WriteValue* wv);
  * \return Fallback allocation event count for sizing/observability.
  */
 size_t SOPC_WriteValuePool_GetNbFallbackAllocsStat(void);
+
+/**
+ * \brief Fast-path equivalent of ::OpcUa_WriteValue_Initialize: calls the same
+ *        underlying typed Initialize functions (NodeId, String, DataValue...)
+ *        directly instead of through the generic reflective
+ *        SOPC_EncodeableObject_InternalInitialize field-descriptor dispatch.
+ *        Behaviorally identical to the generic path; only avoids the per-field
+ *        descriptor walk and indirect function-pointer calls it performs.
+ * \param wv  WriteValue to initialize; must not be NULL.
+ */
+void SOPC_WriteValue_FastInitialize(OpcUa_WriteValue* wv);
+
+/**
+ * \brief Fast-path equivalent of ::OpcUa_WriteValue_Clear: calls the same
+ *        underlying typed Clear functions directly instead of through the
+ *        generic reflective SOPC_EncodeableObject_Clear dispatch. Behaviorally
+ *        identical to the generic path. Used internally by
+ *        ::SOPC_WriteValuePool_ClearAndFree; exposed here mainly so it can be
+ *        exercised directly by differential tests against the generic path.
+ * \param wv  WriteValue to clear; must not be NULL.
+ */
+void SOPC_WriteValue_FastClear(OpcUa_WriteValue* wv);
 
 #endif /* UTIL_WRITE_VALUE_POOL_H_ */

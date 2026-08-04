@@ -131,7 +131,6 @@ static SOPC_InternalNotificationElement* SOPC_InternalNotificationElement_Alloc(
             SOPC_StaticPool_Free(&sopc_notifEltPool, notifElt);
             return NULL;
         }
-        OpcUa_WriteValue_Initialize(notifElt->value);
     }
 
     return notifElt;

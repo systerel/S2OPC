@@ -38,7 +38,12 @@ void SOPC_WriteValuePool_Initialize(void)
 
 OpcUa_WriteValue* SOPC_WriteValuePool_Alloc(void)
 {
-    return (OpcUa_WriteValue*) SOPC_StaticPool_Alloc(&sopc_writeValuePool);
+    OpcUa_WriteValue* wv = (OpcUa_WriteValue*) SOPC_StaticPool_Alloc(&sopc_writeValuePool);
+    if (NULL != wv)
+    {
+        SOPC_WriteValue_FastInitialize(wv);
+    }
+    return wv;
 }
 
 void SOPC_WriteValuePool_ClearAndFree(OpcUa_WriteValue* wv)
@@ -47,11 +52,37 @@ void SOPC_WriteValuePool_ClearAndFree(OpcUa_WriteValue* wv)
     {
         return;
     }
-    OpcUa_WriteValue_Clear(wv);
+    SOPC_WriteValue_FastClear(wv);
     SOPC_StaticPool_Free(&sopc_writeValuePool, wv);
 }
 
 size_t SOPC_WriteValuePool_GetNbFallbackAllocsStat(void)
 {
     return SOPC_StaticPool_GetNbFallbackAllocsStat(&sopc_writeValuePool);
+}
+
+/* Field list and per-field Initialize/Clear taken from OpcUa_WriteValue (sopc_types.h)
+ * and its generated field descriptor table WriteValue_Fields[] (sopc_types.c), so that
+ * this stays behaviorally identical to OpcUa_WriteValue_Initialize/Clear while avoiding
+ * their generic reflective field-descriptor dispatch (SOPC_EncodeableObject_*). Do not
+ * "optimize" this into relying on the pool's zero-init instead of calling Initialize:
+ * SOPC_String_Initialize sets Length = -1, not 0, which zeroed memory would get wrong. */
+
+void SOPC_WriteValue_FastInitialize(OpcUa_WriteValue* wv)
+{
+    wv->encodeableType = &OpcUa_WriteValue_EncodeableType;
+    SOPC_NodeId_Initialize(&wv->NodeId);
+    wv->AttributeId = 0;
+    SOPC_String_Initialize(&wv->IndexRange);
+    SOPC_DataValue_Initialize(&wv->Value);
+    wv->writeByPassPermissionMask = 0;
+}
+
+void SOPC_WriteValue_FastClear(OpcUa_WriteValue* wv)
+{
+    SOPC_NodeId_Clear(&wv->NodeId);
+    wv->AttributeId = 0;
+    SOPC_String_Clear(&wv->IndexRange);
+    SOPC_DataValue_Clear(&wv->Value);
+    wv->writeByPassPermissionMask = 0;
 }

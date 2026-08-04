@@ -55,7 +55,7 @@ void write_value_pointer_bs__copy_write_value_pointer_content(
 
     if (NULL != writeValueCopy)
     {
-        OpcUa_WriteValue_Initialize(writeValueCopy);
+        SOPC_WriteValue_FastInitialize(writeValueCopy);
         retStatus = SOPC_EncodeableObject_Copy(&OpcUa_WriteValue_EncodeableType, writeValueCopy, wv);
 
         if (SOPC_STATUS_OK == retStatus)
@@ -65,7 +65,7 @@ void write_value_pointer_bs__copy_write_value_pointer_content(
         }
         else
         {
-            OpcUa_WriteValue_Clear(writeValueCopy);
+            SOPC_WriteValue_FastClear(writeValueCopy);
             SOPC_Free(writeValueCopy);
         }
     }

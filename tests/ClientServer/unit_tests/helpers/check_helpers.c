@@ -91,6 +91,7 @@ int main(void)
     srunner_add_suite(sr, tests_make_suite_pki_create_from_store());
     srunner_add_suite(sr, tests_make_suite_response_helper());
     srunner_add_suite(sr, tests_make_suite_event_variables());
+    srunner_add_suite(sr, tests_make_suite_write_value_pool());
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);
