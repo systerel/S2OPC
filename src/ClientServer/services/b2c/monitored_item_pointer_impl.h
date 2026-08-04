@@ -21,6 +21,8 @@
 #define SOPC_MONITORED_ITEM_POINTER_IMPL_H_
 
 #include "constants.h"
+
+#include "sopc_macros.h"
 #include "sopc_numeric_range.h"
 
 typedef struct SOPC_InternalMonitoredItemFilterCtx
@@ -62,5 +64,11 @@ typedef struct SOPC_InternalMonitoredItem
     SOPC_SLinkedList* notifQueue;
     bool queueOverflowEventTriggered;
 } SOPC_InternalMonitoredItem;
+
+// Non-static because this inlined function is used in inlined extern one
+static SOPC_STRONG_INLINE bool is_eventMI(SOPC_InternalMonitoredItem* monitoredItemPointer)
+{
+    return (NULL != monitoredItemPointer->filterCtx && !monitoredItemPointer->filterCtx->isDataFilter);
+}
 
 #endif /* SOPC_MONITORED_ITEM_POINTER_IMPL_H_ */

@@ -162,25 +162,25 @@ SOPC_ReturnStatus CryptoProvider_SymmCrypt_AES256(const SOPC_CryptoProvider* pPr
     }
 }
 
-static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,
-                                                   const uint8_t* pInput,
-                                                   uint32_t lenInput,
-                                                   const SOPC_ExposedBuffer* pKey,
-                                                   uint8_t* pOutput,
-                                                   mbedtls_md_type_t hash_type);
-static inline SOPC_ReturnStatus HMAC_hashtype_verify(const SOPC_CryptoProvider* pProvider,
-                                                     const uint8_t* pInput,
-                                                     uint32_t lenInput,
-                                                     const SOPC_ExposedBuffer* pKey,
-                                                     const uint8_t* pSignature,
-                                                     mbedtls_md_type_t hash_type);
+static SOPC_STRONG_INLINE SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,
+                                                               const uint8_t* pInput,
+                                                               uint32_t lenInput,
+                                                               const SOPC_ExposedBuffer* pKey,
+                                                               uint8_t* pOutput,
+                                                               mbedtls_md_type_t hash_type);
+static SOPC_STRONG_INLINE SOPC_ReturnStatus HMAC_hashtype_verify(const SOPC_CryptoProvider* pProvider,
+                                                                 const uint8_t* pInput,
+                                                                 uint32_t lenInput,
+                                                                 const SOPC_ExposedBuffer* pKey,
+                                                                 const uint8_t* pSignature,
+                                                                 mbedtls_md_type_t hash_type);
 
-static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,
-                                                   const uint8_t* pInput,
-                                                   uint32_t lenInput,
-                                                   const SOPC_ExposedBuffer* pKey,
-                                                   uint8_t* pOutput,
-                                                   mbedtls_md_type_t hash_type)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,
+                                                               const uint8_t* pInput,
+                                                               uint32_t lenInput,
+                                                               const SOPC_ExposedBuffer* pKey,
+                                                               uint8_t* pOutput,
+                                                               mbedtls_md_type_t hash_type)
 {
     if (NULL == pInput || NULL == pKey || NULL == pOutput)
     {
@@ -202,12 +202,12 @@ static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pP
     return SOPC_STATUS_OK;
 }
 
-static inline SOPC_ReturnStatus HMAC_hashtype_verify(const SOPC_CryptoProvider* pProvider,
-                                                     const uint8_t* pInput,
-                                                     uint32_t lenInput,
-                                                     const SOPC_ExposedBuffer* pKey,
-                                                     const uint8_t* pSignature,
-                                                     mbedtls_md_type_t hash_type)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus HMAC_hashtype_verify(const SOPC_CryptoProvider* pProvider,
+                                                                 const uint8_t* pInput,
+                                                                 uint32_t lenInput,
+                                                                 const SOPC_ExposedBuffer* pKey,
+                                                                 const uint8_t* pSignature,
+                                                                 mbedtls_md_type_t hash_type)
 {
     if (NULL == pSignature)
     {
@@ -278,25 +278,25 @@ SOPC_ReturnStatus CryptoProvider_GenTrueRnd(const SOPC_CryptoProvider* pProvider
 
 // PRF with SHA256 as defined in RFC 5246 (TLS v1.2), §5, without label.
 // Based on a HMAC with SHA-256.
-static inline SOPC_ReturnStatus PSHA_outer(const mbedtls_md_info_t* pmd_info,
-                                           uint8_t* bufA,
-                                           uint32_t lenBufA,
-                                           const SOPC_ExposedBuffer* pSecret,
-                                           uint32_t lenSecret,
-                                           const SOPC_ExposedBuffer* pSeed,
-                                           uint32_t lenSeed,
-                                           SOPC_ExposedBuffer* pOutput,
-                                           uint32_t lenOutput);
-static inline SOPC_ReturnStatus PSHA(mbedtls_md_context_t* pmd,
-                                     const mbedtls_md_info_t* pmd_info,
-                                     uint8_t* bufA,
-                                     uint32_t lenBufA,
-                                     const SOPC_ExposedBuffer* pSecret,
-                                     uint32_t lenSecret,
-                                     const SOPC_ExposedBuffer* pSeed,
-                                     uint32_t lenSeed,
-                                     SOPC_ExposedBuffer* pOutput,
-                                     uint32_t lenOutput);
+static SOPC_STRONG_INLINE SOPC_ReturnStatus PSHA_outer(const mbedtls_md_info_t* pmd_info,
+                                                       uint8_t* bufA,
+                                                       uint32_t lenBufA,
+                                                       const SOPC_ExposedBuffer* pSecret,
+                                                       uint32_t lenSecret,
+                                                       const SOPC_ExposedBuffer* pSeed,
+                                                       uint32_t lenSeed,
+                                                       SOPC_ExposedBuffer* pOutput,
+                                                       uint32_t lenOutput);
+static SOPC_STRONG_INLINE SOPC_ReturnStatus PSHA(mbedtls_md_context_t* pmd,
+                                                 const mbedtls_md_info_t* pmd_info,
+                                                 uint8_t* bufA,
+                                                 uint32_t lenBufA,
+                                                 const SOPC_ExposedBuffer* pSecret,
+                                                 uint32_t lenSecret,
+                                                 const SOPC_ExposedBuffer* pSeed,
+                                                 uint32_t lenSeed,
+                                                 SOPC_ExposedBuffer* pOutput,
+                                                 uint32_t lenOutput);
 SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider* pProvider,
                                                        const SOPC_ExposedBuffer* pSecret,
                                                        uint32_t lenSecret,
@@ -344,15 +344,15 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider
     return status;
 }
 
-static inline SOPC_ReturnStatus PSHA_outer(const mbedtls_md_info_t* pmd_info,
-                                           uint8_t* bufA,
-                                           uint32_t lenBufA,
-                                           const SOPC_ExposedBuffer* pSecret,
-                                           uint32_t lenSecret,
-                                           const SOPC_ExposedBuffer* pSeed,
-                                           uint32_t lenSeed,
-                                           SOPC_ExposedBuffer* pOutput,
-                                           uint32_t lenOutput)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus PSHA_outer(const mbedtls_md_info_t* pmd_info,
+                                                       uint8_t* bufA,
+                                                       uint32_t lenBufA,
+                                                       const SOPC_ExposedBuffer* pSecret,
+                                                       uint32_t lenSecret,
+                                                       const SOPC_ExposedBuffer* pSeed,
+                                                       uint32_t lenSeed,
+                                                       SOPC_ExposedBuffer* pOutput,
+                                                       uint32_t lenOutput)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     mbedtls_md_context_t md_ctx;
@@ -371,16 +371,16 @@ static inline SOPC_ReturnStatus PSHA_outer(const mbedtls_md_info_t* pmd_info,
     return status;
 }
 
-static inline SOPC_ReturnStatus PSHA(mbedtls_md_context_t* pmd,
-                                     const mbedtls_md_info_t* pmd_info,
-                                     uint8_t* bufA,
-                                     uint32_t lenBufA,
-                                     const SOPC_ExposedBuffer* pSecret,
-                                     uint32_t lenSecret,
-                                     const SOPC_ExposedBuffer* pSeed,
-                                     uint32_t lenSeed,
-                                     SOPC_ExposedBuffer* pOutput,
-                                     uint32_t lenOutput)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus PSHA(mbedtls_md_context_t* pmd,
+                                                 const mbedtls_md_info_t* pmd_info,
+                                                 uint8_t* bufA,
+                                                 uint32_t lenBufA,
+                                                 const SOPC_ExposedBuffer* pSecret,
+                                                 uint32_t lenSecret,
+                                                 const SOPC_ExposedBuffer* pSeed,
+                                                 uint32_t lenSeed,
+                                                 SOPC_ExposedBuffer* pOutput,
+                                                 uint32_t lenOutput)
 {
     uint32_t lenHash = 0;
     uint32_t offsetOutput = 0;
@@ -627,10 +627,10 @@ SOPC_ReturnStatus CryptoProvider_AsymCrypt_RSA_OAEP_SHA256(const SOPC_CryptoProv
 /**
  * (Internal) Allocates and compute SHA-256 of \p pInput. You must free it.
  */
-static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
-                                                   uint32_t lenInput,
-                                                   const mbedtls_md_info_t* pmd_info_hash,
-                                                   uint8_t** ppHash)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
+                                                               uint32_t lenInput,
+                                                               const mbedtls_md_info_t* pmd_info_hash,
+                                                               uint8_t** ppHash)
 {
     uint8_t* hash = NULL;
     uint32_t lenHash = 0;

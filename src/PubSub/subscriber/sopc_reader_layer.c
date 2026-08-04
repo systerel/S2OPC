@@ -30,8 +30,8 @@
  * Filter at NetworkMessage Level
  *
  */
-static inline bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_Conf_PublisherId* conf_pubid,
-                                                      const SOPC_Dataset_LL_PublisherId* nm_pubid);
+static SOPC_STRONG_INLINE bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_Conf_PublisherId* conf_pubid,
+                                                                  const SOPC_Dataset_LL_PublisherId* nm_pubid);
 
 static bool SOPC_Sub_Filter_Reader_FieldMetaData(const SOPC_DataSetReader* reader,
                                                  const SOPC_Dataset_LL_DataSetMessage* dsm);

@@ -348,7 +348,7 @@ SOPC_EncodeableType_StructureType SOPC_EncodeableType_GetStructureType(SOPC_Enco
     return encType->StructType;
 }
 
-static inline bool checkEncodeableTypeDescIsValid(const SOPC_EncodeableType_FieldDescriptor* desc)
+static SOPC_STRONG_INLINE bool checkEncodeableTypeDescIsValid(const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     if (desc->isBuiltIn || desc->isSameNs)
     {

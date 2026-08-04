@@ -25,6 +25,7 @@
 #include "sopc_helper_string.h"
 #include "sopc_raw_sockets.h"
 
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
@@ -581,9 +582,9 @@ static void SOPC_SocketSet_MergeSingleSet(const SOPC_SocketSet* inputFds, SOPC_S
 
 /* Merge different sets in a single SOPC_SocketSetArray for WSAPoll
  *  Returned object shall be cleared by caller (SOPC_SocketSet_Delete) */
-static inline SOPC_SocketSet* SOPC_SocketSet_MergeSets(const SOPC_SocketSet* readSet,
-                                                       const SOPC_SocketSet* writeSet,
-                                                       const SOPC_SocketSet* exceptSet)
+static SOPC_STRONG_INLINE SOPC_SocketSet* SOPC_SocketSet_MergeSets(const SOPC_SocketSet* readSet,
+                                                                   const SOPC_SocketSet* writeSet,
+                                                                   const SOPC_SocketSet* exceptSet)
 {
     size_t nbElem = 1; // just avoid empty allocation.
     if (readSet != NULL)
@@ -627,10 +628,10 @@ static inline SOPC_SocketSet* SOPC_SocketSet_MergeSets(const SOPC_SocketSet* rea
 }
 
 // Rebuild output SocketSets by splitting response in "pollfds"
-static inline void SOPC_SocketSet_UpdateSetsAfterPoll(const SOPC_SocketSet* pollfds,
-                                                      SOPC_SocketSet* readSet,
-                                                      SOPC_SocketSet* writeSet,
-                                                      SOPC_SocketSet* exceptSet)
+static SOPC_STRONG_INLINE void SOPC_SocketSet_UpdateSetsAfterPoll(const SOPC_SocketSet* pollfds,
+                                                                  SOPC_SocketSet* readSet,
+                                                                  SOPC_SocketSet* writeSet,
+                                                                  SOPC_SocketSet* exceptSet)
 {
     SOPC_ASSERT(NULL != pollfds);
     // Clear results

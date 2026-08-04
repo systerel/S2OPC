@@ -192,11 +192,11 @@ static DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
     return 0;
 }
 
-static inline SOPC_ReturnStatus create_thread(SOPC_Thread_Impl* threadImpl,
-                                              void* (*startFct)(void*),
-                                              void* startArgs,
-                                              const char* taskName,
-                                              int cpuAffinity)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus create_thread(SOPC_Thread_Impl* threadImpl,
+                                                          void* (*startFct)(void*),
+                                                          void* startArgs,
+                                                          const char* taskName,
+                                                          int cpuAffinity)
 {
     if (NULL == threadImpl || NULL == startFct)
     {

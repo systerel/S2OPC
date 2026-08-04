@@ -34,9 +34,9 @@
  * ------------------------------------------------------------------------------------------------
  */
 
-static inline SOPC_ReturnStatus fill_UInt32_FromPolicy(const SOPC_SecurityPolicy_Config* pPolicy,
-                                                       uint32_t* pOut,
-                                                       const uint32_t value)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus fill_UInt32_FromPolicy(const SOPC_SecurityPolicy_Config* pPolicy,
+                                                                   uint32_t* pOut,
+                                                                   const uint32_t value)
 {
     if (pPolicy->isInvalid)
     {
@@ -86,10 +86,10 @@ static const SOPC_SecurityPolicy_Config* getPSSecurityPolicyFromProvider(const S
     return SOPC_SecurityPolicy_Config_Get(policy);
 }
 
-static inline bool checkKeyLengthRange(const SOPC_SecurityPolicy_Config* pPolicy,
-                                       uint32_t lenKey,
-                                       const char** errorReason,
-                                       bool isPublic)
+static SOPC_STRONG_INLINE bool checkKeyLengthRange(const SOPC_SecurityPolicy_Config* pPolicy,
+                                                   uint32_t lenKey,
+                                                   const char** errorReason,
+                                                   bool isPublic)
 {
     static const char* invalidKeyMsg[2] = {"invalid private key size for given profile",
                                            "invalid public key size for given profile"};
@@ -1026,17 +1026,17 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DerivePseudoRandomData(const SOPC_CryptoPr
     return pProfile->pFnDeriveData(pProvider, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
 }
 
-static inline SOPC_ReturnStatus DeriveKS(const SOPC_CryptoProvider* pProvider,
-                                         const SOPC_ExposedBuffer* pSecret,
-                                         uint32_t lenSecret,
-                                         const SOPC_ExposedBuffer* pSeed,
-                                         uint32_t lenSeed,
-                                         SOPC_SC_SecurityKeySet* pks,
-                                         uint8_t* genData,
-                                         uint32_t lenData,
-                                         uint32_t lenKeySign,
-                                         uint32_t lenKeyEncr,
-                                         uint32_t lenIV);
+static SOPC_STRONG_INLINE SOPC_ReturnStatus DeriveKS(const SOPC_CryptoProvider* pProvider,
+                                                     const SOPC_ExposedBuffer* pSecret,
+                                                     uint32_t lenSecret,
+                                                     const SOPC_ExposedBuffer* pSeed,
+                                                     uint32_t lenSeed,
+                                                     SOPC_SC_SecurityKeySet* pks,
+                                                     uint8_t* genData,
+                                                     uint32_t lenData,
+                                                     uint32_t lenKeySign,
+                                                     uint32_t lenKeyEncr,
+                                                     uint32_t lenIV);
 SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySets(const SOPC_CryptoProvider* pProvider,
                                                     const SOPC_ExposedBuffer* pClientNonce,
                                                     uint32_t lenClientNonce,
@@ -1097,17 +1097,17 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySets(const SOPC_CryptoProvider* p
     return status;
 }
 
-static inline SOPC_ReturnStatus DeriveKS(const SOPC_CryptoProvider* pProvider,
-                                         const SOPC_ExposedBuffer* pSecret,
-                                         uint32_t lenSecret,
-                                         const SOPC_ExposedBuffer* pSeed,
-                                         uint32_t lenSeed,
-                                         SOPC_SC_SecurityKeySet* pks,
-                                         uint8_t* genData,
-                                         uint32_t lenData,
-                                         uint32_t lenKeySign,
-                                         uint32_t lenKeyEncr,
-                                         uint32_t lenIV)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus DeriveKS(const SOPC_CryptoProvider* pProvider,
+                                                     const SOPC_ExposedBuffer* pSecret,
+                                                     uint32_t lenSecret,
+                                                     const SOPC_ExposedBuffer* pSeed,
+                                                     uint32_t lenSeed,
+                                                     SOPC_SC_SecurityKeySet* pks,
+                                                     uint8_t* genData,
+                                                     uint32_t lenData,
+                                                     uint32_t lenKeySign,
+                                                     uint32_t lenKeyEncr,
+                                                     uint32_t lenIV)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ExposedBuffer *pExpEncr = NULL, *pExpSign = NULL, *pExpIV = NULL;

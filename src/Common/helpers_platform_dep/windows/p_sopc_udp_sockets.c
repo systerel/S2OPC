@@ -52,7 +52,7 @@ static WSADATA wsaData;
 
 void SOPC_UDP_Socket_Close(SOPC_Socket* sock);
 
-static inline void Network_Initialize(void)
+static SOPC_STRONG_INLINE void Network_Initialize(void)
 {
     if (!gInitialized)
     {
@@ -61,7 +61,7 @@ static inline void Network_Initialize(void)
     }
 }
 
-static inline void Network_Clear(void)
+static SOPC_STRONG_INLINE void Network_Clear(void)
 {
     WSACleanup();
 }

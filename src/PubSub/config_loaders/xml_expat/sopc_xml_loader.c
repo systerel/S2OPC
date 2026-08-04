@@ -355,7 +355,7 @@ static bool parse_boolean(const char* data, size_t len, bool* dest)
     return result;
 }
 
-static inline bool check_arrayDimension_isValid(uint32_t arrayDimension)
+static SOPC_STRONG_INLINE bool check_arrayDimension_isValid(uint32_t arrayDimension)
 {
     return arrayDimension <= INT32_MAX;
 }

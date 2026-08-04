@@ -517,13 +517,13 @@ static SOPC_ReturnStatus compare_monitored_item_LT_values(char** localeIds,
     return status;
 }
 
-static SOPC_ReturnStatus compare_monitored_item_values(char** localeIds,
-                                                       const SOPC_NumericRange* numRange,
-                                                       const OpcUa_DataChangeFilter* filter,
-                                                       const void* filterAbsDeadandCtx,
-                                                       const SOPC_Variant* oldValue,
-                                                       const SOPC_Variant* newValue,
-                                                       int32_t* comparison)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus compare_monitored_item_values(char** localeIds,
+                                                                          const SOPC_NumericRange* numRange,
+                                                                          const OpcUa_DataChangeFilter* filter,
+                                                                          const void* filterAbsDeadandCtx,
+                                                                          const SOPC_Variant* oldValue,
+                                                                          const SOPC_Variant* newValue,
+                                                                          int32_t* comparison)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (NULL != filter && OpcUa_DeadbandType_None != filter->DeadbandType)
@@ -600,8 +600,9 @@ static SOPC_ReturnStatus monitored_item_update_last_cached_value(SOPC_InternalMo
     return status;
 }
 
-static const SOPC_Variant* monitored_item_get_last_cached_value(const SOPC_InternalMonitoredItem* monitItem,
-                                                                const SOPC_Variant* oldAddressSpaceValue)
+static SOPC_STRONG_INLINE const SOPC_Variant* monitored_item_get_last_cached_value(
+    const SOPC_InternalMonitoredItem* monitItem,
+    const SOPC_Variant* oldAddressSpaceValue)
 {
     if (monitItem->filterCtx != NULL && monitItem->filterCtx->isDataFilter &&
         OpcUa_DeadbandType_None != monitItem->filterCtx->Filter.Data.dataFilter.DeadbandType)

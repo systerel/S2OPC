@@ -283,7 +283,7 @@ static void FileType_Config_Delete(SOPC_FileType_Config** fileConfig)
  * \brief Creates the FileType_Config structure.
  * \return Pointer of FileType_Config structure created.
  */
-static inline SOPC_FileType_Config* FileType_Config_Create(void)
+static SOPC_STRONG_INLINE SOPC_FileType_Config* FileType_Config_Create(void)
 {
     SOPC_FileType_Config* fileConfig = SOPC_Calloc(1, sizeof(SOPC_FileType_Config));
     if (fileConfig != NULL)
@@ -953,9 +953,9 @@ static SOPC_FileHandle GenerateRandomHandle(void)
  * \param command         true if increment, false if decrement.
  * \return SOPC_GoodGenericStatus in case of success, OpcUa_BadInvalidState otherwise.
  */
-static inline SOPC_StatusCode FileType_OpenCount_Inc_Dec(const SOPC_CallContext* callContextPtr,
-                                                         const SOPC_FileType* file,
-                                                         bool command)
+static SOPC_STRONG_INLINE SOPC_StatusCode FileType_OpenCount_Inc_Dec(const SOPC_CallContext* callContextPtr,
+                                                                     const SOPC_FileType* file,
+                                                                     bool command)
 {
     SOPC_StatusCode result_code = SOPC_GoodGenericStatus;
     SOPC_DataValue* dv = NULL;
@@ -1010,10 +1010,10 @@ static inline SOPC_StatusCode FileType_OpenCount_Inc_Dec(const SOPC_CallContext*
  * \return SOPC_GoodGenericStatus in case of success, OpcUa_BadInvalidState otherwise.
  */
 
-static inline SOPC_StatusCode FileType_WriteSizeWithStatus(const SOPC_CallContext* callContextPtr,
-                                                           const SOPC_FileType* file,
-                                                           uint64_t value_size,
-                                                           SOPC_StatusCode optStatus)
+static SOPC_STRONG_INLINE SOPC_StatusCode FileType_WriteSizeWithStatus(const SOPC_CallContext* callContextPtr,
+                                                                       const SOPC_FileType* file,
+                                                                       uint64_t value_size,
+                                                                       SOPC_StatusCode optStatus)
 {
     SOPC_StatusCode result_code = SOPC_GoodGenericStatus;
     SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
@@ -1050,9 +1050,9 @@ static inline SOPC_StatusCode FileType_WriteSizeWithStatus(const SOPC_CallContex
  * \note  if Read: Writable = NULL -> Write: Writable/UserWritable = True
  *        else Read: Writable -> put in \p writable
  */
-static inline SOPC_StatusCode FileType_ReadWrite_Writable(const SOPC_CallContext* callContextPtr,
-                                                          const SOPC_FileType* file,
-                                                          bool* writable)
+static SOPC_STRONG_INLINE SOPC_StatusCode FileType_ReadWrite_Writable(const SOPC_CallContext* callContextPtr,
+                                                                      const SOPC_FileType* file,
+                                                                      bool* writable)
 {
     SOPC_DataValue* dv = NULL;
     SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);

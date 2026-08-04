@@ -22,8 +22,9 @@
 #include "sopc_helper_endianness_cfg.h"
 
 #include "sopc_assert.h"
+#include "sopc_macros.h"
 
-static inline void check_integer_endianness(void)
+static SOPC_STRONG_INLINE void check_integer_endianness(void)
 {
     uint64_t x = 0x0123456789ABCDEF;
     uint8_t* pX = (uint8_t*) &x;
@@ -33,7 +34,7 @@ static inline void check_integer_endianness(void)
                                               pX[4] == 0x67 && pX[5] == 0x45 && pX[6] == 0x23 && pX[7] == 0x01)));
 }
 
-static inline void check_float_endianness(void)
+static SOPC_STRONG_INLINE void check_float_endianness(void)
 {
     double d = -0x1.3456789ABCDEFp-1005;
     uint8_t* pD = (uint8_t*) &d;

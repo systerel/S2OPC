@@ -73,7 +73,7 @@
 
 static const SOPC_NodeId baseEventType_NodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 
-static inline SOPC_AttributeId SOPC_TypeHelperInternal_CheckAttributeId(SOPC_AttributeId attrId)
+static SOPC_STRONG_INLINE SOPC_AttributeId SOPC_TypeHelperInternal_CheckAttributeId(SOPC_AttributeId attrId)
 {
     switch (attrId)
     {
@@ -111,7 +111,7 @@ static inline SOPC_AttributeId SOPC_TypeHelperInternal_CheckAttributeId(SOPC_Att
     }
 }
 
-static inline bool SOPC_TypeHelperInternal_CheckBrowseDirection(OpcUa_BrowseDirection bd)
+static SOPC_STRONG_INLINE bool SOPC_TypeHelperInternal_CheckBrowseDirection(OpcUa_BrowseDirection bd)
 {
     switch (bd)
     {
@@ -128,7 +128,7 @@ const OpcUa_NodeClass NodeClassMask_ALL =
     OpcUa_NodeClass_Object | OpcUa_NodeClass_Variable | OpcUa_NodeClass_Method | OpcUa_NodeClass_ObjectType |
     OpcUa_NodeClass_VariableType | OpcUa_NodeClass_ReferenceType | OpcUa_NodeClass_DataType | OpcUa_NodeClass_View;
 
-static inline bool SOPC_TypeHelperInternal_CheckNodeClassMask(OpcUa_NodeClass ncm)
+static SOPC_STRONG_INLINE bool SOPC_TypeHelperInternal_CheckNodeClassMask(OpcUa_NodeClass ncm)
 {
     OpcUa_NodeClass filtered_ncm = ncm & NodeClassMask_ALL;
 
@@ -140,7 +140,7 @@ static inline bool SOPC_TypeHelperInternal_CheckNodeClassMask(OpcUa_NodeClass nc
     return true;
 }
 
-static inline bool SOPC_TypeHelperInternal_CheckResultMask(OpcUa_BrowseResultMask rm)
+static SOPC_STRONG_INLINE bool SOPC_TypeHelperInternal_CheckResultMask(OpcUa_BrowseResultMask rm)
 {
     OpcUa_BrowseResultMask filtered_rm = rm & OpcUa_BrowseResultMask_All;
 

@@ -53,11 +53,6 @@ void monitored_item_notification_queue_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-static bool is_eventMI(SOPC_InternalMonitoredItem* monitoredItemPointer)
-{
-    return (NULL != monitoredItemPointer->filterCtx && !monitoredItemPointer->filterCtx->isDataFilter);
-}
-
 void monitored_item_notification_queue_bs__allocate_new_monitored_item_notification_queue(
     const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
     const t_bool monitored_item_notification_queue_bs__p_isEvent,

@@ -25,7 +25,7 @@
 #include "p_sopc_threads.h"
 
 #include "sopc_assert.h"
-#include "sopc_date_time.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
@@ -265,12 +265,12 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_M
     return status;
 }
 
-static inline SOPC_ReturnStatus create_thread(pthread_t* thread,
-                                              pthread_attr_t* attr,
-                                              void* (*startFct)(void*),
-                                              void* startArgs,
-                                              const char* taskName,
-                                              int cpuAffinity)
+static SOPC_STRONG_INLINE SOPC_ReturnStatus create_thread(pthread_t* thread,
+                                                          pthread_attr_t* attr,
+                                                          void* (*startFct)(void*),
+                                                          void* startArgs,
+                                                          const char* taskName,
+                                                          int cpuAffinity)
 {
     int ret = pthread_create(thread, attr, startFct, startArgs);
 

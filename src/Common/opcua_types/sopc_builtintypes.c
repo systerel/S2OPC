@@ -5274,7 +5274,9 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
  *
  * \return true if the range is valid, false otherwise.
  */
-static inline bool is_array_valid_range(int32_t arrayLength, const SOPC_Dimension* dimension, bool fullRange)
+static SOPC_STRONG_INLINE bool is_array_valid_range(int32_t arrayLength,
+                                                    const SOPC_Dimension* dimension,
+                                                    bool fullRange)
 {
     SOPC_ASSERT(NULL != dimension);
     if (arrayLength <= 0)
@@ -5421,7 +5423,7 @@ typedef struct _SOPC_FlattenedRanges
     SOPC_FlattenedRange* ranges;
 } SOPC_FlattenedRanges;
 
-static inline uint32_t SOPC_MIN_INDEX(uint32_t left, uint32_t right)
+static SOPC_STRONG_INLINE uint32_t SOPC_MIN_INDEX(uint32_t left, uint32_t right)
 {
     return (left > right ? right : left);
 }
