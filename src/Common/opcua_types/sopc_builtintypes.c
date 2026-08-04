@@ -4593,7 +4593,12 @@ void SOPC_Variant_Clear(SOPC_Variant* variant)
     int32_t idx = 0;
     if (variant != NULL)
     {
-        if (false == variant->DoNotClear)
+        if (variant->DoNotClear)
+        {
+            // Make Value content zero if no actual clear needed
+            memset(&variant->Value, 0, sizeof variant->Value);
+        }
+        else
         {
             SOPC_EncodeableObject_PfnClear* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeId);
             if (NULL == clearFunction)
@@ -4639,12 +4644,16 @@ void SOPC_Variant_Clear(SOPC_Variant* variant)
                 }
                 break;
             default:
+                // Make Value content zero if unknown array type
+                memset(&variant->Value, 0, sizeof variant->Value);
                 break;
             }
         }
 
         // Reset internal properties
-        SOPC_Variant_Initialize(variant);
+        variant->DoNotClear = false;
+        variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+        variant->BuiltInTypeId = SOPC_Null_Id;
     }
 }
 
