@@ -1,0 +1,496 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+THEORY User_Pass IS
+Operation(add_subscription) & Pattern(a+b : c)
+    & ff(0) & mp & ar(th_eh_ident) & pp(rt.1 | 10);
+Operation(add_subscription) & Pattern(a = a<+{b})
+    & ff(0) & pr(Tac(th_simp_pmm));
+Operation(delete_subscription) & Pattern(not(a : dom(b)))
+    & ff(0) & mp & pp(rp.0 | 10);
+Operation(delete_subscription) & Pattern(card(a[b]) = c)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(delete_subscription) & Pattern(a<=card(b[c]))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(delete_subscription) & Pattern(a<+{b} : c +-> iseq(d))
+    & ff(0) & pr(Tac(th_seq_pmm));
+Operation(is_valid_subscription_on_session) & Pattern(bool(a : b) = bool(c & d))
+    & ff(0) & dd & eh(s_subscription$1,dom(a_subscription_session$1),Goal) & t1;
+Operation(set_subscription_PublishingEnabled) & Pattern(a : POW(b))
+    & ff(0) & mp & pp(rt.1 | 10);
+Operation(add_subscription) & Pattern(not(a : dom(b)))
+    & ff(0) & dd(0) & eh(a_session_seq_priority$2,_h,Goal) & ss & pp(rt.0);
+Operation(add_subscription) & Pattern(not(a : dom(b)))
+    & ff(0) & dd(0) & ss & pp(rt.0);
+Operation(check_add_subscription) & Pattern(card(a)+b<=c)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd & pr(Tac(th_ineg));
+Operation(add_subscription) & Pattern(not(a : ran(b)))
+    & ff(0) & ah(ran(a_session_seq_priority$1(p_session)) = dom((a_session_seq_priority$1(p_session))~)) & pr & dd & eh(ran(a_session_seq_priority$1(p_session)),_h,Goal) & dd(0) & ct & mh(p_priority : dom((a_session_seq_priority$1(p_session))~) => 0 = (a_session_seq_priority$1(p_session))~(p_priority)) & dd & fh(0 = (a_session_seq_priority$1(p_session))~(p_priority)) & ah(p_session : t_session) & ah(dom(a_session_seq_priority$1) = t_session) & ah(a_session_seq_priority$1 : t_session +-> (t_prio_idx>+>t_priority)) & eh(t_prio_idx,_h,Goal) & ah(p_priority : dom((a_session_seq_priority$1(p_session))~)) & pp(rp.0 | 30);
+Operation(add_subscription) & Pattern(a : b +-> (c>+>d))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred) & pr(Tac(th_eh_pred; th_simp));
+Operation(add_subscription) & Pattern(a : b)
+    & ff(0) & mp & eh(p_prioritySubQueue$1,_h,Goal) & eh(a_session_priority_subscriptions_queue$2,_h,Goal) & mp & pr(Tac(th_simp_pmm));
+Operation(add_subscription) & Pattern(ran(a(b)) = ran(c(b)))
+    & ff(0) & dd(0) & ar(th_simp_pmm) & eh(a_session_seq_priority$2,_h,Goal) & ar(th_simp_pmm) & eh(dom(a_session_seq_priority$1(p_session)),_h,Goal) & mp & pr(Tac(th_simp_pmm; th_ran_pmm));
+Operation(add_subscription) & Pattern(not(card(a) = b))
+    & ff(0) & mp & ah(size(a_session_seq_priority$1(p_session)) = p_priority_idx$1) & pr & mp & eh(size(a_session_seq_priority$1(p_session)),_h,Goal) & ar(th_simp_pmm) & dc(l_prio_idx$7778 = p_priority_idx$1+1) & mp & ah(1+p_priority_idx$1<=k_n_subscriptionPerSession_max) & pp(rp.0 | 20) & mp & ar(th_simp_pmm) & mp & ah(1+p_priority_idx$1<=k_n_subscriptionPerSession_max) & pp(rp.0 | 20);
+Operation(add_subscription) & Pattern(a+b : c)
+    & ff(0) & mp & pr(Tac(th_simp_pmm));
+Operation(add_subscription) & Pattern(a<+{b} : c +-> iseq(d))
+    & ff(0) & dd(0) & pr(Tac(InFunctionXY; th_seq_pmm));
+Operation(delete_subscription) & Pattern(a : b..c)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+Operation(delete_subscription) & Pattern(a(b) : c..d +-> e)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+Operation(delete_subscription) & Pattern(dom(a(b)) = c..d)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+Operation(delete_subscription) & Pattern(a+b : dom(c(d)))
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+Operation(delete_subscription) & Pattern(a<+b<+{c} = a<+{d})
+    & ff(0) & dd(0) & pr(Tac(th_simp_pmm; th_eh_dom));
+Operation(delete_subscription) & Pattern(a<+b<+{c} = a<+{d})
+    & ff(0) & mp & ar(th_simp_pmm) & eh(p_prioritySubQueue$2,_h,Goal) & pr(Tac(th_simp_pmm; th_eh_dom));
+Operation(delete_subscription) & Pattern(a = b)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+Operation(delete_subscription) & Pattern(dom(a(b)) = dom(c(b)))
+    & ff(0) & mp & dc(session = p_session$1) & mp & eh(dom(a_session_priority_subscriptions_queue$1(p_session$1)),_h,Goal) & eh(1..size(a_session_seq_priority$1(p_session$1)),_h,Goal) & ah(1+p_priority_idx$1<=p_priority_idx$2) & ah(1<=p_priority_idx$1) & pp(rp.0 | 30) & pr;
+Operation(delete_subscription) & Pattern(card(dom(a))<=card(dom(b)))
+    & ff(0) & mp & dc(session = p_session$1) & pr(Tac(th_simp_pmm)) & mp;
+Operation(add_subscription) & Pattern(a<+b<+{c} : d +-> iseq(e))
+    & ff(0) & dd(0) & ss & pr(Tac(InFunctionXY; th_seq_pmm));
+Operation(add_subscription) & Pattern(dom(a(b)) = c..card(d))
+    & ff(0) & mp & dc(session = p_session) & mp(Tac(th_simp_pmm)) & eh(p_priority_idx$1,_h,Goal) & ss & mp & pr;
+Operation(add_subscription) & Pattern(dom(a(b)) = c..card(d))
+    & ff(0) & mp & dc(session = p_session) & ar(th_simp_pmm; SimplifyRelDomXY; SimplifySetComXY) & eh(dom(a_session_seq_priority$1(p_session)),1..card(dom(a_session_seq_priority$1(p_session))),Goal) & eh(card(dom(a_session_seq_priority$1(p_session))),_h,Goal) & pr(Tac(th_simp_pmm)) & pr;
+Operation(delete_subscription) & Pattern(a : b)
+    & ff(0) & mp & eh(p_prioritySubQueue$2,_h,Goal) & ar(th_simp_pmm) & eh(dom(a_session_priority_subscriptions_queue$1(p_session$1)),_h,Goal) & pr & pr;
+Operation(add_subscription) & Pattern(dom(a(b)) = dom(c(b)))
+    & ff(0) & dd(0) & dc(session = p_session) & ss & pr & pr;
+Operation(add_subscription) & Pattern((a(b))~ : c +-> d)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred) & dd(0) & ar(th_simp_pmm) & eh(dom(a_session_seq_priority$1(p_session)),_h,Goal) & pr & ar(th_simp_pmm) & pr & pr(Tac(th_inverse_pmm));
+Operation(add_subscription) & Pattern(a<+{b} = c<+{d})
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred) & dd(0) & ar(th_simp_pmm) & eh(dom(a_session_seq_priority$1(p_session)),_h,Goal) & pr & ar(th_simp_pmm) & pr & pr(Tac(th_inverse_pmm));
+Operation(add_subscription) & Pattern(a<+{b} = c<+{d})
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred) & dd(0) & ar(th_simp_pmm) & pr & ar(th_simp_pmm) & pr & pr(Tac(th_inverse_pmm));
+Operation(add_subscription) & Pattern(dom(a(b)) = dom(c(b)))
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred) & mp & ah(ran(a_session_seq_priority$1(p_session)) <: t_priority) & pr & pr & ah(l_prio_idx$7777+1..card(dom(a_session_seq_priority$1(p_session)))+1 <: NATURAL-{0}) & ah(1<=l_prio_idx$7777) & pp(rp.0 | 30) & pr;
+Operation(delete_subscription) & Pattern(dom(a(b)) = dom(c(b)))
+    & ff(0) & mp & ah(!session.(session : t_session => dom(a_session_priority_subscriptions_queue$1(session)) = dom(a_session_seq_priority$1(session)))) & dd & ph(session,!session.(session : t_session => dom(a_session_priority_subscriptions_queue$1(session)) = dom(a_session_seq_priority$1(session)))) & pr & dd & dc(session = p_session$1) & pr & pr;
+Operation(delete_subscription) & Pattern(a<+b<+{c} : d +-> (e>+>f))
+    & ff(0) & dd(0) & ar(th_simp_pmm) & eh(dom(a_session_seq_priority$1(p_session$1)),_h,Goal) & pr & ar(th_simp_pmm) & pr & mp & pr & pr(Tac(th_seq_pmm));
+Operation(delete_subscription) & Pattern(dom(a(b)) = c..card(d))
+    & ff(0) & dd(0) & dc(session = p_session$1) & ss & eh(dom(a_session_seq_priority$1(p_session$1)),_h,Goal) & ss & ah(card(1.. -1+p_priority_idx$1) = -1+p_priority_idx$1) & ah( -1+p_priority_idx$1 : NATURAL) & pr & dd & ah( -1+p_priority_idx$1>=0) & pr & dd & ar(SimplifyEnsCard.11,Goal) & pr & dd & eh(card(1.. -1+p_priority_idx$1),_h,Goal) & pr & pr;
+Operation(delete_subscription) & Pattern(card(dom(a))<=card(dom(b)))
+    & ff(0) & dd & dc(session = p_session$1) & ss & eh(dom(a_session_seq_priority$1(p_session$1)),_h,Goal) & ss & ah(p_priority_idx$1..p_priority_idx$2-1 <: 1..p_priority_idx$2-1) & pr & ah(p_priority_idx$1..p_priority_idx$2-1 <: 1..p_priority_idx$2) & pr & ah(not(p_priority_idx$2 : p_priority_idx$1..p_priority_idx$2-1)) & pp(rt.0) & dd(0) & dd(0) & dd(0) & ss & ah(card(1.. -1+p_priority_idx$2) = -1+p_priority_idx$2) & ah( -1+p_priority_idx$2 : NATURAL) & pr & dd & ah(0<= -1+p_priority_idx$2) & pr & dd & ar(SimplifyEnsCard.11,Goal) & pr & dd & eh(card(1.. -1+p_priority_idx$2),_h,Goal) & pr & mp & pr;
+Operation(delete_subscription) & Pattern(dom(a(b)) = c..card(d))
+    & ff(0) & dd & dc(session = p_session$1) & ss & eh(dom(a_session_seq_priority$1(p_session$1)),_h,Goal) & ss & ah(p_priority_idx$1..p_priority_idx$2-1 <: 1..p_priority_idx$2-1) & pr & ah(p_priority_idx$1..p_priority_idx$2-1 <: 1..p_priority_idx$2) & pr & ah(not(p_priority_idx$2 : p_priority_idx$1..p_priority_idx$2-1)) & pp(rt.0) & dd(0) & dd(0) & dd(0) & ss & ah(card(1.. -1+p_priority_idx$2) = -1+p_priority_idx$2) & ah( -1+p_priority_idx$2 : NATURAL) & pr & dd & ah(0<= -1+p_priority_idx$2) & pr & dd & ar(SimplifyEnsCard.11,Goal) & pr & dd & eh(card(1.. -1+p_priority_idx$2),_h,Goal) & pr & mp & pr
+END
+&
+
+THEORY th_typage_pmm IS
+
+    band(binhyp(a: d +-> (e --> f)),
+    band(binhyp(dom(a) = d),
+    band(binhyp(b: d),
+    band(binhyp(e = 0..h),
+    band(binhyp(h<=2147483647),
+    band(binhyp(c: g),
+         binhyp(g = i..h)))))))
+    =>
+    a(b)(c)<=2147483647
+    ;
+
+    band(binhyp(a: d +-> e),
+    band(binhyp(dom(a) = d),
+    band(binhyp(b: d),
+    band(binhyp(c <: a),
+    band(binhyp(dom(c) = f),
+         binhyp(b: f))))))
+    =>
+    a(b) = c(b)
+    ;
+
+    band(binhyp(b: g +-> h),
+    band(binhyp(f <: g),
+    band(binhyp(a <: f),
+    band(binhyp(i = a<|b|>e),
+    band(binhyp(e <: h),
+    band(binhyp(dom(i) = a),
+    band(binhyp(c: g),
+    band(binhyp(c: a),
+    band(binhyp(d: h),
+         binhyp(d: e))))))))))
+    =>
+    dom(a<|(b<+{c|->d})|>e) = a
+    ;
+
+    band(binhyp(b: g +-> e),
+    band(binhyp(h <: g),
+    band(binhyp(a <: h),
+    band(binhyp(i <: e),
+    band(binhyp(c: dom(f)),
+    band(binhyp(d: i),
+    band(binhyp(dom(f) = a),
+         binhyp(f = a<|b|>e))))))))
+    =>
+    a<|(b<+{c|->d})|>e = f<+{c|->d}
+    ;
+
+    band(binhyp(b: f +-> e),
+    band(binhyp(dom(b) = f),
+    band(binhyp(g = a<|b|>e),
+    band(binhyp(a <: h),
+    band(binhyp(h <: f),
+    band(binhyp(c: dom(g)),
+    band(binhyp(d: i),
+         binhyp(i <: e))))))))
+    =>
+    dom(a<|(b<+{c|->d})|>e) = a
+    ;
+
+    band(binhyp(b: f +-> g),
+    band(binhyp(dom(b) = f),
+    band(binhyp(h = a<|b|>e),
+    band(binhyp(dom(h) = a),
+    band(binhyp(a <: i),
+    band(binhyp(i <: f),
+    band(binhyp(c: dom(h)),
+    band(binhyp(d: e),
+         binhyp(e <: g)))))))))
+    =>
+    dom(a<|(b<+{c|->d})|>e) = a
+    ;
+
+    band(binhyp(b: g +-> h),
+    band(binhyp(dom(b) = g),
+    band(binhyp(f = a<|b|>e),
+    band(binhyp(a <: g),
+    band(binhyp(e <: h),
+    band(binhyp(c: a),
+         binhyp(d: e)))))))
+    =>
+    a<|(b<+{c|->d})|>e = f<+{c|->d}
+
+END
+&
+THEORY th_ineg_pmm IS
+
+    band(binhyp(a: d +-> (e --> f)),
+    band(binhyp(dom(a) = d),
+    band(binhyp(b: d),
+    band(binhyp(c: e),
+         binhyp(f = 0..g)))))
+    =>
+    0 <= a(b)(c)
+
+END
+&
+THEORY th_inverse_pmm IS
+
+    /* not proved by pp */
+    band(binhyp(b: g +-> (f >+> e)),
+    band(binhyp(b: g +-> iseq(e)),
+    band(binhyp(dom(b) = g),
+         binhyp(c: g)))) &
+    d\ (a,b,c) &
+    2 <= a &
+    a <= card(dom(b(c)))+1
+    =>
+    ({a-1}<<|b(c)<+%d.(d: a..card(dom(b(c)))+1 | b(c)(d-1)))~: e +-> f
+
+END
+&
+THEORY th_dom_pmm IS
+
+    dom(a <+ b <+ c) == dom(a) \/ dom(b) \/ dom(c)
+    ;
+
+    /* not proved by pp */
+    band(binhyp(b: 1..d +-> e),
+         binhyp(dom(b) = 1..d)) &
+    c\ (a,d) &
+    a: 1..d+1
+    =>
+    card(dom({a}<<|b<+%c.(c: a+1..d+1 | b(c-1)))) = d
+
+END
+&
+THEORY th_ran_pmm IS
+
+    /* not proved by pp */
+    band(binhyp(b: 1..d +-> e),
+         binhyp(dom(b) = 1..d)) &
+    c\ (a,d) &
+    a: 2..d+1
+    =>
+    ran({a-1}<<|b<+%c.(c: a..d+1 | b(c-1))) = ran(b)
+    ;
+
+    /* not proved by pp */
+    a\ (b)
+    =>
+    ran(%a.(a: b | c(d))) <: ran(c)
+
+END
+&
+THEORY th_seq_pmm IS
+
+    binhyp(a: 1..b +-> d) &
+    binhyp(a~: d +-> 1..b) &
+    binhyp(dom(a) = 1..b) &
+    binhyp(not(c: ran(a))) &
+    0 <= b
+    =>
+    a<+{b+1|->c}: iseq(d)
+    ;
+
+    /* not proved by pp */
+    binhyp(dom(b) = 1..d) &
+    binhyp(b: 1..d +-> f) &
+    binhyp(b~: f +-> 1..d) &
+    binhyp(1<=a) &
+    binhyp(a<=1+d) &
+    binhyp(not(e: ran(b)))
+    =>
+    {a}<<|b<+%c.(c: 1+a..1+d | b(-1+c))<+{a|->e}: iseq(f)
+    ;
+
+    /* not proved by pp */
+    band(binhyp(b: 1..a +-> e),
+    band(binhyp(b~: e +-> 1..a),
+    band(binhyp(dom(b) = 1..a),
+         binhyp(1 <= d))))
+    =>
+    {a}<<|b<+%c.(c: d..a-1 | b(c+1)): iseq(e)
+    ;
+
+    /* not proved by pp */
+    band(binhyp(dom(b) = 1..g),
+    band(binhyp(1 <= d),
+         binhyp(1+a <= g))) &
+    b: e >+> f &
+    d <= a
+    =>
+    {a+1}<<|b<+%c.(c: d..a | b(c+1)): e >+> f
+    ;
+
+    /* not proved by pp */
+    binhyp(a: d +-> iseq(e)) &
+    binhyp(dom(a) = d) &
+    binhyp(b: d) &
+    binhyp(not(c: ran(a(b))))
+    =>
+    a<+{b|->(a(b)<+{card(dom(a(b)))+1|->c})}: d +-> iseq(e)
+    ;
+
+    /* not proved by pp */
+    binhyp(b: iseq(e)) &
+    binhyp(d: e) &
+    binhyp(not(d: ran(b))) &
+    c\ (a,b) &
+    a: 1..card(dom(b))+1
+    =>
+    {a}<<|b<+%c.(c: a+1..card(dom(b))+1 | b(c-1))<+{a|->d}: seq(e)
+
+END
+&
+THEORY th_empty_empty_pmm IS
+
+    a<|b = {} &
+    c = {}
+    =>
+    a<|b = c
+
+END
+&
+THEORY th_empty_pmm IS
+
+    not(a: dom(b))
+    =>
+    {a}<|b = {}
+    ;
+
+    not(b: a)
+    =>
+    a<|{b|->c} = {}
+
+END
+&
+THEORY th_simp_pmm IS
+
+    /* not proved by pp */
+    binhyp(a<=b) &
+    blvar(c) &
+    c\ (a,b)
+    =>
+    card(a+1..b) == b-a
+    ;
+
+    binhyp(1<=a) &
+    binhyp(1<=b) &
+    binhyp(b<=a+1) &
+    blvar(c) &
+    c\ (a,b)
+    =>
+    1..a\/b..a+1 == 1..a+1
+    ;
+
+    binhyp(a<=b) &
+    blvar(c) &
+    c\ (a,b)
+    =>
+    {a}\/a+1..b == a..b
+    ;
+
+    a-b\/c\/b == a\/(b\/c)
+    ;
+
+    binhyp(1<=a) &
+    binhyp(1<=b) &
+    binhyp(b<=a+1) &
+    blvar(c) &
+    c\ (a,b)
+    =>
+    1..a\/b+1..a+1\/{b} == 1..a+1
+    ;
+
+    /* not proved by pp */
+    binhyp(1 <= a) &
+    binhyp(b: 1..a) &
+    blvar(c) &
+    c\ (a,b)
+    =>
+    card((1..a)-{b}\/b+1..a+1/\{b}) == 0
+    ;
+
+    /* not proved by pp */
+    binhyp(1 <= a) &
+    binhyp(b: 1..a) &
+    blvar(c) &
+    c\ (a,b)
+    =>
+    card((1..a/\b+1..a+1)-{b}) == a-b
+    ;
+
+    /* not proved by pp */
+    binhyp(a: 1..b) &
+    blvar(c) &
+    c\ (a,b)
+    =>
+    card(a+1..b+1) == b-a+1
+    ;
+
+    /* not proved by pp */
+    binhyp(1 <= a) &
+    binhyp(b: 1..a) &
+    blvar(c) &
+    c\ (a,b)
+    =>
+    card((1..a)-{b}) == a-1
+    ;
+
+    binhyp(a: e +-> f) &
+    c <= d &
+    blvar(g) &
+    g\ (a,c,d) &
+    b\ (c,d)
+    =>
+    a<+%b.(b: c+1..d | a(b-1))<+{c|->a(c-1)} == a<+%b.(b: c..d | a(b-1))
+    ;
+
+    binhyp(b: e +-> f) &
+    a <= d &
+    blvar(g) &
+    g\ (a,b,d) &
+    c\ (a,d)
+    =>
+    {a-1}<<|({a}<<|b<+%c.(c: a+1..d | b(c-1)))<+{a|->b(a-1)} == {a-1}<<|b<+%c.(c: a..d | b(c-1))
+    ;
+
+    binhyp(b: f +-> g) &
+    a-1: dom(b) &
+    blvar(h) &
+    h\ (a,b) &
+    c\ (a,d)
+    =>
+    ({a}<<|b<+%c.(c: a+1..d | e))(a-1) == b(a-1)
+    ;
+
+    binhyp(a: f +-> g) &
+    c-1: dom(a) &
+    blvar(h) &
+    h\ (a,c) &
+    b\ (c, e)
+    =>
+    (a<+%b.(b: c+1..e | d))(c-1) == a(c-1)
+    ;
+
+    binhyp(dom(b) = c..a) &
+    blvar(d) &
+    d\ (a,b)
+    =>
+    {a+1}<<|b == b
+    ;
+
+    binhyp(a : S +-> T) &
+    blvar(f) &
+    f\ (a,c,d) &
+    b\ (c,d) &
+    c<=d
+    =>
+    a<+%b.(b: c..d-1 | a(b+1))<+{d|->a(d+1)} == a<+%b.(b: c..d | a(b+1))
+    ;
+
+    binhyp(a : S +-> T) &
+    blvar(f) &
+    f\ (a,d) &
+    b\ (c,d) &
+    d+1: dom(a)
+    =>
+    (a<+%b.(b: c..d-1 | e))(d+1) == a(d+1)
+    ;
+
+    binhyp(a : S +-> T) &
+    blvar(f) &
+    f\ (a,c,d) &
+    b\ (c,d) &
+    c<=d
+    =>
+    {d+1}<<|({d}<<|a<+%b.(b: c..d-1 | a(b+1)))<+{d|->a(d+1)} == {d+1}<<|a<+%b.(b: c..d | a(b+1))
+    ;
+
+    binhyp(a : S +-> T) &
+    blvar(f) &
+    f\ (a,d) &
+    b\ (c,d) &
+    d+1: dom(a)
+    =>
+    ({d}<<|a<+%b.(b: c..d-1 | e))(d+1) == a(d+1)
+    ;
+
+    /* SimplifyRelFonXY.10 (Backward) */
+    (r<+{a|->b})(a) == b
+    ;
+
+    a+1-1 == a
+    ;
+
+    a-1+1 == a
+
+END

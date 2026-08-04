@@ -1,0 +1,61 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+THEORY User_Pass IS
+Operation(init_iter_subscription) & Pattern(card(a)<=b)
+    & ff(0) & dd & ah(1..card(t_subscription) = dom(cast_t_subscription)) & ah(cast_t_subscription : NAT +-> t_subscription_i) & pp(rp.0 | 30);
+Operation(continue_iter_subscription) & Pattern(a(b) : c)
+    & ff(0) & dd & mp(Tac(th_eh_ident; th_typage));
+Operation(init_iter_subscription) & Pattern(a[b..c] = d)
+    & ff(0) & eh(1..card(t_subscription),_h,Goal) & pr;
+Operation(continue_iter_subscription) & Pattern(a[b..c] = d-{e})
+    & ff(0) & dd & eh(subscriptions_to_iterate,_h,Goal) & pr(Tac(th_size_pmm));
+Operation(init_iter_subscription) & Pattern(card(a) : b..size(c))
+    & ff(0) & mp & ah(card(t_subscription) = size(cast_t_subscription)) & ah(dom(cast_t_subscription) = 1..size(cast_t_subscription)) & pr & eh(dom(cast_t_subscription),_h,Goal) & dd & pr(Tac(th_size_pmm)) & pp(rp.0 | 30);
+Operation(continue_iter_subscription) & Pattern(bool(a<=b) = bool(not(c)))
+    & ff(0) & dd & eh(subscriptions_to_iterate,_h,Goal) & mp & pr(Tac(th_size_pmm)) & ah(subscription_i$1-1 : dom(cast_t_subscription)) & pr & ah(subscription_i$1-1 : 1..subscription_i$1-1) & pr & pp(rp.1 | 5) & dc(2<=subscription_i$1) & pr & dd(0) & ah(subscription_i$1 = 1) & ah(subscription_i$1<=1) & pr & pr & ss & ah(1 : dom(cast_t_subscription)) & pr & ah(cast_t_subscription : NAT +-> t_subscription_i) & pp(rp.0 | 5)
+END
+&
+
+THEORY th_size_pmm IS
+
+    /* not proved by pp */
+    binhyp(1..card(b) = 1..size(a)) &
+    blvar(c) &
+    c\ (a,b)
+    =>
+    size(a) == card(b)
+    ;
+
+    /* not proved by pp */
+    band(binhyp(a: seq(c)),
+         binhyp(a~: c +-> NATURAL)) &
+    binhyp(1<=b) &
+    binhyp(b<=size(a)) &
+    blvar(d) &
+    d\ (a,b,c)
+    =>
+    a[1..b]-{a(b)} == a[1..b-1]
+    ;
+
+    not(a-{b} = {})
+    =>
+    not(a = {b})
+
+END

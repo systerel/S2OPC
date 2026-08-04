@@ -142,7 +142,7 @@ CONCRETE_VARIABLES
 
 INVARIANT
     // iterator variables to iterate on the priorities of session subscriptions in decreasing order
-    next_idx_iter_prio      : t_prio_idx_i &
+    next_idx_iter_prio : t_prio_idx_i &
     continue_iter_prio : BOOL &
     session_iter_prio  : t_session_i &
     prio_idx_iter_prio : t_prio_idx_i &
@@ -174,7 +174,7 @@ INVARIANT
     )
 
 INITIALISATION
-    next_idx_iter_prio      := 0;
+    next_idx_iter_prio := 0;
     continue_iter_prio := FALSE;
     session_iter_prio  := c_session_indet;
     prio_idx_iter_prio := 0;
@@ -236,7 +236,13 @@ LOCAL_OPERATIONS
                 bres := TRUE ||
                 p_subscription := l_subscription
             END
-        END
+        END ||
+        subscriptions_to_iterate,
+        subscriptions_iterated
+        :(subscriptions_to_iterate <: t_subscription &
+          subscriptions_iterated   <: t_subscription &
+          subscriptions_to_iterate /\ subscriptions_iterated = {}
+         )
     END
     ;
 
@@ -440,57 +446,125 @@ LOCAL_OPERATIONS
 
     local_close_subscription (p_subscription) =
     PRE
-        p_subscription : t_subscription_i &
-        p_subscription : s_subscription
+        p_subscription        : t_subscription_i &
+        p_subscription        : s_subscription &
+
+        mi_iterator_it : t_monitoredItemQueueIterator_i &
+        nb_monitored_items_it : NAT &
+        s_mi_to_iterate_it   <: t_monitoredItemPointer_i &
+        s_mi_to_iterate_it   <: t_monitoredItemPointer &
+        s_mi_iterated_it     <: t_monitoredItemPointer_i &
+        s_mi_iterated_it     <: t_monitoredItemPointer &
+        s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
+        card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it &
+
+        s_monitoredItemPointer <: t_monitoredItemPointer &
+        s_monitoredItemId <: t_monitoredItemId &
+        a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
+        a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
+        a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
+        a_monitoredItemAttributeId : s_monitoredItemPointer --> t_AttributeId &
+        a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
+        a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter &
+
+        s_monitoredItemQueue <: t_monitoredItemQueue &
+        a_defined_monitored_items : t_monitoredItemQueue <-> t_monitoredItemPointer &
+
+        a_nodeToMonitoredItemQueue : t_NodeId --> t_monitoredItemQueue &
+
+        a_monitoredItemQueue : s_subscription --> t_monitoredItemQueue
     THEN
-        s_subscription := s_subscription - {p_subscription} ||
+        s_subscription          := s_subscription - {p_subscription}            ||
+        a_subscription_session  := {p_subscription} <<| a_subscription_session  ||
+        a_publishInterval       := {p_subscription} <<| a_publishInterval       ||
+        a_lifetimeExpCount      := {p_subscription} <<| a_lifetimeExpCount      ||
+        a_keepAliveExpCount     := {p_subscription} <<| a_keepAliveExpCount     ||
+        a_maxNotifsPerPublish   := {p_subscription} <<| a_maxNotifsPerPublish   ||
+        a_subscription_state    := {p_subscription} <<| a_subscription_state    ||
+        a_MoreNotifications     := a_MoreNotifications - {p_subscription}       ||
+        a_LifetimeCounter       := {p_subscription} <<| a_LifetimeCounter       ||
+        a_KeepAliveCounter      := {p_subscription} <<| a_KeepAliveCounter      ||
+        a_MessageSent           := a_MessageSent - {p_subscription}             ||
+        a_PublishingEnabled     := a_PublishingEnabled - {p_subscription}       ||
+        a_SeqNum                := {p_subscription} <<| a_SeqNum                ||
+        a_notifRepublishQueue   := {p_subscription} <<| a_notifRepublishQueue   ||
+        a_monitoredItemQueue    := {p_subscription} <<| a_monitoredItemQueue    ||
+        a_publishTimer          := {p_subscription} <<| a_publishTimer          ||
+        a_subscription_priority := {p_subscription} <<| a_subscription_priority ||
 
-        a_subscription_session := {p_subscription} <<| a_subscription_session ||
-        a_publishInterval := {p_subscription} <<| a_publishInterval ||
-        a_lifetimeExpCount := {p_subscription} <<| a_lifetimeExpCount  ||
-        a_keepAliveExpCount := {p_subscription} <<| a_keepAliveExpCount ||
-        a_maxNotifsPerPublish := {p_subscription} <<| a_maxNotifsPerPublish ||
+        a_session_nb_subscriptions
+        :(a_session_nb_subscriptions : t_session --> t_sub_idx_i &
+          (a_session_nb_subscriptions$0(a_subscription_session(p_subscription)) >= 1
+           =>
+           a_session_nb_subscriptions = a_session_nb_subscriptions$0
+               <+ {a_subscription_session(p_subscription) |-> a_session_nb_subscriptions$0(a_subscription_session(p_subscription)) - 1}) &
+          (a_session_nb_subscriptions$0(a_subscription_session(p_subscription)) < 1
+           =>
+           a_session_nb_subscriptions = a_session_nb_subscriptions$0)
+         ) ||
 
-        a_subscription_state := {p_subscription} <<| a_subscription_state ||
-        a_MoreNotifications := a_MoreNotifications - {p_subscription} ||
-        a_LifetimeCounter := {p_subscription} <<| a_LifetimeCounter ||
-        a_KeepAliveCounter := {p_subscription} <<| a_KeepAliveCounter ||
-        a_MessageSent := a_MessageSent - {p_subscription}               ||
-        a_PublishingEnabled := a_PublishingEnabled - {p_subscription}   ||
-        a_SeqNum := {p_subscription} <<| a_SeqNum ||
+        a_session_seq_priority,
+        a_session_priority_subscriptions_queue,
+        a_prio_queue_defined_subscriptions
+        :(a_session_seq_priority : t_session --> iseq(t_priority) &
+          a_session_priority_subscriptions_queue : t_session --> (t_prio_idx +-> t_prioritySubQueue) &
+          a_prio_queue_defined_subscriptions : t_prioritySubQueue <-> t_subscription &
+          !session.(session : t_session
+                    =>
+                    dom(a_session_priority_subscriptions_queue(session)) = dom(a_session_seq_priority(session)))
+        ) ||
 
         /* Queues deleted */
-        a_monitored_item_notification_queue := a_monitoredItemSubs~[{p_subscription}] <<| a_monitored_item_notification_queue ||
-        a_notification_queue_notifications := a_monitored_item_notification_queue[a_monitoredItemSubs~[{p_subscription}]] <<|a_notification_queue_notifications ||
+        a_monitored_item_notification_queue :: t_monitoredItemPointer >+> t_notificationQueue ||
+        a_notification_queue_notifications  :: t_notificationQueue <-> t_notificationData ||
+
+        a_defined_monitored_items :: t_monitoredItemQueue <-> t_monitoredItemPointer ||
 
         /* Republish queue deleted */
         a_republish_notification := a_republish_notification |>> {a_notifRepublishQueue(p_subscription)} ||
-        a_notification_seq_num :=
-          dom(a_republish_notification |> {a_notifRepublishQueue(p_subscription)}) <<| a_notification_seq_num ||
+        a_notification_seq_num :: t_notif_msg --> t_sub_seq_num ||
 
         s_republishQueue := s_republishQueue - {a_notifRepublishQueue(p_subscription)} ||
-        a_notifRepublishQueue := {p_subscription} <<| a_notifRepublishQueue ||
 
-        /* Remove monitoredItems */
-        LET s_removedMonitoredItemPointer BE
-            s_removedMonitoredItemPointer = a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}]
+        LET
+            l_queue,
+            s_removedMonitoredItemPointer
+        BE
+            l_queue = a_monitoredItemQueue (p_subscription) &
+            s_removedMonitoredItemPointer = a_defined_monitored_items[{l_queue}]
         IN
-            s_monitoredItemPointer := s_monitoredItemPointer - s_removedMonitoredItemPointer ||
-            s_monitoredItemId := s_monitoredItemId - a_monitoredItemId[s_removedMonitoredItemPointer] ||
-            a_monitoredItemId := a_monitoredItemId - (s_removedMonitoredItemPointer <| a_monitoredItemId) ||
-            a_monitoredItemSubs := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
-            a_monitoredItemNodeId := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
+            s_monitoredItemQueue := s_monitoredItemQueue - {l_queue} ||
+            IF s_removedMonitoredItemPointer /= {} THEN
+                /* monitored item queue iterator */
+                mi_queue_it           := c_monitoredItemQueue_indet ||
+                mi_iterator_it        := c_monitoredItemQueueIterator_indet ||
+                nb_monitored_items_it := 0 ||
+                s_mi_to_iterate_it    := {} ||
+                s_mi_iterated_it      := {} ||
 
-            s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
-            a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue ||
-
-            /* Remove subscription monitoredItem queue and all removed monitored items from other queues (i.e.:nodeId to mi queues) */
-            a_defined_monitored_items :=
-             {a_monitoredItemQueue (p_subscription)}
-              <<| a_defined_monitored_items |>>
-             s_removedMonitoredItemPointer
-        END ||
-        a_publishTimer := {p_subscription} <<| a_publishTimer
+                /* Remove monitoredItems */
+                s_monitoredItemPointer     := s_monitoredItemPointer - s_removedMonitoredItemPointer ||
+                s_monitoredItemId          := s_monitoredItemId - a_monitoredItemId[s_removedMonitoredItemPointer] ||
+                a_monitoredItemId          := s_removedMonitoredItemPointer <<| a_monitoredItemId ||
+                a_monitoredItemSubs        := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
+                a_monitoredItemNodeId      := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
+                a_monitoredItemAttributeId := s_removedMonitoredItemPointer <<| a_monitoredItemAttributeId ||
+                a_monitoredItemMonitMode   := s_removedMonitoredItemPointer <<| a_monitoredItemMonitMode ||
+                a_monitoredItemQueueSize   := s_removedMonitoredItemPointer <<| a_monitoredItemQueueSize
+            ELSE
+                mi_queue_it,
+                mi_iterator_it,
+                nb_monitored_items_it,
+                s_mi_to_iterate_it,
+                s_mi_iterated_it
+                :(mi_queue_it : t_monitoredItemQueue_i &
+                  mi_iterator_it : t_monitoredItemQueueIterator_i &
+                  s_mi_to_iterate_it <: t_monitoredItemPointer &
+                  s_mi_iterated_it <: t_monitoredItemPointer &
+                  nb_monitored_items_it : NAT
+                 )
+            END
+        END
     END
     ;
 
@@ -724,30 +798,32 @@ OPERATIONS
     bres, p_subscription <-- get_fresh_subscription =
     VAR
         l_subscription,
-        l_is_subscription,
+        l_is_valid_subscription,
         l_continue
     IN
         bres := FALSE;
         p_subscription := c_subscription_indet;
         l_subscription := c_subscription_indet;
-        l_is_subscription := TRUE;
+        l_is_valid_subscription := TRUE;
         l_continue <-- init_iter_subscription;
-        IF  l_continue = TRUE  /* Only for the proof */
+        IF  l_continue = TRUE  // Only for the proof
         THEN
             WHILE
                 l_continue   = TRUE &
-                l_is_subscription = TRUE
+                l_is_valid_subscription = TRUE
             DO
                 l_continue, l_subscription <-- continue_iter_subscription;
-                l_is_subscription <-- is_valid_subscription(l_subscription)
+                l_is_valid_subscription <-- is_valid_subscription(l_subscription)
             INVARIANT
                 l_continue = bool(subscriptions_to_iterate /= {}) &
+                subscriptions_to_iterate <: t_subscription &
+                subscriptions_iterated   <: t_subscription &
                 subscriptions_to_iterate /\ subscriptions_iterated = {} &
                 subscriptions_to_iterate \/ subscriptions_iterated = t_subscription &
-                (   l_is_subscription = TRUE
+                (   l_is_valid_subscription = TRUE
                     =>
                     subscriptions_iterated <: s_subscription) &
-                (   l_is_subscription = FALSE
+                (   l_is_valid_subscription = FALSE
                     =>
                     l_subscription  : t_subscription &
                     l_subscription /: s_subscription)
@@ -755,7 +831,7 @@ OPERATIONS
                 card(subscriptions_to_iterate)
             END
         END;
-        IF l_is_subscription = FALSE
+        IF l_is_valid_subscription = FALSE
         THEN
             bres := TRUE;
             p_subscription := l_subscription
@@ -1055,10 +1131,11 @@ OPERATIONS
         delete_publish_timer (l_timer_id);
         l_publishInterval <-- get_subscription_publishInterval(p_subscription);
         l_republish_queue <-- get_subscription_notifRepublishQueue (p_subscription);
-        /* Deallocate republish queue */
+        // Deallocate republish queue
         clear_and_deallocate_republish_queue (l_republish_queue);
         l_monitored_item_queue <-- get_subscription_monitoredItemQueue (p_subscription);
         l_continue_mi, l_iterator <-- init_iter_monitored_item (l_monitored_item_queue);
+        IF    l_continue_mi = TRUE THEN // only for the proof
         WHILE l_continue_mi = TRUE DO
             l_continue_mi, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, l_monitored_item_queue);
             l_monitoredItemId,
@@ -1084,17 +1161,33 @@ OPERATIONS
             // Deallocate monitored item pointer since l_monitored_item_queue will then be cleared
             delete_monitored_item_pointer (l_monitoredItemPointer)
         INVARIANT
+            l_iterator = mi_iterator_it &
             s_mi_to_iterate_it <: t_monitoredItemPointer &
             s_mi_iterated_it   <: t_monitoredItemPointer &
-
             s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
+            s_mi_to_iterate_it \/ s_mi_iterated_it = a_defined_monitored_items$0[{l_monitored_item_queue}] &
             card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it &
             l_continue_mi = bool(s_mi_to_iterate_it /= {}) &
-            s_mi_iterated_it /\ a_defined_monitored_items[ran(a_nodeToMonitoredItemQueue)] = {} &
-            s_mi_to_iterate_it /\ a_defined_monitored_items[ran(a_nodeToMonitoredItemQueue)] = s_mi_to_iterate_it
 
+            s_monitoredItemQueue <: t_monitoredItemQueue &
+            a_defined_monitored_items : t_monitoredItemQueue <-> t_monitoredItemPointer &
+
+            a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
+            a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
+
+            s_monitoredItemPointer = s_monitoredItemPointer$0 - s_mi_iterated_it &
+            s_monitoredItemPointer <: t_monitoredItemPointer &
+
+            s_monitoredItemId          = s_monitoredItemId$0 - a_monitoredItemId$0[s_mi_iterated_it] &
+            a_monitoredItemId          = s_mi_iterated_it <<| a_monitoredItemId$0 &
+            a_monitoredItemSubs        = s_mi_iterated_it <<| a_monitoredItemSubs$0 &
+            a_monitoredItemNodeId      = s_mi_iterated_it <<| a_monitoredItemNodeId$0 &
+            a_monitoredItemAttributeId = s_mi_iterated_it <<| a_monitoredItemAttributeId$0 &
+            a_monitoredItemMonitMode   = s_mi_iterated_it <<| a_monitoredItemMonitMode$0 &
+            a_monitoredItemQueueSize   = s_mi_iterated_it <<| a_monitoredItemQueueSize$0
         VARIANT
             card(s_mi_to_iterate_it)
+        END
         END;
         clear_iter_monitored_item (l_iterator);
         clear_and_deallocate_monitored_item_queue (l_monitored_item_queue);
@@ -1208,11 +1301,11 @@ OPERATIONS
         l_bres_monitored,
         l_newMonitoredItemQueue,
         l_bres_timer,
-        l_timerId
+        l_timerId,
+        l_prio_subs_queue
     IN
         StatusCode_service := c_StatusCode_indet;
         l_bres, subscription <-- get_fresh_subscription;
-
         IF l_bres = TRUE
         THEN
             l_bres_repub, l_newRepublishQueue <-- allocate_new_republish_queue;
@@ -1220,29 +1313,35 @@ OPERATIONS
             l_bres_timer, l_timerId <-- create_periodic_publish_timer (subscription, p_revPublishInterval);
             IF l_bres_repub = TRUE & l_bres_monitored = TRUE & l_bres_timer = TRUE
             THEN
-                StatusCode_service <--
-                add_subscription (subscription,
-                                  p_session,
-                                  e_subscriptionState_normal,
-                                  FALSE,
-                                  p_priority,
-                                  p_revPublishInterval,
-                                  p_revLifetimeCount,
-                                  p_revMaxKeepAlive,
-                                  p_maxNotificationsPerPublish,
-                                  p_publishEnabled,
-                                  c_sub_seq_num_init, /* => next SeqNum == 1 */
-                                  l_newRepublishQueue,
-                                  l_newMonitoredItemQueue,
-                                  l_timerId);
-                IF StatusCode_service = e_sc_ok
-                THEN
+                l_prio_subs_queue, StatusCode_service <-- check_add_subscription (p_session, subscription, p_priority, FALSE);
+                IF StatusCode_service = e_sc_ok THEN
+                    add_subscription
+                       (subscription,
+                        p_session,
+                        e_subscriptionState_normal,
+                        FALSE,
+                        p_priority,
+                        p_revPublishInterval,
+                        p_revLifetimeCount,
+                        p_revLifetimeCount,
+                        p_revMaxKeepAlive,
+                        p_maxNotificationsPerPublish,
+                        p_publishEnabled,
+                        c_sub_seq_num_init, /* => next SeqNum == 1 */
+                        l_newRepublishQueue,
+                        l_newMonitoredItemQueue,
+                        l_timerId,
+                        l_prio_subs_queue,
+                        FALSE);
                     a_subscription_available_data_notifs(subscription) := 0;
                     a_subscription_available_event_notifs(subscription) := 0;
                     subscription_created(p_revPublishInterval)
+                ELSE
+                    subscription := c_subscription_indet
                 END
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory;
+                subscription := c_subscription_indet;
                 IF l_bres_repub = TRUE
                 THEN
                     clear_and_deallocate_republish_queue (l_newRepublishQueue)
@@ -1263,12 +1362,13 @@ OPERATIONS
     END
     ;
 
-    modify_subscription (p_subscription,
-                         p_revPublishInterval,
-                         p_revLifetimeCount,
-                         p_revMaxKeepAlive,
-                         p_revMaxNotifPerPublish,
-                         p_priority) =
+    p_StatusCode_service <-- modify_subscription
+       (p_subscription,
+        p_revPublishInterval,
+        p_revLifetimeCount,
+        p_revMaxKeepAlive,
+        p_revMaxNotifPerPublish,
+        p_priority) =
     VAR
         l_old_priority,
         l_oldPublishInterval,
@@ -1280,17 +1380,20 @@ OPERATIONS
         l_seqNum,
         l_state,
         l_firstMsgSent,
-        l_statusCode
+        l_prio_subs_queue,
+        l_KeepAliveCount,
+        l_moreNotifs
     IN
         l_state := c_subscriptionState_indet; /* Necessary for an issue in B to c translator (undeclared) */
         l_state <-- get_subscription_state (p_subscription);
-        log_subscription_transition (p_subscription, l_state, l_state, 18);
         l_old_priority <-- get_subscription_priority(p_subscription);
         l_oldPublishInterval <-- get_subscription_publishInterval(p_subscription);
         l_timerId <-- get_subscription_timer_id (p_subscription);
         IF l_old_priority = p_priority
         THEN
             /* Same priority, we only need modify subscription parameters */
+            p_StatusCode_service := e_sc_ok;
+            log_subscription_transition (p_subscription, l_state, l_state, 18);
             set_subscription_publishInterval (p_subscription, p_revPublishInterval);
             set_subscription_MaxLifetimeAndKeepAliveCount (p_subscription, p_revLifetimeCount, p_revMaxKeepAlive);
             reset_subscription_LifetimeCounter (p_subscription);
@@ -1299,28 +1402,35 @@ OPERATIONS
         ELSE
             /* Priority changed, we need to reorder the subscription indexes by using delete/add subscription operations */
             l_session <-- getall_session (p_subscription);
-            l_publishEnabled <-- get_subscription_PublishingEnabled (p_subscription);
-            l_republishQueue <-- get_subscription_notifRepublishQueue (p_subscription);
-            l_monitoredItemQueue <-- get_subscription_monitoredItemQueue (p_subscription);
-            l_seqNum <-- get_subscription_SeqNum (p_subscription);
-            l_firstMsgSent <-- get_subscription_MessageSent (p_subscription);
-            delete_subscription (p_subscription);
-            l_statusCode <--
+            l_prio_subs_queue, p_StatusCode_service <-- check_add_subscription (l_session, p_subscription, p_priority, TRUE);
+            IF p_StatusCode_service = e_sc_ok THEN
+                log_subscription_transition (p_subscription, l_state, l_state, 18);
+                l_publishEnabled <-- get_subscription_PublishingEnabled (p_subscription);
+                l_republishQueue <-- get_subscription_notifRepublishQueue (p_subscription);
+                l_monitoredItemQueue <-- get_subscription_monitoredItemQueue (p_subscription);
+                l_seqNum <-- get_subscription_SeqNum (p_subscription);
+                l_firstMsgSent <-- get_subscription_MessageSent (p_subscription);
+                l_KeepAliveCount <-- get_subscription_KeepAliveCounter (p_subscription);
+                l_moreNotifs <-- get_subscription_MoreNotifications (p_subscription);
+                delete_subscription (p_subscription);
                 add_subscription (p_subscription,
-                                  l_session,
-                                  l_state,
-                                  l_firstMsgSent,
-                                  p_priority,
-                                  p_revPublishInterval,
-                                  p_revLifetimeCount,
-                                  p_revMaxKeepAlive,
-                                  p_revMaxNotifPerPublish,
-                                  l_publishEnabled,
-                                  l_seqNum,
-                                  l_republishQueue,
-                                  l_monitoredItemQueue,
-                                  l_timerId)
-            // note: l_statusCode is always Good as maximum number of subscriptions cannot be reached
+                    l_session,
+                    l_state,
+                    l_firstMsgSent,
+                    p_priority,
+                    p_revPublishInterval,
+                    p_revLifetimeCount,
+                    l_KeepAliveCount,
+                    p_revMaxKeepAlive,
+                    p_revMaxNotifPerPublish,
+                    l_publishEnabled,
+                    l_seqNum,
+                    l_republishQueue,
+                    l_monitoredItemQueue,
+                    l_timerId,
+                    l_prio_subs_queue,
+                    l_moreNotifs)
+            END
         END;
         subscription_modified(l_oldPublishInterval, p_revPublishInterval)
     END

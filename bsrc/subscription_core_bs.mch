@@ -176,7 +176,6 @@ OPERATIONS
                                    p_publishingEnabled) =
     PRE
         p_subscription : t_subscription_i &
-        p_subscription : t_subscription &
         p_old_state : t_subscriptionState_i &
         p_new_state : t_subscriptionState_i &
         p_transition : NAT &

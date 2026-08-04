@@ -366,9 +366,6 @@ extern void constants_bs__get_copy_UserToken(const constants_bs__t_user_token_i 
                                              constants_bs__t_user_token_i* const constants_bs__p_out);
 extern void constants_bs__get_reverse_cast_t_NamespaceIdx(const constants_bs__t_NamespaceIdx constants_bs__p_nsIndex,
                                                           t_entier4* const constants_bs__p_nsIndexNat);
-extern void constants_bs__get_reverse_cast_t_subscription(
-    const constants_bs__t_subscription_i constants_bs__p_subscription,
-    t_entier4* const constants_bs__p_ind);
 extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
     t_bool* const constants_bs__p_local_server,
@@ -409,5 +406,7 @@ extern void constants_bs__is_t_channel_config_idx(const constants_bs__t_channel_
 extern void constants_bs__is_t_endpoint_config_idx(
     const constants_bs__t_endpoint_config_idx_i constants_bs__p_endpoint_config_idx,
     t_bool* const constants_bs__p_res);
+extern void constants_bs__is_t_subscription(const constants_bs__t_subscription_i constants_bs__p_subscription,
+                                            t_bool* const constants_bs__p_bool);
 
 #endif

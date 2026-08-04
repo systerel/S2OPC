@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_1.h
 
- Date                 : 12/10/2026 16:24:34
+ Date                 : 05/11/2026 10:21:22
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "subscription_core_2.h"
 #include "subscription_priority_sub_queue_bs.h"
 #include "subscription_priority_sub_queue_it_bs.h"
 
@@ -52,37 +53,6 @@
 #include "request_handle_bs.h"
 #include "subscription_core_bs.h"
 
-/*----------------------------
-   CONCRETE_VARIABLES Clause
-  ----------------------------*/
-extern t_entier4 subscription_core_1__a_KeepAliveCounter_i[constants__t_subscription_i_max+1];
-extern t_entier4 subscription_core_1__a_LifetimeCounter_i[constants__t_subscription_i_max+1];
-extern t_bool subscription_core_1__a_MessageSent_i[constants__t_subscription_i_max+1];
-extern t_bool subscription_core_1__a_MoreNotifications_i[constants__t_subscription_i_max+1];
-extern t_bool subscription_core_1__a_PublishingEnabled_i[constants__t_subscription_i_max+1];
-extern constants__t_sub_seq_num_i subscription_core_1__a_SeqNum_i[constants__t_subscription_i_max+1];
-extern t_entier4 subscription_core_1__a_keepAliveExpCount_i[constants__t_subscription_i_max+1];
-extern t_entier4 subscription_core_1__a_lifetimeExpCount_i[constants__t_subscription_i_max+1];
-extern t_entier4 subscription_core_1__a_maxNotifsPerPublish_i[constants__t_subscription_i_max+1];
-extern constants__t_monitoredItemQueue_i subscription_core_1__a_monitoredItemQueue_i[constants__t_subscription_i_max+1];
-extern constants__t_notifRepublishQueue_i subscription_core_1__a_notifRepublishQueue_i[constants__t_subscription_i_max+1];
-extern constants__t_opcua_duration_i subscription_core_1__a_publishInterval_i[constants__t_subscription_i_max+1];
-extern constants__t_publishReqQueue_i subscription_core_1__a_publishRequestQueue_i[constants__t_session_i_max+1];
-extern constants__t_timer_id_i subscription_core_1__a_publishTimer_i[constants__t_subscription_i_max+1];
-extern t_entier4 subscription_core_1__a_session_nb_priorities_i[constants__t_session_i_max+1];
-extern t_entier4 subscription_core_1__a_session_nb_subscriptions_i[constants__t_session_i_max+1];
-extern t_entier4 subscription_core_1__a_session_priority_idx_i[constants__t_session_i_max+1][constants__t_priority_i_max+1];
-extern t_entier4 subscription_core_1__a_session_priority_min_sub_idx_i[constants__t_session_i_max+1][constants__t_prio_idx_i_max+1];
-extern t_entier4 subscription_core_1__a_session_priority_nb_subs_i[constants__t_session_i_max+1][constants__t_prio_idx_i_max+1];
-extern constants__t_prioritySubQueue_i subscription_core_1__a_session_priority_subscriptions_queue_i[constants__t_session_i_max+1][constants__t_prio_idx_i_max+1];
-extern t_entier4 subscription_core_1__a_session_seq_priority_i[constants__t_session_i_max+1][constants__t_prio_idx_i_max+1];
-extern constants__t_subscription_i subscription_core_1__a_session_seq_subscription_i[constants__t_session_i_max+1][constants__t_sub_idx_i_max+1];
-extern t_entier4 subscription_core_1__a_session_subscription_idx_i[constants__t_session_i_max+1][constants__t_subscription_i_max+1];
-extern t_entier4 subscription_core_1__a_subscription_priority_i[constants__t_subscription_i_max+1];
-extern constants__t_session_i subscription_core_1__a_subscription_session_i[constants__t_subscription_i_max+1];
-extern constants__t_subscriptionState_i subscription_core_1__a_subscription_state_i[constants__t_subscription_i_max+1];
-extern t_bool subscription_core_1__s_subscription_i[constants__t_subscription_i_max+1];
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -92,32 +62,43 @@ extern void subscription_core_1__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define subscription_core_1__continue_iter_subscription_priority_queue subscription_priority_sub_queue_it_bs__continue_iter_subscription_priority_queue
-
-/*---------------------
-   Inlined OPERATIONS
-  ---------------------*/
-#define subscription_core_1__is_valid_subscription(subscription_core_1__p_subscription, \
-   subscription_core_1__is_valid) { \
-   subscription_core_1__local_is_valid_subscription(subscription_core_1__p_subscription, \
-      subscription_core_1__is_valid); \
-}
-
-#define subscription_core_1__getall_session(subscription_core_1__p_subscription, \
-   subscription_core_1__p_session) { \
-   *subscription_core_1__p_session = subscription_core_1__a_subscription_session_i[subscription_core_1__p_subscription]; \
-}
-
-/*--------------------------
-   LOCAL_OPERATIONS Clause
-  --------------------------*/
-extern void subscription_core_1__local_is_valid_subscription(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_bool * const subscription_core_1__is_valid);
-extern void subscription_core_1__local_log_subscription_transition(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const constants__t_subscriptionState_i subscription_core_1__p_old_state,
-   const constants__t_subscriptionState_i subscription_core_1__p_new_state,
-   const t_entier4 subscription_core_1__p_transition);
+#define subscription_core_1__decrement_subscription_KeepAliveCounter subscription_core_2__decrement_subscription_KeepAliveCounter
+#define subscription_core_1__decrement_subscription_LifetimeCounter subscription_core_2__decrement_subscription_LifetimeCounter
+#define subscription_core_1__get_card_session_seq_priority subscription_core_2__get_card_session_seq_priority
+#define subscription_core_1__get_card_session_seq_subscription subscription_core_2__get_card_session_seq_subscription
+#define subscription_core_1__get_session_publishRequestQueue subscription_core_2__get_session_publishRequestQueue
+#define subscription_core_1__get_subscription_KeepAliveCounter subscription_core_2__get_subscription_KeepAliveCounter
+#define subscription_core_1__get_subscription_LifetimeCounter subscription_core_2__get_subscription_LifetimeCounter
+#define subscription_core_1__get_subscription_MaxNotifsPerPublish subscription_core_2__get_subscription_MaxNotifsPerPublish
+#define subscription_core_1__get_subscription_MessageSent subscription_core_2__get_subscription_MessageSent
+#define subscription_core_1__get_subscription_MoreNotifications subscription_core_2__get_subscription_MoreNotifications
+#define subscription_core_1__get_subscription_PublishingEnabled subscription_core_2__get_subscription_PublishingEnabled
+#define subscription_core_1__get_subscription_SeqNum subscription_core_2__get_subscription_SeqNum
+#define subscription_core_1__get_subscription_monitoredItemQueue subscription_core_2__get_subscription_monitoredItemQueue
+#define subscription_core_1__get_subscription_notifRepublishQueue subscription_core_2__get_subscription_notifRepublishQueue
+#define subscription_core_1__get_subscription_priority subscription_core_2__get_subscription_priority
+#define subscription_core_1__get_subscription_publishInterval subscription_core_2__get_subscription_publishInterval
+#define subscription_core_1__get_subscription_state subscription_core_2__get_subscription_state
+#define subscription_core_1__get_subscription_timer_id subscription_core_2__get_subscription_timer_id
+#define subscription_core_1__getall_session subscription_core_2__getall_session
+#define subscription_core_1__is_valid_subscription subscription_core_2__is_valid_subscription
+#define subscription_core_1__is_valid_subscription_on_session subscription_core_2__is_valid_subscription_on_session
+#define subscription_core_1__log_subscription_request_received subscription_core_2__log_subscription_request_received
+#define subscription_core_1__log_subscription_request_received_invalid_on_session subscription_core_2__log_subscription_request_received_invalid_on_session
+#define subscription_core_1__log_subscription_transition subscription_core_2__log_subscription_transition
+#define subscription_core_1__reset_session_publishRequestQueue subscription_core_2__reset_session_publishRequestQueue
+#define subscription_core_1__reset_subscription_KeepAliveCounter subscription_core_2__reset_subscription_KeepAliveCounter
+#define subscription_core_1__reset_subscription_LifetimeCounter subscription_core_2__reset_subscription_LifetimeCounter
+#define subscription_core_1__set_session_publishRequestQueue subscription_core_2__set_session_publishRequestQueue
+#define subscription_core_1__set_subscription_MaxLifetimeAndKeepAliveCount subscription_core_2__set_subscription_MaxLifetimeAndKeepAliveCount
+#define subscription_core_1__set_subscription_MaxNotifsPerPublish subscription_core_2__set_subscription_MaxNotifsPerPublish
+#define subscription_core_1__set_subscription_MessageSent subscription_core_2__set_subscription_MessageSent
+#define subscription_core_1__set_subscription_MoreNotifications subscription_core_2__set_subscription_MoreNotifications
+#define subscription_core_1__set_subscription_PublishingEnabled subscription_core_2__set_subscription_PublishingEnabled
+#define subscription_core_1__set_subscription_SeqNum subscription_core_2__set_subscription_SeqNum
+#define subscription_core_1__set_subscription_publishInterval subscription_core_2__set_subscription_publishInterval
+#define subscription_core_1__set_subscription_state subscription_core_2__set_subscription_state
+#define subscription_core_1__set_subscription_timer_id subscription_core_2__set_subscription_timer_id
 
 /*--------------------
    OPERATIONS Clause
@@ -130,6 +111,7 @@ extern void subscription_core_1__add_subscription(
    const t_entier4 subscription_core_1__p_priority,
    const constants__t_opcua_duration_i subscription_core_1__p_revPublishInterval,
    const t_entier4 subscription_core_1__p_revLifetimeCount,
+   const t_entier4 subscription_core_1__p_revKeepAliveCount,
    const t_entier4 subscription_core_1__p_revMaxKeepAlive,
    const t_entier4 subscription_core_1__p_maxNotificationsPerPublish,
    const t_bool subscription_core_1__p_publishEnabled,
@@ -137,119 +119,23 @@ extern void subscription_core_1__add_subscription(
    const constants__t_notifRepublishQueue_i subscription_core_1__p_republishQueue,
    const constants__t_monitoredItemQueue_i subscription_core_1__p_monitoredItemQueue,
    const constants__t_timer_id_i subscription_core_1__p_timerId,
-   constants_statuscodes_bs__t_StatusCode_i * const subscription_core_1__StatusCode_service);
-extern void subscription_core_1__decrement_subscription_KeepAliveCounter(
-   const constants__t_subscription_i subscription_core_1__p_subscription);
-extern void subscription_core_1__decrement_subscription_LifetimeCounter(
-   const constants__t_subscription_i subscription_core_1__p_subscription);
+   const constants__t_prioritySubQueue_i subscription_core_1__p_prio_subs_queue,
+   const t_bool subscription_core_1__p_moreNotifs);
+extern void subscription_core_1__check_add_subscription(
+   const constants__t_session_i subscription_core_1__p_session,
+   const constants__t_subscription_i subscription_core_1__p_subscription,
+   const t_entier4 subscription_core_1__p_priority,
+   const t_bool subscription_core_1__p_isModifySub,
+   constants__t_prioritySubQueue_i * const subscription_core_1__p_prio_subs_queue,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core_1__p_StatusCode_service);
 extern void subscription_core_1__delete_subscription(
    const constants__t_subscription_i subscription_core_1__p_subscription);
-extern void subscription_core_1__get_card_session_seq_priority(
-   const constants__t_session_i subscription_core_1__p_session,
-   t_entier4 * const subscription_core_1__p_priority_idx);
-extern void subscription_core_1__get_card_session_seq_subscription(
-   const constants__t_session_i subscription_core_1__p_session,
-   t_entier4 * const subscription_core_1__p_sub_idx);
-extern void subscription_core_1__get_session_publishRequestQueue(
-   const constants__t_session_i subscription_core_1__p_session,
-   t_bool * const subscription_core_1__p_bres,
-   constants__t_publishReqQueue_i * const subscription_core_1__p_publishReqQueue);
-extern void subscription_core_1__get_subscription_KeepAliveCounter(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_entier4 * const subscription_core_1__p_keepAliveCounter);
-extern void subscription_core_1__get_subscription_LifetimeCounter(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_entier4 * const subscription_core_1__p_lifetimeCounter);
-extern void subscription_core_1__get_subscription_MaxNotifsPerPublish(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_entier4 * const subscription_core_1__p_maxNotificationsPerPublish);
-extern void subscription_core_1__get_subscription_MessageSent(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_bool * const subscription_core_1__p_firstMsgSent);
-extern void subscription_core_1__get_subscription_MoreNotifications(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_bool * const subscription_core_1__p_moreNotifs);
-extern void subscription_core_1__get_subscription_PublishingEnabled(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_bool * const subscription_core_1__p_pubEnabled);
-extern void subscription_core_1__get_subscription_SeqNum(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_sub_seq_num_i * const subscription_core_1__p_seqNumToSend);
-extern void subscription_core_1__get_subscription_monitoredItemQueue(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_monitoredItemQueue_i * const subscription_core_1__p_monitoredItemQueue);
-extern void subscription_core_1__get_subscription_notifRepublishQueue(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_notifRepublishQueue_i * const subscription_core_1__p_republishQueue);
-extern void subscription_core_1__get_subscription_priority(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_entier4 * const subscription_core_1__p_priority);
-extern void subscription_core_1__get_subscription_publishInterval(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_opcua_duration_i * const subscription_core_1__p_publishInterval);
-extern void subscription_core_1__get_subscription_state(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_subscriptionState_i * const subscription_core_1__p_state);
-extern void subscription_core_1__get_subscription_timer_id(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_timer_id_i * const subscription_core_1__p_timer_id);
 extern void subscription_core_1__init_session_priority_subscriptions_iterator(
    const constants__t_session_i subscription_core_1__p_session,
    const t_entier4 subscription_core_1__p_prio_idx,
    constants__t_prioritySubQueueIterator_i * const subscription_core_1__p_prio_sub_it);
-extern void subscription_core_1__is_valid_subscription_on_session(
-   const constants__t_session_i subscription_core_1__p_session,
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_bool * const subscription_core_1__is_valid);
-extern void subscription_core_1__log_subscription_request_received(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const t_entier4 subscription_core_1__p_transition);
-extern void subscription_core_1__log_subscription_request_received_invalid_on_session(
-   const constants__t_subscription_i subscription_core_1__p_subscription);
-extern void subscription_core_1__log_subscription_transition(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const constants__t_subscriptionState_i subscription_core_1__p_old_state,
-   const constants__t_subscriptionState_i subscription_core_1__p_new_state,
-   const t_entier4 subscription_core_1__p_transition);
 extern void subscription_core_1__reconfigure_session_priority_subscriptions_queue_last_sub(
    const constants__t_session_i subscription_core_1__p_session,
    const constants__t_subscription_i subscription_core_1__p_sub);
-extern void subscription_core_1__reset_session_publishRequestQueue(
-   const constants__t_session_i subscription_core_1__p_session);
-extern void subscription_core_1__reset_subscription_KeepAliveCounter(
-   const constants__t_subscription_i subscription_core_1__p_subscription);
-extern void subscription_core_1__reset_subscription_LifetimeCounter(
-   const constants__t_subscription_i subscription_core_1__p_subscription);
-extern void subscription_core_1__set_session_publishRequestQueue(
-   const constants__t_session_i subscription_core_1__p_session,
-   const constants__t_publishReqQueue_i subscription_core_1__p_publishReqQueue);
-extern void subscription_core_1__set_subscription_MaxLifetimeAndKeepAliveCount(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const t_entier4 subscription_core_1__p_revLifetimeCount,
-   const t_entier4 subscription_core_1__p_revMaxKeepAlive);
-extern void subscription_core_1__set_subscription_MaxNotifsPerPublish(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const t_entier4 subscription_core_1__p_maxNotificationsPerPublish);
-extern void subscription_core_1__set_subscription_MessageSent(
-   const constants__t_subscription_i subscription_core_1__p_subscription);
-extern void subscription_core_1__set_subscription_MoreNotifications(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const t_bool subscription_core_1__p_moreNotifs);
-extern void subscription_core_1__set_subscription_PublishingEnabled(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const t_bool subscription_core_1__p_pubEnabled);
-extern void subscription_core_1__set_subscription_SeqNum(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const constants__t_sub_seq_num_i subscription_core_1__p_nextSeqNum);
-extern void subscription_core_1__set_subscription_publishInterval(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const constants__t_opcua_duration_i subscription_core_1__p_revPublishInterval);
-extern void subscription_core_1__set_subscription_state(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const constants__t_subscriptionState_i subscription_core_1__p_state,
-   const t_entier4 subscription_core_1__p_transition);
-extern void subscription_core_1__set_subscription_timer_id(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   const constants__t_timer_id_i subscription_core_1__p_timer_id);
 
 #endif

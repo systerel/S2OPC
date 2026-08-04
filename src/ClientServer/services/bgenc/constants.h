@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 28/10/2026 13:18:02
+ Date                 : 03/11/2026 08:33:09
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -648,7 +648,6 @@ extern void constants__INITIALISATION(void);
 #define constants__get_copy_ExpandedNodeId constants_bs__get_copy_ExpandedNodeId
 #define constants__get_copy_UserToken constants_bs__get_copy_UserToken
 #define constants__get_reverse_cast_t_NamespaceIdx constants_bs__get_reverse_cast_t_NamespaceIdx
-#define constants__get_reverse_cast_t_subscription constants_bs__get_reverse_cast_t_subscription
 #define constants__getall_conv_ExpandedNodeId_NodeId constants_bs__getall_conv_ExpandedNodeId_NodeId
 #define constants__is_ClientNodeManagementActive constants_bs__is_ClientNodeManagementActive
 #define constants__is_EventNotifier_SubscribeToEvents constants_bs__is_EventNotifier_SubscribeToEvents
@@ -666,6 +665,7 @@ extern void constants__INITIALISATION(void);
 #define constants__is_t_channel constants_bs__is_t_channel
 #define constants__is_t_channel_config_idx constants_bs__is_t_channel_config_idx
 #define constants__is_t_endpoint_config_idx constants_bs__is_t_endpoint_config_idx
+#define constants__is_t_subscription constants_bs__is_t_subscription
 
 /*---------------------
    Inlined OPERATIONS

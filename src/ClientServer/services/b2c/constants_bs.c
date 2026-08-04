@@ -430,15 +430,9 @@ void constants_bs__get_reverse_cast_t_NamespaceIdx(const constants_bs__t_Namespa
     *constants_bs__p_nsIndexNat = (t_entier4) constants_bs__p_nsIndex;
 }
 
-void constants_bs__get_reverse_cast_t_subscription(const constants_bs__t_subscription_i constants_bs__p_subscription,
-                                                   t_entier4* const constants_bs__p_ind)
+void constants_bs__is_t_subscription(const constants_bs__t_subscription_i constants_bs__p_subscription,
+                                     t_bool* const constants_bs__p_bool)
 {
-    if (constants_bs__p_subscription > 0 && constants_bs__p_subscription <= constants_bs__t_subscription_i_max)
-    {
-        *constants_bs__p_ind = (t_entier4) constants_bs__p_subscription;
-    }
-    else
-    {
-        *constants_bs__p_ind = constants_bs__c_subscription_indet;
-    }
+    *constants_bs__p_bool =
+        (1 <= constants_bs__p_subscription && constants_bs__p_subscription <= constants_bs__t_subscription_i_max);
 }

@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 16/09/2026 08:15:37
+ Date                 : 03/11/2026 08:33:27
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -1047,12 +1047,14 @@ void subscription_mgr__treat_modify_subscription_request(
             subscription_mgr__l_revisedLifetimeCount,
             subscription_mgr__l_revisedMaxKeepAlive,
             subscription_mgr__l_revisedMaxNotificationsPerPublish,
-            subscription_mgr__l_priority);
-         msg_subscription_create_bs__set_msg_modify_subscription_resp_params(subscription_mgr__p_resp_msg,
-            subscription_mgr__l_revisedPublishInterval,
-            subscription_mgr__l_revisedLifetimeCount,
-            subscription_mgr__l_revisedMaxKeepAlive);
-         *subscription_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
+            subscription_mgr__l_priority,
+            subscription_mgr__StatusCode_service);
+         if (*subscription_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
+            msg_subscription_create_bs__set_msg_modify_subscription_resp_params(subscription_mgr__p_resp_msg,
+               subscription_mgr__l_revisedPublishInterval,
+               subscription_mgr__l_revisedLifetimeCount,
+               subscription_mgr__l_revisedMaxKeepAlive);
+         }
       }
       else {
          subscription_core__log_subscription_request_received_invalid_on_session(subscription_mgr__l_sub);

@@ -967,6 +967,7 @@ PROPERTIES
     k_n_NamespaceIndex_max : NAT &
 
     k_n_subscriptionPerSession_max : NAT1 &
+    k_n_subscriptionPerSession_max < MAXINT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -1150,7 +1151,7 @@ PROPERTIES
     c_subscription_indet : t_subscription_i &
     c_subscription_indet /: t_subscription &
     cast_t_subscription : NAT +-> t_subscription_i &
-    1..card(t_subscription_i) = dom(cast_t_subscription) &
+    1..card(t_subscription) = dom(cast_t_subscription) &
     cast_t_subscription : perm(t_subscription) &
 
     t_subscriptionState = t_subscriptionState_i - {c_subscriptionState_indet} &
@@ -1512,11 +1513,13 @@ PROPERTIES
     c_priority_indet = 256 &
     t_priority   = 0..c_priority_max   &
     t_priority_i = 0..c_priority_indet &
+    t_priority <: t_priority_i &
+    c_priority_indet /: t_priority &
 
     t_sub_idx   = 1..k_n_subscriptionPerSession_max &
     t_sub_idx_i = 0..k_n_subscriptionPerSession_max &
 
-    t_prio_idx = 1..k_n_subscriptionPerSession_max &
+    t_prio_idx   = 1..k_n_subscriptionPerSession_max &
     t_prio_idx_i = 0..k_n_subscriptionPerSession_max
 
 ASSERTIONS
@@ -1727,16 +1730,11 @@ OPERATIONS
     END
     ;
 
-    p_ind <-- get_reverse_cast_t_subscription(p_subscription) =
+    p_bool <-- is_t_subscription(p_subscription) =
     PRE
-        p_subscription : t_subscription_i &
-        p_subscription : ran(cast_t_subscription)
+        p_subscription : t_subscription_i
     THEN
-        p_ind :(p_ind : NAT &
-        (p_subscription : ran(cast_t_subscription) =>
-            p_ind = cast_t_subscription~(p_subscription)) &
-        (p_subscription /: ran(cast_t_subscription) =>
-            p_ind = 0))
+        p_bool := bool(p_subscription : t_subscription)
     END
     ;
 

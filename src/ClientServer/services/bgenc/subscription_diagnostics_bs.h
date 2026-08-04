@@ -21,9 +21,9 @@
 
  File Name            : subscription_diagnostics_bs.h
 
- Date                 : 05/10/2026 12:05:11
+ Date                 : 03/11/2026 08:33:46
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 

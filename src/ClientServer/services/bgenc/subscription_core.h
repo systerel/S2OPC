@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 27/10/2026 16:09:50
+ Date                 : 03/11/2026 08:33:26
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -267,7 +267,8 @@ extern void subscription_core__modify_subscription(
    const t_entier4 subscription_core__p_revLifetimeCount,
    const t_entier4 subscription_core__p_revMaxKeepAlive,
    const t_entier4 subscription_core__p_revMaxNotifPerPublish,
-   const t_entier4 subscription_core__p_priority);
+   const t_entier4 subscription_core__p_priority,
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_StatusCode_service);
 extern void subscription_core__receive_publish_request(
    const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_msg_i subscription_core__p_resp_msg,

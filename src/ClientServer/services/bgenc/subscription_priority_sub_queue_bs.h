@@ -21,7 +21,7 @@
 
  File Name            : subscription_priority_sub_queue_bs.h
 
- Date                 : 30/04/2026 16:13:59
+ Date                 : 08/09/2026 15:25:26
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -58,6 +58,9 @@ extern void subscription_priority_sub_queue_bs__allocate_new_prio_queue(
    constants__t_prioritySubQueue_i * const subscription_priority_sub_queue_bs__queue);
 extern void subscription_priority_sub_queue_bs__clear_and_deallocate_prio_queue(
    const constants__t_prioritySubQueue_i subscription_priority_sub_queue_bs__p_queue);
+extern void subscription_priority_sub_queue_bs__get_queue_nb_subs(
+   const constants__t_prioritySubQueue_i subscription_priority_sub_queue_bs__p_queue,
+   t_entier4 * const subscription_priority_sub_queue_bs__p_nb_subs);
 extern void subscription_priority_sub_queue_bs__reconfigure_priority_subscriptions_queue_last_sub(
    const constants__t_prioritySubQueue_i subscription_priority_sub_queue_bs__p_queue,
    const constants__t_subscription_i subscription_priority_sub_queue_bs__p_sub);

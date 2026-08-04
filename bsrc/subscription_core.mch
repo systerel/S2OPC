@@ -47,10 +47,8 @@ DEFINITIONS
     a_maxNotifsPerPublish,
     a_subscription_priority,
     a_session_seq_priority,
-    a_session_seq_subscription,
+    a_session_nb_subscriptions,
     a_session_priority_nb_subs,
-    a_session_priority_min_sub_idx,
-    a_session_priority_next_sub_idx,
     a_subscription_state,
     a_MoreNotifications,
     a_LifetimeCounter,
@@ -107,10 +105,8 @@ DEFINITIONS
 
     a_subscription_priority := {} ||
     a_session_seq_priority := t_session * {{}} ||
-    a_session_seq_subscription := t_session * {{}} ||
-    a_session_priority_nb_subs := t_session * {{}} ||
-    a_session_priority_min_sub_idx := t_session * {{}} ||
-    a_session_priority_next_sub_idx := t_session * {{}} ||
+    a_session_nb_subscriptions := t_session * {0} ||
+    a_session_priority_nb_subs := t_session * {t_prio_idx * {0}} ||
 
     a_subscription_state := {}    ||
 
@@ -125,7 +121,10 @@ DEFINITIONS
     a_notifRepublishQueue := {} ||
     a_monitoredItemQueue := {} ||
     a_publishTimer := {} ||
-    a_nodeToMonitoredItemQueue := {} ||
+
+    s_monitoredItemQueue, a_nodeToMonitoredItemQueue :(
+        a_nodeToMonitoredItemQueue : t_NodeId --> t_monitoredItemQueue &
+        s_monitoredItemQueue = ran(a_nodeToMonitoredItemQueue)) ||
 
     s_monitoredItemPointer := {} ||
     s_monitoredItemId := {} ||
@@ -149,15 +148,14 @@ DEFINITIONS
 
     s_republishQueue := {} ||
     a_republish_notification := {} ||
-    a_notification_seq_num := {} ||
-    notification_republish_iter_queue := c_notifRepublishQueue_indet ||
+    a_notification_seq_num :(a_notification_seq_num : t_notif_msg --> t_sub_seq_num) ||
+
     s_to_iterate_sub_seq_num :(s_to_iterate_sub_seq_num = {}) ||
     s_iterated_sub_seq_num :(s_iterated_sub_seq_num = {}) ||
-
+    notification_republish_iter_queue :(notification_republish_iter_queue : t_notifRepublishQueue) ||
     a_monitored_item_notification_queue := {} ||
     a_notification_queue_notifications := {} ||
 
-    s_monitoredItemQueue := {} ||
     a_defined_monitored_items := {} ||
     mi_queue_it := c_monitoredItemQueue_indet ||
     mi_iterator_it := c_monitoredItemQueueIterator_indet ||
@@ -167,7 +165,7 @@ DEFINITIONS
     ;
 
     d_typing ==
-    s_subscription <: t_subscription &
+    s_subscription <: t_subscription & // set of existing subscriptions
 
     /* Subscription configuration record */
     a_subscription_session : s_subscription --> t_session & // a subscription shall be associated to a session
@@ -182,17 +180,11 @@ DEFINITIONS
     // function associating to a session the sequence of its subscription priorities in increasing order
     a_session_seq_priority : t_session --> iseq(t_priority) &
 
-    // function associating to a session the sequence of its subscriptions
-    a_session_seq_subscription : t_session --> iseq(s_subscription) &
+    // function associating to a session the number of its subscriptions
+    a_session_nb_subscriptions : t_session --> t_sub_idx_i &
 
     // function associating to a session and a priority the number of subscriptions (for this session/priority)
     a_session_priority_nb_subs : t_session --> (t_prio_idx --> t_sub_idx_i) &
-
-    // function associating to a session and a priority its minimum subscription index in a_session_seq_subscription
-    a_session_priority_min_sub_idx : t_session --> (t_prio_idx +-> t_sub_idx) &
-
-    // function associating to a session and a priority the next subscription index in a_session_seq_subscription for a round-robin iteration
-    a_session_priority_next_sub_idx : t_session --> (t_prio_idx +-> t_sub_idx) &
 
     /* Subscription State Machine : state shall be defined (part 4 table 82) */
     a_subscription_state : s_subscription --> t_subscriptionState &
@@ -224,7 +216,7 @@ DEFINITIONS
 
     /* a_retransmissionQueue : s_subscription --> s_notificationMsgQueue */ /* not implemented */
     s_monitoredItemQueue <: t_monitoredItemQueue &
-    a_monitoredItemQueue : s_subscription --> s_monitoredItemQueue &
+    a_monitoredItemQueue : s_subscription >-> s_monitoredItemQueue &
     a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue &
 
     a_publishTimer : s_subscription --> t_timer_id &
@@ -258,14 +250,12 @@ DEFINITIONS
     a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
     a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
 
-    a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer &
+    a_defined_monitored_items : t_monitoredItemQueue <-> t_monitoredItemPointer &
     mi_queue_it : t_monitoredItemQueue_i &
     mi_iterator_it : t_monitoredItemQueueIterator_i &
     nb_monitored_items_it : NAT &
     s_mi_to_iterate_it <: t_monitoredItemPointer_i &
-    s_mi_to_iterate_it <: s_monitoredItemPointer &
     s_mi_iterated_it <: t_monitoredItemPointer_i &
-    s_mi_iterated_it <: s_monitoredItemPointer &
     s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
     card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it
     ;
@@ -410,7 +400,9 @@ ABSTRACT_VARIABLES
     d_variables
 
 INVARIANT
-    d_typing
+    d_typing &
+
+    ran(a_nodeToMonitoredItemQueue) /\ ran(a_monitoredItemQueue) = {}
 
 INITIALISATION
     d_init
@@ -451,7 +443,7 @@ OPERATIONS
     THEN
         p_sub_idx
         :(p_sub_idx : t_sub_idx_i &
-          p_sub_idx = card(a_session_seq_subscription(p_session))
+          p_sub_idx = a_session_nb_subscriptions(p_session)
          )
     END
     ;
@@ -550,13 +542,14 @@ OPERATIONS
         p_session : t_session_i &
         p_session : t_session &
         p_revPublishInterval : t_opcua_duration_i &
+        p_revPublishInterval /= c_opcua_duration_indet &
         p_revLifetimeCount : t_counter &
         p_revLifetimeCount > 0 &
         p_revMaxKeepAlive : t_counter &
         p_revMaxKeepAlive > 0 &
         p_revLifetimeCount >= 3 * p_revMaxKeepAlive & /* part 4 table 86 */
         p_maxNotificationsPerPublish : t_counter &
-        p_publishEnabled = TRUE & /* => no subscription modification for now => refuse publishDisabled */
+        p_publishEnabled : BOOL &
         p_priority : t_priority
     THEN
         /* State table evaluation case (CreateSubscription event: #1, #2, #3) */
@@ -574,58 +567,63 @@ OPERATIONS
             a_maxNotifsPerPublish, a_MessageSent, a_PublishingEnabled, a_SeqNum,
             a_publishRequestQueue, a_notifRepublishQueue,
             a_monitoredItemQueue, a_publishTimer,
-            a_subscription_priority, a_session_seq_priority, a_session_seq_subscription,
-            a_session_priority_nb_subs, a_session_priority_min_sub_idx, a_session_priority_next_sub_idx,
+            a_subscription_priority, a_session_seq_priority,
+            a_session_nb_subscriptions, a_session_priority_nb_subs,
             /* case of e_sc_bad_out_of_memory */
             a_republish_notification, a_notification_seq_num,
             a_defined_monitored_items:(
                 d_typing &
 
+                ran(a_nodeToMonitoredItemQueue) /\ ran(a_monitoredItemQueue) = {} &
+
                 StatusCode_service : t_StatusCode_i &
                 subscription : t_subscription_i &
 
                 (t_monitoredItemQueue /= s_monitoredItemQueue$0 &
-                 t_publishReqQueue /= s_publishReqQueue$0 &
                  t_notifRepublishQueue /= s_republishQueue$0
                 =>
                     /* Transition #1 + #3 */
-                    (   StatusCode_service = e_sc_ok &
+                    (   StatusCode_service = e_sc_ok
+                        =>
                         subscription : t_subscription - s_subscription$0 &
                         s_subscription = s_subscription$0 \/ {subscription} &
-                        a_subscription_session (subscription) = p_session
-                    ) or
+                        a_subscription_session = a_subscription_session$0 <+ {subscription |-> p_session}
+                    ) &
                     /* Transition #1 + #2 */
                     /* to deal with indeterminated timer creation for a_publishTimer */
-                    (   StatusCode_service = e_sc_bad_out_of_memory &
+                    (   StatusCode_service : {e_sc_bad_too_many_subscriptions, e_sc_bad_out_of_memory}
+                        =>
                         subscription = c_subscription_indet &
-                        s_subscription = s_subscription$0
+                        s_subscription = s_subscription$0 &
+                        a_subscription_session = a_subscription_session$0
                     )
                 ) &
                 /* Transition #1 + #2 */
                 (not(t_monitoredItemQueue /= s_monitoredItemQueue$0 &
-                     t_publishReqQueue /= s_publishReqQueue$0 &
                      t_notifRepublishQueue /= s_republishQueue$0)
                 =>
                     StatusCode_service = e_sc_bad_out_of_memory &
                     subscription = c_subscription_indet &
-                    s_subscription = s_subscription$0
+                    s_subscription = s_subscription$0 &
+                    a_subscription_session = a_subscription_session$0
                 )
             )
         END
     END
     ;
 
-
-    modify_subscription (p_subscription,
-                         p_revPublishInterval,
-                         p_revLifetimeCount,
-                         p_revMaxKeepAlive,
-                         p_revMaxNotifPerPublish,
-                         p_priority) =
+    p_StatusCode_service <-- modify_subscription
+       (p_subscription,
+        p_revPublishInterval,
+        p_revLifetimeCount,
+        p_revMaxKeepAlive,
+        p_revMaxNotifPerPublish,
+        p_priority) =
     PRE
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
         p_revPublishInterval : t_opcua_duration_i &
+        p_revPublishInterval /= c_opcua_duration_indet &
         p_revLifetimeCount : t_counter &
         p_revLifetimeCount > 0 &
         p_revMaxKeepAlive : t_counter &
@@ -635,11 +633,38 @@ OPERATIONS
         p_priority : t_priority_i &
         p_priority : t_priority
     THEN
-        a_publishInterval (p_subscription) := p_revPublishInterval ||
-        a_lifetimeExpCount (p_subscription) := p_revLifetimeCount  ||
-        a_keepAliveExpCount (p_subscription) := p_revMaxKeepAlive  ||
-        a_maxNotifsPerPublish (p_subscription) := p_revMaxNotifPerPublish ||
-        a_LifetimeCounter (p_subscription) := p_revLifetimeCount
+        p_StatusCode_service ,
+        a_publishInterval,
+        a_lifetimeExpCount,
+        a_keepAliveExpCount,
+        a_maxNotifsPerPublish,
+        a_LifetimeCounter,
+        a_subscription_priority,
+        a_session_seq_priority,
+        a_session_nb_subscriptions
+        :(
+            p_StatusCode_service : t_StatusCode_i &
+            a_session_nb_subscriptions : t_session --> t_sub_idx_i &
+
+            (p_StatusCode_service = e_sc_ok
+             =>
+             a_publishInterval       = a_publishInterval$0       <+ {p_subscription |-> p_revPublishInterval   } &
+             a_lifetimeExpCount      = a_lifetimeExpCount$0      <+ {p_subscription |-> p_revLifetimeCount     } &
+             a_keepAliveExpCount     = a_keepAliveExpCount$0     <+ {p_subscription |-> p_revMaxKeepAlive      } &
+             a_maxNotifsPerPublish   = a_maxNotifsPerPublish$0   <+ {p_subscription |-> p_revMaxNotifPerPublish} &
+             a_LifetimeCounter       = a_LifetimeCounter$0       <+ {p_subscription |-> p_revLifetimeCount     } &
+             a_subscription_priority = a_subscription_priority$0 <+ {p_subscription |-> p_priority             } &
+             a_session_seq_priority  : t_session --> iseq(t_priority)) &
+            (p_StatusCode_service /= e_sc_ok
+             =>
+             a_publishInterval       = a_publishInterval$0       &
+             a_lifetimeExpCount      = a_lifetimeExpCount$0      &
+             a_keepAliveExpCount     = a_keepAliveExpCount$0     &
+             a_maxNotifsPerPublish   = a_maxNotifsPerPublish$0   &
+             a_LifetimeCounter       = a_LifetimeCounter$0       &
+             a_subscription_priority = a_subscription_priority$0 &
+             a_session_seq_priority  = a_session_seq_priority$0  )
+         )
     END
     ;
 
@@ -648,56 +673,80 @@ OPERATIONS
         p_subscription : t_subscription_i &
         p_subscription : s_subscription
     THEN
-        s_subscription := s_subscription - {p_subscription} ||
+        s_subscription          := s_subscription - {p_subscription}            ||
+        a_subscription_session  := {p_subscription} <<| a_subscription_session  ||
+        a_publishInterval       := {p_subscription} <<| a_publishInterval       ||
+        a_lifetimeExpCount      := {p_subscription} <<| a_lifetimeExpCount      ||
+        a_keepAliveExpCount     := {p_subscription} <<| a_keepAliveExpCount     ||
+        a_maxNotifsPerPublish   := {p_subscription} <<| a_maxNotifsPerPublish   ||
+        a_subscription_state    := {p_subscription} <<| a_subscription_state    ||
+        a_MoreNotifications     := a_MoreNotifications - {p_subscription}       ||
+        a_LifetimeCounter       := {p_subscription} <<| a_LifetimeCounter       ||
+        a_KeepAliveCounter      := {p_subscription} <<| a_KeepAliveCounter      ||
+        a_MessageSent           := a_MessageSent - {p_subscription}             ||
+        a_PublishingEnabled     := a_PublishingEnabled - {p_subscription}       ||
+        a_SeqNum                := {p_subscription} <<| a_SeqNum                ||
+        a_notifRepublishQueue   := {p_subscription} <<| a_notifRepublishQueue   ||
+        a_monitoredItemQueue    := {p_subscription} <<| a_monitoredItemQueue    ||
+        a_publishTimer          := {p_subscription} <<| a_publishTimer          ||
+        a_subscription_priority := {p_subscription} <<| a_subscription_priority ||
 
-        a_subscription_session := {p_subscription} <<| a_subscription_session ||
-        a_publishInterval := {p_subscription} <<| a_publishInterval ||
-        a_lifetimeExpCount := {p_subscription} <<| a_lifetimeExpCount  ||
-        a_keepAliveExpCount := {p_subscription} <<| a_keepAliveExpCount ||
-        a_maxNotifsPerPublish := {p_subscription} <<| a_maxNotifsPerPublish ||
+        a_session_seq_priority :: t_session --> iseq(t_priority) ||
+        a_session_nb_subscriptions :: t_session --> t_sub_idx_i ||
 
-        a_subscription_state := {p_subscription} <<| a_subscription_state ||
-        a_MoreNotifications := a_MoreNotifications - {p_subscription} ||
-        a_LifetimeCounter := {p_subscription} <<| a_LifetimeCounter ||
-        a_KeepAliveCounter := {p_subscription} <<| a_KeepAliveCounter ||
-        a_MessageSent := a_MessageSent - {p_subscription}               ||
-        a_PublishingEnabled := a_PublishingEnabled - {p_subscription}   ||
-        a_SeqNum := {p_subscription} <<| a_SeqNum ||
+        /* Queues deleted */
+        a_monitored_item_notification_queue :: t_monitoredItemPointer >+> t_notificationQueue ||
+        a_notification_queue_notifications  :: t_notificationQueue <-> t_notificationData ||
 
-        /* Queues emptied : publish responses should be sent if remaining */
-        a_monitored_item_notification_queue := a_monitoredItemSubs~[{p_subscription}] <<| a_monitored_item_notification_queue ||
-        a_notification_queue_notifications := a_monitored_item_notification_queue[a_monitoredItemSubs~[{p_subscription}]] <<|a_notification_queue_notifications ||
+        a_defined_monitored_items :: t_monitoredItemQueue <-> t_monitoredItemPointer ||
 
         /* Republish queue deleted */
         a_republish_notification := a_republish_notification |>> {a_notifRepublishQueue(p_subscription)} ||
-        a_notification_seq_num :=
-          dom(a_republish_notification |> {a_notifRepublishQueue(p_subscription)}) <<| a_notification_seq_num ||
+        a_notification_seq_num :: t_notif_msg --> t_sub_seq_num ||
 
         s_republishQueue := s_republishQueue - {a_notifRepublishQueue(p_subscription)} ||
-        a_notifRepublishQueue := {p_subscription} <<| a_notifRepublishQueue ||
 
-        /* Remove monitoredItems */
-        LET s_removedMonitoredItemPointer BE
-            s_removedMonitoredItemPointer = a_defined_monitored_items[{a_monitoredItemQueue (p_subscription)}]
+        LET
+            l_queue,
+            s_removedMonitoredItemPointer
+        BE
+            l_queue = a_monitoredItemQueue (p_subscription) &
+            s_removedMonitoredItemPointer = a_defined_monitored_items[{l_queue}]
         IN
-            s_monitoredItemPointer := s_monitoredItemPointer - s_removedMonitoredItemPointer ||
-            s_monitoredItemId := s_monitoredItemId - a_monitoredItemId[s_removedMonitoredItemPointer] ||
-            a_monitoredItemId := a_monitoredItemId - (s_removedMonitoredItemPointer <| a_monitoredItemId) ||
-            a_monitoredItemSubs := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
-            a_monitoredItemNodeId := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
-            a_monitoredItemMonitMode := s_removedMonitoredItemPointer <<| a_monitoredItemMonitMode ||
-            a_monitoredItemQueueSize := s_removedMonitoredItemPointer <<| a_monitoredItemQueueSize ||
+            s_monitoredItemQueue := s_monitoredItemQueue - {l_queue} ||
+            IF s_removedMonitoredItemPointer /= {} THEN
+                /* monitored item queue iterator */
+                mi_queue_it           := c_monitoredItemQueue_indet ||
+                mi_iterator_it        := c_monitoredItemQueueIterator_indet ||
+                nb_monitored_items_it := 0 ||
+                s_mi_to_iterate_it    := {} ||
+                s_mi_iterated_it      := {} ||
 
-            s_monitoredItemQueue := s_monitoredItemQueue - {a_monitoredItemQueue(p_subscription)} ||
-            a_monitoredItemQueue := {p_subscription} <<| a_monitoredItemQueue ||
-
-            /* Remove subscription monitoredItem queue and all removed monitored items from other queues (i.e.:nodeId to mi queues) */
-            a_defined_monitored_items :=
-             {a_monitoredItemQueue (p_subscription)}
-              <<| a_defined_monitored_items |>>
-             s_removedMonitoredItemPointer
-        END ||
-        a_publishTimer := {p_subscription} <<| a_publishTimer
+                /* Remove monitoredItems */
+                s_monitoredItemPointer     := s_monitoredItemPointer - s_removedMonitoredItemPointer ||
+                s_monitoredItemId          := s_monitoredItemId - a_monitoredItemId[s_removedMonitoredItemPointer] ||
+                a_monitoredItemId          := s_removedMonitoredItemPointer <<| a_monitoredItemId ||
+                a_monitoredItemSubs        := s_removedMonitoredItemPointer <<| a_monitoredItemSubs ||
+                a_monitoredItemNodeId      := s_removedMonitoredItemPointer <<| a_monitoredItemNodeId ||
+                a_monitoredItemAttributeId := s_removedMonitoredItemPointer <<| a_monitoredItemAttributeId ||
+                a_monitoredItemMonitMode   := s_removedMonitoredItemPointer <<| a_monitoredItemMonitMode ||
+                a_monitoredItemQueueSize   := s_removedMonitoredItemPointer <<| a_monitoredItemQueueSize
+            ELSE
+                mi_queue_it,
+                mi_iterator_it,
+                nb_monitored_items_it,
+                s_mi_to_iterate_it,
+                s_mi_iterated_it
+                :(mi_queue_it : t_monitoredItemQueue_i &
+                  mi_iterator_it : t_monitoredItemQueueIterator_i &
+                  nb_monitored_items_it : NAT &
+                  s_mi_to_iterate_it <: t_monitoredItemPointer &
+                  s_mi_iterated_it <: t_monitoredItemPointer &
+                  s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
+                  card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it
+                 )
+            END
+        END
     END
     ;
 

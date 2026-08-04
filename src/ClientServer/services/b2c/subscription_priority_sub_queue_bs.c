@@ -84,6 +84,16 @@ void subscription_priority_sub_queue_bs__add_subscription_to_prio_queue(
     *subscription_priority_sub_queue_bs__bres = (res != 0);
 }
 
+void subscription_priority_sub_queue_bs__get_queue_nb_subs(
+    const constants__t_prioritySubQueue_i subscription_priority_sub_queue_bs__p_queue,
+    t_entier4* const subscription_priority_sub_queue_bs__p_nb_subs)
+{
+    SOPC_ASSERT(NULL != subscription_priority_sub_queue_bs__p_queue);
+    uint32_t length = SOPC_SLinkedList_GetLength(subscription_priority_sub_queue_bs__p_queue);
+    SOPC_ASSERT(length <= INT32_MAX);
+    *subscription_priority_sub_queue_bs__p_nb_subs = (int32_t) length;
+}
+
 void subscription_priority_sub_queue_bs__remove_subscription_from_queue(
     const constants__t_prioritySubQueue_i subscription_priority_sub_queue_bs__p_queue,
     const constants__t_subscription_i subscription_priority_sub_queue_bs__p_sub)

@@ -668,7 +668,7 @@ PROPERTIES
     c_subscription_indet : t_subscription_i &
     c_subscription_indet /: t_subscription &
     cast_t_subscription : NAT +-> t_subscription_i &
-    1..card(t_subscription_i) = dom(cast_t_subscription) &
+    1..card(t_subscription) = dom(cast_t_subscription) &
     cast_t_subscription : perm(t_subscription) &
 
     t_notif_msg <: t_notif_msg_i &
@@ -1085,16 +1085,11 @@ OPERATIONS
         p_subscription := cast_t_subscription(p_ind)
     END;
 
-    p_ind <-- get_reverse_cast_t_subscription(p_subscription) =
+    p_bool <-- is_t_subscription(p_subscription) =
     PRE
-        p_subscription : t_subscription_i &
-        p_subscription : ran(cast_t_subscription)
+        p_subscription : t_subscription_i
     THEN
-        p_ind :(p_ind : NAT &
-        (p_subscription : ran(cast_t_subscription) =>
-            p_ind = cast_t_subscription~(p_subscription)) &
-        (p_subscription /: ran(cast_t_subscription) =>
-            p_ind = 0))
+        p_bool := bool(p_subscription : t_subscription)
     END
     ;
 

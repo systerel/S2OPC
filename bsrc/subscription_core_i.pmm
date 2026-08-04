@@ -1,0 +1,120 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+THEORY User_Pass IS
+Operation(create_subscription) & Pattern(a : b +-> c\/d)
+    & ff(0) & mp & pp(rp.1 | 5);
+Operation(modify_subscription) & Pattern(a : b)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(modify_subscription) & Pattern(a<<|b<+{c} = b<+{c})
+    & ff(0) & dd & pp(rp.0 | 1);
+Operation(close_subscription) & Pattern(a-{b} = a-{c})
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(close_subscription) & Pattern(a-b = a-c[d])
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(close_subscription) & Pattern(a-b[c] = a-b[d])
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(close_subscription) & Pattern(a<<|b = c[d]<<|b)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(close_subscription) & Pattern(a-b = a)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(close_subscription) & Pattern(a-b[c] = a)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(close_subscription) & Pattern(a<<|b = b)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(refinement_of_get_fresh_subscription) & Pattern(card(a)+b<=card(c))
+    & ff(0) & dd & pr(Tac(th_variant));
+Operation(refinement_of_get_fresh_subscription)
+    & ff(0) & pp(rt.1 | 5);
+Operation(refinement_of_local_close_subscription) & Pattern(card(a\/b) = c)
+    & ff(0) & pr(Tac(th_card_pmm));
+Operation(refinement_of_local_close_subscription) & Pattern(a-{b} = c-d[e])
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred; SimplifyRelFonXY) & mp & pp(rp.1 | 5);
+Operation(refinement_of_local_close_subscription) & Pattern({a}<<|b = c\/d<<|e)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred; SimplifyRelFonXY) & mp & pp(rp.1 | 5);
+Operation(refinement_of_local_close_subscription) & Pattern(a|>>{b} = a|>>{c})
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred; SimplifyRelFonXY);
+Operation(refinement_of_local_close_subscription) & Pattern(a-{b} = a-{c})
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred; SimplifyRelFonXY);
+Operation(refinement_of_local_close_subscription) & Pattern(a-b = a-c[d])
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(refinement_of_local_close_subscription) & Pattern(a-b[c] = a-b[d])
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(refinement_of_local_close_subscription) & Pattern(a<<|b = c[d]<<|b)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(refinement_of_local_close_subscription) & Pattern(a-b = a)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(refinement_of_local_close_subscription) & Pattern(a-b[c] = a)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(refinement_of_local_close_subscription) & Pattern(a<<|b = b)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(refinement_of_local_close_subscription) & Pattern(a = b)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(refinement_of_local_close_subscription) & Pattern(a = a-b[c])
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(refinement_of_local_close_subscription) & Pattern(a = b[c]<<|a)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp);
+Operation(create_subscription) & Pattern(a<+{b} : c\/d +-> e\/f)
+    & ff(0) & mp & pp(rp.1 | 5) & pr;
+Operation(modify_subscription) & Pattern(a = b<<|a<+{c})
+    & ff(0) & dd(0) & eh(p_session$1,_h,Goal) & pr(Tac(th_simp_pmm));
+Operation(modify_subscription) & Pattern(a = b<<|a<+{c})
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp; th_eh_pred) & dd & pr(Tac(th_simp_pmm));
+Operation(modify_subscription) & Pattern(a = b)
+    & ff(0) & dd(0) & ah(p_subscription : dom(a_subscription_session$1)) & pr & pp(rt.1 | 20);
+Operation(modify_subscription) & Pattern(a = b<<|a<+{c})
+    & ff(0) & dd(0) & pr(Tac(th_simp_pmm));
+Operation(close_subscription) & Pattern(a = b)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+Operation(close_subscription) & Pattern(a = a-b[c])
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+Operation(close_subscription) & Pattern(a = b[c]<<|a)
+    & ff(0) & ar(PatchProverB0; th_eh_hyp_loc; SUB; th_simp) & dd(0) & pr(Tac(th_eh_pred; th_simp));
+Operation(close_subscription) & Pattern(card(a\/b)<=c)
+    & ff(0) & dd & eh(card(s_mi_to_iterate_it$2\/s_mi_iterated_it$2),_h,Goal) & pr;
+Operation(refinement_of_local_close_subscription) & Pattern(card(a)+b<=card(c))
+    & ff(0) & dd & pr(Tac(th_variant));
+Operation(refinement_of_local_close_subscription) & Pattern(a-b\/(c\/b) = d[{e}])
+    & ff(0) & dd & pr(Tac(th_invariant));
+Operation(modify_subscription) & Pattern(a = b)
+    & ff(0) & mp & dc(p_subscription : a_MoreNotifications$1) & pr & pr
+END
+&
+
+THEORY th_card_pmm IS
+
+    binhyp(b: a) &
+    blvar(d) &
+    d\ (a,b)
+    =>
+    a-{b}\/(c\/{b}) == a\/c
+
+END
+&
+
+THEORY th_simp_pmm IS
+
+    binhyp(b: c +-> d) &
+    a: dom(b) &
+    blvar(e) &
+    e\ (a,b)
+    =>
+    {a}<<|b<+{a|->b(a)} == b
+
+END

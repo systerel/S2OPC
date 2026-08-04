@@ -24,29 +24,22 @@ SEES
     constants
 
 ABSTRACT_VARIABLES
-    s_prioritySubQueue,
     a_prio_queue_defined_subscriptions
 
 INVARIANT
-    s_prioritySubQueue <: t_prioritySubQueue &
-    a_prio_queue_defined_subscriptions : s_prioritySubQueue <-> t_subscription &
-    !prioSubQueue.(prioSubQueue : s_prioritySubQueue
-                   =>
-                   {prioSubQueue} <| a_prio_queue_defined_subscriptions /= {})
+    a_prio_queue_defined_subscriptions : t_prioritySubQueue <-> t_subscription
 
 INITIALISATION
-    s_prioritySubQueue := {} ||
-    a_prio_queue_defined_subscriptions := {}
+    a_prio_queue_defined_subscriptions :(a_prio_queue_defined_subscriptions = {})
 
 OPERATIONS
-
 
     bres, queue <-- allocate_new_prio_queue (p_first_sub) =
     PRE
         p_first_sub : t_subscription_i &
         p_first_sub : t_subscription
     THEN
-        IF s_prioritySubQueue = t_prioritySubQueue
+        IF dom(a_prio_queue_defined_subscriptions) = t_prioritySubQueue
         THEN
             bres := FALSE ||
             queue := c_prioritySubQueue_indet
@@ -54,9 +47,8 @@ OPERATIONS
             ANY l_queue WHERE
                 l_queue : t_prioritySubQueue_i &
                 l_queue : t_prioritySubQueue &
-                l_queue /: s_prioritySubQueue
+                l_queue /: dom(a_prio_queue_defined_subscriptions)
             THEN
-                s_prioritySubQueue := s_prioritySubQueue \/ {l_queue} ||
                 a_prio_queue_defined_subscriptions := a_prio_queue_defined_subscriptions \/ {l_queue |-> p_first_sub} ||
                 queue := l_queue ||
                 bres := TRUE
@@ -68,9 +60,11 @@ OPERATIONS
     clear_and_deallocate_prio_queue (p_queue) =
     PRE
         p_queue : t_prioritySubQueue_i &
-        p_queue : s_prioritySubQueue
+        p_queue : t_prioritySubQueue &
+        /* Last element removed through clear_and_deallocate_prio_queue */
+        card(a_prio_queue_defined_subscriptions[{p_queue}]) = 1
     THEN
-        s_prioritySubQueue := s_prioritySubQueue - {p_queue}
+        a_prio_queue_defined_subscriptions := {p_queue} <<| a_prio_queue_defined_subscriptions
     END
     ;
 
@@ -81,12 +75,10 @@ OPERATIONS
         p_sub : t_subscription_i &
         p_sub : t_subscription
     THEN
-        /* TODO: add invariant in parent to guarantee p_queue : s_prioritySubQueue as precondition ? */
         bres, a_prio_queue_defined_subscriptions :
         (bres : BOOL &
          a_prio_queue_defined_subscriptions : t_prioritySubQueue <-> t_subscription &
          (bres = TRUE =>
-           p_queue : s_prioritySubQueue &
            a_prio_queue_defined_subscriptions = a_prio_queue_defined_subscriptions$0 \/ {p_queue |-> p_sub}) &
          (bres = FALSE => a_prio_queue_defined_subscriptions = a_prio_queue_defined_subscriptions$0)
         )
@@ -99,16 +91,10 @@ OPERATIONS
         p_queue : t_prioritySubQueue &
         p_sub : t_subscription_i &
         p_sub : t_subscription &
-        /* Last element always removed through clear_and_deallocate_prio_queue */
-        a_prio_queue_defined_subscriptions /= {p_queue |-> p_sub}
+        /* Last element removed through clear_and_deallocate_prio_queue */
+        card(a_prio_queue_defined_subscriptions[{p_queue}]) > 1
     THEN
-        /* TODO: add invariant in parent to guarantee p_queue : s_prioritySubQueue as precondition ? */
-        a_prio_queue_defined_subscriptions :
-        (a_prio_queue_defined_subscriptions : t_prioritySubQueue <-> t_subscription &
-         (p_queue : s_prioritySubQueue =>
-           a_prio_queue_defined_subscriptions = a_prio_queue_defined_subscriptions$0 - {p_queue |-> p_sub}) &
-         (p_queue /: s_prioritySubQueue => a_prio_queue_defined_subscriptions = a_prio_queue_defined_subscriptions$0)
-        )
+        a_prio_queue_defined_subscriptions := a_prio_queue_defined_subscriptions - {p_queue |-> p_sub}
     END
     ;
 
@@ -120,6 +106,16 @@ OPERATIONS
         p_sub : t_subscription
     THEN
         skip /* Remove and add to tail */
+    END
+    ;
+
+    /* Get the number of subscriptions in a queue */
+    p_nb_subs <-- get_queue_nb_subs (p_queue) =
+    PRE
+        p_queue : t_prioritySubQueue_i
+    THEN
+        p_nb_subs :(p_nb_subs : t_sub_idx_i &
+                    p_nb_subs = card(a_prio_queue_defined_subscriptions[{p_queue}]))
     END
 
 END

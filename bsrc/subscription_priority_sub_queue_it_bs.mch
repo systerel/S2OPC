@@ -68,6 +68,7 @@ OPERATIONS
         iterator
         :(prio_sub_queue_it : t_prioritySubQueue_i &
           prio_sub_iterator_it : t_prioritySubQueueIterator_i &
+          nb_subscriptions_it : NAT &
           s_prio_sub_to_iterate_it <: t_subscription &
           s_prio_sub_iterated_it <: t_subscription &
           iterator : t_prioritySubQueueIterator_i &
@@ -95,8 +96,8 @@ OPERATIONS
             l_subscription : s_prio_sub_to_iterate_it
         THEN
             p_subscription := l_subscription ||
-            s_prio_sub_to_iterate_it := s_prio_sub_to_iterate_it - {p_subscription} ||
-            s_prio_sub_iterated_it := s_prio_sub_to_iterate_it \/ {p_subscription} ||
+            s_prio_sub_to_iterate_it := s_prio_sub_to_iterate_it - {l_subscription} ||
+            s_prio_sub_iterated_it := s_prio_sub_iterated_it \/ {l_subscription} ||
             p_continue,
             prio_sub_iterator_it,
             p_iterator_updated :(

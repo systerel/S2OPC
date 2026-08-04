@@ -1,0 +1,328 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+THEORY User_Pass IS
+Operation(Initialisation) & Pattern(ran(a<|b) = {c})
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(Initialisation) & Pattern(a*{b} : a +-> (c --> d))
+    & ff(0) & dd & mp(Tac(th_eh_ident; th_typage));
+Operation(Initialisation) & Pattern((a*b)(c) = d(c)|>e)
+    & ff(0) & ss & eh(t_priority,_h,Goal) & pp(rp.0 | 10);
+Operation(is_valid_subscription_on_session) & Pattern(bool(a = b) = bool(c : d))
+    & ff(0) & eh(a_subscription_session,_h,Goal) & ah(dom(a_subscription_session_i$1) = t_subscription_i) & ah(a_subscription_session_i$1 : t_subscription_i +-> t_session_i) & ah(t_session <: t_session_i) & ah(t_subscription <: t_subscription_i) & pp(rp.0 | 10);
+Operation(set_subscription_session) & Pattern(a<+b|>c = d<+{e})
+    & ff(0) & eh(a_subscription_session,_h,Goal) & dd & pp(rt.0 | 10);
+Operation(set_card_session_seq_subscription) & Pattern(a<|(b<+c) = d<+{e})
+    & ff(0) & dd(0) & eh(a_session_nb_subscriptions,_h,Goal) & pp(rt.0 | 10);
+Operation(decrease_card_session_seq_subscription) & Pattern(a<|(b<+c) : a +-> d)
+    & ff(0) & mp & ah(p_session : dom(a_session_nb_subscriptions_i$1)) & ah(a_session_nb_subscriptions_i$1 : t_session_i +-> t_sub_idx_i) & ah(1<=a_session_nb_subscriptions_i$1(p_session)) & eh(t_sub_idx_i,_h,Goal) & pp(rp.0 | 10);
+Operation(getall_session_seq_priority) & Pattern(a(b)(c) = d)
+    & ff(0) & eh(a_session_seq_priority(p_session),_h,Goal) & ah(dom(a_session_seq_priority_i$1) = t_session_i) & ah(a_session_seq_priority_i$1 : t_session_i +-> (t_prio_idx_i --> t_priority_i)) & ah(a_session_seq_priority_i$1 : t_session_i +-> (t_prio_idx_i --> t_priority_i)) & eh(t_priority,_h,Goal) & eh(c_priority_indet,_h,Goal) & eh(t_priority_i,_h,Goal) & pp(rp.0 | 10);
+Operation(get_session_priority_idx) & Pattern(a(b)(c) = (d)~(c))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(get_session_priority_idx) & Pattern(a(b)(c) = d)
+    & ff(0) & eh((a_session_seq_priority(p_session))~,_h,Goal) & ah(dom(a_session_priority_idx_i$1) = t_session_i) & ah(a_session_priority_idx_i$1 : t_session_i +-> (t_priority_i --> t_prio_idx_i)) & eh(t_prio_idx,_h,Goal) & eh(t_prio_idx_i,_h,Goal) & ah(1<=k_n_subscriptionPerSession_max) & ah(k_n_subscriptionPerSession_max : INTEGER) & pp(rp.0 | 10);
+Operation(del_subscription) & Pattern((a)~[{TRUE}] = b-{c})
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(del_subscription) & Pattern(a<+b|>c = {d}<<|e)
+    & ff(0) & dd(0) & eh(a_subscription_session,_h,Goal) & pp(rt.1 | 10);
+Operation(del_subscription) & Pattern({a}<<|b : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(get_subscription_priority) & Pattern(a(b) = c(b))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_priority) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(get_subscription_publishInterval) & Pattern(a(b) = c(b))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_publishInterval) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_timer_id) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(get_subscription_timer_id) & Pattern(a(b) = c(b))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_state) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_MoreNotifications) & Pattern((a)~[{TRUE}] = b-{c})
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_MaxLifetimeAndKeepAliveCount) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_LifetimeAndKeepAliveCounter) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(reset_subscription_LifetimeCounter) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(reset_subscription_KeepAliveCounter) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_MaxNotifsPerPublish) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(setreset_subscription_MessageSent) & Pattern((a)~[{TRUE}] = b-{c})
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_PublishingEnabled) & Pattern((a)~[{TRUE}] = b-{c})
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_SeqNum) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(get_subscription_SeqNum) & Pattern(a(b) = c(b))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(reset_session_publishRequestQueue) & Pattern(a<|b|>>{c} = {d}<<|e)
+    & ff(0) & dd & eh(a_publishRequestQueue,_h,Goal) & pp(rt.1 | 10);
+Operation(set_session_publishRequestQueue) & Pattern(a<|b|>>{c} = d<+{e})
+    & ff(0) & dd(0) & eh(a_publishRequestQueue,_h,Goal) & pp(rt.1 | 10);
+Operation(get_session_publishRequestQueue) & Pattern(a(b) = c(b))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(get_session_publishRequestQueue) & Pattern(bool(not(a)) = bool(b : c))
+    & ff(0) & dd & pp(rt.1 | 10);
+Operation(get_subscription_notifRepublishQueue) & Pattern(a(b) = c(b))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_notifRepublishQueue) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(get_subscription_monitoredItemQueue) & Pattern(a(b) = c(b))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(set_subscription_monitoredItemQueue) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Operation(Initialisation) & Pattern((a(b))~ = c(b)|>d)
+    & ff(0) & eh(t_prio_idx,_h,Goal) & ss & dd & pp(rt.1 | 10);
+Operation(Initialisation) & Pattern((a*b)(c) = d(c)|>e)
+    & ff(0) & dd(0) & ss & pp(rt.1 | 10);
+Operation(insert_session_seq_priority) & Pattern(a<+{b} : c +-> d)
+    & ff(0) & mp & eh(a_session_nb_priorities_i$1(p_session),_h,Goal) & eh(t_prio_idx_i,_h,Goal) & ah(dom(a_session_seq_priority(p_session)) <: t_prio_idx) & pr & pp(rt.1 | 10);
+Operation(insert_session_seq_priority) & Pattern((a<+b)(c) = card(dom(d)))
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+Operation(insert_session_seq_priority) & Pattern((a(b))~ = c(b)|>d)
+    & ff(0) & dd & dc(session = p_session) & mp & eh((a_session_seq_priority(p_session))~,_h,Goal) & pp(rt.1 | 10) & pr;
+Operation(swap_session_seq_priority) & Pattern( -a<=b(c)(d))
+    & ff(0) & dd & pr(Tac(th_ineg));
+Operation(swap_session_seq_priority) & Pattern((a<+b)(c) = d(c)|>e)
+    & ff(0) & dd & dc(session = p_session) & mp & eh(a_session_seq_priority(p_session),_h,Goal) & ah(p_priority_idx1 : dom(a_session_seq_priority_i$1(p_session)|>t_priority)) & pp(rt.1 | 10) & dd & eh(256,_h,Goal) & ah(not(c_priority_indet : t_priority)) & mp & dd & ar(th_raf_fct) & pr;
+Operation(decrease_card_session_seq_subscription) & Pattern(a<|(b<+c) = d<+{e})
+    & ff(0) & mp & ar(th_eh_ident) & ah((t_session<|a_session_nb_subscriptions_i$1)(p_session) = a_session_nb_subscriptions_i$1(p_session)) & pr & dd & eh((t_session<|a_session_nb_subscriptions_i$1)(p_session)) & ah(p_session : t_session) & ah(p_session : dom(a_session_nb_subscriptions_i$1)) & ah(a_session_nb_subscriptions_i$1 : t_session_i +-> t_sub_idx_i) & pp(rp.0 | 10);
+Operation(decrease_card_session_seq_subscription) & Pattern(a<|(b<+c) = d)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+Operation(decrease_card_session_seq_subscription) & Pattern(a<|b = c<+{d})
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+Operation(getall_session_seq_priority) & Pattern( -a<=b(c)(d))
+    & ff(0) & dd & pr(Tac(th_ineg));
+Operation(get_session_seq_priority) & Pattern( -a<=b(c)(d))
+    & ff(0) & dd & pr(Tac(th_ineg));
+Operation(get_session_priority_idx) & Pattern(a(b)(c)<=d)
+    & ff(0) & dd & pr(Tac(th_ineg));
+Operation(get_session_priority_idx) & Pattern( -a<=b(c)(d))
+    & ff(0) & dd & pr(Tac(th_ineg));
+Operation(get_subscription_state) & Pattern(a(b) = c(b))
+    & ff(0) & dd & pr(Tac(th_raf_fct));
+Operation(get_subscription_LifetimeCounter) & Pattern(a(b) = c(b))
+    & ff(0) & dd & pr(Tac(th_raf_fct));
+Operation(get_subscription_KeepAliveCounter) & Pattern(a(b) = c(b))
+    & ff(0) & dd & pr(Tac(th_raf_fct));
+Operation(get_subscription_MaxNotifsPerPublish) & Pattern(a(b) = c(b))
+    & ff(0) & dd & pr(Tac(th_raf_fct));
+Operation(remove_session_seq_priority) & Pattern((a<+b)(c) = d(c)|>e)
+    & ff(0) & dd & eh(a_session_seq_priority(p_session),_h,Goal) & dc(session = p_session) & ss & pp(rt.1 | 10) & pr;
+Operation(insert_session_seq_priority) & Pattern((a<+b)(c) = d(c)|>e)
+    & ff(0) & dd & eh(a_session_seq_priority(p_session),_h,Goal) & dc(session = p_session) & ss & pp(rt.1 | 10) & pr;
+Operation(set_session_priority_subscriptions_queue) & Pattern((a<+b)(c) = d(c)|>e)
+    & ff(0) & dd & dc(session = p_session) & ss & eh(a_session_priority_subscriptions_queue(p_session),_h,Goal) & pp(rt.1 | 10) & mp(Tac(th_raf_fct)) & ah(!session.(session : t_session => a_session_priority_subscriptions_queue(session) = a_session_priority_subscriptions_queue_i$1(session)|>t_prioritySubQueue)) & pr & ph(session,!session.(session : t_session => a_session_priority_subscriptions_queue(session) = a_session_priority_subscriptions_queue_i$1(session)|>t_prioritySubQueue)) & mp;
+Operation(remove_session_priority_subscriptions_queue) & Pattern((a<+b)(c) = d(c)|>e)
+    & ff(0) & dd & dc(session = p_session) & ss & eh(a_session_priority_subscriptions_queue(p_session),_h,Goal) & pp(rt.1 | 10) & mp(Tac(th_raf_fct)) & ah(!session.(session : t_session => a_session_priority_subscriptions_queue(session) = a_session_priority_subscriptions_queue_i$1(session)|>t_prioritySubQueue)) & pr & ph(session,!session.(session : t_session => a_session_priority_subscriptions_queue(session) = a_session_priority_subscriptions_queue_i$1(session)|>t_prioritySubQueue)) & mp;
+Operation(remove_session_seq_priority) & Pattern(a<+{b} : c +-> d)
+    & ff(0) & mp & ah(a_session_nb_priorities_i$1(p_session) : t_prio_idx_i) & ah(a_session_nb_priorities_i$1(p_session)/=0) & eh(a_session_nb_priorities_i$1(p_session),_h,Goal) & pr(Tac(th_smp)) & pr;
+Operation(remove_session_seq_priority) & Pattern((a<+b)(c) = card(dom(d)))
+    & ff(0) & dd & dc(session = p_session) & pr(Tac(th_variant)) & mp & ph(session,!session.(session : t_session => a_session_nb_priorities_i$1(session) = card(dom(a_session_seq_priority(session))))) & pr;
+Operation(remove_session_seq_priority) & Pattern((a(b))~ = c(b)|>d)
+    & ff(0) & dd & dc(session = p_session) & mp & ar(th_smp) & eh(a_session_priority_idx_i$1(p_session)|>t_prio_idx,_h,Goal) & ah(a_session_seq_priority_i$1(p_session)(p_priority_idx) = (a_session_seq_priority_i$1(p_session)|>t_priority)(p_priority_idx)) & pr & dd & eh(a_session_seq_priority_i$1(p_session)(p_priority_idx),_h,Goal) & eh(a_session_seq_priority_i$1(p_session)|>t_priority,_h,Goal) & ah(p_session : dom(a_session_seq_priority)) & ah(a_session_seq_priority(p_session) : t_prio_idx>+>t_priority) & ah(p_priority_idx : dom(a_session_seq_priority(p_session))) & pp(rt.0 | 10) & mp & pr;
+Operation(swap_session_seq_priority) & Pattern(a(b) = card(dom(c)))
+    & ff(0) & dd & dc(session = p_session) & mp & pr(Tac(th_variant)) & mp & ph(session,!session.(session : t_session => a_session_nb_priorities_i$1(session) = card(dom(a_session_seq_priority(session))))) & pr;
+Operation(swap_session_seq_priority) & Pattern((a(b))~ = c(b)|>d)
+    & ff(0) & dd & dc(session = p_session) & mp & ah(a_session_seq_priority_i$1(p_session)(p_priority_idx1) = (a_session_seq_priority_i$1(p_session)|>t_priority)(p_priority_idx1)) & pr & dd & eh(a_session_seq_priority_i$1(p_session)(p_priority_idx1),_h,Goal) & eh(a_session_seq_priority_i$1(p_session)|>t_priority,_h,Goal) & ah(a_session_priority_idx_i$1(p_session)<+{a_session_seq_priority(p_session)(p_priority_idx1)|->p_priority_idx0}|>t_prio_idx = a_session_priority_idx_i$1(p_session)|>t_prio_idx<+{a_session_seq_priority(p_session)(p_priority_idx1)|->p_priority_idx0}) & pp(rt.1 | 10) & dd & eh(a_session_priority_idx_i$1(p_session)<+{a_session_seq_priority(p_session)(p_priority_idx1)|->p_priority_idx0}|>t_prio_idx,_h,Goal) & eh(a_session_priority_idx_i$1(p_session)|>t_prio_idx,_h,Goal) & ah(not(p_priority_idx0 : dom(a_session_seq_priority(p_session)))) & ah(p_priority_idx0 : t_prio_idx) & ah(p_priority_idx1 : dom(a_session_seq_priority(p_session))) & ah(a_session_seq_priority(p_session) : t_prio_idx>+>t_priority) & pp(rt.0 | 10) & pr;
+Operation(decrement_subscription_LifetimeCounter) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd(0) & ah(a_LifetimeCounter_i$1(p_subscription) = a_LifetimeCounter(p_subscription)) & pr(Tac(th_raf_fct)) & dd & eh(a_LifetimeCounter_i$1(p_subscription),_h,Goal) & pr(Tac(th_raf_fct));
+Operation(decrement_subscription_KeepAliveCounter) & Pattern(a<+{b} : c +-> d)
+    & ff(0) & d0 & ah(a_KeepAliveCounter_i$1(p_subscription) = a_KeepAliveCounter(p_subscription)) & pr(Tac(th_raf_fct)) & dd(0) & eh(a_KeepAliveCounter_i$1(p_subscription),_h,Goal) & pr;
+Operation(decrement_subscription_KeepAliveCounter) & Pattern(a<+{b} : POW(c<+d))
+    & ff(0) & dd & ah(a_KeepAliveCounter_i$1(p_subscription) = a_KeepAliveCounter(p_subscription)) & pr(Tac(th_raf_fct)) & dd(0) & eh(a_KeepAliveCounter_i$1(p_subscription),_h,Goal) & pr(Tac(th_raf_fct));
+Operation(decrement_subscription_LifetimeCounter) & Pattern(a<+{b} : c +-> d)
+    & ff(0) & mp & ah(a_LifetimeCounter_i$1(p_subscription) = a_LifetimeCounter(p_subscription)) & pr(Tac(th_raf_fct)) & dd & eh(a_LifetimeCounter_i$1(p_subscription),_h,Goal) & pr & pr
+END
+/*
+THEORY User_Pass IS
+Pattern(ran(a<|b*c) = c)
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Pattern(a*{b*{c}} : a +-> (b --> d))
+    & ff(0) & dd & mp(Tac(th_eh_ident; th_typage));
+Pattern((a*{b})(c) = (d*{e*{f}})(c)|>g)
+    & ff(0) & ss & eh(t_priority,_h,Goal) & pp(rp.0 | 10);
+Pattern(a(b) = bool(b : c))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Pattern(bool(a(b) = c) = bool(b|->c : d))
+    & ff(0) & eh(a_subscription_session,_h,Goal) & ah(dom(a_subscription_session_i$1) = t_subscription_i) & ah(a_subscription_session_i$1 : t_subscription_i +-> t_session_i) & ah(t_session <: t_session_i) & ah(t_subscription <: t_subscription_i) & pp(rp.0 | 60);
+Pattern(a<+b|>c = d<+b)
+    & ff(0) & eh(a_subscription_session,_h,Goal) & dd & pp(rt.0 | 30);
+Pattern(a(b)(c) : d)
+    & ff(0) & dd & pp(rt.1 | 10);
+Pattern(a<|(b<+c) = d<+c)
+    & ff(0) & dd(0) & eh(a_session_nb_subscriptions,_h,Goal) & pp(rt.0 | 60);
+Pattern(a<|(b<+{c|->b(c)-d}) : a +-> e)
+    & ff(0) & mp & ah(p_session : dom(a_session_nb_subscriptions_i$1)) & ah(a_session_nb_subscriptions_i$1 : t_session_i +-> t_sub_idx_i) & ah(1<=a_session_nb_subscriptions_i$1(p_session)) & eh(t_sub_idx_i,_h,Goal) & pp(rp.0 | 30);
+Pattern(a(b)(c) = d)
+    & ff(0) & eh(a_session_seq_priority(p_session),_h,Goal) & ah(dom(a_session_seq_priority_i$1) = t_session_i) & ah(a_session_seq_priority_i$1 : t_session_i +-> (t_prio_idx_i --> t_priority_i)) & ah(a_session_seq_priority_i$1 : t_session_i +-> (t_prio_idx_i --> t_priority_i)) & eh(t_priority,_h,Goal) & eh(c_priority_indet,_h,Goal) & eh(t_priority_i,_h,Goal) & pp(rp.0 | 10);
+Pattern(a(b)(c) : d)
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Pattern(a(b)(c) = (d(b))~(c))
+    & ff(0) & dd(0) & pp(rt.1 | 60);
+Pattern(a(b)(c) = d)
+    & ff(0) & eh((a_session_seq_priority(p_session))~,_h,Goal) & ah(dom(a_session_priority_idx_i$1) = t_session_i) & ah(a_session_priority_idx_i$1 : t_session_i +-> (t_priority_i --> t_prio_idx_i)) & eh(t_prio_idx,_h,Goal) & eh(t_prio_idx_i,_h,Goal) & ah(1<=k_n_subscriptionPerSession_max) & ah(k_n_subscriptionPerSession_max : INTEGER) & pp(rp.0 | 10);
+Pattern((a<+{b|->c})~[{d}] = e-{b})
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Pattern(a<+{b|->c}|>d = {b}<<|e)
+    & ff(0) & dd(0) & eh(a_subscription_session,_h,Goal) & pp(rt.1 | 30);
+Pattern({a}<<|b : POW(c<+{a|->(d|->e)}))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Pattern({a}<<|b : POW(c<+{a|->d}))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Pattern(a(b) = c(b))
+    & ff(0) & dd(0) & pp(rt.1 | 60);
+Pattern(a<+b : POW(c<+b))
+    & ff(0) & dd(0) & pp(rt.1 | 10);
+Pattern(a<+{b|->c(b)} : POW(d<+{b|->e(b)}))
+    & ff(0) & dd(0) & pp(rt.1 | 60);
+Pattern(a<|(b<+{c|->d})|>>{d} = {c}<<|e)
+    & ff(0) & dd & eh(a_publishRequestQueue,_h,Goal) & pp(rt.1 | 60);
+Pattern(a<|(b<+c)|>>{d} = e<+c)
+    & ff(0) & dd(0) & eh(a_publishRequestQueue,_h,Goal) & pp(rt.1 | 60);
+Pattern(bool(not(a = b(c))) = bool(c : dom(d)))
+    & ff(0) & dd & pp(rt.1 | 60);
+Pattern(((a*{b})(c))~ = (d*{e*{f}})(c)|>g)
+    & ff(0) & eh(t_prio_idx,_h,Goal) & ss & dd & pp(rt.1 | 10);
+Pattern((a*{b})(c) = (d*{e*{f}})(c)|>g)
+    & ff(0) & dd(0) & ss & pp(rt.1 | 60);
+Pattern(a<+{b|->a(b)+c} : d +-> e)
+    & ff(0) & mp & eh(a_session_nb_priorities_i$1(p_session),_h,Goal) & eh(t_prio_idx_i,_h,Goal) & ah(dom(a_session_seq_priority(p_session)) <: t_prio_idx) & pr & pp(rt.1 | 30);
+Pattern((a<+{b|->a(b)+c})(d) = card(dom((e<+{b|->(e(b)<+{f|->g})})(d))))
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+Pattern(((a<+{b|->(a(b)<+{c|->d})})(e))~ = (f<+{b|->(f(b)<+{d|->c})})(e)|>g)
+    & ff(0) & dd & dc(session = p_session) & mp & eh((a_session_seq_priority(p_session))~,_h,Goal) & pp(rt.1 | 30) & pr;
+Pattern(a(b)(c)<=d)
+    & ff(0) & dd & pr(Tac(th_ineg));
+Pattern( -a<=b(c)(d))
+    & ff(0) & dd & pr(Tac(th_ineg));
+Pattern((a<+{b|->({c}<<|a(b)<+{d|->a(b)(c)})})(e) = (f<+{b|->(f(b)<+{d|->f(b)(c)})}<+{b|->((f<+{b|->(f(b)<+{d|->f(b)(c)})})(b)<+{c|->g})})(e)|>h)
+    & ff(0) & dd & dc(session = p_session) & mp & eh(a_session_seq_priority(p_session),_h,Goal) & ah(p_priority_idx1 : dom(a_session_seq_priority_i$1(p_session)|>t_priority)) & pp(rt.1 | 10) & dd & eh(256,_h,Goal) & ah(not(c_priority_indet : t_priority)) & mp & dd & ar(th_raf_fct) & pr;
+Pattern(a<|(b<+{c|->b(c)-d}) = e<+{c|->e(c)-d})
+    & ff(0) & mp & ar(th_eh_ident) & ah((t_session<|a_session_nb_subscriptions_i$1)(p_session) = a_session_nb_subscriptions_i$1(p_session)) & pr & dd & eh((t_session<|a_session_nb_subscriptions_i$1)(p_session)) & ah(p_session : t_session) & ah(p_session : dom(a_session_nb_subscriptions_i$1)) & ah(a_session_nb_subscriptions_i$1 : t_session_i +-> t_sub_idx_i) & pp(rp.0 | 30);
+Pattern(a<|(b<+{c|->b(c)-d}) = e)
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+Pattern(a<|b = c<+{d|->c(d)-e})
+    & ff(0) & pr & bb(tp(Hyp) & pr & ll(?));
+Pattern(a(b) = c(b))
+    & ff(0) & dd & pr(Tac(th_raf_fct));
+Pattern((a<+{b|->({c}<<|a(b))})(d) = (e<+{b|->(e(b)<+{c|->f})})(d)|>g)
+    & ff(0) & dd & eh(a_session_seq_priority(p_session),_h,Goal) & dc(session = p_session) & ss & pp(rt.1 | 10) & pr;
+Pattern((a<+{b|->(a(b)<+c)})(d) = (e<+{b|->(e(b)<+c)})(d)|>f)
+    & ff(0) & dd & eh(a_session_seq_priority(p_session),_h,Goal) & dc(session = p_session) & ss & pp(rt.1 | 10) & pr;
+Pattern(((a<+{b|->({c}<<|a(b))})(d))~ = (e<+{b|->(e(b)<+{f(b)(c)|->g})})(d)|>h)
+    & ff(0) & dd & dc(session = p_session) & mp & ar(th_smp) & eh(a_session_priority_idx_i$1(p_session)|>t_prio_idx,_h,Goal) & ah(a_session_seq_priority_i$1(p_session)(p_priority_idx) = (a_session_seq_priority_i$1(p_session)|>t_priority)(p_priority_idx)) & pr & dd & eh(a_session_seq_priority_i$1(p_session)(p_priority_idx),_h,Goal) & eh(a_session_seq_priority_i$1(p_session)|>t_priority,_h,Goal) & ah(p_session : dom(a_session_seq_priority)) & ah(a_session_seq_priority(p_session) : t_prio_idx>+>t_priority) & ah(p_priority_idx : dom(a_session_seq_priority(p_session))) & pp(rt.0 | 30) & mp & pr;
+Pattern(((a<+{b|->({c}<<|a(b)<+{d|->a(b)(c)})})(e))~ = (f<+{b|->(f(b)<+{g(b)(c)|->d})})(e)|>h)
+    & ff(0) & dd & dc(session = p_session) & mp & ah(a_session_seq_priority_i$1(p_session)(p_priority_idx1) = (a_session_seq_priority_i$1(p_session)|>t_priority)(p_priority_idx1)) & pr & dd & eh(a_session_seq_priority_i$1(p_session)(p_priority_idx1),_h,Goal) & eh(a_session_seq_priority_i$1(p_session)|>t_priority,_h,Goal) & ah(a_session_priority_idx_i$1(p_session)<+{a_session_seq_priority(p_session)(p_priority_idx1)|->p_priority_idx0}|>t_prio_idx = a_session_priority_idx_i$1(p_session)|>t_prio_idx<+{a_session_seq_priority(p_session)(p_priority_idx1)|->p_priority_idx0}) & pp(rt.1 | 30) & dd & eh(a_session_priority_idx_i$1(p_session)<+{a_session_seq_priority(p_session)(p_priority_idx1)|->p_priority_idx0}|>t_prio_idx,_h,Goal) & eh(a_session_priority_idx_i$1(p_session)|>t_prio_idx,_h,Goal) & ah(not(p_priority_idx0 : dom(a_session_seq_priority(p_session)))) & ah(p_priority_idx0 : t_prio_idx) & ah(p_priority_idx1 : dom(a_session_seq_priority(p_session))) & ah(a_session_seq_priority(p_session) : t_prio_idx>+>t_priority) & pp(rt.0 | 30) & pr;
+Pattern((a<+{b|->(a(b)<+c)})(d) = (e<+{b|->(e(b)<+c)})(d)|>f)
+    & ff(0) & dd & dc(session = p_session) & ss & eh(a_session_priority_subscriptions_queue(p_session),_h,Goal) & pp(rt.1 | 10) & mp(Tac(th_raf_fct)) & ss & ah(!session.(session : t_session => a_session_priority_subscriptions_queue(session) = a_session_priority_subscriptions_queue_i$1(session)|>t_prioritySubQueue)) & pr & ph(session,!session.(session : t_session => a_session_priority_subscriptions_queue(session) = a_session_priority_subscriptions_queue_i$1(session)|>t_prioritySubQueue)) & mp;
+Pattern((a<+{b|->({c}<<|a(b))})(d) = (e<+{b|->(e(b)<+{c|->f})})(d)|>g)
+    & ff(0) & dd & dc(session = p_session) & ss & eh(a_session_priority_subscriptions_queue(p_session),_h,Goal) & pp(rt.1 | 10) & mp(Tac(th_raf_fct)) & ss & ah(!session.(session : t_session => a_session_priority_subscriptions_queue(session) = a_session_priority_subscriptions_queue_i$1(session)|>t_prioritySubQueue)) & pr & ph(session,!session.(session : t_session => a_session_priority_subscriptions_queue(session) = a_session_priority_subscriptions_queue_i$1(session)|>t_prioritySubQueue)) & mp;
+Pattern(a<+{b|->a(b)-c} : POW(d<+{b|->d(b)-c}))
+    & ff(0) & dd(0) & ah(a_LifetimeCounter_i$1(p_subscription) = a_LifetimeCounter(p_subscription)) & pr(Tac(th_raf_fct)) & dd & eh(a_LifetimeCounter_i$1(p_subscription),_h,Goal) & pr(Tac(th_raf_fct));
+Pattern(a<+{b|->a(b)-c} : d +-> e)
+    & ff(0) & d0 & ah(a_KeepAliveCounter_i$1(p_subscription) = a_KeepAliveCounter(p_subscription)) & pr(Tac(th_raf_fct)) & dd(0) & eh(a_KeepAliveCounter_i$1(p_subscription),_h,Goal) & pr;
+Pattern(a<+{b|->a(b)-c} : POW(d<+{b|->d(b)-c}))
+    & ff(0) & dd & ah(a_KeepAliveCounter_i$1(p_subscription) = a_KeepAliveCounter(p_subscription)) & pr(Tac(th_raf_fct)) & dd(0) & eh(a_KeepAliveCounter_i$1(p_subscription),_h,Goal) & pr(Tac(th_raf_fct));
+Pattern((a<+{b|->a(b)-c})(d) = card(dom((e<+{b|->({f}<<|e(b))})(d))))
+    & ff(0) & dd & dc(session = p_session) & pr(Tac(th_variant)) & mp & ss & ph(session,!session.(session : t_session => a_session_nb_priorities_i$1(session) = card(dom(a_session_seq_priority(session))))) & pr;
+Pattern(a(b) = card(dom((c<+{d|->({e}<<|c(d)<+{f|->c(d)(e)})})(b))))
+    & ff(0) & dd & dc(session = p_session) & mp & pr(Tac(th_variant)) & mp & ss & ph(session,!session.(session : t_session => a_session_nb_priorities_i$1(session) = card(dom(a_session_seq_priority(session))))) & pr;
+Pattern(a<+{b|->a(b)-c} : d +-> e)
+    & ff(0) & mp & ah(a_LifetimeCounter_i$1(p_subscription) = a_LifetimeCounter(p_subscription)) & pr(Tac(th_raf_fct)) & dd & eh(a_LifetimeCounter_i$1(p_subscription),_h,Goal) & pr & pr
+END */
+&
+
+THEORY th_raf_fct IS
+
+    band(binhyp(f: A +-> B),
+    band(binhyp(dom(f) = A),
+    band(binhyp(a <: A),
+    band(binhyp(t <: B),
+    band(binhyp(i: a),
+    band(binhyp(j: a),
+    band(binhyp(not(c: t)),
+    band(binhyp(not(j = i)),
+    band(binhyp(not(c: t)),
+         binhyp(i: dom(f|>t)))))))))))
+    =>
+    {i}<<|(f|>t)<+{j|->(f|>t)(i)} = f<+{j|->f(i),i|->c}|>t
+    ;
+
+    band(binhyp(a : d +-> e),
+    band(binhyp(dom(a) = d),
+    band(binhyp(c : f +-> g),
+    band(binhyp(f <: d),
+    band(binhyp(b : d),
+    band(binhyp(b : dom(c)),
+         binhyp(c <: a)))))))
+    =>
+    a(b) = c(b)
+    ;
+
+    band(binhyp(a : d +-> e),
+    band(binhyp(dom(a) = d),
+    band(binhyp(c : f +-> e),
+    band(binhyp(f <: d),
+    band(binhyp(c <: a),
+    band(binhyp(b : d),
+         binhyp(b : dom(c))))))))
+    =>
+    a(b) = c(b)
+    ;
+
+    binhyp(a <: c)
+    =>
+    a <+ b <: c <+ b
+
+END
+&
+
+THEORY th_eh_abs_var IS
+
+   band(binhyp(b = c<|d$1|>e),
+   band(bvrb(b),
+        bnot(b\a))) &
+   bguard((SUB ; RES) : bresult([b := c<|d$1|>e]a),f) &
+   f
+   =>
+   a
+
+END
+&
+
+THEORY th_smp IS
+
+   (card(a) = 0) == (a = {})
+   ;
+
+   binhyp(c = 1..d) &
+   blvar(e) &
+   e\(c)
+   =>
+   (a<+{b|->0}|>c) == {b}<<|(a|>c)
+
+END

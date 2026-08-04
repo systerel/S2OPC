@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 27/10/2026 14:02:21
+ Date                 : 03/11/2026 08:33:49
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -198,6 +198,7 @@
 #include "subscription_absent_node_bs.h"
 #include "subscription_core.h"
 #include "subscription_core_1.h"
+#include "subscription_core_2.h"
 #include "subscription_core_bs.h"
 #include "subscription_core_it.h"
 #include "subscription_create_monitored_item_it.h"
@@ -354,10 +355,11 @@ void INITIALISATION(void) {
    translate_browse_path__INITIALISATION();
    translate_browse_path_it__INITIALISATION();
    service_set_view__INITIALISATION();
-   subscription_priority_sub_queue_bs__INITIALISATION();
-   subscription_priority_sub_queue_it_bs__INITIALISATION();
    monitored_item_queue_bs__INITIALISATION();
    subscription_core_bs__INITIALISATION();
+   subscription_core_2__INITIALISATION();
+   subscription_priority_sub_queue_bs__INITIALISATION();
+   subscription_priority_sub_queue_it_bs__INITIALISATION();
    subscription_core_1__INITIALISATION();
    subscription_core_it__INITIALISATION();
    subscription_diagnostics_bs__INITIALISATION();

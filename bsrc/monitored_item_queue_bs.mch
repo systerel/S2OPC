@@ -29,7 +29,7 @@ ABSTRACT_VARIABLES
 
 INVARIANT
     s_monitoredItemQueue <: t_monitoredItemQueue &
-    a_defined_monitored_items : s_monitoredItemQueue <-> t_monitoredItemPointer
+    a_defined_monitored_items : t_monitoredItemQueue <-> t_monitoredItemPointer
 
 INITIALISATION
     s_monitoredItemQueue := {} ||
@@ -60,8 +60,7 @@ OPERATIONS
 
     clear_and_deallocate_monitored_item_queue (p_queue) =
     PRE
-        p_queue : t_monitoredItemQueue_i &
-        p_queue : s_monitoredItemQueue
+        p_queue : t_monitoredItemQueue_i
     THEN
         s_monitoredItemQueue := s_monitoredItemQueue - {p_queue}
     END
