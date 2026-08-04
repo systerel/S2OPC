@@ -760,7 +760,7 @@ test-faulty-packets :
 
 test-fuzz:
   stage: test-others
-  image: docker.aix.systerel.fr/c838/opcua-network-fuzzer@sha256:35e40ba847bdfe5f3e7112f465adb2c70d1f0694521f6ba8d018c55f651ef205 #digest version 3.3
+  image: docker.aix.systerel.fr/c838/opcua-network-fuzzer@sha256:2ca211a78360339c3f9ff6e91d046631ec7b849af17992a7b29ff75c33233141 #digest version 4.0
   needs: [build-fuzz]
   script:
     - ./.network_fuzzing.sh build_fuzz/bin
