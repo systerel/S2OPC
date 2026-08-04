@@ -90,4 +90,30 @@
 #else
 #define SOPC_STRING_FORMAT(paramIndex)
 #endif
+
+/*
+ * This macro is used to provide a strong "force inline" hint to the compiler.
+ *
+ * This asks the compiler to inline the function whenever
+ * technically possible, rather than leaving it entirely to its heuristics.
+ * It is still not an absolute guarantee (e.g. recursive calls, calls through
+ * function pointers, or address-taken usages can still prevent inlining),
+ * but the compiler will make a strong effort and typically warn/error if it
+ * truly cannot honour it (depending on compiler/flags).
+ *
+ * - GCC/Clang: `__attribute__((always_inline))` combined with `inline`
+ *   (the base `inline` keyword is still required/expected alongside the
+ *   attribute).
+ * - MSVC: `__forceinline`, which already implies the inline hint on its own.
+ * - Unknown/unsupported compilers: falls back to inline (best-effort
+ *   only, no strong hint available).
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#define SOPC_STRONG_INLINE inline __attribute__((always_inline))
+#elif defined(_MSC_VER)
+#define SOPC_STRONG_INLINE __forceinline
+#else
+#define SOPC_STRONG_INLINE inline
+#endif
+
 #endif // SOPC_MACROS_H_
