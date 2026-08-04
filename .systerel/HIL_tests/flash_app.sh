@@ -78,5 +78,11 @@ else
     fail "The file ${P_FILE} doesn't exist"
 fi
 
+# sync() only guarantees the binary was flushed to the virtual MSC drive exposed by the
+# DAPLink interface; the target's internal flash write (which the interface MCU performs
+# from its staging buffer) is asynchronous and takes longer for bigger binaries. Unmounting
+# immediately can interrupt that write and leave the board with a corrupted/incomplete image.
+sleep 5
+
 #unmount disk after test to avoid locking other user
 umount "$MOUNT" 2> /dev/null
