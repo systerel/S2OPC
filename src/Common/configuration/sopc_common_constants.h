@@ -118,6 +118,17 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #define SOPC_DEFAULT_SEND_MAX_MESSAGE_LENGTH SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE* SOPC_DEFAULT_SEND_MAX_NB_CHUNKS
 #endif /* SOPC_DEFAULT_SEND_MAX_MESSAGE_LENGTH */
 
+/** \brief Default allocated initial buffer size for encoding OPC UA messages.
+ *   Note: the buffer is reallocated when needed until negotiated maximum message size reached.
+ * */
+#ifndef SOPC_DEFAULT_INITIAL_SEND_MESSAGE_LENGTH
+#if SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE < 2 * SOPC_TCP_UA_MIN_BUFFER_SIZE
+#define SOPC_DEFAULT_INITIAL_SEND_MESSAGE_LENGTH SOPC_TCP_UA_MIN_BUFFER_SIZE
+#else
+#define SOPC_DEFAULT_INITIAL_SEND_MESSAGE_LENGTH (SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE / 2)
+#endif
+#endif /* SOPC_DEFAULT_INITIAL_SEND_MESSAGE_LENGTH */
+
 /** \brief Maximum ByteString/String/XmlElement length in bytes used */
 #ifndef SOPC_DEFAULT_MAX_STRING_LENGTH
 #define SOPC_DEFAULT_MAX_STRING_LENGTH UINT16_MAX

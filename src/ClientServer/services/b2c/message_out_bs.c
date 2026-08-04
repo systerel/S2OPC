@@ -238,7 +238,7 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
 
     uint32_t sendMessageMaxSize = (uint32_t) chConfig->internalProtocolData;
     SOPC_Buffer* buffer = SOPC_Buffer_CreateResizable(
-        SOPC_TCP_UA_MIN_BUFFER_SIZE, sendMessageMaxSize + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+        SOPC_DEFAULT_INITIAL_SEND_MESSAGE_LENGTH, sendMessageMaxSize + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
     if (NULL != buffer)
     {
         status = SOPC_STATUS_OK;
