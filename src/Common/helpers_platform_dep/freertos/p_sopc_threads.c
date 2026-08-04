@@ -269,9 +269,14 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 const char* taskName)
 {
     SOPC_UNUSED_ARG(cpuAffinity);
-    if (priority < 1 || priority > configMAX_PRIORITIES)
+    if (priority < 0 || priority > configMAX_PRIORITIES)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (0 == priority)
+    {
+        // 0 means "no specific priority": let the default priority be used, as documented in sopc_threads.h
+        priority = 1; // Same default as SOPC_Thread_Create (0 is the lowest priority, IDLE)
     }
 
     return P_THREAD_Init(thread, (tPtrFct*) startFct, startArgs, priority, taskName);

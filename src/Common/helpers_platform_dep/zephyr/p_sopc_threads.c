@@ -430,9 +430,14 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
 {
     SOPC_UNUSED_ARG(cpuAffinity);
     // No specific limit on priorites on ZEPHYR.
-    if (priority <= 0 || priority > CONFIG_NUM_PREEMPT_PRIORITIES + CONFIG_NUM_COOP_PRIORITIES)
+    if (priority < 0 || priority > CONFIG_NUM_PREEMPT_PRIORITIES + CONFIG_NUM_COOP_PRIORITIES)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (0 == priority)
+    {
+        // 0 means "no specific priority": let the default priority be used, as documented in sopc_threads.h
+        priority = CONFIG_SOPC_THREAD_DEFAULT_PRIORITY;
     }
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
