@@ -65,7 +65,7 @@ void write_value_pointer_bs__copy_write_value_pointer_content(
         }
         else
         {
-            SOPC_WriteValue_FastClear(writeValueCopy);
+            OpcUa_WriteValue_Clear(writeValueCopy);
             SOPC_Free(writeValueCopy);
         }
     }

@@ -51,7 +51,7 @@ void SOPC_WriteValuePool_Initialize(void);
 OpcUa_WriteValue* SOPC_WriteValuePool_Alloc(void);
 
 /**
- * \brief Clears a WriteValue then returns its shell to the pool (or heap).
+ * \brief Clears (only frees allocated memory in) the WriteValue then returns its shell to the pool (or heap).
  * \param wv  WriteValue from ::SOPC_WriteValuePool_Alloc; NULL is a no-op.
  */
 void SOPC_WriteValuePool_ClearAndFree(OpcUa_WriteValue* wv);
@@ -74,14 +74,13 @@ size_t SOPC_WriteValuePool_GetNbFallbackAllocsStat(void);
 void SOPC_WriteValue_FastInitialize(OpcUa_WriteValue* wv);
 
 /**
- * \brief Fast-path equivalent of ::OpcUa_WriteValue_Clear: calls the same
- *        underlying typed Clear functions directly instead of through the
- *        generic reflective SOPC_EncodeableObject_Clear dispatch. Behaviorally
- *        identical to the generic path. Used internally by
- *        ::SOPC_WriteValuePool_ClearAndFree; exposed here mainly so it can be
- *        exercised directly by differential tests against the generic path.
+ * \brief Internal use only or for content never accessed after call,
+          ::SOPC_Free(wv) shall be done after call and pointer set to NULL.
+          This function free the allocated content in the write value
+          without clearing anything else.
+          It is used internally by the pool to optimize ::SOPC_WriteValuePool_ClearAndFree treatment.
  * \param wv  WriteValue to clear; must not be NULL.
  */
-void SOPC_WriteValue_FastClear(OpcUa_WriteValue* wv);
+void SOPC_WriteValue_FastFreeContent(OpcUa_WriteValue* wv);
 
 #endif /* UTIL_WRITE_VALUE_POOL_H_ */

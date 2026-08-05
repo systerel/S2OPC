@@ -24,6 +24,10 @@
 
 #include "util_write_value_pool.h"
 
+#include "sopc_assert.h"
+#include "sopc_builtintypes.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_static_pool.h"
 #include "sopc_toolkit_config_constants.h"
 
@@ -52,7 +56,7 @@ void SOPC_WriteValuePool_ClearAndFree(OpcUa_WriteValue* wv)
     {
         return;
     }
-    SOPC_WriteValue_FastClear(wv);
+    SOPC_WriteValue_FastFreeContent(wv);
     SOPC_StaticPool_Free(&sopc_writeValuePool, wv);
 }
 
@@ -78,11 +82,94 @@ void SOPC_WriteValue_FastInitialize(OpcUa_WriteValue* wv)
     wv->writeByPassPermissionMask = 0;
 }
 
-void SOPC_WriteValue_FastClear(OpcUa_WriteValue* wv)
+static SOPC_STRONG_INLINE void SOPC_String_FastFreeContent(SOPC_String* string)
 {
-    SOPC_NodeId_Clear(&wv->NodeId);
-    wv->AttributeId = 0;
-    SOPC_String_Clear(&wv->IndexRange);
-    SOPC_DataValue_Clear(&wv->Value);
-    wv->writeByPassPermissionMask = 0;
+    SOPC_ASSERT(NULL != string);
+    if (!string->DoNotClear)
+    {
+        SOPC_Free(string->Data);
+    }
+}
+
+static SOPC_STRONG_INLINE void SOPC_NodeId_FastFreeContent(SOPC_NodeId* nodeId)
+{
+    SOPC_ASSERT(NULL != nodeId);
+    switch (nodeId->IdentifierType)
+    {
+    case SOPC_IdentifierType_Numeric:
+        break;
+    case SOPC_IdentifierType_String:
+    case SOPC_IdentifierType_ByteString:
+        SOPC_String_FastFreeContent(&nodeId->Data.String);
+        break;
+    case SOPC_IdentifierType_Guid:
+        SOPC_Free(nodeId->Data.Guid);
+        break;
+    default:
+        break;
+    }
+}
+
+static SOPC_STRONG_INLINE void SOPC_DataValue_FastFreeContent(SOPC_DataValue* dataValue)
+{
+    SOPC_Variant* variant = &dataValue->Value;
+    if (variant->DoNotClear)
+    {
+        return;
+    }
+    else if (variant->ArrayType != SOPC_VariantArrayType_SingleValue || variant->BuiltInTypeId >= SOPC_LocalizedText_Id)
+    {
+        // Not optimized due to complexity
+        SOPC_Variant_Clear(&dataValue->Value);
+    }
+    else if (variant->BuiltInTypeId >= SOPC_String_Id)
+    {
+        // SingleValue && SOPC_String_Id <= BuiltInTypeId < SOPC_LocalizedText_Id
+        switch (variant->BuiltInTypeId)
+        {
+        case SOPC_String_Id:
+        case SOPC_ByteString_Id:
+        case SOPC_XmlElement_Id:
+            SOPC_String_FastFreeContent(&variant->Value.String);
+            break;
+        case SOPC_DateTime_Id:
+        case SOPC_StatusCode_Id:
+            break;
+        case SOPC_Guid_Id:
+            SOPC_Free(variant->Value.Guid);
+            break;
+        case SOPC_NodeId_Id:
+            if (NULL != variant->Value.NodeId)
+            {
+                SOPC_NodeId_FastFreeContent(variant->Value.NodeId);
+                SOPC_Free(variant->Value.NodeId);
+            }
+            break;
+        case SOPC_ExpandedNodeId_Id:
+            if (NULL != variant->Value.ExpNodeId)
+            {
+                SOPC_NodeId_FastFreeContent(&variant->Value.ExpNodeId->NodeId);
+                SOPC_String_FastFreeContent(&variant->Value.ExpNodeId->NamespaceUri);
+                SOPC_Free(variant->Value.ExpNodeId);
+            }
+            break;
+        case SOPC_QualifiedName_Id:
+            if (NULL != variant->Value.Qname)
+            {
+                SOPC_String_FastFreeContent(&variant->Value.Qname->Name);
+                SOPC_Free(variant->Value.Qname);
+            }
+            break;
+        default:
+            SOPC_ASSERT(false && "Unexpected case reached !");
+            break;
+        }
+    } // else: BuiltInTypeId < SOPC_String_Id => numeric types only: no op
+}
+
+void SOPC_WriteValue_FastFreeContent(OpcUa_WriteValue* wv)
+{
+    SOPC_NodeId_FastFreeContent(&wv->NodeId);
+    SOPC_String_FastFreeContent(&wv->IndexRange);
+    SOPC_DataValue_FastFreeContent(&wv->Value);
 }

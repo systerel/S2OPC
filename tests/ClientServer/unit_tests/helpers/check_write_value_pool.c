@@ -22,12 +22,17 @@
 
 #include "check_helpers.h"
 
+#include "sopc_encodeabletype.h"
+#include "sopc_types.h"
 #include "util_write_value_pool.h"
 
-/* Differential tests: SOPC_WriteValue_FastInitialize/FastClear must be byte-for-byte
- * equivalent to the generic OpcUa_WriteValue_Initialize/Clear they replace in the
+/* Differential tests: SOPC_WriteValue_FastInitialize must be byte-for-byte
+ * equivalent to the generic OpcUa_WriteValue_Initialize they replace in the
  * MI notification hot path, so that a future change to the OpcUa_WriteValue struct
- * (regenerated field list) is caught here instead of silently diverging. */
+ * (regenerated field list) is caught here instead of silently diverging.
+ * SOPC_WriteValue_FastFreeContent is not equivalent as it only frees allocated memory but do not clear,
+ * this test only ensure memory is deallocated.
+ */
 
 START_TEST(test_write_value_fast_initialize_matches_generic)
 {
@@ -46,20 +51,17 @@ START_TEST(test_write_value_fast_initialize_matches_generic)
 }
 END_TEST
 
-START_TEST(test_write_value_fast_clear_matches_generic)
+START_TEST(test_write_value_fast_free_content)
 {
     OpcUa_WriteValue wvGeneric;
     OpcUa_WriteValue wvFast;
-    /* Poison both identically first: struct padding is never written by Initialize,
-     * Clear or the field assignments below, so without this the two stack slots'
-     * leftover garbage would differ and produce a false-positive memcmp diff. */
-    memset(&wvGeneric, 0xAA, sizeof(wvGeneric));
-    memset(&wvFast, 0xAA, sizeof(wvFast));
     OpcUa_WriteValue_Initialize(&wvGeneric);
     SOPC_WriteValue_FastInitialize(&wvFast);
 
     /* Fill both identically with owned/dynamically-allocated content, to exercise
-     * the real (de)allocating paths of NodeId/String/Variant Clear, not just a memset. */
+     * the real allocating paths of NodeId/String/Variant Clear.
+     * Check content is equivalent before clear and that FastFreeContent does not leak memory.
+     */
     wvGeneric.NodeId.IdentifierType = SOPC_IdentifierType_String;
     wvGeneric.NodeId.Namespace = 1;
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_String_CopyFromCString(&wvGeneric.NodeId.Data.String, "MyNode"));
@@ -84,10 +86,14 @@ START_TEST(test_write_value_fast_clear_matches_generic)
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_String_CopyFromCString(&wvFast.Value.Value.Value.String, "payload"));
     wvFast.Value.Status = 0x80000000; // Bad
 
-    OpcUa_WriteValue_Clear(&wvGeneric);
-    SOPC_WriteValue_FastClear(&wvFast);
+    int32_t cmp = -1;
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_Compare(&OpcUa_WriteValue_EncodeableType, (void*) &wvGeneric, (void*) &wvFast, &cmp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(0, cmp);
 
-    ck_assert_int_eq(0, memcmp(&wvGeneric, &wvFast, sizeof(OpcUa_WriteValue)));
+    OpcUa_WriteValue_Clear(&wvGeneric);
+    SOPC_WriteValue_FastFreeContent(&wvFast);
 }
 END_TEST
 
@@ -131,7 +137,7 @@ Suite* tests_make_suite_write_value_pool(void)
     TCase* tc = tcase_create("WriteValuePool");
 
     tcase_add_test(tc, test_write_value_fast_initialize_matches_generic);
-    tcase_add_test(tc, test_write_value_fast_clear_matches_generic);
+    tcase_add_test(tc, test_write_value_fast_free_content);
     tcase_add_test(tc, test_write_value_pool_alloc_fast_init_clear_free_roundtrip);
 
     suite_add_tcase(s, tc);
