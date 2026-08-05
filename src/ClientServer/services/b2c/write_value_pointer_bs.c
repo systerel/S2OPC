@@ -26,6 +26,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 #include "util_b2c.h"
+#include "util_fast_init_clear.h"
 #include "util_write_value_pool.h"
 #include "write_value_pointer_bs.h"
 

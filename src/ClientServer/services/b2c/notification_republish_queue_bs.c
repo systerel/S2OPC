@@ -23,6 +23,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "util_fast_init_clear.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -134,7 +135,7 @@ void notification_republish_queue_bs__remove_republish_notif_from_queue(
         notification_republish_queue_bs__p_queue, notification_republish_queue_bs__p_seq_num);
     if (notifMsg != NULL)
     {
-        OpcUa_NotificationMessage_Clear(notifMsg);
+        SOPC_NotificationMessage_FastFreeContent(notifMsg);
         SOPC_Free(notifMsg);
         *notification_republish_queue_bs__bres = true;
     }

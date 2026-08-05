@@ -62,25 +62,4 @@ void SOPC_WriteValuePool_ClearAndFree(OpcUa_WriteValue* wv);
  */
 size_t SOPC_WriteValuePool_GetNbFallbackAllocsStat(void);
 
-/**
- * \brief Fast-path equivalent of ::OpcUa_WriteValue_Initialize: calls the same
- *        underlying typed Initialize functions (NodeId, String, DataValue...)
- *        directly instead of through the generic reflective
- *        SOPC_EncodeableObject_InternalInitialize field-descriptor dispatch.
- *        Behaviorally identical to the generic path; only avoids the per-field
- *        descriptor walk and indirect function-pointer calls it performs.
- * \param wv  WriteValue to initialize; must not be NULL.
- */
-void SOPC_WriteValue_FastInitialize(OpcUa_WriteValue* wv);
-
-/**
- * \brief Internal use only or for content never accessed after call,
-          ::SOPC_Free(wv) shall be done after call and pointer set to NULL.
-          This function free the allocated content in the write value
-          without clearing anything else.
-          It is used internally by the pool to optimize ::SOPC_WriteValuePool_ClearAndFree treatment.
- * \param wv  WriteValue to clear; must not be NULL.
- */
-void SOPC_WriteValue_FastFreeContent(OpcUa_WriteValue* wv);
-
 #endif /* UTIL_WRITE_VALUE_POOL_H_ */

@@ -24,6 +24,7 @@
 
 #include "sopc_encodeabletype.h"
 #include "sopc_types.h"
+#include "util_fast_init_clear.h"
 #include "util_write_value_pool.h"
 
 /* Differential tests: SOPC_WriteValue_FastInitialize must be byte-for-byte

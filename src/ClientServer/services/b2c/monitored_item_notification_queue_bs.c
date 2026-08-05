@@ -34,6 +34,7 @@
 #include "sopc_static_pool.h"
 #include "sopc_toolkit_config_constants.h"
 #include "util_event.h"
+#include "util_fast_init_clear.h"
 #include "util_variant.h"
 #include "util_write_value_pool.h"
 
