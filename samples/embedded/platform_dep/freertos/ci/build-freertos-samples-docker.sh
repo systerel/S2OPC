@@ -137,7 +137,7 @@ C_OPT_CSTD="-std=gnu11 "
 C_OPT_SPECS="--specs=nano.specs "
 C_OPT_F="-ffunction-sections -fdata-sections -fstack-usage"
 C_DEFS="-DUSE_HAL_DRIVER -D${BOARD_HAL}"
-C_DEFS+=" -DSOPC_MAX_SESSION_SUBSCRIPTIONS=3 -DSOPC_MAX_SECURE_CONNECTIONS=6 -DSOPC_MAX_SOCKETS=10 -DSOPC_MAX_SESSIONS=5"
+C_DEFS+=" -DSOPC_MAX_SESSION_SUBSCRIPTIONS=3 -DSOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE=50 -DSOPC_MAX_SECURE_CONNECTIONS=6 -DSOPC_MAX_SOCKETS=10 -DSOPC_MAX_SESSIONS=5"
 C_DEFS+=" -D_RETARGETABLE_LOCKING=1" # Necessary since configuration differs in newlib.h
 [ $OPT_CRYPTO = "mbedtls" ] && C_DEFS+=" -DS2OPC_CRYPTO_MBEDTLS=1"
 C_INCS="-I../Core/Inc -I../Drivers/${BOARD_HAL_Driver}_HAL_Driver/Inc -I../Drivers/${BOARD_HAL_Driver}_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/${BOARD_HAL_Driver}/Include -I../Drivers/CMSIS/RTOS2/Include"
@@ -238,3 +238,4 @@ cat "${LOG_PATH}.err"
 
 # Necessary to avoid issue when doing multiple builds
 rm -rf ${BUILD_DIR}
+
