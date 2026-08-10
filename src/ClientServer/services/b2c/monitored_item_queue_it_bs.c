@@ -30,7 +30,8 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-static SOPC_SLinkedListIterator gIterator = NULL;
+static SOPC_CircularQueueIterator gIterator;
+static bool gIteratorValid = false;
 
 void monitored_item_queue_it_bs__INITIALISATION(void)
 { /*Translated from B but an intialisation is not needed from this module.*/
@@ -48,10 +49,10 @@ void monitored_item_queue_it_bs__continue_iter_monitored_item(
 {
     SOPC_UNUSED_ARG(monitored_item_queue_it_bs__p_queue);
     SOPC_UNUSED_ARG(monitored_item_queue_it_bs__p_iterator);
-    SOPC_ASSERT(NULL != gIterator);
+    SOPC_ASSERT(gIteratorValid);
     *monitored_item_queue_it_bs__p_monitoredItem =
-        (constants__t_monitoredItemPointer_i*) SOPC_SLinkedList_Next(&gIterator);
-    *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(&gIterator);
+        (constants__t_monitoredItemPointer_i*) SOPC_CircularQueue_Next(&gIterator);
+    *monitored_item_queue_it_bs__continue = SOPC_CircularQueue_HasNext(&gIterator);
 }
 
 void monitored_item_queue_it_bs__init_iter_monitored_item(
@@ -61,15 +62,13 @@ void monitored_item_queue_it_bs__init_iter_monitored_item(
 {
     *monitored_item_queue_it_bs__continue = false;
     *monitored_item_queue_it_bs__iterator = constants__c_monitoredItemQueueIterator_indet;
-    SOPC_ASSERT(NULL == gIterator);
-    if (SOPC_SLinkedList_GetLength(monitored_item_queue_it_bs__p_queue) > 0)
+    SOPC_ASSERT(!gIteratorValid);
+    if (SOPC_CircularQueueAutoGrow_GetLength(monitored_item_queue_it_bs__p_queue) > 0)
     {
-        gIterator = SOPC_SLinkedList_GetIterator(monitored_item_queue_it_bs__p_queue);
-        if (gIterator != NULL)
-        {
-            *monitored_item_queue_it_bs__iterator = &gIterator;
-            *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(&gIterator);
-        }
+        gIterator = SOPC_CircularQueueAutoGrow_GetIterator(monitored_item_queue_it_bs__p_queue);
+        gIteratorValid = true;
+        *monitored_item_queue_it_bs__iterator = &gIterator;
+        *monitored_item_queue_it_bs__continue = SOPC_CircularQueue_HasNext(&gIterator);
     }
 }
 
@@ -77,5 +76,5 @@ void monitored_item_queue_it_bs__clear_iter_monitored_item(
     const constants__t_monitoredItemQueueIterator_i monitored_item_queue_it_bs__p_iterator)
 {
     SOPC_UNUSED_ARG(monitored_item_queue_it_bs__p_iterator);
-    gIterator = NULL;
+    gIteratorValid = false;
 }

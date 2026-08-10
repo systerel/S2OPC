@@ -38,11 +38,13 @@ void monitored_item_queue_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+
 void monitored_item_queue_bs__allocate_new_monitored_item_queue(
     t_bool* const monitored_item_queue_bs__bres,
     constants__t_monitoredItemQueue_i* const monitored_item_queue_bs__queue)
 {
-    *monitored_item_queue_bs__queue = SOPC_SLinkedList_Create(0);
+    *monitored_item_queue_bs__queue =
+        SOPC_CircularQueueAutoGrow_Create(SOPC_SUBSCRIPTION_MONITORED_ITEM_QUEUE_INITIAL_SIZE);
     if (*monitored_item_queue_bs__queue == NULL)
     {
         *monitored_item_queue_bs__bres = false;
@@ -56,8 +58,8 @@ void monitored_item_queue_bs__allocate_new_monitored_item_queue(
 void monitored_item_queue_bs__clear_and_deallocate_monitored_item_queue(
     const constants__t_monitoredItemQueue_i monitored_item_queue_bs__p_queue)
 {
-    // No deallocation: done in UNINITIALISATION in monitored_item_pointer_bs
-    SOPC_SLinkedList_Delete(monitored_item_queue_bs__p_queue);
+    // No deallocation for queue elements: done in UNINITIALISATION in monitored_item_pointer_bs
+    SOPC_CircularQueueAutoGrow_Delete(monitored_item_queue_bs__p_queue);
 }
 
 void monitored_item_queue_bs__add_monitored_item_to_queue(
@@ -66,8 +68,8 @@ void monitored_item_queue_bs__add_monitored_item_to_queue(
     t_bool* const monitored_item_queue_bs__bres)
 {
     SOPC_InternalMonitoredItem* mi = (SOPC_InternalMonitoredItem*) monitored_item_queue_bs__p_monitoredItem;
-    void* res = (void*) SOPC_SLinkedList_Append(monitored_item_queue_bs__p_queue, mi->monitoredItemId, (uintptr_t) mi);
-    *monitored_item_queue_bs__bres = (res == mi);
+    uintptr_t res = SOPC_CircularQueueAutoGrow_Append(monitored_item_queue_bs__p_queue, (uintptr_t) mi);
+    *monitored_item_queue_bs__bres = (res == (uintptr_t) mi);
 }
 
 void monitored_item_queue_bs__remove_monitored_item(
@@ -77,7 +79,6 @@ void monitored_item_queue_bs__remove_monitored_item(
 {
     SOPC_InternalMonitoredItem* mi = (SOPC_InternalMonitoredItem*) monitored_item_queue_bs__p_monitoredItem;
 
-    constants__t_monitoredItemPointer_i* res = (constants__t_monitoredItemPointer_i*) SOPC_SLinkedList_RemoveFromId(
-        monitored_item_queue_bs__p_queue, mi->monitoredItemId);
-    *monitored_item_queue_bs__bres = (res != NULL);
+    uintptr_t res = SOPC_CircularQueueAutoGrow_RemoveValue(monitored_item_queue_bs__p_queue, (uintptr_t) mi);
+    *monitored_item_queue_bs__bres = (res != 0);
 }

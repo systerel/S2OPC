@@ -255,6 +255,20 @@
 #define SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE (SOPC_MAX_NOTIFICATION_QUEUE_SIZE / 2)
 #endif
 
+/** @brief Initial capacity of the MonitoredItem queue of a Subscription (auto-grows, doubling,
+ *         as more MonitoredItems are created; this only sizes the first allocation). */
+#ifndef SOPC_SUBSCRIPTION_MONITORED_ITEM_QUEUE_INITIAL_SIZE
+#define SOPC_SUBSCRIPTION_MONITORED_ITEM_QUEUE_INITIAL_SIZE 16
+#endif
+
+/** @brief Initial capacity of the MonitoredItem queue kept for each watched Node (auto-grows, doubling,
+ *         if several MonitoredItems watch the same Node). Kept low by default since there can be as
+ *         many of these queues as distinct watched Nodes, and most Nodes are watched by a single
+ *         MonitoredItem. */
+#ifndef SOPC_NODE_MONITORED_ITEM_QUEUE_INITIAL_SIZE
+#define SOPC_NODE_MONITORED_ITEM_QUEUE_INITIAL_SIZE 2
+#endif
+
 /* TRANSLATE BROWSE PATH MANAGEMENT */
 
 /** @brief Maximum number of matches to return for a given relative path

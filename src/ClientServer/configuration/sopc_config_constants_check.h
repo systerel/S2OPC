@@ -156,6 +156,15 @@
 #error "Default number of event notification queue size cannot be <= 0"
 #endif
 
+/* Initial capacities of the auto-growing MonitoredItem queues */
+#if SOPC_SUBSCRIPTION_MONITORED_ITEM_QUEUE_INITIAL_SIZE <= 0
+#error "Initial capacity of the subscription MonitoredItem queue cannot be <= 0"
+#endif
+
+#if SOPC_NODE_MONITORED_ITEM_QUEUE_INITIAL_SIZE <= 0
+#error "Initial capacity of the Node MonitoredItem queue cannot be <= 0"
+#endif
+
 /* Maximum number of tranlate browse path matches */
 #if SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES < 0
 #error "Maximum number of tranlate browse path matches cannot be < 0"

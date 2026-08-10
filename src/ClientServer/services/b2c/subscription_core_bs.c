@@ -40,9 +40,9 @@ SOPC_Dict* nodeIdToMonitoredItemQueue = NULL;
 
 static void free_monitored_item_queue(uintptr_t data)
 {
-    SOPC_SLinkedList* miQueue = (SOPC_SLinkedList*) data;
+    SOPC_CircularQueueAutoGrow* miQueue = (SOPC_CircularQueueAutoGrow*) data;
     // No deallocation for queue elements: done in UNINITIALISATION in monitored_item_pointer_bs
-    SOPC_SLinkedList_Delete(miQueue);
+    SOPC_CircularQueueAutoGrow_Delete(miQueue);
 }
 
 /*------------------------
@@ -143,7 +143,7 @@ void subscription_core_bs__get_nodeToMonitoredItemQueue(
     constants__t_monitoredItemQueue_i* const subscription_core_bs__p_monitoredItemQueue)
 {
     *subscription_core_bs__p_bres = false;
-    *subscription_core_bs__p_monitoredItemQueue = (SOPC_SLinkedList*) SOPC_Dict_Get(
+    *subscription_core_bs__p_monitoredItemQueue = (SOPC_CircularQueueAutoGrow*) SOPC_Dict_Get(
         nodeIdToMonitoredItemQueue, (uintptr_t) subscription_core_bs__p_nid, subscription_core_bs__p_bres);
 }
 
@@ -156,7 +156,7 @@ void subscription_core_bs__get_or_create_nodeToMonitoredItemQueue(
     *subscription_core_bs__p_monitoredItemQueue = constants__c_monitoredItemQueue_indet;
     bool valFound = false;
     bool valAdded = false;
-    SOPC_SLinkedList* monitoredItemQueue = NULL;
+    SOPC_CircularQueueAutoGrow* monitoredItemQueue = NULL;
     subscription_core_bs__get_nodeToMonitoredItemQueue(subscription_core_bs__p_nid, &valFound, &monitoredItemQueue);
     if (valFound)
     {
@@ -167,7 +167,7 @@ void subscription_core_bs__get_or_create_nodeToMonitoredItemQueue(
         // Insert a new allocated queue for the new nodeId
 
         SOPC_NodeId* nid = SOPC_Malloc(sizeof(SOPC_NodeId));
-        monitoredItemQueue = SOPC_SLinkedList_Create(0);
+        monitoredItemQueue = SOPC_CircularQueueAutoGrow_Create(SOPC_NODE_MONITORED_ITEM_QUEUE_INITIAL_SIZE);
 
         SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
 
@@ -197,7 +197,7 @@ void subscription_core_bs__get_or_create_nodeToMonitoredItemQueue(
         }
         else
         {
-            SOPC_SLinkedList_Delete(monitoredItemQueue);
+            SOPC_CircularQueueAutoGrow_Delete(monitoredItemQueue);
             monitoredItemQueue = NULL;
             SOPC_Free(nid);
         }

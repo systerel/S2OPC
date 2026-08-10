@@ -40,6 +40,7 @@
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_circular_queue.h"
+#include "sopc_circular_queue_autogrow.h"
 #include "sopc_enum_types.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_singly_linked_list.h"
@@ -124,8 +125,8 @@ typedef OpcUa_EventFilterResult* constants_bs__t_filterResult_i;
 typedef OpcUa_HistoryReadValueId* constants_bs__t_historyReadValueId_i;
 typedef uint32_t constants_bs__t_monitoredItemId_i;
 typedef void* constants_bs__t_monitoredItemPointer_i;
-typedef SOPC_SLinkedListIterator* constants_bs__t_monitoredItemQueueIterator_i;
-typedef SOPC_SLinkedList* constants_bs__t_monitoredItemQueue_i;
+typedef SOPC_CircularQueueIterator* constants_bs__t_monitoredItemQueueIterator_i;
+typedef SOPC_CircularQueueAutoGrow* constants_bs__t_monitoredItemQueue_i;
 typedef void* constants_bs__t_monitoringFilterCtx_i;
 typedef SOPC_ExtensionObject* constants_bs__t_monitoringFilter_i;
 typedef void* constants_bs__t_msg_header_i; /* OpcUa_RequestHeader OR OpcUa_ResponseHeader */
