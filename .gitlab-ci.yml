@@ -679,6 +679,13 @@ test-unit-all-builds:
   <<: *test_linux
   image: com.systerel.fr:5000/c838/uactt-linux@sha256:3f1eb2312da5cd6b8ff031773c6860bc456ada6a6e93d4addbc8277408c56da6 # uactt-linux:1.11
   timeout: 1h # set job timeout to 1 hour
+  # Allow two retries for this test due to a known intermittent hang on the UACTT side (not S2OPC).
+  # The script launch_acceptance_tests.sh exits with code 3 specifically when UACTT is killed 
+  # by its internal timeout before writing a result file (i.e., no test report is generated, and it is not a test failure).
+  # However, GitLab ignores this return code and always marks the job as failed (return code 1), making it impossible to distinguish the cause.
+  retry:
+    max: 2
+    when: script_failure
   variables:
     RUNNER_SCRIPT_TIMEOUT: 50m # only allow script to run for 50 minutes (10 minutes remains to upload artifacts)
   script:
