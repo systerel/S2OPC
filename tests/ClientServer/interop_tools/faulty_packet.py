@@ -499,15 +499,30 @@ def single_client(scenario_context, logger) :
 ###############################################################################
 
 # Audit log messages.
-AUDIT_FAIL_CLO = r'AUDIT\s*{\s*"0:ReceiveTime":".*?",\s*"0:ClientAuditEntryId":".*?",\s*"0:SourceNode":"i=2253",\s*"0:Status":"false",\s*"0:Time":".*?",\s*'\
-                 r'"0:SourceName":"SecureChannel/CloseSecureChannel",\s*"0:EventId":".*?",\s*"0:ActionTimeStamp":".*?",\s*'\
-                 r'"0:LocalTime":"<ExtensionObject>",\s*"0:Severity":"10",\s*"0:EventType":"i=2059",\s*'\
-                 r'"0:Message":"[^"]*? Failure .*?'
+#
+# Each AUDIT line is built by iterating a hash dictionary of event fields into a fixed
+# 512-byte buffer (SOPC_LOG_MAX_USER_LINE_LENGTH, see event_To_JSON() in libs2opc_server.c):
+# fields beyond the 512th byte are silently dropped, and which fields survive depends on the
+# dictionary's hash-bucket order (e.g. it shifted when ticket #1803 switched the hash function
+# used for the event field dictionary from DJB to FNV1a). The exact set/order of surviving
+# fields is therefore not a stable contract, so these checks only require each identifying
+# field to be present anywhere on the AUDIT line, and accept either the legacy Status/SourceName
+# fields or their StatusCodeId/ClientUserId equivalents (the server always sets both).
+AUDIT_FAIL_CLO = [
+    r'"0:EventType":"i=2059"',
+    r'"0:Severity":"10"',
+    r'"0:SourceNode":"i=2253"',
+    r'"0:(?:Status":"false"|StatusCodeId":"OpcUa_Bad\w*")',
+    r'"0:Message":"[^"]*? Failure when receiving a message on the secure connection',
+]
 
-AUDIT_FAIL_CLOSE_SESSION = r'AUDIT\s*{\s*"0:ReceiveTime":".*?",\s*"0:ClientAuditEntryId":".*?",\s*"0:SourceNode":"i=2253",\s*"0:Status":"false",\s*'\
-                           r'"0:EventId":".*?",\s*"0:SessionId":"i=0",\s*"0:SourceName":"Session/CloseSession",\s*"0:Time":".*?",\s*"0:ActionTimeStamp":".*?",\s*'\
-                           r'"0:LocalTime":"<ExtensionObject>",\s*"0:Severity":"10",\s*"0:EventType":"i=2069",\s*'\
-                           r'"0:Message":"[^"]*? Session with invalid id .*'
+AUDIT_FAIL_CLOSE_SESSION = [
+    r'"0:EventType":"i=2069"',
+    r'"0:Severity":"10"',
+    r'"0:SessionId":"i=0"',
+    r'"0:(?:Status":"false"|StatusCodeId":"OpcUa_Bad\w*")',
+    r'"0:Message":"[^"]*? Session with invalid id',
+]
 
 def run_scenario(scenario, logger) :
     signal.alarm(TIMEOUT)
@@ -559,11 +574,15 @@ def run_scenario(scenario, logger) :
     signal.alarm(0)
     return status
 
-def parseLog(file, message):
-    pattern = re.compile(message)
+def parseLog(file, patterns):
+    """Return True if some single AUDIT line in `file` matches every regex in `patterns`,
+    regardless of the order in which the fields appear on that line."""
+    compiled = [re.compile(p) for p in patterns]
     with open(file, 'r', encoding='utf-8') as f:
-        content = f.read()
-        return bool(pattern.search(content))
+        for line in f:
+            if 'AUDIT {' in line and all(p.search(line) for p in compiled):
+                return True
+    return False
 
 ###############################################################################
 # MAIN
