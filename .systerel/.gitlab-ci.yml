@@ -748,10 +748,9 @@ test-faulty-packets :
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}_test_faulty'
     paths:
-      - 'build_faulty/bin/**/*.log'
-      - '/tmp/browse_packets.txt'
-      - 'tests/ClientServer/scripts/*.tap'
-    when: on_failure
+      - 'build_faulty/bin/**/*.log'      
+      - 'tests/ClientServer/**/*.tap'
+    when: always
     expire_in: "1 week"
   rules :
     - if: "$ALL_BUILDS != null"
