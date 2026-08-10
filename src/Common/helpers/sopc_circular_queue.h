@@ -36,10 +36,44 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "sopc_macros.h"
+
 /**
- * \brief Opaque fixed-capacity circular queue of uintptr_t values.
+ * \brief Internal representation of the fixed-capacity circular queue of uintptr_t values.
+ * \warning It SHALL NOT be used directly and only allows possible inline of functions for optimization.
  */
-typedef struct SOPC_CircularQueue SOPC_CircularQueue;
+typedef struct SOPC_CircularQueue
+{
+    /**
+     * Heap-allocated ring buffer of value slots.
+     * Size is \c allocatedCap entries; only the \c length entries from \c head
+     * hold live values. Remaining slots are unused (cleared to 0 on pop).
+     */
+    uintptr_t* slots;
+    /**
+     * Index of the oldest element (logical head / FIFO front).
+     * Valid in [0, allocatedCap - 1]. Undefined when \c length is 0 (reset to 0
+     * by Clear).
+     */
+    uint32_t head;
+    /**
+     * Number of live elements currently stored in the ring.
+     * Always <= \c maxLength and <= \c allocatedCap.
+     */
+    uint32_t length;
+    /**
+     * Logical capacity: maximum number of elements the caller may store.
+     * Enforced by Append / Prepend. May be less than \c allocatedCap after a
+     * shrink via SetCapacity (buffer is kept oversized to avoid realloc).
+     */
+    uint32_t maxLength;
+    /**
+     * Physical size of \c slots (number of uintptr_t entries allocated).
+     * Equals \c maxLength at Create. Grows when SetCapacity raises capacity
+     * above the current allocation; never shrinks when capacity is lowered.
+     */
+    uint32_t allocatedCap;
+} SOPC_CircularQueue;
 
 /**
  * \brief Iterator over queue elements from head (oldest) to tail (newest).
@@ -196,7 +230,14 @@ void SOPC_CircularQueue_Delete(SOPC_CircularQueue* queue);
  * \param queue  The queue.
  * \return      Length, or 0 if NULL.
  */
-uint32_t SOPC_CircularQueue_GetLength(SOPC_CircularQueue* queue);
+static SOPC_STRONG_INLINE uint32_t SOPC_CircularQueue_GetLength(SOPC_CircularQueue* queue)
+{
+    if (NULL == queue)
+    {
+        return 0;
+    }
+    return queue->length;
+}
 
 /**
  * \brief Get the maximum number of elements allowed.

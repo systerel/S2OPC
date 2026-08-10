@@ -30,41 +30,7 @@
 
 #include "sopc_circular_queue.h"
 
-#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-
-struct SOPC_CircularQueue
-{
-    /**
-     * Heap-allocated ring buffer of value slots.
-     * Size is \c allocatedCap entries; only the \c length entries from \c head
-     * hold live values. Remaining slots are unused (cleared to 0 on pop).
-     */
-    uintptr_t* slots;
-    /**
-     * Index of the oldest element (logical head / FIFO front).
-     * Valid in [0, allocatedCap]. Undefined when \c length is 0 (reset to 0
-     * by Clear).
-     */
-    uint32_t head;
-    /**
-     * Number of live elements currently stored in the ring.
-     * Always <= \c maxLength and <= \c allocatedCap.
-     */
-    uint32_t length;
-    /**
-     * Logical capacity: maximum number of elements the caller may store.
-     * Enforced by Append / Prepend. May be less than \c allocatedCap after a
-     * shrink via SetCapacity (buffer is kept oversized to avoid realloc).
-     */
-    uint32_t maxLength;
-    /**
-     * Physical size of \c slots (number of uintptr_t entries allocated).
-     * Equals \c maxLength at Create. Grows when SetCapacity raises capacity
-     * above the current allocation; never shrinks when capacity is lowered.
-     */
-    uint32_t allocatedCap;
-};
 
 SOPC_CircularQueue* SOPC_CircularQueue_Create(size_t sizeMax)
 {
@@ -265,15 +231,6 @@ void SOPC_CircularQueue_Delete(SOPC_CircularQueue* queue)
     SOPC_Free(queue->slots);
     queue->slots = NULL;
     SOPC_Free(queue);
-}
-
-uint32_t SOPC_CircularQueue_GetLength(SOPC_CircularQueue* queue)
-{
-    if (NULL == queue)
-    {
-        return 0;
-    }
-    return queue->length;
 }
 
 uint32_t SOPC_CircularQueue_GetCapacity(SOPC_CircularQueue* queue)
