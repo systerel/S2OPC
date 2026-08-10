@@ -118,18 +118,20 @@ OPERATIONS
 
     StatusCode_service <-- treat_write_request_WriteValues (p_user, p_locales) =
     VAR
+        l_current_ts,
         l_nb_req,
         l_continue,
         l_wvi,
         l_status
     IN
         StatusCode_service := e_sc_ok;
+        l_current_ts <-- get_CurrentTimestamp; /* Server timestamp is the current one */
         l_nb_req <-- get_nb_WriteValue;
         init_data_changed_event(l_nb_req);
         l_continue <-- init_iter_write_request(l_nb_req);
         WHILE l_continue = TRUE DO
             l_continue, l_wvi <-- continue_iter_write_request;
-            l_status <-- treat_write_request_WriteValue (p_user, p_locales, l_wvi);
+            l_status <-- treat_write_request_WriteValue (p_user, p_locales, l_wvi, l_current_ts);
             set_ResponseWrite_StatusCode(l_wvi, l_status)
         INVARIANT
             wreqs_to_iterate <: t_WriteValue &

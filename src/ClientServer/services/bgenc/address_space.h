@@ -21,9 +21,9 @@
 
  File Name            : address_space.h
 
- Date                 : 30/09/2026 12:43:50
+ Date                 : 12/10/2026 15:45:30
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -193,6 +193,7 @@ extern void address_space__treat_write_request_WriteValue(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_WriteValue_i address_space__p_wvi,
+   const constants__t_Timestamp address_space__p_currentTs,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__p_status);
 
 #endif

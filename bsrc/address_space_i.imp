@@ -419,7 +419,7 @@ OPERATIONS
     END
     ;
 
-    p_status <-- treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
+    p_status <-- treat_write_request_WriteValue (p_user, p_locales, p_wvi, p_currentTs) =
     VAR
         l_aid,
         l_nid,
@@ -438,8 +438,7 @@ OPERATIONS
         l_new_sc,
         l_new_val,
         l_new_val_sc,
-        l_new_val_ts_src,
-        l_new_val_ts_srv
+        l_new_val_ts_src
     IN
         l_isvalid, l_status1, l_nid, l_aid, l_dataValue, l_index_range, l_bypass_masks <-- getall_WriteValue(p_wvi);
         /* Avoids the IFs with a local operation. */
@@ -453,10 +452,9 @@ OPERATIONS
                and to retrieve all LocalizedText alternatives */
             /* Variable(Type) node class / Value attribute are guaranteed by success of treat_write_1 */
             l_new_sc, l_new_val, l_new_val_sc, l_new_val_ts_src <-- read_AddressSpace_Raw_Node_Value_value (l_node, l_nid, l_aid);
-            l_new_val_ts_srv <-- get_CurrentTimestamp; /* Server timestamp is the current one */
             IF l_new_sc = e_sc_ok THEN
                 /* Shall be called before gen_data_changed_event which takes ownership of l_prev_dataValue content */
-                eval_write_internal_behavior (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv)
+                eval_write_internal_behavior (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, p_currentTs)
             END;
             l_access_read <-- has_access_level_read(l_node);
             /* Check access level: read access right <=> data change event for subscription */
@@ -466,7 +464,7 @@ OPERATIONS
             */
             IF l_access_read = TRUE THEN
                 IF l_new_sc = e_sc_ok THEN
-                    gen_data_changed_event (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv)
+                    gen_data_changed_event (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, p_currentTs)
                 ELSE
                     gen_data_changed_event_failed
                 END

@@ -51,14 +51,16 @@ OPERATIONS
     d_adsp_operations;
     d_adsp_add_node_internal_operation_bs;
 
-    p_status <-- treat_write_request_WriteValue (p_user, p_locales, p_wvi) =
+    p_status <-- treat_write_request_WriteValue (p_user, p_locales, p_wvi, p_currentTs) =
     PRE
         p_user : t_user_i &
         p_user : t_user &
         p_locales : t_LocaleIds_i &
         p_locales : t_LocaleIds &
         p_wvi : t_WriteValue_i &
-        p_wvi : t_WriteValue
+        p_wvi : t_WriteValue &
+        p_currentTs : t_Timestamp &
+        p_currentTs /= c_Timestamp_null
     THEN
         LET dataValue, index_range, nid, aid, bypass_masks BE
             dataValue = WriteValue_DataValue(p_wvi) &

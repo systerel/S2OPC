@@ -21,7 +21,7 @@
 
  File Name            : service_write_1.c
 
- Date                 : 30/10/2025 16:59:46
+ Date                 : 10/08/2026 14:45:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -65,12 +65,14 @@ void service_write_1__treat_write_request_WriteValues(
    const constants__t_LocaleIds_i service_write_1__p_locales,
    constants_statuscodes_bs__t_StatusCode_i * const service_write_1__StatusCode_service) {
    {
+      constants__t_Timestamp service_write_1__l_current_ts;
       t_entier4 service_write_1__l_nb_req;
       t_bool service_write_1__l_continue;
       constants__t_WriteValue_i service_write_1__l_wvi;
       constants_statuscodes_bs__t_StatusCode_i service_write_1__l_status;
       
       *service_write_1__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
+      constants__get_CurrentTimestamp(&service_write_1__l_current_ts);
       service_write_decode_bs__get_nb_WriteValue(&service_write_1__l_nb_req);
       address_space__init_data_changed_event(service_write_1__l_nb_req);
       service_write_1_it__init_iter_write_request(service_write_1__l_nb_req,
@@ -81,6 +83,7 @@ void service_write_1__treat_write_request_WriteValues(
          address_space__treat_write_request_WriteValue(service_write_1__p_user,
             service_write_1__p_locales,
             service_write_1__l_wvi,
+            service_write_1__l_current_ts,
             &service_write_1__l_status);
          response_write_bs__set_ResponseWrite_StatusCode(service_write_1__l_wvi,
             service_write_1__l_status);

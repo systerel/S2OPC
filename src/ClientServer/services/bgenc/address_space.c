@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 12/10/2026 13:06:54
+ Date                 : 12/10/2026 15:45:30
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -108,6 +108,7 @@ void address_space__treat_write_request_WriteValue(
    const constants__t_user_i address_space__p_user,
    const constants__t_LocaleIds_i address_space__p_locales,
    const constants__t_WriteValue_i address_space__p_wvi,
+   const constants__t_Timestamp address_space__p_currentTs,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__p_status) {
    {
       constants__t_AttributeId_i address_space__l_aid;
@@ -128,7 +129,6 @@ void address_space__treat_write_request_WriteValue(
       constants__t_Variant_i address_space__l_new_val;
       constants__t_RawStatusCode address_space__l_new_val_sc;
       constants__t_Timestamp address_space__l_new_val_ts_src;
-      constants__t_Timestamp address_space__l_new_val_ts_srv;
       
       service_write_decode_bs__getall_WriteValue(address_space__p_wvi,
          &address_space__l_isvalid,
@@ -161,7 +161,6 @@ void address_space__treat_write_request_WriteValue(
             &address_space__l_new_val,
             &address_space__l_new_val_sc,
             &address_space__l_new_val_ts_src);
-         constants__get_CurrentTimestamp(&address_space__l_new_val_ts_srv);
          if (address_space__l_new_sc == constants_statuscodes_bs__e_sc_ok) {
             eval_write_internal_cb_bs__eval_write_internal_behavior(address_space__l_nid,
                address_space__l_aid,
@@ -169,7 +168,7 @@ void address_space__treat_write_request_WriteValue(
                address_space__l_new_val,
                address_space__l_new_val_sc,
                address_space__l_new_val_ts_src,
-               address_space__l_new_val_ts_srv);
+               address_space__p_currentTs);
          }
          address_space_authorization__has_access_level_read(address_space__l_node,
             &address_space__l_access_read);
@@ -181,7 +180,7 @@ void address_space__treat_write_request_WriteValue(
                   address_space__l_new_val,
                   address_space__l_new_val_sc,
                   address_space__l_new_val_ts_src,
-                  address_space__l_new_val_ts_srv);
+                  address_space__p_currentTs);
             }
             else {
                gen_subscription_event_bs__gen_data_changed_event_failed();
