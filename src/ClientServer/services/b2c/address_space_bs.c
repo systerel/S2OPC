@@ -830,8 +830,8 @@ void address_space_bs__read_AddressSpace_UserAccessLevel_value(
     SOPC_Byte userAccessLevel = 0;
     if (address_space_bs__p_is_user_read_auth)
     {
-        // Keep supported read flags
-        userAccessLevel = accessLevel & SOPC_AccessLevelMask_CurrentRead;
+        // Keep supported read flags (include HistoryRead for UA Expert History Trend View)
+        userAccessLevel = accessLevel & (SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_HistoryRead);
     }
     if (address_space_bs__p_is_user_write_auth)
     {
