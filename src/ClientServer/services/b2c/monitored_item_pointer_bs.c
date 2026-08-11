@@ -583,7 +583,8 @@ static SOPC_ReturnStatus compare_monitored_item_LT_values(char** localeIds,
     }
     if (NULL != tmpNewValue)
     {
-        status = SOPC_Variant_CompareRange(tmpOldValue, tmpNewValue, numRange, comparison);
+        *comparison = SOPC_Variant_EqualRange(tmpOldValue, tmpNewValue, numRange) ? 0 : 1;
+        status = SOPC_STATUS_OK;
     }
     SOPC_Variant_Delete(tmpOldValue);
     SOPC_Variant_Delete(tmpNewValue);
@@ -634,7 +635,8 @@ static SOPC_STRONG_INLINE SOPC_ReturnStatus compare_monitored_item_values(char**
         }
         else
         {
-            status = SOPC_Variant_CompareRange(oldValue, newValue, numRange, comparison);
+            *comparison = SOPC_Variant_EqualRange(oldValue, newValue, numRange) ? 0 : 1;
+            status = SOPC_STATUS_OK;
         }
     }
     return status;
