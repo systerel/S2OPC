@@ -79,6 +79,7 @@ int main(void)
     srunner_add_suite(sr, tests_make_suite_event_handler());
     srunner_add_suite(sr, tests_make_suite_common_helper_thread_config());
     srunner_add_suite(sr, tests_make_suite_numeric_range());
+    srunner_add_suite(sr, tests_make_suite_variant_equal());
     srunner_add_suite(sr, tests_make_suite_users());
     srunner_add_suite(sr, tests_make_suite_B_base_machines());
     srunner_add_suite(sr, tests_make_suite_encodeable_types());

@@ -973,6 +973,7 @@ SOPC_ReturnStatus SOPC_XmlElement_Compare(const SOPC_XmlElement* left,
                                           const SOPC_XmlElement* right,
                                           int32_t* comparison);
 SOPC_ReturnStatus SOPC_XmlElement_CompareAux(const void* left, const void* right, int32_t* comparison);
+bool SOPC_XmlElement_Equal(const SOPC_XmlElement* left, const SOPC_XmlElement* right);
 void SOPC_XmlElement_Clear(SOPC_XmlElement* xmlElt);
 void SOPC_XmlElement_ClearAux(void* value);
 
@@ -1082,6 +1083,7 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_Compare(const SOPC_ExpandedNodeId* left,
                                               const SOPC_ExpandedNodeId* right,
                                               int32_t* comparison);
 SOPC_ReturnStatus SOPC_ExpandedNodeId_CompareAux(const void* left, const void* right, int32_t* comparison);
+bool SOPC_ExpandedNodeId_Equal(const SOPC_ExpandedNodeId* left, const SOPC_ExpandedNodeId* right);
 void SOPC_ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId);
 void SOPC_ExpandedNodeId_ClearAux(void* value);
 
@@ -1104,6 +1106,7 @@ SOPC_ReturnStatus SOPC_DiagnosticInfo_Compare(const SOPC_DiagnosticInfo* left,
                                               const SOPC_DiagnosticInfo* right,
                                               int32_t* comparison);
 SOPC_ReturnStatus SOPC_DiagnosticInfo_CompareAux(const void* left, const void* right, int32_t* comparison);
+bool SOPC_DiagnosticInfo_Equal(const SOPC_DiagnosticInfo* left, const SOPC_DiagnosticInfo* right);
 void SOPC_DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo);
 void SOPC_DiagnosticInfo_ClearAux(void* value);
 
@@ -1117,6 +1120,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Compare(const SOPC_QualifiedName* left,
                                              const SOPC_QualifiedName* right,
                                              int32_t* comparison);
 SOPC_ReturnStatus SOPC_QualifiedName_CompareAux(const void* left, const void* right, int32_t* comparison);
+bool SOPC_QualifiedName_Equal(const SOPC_QualifiedName* left, const SOPC_QualifiedName* right);
 void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname);
 void SOPC_QualifiedName_ClearAux(void* value);
 SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, const char* str);
@@ -1138,6 +1142,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_Compare(const SOPC_LocalizedText* left,
                                              const SOPC_LocalizedText* right,
                                              int32_t* comparison);
 SOPC_ReturnStatus SOPC_LocalizedText_CompareAux(const void* left, const void* right, int32_t* comparison);
+bool SOPC_LocalizedText_Equal(const SOPC_LocalizedText* left, const SOPC_LocalizedText* right);
 void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText);
 void SOPC_LocalizedText_ClearAux(void* value);
 
@@ -1355,6 +1360,18 @@ SOPC_ReturnStatus SOPC_Variant_CompareCustomRange(SOPC_VariantValue_PfnCompCusto
                                                   const SOPC_NumericRange* range,
                                                   int32_t* comparison);
 
+bool SOPC_Variant_Equal(const SOPC_Variant* left, const SOPC_Variant* right);
+
+/**
+ * \brief Same as ::SOPC_Variant_Equal, restricted to the given numeric range if not NULL (see
+ *        ::SOPC_Variant_GetRange for range semantics on the extracted sub-variants).
+ * \note  Any internal failure (NULL arguments, an unsupported type, or a ::SOPC_Variant_GetRange
+ *        failure) is reported as "not equal" (\c false) rather than surfaced separately - callers
+ *        that need to distinguish a real inequality from an error should use
+ *        ::SOPC_Variant_CompareRange instead.
+ */
+bool SOPC_Variant_EqualRange(const SOPC_Variant* left, const SOPC_Variant* right, const SOPC_NumericRange* range);
+
 void SOPC_Variant_Clear(SOPC_Variant* variant);
 void SOPC_Variant_ClearAux(void* value);
 void SOPC_Variant_Delete(SOPC_Variant* variant);
@@ -1434,6 +1451,8 @@ SOPC_ReturnStatus SOPC_DataValue_CompareRange(const SOPC_DataValue* left,
                                               const SOPC_DataValue* right,
                                               const SOPC_NumericRange* range,
                                               int32_t* comparison);
+bool SOPC_DataValue_Equal(const SOPC_DataValue* left, const SOPC_DataValue* right);
+bool SOPC_DataValue_EqualRange(const SOPC_DataValue* left, const SOPC_DataValue* right, const SOPC_NumericRange* range);
 void SOPC_DataValue_Clear(SOPC_DataValue* dataValue);
 void SOPC_DataValue_ClearAux(void* value);
 

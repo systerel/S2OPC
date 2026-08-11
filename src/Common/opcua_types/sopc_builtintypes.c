@@ -1371,6 +1371,11 @@ SOPC_ReturnStatus SOPC_XmlElement_CompareAux(const void* left, const void* right
     return SOPC_ByteString_Compare((const SOPC_ByteString*) left, (const SOPC_ByteString*) right, comparison);
 }
 
+bool SOPC_XmlElement_Equal(const SOPC_XmlElement* left, const SOPC_XmlElement* right)
+{
+    return SOPC_ByteString_Equal((const SOPC_ByteString*) left, (const SOPC_ByteString*) right);
+}
+
 void SOPC_XmlElement_ClearAux(void* value)
 {
     SOPC_XmlElement_Clear((SOPC_XmlElement*) value);
@@ -2330,6 +2335,16 @@ SOPC_ReturnStatus SOPC_ExpandedNodeId_CompareAux(const void* left, const void* r
                                        comparison);
 }
 
+bool SOPC_ExpandedNodeId_Equal(const SOPC_ExpandedNodeId* left, const SOPC_ExpandedNodeId* right)
+{
+    if (NULL == left || NULL == right)
+    {
+        return false;
+    }
+    return SOPC_NodeId_Equal(&left->NodeId, &right->NodeId) && left->ServerIndex == right->ServerIndex &&
+           SOPC_String_Equal(&left->NamespaceUri, &right->NamespaceUri);
+}
+
 void SOPC_ExpandedNodeId_ClearAux(void* value)
 {
     SOPC_ExpandedNodeId_Clear((SOPC_ExpandedNodeId*) value);
@@ -2552,6 +2567,29 @@ SOPC_ReturnStatus SOPC_DiagnosticInfo_CompareAux(const void* left, const void* r
                                        comparison);
 }
 
+bool SOPC_DiagnosticInfo_Equal(const SOPC_DiagnosticInfo* left, const SOPC_DiagnosticInfo* right)
+{
+    if (NULL == left || NULL == right)
+    {
+        return false;
+    }
+    if (left->SymbolicId != right->SymbolicId || left->NamespaceUri != right->NamespaceUri ||
+        left->Locale != right->Locale || left->LocalizedText != right->LocalizedText)
+    {
+        return false;
+    }
+    // Note: InnerStatusCode is intentionally not compared, same as SOPC_DiagnosticInfo_Compare
+    if (!SOPC_String_Equal(&left->AdditionalInfo, &right->AdditionalInfo))
+    {
+        return false;
+    }
+    if (NULL == left->InnerDiagnosticInfo && NULL == right->InnerDiagnosticInfo)
+    {
+        return true;
+    }
+    return SOPC_DiagnosticInfo_Equal(left->InnerDiagnosticInfo, right->InnerDiagnosticInfo);
+}
+
 void SOPC_DiagnosticInfo_ClearAux(void* value)
 {
     SOPC_DiagnosticInfo_Clear((SOPC_DiagnosticInfo*) value);
@@ -2639,6 +2677,15 @@ SOPC_ReturnStatus SOPC_QualifiedName_Compare(const SOPC_QualifiedName* left,
 SOPC_ReturnStatus SOPC_QualifiedName_CompareAux(const void* left, const void* right, int32_t* comparison)
 {
     return SOPC_QualifiedName_Compare((const SOPC_QualifiedName*) left, (const SOPC_QualifiedName*) right, comparison);
+}
+
+bool SOPC_QualifiedName_Equal(const SOPC_QualifiedName* left, const SOPC_QualifiedName* right)
+{
+    if (NULL == left || NULL == right)
+    {
+        return false;
+    }
+    return left->NamespaceIndex == right->NamespaceIndex && SOPC_String_Equal(&left->Name, &right->Name);
 }
 
 void SOPC_QualifiedName_ClearAux(void* value)
@@ -2870,6 +2917,69 @@ SOPC_ReturnStatus SOPC_LocalizedText_Compare(const SOPC_LocalizedText* left,
 SOPC_ReturnStatus SOPC_LocalizedText_CompareAux(const void* left, const void* right, int32_t* comparison)
 {
     return SOPC_LocalizedText_Compare((const SOPC_LocalizedText*) left, (const SOPC_LocalizedText*) right, comparison);
+}
+
+static bool SOPC_LocalizedText_Equal_Internal(int recursionLimit,
+                                              const SOPC_LocalizedText* left,
+                                              const SOPC_LocalizedText* right)
+{
+    if (recursionLimit < 0)
+    {
+        return false;
+    }
+    recursionLimit--;
+
+    if (NULL == left || NULL == right)
+    {
+        return false;
+    }
+    if (!SOPC_String_Equal(&left->defaultLocale, &right->defaultLocale))
+    {
+        return false;
+    }
+    if (!SOPC_String_Equal(&left->defaultText, &right->defaultText))
+    {
+        return false;
+    }
+
+    if (NULL != left->localizedTextList && NULL != right->localizedTextList)
+    {
+        const uint32_t lengthLeft = SOPC_SLinkedList_GetLength(left->localizedTextList);
+        const uint32_t lengthRight = SOPC_SLinkedList_GetLength(right->localizedTextList);
+        if (lengthLeft != lengthRight)
+        {
+            return false;
+        }
+        SOPC_SLinkedListIterator itLeft = SOPC_SLinkedList_GetIterator(left->localizedTextList);
+        SOPC_SLinkedListIterator itRight = SOPC_SLinkedList_GetIterator(right->localizedTextList);
+        while (SOPC_SLinkedList_HasNext(&itLeft))
+        {
+            SOPC_LocalizedText* ltLeft = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&itLeft);
+            SOPC_LocalizedText* ltRight = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&itRight);
+            SOPC_ASSERT(NULL != ltLeft);
+            SOPC_ASSERT(NULL != ltRight);
+            if (!SOPC_LocalizedText_Equal_Internal(recursionLimit, ltLeft, ltRight))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    if (NULL != left->localizedTextList)
+    {
+        return 0 == SOPC_SLinkedList_GetLength(left->localizedTextList);
+    }
+    if (NULL != right->localizedTextList)
+    {
+        return 0 == SOPC_SLinkedList_GetLength(right->localizedTextList);
+    }
+    return true;
+}
+
+bool SOPC_LocalizedText_Equal(const SOPC_LocalizedText* left, const SOPC_LocalizedText* right)
+{
+    // Only 1 level of LocalizedText contained in a LocalizedText is authorized, same as SOPC_LocalizedText_Compare
+    return SOPC_LocalizedText_Equal_Internal(1, left, right);
 }
 
 SOPC_ReturnStatus SOPC_LocalizedText_CopyAux(void* dest, const void* src)
@@ -4576,6 +4686,363 @@ SOPC_ReturnStatus SOPC_Variant_CompareRange(const SOPC_Variant* left,
                                            comparison);
 }
 
+static bool VariantEqual_ScalarValue(SOPC_BuiltinId builtInTypeId,
+                                     const SOPC_VariantValue* left,
+                                     const SOPC_VariantValue* right)
+{
+    switch (builtInTypeId)
+    {
+    case SOPC_Null_Id:
+        return true;
+    case SOPC_Boolean_Id:
+        return left->Boolean == right->Boolean;
+    case SOPC_SByte_Id:
+        return left->Sbyte == right->Sbyte;
+    case SOPC_Byte_Id:
+        return left->Byte == right->Byte;
+    case SOPC_Int16_Id:
+        return left->Int16 == right->Int16;
+    case SOPC_UInt16_Id:
+        return left->Uint16 == right->Uint16;
+    case SOPC_Int32_Id:
+        return left->Int32 == right->Int32;
+    case SOPC_UInt32_Id:
+        return left->Uint32 == right->Uint32;
+    case SOPC_Int64_Id:
+        return left->Int64 == right->Int64;
+    case SOPC_UInt64_Id:
+        return left->Uint64 == right->Uint64;
+    case SOPC_Float_Id:
+    {
+        int32_t cmp = 0;
+        SOPC_ReturnStatus status = SOPC_Float_CompareAux(&left->Floatv, &right->Floatv, &cmp);
+        return SOPC_STATUS_OK == status && 0 == cmp;
+    }
+    case SOPC_Double_Id:
+    {
+        int32_t cmp = 0;
+        SOPC_ReturnStatus status = SOPC_Double_CompareAux(&left->Doublev, &right->Doublev, &cmp);
+        return SOPC_STATUS_OK == status && 0 == cmp;
+    }
+    case SOPC_String_Id:
+        return SOPC_String_Equal(&left->String, &right->String);
+    case SOPC_DateTime_Id:
+        return left->Date == right->Date;
+    case SOPC_Guid_Id:
+        return NULL != left->Guid && NULL != right->Guid && 0 == memcmp(left->Guid, right->Guid, sizeof(SOPC_Guid));
+    case SOPC_ByteString_Id:
+        return SOPC_ByteString_Equal(&left->Bstring, &right->Bstring);
+    case SOPC_XmlElement_Id:
+        return SOPC_XmlElement_Equal(&left->XmlElt, &right->XmlElt);
+    case SOPC_NodeId_Id:
+        return SOPC_NodeId_Equal(left->NodeId, right->NodeId);
+    case SOPC_ExpandedNodeId_Id:
+        return SOPC_ExpandedNodeId_Equal(left->ExpNodeId, right->ExpNodeId);
+    case SOPC_StatusCode_Id:
+        return left->Status == right->Status;
+    case SOPC_QualifiedName_Id:
+        return SOPC_QualifiedName_Equal(left->Qname, right->Qname);
+    case SOPC_LocalizedText_Id:
+        return SOPC_LocalizedText_Equal(left->LocalizedText, right->LocalizedText);
+    case SOPC_ExtensionObject_Id:
+    {
+        int32_t cmp = 0;
+        SOPC_ReturnStatus status = SOPC_ExtensionObject_Compare(left->ExtObject, right->ExtObject, &cmp);
+        return SOPC_STATUS_OK == status && 0 == cmp;
+    }
+    case SOPC_DataValue_Id:
+        return SOPC_DataValue_Equal(left->DataValue, right->DataValue);
+    case SOPC_Variant_Id:
+        // Part 6 Table 14: a Variant shall not directly contain a Variant as a scalar value
+        return false;
+    case SOPC_DiagnosticInfo_Id:
+        return SOPC_DiagnosticInfo_Equal(left->DiagInfo, right->DiagInfo);
+    default:
+        return false;
+    }
+}
+
+// Check if this type is Plain Old Data (continuous memory block)
+static bool VariantEqual_IsPodBuiltInType(SOPC_BuiltinId builtInTypeId)
+{
+    switch (builtInTypeId)
+    {
+    case SOPC_Boolean_Id:
+    case SOPC_SByte_Id:
+    case SOPC_Byte_Id:
+    case SOPC_Int16_Id:
+    case SOPC_UInt16_Id:
+    case SOPC_Int32_Id:
+    case SOPC_UInt32_Id:
+    case SOPC_Int64_Id:
+    case SOPC_UInt64_Id:
+    case SOPC_DateTime_Id:
+    case SOPC_Guid_Id:
+    case SOPC_StatusCode_Id:
+        return true;
+    default:
+        return false;
+    }
+}
+
+typedef bool(VariantEqual_PfnEqualElt)(const void* left, const void* right);
+
+static bool VariantEqual_StringElt(const void* left, const void* right)
+{
+    return SOPC_String_Equal((const SOPC_String*) left, (const SOPC_String*) right);
+}
+
+static bool VariantEqual_ByteStringElt(const void* left, const void* right)
+{
+    return SOPC_ByteString_Equal((const SOPC_ByteString*) left, (const SOPC_ByteString*) right);
+}
+
+static bool VariantEqual_XmlElementElt(const void* left, const void* right)
+{
+    return SOPC_XmlElement_Equal((const SOPC_XmlElement*) left, (const SOPC_XmlElement*) right);
+}
+
+static bool VariantEqual_NodeIdElt(const void* left, const void* right)
+{
+    return SOPC_NodeId_Equal((const SOPC_NodeId*) left, (const SOPC_NodeId*) right);
+}
+
+static bool VariantEqual_ExpandedNodeIdElt(const void* left, const void* right)
+{
+    return SOPC_ExpandedNodeId_Equal((const SOPC_ExpandedNodeId*) left, (const SOPC_ExpandedNodeId*) right);
+}
+
+static bool VariantEqual_QualifiedNameElt(const void* left, const void* right)
+{
+    return SOPC_QualifiedName_Equal((const SOPC_QualifiedName*) left, (const SOPC_QualifiedName*) right);
+}
+
+static bool VariantEqual_LocalizedTextElt(const void* left, const void* right)
+{
+    return SOPC_LocalizedText_Equal((const SOPC_LocalizedText*) left, (const SOPC_LocalizedText*) right);
+}
+
+static bool VariantEqual_DiagnosticInfoElt(const void* left, const void* right)
+{
+    return SOPC_DiagnosticInfo_Equal((const SOPC_DiagnosticInfo*) left, (const SOPC_DiagnosticInfo*) right);
+}
+
+static bool VariantEqual_DataValueElt(const void* left, const void* right)
+{
+    return SOPC_DataValue_Equal((const SOPC_DataValue*) left, (const SOPC_DataValue*) right);
+}
+
+static bool VariantEqual_VariantElt(const void* left, const void* right)
+{
+    return SOPC_Variant_Equal((const SOPC_Variant*) left, (const SOPC_Variant*) right);
+}
+
+static VariantEqual_PfnEqualElt* VariantEqual_GetEltEqualFunction(SOPC_BuiltinId builtInTypeId)
+{
+    switch (builtInTypeId)
+    {
+    case SOPC_Null_Id:
+    case SOPC_Boolean_Id:
+    case SOPC_SByte_Id:
+    case SOPC_Byte_Id:
+    case SOPC_Int16_Id:
+    case SOPC_UInt16_Id:
+    case SOPC_Int32_Id:
+    case SOPC_UInt32_Id:
+    case SOPC_Int64_Id:
+    case SOPC_UInt64_Id:
+    case SOPC_Float_Id:
+    case SOPC_Double_Id:
+    case SOPC_DateTime_Id:
+    case SOPC_Guid_Id:
+    case SOPC_StatusCode_Id:
+    case SOPC_ExtensionObject_Id:
+        // POD types are handled by the memcmp path above and never reach this dispatch; Float/Double
+        // must keep NaN-parity via SOPC_Float_CompareAux/SOPC_Double_CompareAux, not a raw-field
+        // _Equal; ExtensionObject has no dedicated _Equal (see design doc: its Object-encoded case
+        // recurses through the open-ended encodeable-object registry). All fall back to compareFct.
+        return NULL;
+    case SOPC_String_Id:
+        return VariantEqual_StringElt;
+    case SOPC_ByteString_Id:
+        return VariantEqual_ByteStringElt;
+    case SOPC_XmlElement_Id:
+        return VariantEqual_XmlElementElt;
+    case SOPC_NodeId_Id:
+        return VariantEqual_NodeIdElt;
+    case SOPC_ExpandedNodeId_Id:
+        return VariantEqual_ExpandedNodeIdElt;
+    case SOPC_QualifiedName_Id:
+        return VariantEqual_QualifiedNameElt;
+    case SOPC_LocalizedText_Id:
+        return VariantEqual_LocalizedTextElt;
+    case SOPC_DiagnosticInfo_Id:
+        return VariantEqual_DiagnosticInfoElt;
+    case SOPC_DataValue_Id:
+        return VariantEqual_DataValueElt;
+    case SOPC_Variant_Id:
+        return VariantEqual_VariantElt;
+    default:
+        return NULL;
+    }
+}
+
+static bool VariantEqual_ArrayContent(SOPC_BuiltinId builtInTypeId,
+                                      const SOPC_VariantArrayValue* arrayLeft,
+                                      const SOPC_VariantArrayValue* arrayRight,
+                                      int32_t length)
+{
+    if (0 == length)
+    {
+        return true;
+    }
+    if (length < 0 || builtInTypeId > SOPC_BUILTINID_MAX)
+    {
+        return false;
+    }
+    if (SOPC_Null_Id == builtInTypeId || NULL == arrayLeft->BooleanArr || NULL == arrayRight->BooleanArr)
+    {
+        // A NULL array is not a valid Variant content (mirrors SOPC_Variant_CompareCustom).
+        // The 0-length short-circuit above intentionally precedes this check, so a 0-length
+        // Null-typed array is treated as equal — a degenerate, wire-unreachable case where this
+        // diverges from SOPC_Variant_Compare's SOPC_STATUS_NOT_SUPPORTED for any Null-typed array.
+        return false;
+    }
+    size_t sizeOfElt = SOPC_BuiltInType_HandlingTable[builtInTypeId].size;
+    if (VariantEqual_IsPodBuiltInType(builtInTypeId))
+    {
+        // No internal pointers/heap content in these types (Guid has no struct padding), so a
+        // single memcmp over the flat buffer replaces the per-element indirect-call loop below.
+        return 0 == memcmp(arrayLeft->BooleanArr, arrayRight->BooleanArr, (size_t) length * sizeOfElt);
+    }
+    SOPC_EncodeableObject_PfnComp* compareFct = NULL;
+    VariantEqual_PfnEqualElt* equalFct = VariantEqual_GetEltEqualFunction(builtInTypeId);
+    if (NULL == equalFct)
+    {
+        compareFct = GetBuiltInTypeCompFunction(builtInTypeId);
+        if (NULL == compareFct)
+        {
+            return false;
+        }
+    }
+    const SOPC_Byte* byteArrayLeft = (const SOPC_Byte*) arrayLeft->BooleanArr;
+    const SOPC_Byte* byteArrayRight = (const SOPC_Byte*) arrayRight->BooleanArr;
+    for (int32_t idx = 0; idx < length; idx++)
+    {
+        size_t pos = (size_t) idx * sizeOfElt;
+        if (NULL != equalFct)
+        {
+            if (!equalFct(&byteArrayLeft[pos], &byteArrayRight[pos]))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            int32_t cmp = 0;
+            SOPC_ReturnStatus status = compareFct(&byteArrayLeft[pos], &byteArrayRight[pos], &cmp);
+            if (SOPC_STATUS_OK != status || 0 != cmp)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+static bool VariantEqual_Matrix(const SOPC_Variant* left, const SOPC_Variant* right)
+{
+    if (left->Value.Matrix.Dimensions != right->Value.Matrix.Dimensions)
+    {
+        return false;
+    }
+    int64_t matrixLength = 1; // For multiplication to compute from dimensions values
+    for (int32_t idx = 0; idx < left->Value.Matrix.Dimensions; idx++)
+    {
+        int32_t dimLeft = left->Value.Matrix.ArrayDimensions[idx];
+        int32_t dimRight = right->Value.Matrix.ArrayDimensions[idx];
+        if (dimLeft != dimRight)
+        {
+            return false;
+        }
+        if (dimLeft <= 0 || matrixLength * dimLeft > INT32_MAX)
+        {
+            return false;
+        }
+        matrixLength *= dimLeft;
+    }
+    if (matrixLength <= 0 || matrixLength > INT32_MAX)
+    {
+        return false;
+    }
+    return VariantEqual_ArrayContent(left->BuiltInTypeId, &left->Value.Matrix.Content, &right->Value.Matrix.Content,
+                                     (int32_t) matrixLength);
+}
+
+bool SOPC_Variant_Equal(const SOPC_Variant* left, const SOPC_Variant* right)
+{
+    if (NULL == left || NULL == right)
+    {
+        return false;
+    }
+    if (left->BuiltInTypeId != right->BuiltInTypeId || left->ArrayType != right->ArrayType)
+    {
+        return false;
+    }
+    switch (left->ArrayType)
+    {
+    case SOPC_VariantArrayType_SingleValue:
+        return VariantEqual_ScalarValue(left->BuiltInTypeId, &left->Value, &right->Value);
+    case SOPC_VariantArrayType_Array:
+        if (left->Value.Array.Length != right->Value.Array.Length)
+        {
+            return false;
+        }
+        return VariantEqual_ArrayContent(left->BuiltInTypeId, &left->Value.Array.Content, &right->Value.Array.Content,
+                                         left->Value.Array.Length);
+    case SOPC_VariantArrayType_Matrix:
+        return VariantEqual_Matrix(left, right);
+    default:
+        return false;
+    }
+}
+
+bool SOPC_Variant_EqualRange(const SOPC_Variant* left, const SOPC_Variant* right, const SOPC_NumericRange* range)
+{
+    if (NULL == left || NULL == right)
+    {
+        return false;
+    }
+    if (NULL == range)
+    {
+        return SOPC_Variant_Equal(left, right);
+    }
+
+    SOPC_Variant* leftSub = SOPC_Variant_Create();
+    SOPC_Variant* rightSub = SOPC_Variant_Create();
+    if (NULL == leftSub || NULL == rightSub)
+    {
+        SOPC_Variant_Delete(leftSub);
+        SOPC_Variant_Delete(rightSub);
+        return false;
+    }
+
+    SOPC_ReturnStatus status = SOPC_Variant_GetRange(leftSub, left, range);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Variant_GetRange(rightSub, right, range);
+    }
+    bool equal = false;
+    if (SOPC_STATUS_OK == status)
+    {
+        equal = SOPC_Variant_Equal(leftSub, rightSub);
+    }
+
+    SOPC_Variant_Delete(leftSub);
+    SOPC_Variant_Delete(rightSub);
+    return equal;
+}
+
 SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src)
 {
     return SOPC_Variant_Copy((SOPC_Variant*) dest, (const SOPC_Variant*) src);
@@ -5100,6 +5567,26 @@ SOPC_ReturnStatus SOPC_DataValue_CompareRange(const SOPC_DataValue* left,
         }
     }
     return status;
+}
+
+bool SOPC_DataValue_EqualRange(const SOPC_DataValue* left, const SOPC_DataValue* right, const SOPC_NumericRange* range)
+{
+    if (NULL == left || NULL == right)
+    {
+        return false;
+    }
+    if (left->Status != right->Status || left->ServerTimestamp != right->ServerTimestamp ||
+        left->ServerPicoSeconds != right->ServerPicoSeconds || left->SourceTimestamp != right->SourceTimestamp ||
+        left->SourcePicoSeconds != right->SourcePicoSeconds)
+    {
+        return false;
+    }
+    return SOPC_Variant_EqualRange(&left->Value, &right->Value, range);
+}
+
+bool SOPC_DataValue_Equal(const SOPC_DataValue* left, const SOPC_DataValue* right)
+{
+    return SOPC_DataValue_EqualRange(left, right, NULL);
 }
 
 SOPC_ReturnStatus SOPC_DataValue_CopyAux(void* dest, const void* src)

@@ -70,6 +70,8 @@ Suite* tests_make_suite_common_helper_thread_config(void);
 
 Suite* tests_make_suite_numeric_range(void);
 
+Suite* tests_make_suite_variant_equal(void);
+
 Suite* tests_make_suite_users(void);
 
 Suite* tests_make_suite_B_base_machines(void);
