@@ -21,7 +21,7 @@
 
  File Name            : namespace_uri.h
 
- Date                 : 17/02/2026 11:16:55
+ Date                 : 13/08/2026 08:11:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -65,6 +65,6 @@ extern void namespace_uri__getall_namespace_Reference_Node(
    constants__t_NodeId_i * const namespace_uri__p_nodeId);
 extern void namespace_uri__ref_maybe_get_NamespaceUri(
    const constants__t_Reference_i namespace_uri__p_ref,
-   constants__t_Variant_i * const namespace_uri__p_maybe_val_NamespaceUri);
+   constants__t_ReadOnlyVariant_i * const namespace_uri__p_maybe_val_NamespaceUri);
 
 #endif

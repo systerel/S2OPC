@@ -61,13 +61,11 @@ void default_role_permissions_array_bs__add_DefaultRolePermissions_at_idx(
     {
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "DefaultRolePermissions added for NS=%" PRIu16 ".",
                                default_role_permissions_array_bs__p_idx - 1);
-        // Note: due to above-mentioned verification, it cannot be NULL variant
+        // Important Note: since this is computed only once and DRP shall be static in server, we keep a shallow copy of
+        // content
         a_defaultRolePermissions[default_role_permissions_array_bs__p_idx - 1] =
             *default_role_permissions_array_bs__p_DefaultRolePermissions;
     }
-
-    // Free the variant structure since we put its content in the array.
-    SOPC_Free(default_role_permissions_array_bs__p_DefaultRolePermissions);
 }
 
 void default_role_permissions_array_bs__address_space_default_role_permissions_array_bs_UNINITIALISATION(void)
@@ -83,25 +81,8 @@ void default_role_permissions_array_bs__get_DefaultRolePermissions_at_idx(
     constants__t_RolePermissionTypes_i* const default_role_permissions_array_bs__p_DefaultRolePermissions)
 {
     SOPC_ASSERT(NULL != a_defaultRolePermissions);
-    *default_role_permissions_array_bs__p_DefaultRolePermissions = constants__c_RolePermissionTypes_indet;
-    if (default_role_permissions_array_bs__p_idx < nbr_of_namespaces)
-    {
-        // TODO: try to avoid that ? In addition I think we never return the result in a message for now.
-        // We need to create a variant to have similar behavior than when read_AddressSpace_RolePermissions is
-        // used. Thus we create a shallow copy of the variant.
-        SOPC_Variant* variant = SOPC_Variant_Create();
-        // Note: model guarantees a previous call to has_DefaultRolePermissions_at_idx which ensure value is not null
-        SOPC_ReturnStatus status =
-            SOPC_Variant_ShallowCopy(variant, &a_defaultRolePermissions[default_role_permissions_array_bs__p_idx]);
-        if (SOPC_STATUS_OK == status)
-        {
-            *default_role_permissions_array_bs__p_DefaultRolePermissions = variant;
-        }
-        else
-        {
-            SOPC_Variant_Delete(variant);
-        }
-    }
+    *default_role_permissions_array_bs__p_DefaultRolePermissions =
+        &a_defaultRolePermissions[default_role_permissions_array_bs__p_idx];
 }
 
 void default_role_permissions_array_bs__has_DefaultRolePermissions_at_idx(

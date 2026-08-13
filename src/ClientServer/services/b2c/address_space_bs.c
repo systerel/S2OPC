@@ -39,6 +39,7 @@
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_date_time.h"
+#include "sopc_enums.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -56,6 +57,10 @@ static bool sopc_addressSpace_configured = false;
 
 /* For prev_dataValue in set_Value: its lifetime is a single WriteValue processing, singleton avoid useless alloc */
 static SOPC_DataValue setValueTmpDataValue = {0};
+/* For read_AddressSpace_RolePermissions: its lifetime is single processing, singleton avoid useless alloc.
+ * Note: there is internal allocated memory that is managed only in this module: always clear on UNINIT
+ */
+static SOPC_Variant rolePermVarSingleton = {0};
 
 #define GENERATED_NODE_NAMESPACE_INDEX 1
 
@@ -91,6 +96,7 @@ void address_space_bs__address_space_bs_UNINITIALISATION(void)
 {
     address_space_bs__nodes = NULL;
     sopc_addressSpace_configured = false;
+    SOPC_Variant_Clear(&rolePermVarSingleton);
 }
 
 static void generate_notifs_after_address_space_access(SOPC_AddressSpaceAccessOperations* operations)
@@ -770,7 +776,7 @@ void address_space_bs__read_AddressSpace_Raw_Node_Value_value(
     const constants__t_NodeId_i address_space_bs__p_nid,
     const constants__t_AttributeId_i address_space_bs__p_aid,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
-    constants__t_Variant_i* const address_space_bs__variant,
+    constants__t_ReadOnlyVariant_i* const address_space_bs__variant,
     constants__t_RawStatusCode* const address_space_bs__val_sc,
     constants__t_Timestamp* const address_space_bs__val_ts_src)
 {
@@ -784,8 +790,7 @@ void address_space_bs__read_AddressSpace_Raw_Node_Value_value(
     *address_space_bs__val_ts_src = constants_bs__c_Timestamp_null;
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
 
-    *address_space_bs__variant = util_variant__new_Variant_from_Variant(
-        SOPC_AddressSpace_Get_Value(address_space_bs__nodes, address_space_bs__p_node), false);
+    *address_space_bs__variant = SOPC_AddressSpace_Get_Value(address_space_bs__nodes, address_space_bs__p_node);
     if (NULL == *address_space_bs__variant)
     {
         return;
@@ -803,11 +808,55 @@ void address_space_bs__read_AddressSpace_Raw_Node_Value_value(
     }
 }
 
+static const SOPC_Variant* fill_variant_from_RolePermissions(SOPC_Variant* variantToFill,
+                                                             OpcUa_RolePermissionType* rolePermissionsArray,
+                                                             int32_t noOfRolePermissions,
+                                                             SOPC_ReturnStatus* fillStatus)
+{
+    SOPC_ASSERT(fillStatus != NULL);
+    SOPC_ASSERT(noOfRolePermissions > 0 && rolePermissionsArray != NULL);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    bool res = false;
+
+    // Initialize variant and create extObjects.
+    res = SOPC_Variant_Initialize_Array(variantToFill, SOPC_ExtensionObject_Id, noOfRolePermissions);
+    if (res)
+    {
+        // Variant extensionObjects are now allocated.
+        for (int32_t i = 0; i < noOfRolePermissions; i++)
+        {
+            // Create the encodeableObject that will be pointed by the extensionObjects in the variant.
+            OpcUa_RolePermissionType* rolePerm = NULL;
+            status = SOPC_ExtensionObject_CreateObject(&variantToFill->Value.Array.Content.ExtObjectArr[i],
+                                                       &OpcUa_RolePermissionType_EncodeableType, (void**) &rolePerm);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_EncodeableObject_Copy(&OpcUa_RolePermissionType_EncodeableType, (void*) rolePerm,
+                                                    (const void*) &rolePermissionsArray[i]);
+            }
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Variant_Clear(variantToFill);
+    }
+    *fillStatus = status;
+    return variantToFill;
+}
+
 void address_space_bs__read_AddressSpace_RolePermissions(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_RolePermissionTypes_i* const address_space_bs__rolePermissions)
 {
+    SOPC_Variant_Clear(&rolePermVarSingleton);
+
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_not_found;
     *address_space_bs__rolePermissions = constants_bs__c_RolePermissionTypes_indet;
     int32_t* node_noOfRolePermissions =
@@ -818,9 +867,10 @@ void address_space_bs__read_AddressSpace_RolePermissions(
         OpcUa_RolePermissionType** rolePermissions =
             SOPC_AddressSpace_Get_RolePermissions(address_space_bs__nodes, address_space_bs__p_node);
         // Variant contains some RolePermissions, it is checked by construction.
-        *address_space_bs__rolePermissions =
-            util_variant__new_Variant_from_RolePermissions(*rolePermissions, *node_noOfRolePermissions);
-        if (NULL == *address_space_bs__rolePermissions)
+        SOPC_ReturnStatus fillStatus = SOPC_STATUS_OK;
+        *address_space_bs__rolePermissions = fill_variant_from_RolePermissions(&rolePermVarSingleton, *rolePermissions,
+                                                                               *node_noOfRolePermissions, &fillStatus);
+        if (SOPC_STATUS_OK != fillStatus)
         {
             *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
         }

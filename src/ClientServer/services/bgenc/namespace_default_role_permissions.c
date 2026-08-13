@@ -21,7 +21,7 @@
 
  File Name            : namespace_default_role_permissions.c
 
- Date                 : 31/10/2024 15:35:56
+ Date                 : 12/10/2026 14:03:35
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -85,7 +85,7 @@ void namespace_default_role_permissions__namespacemetadata_and_uri_match(
       constants__t_Reference_i namespace_default_role_permissions__l_ref;
       t_bool namespace_default_role_permissions__l_bres;
       constants__t_RolePermissionTypes_i namespace_default_role_permissions__l_val_DefaultRolePermissions;
-      constants__t_Variant_i namespace_default_role_permissions__l_val_NamespaceUri;
+      constants__t_ReadOnlyVariant_i namespace_default_role_permissions__l_val_NamespaceUri;
       
       *namespace_default_role_permissions__p_maybe_val_DefaultRolePermissions = constants__c_RolePermissionTypes_indet;
       namespace_default_role_permissions__l_val_DefaultRolePermissions = constants__c_RolePermissionTypes_indet;
@@ -105,19 +105,15 @@ void namespace_default_role_permissions__namespacemetadata_and_uri_match(
             }
             namespace_uri__ref_maybe_get_NamespaceUri(namespace_default_role_permissions__l_ref,
                &namespace_default_role_permissions__l_val_NamespaceUri);
-            if (namespace_default_role_permissions__l_val_NamespaceUri != constants__c_Variant_indet) {
+            if (namespace_default_role_permissions__l_val_NamespaceUri != constants__c_ReadOnlyVariant_indet) {
                namespaces_uri_eval_bs__compare_namespaceUri_and_value_uri(namespace_default_role_permissions__p_namespaceUri,
                   namespace_default_role_permissions__l_val_NamespaceUri,
                   namespace_default_role_permissions__p_bres);
             }
-            address_space_bs__read_AddressSpace_free_variant(namespace_default_role_permissions__l_val_NamespaceUri);
          }
       }
       if (*namespace_default_role_permissions__p_bres == true) {
          *namespace_default_role_permissions__p_maybe_val_DefaultRolePermissions = namespace_default_role_permissions__l_val_DefaultRolePermissions;
-      }
-      else {
-         namespace_default_role_permissions_value__delete_rolePermissions(namespace_default_role_permissions__l_val_DefaultRolePermissions);
       }
    }
 }

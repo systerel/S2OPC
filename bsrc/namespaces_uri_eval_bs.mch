@@ -27,17 +27,17 @@ ABSTRACT_VARIABLES
     a_variant_value_uri
 
 INVARIANT
-    a_variant_value_uri : t_Variant +-> t_NamespaceUri
+    a_variant_value_uri : t_ReadOnlyVariant +-> t_NamespaceUri
 
 INITIALISATION
-    a_variant_value_uri :: t_Variant +-> t_NamespaceUri
+    a_variant_value_uri :: t_ReadOnlyVariant +-> t_NamespaceUri
 
 OPERATIONS
     p_bres <-- compare_namespaceUri_and_value_uri(p_namespaceUri, p_variant) =
     PRE
         p_namespaceUri : t_NamespaceUri &
-        p_variant : t_Variant_i &
-        p_variant : t_Variant
+        p_variant : t_ReadOnlyVariant_i &
+        p_variant : t_ReadOnlyVariant
     THEN
         p_bres := bool(a_variant_value_uri(p_variant) = p_namespaceUri)
     END

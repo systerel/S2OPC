@@ -47,10 +47,7 @@ OPERATIONS
     END
     ;
 
-    /* Returns the DRP of the given NS, has_DefaultRolePermissions_at_idx shall have return TRUE prior to this call.
-       Note: we need to create a variant to be consistant with read_AddressSpace_RolePermissions returned value when DRP is not used.
-             The returned DRP shall be freed using delete_rolePermissions after use.
-    */
+    /* Returns the DRP of the given NS, has_DefaultRolePermissions_at_idx shall have return TRUE prior to this call. */
     p_DefaultRolePermissions <-- get_DefaultRolePermissions_at_idx(p_idx) =
     PRE
         p_idx : t_NamespaceIdx &
@@ -66,16 +63,6 @@ OPERATIONS
     address_space_default_role_permissions_array_bs_UNINITIALISATION =
     BEGIN
         a_default_role_permissions :: {{}}
-    END
-    ;
-
-    /* It shall be called on returned DRP by get_DefaultRolePermissions_at_idx after use */
-    delete_rolePermissions(p_rolePermissions) =
-    PRE
-        p_rolePermissions : t_RolePermissionTypes_i &
-        p_rolePermissions : t_RolePermissionTypes
-    THEN
-        skip
     END
 
 END

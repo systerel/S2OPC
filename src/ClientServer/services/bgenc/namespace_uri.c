@@ -21,7 +21,7 @@
 
  File Name            : namespace_uri.c
 
- Date                 : 17/02/2026 11:16:55
+ Date                 : 13/08/2026 08:11:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -74,7 +74,7 @@ void namespace_uri__l_getall_namespace_Reference_Node(
 
 void namespace_uri__ref_maybe_get_NamespaceUri(
    const constants__t_Reference_i namespace_uri__p_ref,
-   constants__t_Variant_i * const namespace_uri__p_maybe_val_NamespaceUri) {
+   constants__t_ReadOnlyVariant_i * const namespace_uri__p_maybe_val_NamespaceUri) {
    {
       t_bool namespace_uri__l_valid;
       constants__t_Node_i namespace_uri__l_ref_target_Node;
@@ -83,11 +83,11 @@ void namespace_uri__ref_maybe_get_NamespaceUri(
       constants__t_QualifiedName_i namespace_uri__l_browseName;
       t_bool namespace_uri__l_browseName_comparison;
       constants_statuscodes_bs__t_StatusCode_i namespace_uri__l_sc;
-      constants__t_Variant_i namespace_uri__l_val;
+      constants__t_ReadOnlyVariant_i namespace_uri__l_val;
       constants__t_RawStatusCode namespace_uri__l_val_sc;
       constants__t_Timestamp namespace_uri__l_val_ts_src;
       
-      *namespace_uri__p_maybe_val_NamespaceUri = constants__c_Variant_indet;
+      *namespace_uri__p_maybe_val_NamespaceUri = constants__c_ReadOnlyVariant_indet;
       namespace_uri__l_NodeClass = constants__c_NodeClass_indet;
       namespace_uri__l_getall_namespace_Reference_Node(namespace_uri__p_ref,
          &namespace_uri__l_valid,

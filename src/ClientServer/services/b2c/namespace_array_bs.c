@@ -31,10 +31,10 @@ void namespace_array_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-static SOPC_Variant* namespace_array_bs__check_and_get_variant(
-    const constants__t_Variant_i namespace_array_bs__p_variant)
+static const SOPC_Variant* namespace_array_bs__check_and_get_variant(
+    constants__t_ReadOnlyVariant_i namespace_array_bs__p_variant)
 {
-    SOPC_Variant* variant = namespace_array_bs__p_variant;
+    const SOPC_Variant* variant = namespace_array_bs__p_variant;
     // Check that the variant contains String[].
     if (NULL == variant || SOPC_String_Id != variant->BuiltInTypeId ||
         SOPC_VariantArrayType_Array != variant->ArrayType)
@@ -44,11 +44,11 @@ static SOPC_Variant* namespace_array_bs__check_and_get_variant(
     return variant;
 }
 
-void namespace_array_bs__read_variant_namespaceUri(const constants__t_Variant_i namespace_array_bs__p_variant,
+void namespace_array_bs__read_variant_namespaceUri(const constants__t_ReadOnlyVariant_i namespace_array_bs__p_variant,
                                                    const t_entier4 namespace_array_bs__p_index,
                                                    constants__t_NamespaceUri* const namespace_array_bs__p_namespaceUri)
 {
-    SOPC_Variant* variant = namespace_array_bs__check_and_get_variant(namespace_array_bs__p_variant);
+    const SOPC_Variant* variant = namespace_array_bs__check_and_get_variant(namespace_array_bs__p_variant);
     SOPC_ASSERT(NULL != variant);
     int32_t length = variant->Value.Array.Length;
     // Check we try to access at a valid index
@@ -56,12 +56,12 @@ void namespace_array_bs__read_variant_namespaceUri(const constants__t_Variant_i 
     *namespace_array_bs__p_namespaceUri = &variant->Value.Array.Content.StringArr[namespace_array_bs__p_index - 1];
 }
 
-void namespace_array_bs__read_variant_nb_namespaceUris(const constants__t_Variant_i namespace_array_bs__p_variant,
+void namespace_array_bs__read_variant_nb_namespaceUris(constants__t_ReadOnlyVariant_i namespace_array_bs__p_variant,
                                                        t_entier4* const namespace_array_bs__p_nb)
 {
     SOPC_ASSERT(NULL != namespace_array_bs__p_nb);
 
-    SOPC_Variant* variant = namespace_array_bs__check_and_get_variant(namespace_array_bs__p_variant);
+    const SOPC_Variant* variant = namespace_array_bs__check_and_get_variant(namespace_array_bs__p_variant);
     if (NULL == variant)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

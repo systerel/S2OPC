@@ -21,7 +21,7 @@
 
  File Name            : address_space_namespaces_indexes_bs.h
 
- Date                 : 29/07/2025 17:01:41
+ Date                 : 13/08/2026 08:11:31
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,7 +49,7 @@ extern void address_space_namespaces_indexes_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void address_space_namespaces_indexes_bs__read_variant_max_namespaceIndex(
-   const constants__t_Variant_i address_space_namespaces_indexes_bs__p_variant,
+   const constants__t_ReadOnlyVariant_i address_space_namespaces_indexes_bs__p_variant,
    t_entier4 * const address_space_namespaces_indexes_bs__p_maxNsIdx);
 
 #endif

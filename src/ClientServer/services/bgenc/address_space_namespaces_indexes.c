@@ -21,7 +21,7 @@
 
  File Name            : address_space_namespaces_indexes.c
 
- Date                 : 16/09/2026 08:15:04
+ Date                 : 12/10/2026 15:50:54
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -52,7 +52,7 @@ void address_space_namespaces_indexes__update_max_namespace_idx(void) {
       t_bool address_space_namespaces_indexes__l_nid_valid;
       constants__t_Node_i address_space_namespaces_indexes__l_Server_NamespaceArray_node;
       constants_statuscodes_bs__t_StatusCode_i address_space_namespaces_indexes__l_sc;
-      constants__t_Variant_i address_space_namespaces_indexes__l_val;
+      constants__t_ReadOnlyVariant_i address_space_namespaces_indexes__l_val;
       constants__t_RawStatusCode address_space_namespaces_indexes__l_val_sc;
       constants__t_Timestamp address_space_namespaces_indexes__l_val_ts_src;
       
@@ -70,7 +70,6 @@ void address_space_namespaces_indexes__update_max_namespace_idx(void) {
          if (address_space_namespaces_indexes__l_sc == constants_statuscodes_bs__e_sc_ok) {
             address_space_namespaces_indexes_bs__read_variant_max_namespaceIndex(address_space_namespaces_indexes__l_val,
                &address_space_namespaces_indexes__a_nsIdxMax_i);
-            address_space_bs__read_AddressSpace_free_variant(address_space_namespaces_indexes__l_val);
          }
       }
    }

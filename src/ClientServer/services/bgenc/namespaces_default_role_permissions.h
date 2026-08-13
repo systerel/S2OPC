@@ -21,7 +21,7 @@
 
  File Name            : namespaces_default_role_permissions.h
 
- Date                 : 17/02/2026 11:16:55
+ Date                 : 13/08/2026 08:11:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -51,11 +51,6 @@
    INITIALISATION Clause
   ------------------------*/
 extern void namespaces_default_role_permissions__INITIALISATION(void);
-
-/*-------------------------------
-   PROMOTES and EXTENDS Clauses
-  -------------------------------*/
-#define namespaces_default_role_permissions__delete_rolePermissions namespace_default_role_permissions__delete_rolePermissions
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

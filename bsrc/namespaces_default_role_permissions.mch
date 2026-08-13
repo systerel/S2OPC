@@ -30,13 +30,5 @@ OPERATIONS
     THEN
         p_val_DefaultRolePermissions :(p_val_DefaultRolePermissions : t_RolePermissionTypes_i)
     END
-    ;
 
-    delete_rolePermissions(p_rolePermissions) =
-    PRE
-        p_rolePermissions : t_RolePermissionTypes_i &
-        p_rolePermissions : t_RolePermissionTypes
-    THEN
-        skip
-    END
 END

@@ -21,7 +21,7 @@
 
  File Name            : address_space_user_permissions.c
 
- Date                 : 03/06/2026 15:58:57
+ Date                 : 13/08/2026 08:11:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -116,7 +116,6 @@ void address_space_user_permissions__read_AddressSpace_UserRolePermissions(
             address_space_user_permissions_bs__add_user_permissions(address_space_user_permissions__p_user,
                address_space_user_permissions__l_user_permissions);
          }
-         address_space_namespaces__delete_rolePermissions(address_space_user_permissions__l_rolePermissions);
          address_space_authorization_session_roles_it_bs__clear_iter_roles();
          address_space_user_permissions_bs__get_merged_user_permissions(address_space_user_permissions__p_user,
             address_space_user_permissions__p_permissions);

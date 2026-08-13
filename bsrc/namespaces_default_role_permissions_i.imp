@@ -23,9 +23,6 @@ IMPLEMENTATION
 REFINES
     namespaces_default_role_permissions
 
-PROMOTES
-    delete_rolePermissions
-
 SEES
     constants,
     address_space_bs

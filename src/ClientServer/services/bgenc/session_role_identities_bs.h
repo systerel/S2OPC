@@ -21,7 +21,7 @@
 
  File Name            : session_role_identities_bs.h
 
- Date                 : 06/09/2024 15:27:01
+ Date                 : 13/08/2026 08:11:41
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,11 +49,11 @@ extern void session_role_identities_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void session_role_identities_bs__read_variant_identity(
-   const constants__t_Variant_i session_role_identities_bs__p_variant,
+   const constants__t_ReadOnlyVariant_i session_role_identities_bs__p_variant,
    const t_entier4 session_role_identities_bs__p_index,
    constants__t_Identity_i * const session_role_identities_bs__p_identity);
 extern void session_role_identities_bs__read_variant_nb_identities(
-   const constants__t_Variant_i session_role_identities_bs__p_variant,
+   const constants__t_ReadOnlyVariant_i session_role_identities_bs__p_variant,
    const constants__t_Node_i session_role_identities_bs__p_node,
    t_entier4 * const session_role_identities_bs__p_nb);
 

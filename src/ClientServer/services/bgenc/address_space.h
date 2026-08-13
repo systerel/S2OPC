@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 12/10/2026 15:45:30
+ Date                 : 12/10/2026 15:50:53
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -168,7 +168,7 @@ extern void address_space__is_mandatory_attribute(
 extern void address_space__read_AddressSpace_Raw_Node_Value_only(
    const constants__t_Node_i address_space__p_node,
    const constants__t_NodeId_i address_space__p_nid,
-   constants__t_Variant_i * const address_space__p_val,
+   constants__t_ReadOnlyVariant_i * const address_space__p_val,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__p_sc);
 extern void address_space__read_Node_Attribute(
    const constants__t_user_i address_space__p_user,

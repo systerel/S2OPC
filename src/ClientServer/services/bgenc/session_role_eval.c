@@ -21,7 +21,7 @@
 
  File Name            : session_role_eval.c
 
- Date                 : 16/09/2026 08:15:33
+ Date                 : 12/10/2026 15:51:11
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -131,7 +131,7 @@ void session_role_eval__role_eval_user(
       constants__t_NodeId_i session_role_eval__l_identities_nodeId;
       t_bool session_role_eval__l_continue;
       constants_statuscodes_bs__t_StatusCode_i session_role_eval__l_sc;
-      constants__t_Variant_i session_role_eval__l_val;
+      constants__t_ReadOnlyVariant_i session_role_eval__l_val;
       t_entier4 session_role_eval__l_nb_identities;
       t_bool session_role_eval__l_bres;
       t_entier4 session_role_eval__l_identityIdx;
@@ -141,7 +141,7 @@ void session_role_eval__role_eval_user(
       session_role_eval__l_nb_identities = 0;
       session_role_eval__l_continue = false;
       session_role_eval__l_sc = constants_statuscodes_bs__e_sc_bad_generic_mask;
-      session_role_eval__l_val = constants__c_Variant_indet;
+      session_role_eval__l_val = constants__c_ReadOnlyVariant_indet;
       session_role_eval__l_get_role_identities_node(session_role_eval__p_role_node,
          &session_role_eval__l_identities_nodeId,
          &session_role_eval__l_identities_node);
@@ -175,7 +175,6 @@ void session_role_eval__role_eval_user(
             *session_role_eval__p_bres = true;
          }
       }
-      address_space_itf__read_AddressSpace_free_variant(session_role_eval__l_val);
    }
 }
 

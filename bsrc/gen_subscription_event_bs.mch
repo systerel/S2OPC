@@ -35,8 +35,8 @@ OPERATIONS
         p_attribute : t_AttributeId &
         p_prev_dataValue : t_DataValue_i &
         p_prev_dataValue : t_DataValue &
-        p_new_val : t_Variant_i &
-        p_new_val : t_Variant &
+        p_new_val : t_ReadOnlyVariant_i &
+        p_new_val : t_ReadOnlyVariant &
         p_new_val_sc : t_RawStatusCode &
         p_new_val_ts_src : t_Timestamp &
         p_new_val_ts_srv : t_Timestamp

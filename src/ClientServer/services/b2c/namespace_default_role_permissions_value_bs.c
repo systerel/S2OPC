@@ -18,7 +18,6 @@
  */
 
 #include "namespace_default_role_permissions_value_bs.h"
-#include "sopc_macros.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -31,10 +30,10 @@ void namespace_default_role_permissions_value_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-static SOPC_Variant* namespace_default_role_permissions_value_bs__check_and_get_variant(
-    const constants__t_Variant_i namespace_array_bs__p_variant)
+static const SOPC_Variant* namespace_default_role_permissions_value_bs__check_and_get_variant(
+    const constants__t_ReadOnlyVariant_i namespace_array_bs__p_variant)
 {
-    SOPC_Variant* variant = namespace_array_bs__p_variant;
+    const SOPC_Variant* variant = namespace_array_bs__p_variant;
     if (NULL == variant)
     {
         return NULL;
@@ -59,16 +58,10 @@ static SOPC_Variant* namespace_default_role_permissions_value_bs__check_and_get_
 }
 
 void namespace_default_role_permissions_value_bs__get_conv_Variant_RolePermissionTypes(
-    const constants__t_Variant_i namespace_default_role_permissions_value_bs__p_variant,
+    const constants__t_ReadOnlyVariant_i namespace_default_role_permissions_value_bs__p_variant,
     constants__t_RolePermissionTypes_i* const namespace_default_role_permissions_value_bs__p_rolePermissions)
 {
-    SOPC_Variant* variant = namespace_default_role_permissions_value_bs__check_and_get_variant(
+    const SOPC_Variant* variant = namespace_default_role_permissions_value_bs__check_and_get_variant(
         namespace_default_role_permissions_value_bs__p_variant);
     *namespace_default_role_permissions_value_bs__p_rolePermissions = variant;
-}
-
-void namespace_default_role_permissions_value_bs__delete_rolePermissions(
-    const constants__t_RolePermissionTypes_i namespace_default_role_permissions_value_bs__p_rolePermissions)
-{
-    SOPC_Variant_Delete(namespace_default_role_permissions_value_bs__p_rolePermissions);
 }

@@ -21,9 +21,9 @@
 
  File Name            : eval_write_internal_cb_bs.h
 
- Date                 : 30/09/2026 12:44:10
+ Date                 : 12/10/2026 15:51:20
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -52,7 +52,7 @@ extern void eval_write_internal_cb_bs__eval_write_internal_behavior(
    const constants__t_NodeId_i eval_write_internal_cb_bs__p_nid,
    const constants__t_AttributeId_i eval_write_internal_cb_bs__p_attribute,
    const constants__t_DataValue_i eval_write_internal_cb_bs__p_prev_dataValue,
-   const constants__t_Variant_i eval_write_internal_cb_bs__p_new_val,
+   const constants__t_ReadOnlyVariant_i eval_write_internal_cb_bs__p_new_val,
    const constants__t_RawStatusCode eval_write_internal_cb_bs__p_new_val_sc,
    const constants__t_Timestamp eval_write_internal_cb_bs__p_new_val_ts_src,
    const constants__t_Timestamp eval_write_internal_cb_bs__p_new_val_ts_srv);

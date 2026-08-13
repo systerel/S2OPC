@@ -61,8 +61,7 @@ OPERATIONS
             IF l_sc = e_sc_ok
             THEN
                 // Get the number of namespaces URIs in the array
-                a_nsIdxMax_i <-- read_variant_max_namespaceIndex(l_val);
-                read_AddressSpace_free_variant(l_val) /* Frees the shallow copy only */
+                a_nsIdxMax_i <-- read_variant_max_namespaceIndex(l_val)
             END
         END
     END

@@ -31,8 +31,7 @@ IMPORTS
     address_space_namespaces_metadata
 
 PROMOTES
-    address_space_default_role_permissions_array_bs_UNINITIALISATION,
-    delete_rolePermissions
+    address_space_default_role_permissions_array_bs_UNINITIALISATION
 
 OPERATIONS
 

@@ -28,19 +28,19 @@ ABSTRACT_VARIABLES
     a_identities
 
 INVARIANT
-    a_variant : t_Variant &
+    a_variant : t_ReadOnlyVariant_i &
     a_identities : seq(t_Identity)
 
 INITIALISATION
-    a_variant := c_Variant_indet ||
+    a_variant := c_ReadOnlyVariant_indet ||
     a_identities := {}
 
 OPERATIONS
 
     p_nb <-- read_variant_nb_identities(p_variant, p_node) =
     PRE
-        p_variant : t_Variant_i &
-        p_variant : t_Variant &
+        p_variant : t_ReadOnlyVariant_i &
+        p_variant : t_ReadOnlyVariant &
         p_node : t_Node_i &
         p_node : t_Node
     THEN
@@ -52,8 +52,8 @@ OPERATIONS
 
     p_identity <-- read_variant_identity(p_variant, p_index) =
     PRE
-        p_variant : t_Variant_i &
-        p_variant : t_Variant &
+        p_variant : t_ReadOnlyVariant_i &
+        p_variant : t_ReadOnlyVariant &
         p_variant = a_variant &
         p_index : NAT1 &
         p_index <= size(a_identities)

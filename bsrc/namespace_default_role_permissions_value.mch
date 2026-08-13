@@ -30,7 +30,7 @@ ABSTRACT_VARIABLES
 
 INVARIANT
     a_ref_default_role_permissions : t_Reference +-> t_RolePermissionTypes_i &
-    a_conv_variant_RolePermissionTypes : t_Variant_i +-> t_RolePermissionTypes_i
+    a_conv_variant_RolePermissionTypes : t_ReadOnlyVariant_i +-> t_RolePermissionTypes_i
 
 INITIALISATION
     a_ref_default_role_permissions := {} ||
@@ -39,8 +39,8 @@ INITIALISATION
 OPERATIONS
     p_rolePermissions <-- get_conv_Variant_RolePermissionTypes(p_variant) =
     PRE
-        p_variant : t_Variant_i &
-        p_variant : t_Variant
+        p_variant : t_ReadOnlyVariant_i &
+        p_variant : t_ReadOnlyVariant
     THEN
         p_rolePermissions := a_conv_variant_RolePermissionTypes(p_variant)
     END
@@ -60,17 +60,8 @@ OPERATIONS
                 a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) = c_DefaultRolePermissions_QualifiedName)) &
             (p_ref : dom(a_ref_default_role_permissions) =>
                 a_ref_default_role_permissions(p_ref) = p_maybe_val_DefaultRolePermissions &
-            p_maybe_val_DefaultRolePermissions = a_conv_variant_RolePermissionTypes(a_Value(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))))) &
+            p_maybe_val_DefaultRolePermissions = a_conv_variant_RolePermissionTypes(conv_Variant_ReadOnly(a_Value(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))))) &
             (p_ref /: dom(a_ref_default_role_permissions) => p_maybe_val_DefaultRolePermissions = c_RolePermissionTypes_indet))
-    END
-    ;
-
-    delete_rolePermissions(p_rolePermissions) =
-    PRE
-        p_rolePermissions : t_RolePermissionTypes_i &
-        p_rolePermissions : t_RolePermissionTypes
-    THEN
-        skip
     END
 
 END

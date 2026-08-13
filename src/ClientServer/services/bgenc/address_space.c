@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 12/10/2026 15:45:30
+ Date                 : 12/10/2026 15:50:53
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -126,7 +126,7 @@ void address_space__treat_write_request_WriteValue(
       t_bool address_space__l_bres_wv_copy;
       constants__t_WriteValuePointer_i address_space__l_wv_copy;
       constants_statuscodes_bs__t_StatusCode_i address_space__l_new_sc;
-      constants__t_Variant_i address_space__l_new_val;
+      constants__t_ReadOnlyVariant_i address_space__l_new_val;
       constants__t_RawStatusCode address_space__l_new_val_sc;
       constants__t_Timestamp address_space__l_new_val_ts_src;
       
@@ -150,7 +150,7 @@ void address_space__treat_write_request_WriteValue(
          address_space__p_status,
          &address_space__l_prev_dataValue,
          &address_space__l_node);
-      address_space__l_new_val = constants__c_Variant_indet;
+      address_space__l_new_val = constants__c_ReadOnlyVariant_indet;
       service_write_decode_bs__getall_WriteValuePointer(address_space__p_wvi,
          &address_space__l_wv);
       if (*address_space__p_status == constants_statuscodes_bs__e_sc_ok) {
@@ -188,7 +188,6 @@ void address_space__treat_write_request_WriteValue(
          }
       }
       address_space_authorization__write_AddressSpace_free_dataValue(address_space__l_prev_dataValue);
-      address_space_authorization__read_AddressSpace_free_variant(address_space__l_new_val);
       address_space_authorization__is_local_service_treatment(&address_space__l_local_treatment);
       if (address_space__l_local_treatment == false) {
          write_value_pointer_bs__copy_write_value_pointer_content(address_space__l_wv,
@@ -617,14 +616,14 @@ void address_space__read_AddressSpace_Attribute_value(
 void address_space__read_AddressSpace_Raw_Node_Value_only(
    const constants__t_Node_i address_space__p_node,
    const constants__t_NodeId_i address_space__p_nid,
-   constants__t_Variant_i * const address_space__p_val,
+   constants__t_ReadOnlyVariant_i * const address_space__p_val,
    constants_statuscodes_bs__t_StatusCode_i * const address_space__p_sc) {
    {
       constants__t_NodeClass_i address_space__l_nodeClass;
       constants__t_RawStatusCode address_space__l_val_sc;
       constants__t_Timestamp address_space__l_val_ts_src;
       
-      *address_space__p_val = constants__c_Variant_indet;
+      *address_space__p_val = constants__c_ReadOnlyVariant_indet;
       *address_space__p_sc = constants_statuscodes_bs__e_sc_bad_node_class_invalid;
       address_space_authorization__get_NodeClass(address_space__p_node,
          &address_space__l_nodeClass);

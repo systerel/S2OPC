@@ -21,7 +21,7 @@
 
  File Name            : namespaces_uri_eval_bs.h
 
- Date                 : 14/08/2024 16:16:47
+ Date                 : 13/08/2026 08:11:38
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -50,7 +50,7 @@ extern void namespaces_uri_eval_bs__INITIALISATION(void);
   --------------------*/
 extern void namespaces_uri_eval_bs__compare_namespaceUri_and_value_uri(
    const constants__t_NamespaceUri namespaces_uri_eval_bs__p_namespaceUri,
-   const constants__t_Variant_i namespaces_uri_eval_bs__p_variant,
+   const constants__t_ReadOnlyVariant_i namespaces_uri_eval_bs__p_variant,
    t_bool * const namespaces_uri_eval_bs__p_bres);
 
 #endif

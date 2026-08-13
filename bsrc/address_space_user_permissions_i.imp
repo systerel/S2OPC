@@ -137,8 +137,6 @@ OPERATIONS
                 card(roles_to_iterate)
             END
             ;
-            // Getting RolePermissions (attribute or DefaultRolePermissions) returns a copy of the variant. Free it.
-            delete_rolePermissions(l_rolePermissions);
             clear_iter_roles;
             p_permissions <-- get_merged_user_permissions(p_user)
         END

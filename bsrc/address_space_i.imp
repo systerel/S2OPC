@@ -443,7 +443,7 @@ OPERATIONS
         l_isvalid, l_status1, l_nid, l_aid, l_dataValue, l_index_range, l_bypass_masks <-- getall_WriteValue(p_wvi);
         /* Avoids the IFs with a local operation. */
         p_status, l_prev_dataValue, l_node <-- treat_write_1(l_isvalid, l_status1, p_user, p_locales, l_nid, l_aid, l_dataValue, l_index_range, l_bypass_masks);
-        l_new_val := c_Variant_indet;
+        l_new_val := c_ReadOnlyVariant_indet;
         l_wv <-- getall_WriteValuePointer(p_wvi);
         /* If write succeeded, generates a data change event for subscriptions */
         IF p_status = e_sc_ok
@@ -471,7 +471,6 @@ OPERATIONS
             END
         END;
         write_AddressSpace_free_dataValue (l_prev_dataValue);
-        read_AddressSpace_free_variant (l_new_val);
         l_local_treatment <-- is_local_service_treatment;
         IF l_local_treatment = FALSE
         THEN
@@ -708,7 +707,7 @@ OPERATIONS
         l_val_sc,
         l_val_ts_src
     IN
-        p_val := c_Variant_indet;
+        p_val := c_ReadOnlyVariant_indet;
         p_sc := e_sc_bad_node_class_invalid;
         l_nodeClass <-- get_NodeClass(p_node);
         IF l_nodeClass = e_ncl_Variable or l_nodeClass = e_ncl_VariableType

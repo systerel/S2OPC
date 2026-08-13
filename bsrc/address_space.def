@@ -1024,12 +1024,12 @@ DEFINITIONS
         p_sc : (
           p_sc : t_StatusCode_i &
           p_sc : t_StatusCode &
-          p_val : t_Variant_i &
+          p_val : t_ReadOnlyVariant_i &
           (a_NodeClass(p_node) = e_ncl_Variable or a_NodeClass(p_node) = e_ncl_VariableType =>
-            (p_val = a_Value(p_node) & p_sc = e_sc_ok or
-             p_val = c_Variant_indet & p_sc = e_sc_bad_out_of_memory)) &
+            (p_val = conv_Variant_ReadOnly(a_Value(p_node)) & p_sc = e_sc_ok or
+             p_val = c_ReadOnlyVariant_indet & p_sc = e_sc_bad_out_of_memory)) &
           (not(a_NodeClass(p_node) = e_ncl_Variable or a_NodeClass(p_node) = e_ncl_VariableType) =>
-             p_val = c_Variant_indet & p_sc = e_sc_bad_node_class_invalid))
+             p_val = c_ReadOnlyVariant_indet & p_sc = e_sc_bad_node_class_invalid))
     END
     ;
 

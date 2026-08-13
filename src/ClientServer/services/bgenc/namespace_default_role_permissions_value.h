@@ -21,7 +21,7 @@
 
  File Name            : namespace_default_role_permissions_value.h
 
- Date                 : 17/02/2026 11:16:54
+ Date                 : 13/08/2026 08:11:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -55,7 +55,6 @@ extern void namespace_default_role_permissions_value__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define namespace_default_role_permissions_value__delete_rolePermissions namespace_default_role_permissions_value_bs__delete_rolePermissions
 #define namespace_default_role_permissions_value__get_conv_Variant_RolePermissionTypes namespace_default_role_permissions_value_bs__get_conv_Variant_RolePermissionTypes
 
 /*--------------------

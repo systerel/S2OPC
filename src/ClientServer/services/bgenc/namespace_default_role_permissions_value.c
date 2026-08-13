@@ -21,7 +21,7 @@
 
  File Name            : namespace_default_role_permissions_value.c
 
- Date                 : 17/02/2026 11:16:54
+ Date                 : 13/08/2026 08:11:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -52,10 +52,9 @@ void namespace_default_role_permissions_value__ref_maybe_get_DefaultRolePermissi
       constants__t_QualifiedName_i namespace_default_role_permissions_value__l_browseName;
       t_bool namespace_default_role_permissions_value__l_browseName_comparison;
       constants_statuscodes_bs__t_StatusCode_i namespace_default_role_permissions_value__l_sc;
-      constants__t_Variant_i namespace_default_role_permissions_value__l_val_DefaultRolePermissions;
+      constants__t_ReadOnlyVariant_i namespace_default_role_permissions_value__l_val_DefaultRolePermissions;
       constants__t_RawStatusCode namespace_default_role_permissions_value__l_val_sc;
       constants__t_Timestamp namespace_default_role_permissions_value__l_val_ts_src;
-      constants__t_RolePermissionTypes_i namespace_default_role_permissions_value__l_DefaultRolePermissions;
       
       *namespace_default_role_permissions_value__p_maybe_val_DefaultRolePermissions = constants__c_RolePermissionTypes_indet;
       namespace_uri__getall_namespace_Reference_Node(namespace_default_role_permissions_value__p_ref,
@@ -80,11 +79,7 @@ void namespace_default_role_permissions_value__ref_maybe_get_DefaultRolePermissi
                   &namespace_default_role_permissions_value__l_val_sc,
                   &namespace_default_role_permissions_value__l_val_ts_src);
                namespace_default_role_permissions_value_bs__get_conv_Variant_RolePermissionTypes(namespace_default_role_permissions_value__l_val_DefaultRolePermissions,
-                  &namespace_default_role_permissions_value__l_DefaultRolePermissions);
-               if (namespace_default_role_permissions_value__l_DefaultRolePermissions == constants__c_RolePermissionTypes_indet) {
-                  address_space_bs__read_AddressSpace_free_variant(namespace_default_role_permissions_value__l_val_DefaultRolePermissions);
-               }
-               *namespace_default_role_permissions_value__p_maybe_val_DefaultRolePermissions = namespace_default_role_permissions_value__l_DefaultRolePermissions;
+                  namespace_default_role_permissions_value__p_maybe_val_DefaultRolePermissions);
             }
          }
       }

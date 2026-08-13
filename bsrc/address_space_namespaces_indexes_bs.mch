@@ -27,8 +27,8 @@ OPERATIONS
 
     p_maxNsIdx <-- read_variant_max_namespaceIndex(p_variant) =
     PRE
-        p_variant : t_Variant_i &
-        p_variant : t_Variant
+        p_variant : t_ReadOnlyVariant_i &
+        p_variant : t_ReadOnlyVariant
     THEN
         p_maxNsIdx :: NAT
     END

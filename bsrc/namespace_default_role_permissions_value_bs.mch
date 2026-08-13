@@ -27,26 +27,18 @@ ABSTRACT_VARIABLES
     a_conv_variant_RolePermissionTypes
 
 INVARIANT
-    a_conv_variant_RolePermissionTypes : t_Variant_i +-> t_RolePermissionTypes_i
+    a_conv_variant_RolePermissionTypes : t_ReadOnlyVariant_i +-> t_RolePermissionTypes_i
 
 INITIALISATION
-    a_conv_variant_RolePermissionTypes :: t_Variant_i +-> t_RolePermissionTypes_i
+    a_conv_variant_RolePermissionTypes :: t_ReadOnlyVariant_i +-> t_RolePermissionTypes_i
 
 OPERATIONS
     p_rolePermissions <-- get_conv_Variant_RolePermissionTypes(p_variant) =
     PRE
-        p_variant : t_Variant_i &
-        p_variant : t_Variant
+        p_variant : t_ReadOnlyVariant_i &
+        p_variant : t_ReadOnlyVariant
     THEN
         p_rolePermissions := a_conv_variant_RolePermissionTypes(p_variant)
     END
-    ;
 
-    delete_rolePermissions(p_rolePermissions) =
-    PRE
-        p_rolePermissions : t_RolePermissionTypes_i &
-        p_rolePermissions : t_RolePermissionTypes
-    THEN
-        skip
-    END
 END

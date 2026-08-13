@@ -187,7 +187,7 @@ OPERATIONS
         l_nb_identities := 0;
         l_continue := FALSE;
         l_sc := e_sc_bad_generic_mask;
-        l_val := c_Variant_indet;
+        l_val := c_ReadOnlyVariant_indet;
         // Get the Identities node in the RoleType node
         l_identities_nodeId, l_identities_node <-- l_get_role_identities_node(p_role_node);
         // If we found the node Identity, eval the identities with user
@@ -227,7 +227,7 @@ OPERATIONS
             identityIdx_to_iterate /\ identityIdx_iterated = {} &
             1..nb_identities = identityIdx_to_iterate \/ identityIdx_iterated &
             // We use the good variant value
-            a_variant = a_Value(l_identities_node) &
+            a_variant = conv_Variant_ReadOnly(a_Value(l_identities_node)) &
             a_identities : seq(t_Identity) &
             nb_identities = size(a_identities) &
             // p_bres is the result of the final match
@@ -235,8 +235,6 @@ OPERATIONS
         VARIANT
             card(identityIdx_to_iterate)
         END
-        ;
-        read_AddressSpace_free_variant(l_val)
     END
     ;
 

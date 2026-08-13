@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 08/07/2026 11:24:59
+ Date                 : 07/09/2026 13:17:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -78,6 +78,7 @@
 #define constants__t_PermissionType_i constants_bs__t_PermissionType_i
 #define constants__t_QualifiedName_i constants_bs__t_QualifiedName_i
 #define constants__t_RawStatusCode constants_bs__t_RawStatusCode
+#define constants__t_ReadOnlyVariant_i constants_bs__t_ReadOnlyVariant_i
 #define constants__t_Reference_i constants_bs__t_Reference_i
 #define constants__t_RegisteredServer2Info_i constants_bs__t_RegisteredServer2Info_i
 #define constants__t_RegisteredServer_i constants_bs__t_RegisteredServer_i
@@ -396,6 +397,7 @@ typedef enum {
 #define constants__t_PermissionType_i_max constants_bs__t_PermissionType_i_max
 #define constants__t_QualifiedName_i_max constants_bs__t_QualifiedName_i_max
 #define constants__t_RawStatusCode_max constants_bs__t_RawStatusCode_max
+#define constants__t_ReadOnlyVariant_i_max constants_bs__t_ReadOnlyVariant_i_max
 #define constants__t_Reference_i_max constants_bs__t_Reference_i_max
 #define constants__t_RegisteredServer2Info_i_max constants_bs__t_RegisteredServer2Info_i_max
 #define constants__t_RegisteredServer_i_max constants_bs__t_RegisteredServer_i_max
@@ -508,6 +510,7 @@ typedef enum {
 #define constants__c_Null_Type_NodeId constants_bs__c_Null_Type_NodeId
 #define constants__c_PermissionType_none constants_bs__c_PermissionType_none
 #define constants__c_QualifiedName_indet constants_bs__c_QualifiedName_indet
+#define constants__c_ReadOnlyVariant_indet constants_bs__c_ReadOnlyVariant_indet
 #define constants__c_Reference_indet constants_bs__c_Reference_indet
 #define constants__c_RefreshEndEventType_NodeId constants_bs__c_RefreshEndEventType_NodeId
 #define constants__c_RefreshRequiredEventType_NodeId constants_bs__c_RefreshRequiredEventType_NodeId

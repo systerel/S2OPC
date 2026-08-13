@@ -63,7 +63,7 @@ static OpcUa_RolePermissionType* get_role_permission_at_idx(
     const t_entier4 role_permissions_value_eval_bs__p_idx)
 {
     SOPC_ASSERT(NULL != role_permissions_value_eval_bs__p_rolePermissions);
-    SOPC_Variant* variant = role_permissions_value_eval_bs__p_rolePermissions;
+    const SOPC_Variant* variant = role_permissions_value_eval_bs__p_rolePermissions;
 
     SOPC_ASSERT(SOPC_VariantArrayType_Array == variant->ArrayType);
     SOPC_ASSERT(role_permissions_value_eval_bs__p_idx - 1 < variant->Value.Array.Length);

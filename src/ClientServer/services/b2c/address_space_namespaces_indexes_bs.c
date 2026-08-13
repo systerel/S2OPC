@@ -29,11 +29,11 @@ void address_space_namespaces_indexes_bs__INITIALISATION(void)
     /*Translated from B but an intialisation is not needed from this module.*/
 }
 
-static SOPC_Variant* address_space_namespaces_indexes_bs__check_and_get_variant(
-    const constants__t_Variant_i namespace_array_bs__p_variant)
+static const SOPC_Variant* address_space_namespaces_indexes_bs__check_and_get_variant(
+    const constants__t_ReadOnlyVariant_i namespace_array_bs__p_variant)
 {
     // Same as namespace_array_bs__check_and_get_variant
-    SOPC_Variant* variant = namespace_array_bs__p_variant;
+    const SOPC_Variant* variant = namespace_array_bs__p_variant;
     // Check that the variant contains String[].
     if (NULL == variant || SOPC_String_Id != variant->BuiltInTypeId ||
         SOPC_VariantArrayType_Array != variant->ArrayType)
@@ -47,7 +47,7 @@ static SOPC_Variant* address_space_namespaces_indexes_bs__check_and_get_variant(
    OPERATIONS Clause
   --------------------*/
 void address_space_namespaces_indexes_bs__read_variant_max_namespaceIndex(
-    const constants__t_Variant_i address_space_namespaces_indexes_bs__p_variant,
+    const constants__t_ReadOnlyVariant_i address_space_namespaces_indexes_bs__p_variant,
     t_entier4* const address_space_namespaces_indexes_bs__p_maxNsIdx)
 {
     // Same as namespace_array_bs__read_variant_nb_namespaceUris

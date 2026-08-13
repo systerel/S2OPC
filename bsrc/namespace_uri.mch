@@ -28,10 +28,10 @@ ABSTRACT_VARIABLES
     a_ref_namespaceUri
 
 INVARIANT
-    a_ref_namespaceUri : t_Reference +-> t_Variant
+    a_ref_namespaceUri : t_Reference +-> t_ReadOnlyVariant
 
 INITIALISATION
-    a_ref_namespaceUri :: t_Reference +-> t_Variant
+    a_ref_namespaceUri :: t_Reference +-> t_ReadOnlyVariant
 
 OPERATIONS
 
@@ -42,14 +42,14 @@ OPERATIONS
         Reference_ReferenceType(p_ref) = c_HasPropertyType_NodeId
     THEN
         p_maybe_val_NamespaceUri :(
-            p_maybe_val_NamespaceUri : t_Variant_i &
+            p_maybe_val_NamespaceUri : t_ReadOnlyVariant_i &
             (p_ref : dom(a_ref_namespaceUri) <=>
                 (a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) = e_ncl_Variable &
                  a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))) = c_NamespaceUri_QualifiedName)) &
             (p_ref : dom(a_ref_namespaceUri) =>
                 a_ref_namespaceUri(p_ref) = p_maybe_val_NamespaceUri &
-                p_maybe_val_NamespaceUri = a_Value(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref))))) &
-            (p_ref /: dom(a_ref_namespaceUri) => p_maybe_val_NamespaceUri = c_Variant_indet))
+                p_maybe_val_NamespaceUri = conv_Variant_ReadOnly(a_Value(a_NodeId~(conv_ExpandedNodeId_NodeId(Reference_TargetNode(p_ref)))))) &
+            (p_ref /: dom(a_ref_namespaceUri) => p_maybe_val_NamespaceUri = c_ReadOnlyVariant_indet))
     END
     ;
 

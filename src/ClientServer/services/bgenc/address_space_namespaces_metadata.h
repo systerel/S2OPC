@@ -21,7 +21,7 @@
 
  File Name            : address_space_namespaces_metadata.h
 
- Date                 : 29/10/2024 09:08:38
+ Date                 : 07/09/2026 13:17:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -59,7 +59,6 @@ extern void address_space_namespaces_metadata__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define address_space_namespaces_metadata__address_space_default_role_permissions_array_bs_UNINITIALISATION default_role_permissions_array_bs__address_space_default_role_permissions_array_bs_UNINITIALISATION
-#define address_space_namespaces_metadata__delete_rolePermissions namespaces_default_role_permissions__delete_rolePermissions
 #define address_space_namespaces_metadata__get_DefaultRolePermissions_at_idx default_role_permissions_array_bs__get_DefaultRolePermissions_at_idx
 #define address_space_namespaces_metadata__has_DefaultRolePermissions_at_idx default_role_permissions_array_bs__has_DefaultRolePermissions_at_idx
 
@@ -67,7 +66,7 @@ extern void address_space_namespaces_metadata__INITIALISATION(void);
    LOCAL_OPERATIONS Clause
   --------------------------*/
 extern void address_space_namespaces_metadata__l_fill_default_role_permissions(
-   const constants__t_Variant_i address_space_namespaces_metadata__p_val);
+   const constants__t_ReadOnlyVariant_i address_space_namespaces_metadata__p_val);
 
 /*--------------------
    OPERATIONS Clause

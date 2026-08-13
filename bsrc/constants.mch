@@ -37,6 +37,7 @@ SETS
                      e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType,
                      e_ncl_View};
     t_Variant_i; /* (SOPC_Variant*) */
+    t_ReadOnlyVariant_i; /* (const SOPC_Variant*) => & only for current execution path (shall not be stored) */
     t_DataValue_i; /* (SOPC_DataValue*) */
     t_DataValue_array_i;
     t_AttributeId_i = {c_AttributeId_indet,
@@ -413,6 +414,7 @@ CONCRETE_CONSTANTS
     c_Identities_QualifiedName,
 
     c_Variant_indet,
+    c_ReadOnlyVariant_indet,
     c_DataValue_indet,
     c_DataValue_array_indet,
     c_NodeId_indet,
@@ -523,6 +525,7 @@ CONCRETE_CONSTANTS
     t_prio_idx_i
 
 ABSTRACT_CONSTANTS
+    conv_Variant_ReadOnly,
     conv_AccessLevel_Variant,
     conv_AccessLevelEx_Variant,
     conv_QualifiedName_Variant,
@@ -553,6 +556,7 @@ ABSTRACT_CONSTANTS
     t_AttributeId,
     t_NodeClass,
     t_Variant,
+    t_ReadOnlyVariant,
     t_DataValue,
     t_DataValue_array,
     t_NodeId,
@@ -680,6 +684,10 @@ PROPERTIES
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
     c_Variant_indet /: t_Variant &
+
+    t_ReadOnlyVariant <: t_ReadOnlyVariant_i &
+    c_ReadOnlyVariant_indet : t_ReadOnlyVariant_i &
+    c_ReadOnlyVariant_indet /: t_ReadOnlyVariant &
 
     t_DataValue <: t_DataValue_i &
     c_DataValue_indet : t_DataValue_i &
@@ -1446,6 +1454,7 @@ PROPERTIES
                                  e_bd_both    |-> FALSE |-> TRUE,
                                  e_bd_both    |-> TRUE  |-> TRUE} &
 
+    conv_Variant_ReadOnly : t_Variant >->> t_ReadOnlyVariant &
     conv_AccessLevel_Variant : t_access_level --> t_Variant &
     conv_AccessLevelEx_Variant : t_access_level_ex --> t_Variant &
     conv_QualifiedName_Variant : t_QualifiedName_i +-> t_Variant &

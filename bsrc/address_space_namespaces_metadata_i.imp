@@ -37,8 +37,7 @@ IMPORTS
 PROMOTES
     address_space_default_role_permissions_array_bs_UNINITIALISATION,
     has_DefaultRolePermissions_at_idx,
-    get_DefaultRolePermissions_at_idx,
-    delete_rolePermissions
+    get_DefaultRolePermissions_at_idx
 
 INVARIANT
     a_default_role_permissions = a_default_role_permissions_bs |> t_RolePermissionTypes
@@ -46,10 +45,10 @@ INVARIANT
 LOCAL_OPERATIONS
     l_fill_default_role_permissions(p_val) =
     PRE
-        p_val : t_Variant_i &
-        p_val : t_Variant &
+        p_val : t_ReadOnlyVariant_i &
+        p_val : t_ReadOnlyVariant &
         p_val = a_variant &
-        p_val = a_Value(a_NodeId~(c_Server_NamespaceArray_NodeId)) &
+        p_val = conv_Variant_ReadOnly(a_Value(a_NodeId~(c_Server_NamespaceArray_NodeId))) &
         a_default_role_permissions_bs = {}
     THEN
         a_default_role_permissions_bs :(a_default_role_permissions_bs /= {}) ||
@@ -112,8 +111,7 @@ OPERATIONS
                     <-- read_AddressSpace_Raw_Node_Value_value(l_Server_NamespaceArray_node, c_Server_NamespaceArray_NodeId, e_aid_Value);
                 IF l_sc = e_sc_ok
                 THEN
-                    l_fill_default_role_permissions(l_val);
-                    read_AddressSpace_free_variant(l_val) /* Frees the shallow copy only */
+                    l_fill_default_role_permissions(l_val)
                 END
             END
         END

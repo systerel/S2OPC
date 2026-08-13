@@ -28,19 +28,19 @@ ABSTRACT_VARIABLES
     a_namespaceUris
 
 INVARIANT
-    a_variant : t_Variant &
+    a_variant : t_ReadOnlyVariant &
     a_namespaceUris : seq(t_NamespaceUri)
 
 INITIALISATION
-    a_variant := c_Variant_indet ||
+    a_variant := c_ReadOnlyVariant_indet ||
     a_namespaceUris := {}
 
 OPERATIONS
 
     p_nb <-- read_variant_nb_namespaceUris(p_variant) =
     PRE
-        p_variant : t_Variant_i &
-        p_variant : t_Variant
+        p_variant : t_ReadOnlyVariant_i &
+        p_variant : t_ReadOnlyVariant
     THEN
         a_variant := p_variant ||
         a_namespaceUris :: seq(t_NamespaceUri) ||
@@ -50,8 +50,8 @@ OPERATIONS
 
     p_namespaceUri <-- read_variant_namespaceUri(p_variant, p_index) =
     PRE
-        p_variant : t_Variant_i &
-        p_variant : t_Variant &
+        p_variant : t_ReadOnlyVariant_i &
+        p_variant : t_ReadOnlyVariant &
         p_variant = a_variant &
         p_index : NAT1 &
         p_index <= size(a_namespaceUris)

@@ -241,6 +241,7 @@ OPERATIONS
     END
     ;
 
+    /* IMPORTANT NOTE: returned RolePermission variant is a singleton that shall not be stored */
     sc, rolePermissions <-- read_AddressSpace_RolePermissions(p_node) =
     PRE
         p_node : t_Node_i &
@@ -657,12 +658,12 @@ OPERATIONS
         conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE
     THEN
         CHOICE
-            variant := c_Variant_indet ||
+            variant := c_ReadOnlyVariant_indet ||
             val_sc := c_RawStatusCode_BadInvalidState ||
             val_ts_src := c_Timestamp_null ||
             sc := e_sc_bad_out_of_memory
         OR
-            variant :(variant : t_Variant_i & variant = a_Value(p_node)) ||
+            variant :(variant : t_ReadOnlyVariant_i & variant = conv_Variant_ReadOnly(a_Value(p_node))) ||
             sc := e_sc_ok ||
             IF a_NodeClass(p_node) = e_ncl_Variable THEN
                 val_sc := a_Value_StatusCode(p_node) ||

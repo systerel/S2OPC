@@ -21,7 +21,7 @@
 
  File Name            : address_space_namespaces.h
 
- Date                 : 29/10/2024 09:08:38
+ Date                 : 07/09/2026 13:17:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -55,7 +55,6 @@ extern void address_space_namespaces__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define address_space_namespaces__address_space_default_role_permissions_array_bs_UNINITIALISATION address_space_namespaces_metadata__address_space_default_role_permissions_array_bs_UNINITIALISATION
-#define address_space_namespaces__delete_rolePermissions address_space_namespaces_metadata__delete_rolePermissions
 
 /*--------------------
    OPERATIONS Clause

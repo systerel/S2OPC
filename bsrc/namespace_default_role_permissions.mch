@@ -68,15 +68,6 @@ OPERATIONS
 
     /* PROMOTES */
 
-    delete_rolePermissions(p_rolePermissions) =
-    PRE
-        p_rolePermissions : t_RolePermissionTypes_i &
-        p_rolePermissions : t_RolePermissionTypes
-    THEN
-        skip
-    END
-    ;
-
     /* Same implementation than getall_Reference_Node operation in address_space_i (cannot be accessed here) */
     p_valid, p_node, p_nodeId <-- getall_namespace_Reference_Node(p_ref) =
     PRE

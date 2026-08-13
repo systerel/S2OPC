@@ -21,7 +21,7 @@
 
  File Name            : namespace_array_bs.h
 
- Date                 : 10/09/2024 09:47:18
+ Date                 : 13/08/2026 08:11:38
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,11 +49,11 @@ extern void namespace_array_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void namespace_array_bs__read_variant_namespaceUri(
-   const constants__t_Variant_i namespace_array_bs__p_variant,
+   const constants__t_ReadOnlyVariant_i namespace_array_bs__p_variant,
    const t_entier4 namespace_array_bs__p_index,
    constants__t_NamespaceUri * const namespace_array_bs__p_namespaceUri);
 extern void namespace_array_bs__read_variant_nb_namespaceUris(
-   const constants__t_Variant_i namespace_array_bs__p_variant,
+   const constants__t_ReadOnlyVariant_i namespace_array_bs__p_variant,
    t_entier4 * const namespace_array_bs__p_nb);
 
 #endif

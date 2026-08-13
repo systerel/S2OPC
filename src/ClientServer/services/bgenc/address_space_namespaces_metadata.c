@@ -21,7 +21,7 @@
 
  File Name            : address_space_namespaces_metadata.c
 
- Date                 : 02/12/2024 16:44:52
+ Date                 : 13/08/2026 08:11:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -42,7 +42,7 @@ void address_space_namespaces_metadata__INITIALISATION(void) {
    OPERATIONS Clause
   --------------------*/
 void address_space_namespaces_metadata__l_fill_default_role_permissions(
-   const constants__t_Variant_i address_space_namespaces_metadata__p_val) {
+   const constants__t_ReadOnlyVariant_i address_space_namespaces_metadata__p_val) {
    {
       t_bool address_space_namespaces_metadata__l_continue;
       t_entier4 address_space_namespaces_metadata__l_namespaceUriIdx;
@@ -78,7 +78,7 @@ void address_space_namespaces_metadata__may_initialize_default_role_permissions(
       t_bool address_space_namespaces_metadata__l_nid_valid;
       constants__t_Node_i address_space_namespaces_metadata__l_Server_NamespaceArray_node;
       constants_statuscodes_bs__t_StatusCode_i address_space_namespaces_metadata__l_sc;
-      constants__t_Variant_i address_space_namespaces_metadata__l_val;
+      constants__t_ReadOnlyVariant_i address_space_namespaces_metadata__l_val;
       constants__t_RawStatusCode address_space_namespaces_metadata__l_val_sc;
       constants__t_Timestamp address_space_namespaces_metadata__l_val_ts_src;
       t_bool address_space_namespaces_metadata__l_b_is_initialized;
@@ -98,7 +98,6 @@ void address_space_namespaces_metadata__may_initialize_default_role_permissions(
                &address_space_namespaces_metadata__l_val_ts_src);
             if (address_space_namespaces_metadata__l_sc == constants_statuscodes_bs__e_sc_ok) {
                address_space_namespaces_metadata__l_fill_default_role_permissions(address_space_namespaces_metadata__l_val);
-               address_space_bs__read_AddressSpace_free_variant(address_space_namespaces_metadata__l_val);
             }
          }
       }

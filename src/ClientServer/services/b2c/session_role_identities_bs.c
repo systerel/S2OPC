@@ -41,10 +41,10 @@ void session_role_identities_bs__INITIALISATION(void)
   --------------------*/
 
 // Variant is a list of ExtensionObject.
-static SOPC_Variant* session_role_identities_bs__check_and_get_variant(
-    const constants__t_Variant_i session_role_identities_bs__p_variant)
+static const SOPC_Variant* session_role_identities_bs__check_and_get_variant(
+    const constants__t_ReadOnlyVariant_i session_role_identities_bs__p_variant)
 {
-    SOPC_Variant* variant = session_role_identities_bs__p_variant;
+    const SOPC_Variant* variant = session_role_identities_bs__p_variant;
     // + add check good type of variant first element
     if (NULL == variant || SOPC_ExtensionObject_Id != variant->BuiltInTypeId)
     {
@@ -54,13 +54,14 @@ static SOPC_Variant* session_role_identities_bs__check_and_get_variant(
 }
 
 extern void session_role_identities_bs__read_variant_identity(
-    const constants__t_Variant_i session_role_identities_bs__p_variant,
+    const constants__t_ReadOnlyVariant_i session_role_identities_bs__p_variant,
     const t_entier4 session_role_identities_bs__p_index,
     constants__t_Identity_i* const session_role_identities_bs__p_identity)
 {
     SOPC_ASSERT(NULL != session_role_identities_bs__p_identity);
 
-    SOPC_Variant* variant = session_role_identities_bs__check_and_get_variant(session_role_identities_bs__p_variant);
+    const SOPC_Variant* variant =
+        session_role_identities_bs__check_and_get_variant(session_role_identities_bs__p_variant);
     SOPC_ASSERT(NULL != variant);
     SOPC_ExtensionObject* extObjectArr = NULL;
     if (SOPC_VariantArrayType_SingleValue == variant->ArrayType && 1 == session_role_identities_bs__p_index)
@@ -83,13 +84,14 @@ extern void session_role_identities_bs__read_variant_identity(
 }
 
 extern void session_role_identities_bs__read_variant_nb_identities(
-    const constants__t_Variant_i session_role_identities_bs__p_variant,
+    const constants__t_ReadOnlyVariant_i session_role_identities_bs__p_variant,
     const constants__t_Node_i session_role_identities_bs__p_node,
     t_entier4* const session_role_identities_bs__p_nb)
 {
     SOPC_ASSERT(NULL != session_role_identities_bs__p_nb);
 
-    SOPC_Variant* variant = session_role_identities_bs__check_and_get_variant(session_role_identities_bs__p_variant);
+    const SOPC_Variant* variant =
+        session_role_identities_bs__check_and_get_variant(session_role_identities_bs__p_variant);
     if (NULL == variant)
     {
         char* nodeId = SOPC_NodeId_ToCString(

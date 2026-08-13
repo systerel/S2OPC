@@ -24,7 +24,6 @@ REFINES
     namespace_default_role_permissions
 
 PROMOTES
-    delete_rolePermissions,
     getall_namespace_Reference_Node
 
 IMPORTS
@@ -104,12 +103,10 @@ OPERATIONS
                 END
                 ;
                 l_val_NamespaceUri <-- ref_maybe_get_NamespaceUri(l_ref);
-                IF l_val_NamespaceUri /= c_Variant_indet THEN
+                IF l_val_NamespaceUri /= c_ReadOnlyVariant_indet THEN
                     // Value is a single string
                     p_bres <-- compare_namespaceUri_and_value_uri(p_namespaceUri, l_val_NamespaceUri)
                 END
-                ;
-                read_AddressSpace_free_variant(l_val_NamespaceUri)
             END
         INVARIANT
             // Glue with spec variables
@@ -138,8 +135,6 @@ OPERATIONS
         IF p_bres = TRUE
         THEN
             p_maybe_val_DefaultRolePermissions := l_val_DefaultRolePermissions
-        ELSE
-            delete_rolePermissions(l_val_DefaultRolePermissions)
         END
     END
 

@@ -33,7 +33,7 @@ void namespaces_uri_eval_bs__INITIALISATION(void)
   --------------------*/
 void namespaces_uri_eval_bs__compare_namespaceUri_and_value_uri(
     const constants__t_NamespaceUri namespaces_uri_eval_bs__p_namespaceUri,
-    const constants__t_Variant_i namespaces_uri_eval_bs__p_variant,
+    const constants__t_ReadOnlyVariant_i namespaces_uri_eval_bs__p_variant,
     t_bool* const namespaces_uri_eval_bs__p_bres)
 {
     const SOPC_Variant* variant = namespaces_uri_eval_bs__p_variant;
