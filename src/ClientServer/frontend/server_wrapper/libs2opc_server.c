@@ -41,6 +41,7 @@
 #include "sopc_threads.h"
 #include "sopc_time_reference.h"
 #include "sopc_toolkit_async_api.h"
+#include "sopc_types.h"
 
 // Periodic timeout used to check for catch signal or for updating seconds shutdown counter
 #define UPDATE_TIMEOUT_MS 500
@@ -228,7 +229,31 @@ void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType* encTy
         return;
     }
 
-    SOPC_ASSERT(&OpcUa_WriteResponse_EncodeableType == encType);
+    if (&OpcUa_WriteResponse_EncodeableType != encType)
+    {
+        // A ServiceFault might be received when the Services queue is busy
+        if (&OpcUa_ServiceFault_EncodeableType == encType)
+        {
+            OpcUa_ServiceFault* serviceFault = (OpcUa_ServiceFault*) response;
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "Error while updating address space ServiceFault received: %" PRIX32,
+                                     serviceFault->ResponseHeader.ServiceResult);
+        }
+        else
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "Error while updating address space, unexpected response type received: %s",
+                                     encType->TypeName);
+        }
+        void* vwriteReqCtx = (NULL != helperCtx ? (void*) helperCtx->userContext : NULL);
+        if (NULL != vwriteReqCtx)
+        {
+            OpcUa_WriteRequest_Clear(vwriteReqCtx);
+            SOPC_Free(vwriteReqCtx);
+        }
+        return;
+    }
+
     OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
     OpcUa_WriteRequest* writeReqCtx = (OpcUa_WriteRequest*) helperCtx->userContext;
     // ok is false only on unexpected failure: a node absent from the address space (BadNodeIdUnknown) is expected
