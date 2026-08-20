@@ -24,6 +24,9 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
+/* Limited to a unique call to subscription_core_bs__get_nodeToMonitoredItemQueue which only existence of MI */
+#include "subscription_core_bs.h"
+
 SOPC_Array* dataChangedEvents = NULL;
 
 /*------------------------
@@ -66,6 +69,16 @@ void gen_subscription_event_bs__gen_data_changed_event(
     {
         return;
     }
+
+    /* Check if the data changed event is necessary to avoid useless allocation and service event */
+    bool isWatched = false;
+    constants__t_monitoredItemQueue_i unusedQueue = constants__c_monitoredItemQueue_indet;
+    subscription_core_bs__get_nodeToMonitoredItemQueue(gen_subscription_event_bs__p_nid, &isWatched, &unusedQueue);
+    if (!isWatched)
+    {
+        return;
+    }
+
     bool res = false;
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     OpcUa_WriteValue* newValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
