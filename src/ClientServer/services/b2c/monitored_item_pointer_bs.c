@@ -483,6 +483,24 @@ void monitored_item_pointer_bs__getall_monitoredItemPointer(
     *monitored_item_pointer_bs__p_clientHandle = monitItem->clientHandle;
 }
 
+/**
+ * \brief Retrieve the subscription owning a monitored item and its current monitoring mode.
+ * \param monitored_item_pointer_bs__p_monitoredItemPointer the monitored item
+ * \param[out] monitored_item_pointer_bs__p_subscription the id of the owning subscription
+ * \param[out] monitored_item_pointer_bs__p_monitoringMode the current monitoring mode of the monitored item
+ */
+void monitored_item_pointer_bs__get_monitoredItemPointer_subscription_monitMode(
+    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
+    constants__t_subscription_i* const monitored_item_pointer_bs__p_subscription,
+    constants__t_monitoringMode_i* const monitored_item_pointer_bs__p_monitoringMode)
+{
+    SOPC_ASSERT(NULL != monitored_item_pointer_bs__p_monitoredItemPointer); // Guaranteed by B model
+    SOPC_InternalMonitoredItem* monitItem =
+        (SOPC_InternalMonitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
+    *monitored_item_pointer_bs__p_subscription = monitItem->subId;
+    *monitored_item_pointer_bs__p_monitoringMode = monitItem->monitoringMode;
+}
+
 // Note: both < and > operators always return False with NaN, testing both allow to consider NaN values equal
 #define COMPARE_DEADBAND_ABSOLUTE_NUMERIC_VALUE(sopcTypeid, ntype, tmpVarType) \
     else if (builtInTypeId == sopcTypeid)                                      \

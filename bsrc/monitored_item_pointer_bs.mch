@@ -177,8 +177,7 @@ OPERATIONS
         p_monitoring_mode : t_monitoringMode_i &
         p_monitoring_mode : t_monitoringMode
     THEN
-        /* TODO: add variable */
-        skip
+        a_monitoredItemMonitMode (p_monitoredItemPointer) := p_monitoring_mode
     END
     ;
 
@@ -218,6 +217,19 @@ OPERATIONS
           p_monitoringMode = a_monitoredItemMonitMode(p_monitoredItemPointer) &
           p_clientHandle : t_client_handle_i
         )
+    END
+    ;
+
+    p_subscription, p_monitoringMode <-- get_monitoredItemPointer_subscription_monitMode (p_monitoredItemPointer) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer
+    THEN
+        p_subscription, p_monitoringMode
+        :(p_subscription : t_subscription_i &
+          p_subscription = a_monitoredItemSubs(p_monitoredItemPointer) &
+          p_monitoringMode : t_monitoringMode_i &
+          p_monitoringMode = a_monitoredItemMonitMode(p_monitoredItemPointer))
     END
     ;
 

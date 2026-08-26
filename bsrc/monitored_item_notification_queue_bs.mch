@@ -245,8 +245,8 @@ OPERATIONS
         :(bres : BOOL &
             a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
             /* Due to discard, previous content may have been modified */
-            (bres = TRUE => p_queue |-> a_notif_conv_event~(p_eventFieldList) : a_notification_queue_notifications) &
-            (bres = FALSE => a_notification_queue_notifications = a_notification_queue_notifications$0)
+            (bres = TRUE => p_queue |-> a_notif_conv_event~(p_eventFieldList) : a_notification_queue_notifications)
+         // (bres = FALSE => a_notification_queue_notifications might be modified in case of OOM for OverflowEvent creation)
         )
     END
     ;

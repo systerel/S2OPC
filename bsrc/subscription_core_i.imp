@@ -132,7 +132,10 @@ CONCRETE_VARIABLES
     session_iter_prio,
     prio_idx_iter_prio,
 
-    prio_iter_sub
+    prio_iter_sub,
+
+    a_subscription_available_data_notifs,
+    a_subscription_available_event_notifs
 
 INVARIANT
     // iterator variables to iterate on the priorities of session subscriptions in decreasing order
@@ -141,15 +144,40 @@ INVARIANT
     session_iter_prio  : t_session_i &
     prio_idx_iter_prio : t_prio_idx_i &
 
+
     // iterator variable to iterate on the subscriptions with a given priority in a round-robin order
-    prio_iter_sub      : t_prioritySubQueueIterator_i
+    prio_iter_sub      : t_prioritySubQueueIterator_i &
+
+    // Number of notifications available in the queues of the subscription MIs in reporting mode
+    a_subscription_available_data_notifs : t_subscription_i --> NAT &
+    a_subscription_available_event_notifs : t_subscription_i --> NAT &
+    !p_sub.(p_sub : s_subscription =>
+        a_subscription_available_data_notifs(p_sub) =
+        min({MAXINT,
+            SIGMA(mi).(mi : a_monitoredItemSubs~[{p_sub}] &
+                       mi : dom(a_monitoredItemMonitMode |> {e_monitoringMode_reporting}) &
+                       mi : dom(a_monitored_item_notification_queue) &
+                       a_monitored_item_notification_queue(mi) /: s_event_notification_queue |
+                card(a_notification_queue_notifications[{a_monitored_item_notification_queue(mi)}]))})
+    ) &
+    !p_sub.(p_sub : s_subscription =>
+        a_subscription_available_event_notifs(p_sub) =
+        min({MAXINT,
+            SIGMA(mi).(mi : a_monitoredItemSubs~[{p_sub}] &
+                       mi : dom(a_monitoredItemMonitMode |> {e_monitoringMode_reporting}) &
+                       mi : dom(a_monitored_item_notification_queue) &
+                       a_monitored_item_notification_queue(mi) : s_event_notification_queue |
+                card(a_notification_queue_notifications[{a_monitored_item_notification_queue(mi)}]))})
+    )
 
 INITIALISATION
     next_idx_iter_prio      := 0;
     continue_iter_prio := FALSE;
     session_iter_prio  := c_session_indet;
     prio_idx_iter_prio := 0;
-    prio_iter_sub      := c_prioritySubQueueIterator_indet
+    prio_iter_sub      := c_prioritySubQueueIterator_indet;
+    a_subscription_available_data_notifs := t_subscription_i * {0};
+    a_subscription_available_event_notifs := t_subscription_i * {0}
 
 LOCAL_OPERATIONS
 
@@ -479,14 +507,31 @@ LOCAL_OPERATIONS
     END
     ;
 
-    p_nb_available_notifs, p_isEvent <-- local_monitored_item_nb_available_notifications (p_monitoredItemPointer) =
+    /* Update the available notifications counter of the MI subscription with the MI notification queue
+       length change, only if the MI is in reporting mode (notifications are not available otherwise) */
+    local_update_available_notifs (p_monitoredItemPointer, p_isEvent, p_lenBefore, p_lenAfter) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
-        p_monitoredItemPointer : t_monitoredItemPointer
+        p_monitoredItemPointer : s_monitoredItemPointer &
+        p_isEvent : BOOL &
+        p_lenBefore : NAT &
+        p_lenAfter : NAT &
+        a_subscription_available_data_notifs : t_subscription_i --> NAT &
+        a_subscription_available_event_notifs : t_subscription_i --> NAT
     THEN
-        p_nb_available_notifs :=
-        card(a_notification_queue_notifications[{a_monitored_item_notification_queue(p_monitoredItemPointer)}]) ||
-        p_isEvent := bool(a_monitored_item_notification_queue(p_monitoredItemPointer) : s_event_notification_queue)
+        IF a_monitoredItemMonitMode (p_monitoredItemPointer) = e_monitoringMode_reporting
+        THEN
+            IF p_isEvent = TRUE
+            THEN
+                a_subscription_available_event_notifs (a_monitoredItemSubs (p_monitoredItemPointer)) :=
+                    min({MAXINT, max({0, a_subscription_available_event_notifs (a_monitoredItemSubs (p_monitoredItemPointer)) +
+                                         p_lenAfter - p_lenBefore})})
+            ELSE
+                a_subscription_available_data_notifs (a_monitoredItemSubs (p_monitoredItemPointer)) :=
+                    min({MAXINT, max({0, a_subscription_available_data_notifs (a_monitoredItemSubs (p_monitoredItemPointer)) +
+                                         p_lenAfter - p_lenBefore})})
+            END
+        END
     END
     ;
 
@@ -790,6 +835,7 @@ OPERATIONS
             l_monitoringMode,
             l_clientHandle
             <--getall_monitoredItemPointer (p_monitoredItemPointer);
+            a_subscription_available_data_notifs(l_subscription) := a_subscription_available_data_notifs(l_subscription) - 1;
 
             setall_notification_msg_monitored_item_data_notif (p_notif_msg, p_next_index, l_monitoredItemId, l_clientHandle, l_writeValuePointer);
             p_next_index := p_next_index + 1
@@ -903,6 +949,7 @@ OPERATIONS
             l_monitoringMode,
             l_clientHandle
             <--getall_monitoredItemPointer (p_monitoredItemPointer);
+            a_subscription_available_event_notifs(l_subscription) := a_subscription_available_event_notifs(l_subscription) - 1;
 
             setall_notification_msg_monitored_item_event_notif
               (p_notif_msg, p_next_index, l_monitoredItemId, l_eventFieldList);
@@ -1049,95 +1096,63 @@ OPERATIONS
         clear_iter_monitored_item (l_iterator);
         clear_and_deallocate_monitored_item_queue (l_monitored_item_queue);
         delete_subscription (p_subscription);
+        a_subscription_available_data_notifs(p_subscription) := 0;
+        a_subscription_available_event_notifs(p_subscription) := 0;
         subscription_deleted(l_publishInterval)
     END
     ;
 
     p_nb_available_data_notifs, p_nb_available_event_notifs <-- local_subscription_nb_available_notifications (p_subscription) =
-    VAR
-        l_monitored_item_queue,
-        l_continue_mi,
-        l_iterator,
-        l_monitoredItemPointer,
-        l_monitoredItemId,
-        l_subscription,
-        l_nid,
-        l_aid,
-        l_indexRange,
-        l_timestampToReturn,
-        l_monitoringMode,
-        l_clientHandle,
-        l_mi_available_notifs,
-        l_isEvent,
-        l_offset_from_maxint
-    IN
-        p_nb_available_data_notifs := 0;
-        p_nb_available_event_notifs := 0;
-        l_monitored_item_queue <-- get_subscription_monitoredItemQueue (p_subscription);
-        l_continue_mi, l_iterator <-- init_iter_monitored_item (l_monitored_item_queue);
-        WHILE l_continue_mi = TRUE DO
-            l_continue_mi, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, l_monitored_item_queue);
-            l_monitoredItemId,
-            l_subscription,
-            l_nid,
-            l_aid,
-            l_indexRange,
-            l_timestampToReturn,
-            l_monitoringMode,
-            l_clientHandle
-              <--getall_monitoredItemPointer (l_monitoredItemPointer);
-            IF l_monitoringMode = e_monitoringMode_reporting
-            THEN
-                l_mi_available_notifs, l_isEvent <-- local_monitored_item_nb_available_notifications (l_monitoredItemPointer);
-
-                IF l_isEvent = TRUE
-                THEN
-                    l_offset_from_maxint := MAXINT - p_nb_available_event_notifs;
-                    IF l_mi_available_notifs <= l_offset_from_maxint
-                    THEN
-                        p_nb_available_event_notifs := p_nb_available_event_notifs + l_mi_available_notifs
-                    ELSE
-                        p_nb_available_event_notifs := MAXINT
-                    END
-                ELSE
-                    l_offset_from_maxint := MAXINT - p_nb_available_data_notifs;
-                    IF l_mi_available_notifs <= l_offset_from_maxint
-                    THEN
-                        p_nb_available_data_notifs := p_nb_available_data_notifs + l_mi_available_notifs
-                    ELSE
-                        p_nb_available_data_notifs := MAXINT
-                    END
-                END
-            END
-        INVARIANT
-            s_mi_to_iterate_it <: t_monitoredItemPointer &
-            s_mi_iterated_it   <: t_monitoredItemPointer &
-
-            s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
-            card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it &
-            l_continue_mi = bool(s_mi_to_iterate_it /= {}) &
-            s_mi_iterated_it /\ a_defined_monitored_items[ran(a_nodeToMonitoredItemQueue)] = {} &
-            s_mi_to_iterate_it /\ a_defined_monitored_items[ran(a_nodeToMonitoredItemQueue)] = s_mi_to_iterate_it
-
-        VARIANT
-            card(s_mi_to_iterate_it)
-        END;
-        clear_iter_monitored_item (l_iterator)
+    BEGIN
+        p_nb_available_data_notifs := a_subscription_available_data_notifs(p_subscription);
+        p_nb_available_event_notifs := a_subscription_available_event_notifs(p_subscription)
     END
     ;
 
-    p_nb_available_notifs, p_isEvent <-- local_monitored_item_nb_available_notifications (p_monitoredItemPointer) =
+    local_update_available_notifs (p_monitoredItemPointer, p_isEvent, p_lenBefore, p_lenAfter) =
     VAR
-        l_bres,
-        l_mi_notif_queue
+        l_subscription,
+        l_monitoringMode,
+        l_delta,
+        l_curCount,
+        l_offsetFromMaxint
     IN
-        p_isEvent := FALSE;
-        p_nb_available_notifs := 0;
-        l_bres, l_mi_notif_queue <-- get_monitored_item_notification_queue (p_monitoredItemPointer);
-        IF l_bres = TRUE
+        l_subscription, l_monitoringMode <-- get_monitoredItemPointer_subscription_monitMode (p_monitoredItemPointer);
+        IF l_monitoringMode = e_monitoringMode_reporting
         THEN
-            p_nb_available_notifs <-- get_length_monitored_item_notification_queue (l_mi_notif_queue);
-            p_isEvent <-- is_event_monitored_item_notification_queue (p_monitoredItemPointer, l_mi_notif_queue)
+            IF p_isEvent = TRUE
+            THEN
+                l_curCount := a_subscription_available_event_notifs (l_subscription)
+            ELSE
+                l_curCount := a_subscription_available_data_notifs (l_subscription)
+            END
+            ;
+            IF p_lenBefore <= p_lenAfter
+            THEN
+                l_delta := p_lenAfter - p_lenBefore;
+                l_offsetFromMaxint := MAXINT - l_curCount;
+                IF l_delta <= l_offsetFromMaxint
+                THEN
+                    l_curCount := l_curCount + l_delta
+                ELSE
+                    l_curCount := MAXINT
+                END
+            ELSE
+                l_delta := p_lenBefore - p_lenAfter;
+                IF l_delta <= l_curCount
+                THEN
+                    l_curCount := l_curCount - l_delta
+                ELSE
+                    l_curCount := 0
+                END
+            END
+            ;
+            IF p_isEvent = TRUE
+            THEN
+                a_subscription_available_event_notifs (l_subscription) := l_curCount
+            ELSE
+                a_subscription_available_data_notifs (l_subscription) := l_curCount
+            END
         END
     END
     ;
@@ -1219,6 +1234,8 @@ OPERATIONS
                                   l_timerId);
                 IF StatusCode_service = e_sc_ok
                 THEN
+                    a_subscription_available_data_notifs(subscription) := 0;
+                    a_subscription_available_event_notifs(subscription) := 0;
                     subscription_created(p_revPublishInterval)
                 END
             ELSE
@@ -1485,7 +1502,9 @@ OPERATIONS
         l_node_monitIt_queue,
         l_sub_notif_queue,
         l_ts_src,
-        l_ts_srv
+        l_ts_srv,
+        l_lenBefore,
+        l_lenAfter
     IN
         monitoredItemPointer := c_monitoredItemPointer_indet;
         monitoredItemId := c_monitoredItemId_indet;
@@ -1549,6 +1568,7 @@ OPERATIONS
                             END
                             ;
                             /* Generate a notification for new monitored item */
+                            l_lenBefore <-- get_length_monitored_item_notification_queue (l_sub_notif_queue);
                             l_bres <-- add_first_monitored_item_notification_to_queue (monitoredItemPointer,
                                 l_sub_notif_queue,
                                 p_nid,
@@ -1556,7 +1576,12 @@ OPERATIONS
                                 p_value,
                                 p_valueSc,
                                 l_ts_src,
-                                l_ts_srv)
+                                l_ts_srv);
+                            IF l_bres = TRUE
+                            THEN
+                                l_lenAfter <-- get_length_monitored_item_notification_queue (l_sub_notif_queue);
+                                local_update_available_notifs (monitoredItemPointer, l_isEvent, l_lenBefore, l_lenAfter)
+                            END
                         END
                     END
                     ;
@@ -1594,7 +1619,11 @@ OPERATIONS
         l_clientHandle,
         l_filterCtx,
         l_isEvent,
-        l_isExpectedSubId
+        l_isExpectedSubId,
+        l_bresNQ,
+        l_notifQueue,
+        l_lenBefore,
+        l_lenAfter
     IN
         bres, l_monitoredItemPointer <--getall_monitoredItemId (p_mi_id);
         p_sc := e_sc_bad_monitored_item_id_invalid;
@@ -1602,6 +1631,7 @@ OPERATIONS
         p_filterResult := c_filterResult_indet;
         p_revSamplingItv := c_opcua_duration_zero;
         p_revQueueSize := 0;
+        l_isEvent := FALSE;
         IF bres = TRUE
         THEN
             l_monitoredItemId,
@@ -1632,7 +1662,21 @@ OPERATIONS
                                                        p_revQueueSize);
                 IF p_sc = e_sc_ok
                 THEN
-                    resize_monitored_item_notification_queue(l_monitoredItemPointer)
+                    /* Resize_monitored_item_notification_queue may drop notifications if the
+                       queue shrinks, update the available notifications at same time we resize. */
+                    l_bresNQ, l_notifQueue <-- get_monitored_item_notification_queue(l_monitoredItemPointer);
+                    IF l_bresNQ = TRUE
+                    THEN
+                        l_lenBefore <-- get_length_monitored_item_notification_queue(l_notifQueue);
+
+                        /* Actual resizing operation */
+                        resize_monitored_item_notification_queue(l_monitoredItemPointer);
+
+                        l_lenAfter <-- get_length_monitored_item_notification_queue(l_notifQueue);
+                        local_update_available_notifs (l_monitoredItemPointer, l_isEvent, l_lenBefore, l_lenAfter)
+                    ELSE
+                        resize_monitored_item_notification_queue(l_monitoredItemPointer)
+                    END
                 END
             END
         END
@@ -1654,13 +1698,16 @@ OPERATIONS
         l_isMonitoredItemFound,
         l_monitored_item_queue,
         l_bres,
-        l_notificationQueue
+        l_notificationQueue,
+        l_lenBefore,
+        l_isEvent
     IN
         p_sc := e_sc_bad_monitored_item_id_invalid;
         l_isMonitoredItemFound := FALSE;
         l_monitoredItemPointer := c_monitoredItemPointer_indet;
         l_monitored_item_queue := c_monitoredItemQueue_indet;
         l_nid := c_NodeId_indet;
+        l_isEvent := FALSE;
         l_isMonitoredItemFound, l_monitoredItemPointer <-- getall_monitoredItemId (p_mi_id);
         IF l_isMonitoredItemFound = TRUE THEN
             l_monitoredItemId,
@@ -1691,7 +1738,12 @@ OPERATIONS
                 l_bres, l_notificationQueue <-- get_monitored_item_notification_queue (l_monitoredItemPointer);
                 IF l_bres = TRUE
                 THEN
-                    clear_and_deallocate_monitored_item_notification_queue (l_monitoredItemPointer, l_notificationQueue)
+                    // Read the queue's length and kind before clearing it, so the subscription's
+                    // O(1) counter can be decremented by exactly what is discarded.
+                    l_lenBefore <-- get_length_monitored_item_notification_queue (l_notificationQueue);
+                    l_isEvent <-- is_event_monitored_item_notification_queue (l_monitoredItemPointer, l_notificationQueue);
+                    clear_and_deallocate_monitored_item_notification_queue (l_monitoredItemPointer, l_notificationQueue);
+                    local_update_available_notifs (l_monitoredItemPointer, l_isEvent, l_lenBefore, 0)
                 END
                 ;
                 delete_monitored_item_pointer (l_monitoredItemPointer)
@@ -1710,7 +1762,11 @@ OPERATIONS
         l_aid,
         l_indexRange,
         l_timestampToReturn,
-        l_clientHandle
+        l_clientHandle,
+        l_bres,
+        l_notifQueue,
+        l_len,
+        l_isEvent
     IN
         p_sc := e_sc_bad_monitored_item_id_invalid;
         p_mi_pointer := c_monitoredItemPointer_indet;
@@ -1732,7 +1788,20 @@ OPERATIONS
             l_isMonitoredItemFound := bool(p_subscription = l_subscription);
             IF l_isMonitoredItemFound = TRUE
             THEN
+                /* Queued notifications are available only in reporting mode:
+                   remove them from the counter with previous mode and add them back with the new mode */
+                l_len := 0;
+                l_isEvent := FALSE;
+                l_bres, l_notifQueue <-- get_monitored_item_notification_queue (l_monitoredItemPointer);
+                IF l_bres = TRUE
+                THEN
+                    l_len <-- get_length_monitored_item_notification_queue (l_notifQueue);
+                    l_isEvent <-- is_event_monitored_item_notification_queue (l_monitoredItemPointer, l_notifQueue)
+                END
+                ;
+                local_update_available_notifs (l_monitoredItemPointer, l_isEvent, l_len, 0);
                 set_monit_mode_monitored_item_pointer (l_monitoredItemPointer, p_monitoring_mode);
+                local_update_available_notifs (l_monitoredItemPointer, l_isEvent, 0, l_len);
                 p_sc := e_sc_ok
             END
         END
@@ -1742,12 +1811,19 @@ OPERATIONS
     clear_monitored_item_notifications (p_monitoredItemPointer) =
     VAR
         l_bres,
-        l_notifQueue
+        l_notifQueue,
+        l_lenBefore,
+        l_isEvent
     IN
         l_bres, l_notifQueue <-- get_monitored_item_notification_queue (p_monitoredItemPointer);
         IF l_bres = TRUE
         THEN
-            clear_monitored_item_notification_queue (p_monitoredItemPointer, l_notifQueue)
+            // Same treatment as delete_monitored_item: read length + kind before clearing, then
+            // decrement the owning subscription's O(1) counter by exactly what was discarded.
+            l_lenBefore <-- get_length_monitored_item_notification_queue (l_notifQueue);
+            l_isEvent <-- is_event_monitored_item_notification_queue (p_monitoredItemPointer, l_notifQueue);
+            clear_monitored_item_notification_queue (p_monitoredItemPointer, l_notifQueue);
+            local_update_available_notifs (p_monitoredItemPointer, l_isEvent, l_lenBefore, 0)
         END
     END
     ;
@@ -2028,7 +2104,9 @@ OPERATIONS
         l_triggered,
         l_event_notif,
         l_bres,
-        l_notif_queue
+        l_notif_queue,
+        l_lenBefore,
+        l_lenAfter
     IN
         l_filterCtx <-- get_monitoredItemFilter(p_monitoredItemPointer);
         l_triggered, l_event_notif
@@ -2038,9 +2116,13 @@ OPERATIONS
         l_bres, l_notif_queue <-- get_monitored_item_notification_queue (p_monitoredItemPointer);
         IF l_triggered = TRUE & l_bres = TRUE
         THEN
+            l_lenBefore <-- get_length_monitored_item_notification_queue (l_notif_queue);
             l_bres <-- add_monitored_item_event_notification_to_queue (p_monitoredItemPointer,
                                                                        l_notif_queue,
-                                                                       l_event_notif)
+                                                                       l_event_notif);
+            // Note: in case l_bres = FALSE, there is no guarantee number of notifications is unchanged
+            l_lenAfter <-- get_length_monitored_item_notification_queue (l_notif_queue);
+            local_update_available_notifs (p_monitoredItemPointer, TRUE, l_lenBefore, l_lenAfter)
         END
     END
     ;
@@ -2049,7 +2131,9 @@ OPERATIONS
     VAR
         l_bres,
         l_notif_queue,
-        l_is_event
+        l_is_event,
+        l_lenBefore,
+        l_lenAfter
     IN
         l_bres, l_notif_queue <-- get_monitored_item_notification_queue (p_monitoredItemPointer);
         IF l_bres = TRUE
@@ -2058,8 +2142,15 @@ OPERATIONS
             IF l_is_event = FALSE
             THEN
                 /* Note: indexRange and locales filtering on value done in C implementation */
+                l_lenBefore <-- get_length_monitored_item_notification_queue (l_notif_queue);
                 l_bres <-- add_monitored_item_data_notification_to_queue
-                             (p_localeIds, p_monitoredItemPointer, l_notif_queue, p_timestampToReturn, p_writeValuePointer)
+                             (p_localeIds, p_monitoredItemPointer, l_notif_queue, p_timestampToReturn, p_writeValuePointer);
+                // Hot path: every data write to a monitored node goes through here.
+                IF l_bres = TRUE
+                THEN
+                    l_lenAfter <-- get_length_monitored_item_notification_queue (l_notif_queue);
+                    local_update_available_notifs (p_monitoredItemPointer, FALSE, l_lenBefore, l_lenAfter)
+                END
             END
         END
 
@@ -2075,12 +2166,16 @@ OPERATIONS
         p_val_ts_src,
         p_val_ts_srv) =
     VAR
-        l_notif_queue
+        l_notif_queue,
+        l_isEvent,
+        l_lenBefore,
+        l_lenAfter
     IN
         bres, l_notif_queue <-- get_monitored_item_notification_queue (p_monitoredItemPointer);
         IF bres = TRUE
         THEN
             /* Generate a notification for monitored item concerned by the added / removed node */
+            l_lenBefore <-- get_length_monitored_item_notification_queue (l_notif_queue);
             bres <-- add_first_monitored_item_notification_to_queue
             (p_monitoredItemPointer,
                 l_notif_queue,
@@ -2089,7 +2184,13 @@ OPERATIONS
                 p_VariantValuePointer,
                 p_ValueSc,
                 p_val_ts_src,
-                p_val_ts_srv)
+                p_val_ts_srv);
+            IF bres = TRUE
+            THEN
+                l_lenAfter <-- get_length_monitored_item_notification_queue (l_notif_queue);
+                l_isEvent <-- is_event_monitored_item_notification_queue (p_monitoredItemPointer, l_notif_queue);
+                local_update_available_notifs (p_monitoredItemPointer, l_isEvent, l_lenBefore, l_lenAfter)
+            END
         END
     END
     ;

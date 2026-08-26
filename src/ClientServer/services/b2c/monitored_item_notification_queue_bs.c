@@ -269,6 +269,7 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifDataElt(
                     monitored_item_notification_queue_bs__p_queue, (uintptr_t) notifElt);
                 if (checkAdded != notifElt)
                 {
+                    SOPC_ASSERT(false && "Append data notif cannot fail: assertions + discard + append guarantees it");
                     retStatus = SOPC_STATUS_NOK;
                 }
                 else if (SOPC_CircularQueue_GetCapacity(monitored_item_notification_queue_bs__p_queue) != 1)

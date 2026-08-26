@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 19/10/2026 12:53:24
+ Date                 : 20/10/2026 12:08:25
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -69,6 +69,8 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
+extern t_entier4 subscription_core__a_subscription_available_data_notifs[constants__t_subscription_i_max+1];
+extern t_entier4 subscription_core__a_subscription_available_event_notifs[constants__t_subscription_i_max+1];
 extern t_bool subscription_core__continue_iter_prio;
 extern t_entier4 subscription_core__next_idx_iter_prio;
 extern t_entier4 subscription_core__prio_idx_iter_prio;
@@ -165,14 +167,15 @@ extern void subscription_core__local_init_iter_session_seq_priority(
    t_bool * const subscription_core__p_continue);
 extern void subscription_core__local_init_iter_subscription_priority(
    const t_entier4 subscription_core__p_prio_idx);
-extern void subscription_core__local_monitored_item_nb_available_notifications(
-   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
-   t_entier4 * const subscription_core__p_nb_available_notifs,
-   t_bool * const subscription_core__p_isEvent);
 extern void subscription_core__local_subscription_nb_available_notifications(
    const constants__t_subscription_i subscription_core__p_subscription,
    t_entier4 * const subscription_core__p_nb_available_data_notifs,
    t_entier4 * const subscription_core__p_nb_available_event_notifs);
+extern void subscription_core__local_update_available_notifs(
+   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
+   const t_bool subscription_core__p_isEvent,
+   const t_entier4 subscription_core__p_lenBefore,
+   const t_entier4 subscription_core__p_lenAfter);
 extern void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
    const constants__t_session_i subscription_core__p_session,
    t_bool * const subscription_core__p_validPubReqQueued);
