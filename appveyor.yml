@@ -14,7 +14,7 @@ install:
     # Check that we have the expected version and architecture for Python
     - "pip --version"
     - "python.exe -m pip install -U pip setuptools==81.0.0 build wheel"
-    - "pip install wexpect==4.0.0 cryptography pycparser six==1.11.0 asn1crypto==0.23.0 click cython python_dateutil==2.6.1 argparse==1.4.0 pytz==2025.2 idna==2.6 lxml"
+    - "pip install wexpect==4.0.0 cryptography pycparser six==1.11.0 asn1crypto==0.23.0 click cython==3.0.10 python_dateutil==2.6.1 argparse==1.4.0 pytz==2025.2 idna==2.6 lxml"
     - set FREEOPCUA_DIR_NAME=python-opcua-0.98.13
     - "appveyor.exe DownloadFile https://github.com/FreeOpcUa/python-opcua/archive/refs/tags/0.98.13.zip -FileName %FREEOPCUA_DIR_NAME%.zip"
     - "unzip %FREEOPCUA_DIR_NAME%.zip"
@@ -157,7 +157,7 @@ test_script:
         set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
         set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp310-cp310-win_amd64.whl
         pip --version
-        pip install --upgrade wheel pycparser click cython setuptools build
+        pip install --upgrade wheel pycparser click cython==3.0.10 setuptools build
         cd %ROOT_DIR%\%AUTOPXD2_DIR_NAME%
         python setup.py install
         cd %ROOT_DIR%\build
@@ -170,7 +170,7 @@ test_script:
         set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
         set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp311-cp311-win_amd64.whl
         pip --version
-        pip install --upgrade wheel pycparser click cython setuptools build
+        pip install --upgrade wheel pycparser click cython==3.0.10 setuptools build
         cd %ROOT_DIR%\%AUTOPXD2_DIR_NAME%
         python setup.py install
         cd %ROOT_DIR%\build
@@ -183,7 +183,7 @@ test_script:
         set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
         set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp312-cp312-win_amd64.whl
         pip --version
-        pip install --upgrade wheel pycparser click cython setuptools build
+        pip install --upgrade wheel pycparser click cython==3.0.10 setuptools build
         cd %ROOT_DIR%\%AUTOPXD2_DIR_NAME%
         python setup.py install
         cd %ROOT_DIR%\build
@@ -196,7 +196,7 @@ test_script:
         set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
         set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp313-cp313-win_amd64.whl
         pip --version
-        pip install --upgrade wheel pycparser click cython setuptools build
+        pip install --upgrade wheel pycparser click cython==3.0.10 setuptools build
         cd %ROOT_DIR%\%AUTOPXD2_DIR_NAME%
         python setup.py install
         cd %ROOT_DIR%\build
