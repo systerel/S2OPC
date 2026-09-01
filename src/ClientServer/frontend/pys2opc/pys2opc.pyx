@@ -687,14 +687,14 @@ cdef class _Request:
         if status == SOPC_ReturnStatus.SOPC_STATUS_OK and len(inputArgList) > 0: # If status is OK and there are input argument(s)
             pVariantInputArguments = <SOPC_Variant*> calloc(len(inputArgList), sizeof(SOPC_Variant))
             status = SOPC_ReturnStatus.SOPC_STATUS_OK if NULL != pVariantInputArguments else SOPC_ReturnStatus.SOPC_STATUS_OUT_OF_MEMORY
-            errorMessage: str = 'Memory issue : Variant(s) allocation failed'
+            errorMessage = 'Memory issue : Variant(s) allocation failed'
 
         # Translate python variants into C variants (Call Method Input Arguments)
         if status == SOPC_ReturnStatus.SOPC_STATUS_OK:
             for i, variant in enumerate(inputArgList):
                 _C_Variant.to_sopc_variant(variant, &pVariantInputArguments[i])
             status = SOPC_CallRequest_SetMethodToCallFromStrings(pCallRequest, 0, b_objectNodeId, b_methodNodeId, len(inputArgList), pVariantInputArguments)
-            errorMessage: str = 'SOPC_CallRequest_SetMethodToCallFromStrings failed for method {}'.format(methodNodeId)
+            errorMessage = 'SOPC_CallRequest_SetMethodToCallFromStrings failed for method {}'.format(methodNodeId)
 
         if NULL != pVariantInputArguments:
             for i in range(len(inputArgList)):
@@ -1581,7 +1581,6 @@ cdef void _callback_client_connection_event(SOPC_ClientConnection* conn, SOPC_Cl
     cdef uintptr_t id_sc = <uintptr_t> (<void*> conn)
     connectHandler: BaseClientConnectionHandler = PyS2OPC_Client._dConnectHandler[id_sc]
     if connectHandler is not None and event == SOPC_ClientConnectionEvent.SOPC_ClientConnectionEvent_Disconnected:
-        connectHandler: BaseClientConnectionHandler = PyS2OPC_Client._dConnectHandler[id_sc]
         connectHandler._connected = False
 
 cdef void _callback_ClientServiceAsyncResp(SOPC_EncodeableType* type, const void* response, uintptr_t userContext) noexcept with gil:
