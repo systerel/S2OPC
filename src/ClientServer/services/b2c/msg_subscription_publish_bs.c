@@ -152,6 +152,10 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
                     OpcUa_MonitoredItemNotification_Initialize(&dataChangeNotif->MonitoredItems[i]);
                 }
             }
+            else
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
         }
         if (SOPC_STATUS_OK == status && hasEvent)
         {
@@ -168,7 +172,7 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
             }
             else
             {
-                SOPC_ExtensionObject_Clear(notifMsg->NotificationData);
+                status = SOPC_STATUS_OUT_OF_MEMORY;
             }
         }
         if (SOPC_STATUS_OK == status)
