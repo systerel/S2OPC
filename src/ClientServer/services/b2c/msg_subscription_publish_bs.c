@@ -106,11 +106,17 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
 
         if (NULL != notifMsg->NotificationData)
         {
+            // Initialize the whole array first: the creation loop below may stop early on failure,
+            // and the error cleanup path clears all NoOfNotificationData entries.
             for (int32_t i = 0; i < notifMsg->NoOfNotificationData; i++)
             {
-                SOPC_ExtensionObject* notifData = &notifMsg->NotificationData[i];
+                SOPC_ExtensionObject_Initialize(&notifMsg->NotificationData[i]);
+            }
 
-                SOPC_ExtensionObject_Initialize(notifData);
+            status = SOPC_STATUS_OK; // loop below stops on first creation failure
+            for (int32_t i = 0; (SOPC_STATUS_OK == status) && i < notifMsg->NoOfNotificationData; i++)
+            {
+                SOPC_ExtensionObject* notifData = &notifMsg->NotificationData[i];
 
                 if (dataToSet)
                 {
