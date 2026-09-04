@@ -63,6 +63,8 @@
 #define NB_OF_CHILD_DIALOG_CONDITION NB_OF_REFERENCES_DIALOG_CONDITION - 2
 #define NB_OF_REFERENCE_DIALOG_COND_TYPE_ENABLED_STATE 3
 
+#define CUSTOM_BUILD_INFO_PRODUCT_NAME "S2OPC toolkit test server (custom build info)"
+
 static int32_t nonRegWriteResponses = 0;
 
 static uint32_t cptReadResps = 0;
@@ -1045,6 +1047,67 @@ static SOPC_ReturnStatus check_inverse_reference_type_to_addedNode(const SOPC_No
     return status;
 }
 
+static SOPC_ReturnStatus configure_custom_build_info(void)
+{
+    OpcUa_BuildInfo buildInfo;
+    OpcUa_BuildInfo_Initialize(&buildInfo);
+
+    SOPC_ReturnStatus status = SOPC_String_InitializeFromCString(&buildInfo.ProductUri, DEFAULT_PRODUCT_URI);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_InitializeFromCString(&buildInfo.ManufacturerName, "Systerel");
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_InitializeFromCString(&buildInfo.ProductName, CUSTOM_BUILD_INFO_PRODUCT_NAME);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_InitializeFromCString(&buildInfo.SoftwareVersion, "1.0.0-test");
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_InitializeFromCString(&buildInfo.BuildNumber, "test-custom-build-info");
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerConfigHelper_SetSoftwareBuildInfo(&buildInfo);
+    }
+
+    OpcUa_BuildInfo_Clear(&buildInfo);
+    return status;
+}
+
+static bool check_custom_build_info_applied(void)
+{
+    const SOPC_NodeId productNameId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerStatus_BuildInfo_ProductName);
+    OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
+    SOPC_ReturnStatus status = (NULL != readReq) ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ReadRequest_SetReadValue(readReq, 0, &productNameId, SOPC_AttributeId_Value, NULL);
+    }
+
+    OpcUa_ReadResponse* readResp = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerHelper_LocalServiceSync(readReq, (void**) &readResp);
+    }
+
+    bool ok = SOPC_STATUS_OK == status && SOPC_IsGoodStatus(readResp->ResponseHeader.ServiceResult) &&
+              SOPC_IsGoodStatus(readResp->Results[0].Status) &&
+              SOPC_VariantArrayType_SingleValue == readResp->Results[0].Value.ArrayType &&
+              SOPC_String_Id == readResp->Results[0].Value.BuiltInTypeId &&
+              0 == strcmp(CUSTOM_BUILD_INFO_PRODUCT_NAME,
+                          SOPC_String_GetRawCString(&readResp->Results[0].Value.Value.String));
+
+    if (NULL != readResp)
+    {
+        SOPC_EncodeableObject_Delete(readResp->encodeableType, (void**) &readResp);
+    }
+    return ok;
+}
+
 int main(int argc, char* argv[])
 {
     SOPC_UNUSED_ARG(argc);
@@ -1205,6 +1268,16 @@ int main(int argc, char* argv[])
         status = SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(SOPC_LocalServiceDefaultWriteAddRespCallback);
     }
 
+    // Configure a custom build info (non-regression test, see configure_custom_build_info)
+    if (SOPC_STATUS_OK == status)
+    {
+        status = configure_custom_build_info();
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Test_Server_Local_Service: Failed setting custom build info \n");
+        }
+    }
+
     // Asynchronous request to start server
     if (SOPC_STATUS_OK == status)
     {
@@ -1239,6 +1312,16 @@ int main(int argc, char* argv[])
         {
             printf("<Test_Server_Local_Service: Get endpoints local  service synchronous call: NOK\n");
         }
+    }
+
+    // Check the custom build info configured before starting the server was effectively used
+    // (see configure_custom_build_info): confirms SOPC_HelperInternal_OpenEndpoints took the
+    // custom build info branch, not the default one.
+    if (SOPC_STATUS_OK == status)
+    {
+        status = check_custom_build_info_applied() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        printf("<Test_Server_Local_Service: Custom build info applied to ServerStatus.BuildInfo: %s\n",
+               SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
 
     if (SOPC_STATUS_OK == status)
