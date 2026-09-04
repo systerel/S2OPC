@@ -425,7 +425,8 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
     }
     else
     {
-        SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &pConfig->serverConfig);
+        sopc_server_helper_config.runtimeVariables =
+            SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &pConfig->serverConfig);
     }
 
     OpcUa_WriteRequest* writeRequest =
