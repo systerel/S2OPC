@@ -42,7 +42,7 @@ START_TEST(test_timeReference_getCurrent)
     ck_assert_uint_gt(t1, 0);
 
     // Increasing test value
-    SOPC_Sleep(1); // 1 ms
+    SOPC_Sleep(50); // 50 ms
     SOPC_TimeReference t2 = SOPC_TimeReference_GetCurrent();
     ck_assert_uint_gt(t2, t1);
 
