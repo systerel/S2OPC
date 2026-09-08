@@ -39,6 +39,7 @@
 #include "sopc_address_space.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
+#include "sopc_circular_queue.h"
 #include "sopc_enum_types.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_singly_linked_list.h"
@@ -132,7 +133,7 @@ typedef SOPC_SLinkedListIterator* constants_bs__t_notifRepublishQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_notifRepublishQueue_i;
 typedef OpcUa_NotificationMessage* constants_bs__t_notif_msg_i;
 typedef void* constants_bs__t_notificationData;
-typedef SOPC_SLinkedList* constants_bs__t_notificationQueue_i;
+typedef SOPC_CircularQueue* constants_bs__t_notificationQueue_i;
 typedef double constants_bs__t_opcua_duration_i;
 typedef SOPC_SLinkedListIterator constants_bs__t_prioritySubQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_prioritySubQueue_i;

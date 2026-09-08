@@ -25,12 +25,12 @@
 #include "constants.h"
 
 #include "monitored_item_pointer_impl.h"
+#include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_circular_queue.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_singly_linked_list.h"
-#include "util_b2c.h"
 #include "util_event.h"
 #include "util_variant.h"
 
@@ -66,11 +66,11 @@ void monitored_item_notification_queue_bs__allocate_new_monitored_item_notificat
     if (monitored_item_notification_queue_bs__p_isEvent)
     {
         // 1 element added to maximum in order to be allowed to store an EventQueueOverflowEventType event
-        monitoredItemPointer->notifQueue = SOPC_SLinkedList_Create((size_t) monitoredItemPointer->queueSize + 1);
+        monitoredItemPointer->notifQueue = SOPC_CircularQueue_Create((size_t) monitoredItemPointer->queueSize + 1);
     }
     else
     {
-        monitoredItemPointer->notifQueue = SOPC_SLinkedList_Create((size_t) monitoredItemPointer->queueSize);
+        monitoredItemPointer->notifQueue = SOPC_CircularQueue_Create((size_t) monitoredItemPointer->queueSize);
     }
     if (NULL == monitoredItemPointer->notifQueue)
     {
@@ -96,9 +96,8 @@ static void SOPC_InternalNotificationElement_Free(SOPC_InternalNotificationEleme
     }
 }
 
-static void SOPC_InternalNotificationQueueElement_Free(uint32_t id, uintptr_t val)
+static void SOPC_InternalNotificationQueueElement_Free(uintptr_t val)
 {
-    SOPC_UNUSED_ARG(id);
     SOPC_InternalNotificationElement_Free((SOPC_InternalNotificationElement*) val);
 }
 
@@ -109,8 +108,8 @@ void monitored_item_notification_queue_bs__clear_monitored_item_notification_que
     SOPC_InternalMonitoredItem* monitoredItemPointer =
         (SOPC_InternalMonitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
     SOPC_ASSERT(monitoredItemPointer->notifQueue == monitored_item_notification_queue_bs__p_queue);
-    SOPC_SLinkedList_Apply(monitoredItemPointer->notifQueue, SOPC_InternalNotificationQueueElement_Free);
-    SOPC_SLinkedList_Clear(monitoredItemPointer->notifQueue);
+    SOPC_CircularQueue_Apply(monitoredItemPointer->notifQueue, SOPC_InternalNotificationQueueElement_Free);
+    SOPC_CircularQueue_Clear(monitoredItemPointer->notifQueue);
 }
 
 void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(
@@ -120,53 +119,53 @@ void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_n
     SOPC_InternalMonitoredItem* monitoredItemPointer =
         (SOPC_InternalMonitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
     SOPC_ASSERT(monitoredItemPointer->notifQueue == monitored_item_notification_queue_bs__p_queue);
-    SOPC_SLinkedList_Apply(monitoredItemPointer->notifQueue, SOPC_InternalNotificationQueueElement_Free);
-    SOPC_SLinkedList_Delete(monitoredItemPointer->notifQueue);
+    SOPC_CircularQueue_Apply(monitoredItemPointer->notifQueue, SOPC_InternalNotificationQueueElement_Free);
+    SOPC_CircularQueue_Delete(monitoredItemPointer->notifQueue);
     monitoredItemPointer->notifQueue = NULL;
 }
 
-static SOPC_InternalNotificationElement* SOPC_InternalGetDiscardedNotification(SOPC_SLinkedList* notifQueue,
+static SOPC_InternalNotificationElement* SOPC_InternalGetDiscardedNotification(SOPC_CircularQueue* notifQueue,
                                                                                bool discardOldest)
 {
     SOPC_ASSERT(NULL != notifQueue);
-    SOPC_ASSERT(SOPC_SLinkedList_GetLength(notifQueue) > 0);
+    SOPC_ASSERT(SOPC_CircularQueue_GetLength(notifQueue) > 0);
     SOPC_InternalNotificationElement* discardedNotifElt = NULL;
     if (discardOldest)
     {
-        discardedNotifElt = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_PopHead(notifQueue);
+        discardedNotifElt = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_PopHead(notifQueue);
     }
     else
     {
-        discardedNotifElt = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_PopLast(notifQueue);
+        discardedNotifElt = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_PopLast(notifQueue);
     }
     SOPC_ASSERT(NULL != discardedNotifElt);
     return discardedNotifElt;
 }
 
-static void SOPC_InternalDiscardOneNotification(SOPC_SLinkedList* notifQueue, bool discardOldest)
+static void SOPC_InternalDiscardOneNotification(SOPC_CircularQueue* notifQueue, bool discardOldest)
 {
     SOPC_InternalNotificationElement* discardedNotifElt =
         SOPC_InternalGetDiscardedNotification(notifQueue, discardOldest);
     SOPC_InternalNotificationElement_Free(discardedNotifElt);
 }
 
-static void SOPC_InternalSetOverflowBitAfterDiscard(SOPC_SLinkedList* notifQueue, bool discardOldest)
+static void SOPC_InternalSetOverflowBitAfterDiscard(SOPC_CircularQueue* notifQueue, bool discardOldest)
 {
     SOPC_InternalNotificationElement* notifElt = NULL;
 
     SOPC_ASSERT(NULL != notifQueue);
-    SOPC_ASSERT(SOPC_SLinkedList_GetLength(notifQueue) > 0);
+    SOPC_ASSERT(SOPC_CircularQueue_GetLength(notifQueue) > 0);
 
     /* Set the overflow bit in DataValue status code in value replacing discarded one */
     if (discardOldest)
     {
         /* New oldest notification DataValue status code should have bit set */
-        notifElt = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_GetHead(notifQueue);
+        notifElt = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_GetHead(notifQueue);
     }
     else
     {
         /* New last notification DataValue status code should have bit set */
-        notifElt = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_GetLast(notifQueue);
+        notifElt = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_GetLast(notifQueue);
     }
     SOPC_ASSERT(NULL != notifElt);
 
@@ -210,23 +209,23 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifDataElt(
         notifElt->value->Value.ServerTimestamp = monitored_item_notification_queue_bs__p_val_ts_srv.timestamp;
         notifElt->value->Value.ServerPicoSeconds = monitored_item_notification_queue_bs__p_val_ts_srv.picoSeconds;
 
-        checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Append(
-            monitored_item_notification_queue_bs__p_queue, 0, (uintptr_t) notifElt);
+        checkAdded = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_Append(
+            monitored_item_notification_queue_bs__p_queue, (uintptr_t) notifElt);
         if (checkAdded != notifElt)
         {
-            uint32_t capacity = SOPC_SLinkedList_GetCapacity(monitored_item_notification_queue_bs__p_queue);
+            uint32_t capacity = SOPC_CircularQueue_GetCapacity(monitored_item_notification_queue_bs__p_queue);
             /* Discard a notification to add the new one */
-            if (capacity > 0 && SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) == capacity)
+            if (capacity > 0 && SOPC_CircularQueue_GetLength(monitored_item_notification_queue_bs__p_queue) == capacity)
             {
                 SOPC_InternalDiscardOneNotification(monitored_item_notification_queue_bs__p_queue,
                                                     notifElt->monitoredItemPointer->discardOldest);
-                checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Append(
-                    monitored_item_notification_queue_bs__p_queue, 0, (uintptr_t) notifElt);
+                checkAdded = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_Append(
+                    monitored_item_notification_queue_bs__p_queue, (uintptr_t) notifElt);
                 if (checkAdded != notifElt)
                 {
                     retStatus = SOPC_STATUS_NOK;
                 }
-                else if (SOPC_SLinkedList_GetCapacity(monitored_item_notification_queue_bs__p_queue) != 1)
+                else if (SOPC_CircularQueue_GetCapacity(monitored_item_notification_queue_bs__p_queue) != 1)
                 {
                     SOPC_InternalSetOverflowBitAfterDiscard(monitored_item_notification_queue_bs__p_queue,
                                                             notifElt->monitoredItemPointer->discardOldest);
@@ -262,7 +261,7 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
 {
     *monitored_item_notification_queue_bs__bres = false;
     SOPC_StatusCode valueStatus = monitored_item_notification_queue_bs__p_ValueSc;
-    if (SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) >=
+    if (SOPC_CircularQueue_GetLength(monitored_item_notification_queue_bs__p_queue) >=
         INT32_MAX) // number of notifications returned in B model as a int32
     {
         return;
@@ -462,15 +461,15 @@ static bool SOPC_InternalAddCommonFinishAddNotifEventElt(
      */
     SOPC_ASSERT(notifElt != NULL);
     SOPC_InternalNotificationElement* checkAdded = NULL;
-    uint32_t capacity = SOPC_SLinkedList_GetCapacity(monitored_item_notification_queue_bs__p_queue);
+    uint32_t capacity = SOPC_CircularQueue_GetCapacity(monitored_item_notification_queue_bs__p_queue);
     // One element reserved for queue overflow event
     capacity = (capacity > 0 ? capacity - 1 : 0);
-    uint32_t length = SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue);
+    uint32_t length = SOPC_CircularQueue_GetLength(monitored_item_notification_queue_bs__p_queue);
     bool res = length < capacity;
     if (res)
     {
-        checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Append(
-            monitored_item_notification_queue_bs__p_queue, 0, (uintptr_t) notifElt);
+        checkAdded = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_Append(
+            monitored_item_notification_queue_bs__p_queue, (uintptr_t) notifElt);
         res = (checkAdded == notifElt);
     }
     if (!res && capacity > 0)
@@ -513,22 +512,22 @@ static bool SOPC_InternalAddCommonFinishAddNotifEventElt(
             if (monitoredItemPointer->discardOldest)
             {
                 // Enqueue the overflow notification (previously discarded or newly created) at the beginning
-                checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Prepend(
-                    monitored_item_notification_queue_bs__p_queue, 0, (uintptr_t) queueOverflowNotif);
+                checkAdded = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_Prepend(
+                    monitored_item_notification_queue_bs__p_queue, (uintptr_t) queueOverflowNotif);
             }
             else
             {
                 // Enqueue the newly created overflow notification at the end
-                checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Append(
-                    monitored_item_notification_queue_bs__p_queue, 0, (uintptr_t) queueOverflowNotif);
+                checkAdded = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_Append(
+                    monitored_item_notification_queue_bs__p_queue, (uintptr_t) queueOverflowNotif);
             }
             res = (checkAdded == queueOverflowNotif);
         }
         // Add the new notification event since one has been discarded
         if (res)
         {
-            checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Append(
-                monitored_item_notification_queue_bs__p_queue, 0, (uintptr_t) notifElt);
+            checkAdded = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_Append(
+                monitored_item_notification_queue_bs__p_queue, (uintptr_t) notifElt);
             res = (checkAdded == notifElt);
         }
         else
@@ -575,12 +574,12 @@ void monitored_item_notification_queue_bs__add_monitored_item_event_notification
     *monitored_item_notification_queue_bs__bres = res;
 }
 
-static SOPC_InternalNotificationElement* continue_pop_iter_notif(SOPC_SLinkedList* notifQueue, bool* hasMoreElts)
+static SOPC_InternalNotificationElement* continue_pop_iter_notif(SOPC_CircularQueue* notifQueue, bool* hasMoreElts)
 {
     SOPC_InternalNotificationElement* notifElt =
-        (SOPC_InternalNotificationElement*) SOPC_SLinkedList_PopHead(notifQueue);
+        (SOPC_InternalNotificationElement*) SOPC_CircularQueue_PopHead(notifQueue);
     SOPC_ASSERT(notifElt != NULL);
-    *hasMoreElts = SOPC_SLinkedList_GetLength(notifQueue) > 0;
+    *hasMoreElts = SOPC_CircularQueue_GetLength(notifQueue) > 0;
     return notifElt;
 }
 
@@ -629,7 +628,7 @@ void monitored_item_notification_queue_bs__get_length_monitored_item_notificatio
     t_entier4* const monitored_item_notification_queue_bs__p_nb_available_notifs)
 {
     SOPC_ASSERT(NULL != monitored_item_notification_queue_bs__p_mi_notif_queue);
-    uint32_t length = SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_mi_notif_queue);
+    uint32_t length = SOPC_CircularQueue_GetLength(monitored_item_notification_queue_bs__p_mi_notif_queue);
     SOPC_ASSERT(length <= INT32_MAX); // Guaranteed by add functions
     *monitored_item_notification_queue_bs__p_nb_available_notifs = (int32_t) length;
 }
@@ -666,7 +665,7 @@ void monitored_item_notification_queue_bs__init_iter_monitored_item_notification
         (SOPC_InternalMonitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
     *monitored_item_notification_queue_bs__p_isEvent = is_eventMI(monitoredItemPointer);
     *monitored_item_notification_queue_bs__p_continue =
-        SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_queue) > 0;
+        SOPC_CircularQueue_GetLength(monitored_item_notification_queue_bs__p_queue) > 0;
 }
 
 void monitored_item_notification_queue_bs__is_event_monitored_item_notification_queue(
@@ -682,11 +681,11 @@ void monitored_item_notification_queue_bs__is_event_monitored_item_notification_
 static void resize_data_notif_queue(SOPC_InternalMonitoredItem* monitoredItemPointer)
 {
     SOPC_ASSERT(monitoredItemPointer != NULL);
-    SOPC_SLinkedList* notifQueue = monitoredItemPointer->notifQueue;
-
+    SOPC_CircularQueue* notifQueue = monitoredItemPointer->notifQueue;
+    SOPC_ASSERT(monitoredItemPointer->queueSize >= 0);
     /* Discard notifications if more available than new capacity */
     bool discardedNotifs = false;
-    while (SOPC_SLinkedList_GetLength(notifQueue) > (uint32_t) monitoredItemPointer->queueSize)
+    while (SOPC_CircularQueue_GetLength(notifQueue) > (uint32_t) monitoredItemPointer->queueSize)
     {
         discardedNotifs = true;
         SOPC_InternalDiscardOneNotification(notifQueue, monitoredItemPointer->discardOldest);
@@ -698,26 +697,31 @@ static void resize_data_notif_queue(SOPC_InternalMonitoredItem* monitoredItemPoi
     }
 
     /* Change notification queue capacity */
-    bool capacitySet = SOPC_SLinkedList_SetCapacity(notifQueue, (size_t) monitoredItemPointer->queueSize);
+    bool capacitySet = SOPC_CircularQueue_SetCapacity(notifQueue, (size_t) monitoredItemPointer->queueSize);
     SOPC_ASSERT(capacitySet);
 }
 
 static bool is_discard_necessary_and_overflow_event_in_notif_queue(
     SOPC_InternalMonitoredItem* monitoredItemPointer,
-    SOPC_InternalNotificationElement** pOverflowNotifInQueue)
+    SOPC_InternalNotificationElement** pOverflowNotifInQueue,
+    uint32_t* pOverflowNotifIndex)
 {
     SOPC_ASSERT(NULL != pOverflowNotifInQueue && NULL == *pOverflowNotifInQueue);
+    SOPC_ASSERT(NULL != pOverflowNotifIndex);
     /* Count real notifications and check if an overflow event notif is in the queue if it was already triggered  */
     uint32_t nbRealNotifs = 0;
     if (monitoredItemPointer->queueOverflowEventTriggered)
     {
-        SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(monitoredItemPointer->notifQueue);
-        while (SOPC_SLinkedList_HasNext(&it))
+        SOPC_CircularQueueIterator it = SOPC_CircularQueue_GetIterator(monitoredItemPointer->notifQueue);
+        while (SOPC_CircularQueue_HasNext(&it))
         {
-            SOPC_InternalNotificationElement* notifElt = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Next(&it);
+            uint32_t index = 0;
+            SOPC_InternalNotificationElement* notifElt =
+                (SOPC_InternalNotificationElement*) SOPC_CircularQueue_NextWithIndex(&it, &index);
             if (notifElt->isQueueOverflowEvent)
             {
                 *pOverflowNotifInQueue = notifElt;
+                *pOverflowNotifIndex = index;
             }
             else
             {
@@ -728,7 +732,7 @@ static bool is_discard_necessary_and_overflow_event_in_notif_queue(
     else
     {
         // Only real notification present in queue
-        nbRealNotifs = SOPC_SLinkedList_GetLength(monitoredItemPointer->notifQueue);
+        nbRealNotifs = SOPC_CircularQueue_GetLength(monitoredItemPointer->notifQueue);
     }
     /* Capacity is 1 element more than the queue size to store the EventQueueOverflowEventType event in addition. */
     if (nbRealNotifs <= (uint32_t) monitoredItemPointer->queueSize)
@@ -744,24 +748,25 @@ static bool is_discard_necessary_and_overflow_event_in_notif_queue(
 static void resize_event_notif_queue(SOPC_InternalMonitoredItem* monitoredItemPointer)
 {
     SOPC_ASSERT(NULL != monitoredItemPointer);
-    SOPC_SLinkedList* notifQueue = monitoredItemPointer->notifQueue;
+    SOPC_CircularQueue* notifQueue = monitoredItemPointer->notifQueue;
     SOPC_InternalNotificationElement* discardedOverflowNotif = NULL;
+    uint32_t discardedOverflowIndex = 0;
 
-    if (is_discard_necessary_and_overflow_event_in_notif_queue(monitoredItemPointer, &discardedOverflowNotif))
+    if (is_discard_necessary_and_overflow_event_in_notif_queue(monitoredItemPointer, &discardedOverflowNotif,
+                                                               &discardedOverflowIndex))
     {
         if (NULL != discardedOverflowNotif)
         {
             // We remove it temporarily to discard only real notifications from the queue with expected size
-            uintptr_t removed = SOPC_SLinkedList_RemoveFromValuePtr(monitoredItemPointer->notifQueue,
-                                                                    (uintptr_t) discardedOverflowNotif);
-            SOPC_ASSERT(removed != 0);
+            uintptr_t removed = SOPC_CircularQueue_RemoveAt(monitoredItemPointer->notifQueue, discardedOverflowIndex);
+            SOPC_ASSERT(removed == (uintptr_t) discardedOverflowNotif);
         }
     }
     else
     {
         /* No notification to discard: only change the capacity (queue size + 1 overflow event),
          * keep content and order unchanged. */
-        bool capacitySet = SOPC_SLinkedList_SetCapacity(notifQueue, (size_t) monitoredItemPointer->queueSize + 1);
+        bool capacitySet = SOPC_CircularQueue_SetCapacity(notifQueue, (size_t) monitoredItemPointer->queueSize + 1);
         SOPC_ASSERT(capacitySet);
         return;
     }
@@ -769,7 +774,7 @@ static void resize_event_notif_queue(SOPC_InternalMonitoredItem* monitoredItemPo
     /* Discard notifications if more available than new capacity */
     bool discardedNotifs = false;
     SOPC_InternalNotificationElement* discardedNewest = NULL;
-    while (SOPC_SLinkedList_GetLength(notifQueue) > (uint32_t) monitoredItemPointer->queueSize)
+    while (SOPC_CircularQueue_GetLength(notifQueue) > (uint32_t) monitoredItemPointer->queueSize)
     {
         discardedNotifs = true;
         // Keep the first discarded when discardNewest as it is the one to be kept as the latest and restored
@@ -813,15 +818,15 @@ static void resize_event_notif_queue(SOPC_InternalMonitoredItem* monitoredItemPo
             {
                 SOPC_ASSERT(NULL == discardedNewest);
                 // Enqueue the overflow notification (previously discarded or newly created) at the beginning
-                checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Prepend(
-                    notifQueue, 0, (uintptr_t) discardedOverflowNotif);
+                checkAdded = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_Prepend(
+                    notifQueue, (uintptr_t) discardedOverflowNotif);
             }
             else
             {
                 SOPC_ASSERT(NULL != discardedNewest);
                 // Enqueue the overflow notification (previously discarded or newly created) at the end
-                checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Append(
-                    notifQueue, 0, (uintptr_t) discardedOverflowNotif);
+                checkAdded = (SOPC_InternalNotificationElement*) SOPC_CircularQueue_Append(
+                    notifQueue, (uintptr_t) discardedOverflowNotif);
             }
             res = (checkAdded == discardedOverflowNotif);
         } // else: overflow event already triggered and delivered: nothing to do
@@ -839,7 +844,7 @@ static void resize_event_notif_queue(SOPC_InternalMonitoredItem* monitoredItemPo
             SOPC_ASSERT(NULL != discardedNewest);
             // Enqueue the latest notification kept to be restored
             SOPC_InternalNotificationElement* checkAdded =
-                (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Append(notifQueue, 0, (uintptr_t) discardedNewest);
+                (SOPC_InternalNotificationElement*) SOPC_CircularQueue_Append(notifQueue, (uintptr_t) discardedNewest);
             if (checkAdded != discardedNewest)
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -852,7 +857,7 @@ static void resize_event_notif_queue(SOPC_InternalMonitoredItem* monitoredItemPo
 
     /* Change notification queue capacity: 1 element added to maximum in order to be allowed to store an
      * EventQueueOverflowEventType event */
-    bool capacitySet = SOPC_SLinkedList_SetCapacity(notifQueue, (size_t) monitoredItemPointer->queueSize + 1);
+    bool capacitySet = SOPC_CircularQueue_SetCapacity(notifQueue, (size_t) monitoredItemPointer->queueSize + 1);
     SOPC_ASSERT(capacitySet);
 }
 

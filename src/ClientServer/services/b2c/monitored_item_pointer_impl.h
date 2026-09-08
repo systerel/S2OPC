@@ -22,6 +22,7 @@
 
 #include "constants.h"
 
+#include "sopc_circular_queue.h"
 #include "sopc_macros.h"
 #include "sopc_numeric_range.h"
 
@@ -61,7 +62,7 @@ typedef struct SOPC_InternalMonitoredItem
     SOPC_InternalMonitoredItemFilterCtx* filterCtx;
     bool discardOldest;
     int32_t queueSize;
-    SOPC_SLinkedList* notifQueue;
+    SOPC_CircularQueue* notifQueue;
     bool queueOverflowEventTriggered;
 } SOPC_InternalMonitoredItem;
 
