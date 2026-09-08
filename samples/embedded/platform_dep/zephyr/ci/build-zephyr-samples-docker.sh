@@ -54,7 +54,7 @@ OPT_IP_ADDRESS=
 IP_ADDRESS=
 LOG_PATH=
 BIN_PATH=
-export NOCRYTO=0
+unset NOCRYTO
 
 export BOARD=$1
 shift

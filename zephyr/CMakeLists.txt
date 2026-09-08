@@ -2,8 +2,16 @@ if (CONFIG_S2OPC)
 
 zephyr_interface_library_named(S2OPC)
 
-# This macro is only available for MbedTLS versions 3.5.0 and higher
-add_definitions (-DMBEDTLS_CONFIG_FILE="${ZEPHYR_BASE}/modules/mbedtls/configs/config-tls-generic.h")
+# Zephyr generates config-mbedtls.h from Kconfig and appends
+# CONFIG_MBEDTLS_USER_CONFIG_FILE when enabled. Point all S2OPC sources at
+# that generated header instead of the old hardcoded config-tls-generic.h.
+add_definitions(-DMBEDTLS_CONFIG_FILE="config-mbedtls.h")
+
+if(DEFINED ENV{ZEPHYR_BASE} AND EXISTS "$ENV{ZEPHYR_BASE}/modules/mbedtls/configs")
+  zephyr_include_directories($ENV{ZEPHYR_BASE}/modules/mbedtls/configs)
+elseif(DEFINED ZEPHYR_BASE AND EXISTS "${ZEPHYR_BASE}/modules/mbedtls/configs")
+  zephyr_include_directories(${ZEPHYR_BASE}/modules/mbedtls/configs)
+endif()
 
 add_definitions (-DWITH_STATIC_SECURITY_DATA=1)
 add_definitions (-DPUBSUB_STATIC_CONFIG=1)

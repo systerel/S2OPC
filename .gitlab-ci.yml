@@ -476,12 +476,12 @@ build-linux64-coverity:
 build-zephyr:
   <<: *zephyr_job
   stage: build-others
-  image: # digest of zephyr_build :v4.2.0
-    name: registry.gitlab.com/systerel/s2opc/zephyr_build@sha256:504fd0613b96e99ec16ed23b3fcba1455e8bbede4fe352bfb2b921b04cae5221
+  image: # digest of zephyr_build :v4.3.0
+    name: registry.gitlab.com/systerel/s2opc/zephyr_build@sha256:bc6f5386268c81ac1d0544be1d843c1e0caa22739f4269e33079579b85b454f0
     entrypoint: [""] # Needs cause of issue with `sh` https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3622
   needs: []
   script:
-    - "ln -s $(pwd) /zephyrproject/modules/lib/s2opc"
+    - "(cd /zephyrproject && west zephyr-export)"
     - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client"
     - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh nucleo_h745zi_q/stm32h745xx/m7 cli_client -DCONFIG_NET_GPTP=y"
     - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server"
@@ -776,7 +776,7 @@ test-faulty-packets:
 #test-zephyr:
 #  <<: *zephyr_job
 #  stage: test-others
-#  image: registry.gitlab.com/systerel/s2opc/zephyr_build@sha256:504fd0613b96e99ec16ed23b3fcba1455e8bbede4fe352bfb2b921b04cae5221 # digest of zephyr_build:v4.2.0
+#  image: registry.gitlab.com/systerel/s2opc/zephyr_build@sha256:bc6f5386268c81ac1d0544be1d843c1e0caa22739f4269e33079579b85b454f0 # digest of zephyr_build:v4.3.0
 #  needs : [build-zephyr]
 #  script:
 #    - "./samples/embedded/platform_dep/zephyr/ci/test-in-docker.sh"
