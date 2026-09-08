@@ -182,15 +182,12 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
         }
         else
         {
-            if (SOPC_STATUS_OK != status)
+            for (int32_t i = 0; i < notifMsg->NoOfNotificationData; i++)
             {
-                for (int32_t i = 0; i < notifMsg->NoOfNotificationData; i++)
-                {
-                    SOPC_ExtensionObject_Clear(&notifMsg->NotificationData[i]);
-                }
-                SOPC_Free(notifMsg->NotificationData);
-                notifMsg->NotificationData = NULL;
+                SOPC_ExtensionObject_Clear(&notifMsg->NotificationData[i]);
             }
+            SOPC_Free(notifMsg->NotificationData);
+            notifMsg->NotificationData = NULL;
         }
     }
 }
