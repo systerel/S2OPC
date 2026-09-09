@@ -51,3 +51,4 @@ the legal rights to contribute.
 * Chafik AKRICH <chafik.akrich@systerel.fr>
 
 * Walid Raïs <walid.rais-stg@systerel.fr>
+* Kponou <keith@systerel.fr>
