@@ -37,4 +37,4 @@ UACTT_LINUX_DIGEST=com.systerel.fr:5000/c838/uactt-linux@sha256:3f1eb2312da5cd6b
 NETWORK_FUZZING_DIGEST=docker.aix.systerel.fr/c838/opcua-network-fuzzer@sha256:35e40ba847bdfe5f3e7112f465adb2c70d1f0694521f6ba8d018c55f651ef205 # docker.aix.systerel.fr/c838/opcua-network-fuzzer:3.3
 PIKEOS_DIGEST=docker.aix.systerel.fr/c838/pikeos@sha256:3d5dcbab75b0c98a8d27d1cfa239bfa43b5b87bc1bbaca2a7c8a5bfe2adc5aeb # docker.aix.systerel.fr/c838/pikeos:1.2.1
 CYBERWATCH_DIGEST=docker.aix.systerel.fr/c838/cyberwatch@sha256:003b648857636b08825c6214c7ae86390e7c958a6814f15ee4c170c737347292 # docker.aix.systerel.fr/c838/cyberwatch:3.0
-
+FUZZYSULLY_DIGEST=docker.aix.systerel.fr/c838/opcua-fuzzysully@sha256:6e01e319277f700c635e07ccc697106fbe2789e20af404071a9297d038bba542 # docker.aix.systerel.fr/c838/opcua-fuzzysully:1.1
