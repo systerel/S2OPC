@@ -1110,14 +1110,14 @@ int main(void)
         typeDefinition.NodeId.Data.Numeric = OpcUaId_BaseDataVariableType;
         reqNodeId.NodeId.Namespace = 1;
         reqNodeId.NodeId.IdentifierType = SOPC_IdentifierType_String;
-        status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId_GenericAttrsVariable");
-        if (SOPC_STATUS_OK == status)
+        tc_status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId_GenericAttrsVariable");
+        if (SOPC_STATUS_OK == tc_status)
         {
             browseName.NamespaceIndex = 1;
-            status = SOPC_String_AttachFromCstring(&browseName.Name, "BrowseName_GenericAttrsVariable");
+            tc_status = SOPC_String_AttachFromCstring(&browseName.Name, "BrowseName_GenericAttrsVariable");
         }
         addNodesResp = NULL;
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == tc_status)
         {
             addNodesResp = add_node_with_generic_node_attributes(secureConnection, OpcUa_NodeClass_Variable, 0,
                                                                   &parentNodeId, &referenceTypeId, &reqNodeId,
@@ -1146,14 +1146,14 @@ int main(void)
         typeDefinition.NodeId.Data.Numeric = OpcUaId_BaseObjectType;
         reqNodeId.NodeId.Namespace = 1;
         reqNodeId.NodeId.IdentifierType = SOPC_IdentifierType_String;
-        status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId_GenericAttrsObject");
-        if (SOPC_STATUS_OK == status)
+        tc_status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId_GenericAttrsObject");
+        if (SOPC_STATUS_OK == tc_status)
         {
             browseName.NamespaceIndex = 1;
-            status = SOPC_String_AttachFromCstring(&browseName.Name, "BrowseName_GenericAttrsObject");
+            tc_status = SOPC_String_AttachFromCstring(&browseName.Name, "BrowseName_GenericAttrsObject");
         }
         addNodesResp = NULL;
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == tc_status)
         {
             addNodesResp = add_node_with_generic_node_attributes(
                 secureConnection, OpcUa_NodeClass_Object, OpcUa_NodeAttributesMask_EventNotifier, &parentNodeId,
@@ -1181,14 +1181,14 @@ int main(void)
         referenceTypeId.Data.Numeric = OpcUaId_HasComponent;
         reqNodeId.NodeId.Namespace = 1;
         reqNodeId.NodeId.IdentifierType = SOPC_IdentifierType_String;
-        status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId_GenericAttrsMethod");
-        if (SOPC_STATUS_OK == status)
+        tc_status = SOPC_String_AttachFromCstring(&reqNodeId.NodeId.Data.String, "NewNodeId_GenericAttrsMethod");
+        if (SOPC_STATUS_OK == tc_status)
         {
             browseName.NamespaceIndex = 1;
-            status = SOPC_String_AttachFromCstring(&browseName.Name, "BrowseName_GenericAttrsMethod");
+            tc_status = SOPC_String_AttachFromCstring(&browseName.Name, "BrowseName_GenericAttrsMethod");
         }
         addNodesResp = NULL;
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == tc_status)
         {
             addNodesResp = add_node_with_generic_node_attributes(secureConnection, OpcUa_NodeClass_Method, 0,
                                                                   &parentNodeId, &referenceTypeId, &reqNodeId,
