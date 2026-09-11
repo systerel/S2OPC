@@ -692,13 +692,9 @@ OPERATIONS
     secure_channel_lost (channel) =
     VAR
         l_connected_channel,
-        l_valid_new_channel,
         l_is_client,
         l_channel_config_idx,
-        l_reverse_endpoint_config_idx,
-        l_new_channel,
-        l_bres,
-        l_is_one_sc_closing
+        l_reverse_endpoint_config_idx
     IN
         l_connected_channel <-- is_connected_channel (channel);
         IF l_connected_channel = TRUE

@@ -278,7 +278,6 @@ OPERATIONS
     bres <-- close_client_channel (p_config_idx, p_close_ctx) =
     VAR
         l_channel,
-        l_config_idx,
         l_connected,
         l_connecting,
         l_disconnecting,

@@ -213,8 +213,7 @@ OPERATIONS
         l_is_valid_req_handle,
         l_is_applicative,
         l_app_context,
-        l_req_typ,
-        l_session
+        l_req_typ
     IN
         l_continue <-- init_session_req_handle_it (session);
         IF l_continue = TRUE

@@ -1577,8 +1577,7 @@ OPERATIONS
     VAR
         l_continue,
         l_session,
-        l_valid_session,
-        l_is_client
+        l_valid_session
     IN
         l_continue <-- init_iter_session;
         IF  l_continue = TRUE THEN  /* Only for proving */
