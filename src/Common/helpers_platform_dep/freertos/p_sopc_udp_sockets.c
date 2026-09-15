@@ -44,6 +44,9 @@
 #include "lwip/sockets.h"
 #include "lwip/tcpip.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
 /****** CONFIGURATION CHECK *******/
 #if !LWIP_MULTICAST_TX_OPTIONS
 #error "LwIP 'LWIP_MULTICAST_TX_OPTIONS' is required for this sample!"
@@ -315,20 +318,29 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(SOPC_Socket sock, const SOPC_Socket_Add
      * to be more securely done for a real project.
      */
     static uint8_t* DTCMR_Buffer = (void*) SOPC_FREERTOS_UDP_RAM_BASE;
-    static SOPC_Mutex* mutex = NULL;
+    static SOPC_Mutex mutex = SOPC_INVALID_MUTEX;
 
-    if (NULL == mutex)
+    /* Lazy creation of the mutex must itself be race-free: if two tasks call SendTo for the
+     * first time concurrently, both could observe SOPC_INVALID_MUTEX and both try to create it.
+     * vTaskSuspendAll/xTaskResumeAll is a scheduler-level lock (interrupts stay enabled), which is
+     * safe to allocate heap under, unlike a taskENTER_CRITICAL section. */
+    if (SOPC_INVALID_MUTEX == mutex)
     {
-        SOPC_Mutex_Initialization(mutex);
+        vTaskSuspendAll();
+        if (SOPC_INVALID_MUTEX == mutex)
+        {
+            SOPC_Mutex_Initialization(&mutex);
+        }
+        xTaskResumeAll();
     }
 
-    SOPC_Mutex_Lock(mutex);
+    SOPC_Mutex_Lock(&mutex);
 
     memcpy(DTCMR_Buffer, buffer->data, buffer->length);
     ssize_t res =
         sendto(sock->sock, DTCMR_Buffer, buffer->length, 0, destAddr->addrInfo.ai_addr, destAddr->addrInfo.ai_addrlen);
 
-    SOPC_Mutex_Unlock(mutex);
+    SOPC_Mutex_Unlock(&mutex);
 #else
 #warning \
     "SOPC_FREERTOS_UDP_RAM_BASE is not defined and UDP sending may probably fail if RAM section is not properly set with DMA! (STM32H series at least)."
