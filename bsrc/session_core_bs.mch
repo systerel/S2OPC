@@ -51,15 +51,15 @@ INVARIANT
     a_NonceClient                : t_session       +-> t_Nonce
 
 INITIALISATION
-    a_client_app_context         :: {{}} ||
-    a_client_token               :: {{}} ||
-    a_server_token               :: {{}} ||
-    a_user_server                :: {{}} ||
-    a_user_client                :: {{}} ||
-    a_user_secu_client           :: {{}} ||
-    a_user_server_cert           :: {{}} ||
-    a_NonceServer                :: {{}} ||
-    a_NonceClient                :: {{}}
+    a_client_app_context         := {} ||
+    a_client_token               := {} ||
+    a_server_token               := {} ||
+    a_user_server                := {} ||
+    a_user_client                := {} ||
+    a_user_secu_client           := {} ||
+    a_user_server_cert           := {} ||
+    a_NonceServer                := {} ||
+    a_NonceClient                := {}
 
 OPERATIONS
 

@@ -43,15 +43,12 @@ DEFINITIONS
     ;
 
     d_init_set ==
-    d_variables_set
-    :(
-        RegisteredServer2_CounterResetTime : t_Timestamp & /* INITIALISATION timestamp */
-        s_RegisteredServer2 = {} &
-        a_RegisteredServer2_RecordId = {} &
-        a_RegisteredServer2_ExpirationTime = {} &
-        a_RegisteredServer2_RegisteredServer = {} &
-        a_RegisteredServer2_mDNSconfig = {}
-    )
+    RegisteredServer2_CounterResetTime :: t_Timestamp || /* INITIALISATION timestamp */
+    s_RegisteredServer2 := {} ||
+    a_RegisteredServer2_RecordId := {} ||
+    a_RegisteredServer2_ExpirationTime := {} ||
+    a_RegisteredServer2_RegisteredServer := {} ||
+    a_RegisteredServer2_mDNSconfig := {}
     ;
 
     d_variables_set_it ==
@@ -71,8 +68,8 @@ DEFINITIONS
     ;
 
     d_init_set_it ==
-    s_registered_server2_to_iterate_it :(s_registered_server2_to_iterate_it = {}) ||
-    s_registered_server2_iterated_it :(s_registered_server2_iterated_it = {})
+    s_registered_server2_to_iterate_it := {} ||
+    s_registered_server2_iterated_it := {}
 
 ABSTRACT_VARIABLES
     d_variables_set,

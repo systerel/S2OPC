@@ -37,8 +37,8 @@ DEFINITIONS
     ;
 
     d_init_set_it ==
-    s_registered_server2_offline_to_iterate_it :(s_registered_server2_offline_to_iterate_it = {}) ||
-    s_registered_server2_offline_iterated_it :(s_registered_server2_offline_iterated_it = {})
+    s_registered_server2_offline_to_iterate_it := {} ||
+    s_registered_server2_offline_iterated_it := {}
 
 ABSTRACT_VARIABLES
     s_RegisteredServer2_offline,
@@ -49,7 +49,7 @@ INVARIANT
     d_inv_set_it
 
 INITIALISATION
-    s_RegisteredServer2_offline :( s_RegisteredServer2_offline <: NAT & s_RegisteredServer2_offline = {}) ||
+    s_RegisteredServer2_offline := {} ||
     d_init_set_it
 
 OPERATIONS

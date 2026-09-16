@@ -37,8 +37,8 @@ INVARIANT
 
 INITIALISATION
     notification_republish_iter_queue := c_notifRepublishQueue_indet ||
-    s_to_iterate_sub_seq_num :(s_to_iterate_sub_seq_num = {}) ||
-    s_iterated_sub_seq_num :(s_iterated_sub_seq_num = {})
+    s_to_iterate_sub_seq_num := {} ||
+    s_iterated_sub_seq_num := {}
 
 OPERATIONS
 

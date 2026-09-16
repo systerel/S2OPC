@@ -30,7 +30,7 @@ INVARIANT
     s_AuthorizedOperations_bs <: t_operation_type * t_NodeId * t_AttributeId * t_user
 
 INITIALISATION
-    s_AuthorizedOperations_bs :: {{}}
+    s_AuthorizedOperations_bs := {}
 
 OPERATIONS
     p_authorized <-- get_user_authorization_bs(p_operation_type, p_node_id, p_attribute_id, p_user) =

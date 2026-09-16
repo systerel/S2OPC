@@ -38,14 +38,10 @@ INVARIANT
     ReadValue_MaxAge : INT
 
 INITIALISATION
-    ReadValue_NodeId,
-    ReadValue_AttributeId,
-    ReadValue_MaxAge,
-    ReadValue_IndexRange
-    :(
-        ReadValue_NodeId      = {} &
-        ReadValue_AttributeId = {} &
-        ReadValue_IndexRange  = {} &
+    ReadValue_NodeId      := {} ||
+    ReadValue_AttributeId := {} ||
+    ReadValue_IndexRange  := {} ||
+    ReadValue_MaxAge      :(
         ReadValue_MaxAge : INT &
         ReadValue_MaxAge < 0
      )

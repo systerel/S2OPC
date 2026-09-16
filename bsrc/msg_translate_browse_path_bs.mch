@@ -87,31 +87,26 @@ DEFINITIONS
          )
         ;
     d_init ==
-    d_variables_in,
-    d_variables_out
-        :(
-            IsDecoded : BOOL &
-            BrowsePaths                   = {} &
-            BrowsePath_StartingNode       = {} &
-            BrowsePath_RelativePath       = {} &
+        IsDecoded                     :: BOOL ||
+        BrowsePaths                   := {} ||
+        BrowsePath_StartingNode       := {} ||
+        BrowsePath_RelativePath       := {} ||
 
-            /* RelativePath */
-            s_RelativePathElt                = {} &
-            RelativePath_RelativePathElt     = {} &
+        /* RelativePath */
+        s_RelativePathElt                := {} ||
+        RelativePath_RelativePathElt     := {} ||
 
-            /* RelativePathElt */
-            RelativePathElt_ReferenceTypeId  = {} &
-            RelativePathElt_IsInverse        = {} &
-            RelativePathElt_IncludedSubtypes = {} &
-            RelativePathElt_TargetName       = {} &
+        /* RelativePathElt */
+        RelativePathElt_ReferenceTypeId  := {} ||
+        RelativePathElt_IsInverse        := {} ||
+        RelativePathElt_IncludedSubtypes := {} ||
+        RelativePathElt_TargetName       := {} ||
 
-            /* Result */
-            BrowsePath_Res_NbTargetMax  = {} &
-            BrowsePath_Res_StatusCode   = {} &
-            BrowsePath_Res_Target_Node  = {} &
-            BrowsePath_Res_Target_Index = {}
-
-    )
+        /* Result */
+        BrowsePath_Res_NbTargetMax  := {} ||
+        BrowsePath_Res_StatusCode   := {} ||
+        BrowsePath_Res_Target_Node  := {} ||
+        BrowsePath_Res_Target_Index := {}
     ;
 
     d_add_BrowsePath_Res_Target(remainingIndex) ==

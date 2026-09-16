@@ -46,7 +46,7 @@ INITIALISATION
     a_permissions_authorizes_operation :: t_PermissionType_i <-> t_operation_type ||
 
     a_user := c_user_indet ||
-    s_user_permissions :: {}
+    s_user_permissions := {}
 
 OPERATIONS
     p_bres <-- is_operation_authorized(p_permissions, p_operation_type) =

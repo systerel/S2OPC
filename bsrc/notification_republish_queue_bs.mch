@@ -34,9 +34,9 @@ INVARIANT
     a_notification_seq_num : t_notif_msg --> t_sub_seq_num
 
 INITIALISATION
-    s_republishQueue :(s_republishQueue = {}) ||
-    a_republish_notification :(a_republish_notification = {}) ||
-    a_notification_seq_num :(a_notification_seq_num = {})
+    s_republishQueue := {} ||
+    a_republish_notification := {} ||
+    a_notification_seq_num := {}
 
 OPERATIONS
 

@@ -39,9 +39,9 @@ INVARIANT
     delete_subscriptions_resp_StatusCode : 1..k_n_genericOperationPerReq_max +-> t_StatusCode
 
 INITIALISATION
-    delete_subscriptions_req_sub_id :(delete_subscriptions_req_sub_id = {}) ||
+    delete_subscriptions_req_sub_id := {} ||
     delete_subscriptions_resp_allocated := FALSE ||
-    delete_subscriptions_resp_StatusCode :(delete_subscriptions_resp_StatusCode = {}) ||
+    delete_subscriptions_resp_StatusCode := {} ||
     nb_delete_subscriptions := 0
 
 OPERATIONS

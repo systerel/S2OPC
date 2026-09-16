@@ -39,9 +39,9 @@ INVARIANT
     nb_set_publishing_mode : NAT
 
 INITIALISATION
-    set_publishing_mode_req_sub_id :(set_publishing_mode_req_sub_id = {}) ||
+    set_publishing_mode_req_sub_id := {} ||
     set_publishing_mode_resp_allocated := FALSE ||
-    set_publishing_mode_resp_StatusCode :(set_publishing_mode_resp_StatusCode = {}) ||
+    set_publishing_mode_resp_StatusCode := {} ||
     nb_set_publishing_mode := 0
 
 OPERATIONS

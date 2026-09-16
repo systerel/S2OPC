@@ -40,10 +40,10 @@ INVARIANT
     a_session_request_handle_iterated <: t_client_request_handle /* iterated will be removed (during iteration) */
 
 INITIALISATION
-    a_cli_pending_requests :: {} ||
+    a_cli_pending_requests := {} ||
     a_session_request_handle_it := c_session_indet ||
-    a_session_request_handle_to_iterate :: {} ||
-    a_session_request_handle_iterated:: {}
+    a_session_request_handle_to_iterate := {} ||
+    a_session_request_handle_iterated := {}
 
 OPERATIONS
 

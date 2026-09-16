@@ -41,8 +41,8 @@ INVARIANT
 INITIALISATION
     nbNodesToRead := 0 ||
     ReadRawmodifiedDetails :: t_readRawModifiedDetails ||
-    HistReadValueID :( HistReadValueID = {}) ||
-    HistReadValueID_NodeId :( HistReadValueID_NodeId = {})
+    HistReadValueID := {} ||
+    HistReadValueID_NodeId := {}
 
 OPERATIONS
 

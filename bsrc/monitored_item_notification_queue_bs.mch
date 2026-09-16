@@ -44,13 +44,13 @@ INVARIANT
     a_notif_conv_event : t_notificationData <-> t_eventFieldList
 
 INITIALISATION
-    a_monitored_item_notification_queue :(a_monitored_item_notification_queue = {}) ||
-    a_notification_queue_notifications :(a_notification_queue_notifications = {}) ||
+    a_monitored_item_notification_queue := {} ||
+    a_notification_queue_notifications := {} ||
     monitored_item_notification_queue_iter := c_notificationQueue_indet ||
 
-    s_event_notification_queue :(s_event_notification_queue <: t_notificationQueue) ||
-    a_notif_conv_data :(a_notif_conv_data : t_notificationData <-> t_WriteValuePointer) ||
-    a_notif_conv_event :(a_notif_conv_event : t_notificationData <-> t_eventFieldList)
+    s_event_notification_queue :: POW(t_notificationQueue) ||
+    a_notif_conv_data :: t_notificationData <-> t_WriteValuePointer ||
+    a_notif_conv_event :: t_notificationData <-> t_eventFieldList
 
 OPERATIONS
 

@@ -89,24 +89,21 @@ DEFINITIONS
     ;
 
     d_init_out ==
-        d_variables_out
-        :(
-            out_BrowseResult_BrowseStatus    = c_StatusCode_indet             &
-            out_BrowseResult_nb_References   = 0                              &
-            out_BrowseResultReferences       = c_BrowseResultReferences_indet &
-            out_BrowseResult_ReferenceTypeId = {}                         &
-            out_BrowseResult_isForward       = {}                         &
-            out_BrowseResult_NodeId          = {}                         &
-            out_BrowseResult_BrowseName      = {}                         &
-            out_BrowseResult_DisplayName     = {}                         &
-            out_BrowseResult_NodeClass       = {}                         &
-            out_BrowseResult_TypeDefinition  = {}                         &
-            max_nb_references                = 0
-        )
+        out_BrowseResult_BrowseStatus    := c_StatusCode_indet             ||
+        out_BrowseResult_nb_References   := 0                              ||
+        out_BrowseResultReferences       := c_BrowseResultReferences_indet ||
+        out_BrowseResult_ReferenceTypeId := {}                             ||
+        out_BrowseResult_isForward       := {}                             ||
+        out_BrowseResult_NodeId          := {}                             ||
+        out_BrowseResult_BrowseName      := {}                             ||
+        out_BrowseResult_DisplayName     := {}                             ||
+        out_BrowseResult_NodeClass       := {}                             ||
+        out_BrowseResult_TypeDefinition  := {}                             ||
+        max_nb_references                := 0
     ;
 
     d_init_out_status ==
-        isBrowseResultAllocated :(isBrowseResultAllocated = FALSE)
+        isBrowseResultAllocated := FALSE
     ;
 
     d_init_mask ==

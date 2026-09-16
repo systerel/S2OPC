@@ -31,7 +31,7 @@ INVARIANT
     a_monitoredItemNodeDataFilterValid : t_Node <-> t_monitoringFilter
 
 INITIALISATION
-    a_monitoredItemNodeDataFilterValid :(a_monitoredItemNodeDataFilterValid : t_Node <-> t_monitoringFilter)
+    a_monitoredItemNodeDataFilterValid :: t_Node <-> t_monitoringFilter
 
 OPERATIONS
 

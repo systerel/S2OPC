@@ -59,14 +59,15 @@ INITIALISATION
     FindServersOnNetworkReq := c_msg_indet ||
     FindServersOnNetworkReq_StartingRecordId := 0 ||
     FindServersOnNetworkReq_MaxRecordsToReturn := 0 ||
-    FindServersOnNetworkReq_ServerCapabilities :(FindServersOnNetworkReq_ServerCapabilities : t_ServerCapabilities) ||
+    FindServersOnNetworkReq_ServerCapabilities :: t_ServerCapabilities ||
 
     FindServersOnNetworkResp := c_msg_indet ||
     FindServersOnNetworkResp_LastCounterResetTime := c_Timestamp_null ||
     FindServersOnNetworkResp_NbServers := 0 ||
-    FindServersOnNetworkResp_ServerRecordId :(FindServersOnNetworkResp_ServerRecordId = {}) ||
-    FindServersOnNetworkResp_ServerRegisteredConfig :(FindServersOnNetworkResp_ServerRegisteredConfig = {}) ||
-    FindServersOnNetworkResp_ServerMdnsConfig :(FindServersOnNetworkResp_ServerMdnsConfig = {})
+    FindServersOnNetworkResp_ServerRecordId := {} ||
+    FindServersOnNetworkResp_ServerRegisteredConfig := {} ||
+    FindServersOnNetworkResp_ServerMdnsConfig := {}
+
 OPERATIONS
 
     p_startingRecordId, p_maxRecordsToReturn, p_serverCapabilities <-- get_find_servers_on_network_req_params (p_req) =

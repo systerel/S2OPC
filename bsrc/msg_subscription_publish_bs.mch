@@ -64,11 +64,11 @@ INITIALISATION
     notification_message_seq_num := c_sub_seq_num_indet ||
 
     nb_data_notifications := 0 ||
-    DataNotification_MonitoredItemId :(DataNotification_MonitoredItemId = {}) ||
-    DataNotification_MonitoredItemNotif :(DataNotification_MonitoredItemNotif = {}) ||
+    DataNotification_MonitoredItemId := {} ||
+    DataNotification_MonitoredItemNotif := {} ||
     nb_event_notifications := 0 ||
-    EventNotification_MonitoredItemId :(EventNotification_MonitoredItemId = {}) ||
-    EventNotification_MonitoredItemNotif :(EventNotification_MonitoredItemNotif = {})
+    EventNotification_MonitoredItemId := {} ||
+    EventNotification_MonitoredItemNotif := {}
 
 OPERATIONS
 

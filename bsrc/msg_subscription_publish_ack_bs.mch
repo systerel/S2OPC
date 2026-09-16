@@ -47,12 +47,12 @@ INVARIANT
 
 INITIALISATION
     nb_subscription_acks := 0 ||
-    subscription_ack_req_ackSeqNum :(subscription_ack_req_ackSeqNum = {}) ||
-    subscription_ack_req_subscription :(subscription_ack_req_subscription = {}) ||
+    subscription_ack_req_ackSeqNum := {} ||
+    subscription_ack_req_subscription := {} ||
     subscription_ack_resp_allocated := FALSE ||
-    subscription_ack_resp_StatusCode :(subscription_ack_resp_StatusCode = {}) ||
+    subscription_ack_resp_StatusCode := {} ||
     subscription_available_seq_nums_resp_nb := 0 ||
-    subscription_available_seq_nums_resp_SeqNum :(subscription_available_seq_nums_resp_SeqNum = {})
+    subscription_available_seq_nums_resp_SeqNum := {}
 
 OPERATIONS
 

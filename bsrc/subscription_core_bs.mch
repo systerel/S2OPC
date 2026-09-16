@@ -31,7 +31,7 @@ INVARIANT
     a_nodeToMonitoredItemQueue : t_NodeId --> t_monitoredItemQueue
 
 INITIALISATION
-    a_nodeToMonitoredItemQueue :(a_nodeToMonitoredItemQueue : t_NodeId --> s_monitoredItemQueue)
+    a_nodeToMonitoredItemQueue :: t_NodeId --> s_monitoredItemQueue
 
 OPERATIONS
 

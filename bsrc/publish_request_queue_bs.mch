@@ -42,10 +42,10 @@ INVARIANT
     validPublishReqQueued : BOOL
 
 INITIALISATION
-    s_publishReqQueue :(s_publishReqQueue = {}) ||
-    a_publish_responses :(a_publish_responses = {}) ||
-    a_publish_expiration_time :(a_publish_expiration_time = {}) ||
-    s_expired_time_ref :(s_expired_time_ref <: t_timeref) ||
+    s_publishReqQueue := {} ||
+    a_publish_responses := {} ||
+    a_publish_expiration_time := {} ||
+    s_expired_time_ref :: POW(t_timeref) ||
     validPublishReqQueued := FALSE
 
 OPERATIONS

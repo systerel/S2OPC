@@ -31,7 +31,7 @@ INVARIANT
     ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
 
 INITIALISATION
-    ResponseWrite_StatusCode :: {{}}
+    ResponseWrite_StatusCode := {}
 
 OPERATIONS
     ResponseWrite_allocated <-- alloc_write_request_responses_malloc(nb_req) =

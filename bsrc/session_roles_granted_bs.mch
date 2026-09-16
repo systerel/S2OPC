@@ -30,7 +30,7 @@ INVARIANT
     s_sessionRoles <: t_NodeId
 
 INITIALISATION
-    s_sessionRoles :(s_sessionRoles <: t_NodeId)
+    s_sessionRoles :: POW(t_NodeId)
 
 OPERATIONS
     initialize_session_roles =

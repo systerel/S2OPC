@@ -35,8 +35,8 @@ INVARIANT
                    {prioSubQueue} <| a_prio_queue_defined_subscriptions /= {})
 
 INITIALISATION
-    s_prioritySubQueue :(s_prioritySubQueue = {}) ||
-    a_prio_queue_defined_subscriptions :(a_prio_queue_defined_subscriptions = {})
+    s_prioritySubQueue := {} ||
+    a_prio_queue_defined_subscriptions := {}
 
 OPERATIONS
 

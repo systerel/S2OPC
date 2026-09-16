@@ -36,7 +36,7 @@ INVARIANT
     statusCode_alloc : t_StatusCode_i
 
 INITIALISATION
-    historyReadResult_historyDataValue :( historyReadResult_historyDataValue = {} ) ||
+    historyReadResult_historyDataValue := {} ||
     statusCode_alloc := c_StatusCode_indet
 
 OPERATIONS

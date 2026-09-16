@@ -67,29 +67,23 @@ DEFINITIONS
         isBrowseResponseAllocated : BOOL
     ;
     d_init_req ==
-        d_variables_req
-        :(
-            RequestBrowse = c_msg_indet                     &
-            RequestBrowse_nb_BrowseValue               = 0  &
-            RequestBrowse_nb_BrowseTargetMax           = 0  &
-            RequestBrowse_BrowseView                   = c_NodeId_indet &
-            RequestBrowse_BrowseValue_NodeId           = {} &
-            RequestBrowse_BrowseValue_BrowseDirection  = {} &
-            RequestBrowse_BrowseValue_ReferenceTypeId  = {} &
-            RequestBrowse_BrowseValue_IncludedSubtypes = {} &
-            RequestBrowse_BrowseValue_NodeClassMask    = {} &
-            RequestBrowse_BrowseValue_ResultMask    = {}
-        )
+        RequestBrowse := c_msg_indet                     ||
+        RequestBrowse_nb_BrowseValue               := 0  ||
+        RequestBrowse_nb_BrowseTargetMax           := 0  ||
+        RequestBrowse_BrowseView                   := c_NodeId_indet ||
+        RequestBrowse_BrowseValue_NodeId           := {} ||
+        RequestBrowse_BrowseValue_BrowseDirection  := {} ||
+        RequestBrowse_BrowseValue_ReferenceTypeId  := {} ||
+        RequestBrowse_BrowseValue_IncludedSubtypes := {} ||
+        RequestBrowse_BrowseValue_NodeClassMask    := {} ||
+        RequestBrowse_BrowseValue_ResultMask       := {}
     ;
     d_init_resp ==
-        d_variables_resp
-        :(
-            ResponseBrowse                     = c_msg_indet &
-            ResponseBrowse_BrowseStatus        = {} &
-            ResponseBrowse_ContinuationPoint   = {} &
-            ResponseBrowse_ResultReferences    = {} &
-            isBrowseResponseAllocated = FALSE
-         )
+        ResponseBrowse                     := c_msg_indet ||
+        ResponseBrowse_BrowseStatus        := {} ||
+        ResponseBrowse_ContinuationPoint   := {} ||
+        ResponseBrowse_ResultReferences    := {} ||
+        isBrowseResponseAllocated := FALSE
 
 ABSTRACT_VARIABLES
     d_variables_req,

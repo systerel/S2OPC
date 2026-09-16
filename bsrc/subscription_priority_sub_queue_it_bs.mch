@@ -46,12 +46,12 @@ INVARIANT
     card(s_prio_sub_to_iterate_it \/ s_prio_sub_iterated_it) = nb_subscriptions_it
 
 INITIALISATION
-    a_priority_subscriptions_queue_iterator :(a_priority_subscriptions_queue_iterator : t_prioritySubQueue >->> t_prioritySubQueueIterator) ||
+    a_priority_subscriptions_queue_iterator :: t_prioritySubQueue >->> t_prioritySubQueueIterator ||
     prio_sub_queue_it := c_prioritySubQueue_indet ||
     prio_sub_iterator_it := c_prioritySubQueueIterator_indet ||
     nb_subscriptions_it := 0 ||
-    s_prio_sub_to_iterate_it :(s_prio_sub_to_iterate_it = {}) ||
-    s_prio_sub_iterated_it :(s_prio_sub_iterated_it = {})
+    s_prio_sub_to_iterate_it := {} ||
+    s_prio_sub_iterated_it := {}
 
 OPERATIONS
 

@@ -45,10 +45,10 @@ INVARIANT
     d_inv_response
 
 INITIALISATION
-    data_Value_Value      :: {{}} ||
-    data_Value_StatusCode :: {{}} ||
-    data_Value_SourceTimestamp :: {{}} ||
-    data_Value_ServerTimestamp :: {{}} ||
+    data_Value_Value      := {} ||
+    data_Value_StatusCode := {} ||
+    data_Value_SourceTimestamp := {} ||
+    data_Value_ServerTimestamp := {} ||
     response_StatusCode := c_StatusCode_indet
 
     /*data_Value_SourceTimestamp, data_Value_ServerTimestamp := {}, {} ||*/

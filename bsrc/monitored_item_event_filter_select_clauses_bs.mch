@@ -40,16 +40,10 @@ INVARIANT
     a_eventFieldListFilled <: NAT
 
 INITIALISATION
-    c_filterResult,
-    a_selectClauseResultSet,
-    c_eventFieldList,
-    a_eventFieldListFilled
-    :(
-      c_filterResult = c_filterResult_indet &
-      a_selectClauseResultSet = {} &
-      c_eventFieldList : t_eventFieldList_i &
-      a_eventFieldListFilled = {}
-     )
+    c_filterResult := c_filterResult_indet ||
+    a_selectClauseResultSet := {} ||
+    c_eventFieldList :: t_eventFieldList_i ||
+    a_eventFieldListFilled := {}
 
 OPERATIONS
 

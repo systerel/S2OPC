@@ -36,7 +36,7 @@ INVARIANT
 
 INITIALISATION
     init_default_role_permissions_bs := FALSE ||
-    a_default_role_permissions_bs :: {{}} ||
+    a_default_role_permissions_bs := {} ||
     nbr_default_role_permissions_bs := 0
 
 OPERATIONS

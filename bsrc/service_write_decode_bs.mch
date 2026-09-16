@@ -46,11 +46,11 @@ DEFINITIONS
     ;
     d_init ==
         nb_WriteValue := 0 ||
-        WriteValue_NodeId :: {{}} ||
-        WriteValue_AttributeId :: {{}} ||
-        WriteValue_DataValue :: {{}} ||
-        WriteValue_IndexRange :: {{}} ||
-        WriteValue_ByPass :: {{}}
+        WriteValue_NodeId := {} ||
+        WriteValue_AttributeId := {} ||
+        WriteValue_DataValue := {} ||
+        WriteValue_IndexRange := {} ||
+        WriteValue_ByPass := {}
 
 ABSTRACT_VARIABLES
     d_variables

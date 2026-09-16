@@ -77,67 +77,31 @@ INVARIANT
     a_sourceNodeId : t_NodeId_i
 
 INITIALISATION
-    c_eventsSupport,
-    s_isEventNotifier,
+    c_eventsSupport :: BOOL ||
+    s_isEventNotifier :: POW(t_Variant_i) ||
 
-    c_filter,
-    a_isEventFilter,
+    c_filter := c_monitoringFilter_indet ||
+    a_isEventFilter := FALSE ||
 
-    a_filter_NbSelectClauses,
-    a_filter_NbWhereClauseElements,
+    a_filter_NbSelectClauses := 0 ||
+    a_filter_NbWhereClauseElements := 0 ||
 
-    a_eventSelectClauseValid,
-    a_whereClauseElementValid,
+    a_eventSelectClauseValid := {} ||
+    a_whereClauseElementValid := FALSE ||
 
-    c_filterCtx,
-    a_isEventFilterCtx,
+    c_filterCtx := c_monitoringFilterCtx_indet ||
+    a_isEventFilterCtx := FALSE ||
 
-    a_filterCtx_NbSelectClauses,
-    a_filterCtx_NbWhereClauseElements,
-    a_selectClauseTypeId,
-    a_whereClauseElementOfTypeId,
+    a_filterCtx_NbSelectClauses := 0 ||
+    a_filterCtx_NbWhereClauseElements := 0 ||
+    a_whereClauseElementOfTypeId := c_NodeId_indet ||
+    a_selectClauseTypeId := {} ||
 
-    c_event,
-    a_eventTypeId,
-    a_sourceNodeId
+    c_event := c_Event_indet ||
 
-    :(c_eventsSupport : BOOL &
-      s_isEventNotifier <: t_Variant_i &
+    a_eventTypeId := c_NodeId_indet ||
 
-      c_filter : t_monitoringFilter_i &
-      c_filter = c_monitoringFilter_indet &
-      a_isEventFilter : BOOL &
-      a_isEventFilter = FALSE &
-
-      a_filter_NbSelectClauses : NAT &
-      a_filter_NbSelectClauses = 0 &
-      a_filter_NbWhereClauseElements : NAT &
-      a_filter_NbWhereClauseElements = 0 &
-
-      a_eventSelectClauseValid = {} &
-      a_whereClauseElementValid = FALSE &
-
-      c_filterCtx : t_monitoringFilterCtx_i &
-      c_filterCtx = c_monitoringFilterCtx_indet &
-      a_isEventFilterCtx : BOOL &
-      a_isEventFilterCtx = FALSE &
-
-      a_filterCtx_NbSelectClauses = 0 &
-      a_filterCtx_NbWhereClauseElements = 0 &
-      a_whereClauseElementOfTypeId = c_NodeId_indet &
-      a_selectClauseTypeId : NAT --> t_NodeId &
-      a_selectClauseTypeId = {} &
-
-      c_event : t_Event_i &
-      c_event = c_Event_indet &
-
-      a_eventTypeId : t_NodeId_i &
-      a_eventTypeId = c_NodeId_indet &
-
-      a_sourceNodeId : t_NodeId_i &
-      a_sourceNodeId = c_NodeId_indet
-
-     )
+    a_sourceNodeId := c_NodeId_indet
 
 OPERATIONS
 

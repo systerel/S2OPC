@@ -34,12 +34,8 @@ INVARIANT
     a_whereElementResultSet <: NAT
 
 INITIALISATION
-    c_filterResult,
-    a_whereElementResultSet
-    :(
-      c_filterResult = c_filterResult_indet &
-      a_whereElementResultSet = {}
-     )
+    c_filterResult := c_filterResult_indet ||
+    a_whereElementResultSet := {}
 
 OPERATIONS
 

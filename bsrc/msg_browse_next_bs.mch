@@ -54,22 +54,16 @@ DEFINITIONS
         isBrowseNextResponseAllocated : BOOL
     ;
     d_init_req ==
-        d_variables_req
-        :(
-            RequestBrowseNext = c_msg_indet &
-            RequestBrowseNext_ReleaseContinuationPoints = FALSE &
-            RequestBrowseNext_ContinuationPointId = {}
-        )
+        RequestBrowseNext := c_msg_indet ||
+        RequestBrowseNext_ReleaseContinuationPoints := FALSE ||
+        RequestBrowseNext_ContinuationPointId := {}
     ;
     d_init_resp ==
-        d_variables_resp
-        :(
-            ResponseBrowseNext = c_msg_indet &
-            ResponseBrowseNext_BrowseStatus        = {} &
-            ResponseBrowseNext_ContinuationPoint   = {} &
-            ResponseBrowseNext_ResultReferences    = {} &
-            isBrowseNextResponseAllocated = FALSE
-         )
+        ResponseBrowseNext := c_msg_indet ||
+        ResponseBrowseNext_BrowseStatus        := {} ||
+        ResponseBrowseNext_ContinuationPoint   := {} ||
+        ResponseBrowseNext_ResultReferences    := {} ||
+        isBrowseNextResponseAllocated := FALSE
 
 ABSTRACT_VARIABLES
     d_variables_req,

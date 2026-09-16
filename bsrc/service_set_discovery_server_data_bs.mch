@@ -32,10 +32,9 @@ INVARIANT
     MdnsDiscoveryConfig_HasServerCapabilities : t_MdnsDiscoveryConfig <-> t_ServerCapabilities &
     ServerUriArray_HasServerUri : t_ServerUris <-> t_ServerUri
 INITIALISATION
-    RegisteredServer_ServerUri :(RegisteredServer_ServerUri : t_RegisteredServer --> t_ServerUri) ||
-    MdnsDiscoveryConfig_HasServerCapabilities
-     :(MdnsDiscoveryConfig_HasServerCapabilities : t_MdnsDiscoveryConfig <-> t_ServerCapabilities) ||
-    ServerUriArray_HasServerUri :(ServerUriArray_HasServerUri : t_ServerUris <-> t_ServerUri)
+    RegisteredServer_ServerUri :: t_RegisteredServer --> t_ServerUri ||
+    MdnsDiscoveryConfig_HasServerCapabilities :: t_MdnsDiscoveryConfig <-> t_ServerCapabilities ||
+    ServerUriArray_HasServerUri :: t_ServerUris <-> t_ServerUri
 
 OPERATIONS
 

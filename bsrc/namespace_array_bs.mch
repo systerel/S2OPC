@@ -33,7 +33,7 @@ INVARIANT
 
 INITIALISATION
     a_variant := c_Variant_indet ||
-    a_namespaceUris :(a_namespaceUris = {})
+    a_namespaceUris := {}
 
 OPERATIONS
 

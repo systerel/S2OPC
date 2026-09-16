@@ -45,8 +45,8 @@ INITIALISATION
     mi_queue_it := c_monitoredItemQueue_indet ||
     mi_iterator_it := c_monitoredItemQueueIterator_indet ||
     nb_monitored_items_it := 0 ||
-    s_mi_to_iterate_it :(s_mi_to_iterate_it = {}) ||
-    s_mi_iterated_it :(s_mi_iterated_it = {})
+    s_mi_to_iterate_it := {} ||
+    s_mi_iterated_it := {}
 
 OPERATIONS
 

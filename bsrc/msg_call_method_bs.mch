@@ -79,24 +79,20 @@ INVARIANT
 
 INITIALISATION
 
-    d_variables_in,
-    d_variables_out
-    :
-    (
-        CallMethods_Msg = c_msg_indet &
-        CallMethods = {} &
-        CallMethod_Pointer = {} &
-        CallMethod_ObjectId = {} &
-        CallMethod_MethodId = {} &
-        CallMethod_InputArguments = {} &
+    CallMethods_Msg := c_msg_indet ||
+    CallMethods := {} ||
+    CallMethod_Pointer := {} ||
+    CallMethod_ObjectId := {} ||
+    CallMethod_MethodId := {} ||
+    CallMethod_InputArguments := {} ||
 
-        CallMethodRes_Msg = c_msg_indet &
-        CallMethodRes_status = {} &
-        CallMethodRes_AllocatedInputArgumentResult = {} &
-        CallMethodRes_InputArgumentResult = {} &
-        CallMethodRes_NbOutputArguments = {} &
-        CallMethodRes_OutputArguments = {}
-    )
+    CallMethodRes_Msg := c_msg_indet ||
+    CallMethodRes_status := {} ||
+    CallMethodRes_AllocatedInputArgumentResult := {} ||
+    CallMethodRes_InputArgumentResult := {} ||
+    CallMethodRes_NbOutputArguments := {} ||
+    CallMethodRes_OutputArguments := {}
+
 OPERATIONS
 
     Status, p_nb <-- read_call_method_request (p_req_msg) =

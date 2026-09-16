@@ -31,7 +31,7 @@ INVARIANT
     a_SecurityPolicy : t_channel +-> t_SecurityPolicy
 
 INITIALISATION
-    a_SecurityPolicy :: {{}}
+    a_SecurityPolicy := {}
 
 OPERATIONS
 

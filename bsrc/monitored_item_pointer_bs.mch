@@ -47,14 +47,14 @@ INVARIANT
 
 INITIALISATION
 
-    s_monitoredItemPointer :(s_monitoredItemPointer <: t_monitoredItemPointer & s_monitoredItemPointer = {}) ||
-    s_monitoredItemId :(s_monitoredItemId <: t_monitoredItemId & s_monitoredItemId = {}) ||
-    a_monitoredItemId :(a_monitoredItemId : s_monitoredItemPointer <-> s_monitoredItemId & a_monitoredItemId = {}) ||
-    a_monitoredItemSubs :(a_monitoredItemSubs : s_monitoredItemPointer <-> t_subscription & a_monitoredItemSubs = {}) ||
-    a_monitoredItemNodeId :(a_monitoredItemNodeId : s_monitoredItemPointer <-> t_NodeId & a_monitoredItemNodeId = {}) ||
-    a_monitoredItemAttributeId :(a_monitoredItemAttributeId : s_monitoredItemPointer <-> t_AttributeId & a_monitoredItemAttributeId = {}) ||
-    a_monitoredItemMonitMode :(a_monitoredItemMonitMode : s_monitoredItemPointer <-> t_monitoringMode & a_monitoredItemMonitMode = {}) ||
-    a_monitoredItemQueueSize :(a_monitoredItemQueueSize : s_monitoredItemPointer <-> t_counter & a_monitoredItemQueueSize = {})
+    s_monitoredItemPointer := {} ||
+    s_monitoredItemId := {} ||
+    a_monitoredItemId := {} ||
+    a_monitoredItemSubs := {} ||
+    a_monitoredItemNodeId := {} ||
+    a_monitoredItemAttributeId := {} ||
+    a_monitoredItemMonitMode := {} ||
+    a_monitoredItemQueueSize := {}
 
 OPERATIONS
 

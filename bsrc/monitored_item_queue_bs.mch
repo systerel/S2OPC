@@ -32,8 +32,8 @@ INVARIANT
     a_defined_monitored_items : s_monitoredItemQueue <-> t_monitoredItemPointer
 
 INITIALISATION
-    s_monitoredItemQueue :(s_monitoredItemQueue = {}) ||
-    a_defined_monitored_items :(a_defined_monitored_items = {})
+    s_monitoredItemQueue := {} ||
+    a_defined_monitored_items := {}
 
 OPERATIONS
 

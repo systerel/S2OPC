@@ -55,14 +55,13 @@ INITIALISATION
     FindServersReq := c_msg_indet ||
     FindServersReq_LocaleIds := c_LocaleIds_indet ||
     FindServersReq_NbServerUri := 0 ||
-    FindServersReq_ServerUris :(FindServersReq_ServerUris : t_ServerUris) ||
+    FindServersReq_ServerUris :: t_ServerUris ||
 
     FindServersResp := c_msg_indet ||
     FindServersResp_NbServers := 0 ||
-    FindServersResp_ApplicationDescription :(FindServersResp_ApplicationDescription = {}) ||
+    FindServersResp_ApplicationDescription := {} ||
 
-    FindServers_RegisteredServerToApplicationDesc
-      :(FindServers_RegisteredServerToApplicationDesc : t_RegisteredServer --> t_ApplicationDescription)
+    FindServers_RegisteredServerToApplicationDesc :: t_RegisteredServer --> t_ApplicationDescription
 
 OPERATIONS
 

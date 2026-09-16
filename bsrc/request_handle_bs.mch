@@ -47,15 +47,15 @@ INVARIANT
     a_channel_request_handle_iterated <: t_client_request_handle /* iterated will be removed (during iteration) */
 
 INITIALISATION
-    s_client_request_handle :: {{}} ||
-    a_client_request_type :: {{}} ||
-    a_client_request_resp_type :: {{}} ||
-    a_client_request_channel :: {{}} ||
-    a_client_request_context :: {{}} ||
+    s_client_request_handle := {} ||
+    a_client_request_type := {} ||
+    a_client_request_resp_type := {} ||
+    a_client_request_channel := {} ||
+    a_client_request_context := {} ||
 
-    a_channel_it := c_channel_indet              ||
-    a_channel_request_handle_to_iterate :: {{}}  ||
-    a_channel_request_handle_iterated :: {{}}
+    a_channel_it := c_channel_indet           ||
+    a_channel_request_handle_to_iterate := {} ||
+    a_channel_request_handle_iterated := {}
 
 
 OPERATIONS

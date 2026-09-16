@@ -39,12 +39,10 @@ DEFINITIONS
         roles_to_iterate \/ roles_iterated = s_roles;
 
     d_init ==
-        d_variables
-        :( a_user_roles = {} &
-           s_roles = {} &
-           roles_to_iterate = {} &
-           roles_iterated = {}
-         )
+        a_user_roles := {} ||
+        s_roles := {} ||
+        roles_to_iterate := {} ||
+        roles_iterated := {}
 
 ABSTRACT_VARIABLES
     d_variables

@@ -49,11 +49,11 @@ INVARIANT
 
 INITIALISATION
     a_rolesPermissions := c_RolePermissionTypes_indet ||
-    a_roles :: {} ||
-    a_permissions :: {} ||
+    a_roles := {} ||
+    a_permissions := {} ||
 
     a_user_role := c_NodeId_indet ||
-    s_user_role_permissions :: {}
+    s_user_role_permissions := {}
 
 OPERATIONS
     /* Operations related to iteration on RolePermissions variant value */

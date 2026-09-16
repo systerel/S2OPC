@@ -28,7 +28,7 @@ DEFINITIONS
     currentSubscriptionCount := 0 ||
     cumulatedSubscriptionCount := 0 ||
     publishingIntervalCount := 0 ||
-    a_publishingIntervalNbSubscriptions :( a_publishingIntervalNbSubscriptions = t_opcua_duration_i*{0})
+    a_publishingIntervalNbSubscriptions := t_opcua_duration_i*{0}
 
 ABSTRACT_VARIABLES
     currentSubscriptionCount,

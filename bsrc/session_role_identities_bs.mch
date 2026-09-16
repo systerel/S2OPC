@@ -33,7 +33,7 @@ INVARIANT
 
 INITIALISATION
     a_variant := c_Variant_indet ||
-    a_identities :(a_identities = {})
+    a_identities := {}
 
 OPERATIONS
 
