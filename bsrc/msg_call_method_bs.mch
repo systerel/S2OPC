@@ -85,6 +85,7 @@ INITIALISATION
     (
         CallMethods_Msg = c_msg_indet &
         CallMethods = {} &
+        CallMethod_Pointer = {} &
         CallMethod_ObjectId = {} &
         CallMethod_MethodId = {} &
         CallMethod_InputArguments = {} &
