@@ -21,9 +21,9 @@
 
  File Name            : service_add_nodes_1.c
 
- Date                 : 05/09/2025 13:22:12
+ Date                 : 16/09/2026 08:15:22
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -126,8 +126,8 @@ void service_add_nodes_1__check_add_nodes_item_params_type_def(
       constants__t_NodeClass_i service_add_nodes_1__l_node_class;
       
       *service_add_nodes_1__sc_operation = service_add_nodes_1__p_sc_operation;
-      if ((*service_add_nodes_1__sc_operation == constants_statuscodes_bs__e_sc_ok) &&
-         (service_add_nodes_1__p_typeDefId != constants__c_ExpandedNodeId_indet)) {
+      if (*service_add_nodes_1__sc_operation == constants_statuscodes_bs__e_sc_ok &&
+         service_add_nodes_1__p_typeDefId != constants__c_ExpandedNodeId_indet) {
          constants__getall_conv_ExpandedNodeId_NodeId(service_add_nodes_1__p_typeDefId,
             &service_add_nodes_1__l_local_server_exp_node_id,
             &service_add_nodes_1__l_node_id);
@@ -138,12 +138,12 @@ void service_add_nodes_1__check_add_nodes_item_params_type_def(
             if (service_add_nodes_1__l_node_exists == true) {
                call_method_mgr__get_NodeClass(service_add_nodes_1__l_node,
                   &service_add_nodes_1__l_node_class);
-               if ((service_add_nodes_1__l_node_class == constants__e_ncl_VariableType) &&
-                  (service_add_nodes_1__p_nodeClass == constants__e_ncl_Variable)) {
+               if (service_add_nodes_1__l_node_class == constants__e_ncl_VariableType &&
+                  service_add_nodes_1__p_nodeClass == constants__e_ncl_Variable) {
                   ;
                }
-               else if ((service_add_nodes_1__l_node_class == constants__e_ncl_ObjectType) &&
-                  (service_add_nodes_1__p_nodeClass == constants__e_ncl_Object)) {
+               else if (service_add_nodes_1__l_node_class == constants__e_ncl_ObjectType &&
+                  service_add_nodes_1__p_nodeClass == constants__e_ncl_Object) {
                   ;
                }
                else {
@@ -188,8 +188,8 @@ void service_add_nodes_1__check_add_nodes_item_params_req_node_id(
                   &service_add_nodes_1__l_ns_index);
                service_add_nodes_1__has_NamespaceIndex(service_add_nodes_1__l_ns_index,
                   &service_add_nodes_1__l_ns_index_valid);
-               if ((service_add_nodes_1__l_node_exists == false) &&
-                  (service_add_nodes_1__l_ns_index_valid == true)) {
+               if (service_add_nodes_1__l_node_exists == false &&
+                  service_add_nodes_1__l_ns_index_valid == true) {
                   node_id_pointer_bs__copy_node_id_pointer_content(service_add_nodes_1__l_node_id,
                      &service_add_nodes_1__l_bres,
                      service_add_nodes_1__new_nid);

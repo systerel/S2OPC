@@ -21,9 +21,9 @@
 
  File Name            : service_write_1_it.c
 
- Date                 : 04/08/2022 14:53:15
+ Date                 : 16/09/2026 08:15:29
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -51,7 +51,7 @@ void service_write_1_it__init_iter_write_request(
    const t_entier4 service_write_1_it__nb_req,
    t_bool * const service_write_1_it__continue) {
    service_write_1_it__wreqs_i = service_write_1_it__nb_req;
-   *service_write_1_it__continue = (0 < service_write_1_it__nb_req);
+   *service_write_1_it__continue = 0 < service_write_1_it__nb_req;
 }
 
 void service_write_1_it__continue_iter_write_request(
@@ -61,6 +61,6 @@ void service_write_1_it__continue_iter_write_request(
       service_write_1_it__wvi);
    service_write_1_it__wreqs_i = service_write_1_it__wreqs_i -
       1;
-   *service_write_1_it__continue = (0 < service_write_1_it__wreqs_i);
+   *service_write_1_it__continue = 0 < service_write_1_it__wreqs_i;
 }
 

@@ -21,9 +21,9 @@
 
  File Name            : session_core.c
 
- Date                 : 05/05/2026 16:00:26
+ Date                 : 16/09/2026 08:15:31
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -406,8 +406,8 @@ void session_core__l_server_create_session_req_and_resp_sm(
          &session_core__l_nsession_token);
       session_core_1__server_is_valid_session_token(session_core__l_nsession_token,
          &session_core__l_valid_session_token);
-      if ((session_core__l_valid_session_token == true) &&
-         (session_core__l_valid_server_cert == true)) {
+      if (session_core__l_valid_session_token == true &&
+         session_core__l_valid_server_cert == true) {
          *session_core__nsession = session_core__p_session;
          session_core__l_server_write_create_session_resp(session_core__p_session,
             session_core__p_channel,
@@ -489,9 +489,9 @@ void session_core__client_create_session_resp_sm(
          session_core__l_channel_config_idx,
          session_core__create_resp_msg,
          &session_core__l_valid_user_secu_properties);
-      *session_core__bret = (((session_core__l_valid_server_cert == true) &&
-         (session_core__l_endpoints_bres == true)) &&
-         (session_core__l_valid_user_secu_properties == true));
+      *session_core__bret = session_core__l_valid_server_cert == true &&
+         session_core__l_endpoints_bres == true &&
+         session_core__l_valid_user_secu_properties == true;
       if (*session_core__bret == true) {
          if (session_core__l_secpol != constants__e_secpol_None) {
             session_core_1__client_create_session_check_crypto(session_core__session,
@@ -596,8 +596,8 @@ void session_core__l_client_user_activate_session_req_sm(
          else if (session_core__l_user_token_type == constants__e_userTokenType_anonymous) {
             session_core__l_valid_cert = true;
          }
-         if ((session_core__l_valid_cert == true) ||
-            (session_core__l_valid_user_token_sign == true)) {
+         if (session_core__l_valid_cert == true ||
+            session_core__l_valid_user_token_sign == true) {
             user_authentication__may_encrypt_user_token(session_core__l_channel_config_idx,
                session_core__l_user_server_cert,
                session_core__l_server_nonce,
@@ -752,7 +752,7 @@ void session_core__allocate_authenticated_user(
             session_core__p_sc_valid_user,
             session_core__p_user);
          session_core_1__check_server_session_user_auth_attempts(session_core__p_session,
-            (*session_core__p_sc_valid_user == constants_statuscodes_bs__e_sc_ok),
+            *session_core__p_sc_valid_user == constants_statuscodes_bs__e_sc_ok,
             session_core__p_max_attempts);
       }
    }
@@ -848,8 +848,8 @@ void session_core__client_secure_channel_lost_session_sm(
             session_core_1__getall_session_channel(session_core__l_session,
                &session_core__l_dom,
                &session_core__l_channel);
-            if ((session_core__l_dom == true) &&
-               (session_core__l_channel == session_core__p_lost_channel)) {
+            if (session_core__l_dom == true &&
+               session_core__l_channel == session_core__p_lost_channel) {
                session_core__l_client_secure_channel_lost_session_sm(session_core__l_session,
                   session_core__p_channel_config_idx);
             }
@@ -919,8 +919,8 @@ void session_core__server_secure_channel_lost_session_sm(
             session_core_1__getall_session_channel(session_core__l_session,
                &session_core__l_dom,
                &session_core__l_channel);
-            if ((session_core__l_dom == true) &&
-               (session_core__l_channel == session_core__p_lost_channel)) {
+            if (session_core__l_dom == true &&
+               session_core__l_channel == session_core__p_lost_channel) {
                session_core__l_server_secure_channel_lost_session_sm(session_core__l_session);
             }
          }
@@ -950,9 +950,9 @@ void session_core__server_close_sessions(
                &session_core__l_is_client_session);
             session_core_1__is_valid_session(session_core__l_session,
                &session_core__l_valid_session);
-            if (((session_core__l_valid_session == true) &&
-               (session_core__l_session != session_core__exceptSession)) &&
-               (session_core__l_is_client_session == false)) {
+            if (session_core__l_valid_session == true &&
+               session_core__l_session != session_core__exceptSession &&
+               session_core__l_is_client_session == false) {
                session_core_1__get_server_session_client_app_desc(session_core__l_session,
                   &session_core__l_client_app_desc);
                session_core_1__get_server_session_client_cert_tb(session_core__l_session,
@@ -1098,8 +1098,8 @@ void session_core__find_channel_to_close(
             &session_core__l_connected);
          session_core_1__get_channel_nb_sessions(session_core__l_channel,
             &session_core__l_nb_sessions);
-         if ((session_core__l_connected == true) &&
-            (session_core__l_nb_sessions == 0)) {
+         if (session_core__l_connected == true &&
+            session_core__l_nb_sessions == 0) {
             channel_mgr__get_connection_time(session_core__l_channel,
                &session_core__l_timeref);
             if (session_core__l_oldest_channel_timeref == constants__c_timeref_indet) {

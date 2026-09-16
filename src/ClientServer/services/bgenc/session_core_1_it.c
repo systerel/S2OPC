@@ -21,9 +21,9 @@
 
  File Name            : session_core_1_it.c
 
- Date                 : 04/08/2022 14:53:17
+ Date                 : 16/09/2026 08:15:30
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -50,7 +50,7 @@ void session_core_1_it__INITIALISATION(void) {
 void session_core_1_it__init_iter_session(
    t_bool * const session_core_1_it__p_continue) {
    constants__get_card_t_session(&session_core_1_it__session_i);
-   *session_core_1_it__p_continue = (1 <= session_core_1_it__session_i);
+   *session_core_1_it__p_continue = 1 <= session_core_1_it__session_i;
 }
 
 void session_core_1_it__continue_iter_session(
@@ -60,6 +60,6 @@ void session_core_1_it__continue_iter_session(
       session_core_1_it__p_session);
    session_core_1_it__session_i = session_core_1_it__session_i -
       1;
-   *session_core_1_it__p_continue = (1 <= session_core_1_it__session_i);
+   *session_core_1_it__p_continue = 1 <= session_core_1_it__session_i;
 }
 

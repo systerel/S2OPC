@@ -21,9 +21,9 @@
 
  File Name            : unregister_nodes_it.c
 
- Date                 : 04/08/2022 14:53:26
+ Date                 : 16/09/2026 08:15:42
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -51,7 +51,7 @@ void unregister_nodes_it__init_iter_unregister_nodes_request(
    const t_entier4 unregister_nodes_it__nb_req,
    t_bool * const unregister_nodes_it__continue) {
    unregister_nodes_it__rreqs_i = unregister_nodes_it__nb_req;
-   *unregister_nodes_it__continue = (0 < unregister_nodes_it__nb_req);
+   *unregister_nodes_it__continue = 0 < unregister_nodes_it__nb_req;
 }
 
 void unregister_nodes_it__continue_iter_unregister_nodes_request(
@@ -60,6 +60,6 @@ void unregister_nodes_it__continue_iter_unregister_nodes_request(
    *unregister_nodes_it__index = unregister_nodes_it__rreqs_i;
    unregister_nodes_it__rreqs_i = unregister_nodes_it__rreqs_i -
       1;
-   *unregister_nodes_it__continue = (0 < unregister_nodes_it__rreqs_i);
+   *unregister_nodes_it__continue = 0 < unregister_nodes_it__rreqs_i;
 }
 

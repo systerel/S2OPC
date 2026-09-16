@@ -21,9 +21,9 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 05/10/2026 12:04:43
+ Date                 : 12/10/2026 13:07:01
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -198,8 +198,8 @@ void io_dispatch_mgr__receive_msg_buffer(
       service_mgr__decode_msg_type(io_dispatch_mgr__buffer,
          &io_dispatch_mgr__l_valid_msg_type,
          &io_dispatch_mgr__l_msg_type);
-      if ((io_dispatch_mgr__l_connected_channel == true) &&
-         (io_dispatch_mgr__l_valid_msg_type == true)) {
+      if (io_dispatch_mgr__l_connected_channel == true &&
+         io_dispatch_mgr__l_valid_msg_type == true) {
          channel_mgr__is_client_channel(io_dispatch_mgr__channel,
             &io_dispatch_mgr__l_is_client);
          io_dispatch_mgr__get_msg_header_type(io_dispatch_mgr__l_msg_type,
@@ -257,8 +257,8 @@ void io_dispatch_mgr__receive_msg_buffer(
                      channel_mgr__set_create_session_locked(io_dispatch_mgr__channel);
                   }
                }
-               else if ((io_dispatch_mgr__l_valid_req == true) &&
-                  (io_dispatch_mgr__l_async_resp == false)) {
+               else if (io_dispatch_mgr__l_valid_req == true &&
+                  io_dispatch_mgr__l_async_resp == false) {
                   service_mgr__send_channel_error_msg(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_sc,
                      io_dispatch_mgr__request_context);
@@ -328,8 +328,8 @@ void io_dispatch_mgr__receive_msg_buffer(
             break;
          }
       }
-      else if ((io_dispatch_mgr__l_connected_channel == true) &&
-         (io_dispatch_mgr__l_valid_msg_type == false)) {
+      else if (io_dispatch_mgr__l_connected_channel == true &&
+         io_dispatch_mgr__l_valid_msg_type == false) {
          channel_mgr__close_secure_channel(io_dispatch_mgr__channel,
             constants_statuscodes_bs__e_sc_bad_decoding_error);
       }
@@ -530,8 +530,8 @@ void io_dispatch_mgr__client_send_service_request(
          &io_dispatch_mgr__l_valid_session);
       service_mgr__bless_msg_out(io_dispatch_mgr__req_msg,
          &io_dispatch_mgr__l_msg_typ);
-      if ((io_dispatch_mgr__l_valid_session == true) &&
-         (io_dispatch_mgr__l_msg_typ != constants__c_msg_type_indet)) {
+      if (io_dispatch_mgr__l_valid_session == true &&
+         io_dispatch_mgr__l_msg_typ != constants__c_msg_type_indet) {
          service_mgr__client_service_request(io_dispatch_mgr__session,
             io_dispatch_mgr__l_msg_typ,
             io_dispatch_mgr__req_msg,
@@ -582,8 +582,8 @@ void io_dispatch_mgr__client_send_discovery_request(
          &io_dispatch_mgr__l_msg_typ);
       channel_mgr__is_valid_channel_config_idx(io_dispatch_mgr__channel_config_idx,
          &io_dispatch_mgr__l_valid_channel_config);
-      if ((io_dispatch_mgr__l_msg_typ != constants__c_msg_type_indet) &&
-         (io_dispatch_mgr__l_valid_channel_config == true)) {
+      if (io_dispatch_mgr__l_msg_typ != constants__c_msg_type_indet &&
+         io_dispatch_mgr__l_valid_channel_config == true) {
          channel_mgr__get_connected_channel(io_dispatch_mgr__channel_config_idx,
             &io_dispatch_mgr__l_channel);
          channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
@@ -842,8 +842,8 @@ void io_dispatch_mgr__internal_server_data_changed(
          &io_dispatch_mgr__l_old_valid_pointer);
       write_value_pointer_bs__write_value_pointer_is_valid(io_dispatch_mgr__p_new_write_value_pointer,
          &io_dispatch_mgr__l_new_valid_pointer);
-      if ((io_dispatch_mgr__l_old_valid_pointer == true) &&
-         (io_dispatch_mgr__l_new_valid_pointer == true)) {
+      if (io_dispatch_mgr__l_old_valid_pointer == true &&
+         io_dispatch_mgr__l_new_valid_pointer == true) {
          service_mgr__server_subscription_data_changed(io_dispatch_mgr__p_old_write_value_pointer,
             io_dispatch_mgr__p_new_write_value_pointer);
          *io_dispatch_mgr__bres = true;
@@ -898,9 +898,9 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
          &io_dispatch_mgr__l_valid_session);
       service_mgr__bless_msg_out(io_dispatch_mgr__p_publish_resp_msg,
          &io_dispatch_mgr__l_msg_typ);
-      if (((io_dispatch_mgr__l_valid_session == true) &&
-         (io_dispatch_mgr__l_msg_typ == constants__e_msg_subscription_publish_resp)) &&
-         (io_dispatch_mgr__p_statusCode != constants_statuscodes_bs__c_StatusCode_indet)) {
+      if (io_dispatch_mgr__l_valid_session == true &&
+         io_dispatch_mgr__l_msg_typ == constants__e_msg_subscription_publish_resp &&
+         io_dispatch_mgr__p_statusCode != constants_statuscodes_bs__c_StatusCode_indet) {
          service_mgr__server_send_publish_response(io_dispatch_mgr__p_session,
             io_dispatch_mgr__p_req_handle,
             io_dispatch_mgr__p_statusCode,
@@ -912,8 +912,8 @@ void io_dispatch_mgr__internal_server_send_publish_response_prio_event(
             &io_dispatch_mgr__l_channel);
          channel_mgr__is_connected_channel(io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_connected_channel);
-         if ((*io_dispatch_mgr__bres == true) &&
-            (io_dispatch_mgr__l_connected_channel == true)) {
+         if (*io_dispatch_mgr__bres == true &&
+            io_dispatch_mgr__l_connected_channel == true) {
             service_mgr__send_channel_msg_buffer(io_dispatch_mgr__l_channel,
                io_dispatch_mgr__l_buffer_out,
                io_dispatch_mgr__p_req_context);

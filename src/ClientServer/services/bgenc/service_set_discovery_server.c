@@ -21,9 +21,9 @@
 
  File Name            : service_set_discovery_server.c
 
- Date                 : 03/03/2026 14:59:11
+ Date                 : 16/09/2026 08:15:27
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -55,9 +55,9 @@ void service_set_discovery_server__local_get_nb_servers_on_network_to_return(
       
       *service_set_discovery_server__p_nb_servers = 0;
       service_register_server2__init_iter_registered_server2_set(&service_set_discovery_server__l_continue);
-      while ((service_set_discovery_server__l_continue == true) &&
-         ((service_set_discovery_server__p_max_records_to_return == 0) ||
-         (*service_set_discovery_server__p_nb_servers < service_set_discovery_server__p_max_records_to_return))) {
+      while (service_set_discovery_server__l_continue == true &&
+         (service_set_discovery_server__p_max_records_to_return == 0 ||
+         *service_set_discovery_server__p_nb_servers < service_set_discovery_server__p_max_records_to_return)) {
          service_register_server2__continue_iter_registered_server2_set(&service_set_discovery_server__l_continue,
             &service_set_discovery_server__l_registeredServerInfo);
          service_register_server2__get_registered_server2_recordId(service_set_discovery_server__l_registeredServerInfo,
@@ -94,8 +94,8 @@ void service_set_discovery_server__local_set_servers_on_network_to_return(
       
       service_set_discovery_server__l_nb_servers = 0;
       service_register_server2__init_iter_registered_server2_set(&service_set_discovery_server__l_continue);
-      while ((service_set_discovery_server__l_continue == true) &&
-         (service_set_discovery_server__l_nb_servers < service_set_discovery_server__p_nb_servers)) {
+      while (service_set_discovery_server__l_continue == true &&
+         service_set_discovery_server__l_nb_servers < service_set_discovery_server__p_nb_servers) {
          service_register_server2__continue_iter_registered_server2_set(&service_set_discovery_server__l_continue,
             &service_set_discovery_server__l_registeredServerInfo);
          service_register_server2__get_registered_server2_recordId(service_set_discovery_server__l_registeredServerInfo,
@@ -212,9 +212,9 @@ void service_set_discovery_server__local_set_servers_to_return(
       *service_set_discovery_server__ret = constants_statuscodes_bs__e_sc_ok;
       service_set_discovery_server__l_nb_servers = 0;
       service_register_server2__init_iter_registered_server2_set(&service_set_discovery_server__l_continue);
-      while (((*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok) &&
-         (service_set_discovery_server__l_continue == true)) &&
-         (service_set_discovery_server__l_nb_servers < service_set_discovery_server__p_nb_servers)) {
+      while (*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok &&
+         service_set_discovery_server__l_continue == true &&
+         service_set_discovery_server__l_nb_servers < service_set_discovery_server__p_nb_servers) {
          service_register_server2__continue_iter_registered_server2_set(&service_set_discovery_server__l_continue,
             &service_set_discovery_server__l_registeredServerInfo);
          service_register_server2__get_registered_server2_registered_server(service_set_discovery_server__l_registeredServerInfo,
@@ -369,8 +369,8 @@ void service_set_discovery_server__treat_find_servers_request(
                service_set_discovery_server__l_ServerUris,
                service_set_discovery_server__l_nbServers,
                service_set_discovery_server__ret);
-            if ((*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok) &&
-               (service_set_discovery_server__l_isCurrentCompat == true)) {
+            if (*service_set_discovery_server__ret == constants_statuscodes_bs__e_sc_ok &&
+               service_set_discovery_server__l_isCurrentCompat == true) {
                msg_find_servers_bs__set_find_servers_server_ApplicationDescription(service_set_discovery_server__resp_msg,
                   service_set_discovery_server__l_nbServersPlusSelf -
                   1,

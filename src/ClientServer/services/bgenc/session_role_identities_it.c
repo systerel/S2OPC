@@ -21,9 +21,9 @@
 
  File Name            : session_role_identities_it.c
 
- Date                 : 05/08/2024 13:22:12
+ Date                 : 16/09/2026 08:15:33
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -54,7 +54,7 @@ void session_role_identities_it__init_iter_identities(
    t_bool * const session_role_identities_it__p_continue) {
    session_role_identities_it__nb_identities_i = session_role_identities_it__p_nb_identities;
    session_role_identities_it__currentIdentityIdx_i = 0;
-   *session_role_identities_it__p_continue = (0 < session_role_identities_it__p_nb_identities);
+   *session_role_identities_it__p_continue = 0 < session_role_identities_it__p_nb_identities;
 }
 
 void session_role_identities_it__continue_iter_identities(
@@ -63,6 +63,6 @@ void session_role_identities_it__continue_iter_identities(
    session_role_identities_it__currentIdentityIdx_i = session_role_identities_it__currentIdentityIdx_i +
       1;
    *session_role_identities_it__p_identityIdx = session_role_identities_it__currentIdentityIdx_i;
-   *session_role_identities_it__p_continue = (session_role_identities_it__currentIdentityIdx_i < session_role_identities_it__nb_identities_i);
+   *session_role_identities_it__p_continue = session_role_identities_it__currentIdentityIdx_i < session_role_identities_it__nb_identities_i;
 }
 

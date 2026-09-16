@@ -21,9 +21,9 @@
 
  File Name            : namespace_array_it.c
 
- Date                 : 04/11/2024 10:51:48
+ Date                 : 16/09/2026 08:15:17
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -54,8 +54,8 @@ void namespace_array_it__init_iter_namespaceUris(
    t_bool * const namespace_array_it__p_continue) {
    namespace_array_it__nb_namespaceUris_i = namespace_array_it__p_nb_namespaceUris;
    namespace_array_it__currentnamespaceUriIdx_i = 0;
-   *namespace_array_it__p_continue = ((0 < namespace_array_it__p_nb_namespaceUris) &&
-      (namespace_array_it__p_nb_namespaceUris < constants__k_n_NamespaceIndex_max));
+   *namespace_array_it__p_continue = 0 < namespace_array_it__p_nb_namespaceUris &&
+      namespace_array_it__p_nb_namespaceUris < constants__k_n_NamespaceIndex_max;
 }
 
 void namespace_array_it__continue_iter_namespaceUris(
@@ -64,6 +64,6 @@ void namespace_array_it__continue_iter_namespaceUris(
    namespace_array_it__currentnamespaceUriIdx_i = namespace_array_it__currentnamespaceUriIdx_i +
       1;
    *namespace_array_it__p_namespaceUriIdx = namespace_array_it__currentnamespaceUriIdx_i;
-   *namespace_array_it__p_continue = (namespace_array_it__currentnamespaceUriIdx_i < namespace_array_it__nb_namespaceUris_i);
+   *namespace_array_it__p_continue = namespace_array_it__currentnamespaceUriIdx_i < namespace_array_it__nb_namespaceUris_i;
 }
 

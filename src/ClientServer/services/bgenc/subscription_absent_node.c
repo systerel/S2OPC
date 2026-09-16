@@ -21,9 +21,9 @@
 
  File Name            : subscription_absent_node.c
 
- Date                 : 05/08/2022 08:40:49
+ Date                 : 16/09/2026 08:15:34
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -86,8 +86,8 @@ void subscription_absent_node__eval_knownNode_requested_properties(
       if (subscription_absent_node__l_is_supported_attribute == true) {
          address_space_itf__is_IndexRangeDefined(subscription_absent_node__p_indexRange,
             &subscription_absent_node__l_is_index_range_defined);
-         if ((subscription_absent_node__p_aid != constants__e_aid_Value) &&
-            (subscription_absent_node__l_is_index_range_defined == true)) {
+         if (subscription_absent_node__p_aid != constants__e_aid_Value &&
+            subscription_absent_node__l_is_index_range_defined == true) {
             *subscription_absent_node__sc = constants_statuscodes_bs__e_sc_bad_index_range_no_data;
          }
          else {

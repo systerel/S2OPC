@@ -21,9 +21,9 @@
 
  File Name            : service_browse_it.c
 
- Date                 : 04/08/2022 14:53:10
+ Date                 : 16/09/2026 08:15:23
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -54,7 +54,7 @@ void service_browse_it__init_iter_browse_request(
    t_bool * const service_browse_it__p_continue) {
    service_browse_it__nb_bvi = service_browse_it__p_nb_req;
    service_browse_it__bvi_i = 1;
-   *service_browse_it__p_continue = (1 <= service_browse_it__p_nb_req);
+   *service_browse_it__p_continue = 1 <= service_browse_it__p_nb_req;
 }
 
 void service_browse_it__continue_iter_browse_request(
@@ -64,6 +64,6 @@ void service_browse_it__continue_iter_browse_request(
       service_browse_it__p_bvi);
    service_browse_it__bvi_i = service_browse_it__bvi_i +
       1;
-   *service_browse_it__p_continue = (service_browse_it__bvi_i <= service_browse_it__nb_bvi);
+   *service_browse_it__p_continue = service_browse_it__bvi_i <= service_browse_it__nb_bvi;
 }
 

@@ -21,9 +21,9 @@
 
  File Name            : address_space.c
 
- Date                 : 06/10/2026 16:12:52
+ Date                 : 12/10/2026 13:06:54
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -45,49 +45,49 @@ void address_space__local_is_mandatory_attribute(
    const constants__t_NodeClass_i address_space__p_ncl,
    const constants__t_AttributeId_i address_space__p_aid,
    t_bool * const address_space__bres) {
-   *address_space__bres = ((((address_space__p_aid == constants__e_aid_BrowseName) ||
-      (address_space__p_aid == constants__e_aid_DisplayName)) ||
-      (address_space__p_aid == constants__e_aid_NodeClass)) ||
-      (address_space__p_aid == constants__e_aid_NodeId));
+   *address_space__bres = address_space__p_aid == constants__e_aid_BrowseName ||
+      address_space__p_aid == constants__e_aid_DisplayName ||
+      address_space__p_aid == constants__e_aid_NodeClass ||
+      address_space__p_aid == constants__e_aid_NodeId;
    if (*address_space__bres == false) {
       switch (address_space__p_ncl) {
       case constants__e_ncl_Variable:
-         *address_space__bres = ((((((((address_space__p_aid == constants__e_aid_AccessLevel) ||
-            (address_space__p_aid == constants__e_aid_AccessLevelEx)) ||
-            (address_space__p_aid == constants__e_aid_DataType)) ||
-            (address_space__p_aid == constants__e_aid_Historizing)) ||
-            (address_space__p_aid == constants__e_aid_UserAccessLevel)) ||
-            (address_space__p_aid == constants__e_aid_Value)) ||
-            (address_space__p_aid == constants__e_aid_ValueRank)) ||
-            (address_space__p_aid == constants__e_aid_ArrayDimensions));
+         *address_space__bres = address_space__p_aid == constants__e_aid_AccessLevel ||
+            address_space__p_aid == constants__e_aid_AccessLevelEx ||
+            address_space__p_aid == constants__e_aid_DataType ||
+            address_space__p_aid == constants__e_aid_Historizing ||
+            address_space__p_aid == constants__e_aid_UserAccessLevel ||
+            address_space__p_aid == constants__e_aid_Value ||
+            address_space__p_aid == constants__e_aid_ValueRank ||
+            address_space__p_aid == constants__e_aid_ArrayDimensions;
          break;
       case constants__e_ncl_VariableType:
-         *address_space__bres = ((((address_space__p_aid == constants__e_aid_DataType) ||
-            (address_space__p_aid == constants__e_aid_IsAbstract)) ||
-            (address_space__p_aid == constants__e_aid_ValueRank)) ||
-            (address_space__p_aid == constants__e_aid_ArrayDimensions));
+         *address_space__bres = address_space__p_aid == constants__e_aid_DataType ||
+            address_space__p_aid == constants__e_aid_IsAbstract ||
+            address_space__p_aid == constants__e_aid_ValueRank ||
+            address_space__p_aid == constants__e_aid_ArrayDimensions;
          break;
       case constants__e_ncl_Object:
-         *address_space__bres = (address_space__p_aid == constants__e_aid_EventNotifier);
+         *address_space__bres = address_space__p_aid == constants__e_aid_EventNotifier;
          break;
       case constants__e_ncl_ObjectType:
-         *address_space__bres = (address_space__p_aid == constants__e_aid_IsAbstract);
+         *address_space__bres = address_space__p_aid == constants__e_aid_IsAbstract;
          break;
       case constants__e_ncl_ReferenceType:
-         *address_space__bres = ((address_space__p_aid == constants__e_aid_IsAbstract) ||
-            (address_space__p_aid == constants__e_aid_Symmetric));
+         *address_space__bres = address_space__p_aid == constants__e_aid_IsAbstract ||
+            address_space__p_aid == constants__e_aid_Symmetric;
          break;
       case constants__e_ncl_DataType:
-         *address_space__bres = ((address_space__p_aid == constants__e_aid_IsAbstract) ||
-            (address_space__p_aid == constants__e_aid_DataTypeDefinition));
+         *address_space__bres = address_space__p_aid == constants__e_aid_IsAbstract ||
+            address_space__p_aid == constants__e_aid_DataTypeDefinition;
          break;
       case constants__e_ncl_Method:
-         *address_space__bres = ((address_space__p_aid == constants__e_aid_Executable) ||
-            (address_space__p_aid == constants__e_aid_UserExecutable));
+         *address_space__bres = address_space__p_aid == constants__e_aid_Executable ||
+            address_space__p_aid == constants__e_aid_UserExecutable;
          break;
       case constants__e_ncl_View:
-         *address_space__bres = ((address_space__p_aid == constants__e_aid_EventNotifier) ||
-            (address_space__p_aid == constants__e_aid_ContainsNoLoops));
+         *address_space__bres = address_space__p_aid == constants__e_aid_EventNotifier ||
+            address_space__p_aid == constants__e_aid_ContainsNoLoops;
          break;
       default:
          break;
@@ -247,8 +247,8 @@ void address_space__treat_write_1(
          if (address_space__l_isvalid == true) {
             address_space_authorization__get_NodeClass(*address_space__node,
                &address_space__l_ncl);
-            if ((address_space__aid == constants__e_aid_Value) &&
-               (address_space__l_ncl == constants__e_ncl_Variable)) {
+            if (address_space__aid == constants__e_aid_Value &&
+               address_space__l_ncl == constants__e_ncl_Variable) {
                address_space_authorization__get_DataType(*address_space__node,
                   &address_space__l_var_datatype_nid);
                address_space_authorization__get_ValueRank(*address_space__node,
@@ -270,9 +270,9 @@ void address_space__treat_write_1(
                constants__is_Timestamps_Null(address_space__l_server_ts,
                   &address_space__l_server_ts_null);
                address_space_authorization__is_local_service_treatment(&address_space__l_local_treatment);
-               if ((address_space__l_compatible_type == true) &&
-                  ((address_space__l_server_ts_null == true) ||
-                  (address_space__l_local_treatment == true))) {
+               if (address_space__l_compatible_type == true &&
+                  (address_space__l_server_ts_null == true ||
+                  address_space__l_local_treatment == true)) {
                   data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(address_space__dataValue,
                      &address_space__l_source_ts);
                   data_value_pointer_bs__get_conv_DataValue_Status(address_space__dataValue,
@@ -409,18 +409,18 @@ void address_space__is_variable_compat_type(
                constants__is_included_ValueRank(constants__c_ValueRank_OneDimension,
                   address_space__p_var_vr,
                   &address_space__l_var_is_one_dim_vr);
-               if ((((address_space__l_dv_is_bytestring_type == true) &&
-                  (address_space__p_dv_vr == constants__c_ValueRank_Scalar)) &&
-                  (address_space__l_var_is_byte_type == true)) &&
-                  (address_space__l_var_is_one_dim_vr == true)) {
+               if (address_space__l_dv_is_bytestring_type == true &&
+                  address_space__p_dv_vr == constants__c_ValueRank_Scalar &&
+                  address_space__l_var_is_byte_type == true &&
+                  address_space__l_var_is_one_dim_vr == true) {
                   address_space__l_typ_is_ok = true;
                   address_space__l_typ_need_conv = true;
                   address_space__l_value_rank_is_ok = true;
                }
-               else if ((((address_space__l_dv_is_byte_type == true) &&
-                  (address_space__p_dv_vr == constants__c_ValueRank_OneDimension)) &&
-                  (address_space__l_var_is_bytestring_type == true)) &&
-                  (address_space__l_var_is_scalar_vr == true)) {
+               else if (address_space__l_dv_is_byte_type == true &&
+                  address_space__p_dv_vr == constants__c_ValueRank_OneDimension &&
+                  address_space__l_var_is_bytestring_type == true &&
+                  address_space__l_var_is_scalar_vr == true) {
                   address_space__l_typ_is_ok = true;
                   address_space__l_typ_need_conv = true;
                   address_space__l_value_rank_is_ok = true;
@@ -428,8 +428,8 @@ void address_space__is_variable_compat_type(
             }
          }
       }
-      *address_space__btyp_ok = ((address_space__l_typ_is_ok == true) &&
-         (address_space__l_value_rank_is_ok == true));
+      *address_space__btyp_ok = address_space__l_typ_is_ok == true &&
+         address_space__l_value_rank_is_ok == true;
       *address_space__btyp_need_conv = address_space__l_typ_need_conv;
    }
 }
@@ -462,8 +462,8 @@ void address_space__read_AddressSpace_Attribute_value(
       *address_space__val_ts_src = constants__c_Timestamp_null;
       address_space_authorization__is_IndexRangeDefined(address_space__p_index_range,
          &address_space__l_is_range_defined);
-      if ((address_space__p_aid != constants__e_aid_Value) &&
-         (address_space__l_is_range_defined == true)) {
+      if (address_space__p_aid != constants__e_aid_Value &&
+         address_space__l_is_range_defined == true) {
          *address_space__sc = constants_statuscodes_bs__e_sc_bad_index_range_no_data;
       }
       else {
@@ -629,8 +629,8 @@ void address_space__read_AddressSpace_Raw_Node_Value_only(
       *address_space__p_sc = constants_statuscodes_bs__e_sc_bad_node_class_invalid;
       address_space_authorization__get_NodeClass(address_space__p_node,
          &address_space__l_nodeClass);
-      if ((address_space__l_nodeClass == constants__e_ncl_Variable) ||
-         (address_space__l_nodeClass == constants__e_ncl_VariableType)) {
+      if (address_space__l_nodeClass == constants__e_ncl_Variable ||
+         address_space__l_nodeClass == constants__e_ncl_VariableType) {
          address_space_authorization__read_AddressSpace_Raw_Node_Value_value(address_space__p_node,
             address_space__p_nid,
             constants__e_aid_Value,
@@ -677,8 +677,8 @@ void address_space__read_Node_Attribute(
          address_space__p_aid,
          &address_space__l_is_mandatory_attribute);
       if (address_space__l_is_mandatory_attribute == true) {
-         if ((address_space__l_ncl == constants__e_ncl_Variable) &&
-            (address_space__p_aid == constants__e_aid_Value)) {
+         if (address_space__l_ncl == constants__e_ncl_Variable &&
+            address_space__p_aid == constants__e_aid_Value) {
             address_space_authorization__has_access_level_read(address_space__p_node,
                &address_space__l_access_read);
             if (address_space__l_access_read == true) {

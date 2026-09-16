@@ -21,9 +21,9 @@
 
  File Name            : address_space_namespaces_indexes.c
 
- Date                 : 05/09/2025 13:22:02
+ Date                 : 16/09/2026 08:15:04
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -84,7 +84,7 @@ void address_space_namespaces_indexes__has_NamespaceIndex_index(
       
       constants__get_reverse_cast_t_NamespaceIdx(address_space_namespaces_indexes__p_idx,
          &address_space_namespaces_indexes__l_natIdx);
-      *address_space_namespaces_indexes__bres = (address_space_namespaces_indexes__l_natIdx <= address_space_namespaces_indexes__a_nsIdxMax_i);
+      *address_space_namespaces_indexes__bres = address_space_namespaces_indexes__l_natIdx <= address_space_namespaces_indexes__a_nsIdxMax_i;
    }
 }
 

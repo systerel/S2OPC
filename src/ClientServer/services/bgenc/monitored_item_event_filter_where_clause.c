@@ -21,9 +21,9 @@
 
  File Name            : monitored_item_event_filter_where_clause.c
 
- Date                 : 20/01/2026 18:00:30
+ Date                 : 16/09/2026 08:15:13
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -70,8 +70,8 @@ void monitored_item_event_filter_where_clause__check_where_clause_and_fill_ctx_a
                monitored_item_event_filter_where_clause__l_whereEltIdx,
                monitored_item_event_filter_where_clause__l_whereOperatorResult,
                monitored_item_event_filter_where_clause__l_whereOperandResult);
-            if ((monitored_item_event_filter_where_clause__l_whereStatusCode != constants_statuscodes_bs__e_sc_ok) &&
-               (*monitored_item_event_filter_where_clause__scWhereClause == constants_statuscodes_bs__e_sc_ok)) {
+            if (monitored_item_event_filter_where_clause__l_whereStatusCode != constants_statuscodes_bs__e_sc_ok &&
+               *monitored_item_event_filter_where_clause__scWhereClause == constants_statuscodes_bs__e_sc_ok) {
                *monitored_item_event_filter_where_clause__scWhereClause = monitored_item_event_filter_where_clause__l_whereStatusCode;
             }
          }
@@ -90,7 +90,7 @@ void monitored_item_event_filter_where_clause__evaluate_where_clause(
       t_bool monitored_item_event_filter_where_clause__l_nodeIdsEqual;
       t_bool monitored_item_event_filter_where_clause__l_isEventTypeRetained;
       
-      monitored_item_event_filter_where_clause__l_isEventTypeRetained = (monitored_item_event_filter_where_clause__p_nbWhereElts == 0);
+      monitored_item_event_filter_where_clause__l_isEventTypeRetained = monitored_item_event_filter_where_clause__p_nbWhereElts == 0;
       if (monitored_item_event_filter_where_clause__l_isEventTypeRetained == false) {
          monitored_item_event_filter_treatment_bs__get_event_type_id(monitored_item_event_filter_where_clause__p_event,
             &monitored_item_event_filter_where_clause__l_eventTypeId);

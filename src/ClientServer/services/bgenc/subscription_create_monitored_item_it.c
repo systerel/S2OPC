@@ -21,9 +21,9 @@
 
  File Name            : subscription_create_monitored_item_it.c
 
- Date                 : 04/08/2022 14:53:21
+ Date                 : 16/09/2026 08:15:36
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -51,7 +51,7 @@ void subscription_create_monitored_item_it__init_iter_monitored_item_request(
    const t_entier4 subscription_create_monitored_item_it__nb_req,
    t_bool * const subscription_create_monitored_item_it__continue) {
    subscription_create_monitored_item_it__rreqs_i = subscription_create_monitored_item_it__nb_req;
-   *subscription_create_monitored_item_it__continue = (0 < subscription_create_monitored_item_it__nb_req);
+   *subscription_create_monitored_item_it__continue = 0 < subscription_create_monitored_item_it__nb_req;
 }
 
 void subscription_create_monitored_item_it__continue_iter_monitored_item_request(
@@ -60,6 +60,6 @@ void subscription_create_monitored_item_it__continue_iter_monitored_item_request
    *subscription_create_monitored_item_it__index = subscription_create_monitored_item_it__rreqs_i;
    subscription_create_monitored_item_it__rreqs_i = subscription_create_monitored_item_it__rreqs_i -
       1;
-   *subscription_create_monitored_item_it__continue = (0 < subscription_create_monitored_item_it__rreqs_i);
+   *subscription_create_monitored_item_it__continue = 0 < subscription_create_monitored_item_it__rreqs_i;
 }
 

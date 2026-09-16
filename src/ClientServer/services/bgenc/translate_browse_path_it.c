@@ -21,9 +21,9 @@
 
  File Name            : translate_browse_path_it.c
 
- Date                 : 04/08/2022 14:53:25
+ Date                 : 16/09/2026 08:15:38
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -53,7 +53,7 @@ void translate_browse_path_it__init_iter_browsePaths(
    t_bool * const translate_browse_path_it__p_continue) {
    translate_browse_path__read_nb_BrowsePaths(&translate_browse_path_it__nb_browsePaths_to_iterate);
    translate_browse_path_it__current_browsePath_idx = translate_browse_path_it__nb_browsePaths_to_iterate;
-   *translate_browse_path_it__p_continue = (0 < translate_browse_path_it__current_browsePath_idx);
+   *translate_browse_path_it__p_continue = 0 < translate_browse_path_it__current_browsePath_idx;
 }
 
 void translate_browse_path_it__continue_iter_browsePath(
@@ -63,6 +63,6 @@ void translate_browse_path_it__continue_iter_browsePath(
       translate_browse_path_it__p_browsePath);
    translate_browse_path_it__current_browsePath_idx = translate_browse_path_it__current_browsePath_idx -
       1;
-   *translate_browse_path_it__p_continue = (0 < translate_browse_path_it__current_browsePath_idx);
+   *translate_browse_path_it__p_continue = 0 < translate_browse_path_it__current_browsePath_idx;
 }
 

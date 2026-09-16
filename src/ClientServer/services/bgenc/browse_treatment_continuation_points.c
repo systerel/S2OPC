@@ -21,9 +21,9 @@
 
  File Name            : browse_treatment_continuation_points.c
 
- Date                 : 05/12/2024 17:24:04
+ Date                 : 16/09/2026 08:15:06
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -70,8 +70,8 @@ void browse_treatment_continuation_points__has_continuation_point(
       session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
          &browse_treatment_continuation_points__l_valid_session);
       browse_treatment_continuation_points__l_has_cp = browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session];
-      if ((browse_treatment_continuation_points__l_valid_session == true) &&
-         (browse_treatment_continuation_points__l_has_cp == true)) {
+      if (browse_treatment_continuation_points__l_valid_session == true &&
+         browse_treatment_continuation_points__l_has_cp == true) {
          *browse_treatment_continuation_points__bres = true;
          browse_treatment_continuation_points_bs__get_continuation_point_id(browse_treatment_continuation_points__session_ContinuationPoint_i[browse_treatment_continuation_points__p_session],
             browse_treatment_continuation_points__p_ContinuationPointId);
@@ -105,8 +105,8 @@ void browse_treatment_continuation_points__create_continuation_point(
       session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
          &browse_treatment_continuation_points__l_valid_session);
       browse_treatment_continuation_points__l_has_cp = browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session];
-      *browse_treatment_continuation_points__bres = ((browse_treatment_continuation_points__l_valid_session == true) &&
-         (browse_treatment_continuation_points__l_has_cp == false));
+      *browse_treatment_continuation_points__bres = browse_treatment_continuation_points__l_valid_session == true &&
+         browse_treatment_continuation_points__l_has_cp == false;
       if (*browse_treatment_continuation_points__bres == true) {
          browse_treatment_continuation_points_bs__create_continuation_point_bs(browse_treatment_continuation_points__p_nextIndex,
             browse_treatment_continuation_points__p_maxTargetRef,
@@ -161,8 +161,8 @@ void browse_treatment_continuation_points__getall_continuation_point(
       session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
          &browse_treatment_continuation_points__l_valid_session);
       browse_treatment_continuation_points__l_session_has_cp = browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session];
-      if ((browse_treatment_continuation_points__l_valid_session == true) &&
-         (browse_treatment_continuation_points__l_session_has_cp == true)) {
+      if (browse_treatment_continuation_points__l_valid_session == true &&
+         browse_treatment_continuation_points__l_session_has_cp == true) {
          browse_treatment_continuation_points__l_session_cp = browse_treatment_continuation_points__session_ContinuationPoint_i[browse_treatment_continuation_points__p_session];
          browse_treatment_continuation_points_bs__get_continuation_point_id(browse_treatment_continuation_points__l_session_cp,
             &browse_treatment_continuation_points__l_session_cp_id);
@@ -197,8 +197,8 @@ void browse_treatment_continuation_points__release_continuation_point(
       session_mgr__is_valid_session(browse_treatment_continuation_points__p_session,
          &browse_treatment_continuation_points__l_valid_session);
       browse_treatment_continuation_points__l_session_has_cp = browse_treatment_continuation_points__session_hasContinuationPoint_i[browse_treatment_continuation_points__p_session];
-      if ((browse_treatment_continuation_points__l_valid_session == true) &&
-         (browse_treatment_continuation_points__l_session_has_cp == true)) {
+      if (browse_treatment_continuation_points__l_valid_session == true &&
+         browse_treatment_continuation_points__l_session_has_cp == true) {
          browse_treatment_continuation_points__l_session_cp = browse_treatment_continuation_points__session_ContinuationPoint_i[browse_treatment_continuation_points__p_session];
          browse_treatment_continuation_points_bs__get_continuation_point_id(browse_treatment_continuation_points__l_session_cp,
             &browse_treatment_continuation_points__l_session_cp_id);

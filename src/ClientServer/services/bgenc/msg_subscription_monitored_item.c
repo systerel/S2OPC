@@ -21,9 +21,9 @@
 
  File Name            : msg_subscription_monitored_item.c
 
- Date                 : 08/09/2022 13:07:04
+ Date                 : 16/09/2026 08:15:16
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -131,9 +131,9 @@ void msg_subscription_monitored_item__getall_msg_set_monit_mode_monitored_items_
       msg_subscription_monitored_item__p_subscription,
       msg_subscription_monitored_item__p_monitoring_mode,
       msg_subscription_monitored_item__p_nb_monitored_items);
-   if (((*msg_subscription_monitored_item__p_monitoring_mode != constants__e_monitoringMode_disabled) &&
-      (*msg_subscription_monitored_item__p_monitoring_mode != constants__e_monitoringMode_sampling)) &&
-      (*msg_subscription_monitored_item__p_monitoring_mode != constants__e_monitoringMode_reporting)) {
+   if (*msg_subscription_monitored_item__p_monitoring_mode != constants__e_monitoringMode_disabled &&
+      *msg_subscription_monitored_item__p_monitoring_mode != constants__e_monitoringMode_sampling &&
+      *msg_subscription_monitored_item__p_monitoring_mode != constants__e_monitoringMode_reporting) {
       *msg_subscription_monitored_item__p_sc = constants_statuscodes_bs__e_sc_bad_monitoring_mode_invalid;
    }
    else if (*msg_subscription_monitored_item__p_nb_monitored_items <= 0) {

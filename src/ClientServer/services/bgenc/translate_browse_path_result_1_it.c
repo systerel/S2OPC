@@ -21,9 +21,9 @@
 
  File Name            : translate_browse_path_result_1_it.c
 
- Date                 : 24/07/2023 14:29:21
+ Date                 : 16/09/2026 08:15:39
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -54,7 +54,7 @@ void translate_browse_path_result_1_it__init_iter_browsePathIdx(
    t_bool * const translate_browse_path_result_1_it__p_continue) {
    translate_browse_path_result_1_it__nb_browsePathIdx_max_refs_i = translate_browse_path_result_1_it__p_nb_browsePathIdx_max_refs;
    translate_browse_path_result_1_it__currentBrowsePathIdx_i = 0;
-   *translate_browse_path_result_1_it__p_continue = (0 < translate_browse_path_result_1_it__p_nb_browsePathIdx_max_refs);
+   *translate_browse_path_result_1_it__p_continue = 0 < translate_browse_path_result_1_it__p_nb_browsePathIdx_max_refs;
 }
 
 void translate_browse_path_result_1_it__continue_iter_browsePathIdx(
@@ -63,6 +63,6 @@ void translate_browse_path_result_1_it__continue_iter_browsePathIdx(
    translate_browse_path_result_1_it__currentBrowsePathIdx_i = translate_browse_path_result_1_it__currentBrowsePathIdx_i +
       1;
    *translate_browse_path_result_1_it__p_browsePathIdx = translate_browse_path_result_1_it__currentBrowsePathIdx_i;
-   *translate_browse_path_result_1_it__p_continue = (translate_browse_path_result_1_it__currentBrowsePathIdx_i < translate_browse_path_result_1_it__nb_browsePathIdx_max_refs_i);
+   *translate_browse_path_result_1_it__p_continue = translate_browse_path_result_1_it__currentBrowsePathIdx_i < translate_browse_path_result_1_it__nb_browsePathIdx_max_refs_i;
 }
 

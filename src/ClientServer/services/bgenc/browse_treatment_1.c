@@ -21,9 +21,9 @@
 
  File Name            : browse_treatment_1.c
 
- Date                 : 27/10/2023 05:20:47
+ Date                 : 16/09/2026 08:15:06
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -119,8 +119,8 @@ void browse_treatment_1__get_optional_fields_ReferenceDescription(
                browse_treatment_1__p_DisplayName);
             address_space_itf__get_NodeClass(browse_treatment_1__l_node,
                browse_treatment_1__p_NodeClass);
-            if ((*browse_treatment_1__p_NodeClass == constants__e_ncl_Variable) ||
-               (*browse_treatment_1__p_NodeClass == constants__e_ncl_Object)) {
+            if (*browse_treatment_1__p_NodeClass == constants__e_ncl_Variable ||
+               *browse_treatment_1__p_NodeClass == constants__e_ncl_Object) {
                address_space_itf__get_TypeDefinition(browse_treatment_1__l_node,
                   browse_treatment_1__p_TypeDefinition);
             }

@@ -21,9 +21,9 @@
 
  File Name            : session_core_2.c
 
- Date                 : 25/02/2026 11:31:40
+ Date                 : 16/09/2026 08:15:30
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -204,7 +204,7 @@ void session_core_2__is_valid_session(
       constants__t_sessionState_i session_core_2__l_state;
       
       session_core_2__l_state = session_core_2__a_state_i[session_core_2__session];
-      *session_core_2__ret = (session_core_2__l_state != constants__e_session_closed);
+      *session_core_2__ret = session_core_2__l_state != constants__e_session_closed;
    }
 }
 

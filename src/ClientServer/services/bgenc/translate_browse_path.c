@@ -21,9 +21,9 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 24/07/2023 14:29:19
+ Date                 : 16/09/2026 08:15:38
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -93,8 +93,8 @@ void translate_browse_path__treat_one_translate_browse_path(
          translate_browse_path__treat_one_translate_browse_path_1(translate_browse_path__l_source,
             translate_browse_path__l_relativePath,
             &translate_browse_path__l_statusCode_operation);
-         if ((translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
-            (translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) {
+         if (translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_ok ||
+            translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server) {
             translate_browse_path__l_statusCode_operation_2 = translate_browse_path__l_statusCode_operation;
             translate_browse_path__copy_browsePathResult_to_msg(translate_browse_path__browsePath,
                translate_browse_path__l_statusCode_operation_2,
@@ -323,9 +323,9 @@ void translate_browse_path__treat_relative_path_sequence(
       translate_browse_path__path_index,
       translate_browse_path__statusCode_operation);
    translate_browse_path_source__free_BrowsePathSource();
-   *translate_browse_path__p_continue = ((translate_browse_path__continue == true) &&
-      ((*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
-      (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)));
+   *translate_browse_path__p_continue = translate_browse_path__continue == true &&
+      (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_ok ||
+      *translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server);
    if (*translate_browse_path__p_continue == true) {
       translate_browse_path__copy_browsePathResult_to_source(translate_browse_path__statusCode_operation);
    }

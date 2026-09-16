@@ -21,9 +21,9 @@
 
  File Name            : msg_register_server2.c
 
- Date                 : 04/08/2022 14:53:08
+ Date                 : 16/09/2026 08:15:16
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -83,8 +83,8 @@ void msg_register_server2__check_register_server2_req(
          msg_register_server2__p_mdns_config,
          msg_register_server2__p_nb_discovery_config,
          msg_register_server2__p_mdns_discovery_config_index);
-      if ((msg_register_server2__l_has_discovery_configuration == true) &&
-         (msg_register_server2__l_has_one_and_only_one_mdns_config == true)) {
+      if (msg_register_server2__l_has_discovery_configuration == true &&
+         msg_register_server2__l_has_one_and_only_one_mdns_config == true) {
          msg_register_server2_bs__check_mdns_server_name(*msg_register_server2__p_mdns_config,
             &msg_register_server2__l_valid_mdns_server_name);
          msg_register_server2_bs__check_mdns_server_capabilities(*msg_register_server2__p_mdns_config,
@@ -113,12 +113,12 @@ void msg_register_server2__check_register_server2_req(
       else if (msg_register_server2__l_valid_semaphore_file == false) {
          *msg_register_server2__p_sc = constants_statuscodes_bs__e_sc_bad_semaphore_file_missing;
       }
-      else if ((msg_register_server2__l_has_discovery_configuration == false) ||
-         (msg_register_server2__l_has_one_and_only_one_mdns_config == false)) {
+      else if (msg_register_server2__l_has_discovery_configuration == false ||
+         msg_register_server2__l_has_one_and_only_one_mdns_config == false) {
          *msg_register_server2__p_sc = constants_statuscodes_bs__e_sc_bad_invalid_argument;
       }
-      else if ((msg_register_server2__l_valid_mdns_server_name == false) ||
-         (msg_register_server2__l_valid_server_capabilities == false)) {
+      else if (msg_register_server2__l_valid_mdns_server_name == false ||
+         msg_register_server2__l_valid_server_capabilities == false) {
          *msg_register_server2__p_sc = constants_statuscodes_bs__e_sc_bad_invalid_argument;
       }
    }

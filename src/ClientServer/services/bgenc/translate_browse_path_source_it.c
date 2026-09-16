@@ -21,9 +21,9 @@
 
  File Name            : translate_browse_path_source_it.c
 
- Date                 : 04/08/2022 14:53:25
+ Date                 : 16/09/2026 08:15:41
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -54,7 +54,7 @@ void translate_browse_path_source_it__init_iter_browsePathSourceIdx(
    t_bool * const translate_browse_path_source_it__p_continue) {
    translate_browse_path_source_it__nb_browsePathSourceIdx_max_refs_i = translate_browse_path_source_it__p_nb_browsePathSourceIdx_max_refs;
    translate_browse_path_source_it__currentBrowsePathSourceIdx_i = 0;
-   *translate_browse_path_source_it__p_continue = (0 < translate_browse_path_source_it__p_nb_browsePathSourceIdx_max_refs);
+   *translate_browse_path_source_it__p_continue = 0 < translate_browse_path_source_it__p_nb_browsePathSourceIdx_max_refs;
 }
 
 void translate_browse_path_source_it__continue_iter_browsePathSourceIdx(
@@ -63,6 +63,6 @@ void translate_browse_path_source_it__continue_iter_browsePathSourceIdx(
    translate_browse_path_source_it__currentBrowsePathSourceIdx_i = translate_browse_path_source_it__currentBrowsePathSourceIdx_i +
       1;
    *translate_browse_path_source_it__p_browsePathSourceIdx = translate_browse_path_source_it__currentBrowsePathSourceIdx_i;
-   *translate_browse_path_source_it__p_continue = (translate_browse_path_source_it__currentBrowsePathSourceIdx_i < translate_browse_path_source_it__nb_browsePathSourceIdx_max_refs_i);
+   *translate_browse_path_source_it__p_continue = translate_browse_path_source_it__currentBrowsePathSourceIdx_i < translate_browse_path_source_it__nb_browsePathSourceIdx_max_refs_i;
 }
 

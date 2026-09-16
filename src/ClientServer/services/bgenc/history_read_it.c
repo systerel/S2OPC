@@ -21,9 +21,9 @@
 
  File Name            : history_read_it.c
 
- Date                 : 31/07/2025 12:10:22
+ Date                 : 16/09/2026 08:15:11
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -51,7 +51,7 @@ void history_read_it__init_iter_hist_read_request(
    const t_entier4 history_read_it__p_nb_req,
    t_bool * const history_read_it__p_continue) {
    history_read_it__rreqs_i = history_read_it__p_nb_req;
-   *history_read_it__p_continue = (0 < history_read_it__p_nb_req);
+   *history_read_it__p_continue = 0 < history_read_it__p_nb_req;
 }
 
 void history_read_it__continue_iter_hist_read_request(
@@ -60,6 +60,6 @@ void history_read_it__continue_iter_hist_read_request(
    *history_read_it__p_index = history_read_it__rreqs_i;
    history_read_it__rreqs_i = history_read_it__rreqs_i -
       1;
-   *history_read_it__p_continue = (0 < history_read_it__rreqs_i);
+   *history_read_it__p_continue = 0 < history_read_it__rreqs_i;
 }
 

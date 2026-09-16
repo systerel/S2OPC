@@ -21,9 +21,9 @@
 
  File Name            : service_register_nodes.c
 
- Date                 : 04/08/2022 14:53:12
+ Date                 : 16/09/2026 08:15:26
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -57,8 +57,8 @@ void service_register_nodes__fill_response_register_nodes(
       service_register_nodes__l_ok = true;
       service_register_nodes__l_index = 0;
       service_register_nodes__l_node_id = constants__c_NodeId_indet;
-      while ((service_register_nodes__l_continue == true) &&
-         (service_register_nodes__l_ok == true)) {
+      while (service_register_nodes__l_continue == true &&
+         service_register_nodes__l_ok == true) {
          register_nodes_it__continue_iter_register_nodes_request(&service_register_nodes__l_continue,
             &service_register_nodes__l_index);
          msg_register_nodes__get_msg_register_nodes_req_node_id(service_register_nodes__p_req_msg,

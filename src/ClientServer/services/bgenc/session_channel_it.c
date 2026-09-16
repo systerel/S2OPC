@@ -21,9 +21,9 @@
 
  File Name            : session_channel_it.c
 
- Date                 : 04/08/2022 14:53:16
+ Date                 : 16/09/2026 08:15:29
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -50,7 +50,7 @@ void session_channel_it__INITIALISATION(void) {
 void session_channel_it__init_iter_channel(
    t_bool * const session_channel_it__p_continue) {
    constants__get_card_t_channel(&session_channel_it__channel_i);
-   *session_channel_it__p_continue = (1 <= session_channel_it__channel_i);
+   *session_channel_it__p_continue = 1 <= session_channel_it__channel_i;
 }
 
 void session_channel_it__continue_iter_channel(
@@ -60,6 +60,6 @@ void session_channel_it__continue_iter_channel(
       session_channel_it__p_channel);
    session_channel_it__channel_i = session_channel_it__channel_i -
       1;
-   *session_channel_it__p_continue = (1 <= session_channel_it__channel_i);
+   *session_channel_it__p_continue = 1 <= session_channel_it__channel_i;
 }
 

@@ -21,9 +21,9 @@
 
  File Name            : browse_treatment_context.c
 
- Date                 : 04/08/2022 14:53:00
+ Date                 : 16/09/2026 08:15:06
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -123,9 +123,9 @@ void browse_treatment_context__setall_browse_value_context(
       browse_treatment_context__in_BrowseValue_ResultMask_i = browse_treatment_context__p_resultMask;
       browse_treatment_context__in_ReleasePrevContinuationPoint_i = browse_treatment_context__p_autoReleaseCP;
       browse_treatment_context__isBrowseValueContextDefined_i = true;
-      if (((browse_treatment_context__l_bresView == true) &&
-         (browse_treatment_context__l_bresSrc == true)) &&
-         (browse_treatment_context__l_bresRef == true)) {
+      if (browse_treatment_context__l_bresView == true &&
+         browse_treatment_context__l_bresSrc == true &&
+         browse_treatment_context__l_bresRef == true) {
          *browse_treatment_context__p_service_StatusCode = constants_statuscodes_bs__e_sc_ok;
       }
       else {
@@ -154,7 +154,7 @@ void browse_treatment_context__getall_browse_value_context(
    *browse_treatment_context__p_browseView = browse_treatment_context__in_BrowseView_i;
    *browse_treatment_context__p_nodeId = browse_treatment_context__in_BrowseValue_NodeId_i;
    *browse_treatment_context__p_browseDirection = browse_treatment_context__in_BrowseValue_BrowseDirection_i;
-   *browse_treatment_context__p_refType_defined = (browse_treatment_context__in_BrowseValue_ReferenceTypeId_i != constants__c_NodeId_indet);
+   *browse_treatment_context__p_refType_defined = browse_treatment_context__in_BrowseValue_ReferenceTypeId_i != constants__c_NodeId_indet;
    *browse_treatment_context__p_referenceType = browse_treatment_context__in_BrowseValue_ReferenceTypeId_i;
    *browse_treatment_context__p_includeSubtypes = browse_treatment_context__in_BrowseValue_IncludeSubtypes_i;
    *browse_treatment_context__p_nodeClassMask = browse_treatment_context__in_BrowseValue_NodeClassMask_i;

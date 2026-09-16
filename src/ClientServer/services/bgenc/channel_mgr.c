@@ -21,9 +21,9 @@
 
  File Name            : channel_mgr.c
 
- Date                 : 01/10/2025 15:57:50
+ Date                 : 16/09/2026 08:15:10
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -82,26 +82,26 @@ void channel_mgr__l_check_all_channel_lost(void) {
       constants__t_channel_i channel_mgr__l_channel;
       constants__t_channel_config_idx_i channel_mgr__l_config_idx;
       
-      if ((channel_mgr__all_channel_closing == true) ||
-         (channel_mgr__all_client_only_channel_closing == true)) {
+      if (channel_mgr__all_channel_closing == true ||
+         channel_mgr__all_client_only_channel_closing == true) {
          channel_mgr__l_any_channel_connected_or_connecting = false;
          channel_mgr_it__init_iter_channel(&channel_mgr__l_continue);
-         while ((channel_mgr__l_continue == true) &&
-            (channel_mgr__l_any_channel_connected_or_connecting == false)) {
+         while (channel_mgr__l_continue == true &&
+            channel_mgr__l_any_channel_connected_or_connecting == false) {
             channel_mgr_it__continue_iter_channel(&channel_mgr__l_continue,
                &channel_mgr__l_channel);
             channel_mgr_1__is_client_channel(channel_mgr__l_channel,
                &channel_mgr__l_cli_con);
-            if ((channel_mgr__all_channel_closing == true) ||
-               ((channel_mgr__all_client_only_channel_closing == true) &&
-               (channel_mgr__l_cli_con == true))) {
+            if (channel_mgr__all_channel_closing == true ||
+               (channel_mgr__all_client_only_channel_closing == true &&
+               channel_mgr__l_cli_con == true)) {
                channel_mgr_1__is_channel_connected(channel_mgr__l_channel,
                   &channel_mgr__l_any_channel_connected_or_connecting);
             }
          }
          channel_mgr_it__init_iter_channel_config_idx(&channel_mgr__l_continue);
-         while ((channel_mgr__l_continue == true) &&
-            (channel_mgr__l_any_channel_connected_or_connecting == false)) {
+         while (channel_mgr__l_continue == true &&
+            channel_mgr__l_any_channel_connected_or_connecting == false) {
             channel_mgr_it__continue_iter_channel_config_idx(&channel_mgr__l_continue,
                &channel_mgr__l_config_idx);
             channel_mgr_1__is_cli_channel_connecting(channel_mgr__l_config_idx,
@@ -127,8 +127,8 @@ void channel_mgr__l_is_new_sc_connection_allowed(
       channel_mgr_1__get_card_channel_used(&channel_mgr__l_card_used);
       constants__get_card_t_channel(&channel_mgr__l_card_channel);
       if (channel_mgr__l_card_used != channel_mgr__l_card_channel) {
-         if ((channel_mgr__l_card_used < constants__c_max_channels_connected) ||
-            (channel_mgr__is_one_sc_auto_closing == true)) {
+         if (channel_mgr__l_card_used < constants__c_max_channels_connected ||
+            channel_mgr__is_one_sc_auto_closing == true) {
             *channel_mgr__l_allowed_new_sc = true;
          }
       }
@@ -195,9 +195,9 @@ void channel_mgr__srv_new_secure_channel(
          &channel_mgr__l_channel);
       channel_mgr__l_is_new_sc_connection_allowed(channel_mgr__is_one_sc_auto_closing,
          &channel_mgr__l_allowed_new_sc);
-      if (((channel_mgr__l_con == false) &&
-         (channel_mgr__l_dom == false)) &&
-         (channel_mgr__l_allowed_new_sc == true)) {
+      if (channel_mgr__l_con == false &&
+         channel_mgr__l_dom == false &&
+         channel_mgr__l_allowed_new_sc == true) {
          time_reference_bs__get_current_TimeReference(&channel_mgr__l_current_time);
          channel_mgr_1__add_channel_connected(channel_mgr__channel,
             channel_mgr__l_current_time);
@@ -286,9 +286,9 @@ void channel_mgr__close_all_channel(
             &channel_mgr__l_connected);
          channel_mgr_1__is_client_channel(channel_mgr__l_channel,
             &channel_mgr__l_cli_con);
-         if ((channel_mgr__l_connected == true) &&
-            ((channel_mgr__p_clientOnly == false) ||
-            (channel_mgr__l_cli_con == true))) {
+         if (channel_mgr__l_connected == true &&
+            (channel_mgr__p_clientOnly == false ||
+            channel_mgr__l_cli_con == true)) {
             channel_mgr__l_any_channel_closing_or_connecting = true;
             channel_mgr__l_close_secure_channel(channel_mgr__l_channel,
                constants_statuscodes_bs__e_sc_bad_secure_channel_closed,
@@ -307,10 +307,10 @@ void channel_mgr__close_all_channel(
                constants__c_no_application_context);
          }
       }
-      channel_mgr__all_channel_closing = ((channel_mgr__p_clientOnly == false) &&
-         (channel_mgr__l_any_channel_closing_or_connecting == true));
-      channel_mgr__all_client_only_channel_closing = ((channel_mgr__p_clientOnly == true) &&
-         (channel_mgr__l_any_channel_closing_or_connecting == true));
+      channel_mgr__all_channel_closing = channel_mgr__p_clientOnly == false &&
+         channel_mgr__l_any_channel_closing_or_connecting == true;
+      channel_mgr__all_client_only_channel_closing = channel_mgr__p_clientOnly == true &&
+         channel_mgr__l_any_channel_closing_or_connecting == true;
       *channel_mgr__bres = channel_mgr__l_any_channel_closing_or_connecting;
    }
 }
@@ -359,8 +359,8 @@ void channel_mgr__cli_set_connected_channel(
          &channel_mgr__l_is_channel_disconnecting);
       channel_mgr_1__is_channel_connected(channel_mgr__channel,
          &channel_mgr__l_is_channel_connected);
-      if ((channel_mgr__l_is_channel_connecting == true) &&
-         (channel_mgr__l_is_channel_connected == false)) {
+      if (channel_mgr__l_is_channel_connecting == true &&
+         channel_mgr__l_is_channel_connected == false) {
          channel_mgr_1__remove_cli_channel_connecting(channel_mgr__config_idx);
          time_reference_bs__get_current_TimeReference(&channel_mgr__l_current_time);
          channel_mgr_1__add_channel_connected(channel_mgr__channel,
@@ -411,7 +411,7 @@ void channel_mgr__is_auto_close_channel_active(
       
       channel_mgr_1__get_card_channel_used(&channel_mgr__l_card_used);
       constants__get_card_t_channel(&channel_mgr__l_card_channel);
-      *channel_mgr__p_auto_closed_active = (channel_mgr__l_card_used >= constants__c_max_channels_connected);
+      *channel_mgr__p_auto_closed_active = channel_mgr__l_card_used >= constants__c_max_channels_connected;
    }
 }
 
@@ -457,7 +457,7 @@ void channel_mgr__is_create_session_locked(
       
       channel_mgr_1__get_create_session_locked_1(channel_mgr__p_channel,
          &channel_mgr__l_target_timeref);
-      *channel_mgr__p_session_locked = (channel_mgr__l_target_timeref != constants__c_timeref_indet);
+      *channel_mgr__p_session_locked = channel_mgr__l_target_timeref != constants__c_timeref_indet;
    }
 }
 

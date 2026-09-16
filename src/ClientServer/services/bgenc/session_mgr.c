@@ -21,9 +21,9 @@
 
  File Name            : session_mgr.c
 
- Date                 : 08/07/2026 11:25:10
+ Date                 : 16/09/2026 08:15:32
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -110,16 +110,16 @@ void session_mgr__local_client_activate_sessions_on_SC_connection(
             session_core__getall_orphaned(session_mgr__l_session,
                &session_mgr__l_dom,
                &session_mgr__l_channel_config_idx);
-            if ((session_mgr__l_dom == true) &&
-               (session_mgr__l_channel_config_idx == session_mgr__channel_config_idx)) {
+            if (session_mgr__l_dom == true &&
+               session_mgr__l_channel_config_idx == session_mgr__channel_config_idx) {
                session_core__client_gen_activate_orphaned_session_internal_event(session_mgr__l_session,
                   session_mgr__channel_config_idx);
             }
             session_core__getall_to_create(session_mgr__l_session,
                &session_mgr__l_dom,
                &session_mgr__l_channel_config_idx);
-            if ((session_mgr__l_dom == true) &&
-               (session_mgr__l_channel_config_idx == session_mgr__channel_config_idx)) {
+            if (session_mgr__l_dom == true &&
+               session_mgr__l_channel_config_idx == session_mgr__channel_config_idx) {
                session_core__reset_session_to_create(session_mgr__l_session);
                session_core__client_gen_create_session_internal_event(session_mgr__l_session,
                   session_mgr__channel_config_idx);
@@ -145,16 +145,16 @@ void session_mgr__local_client_close_sessions_on_SC_final_connection_failure(
             session_core__getall_orphaned(session_mgr__l_session,
                &session_mgr__l_dom,
                &session_mgr__l_channel_config_idx);
-            if ((session_mgr__l_dom == true) &&
-               (session_mgr__l_channel_config_idx == session_mgr__channel_config_idx)) {
+            if (session_mgr__l_dom == true &&
+               session_mgr__l_channel_config_idx == session_mgr__channel_config_idx) {
                session_mgr__local_client_close_session(session_mgr__l_session,
                   constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
             }
             session_core__getall_to_create(session_mgr__l_session,
                &session_mgr__l_dom,
                &session_mgr__l_channel_config_idx);
-            if ((session_mgr__l_dom == true) &&
-               (session_mgr__l_channel_config_idx == session_mgr__channel_config_idx)) {
+            if (session_mgr__l_dom == true &&
+               session_mgr__l_channel_config_idx == session_mgr__channel_config_idx) {
                session_mgr__local_client_close_session(session_mgr__l_session,
                   constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
             }
@@ -207,8 +207,8 @@ void session_mgr__local_client_validate_and_drop_session_req_session_handle(
             &session_mgr__l_session_state);
          session_core__get_session_channel(session_mgr__l_session,
             &session_mgr__l_session_channel);
-         if ((session_mgr__l_session_state == constants__e_session_userActivated) &&
-            (session_mgr__l_session_channel == session_mgr__channel)) {
+         if (session_mgr__l_session_state == constants__e_session_userActivated &&
+            session_mgr__l_session_channel == session_mgr__channel) {
             session_core__is_session_valid_for_service(session_mgr__channel,
                session_mgr__l_session,
                session_mgr__bres);
@@ -249,8 +249,8 @@ void session_mgr__client_receive_session_resp(
          &session_mgr__l_session_state);
       message_in_bs__read_msg_resp_header_service_status(session_mgr__resp_header,
          &session_mgr__l_resp_status);
-      if ((session_mgr__l_session_state != constants__e_session_closed) &&
-         (session_mgr__l_resp_status == constants_statuscodes_bs__e_sc_ok)) {
+      if (session_mgr__l_session_state != constants__e_session_closed &&
+         session_mgr__l_resp_status == constants_statuscodes_bs__e_sc_ok) {
          switch (session_mgr__resp_typ) {
          case constants__e_msg_session_create_resp:
             if (session_mgr__l_session_state == constants__e_session_creating) {
@@ -288,8 +288,8 @@ void session_mgr__client_receive_session_resp(
             }
             break;
          case constants__e_msg_session_activate_resp:
-            if ((session_mgr__l_session_state == constants__e_session_userActivating) ||
-               (session_mgr__l_session_state == constants__e_session_scActivating)) {
+            if (session_mgr__l_session_state == constants__e_session_userActivating ||
+               session_mgr__l_session_state == constants__e_session_scActivating) {
                session_core__get_session_channel(*session_mgr__session,
                   &session_mgr__l_session_channel);
                if (session_mgr__l_session_channel == session_mgr__channel) {
@@ -418,9 +418,9 @@ void session_mgr__server_receive_session_req(
             &session_mgr__l_session_creation_locked);
          session_core__get_channel_nb_sessions(session_mgr__channel,
             &session_mgr__l_nb_sessions_on_SC);
-         if (((session_mgr__l_has_user_token_policy_available == true) &&
-            (session_mgr__l_session_creation_locked == false)) &&
-            (session_mgr__l_nb_sessions_on_SC < constants__c_max_sessions_per_channel)) {
+         if (session_mgr__l_has_user_token_policy_available == true &&
+            session_mgr__l_session_creation_locked == false &&
+            session_mgr__l_nb_sessions_on_SC < constants__c_max_sessions_per_channel) {
             session_core__may_close_unactivated_session();
             session_core__server_create_session_req_and_resp_sm(session_mgr__channel,
                session_mgr__req_msg,
@@ -478,9 +478,9 @@ void session_mgr__server_receive_session_req(
                &session_mgr__l_client_cert_tb);
             session_core__get_server_session_name(*session_mgr__session,
                &session_mgr__l_session_name);
-            if (((session_mgr__l_session_state == constants__e_session_created) ||
-               (session_mgr__l_session_state == constants__e_session_userActivated)) ||
-               (session_mgr__l_session_state == constants__e_session_scOrphaned)) {
+            if (session_mgr__l_session_state == constants__e_session_created ||
+               session_mgr__l_session_state == constants__e_session_userActivated ||
+               session_mgr__l_session_state == constants__e_session_scOrphaned) {
                message_in_bs__read_activate_req_msg_identity_token(session_mgr__req_msg,
                   &session_mgr__l_is_valid_user_token,
                   &session_mgr__l_user_token,
@@ -548,9 +548,9 @@ void session_mgr__server_receive_session_req(
          session_core__get_session_state_or_closed(*session_mgr__session,
             &session_mgr__l_session_state);
          if (session_mgr__l_valid_session == true) {
-            if (((session_mgr__l_session_state == constants__e_session_created) ||
-               (session_mgr__l_session_state == constants__e_session_userActivating)) ||
-               (session_mgr__l_session_state == constants__e_session_userActivated)) {
+            if (session_mgr__l_session_state == constants__e_session_created ||
+               session_mgr__l_session_state == constants__e_session_userActivating ||
+               session_mgr__l_session_state == constants__e_session_userActivated) {
                if (session_mgr__l_session_state != constants__e_session_created) {
                   session_core__get_session_user_server(*session_mgr__session,
                      &session_mgr__l_user);
@@ -646,7 +646,7 @@ void session_mgr__client_validate_session_service_req_failed(
       if (*session_mgr__bres == true) {
          session_core__get_session_state_or_closed(session_mgr__l_session,
             &session_mgr__l_session_state);
-         *session_mgr__bres = (session_mgr__l_session_state != constants__e_session_closed);
+         *session_mgr__bres = session_mgr__l_session_state != constants__e_session_closed;
       }
    }
 }
@@ -714,8 +714,8 @@ void session_mgr__server_validate_session_service_req(
       if (session_mgr__l_valid_session == true) {
          session_core__get_session_channel(session_mgr__l_session,
             &session_mgr__l_session_channel);
-         if ((session_mgr__l_session_state == constants__e_session_userActivated) &&
-            (session_mgr__l_session_channel == session_mgr__channel)) {
+         if (session_mgr__l_session_state == constants__e_session_userActivated &&
+            session_mgr__l_session_channel == session_mgr__channel) {
             session_core__is_session_valid_for_service(session_mgr__channel,
                session_mgr__l_session,
                session_mgr__is_valid_res);
@@ -912,8 +912,8 @@ void session_mgr__client_user_activate_session_req(
       if (session_mgr__l_valid_session == true) {
          session_core__get_session_state_or_closed(session_mgr__session,
             &session_mgr__l_session_state);
-         if ((session_mgr__l_session_state == constants__e_session_created) ||
-            (session_mgr__l_session_state == constants__e_session_userActivated)) {
+         if (session_mgr__l_session_state == constants__e_session_created ||
+            session_mgr__l_session_state == constants__e_session_userActivated) {
             session_core__client_user_activate_session_req_sm(session_mgr__session,
                session_mgr__p_user_token,
                session_mgr__activate_req_msg,
@@ -957,8 +957,8 @@ void session_mgr__client_sc_activate_session_req(
       if (session_mgr__l_valid_session == true) {
          session_core__get_session_state_or_closed(session_mgr__session,
             &session_mgr__l_session_state);
-         if ((session_mgr__l_session_state == constants__e_session_scOrphaned) ||
-            (session_mgr__l_session_state == constants__e_session_userActivated)) {
+         if (session_mgr__l_session_state == constants__e_session_scOrphaned ||
+            session_mgr__l_session_state == constants__e_session_userActivated) {
             session_core__client_sc_activate_session_req_sm(session_mgr__session,
                session_mgr__channel,
                session_mgr__activate_req_msg,
@@ -1004,9 +1004,9 @@ void session_mgr__client_close_session_req(
       if (session_mgr__l_valid_session == true) {
          session_core__get_session_state_or_closed(session_mgr__session,
             &session_mgr__l_session_state);
-         if (((session_mgr__l_session_state == constants__e_session_created) ||
-            (session_mgr__l_session_state == constants__e_session_userActivating)) ||
-            (session_mgr__l_session_state == constants__e_session_userActivated)) {
+         if (session_mgr__l_session_state == constants__e_session_created ||
+            session_mgr__l_session_state == constants__e_session_userActivating ||
+            session_mgr__l_session_state == constants__e_session_userActivated) {
             session_core__client_close_session_req_sm(session_mgr__session,
                session_mgr__close_req_msg,
                &session_mgr__l_ret,

@@ -21,9 +21,9 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 19/05/2024 23:40:51
+ Date                 : 16/09/2026 08:15:07
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -48,8 +48,8 @@ void browse_treatment__min_nb_result_refs(
    {
       t_entier4 browse_treatment__l_maxTargetRef;
       
-      if ((0 == browse_treatment__p_maxTargetRef) ||
-         (browse_treatment__p_maxTargetRef >= constants__k_n_BrowseTarget_max)) {
+      if (0 == browse_treatment__p_maxTargetRef ||
+         browse_treatment__p_maxTargetRef >= constants__k_n_BrowseTarget_max) {
          browse_treatment__l_maxTargetRef = constants__k_n_BrowseTarget_max;
       }
       else {
@@ -261,8 +261,8 @@ void browse_treatment__fill_browse_result(
          browse_treatment__p_startIndex,
          &browse_treatment__l_continue_ref);
       *browse_treatment__p_nextIndex = browse_treatment__p_startIndex;
-      while ((browse_treatment__l_continue_ref == true) &&
-         (browse_treatment__l_continue_bri == true)) {
+      while (browse_treatment__l_continue_ref == true &&
+         browse_treatment__l_continue_bri == true) {
          browse_treatment_target_it__continue_iter_reference(&browse_treatment__l_continue_ref,
             &browse_treatment__l_ref,
             browse_treatment__p_nextIndex);
@@ -276,9 +276,9 @@ void browse_treatment__fill_browse_result(
             &browse_treatment__l_continue_bri,
             &browse_treatment__l_alloc_failed);
       }
-      *browse_treatment__p_toContinue = (((browse_treatment__l_continue_ref == true) &&
-         (browse_treatment__l_continue_bri == false)) &&
-         (browse_treatment__l_alloc_failed == false));
+      *browse_treatment__p_toContinue = browse_treatment__l_continue_ref == true &&
+         browse_treatment__l_continue_bri == false &&
+         browse_treatment__l_alloc_failed == false;
       if (browse_treatment__l_alloc_failed == true) {
          *browse_treatment__p_serviceStatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
       }
@@ -414,8 +414,8 @@ void browse_treatment__compute_browse_result(
          &browse_treatment__l_is_src_node_valid,
          &browse_treatment__l_nb_target,
          &browse_treatment__l_src_node);
-      if ((browse_treatment__l_is_ref_type_id_valid == true) &&
-         (browse_treatment__l_is_src_node_valid == true)) {
+      if (browse_treatment__l_is_ref_type_id_valid == true &&
+         browse_treatment__l_is_src_node_valid == true) {
          browse_treatment__min_nb_result_refs(browse_treatment__l_maxTargetRef,
             browse_treatment__l_nb_target,
             &browse_treatment__l_max_nb_results);
@@ -440,8 +440,8 @@ void browse_treatment__compute_browse_result(
                   browse_treatment_continuation_points__has_continuation_point(browse_treatment__l_session,
                      &browse_treatment__l_has_continuation_point,
                      &browse_treatment__l_prev_cp_id);
-                  if ((browse_treatment__l_autoReleaseCP == true) &&
-                     (browse_treatment__l_has_continuation_point == true)) {
+                  if (browse_treatment__l_autoReleaseCP == true &&
+                     browse_treatment__l_has_continuation_point == true) {
                      browse_treatment_continuation_points__release_continuation_point(browse_treatment__l_session,
                         browse_treatment__l_prev_cp_id,
                         &browse_treatment__l_cp_bres);

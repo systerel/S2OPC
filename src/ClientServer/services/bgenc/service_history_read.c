@@ -21,9 +21,9 @@
 
  File Name            : service_history_read.c
 
- Date                 : 22/10/2025 10:33:16
+ Date                 : 16/09/2026 08:15:24
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -96,8 +96,8 @@ void service_history_read__l_fill_response_hist_read_1(
                      &service_history_read__l_contPoint,
                      &service_history_read__l_nb_dataValues,
                      &service_history_read__l_dataValues);
-                  if ((service_history_read__p_TsSrvRequired == true) &&
-                     (service_history_read__l_sc == constants_statuscodes_bs__e_sc_ok)) {
+                  if (service_history_read__p_TsSrvRequired == true &&
+                     service_history_read__l_sc == constants_statuscodes_bs__e_sc_ok) {
                      history_read_treatment_bs__set_ts_srv_dataValues(service_history_read__l_nb_dataValues,
                         service_history_read__l_dataValues,
                         service_history_read__p_currentTs);

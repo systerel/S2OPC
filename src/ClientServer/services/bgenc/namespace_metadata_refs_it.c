@@ -21,9 +21,9 @@
 
  File Name            : namespace_metadata_refs_it.c
 
- Date                 : 14/08/2024 16:16:28
+ Date                 : 16/09/2026 08:15:18
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -58,7 +58,7 @@ void namespace_metadata_refs_it__init_iter_namespacemetadata_refs(
    namespace_metadata_refs_it__RefIndex = 1;
    address_space_bs__get_Node_RefIndexEnd(namespace_metadata_refs_it__p_node,
       &namespace_metadata_refs_it__RefIndexEnd);
-   *namespace_metadata_refs_it__p_continue = (namespace_metadata_refs_it__RefIndexEnd >= namespace_metadata_refs_it__RefIndex);
+   *namespace_metadata_refs_it__p_continue = namespace_metadata_refs_it__RefIndexEnd >= namespace_metadata_refs_it__RefIndex;
 }
 
 void namespace_metadata_refs_it__continue_iter_namespacemetadata_refs(
@@ -69,6 +69,6 @@ void namespace_metadata_refs_it__continue_iter_namespacemetadata_refs(
       namespace_metadata_refs_it__p_ref);
    namespace_metadata_refs_it__RefIndex = namespace_metadata_refs_it__RefIndex +
       1;
-   *namespace_metadata_refs_it__p_continue = (namespace_metadata_refs_it__RefIndex <= namespace_metadata_refs_it__RefIndexEnd);
+   *namespace_metadata_refs_it__p_continue = namespace_metadata_refs_it__RefIndex <= namespace_metadata_refs_it__RefIndexEnd;
 }
 

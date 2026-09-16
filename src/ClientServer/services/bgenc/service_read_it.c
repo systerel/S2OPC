@@ -21,9 +21,9 @@
 
  File Name            : service_read_it.c
 
- Date                 : 04/08/2022 14:53:12
+ Date                 : 16/09/2026 08:15:26
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -51,7 +51,7 @@ void service_read_it__init_iter_read_request(
    const t_entier4 service_read_it__nb_req,
    t_bool * const service_read_it__continue) {
    service_read_it__rreqs_i = service_read_it__nb_req;
-   *service_read_it__continue = (0 < service_read_it__nb_req);
+   *service_read_it__continue = 0 < service_read_it__nb_req;
 }
 
 void service_read_it__continue_iter_read_request(
@@ -61,6 +61,6 @@ void service_read_it__continue_iter_read_request(
       service_read_it__rvi);
    service_read_it__rreqs_i = service_read_it__rreqs_i -
       1;
-   *service_read_it__continue = (0 < service_read_it__rreqs_i);
+   *service_read_it__continue = 0 < service_read_it__rreqs_i;
 }
 

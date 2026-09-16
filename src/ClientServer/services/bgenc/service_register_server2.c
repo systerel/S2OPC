@@ -21,9 +21,9 @@
 
  File Name            : service_register_server2.c
 
- Date                 : 03/03/2026 14:59:11
+ Date                 : 16/09/2026 08:15:27
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -63,8 +63,8 @@ void service_register_server2__local_need_register_server2_update(
       service_register_server2_set_bs__init_iter_registered_server2_set(&service_register_server2__l_continue);
       service_set_discovery_server_data_bs__get_RegisteredServer_ServerUri(service_register_server2__p_registered_server,
          &service_register_server2__l_newServerUri);
-      while ((service_register_server2__l_continue == true) &&
-         (*service_register_server2__hasServerUri == false)) {
+      while (service_register_server2__l_continue == true &&
+         *service_register_server2__hasServerUri == false) {
          service_register_server2_set_bs__continue_iter_registered_server2_set(&service_register_server2__l_continue,
             &service_register_server2__l_registeredServerInfo);
          service_register_server2_set_bs__get_registered_server2_registered_server(service_register_server2__l_registeredServerInfo,

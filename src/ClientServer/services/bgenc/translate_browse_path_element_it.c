@@ -21,9 +21,9 @@
 
  File Name            : translate_browse_path_element_it.c
 
- Date                 : 04/08/2022 14:53:23
+ Date                 : 16/09/2026 08:15:38
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -58,7 +58,7 @@ void translate_browse_path_element_it__init_iter_relativePath(
       &translate_browse_path_element_it__nb_elements_to_iterate);
    translate_browse_path_element_it__current_element_index = 1;
    translate_browse_path_element_it__relativePath = translate_browse_path_element_it__p_relativePath;
-   *translate_browse_path_element_it__p_continue = (translate_browse_path_element_it__current_element_index <= translate_browse_path_element_it__nb_elements_to_iterate);
+   *translate_browse_path_element_it__p_continue = translate_browse_path_element_it__current_element_index <= translate_browse_path_element_it__nb_elements_to_iterate;
 }
 
 void translate_browse_path_element_it__continue_iter_relativePath(
@@ -71,6 +71,6 @@ void translate_browse_path_element_it__continue_iter_relativePath(
       translate_browse_path_element_it__p_relativePathElt);
    translate_browse_path_element_it__current_element_index = translate_browse_path_element_it__current_element_index +
       1;
-   *translate_browse_path_element_it__p_continue = (translate_browse_path_element_it__current_element_index <= translate_browse_path_element_it__nb_elements_to_iterate);
+   *translate_browse_path_element_it__p_continue = translate_browse_path_element_it__current_element_index <= translate_browse_path_element_it__nb_elements_to_iterate;
 }
 

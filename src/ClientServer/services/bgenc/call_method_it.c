@@ -21,9 +21,9 @@
 
  File Name            : call_method_it.c
 
- Date                 : 04/08/2022 14:53:03
+ Date                 : 16/09/2026 08:15:08
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -55,7 +55,7 @@ void call_method_it__init_iter_callMethods(
    msg_call_method_bs__read_nb_CallMethods(call_method_it__p_req_msg,
       &call_method_it__nb_callMethods_to_iterate);
    call_method_it__current_callMethod_idx = call_method_it__nb_callMethods_to_iterate;
-   *call_method_it__p_continue = (0 < call_method_it__current_callMethod_idx);
+   *call_method_it__p_continue = 0 < call_method_it__current_callMethod_idx;
 }
 
 void call_method_it__continue_iter_callMethod(
@@ -65,6 +65,6 @@ void call_method_it__continue_iter_callMethod(
       call_method_it__p_callMethod);
    call_method_it__current_callMethod_idx = call_method_it__current_callMethod_idx -
       1;
-   *call_method_it__p_continue = (0 < call_method_it__current_callMethod_idx);
+   *call_method_it__p_continue = 0 < call_method_it__current_callMethod_idx;
 }
 

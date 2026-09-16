@@ -21,9 +21,9 @@
 
  File Name            : role_permissions_value_it.c
 
- Date                 : 30/10/2024 16:34:23
+ Date                 : 16/09/2026 08:15:21
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -54,7 +54,7 @@ void role_permissions_value_it__init_iter_rolePermissions(
    t_bool * const role_permissions_value_it__p_continue) {
    role_permissions_value_it__nb_rolePermissions_i = role_permissions_value_it__p_nb_rolePermissions;
    role_permissions_value_it__currentRolePermissionIdx_i = 0;
-   *role_permissions_value_it__p_continue = (0 < role_permissions_value_it__p_nb_rolePermissions);
+   *role_permissions_value_it__p_continue = 0 < role_permissions_value_it__p_nb_rolePermissions;
 }
 
 void role_permissions_value_it__continue_iter_rolePermissions(
@@ -63,6 +63,6 @@ void role_permissions_value_it__continue_iter_rolePermissions(
    role_permissions_value_it__currentRolePermissionIdx_i = role_permissions_value_it__currentRolePermissionIdx_i +
       1;
    *role_permissions_value_it__p_rolePermissionIdx = role_permissions_value_it__currentRolePermissionIdx_i;
-   *role_permissions_value_it__p_continue = (role_permissions_value_it__currentRolePermissionIdx_i < role_permissions_value_it__nb_rolePermissions_i);
+   *role_permissions_value_it__p_continue = role_permissions_value_it__currentRolePermissionIdx_i < role_permissions_value_it__nb_rolePermissions_i;
 }
 

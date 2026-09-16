@@ -21,9 +21,9 @@
 
  File Name            : monitored_item_event_filter_where_it.c
 
- Date                 : 10/04/2024 13:31:22
+ Date                 : 16/09/2026 08:15:13
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -54,7 +54,7 @@ void monitored_item_event_filter_where_it__init_iter_eventFilterWhereElt(
    t_bool * const monitored_item_event_filter_where_it__p_continue) {
    monitored_item_event_filter_where_it__nb_eventFilterWhereElts_i = monitored_item_event_filter_where_it__p_nb_eventFilterWhereElts;
    monitored_item_event_filter_where_it__currentEventFilterWhereEltIdx_i = 0;
-   *monitored_item_event_filter_where_it__p_continue = (0 < monitored_item_event_filter_where_it__p_nb_eventFilterWhereElts);
+   *monitored_item_event_filter_where_it__p_continue = 0 < monitored_item_event_filter_where_it__p_nb_eventFilterWhereElts;
 }
 
 void monitored_item_event_filter_where_it__continue_iter_eventFilterWhereEltIdx(
@@ -63,6 +63,6 @@ void monitored_item_event_filter_where_it__continue_iter_eventFilterWhereEltIdx(
    monitored_item_event_filter_where_it__currentEventFilterWhereEltIdx_i = monitored_item_event_filter_where_it__currentEventFilterWhereEltIdx_i +
       1;
    *monitored_item_event_filter_where_it__p_eventFilterWhereEltIdx = monitored_item_event_filter_where_it__currentEventFilterWhereEltIdx_i;
-   *monitored_item_event_filter_where_it__p_continue = (monitored_item_event_filter_where_it__currentEventFilterWhereEltIdx_i < monitored_item_event_filter_where_it__nb_eventFilterWhereElts_i);
+   *monitored_item_event_filter_where_it__p_continue = monitored_item_event_filter_where_it__currentEventFilterWhereEltIdx_i < monitored_item_event_filter_where_it__nb_eventFilterWhereElts_i;
 }
 

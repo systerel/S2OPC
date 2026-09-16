@@ -21,9 +21,9 @@
 
  File Name            : msg_read_request.c
 
- Date                 : 04/08/2022 14:53:07
+ Date                 : 16/09/2026 08:15:15
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -55,8 +55,8 @@ void msg_read_request__check_ReadRequest(
    constants_statuscodes_bs__t_StatusCode_i * const msg_read_request__p_statusCode) {
    msg_read_request_bs__read_req_nb_ReadValue(msg_read_request__p_msg,
       msg_read_request__p_nb_ReadValue);
-   *msg_read_request__p_read_ok = ((0 < *msg_read_request__p_nb_ReadValue) &&
-      (*msg_read_request__p_nb_ReadValue <= constants__k_n_read_resp_max));
+   *msg_read_request__p_read_ok = 0 < *msg_read_request__p_nb_ReadValue &&
+      *msg_read_request__p_nb_ReadValue <= constants__k_n_read_resp_max;
    *msg_read_request__p_tsToReturn = constants__c_TimestampsToReturn_indet;
    *msg_read_request__p_statusCode = constants_statuscodes_bs__c_StatusCode_indet;
    if (*msg_read_request__p_read_ok == true) {
@@ -114,10 +114,10 @@ void msg_read_request__getall_ReadValue_NodeId_AttributeId(
          msg_read_request__p_rvi,
          &msg_read_request__l_is_known_data,
          &msg_read_request__l_data_encoding);
-      if ((*msg_read_request__p_sc == constants_statuscodes_bs__e_sc_ok) &&
-         (msg_read_request__l_data_encoding != constants__c_QualifiedName_indet)) {
-         if ((*msg_read_request__p_aid != constants__e_aid_Value) ||
-            (msg_read_request__l_is_known_data == false)) {
+      if (*msg_read_request__p_sc == constants_statuscodes_bs__e_sc_ok &&
+         msg_read_request__l_data_encoding != constants__c_QualifiedName_indet) {
+         if (*msg_read_request__p_aid != constants__e_aid_Value ||
+            msg_read_request__l_is_known_data == false) {
             *msg_read_request__p_sc = constants_statuscodes_bs__e_sc_bad_data_encoding_invalid;
             *msg_read_request__p_aid = constants__c_AttributeId_indet;
          }

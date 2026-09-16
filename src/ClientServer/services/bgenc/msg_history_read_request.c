@@ -21,9 +21,9 @@
 
  File Name            : msg_history_read_request.c
 
- Date                 : 27/08/2025 14:29:43
+ Date                 : 16/09/2026 08:15:14
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -60,8 +60,8 @@ void msg_history_read_request__check_history_read_request(
       *msg_history_read_request__p_ContinuationPoint = false;
       msg_history_read_request_bs__get_msg_hist_read_req_nb_nodes_to_read(msg_history_read_request__p_req_msg,
          msg_history_read_request__p_nb_nodes_to_read);
-      msg_history_read_request__l_read_ok = ((0 < *msg_history_read_request__p_nb_nodes_to_read) &&
-         (*msg_history_read_request__p_nb_nodes_to_read <= constants__k_n_histRead_max));
+      msg_history_read_request__l_read_ok = 0 < *msg_history_read_request__p_nb_nodes_to_read &&
+         *msg_history_read_request__p_nb_nodes_to_read <= constants__k_n_histRead_max;
       if (msg_history_read_request__l_read_ok == true) {
          msg_history_read_request_bs__getall_msg_hist_read_req_read_details(msg_history_read_request__p_req_msg,
             msg_history_read_request__p_StatusCode,
@@ -69,11 +69,11 @@ void msg_history_read_request__check_history_read_request(
          if (*msg_history_read_request__p_StatusCode == constants_statuscodes_bs__e_sc_ok) {
             msg_history_read_request_bs__get_msg_hist_read_req_TSToReturn(msg_history_read_request__p_req_msg,
                &msg_history_read_request__l_TSToReturn);
-            if (((msg_history_read_request__l_TSToReturn == constants__e_ttr_source) ||
-               (msg_history_read_request__l_TSToReturn == constants__e_ttr_server)) ||
-               (msg_history_read_request__l_TSToReturn == constants__e_ttr_both)) {
-               *msg_history_read_request__p_TsSrcRequired = (msg_history_read_request__l_TSToReturn != constants__e_ttr_server);
-               *msg_history_read_request__p_TsSrvRequired = (msg_history_read_request__l_TSToReturn != constants__e_ttr_source);
+            if (msg_history_read_request__l_TSToReturn == constants__e_ttr_source ||
+               msg_history_read_request__l_TSToReturn == constants__e_ttr_server ||
+               msg_history_read_request__l_TSToReturn == constants__e_ttr_both) {
+               *msg_history_read_request__p_TsSrcRequired = msg_history_read_request__l_TSToReturn != constants__e_ttr_server;
+               *msg_history_read_request__p_TsSrvRequired = msg_history_read_request__l_TSToReturn != constants__e_ttr_source;
                msg_history_read_request_bs__get_msg_hist_read_req_release_CP(msg_history_read_request__p_req_msg,
                   msg_history_read_request__p_ContinuationPoint);
                *msg_history_read_request__p_StatusCode = constants_statuscodes_bs__e_sc_ok;

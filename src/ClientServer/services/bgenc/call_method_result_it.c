@@ -21,9 +21,9 @@
 
  File Name            : call_method_result_it.c
 
- Date                 : 04/08/2022 14:53:04
+ Date                 : 16/09/2026 08:15:09
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -54,7 +54,7 @@ void call_method_result_it__init_iter_callMethodResultIdx(
    t_bool * const call_method_result_it__p_continue) {
    call_method_result_it__nb_callMethodResultIdx_max_refs_i = call_method_result_it__p_nb_callMethodResultIdx_max_refs;
    call_method_result_it__currentCallMethodResultIdx_i = 0;
-   *call_method_result_it__p_continue = (0 < call_method_result_it__p_nb_callMethodResultIdx_max_refs);
+   *call_method_result_it__p_continue = 0 < call_method_result_it__p_nb_callMethodResultIdx_max_refs;
 }
 
 void call_method_result_it__continue_iter_callMethodResultIdx(
@@ -63,6 +63,6 @@ void call_method_result_it__continue_iter_callMethodResultIdx(
    call_method_result_it__currentCallMethodResultIdx_i = call_method_result_it__currentCallMethodResultIdx_i +
       1;
    *call_method_result_it__p_callMethodResultIdx = call_method_result_it__currentCallMethodResultIdx_i;
-   *call_method_result_it__p_continue = (call_method_result_it__currentCallMethodResultIdx_i < call_method_result_it__nb_callMethodResultIdx_max_refs_i);
+   *call_method_result_it__p_continue = call_method_result_it__currentCallMethodResultIdx_i < call_method_result_it__nb_callMethodResultIdx_max_refs_i;
 }
 

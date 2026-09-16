@@ -21,9 +21,9 @@
 
  File Name            : browse_treatment_continuation_points_session_it.c
 
- Date                 : 04/08/2022 14:53:01
+ Date                 : 16/09/2026 08:15:07
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -50,7 +50,7 @@ void browse_treatment_continuation_points_session_it__INITIALISATION(void) {
 void browse_treatment_continuation_points_session_it__init_iter_session(
    t_bool * const browse_treatment_continuation_points_session_it__p_continue) {
    constants__get_card_t_session(&browse_treatment_continuation_points_session_it__session_i);
-   *browse_treatment_continuation_points_session_it__p_continue = (1 <= browse_treatment_continuation_points_session_it__session_i);
+   *browse_treatment_continuation_points_session_it__p_continue = 1 <= browse_treatment_continuation_points_session_it__session_i;
 }
 
 void browse_treatment_continuation_points_session_it__continue_iter_session(
@@ -60,6 +60,6 @@ void browse_treatment_continuation_points_session_it__continue_iter_session(
       browse_treatment_continuation_points_session_it__p_session);
    browse_treatment_continuation_points_session_it__session_i = browse_treatment_continuation_points_session_it__session_i -
       1;
-   *browse_treatment_continuation_points_session_it__p_continue = (1 <= browse_treatment_continuation_points_session_it__session_i);
+   *browse_treatment_continuation_points_session_it__p_continue = 1 <= browse_treatment_continuation_points_session_it__session_i;
 }
 

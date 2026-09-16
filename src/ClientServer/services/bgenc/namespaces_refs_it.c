@@ -21,9 +21,9 @@
 
  File Name            : namespaces_refs_it.c
 
- Date                 : 14/08/2024 16:16:28
+ Date                 : 16/09/2026 08:15:19
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -58,7 +58,7 @@ void namespaces_refs_it__init_iter_namespaces_refs(
    namespaces_refs_it__RefIndex = 1;
    address_space_bs__get_Node_RefIndexEnd(namespaces_refs_it__p_node,
       &namespaces_refs_it__RefIndexEnd);
-   *namespaces_refs_it__p_continue = (namespaces_refs_it__RefIndexEnd >= namespaces_refs_it__RefIndex);
+   *namespaces_refs_it__p_continue = namespaces_refs_it__RefIndexEnd >= namespaces_refs_it__RefIndex;
 }
 
 void namespaces_refs_it__continue_iter_namespaces_refs(
@@ -69,6 +69,6 @@ void namespaces_refs_it__continue_iter_namespaces_refs(
       namespaces_refs_it__p_ref);
    namespaces_refs_it__RefIndex = namespaces_refs_it__RefIndex +
       1;
-   *namespaces_refs_it__p_continue = (namespaces_refs_it__RefIndex <= namespaces_refs_it__RefIndexEnd);
+   *namespaces_refs_it__p_continue = namespaces_refs_it__RefIndex <= namespaces_refs_it__RefIndexEnd;
 }
 

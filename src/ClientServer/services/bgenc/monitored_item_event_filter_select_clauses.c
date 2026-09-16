@@ -21,9 +21,9 @@
 
  File Name            : monitored_item_event_filter_select_clauses.c
 
- Date                 : 03/05/2024 09:44:47
+ Date                 : 16/09/2026 08:15:12
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -111,8 +111,8 @@ void monitored_item_event_filter_select_clauses__apply_select_clauses_and_build_
          &monitored_item_event_filter_select_clauses__l_eventTypeId);
       monitored_item_event_filter_select_it__init_iter_eventFilterSelectClause(monitored_item_event_filter_select_clauses__p_nbSelectClauses,
          &monitored_item_event_filter_select_clauses__l_continue);
-      while ((*monitored_item_event_filter_select_clauses__notifTriggered == true) &&
-         (monitored_item_event_filter_select_clauses__l_continue == true)) {
+      while (*monitored_item_event_filter_select_clauses__notifTriggered == true &&
+         monitored_item_event_filter_select_clauses__l_continue == true) {
          monitored_item_event_filter_select_it__continue_iter_eventFilterSelectClauseIdx(&monitored_item_event_filter_select_clauses__l_continue,
             &monitored_item_event_filter_select_clauses__l_selectClauseIdx);
          monitored_item_event_filter_treatment_bs__get_select_clause_type_id(monitored_item_event_filter_select_clauses__l_selectClauseIdx,

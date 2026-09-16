@@ -21,9 +21,9 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 04/06/2026 09:10:35
+ Date                 : 16/09/2026 08:15:09
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -70,7 +70,7 @@ void call_method_mgr__treat_method_call_request(
                msg_call_method_bs__alloc_CallMethod_Result(call_method_mgr__p_resp_msg,
                   call_method_mgr__l_nb,
                   call_method_mgr__StatusCode_service);
-               call_method_mgr__l_continue = (*call_method_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
+               call_method_mgr__l_continue = *call_method_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok;
                while (call_method_mgr__l_continue == true) {
                   call_method_it__continue_iter_callMethod(&call_method_mgr__l_continue,
                      &call_method_mgr__l_callMethod);
@@ -125,10 +125,10 @@ void call_method_mgr__treat_one_method_call(
             &call_method_mgr__l_arguments_out);
          constants_statuscodes_bs__getall_conv_RawStatusCode_To_StatusCode(call_method_mgr__l_rawStatusCode,
             call_method_mgr__StatusCode);
-         if ((((*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) ||
-            (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_good_generic_mask)) ||
-            (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_uncertain_generic_mask)) &&
-            (call_method_mgr__l_nb_out > 0)) {
+         if ((*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok ||
+            *call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_good_generic_mask ||
+            *call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_uncertain_generic_mask) &&
+            call_method_mgr__l_nb_out > 0) {
             msg_call_method_bs__set_CallMethod_Res_OutputArgument(call_method_mgr__p_res_msg,
                call_method_mgr__p_callMethod,
                call_method_mgr__l_nb_out,
@@ -185,8 +185,8 @@ void call_method_mgr__check_method_call_inputs(
                   call_method_mgr__p_user,
                   call_method_mgr__l_roles,
                   &call_method_mgr__l_valid_user_executable);
-               if ((call_method_mgr__l_valid_executable == true) &&
-                  (call_method_mgr__l_valid_user_executable == true)) {
+               if (call_method_mgr__l_valid_executable == true &&
+                  call_method_mgr__l_valid_user_executable == true) {
                   service_write__check_object_has_method(call_method_mgr__l_objectid,
                      call_method_mgr__l_methodid,
                      &call_method_mgr__l_object_has_method);
@@ -245,12 +245,12 @@ void call_method_mgr__check_method_call_arguments(
       msg_call_method_bs__read_CallMethod_Nb_InputArguments(call_method_mgr__p_req_msg,
          call_method_mgr__p_callMethod,
          &call_method_mgr__l_nb_req_arg);
-      if ((call_method_mgr__l_input_arg_valid == true) &&
-         (call_method_mgr__l_nb_req_arg < call_method_mgr__l_nb_method_arg)) {
+      if (call_method_mgr__l_input_arg_valid == true &&
+         call_method_mgr__l_nb_req_arg < call_method_mgr__l_nb_method_arg) {
          *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_arguments_missing;
       }
-      else if ((call_method_mgr__l_nb_req_arg > call_method_mgr__l_nb_method_arg) ||
-         (call_method_mgr__l_input_arg_valid == false)) {
+      else if (call_method_mgr__l_nb_req_arg > call_method_mgr__l_nb_method_arg ||
+         call_method_mgr__l_input_arg_valid == false) {
          *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_too_many_arguments;
       }
       else {
@@ -262,7 +262,7 @@ void call_method_mgr__check_method_call_arguments(
                call_method_mgr__p_callMethod,
                call_method_mgr__l_nb_req_arg,
                call_method_mgr__StatusCode);
-            call_method_mgr__l_continue = (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok);
+            call_method_mgr__l_continue = *call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok;
             while (call_method_mgr__l_continue == true) {
                call_method_result_it__continue_iter_callMethodResultIdx(&call_method_mgr__l_continue,
                   &call_method_mgr__l_index);

@@ -21,9 +21,9 @@
 
  File Name            : role_references_it.c
 
- Date                 : 14/08/2024 15:16:58
+ Date                 : 16/09/2026 08:15:21
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -58,7 +58,7 @@ void role_references_it__init_iter_role_references(
    role_references_it__RefIndex = 1;
    address_space_itf__get_Node_RefIndexEnd(role_references_it__p_node,
       &role_references_it__RefIndexEnd);
-   *role_references_it__p_continue = (role_references_it__RefIndexEnd >= role_references_it__RefIndex);
+   *role_references_it__p_continue = role_references_it__RefIndexEnd >= role_references_it__RefIndex;
 }
 
 void role_references_it__continue_iter_role_references(
@@ -69,6 +69,6 @@ void role_references_it__continue_iter_role_references(
       role_references_it__p_ref);
    role_references_it__RefIndex = role_references_it__RefIndex +
       1;
-   *role_references_it__p_continue = (role_references_it__RefIndex <= role_references_it__RefIndexEnd);
+   *role_references_it__p_continue = role_references_it__RefIndex <= role_references_it__RefIndexEnd;
 }
 

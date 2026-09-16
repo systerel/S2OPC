@@ -21,9 +21,9 @@
 
  File Name            : service_add_nodes.c
 
- Date                 : 28/07/2025 09:08:33
+ Date                 : 16/09/2026 08:15:23
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -75,8 +75,8 @@ void service_add_nodes__local_treat_add_nodes_index(
          &service_add_nodes__l_typeDefId);
       if (service_add_nodes__l_sc == constants_statuscodes_bs__e_sc_ok) {
          service_add_nodes_1__is_local_service_treatment(&service_add_nodes__l_local_treatment);
-         if ((service_add_nodes__l_local_treatment == false) &&
-            (service_add_nodes__l_reqExpNodeId != constants__c_ExpandedNodeId_indet)) {
+         if (service_add_nodes__l_local_treatment == false &&
+            service_add_nodes__l_reqExpNodeId != constants__c_ExpandedNodeId_indet) {
             constants__getall_conv_ExpandedNodeId_NodeId(service_add_nodes__l_reqExpNodeId,
                &service_add_nodes__l_local_server_exp_node_id,
                &service_add_nodes__l_node_id);

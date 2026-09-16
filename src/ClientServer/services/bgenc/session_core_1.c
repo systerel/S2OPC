@@ -21,9 +21,9 @@
 
  File Name            : session_core_1.c
 
- Date                 : 25/02/2026 11:31:39
+ Date                 : 16/09/2026 08:15:30
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -115,8 +115,8 @@ void session_core_1__init_new_session(
       session_core_1__l_is_session = true;
       session_core_1_it__init_iter_session(&session_core_1__l_continue);
       if (session_core_1__l_continue == true) {
-         while ((session_core_1__l_continue == true) &&
-            (session_core_1__l_is_session == true)) {
+         while (session_core_1__l_continue == true &&
+            session_core_1__l_is_session == true) {
             session_core_1_it__continue_iter_session(&session_core_1__l_continue,
                session_core_1__p_session);
             session_core_2__is_valid_session(*session_core_1__p_session,
@@ -184,7 +184,7 @@ void session_core_1__check_server_session_user_auth_attempts(
             1;
          session_core_2__set_server_session_user_auth_attempts(session_core_1__p_session,
             session_core_1__l_attempts);
-         *session_core_1__p_max_reached = (session_core_1__l_attempts >= constants__k_n_UserAuthAttempts_max);
+         *session_core_1__p_max_reached = session_core_1__l_attempts >= constants__k_n_UserAuthAttempts_max;
       }
    }
 }
@@ -360,7 +360,7 @@ void session_core_1__is_auto_close_session_active(
       session_core_2__get_card_s_session(&session_core_1__l_s_session_card);
       session_core_1__l_avail_session_card = session_core_1__l_t_session_card -
          session_core_1__l_s_session_card;
-      *session_core_1__p_auto_closed_active = (session_core_1__l_avail_session_card <= 1);
+      *session_core_1__p_auto_closed_active = session_core_1__l_avail_session_card <= 1;
    }
 }
 

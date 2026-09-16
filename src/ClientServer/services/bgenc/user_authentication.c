@@ -21,9 +21,9 @@
 
  File Name            : user_authentication.c
 
- Date                 : 12/01/2024 15:45:13
+ Date                 : 16/09/2026 08:15:42
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -83,8 +83,8 @@ void user_authentication__may_encrypt_user_token(
       
       user_authentication_bs__get_user_token_type_from_token(user_authentication__p_user_token,
          &user_authentication__l_user_token_type);
-      if ((user_authentication__l_user_token_type == constants__e_userTokenType_anonymous) ||
-         (user_authentication__l_user_token_type == constants__e_userTokenType_x509)) {
+      if (user_authentication__l_user_token_type == constants__e_userTokenType_anonymous ||
+         user_authentication__l_user_token_type == constants__e_userTokenType_x509) {
          user_authentication_bs__shallow_copy_user_token(user_authentication__l_user_token_type,
             user_authentication__p_user_token,
             user_authentication__p_valid,

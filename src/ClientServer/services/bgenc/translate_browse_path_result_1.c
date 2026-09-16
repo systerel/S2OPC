@@ -21,9 +21,9 @@
 
  File Name            : translate_browse_path_result_1.c
 
- Date                 : 24/07/2023 14:29:20
+ Date                 : 16/09/2026 08:15:39
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -87,7 +87,7 @@ void translate_browse_path_result_1__get_BrowsePathResultSize(
 
 void translate_browse_path_result_1__get_BrowsePathResult_IsFull(
    t_bool * const translate_browse_path_result_1__res) {
-   *translate_browse_path_result_1__res = (translate_browse_path_result_1__BrowsePathResult_size_i == constants__k_n_BrowsePathResPerElt_max);
+   *translate_browse_path_result_1__res = translate_browse_path_result_1__BrowsePathResult_size_i == constants__k_n_BrowsePathResPerElt_max;
 }
 
 void translate_browse_path_result_1__get_BrowsePathResult(
@@ -126,7 +126,7 @@ void translate_browse_path_result_1__get_BrowsePathRemainingSize(
 
 void translate_browse_path_result_1__get_BrowsePathRemaining_IsFull(
    t_bool * const translate_browse_path_result_1__res) {
-   *translate_browse_path_result_1__res = (translate_browse_path_result_1__BrowsePathRemainingNodeId_size_i == constants__k_n_BrowsePathResPerElt_max);
+   *translate_browse_path_result_1__res = translate_browse_path_result_1__BrowsePathRemainingNodeId_size_i == constants__k_n_BrowsePathResPerElt_max;
 }
 
 void translate_browse_path_result_1__get_BrowsePathRemaining(

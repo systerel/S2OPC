@@ -21,9 +21,9 @@
 
  File Name            : address_space_authorization.c
 
- Date                 : 24/06/2026 15:32:05
+ Date                 : 16/09/2026 08:15:02
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -102,20 +102,20 @@ void address_space_authorization__has_access_level_write(
                &address_space_authorization__l_sc);
             constants__is_t_WriteByPassMask_statusWrite(address_space_authorization__bypass_masks,
                &address_space_authorization__l_bypass);
-            address_space_authorization__l_access_write_status = ((address_space_authorization__l_sc == constants_statuscodes_bs__e_sc_ok) ||
-               (address_space_authorization__l_bypass == true));
+            address_space_authorization__l_access_write_status = address_space_authorization__l_sc == constants_statuscodes_bs__e_sc_ok ||
+               address_space_authorization__l_bypass == true;
          }
          if (address_space_authorization__l_access_write_timestamp == false) {
             constants__is_Timestamps_Null(address_space_authorization__source_ts,
                &address_space_authorization__l_access_write_timestamp);
             constants__is_t_WriteByPassMask_timestampWrite(address_space_authorization__bypass_masks,
                &address_space_authorization__l_bypass);
-            address_space_authorization__l_access_write_timestamp = ((address_space_authorization__l_access_write_timestamp == true) ||
-               (address_space_authorization__l_bypass == true));
+            address_space_authorization__l_access_write_timestamp = address_space_authorization__l_access_write_timestamp == true ||
+               address_space_authorization__l_bypass == true;
          }
-         *address_space_authorization__bres = (((address_space_authorization__l_access_write == true) &&
-            (address_space_authorization__l_access_write_status == true)) &&
-            (address_space_authorization__l_access_write_timestamp == true));
+         *address_space_authorization__bres = address_space_authorization__l_access_write == true &&
+            address_space_authorization__l_access_write_status == true &&
+            address_space_authorization__l_access_write_timestamp == true;
       }
    }
 }
@@ -204,8 +204,8 @@ void address_space_authorization__get_user_authorization(
             address_space_authorization__p_authorized);
          address_space_user_permissions__has_AddressSpace_RolePermissions(address_space_authorization__p_node_id,
             &address_space_authorization__l_has_permissions);
-         if ((*address_space_authorization__p_authorized == true) &&
-            (address_space_authorization__l_has_permissions == true)) {
+         if (*address_space_authorization__p_authorized == true &&
+            address_space_authorization__l_has_permissions == true) {
             address_space_user_permissions__read_AddressSpace_UserRolePermissions(address_space_authorization__p_node_id,
                address_space_authorization__p_user,
                address_space_authorization__p_roles,

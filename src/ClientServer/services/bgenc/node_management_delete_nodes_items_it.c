@@ -21,9 +21,9 @@
 
  File Name            : node_management_delete_nodes_items_it.c
 
- Date                 : 11/02/2025 09:51:28
+ Date                 : 16/09/2026 08:15:20
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -51,7 +51,7 @@ void node_management_delete_nodes_items_it__init_iter_delete_nodes_items(
    const t_entier4 node_management_delete_nodes_items_it__nb_req,
    t_bool * const node_management_delete_nodes_items_it__continue) {
    node_management_delete_nodes_items_it__rreqs_i = node_management_delete_nodes_items_it__nb_req;
-   *node_management_delete_nodes_items_it__continue = (0 < node_management_delete_nodes_items_it__nb_req);
+   *node_management_delete_nodes_items_it__continue = 0 < node_management_delete_nodes_items_it__nb_req;
 }
 
 void node_management_delete_nodes_items_it__continue_iter_delete_nodes_items(
@@ -60,6 +60,6 @@ void node_management_delete_nodes_items_it__continue_iter_delete_nodes_items(
    *node_management_delete_nodes_items_it__index = node_management_delete_nodes_items_it__rreqs_i;
    node_management_delete_nodes_items_it__rreqs_i = node_management_delete_nodes_items_it__rreqs_i -
       1;
-   *node_management_delete_nodes_items_it__continue = (0 < node_management_delete_nodes_items_it__rreqs_i);
+   *node_management_delete_nodes_items_it__continue = 0 < node_management_delete_nodes_items_it__rreqs_i;
 }
 

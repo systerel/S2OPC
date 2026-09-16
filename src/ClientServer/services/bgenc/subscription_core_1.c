@@ -21,9 +21,9 @@
 
  File Name            : subscription_core_1.c
 
- Date                 : 08/07/2026 11:25:12
+ Date                 : 16/09/2026 08:15:35
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -259,8 +259,8 @@ void subscription_core_1__local_is_valid_subscription(
       constants__get_card_t_subscription(&subscription_core_1__l_subscription_card);
       constants__get_reverse_cast_t_subscription(subscription_core_1__p_subscription,
          &subscription_core_1__l_subscription_int);
-      if ((subscription_core_1__l_subscription_int != 0) &&
-         (subscription_core_1__l_subscription_int <= subscription_core_1__l_subscription_card)) {
+      if (subscription_core_1__l_subscription_int != 0 &&
+         subscription_core_1__l_subscription_int <= subscription_core_1__l_subscription_card) {
          *subscription_core_1__is_valid = subscription_core_1__s_subscription_i[subscription_core_1__p_subscription];
       }
    }
@@ -309,8 +309,8 @@ void subscription_core_1__is_valid_subscription_on_session(
       if (subscription_core_1__l_is_valid_sub == true) {
          subscription_core_1__l_session = subscription_core_1__a_subscription_session_i[subscription_core_1__p_subscription];
       }
-      *subscription_core_1__is_valid = ((subscription_core_1__l_is_valid_sub == true) &&
-         (subscription_core_1__l_session == subscription_core_1__p_session));
+      *subscription_core_1__is_valid = subscription_core_1__l_is_valid_sub == true &&
+         subscription_core_1__l_session == subscription_core_1__p_session;
    }
 }
 
@@ -448,12 +448,12 @@ void subscription_core_1__add_subscription(
             subscription_core_1__l_prio_idx = subscription_core_1__l_nb_prio +
                1;
             subscription_core_1__l_int_continue = 1;
-            while ((0 < subscription_core_1__l_prio_idx) &&
-               (subscription_core_1__l_int_continue == 1)) {
+            while (0 < subscription_core_1__l_prio_idx &&
+               subscription_core_1__l_int_continue == 1) {
                subscription_core_1__l_prio = subscription_core_1__a_session_seq_priority_i[subscription_core_1__p_session][subscription_core_1__l_prio_idx -
                   1];
-               if ((subscription_core_1__l_prio != constants__c_priority_indet) &&
-                  (subscription_core_1__p_priority < subscription_core_1__l_prio)) {
+               if (subscription_core_1__l_prio != constants__c_priority_indet &&
+                  subscription_core_1__p_priority < subscription_core_1__l_prio) {
                   subscription_core_1__a_session_seq_priority_i[subscription_core_1__p_session][subscription_core_1__l_prio_idx] = subscription_core_1__l_prio;
                   subscription_core_1__a_session_priority_idx_i[subscription_core_1__p_session][subscription_core_1__l_prio] = subscription_core_1__l_prio_idx;
                   subscription_core_1__a_session_priority_subscriptions_queue_i[subscription_core_1__p_session][subscription_core_1__l_prio_idx] = subscription_core_1__a_session_priority_subscriptions_queue_i[subscription_core_1__p_session][subscription_core_1__l_prio_idx -
@@ -776,7 +776,7 @@ void subscription_core_1__get_session_publishRequestQueue(
    t_bool * const subscription_core_1__p_bres,
    constants__t_publishReqQueue_i * const subscription_core_1__p_publishReqQueue) {
    *subscription_core_1__p_publishReqQueue = subscription_core_1__a_publishRequestQueue_i[subscription_core_1__p_session];
-   *subscription_core_1__p_bres = (constants__c_publishReqQueue_indet != *subscription_core_1__p_publishReqQueue);
+   *subscription_core_1__p_bres = constants__c_publishReqQueue_indet != *subscription_core_1__p_publishReqQueue;
 }
 
 void subscription_core_1__get_subscription_notifRepublishQueue(

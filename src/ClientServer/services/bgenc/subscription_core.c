@@ -21,9 +21,9 @@
 
  File Name            : subscription_core.c
 
- Date                 : 06/10/2026 09:50:22
+ Date                 : 12/10/2026 13:07:18
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -104,8 +104,8 @@ void subscription_core__local_compute_msg_nb_notifs(
       *subscription_core__moreNotifs = false;
       *subscription_core__nb_data_notifs = subscription_core__p_avail_data_notifs;
       *subscription_core__nb_event_notifs = subscription_core__p_avail_event_notifs;
-      if ((subscription_core__p_max_notifs > 0) &&
-         (subscription_core__p_max_notifs < constants__k_n_monitoredItemNotif_max)) {
+      if (subscription_core__p_max_notifs > 0 &&
+         subscription_core__p_max_notifs < constants__k_n_monitoredItemNotif_max) {
          subscription_core__l_max_nb_notifications = subscription_core__p_max_notifs;
       }
       else {
@@ -149,12 +149,12 @@ void subscription_core__local_compute_msg_nb_notifs(
                subscription_core__l_abs_diff_notifs;
             if (subscription_core__l_overflow_notifs > 0) {
                *subscription_core__nb_data_notifs = *subscription_core__nb_data_notifs -
-                  (subscription_core__l_overflow_notifs /
-                  2);
+                  subscription_core__l_overflow_notifs /
+                  2;
                *subscription_core__nb_event_notifs = *subscription_core__nb_event_notifs -
                   (subscription_core__l_overflow_notifs -
-                  (subscription_core__l_overflow_notifs /
-                  2));
+                  subscription_core__l_overflow_notifs /
+                  2);
             }
          }
          *subscription_core__moreNotifs = true;
@@ -176,8 +176,8 @@ void subscription_core__get_fresh_subscription(
       subscription_core__l_is_subscription = true;
       subscription_core_it__init_iter_subscription(&subscription_core__l_continue);
       if (subscription_core__l_continue == true) {
-         while ((subscription_core__l_continue == true) &&
-            (subscription_core__l_is_subscription == true)) {
+         while (subscription_core__l_continue == true &&
+            subscription_core__l_is_subscription == true) {
             subscription_core_it__continue_iter_subscription(&subscription_core__l_continue,
                &subscription_core__l_subscription);
             subscription_core_1__is_valid_subscription(subscription_core__l_subscription,
@@ -211,8 +211,8 @@ void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
          publish_request_queue_bs__init_iter_publish_request(subscription_core__l_pubReqQueue,
             &subscription_core__l_continue);
          subscription_core__l_is_expired = true;
-         while ((subscription_core__l_continue == true) &&
-            (subscription_core__l_is_expired == true)) {
+         while (subscription_core__l_continue == true &&
+            subscription_core__l_is_expired == true) {
             publish_request_queue_bs__continue_pop_head_iter_publish_request(subscription_core__l_pubReqQueue,
                &subscription_core__l_continue,
                &subscription_core__l_req_exp_time,
@@ -273,9 +273,9 @@ void subscription_core__local_fill_notification_message_for_data_monitored_item(
             &subscription_core__l_continue,
             &subscription_core__l_isEvent);
       }
-      while (((subscription_core__l_continue == true) &&
-         (subscription_core__l_isEvent == false)) &&
-         (*subscription_core__p_next_index <= subscription_core__nb_notif_to_dequeue)) {
+      while (subscription_core__l_continue == true &&
+         subscription_core__l_isEvent == false &&
+         *subscription_core__p_next_index <= subscription_core__nb_notif_to_dequeue) {
          monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_data_notification(subscription_core__p_monitoredItemPointer,
             subscription_core__l_notifQueue,
             &subscription_core__l_continue,
@@ -327,8 +327,8 @@ void subscription_core__local_fill_data_notification_message(
       monitored_item_queue_it_bs__init_iter_monitored_item(subscription_core__l_monitored_item_queue,
          &subscription_core__l_continue_mi,
          &subscription_core__l_iterator);
-      while ((subscription_core__l_continue_mi == true) &&
-         (subscription_core__l_index <= subscription_core__p_nb_data_notifs)) {
+      while (subscription_core__l_continue_mi == true &&
+         subscription_core__l_index <= subscription_core__p_nb_data_notifs) {
          monitored_item_queue_it_bs__continue_iter_monitored_item(subscription_core__l_iterator,
             subscription_core__l_monitored_item_queue,
             &subscription_core__l_continue_mi,
@@ -344,8 +344,8 @@ void subscription_core__local_fill_data_notification_message(
             &subscription_core__l_clientHandle);
          monitored_item_pointer_bs__is_event_monitoredItem(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_isEvent);
-         if ((subscription_core__l_monitoringMode == constants__e_monitoringMode_reporting) &&
-            (subscription_core__l_isEvent == false)) {
+         if (subscription_core__l_monitoringMode == constants__e_monitoringMode_reporting &&
+            subscription_core__l_isEvent == false) {
             subscription_core__local_fill_notification_message_for_data_monitored_item(subscription_core__l_monitoredItemPointer,
                subscription_core__p_notif_msg,
                subscription_core__l_index,
@@ -389,9 +389,9 @@ void subscription_core__local_fill_notification_message_for_event_monitored_item
             &subscription_core__l_continue,
             &subscription_core__l_isEvent);
       }
-      while (((subscription_core__l_continue == true) &&
-         (subscription_core__l_isEvent == true)) &&
-         (*subscription_core__p_next_index <= subscription_core__nb_notif_to_dequeue)) {
+      while (subscription_core__l_continue == true &&
+         subscription_core__l_isEvent == true &&
+         *subscription_core__p_next_index <= subscription_core__nb_notif_to_dequeue) {
          monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_event_notification(subscription_core__p_monitoredItemPointer,
             subscription_core__l_notifQueue,
             &subscription_core__l_continue,
@@ -442,8 +442,8 @@ void subscription_core__local_fill_event_notification_message(
       monitored_item_queue_it_bs__init_iter_monitored_item(subscription_core__l_monitored_item_queue,
          &subscription_core__l_continue_mi,
          &subscription_core__l_iterator);
-      while ((subscription_core__l_continue_mi == true) &&
-         (subscription_core__l_index <= subscription_core__p_nb_event_notifs)) {
+      while (subscription_core__l_continue_mi == true &&
+         subscription_core__l_index <= subscription_core__p_nb_event_notifs) {
          monitored_item_queue_it_bs__continue_iter_monitored_item(subscription_core__l_iterator,
             subscription_core__l_monitored_item_queue,
             &subscription_core__l_continue_mi,
@@ -459,8 +459,8 @@ void subscription_core__local_fill_event_notification_message(
             &subscription_core__l_clientHandle);
          monitored_item_pointer_bs__is_event_monitoredItem(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_isEvent);
-         if ((subscription_core__l_monitoringMode == constants__e_monitoringMode_reporting) &&
-            (subscription_core__l_isEvent == true)) {
+         if (subscription_core__l_monitoringMode == constants__e_monitoringMode_reporting &&
+            subscription_core__l_isEvent == true) {
             subscription_core__local_fill_notification_message_for_event_monitored_item(subscription_core__l_monitoredItemPointer,
                subscription_core__p_notif_msg,
                subscription_core__l_index,
@@ -649,7 +649,7 @@ void subscription_core__local_init_iter_session_seq_priority(
    subscription_core__session_iter_prio = subscription_core__p_session;
    subscription_core_1__get_card_session_seq_priority(subscription_core__p_session,
       &subscription_core__next_idx_iter_prio);
-   *subscription_core__p_continue = (subscription_core__next_idx_iter_prio != 0);
+   *subscription_core__p_continue = subscription_core__next_idx_iter_prio != 0;
 }
 
 void subscription_core__local_continue_iter_session_seq_priority(
@@ -658,7 +658,7 @@ void subscription_core__local_continue_iter_session_seq_priority(
    *subscription_core__p_prio_idx = subscription_core__next_idx_iter_prio;
    subscription_core__next_idx_iter_prio = subscription_core__next_idx_iter_prio -
       1;
-   *subscription_core__p_continue = (subscription_core__next_idx_iter_prio != 0);
+   *subscription_core__p_continue = subscription_core__next_idx_iter_prio != 0;
 }
 
 void subscription_core__local_init_iter_subscription_priority(
@@ -714,9 +714,9 @@ void subscription_core__create_subscription(
             subscription_core__p_revPublishInterval,
             &subscription_core__l_bres_timer,
             &subscription_core__l_timerId);
-         if (((subscription_core__l_bres_repub == true) &&
-            (subscription_core__l_bres_monitored == true)) &&
-            (subscription_core__l_bres_timer == true)) {
+         if (subscription_core__l_bres_repub == true &&
+            subscription_core__l_bres_monitored == true &&
+            subscription_core__l_bres_timer == true) {
             subscription_core_1__add_subscription(*subscription_core__subscription,
                subscription_core__p_session,
                constants__e_subscriptionState_normal,
@@ -889,17 +889,17 @@ void subscription_core__receive_publish_request(
          &subscription_core__l_nb_avail_event_notifs);
       subscription_core_1__get_subscription_MaxNotifsPerPublish(subscription_core__p_subscription,
          &subscription_core__l_max_configured_notifications);
-      subscription_core__l_NotificationAvailable = ((subscription_core__l_nb_avail_data_notifs > 0) ||
-         (subscription_core__l_nb_avail_event_notifs > 0));
+      subscription_core__l_NotificationAvailable = subscription_core__l_nb_avail_data_notifs > 0 ||
+         subscription_core__l_nb_avail_event_notifs > 0;
       subscription_core_1__get_subscription_notifRepublishQueue(subscription_core__p_subscription,
          &subscription_core__l_notifRepublishQueue);
       *subscription_core__async_resp_msg = false;
       *subscription_core__moreNotifs = false;
-      if (((subscription_core__l_subscriptionState == constants__e_subscriptionState_normal) &&
-         ((subscription_core__l_PublishingEnabled == false) ||
-         ((subscription_core__l_PublishingEnabled == true) &&
-         (subscription_core__l_MoreNotifications == false)))) ||
-         (subscription_core__l_subscriptionState == constants__e_subscriptionState_keepAlive)) {
+      if ((subscription_core__l_subscriptionState == constants__e_subscriptionState_normal &&
+         (subscription_core__l_PublishingEnabled == false ||
+         (subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_MoreNotifications == false))) ||
+         subscription_core__l_subscriptionState == constants__e_subscriptionState_keepAlive) {
          if (subscription_core__l_subscriptionState == constants__e_subscriptionState_keepAlive) {
             subscription_core_1__log_subscription_transition(subscription_core__p_subscription,
                constants__e_subscriptionState_keepAlive,
@@ -915,9 +915,9 @@ void subscription_core__receive_publish_request(
          *subscription_core__async_resp_msg = true;
          *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
       }
-      else if (((subscription_core__l_subscriptionState == constants__e_subscriptionState_normal) &&
-         (subscription_core__l_PublishingEnabled == true)) &&
-         (subscription_core__l_MoreNotifications == true)) {
+      else if (subscription_core__l_subscriptionState == constants__e_subscriptionState_normal &&
+         subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_MoreNotifications == true) {
          subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
          subscription_core_1__log_subscription_transition(subscription_core__p_subscription,
             constants__e_subscriptionState_normal,
@@ -968,10 +968,10 @@ void subscription_core__receive_publish_request(
             *subscription_core__moreNotifs);
          subscription_core_1__set_subscription_MessageSent(subscription_core__p_subscription);
       }
-      else if (((subscription_core__l_subscriptionState == constants__e_subscriptionState_late) &&
-         (subscription_core__l_PublishingEnabled == true)) &&
-         ((subscription_core__l_MoreNotifications == true) ||
-         (subscription_core__l_NotificationAvailable == true))) {
+      else if (subscription_core__l_subscriptionState == constants__e_subscriptionState_late &&
+         subscription_core__l_PublishingEnabled == true &&
+         (subscription_core__l_MoreNotifications == true ||
+         subscription_core__l_NotificationAvailable == true)) {
          subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_normal,
             10);
@@ -1021,11 +1021,11 @@ void subscription_core__receive_publish_request(
             *subscription_core__moreNotifs);
          subscription_core_1__set_subscription_MessageSent(subscription_core__p_subscription);
       }
-      else if ((subscription_core__l_subscriptionState == constants__e_subscriptionState_late) &&
-         ((subscription_core__l_PublishingEnabled == false) ||
-         (((subscription_core__l_PublishingEnabled == true) &&
-         (subscription_core__l_NotificationAvailable == false)) &&
-         (subscription_core__l_MoreNotifications == false)))) {
+      else if (subscription_core__l_subscriptionState == constants__e_subscriptionState_late &&
+         (subscription_core__l_PublishingEnabled == false ||
+         (subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_NotificationAvailable == false &&
+         subscription_core__l_MoreNotifications == false))) {
          subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_keepAlive,
             11);
@@ -1195,8 +1195,8 @@ void subscription_core__create_monitored_item(
                   &subscription_core__l_bres,
                   &subscription_core__l_sub_notif_queue);
                if (subscription_core__l_bres == true) {
-                  if ((subscription_core__p_monitoringMode != constants__e_monitoringMode_disabled) &&
-                     (subscription_core__p_aid != constants__e_aid_EventNotifier)) {
+                  if (subscription_core__p_monitoringMode != constants__e_monitoringMode_disabled &&
+                     subscription_core__p_aid != constants__e_aid_EventNotifier) {
                      switch (subscription_core__p_timestampToReturn) {
                      case constants__e_ttr_source:
                         subscription_core__l_ts_src = subscription_core__p_val_ts_src;
@@ -1297,7 +1297,7 @@ void subscription_core__modify_monitored_item(
             subscription_core__p_queueSize,
             subscription_core__p_revSamplingItv,
             subscription_core__p_revQueueSize);
-         subscription_core__l_isExpectedSubId = (subscription_core__p_subscription == subscription_core__l_subscription);
+         subscription_core__l_isExpectedSubId = subscription_core__p_subscription == subscription_core__l_subscription;
          if (subscription_core__l_isExpectedSubId == true) {
             monitored_item_filter_treatment__check_monitored_item_filter_valid_and_fill_result(subscription_core__l_nid,
                subscription_core__l_aid,
@@ -1308,8 +1308,8 @@ void subscription_core__modify_monitored_item(
                subscription_core__p_filterResult,
                &subscription_core__l_isEvent);
          }
-         if ((subscription_core__l_isExpectedSubId == true) &&
-            (*subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok)) {
+         if (subscription_core__l_isExpectedSubId == true &&
+            *subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok) {
             monitored_item_pointer_bs__modify_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
                subscription_core__p_timestampToReturn,
                subscription_core__p_clientHandle,
@@ -1365,7 +1365,7 @@ void subscription_core__delete_monitored_item(
             &subscription_core__l_clientHandle);
          subscription_core_1__get_subscription_monitoredItemQueue(subscription_core__p_subscription,
             &subscription_core__l_subscription_queue);
-         subscription_core__l_isMonitoredItemFound = (subscription_core__p_subscription == subscription_core__l_subscription);
+         subscription_core__l_isMonitoredItemFound = subscription_core__p_subscription == subscription_core__l_subscription;
          if (subscription_core__l_isMonitoredItemFound == true) {
             *subscription_core__p_sc = constants_statuscodes_bs__e_sc_ok;
             monitored_item_queue_bs__remove_monitored_item(subscription_core__l_subscription_queue,
@@ -1430,7 +1430,7 @@ void subscription_core__set_monit_mode_monitored_item(
             &subscription_core__l_timestampToReturn,
             subscription_core__p_prevMonitMode,
             &subscription_core__l_clientHandle);
-         subscription_core__l_isMonitoredItemFound = (subscription_core__p_subscription == subscription_core__l_subscription);
+         subscription_core__l_isMonitoredItemFound = subscription_core__p_subscription == subscription_core__l_subscription;
          if (subscription_core__l_isMonitoredItemFound == true) {
             monitored_item_pointer_bs__set_monit_mode_monitored_item_pointer(subscription_core__l_monitoredItemPointer,
                subscription_core__p_monitoring_mode);
@@ -1555,19 +1555,19 @@ void subscription_core__server_subscription_core_publish_timeout(
          &subscription_core__l_nb_avail_event_notifs);
       subscription_core_1__get_subscription_MaxNotifsPerPublish(subscription_core__p_subscription,
          &subscription_core__l_max_configured_notifications);
-      subscription_core__l_NotificationAvailable = ((subscription_core__l_nb_avail_data_notifs > 0) ||
-         (subscription_core__l_nb_avail_event_notifs > 0));
+      subscription_core__l_NotificationAvailable = subscription_core__l_nb_avail_data_notifs > 0 ||
+         subscription_core__l_nb_avail_event_notifs > 0;
       subscription_core_1__get_subscription_MessageSent(subscription_core__p_subscription,
          &subscription_core__l_MessageSent);
       subscription_core_1__get_subscription_KeepAliveCounter(subscription_core__p_subscription,
          &subscription_core__l_KeepAliveCounter);
       subscription_core_1__get_subscription_notifRepublishQueue(subscription_core__p_subscription,
          &subscription_core__l_notifRepublishQueue);
-      if (((((subscription_core__l_pubQueueValid == true) &&
-         (subscription_core__l_State == constants__e_subscriptionState_normal)) &&
-         (subscription_core__p_validPublishReqQueued == true)) &&
-         (subscription_core__l_PublishingEnabled == true)) &&
-         (subscription_core__l_NotificationAvailable == true)) {
+      if (subscription_core__l_pubQueueValid == true &&
+         subscription_core__l_State == constants__e_subscriptionState_normal &&
+         subscription_core__p_validPublishReqQueued == true &&
+         subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_NotificationAvailable == true) {
          subscription_core_1__log_subscription_transition(subscription_core__p_subscription,
             constants__e_subscriptionState_normal,
             constants__e_subscriptionState_normal,
@@ -1623,13 +1623,13 @@ void subscription_core__server_subscription_core_publish_timeout(
             *subscription_core__p_moreNotifs);
          subscription_core_1__set_subscription_MessageSent(subscription_core__p_subscription);
       }
-      else if (((((subscription_core__l_pubQueueValid == true) &&
-         (subscription_core__l_State == constants__e_subscriptionState_normal)) &&
-         (subscription_core__p_validPublishReqQueued == true)) &&
-         (subscription_core__l_MessageSent == false)) &&
-         ((subscription_core__l_PublishingEnabled == false) ||
-         ((subscription_core__l_PublishingEnabled == true) &&
-         (subscription_core__l_NotificationAvailable == false)))) {
+      else if (subscription_core__l_pubQueueValid == true &&
+         subscription_core__l_State == constants__e_subscriptionState_normal &&
+         subscription_core__p_validPublishReqQueued == true &&
+         subscription_core__l_MessageSent == false &&
+         (subscription_core__l_PublishingEnabled == false ||
+         (subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_NotificationAvailable == false))) {
          subscription_core_1__log_subscription_transition(subscription_core__p_subscription,
             constants__e_subscriptionState_normal,
             constants__e_subscriptionState_normal,
@@ -1650,20 +1650,20 @@ void subscription_core__server_subscription_core_publish_timeout(
             subscription_core__l_seq_num);
          subscription_core_1__set_subscription_MessageSent(subscription_core__p_subscription);
       }
-      else if (((subscription_core__l_State == constants__e_subscriptionState_normal) &&
-         (subscription_core__p_validPublishReqQueued == false)) &&
-         ((subscription_core__l_MessageSent == false) ||
-         ((subscription_core__l_PublishingEnabled == true) &&
-         (subscription_core__l_NotificationAvailable == true)))) {
+      else if (subscription_core__l_State == constants__e_subscriptionState_normal &&
+         subscription_core__p_validPublishReqQueued == false &&
+         (subscription_core__l_MessageSent == false ||
+         (subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_NotificationAvailable == true))) {
          subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_late,
             8);
       }
-      else if (((subscription_core__l_State == constants__e_subscriptionState_normal) &&
-         (subscription_core__l_MessageSent == true)) &&
-         ((subscription_core__l_PublishingEnabled == false) ||
-         ((subscription_core__l_PublishingEnabled == true) &&
-         (subscription_core__l_NotificationAvailable == false)))) {
+      else if (subscription_core__l_State == constants__e_subscriptionState_normal &&
+         subscription_core__l_MessageSent == true &&
+         (subscription_core__l_PublishingEnabled == false ||
+         (subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_NotificationAvailable == false))) {
          subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_keepAlive,
             9);
@@ -1676,11 +1676,11 @@ void subscription_core__server_subscription_core_publish_timeout(
             constants__e_subscriptionState_late,
             12);
       }
-      else if (((((subscription_core__l_pubQueueValid == true) &&
-         (subscription_core__l_State == constants__e_subscriptionState_keepAlive)) &&
-         (subscription_core__l_PublishingEnabled == true)) &&
-         (subscription_core__l_NotificationAvailable == true)) &&
-         (subscription_core__p_validPublishReqQueued == true)) {
+      else if (subscription_core__l_pubQueueValid == true &&
+         subscription_core__l_State == constants__e_subscriptionState_keepAlive &&
+         subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_NotificationAvailable == true &&
+         subscription_core__p_validPublishReqQueued == true) {
          subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_normal,
             14);
@@ -1735,13 +1735,13 @@ void subscription_core__server_subscription_core_publish_timeout(
             *subscription_core__p_moreNotifs);
          subscription_core_1__set_subscription_MessageSent(subscription_core__p_subscription);
       }
-      else if (((((subscription_core__l_pubQueueValid == true) &&
-         (subscription_core__l_State == constants__e_subscriptionState_keepAlive)) &&
-         (subscription_core__p_validPublishReqQueued == true)) &&
-         (subscription_core__l_KeepAliveCounter <= 1)) &&
-         ((subscription_core__l_PublishingEnabled == false) ||
-         ((subscription_core__l_PublishingEnabled == true) &&
-         (subscription_core__l_NotificationAvailable == false)))) {
+      else if (subscription_core__l_pubQueueValid == true &&
+         subscription_core__l_State == constants__e_subscriptionState_keepAlive &&
+         subscription_core__p_validPublishReqQueued == true &&
+         subscription_core__l_KeepAliveCounter <= 1 &&
+         (subscription_core__l_PublishingEnabled == false ||
+         (subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_NotificationAvailable == false))) {
          subscription_core_1__log_subscription_transition(subscription_core__p_subscription,
             constants__e_subscriptionState_keepAlive,
             constants__e_subscriptionState_keepAlive,
@@ -1763,23 +1763,23 @@ void subscription_core__server_subscription_core_publish_timeout(
             subscription_core__l_seq_num);
          subscription_core_1__set_subscription_MessageSent(subscription_core__p_subscription);
       }
-      else if (((subscription_core__l_State == constants__e_subscriptionState_keepAlive) &&
-         (subscription_core__l_KeepAliveCounter > 1)) &&
-         ((subscription_core__l_PublishingEnabled == false) ||
-         ((subscription_core__l_PublishingEnabled == true) &&
-         (subscription_core__l_NotificationAvailable == false)))) {
+      else if (subscription_core__l_State == constants__e_subscriptionState_keepAlive &&
+         subscription_core__l_KeepAliveCounter > 1 &&
+         (subscription_core__l_PublishingEnabled == false ||
+         (subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_NotificationAvailable == false))) {
          subscription_core_1__log_subscription_transition(subscription_core__p_subscription,
             constants__e_subscriptionState_keepAlive,
             constants__e_subscriptionState_keepAlive,
             16);
          subscription_core_1__decrement_subscription_KeepAliveCounter(subscription_core__p_subscription);
       }
-      else if (((subscription_core__l_State == constants__e_subscriptionState_keepAlive) &&
-         (subscription_core__p_validPublishReqQueued == false)) &&
-         ((subscription_core__l_KeepAliveCounter <= 1) ||
-         (((subscription_core__l_KeepAliveCounter > 1) &&
-         (subscription_core__l_PublishingEnabled == true)) &&
-         (subscription_core__l_NotificationAvailable == true)))) {
+      else if (subscription_core__l_State == constants__e_subscriptionState_keepAlive &&
+         subscription_core__p_validPublishReqQueued == false &&
+         (subscription_core__l_KeepAliveCounter <= 1 ||
+         (subscription_core__l_KeepAliveCounter > 1 &&
+         subscription_core__l_PublishingEnabled == true &&
+         subscription_core__l_NotificationAvailable == true))) {
          subscription_core_1__set_subscription_state(subscription_core__p_subscription,
             constants__e_subscriptionState_late,
             17);
@@ -1918,8 +1918,8 @@ void subscription_core__server_subscription_add_notification_on_event_if_trigger
       monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
          &subscription_core__l_bres,
          &subscription_core__l_notif_queue);
-      if ((subscription_core__l_triggered == true) &&
-         (subscription_core__l_bres == true)) {
+      if (subscription_core__l_triggered == true &&
+         subscription_core__l_bres == true) {
          monitored_item_notification_queue_bs__add_monitored_item_event_notification_to_queue(subscription_core__p_monitoredItemPointer,
             subscription_core__l_notif_queue,
             subscription_core__l_event_notif,

@@ -21,9 +21,9 @@
 
  File Name            : browse_treatment_result_it.c
 
- Date                 : 04/08/2022 14:53:02
+ Date                 : 16/09/2026 08:15:07
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -54,7 +54,7 @@ void browse_treatment_result_it__init_iter_browseResult(
    t_bool * const browse_treatment_result_it__p_continue) {
    browse_treatment_result_it__nb_browseResult_max_refs_i = browse_treatment_result_it__p_nb_browseResult_max_refs;
    browse_treatment_result_it__currentBrowseResultIdx_i = 0;
-   *browse_treatment_result_it__p_continue = (0 < browse_treatment_result_it__p_nb_browseResult_max_refs);
+   *browse_treatment_result_it__p_continue = 0 < browse_treatment_result_it__p_nb_browseResult_max_refs;
 }
 
 void browse_treatment_result_it__continue_iter_browseResult(
@@ -63,6 +63,6 @@ void browse_treatment_result_it__continue_iter_browseResult(
    browse_treatment_result_it__currentBrowseResultIdx_i = browse_treatment_result_it__currentBrowseResultIdx_i +
       1;
    *browse_treatment_result_it__p_browseResultIdx = browse_treatment_result_it__currentBrowseResultIdx_i;
-   *browse_treatment_result_it__p_continue = (browse_treatment_result_it__currentBrowseResultIdx_i < browse_treatment_result_it__nb_browseResult_max_refs_i);
+   *browse_treatment_result_it__p_continue = browse_treatment_result_it__currentBrowseResultIdx_i < browse_treatment_result_it__nb_browseResult_max_refs_i;
 }
 

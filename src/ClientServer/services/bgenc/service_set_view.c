@@ -21,9 +21,9 @@
 
  File Name            : service_set_view.c
 
- Date                 : 04/08/2022 14:53:14
+ Date                 : 16/09/2026 08:15:27
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -87,8 +87,8 @@ void service_set_view__treat_browse_request_BrowseValue_1(
                   &service_set_view__l_continuationPointId,
                   &service_set_view__l_nbTargets);
                translate_browse_path__clear_browse_value_context();
-               if ((service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_ok) ||
-                  (service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points)) {
+               if (service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_ok ||
+                  service_set_view__l_serviceStatusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points) {
                   translate_browse_path__getall_and_move_browse_result(&service_set_view__l_nbTargets,
                      &service_set_view__l_browseResult);
                   msg_browse_bs__set_ResponseBrowse_BrowseResult(service_set_view__p_resp_msg,
@@ -133,8 +133,8 @@ void service_set_view__treat_browse_request_BrowseValues(
       t_bool service_set_view__l_isallocated;
       
       if (service_set_view__p_nid_view == constants__c_NodeId_indet) {
-         if ((service_set_view__p_nb_browse_value > 0) &&
-            (service_set_view__p_nb_browse_value <= constants__k_n_BrowseResponse_max)) {
+         if (service_set_view__p_nb_browse_value > 0 &&
+            service_set_view__p_nb_browse_value <= constants__k_n_BrowseResponse_max) {
             msg_browse_bs__alloc_browse_response(service_set_view__p_resp_msg,
                service_set_view__p_nb_browse_value,
                &service_set_view__l_isallocated);
@@ -197,8 +197,8 @@ void service_set_view__treat_browse_next_request_BrowseContinuationPoint_1(
             &service_set_view__l_continuationPointId,
             &service_set_view__l_nbTargets);
          translate_browse_path__clear_browse_value_context();
-         if ((service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_ok) ||
-            (service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points)) {
+         if (service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_ok ||
+            service_set_view__l_statusCode == constants_statuscodes_bs__e_sc_bad_no_continuation_points) {
             translate_browse_path__getall_and_move_browse_result(&service_set_view__l_nbTargets,
                &service_set_view__l_browseResult);
             msg_browse_next_bs__set_ResponseBrowseNext_BrowseResult(service_set_view__p_resp_msg,
@@ -256,8 +256,8 @@ void service_set_view__treat_browse_next_request_BrowseContinuationPoints(
       t_bool service_set_view__l_continue;
       constants__t_BrowseValue_i service_set_view__l_cpi;
       
-      if ((service_set_view__p_nbCP > 0) &&
-         (service_set_view__p_nbCP <= constants__k_n_BrowseResponse_max)) {
+      if (service_set_view__p_nbCP > 0 &&
+         service_set_view__p_nbCP <= constants__k_n_BrowseResponse_max) {
          msg_browse_next_bs__alloc_browse_next_response(service_set_view__p_resp_msg,
             service_set_view__p_nbCP,
             &service_set_view__l_isallocated);

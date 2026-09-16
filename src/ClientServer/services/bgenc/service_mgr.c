@@ -21,9 +21,9 @@
 
  File Name            : service_mgr.c
 
- Date                 : 27/05/2026 09:55:06
+ Date                 : 16/09/2026 08:15:25
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -312,7 +312,7 @@ void service_mgr__treat_session_local_service_req(
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
-         service_mgr__l_node_management_done = (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
+         service_mgr__l_node_management_done = *service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok;
          break;
       case constants__e_msg_node_delete_nodes_req:
          session_mgr__get_local_user(service_mgr__endpoint_config_idx,
@@ -321,7 +321,7 @@ void service_mgr__treat_session_local_service_req(
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);
-         service_mgr__l_node_management_done = (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
+         service_mgr__l_node_management_done = *service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok;
          break;
       default:
          *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
@@ -532,7 +532,7 @@ void service_mgr__treat_session_nano_extended_service_req(
                service_mgr__req_msg,
                service_mgr__resp_msg,
                service_mgr__StatusCode_service);
-            service_mgr__l_node_management_done = (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
+            service_mgr__l_node_management_done = *service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok;
          }
          else {
             *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
@@ -547,7 +547,7 @@ void service_mgr__treat_session_nano_extended_service_req(
                service_mgr__req_msg,
                service_mgr__resp_msg,
                service_mgr__StatusCode_service);
-            service_mgr__l_node_management_done = (*service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok);
+            service_mgr__l_node_management_done = *service_mgr__StatusCode_service == constants_statuscodes_bs__e_sc_ok;
          }
          else {
             *service_mgr__StatusCode_service = constants_statuscodes_bs__e_sc_bad_service_unsupported;
@@ -602,8 +602,8 @@ void service_mgr__decode_and_treat_session_service_req(
          &service_mgr__l_endpoint_config_idx);
       channel_mgr__is_valid_endpoint_config_idx(service_mgr__l_endpoint_config_idx,
          &service_mgr__l_is_valid_ep_config_idx);
-      if ((service_mgr__l_is_valid_req_on_session == true) &&
-         (service_mgr__l_is_valid_ep_config_idx == true)) {
+      if (service_mgr__l_is_valid_req_on_session == true &&
+         service_mgr__l_is_valid_ep_config_idx == true) {
          message_in_bs__decode_msg(service_mgr__p_req_typ,
             service_mgr__p_msg_buffer,
             service_mgr__p_valid_req,
@@ -869,8 +869,8 @@ void service_mgr__local_client_discovery_service_request(
             &service_mgr__l_req_handle);
          request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
             &service_mgr__l_valid_req_handle);
-         if ((service_mgr__l_valid_req_handle == true) &&
-            (service_mgr__l_msg_header != constants__c_msg_header_indet)) {
+         if (service_mgr__l_valid_req_handle == true &&
+            service_mgr__l_msg_header != constants__c_msg_header_indet) {
             request_handle_bs__set_req_handle_channel(service_mgr__l_req_handle,
                service_mgr__channel);
             message_out_bs__client_write_msg_out_header_req_handle(service_mgr__l_msg_header,
@@ -892,8 +892,8 @@ void service_mgr__local_client_discovery_service_request(
             service_mgr__l_req_handle = constants__c_client_request_handle_indet;
             *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
          }
-         if ((service_mgr__l_valid_req_handle == true) &&
-            (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok)) {
+         if (service_mgr__l_valid_req_handle == true &&
+            *service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
             request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
          }
          if (service_mgr__l_msg_header != constants__c_msg_header_indet) {
@@ -930,8 +930,8 @@ void service_mgr__l_client_snd_msg_failure(
          &service_mgr__l_valid_req_handle);
       request_handle_bs__get_req_handle_channel(service_mgr__request_handle,
          &service_mgr__l_req_handle_channel);
-      if ((service_mgr__l_valid_req_handle == true) &&
-         (service_mgr__l_req_handle_channel == service_mgr__channel)) {
+      if (service_mgr__l_valid_req_handle == true &&
+         service_mgr__l_req_handle_channel == service_mgr__channel) {
          request_handle_bs__get_req_handle_resp_typ(service_mgr__request_handle,
             &service_mgr__l_exp_resp_msg_typ);
          service_mgr__l_get_msg_service_class(service_mgr__l_exp_resp_msg_typ,
@@ -1870,8 +1870,8 @@ void service_mgr__client_service_request(
             &service_mgr__l_req_handle);
          request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
             &service_mgr__l_valid_req_handle);
-         if ((service_mgr__l_valid_req_handle == true) &&
-            (service_mgr__l_msg_header != constants__c_msg_header_indet)) {
+         if (service_mgr__l_valid_req_handle == true &&
+            service_mgr__l_msg_header != constants__c_msg_header_indet) {
             session_mgr__client_validate_session_service_req(service_mgr__session,
                service_mgr__l_req_handle,
                service_mgr__ret,
@@ -1901,8 +1901,8 @@ void service_mgr__client_service_request(
          else {
             *service_mgr__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
          }
-         if ((service_mgr__l_valid_req_handle == true) &&
-            (*service_mgr__ret != constants_statuscodes_bs__e_sc_ok)) {
+         if (service_mgr__l_valid_req_handle == true &&
+            *service_mgr__ret != constants_statuscodes_bs__e_sc_ok) {
             request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
          }
          if (service_mgr__l_msg_header != constants__c_msg_header_indet) {

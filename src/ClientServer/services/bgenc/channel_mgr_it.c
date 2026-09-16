@@ -21,9 +21,9 @@
 
  File Name            : channel_mgr_it.c
 
- Date                 : 10/11/2023 17:24:45
+ Date                 : 16/09/2026 08:15:10
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -52,7 +52,7 @@ void channel_mgr_it__INITIALISATION(void) {
 void channel_mgr_it__init_iter_channel(
    t_bool * const channel_mgr_it__p_continue) {
    constants__get_card_t_channel(&channel_mgr_it__channel_i);
-   *channel_mgr_it__p_continue = (1 <= channel_mgr_it__channel_i);
+   *channel_mgr_it__p_continue = 1 <= channel_mgr_it__channel_i;
 }
 
 void channel_mgr_it__continue_iter_channel(
@@ -62,13 +62,13 @@ void channel_mgr_it__continue_iter_channel(
       channel_mgr_it__p_channel);
    channel_mgr_it__channel_i = channel_mgr_it__channel_i -
       1;
-   *channel_mgr_it__p_continue = (1 <= channel_mgr_it__channel_i);
+   *channel_mgr_it__p_continue = 1 <= channel_mgr_it__channel_i;
 }
 
 void channel_mgr_it__init_iter_channel_config_idx(
    t_bool * const channel_mgr_it__p_continue) {
    constants__get_card_t_channel_config_idx(&channel_mgr_it__channel_config_i);
-   *channel_mgr_it__p_continue = (1 <= channel_mgr_it__channel_config_i);
+   *channel_mgr_it__p_continue = 1 <= channel_mgr_it__channel_config_i;
 }
 
 void channel_mgr_it__continue_iter_channel_config_idx(
@@ -78,6 +78,6 @@ void channel_mgr_it__continue_iter_channel_config_idx(
       channel_mgr_it__p_config_idx);
    channel_mgr_it__channel_config_i = channel_mgr_it__channel_config_i -
       1;
-   *channel_mgr_it__p_continue = (1 <= channel_mgr_it__channel_config_i);
+   *channel_mgr_it__p_continue = 1 <= channel_mgr_it__channel_config_i;
 }
 

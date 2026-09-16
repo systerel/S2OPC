@@ -21,9 +21,9 @@
 
  File Name            : register_nodes_it.c
 
- Date                 : 04/08/2022 14:53:09
+ Date                 : 16/09/2026 08:15:20
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -51,7 +51,7 @@ void register_nodes_it__init_iter_register_nodes_request(
    const t_entier4 register_nodes_it__nb_req,
    t_bool * const register_nodes_it__continue) {
    register_nodes_it__rreqs_i = register_nodes_it__nb_req;
-   *register_nodes_it__continue = (0 < register_nodes_it__nb_req);
+   *register_nodes_it__continue = 0 < register_nodes_it__nb_req;
 }
 
 void register_nodes_it__continue_iter_register_nodes_request(
@@ -60,6 +60,6 @@ void register_nodes_it__continue_iter_register_nodes_request(
    *register_nodes_it__index = register_nodes_it__rreqs_i;
    register_nodes_it__rreqs_i = register_nodes_it__rreqs_i -
       1;
-   *register_nodes_it__continue = (0 < register_nodes_it__rreqs_i);
+   *register_nodes_it__continue = 0 < register_nodes_it__rreqs_i;
 }
 

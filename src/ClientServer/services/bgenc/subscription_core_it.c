@@ -21,9 +21,9 @@
 
  File Name            : subscription_core_it.c
 
- Date                 : 04/08/2022 14:53:21
+ Date                 : 16/09/2026 08:15:36
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -50,7 +50,7 @@ void subscription_core_it__INITIALISATION(void) {
 void subscription_core_it__init_iter_subscription(
    t_bool * const subscription_core_it__p_continue) {
    constants__get_card_t_subscription(&subscription_core_it__subscription_i);
-   *subscription_core_it__p_continue = (1 <= subscription_core_it__subscription_i);
+   *subscription_core_it__p_continue = 1 <= subscription_core_it__subscription_i;
 }
 
 void subscription_core_it__continue_iter_subscription(
@@ -60,6 +60,6 @@ void subscription_core_it__continue_iter_subscription(
       subscription_core_it__p_subscription);
    subscription_core_it__subscription_i = subscription_core_it__subscription_i -
       1;
-   *subscription_core_it__p_continue = (1 <= subscription_core_it__subscription_i);
+   *subscription_core_it__p_continue = 1 <= subscription_core_it__subscription_i;
 }
 
