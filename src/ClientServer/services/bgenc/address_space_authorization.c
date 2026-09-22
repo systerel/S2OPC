@@ -21,7 +21,7 @@
 
  File Name            : address_space_authorization.c
 
- Date                 : 16/09/2026 08:15:02
+ Date                 : 12/10/2026 16:24:10
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -178,43 +178,5 @@ void address_space_authorization__get_user_roles(
 void address_space_authorization__clear_user_roles(void) {
    address_space_authorization__a_set_user_i = constants__c_user_indet;
    address_space_authorization__a_set_roles_i = constants__c_sessionRoles_indet;
-}
-
-void address_space_authorization__get_user_authorization(
-   const constants__t_operation_type_i address_space_authorization__p_operation_type,
-   const constants__t_NodeId_i address_space_authorization__p_node_id,
-   const constants__t_AttributeId_i address_space_authorization__p_attribute_id,
-   const constants__t_user_i address_space_authorization__p_user,
-   const constants__t_sessionRoles_i address_space_authorization__p_roles,
-   t_bool * const address_space_authorization__p_authorized) {
-   {
-      t_bool address_space_authorization__l_local_service_treatment;
-      t_bool address_space_authorization__l_has_permissions;
-      constants__t_PermissionType_i address_space_authorization__l_permissions;
-      
-      address_space_local__is_local_service_treatment(&address_space_authorization__l_local_service_treatment);
-      if (address_space_authorization__l_local_service_treatment == true) {
-         *address_space_authorization__p_authorized = true;
-      }
-      else {
-         user_authorization_bs__get_user_authorization_bs(address_space_authorization__p_operation_type,
-            address_space_authorization__p_node_id,
-            address_space_authorization__p_attribute_id,
-            address_space_authorization__p_user,
-            address_space_authorization__p_authorized);
-         address_space_user_permissions__has_AddressSpace_RolePermissions(address_space_authorization__p_node_id,
-            &address_space_authorization__l_has_permissions);
-         if (*address_space_authorization__p_authorized == true &&
-            address_space_authorization__l_has_permissions == true) {
-            address_space_user_permissions__read_AddressSpace_UserRolePermissions(address_space_authorization__p_node_id,
-               address_space_authorization__p_user,
-               address_space_authorization__p_roles,
-               &address_space_authorization__l_permissions);
-            address_space_user_permissions__is_operation_authorized(address_space_authorization__l_permissions,
-               address_space_authorization__p_operation_type,
-               address_space_authorization__p_authorized);
-         }
-      }
-   }
 }
 

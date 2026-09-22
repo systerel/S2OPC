@@ -243,6 +243,8 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
+    /* pragma INLINE(is_valid_subscription, getall_session) */
+
     is_valid <-- local_is_valid_subscription (p_subscription) =
     VAR
         l_subscription_card,

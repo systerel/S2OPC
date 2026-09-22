@@ -21,9 +21,9 @@
 
  File Name            : subscription_core_1.h
 
- Date                 : 08/07/2026 11:25:12
+ Date                 : 12/10/2026 16:24:34
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -92,6 +92,20 @@ extern void subscription_core_1__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define subscription_core_1__continue_iter_subscription_priority_queue subscription_priority_sub_queue_it_bs__continue_iter_subscription_priority_queue
+
+/*---------------------
+   Inlined OPERATIONS
+  ---------------------*/
+#define subscription_core_1__is_valid_subscription(subscription_core_1__p_subscription, \
+   subscription_core_1__is_valid) { \
+   subscription_core_1__local_is_valid_subscription(subscription_core_1__p_subscription, \
+      subscription_core_1__is_valid); \
+}
+
+#define subscription_core_1__getall_session(subscription_core_1__p_subscription, \
+   subscription_core_1__p_session) { \
+   *subscription_core_1__p_session = subscription_core_1__a_subscription_session_i[subscription_core_1__p_subscription]; \
+}
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -179,16 +193,10 @@ extern void subscription_core_1__get_subscription_state(
 extern void subscription_core_1__get_subscription_timer_id(
    const constants__t_subscription_i subscription_core_1__p_subscription,
    constants__t_timer_id_i * const subscription_core_1__p_timer_id);
-extern void subscription_core_1__getall_session(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_session_i * const subscription_core_1__p_session);
 extern void subscription_core_1__init_session_priority_subscriptions_iterator(
    const constants__t_session_i subscription_core_1__p_session,
    const t_entier4 subscription_core_1__p_prio_idx,
    constants__t_prioritySubQueueIterator_i * const subscription_core_1__p_prio_sub_it);
-extern void subscription_core_1__is_valid_subscription(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_bool * const subscription_core_1__is_valid);
 extern void subscription_core_1__is_valid_subscription_on_session(
    const constants__t_session_i subscription_core_1__p_session,
    const constants__t_subscription_i subscription_core_1__p_subscription,

@@ -21,7 +21,7 @@
 
  File Name            : address_space_user_permissions.h
 
- Date                 : 30/10/2024 16:23:51
+ Date                 : 22/09/2026 15:23:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -61,6 +61,21 @@ extern void address_space_user_permissions__INITIALISATION(void);
 #define address_space_user_permissions__address_space_default_role_permissions_array_bs_UNINITIALISATION address_space_namespaces__address_space_default_role_permissions_array_bs_UNINITIALISATION
 #define address_space_user_permissions__is_operation_authorized address_space_user_permissions_bs__is_operation_authorized
 
+/*---------------------
+   Inlined OPERATIONS
+  ---------------------*/
+#define address_space_user_permissions__has_AddressSpace_RolePermissions(address_space_user_permissions__p_nodeId, \
+   address_space_user_permissions__bres) { \
+   { \
+      constants__t_NamespaceIdx address_space_user_permissions__l_nodeNSidx; \
+       \
+      constants__get_NodeId_NamespaceIndex(address_space_user_permissions__p_nodeId, \
+         &address_space_user_permissions__l_nodeNSidx); \
+      address_space_namespaces__has_Namespace_DefaultRolePermissions(address_space_user_permissions__l_nodeNSidx, \
+         address_space_user_permissions__bres); \
+   } \
+}
+
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
@@ -71,9 +86,6 @@ extern void address_space_user_permissions__l_read_AddressSpace_RolePermissionsO
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void address_space_user_permissions__has_AddressSpace_RolePermissions(
-   const constants__t_NodeId_i address_space_user_permissions__p_nodeId,
-   t_bool * const address_space_user_permissions__bres);
 extern void address_space_user_permissions__read_AddressSpace_UserRolePermissions(
    const constants__t_NodeId_i address_space_user_permissions__p_nodeId,
    const constants__t_user_i address_space_user_permissions__p_user,

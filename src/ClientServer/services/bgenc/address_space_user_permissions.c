@@ -21,7 +21,7 @@
 
  File Name            : address_space_user_permissions.c
 
- Date                 : 13/08/2026 08:11:13
+ Date                 : 22/09/2026 15:23:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -70,19 +70,6 @@ void address_space_user_permissions__l_read_AddressSpace_RolePermissionsOrDefaul
       else {
          *address_space_user_permissions__p_rolePermissions = address_space_user_permissions__l_nodeRolePermissions;
       }
-   }
-}
-
-void address_space_user_permissions__has_AddressSpace_RolePermissions(
-   const constants__t_NodeId_i address_space_user_permissions__p_nodeId,
-   t_bool * const address_space_user_permissions__bres) {
-   {
-      constants__t_NamespaceIdx address_space_user_permissions__l_nodeNSidx;
-      
-      constants__get_NodeId_NamespaceIndex(address_space_user_permissions__p_nodeId,
-         &address_space_user_permissions__l_nodeNSidx);
-      address_space_namespaces__has_Namespace_DefaultRolePermissions(address_space_user_permissions__l_nodeNSidx,
-         address_space_user_permissions__bres);
    }
 }
 

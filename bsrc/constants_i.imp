@@ -83,6 +83,9 @@ VALUES
 
 OPERATIONS
 
+    // Inline all operations
+    /* pragma INLINE */
+
     rvi <-- read_cast_t_ReadValue(ii) =
     BEGIN
         rvi := ii

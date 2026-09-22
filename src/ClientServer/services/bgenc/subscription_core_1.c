@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_1.c
 
- Date                 : 16/09/2026 08:15:35
+ Date                 : 12/10/2026 16:24:34
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -312,19 +312,6 @@ void subscription_core_1__is_valid_subscription_on_session(
       *subscription_core_1__is_valid = subscription_core_1__l_is_valid_sub == true &&
          subscription_core_1__l_session == subscription_core_1__p_session;
    }
-}
-
-void subscription_core_1__is_valid_subscription(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   t_bool * const subscription_core_1__is_valid) {
-   subscription_core_1__local_is_valid_subscription(subscription_core_1__p_subscription,
-      subscription_core_1__is_valid);
-}
-
-void subscription_core_1__getall_session(
-   const constants__t_subscription_i subscription_core_1__p_subscription,
-   constants__t_session_i * const subscription_core_1__p_session) {
-   *subscription_core_1__p_session = subscription_core_1__a_subscription_session_i[subscription_core_1__p_subscription];
 }
 
 void subscription_core_1__get_card_session_seq_priority(

@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 19/10/2026 12:53:10
+ Date                 : 20/10/2026 12:22:13
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -666,25 +666,59 @@ extern void constants__INITIALISATION(void);
 #define constants__is_t_channel_config_idx constants_bs__is_t_channel_config_idx
 #define constants__is_t_endpoint_config_idx constants_bs__is_t_endpoint_config_idx
 
-/*--------------------
-   OPERATIONS Clause
-  --------------------*/
-extern void constants__get_Is_Dir_Forward_Compatible(
-   const constants__t_BrowseDirection_i constants__p_dir,
-   const t_bool constants__p_IsForward,
-   t_bool * const constants__p_dir_compat);
-extern void constants__get_cast_t_BrowseValue(
-   const t_entier4 constants__p_ind,
-   constants__t_BrowseValue_i * const constants__p_bvi);
-extern void constants__get_cast_t_WriteValue(
-   const t_entier4 constants__ii,
-   constants__t_WriteValue_i * const constants__wvi);
-extern void constants__is_included_ValueRank(
-   const t_entier4 constants__p_concValueRank,
-   const t_entier4 constants__p_expValueRank,
-   t_bool * const constants__bres);
-extern void constants__read_cast_t_ReadValue(
-   const t_entier4 constants__ii,
-   constants__t_ReadValue_i * const constants__rvi);
+/*---------------------
+   Inlined OPERATIONS
+  ---------------------*/
+#define constants__read_cast_t_ReadValue(constants__ii, \
+   constants__rvi) { \
+   *constants__rvi = constants__ii; \
+}
+
+#define constants__get_cast_t_WriteValue(constants__ii, \
+   constants__wvi) { \
+   *constants__wvi = constants__ii; \
+}
+
+#define constants__get_cast_t_BrowseValue(constants__p_ind, \
+   constants__p_bvi) { \
+   *constants__p_bvi = constants__p_ind; \
+}
+
+#define constants__get_Is_Dir_Forward_Compatible(constants__p_dir, \
+   constants__p_IsForward, \
+   constants__p_dir_compat) { \
+   switch (constants__p_dir) { \
+   case constants__e_bd_forward: \
+      *constants__p_dir_compat = constants__p_IsForward; \
+      break; \
+   case constants__e_bd_inverse: \
+      *constants__p_dir_compat = constants__p_IsForward == false; \
+      break; \
+   default: \
+      *constants__p_dir_compat = true; \
+      break; \
+   } \
+}
+
+#define constants__is_included_ValueRank(constants__p_concValueRank, \
+   constants__p_expValueRank, \
+   constants__bres) { \
+   if (constants__p_expValueRank == constants__c_ValueRank_ScalarOrOneDimension) { \
+      *constants__bres = constants__p_concValueRank == constants__c_ValueRank_Scalar || \
+         constants__p_concValueRank == constants__c_ValueRank_OneDimension; \
+   } \
+   else if (constants__p_expValueRank == constants__c_ValueRank_Any) { \
+      *constants__bres = true; \
+   } \
+   else if (constants__p_expValueRank == constants__c_ValueRank_Scalar) { \
+      *constants__bres = constants__p_concValueRank == constants__c_ValueRank_Scalar; \
+   } \
+   else if (constants__p_expValueRank == constants__c_ValueRank_OneOrMoreDimensions) { \
+      *constants__bres = constants__p_concValueRank >= constants__c_ValueRank_OneDimension; \
+   } \
+   else { \
+      *constants__bres = constants__p_expValueRank == constants__p_concValueRank; \
+   } \
+}
 
 #endif

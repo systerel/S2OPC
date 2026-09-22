@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.c
 
- Date                 : 16/09/2026 08:15:30
+ Date                 : 12/10/2026 16:24:30
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -142,12 +142,6 @@ void session_core_2__set_session_roles_2(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_sessionRoles_i session_core_2__p_roles) {
    session_core_2__a_session_roles_i[session_core_2__p_session] = session_core_2__p_roles;
-}
-
-void session_core_2__get_session_roles(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_sessionRoles_i * const session_core_2__p_session_roles) {
-   *session_core_2__p_session_roles = session_core_2__a_session_roles_i[session_core_2__p_session];
 }
 
 void session_core_2__add_session(
@@ -342,12 +336,6 @@ void session_core_2__set_server_session_name(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_SessionName_i session_core_2__p_sessionName) {
    session_core_2__a_server_session_name_i[session_core_2__p_session] = session_core_2__p_sessionName;
-}
-
-void session_core_2__get_server_session_name(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_SessionName_i * const session_core_2__p_sessionName) {
-   *session_core_2__p_sessionName = session_core_2__a_server_session_name_i[session_core_2__p_session];
 }
 
 void session_core_2__reset_server_session_roles(

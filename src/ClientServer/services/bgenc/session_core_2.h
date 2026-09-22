@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.h
 
- Date                 : 25/02/2026 11:31:40
+ Date                 : 22/09/2026 15:23:35
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -67,6 +67,19 @@ extern t_entier4 session_core_2__card_s_session_i;
   ------------------------*/
 extern void session_core_2__INITIALISATION(void);
 
+/*---------------------
+   Inlined OPERATIONS
+  ---------------------*/
+#define session_core_2__get_session_roles(session_core_2__p_session, \
+   session_core_2__p_session_roles) { \
+   *session_core_2__p_session_roles = session_core_2__a_session_roles_i[session_core_2__p_session]; \
+}
+
+#define session_core_2__get_server_session_name(session_core_2__p_session, \
+   session_core_2__p_sessionName) { \
+   *session_core_2__p_sessionName = session_core_2__a_server_session_name_i[session_core_2__p_session]; \
+}
+
 /*--------------------
    OPERATIONS Clause
   --------------------*/
@@ -88,9 +101,6 @@ extern void session_core_2__get_server_session_client_app_desc(
 extern void session_core_2__get_server_session_client_cert_tb(
    const constants__t_session_i session_core_2__p_session,
    constants__t_CertThumbprint_i * const session_core_2__p_cliCertTb);
-extern void session_core_2__get_server_session_name(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_SessionName_i * const session_core_2__p_sessionName);
 extern void session_core_2__get_server_session_preferred_locales(
    const constants__t_session_i session_core_2__p_session,
    constants__t_LocaleIds_i * const session_core_2__p_localeIds);
@@ -100,9 +110,6 @@ extern void session_core_2__get_server_session_user_auth_attempts(
 extern void session_core_2__get_session_channel(
    const constants__t_session_i session_core_2__session,
    constants__t_channel_i * const session_core_2__channel);
-extern void session_core_2__get_session_roles(
-   const constants__t_session_i session_core_2__p_session,
-   constants__t_sessionRoles_i * const session_core_2__p_session_roles);
 extern void session_core_2__get_session_state(
    const constants__t_session_i session_core_2__session,
    constants__t_sessionState_i * const session_core_2__state);

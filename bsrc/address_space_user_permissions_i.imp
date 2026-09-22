@@ -62,6 +62,8 @@ LOCAL_OPERATIONS
 
 OPERATIONS
 
+    /* pragma INLINE(has_AddressSpace_RolePermissions) */
+
     p_rolePermissions <-- l_read_AddressSpace_RolePermissionsOrDefault(p_nodeId) =
     VAR
         l_nodeRolePermissions,

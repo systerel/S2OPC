@@ -95,6 +95,8 @@ INITIALISATION
 
 OPERATIONS
 
+    /* pragma INLINE(get_server_session_name, get_session_roles) */
+
     set_session_roles_2(p_session, p_roles) =
     BEGIN
         a_session_roles_i(p_session) := p_roles

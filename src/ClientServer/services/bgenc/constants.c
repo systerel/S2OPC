@@ -21,7 +21,7 @@
 
  File Name            : constants.c
 
- Date                 : 16/09/2026 08:15:10
+ Date                 : 12/10/2026 16:24:16
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -36,65 +36,5 @@
    INITIALISATION Clause
   ------------------------*/
 void constants__INITIALISATION(void) {
-}
-
-/*--------------------
-   OPERATIONS Clause
-  --------------------*/
-void constants__read_cast_t_ReadValue(
-   const t_entier4 constants__ii,
-   constants__t_ReadValue_i * const constants__rvi) {
-   *constants__rvi = constants__ii;
-}
-
-void constants__get_cast_t_WriteValue(
-   const t_entier4 constants__ii,
-   constants__t_WriteValue_i * const constants__wvi) {
-   *constants__wvi = constants__ii;
-}
-
-void constants__get_cast_t_BrowseValue(
-   const t_entier4 constants__p_ind,
-   constants__t_BrowseValue_i * const constants__p_bvi) {
-   *constants__p_bvi = constants__p_ind;
-}
-
-void constants__get_Is_Dir_Forward_Compatible(
-   const constants__t_BrowseDirection_i constants__p_dir,
-   const t_bool constants__p_IsForward,
-   t_bool * const constants__p_dir_compat) {
-   switch (constants__p_dir) {
-   case constants__e_bd_forward:
-      *constants__p_dir_compat = constants__p_IsForward;
-      break;
-   case constants__e_bd_inverse:
-      *constants__p_dir_compat = constants__p_IsForward == false;
-      break;
-   default:
-      *constants__p_dir_compat = true;
-      break;
-   }
-}
-
-void constants__is_included_ValueRank(
-   const t_entier4 constants__p_concValueRank,
-   const t_entier4 constants__p_expValueRank,
-   t_bool * const constants__bres) {
-   if (constants__p_expValueRank == constants__c_ValueRank_ScalarOrOneDimension) {
-      *constants__bres = constants__p_concValueRank == constants__c_ValueRank_Scalar ||
-         constants__p_concValueRank == constants__c_ValueRank_OneDimension;
-   }
-   else if (constants__p_expValueRank == constants__c_ValueRank_Any) {
-      *constants__bres = true;
-   }
-   else if (constants__p_expValueRank == constants__c_ValueRank_Scalar) {
-      *constants__bres = constants__p_concValueRank == constants__c_ValueRank_Scalar;
-   }
-   else if (constants__p_expValueRank == constants__c_ValueRank_OneOrMoreDimensions) {
-      *constants__bres = constants__p_concValueRank >= constants__c_ValueRank_OneDimension;
-   }
-   else {
-      *constants__bres = constants__p_expValueRank == constants__p_concValueRank;
-   }
 }
 

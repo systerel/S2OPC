@@ -128,6 +128,9 @@ INITIALISATION
     a_set_roles_i := c_sessionRoles_indet
 
 OPERATIONS
+
+    /* pragma INLINE(get_user_authorization) */
+
     bres <-- has_access_level_read(node) =
     VAR
         l_access_level,
