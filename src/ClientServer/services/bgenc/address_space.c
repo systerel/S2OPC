@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 29/09/2026 08:52:03
+ Date                 : 06/10/2026 16:12:52
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -154,18 +154,27 @@ void address_space__treat_write_request_WriteValue(
       service_write_decode_bs__getall_WriteValuePointer(address_space__p_wvi,
          &address_space__l_wv);
       if (*address_space__p_status == constants_statuscodes_bs__e_sc_ok) {
+         address_space_authorization__read_AddressSpace_Raw_Node_Value_value(address_space__l_node,
+            address_space__l_nid,
+            address_space__l_aid,
+            &address_space__l_new_sc,
+            &address_space__l_new_val,
+            &address_space__l_new_val_sc,
+            &address_space__l_new_val_ts_src);
+         constants__get_CurrentTimestamp(&address_space__l_new_val_ts_srv);
+         if (address_space__l_new_sc == constants_statuscodes_bs__e_sc_ok) {
+            eval_write_internal_cb_bs__eval_write_internal_behavior(address_space__l_nid,
+               address_space__l_aid,
+               address_space__l_prev_dataValue,
+               address_space__l_new_val,
+               address_space__l_new_val_sc,
+               address_space__l_new_val_ts_src,
+               address_space__l_new_val_ts_srv);
+         }
          address_space_authorization__has_access_level_read(address_space__l_node,
             &address_space__l_access_read);
          if (address_space__l_access_read == true) {
-            address_space_authorization__read_AddressSpace_Raw_Node_Value_value(address_space__l_node,
-               address_space__l_nid,
-               address_space__l_aid,
-               &address_space__l_new_sc,
-               &address_space__l_new_val,
-               &address_space__l_new_val_sc,
-               &address_space__l_new_val_ts_src);
             if (address_space__l_new_sc == constants_statuscodes_bs__e_sc_ok) {
-               constants__get_CurrentTimestamp(&address_space__l_new_val_ts_srv);
                gen_subscription_event_bs__gen_data_changed_event(address_space__l_nid,
                   address_space__l_aid,
                   address_space__l_prev_dataValue,

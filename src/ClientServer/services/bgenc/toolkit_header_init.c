@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 18/08/2026 14:57:52
+ Date                 : 30/09/2026 12:44:22
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -74,6 +74,7 @@
 #include "constants_statuscodes_bs.h"
 #include "data_value_pointer_bs.h"
 #include "default_role_permissions_array_bs.h"
+#include "eval_write_internal_cb_bs.h"
 #include "gen_subscription_event_bs.h"
 #include "history_read_it.h"
 #include "history_read_treatment_bs.h"
@@ -271,6 +272,7 @@ void INITIALISATION(void) {
    address_space_typing_bs__INITIALISATION();
    address_space_typing__INITIALISATION();
    gen_subscription_event_bs__INITIALISATION();
+   eval_write_internal_cb_bs__INITIALISATION();
    service_write_decode_bs__INITIALISATION();
    service_response_cb_bs__INITIALISATION();
    write_value_pointer_bs__INITIALISATION();

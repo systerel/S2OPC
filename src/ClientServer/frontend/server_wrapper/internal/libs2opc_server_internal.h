@@ -33,6 +33,7 @@
 #include <stdbool.h>
 
 #include "sopc_address_space.h"
+#include "sopc_builtintypes.h"
 #include "sopc_event_manager.h"
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_config.h"
@@ -144,6 +145,9 @@ typedef struct SOPC_ServerHelper_Config
 
     // Runtime variables
     SOPC_Server_RuntimeVariables runtimeVariables;
+
+    // Write node specific behavior callbacks
+    SOPC_Dict* writeInternalBehaviorCb;
 
 } SOPC_ServerHelper_Config;
 
@@ -279,5 +283,51 @@ void SOPC_ServerInternal_SetDiagnosticsEventHandler(SOPC_EventHandler* eventHand
  * \return The ServerDiagnostics event handler, or NULL if it has not been initialized.
  */
 SOPC_EventHandler* SOPC_ServerInternal_GetDiagnosticsEventHandler(void);
+
+/**
+ * \brief Internal behavior callback called on successful write of a node Value attribute.
+ *
+ * Called synchronously from the services thread: it shall not block, shall not call synchronous local services
+ * and shall not keep references to its parameters after returning.
+ *
+ * \param nodeId     The NodeId of the written node
+ * \param prevValue  The value before the write operation
+ * \param newValue   The value after the write operation (Good status code)
+ * \param auxParam   The auxiliary parameter provided on registration
+ */
+typedef void SOPC_ServerInternal_WriteBehavior_Fct(const SOPC_NodeId* nodeId,
+                                                   const SOPC_DataValue* prevValue,
+                                                   const SOPC_DataValue* newValue,
+                                                   uintptr_t auxParam);
+
+/**
+ * \brief Registers an internal behavior callback called on write of the given node Value attribute.
+ *        Only one callback can be registered per node.
+ *
+ * \param nodeId    The NodeId of the node (copied)
+ * \param callback  The callback to call on write of the node Value attribute
+ * \param auxParam  The auxiliary parameter provided to the callback
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_STATE if the server is not in configuring state,
+ *         SOPC_STATUS_INVALID_PARAMETERS if a parameter is NULL or a callback is already registered for the node,
+ *         SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ */
+SOPC_ReturnStatus SOPC_ServerInternal_RegisterWriteBehaviorCb(const SOPC_NodeId* nodeId,
+                                                              SOPC_ServerInternal_WriteBehavior_Fct* callback,
+                                                              uintptr_t auxParam);
+
+/**
+ * \brief Gets the internal behavior callback registered for the given node.
+ *
+ * \param nodeId          The NodeId of the node
+ * \param[out] callback   The registered callback
+ * \param[out] auxParam   The registered auxiliary parameter
+ *
+ * \return true if the server is started or stopping and a callback is registered for the node, false otherwise.
+ */
+bool SOPC_ServerInternal_GetRegisteredWriteBehaviorCb(const SOPC_NodeId* nodeId,
+                                                      SOPC_ServerInternal_WriteBehavior_Fct** callback,
+                                                      uintptr_t* auxParam);
 
 #endif

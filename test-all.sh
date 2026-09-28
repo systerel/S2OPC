@@ -87,6 +87,7 @@ toolkit_test_server_client_expired_cert.tap
 toolkit_test_server_local_service.tap
 toolkit_test_server_notif_session_events.tap
 toolkit_test_server_restart.tap
+toolkit_test_server_write_behavior_cb.tap
 toolkit_test_suite_client.tap
 validation.tap
 s2opc_write.tap

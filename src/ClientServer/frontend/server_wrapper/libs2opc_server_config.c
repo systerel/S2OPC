@@ -29,6 +29,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_dict.h"
 #include "sopc_hash.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -71,6 +72,7 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .endpointIndexes = NULL,
     .endpointClosed = NULL,
     .getServerKeyPassword = NULL,
+    .writeInternalBehaviorCb = NULL,
 };
 
 SOPC_ServerHelper_Config sopc_server_helper_config = {
@@ -781,6 +783,9 @@ void SOPC_ServerConfigHelper_Clear(void)
 
     SOPC_Free(sopc_server_helper_config.endpointIndexes);
     SOPC_Free(sopc_server_helper_config.endpointClosed);
+    SOPC_Dict_Delete(sopc_server_helper_config.writeInternalBehaviorCb);
+    sopc_server_helper_config.writeInternalBehaviorCb = NULL;
+
     SOPC_Atomic_Int_Set(&sopc_server_helper_config.initialized, (int32_t) false);
     SOPC_Mutex_Clear(&sopc_server_helper_config.stateMutex);
 
@@ -986,4 +991,105 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetOverwriteRequestCb(SOPC_OverwriteSe
     SOPC_ASSERT(NULL != pConfig);
     pConfig->serverConfig.overwriteRequestFunc = overwriteReqCb;
     return SOPC_STATUS_OK;
+}
+
+typedef struct SOPC_WriteBehaviorCb
+{
+    SOPC_ServerInternal_WriteBehavior_Fct* callback;
+    uintptr_t auxParam;
+} SOPC_WriteBehaviorCb;
+
+static void SOPC_WriteBehaviorCb_Free(uintptr_t data)
+{
+    SOPC_Free((void*) data);
+}
+
+SOPC_ReturnStatus SOPC_ServerInternal_RegisterWriteBehaviorCb(const SOPC_NodeId* nodeId,
+                                                              SOPC_ServerInternal_WriteBehavior_Fct* callback,
+                                                              uintptr_t auxParam)
+{
+    if (NULL == nodeId || NULL == callback)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (!SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_NodeId* key = NULL;
+    SOPC_WriteBehaviorCb* value = NULL;
+
+    // Keep state lock (recursive) to guarantee the state does not change until dictionary is updated
+    SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
+    if (!SOPC_ServerInternal_IsConfiguring())
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    if (SOPC_STATUS_OK == status && NULL == sopc_server_helper_config.writeInternalBehaviorCb)
+    {
+        sopc_server_helper_config.writeInternalBehaviorCb = SOPC_NodeId_Dict_Create(true, SOPC_WriteBehaviorCb_Free);
+        status = (NULL == sopc_server_helper_config.writeInternalBehaviorCb) ? SOPC_STATUS_OUT_OF_MEMORY : status;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        bool found = false;
+        SOPC_Dict_Get(sopc_server_helper_config.writeInternalBehaviorCb, (uintptr_t) nodeId, &found);
+        status = found ? SOPC_STATUS_INVALID_PARAMETERS : status;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        key = SOPC_Malloc(sizeof(*key));
+        value = SOPC_Malloc(sizeof(*value));
+        status = (NULL == key || NULL == value) ? SOPC_STATUS_OUT_OF_MEMORY : status;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_NodeId_Initialize(key);
+        status = SOPC_NodeId_Copy(key, nodeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        value->callback = callback;
+        value->auxParam = auxParam;
+        status = SOPC_Dict_Insert(sopc_server_helper_config.writeInternalBehaviorCb, (uintptr_t) key, (uintptr_t) value)
+                     ? SOPC_STATUS_OK
+                     : SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_NodeId_Clear(key);
+        SOPC_Free(key);
+        SOPC_Free(value);
+    }
+    return status;
+}
+
+bool SOPC_ServerInternal_GetRegisteredWriteBehaviorCb(const SOPC_NodeId* nodeId,
+                                                      SOPC_ServerInternal_WriteBehavior_Fct** callback,
+                                                      uintptr_t* auxParam)
+{
+    // Dictionary is only modified in configuring state: no lock needed to read it once started
+    if (NULL == nodeId || NULL == callback || NULL == auxParam ||
+        NULL == sopc_server_helper_config.writeInternalBehaviorCb)
+    {
+        return false;
+    }
+    if (!SOPC_ServerInternal_IsStarted() && !SOPC_ServerInternal_IsStopping())
+    {
+        return false;
+    }
+    bool found = false;
+    const SOPC_WriteBehaviorCb* value = (const SOPC_WriteBehaviorCb*) SOPC_Dict_Get(
+        sopc_server_helper_config.writeInternalBehaviorCb, (uintptr_t) nodeId, &found);
+    if (!found || NULL == value)
+    {
+        return false;
+    }
+    *callback = value->callback;
+    *auxParam = value->auxParam;
+    return true;
 }

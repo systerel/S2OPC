@@ -35,7 +35,8 @@ SEES
 IMPORTS
     address_space_authorization,
     address_space_typing,
-    gen_subscription_event_bs
+    gen_subscription_event_bs,
+    eval_write_internal_cb_bs
 
 PROMOTES
     is_AddressSpace_constant,
@@ -448,19 +449,23 @@ OPERATIONS
         /* If write succeeded, generates a data change event for subscriptions */
         IF p_status = e_sc_ok
         THEN
+            /* Read updated value after write: necessary since write value item can be partial due to indexRange
+               and to retrieve all LocalizedText alternatives */
+            /* Variable(Type) node class / Value attribute are guaranteed by success of treat_write_1 */
+            l_new_sc, l_new_val, l_new_val_sc, l_new_val_ts_src <-- read_AddressSpace_Raw_Node_Value_value (l_node, l_nid, l_aid);
+            l_new_val_ts_srv <-- get_CurrentTimestamp; /* Server timestamp is the current one */
+            IF l_new_sc = e_sc_ok THEN
+                /* Shall be called before gen_data_changed_event which takes ownership of l_prev_dataValue content */
+                eval_write_internal_behavior (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv)
+            END;
+            l_access_read <-- has_access_level_read(l_node);
             /* Check access level: read access right <=> data change event for subscription */
             /*
             Justif: we do not generate data change event since we cannot return notification on non readable value.
             Moreover the access level is static and then the subscriber has already been notified on M.I. creation.
             */
-            l_access_read <-- has_access_level_read(l_node);
             IF l_access_read = TRUE THEN
-                /* Read updated value after write: necessary since write value item can be partial due to indexRange
-                                                   and to retrieve all LocalizedText alternatives */
-                /* Variable(Type) node class / Value attribute are guaranteed by success of treat_write_1 */
-                l_new_sc, l_new_val, l_new_val_sc, l_new_val_ts_src <-- read_AddressSpace_Raw_Node_Value_value (l_node, l_nid, l_aid);
                 IF l_new_sc = e_sc_ok THEN
-                    l_new_val_ts_srv <-- get_CurrentTimestamp; /* Server timestamp is the current one */
                     gen_data_changed_event (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv)
                 ELSE
                     gen_data_changed_event_failed

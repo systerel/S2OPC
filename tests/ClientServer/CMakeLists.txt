@@ -399,6 +399,19 @@ if (expat_FOUND)
   target_compile_definitions(toolkit_test_server_local_service PRIVATE "WITH_EXPAT")
 endif()
 
+# Server internal write behavior callback
+add_executable(toolkit_test_server_write_behavior_cb "validation_tests/server/toolkit_test_server_write_behavior_cb.c"
+  ${TEST_SERVER_ADDRESS_SPACE_C}
+  ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+add_dependencies(toolkit_test_server_write_behavior_cb make-server-address-space)
+target_include_directories(toolkit_test_server_write_behavior_cb PRIVATE
+                           ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
+                           "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/server_wrapper/internal")
+target_link_libraries(toolkit_test_server_write_behavior_cb PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+target_compile_options(toolkit_test_server_write_behavior_cb PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_server_write_behavior_cb PRIVATE ${S2OPC_DEFINITIONS})
+s2opc_unit_test(toolkit_test_server_write_behavior_cb GENERATE_TAP)
+
 
 
 # Client scenario
