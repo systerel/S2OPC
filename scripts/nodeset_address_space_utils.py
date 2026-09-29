@@ -535,6 +535,15 @@ class NodesetMerger(NSFinder):
         # Delete MaxNodesPerNodeManagemeent
         self._remove_nids_and_refs(['i=11713'])
 
+    def enable_diag_flag(self):
+        # Set AccessLevel of ServerDiagnostics EnabledFlag to CurrentRead | CurrentWrite
+        node = self._find_node_with_nid('i=2294')
+        if node is None:
+            raise Exception("Missing UAVariable EnabledFlag (i=2294) in NS0")
+        if self.verbose:
+            print('EnableDiagFlag: set AccessLevel=3 on i=2294', file=sys.stderr)
+        node.set('AccessLevel', '3')
+
     def remove_methods(self):
         # Delete methods that are instances of other methods.
         # For now, this difference between instantiated methods or not is solely based on the MethodDeclarationId.
@@ -988,6 +997,9 @@ def run_merge(args):
     if args.remove_max_node_mgt:
         merger.remove_max_node_mgt()
 
+    if args.enable_diag_flag:
+        merger.enable_diag_flag()
+
     if args.remove_node_ids_gt > 0:
         merger.remove_node_ids_greater_than(args.remove_node_ids_gt)
 
@@ -1042,6 +1054,11 @@ def make_argparser():
                         help='Remove nodes and references that enable the use of methods')
     parser.add_argument('--remove-max-node-management', action='store_true', dest='remove_max_node_mgt',
                         help='Remove the MaxNodesPerNodeManagement node and references to it')
+    parser.add_argument('--enable-diag-flag', action='store_true', dest='enable_diag_flag',
+                        help='''
+                        Set the AccessLevel of ServerDiagnostics EnabledFlag (i=2294) to 3 (CurrentRead | CurrentWrite)
+                        so that server diagnostics can be enabled
+                        ''')
     parser.add_argument('--remove-node-ids-greater-than', default=0, type=int, dest='remove_node_ids_gt',
                         help='Remove the nodes of NS 0 with a NodeId greater than the given value')
     parser.add_argument('--remove-subtrees', default=[], nargs='+', dest='remove_subtrees',

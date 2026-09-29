@@ -203,5 +203,13 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_sanitize_parentnodeid_cases.xml', [],
                       'ns0.xml', 'TestParentNodeIdCases.xml')
 
+    def test_enable_diag_flag(self):
+        self.run_test('test_enable_diag_flag.xml', ['--enable-diag-flag'],
+                      'ns0.xml')
+
+    def test_enable_diag_flag_missing_node(self):
+        self.run_error("Missing UAVariable EnabledFlag (i=2294) in NS0", ['--enable-diag-flag'],
+                       's2opc_base_nodeset_check.xml')
+
 if __name__ == '__main__':
     unittest.main()
