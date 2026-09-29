@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 24/06/2026 15:32:05
+ Date                 : 29/09/2026 08:52:03
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -440,6 +440,7 @@ void address_space__read_AddressSpace_Attribute_value(
    {
       t_bool address_space__l_user_read_auth;
       t_bool address_space__l_user_write_auth;
+      t_bool address_space__l_user_hist_read_auth;
       t_bool address_space__l_is_range_defined;
       t_bool address_space__l_user_executable_auth;
       t_bool address_space__l_local_treatment;
@@ -544,9 +545,16 @@ void address_space__read_AddressSpace_Attribute_value(
                address_space__p_user,
                address_space__l_roles,
                &address_space__l_user_write_auth);
+            address_space_authorization__get_user_authorization(constants__e_operation_type_historyread,
+               address_space__p_nid,
+               constants__e_aid_Value,
+               address_space__p_user,
+               address_space__l_roles,
+               &address_space__l_user_hist_read_auth);
             address_space_authorization__read_AddressSpace_UserAccessLevel_value(address_space__p_node,
                address_space__l_user_read_auth,
                address_space__l_user_write_auth,
+               address_space__l_user_hist_read_auth,
                address_space__sc,
                address_space__val);
             break;

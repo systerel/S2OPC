@@ -522,7 +522,7 @@ OPERATIONS
     END
     ;
 
-    sc, variant <-- read_AddressSpace_UserAccessLevel_value(p_node, p_is_user_read_auth, p_is_user_write_auth) =
+    sc, variant <-- read_AddressSpace_UserAccessLevel_value(p_node, p_is_user_read_auth, p_is_user_write_auth, p_is_user_hist_read_auth) =
     PRE
         p_node : t_Node_i         &
         p_node : s_Node           &
@@ -531,7 +531,8 @@ OPERATIONS
         p_node : dom(a_UserAccessLevel) &
         p_node : dom(a_AccessLevel) & /* AccessLevel used to generate value */
         p_is_user_read_auth : BOOL &
-        p_is_user_write_auth : BOOL
+        p_is_user_write_auth : BOOL &
+        p_is_user_hist_read_auth : BOOL
     THEN
         CHOICE
             variant := c_Variant_indet ||

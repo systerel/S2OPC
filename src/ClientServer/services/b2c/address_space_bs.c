@@ -31,6 +31,7 @@
 #include "address_space_impl.h"
 #include "app_cb_call_context_internal.h"
 #include "b2c.h"
+#include "constants_bs.h"
 #include "opcua_identifiers.h"
 #include "sopc_address_space_access_internal.h"
 #include "sopc_address_space_utils_internal.h"
@@ -845,6 +846,7 @@ void address_space_bs__read_AddressSpace_UserAccessLevel_value(
     const constants__t_Node_i address_space_bs__p_node,
     const t_bool address_space_bs__p_is_user_read_auth,
     const t_bool address_space_bs__p_is_user_write_auth,
+    const t_bool address_space_bs__p_is_user_hist_read_auth,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
@@ -864,7 +866,11 @@ void address_space_bs__read_AddressSpace_UserAccessLevel_value(
             SOPC_AccessLevelMask_CurrentWrite | SOPC_AccessLevelMask_StatusWrite | SOPC_AccessLevelMask_TimestampWrite;
         userAccessLevel |= (accessLevel & supportedWriteFlags);
     }
-
+    if (address_space_bs__p_is_user_hist_read_auth)
+    {
+        uint8_t supportedHistoryFlag = accessLevel & SOPC_AccessLevelMask_HistoryRead;
+        userAccessLevel |= supportedHistoryFlag;
+    }
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_Byte(userAccessLevel);
     if (NULL == *address_space_bs__variant)

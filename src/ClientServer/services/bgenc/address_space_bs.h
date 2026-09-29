@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 08/07/2026 11:25:16
+ Date                 : 29/09/2026 08:52:21
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -244,6 +244,7 @@ extern void address_space_bs__read_AddressSpace_UserAccessLevel_value(
    const constants__t_Node_i address_space_bs__p_node,
    const t_bool address_space_bs__p_is_user_read_auth,
    const t_bool address_space_bs__p_is_user_write_auth,
+   const t_bool address_space_bs__p_is_user_hist_read_auth,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_UserExecutable_value(

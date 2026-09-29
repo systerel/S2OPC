@@ -624,6 +624,7 @@ OPERATIONS
     VAR
         l_user_read_auth,
         l_user_write_auth,
+        l_user_hist_read_auth,
         l_is_range_defined,
         l_user_executable_auth,
         l_local_treatment,
@@ -676,7 +677,8 @@ OPERATIONS
                     l_roles <-- get_user_roles(p_user);
                     l_user_read_auth <-- get_user_authorization(e_operation_type_read, p_nid, e_aid_Value, p_user, l_roles);
                     l_user_write_auth <-- get_user_authorization(e_operation_type_write, p_nid, e_aid_Value, p_user, l_roles);
-                    sc, val <-- read_AddressSpace_UserAccessLevel_value(p_node, l_user_read_auth, l_user_write_auth)
+                    l_user_hist_read_auth <-- get_user_authorization(e_operation_type_historyread, p_nid, e_aid_Value, p_user, l_roles);
+                    sc, val <-- read_AddressSpace_UserAccessLevel_value(p_node, l_user_read_auth, l_user_write_auth, l_user_hist_read_auth)
                 OR e_aid_UserExecutable THEN
                     l_roles <-- get_user_roles(p_user);
                     l_user_executable_auth <-- get_user_authorization(e_operation_type_executable, p_nid, e_aid_Executable, p_user, l_roles);
