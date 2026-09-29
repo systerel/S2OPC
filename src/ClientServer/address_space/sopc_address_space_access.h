@@ -62,9 +62,7 @@ typedef struct _SOPC_AddressSpaceAccess SOPC_AddressSpaceAccess;
  *          - ContainsNoLoops
  *          - InverseName
  *          - Symmetric
- *          - EventNotifier
  *          - MinimumSamplingInterval
- *          - Historizing
  *          - UserAccessLevel
  *          - UserExecutable
  *          User related attributes will never be provided since behavior is dynamic.

@@ -301,14 +301,17 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
     case SOPC_AttributeId_Executable:
         val = util_variant__new_Variant_from_Bool(SOPC_AddressSpace_Get_Executable(addSpaceAccess->addSpaceRef, node));
         break;
-    case SOPC_AttributeId_ContainsNoLoops:
-    case SOPC_AttributeId_InverseName:
-    case SOPC_AttributeId_Symmetric:
-    case SOPC_AttributeId_EventNotifier:
-    case SOPC_AttributeId_MinimumSamplingInterval:
     case SOPC_AttributeId_Historizing:
         val = util_variant__new_Variant_from_Bool(SOPC_AddressSpace_Get_Historizing(addSpaceAccess->addSpaceRef, node));
         break;
+    case SOPC_AttributeId_EventNotifier:
+        val =
+            util_variant__new_Variant_from_Byte(SOPC_AddressSpace_Get_EventNotifier(addSpaceAccess->addSpaceRef, node));
+        break;
+    case SOPC_AttributeId_ContainsNoLoops:
+    case SOPC_AttributeId_InverseName:
+    case SOPC_AttributeId_Symmetric:
+    case SOPC_AttributeId_MinimumSamplingInterval:
     case SOPC_AttributeId_UserAccessLevel:
     case SOPC_AttributeId_UserExecutable:
     default:

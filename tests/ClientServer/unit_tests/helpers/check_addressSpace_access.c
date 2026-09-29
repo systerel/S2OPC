@@ -66,6 +66,78 @@ START_TEST(test_read_attribute)
 }
 END_TEST
 
+// Read an attribute and check result is a single value of the expected type or the expected bad status
+static void check_read_attribute(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                 const char* nodeIdString,
+                                 SOPC_AttributeId attribId,
+                                 SOPC_StatusCode expectedStatus,
+                                 SOPC_BuiltinId expectedType,
+                                 SOPC_Byte expectedValue)
+{
+    SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(nodeIdString);
+    ck_assert_ptr_nonnull(nodeId);
+    SOPC_Variant* outValue = NULL;
+    SOPC_StatusCode status = SOPC_AddressSpaceAccess_ReadAttribute(addSpaceAccess, nodeId, attribId, &outValue);
+    ck_assert_uint_eq(expectedStatus, status);
+    if (SOPC_IsGoodStatus(expectedStatus))
+    {
+        ck_assert_ptr_nonnull(outValue);
+        ck_assert_int_eq(SOPC_VariantArrayType_SingleValue, outValue->ArrayType);
+        ck_assert_int_eq(expectedType, outValue->BuiltInTypeId);
+        // Boolean and Byte share the same storage type
+        ck_assert_uint_eq(expectedValue,
+                          SOPC_Boolean_Id == expectedType ? outValue->Value.Boolean : outValue->Value.Byte);
+        SOPC_Variant_Clear(outValue);
+        SOPC_Free(outValue);
+    }
+    else
+    {
+        ck_assert_ptr_null(outValue);
+    }
+    SOPC_NodeId_Clear(nodeId);
+    SOPC_Free(nodeId);
+}
+
+START_TEST(test_read_attribute_by_node_class)
+{
+    SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
+    ck_assert_ptr_nonnull(addressSpace);
+
+    // Add a View node since there is none in test address space
+    SOPC_AddressSpace_Node* viewNode = SOPC_Calloc(1, sizeof(*viewNode));
+    ck_assert_ptr_nonnull(viewNode);
+    SOPC_AddressSpace_Node_Initialize(addressSpace, viewNode, OpcUa_NodeClass_View);
+    viewNode->data.view.NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 424242};
+    viewNode->data.view.EventNotifier = OpcUa_EventNotifierType_SubscribeToEvents;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AddressSpace_Append(addressSpace, viewNode));
+
+    SOPC_AddressSpaceAccess* addSpaceAccess = SOPC_AddressSpaceAccess_Create(addressSpace, false);
+    ck_assert_ptr_nonnull(addSpaceAccess);
+
+    // Object: Server
+    check_read_attribute(addSpaceAccess, "i=2253", SOPC_AttributeId_EventNotifier, SOPC_GoodGenericStatus,
+                         SOPC_Byte_Id, OpcUa_EventNotifierType_SubscribeToEvents);
+    // View
+    check_read_attribute(addSpaceAccess, "ns=1;i=424242", SOPC_AttributeId_EventNotifier, SOPC_GoodGenericStatus,
+                         SOPC_Byte_Id, OpcUa_EventNotifierType_SubscribeToEvents);
+    check_read_attribute(addSpaceAccess, "ns=1;i=424242", SOPC_AttributeId_ContainsNoLoops, OpcUa_BadNotImplemented,
+                         SOPC_Null_Id, 0);
+    // ReferenceType: HierarchicalReferences
+    check_read_attribute(addSpaceAccess, "i=33", SOPC_AttributeId_Symmetric, OpcUa_BadNotImplemented, SOPC_Null_Id,
+                         0);
+    check_read_attribute(addSpaceAccess, "i=33", SOPC_AttributeId_InverseName, OpcUa_BadNotImplemented, SOPC_Null_Id,
+                         0);
+    // Variable with Historizing = true
+    check_read_attribute(addSpaceAccess, "ns=1;i=1001", SOPC_AttributeId_Historizing, SOPC_GoodGenericStatus,
+                         SOPC_Boolean_Id, true);
+    check_read_attribute(addSpaceAccess, "ns=1;i=1001", SOPC_AttributeId_MinimumSamplingInterval,
+                         OpcUa_BadNotImplemented, SOPC_Null_Id, 0);
+
+    SOPC_AddressSpace_Delete(addressSpace);
+    SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
+}
+END_TEST
+
 START_TEST(test_read_value)
 {
     SOPC_AddressSpace* addressSpace = SOPC_Embedded_AddressSpace_LoadWithAlloc(true);
@@ -686,6 +758,7 @@ Suite* tests_make_suite_address_space_access(void)
     tc_nominal_use = tcase_create("Nominal");
 #if 0 != S2OPC_NODE_MANAGEMENT
     tcase_add_test(tc_nominal_use, test_read_attribute);
+    tcase_add_test(tc_nominal_use, test_read_attribute_by_node_class);
     tcase_add_test(tc_nominal_use, test_read_value);
     tcase_add_test(tc_nominal_use, test_write_value);
     tcase_add_test(tc_nominal_use, test_add_variable_node);
