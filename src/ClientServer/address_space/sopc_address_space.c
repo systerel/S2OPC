@@ -464,6 +464,8 @@ SOPC_Byte SOPC_AddressSpace_Get_EventNotifier(const SOPC_AddressSpace* space, co
     {
     case OpcUa_NodeClass_Object:
         return node->data.object.EventNotifier;
+    case OpcUa_NodeClass_View:
+        return node->data.view.EventNotifier;
     default:
         SOPC_ASSERT(false && "Current element has no EventNotifier attribute.");
         return 0;

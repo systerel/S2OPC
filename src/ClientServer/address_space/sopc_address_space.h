@@ -191,8 +191,8 @@ int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC
 uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 SOPC_ExtensionObject* SOPC_AddressSpace_Get_DataTypeDefinition(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 
-/* Object common attributes */
-SOPC_Boolean SOPC_AddressSpace_Get_EventNotifier(const SOPC_AddressSpace* space, const SOPC_AddressSpace_Node* node);
+/* Object / View common attributes */
+SOPC_Byte SOPC_AddressSpace_Get_EventNotifier(const SOPC_AddressSpace* space, const SOPC_AddressSpace_Node* node);
 
 /* Types common attribute */
 SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
