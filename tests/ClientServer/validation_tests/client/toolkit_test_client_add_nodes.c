@@ -911,6 +911,112 @@ static OpcUa_AddNodesResponse* add_node_with_generic_node_attributes(SOPC_Client
 
     return addNodesResp;
 }
+
+// Add a Variable with Historizing attribute set to true and check it is read as true
+static SOPC_ReturnStatus add_node_variable_historizing(SOPC_ClientConnection* secureConnection,
+                                                       SOPC_ExpandedNodeId* parentNodeId,
+                                                       SOPC_NodeId* referenceTypeId,
+                                                       SOPC_ExpandedNodeId* reqNodeId,
+                                                       SOPC_QualifiedName* browseName,
+                                                       SOPC_ExpandedNodeId* typeDefinition)
+{
+    OpcUa_AddNodesResponse* addNodesResp = NULL;
+    OpcUa_ReadResponse* readResp = NULL;
+    SOPC_Boolean historizing = true;
+
+    // Use "Objects" node for parent node
+    parentNodeId->NodeId.Data.Numeric = OpcUaId_ObjectsFolder;
+    // Reference type "Organizes"
+    referenceTypeId->Data.Numeric = OpcUaId_Organizes;
+    // Use Type definition is OpcUaId_BaseDataVariableType
+    typeDefinition->NodeId.Data.Numeric = OpcUaId_BaseDataVariableType;
+    // NodeId requested
+    reqNodeId->NodeId.Namespace = 1;
+    reqNodeId->NodeId.IdentifierType = SOPC_IdentifierType_String;
+    SOPC_ReturnStatus status =
+        SOPC_String_AttachFromCstring(&reqNodeId->NodeId.Data.String, "NewNodeId_HistorizingVariable");
+    if (SOPC_STATUS_OK == status)
+    {
+        browseName->NamespaceIndex = 1;
+        status = SOPC_String_AttachFromCstring(&browseName->Name, "BrowseName_HistorizingVariable");
+    }
+
+    OpcUa_AddNodesRequest* addNodesReq = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        addNodesReq = SOPC_AddNodesRequest_Create(1);
+        status = (NULL == addNodesReq ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_AddNodeRequest_SetVariableAttributes(addNodesReq, 0, parentNodeId, referenceTypeId, reqNodeId,
+                                                           browseName, typeDefinition, NULL, NULL, NULL, NULL, NULL,
+                                                           NULL, NULL, 0, NULL, NULL, NULL, NULL, &historizing);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) addNodesReq, (void**) &addNodesResp);
+    }
+    else if (NULL != addNodesReq)
+    {
+        SOPC_ReturnStatus delStatus =
+            SOPC_EncodeableObject_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ASSERT(NULL != addNodesResp);
+        if (!SOPC_IsGoodStatus(addNodesResp->ResponseHeader.ServiceResult) || addNodesResp->NoOfResults != 1 ||
+            SOPC_GoodGenericStatus != addNodesResp->Results[0].StatusCode)
+        {
+            printf("add_node_variable_historizing: AddNodes failed\n");
+            status = SOPC_STATUS_NOK;
+        }
+        SOPC_ReturnStatus delStatus =
+            SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+    }
+
+    // Read Historizing attribute of the added node
+    OpcUa_ReadRequest* readReq = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        readReq = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
+        status = (NULL == readReq ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ReadRequest_SetReadValue(readReq, 0, &reqNodeId->NodeId, SOPC_AttributeId_Historizing, NULL);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, (void*) readReq, (void**) &readResp);
+    }
+    else if (NULL != readReq)
+    {
+        SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &readReq);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ASSERT(NULL != readResp);
+        if (!SOPC_IsGoodStatus(readResp->ResponseHeader.ServiceResult) || readResp->NoOfResults != 1 ||
+            !SOPC_IsGoodStatus(readResp->Results[0].Status) ||
+            SOPC_Boolean_Id != readResp->Results[0].Value.BuiltInTypeId || !readResp->Results[0].Value.Value.Boolean)
+        {
+            printf("add_node_variable_historizing: Historizing attribute not read as true\n");
+            status = SOPC_STATUS_NOK;
+        }
+        SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(readResp->encodeableType, (void**) &readResp);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+    }
+
+    // Clear data set
+    SOPC_ExpandedNodeId_Clear(reqNodeId);
+    SOPC_QualifiedName_Clear(browseName);
+
+    return status;
+}
 #endif
 #endif
 #endif
@@ -1208,6 +1314,19 @@ int main(void)
         {
             del_status = SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
             SOPC_ASSERT(SOPC_STATUS_OK == del_status);
+        }
+
+        /* 12. Good case. Add a Variable with Historizing = true and read it back */
+        tc_status = add_node_variable_historizing(secureConnection, &parentNodeId, &referenceTypeId, &reqNodeId,
+                                                  &browseName, &typeDefinition);
+        if (SOPC_STATUS_OK == tc_status)
+        {
+            printf("[Test 12] Add Variable with Historizing = true: SUCCESS\n");
+        }
+        else
+        {
+            printf("[Test 12] Add Variable with Historizing = true: FAILURE (status=%d)\n", tc_status);
+            status = SOPC_STATUS_NOK;
         }
     }
 

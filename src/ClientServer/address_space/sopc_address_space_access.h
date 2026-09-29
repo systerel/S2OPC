@@ -186,7 +186,6 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_GetFreshNodeId(SOPC_AddressSpaceAccess* 
  *                              WriteMask or UserWriteMask,
  *                              UserAccessLevel,
  *                              NoOfArrayDimensions without ArrayDimensions,
- *                              Historizing = true,
  *                              MinimumSamplingInterval != 0,
  * \param typeDefId             The ExpandedNodeId of the type definition node in AddressSpace for the variable to add.
  *                              E.g. BaseDataVariable, PropertyType, etc.

@@ -642,19 +642,9 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(SOPC_Addr
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (0 != (varAttributes->SpecifiedAttributes & OpcUa_NodeAttributesMask_Historizing) &&
-            varAttributes->Historizing)
+        if (0 != (varAttributes->SpecifiedAttributes & OpcUa_NodeAttributesMask_Historizing))
         {
-            char* nodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, node));
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes: cannot add Variable node %s "
-                                   "with Historizing attribute value since it is not supported",
-                                   nodeIdStr);
-            SOPC_Free(nodeIdStr);
-
-            // Note: server does not manage to set historizing
-            *scAddNode = OpcUa_BadNodeAttributesInvalid;
-            status = SOPC_STATUS_INVALID_PARAMETERS;
+            varNode->Historizing = varAttributes->Historizing;
         } // else: remains false
     }
     if (SOPC_STATUS_OK == status)

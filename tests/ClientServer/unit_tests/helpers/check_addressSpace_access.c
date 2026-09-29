@@ -238,8 +238,10 @@ START_TEST(test_add_variable_node)
     OpcUa_VariableAttributes varAttributes;
     OpcUa_VariableAttributes_Initialize(&varAttributes);
     varAttributes.SpecifiedAttributes = OpcUa_NodeAttributesMask_DataType | OpcUa_NodeAttributesMask_AccessLevel |
-                                        OpcUa_NodeAttributesMask_Value | OpcUa_NodeAttributesMask_DisplayName;
+                                        OpcUa_NodeAttributesMask_Value | OpcUa_NodeAttributesMask_DisplayName |
+                                        OpcUa_NodeAttributesMask_Historizing;
     varAttributes.AccessLevel = 1;
+    varAttributes.Historizing = true;
     SOPC_Variant_Initialize(&varAttributes.Value);
     varAttributes.Value.BuiltInTypeId = SOPC_Boolean_Id;
     varAttributes.Value.Value.Boolean = true;
@@ -281,6 +283,9 @@ START_TEST(test_add_variable_node)
     char* actualResult = SOPC_String_GetCString(defaultText);
     ck_assert_ptr_nonnull(actualResult);
     ck_assert_str_eq("TestDisplayName", actualResult);
+
+    check_read_attribute(addSpaceAccess, "i=1111", SOPC_AttributeId_Historizing, SOPC_GoodGenericStatus,
+                         SOPC_Boolean_Id, true);
 
     SOPC_LocalizedText_Clear(&displayName);
     SOPC_Free(actualResult);
