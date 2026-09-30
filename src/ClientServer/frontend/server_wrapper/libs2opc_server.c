@@ -211,6 +211,21 @@ static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType
 {
     SOPC_HelperConfigInternal_Ctx* helperCtx = (SOPC_HelperConfigInternal_Ctx*) context;
 
+    //  In case a ::SOPC_ServerConfigHelper_Clear call is ongoing,
+    //  NULL is provided only to be able to clear the context
+    if (NULL == encType)
+    {
+        void* vwriteReqCtx = (NULL != helperCtx ? (void*) helperCtx->userContext : NULL);
+        if (NULL != vwriteReqCtx)
+        {
+            OpcUa_WriteRequest_Clear(vwriteReqCtx);
+            SOPC_Free(vwriteReqCtx);
+        }
+        // Response is always NULL in this case
+        SOPC_ASSERT(NULL == response);
+        return;
+    }
+
     SOPC_ASSERT(&OpcUa_WriteResponse_EncodeableType == encType);
     OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
     OpcUa_WriteRequest* writeReqCtx = (OpcUa_WriteRequest*) helperCtx->userContext;
