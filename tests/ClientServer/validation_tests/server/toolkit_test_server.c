@@ -1331,6 +1331,10 @@ int main(int argc, char* argv[])
             if (activateAlarms)
             {
                 status = Test_Server_InitializeAlarms();
+                if (SOPC_STATUS_OK != status)
+                {
+                    printf("<Test_Server_Toolkit: Failed to initialize alarms with error = '%d'\n", status);
+                }
             }
             while (SOPC_STATUS_OK == status && 0 == stopRequested && false == SOPC_Atomic_Int_Get(&atomicStopped))
             {
@@ -1341,7 +1345,12 @@ int main(int argc, char* argv[])
             {
                 Test_Server_PreStopAlarms();
             }
-            status = SOPC_ServerHelper_StopServer();
+            // Keep the first error status: a stop success shall not hide a previous failure
+            SOPC_ReturnStatus stopStatus = SOPC_ServerHelper_StopServer();
+            if (SOPC_STATUS_OK == status)
+            {
+                status = stopStatus;
+            }
 
             if (activateAlarms)
             {
