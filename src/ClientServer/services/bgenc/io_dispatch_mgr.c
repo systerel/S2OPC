@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 03/06/2026 15:59:00
+ Date                 : 05/10/2026 12:04:43
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -705,6 +705,11 @@ void io_dispatch_mgr__client_send_close_session_request(
          *io_dispatch_mgr__ret = constants_statuscodes_bs__e_sc_bad_invalid_argument;
       }
    }
+}
+
+void io_dispatch_mgr__server_stopped(void) {
+   service_mgr__msg_diagnostics_server_stopped();
+   service_mgr__subscription_diagnostics_server_stopped();
 }
 
 void io_dispatch_mgr__internal_client_create_session(

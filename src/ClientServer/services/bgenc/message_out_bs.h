@@ -21,7 +21,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 12/10/2022 09:04:52
+ Date                 : 05/10/2026 12:05:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -40,7 +40,6 @@
   --------------*/
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
-#include "message_in_bs.h"
 #include "request_handle_bs.h"
 
 /*------------------------
@@ -85,6 +84,7 @@ extern void message_out_bs__encode_msg(
    constants__t_byte_buffer_i * const message_out_bs__buffer);
 extern void message_out_bs__forget_msg_out(
    const constants__t_msg_i message_out_bs__msg);
+extern void message_out_bs__msg_diagnostics_server_stopped(void);
 extern void message_out_bs__server_write_msg_out_header_req_handle(
    const constants__t_msg_header_i message_out_bs__msg_header,
    const constants__t_server_request_handle_i message_out_bs__req_handle);

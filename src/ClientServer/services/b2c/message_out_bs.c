@@ -23,6 +23,7 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -30,6 +31,7 @@
 #include "util_b2c.h"
 
 #include "libs2opc_server_diagnostics.h"
+
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
 #include "sopc_encoder.h"
@@ -42,14 +44,19 @@
 static uint32_t rejectedRequestsCount = 0;
 static uint32_t securityRejectedRequestsCount = 0;
 
+static void message_util_diag_requests__reset_counters(void)
+{
+    rejectedRequestsCount = 0;
+    securityRejectedRequestsCount = 0;
+}
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void message_out_bs__INITIALISATION(void)
 {
     // Reset server diagnostics rejected requests counters
-    rejectedRequestsCount = 0;
-    securityRejectedRequestsCount = 0;
+    message_util_diag_requests__reset_counters();
 }
 
 /*--------------------
@@ -174,9 +181,12 @@ static bool message_util_diag_requests__is_security_failure(const SOPC_StatusCod
 
 static void message_util_diag_requests__notify_rejected_request(const bool securityRejected)
 {
-    rejectedRequestsCount++;
+    if (rejectedRequestsCount < UINT32_MAX)
+    {
+        rejectedRequestsCount++;
+    }
 
-    if (securityRejected)
+    if (securityRejected && securityRejectedRequestsCount < UINT32_MAX)
     {
         securityRejectedRequestsCount++;
     }
@@ -497,6 +507,11 @@ void message_out_bs__copy_msg_resp_header_into_msg_out(const constants__t_msg_he
                                                        const constants__t_msg_i message_out_bs__msg)
 {
     util_message__copy_resp_header_into_msg(message_out_bs__msg_header, message_out_bs__msg);
+}
+
+void message_out_bs__msg_diagnostics_server_stopped(void)
+{
+    message_util_diag_requests__reset_counters();
 }
 
 void message_out_bs__server_write_msg_out_header_req_handle(

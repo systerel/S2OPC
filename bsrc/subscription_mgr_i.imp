@@ -48,7 +48,8 @@ IMPORTS
     subscription_absent_node
 
 PROMOTES
-    is_valid_subscription
+    is_valid_subscription,
+    subscription_diagnostics_server_stopped
 
 LOCAL_OPERATIONS
 

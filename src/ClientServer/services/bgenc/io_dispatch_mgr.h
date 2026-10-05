@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 03/03/2026 16:20:07
+ Date                 : 05/10/2026 12:04:43
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -164,6 +164,7 @@ extern void io_dispatch_mgr__server_channel_connected_event(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
    const constants__t_channel_i io_dispatch_mgr__channel,
    t_bool * const io_dispatch_mgr__bres);
+extern void io_dispatch_mgr__server_stopped(void);
 extern void io_dispatch_mgr__server_treat_local_service_request(
    const constants__t_endpoint_config_idx_i io_dispatch_mgr__endpoint_config_idx,
    const constants__t_msg_i io_dispatch_mgr__req_msg,

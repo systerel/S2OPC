@@ -133,6 +133,12 @@ void SOPC_ServerInternal_DiagnosticsOnSessionEvent(SOPC_ServerSessionEvent event
                                                    SOPC_StatusCode status);
 
 /**
+ * \brief Enqueue an event in application looper to reset the session related counters
+ *        in the context of a server shutdown.
+ */
+void SOPC_ServerInternal_DiagnosticsSessionCountersReset(void);
+
+/**
  * \brief Resets the ServerDiagnostics state: diagnostics not supported, disabled and event handler reference cleared.
  *        The event handler itself is owned (and freed) by the application looper.
  *

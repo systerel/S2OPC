@@ -124,7 +124,7 @@ static void notify_server_diagnostics_update(void)
    INITIALISATION Clause
   ------------------------*/
 
-void subscription_diagnostics_bs__INITIALISATION(void)
+static void internal_init_reset_counters(void)
 {
     currentSubscriptionCount = 0;
     cumulatedSubscriptionCount = 0;
@@ -144,6 +144,11 @@ void subscription_diagnostics_bs__INITIALISATION(void)
     {
         SOPC_Dict_SetTombstoneKey(publishingIntervalDict, PUBLISH_INTERVAL_TOMBSTONE_KEY);
     }
+}
+
+void subscription_diagnostics_bs__INITIALISATION(void)
+{
+    internal_init_reset_counters();
 }
 
 /*--------------------
@@ -199,6 +204,11 @@ void subscription_diagnostics_bs__subscription_modified(
 
         notify_server_diagnostics_update();
     }
+}
+
+void subscription_diagnostics_bs__subscription_diagnostics_server_stopped(void)
+{
+    internal_init_reset_counters();
 }
 
 void subscription_diagnostics_bs__subscription_diagnostics_bs_UNINITIALISATION(void)

@@ -22,7 +22,6 @@ MACHINE
 SEES
     constants,
     constants_statuscodes_bs,
-    message_in_bs,
     request_handle_bs
 
 DEFINITIONS
@@ -39,13 +38,16 @@ DEFINITIONS
     a_msg_out_type : t_msg_type_i
 
 ABSTRACT_VARIABLES
-    d_variables
+    d_variables,
+    diagRejectedRequestsCount
 
 INVARIANT
-    d_typing
+    d_typing &
+    diagRejectedRequestsCount : NAT
 
 INITIALISATION
-    d_variables :( d_typing )
+    d_variables :( d_typing ) ||
+    diagRejectedRequestsCount :(diagRejectedRequestsCount : NAT & diagRejectedRequestsCount = 0)
 
 OPERATIONS
 
@@ -184,7 +186,12 @@ OPERATIONS
         OR
             buffer :(buffer : t_byte_buffer_i & buffer : t_byte_buffer) ||
             a_buffer_out_state := e_buffer_out_msg_written ||
-            sc := e_sc_ok
+            sc := e_sc_ok ||
+            /* Updating the diagnostic rejected counter when a service fault is encoded */
+            IF msg_type = e_msg_service_fault_resp & diagRejectedRequestsCount < MAXINT
+            THEN
+                diagRejectedRequestsCount := diagRejectedRequestsCount + 1
+            END
         END
     END
     ;
@@ -255,6 +262,13 @@ OPERATIONS
         a_msg_out_type : s_service_resps
     THEN
         skip
+    END
+    ;
+
+    msg_diagnostics_server_stopped =
+    BEGIN
+        /* Reset rejected requests counter */
+        diagRejectedRequestsCount := 0
     END
 
 END

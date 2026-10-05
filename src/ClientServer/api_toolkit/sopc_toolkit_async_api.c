@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <stdint.h>
 #include <string.h>
 
 #include "sopc_toolkit_async_api.h"
@@ -120,7 +121,7 @@ void SOPC_ToolkitServer_AsyncReEvalUserCertSessions(void)
     SOPC_Services_EnqueueEvent(APP_TO_SE_EVAL_USR_CRT_SESSIONS, 0, (uintptr_t) NULL, (uintptr_t) NULL);
 }
 
-void SOPC_ToolkitServer_AsyncCloseSessions(SOPC_SessionId exceptSessionId)
+void SOPC_ToolkitServer_AsyncCloseSessions(SOPC_SessionId exceptSessionId, bool isShutdown)
 {
     if (!SOPC_ToolkitServer_IsConfigured())
     {
@@ -128,8 +129,10 @@ void SOPC_ToolkitServer_AsyncCloseSessions(SOPC_SessionId exceptSessionId)
                                "SOPC_ToolkitServer_AsyncCloseSessions: toolkit server is not configured");
         return;
     }
+    // For shutdown all session shall be closed: otherwise unexpected call is made
+    SOPC_ASSERT(!isShutdown || 0 == exceptSessionId);
 
-    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SERVER_SESSIONS, exceptSessionId, 0, 0);
+    SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_SERVER_SESSIONS, exceptSessionId, (uintptr_t) isShutdown, 0);
 }
 
 SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(SOPC_SecureChannelConfigIdx secureChannelConfigIdx)

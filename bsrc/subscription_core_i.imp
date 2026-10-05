@@ -75,7 +75,8 @@ PROMOTES
     /* notif republish queue */
     get_republish_notif_from_queue,
     /* monitored_item_filter_treatment */
-    get_event_user_authorization
+    get_event_user_authorization,
+    subscription_diagnostics_server_stopped
 
 DEFINITIONS
 

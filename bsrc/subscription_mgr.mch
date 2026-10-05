@@ -37,6 +37,12 @@ OPERATIONS
     END
     ;
 
+    subscription_diagnostics_server_stopped =
+    BEGIN
+        skip
+    END
+    ;
+
     StatusCode_service <-- treat_create_subscription_request (p_session, p_req_msg, p_resp_msg) =
     PRE
         p_session : t_session_i &

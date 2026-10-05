@@ -135,8 +135,9 @@ void SOPC_ToolkitServer_AsyncReEvalUserCertSessions(void);
  *                         It might have been obtained during a method call with SOPC_CallContext_GetSessionId()
  *                         or during session creation/activation with
  *                         ::AS_SESSION_CREATION/::AS_SESSION_ACTIVATION event.
+ * \param isShutdown       Internal use only for server shutdown, it shall be FALSE otherwise.
  */
-void SOPC_ToolkitServer_AsyncCloseSessions(SOPC_SessionId exceptSessionId);
+void SOPC_ToolkitServer_AsyncCloseSessions(SOPC_SessionId exceptSessionId, bool isShutdown);
 
 typedef struct SOPC_EndpointConnectionCfg
 {

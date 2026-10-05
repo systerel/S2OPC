@@ -1695,6 +1695,12 @@ OPERATIONS
     END
     ;
 
+    subscription_diagnostics_server_stopped =
+    BEGIN
+        skip
+    END
+    ;
+
     bres <-- allocate_new_session_publish_queue (p_session) =
     PRE
         p_session : t_session_i &

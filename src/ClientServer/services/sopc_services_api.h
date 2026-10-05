@@ -211,6 +211,8 @@ typedef enum SOPC_Services_Event
     APP_TO_SE_CLOSE_SERVER_SESSIONS, /**< Server side only:<BR/>
                                           Requests to close all server sessions except the one provided (optional)<BR/>
                                           id = session id of the session to keep open, or 0 to close all sessions.<BR/>
+                                          params = (bool) isShutdown flag indicates if the request includes server
+                                          shutdown.<BR/>
                                       */
 } SOPC_Services_Event;
 

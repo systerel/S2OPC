@@ -275,6 +275,12 @@ OPERATIONS
     END
     ;
 
+    server_stopped =
+    BEGIN
+        skip
+    END
+    ;
+
     internal_client_create_session (session, channel_config_idx) =
     PRE
         session : t_session_i &

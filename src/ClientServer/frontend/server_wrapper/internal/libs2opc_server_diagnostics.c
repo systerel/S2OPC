@@ -150,6 +150,17 @@ static void diagnostics_event_handler_cb(SOPC_EventHandler* handler,
     // Runtime variables diagnostics are updated even if diagnostics are disabled: only AddressSpace update is inhibited
     switch (event)
     {
+    case OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount:
+        // Only used to reset the session counters
+        // (values are actually updated in ::SOPC_ServerInternal_DiagnosticsOnSessionEvent)
+        diagnostics->currentSessionCount = 0;
+        diagnostics->cumulatedSessionCount = 0;
+        diagnostics->securityRejectedSessionCount = 0;
+        diagnostics->rejectedSessionCount = 0;
+        diagnostics->sessionTimeoutCount = 0;
+        diagnostics->sessionAbortCount = 0;
+        break;
+
     case OpcUaId_Server_ServerDiagnostics_EnabledFlag:
         update_enabled_flag((bool) eltId);
         updateServerDiagnostics = false; // already managed in ::update_enabled_flag
@@ -366,6 +377,27 @@ void SOPC_ServerInternal_DiagnosticsOnSessionEvent(SOPC_ServerSessionEvent event
     if (diagnosticsChanged)
     {
         SOPC_ServerInternal_UpdateServerDiagnostics(diagnostics);
+    }
+}
+
+void SOPC_ServerInternal_DiagnosticsSessionCountersReset(void)
+{
+    if (!diagSupported)
+    {
+        return;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    if (NULL != serverDiagnosticsEventHandler)
+    {
+        status = SOPC_EventHandler_Post(serverDiagnosticsEventHandler,
+                                        OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount,
+                                        0, 0, 0);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Failed to notify ServerDiagnostics Session counters reset (status=%d).", (int) status);
     }
 }
 

@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 03/03/2026 16:20:13
+ Date                 : 05/10/2026 12:04:49
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -95,6 +95,7 @@ extern void service_mgr__INITIALISATION(void);
 #define service_mgr__is_valid_request_context message_in_bs__is_valid_request_context
 #define service_mgr__is_valid_session session_mgr__is_valid_session
 #define service_mgr__is_valid_subscription subscription_mgr__is_valid_subscription
+#define service_mgr__msg_diagnostics_server_stopped message_out_bs__msg_diagnostics_server_stopped
 #define service_mgr__send_channel_error_msg service_mgr_bs__send_channel_error_msg
 #define service_mgr__send_channel_msg_buffer service_mgr_bs__send_channel_msg_buffer
 #define service_mgr__server_close_sessions session_mgr__server_close_sessions
@@ -105,6 +106,7 @@ extern void service_mgr__INITIALISATION(void);
 #define service_mgr__server_subscription_event_triggered subscription_mgr__server_subscription_event_triggered
 #define service_mgr__server_subscription_node_changed subscription_mgr__server_subscription_node_changed
 #define service_mgr__server_subscription_publish_timeout subscription_mgr__server_subscription_publish_timeout
+#define service_mgr__subscription_diagnostics_server_stopped subscription_mgr__subscription_diagnostics_server_stopped
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

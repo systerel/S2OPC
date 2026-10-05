@@ -620,6 +620,13 @@ OPERATIONS
     END
     ;
 
+    server_stopped =
+    BEGIN
+        msg_diagnostics_server_stopped;
+        subscription_diagnostics_server_stopped
+    END
+    ;
+
     internal_client_create_session (session, channel_config_idx) =
     VAR
         l_channel,

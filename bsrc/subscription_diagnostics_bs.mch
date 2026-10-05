@@ -23,6 +23,13 @@ MACHINE
 SEES
     constants
 
+DEFINITIONS
+    d_init ==
+    currentSubscriptionCount := 0 ||
+    cumulatedSubscriptionCount := 0 ||
+    publishingIntervalCount := 0 ||
+    a_publishingIntervalNbSubscriptions :( a_publishingIntervalNbSubscriptions = t_opcua_duration_i*{0})
+
 ABSTRACT_VARIABLES
     currentSubscriptionCount,
     cumulatedSubscriptionCount,
@@ -40,10 +47,7 @@ INVARIANT
     currentSubscriptionCount <= cumulatedSubscriptionCount
 
 INITIALISATION
-    currentSubscriptionCount := 0 ||
-    cumulatedSubscriptionCount := 0 ||
-    publishingIntervalCount := 0 ||
-    a_publishingIntervalNbSubscriptions :( a_publishingIntervalNbSubscriptions = t_opcua_duration_i*{0})
+    d_init
 
 OPERATIONS
 
@@ -93,9 +97,15 @@ OPERATIONS
     END
     ;
 
+    subscription_diagnostics_server_stopped =
+    BEGIN
+        d_init
+    END
+    ;
+
     subscription_diagnostics_bs_UNINITIALISATION =
     BEGIN
-        skip
+        d_init
     END
 
 END

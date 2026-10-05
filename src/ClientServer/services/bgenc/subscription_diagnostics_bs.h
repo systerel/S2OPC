@@ -21,7 +21,7 @@
 
  File Name            : subscription_diagnostics_bs.h
 
- Date                 : 28/09/2026 12:41:41
+ Date                 : 05/10/2026 12:05:11
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -53,6 +53,7 @@ extern void subscription_diagnostics_bs__subscription_created(
 extern void subscription_diagnostics_bs__subscription_deleted(
    const constants__t_opcua_duration_i subscription_diagnostics_bs__p_publishInterval);
 extern void subscription_diagnostics_bs__subscription_diagnostics_bs_UNINITIALISATION(void);
+extern void subscription_diagnostics_bs__subscription_diagnostics_server_stopped(void);
 extern void subscription_diagnostics_bs__subscription_modified(
    const constants__t_opcua_duration_i subscription_diagnostics_bs__p_oldPublishInterval,
    const constants__t_opcua_duration_i subscription_diagnostics_bs__p_newPublishInterval);

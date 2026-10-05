@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "libs2opc_server_diagnostics.h"
+
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
@@ -34,13 +36,10 @@
 #include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"
 #include "sopc_services_api_internal.h"
-#include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
 
 #include "io_dispatch_mgr.h"
-#include "monitored_item_pointer_bs.h"
-#include "service_mgr_bs.h"
 #include "toolkit_header_init.h"
 #include "util_b2c.h"
 
@@ -878,8 +877,15 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         io_dispatch_mgr__UNINITIALISATION();
         break;
     case APP_TO_SE_CLOSE_SERVER_SESSIONS:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_CLOSE_SERVER_SESSIONS");
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: APP_TO_SE_CLOSE_SERVER_SESSIONS exceptSessionId=%" PRIu32 " isShutdown=%s",
+                               id, ((bool) params ? "TRUE" : "FALSE"));
         io_dispatch_mgr__server_close_sessions((SOPC_SessionId) id);
+        if ((bool) params)
+        {
+            io_dispatch_mgr__server_stopped();
+            SOPC_ServerInternal_DiagnosticsSessionCountersReset();
+        }
         break;
     default:
         SOPC_ASSERT(false);

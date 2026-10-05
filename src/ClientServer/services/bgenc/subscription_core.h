@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 18/08/2026 14:57:34
+ Date                 : 05/10/2026 12:04:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -112,6 +112,7 @@ extern void subscription_core__INITIALISATION(void);
 #define subscription_core__set_msg_publish_resp_notificationMsg msg_subscription_publish_bs__set_msg_publish_resp_notificationMsg
 #define subscription_core__set_msg_publish_resp_subscription msg_subscription_publish_bs__set_msg_publish_resp_subscription
 #define subscription_core__set_subscription_PublishingEnabled subscription_core_1__set_subscription_PublishingEnabled
+#define subscription_core__subscription_diagnostics_server_stopped subscription_diagnostics_bs__subscription_diagnostics_server_stopped
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

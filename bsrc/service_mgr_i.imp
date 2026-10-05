@@ -57,6 +57,7 @@ PROMOTES
     bless_msg_out,
     forget_msg_out,
     dealloc_msg_out,
+    msg_diagnostics_server_stopped,
 
     /* service_mgr_bs */
     client_async_discovery_request_without_channel,
@@ -91,7 +92,9 @@ PROMOTES
     server_subscription_data_changed,
     server_subscription_node_changed,
     server_subscription_publish_timeout,
-    internal_server_close_subscription
+    internal_server_close_subscription,
+    subscription_diagnostics_server_stopped
+
 
 DEFINITIONS
 

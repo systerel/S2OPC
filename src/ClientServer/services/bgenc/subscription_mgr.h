@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 30/04/2026 16:13:46
+ Date                 : 05/10/2026 12:04:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -70,6 +70,7 @@ extern void subscription_mgr__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define subscription_mgr__is_valid_subscription subscription_core__is_valid_subscription
+#define subscription_mgr__subscription_diagnostics_server_stopped subscription_core__subscription_diagnostics_server_stopped
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

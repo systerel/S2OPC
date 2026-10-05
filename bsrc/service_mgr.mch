@@ -824,6 +824,12 @@ OPERATIONS
     END
     ;
 
+    msg_diagnostics_server_stopped =
+    BEGIN
+        skip
+    END
+    ;
+
     bres <-- is_valid_request_context (req_context) =
     PRE
         req_context : t_request_context_i
@@ -883,6 +889,12 @@ OPERATIONS
         p_subscription : t_subscription
     THEN
         bres :: BOOL
+    END
+    ;
+
+    subscription_diagnostics_server_stopped =
+    BEGIN
+        skip
     END
     ;
 
