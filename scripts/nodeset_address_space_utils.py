@@ -620,6 +620,9 @@ class NodesetMerger(NSFinder):
                 # deleted, not to be removed
                 continue
             n = self._find_node_with_nid(nid)
+            if n is None:
+                # already removed (node reachable through several paths of the subtree)
+                continue
             outer_parents = [parent_nid for parent_nid in self._iter_hierarchical(n, downwards=False) if parent_nid not in subtree]
             if outer_parents and not is_root:
                 # there is a parent not to be removed: don't remove this node and all its subtree
