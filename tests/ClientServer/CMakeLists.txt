@@ -96,6 +96,7 @@ set(TEST_SERVER_DIAGNOSTICS_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/Client
 set(TEST_SERVER_DIAGNOSTICS_ADDRESS_SPACE_FILE "S2OPC_Server_Diagnostics_NodeSet.xml")
 
 set(TEST_SERVER_ADDRESS_SPACE_C "test_server_address_space.c")
+set(TEST_SERVER_DIAGNOSTICS_ADDRESS_SPACE_C "test_server_diagnostics_address_space.c")
 set(TEST_LIGHT_ADDRESS_SPACE_C "s2opc_no_base_info_address_space.c")
 
 s2opc_embed_address_space(${TEST_LIGHT_ADDRESS_SPACE_C} ${TEST_LIGHT_ADDRESS_SPACE_XML})
@@ -103,6 +104,10 @@ add_custom_target(make-light-address-space DEPENDS ${TEST_LIGHT_ADDRESS_SPACE_C}
 
 s2opc_embed_address_space(${TEST_SERVER_ADDRESS_SPACE_C} ${TEST_ADDRESS_SPACE_XML_ORIGIN})
 add_custom_target(make-server-address-space DEPENDS ${TEST_SERVER_ADDRESS_SPACE_C})
+
+# Address space containing the ServerDiagnostics nodes
+s2opc_embed_address_space(${TEST_SERVER_DIAGNOSTICS_ADDRESS_SPACE_C} ${TEST_SERVER_DIAGNOSTICS_ADDRESS_SPACE_XML})
+add_custom_target(make-server-diagnostics-address-space DEPENDS ${TEST_SERVER_DIAGNOSTICS_ADDRESS_SPACE_C})
 
 ## S2OPC unit tests ##
 
@@ -411,6 +416,32 @@ target_link_libraries(toolkit_test_server_write_behavior_cb PRIVATE s2opc_client
 target_compile_options(toolkit_test_server_write_behavior_cb PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_server_write_behavior_cb PRIVATE ${S2OPC_DEFINITIONS})
 s2opc_unit_test(toolkit_test_server_write_behavior_cb GENERATE_TAP)
+
+# Server diagnostics EnabledFlag management
+add_executable(toolkit_test_server_diagnostics_enabled_flag "validation_tests/server/toolkit_test_server_diagnostics_enabled_flag.c"
+  ${TEST_SERVER_DIAGNOSTICS_ADDRESS_SPACE_C}
+  ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+add_dependencies(toolkit_test_server_diagnostics_enabled_flag make-server-diagnostics-address-space)
+target_include_directories(toolkit_test_server_diagnostics_enabled_flag PRIVATE
+                           ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
+                           "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/server_wrapper/internal")
+target_link_libraries(toolkit_test_server_diagnostics_enabled_flag PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+target_compile_options(toolkit_test_server_diagnostics_enabled_flag PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_server_diagnostics_enabled_flag PRIVATE ${S2OPC_DEFINITIONS})
+s2opc_unit_test(toolkit_test_server_diagnostics_enabled_flag GENERATE_TAP)
+
+# Server diagnostics inhibited (EnabledFlag FALSE and not writable)
+add_executable(toolkit_test_server_diagnostics_inhibited "validation_tests/server/toolkit_test_server_diagnostics_enabled_flag.c"
+  ${TEST_SERVER_DIAGNOSTICS_ADDRESS_SPACE_C}
+  ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+add_dependencies(toolkit_test_server_diagnostics_inhibited make-server-diagnostics-address-space)
+target_include_directories(toolkit_test_server_diagnostics_inhibited PRIVATE
+                           ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
+                           "${S2OPC_ROOT_PATH}/src/ClientServer/frontend/server_wrapper/internal")
+target_link_libraries(toolkit_test_server_diagnostics_inhibited PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+target_compile_options(toolkit_test_server_diagnostics_inhibited PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_server_diagnostics_inhibited PRIVATE ${S2OPC_DEFINITIONS} TEST_DIAGNOSTICS_INHIBITED)
+s2opc_unit_test(toolkit_test_server_diagnostics_inhibited GENERATE_TAP)
 
 
 

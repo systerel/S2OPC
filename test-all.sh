@@ -84,6 +84,8 @@ session_timeout.tap
 toolkit_test_file_transfer.tap
 toolkit_test_server_client.tap
 toolkit_test_server_client_expired_cert.tap
+toolkit_test_server_diagnostics_enabled_flag.tap
+toolkit_test_server_diagnostics_inhibited.tap
 toolkit_test_server_local_service.tap
 toolkit_test_server_notif_session_events.tap
 toolkit_test_server_restart.tap
