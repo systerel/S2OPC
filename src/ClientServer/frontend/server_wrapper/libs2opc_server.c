@@ -27,6 +27,7 @@
 #include "libs2opc_server_internal.h"
 
 #include "opcua_identifiers.h"
+#include "opcua_statuscodes.h"
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
@@ -227,11 +228,20 @@ void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType* encTy
     SOPC_ASSERT(&OpcUa_WriteResponse_EncodeableType == encType);
     OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
     OpcUa_WriteRequest* writeReqCtx = (OpcUa_WriteRequest*) helperCtx->userContext;
+    // ok is false only on unexpected failure: a node absent from the address space (BadNodeIdUnknown) is expected
     bool ok = (SOPC_IsGoodStatus(writeResp->ResponseHeader.ServiceResult));
+    int32_t nbAbsentNodes = 0;
 
-    for (int32_t i = 0; ok && i < writeResp->NoOfResults; ++i)
+    for (int32_t i = 0; i < writeResp->NoOfResults; ++i)
     {
-        ok &= SOPC_IsGoodStatus(writeResp->Results[i]);
+        if (OpcUa_BadNodeIdUnknown == writeResp->Results[i])
+        {
+            nbAbsentNodes++;
+        }
+        else if (!SOPC_IsGoodStatus(writeResp->Results[i]))
+        {
+            ok = false;
+        }
     }
     // Display warning if we have context information recorded
     if (!ok && NULL != helperCtx->eventCtx.localService.internalErrorMsg)
@@ -239,17 +249,26 @@ void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType* encTy
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Error while updating address space: %s",
                                  helperCtx->eventCtx.localService.internalErrorMsg);
     }
-    // Display concerned node if we have the write context
-    if (!ok && NULL != writeReqCtx)
+    // Display concerned node if we have the write context: warning on failure, debug for absent node
+    if ((!ok || nbAbsentNodes > 0) && NULL != writeReqCtx)
     {
         for (int32_t i = 0; i < writeResp->NoOfResults && i < writeReqCtx->NoOfNodesToWrite; ++i)
         {
             if (!SOPC_IsGoodStatus(writeResp->Results[i]))
             {
                 char* nodeIdStr = SOPC_NodeId_ToCString(&writeReqCtx->NodesToWrite[i].NodeId);
-                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                         "- Writing runtime variable %s failed with status 0x%" PRIX32, nodeIdStr,
-                                         writeResp->Results[i]);
+                if (OpcUa_BadNodeIdUnknown == writeResp->Results[i])
+                {
+                    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "- Runtime variable %s not present in address space: not written",
+                                           nodeIdStr);
+                }
+                else
+                {
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                             "- Writing runtime variable %s failed with status 0x%" PRIX32, nodeIdStr,
+                                             writeResp->Results[i]);
+                }
                 SOPC_Free(nodeIdStr);
             }
         }

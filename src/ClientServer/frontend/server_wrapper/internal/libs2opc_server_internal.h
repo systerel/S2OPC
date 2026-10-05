@@ -257,6 +257,10 @@ SOPC_ReturnStatus SOPC_ServerInternal_TriggerAuditEvent(SOPC_Event* event);
 /**
  * \brief Callback called when an internal Write request updating server runtime variables completes.
  *
+ * A result OpcUa_BadNodeIdUnknown is expected (runtime variable node absent from the address space): no warning
+ * is traced for it. If the context contains a copy of the write request, absent nodes are traced in debug level
+ * with an info level summary. Any other failure (service result or write result) is traced as a warning.
+ *
  * \param encType Encodeable type of the received response.
  * \param response Pointer to the received service response.
  * \param context Internal context associated with the asynchronous local service request.
