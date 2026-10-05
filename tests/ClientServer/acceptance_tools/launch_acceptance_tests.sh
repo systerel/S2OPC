@@ -65,6 +65,12 @@ else
     CONFIGURATION=$UACTT_PROJECT_PATH/Acceptation_S2OPC.nano.ctt.xml
 fi
 
+# Allow a CI job to override the default UACTT selection
+if [[ -n "${S2OPC_UACTT_SELECTION_FILE:-}" ]]
+then
+    SELECTION=$UACTT_PROJECT_PATH/$S2OPC_UACTT_SELECTION_FILE
+fi
+
 # Copy the local S2OPC UACTT configuration files to the UACTT project (overwrite ones in docker)
 echo "Copy the S2OPC repository configuration files into UACTT project (overwrite)"
 pushd $S2OPC_UACTT_CONFIG/

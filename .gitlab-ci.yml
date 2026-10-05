@@ -718,6 +718,29 @@ test-uactt:
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG || $RUN_UACTT != null"
       when: on_success
 
+# Test uactt only for server diagnostics, with a dedicated addressSpace
+test-uactt-server-diags:
+  <<: *test_uactt
+  needs: [build-linux64-ASan-light]
+  variables:
+    <<: [*nominal_test_variables, *nominal_build_variables]
+    LINUX_UACTT: 1
+    TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Server_Diagnostics_NodeSet.xml
+    S2OPC_UACTT_SELECTION_FILE: Acceptation_S2OPC.server_diags.selection.xml
+  rules:
+    - if: "$NO_TESTS != null || $WINDOWS_TEST != null || \
+        $CROSS_COMPILE != null || $GEN_PROOF_OBLIGATIONS != null || \
+        $WITH_COVERITY != null || \
+        $WITH_COVERAGE != null || $WITH_DOC != null || \
+        $S2OPC_PUBSUB_ONLY != null || $S2OPC_CLIENTSERVER_ONLY != null || \
+        $ALL_BUILDS != null || $ALL_TESTS != null"
+      when: never
+    - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || \
+        $CI_COMMIT_BRANCH == 'master' || \
+        $CI_COMMIT_TAG || \
+        $RUN_UACTT != null"
+      when: on_success
+
 test-faulty-packets:
   stage: test-others
   image: registry.gitlab.com/systerel/s2opc/test@sha256:d6ca3821754b8f5f74d7fe426e35e7709e1ce772b5f05c9f2e28efd2f4ee3189 # digest of test:2.19

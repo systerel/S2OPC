@@ -151,6 +151,7 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
     Permissions managed: Read, Write, ReadHistory, Call, AddNodes, DeleteNodes, ReceiveEvents. 
     Supported role mapping criterias: anonymous, username, authenticated user.
 - Server and Client support for OPC UA Alarms & Conditions (AlarmConditionType)
+- Server diagnostics: partial support of `ServerDiagnosticsSummary` and `EnabledFlag`. See the [Server diagnostics ticket](https://gitlab.com/systerel/S2OPC/-/work_items/1812) for details and limitations.
 - Client instantiation: multiple secure channel instances and session instances
 - Client subscription service: management of subscriptions with monitored items
 - Client services requests: any discovery service or service on session request. Some request builders are provided, requests are only forwarded to server (no functional behavior).
