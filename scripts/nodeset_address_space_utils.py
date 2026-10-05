@@ -189,11 +189,11 @@ class NSIndexReassigner(NSFinder):
 
     def reassign_node_ns_index(self, node: ET.Element):
         # Reassign namespace index for:
-        #   @NodeId, @BrowseName, @ParentNodeId, @DataType,
+        #   @NodeId, @BrowseName, @ParentNodeId, @DataType, @MethodDeclarationId,
         #   References/Reference/@ReferenceType and References/Reference/text
         #   TypeId/Identifier/text
         #   DataType/Identifier/text
-        for attr in ['NodeId', 'ParentNodeId', 'DataType']:
+        for attr in ['NodeId', 'ParentNodeId', 'DataType', 'MethodDeclarationId']:
             self.__reassign_elem_attr(node, attr, self.__reassigned_ns_index)
             self.__reassign_elem_attr(node, attr, self.__remove_ns0_index)
         self.__reassign_elem_attr(node, 'BrowseName', self.__reassigned_prefix_index)
@@ -330,7 +330,7 @@ class NodesetMerger(NSFinder):
                 raise Exception("Duplicate Namespace URI declaration in: " + str(declarations))
             ns_count = len(declared_ns)
 
-        for attr in ['NodeId', 'ParentNodeId', 'DataType']:
+        for attr in ['NodeId', 'ParentNodeId', 'DataType', 'MethodDeclarationId']:
             for node in self._iterfind(any_tree, f'*[@{attr}]'):
                 nid = node.get(attr)
                 _check_declared_nid(nid, ns_count, NS_IDX_MATCHER)

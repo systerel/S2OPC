@@ -202,6 +202,11 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_reassign_namespace_index.xml', ['--remove-max-node-management'],
                       'ns0.xml', 'TestReassign_NS1.xml', 'TestReassign_NS2_NS1.xml')
 
+    def test_reassign_method_declaration_id(self):
+        # MethodDeclarationId namespace index shall be reassigned as NodeId and ParentNodeId
+        self.run_test('test_reassign_method_declaration_id.xml', [],
+                      'ns0.xml', 'TestReassign_NS1.xml', 'TestReassign_MethodDeclarationId.xml')
+
     def test_reassign_then_no_reassign_namespace_index(self):
         self.run_test('test_reassign_then_no_reassign_namespace_index.xml', [],
                       'ns0.xml', 'TestReassign_NS1.xml', 'TestReassign_NS2_NS1.xml', 'TestReassign_NS1_NS2.xml')
