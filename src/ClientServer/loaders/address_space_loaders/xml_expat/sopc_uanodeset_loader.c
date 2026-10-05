@@ -1886,36 +1886,64 @@ static uint8_t type_width(SOPC_BuiltinId ty)
     }
 
 /* This function computes the variant corresponding to a base64 ByteString.
- * Base64 ByteString shall be null terminated. Otherwise, the result is undefined. */
+ * Base64 ByteString shall be null terminated. Otherwise, the result is undefined.
+ * XML whitespaces are allowed anywhere in xs:base64Binary: they are removed before decoding.
+ * An empty ByteString keeps the initial value of the variant ByteString (as for an empty String). */
 static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str)
 {
+    bool result = true;
     size_t length = 0;
-    SOPC_ReturnStatus status;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     unsigned char* str = NULL;
+    size_t base64_len = 0;
 
-    status = SOPC_HelperDecode_Base64(bstring_str, &str, &length);
-    if (SOPC_STATUS_OK != status)
+    // Whitespaces are not copied but the null terminator is required by SOPC_HelperDecode_Base64:
+    // the +1 provides it since the buffer is zero-initialized
+    char* base64_str = SOPC_Calloc(strlen(bstring_str) + 1, sizeof(char));
+    if (NULL == base64_str)
     {
-        return false;
-    }
-    SOPC_ASSERT(NULL != str);
-    SOPC_ASSERT(0 != length);
-
-    status = SOPC_String_CopyFromCString(&var->Value.Bstring, (char*) str);
-    SOPC_Free(str);
-
-    if (status == SOPC_STATUS_OK)
-    {
-        var->BuiltInTypeId = SOPC_ByteString_Id;
-        return true;
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        result = false;
     }
     else
     {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
+        for (const char* c = bstring_str; '\0' != *c; c++)
+        {
+            if (' ' != *c && '\t' != *c && '\r' != *c && '\n' != *c)
+            {
+                base64_str[base64_len] = *c;
+                base64_len++;
+            }
+        }
     }
 
-    return true;
+    // An empty ByteString keeps the initial (empty) value of the variant ByteString
+    if (result && 0 != base64_len)
+    {
+        status = SOPC_HelperDecode_Base64(base64_str, &str, &length);
+        // Decoded ByteString shall not be empty (e.g. only padding characters) or too large
+        result = (SOPC_STATUS_OK == status && 0 != length && length <= INT32_MAX);
+        if (result)
+        {
+            SOPC_ASSERT(NULL != str);
+            SOPC_ASSERT(NULL == var->Value.Bstring.Data);
+            // Decoded bytes may contain zeros: use the decoded length and not a C string.
+            // The decoded buffer is moved into the variant ByteString to avoid a copy.
+            var->Value.Bstring.Data = str;
+            var->Value.Bstring.Length = (int32_t) length;
+            str = NULL;
+        }
+    }
+
+    if (result)
+    {
+        var->BuiltInTypeId = SOPC_ByteString_Id;
+    }
+
+    SOPC_Free(base64_str);
+    SOPC_Free(str);
+
+    return result;
 }
 
 static bool set_variant_value_localized_text(SOPC_LocalizedText** plt, parse_complex_value_tag_array_t tagsContext)

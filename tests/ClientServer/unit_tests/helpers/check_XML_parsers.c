@@ -27,6 +27,7 @@
 
 #include <check.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "check_helpers.h"
 
@@ -40,6 +41,7 @@
 
 #include "opcua_identifiers.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_filesystem.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -316,6 +318,102 @@ START_TEST(test_same_address_space_results)
 #endif // WITH_CONST_ADDSPACE
 #else
     printf("Test test_same_address_space_results ignored since EXPAT is not available\n");
+#endif // WITH_EXPAT
+}
+END_TEST
+
+#ifdef WITH_EXPAT
+// ByteString values: whitespaces are allowed anywhere in xs:base64Binary, ByteString may be empty
+// and may contain zero bytes ("Hello\0World!" is "SGVsbG8AV29ybGQh" in base64)
+static char XML_BYTESTRING_NODESET[] =
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+    "<UANodeSet xmlns=\"http://opcfoundation.org/UA/2011/03/UANodeSet.xsd\"\n"
+    "           xmlns:uax=\"http://opcfoundation.org/UA/2008/02/Types.xsd\">\n"
+    "  <UAVariable NodeId=\"i=100001\" BrowseName=\"Indented\" DataType=\"i=15\">\n"
+    "    <DisplayName>Indented</DisplayName>\n"
+    "    <Value>\n"
+    "      <uax:ByteString>\n"
+    "        SGVsbG8A\n"
+    "        V29ybGQh\n"
+    "      </uax:ByteString>\n"
+    "    </Value>\n"
+    "  </UAVariable>\n"
+    "  <UAVariable NodeId=\"i=100002\" BrowseName=\"Tabs\" DataType=\"i=15\">\n"
+    "    <DisplayName>Tabs</DisplayName>\n"
+    "    <Value><uax:ByteString>\tSGVs bG8A\r\n\tV29ybGQh</uax:ByteString></Value>\n"
+    "  </UAVariable>\n"
+    "  <UAVariable NodeId=\"i=100003\" BrowseName=\"EmptyElement\" DataType=\"i=15\">\n"
+    "    <DisplayName>EmptyElement</DisplayName>\n"
+    "    <Value><uax:ByteString /></Value>\n"
+    "  </UAVariable>\n"
+    "  <UAVariable NodeId=\"i=100004\" BrowseName=\"EmptyContent\" DataType=\"i=15\">\n"
+    "    <DisplayName>EmptyContent</DisplayName>\n"
+    "    <Value><uax:ByteString></uax:ByteString></Value>\n"
+    "  </UAVariable>\n"
+    "</UANodeSet>\n";
+
+// Only padding characters: decoded ByteString is empty, the NodeSet shall be rejected
+static char XML_BYTESTRING_PADDING_ONLY_NODESET[] =
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+    "<UANodeSet xmlns=\"http://opcfoundation.org/UA/2011/03/UANodeSet.xsd\"\n"
+    "           xmlns:uax=\"http://opcfoundation.org/UA/2008/02/Types.xsd\">\n"
+    "  <UAVariable NodeId=\"i=100001\" BrowseName=\"PaddingOnly\" DataType=\"i=15\">\n"
+    "    <DisplayName>PaddingOnly</DisplayName>\n"
+    "    <Value><uax:ByteString>==</uax:ByteString></Value>\n"
+    "  </UAVariable>\n"
+    "</UANodeSet>\n";
+
+static void check_bytestring_value(SOPC_AddressSpace* space,
+                                   uint32_t numericId,
+                                   const SOPC_Byte* expected,
+                                   int32_t expectedLength)
+{
+    SOPC_NodeId nodeId = SOPC_NS0_NUMERIC_NODEID(numericId);
+    bool found = false;
+    SOPC_AddressSpace_Node* node = SOPC_AddressSpace_Get_Node(space, &nodeId, &found);
+    ck_assert(found);
+    SOPC_Variant* value = SOPC_AddressSpace_Get_Value(space, node);
+    ck_assert_ptr_nonnull(value);
+    ck_assert_int_eq(SOPC_ByteString_Id, value->BuiltInTypeId);
+    ck_assert_int_eq(SOPC_VariantArrayType_SingleValue, value->ArrayType);
+    if (expectedLength > 0)
+    {
+        ck_assert_int_eq(expectedLength, value->Value.Bstring.Length);
+        ck_assert_int_eq(0, memcmp(expected, value->Value.Bstring.Data, (size_t) expectedLength));
+    }
+    else
+    {
+        ck_assert_int_le(value->Value.Bstring.Length, 0);
+    }
+}
+#endif // WITH_EXPAT
+
+START_TEST(test_bytestring_values)
+{
+#ifdef WITH_EXPAT
+    const SOPC_Byte expected[] = {'H', 'e', 'l', 'l', 'o', 0, 'W', 'o', 'r', 'l', 'd', '!'};
+
+    FILE* fd = SOPC_FileSystem_fmemopen(XML_BYTESTRING_NODESET, strlen(XML_BYTESTRING_NODESET), "r");
+    ck_assert_ptr_nonnull(fd);
+    SOPC_AddressSpace* space = SOPC_UANodeSet_Parse(fd);
+    fclose(fd);
+    ck_assert_ptr_nonnull(space);
+
+    check_bytestring_value(space, 100001, expected, (int32_t) sizeof(expected));
+    check_bytestring_value(space, 100002, expected, (int32_t) sizeof(expected));
+    check_bytestring_value(space, 100003, NULL, 0);
+    check_bytestring_value(space, 100004, NULL, 0);
+
+    SOPC_AddressSpace_Delete(space);
+
+    fd =
+        SOPC_FileSystem_fmemopen(XML_BYTESTRING_PADDING_ONLY_NODESET, strlen(XML_BYTESTRING_PADDING_ONLY_NODESET), "r");
+    ck_assert_ptr_nonnull(fd);
+    space = SOPC_UANodeSet_Parse(fd);
+    fclose(fd);
+    ck_assert_ptr_null(space);
+#else
+    printf("Test test_bytestring_values ignored since EXPAT is not available\n");
 #endif // WITH_EXPAT
 }
 END_TEST
@@ -1199,6 +1297,7 @@ Suite* tests_make_suite_XML_parsers(void)
     tcase_set_timeout(tc_XML_parsers, 10);
     tcase_add_checked_fixture(tc_XML_parsers, setup, NULL);
     tcase_add_test(tc_XML_parsers, test_same_address_space_results);
+    tcase_add_test(tc_XML_parsers, test_bytestring_values);
     tcase_add_test(tc_XML_parsers, test_XML_config_configuration);
     tcase_add_test(tc_XML_parsers, test_XML_users_configuration);
     suite_add_tcase(s, tc_XML_parsers);
