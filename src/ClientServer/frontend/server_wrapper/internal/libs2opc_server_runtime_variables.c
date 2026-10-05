@@ -683,6 +683,38 @@ static bool set_server_server_diagnostics_variables(SOPC_Array* write_values,
     return isWriteOk;
 }
 
+/* Mandatory ServerDiagnostics array variables (ExtensionObject arrays) for which no value is computed */
+static const uint32_t unmanagedServerDiagnosticsArrays[] = {
+    OpcUaId_Server_ServerDiagnostics_SubscriptionDiagnosticsArray,
+    OpcUaId_Server_ServerDiagnostics_SessionsDiagnosticsSummary_SessionDiagnosticsArray,
+    OpcUaId_Server_ServerDiagnostics_SessionsDiagnosticsSummary_SessionSecurityDiagnosticsArray,
+};
+
+/* Sets the unmanaged ServerDiagnostics nodes to an empty ExtensionObject array with OpcUa_BadNotReadable status:
+ * an empty ExtensionObject array has the Null DataType, thus it is compatible with the nodes DataType and ValueRank.
+ * Note: write fails (warning trace only) for each node absent from the address space. */
+static bool set_server_server_diagnostics_unmanaged_variables(SOPC_Array* write_values)
+{
+    const size_t nbValues = sizeof(unmanagedServerDiagnosticsArrays) / sizeof(unmanagedServerDiagnosticsArrays[0]);
+    OpcUa_WriteValue* values = append_write_values(write_values, nbValues);
+
+    if (NULL == values)
+    {
+        return false;
+    }
+
+    for (size_t i = 0; i < nbValues; i++)
+    {
+        set_write_value_id(&values[i], unmanagedServerDiagnosticsArrays[i]);
+        values[i].Value.Value.ArrayType = SOPC_VariantArrayType_Array;
+        values[i].Value.Value.BuiltInTypeId = SOPC_ExtensionObject_Id;
+        values[i].Value.Value.Value.Array.Length = 0;
+        values[i].Value.Value.Value.Array.Content.ExtObjectArr = NULL;
+        values[i].Value.Status = OpcUa_BadNotReadable;
+    }
+    return true;
+}
+
 OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerDiagnosticsWriteRequest(
     const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics)
 {
@@ -728,7 +760,8 @@ static bool set_server_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVa
            set_server_server_status_variables(write_values, vars) &&
            set_server_capabilities_max_variables(write_values) &&
            set_server_capabilities_operation_limits_variables(write_values, vars) &&
-           set_server_server_diagnostics_variables(write_values, &vars->diagnostics);
+           set_server_server_diagnostics_variables(write_values, &vars->diagnostics) &&
+           set_server_server_diagnostics_unmanaged_variables(write_values);
 }
 
 OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeVariables* vars)
