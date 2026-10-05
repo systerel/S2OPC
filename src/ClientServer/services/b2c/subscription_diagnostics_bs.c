@@ -19,9 +19,9 @@
 
 #include <string.h>
 
-#include "libs2opc_server_internal.h"
-#include "libs2opc_server_runtime_variables.h"
+#include "libs2opc_server_diagnostics.h"
 
+#include "opcua_identifiers.h"
 #include "sopc_assert.h"
 #include "sopc_event_handler.h"
 #include "sopc_macros.h"
@@ -111,10 +111,10 @@ static void notify_server_diagnostics_update(void)
 
     if (NULL != diagnosticsEventHandler)
     {
-        const SOPC_ReturnStatus status =
-            SOPC_EventHandler_Post(diagnosticsEventHandler, OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary,
-                                   (uint32_t) currentSubscriptionCount, (uintptr_t) cumulatedSubscriptionCount,
-                                   (uintptr_t) SOPC_Dict_Size(publishingIntervalDict));
+        const SOPC_ReturnStatus status = SOPC_EventHandler_Post(
+            diagnosticsEventHandler, OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSubscriptionCount,
+            (uint32_t) currentSubscriptionCount, (uintptr_t) cumulatedSubscriptionCount,
+            (uintptr_t) SOPC_Dict_Size(publishingIntervalDict));
 
         SOPC_UNUSED_RESULT(status);
     }
@@ -153,6 +153,11 @@ void subscription_diagnostics_bs__INITIALISATION(void)
 void subscription_diagnostics_bs__subscription_created(
     const constants__t_opcua_duration_i subscription_diagnostics_bs__p_publishInterval)
 {
+    // Diagnostics support state is constant while server runs: bookkeeping is consistently skipped when inhibited
+    if (!SOPC_ServerInternal_IsDiagnosticsSupported())
+    {
+        return;
+    }
     SOPC_ASSERT(currentSubscriptionCount < SOPC_MAX_SUBSCRIPTIONS);
 
     increment_publish_interval_usage(subscription_diagnostics_bs__p_publishInterval);
@@ -165,6 +170,10 @@ void subscription_diagnostics_bs__subscription_created(
 void subscription_diagnostics_bs__subscription_deleted(
     const constants__t_opcua_duration_i subscription_diagnostics_bs__p_publishInterval)
 {
+    if (!SOPC_ServerInternal_IsDiagnosticsSupported())
+    {
+        return;
+    }
     SOPC_ASSERT(currentSubscriptionCount > 0);
 
     decrement_publish_interval_usage(subscription_diagnostics_bs__p_publishInterval);
@@ -177,6 +186,10 @@ void subscription_diagnostics_bs__subscription_modified(
     const constants__t_opcua_duration_i subscription_diagnostics_bs__p_oldPublishInterval,
     const constants__t_opcua_duration_i subscription_diagnostics_bs__p_newPublishInterval)
 {
+    if (!SOPC_ServerInternal_IsDiagnosticsSupported())
+    {
+        return;
+    }
     if (!publish_interval_values_equal(subscription_diagnostics_bs__p_oldPublishInterval,
                                        subscription_diagnostics_bs__p_newPublishInterval))
     {

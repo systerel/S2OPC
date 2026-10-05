@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "opcua_identifiers.h"
+#include "opcua_statuscodes.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_audit.h"
@@ -623,51 +624,63 @@ static bool set_write_value_server_diagnostics_summary(OpcUa_WriteValue* wv,
 }
 
 static bool set_server_server_diagnostics_variables(SOPC_Array* write_values,
-                                                    const SOPC_Server_RuntimeVariablesDiagnostics* diag)
+                                                    const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 13);
+    // Diagnostic values are not available while diagnostics are disabled
+    const SOPC_Server_RuntimeVariablesDiagnostics noDiagnostics = {0};
+    const SOPC_Server_RuntimeVariablesDiagnostics* diag = diagnostics->enabledFlag ? diagnostics : &noDiagnostics;
+    const SOPC_StatusCode status = diagnostics->enabledFlag ? SOPC_GoodGenericStatus : OpcUa_BadNotReadable;
+
+    const size_t nbValues = 13;
+    OpcUa_WriteValue* values = append_write_values(write_values, nbValues);
 
     if (NULL == values)
     {
         return false;
     }
 
-    return set_write_value_uint32(&values[0], OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_ServerViewCount,
-                                  diag->serverViewCount) &&
-           set_write_value_uint32(&values[1],
-                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount,
-                                  diag->currentSessionCount) &&
-           set_write_value_uint32(&values[2],
-                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CumulatedSessionCount,
-                                  diag->cumulatedSessionCount) &&
-           set_write_value_uint32(
-               &values[3], OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedSessionCount,
-               diag->securityRejectedSessionCount) &&
-           set_write_value_uint32(&values[4],
-                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedSessionCount,
-                                  diag->rejectedSessionCount) &&
-           set_write_value_uint32(&values[5],
-                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SessionTimeoutCount,
-                                  diag->sessionTimeoutCount) &&
-           set_write_value_uint32(&values[6],
-                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SessionAbortCount,
-                                  diag->sessionAbortCount) &&
-           set_write_value_uint32(&values[7],
-                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_PublishingIntervalCount,
-                                  diag->publishingIntervalCount) &&
-           set_write_value_uint32(&values[8],
-                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSubscriptionCount,
-                                  diag->currentSubscriptionCount) &&
-           set_write_value_uint32(&values[9],
-                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CumulatedSubscriptionCount,
-                                  diag->cumulatedSubscriptionCount) &&
-           set_write_value_uint32(
-               &values[10], OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedRequestsCount,
-               diag->securityRejectedRequestsCount) &&
-           set_write_value_uint32(&values[11],
-                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount,
-                                  diag->rejectedRequestsCount) &&
-           set_write_value_server_diagnostics_summary(&values[12], diag);
+    bool isWriteOk =
+        set_write_value_uint32(&values[0], OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_ServerViewCount,
+                               diag->serverViewCount) &&
+        set_write_value_uint32(&values[1],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount,
+                               diag->currentSessionCount) &&
+        set_write_value_uint32(&values[2],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CumulatedSessionCount,
+                               diag->cumulatedSessionCount) &&
+        set_write_value_uint32(&values[3],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedSessionCount,
+                               diag->securityRejectedSessionCount) &&
+        set_write_value_uint32(&values[4],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedSessionCount,
+                               diag->rejectedSessionCount) &&
+        set_write_value_uint32(&values[5],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SessionTimeoutCount,
+                               diag->sessionTimeoutCount) &&
+        set_write_value_uint32(&values[6], OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SessionAbortCount,
+                               diag->sessionAbortCount) &&
+        set_write_value_uint32(&values[7],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_PublishingIntervalCount,
+                               diag->publishingIntervalCount) &&
+        set_write_value_uint32(&values[8],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSubscriptionCount,
+                               diag->currentSubscriptionCount) &&
+        set_write_value_uint32(&values[9],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CumulatedSubscriptionCount,
+                               diag->cumulatedSubscriptionCount) &&
+        set_write_value_uint32(&values[10],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedRequestsCount,
+                               diag->securityRejectedRequestsCount) &&
+        set_write_value_uint32(&values[11],
+                               OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount,
+                               diag->rejectedRequestsCount) &&
+        set_write_value_server_diagnostics_summary(&values[12], diag);
+
+    for (size_t i = 0; isWriteOk && i < nbValues; i++)
+    {
+        values[i].Value.Status = status;
+    }
+    return isWriteOk;
 }
 
 OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerDiagnosticsWriteRequest(
@@ -706,7 +719,8 @@ static bool set_server_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVa
            set_server_server_array_value(&values[0], &vars->serverConfig->serverDescription.ApplicationUri) &&
            set_server_service_level_value(&values[1], vars->service_level) &&
            set_write_value_bool(&values[2], OpcUaId_Server_Auditing, vars->auditing) &&
-           set_write_value_bool(&values[3], OpcUaId_Server_ServerDiagnostics_EnabledFlag, false) &&
+           set_write_value_bool(&values[3], OpcUaId_Server_ServerDiagnostics_EnabledFlag,
+                                vars->diagnostics.enabledFlag) &&
            set_write_value_int32(&values[4], OpcUaId_Server_ServerRedundancy_RedundancySupport,
                                  OpcUa_RedundancySupport_None) &&
            set_server_capabilities_server_profile_array(&values[5]) &&

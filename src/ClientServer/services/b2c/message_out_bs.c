@@ -29,7 +29,7 @@
 #include "message_out_bs.h"
 #include "util_b2c.h"
 
-#include "libs2opc_server_internal.h"
+#include "libs2opc_server_diagnostics.h"
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
 #include "sopc_encoder.h"
@@ -200,7 +200,8 @@ static void message_util_diag_requests__update_counters(
 {
     // Only ServiceFault responses (server side) are rejected requests
     if (constants__e_msg_response_type != message_out_bs__header_type ||
-        constants__e_msg_service_fault_resp != message_out_bs__msg_type)
+        constants__e_msg_service_fault_resp != message_out_bs__msg_type ||
+        !SOPC_ServerInternal_IsDiagnosticsSupported())
     {
         return;
     }

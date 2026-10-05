@@ -22,6 +22,7 @@
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 #include "libs2opc_server_config_custom.h"
+#include "libs2opc_server_diagnostics.h"
 #include "libs2opc_server_internal.h"
 
 #include "sopc_assert.h"
@@ -663,6 +664,11 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* add
         }
     }
 
+    // Configure diagnostics prior to toolkit configuration: after SetAddressSpaceConfig ownership is transferred
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerInternal_DiagnosticsConfigure(addressSpaceConfig);
+    }
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ToolkitServer_SetAddressSpaceConfig(addressSpaceConfig);

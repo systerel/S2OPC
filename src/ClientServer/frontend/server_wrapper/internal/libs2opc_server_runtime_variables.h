@@ -31,6 +31,13 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
+/**
+ * \brief Server diagnostics values.
+ *
+ * Values are always kept up to date, whatever the ServerDiagnostics EnabledFlag value is:
+ * the EnabledFlag only inhibits their update in the address space.
+ * They shall only be modified from the application looper thread.
+ */
 typedef struct
 {
     uint32_t serverViewCount;
@@ -45,6 +52,9 @@ typedef struct
     uint32_t cumulatedSubscriptionCount;
     uint32_t securityRejectedRequestsCount;
     uint32_t rejectedRequestsCount;
+    /* ServerDiagnostics EnabledFlag value: when false, the server diagnostics variables are written with 0 and the
+     * OpcUa_BadNotReadable status. Copy of the diagnostics module state, only written by the diagnostics module. */
+    bool enabledFlag;
 } SOPC_Server_RuntimeVariablesDiagnostics;
 
 typedef struct SOPC_Server_RuntimeVariables
@@ -121,7 +131,8 @@ OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(SO
 /**
  * \brief Build a write request to update the server diagnostics runtime variables in the address space.
  *
- * \param diagnostics   Values of the server diagnostics variables.
+ * \param diagnostics   Values of the server diagnostics variables. When the EnabledFlag is false,
+ *                      the variables are written with 0 and the OpcUa_BadNotReadable status.
  * \return the WriteRequest to use with local services in case of success, NULL in case of failure.
  *
  * This function gathers all the server diagnostics values passed as parameters into a

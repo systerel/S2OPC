@@ -23,9 +23,8 @@
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 #include "libs2opc_server_config.h"
+#include "libs2opc_server_diagnostics.h"
 #include "libs2opc_server_internal.h"
-
-#include "opcua_statuscodes.h"
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
@@ -66,7 +65,6 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .configuredSecondsTillShutdown = SOPC_DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,
     .configuredCurrentTimeRefreshIntervalMs = SOPC_DEFAULT_CURRENT_TIME_REFRESH_PERIOD_MS,
     .currentTimeRefreshTimerId = 0,
-    .serverDiagnosticsEventHandler = NULL,
     .buildInfo = NULL,
     .nbEndpoints = 0,
     .endpointIndexes = NULL,
@@ -509,102 +507,6 @@ static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
     }
 }
 
-static bool SOPC_ServerDiagnostics_IsSecurityRejectedSessionStatus(SOPC_StatusCode status)
-{
-    /* UACTT Base Info Diagnostics/023 explicitly checks that BadIdentityTokenInvalid, BadIdentityTokenRejected and
-     * BadUserAccessDenied increment SecurityRejectedSessionCount.
-     * The other StatusCodes below are security-related ActivateSession Service results
-     * defined in OPC UA Part 4, §5.7.3.3
-     */
-    switch (status)
-    {
-    case OpcUa_BadIdentityTokenInvalid:
-    case OpcUa_BadIdentityTokenRejected:
-    case OpcUa_BadUserAccessDenied:
-    case OpcUa_BadApplicationSignatureInvalid:
-    case OpcUa_BadUserSignatureInvalid:
-    case OpcUa_BadNoValidCertificates:
-    case OpcUa_BadSecurityPolicyRejected:
-        return true;
-
-    default:
-        return false;
-    }
-}
-
-static void SOPC_ServerDiagnostics_OnSessionEvent(SOPC_Server_RuntimeVariables* runtimeVariables,
-                                                  SOPC_App_AddSpace_Event event,
-                                                  SOPC_SessionId sessionId,
-                                                  SOPC_StatusCode status)
-{
-    SOPC_ASSERT(NULL != runtimeVariables);
-
-    SOPC_UNUSED_ARG(sessionId);
-
-    bool diagnosticsChanged = false;
-
-    switch (event)
-    {
-    case AS_SESSION_CREATION:
-        runtimeVariables->diagnostics.currentSessionCount++;
-        runtimeVariables->diagnostics.cumulatedSessionCount++;
-        diagnosticsChanged = true;
-
-        /* TODO: Also update (Security)RejectedSessionCount on failed CreateSession requests.
-         * AS_SESSION_CREATION currently only notifies successful session creations.
-         */
-        break;
-
-    case AS_SESSION_CLOSURE:
-        /* if status = OpcUa_BadSessionIdInvalid the session can't be closed but common_server_notify_session_closed is
-         * called and generates AS_SESSION_CLOSURE.
-         * (see session_audit_bs__server_notify_session_closed in session_audit_bs.c)
-         */
-        if (OpcUa_BadSessionIdInvalid != status)
-        {
-            if (runtimeVariables->diagnostics.currentSessionCount > 0)
-            {
-                runtimeVariables->diagnostics.currentSessionCount--;
-            }
-
-            if (OpcUa_BadTimeout == status)
-            {
-                runtimeVariables->diagnostics.sessionTimeoutCount++;
-            }
-            else if (SOPC_IsBadStatus(status))
-            {
-                runtimeVariables->diagnostics.sessionAbortCount++;
-            }
-
-            // TODO : Let this boolean here, or put it in each branch to avoid useless address space update ?
-            diagnosticsChanged = true;
-        }
-
-        break;
-
-    case AS_SESSION_ACTIVATION:
-        if (SOPC_IsBadStatus(status))
-        {
-            runtimeVariables->diagnostics.rejectedSessionCount++;
-            if (SOPC_ServerDiagnostics_IsSecurityRejectedSessionStatus(status))
-            {
-                runtimeVariables->diagnostics.securityRejectedSessionCount++;
-            }
-            diagnosticsChanged = true;
-        }
-        break;
-
-    case AS_SESSION_INACTIVE:
-    default:
-        break;
-    }
-
-    if (diagnosticsChanged && NULL != sopc_server_helper_config.serverDiagnosticsEventHandler)
-    {
-        SOPC_ServerInternal_UpdateServerDiagnostics(&sopc_server_helper_config.runtimeVariables.diagnostics);
-    }
-}
-
 static void SOPC_ServerHelper_AddressSpaceNotifCb(const SOPC_CallContext* callCtxPtr,
                                                   SOPC_App_AddSpace_Event event,
                                                   uintptr_t opParam,
@@ -628,8 +530,8 @@ static void SOPC_ServerHelper_AddressSpaceNotifCb(const SOPC_CallContext* callCt
     else if (AS_SESSION_CREATION == event || AS_SESSION_ACTIVATION == event || AS_SESSION_INACTIVE == event ||
              AS_SESSION_CLOSURE == event)
     {
-        SOPC_ServerDiagnostics_OnSessionEvent(&sopc_server_helper_config.runtimeVariables, event,
-                                              (SOPC_SessionId) opParam, opStatus);
+        SOPC_ServerInternal_DiagnosticsOnSessionEvent((SOPC_ServerSessionEvent) event, (SOPC_SessionId) opParam,
+                                                      opStatus);
         if (NULL != sessionNotifCb)
         {
             sessionNotifCb(callCtxPtr, (SOPC_ServerSessionEvent) event, (SOPC_SessionId) opParam, opStatus);
@@ -785,6 +687,7 @@ void SOPC_ServerConfigHelper_Clear(void)
     SOPC_Free(sopc_server_helper_config.endpointClosed);
     SOPC_Dict_Delete(sopc_server_helper_config.writeInternalBehaviorCb);
     sopc_server_helper_config.writeInternalBehaviorCb = NULL;
+    SOPC_ServerInternal_DiagnosticsClear();
 
     SOPC_Atomic_Int_Set(&sopc_server_helper_config.initialized, (int32_t) false);
     SOPC_Mutex_Clear(&sopc_server_helper_config.stateMutex);

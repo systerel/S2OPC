@@ -24,6 +24,7 @@
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 #include "libs2opc_server.h"
+#include "libs2opc_server_diagnostics.h"
 #include "libs2opc_server_internal.h"
 
 #include "opcua_identifiers.h"
@@ -442,54 +443,6 @@ static void SOPC_UpdateCurrentTime_EventHandler_Callback(SOPC_EventHandler* hand
     }
 }
 
-static void SOPC_UpdateServerDiagnostics_EventHandler_Callback(SOPC_EventHandler* handler,
-                                                               int32_t event,
-                                                               uint32_t eltId,
-                                                               uintptr_t params,
-                                                               uintptr_t auxParam)
-{
-    SOPC_UNUSED_ARG(handler);
-
-    uint32_t currentSubscriptionCount = 0;
-    uint32_t cumulatedSubscriptionCount = 0;
-    uint32_t publishingIntervalCount = 0;
-    uint32_t rejectedRequestsCount = 0;
-    uint32_t securityRejectedRequestsCount = 0;
-
-    switch (event)
-    {
-    case OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary:
-        SOPC_ASSERT(params <= UINT32_MAX);
-        SOPC_ASSERT(auxParam <= UINT32_MAX);
-
-        currentSubscriptionCount = eltId;
-        cumulatedSubscriptionCount = (uint32_t) params;
-        publishingIntervalCount = (uint32_t) auxParam;
-
-        sopc_server_helper_config.runtimeVariables.diagnostics.currentSubscriptionCount = currentSubscriptionCount;
-        sopc_server_helper_config.runtimeVariables.diagnostics.cumulatedSubscriptionCount = cumulatedSubscriptionCount;
-        sopc_server_helper_config.runtimeVariables.diagnostics.publishingIntervalCount = publishingIntervalCount;
-        break;
-
-    case OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount:
-        SOPC_ASSERT(params <= UINT32_MAX);
-
-        rejectedRequestsCount = (uint32_t) eltId;
-        securityRejectedRequestsCount = (uint32_t) params;
-
-        sopc_server_helper_config.runtimeVariables.diagnostics.rejectedRequestsCount = rejectedRequestsCount;
-        sopc_server_helper_config.runtimeVariables.diagnostics.securityRejectedRequestsCount =
-            securityRejectedRequestsCount;
-        break;
-
-    default:
-        SOPC_ASSERT(false);
-        return;
-    }
-
-    SOPC_ServerInternal_UpdateServerDiagnostics(&sopc_server_helper_config.runtimeVariables.diagnostics);
-}
-
 // Build and update server runtime variables (Server node info) and request to open all endpoints of the server
 static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 {
@@ -512,6 +465,10 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
             SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &pConfig->serverConfig);
     }
 
+    SOPC_Looper* appLooper = SOPC_App_GetLooper();
+    // Start diagnostics prior to runtime variables write: EnabledFlag write notifies the diagnostics event handler
+    SOPC_ServerInternal_DiagnosticsStart(appLooper);
+
     OpcUa_WriteRequest* writeRequest =
         SOPC_RuntimeVariables_BuildWriteRequest(&sopc_server_helper_config.runtimeVariables);
 
@@ -522,45 +479,21 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
             "Setting runtime variables of server build information nodes failed."
             " Please check address space content includes necessary base information nodes.");
 
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status && 0 != sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs)
         {
-            SOPC_Looper* appLooper = SOPC_App_GetLooper();
-
-            if (NULL == sopc_server_helper_config.serverDiagnosticsEventHandler)
+            SOPC_EventHandler* currentTimeHandler =
+                SOPC_EventHandler_Create(appLooper, SOPC_UpdateCurrentTime_EventHandler_Callback);
+            SOPC_LooperEvent currentTimeEvent = {OpcUaId_Server_ServerStatus_CurrentTime,
+                                                 OpcUaId_Server_ServerStatus_CurrentTime, 0, 0};
+            uint32_t currentTimeTimerId = SOPC_EventTimer_CreatePeriodic(
+                currentTimeHandler, currentTimeEvent, sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs);
+            if (0 == currentTimeTimerId)
             {
-                sopc_server_helper_config.serverDiagnosticsEventHandler =
-                    SOPC_EventHandler_Create(appLooper, SOPC_UpdateServerDiagnostics_EventHandler_Callback);
-
-                SOPC_ServerInternal_SetDiagnosticsEventHandler(sopc_server_helper_config.serverDiagnosticsEventHandler);
-
-                if (NULL == sopc_server_helper_config.serverDiagnosticsEventHandler)
-                {
-                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                             "Event handler creation to update server diagnostics failed.");
-                }
+                SOPC_Logger_TraceWarning(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "Timer creation to update server status current time failed, it will not be updated.");
             }
-
-            if (0 != sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs)
-            {
-                SOPC_EventHandler* currentTimeHandler =
-                    SOPC_EventHandler_Create(appLooper, SOPC_UpdateCurrentTime_EventHandler_Callback);
-
-                SOPC_LooperEvent currentTimeEvent = {OpcUaId_Server_ServerStatus_CurrentTime,
-                                                     OpcUaId_Server_ServerStatus_CurrentTime, 0, 0};
-
-                uint32_t currentTimeTimerId =
-                    SOPC_EventTimer_CreatePeriodic(currentTimeHandler, currentTimeEvent,
-                                                   sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs);
-
-                if (0 == currentTimeTimerId)
-                {
-                    SOPC_Logger_TraceWarning(
-                        SOPC_LOG_MODULE_CLIENTSERVER,
-                        "Timer creation to update server status current time failed, it will not be updated.");
-                }
-
-                sopc_server_helper_config.currentTimeRefreshTimerId = currentTimeTimerId;
-            }
+            sopc_server_helper_config.currentTimeRefreshTimerId = currentTimeTimerId;
         }
     }
     else
