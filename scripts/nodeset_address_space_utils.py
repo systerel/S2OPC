@@ -78,11 +78,20 @@ def is_forward(ref: ET.Element):
     return ref.get('IsForward') != 'false'
 
 
-def get_ns0_version(tree_models):
+def get_ns0_model(tree_models):
     for model in tree_models:
         if model.get('ModelUri') == UA_URI:
-            return model.get('Version')
+            return model
     return None
+
+
+def get_compared_versions(model, required_model):
+    # ModelVersion (OPC UA 1.05) is the attribute to compare with RequiredModel,
+    # fall back to Version when one of the two elements does not define it
+    attr = 'ModelVersion'
+    if model.get(attr) is None or required_model.get(attr) is None:
+        attr = 'Version'
+    return attr, model.get(attr), required_model.get(attr)
 
 
 def _check_declared_nid(nid, ns_count, matcher):
@@ -358,8 +367,8 @@ class NodesetMerger(NSFinder):
         if tree_models is None:
             print(f"Error: missing Node <Models> in file '{source}'")
             return False    # Mandatory on first file
-        ns0_version = get_ns0_version(tree_models)
-        if ns0_version is None:
+        ns0_model = get_ns0_model(tree_models)
+        if ns0_model is None:
             print(f"Error: Missing a NS0 <Model> in file '{source}'")
             return False
         new_models = self._find_in(new, 'uanodeset:Models')
@@ -379,9 +388,10 @@ class NodesetMerger(NSFinder):
                     raise Exception(f"Incompatible model version in file '{source}': {new_model_uri} provided with versions {already_model_version} and {new_model_version}")
             req_ns0 = self._find_in(model, f'uanodeset:RequiredModel[@ModelUri="{UA_URI}"]')
             if req_ns0 is not None:
-                req_ns0_version = req_ns0.get('Version')
+                attr, ns0_version, req_ns0_version = get_compared_versions(ns0_model, req_ns0)
                 if req_ns0_version != ns0_version:
-                    raise Exception(f"Incompatible NS0 version in file '{source}': provided {ns0_version} but require {req_ns0_version}")
+                    print(f"Warning: NS0 {attr} mismatch in file '{source}' for model {new_model_uri}: "
+                          f"provided {ns0_version} but require {req_ns0_version}", file=sys.stderr)
             tree_models.append(model)
         return True
 

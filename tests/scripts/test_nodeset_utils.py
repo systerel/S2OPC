@@ -18,7 +18,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import contextlib
 import difflib
+import io
 import os
 from os.path import join as pj
 import shutil
@@ -91,6 +93,15 @@ class MergeTests(unittest.TestCase):
     def test_merge_ns0_temperature(self):
         self.run_test('test_merge_ns0_temperature.xml', [],
                       'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
+
+    def test_merge_other_required_ns0_version(self):
+        # a RequiredModel NS0 version different from the provided NS0 version is only a warning
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            self.run_test('test_merge_other_required_ns0_version.xml', [],
+                          'ns0.xml', 'TestTemperatureNS_other_ns0_version.NodeSet2.xml')
+        self.assertIn("Warning: NS0 Version mismatch in file", stderr.getvalue())
+        self.assertIn("provided 1.05 but require 1.04", stderr.getvalue())
 
     def test_merge_ns0_temperature_pressure(self):
         self.run_test('test_merge_ns0_temperature_pressure.xml', [],
