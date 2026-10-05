@@ -29,6 +29,7 @@
 #include "message_out_bs.h"
 #include "util_b2c.h"
 
+#include "libs2opc_server_internal.h"
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
 #include "sopc_encoder.h"
@@ -38,11 +39,17 @@
 #include "sopc_protocol_constants.h"
 #include "sopc_toolkit_config_internal.h"
 
+static uint32_t rejectedRequestsCount = 0;
+static uint32_t securityRejectedRequestsCount = 0;
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void message_out_bs__INITIALISATION(void)
-{ /*Translated from B but an intialisation is not needed from this module.*/
+{
+    // Reset server diagnostics rejected requests counters
+    rejectedRequestsCount = 0;
+    securityRejectedRequestsCount = 0;
 }
 
 /*--------------------
@@ -116,6 +123,91 @@ static void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message
         *message_out_bs__nmsg = constants__c_msg_indet;
         *message_out_bs__nmsg_header = constants__c_msg_header_indet;
     }
+}
+
+static bool message_util_diag_requests__is_security_failure(const SOPC_StatusCode status)
+{
+    /*
+     * Notes:
+     * - some of those status codes are never actually returned in a service fault by services layer,
+     *   they reflect all the status codes security services related in the OPC UA specification part 4.
+     * - the secure channel service requests are not actual service requests (protocol dependent),
+     *   are not managed in this services layer and thus not counted here.
+     */
+    switch (status)
+    {
+    case OpcUa_BadSecurityChecksFailed:
+    case OpcUa_BadSecurityPolicyRejected:
+    case OpcUa_BadSecurityModeInsufficient:
+    case OpcUa_BadSecureChannelIdInvalid:
+    case OpcUa_BadNonceInvalid:
+
+    // Service fault from ActivateSession
+    case OpcUa_BadIdentityTokenInvalid:
+    case OpcUa_BadIdentityTokenRejected:
+    case OpcUa_BadUserAccessDenied:
+    case OpcUa_BadApplicationSignatureInvalid:
+    case OpcUa_BadUserSignatureInvalid:
+    case OpcUa_BadNoValidCertificates:
+    // Bad_IdentityChangeNotSupported --> Not security fail
+
+    // Service fault from CreateSession
+    case OpcUa_BadCertificateInvalid:
+    case OpcUa_BadCertificateTimeInvalid:
+    case OpcUa_BadCertificateIssuerTimeInvalid:
+    case OpcUa_BadCertificateHostNameInvalid:
+    case OpcUa_BadCertificateUriInvalid:
+    case OpcUa_BadCertificateUseNotAllowed:
+    case OpcUa_BadCertificateIssuerUseNotAllowed:
+    case OpcUa_BadCertificateUntrusted:
+    case OpcUa_BadCertificateRevocationUnknown:
+    case OpcUa_BadCertificateIssuerRevocationUnknown:
+    case OpcUa_BadCertificateRevoked:
+    // Bad_ServerUriInvalid, Bad_TooManySessions --> Not security fail
+    case OpcUa_BadCertificateIssuerRevoked:
+        return true;
+
+    default:
+        return false;
+    }
+}
+
+static void message_util_diag_requests__notify_rejected_request(const bool securityRejected)
+{
+    rejectedRequestsCount++;
+
+    if (securityRejected)
+    {
+        securityRejectedRequestsCount++;
+    }
+
+    SOPC_EventHandler* diagnosticsEventHandler = SOPC_ServerInternal_GetDiagnosticsEventHandler();
+
+    if (NULL != diagnosticsEventHandler)
+    {
+        const SOPC_ReturnStatus status = SOPC_EventHandler_Post(
+            diagnosticsEventHandler, OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount,
+            rejectedRequestsCount, (uintptr_t) securityRejectedRequestsCount, (uintptr_t) 0);
+
+        SOPC_UNUSED_RESULT(status);
+    }
+}
+
+static void message_util_diag_requests__update_counters(
+    const constants__t_msg_header_type_i message_out_bs__header_type,
+    const constants__t_msg_type_i message_out_bs__msg_type,
+    const constants__t_msg_header_i message_out_bs__msg_header)
+{
+    // Only ServiceFault responses (server side) are rejected requests
+    if (constants__e_msg_response_type != message_out_bs__header_type ||
+        constants__e_msg_service_fault_resp != message_out_bs__msg_type)
+    {
+        return;
+    }
+    const OpcUa_ResponseHeader* responseHeader = (const OpcUa_ResponseHeader*) message_out_bs__msg_header;
+    const bool securityRejected = message_util_diag_requests__is_security_failure(responseHeader->ServiceResult);
+
+    message_util_diag_requests__notify_rejected_request(securityRejected);
 }
 
 void message_out_bs__alloc_msg_header(const t_bool message_out_bs__p_is_request,
@@ -363,6 +455,10 @@ void message_out_bs__encode_msg(const constants__t_channel_config_idx_i message_
                                 constants_statuscodes_bs__t_StatusCode_i* const message_out_bs__sc,
                                 constants__t_byte_buffer_i* const message_out_bs__buffer)
 {
+    // ServiceFault fallback on encoding failure below is not a rejected request: count on requested message type
+    message_util_diag_requests__update_counters(message_out_bs__header_type, message_out_bs__msg_type,
+                                                message_out_bs__msg_header);
+
     internal__message_out_bs__encode_msg(message_out_bs__channel_cfg, message_out_bs__header_type,
                                          message_out_bs__msg_type, message_out_bs__msg_header, message_out_bs__msg,
                                          message_out_bs__sc, message_out_bs__buffer);

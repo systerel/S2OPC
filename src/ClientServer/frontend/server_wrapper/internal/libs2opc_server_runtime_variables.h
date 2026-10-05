@@ -31,6 +31,22 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
+typedef struct
+{
+    uint32_t serverViewCount;
+    uint32_t currentSessionCount;
+    uint32_t cumulatedSessionCount;
+    uint32_t securityRejectedSessionCount;
+    uint32_t rejectedSessionCount;
+    uint32_t sessionTimeoutCount;
+    uint32_t sessionAbortCount;
+    uint32_t publishingIntervalCount;
+    uint32_t currentSubscriptionCount;
+    uint32_t cumulatedSubscriptionCount;
+    uint32_t securityRejectedRequestsCount;
+    uint32_t rejectedRequestsCount;
+} SOPC_Server_RuntimeVariablesDiagnostics;
+
 typedef struct SOPC_Server_RuntimeVariables
 {
     SOPC_Server_Config* serverConfig;
@@ -43,6 +59,7 @@ typedef struct SOPC_Server_RuntimeVariables
     bool auditing;
     uint32_t maximum_operations_per_request;
     uint32_t maximum_heavy_operations_per_request;
+    SOPC_Server_RuntimeVariablesDiagnostics diagnostics;
 } SOPC_Server_RuntimeVariables;
 
 /**
@@ -100,6 +117,19 @@ OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeV
  * to update the runtime variables of the server.
  */
 OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(SOPC_Server_RuntimeVariables* vars);
+
+/**
+ * \brief Build a write request to update the server diagnostics runtime variables in the address space.
+ *
+ * \param diagnostics   Values of the server diagnostics variables.
+ * \return the WriteRequest to use with local services in case of success, NULL in case of failure.
+ *
+ * This function gathers all the server diagnostics values passed as parameters into a
+ * single write request that should be used with ::SOPC_ToolkitServer_AsyncLocalServiceRequest
+ * to update the runtime variables of the server diagnostics.
+ */
+OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerDiagnosticsWriteRequest(
+    const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics);
 
 /**
  * \brief Build a write request to update the server status current time variables value in the address space.

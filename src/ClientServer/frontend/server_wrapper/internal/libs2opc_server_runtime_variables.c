@@ -125,6 +125,8 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Bui
     runtimeVariables.maximum_operations_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
     runtimeVariables.maximum_heavy_operations_per_request = SOPC_MAX_HEAVY_OPERATIONS_PER_MSG;
 
+    memset(&runtimeVariables.diagnostics, 0, sizeof(runtimeVariables.diagnostics));
+
     return runtimeVariables;
 }
 
@@ -165,6 +167,8 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_
 
     runtimeVariables.maximum_operations_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
     runtimeVariables.maximum_heavy_operations_per_request = SOPC_MAX_HEAVY_OPERATIONS_PER_MSG;
+
+    memset(&runtimeVariables.diagnostics, 0, sizeof(runtimeVariables.diagnostics));
 
     return runtimeVariables;
 }
@@ -578,6 +582,123 @@ static bool set_server_capabilities_server_profile_array(OpcUa_WriteValue* wv)
     return true;
 }
 
+static bool set_write_value_server_diagnostics_summary(OpcUa_WriteValue* wv,
+                                                       const SOPC_Server_RuntimeVariablesDiagnostics* diag)
+{
+    SOPC_ExtensionObject* extObject = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    if (NULL == extObject)
+    {
+        return false;
+    }
+    OpcUa_ServerDiagnosticsSummaryDataType* summary = NULL;
+    SOPC_ExtensionObject_Initialize(extObject);
+    SOPC_ReturnStatus status = SOPC_ExtensionObject_CreateObject(
+        extObject, &OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType, (void**) &summary);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_ExtensionObject_Clear(extObject);
+        SOPC_Free(extObject);
+        return false;
+    }
+
+    summary->ServerViewCount = diag->serverViewCount;
+    summary->CurrentSessionCount = diag->currentSessionCount;
+    summary->CumulatedSessionCount = diag->cumulatedSessionCount;
+    summary->SecurityRejectedSessionCount = diag->securityRejectedSessionCount;
+    summary->RejectedSessionCount = diag->rejectedSessionCount;
+    summary->SessionTimeoutCount = diag->sessionTimeoutCount;
+    summary->SessionAbortCount = diag->sessionAbortCount;
+    summary->PublishingIntervalCount = diag->publishingIntervalCount;
+    summary->CurrentSubscriptionCount = diag->currentSubscriptionCount;
+    summary->CumulatedSubscriptionCount = diag->cumulatedSubscriptionCount;
+    summary->SecurityRejectedRequestsCount = diag->securityRejectedRequestsCount;
+    summary->RejectedRequestsCount = diag->rejectedRequestsCount;
+
+    set_write_value_id(wv, OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary);
+    wv->Value.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    wv->Value.Value.BuiltInTypeId = SOPC_ExtensionObject_Id;
+    wv->Value.Value.Value.ExtObject = extObject;
+
+    return true;
+}
+
+static bool set_server_server_diagnostics_variables(SOPC_Array* write_values,
+                                                    const SOPC_Server_RuntimeVariablesDiagnostics* diag)
+{
+    OpcUa_WriteValue* values = append_write_values(write_values, 13);
+
+    if (NULL == values)
+    {
+        return false;
+    }
+
+    return set_write_value_uint32(&values[0], OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_ServerViewCount,
+                                  diag->serverViewCount) &&
+           set_write_value_uint32(&values[1],
+                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount,
+                                  diag->currentSessionCount) &&
+           set_write_value_uint32(&values[2],
+                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CumulatedSessionCount,
+                                  diag->cumulatedSessionCount) &&
+           set_write_value_uint32(
+               &values[3], OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedSessionCount,
+               diag->securityRejectedSessionCount) &&
+           set_write_value_uint32(&values[4],
+                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedSessionCount,
+                                  diag->rejectedSessionCount) &&
+           set_write_value_uint32(&values[5],
+                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SessionTimeoutCount,
+                                  diag->sessionTimeoutCount) &&
+           set_write_value_uint32(&values[6],
+                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SessionAbortCount,
+                                  diag->sessionAbortCount) &&
+           set_write_value_uint32(&values[7],
+                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_PublishingIntervalCount,
+                                  diag->publishingIntervalCount) &&
+           set_write_value_uint32(&values[8],
+                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSubscriptionCount,
+                                  diag->currentSubscriptionCount) &&
+           set_write_value_uint32(&values[9],
+                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CumulatedSubscriptionCount,
+                                  diag->cumulatedSubscriptionCount) &&
+           set_write_value_uint32(
+               &values[10], OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedRequestsCount,
+               diag->securityRejectedRequestsCount) &&
+           set_write_value_uint32(&values[11],
+                                  OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount,
+                                  diag->rejectedRequestsCount) &&
+           set_write_value_server_diagnostics_summary(&values[12], diag);
+}
+
+OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerDiagnosticsWriteRequest(
+    const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics)
+{
+    SOPC_ASSERT(NULL != diagnostics);
+
+    OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
+    SOPC_Array* writeValues = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);
+
+    bool ok =
+        NULL != request && NULL != writeValues && set_server_server_diagnostics_variables(writeValues, diagnostics);
+
+    if (!ok)
+    {
+        SOPC_Array_Delete(writeValues);
+        SOPC_Free(request);
+        return NULL;
+    }
+
+    size_t nbValues = SOPC_Array_Size(writeValues);
+    SOPC_ASSERT(nbValues <= INT32_MAX);
+
+    OpcUa_WriteRequest_Initialize(request);
+
+    request->NodesToWrite = SOPC_Array_Into_Raw(writeValues);
+    request->NoOfNodesToWrite = (int32_t) nbValues;
+
+    return request;
+}
+
 static bool set_server_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVariables* vars)
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 7);
@@ -592,7 +713,8 @@ static bool set_server_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVa
            set_server_capabilities_locale_ids_array_value(&values[6], vars->serverConfig->localeIds) &&
            set_server_server_status_variables(write_values, vars) &&
            set_server_capabilities_max_variables(write_values) &&
-           set_server_capabilities_operation_limits_variables(write_values, vars);
+           set_server_capabilities_operation_limits_variables(write_values, vars) &&
+           set_server_server_diagnostics_variables(write_values, &vars->diagnostics);
 }
 
 OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeVariables* vars)

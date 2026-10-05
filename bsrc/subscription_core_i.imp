@@ -34,6 +34,7 @@ IMPORTS
     subscription_core_1,
     subscription_core_bs,
     subscription_core_it,
+    subscription_diagnostics_bs,
     monitored_item_notification_queue_bs,
     monitored_item_queue_bs,
     monitored_item_pointer_bs,
@@ -981,6 +982,7 @@ OPERATIONS
     local_close_subscription (p_subscription) =
     VAR
         l_timer_id,
+        l_publishInterval,
         l_republish_queue,
         l_monitored_item_queue,
         l_notification_queue,
@@ -1000,6 +1002,7 @@ OPERATIONS
     IN
         l_timer_id <-- get_subscription_timer_id (p_subscription);
         delete_publish_timer (l_timer_id);
+        l_publishInterval <-- get_subscription_publishInterval(p_subscription);
         l_republish_queue <-- get_subscription_notifRepublishQueue (p_subscription);
         /* Deallocate republish queue */
         clear_and_deallocate_republish_queue (l_republish_queue);
@@ -1044,7 +1047,8 @@ OPERATIONS
         END;
         clear_iter_monitored_item (l_iterator);
         clear_and_deallocate_monitored_item_queue (l_monitored_item_queue);
-        delete_subscription (p_subscription)
+        delete_subscription (p_subscription);
+        subscription_deleted(l_publishInterval)
     END
     ;
 
@@ -1211,7 +1215,11 @@ OPERATIONS
                                   c_sub_seq_num_init, /* => next SeqNum == 1 */
                                   l_newRepublishQueue,
                                   l_newMonitoredItemQueue,
-                                  l_timerId)
+                                  l_timerId);
+                IF StatusCode_service = e_sc_ok
+                THEN
+                    subscription_created(p_revPublishInterval)
+                END
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory;
                 IF l_bres_repub = TRUE
@@ -1242,6 +1250,7 @@ OPERATIONS
                          p_priority) =
     VAR
         l_old_priority,
+        l_oldPublishInterval,
         l_timerId,
         l_session,
         l_publishEnabled,
@@ -1256,6 +1265,7 @@ OPERATIONS
         l_state <-- get_subscription_state (p_subscription);
         log_subscription_transition (p_subscription, l_state, l_state, 18);
         l_old_priority <-- get_subscription_priority(p_subscription);
+        l_oldPublishInterval <-- get_subscription_publishInterval(p_subscription);
         l_timerId <-- get_subscription_timer_id (p_subscription);
         IF l_old_priority = p_priority
         THEN
@@ -1290,7 +1300,8 @@ OPERATIONS
                                   l_monitoredItemQueue,
                                   l_timerId)
             // note: l_statusCode is always Good as maximum number of subscriptions cannot be reached
-        END
+        END;
+        subscription_modified(l_oldPublishInterval, p_revPublishInterval)
     END
     ;
 
@@ -2108,6 +2119,7 @@ OPERATIONS
             card(subscriptions_to_iterate)
         END;
         subscription_core_bs_UNINITIALISATION;
+        subscription_diagnostics_bs_UNINITIALISATION;
         monitored_item_pointer_bs_UNINITIALISATION;
         msg_subscription_publish_bs_UNINITIALISATION
     END

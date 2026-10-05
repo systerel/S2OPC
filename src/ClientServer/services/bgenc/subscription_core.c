@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 10/08/2026 08:14:40
+ Date                 : 06/10/2026 09:50:22
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -477,6 +477,7 @@ void subscription_core__local_close_subscription(
    const constants__t_subscription_i subscription_core__p_subscription) {
    {
       constants__t_timer_id_i subscription_core__l_timer_id;
+      constants__t_opcua_duration_i subscription_core__l_publishInterval;
       constants__t_notifRepublishQueue_i subscription_core__l_republish_queue;
       constants__t_monitoredItemQueue_i subscription_core__l_monitored_item_queue;
       constants__t_notificationQueue_i subscription_core__l_notification_queue;
@@ -497,6 +498,8 @@ void subscription_core__local_close_subscription(
       subscription_core_1__get_subscription_timer_id(subscription_core__p_subscription,
          &subscription_core__l_timer_id);
       subscription_core_bs__delete_publish_timer(subscription_core__l_timer_id);
+      subscription_core_1__get_subscription_publishInterval(subscription_core__p_subscription,
+         &subscription_core__l_publishInterval);
       subscription_core_1__get_subscription_notifRepublishQueue(subscription_core__p_subscription,
          &subscription_core__l_republish_queue);
       notification_republish_queue_bs__clear_and_deallocate_republish_queue(subscription_core__l_republish_queue);
@@ -539,6 +542,7 @@ void subscription_core__local_close_subscription(
       monitored_item_queue_it_bs__clear_iter_monitored_item(subscription_core__l_iterator);
       monitored_item_queue_bs__clear_and_deallocate_monitored_item_queue(subscription_core__l_monitored_item_queue);
       subscription_core_1__delete_subscription(subscription_core__p_subscription);
+      subscription_diagnostics_bs__subscription_deleted(subscription_core__l_publishInterval);
    }
 }
 
@@ -728,6 +732,9 @@ void subscription_core__create_subscription(
                subscription_core__l_newMonitoredItemQueue,
                subscription_core__l_timerId,
                subscription_core__StatusCode_service);
+            if (*subscription_core__StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
+               subscription_diagnostics_bs__subscription_created(subscription_core__p_revPublishInterval);
+            }
          }
          else {
             *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
@@ -757,6 +764,7 @@ void subscription_core__modify_subscription(
    const t_entier4 subscription_core__p_priority) {
    {
       t_entier4 subscription_core__l_old_priority;
+      constants__t_opcua_duration_i subscription_core__l_oldPublishInterval;
       constants__t_timer_id_i subscription_core__l_timerId;
       constants__t_session_i subscription_core__l_session;
       t_bool subscription_core__l_publishEnabled;
@@ -776,6 +784,8 @@ void subscription_core__modify_subscription(
          18);
       subscription_core_1__get_subscription_priority(subscription_core__p_subscription,
          &subscription_core__l_old_priority);
+      subscription_core_1__get_subscription_publishInterval(subscription_core__p_subscription,
+         &subscription_core__l_oldPublishInterval);
       subscription_core_1__get_subscription_timer_id(subscription_core__p_subscription,
          &subscription_core__l_timerId);
       if (subscription_core__l_old_priority == subscription_core__p_priority) {
@@ -820,6 +830,8 @@ void subscription_core__modify_subscription(
             subscription_core__l_timerId,
             &subscription_core__l_statusCode);
       }
+      subscription_diagnostics_bs__subscription_modified(subscription_core__l_oldPublishInterval,
+         subscription_core__p_revPublishInterval);
    }
 }
 
@@ -1991,6 +2003,7 @@ void subscription_core__subscription_core_UNINITIALISATION(void) {
          }
       }
       subscription_core_bs__subscription_core_bs_UNINITIALISATION();
+      subscription_diagnostics_bs__subscription_diagnostics_bs_UNINITIALISATION();
       monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION();
       msg_subscription_publish_bs__msg_subscription_publish_bs_UNINITIALISATION();
    }

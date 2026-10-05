@@ -97,6 +97,7 @@ set(S2OPC_WRAPPERS_SRC
     "${SERVERWRAPPER_PATH}/libs2opc_server.c"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config.c"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.c"
+    "${SERVERWRAPPER_PATH}/internal/libs2opc_server_diagnostics.c"
     "${SERVERWRAPPER_PATH}/internal/libs2opc_server_runtime_variables.c"
     "${SERVERWRAPPER_PATH}/file_transfer/libs2opc_file_transfer.c"
     ${WRAPPERS_XML_CONFIG}

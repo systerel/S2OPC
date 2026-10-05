@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 08/07/2026 11:25:12
+ Date                 : 18/08/2026 14:57:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -48,6 +48,7 @@
 #include "subscription_core_1.h"
 #include "subscription_core_bs.h"
 #include "subscription_core_it.h"
+#include "subscription_diagnostics_bs.h"
 
 /*-----------------
    EXTENDS Clause

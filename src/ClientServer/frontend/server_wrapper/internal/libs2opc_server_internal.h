@@ -129,6 +129,9 @@ typedef struct SOPC_ServerHelper_Config
     uint16_t configuredCurrentTimeRefreshIntervalMs;
     uint32_t currentTimeRefreshTimerId;
 
+    // Server diagnostics update event handler
+    SOPC_EventHandler* serverDiagnosticsEventHandler;
+
     // Server build info
     OpcUa_BuildInfo* buildInfo;
 
@@ -246,5 +249,35 @@ bool SOPC_ServerInternal_LocalServiceAsync(SOPC_LocalServiceAsyncResp_Fct* async
  *          SOPC_STATUS_NOT_SUPPORTED otherwise.
  */
 SOPC_ReturnStatus SOPC_ServerInternal_TriggerAuditEvent(SOPC_Event* event);
+
+/**
+ * \brief Callback called when an internal Write request updating server runtime variables completes.
+ *
+ * \param encType Encodeable type of the received response.
+ * \param response Pointer to the received service response.
+ * \param context Internal context associated with the asynchronous local service request.
+ */
+void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType* encType, void* response, uintptr_t context);
+
+/**
+ * \brief Updates the ServerDiagnostics nodes in the AddressSpace from the current server runtime variables.
+ *
+ * \param diagnostics Pointer to the diagnostic values to write.
+ */
+void SOPC_ServerInternal_UpdateServerDiagnostics(const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics);
+
+/**
+ * \brief Sets the event handler used to trigger ServerDiagnostics updates.
+ *
+ * \param eventHandler The ServerDiagnostics event handler to store.
+ */
+void SOPC_ServerInternal_SetDiagnosticsEventHandler(SOPC_EventHandler* eventHandler);
+
+/**
+ * \brief Returns the event handler used to update ServerDiagnostics.
+ *
+ * \return The ServerDiagnostics event handler, or NULL if it has not been initialized.
+ */
+SOPC_EventHandler* SOPC_ServerInternal_GetDiagnosticsEventHandler(void);
 
 #endif
