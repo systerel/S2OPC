@@ -7861,6 +7861,7 @@
     </References>
   </UAObject>
   <!-- ServerDiagnostics is disabled: do not show nodes of diagnostic -->
+  <!-- NOTE : The mandatory nodes can be activated with the merge of s2opc_base_server_diagnostics_origin.xml -->
   <!--
   <UAVariable NodeId="i=2275" BrowseName="ServerDiagnosticsSummary" ParentNodeId="i=2274" DataType="i=859">
     <DisplayName>ServerDiagnosticsSummary</DisplayName>
@@ -8009,6 +8010,10 @@
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">i=2274</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="33">i=15668</RolePermission>
+      <RolePermission Permissions="6241">i=15704</RolePermission>
+    </RolePermissions>
   </UAVariable>
   <UAObject NodeId="i=2295" BrowseName="VendorServerInfo" ParentNodeId="i=2253">
     <DisplayName>VendorServerInfo</DisplayName>

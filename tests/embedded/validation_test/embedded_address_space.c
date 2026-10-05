@@ -2745,6 +2745,17 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] =
                               false,
                               {SOPC_NODEID_NS0_NUMERIC(68), SOPC_STRING_NULL, 0},
                           }},
+                  .NoOfRolePermissions = 2,
+                  .RolePermissions = (const OpcUa_RolePermissionType[]){{
+                                                                            &OpcUa_RolePermissionType_EncodeableType,
+                                                                            SOPC_NODEID_NS0_NUMERIC(15668),
+                                                                            33,
+                                                                        },
+                                                                        {
+                                                                            &OpcUa_RolePermissionType_EncodeableType,
+                                                                            SOPC_NODEID_NS0_NUMERIC(15704),
+                                                                            6241,
+                                                                        }},
                   .Value = SOPC_VARIANT_UINT32(39),
                   .DataType = SOPC_NODEID_NS0_NUMERIC(1),
                   .ValueRank = (-1),

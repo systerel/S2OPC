@@ -58,3 +58,8 @@ gen_nodeset s2opc_no_base_info.xml --remove-subtree "i=92" "i=93" --remove-unuse
 
 # Generate demo NodeSet for RolePermissions test
 gen_nodeset s2opc_role_test.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_test_role_permissions_origin.xml s2opc_test_role_permissions_ns1_ns2.xml
+
+# Generate demo NodeSet for Server diagnostics test
+# WARNING : This nodeset contains the mandatory server diagnostics nodes, not the optionnal, according to the Part 5 of specification
+# ServerDiagnostics EnabledFlag (i=2294) is writable in this NodeSet only.
+gen_nodeset s2opc_server_diags.xml --enable-diag-flag s2opc_base_nodeset_origin.xml s2opc_base_server_diagnostics_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml s2opc_test_alarm_conditions.xml
