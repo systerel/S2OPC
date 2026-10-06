@@ -38,6 +38,7 @@
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_server.h"
+#include "libs2opc_server_diagnostics.h"
 #include "libs2opc_server_internal.h"
 
 #include "app_cb_call_context_internal.h"
@@ -79,6 +80,7 @@ static void server_session_event_notif(const constants__t_session_i session_core
     SOPC_ReturnStatus enqStatus = SOPC_STATUS_OK;
     SOPC_App_AddSpace_Event sessionEvent = AS_SESSION_CLOSURE;
     uintptr_t params = (uintptr_t) NULL;
+    bool evalDiagnostics = true;
 
     if (session_core_bs__sc_reason != constants_statuscodes_bs__c_StatusCode_indet)
     {
@@ -99,10 +101,12 @@ static void server_session_event_notif(const constants__t_session_i session_core
         break;
     case constants__e_session_scOrphaned:
         sessionEvent = AS_SESSION_INACTIVE;
+        evalDiagnostics = false; // activation not counted
         break;
     case constants__e_session_closing:
         sessionEvent = AS_SESSION_CLOSURE;
         params = (uintptr_t) session_core_bs__state;
+        evalDiagnostics = false; // client side event only
         break;
     default:
         enqStatus = SOPC_STATUS_NOK;
@@ -113,6 +117,10 @@ static void server_session_event_notif(const constants__t_session_i session_core
     {
         enqStatus =
             SOPC_App_EnqueueAddressSpaceNotification(ccc, sessionEvent, session_core_bs__session, params, scReason);
+        if (evalDiagnostics)
+        {
+            SOPC_ServerInternal_DiagnosticsUpdateSessionCounts((SOPC_ServerSessionEvent) sessionEvent, scReason);
+        }
     }
     if (SOPC_STATUS_OK != enqStatus)
     {

@@ -191,16 +191,7 @@ static void message_util_diag_requests__notify_rejected_request(const bool secur
         securityRejectedRequestsCount++;
     }
 
-    SOPC_EventHandler* diagnosticsEventHandler = SOPC_ServerInternal_GetDiagnosticsEventHandler();
-
-    if (NULL != diagnosticsEventHandler)
-    {
-        const SOPC_ReturnStatus status = SOPC_EventHandler_Post(
-            diagnosticsEventHandler, OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount,
-            rejectedRequestsCount, (uintptr_t) securityRejectedRequestsCount, (uintptr_t) 0);
-
-        SOPC_UNUSED_RESULT(status);
-    }
+    SOPC_ServerInternal_DiagnosticsUpdateRequestCounts(rejectedRequestsCount, securityRejectedRequestsCount);
 }
 
 static void message_util_diag_requests__update_counters(

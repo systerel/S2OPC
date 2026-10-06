@@ -42,7 +42,6 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeabletype.h"
-#include "sopc_event_handler.h"
 #include "sopc_macros.h"
 #include "sopc_threads.h"
 
@@ -65,9 +64,6 @@
 
 #define SLEEP_TIMEOUT_MS 50
 #define WAIT_TIMEOUT_MS 5000
-
-#define REJECTED_REQUESTS_COUNT 5
-#define SECURITY_REJECTED_REQUESTS_COUNT 2
 
 // AccessLevel values of EnabledFlag node: CurrentRead and CurrentRead | CurrentWrite
 #define ACCESS_LEVEL_READ 1
@@ -402,18 +398,6 @@ static bool wait_rejected_requests_nodes(SOPC_StatusCode expStatus, uint32_t exp
     return wait_for(are_rejected_requests_nodes, &expected);
 }
 
-/* Returns true once the posted rejected requests event has been treated by the diagnostics event handler.
- * Note: runtime variables are modified from the application looper thread, reading them from the test thread is
- *       acceptable for test purpose only. */
-static bool is_rejected_requests_event_treated(void* context)
-{
-    SOPC_UNUSED_ARG(context);
-    const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics =
-        &sopc_server_helper_config.runtimeVariables.diagnostics;
-    return REJECTED_REQUESTS_COUNT == diagnostics->rejectedRequestsCount &&
-           SECURITY_REJECTED_REQUESTS_COUNT == diagnostics->securityRejectedRequestsCount;
-}
-
 static SOPC_ReturnStatus configure_client(SOPC_SecureConnection_Config** secureConnConfig)
 {
     SOPC_ReturnStatus status = SOPC_ClientConfigHelper_SetApplicationDescription(
@@ -488,10 +472,9 @@ static SOPC_ReturnStatus send_rejected_request(SOPC_ClientConnection* connection
     return status;
 }
 
-/* Connects a client (1 session), creates a subscription and sends a rejected request,
- * then checks the cumulated counters are equal to 1 and disconnects.
- * Note: rejected requests counters are posted as absolute values, the value previously posted by the test is
- *       overwritten by the first actual rejected request. */
+/* Connects a client (1 session), creates a subscription, sends a rejected request and disconnects:
+ * each cumulated counter is incremented by 1.
+ * Note: diagnostics are updated synchronously by the services thread before the responses are sent. */
 static SOPC_ReturnStatus run_client_activity(SOPC_SecureConnection_Config* secureConnConfig)
 {
     SOPC_ClientConnection* connection = NULL;
@@ -506,11 +489,6 @@ static SOPC_ReturnStatus run_client_activity(SOPC_SecureConnection_Config* secur
     if (SOPC_STATUS_OK == status)
     {
         status = send_rejected_request(connection);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        uint32_t expValue = 1;
-        status = wait_for(are_cumulated_counters, &expValue) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
     if (NULL != subscription)
     {
@@ -547,8 +525,14 @@ static SOPC_ReturnStatus restart_server(void)
     return status;
 }
 
+// Returns SOPC_STATUS_OK if all the cumulated counters reach the expected value with a Good status
+static SOPC_ReturnStatus wait_cumulated_counters(uint32_t expValue)
+{
+    return wait_for(are_cumulated_counters, &expValue) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+}
+
 // Shall be called in server started state
-static SOPC_ReturnStatus check_enabled_flag_started(void)
+static SOPC_ReturnStatus check_enabled_flag_started(SOPC_SecureConnection_Config* secureConnConfig)
 {
     // Initial state: diagnostics disabled
     SOPC_ReturnStatus status =
@@ -559,20 +543,12 @@ static SOPC_ReturnStatus check_enabled_flag_started(void)
     // Diagnostics values updated while disabled: address space not updated
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EventHandler* diagHandler = SOPC_ServerInternal_GetDiagnosticsEventHandler();
-        status = (NULL == diagHandler)
-                     ? SOPC_STATUS_NOK
-                     : SOPC_EventHandler_Post(
-                           diagHandler, OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount,
-                           REJECTED_REQUESTS_COUNT, (uintptr_t) SECURITY_REJECTED_REQUESTS_COUNT, (uintptr_t) 0);
+        status = run_client_activity(secureConnConfig);
     }
     if (SOPC_STATUS_OK == status)
     {
-        // Wait for the event to be treated before checking the address space is not updated
-        status = (wait_for(is_rejected_requests_event_treated, NULL) &&
-                  check_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0))
-                     ? SOPC_STATUS_OK
-                     : SOPC_STATUS_NOK;
+        // Diagnostics updates are synchronous: a local read is treated after any address space update
+        status = check_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: no update while disabled: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
@@ -584,10 +560,7 @@ static SOPC_ReturnStatus check_enabled_flag_started(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = wait_rejected_requests_nodes(SOPC_GoodGenericStatus, REJECTED_REQUESTS_COUNT,
-                                              SECURITY_REJECTED_REQUESTS_COUNT)
-                     ? SOPC_STATUS_OK
-                     : SOPC_STATUS_NOK;
+        status = wait_cumulated_counters(1);
         printf("<Test_Server_Diagnostics_Enabled_Flag: enabled: %s\n", SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
     // Unmanaged nodes are not readable even if diagnostics are enabled
@@ -612,10 +585,10 @@ static SOPC_ReturnStatus check_enabled_flag_started(void)
 // Shall be called in server started state with diagnostics inhibited
 static SOPC_ReturnStatus check_inhibited_started(void)
 {
-    SOPC_ReturnStatus status = (NULL == SOPC_ServerInternal_GetDiagnosticsEventHandler() &&
-                                wait_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0))
-                                   ? SOPC_STATUS_OK
-                                   : SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status =
+        (!SOPC_ServerInternal_IsDiagnosticsSupported() && wait_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0))
+            ? SOPC_STATUS_OK
+            : SOPC_STATUS_NOK;
     printf("<Test_Server_Diagnostics_Enabled_Flag: initial inhibited state: %s\n",
            SOPC_STATUS_OK == status ? "OK" : "NOK");
     if (SOPC_STATUS_OK == status)
@@ -628,8 +601,8 @@ static SOPC_ReturnStatus check_inhibited_started(void)
     {
         status = write_enabled_flag_sync(true);
     }
-    /* The write is synchronous and no asynchronous effect is possible: no write behavior callback is registered and
-     * no diagnostics event handler exists when diagnostics are inhibited (checked above) */
+    /* The write is synchronous and no asynchronous effect is possible: no write behavior callback is registered when
+     * diagnostics are inhibited (checked above) */
     if (SOPC_STATUS_OK == status)
     {
         status =
@@ -642,15 +615,19 @@ static SOPC_ReturnStatus check_inhibited_started(void)
     return status;
 }
 
-/* Shall be called in server started state with diagnostics supported:
+/* Shall be called after ::check_enabled_flag_started (cumulated counters equal to 1):
  * checks counters are reset on server stop and EnabledFlag state is kept on server restart */
 static SOPC_ReturnStatus check_reset_on_restart(SOPC_SecureConnection_Config* secureConnConfig)
 {
-    // Enable diagnostics and generate client activity: cumulated counters equal to 1
+    // Enable diagnostics and generate client activity: cumulated counters equal to 2
     SOPC_ReturnStatus status = write_enabled_flag_sync(true);
     if (SOPC_STATUS_OK == status)
     {
         status = run_client_activity(secureConnConfig);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = wait_cumulated_counters(2);
         printf("<Test_Server_Diagnostics_Enabled_Flag: counters incremented: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
@@ -661,17 +638,18 @@ static SOPC_ReturnStatus check_reset_on_restart(SOPC_SecureConnection_Config* se
     // EnabledFlag state kept on restart and cumulated counters reset to 0
     if (SOPC_STATUS_OK == status)
     {
-        uint32_t expValue = 0;
-        status = (SOPC_ServerInternal_IsDiagnosticsEnabled() && wait_for(are_cumulated_counters, &expValue))
-                     ? SOPC_STATUS_OK
-                     : SOPC_STATUS_NOK;
+        status = SOPC_ServerInternal_IsDiagnosticsEnabled() ? wait_cumulated_counters(0) : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: counters reset on restart: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
-    // Same client activity after restart: cumulated counters equal to 1 (not 2)
+    // Same client activity after restart: cumulated counters equal to 1 (not 3)
     if (SOPC_STATUS_OK == status)
     {
         status = run_client_activity(secureConnConfig);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = wait_cumulated_counters(1);
         printf("<Test_Server_Diagnostics_Enabled_Flag: counters incremented after restart: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
@@ -684,11 +662,10 @@ static SOPC_ReturnStatus check_inhibited_on_restart(void)
     SOPC_ReturnStatus status = restart_server();
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            (NULL == SOPC_ServerInternal_GetDiagnosticsEventHandler() && !SOPC_ServerInternal_IsDiagnosticsEnabled() &&
-             wait_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0))
-                ? SOPC_STATUS_OK
-                : SOPC_STATUS_NOK;
+        status = (!SOPC_ServerInternal_IsDiagnosticsSupported() && !SOPC_ServerInternal_IsDiagnosticsEnabled() &&
+                  wait_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0))
+                     ? SOPC_STATUS_OK
+                     : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: inhibited after restart: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
@@ -742,7 +719,7 @@ int main(int argc, char* argv[])
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = expSupported ? check_enabled_flag_started() : check_inhibited_started();
+        status = expSupported ? check_enabled_flag_started(secureConnConfig) : check_inhibited_started();
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -755,8 +732,7 @@ int main(int argc, char* argv[])
     SOPC_ServerConfigHelper_Clear();
     // Diagnostics state is reset on clear
     if (SOPC_STATUS_OK == status &&
-        (SOPC_ServerInternal_IsDiagnosticsSupported() || SOPC_ServerInternal_IsDiagnosticsEnabled() ||
-         NULL != SOPC_ServerInternal_GetDiagnosticsEventHandler()))
+        (SOPC_ServerInternal_IsDiagnosticsSupported() || SOPC_ServerInternal_IsDiagnosticsEnabled()))
     {
         status = SOPC_STATUS_NOK;
     }

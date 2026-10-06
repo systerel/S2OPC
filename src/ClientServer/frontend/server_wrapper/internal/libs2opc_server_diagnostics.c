@@ -24,23 +24,17 @@
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
-#include "sopc_assert.h"
-#include "sopc_event_handler.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 
-/* ServerDiagnostics event handler: created before endpoints are opened when diagnostics are supported,
- * its callback is executed in the application looper thread */
-static SOPC_EventHandler* serverDiagnosticsEventHandler = NULL;
-
-/* ServerDiagnostics EnabledFlag state: set during configuration, then only accessed from the application looper
- * thread (write behavior callback posts an event to the diagnostics event handler).
+/* ServerDiagnostics EnabledFlag state: set during configuration, then only accessed from the services thread
+ * (EnabledFlag write behavior callback).
  * Copied into the runtime variables diagnostics on server start (see set_enabled_flag). */
 static bool diagEnabledFlag = false;
 
-/* ServerDiagnostics support state: set during configuration and read-only afterwards (services thread and
- * application looper thread). Server messages are only treated once endpoints are opened, which occurs after
- * configuration through the services event queue. */
+/* ServerDiagnostics support state: set during configuration and read-only afterwards (services thread).
+ * Server messages are only treated once endpoints are opened, which occurs after configuration through the services
+ * event queue. */
 static bool diagSupported = false;
 
 static const SOPC_NodeId enabledFlagNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_EnabledFlag);
@@ -52,9 +46,13 @@ static void set_enabled_flag(bool value)
     sopc_server_helper_config.runtimeVariables.diagnostics.enabledFlag = value;
 }
 
-static void write_server_diagnostics(const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics)
+/* Writes the runtime variables diagnostics into the ServerDiagnostics nodes of the AddressSpace.
+ * Called from the services thread: the local WriteRequest is enqueued in the services event queue before the response
+ * of the request being treated is sent, a subsequent client request is then treated after the AddressSpace update. */
+static void write_server_diagnostics(void)
 {
-    OpcUa_WriteRequest* writeRequest = SOPC_RuntimeVariables_BuildUpdateServerDiagnosticsWriteRequest(diagnostics);
+    OpcUa_WriteRequest* writeRequest = SOPC_RuntimeVariables_BuildUpdateServerDiagnosticsWriteRequest(
+        &sopc_server_helper_config.runtimeVariables.diagnostics);
 
     if (NULL != writeRequest)
     {
@@ -67,7 +65,16 @@ static void write_server_diagnostics(const SOPC_Server_RuntimeVariablesDiagnosti
     }
 }
 
-// Called from the application looper thread on EnabledFlag write
+// Updates the ServerDiagnostics nodes in the AddressSpace only if diagnostics are enabled
+static void update_server_diagnostics(void)
+{
+    if (diagEnabledFlag)
+    {
+        write_server_diagnostics();
+    }
+}
+
+// Called from the services thread on EnabledFlag write
 static void update_enabled_flag(bool newValue)
 {
     if (newValue == diagEnabledFlag)
@@ -77,7 +84,7 @@ static void update_enabled_flag(bool newValue)
     set_enabled_flag(newValue);
     /* Runtime variables are kept up to date while diagnostics are disabled:
        up to date values are written when enabled, 0 with OpcUa_BadNotReadable when disabled */
-    write_server_diagnostics(&sopc_server_helper_config.runtimeVariables.diagnostics);
+    write_server_diagnostics();
 }
 
 static bool get_enabled_flag_value(const SOPC_Variant* value, bool* enabled)
@@ -91,7 +98,7 @@ static bool get_enabled_flag_value(const SOPC_Variant* value, bool* enabled)
     return true; // enabled value extraction succeeded
 }
 
-// Called from the services thread: postpone the EnabledFlag update in the application looper thread
+// Called from the services thread on EnabledFlag write
 static void enabled_flag_write_behavior_cb(const SOPC_NodeId* nodeId,
                                            const SOPC_DataValue* prevValue,
                                            const SOPC_DataValue* newValue,
@@ -101,12 +108,6 @@ static void enabled_flag_write_behavior_cb(const SOPC_NodeId* nodeId,
     SOPC_UNUSED_ARG(prevValue);
     SOPC_UNUSED_ARG(auxParam);
 
-    // Diagnostics inhibited after configuration (event handler creation failure): nothing to notify
-    if (!diagSupported)
-    {
-        return;
-    }
-
     bool enabled = false;
     if (!get_enabled_flag_value(&newValue->Value, &enabled))
     {
@@ -115,90 +116,7 @@ static void enabled_flag_write_behavior_cb(const SOPC_NodeId* nodeId,
         return;
     }
 
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    if (NULL != serverDiagnosticsEventHandler)
-    {
-        status = SOPC_EventHandler_Post(serverDiagnosticsEventHandler, OpcUaId_Server_ServerDiagnostics_EnabledFlag,
-                                        (uint32_t) enabled, (uintptr_t) 0, (uintptr_t) 0);
-    }
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Failed to notify ServerDiagnostics EnabledFlag change (status=%d).", (int) status);
-    }
-}
-
-// Called from the application looper thread: events posted by the diagnostics sources
-static void diagnostics_event_handler_cb(SOPC_EventHandler* handler,
-                                         int32_t event,
-                                         uint32_t eltId,
-                                         uintptr_t params,
-                                         uintptr_t auxParam)
-{
-    SOPC_UNUSED_ARG(handler);
-
-    SOPC_Server_RuntimeVariablesDiagnostics* diagnostics = &sopc_server_helper_config.runtimeVariables.diagnostics;
-
-    uint32_t currentSubscriptionCount = 0;
-    uint32_t cumulatedSubscriptionCount = 0;
-    uint32_t publishingIntervalCount = 0;
-    uint32_t rejectedRequestsCount = 0;
-    uint32_t securityRejectedRequestsCount = 0;
-
-    bool updateServerDiagnostics = true;
-
-    // Runtime variables diagnostics are updated even if diagnostics are disabled: only AddressSpace update is inhibited
-    switch (event)
-    {
-    case OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount:
-        // Only used to reset the session counters
-        // (values are actually updated in ::SOPC_ServerInternal_DiagnosticsOnSessionEvent)
-        diagnostics->currentSessionCount = 0;
-        diagnostics->cumulatedSessionCount = 0;
-        diagnostics->securityRejectedSessionCount = 0;
-        diagnostics->rejectedSessionCount = 0;
-        diagnostics->sessionTimeoutCount = 0;
-        diagnostics->sessionAbortCount = 0;
-        break;
-
-    case OpcUaId_Server_ServerDiagnostics_EnabledFlag:
-        update_enabled_flag((bool) eltId);
-        updateServerDiagnostics = false; // already managed in ::update_enabled_flag
-        break;
-
-    case OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSubscriptionCount:
-        SOPC_ASSERT(params <= UINT32_MAX);
-        SOPC_ASSERT(auxParam <= UINT32_MAX);
-
-        currentSubscriptionCount = eltId;
-        cumulatedSubscriptionCount = (uint32_t) params;
-        publishingIntervalCount = (uint32_t) auxParam;
-
-        diagnostics->currentSubscriptionCount = currentSubscriptionCount;
-        diagnostics->cumulatedSubscriptionCount = cumulatedSubscriptionCount;
-        diagnostics->publishingIntervalCount = publishingIntervalCount;
-        break;
-
-    case OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount:
-        SOPC_ASSERT(params <= UINT32_MAX);
-
-        rejectedRequestsCount = (uint32_t) eltId;
-        securityRejectedRequestsCount = (uint32_t) params;
-
-        diagnostics->rejectedRequestsCount = rejectedRequestsCount;
-        diagnostics->securityRejectedRequestsCount = securityRejectedRequestsCount;
-        break;
-
-    default:
-        SOPC_ASSERT(false);
-        updateServerDiagnostics = false;
-        break;
-    }
-
-    if (updateServerDiagnostics)
-    {
-        SOPC_ServerInternal_UpdateServerDiagnostics(diagnostics);
-    }
+    update_enabled_flag(enabled);
 }
 
 static bool is_security_rejected_session_status(SOPC_StatusCode status)
@@ -268,28 +186,10 @@ SOPC_ReturnStatus SOPC_ServerInternal_DiagnosticsConfigure(SOPC_AddressSpace* ad
     return SOPC_ServerInternal_RegisterWriteBehaviorCb(&enabledFlagNodeId, enabled_flag_write_behavior_cb, 0);
 }
 
-void SOPC_ServerInternal_DiagnosticsStart(SOPC_Looper* looper)
+void SOPC_ServerInternal_DiagnosticsStart(void)
 {
-    if (diagSupported && NULL == serverDiagnosticsEventHandler)
-    {
-        serverDiagnosticsEventHandler = SOPC_EventHandler_Create(looper, diagnostics_event_handler_cb);
-        if (NULL == serverDiagnosticsEventHandler)
-        {
-            // Diagnostics cannot be managed without event handler: inhibit them all consistently
-            diagSupported = false;
-            diagEnabledFlag = false;
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "Event handler creation to update server diagnostics failed:"
-                                     " server diagnostics are inhibited.");
-        }
-    }
     // Runtime variables have been (re)built: copy the current EnabledFlag state
     set_enabled_flag(diagEnabledFlag);
-}
-
-SOPC_EventHandler* SOPC_ServerInternal_GetDiagnosticsEventHandler(void)
-{
-    return serverDiagnosticsEventHandler;
 }
 
 bool SOPC_ServerInternal_IsDiagnosticsEnabled(void)
@@ -302,21 +202,9 @@ bool SOPC_ServerInternal_IsDiagnosticsSupported(void)
     return diagSupported;
 }
 
-void SOPC_ServerInternal_UpdateServerDiagnostics(const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics)
+void SOPC_ServerInternal_DiagnosticsUpdateSessionCounts(SOPC_ServerSessionEvent event, SOPC_StatusCode status)
 {
-    if (diagEnabledFlag)
-    {
-        write_server_diagnostics(diagnostics);
-    }
-}
-
-void SOPC_ServerInternal_DiagnosticsOnSessionEvent(SOPC_ServerSessionEvent event,
-                                                   SOPC_SessionId sessionId,
-                                                   SOPC_StatusCode status)
-{
-    SOPC_UNUSED_ARG(sessionId);
-
-    if (!SOPC_ServerInternal_IsDiagnosticsSupported())
+    if (!diagSupported)
     {
         return;
     }
@@ -376,34 +264,46 @@ void SOPC_ServerInternal_DiagnosticsOnSessionEvent(SOPC_ServerSessionEvent event
 
     if (diagnosticsChanged)
     {
-        SOPC_ServerInternal_UpdateServerDiagnostics(diagnostics);
+        update_server_diagnostics();
     }
 }
 
-void SOPC_ServerInternal_DiagnosticsSessionCountersReset(void)
+void SOPC_ServerInternal_DiagnosticsUpdateSubscriptionCounts(uint32_t currentSubscriptionCount,
+                                                             uint32_t cumulatedSubscriptionCount,
+                                                             uint32_t publishingIntervalCount)
 {
     if (!diagSupported)
     {
         return;
     }
 
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    if (NULL != serverDiagnosticsEventHandler)
+    // Runtime variables diagnostics are updated even if diagnostics are disabled: only AddressSpace update is inhibited
+    SOPC_Server_RuntimeVariablesDiagnostics* diagnostics = &sopc_server_helper_config.runtimeVariables.diagnostics;
+    diagnostics->currentSubscriptionCount = currentSubscriptionCount;
+    diagnostics->cumulatedSubscriptionCount = cumulatedSubscriptionCount;
+    diagnostics->publishingIntervalCount = publishingIntervalCount;
+
+    update_server_diagnostics();
+}
+
+void SOPC_ServerInternal_DiagnosticsUpdateRequestCounts(uint32_t rejectedRequestsCount,
+                                                        uint32_t securityRejectedRequestsCount)
+{
+    if (!diagSupported)
     {
-        status = SOPC_EventHandler_Post(serverDiagnosticsEventHandler,
-                                        OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount,
-                                        0, 0, 0);
+        return;
     }
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Failed to notify ServerDiagnostics Session counters reset (status=%d).", (int) status);
-    }
+
+    // Runtime variables diagnostics are updated even if diagnostics are disabled: only AddressSpace update is inhibited
+    SOPC_Server_RuntimeVariablesDiagnostics* diagnostics = &sopc_server_helper_config.runtimeVariables.diagnostics;
+    diagnostics->rejectedRequestsCount = rejectedRequestsCount;
+    diagnostics->securityRejectedRequestsCount = securityRejectedRequestsCount;
+
+    update_server_diagnostics();
 }
 
 void SOPC_ServerInternal_DiagnosticsClear(void)
 {
     diagSupported = false;
     diagEnabledFlag = false;
-    serverDiagnosticsEventHandler = NULL;
 }

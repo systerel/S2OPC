@@ -21,8 +21,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "libs2opc_server_diagnostics.h"
-
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
@@ -884,7 +882,6 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         if ((bool) params)
         {
             io_dispatch_mgr__server_stopped();
-            SOPC_ServerInternal_DiagnosticsSessionCountersReset();
         }
         break;
     default:

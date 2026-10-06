@@ -530,8 +530,6 @@ static void SOPC_ServerHelper_AddressSpaceNotifCb(const SOPC_CallContext* callCt
     else if (AS_SESSION_CREATION == event || AS_SESSION_ACTIVATION == event || AS_SESSION_INACTIVE == event ||
              AS_SESSION_CLOSURE == event)
     {
-        SOPC_ServerInternal_DiagnosticsOnSessionEvent((SOPC_ServerSessionEvent) event, (SOPC_SessionId) opParam,
-                                                      opStatus);
         if (NULL != sessionNotifCb)
         {
             sessionNotifCb(callCtxPtr, (SOPC_ServerSessionEvent) event, (SOPC_SessionId) opParam, opStatus);

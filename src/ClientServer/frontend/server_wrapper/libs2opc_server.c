@@ -465,9 +465,8 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
             SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &pConfig->serverConfig);
     }
 
-    SOPC_Looper* appLooper = SOPC_App_GetLooper();
-    // Start diagnostics prior to runtime variables write: EnabledFlag write notifies the diagnostics event handler
-    SOPC_ServerInternal_DiagnosticsStart(appLooper);
+    // Start diagnostics prior to runtime variables write: EnabledFlag value is part of the runtime variables
+    SOPC_ServerInternal_DiagnosticsStart();
 
     OpcUa_WriteRequest* writeRequest =
         SOPC_RuntimeVariables_BuildWriteRequest(&sopc_server_helper_config.runtimeVariables);
@@ -482,7 +481,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
         if (SOPC_STATUS_OK == status && 0 != sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs)
         {
             SOPC_EventHandler* currentTimeHandler =
-                SOPC_EventHandler_Create(appLooper, SOPC_UpdateCurrentTime_EventHandler_Callback);
+                SOPC_EventHandler_Create(SOPC_App_GetLooper(), SOPC_UpdateCurrentTime_EventHandler_Callback);
             SOPC_LooperEvent currentTimeEvent = {OpcUaId_Server_ServerStatus_CurrentTime,
                                                  OpcUaId_Server_ServerStatus_CurrentTime, 0, 0};
             uint32_t currentTimeTimerId = SOPC_EventTimer_CreatePeriodic(

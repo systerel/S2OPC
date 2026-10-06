@@ -27,22 +27,25 @@
  * Threading model:
  * - the diagnostics support and EnabledFlag states are initialized during server configuration
  *   (::SOPC_ServerInternal_DiagnosticsConfigure),
- * - the diagnostics event handler is created and the EnabledFlag state copied into the server runtime variables
- *   before endpoints are opened (::SOPC_ServerInternal_DiagnosticsStart),
- * - then the diagnostics support state is read-only (services thread and application looper thread),
- *   the EnabledFlag state and the runtime variables diagnostics are only accessed from the application looper thread.
+ * - the EnabledFlag state is copied into the server runtime variables before endpoints are opened
+ *   (::SOPC_ServerInternal_DiagnosticsStart),
+ * - then the diagnostics support state is read-only, the EnabledFlag state and the runtime variables diagnostics are
+ *   only accessed from the services thread.
+ *
+ * The ServerDiagnostics nodes are updated synchronously by the services thread: the local WriteRequest is enqueued in
+ * the services event queue before the response of the request being treated is sent, a subsequent client request is
+ * then treated after the AddressSpace update.
  */
 
 #ifndef LIBS2OPC_SERVER_DIAGNOSTICS_H_
 #define LIBS2OPC_SERVER_DIAGNOSTICS_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "sopc_address_space.h"
-#include "sopc_event_handler.h"
 
 #include "libs2opc_server_config.h"
-#include "libs2opc_server_runtime_variables.h"
 
 /**
  * \brief Initializes the ServerDiagnostics state from the EnabledFlag node of the address space.
@@ -56,6 +59,8 @@
  *
  * \note Local services bypass the AccessLevel check: when diagnostics are not supported,
  *       a local write of EnabledFlag remains possible but has no effect on diagnostics.
+ * \note The EnabledFlag value is part of the runtime variables written on server start: its write behavior callback
+ *       is then called and enqueues the ServerDiagnostics nodes update.
  * \note Shall be called in server configuring state.
  *
  * \param addSpace  The server address space
@@ -66,25 +71,12 @@ SOPC_ReturnStatus SOPC_ServerInternal_DiagnosticsConfigure(SOPC_AddressSpace* ad
 
 /**
  * \brief Starts the ServerDiagnostics management on server start:
- *        - creates the event handler used to update ServerDiagnostics in the application looper thread,
- *          if diagnostics are supported and the handler does not exist yet.
- *          On creation failure, the diagnostics are inhibited (not supported and disabled),
- *        - copies the EnabledFlag state into the server runtime variables diagnostics.
+ *        copies the EnabledFlag state into the server runtime variables diagnostics.
  *
  * \note Shall be called after the server runtime variables are built, before they are written and before endpoints
- *       are opened: the EnabledFlag write notifies the event handler and the diagnostics support state is read-only
- *       afterwards.
- *
- * \param looper  The application looper on which the event handler callback is executed
+ *       are opened.
  */
-void SOPC_ServerInternal_DiagnosticsStart(SOPC_Looper* looper);
-
-/**
- * \brief Returns the event handler used to update ServerDiagnostics.
- *
- * \return The ServerDiagnostics event handler, or NULL if it has not been initialized.
- */
-SOPC_EventHandler* SOPC_ServerInternal_GetDiagnosticsEventHandler(void);
+void SOPC_ServerInternal_DiagnosticsStart(void);
 
 /**
  * \brief Returns the current ServerDiagnostics EnabledFlag state.
@@ -97,7 +89,7 @@ bool SOPC_ServerInternal_IsDiagnosticsEnabled(void);
 
 /**
  * \brief Returns whether the ServerDiagnostics are supported by the server.
- *        When not supported, all the diagnostics code is inhibited (no counting, no event handler, no callback).
+ *        When not supported, all the diagnostics code is inhibited (no counting, no AddressSpace update, no callback).
  *
  * \note Set during server configuration by ::SOPC_ServerInternal_DiagnosticsConfigure and read-only afterwards.
  *
@@ -106,41 +98,47 @@ bool SOPC_ServerInternal_IsDiagnosticsEnabled(void);
 bool SOPC_ServerInternal_IsDiagnosticsSupported(void);
 
 /**
- * \brief Updates the ServerDiagnostics nodes in the AddressSpace from the current server runtime variables.
- *        Nothing is written when the ServerDiagnostics EnabledFlag is FALSE.
- *
- * \note Diagnostic values shall be kept up to date by the caller even when diagnostics are disabled,
- *       only the AddressSpace update is inhibited.
- * \note Shall be called from the application looper thread.
- *
- * \param diagnostics Pointer to the diagnostic values to write.
- */
-void SOPC_ServerInternal_UpdateServerDiagnostics(const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics);
-
-/**
  * \brief Updates the session diagnostics on a session event and the ServerDiagnostics nodes in the AddressSpace.
  *        Session diagnostics are counted even if diagnostics are disabled (only the AddressSpace update is
  *        inhibited) and are not counted if diagnostics are not supported.
  *
- * \note Shall be called from the application looper thread.
+ * \note Shall be called from the services thread.
  *
- * \param event      The session event
- * \param sessionId  The session identifier
- * \param status     The status associated to the session event
+ * \param event   The session event
+ * \param status  The status associated to the session event
  */
-void SOPC_ServerInternal_DiagnosticsOnSessionEvent(SOPC_ServerSessionEvent event,
-                                                   SOPC_SessionId sessionId,
-                                                   SOPC_StatusCode status);
+void SOPC_ServerInternal_DiagnosticsUpdateSessionCounts(SOPC_ServerSessionEvent event, SOPC_StatusCode status);
 
 /**
- * \brief Enqueue an event in application looper to reset the session related counters
- *        in the context of a server shutdown.
+ * \brief Updates the subscription diagnostics and the ServerDiagnostics nodes in the AddressSpace.
+ *        Subscription diagnostics are updated even if diagnostics are disabled (only the AddressSpace update is
+ *        inhibited) and are not updated if diagnostics are not supported.
+ *
+ * \note Shall be called from the services thread.
+ *
+ * \param currentSubscriptionCount    The number of subscriptions currently existing
+ * \param cumulatedSubscriptionCount  The number of subscriptions created since server start
+ * \param publishingIntervalCount     The number of distinct publishing intervals currently used
  */
-void SOPC_ServerInternal_DiagnosticsSessionCountersReset(void);
+void SOPC_ServerInternal_DiagnosticsUpdateSubscriptionCounts(uint32_t currentSubscriptionCount,
+                                                             uint32_t cumulatedSubscriptionCount,
+                                                             uint32_t publishingIntervalCount);
 
 /**
- * \brief Resets the ServerDiagnostics state: diagnostics not supported, disabled and event handler reference cleared.
- *        The event handler itself is owned (and freed) by the application looper.
+ * \brief Updates the rejected requests diagnostics and the ServerDiagnostics nodes in the AddressSpace.
+ *        Rejected requests diagnostics are updated even if diagnostics are disabled (only the AddressSpace update is
+ *        inhibited) and are not updated if diagnostics are not supported.
+ *
+ * \note Shall be called from the services thread.
+ *
+ * \param rejectedRequestsCount          The number of requests rejected since server start
+ * \param securityRejectedRequestsCount  The number of requests rejected for security reasons since server start
+ */
+void SOPC_ServerInternal_DiagnosticsUpdateRequestCounts(uint32_t rejectedRequestsCount,
+                                                        uint32_t securityRejectedRequestsCount);
+
+/**
+ * \brief Resets the ServerDiagnostics state: diagnostics not supported and disabled.
  *
  * \note Shall be called on server configuration clear.
  */

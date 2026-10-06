@@ -21,9 +21,7 @@
 
 #include "libs2opc_server_diagnostics.h"
 
-#include "opcua_identifiers.h"
 #include "sopc_assert.h"
-#include "sopc_event_handler.h"
 #include "sopc_macros.h"
 
 #include "subscription_diagnostics_bs.h"
@@ -107,17 +105,9 @@ static void decrement_publish_interval_usage(const constants__t_opcua_duration_i
 
 static void notify_server_diagnostics_update(void)
 {
-    SOPC_EventHandler* diagnosticsEventHandler = SOPC_ServerInternal_GetDiagnosticsEventHandler();
-
-    if (NULL != diagnosticsEventHandler)
-    {
-        const SOPC_ReturnStatus status = SOPC_EventHandler_Post(
-            diagnosticsEventHandler, OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSubscriptionCount,
-            (uint32_t) currentSubscriptionCount, (uintptr_t) cumulatedSubscriptionCount,
-            (uintptr_t) SOPC_Dict_Size(publishingIntervalDict));
-
-        SOPC_UNUSED_RESULT(status);
-    }
+    SOPC_ServerInternal_DiagnosticsUpdateSubscriptionCounts((uint32_t) currentSubscriptionCount,
+                                                            (uint32_t) cumulatedSubscriptionCount,
+                                                            (uint32_t) SOPC_Dict_Size(publishingIntervalDict));
 }
 
 /*------------------------
