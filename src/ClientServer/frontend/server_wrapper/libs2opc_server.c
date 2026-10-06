@@ -88,7 +88,8 @@ static SOPC_ReturnStatus SOPC_ServerInternal_InternalLocalServiceAsync(SOPC_Loca
                                                                        void* request,
                                                                        uintptr_t userCtx,
                                                                        bool isInternal,
-                                                                       const char* errorMsg)
+                                                                       const char* errorMsg,
+                                                                       bool isPrio)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool sendResult = false;
@@ -123,7 +124,7 @@ static SOPC_ReturnStatus SOPC_ServerInternal_InternalLocalServiceAsync(SOPC_Loca
             ctx->eventCtx.localService.isHelperInternal = isInternal;
             ctx->eventCtx.localService.internalErrorMsg = errorMsg;
             sendResult = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0],
-                                                                     request, (uintptr_t) ctx);
+                                                                     request, (uintptr_t) ctx, isPrio);
             status = sendResult ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
             if (!sendResult)
             {
@@ -144,10 +145,11 @@ static SOPC_ReturnStatus SOPC_ServerInternal_InternalLocalServiceAsync(SOPC_Loca
 bool SOPC_ServerInternal_LocalServiceAsync(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
                                            void* request,
                                            uintptr_t userCtx,
-                                           const char* errorMsg)
+                                           const char* errorMsg,
+                                           bool isPrio)
 {
     SOPC_ReturnStatus status =
-        SOPC_ServerInternal_InternalLocalServiceAsync(asyncRespCb, request, userCtx, true, errorMsg);
+        SOPC_ServerInternal_InternalLocalServiceAsync(asyncRespCb, request, userCtx, true, errorMsg, isPrio);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) request, &request);
@@ -400,7 +402,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(SOPC_
         if (SOPC_STATUS_OK == status)
         {
             bool res = SOPC_ServerInternal_LocalServiceAsync(asyncRespCb, writeRequest, (uintptr_t) writeRequestCopyCtx,
-                                                             errorMsg);
+                                                             errorMsg, false);
             if (!res)
             {
                 status = SOPC_STATUS_NOK;
@@ -438,7 +440,8 @@ static void SOPC_UpdateCurrentTime_EventHandler_Callback(SOPC_EventHandler* hand
         bool res = SOPC_ServerInternal_LocalServiceAsync(
             SOPC_HelperInternal_RuntimeVariableSetResponseCb, writeRequest, (uintptr_t) NULL,
             "Updating server status current time runtime variables of server information nodes failed."
-            " Please check address space content includes necessary base information nodes.");
+            " Please check address space content includes necessary base information nodes.",
+            false);
         SOPC_UNUSED_RESULT(res);
     }
 }
@@ -912,7 +915,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
 
         // Send request
         sendResult = SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
-                                                                 (uintptr_t) ctx);
+                                                                 (uintptr_t) ctx, false);
         status = sendResult ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
         // Wait until response received or error status (timeout)
@@ -966,7 +969,14 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsyncCustom(SOPC_LocalServiceAsy
                                                             void* request,
                                                             uintptr_t userContext)
 {
-    return SOPC_ServerInternal_InternalLocalServiceAsync(asyncRespCb, request, userContext, false, NULL);
+    return SOPC_ServerInternal_InternalLocalServiceAsync(asyncRespCb, request, userContext, false, NULL, false);
+}
+
+SOPC_ReturnStatus SOPC_ServerHelper_LocalServicePrioAsyncCustom(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
+                                                                void* request,
+                                                                uintptr_t userContext)
+{
+    return SOPC_ServerInternal_InternalLocalServiceAsync(asyncRespCb, request, userContext, false, NULL, true);
 }
 
 SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t userContext)

@@ -208,6 +208,7 @@ The server application will be notified of address space changes, it only needs 
 The server application is able to modify the address space on runtime using OPC UA services locally.
 It is allowed to treat OPC UA service requests (::OpcUa_ReadRequest, ::OpcUa_WriteRequest, ::OpcUa_BrowseRequest and discovery service requests) using ::SOPC_ToolkitServer_AsyncLocalServiceRequest.
 Once the function is called, an asynchronous ::SE_LOCAL_SERVICE_RESPONSE event will be received by the ::SOPC_ComEvent_Fct application callback containing the response message (::OpcUa_ReadResponse, etc.).
+Its isPrio parameter allows to request the treatment of the request before the already pending ones.
 
 \subsubsection users User authentication and user authorization managers
 

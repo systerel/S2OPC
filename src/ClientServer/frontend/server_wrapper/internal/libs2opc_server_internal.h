@@ -235,10 +235,13 @@ void SOPC_ServerInternal_PKIProviderUpdateCb(uintptr_t updateParam);
 // Local service asynchronous internal version:
 // it differs from ::SOPC_ServerHelper_LocalServiceAsyncCustom
 // in that the provided context in \p asyncRespCb call is internal ::SOPC_HelperConfigInternal_Ctx instead of \p userCtx
+// When \p isPrio is true, the request is treated before the already pending ones
+// (see ::SOPC_ServerHelper_LocalServicePrioAsyncCustom).
 bool SOPC_ServerInternal_LocalServiceAsync(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
                                            void* request,
                                            uintptr_t userCtx,
-                                           const char* errorMsg);
+                                           const char* errorMsg,
+                                           bool isPrio);
 
 /**
  * \brief Triggers an audit event from the Server node and log a trace in audit log entry.

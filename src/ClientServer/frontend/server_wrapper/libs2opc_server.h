@@ -144,6 +144,16 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsyncCustom(SOPC_LocalServiceAsy
                                                             uintptr_t userContext);
 
 /**
+ * \brief Same as ::SOPC_ServerHelper_LocalServiceAsyncCustom but the request is treated
+ *        before the already pending local service requests and other server events.
+ *
+ * \note Several pending priority requests are treated in reverse order of call (LIFO).
+ */
+SOPC_ReturnStatus SOPC_ServerHelper_LocalServicePrioAsyncCustom(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb,
+                                                                void* request,
+                                                                uintptr_t userContext);
+
+/**
  * \brief Executes a local OPC UA service on server (read, write, browse or discovery service) synchronously.
  *
  * \note ::SOPC_ServerHelper_StartServer or ::SOPC_ServerHelper_Serve shall have been called

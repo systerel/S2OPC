@@ -530,9 +530,9 @@ static void SOPC_InternalWrite_InitAlarmCondition_Node_Values(SOPC_AlarmConditio
 
     tbpCtx->ac = ac;
     tbpCtx->varPathArr = varPathArr;
-    bool res = SOPC_ServerInternal_LocalServiceAsync(&SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq,
-                                                     (uintptr_t) tbpCtx,
-                                                     "Failure to treat Write to initialize A&C nodes from event.");
+    bool res = SOPC_ServerInternal_LocalServiceAsync(
+        &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
+        "Failure to treat Write to initialize A&C nodes from event.", false);
     if (!res)
     {
         // Delete context
@@ -802,9 +802,9 @@ void SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(SOPC_AlarmCon
         tbpCtx->ac = ac;
         tbpCtx->varPathArr = varPathArr;
         reqNeedDealloc = false;
-        bool res = SOPC_ServerInternal_LocalServiceAsync(&SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, tbpReq,
-                                                         (uintptr_t) tbpCtx,
-                                                         "Failure to treat TBP to initialize A&C nodes from event.");
+        bool res = SOPC_ServerInternal_LocalServiceAsync(
+            &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, tbpReq, (uintptr_t) tbpCtx,
+            "Failure to treat TBP to initialize A&C nodes from event.", false);
         if (!res)
         {
             // Delete context
@@ -999,9 +999,9 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateVariableNode(SO
             tbpCtx->ac = ac;
             *varPathArr = varPath;
             tbpCtx->varPathArr = varPathArr;
-            res = SOPC_ServerInternal_LocalServiceAsync(&SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq,
-                                                        (uintptr_t) tbpCtx,
-                                                        "Failure to treat Write to update value of variable A&C node");
+            res = SOPC_ServerInternal_LocalServiceAsync(
+                &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
+                "Failure to treat Write to update value of variable A&C node", false);
         }
         if (!res)
         {
@@ -1091,9 +1091,9 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateTwoStateVariabl
         {
             tbpCtx->ac = ac;
             tbpCtx->varPathArr = varPathArr;
-            res = SOPC_ServerInternal_LocalServiceAsync(&SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq,
-                                                        (uintptr_t) tbpCtx,
-                                                        "Failure to treat Write to update TwoState variable A&C nodes");
+            res = SOPC_ServerInternal_LocalServiceAsync(
+                &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
+                "Failure to treat Write to update TwoState variable A&C nodes", false);
         }
         if (!res)
         {

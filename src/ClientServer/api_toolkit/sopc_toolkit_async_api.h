@@ -72,6 +72,8 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfig
  * \param requestStruct      OPC UA message payload structure pointer (OpcUa_<MessageStruct>*).
  *                           Deallocated by the toolkit.
  * \param requestContext     A context value, it will be provided with corresponding response
+ * \param isPrio             If true, the request is treated before the already pending ones.
+ *                           Several pending priority requests are treated in reverse order (LIFO).
  *
  * Note: the provided request message structure and its content is automatically deallocated by the toolkit
  *
@@ -79,7 +81,8 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfig
  */
 bool SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
                                                  void* requestStruct,
-                                                 uintptr_t requestContext);
+                                                 uintptr_t requestContext,
+                                                 bool isPrio);
 
 /**
  * \brief Triggers the given event from the given node as notifier

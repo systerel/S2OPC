@@ -59,7 +59,8 @@ static void write_server_diagnostics(void)
         bool res = SOPC_ServerInternal_LocalServiceAsync(
             SOPC_HelperInternal_RuntimeVariableSetResponseCb, writeRequest, (uintptr_t) NULL,
             "Updating server diagnostics runtime variables of server information nodes failed."
-            " Please check address space content includes necessary diagnostic information nodes.");
+            " Please check address space content includes necessary diagnostic information nodes.",
+            false);
 
         SOPC_UNUSED_RESULT(res);
     }

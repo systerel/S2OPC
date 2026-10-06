@@ -56,7 +56,8 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfig
 
 bool SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
                                                  void* requestStruct,
-                                                 uintptr_t requestContext)
+                                                 uintptr_t requestContext,
+                                                 bool isPrio)
 {
     if (!SOPC_ToolkitServer_IsConfigured())
     {
@@ -64,8 +65,16 @@ bool SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
                                "SOPC_ToolkitServer_AsyncLocalServiceRequest: toolkit server is not configured");
         return false;
     }
-    SOPC_Services_EnqueueEvent(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConfigIdx, (uintptr_t) requestStruct,
-                               requestContext);
+    if (isPrio)
+    {
+        SOPC_Services_EnqueueEventAsNext(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConfigIdx, (uintptr_t) requestStruct,
+                                         requestContext);
+    }
+    else
+    {
+        SOPC_Services_EnqueueEvent(APP_TO_SE_LOCAL_SERVICE_REQUEST, endpointConfigIdx, (uintptr_t) requestStruct,
+                                   requestContext);
+    }
     return true;
 }
 

@@ -443,7 +443,14 @@ target_compile_options(toolkit_test_server_diagnostics_inhibited PRIVATE ${S2OPC
 target_compile_definitions(toolkit_test_server_diagnostics_inhibited PRIVATE ${S2OPC_DEFINITIONS} TEST_DIAGNOSTICS_INHIBITED)
 s2opc_unit_test(toolkit_test_server_diagnostics_inhibited GENERATE_TAP)
 
-
+# Server running prioritized local services requested from a method call (services thread)
+add_executable(toolkit_test_server_local_service_prio "validation_tests/server/toolkit_test_server_local_service_prio.c"
+  ${TEST_SERVER_ADDRESS_SPACE_C})
+add_dependencies(toolkit_test_server_local_service_prio make-server-address-space)
+target_link_libraries(toolkit_test_server_local_service_prio PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
+target_compile_options(toolkit_test_server_local_service_prio PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_server_local_service_prio PRIVATE ${S2OPC_DEFINITIONS})
+s2opc_unit_test(toolkit_test_server_local_service_prio GENERATE_TAP)
 
 # Client scenario
 set(TEST_CLIENT_CONFIG_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Test_Config.xml")
