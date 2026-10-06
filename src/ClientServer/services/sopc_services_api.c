@@ -23,6 +23,7 @@
 
 #include "sopc_array.h"
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
 #include "sopc_date_time.h"
 #include "sopc_enums.h"
 #include "sopc_helper_string.h"
@@ -51,6 +52,10 @@ static SOPC_Looper* servicesLooper = NULL;
 static SOPC_EventHandler* secureChannelsEventHandler = NULL;
 static SOPC_EventHandler* servicesEventHandler = NULL;
 
+/* Hook called after each event treatment (SOPC_Services_EventTreatedHook*): set from any thread, read from the services
+ * thread */
+static void* eventTreatedHook = NULL;
+
 // Structure used to close all connections in a synchronous way
 // (necessary on toolkit clear)
 static struct
@@ -77,6 +82,15 @@ static void SOPC_Internal_AllClientSecureChannelsDisconnected(bool clientOnly)
         SOPC_Condition_SignalAll(&closeAllConnectionsSync.cond);
     }
     SOPC_Mutex_Unlock(&closeAllConnectionsSync.mutex);
+}
+
+static SOPC_STRONG_INLINE void call_event_treated_hook(void)
+{
+    SOPC_Services_EventTreatedHook* hook = (SOPC_Services_EventTreatedHook*) SOPC_Atomic_Ptr_Get(&eventTreatedHook);
+    if (NULL != hook && NULL != hook->eventTreatedCb)
+    {
+        hook->eventTreatedCb();
+    }
 }
 
 static void onSecureChannelEvent(SOPC_EventHandler* handler,
@@ -225,6 +239,8 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
     default:
         SOPC_ASSERT(false && "Unknown event");
     }
+
+    call_event_treated_hook();
 }
 
 static void SOPC_Array_Free_WriteDataChanged(void* data)
@@ -887,6 +903,9 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     default:
         SOPC_ASSERT(false);
     }
+
+    // Note: not called for filtered events (not treated)
+    call_event_treated_hook();
 }
 
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, uintptr_t params, uintptr_t auxParam)
@@ -899,6 +918,11 @@ void SOPC_Services_EnqueueEventAsNext(SOPC_Services_Event seEvent, uint32_t id, 
 {
     SOPC_ASSERT(servicesEventHandler != NULL);
     SOPC_EventHandler_PostAsNext(servicesEventHandler, (int32_t) seEvent, id, params, auxParam);
+}
+
+void SOPC_Services_SetEventTreatedHook(SOPC_Services_EventTreatedHook* hook)
+{
+    SOPC_Atomic_Ptr_Set(&eventTreatedHook, (void*) hook);
 }
 
 uint32_t SOPC_Services_Get_QueueSize(void)
@@ -961,6 +985,7 @@ void SOPC_Services_Clear(void)
     secureChannelsEventHandler = NULL;
     SOPC_Looper_Delete(servicesLooper);
     servicesLooper = NULL;
+    SOPC_Atomic_Ptr_Set(&eventTreatedHook, NULL);
 
     closeAllConnectionsSync.allDisconnectedFlag = false;
     closeAllConnectionsSync.clientOnlyFlag = false;

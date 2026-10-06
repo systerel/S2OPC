@@ -226,6 +226,25 @@ void SOPC_Services_EnqueueEventAsNext(SOPC_Services_Event seEvent, uint32_t id, 
 uint32_t SOPC_Services_Get_QueueSize(void);
 
 /**
+ * \brief Hook called by the services thread after each services event treatment
+ *        (including secure channels events treated by the services thread).
+ */
+typedef struct SOPC_Services_EventTreatedHook
+{
+    void (*eventTreatedCb)(void); /**< Called from the services thread, shall not be blocking */
+} SOPC_Services_EventTreatedHook;
+
+/**
+ * \brief Sets the hook called by the services thread after each services event treatment.
+ *
+ * \note Only one hook can be set, setting a new one replaces the previous one.
+ * \note The hook shall remain valid until it is reset (static storage is recommended).
+ *
+ * \param hook  The hook to set, or NULL to reset it
+ */
+void SOPC_Services_SetEventTreatedHook(SOPC_Services_EventTreatedHook* hook);
+
+/**
  *  \brief Initializes the services and application event dispatcher threads
  */
 void SOPC_Services_Initialize(SOPC_SetListenerFunc* setSecureChannelsListener);
