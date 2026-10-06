@@ -32,9 +32,10 @@
  * - then the diagnostics support state is read-only, the EnabledFlag state and the runtime variables diagnostics are
  *   only accessed from the services thread.
  *
- * The ServerDiagnostics nodes are updated synchronously by the services thread: the local WriteRequest is enqueued in
- * the services event queue before the response of the request being treated is sent, a subsequent client request is
- * then treated after the AddressSpace update.
+ * The ServerDiagnostics nodes are updated by the services thread: diagnostics updates only record that an update is
+ * needed during a services event treatment, then a single priority local WriteRequest is enqueued at the end of the
+ * event treatment (::SOPC_ServerInternal_DiagnosticsMayUpdateVariables services hook). It is treated before any other
+ * pending event, including already received client requests.
  */
 
 #ifndef LIBS2OPC_SERVER_DIAGNOSTICS_H_
@@ -71,12 +72,22 @@ SOPC_ReturnStatus SOPC_ServerInternal_DiagnosticsConfigure(SOPC_AddressSpace* ad
 
 /**
  * \brief Starts the ServerDiagnostics management on server start:
- *        copies the EnabledFlag state into the server runtime variables diagnostics.
+ *        copies the EnabledFlag state into the server runtime variables diagnostics and, if diagnostics are supported,
+ *        sets ::SOPC_ServerInternal_DiagnosticsMayUpdateVariables as services event treated hook.
  *
  * \note Shall be called after the server runtime variables are built, before they are written and before endpoints
  *       are opened.
  */
 void SOPC_ServerInternal_DiagnosticsStart(void);
+
+/**
+ * \brief Writes the ServerDiagnostics nodes in the AddressSpace with a priority local WriteRequest if an update was
+ *        requested during the services event treatment (diagnostics values or EnabledFlag changed).
+ *
+ * \note Services event treated hook (see ::SOPC_Services_SetEventTreatedHook): called from the services thread at the
+ *       end of each event treatment.
+ */
+void SOPC_ServerInternal_DiagnosticsMayUpdateVariables(void);
 
 /**
  * \brief Returns the current ServerDiagnostics EnabledFlag state.
@@ -98,7 +109,8 @@ bool SOPC_ServerInternal_IsDiagnosticsEnabled(void);
 bool SOPC_ServerInternal_IsDiagnosticsSupported(void);
 
 /**
- * \brief Updates the session diagnostics on a session event and the ServerDiagnostics nodes in the AddressSpace.
+ * \brief Updates the session diagnostics on a session event and requests the ServerDiagnostics nodes update
+ *        at the end of the services event treatment.
  *        Session diagnostics are counted even if diagnostics are disabled (only the AddressSpace update is
  *        inhibited) and are not counted if diagnostics are not supported.
  *
@@ -110,7 +122,8 @@ bool SOPC_ServerInternal_IsDiagnosticsSupported(void);
 void SOPC_ServerInternal_DiagnosticsUpdateSessionCounts(SOPC_ServerSessionEvent event, SOPC_StatusCode status);
 
 /**
- * \brief Updates the subscription diagnostics and the ServerDiagnostics nodes in the AddressSpace.
+ * \brief Updates the subscription diagnostics and requests the ServerDiagnostics nodes update
+ *        at the end of the services event treatment.
  *        Subscription diagnostics are updated even if diagnostics are disabled (only the AddressSpace update is
  *        inhibited) and are not updated if diagnostics are not supported.
  *
@@ -125,7 +138,8 @@ void SOPC_ServerInternal_DiagnosticsUpdateSubscriptionCounts(uint32_t currentSub
                                                              uint32_t publishingIntervalCount);
 
 /**
- * \brief Updates the rejected requests diagnostics and the ServerDiagnostics nodes in the AddressSpace.
+ * \brief Updates the rejected requests diagnostics and requests the ServerDiagnostics nodes update
+ *        at the end of the services event treatment.
  *        Rejected requests diagnostics are updated even if diagnostics are disabled (only the AddressSpace update is
  *        inhibited) and are not updated if diagnostics are not supported.
  *
@@ -138,7 +152,7 @@ void SOPC_ServerInternal_DiagnosticsUpdateRequestCounts(uint32_t rejectedRequest
                                                         uint32_t securityRejectedRequestsCount);
 
 /**
- * \brief Resets the ServerDiagnostics state: diagnostics not supported and disabled.
+ * \brief Resets the ServerDiagnostics state: diagnostics not supported and disabled, services event treated hook reset.
  *
  * \note Shall be called on server configuration clear.
  */

@@ -474,7 +474,7 @@ static SOPC_ReturnStatus send_rejected_request(SOPC_ClientConnection* connection
 
 /* Connects a client (1 session), creates a subscription, sends a rejected request and disconnects:
  * each cumulated counter is incremented by 1.
- * Note: diagnostics are updated synchronously by the services thread before the responses are sent. */
+ * Note: diagnostics nodes update is enqueued as priority request by the services thread before the next event. */
 static SOPC_ReturnStatus run_client_activity(SOPC_SecureConnection_Config* secureConnConfig)
 {
     SOPC_ClientConnection* connection = NULL;
@@ -547,7 +547,7 @@ static SOPC_ReturnStatus check_enabled_flag_started(SOPC_SecureConnection_Config
     }
     if (SOPC_STATUS_OK == status)
     {
-        // Diagnostics updates are synchronous: a local read is treated after any address space update
+        // Diagnostics nodes update is a priority request: a local read is treated after any address space update
         status = check_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: no update while disabled: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");

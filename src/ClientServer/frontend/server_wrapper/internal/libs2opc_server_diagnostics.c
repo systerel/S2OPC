@@ -26,6 +26,7 @@
 #include "opcua_statuscodes.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
+#include "sopc_services_api.h"
 
 /* ServerDiagnostics EnabledFlag state: set during configuration, then only accessed from the services thread
  * (EnabledFlag write behavior callback).
@@ -37,6 +38,15 @@ static bool diagEnabledFlag = false;
  * event queue. */
 static bool diagSupported = false;
 
+/* ServerDiagnostics nodes update needed: set during a services event treatment, the update is done once at the end of
+ * the event treatment (see SOPC_ServerInternal_DiagnosticsMayUpdateVariables). Only accessed from the services thread
+ * once server is started. */
+static bool updatePending = false;
+
+// Services event treated hook, only set when diagnostics are supported
+static SOPC_Services_EventTreatedHook diagnosticsHook = {.eventTreatedCb =
+                                                             SOPC_ServerInternal_DiagnosticsMayUpdateVariables};
+
 static const SOPC_NodeId enabledFlagNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_EnabledFlag);
 
 // Keeps the module EnabledFlag state and its copy in the runtime variables diagnostics consistent
@@ -47,8 +57,8 @@ static void set_enabled_flag(bool value)
 }
 
 /* Writes the runtime variables diagnostics into the ServerDiagnostics nodes of the AddressSpace.
- * Called from the services thread: the local WriteRequest is enqueued in the services event queue before the response
- * of the request being treated is sent, a subsequent client request is then treated after the AddressSpace update. */
+ * Called from the services thread at the end of an event treatment: the local WriteRequest is a priority request,
+ * it is treated before any other pending event (including already received client requests). */
 static void write_server_diagnostics(void)
 {
     OpcUa_WriteRequest* writeRequest = SOPC_RuntimeVariables_BuildUpdateServerDiagnosticsWriteRequest(
@@ -60,18 +70,18 @@ static void write_server_diagnostics(void)
             SOPC_HelperInternal_RuntimeVariableSetResponseCb, writeRequest, (uintptr_t) NULL,
             "Updating server diagnostics runtime variables of server information nodes failed."
             " Please check address space content includes necessary diagnostic information nodes.",
-            false);
+            true);
 
         SOPC_UNUSED_RESULT(res);
     }
 }
 
-// Updates the ServerDiagnostics nodes in the AddressSpace only if diagnostics are enabled
+// Requests the ServerDiagnostics nodes update at the end of the event treatment only if diagnostics are enabled
 static void update_server_diagnostics(void)
 {
     if (diagEnabledFlag)
     {
-        write_server_diagnostics();
+        updatePending = true;
     }
 }
 
@@ -85,7 +95,7 @@ static void update_enabled_flag(bool newValue)
     set_enabled_flag(newValue);
     /* Runtime variables are kept up to date while diagnostics are disabled:
        up to date values are written when enabled, 0 with OpcUa_BadNotReadable when disabled */
-    write_server_diagnostics();
+    updatePending = true;
 }
 
 static bool get_enabled_flag_value(const SOPC_Variant* value, bool* enabled)
@@ -191,6 +201,20 @@ void SOPC_ServerInternal_DiagnosticsStart(void)
 {
     // Runtime variables have been (re)built: copy the current EnabledFlag state
     set_enabled_flag(diagEnabledFlag);
+    updatePending = false;
+    if (diagSupported)
+    {
+        SOPC_Services_SetEventTreatedHook(&diagnosticsHook);
+    }
+}
+
+void SOPC_ServerInternal_DiagnosticsMayUpdateVariables(void)
+{
+    if (updatePending)
+    {
+        updatePending = false;
+        write_server_diagnostics();
+    }
 }
 
 bool SOPC_ServerInternal_IsDiagnosticsEnabled(void)
@@ -305,6 +329,11 @@ void SOPC_ServerInternal_DiagnosticsUpdateRequestCounts(uint32_t rejectedRequest
 
 void SOPC_ServerInternal_DiagnosticsClear(void)
 {
+    if (diagSupported)
+    {
+        SOPC_Services_SetEventTreatedHook(NULL);
+    }
     diagSupported = false;
     diagEnabledFlag = false;
+    updatePending = false;
 }
