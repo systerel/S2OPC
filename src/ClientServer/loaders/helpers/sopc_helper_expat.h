@@ -20,11 +20,22 @@
 #ifndef SOPC_HELPER_EXPAT_H_
 #define SOPC_HELPER_EXPAT_H_
 
+#include <inttypes.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "expat.h"
+
+/* Expat >= 2.9.0 deprecates XML_GetCurrent{Line,Column}Number in favor of their 64-bit variants */
+#if XML_MAJOR_VERSION > 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION >= 9)
+#define SOPC_XML_LINE(parser) XML_GetCurrentLineNumber64(parser)
+#define SOPC_XML_COLUMN(parser) XML_GetCurrentColumnNumber64(parser)
+#else
+#define SOPC_XML_LINE(parser) ((uint64_t) XML_GetCurrentLineNumber(parser))
+#define SOPC_XML_COLUMN(parser) ((uint64_t) XML_GetCurrentColumnNumber(parser))
+#endif
 
 #define SKIP_TAG_LEN 256
 
@@ -48,14 +59,14 @@ typedef struct SOPC_HelperExpatCtx
 
 #ifdef UANODESET_LOADER_LOG
 #define LOG(str) fprintf(stderr, "UANODESET_LOADER: %s:%d: %s\n", __FILE__, __LINE__, (str))
-#define LOG_XML_ERROR(parser, str)                                                                \
-    fprintf(stderr, "UANODESET_LOADER: %s:%d: at line %lu, column %lu: %s\n", __FILE__, __LINE__, \
-            XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser), (str))
+#define LOG_XML_ERROR(parser, str)                                                                                \
+    fprintf(stderr, "UANODESET_LOADER: %s:%d: at line %" PRIu64 ", column %" PRIu64 ": %s\n", __FILE__, __LINE__, \
+            SOPC_XML_LINE(parser), SOPC_XML_COLUMN(parser), (str))
 
 #define LOGF(format, ...) fprintf(stderr, "UANODESET_LOADER: %s:%d: " format "\n", __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_XML_ERRORF(parser, format, ...)                                                               \
-    fprintf(stderr, "UANODESET_LOADER: %s:%d: at line %lu, column %lu: " format "\n", __FILE__, __LINE__, \
-            XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser), __VA_ARGS__)
+#define LOG_XML_ERRORF(parser, format, ...)                                                                     \
+    fprintf(stderr, "UANODESET_LOADER: %s:%d: at line %" PRIu64 ", column %" PRIu64 ": " format "\n", __FILE__, \
+            __LINE__, SOPC_XML_LINE(parser), SOPC_XML_COLUMN(parser), __VA_ARGS__)
 #else
 #define LOG(str)
 #define LOG_XML_ERROR(parser, str)

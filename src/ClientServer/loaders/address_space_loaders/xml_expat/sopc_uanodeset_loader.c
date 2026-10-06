@@ -148,9 +148,8 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 
             if (parser_error != XML_ERROR_NONE)
             {
-                fprintf(stderr, "XML parsing failed at line %lu, column %lu. Error: %s.\n",
-                        XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser),
-                        XML_ErrorString(parser_error));
+                fprintf(stderr, "XML parsing failed at line %" PRIu64 ", column %" PRIu64 ". Error: %s.\n",
+                        SOPC_XML_LINE(parser), SOPC_XML_COLUMN(parser), XML_ErrorString(parser_error));
             }
 
             // else, the error comes from one of the callbacks, that log an error

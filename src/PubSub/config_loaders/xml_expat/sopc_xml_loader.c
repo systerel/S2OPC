@@ -21,12 +21,22 @@
 
 #include <errno.h>
 #include <float.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "expat.h"
+
+/* Expat >= 2.9.0 deprecates XML_GetCurrent{Line,Column}Number in favor of their 64-bit variants */
+#if XML_MAJOR_VERSION > 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION >= 9)
+#define SOPC_XML_LINE(parser) XML_GetCurrentLineNumber64(parser)
+#define SOPC_XML_COLUMN(parser) XML_GetCurrentColumnNumber64(parser)
+#else
+#define SOPC_XML_LINE(parser) ((uint64_t) XML_GetCurrentLineNumber(parser))
+#define SOPC_XML_COLUMN(parser) ((uint64_t) XML_GetCurrentColumnNumber(parser))
+#endif
 
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
@@ -50,14 +60,14 @@
 
 #if XML_CONFIG_LOADER_LOG
 #define LOG(str) fprintf(stderr, "XML_CONFIG_LOADER: %s:%d: %s\n", __FILE__, __LINE__, (str))
-#define LOG_XML_ERROR(str)                                                                         \
-    fprintf(stderr, "XML_CONFIG_LOADER: %s:%d: at line %lu, column %lu: %s\n", __FILE__, __LINE__, \
-            XML_GetCurrentLineNumber(ctx->parser), XML_GetCurrentColumnNumber(ctx->parser), (str))
+#define LOG_XML_ERROR(str)                                                                                         \
+    fprintf(stderr, "XML_CONFIG_LOADER: %s:%d: at line %" PRIu64 ", column %" PRIu64 ": %s\n", __FILE__, __LINE__, \
+            SOPC_XML_LINE(ctx->parser), SOPC_XML_COLUMN(ctx->parser), (str))
 
 #define LOGF(format, ...) fprintf(stderr, "XML_CONFIG_LOADER: %s:%d: " format "\n", __FILE__, __LINE__, __VA_ARGS__)
-#define LOG_XML_ERRORF(format, ...)                                                                        \
-    fprintf(stderr, "XML_CONFIG_LOADER: %s:%d: at line %lu, column %lu: " format "\n", __FILE__, __LINE__, \
-            XML_GetCurrentLineNumber(ctx->parser), XML_GetCurrentColumnNumber(ctx->parser), __VA_ARGS__)
+#define LOG_XML_ERRORF(format, ...)                                                                              \
+    fprintf(stderr, "XML_CONFIG_LOADER: %s:%d: at line %" PRIu64 ", column %" PRIu64 ": " format "\n", __FILE__, \
+            __LINE__, SOPC_XML_LINE(ctx->parser), SOPC_XML_COLUMN(ctx->parser), __VA_ARGS__)
 #else
 #define LOG(str)
 #define LOG_XML_ERROR(str)
@@ -242,8 +252,8 @@ static bool parse(XML_Parser parser, FILE* fd)
 
             if (parser_error != XML_ERROR_NONE)
             {
-                fprintf(stderr, "XML parsing failed at line %lu, column %lu. Error code is %u.\n",
-                        XML_GetCurrentLineNumber(parser), XML_GetCurrentColumnNumber(parser), XML_GetErrorCode(parser));
+                fprintf(stderr, "XML parsing failed at line %" PRIu64 ", column %" PRIu64 ". Error code is %u.\n",
+                        SOPC_XML_LINE(parser), SOPC_XML_COLUMN(parser), XML_GetErrorCode(parser));
             }
 
             // else, the error comes from one of the callbacks, that log an error
