@@ -580,26 +580,11 @@ test-check:
   needs: []
   script:
     - ./.check-code.sh
-    # Check generated types are up to date
-    - './scripts/gen-sopc-types.py ./schemas/Opc.Ua.Types.bsd'
-    - './scripts/generate-embedded-base-type-info.py ./schemas/Opc.Ua.NodeSet2.xml src/Common/opcua_types/sopc_embedded_nodeset2.h'
-    # Check generated statuscodes helpers are up to date
-    - './scripts/generate_statuscodes_helpers.py'
-    # Check test types are up to date
-    - './scripts/gen-sopc-types.py --types_prefix Custom --ns_index 1 ./tests/ClientServer/data/types/customTypes.bsd --files_path ./tests/ClientServer/unit_tests/helpers/'
-    - './scripts/gen-sopc-types.py --types_prefix Custom2 --ns_index 2 ./tests/ClientServer/data/types/level2Types.bsd --files_path ./tests/ClientServer/unit_tests/helpers/ --imported_ns_prefixes Custom'
-    - './.format.sh'
-    # Check that generated files are up to date
-    - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/src/test_address_space.c --const_addspace'
-    - '${CI_PROJECT_DIR}/scripts/generate-s2opc_pubsub-static-config.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/config_pubsub.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/pubsub_config_static.c'
-    - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/embedded_address_space.c --const_addspace'
-    - './.format.sh'
-    - './.verify-no-git-changes.sh'
-    # Check generated demo nodesets are up to date
-    - 'cd samples/ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
-    - './.verify-no-git-changes.sh'
-    - 'cd samples/PubSub_ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
-    - './.format.sh'
+    # Regenerate files (dependency order matters) and check they are up to date
+    # Note: ./.generate-all.sh which calls the 3 following scripts might also be used manually
+    - './.generate-types.sh'
+    - './.generate-demo-nodesets.sh'
+    - './.generate-embedded-files.sh'
     - './.verify-no-git-changes.sh'
   variables:
       DOCKER_DIGEST: 'sha256:c3a99ad388043fa77a33d93bb61be11969511af6ced23929c16527eb6046e444'
