@@ -24,17 +24,16 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "sopc_assert.h"
 #include "sopc_event.h"
 #include "sopc_event_helpers.h"
-#include "sopc_helper_string.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_toolkit_config_internal.h"
 
 #include "libs2opc_common_config.h"
@@ -78,6 +77,8 @@ static void server_session_event_notif(const constants__t_session_i session_core
     SOPC_CallContextCopy* ccc = NULL;
     SOPC_StatusCode scReason = SOPC_GoodGenericStatus;
     SOPC_ReturnStatus enqStatus = SOPC_STATUS_OK;
+    SOPC_App_AddSpace_Event sessionEvent = AS_SESSION_CLOSURE;
+    uintptr_t params = (uintptr_t) NULL;
 
     if (session_core_bs__sc_reason != constants_statuscodes_bs__c_StatusCode_indet)
     {
@@ -88,31 +89,30 @@ static void server_session_event_notif(const constants__t_session_i session_core
     switch (session_core_bs__state)
     {
     case constants__e_session_closed:
-        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_CLOSURE, session_core_bs__session,
-                                                             (uintptr_t) NULL, scReason);
+        sessionEvent = AS_SESSION_CLOSURE;
         break;
     case constants__e_session_created:
-        // Missing failure cases
-        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_CREATION, session_core_bs__session,
-                                                             (uintptr_t) NULL, scReason);
+        sessionEvent = AS_SESSION_CREATION;
         break;
     case constants__e_session_userActivated:
-        // Missing failure cases
-        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_ACTIVATION, session_core_bs__session,
-                                                             (uintptr_t) NULL, scReason);
+        sessionEvent = AS_SESSION_ACTIVATION;
         break;
     case constants__e_session_scOrphaned:
-        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_INACTIVE, session_core_bs__session,
-                                                             (uintptr_t) NULL, scReason);
+        sessionEvent = AS_SESSION_INACTIVE;
         break;
     case constants__e_session_closing:
-        enqStatus = SOPC_App_EnqueueAddressSpaceNotification(ccc, AS_SESSION_CLOSURE, session_core_bs__session,
-                                                             (uintptr_t) session_core_bs__state, scReason);
+        sessionEvent = AS_SESSION_CLOSURE;
+        params = (uintptr_t) session_core_bs__state;
         break;
     default:
         enqStatus = SOPC_STATUS_NOK;
         SOPC_ASSERT(false); // unexpected state, should be guaranteed by B model
         break;
+    }
+    if (SOPC_STATUS_OK == enqStatus)
+    {
+        enqStatus =
+            SOPC_App_EnqueueAddressSpaceNotification(ccc, sessionEvent, session_core_bs__session, params, scReason);
     }
     if (SOPC_STATUS_OK != enqStatus)
     {
