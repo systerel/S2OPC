@@ -165,7 +165,7 @@ proof_obligations:
 
 check_commit_signature:
   stage: gen
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:d48f2685fcb30346acb8f2e64f6f2b0278761290d158052fb9bf31d2b41e9005 # digest of build:2.0
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:4417afb168c67891a2c523d03e659e957e88b1e339b85800e6443a61a85b0d1a # digest of build:2.1
   needs: []
   script:
     - ./.check_signed_commit.sh
@@ -189,12 +189,12 @@ check_commit_validity:
 
 .build-linux: &build_linux
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:d48f2685fcb30346acb8f2e64f6f2b0278761290d158052fb9bf31d2b41e9005 # digest of build:2.0
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:4417afb168c67891a2c523d03e659e957e88b1e339b85800e6443a61a85b0d1a # digest of build:2.1
   script:
     - &build_command_line "./build.sh && cmake --build $BUILD_DIR --target install || exit $?"
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: "../install_linux64"
-    DOCKER_DIGEST: "sha256:d48f2685fcb30346acb8f2e64f6f2b0278761290d158052fb9bf31d2b41e9005"
+    DOCKER_DIGEST: "sha256:4417afb168c67891a2c523d03e659e957e88b1e339b85800e6443a61a85b0d1a"
     BUILD_DIR: build
     CMAKE_C_FLAGS: "-DSOPC_REQUEST_TIMEOUT_MS=40000" # increase timeout for CI tests
   artifacts:

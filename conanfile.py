@@ -21,23 +21,20 @@
 from conan import ConanFile
 
 class CompressorRecipe(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "CMakeToolchain", "CMakeDeps"
+    settings = ("os", "compiler", "build_type", "arch")
+    generators = ("CMakeToolchain", "CMakeDeps")
 
     def requirements(self):
-        self.requires("binutils/2.36.1@Systerel+S2OPC/default")
-        self.requires("expat/2.8.1@Systerel+S2OPC/default")
-        self.requires("gcc/15.2.0@Systerel+S2OPC/default")
-        self.requires("make/4.3")
-        self.requires("mbedtls/3.6.6@Systerel+S2OPC/default")
-        self.requires("cyclone-common/2.6.0@Systerel+S2OPC/default")
-        self.requires("cyclone-crypto/2.6.0@Systerel+S2OPC/default")
+        self.requires("expat/2.9.0")
+        self.requires("mbedtls/3.6.7")
+        self.requires("cyclone-common/2.6.0@systerel+s2opc/default")
+        self.requires("cyclone-crypto/2.6.0@systerel+s2opc/default")
         self.requires("paho-mqtt-c/1.3.4")
-        self.requires("libcheck/0.14.0@Systerel+S2OPC/default")
-        self.requires("doxygen/1.12.0@Systerel+S2OPC/default")
-        self.requires("gmp/6.2.1",override=True) #Sub-depency of mpfr, gcc and isl
-        self.requires("mpfr/4.1.0",override=True) #Sub-depency of gcc
-        self.requires("zlib/1.2.13",override=True) #Sub-depency of gcc, binutils, doxygen, mbedtls and openssl
-        self.requires("isl/0.24",override=True) #Sub-depency of gcc
-        self.requires("openssl/3.2.0",override=True) #Sub-depency of paho-mqtt-c and cmake
-        self.requires("cmake/3.31.9@Systerel+S2OPC/default")
+        self.requires("libcheck/0.14.0@systerel+s2opc/default")
+        self.requires("doxygen/1.12.0")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/3.31.12")
+        self.tool_requires("make/4.3")
+        self.tool_requires("gcc/15.3.0")
+        self.tool_requires("binutils/2.47@systerel+s2opc/default")

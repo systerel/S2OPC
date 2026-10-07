@@ -251,11 +251,11 @@ At the end of build process, the binary is available here `build/bin/pubsub_serv
 Tested under Debian 11.
 Prerequisites:
 - Make (tested with GNU Make version 4.3)
-- CMake (>= 3.12, tested with CMake version 3.31.9)
-- GCC (tested with GCC version 15.2.0)
+- CMake (>= 3.12, tested with CMake version 3.31.12)
+- GCC (tested with GCC version 15.3.0)
 - [Mbedtls](https://tls.mbed.org/)(>= 3.6, tested with mbedtls version 3.6.7 compiled with CMake) or [CycloneCRYPTO](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/Compilation-of-CycloneCRYPTO-(Linux)) (tested with version 2.6.0)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
-- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.8.2 compiled with CMake)
+- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.9.0 compiled with CMake)
 - Python3 (tested with version 3.13.11, >= 3.10 for PyS2OPC compatibility)
 - [Paho](https://github.com/eclipse/paho.mqtt.c) only needed for PubSub with MQTT (tested with version 1.3.4 compiled with CMake)
 
@@ -279,7 +279,7 @@ To build with those options:
 SECURITY_HARDENING=1 POSITION_INDEPENDENT_EXECUTABLE=1 USE_STATIC_EXT_LIBS=0 ./build.sh
 ```
 
-Note: some options activated by SECURITY_HARDENING require recent version for GCC (see pre-requisites) and for binutils (tested with 2.36.1).
+Note: some options activated by SECURITY_HARDENING require recent version for GCC (see pre-requisites) and for binutils (tested with 2.47).
 Note 2: it is possible to use the `hardening-check` tool on binaries to check option activation worked.
 
 ## S2OPC Windows compilation
@@ -290,7 +290,7 @@ Prerequisites:
 - CMake (tested with CMake version 3.16.2 and 3.22.2)
 - Python3 (tested with Python version >= 3.10)
 - [mbedtls](https://tls.mbed.org/) (>= 3.6, tested with mbedtls version 3.6.7 compiled with CMake)
-- [expat](https://libexpat.github.io/) (tested with expat version 2.8.2 compiled with CMake)
+- [expat](https://libexpat.github.io/) (tested with expat version 2.9.0 compiled with CMake)
 - [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14 compiled with CMake)
 - Python3 (tested with version 3.13.6, >= 3.10 for PyS2OPC compatibility)
 - [Paho](https://github.com/eclipse/paho.mqtt.c) only needed for PubSub with MQTT (tested with version 1.3.15 compiled with CMake)
