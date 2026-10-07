@@ -90,6 +90,9 @@ static const SOPC_NodeId cumulatedCountersNodeIds[] = {
     SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount)};
 #define NB_CUMULATED_COUNTERS (sizeof(cumulatedCountersNodeIds) / sizeof(cumulatedCountersNodeIds[0]))
 
+// Defined in the generated embedded address space: true if generated as constant (WITH_CONST_ADDSPACE)
+extern const bool sopc_embedded_is_const_addspace;
+
 static int32_t serverStopped = 0;
 
 static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
@@ -676,6 +679,14 @@ int main(int argc, char* argv[])
 {
     SOPC_UNUSED_ARG(argc);
     SOPC_UNUSED_ARG(argv);
+
+    /* The test modifies the EnabledFlag node (AccessLevel and value) and reloads the embedded address space:
+     * not possible with a constant address space (WITH_CONST_ADDSPACE) */
+    if (sopc_embedded_is_const_addspace)
+    {
+        printf("<Test_Server_Diagnostics_Enabled_Flag: ignored since address space is constant\n");
+        return 0;
+    }
 
     SOPC_SecureConnection_Config* secureConnConfig = NULL;
 
