@@ -315,7 +315,18 @@ build-linux64-NoASan-NoPyS2OPC:
   <<: *build_linux
   variables:
     <<: [*build_linux_variables,*nominal_build_variables]
+    BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
+    CMAKE_BUILD_RPATH_USE_ORIGIN: 'true' # set a relative path in binaries RPATH for shared libraries
   needs: []
+  artifacts:
+    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    paths:
+      - '*.log'
+      - 'build/'  # Required by tests / coverage
+    exclude:
+      - 'build/**/*.o' # avoid exceeding max artifacts size (coverage only needs .gcno/.gcda files)
+    expire_in: '1 week'
+    when: always
   rules: # In case of coverage analysis or when nano scope is used (TODO: PyS2OPC shall be built but tests will fail: use another server with subscription in tests)
     - if: "$WITH_COVERAGE != null"
       when: on_success
