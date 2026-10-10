@@ -21,9 +21,9 @@
 
  File Name            : message_in_bs.h
 
- Date                 : 17/10/2022 15:42:13
+ Date                 : 03/11/2026 22:00:40
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -103,6 +103,9 @@ extern void message_in_bs__read_msg_req_header_session_token(
 extern void message_in_bs__read_msg_resp_header_service_status(
    const constants__t_msg_header_i message_in_bs__msg_header,
    constants_statuscodes_bs__t_StatusCode_i * const message_in_bs__status);
+extern void message_in_bs__server_is_msg_req_header_timeout_expired(
+   const constants__t_msg_header_i message_in_bs__msg_header,
+   t_bool * const message_in_bs__is_expired);
 extern void message_in_bs__server_read_msg_header_req_handle(
    const constants__t_msg_header_i message_in_bs__msg_header,
    constants__t_server_request_handle_i * const message_in_bs__handle);

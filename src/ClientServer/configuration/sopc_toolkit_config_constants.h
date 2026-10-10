@@ -101,6 +101,27 @@
 #define SOPC_REQUEST_TIMEOUT_MS 10000
 #endif
 
+/** @brief Server side: when true, a service request on session (e.g. Read, Write, Browse, Publish) is not decoded nor
+ *  treated if its RequestHeader TimeoutHint (non-zero) already elapsed since its reception by the services layer:
+ *  a ServiceFault with Bad_Timeout is returned instead (OPC UA Part 4 RequestHeader TimeoutHint).
+ *  It avoids treating requests for which the client does not expect a response anymore (e.g. in case of overload).
+ *  Note: session treatment requests (CreateSession, ActivateSession, CloseSession) are never checked.
+ */
+#ifndef SOPC_SERVER_CHECK_REQUEST_TIMEOUT_HINT
+#define SOPC_SERVER_CHECK_REQUEST_TIMEOUT_HINT true
+#endif
+
+/** @brief Server side: margin in milliseconds subtracted from the request TimeoutHint when checking it
+ *  (see ::SOPC_SERVER_CHECK_REQUEST_TIMEOUT_HINT): a request is considered expired when
+ *  (elapsed time since reception + margin) > TimeoutHint.
+ *  Default is 0: OPC UA Part 4 states that the server should wait at minimum the TimeoutHint after it received
+ *  the request before cancelling it. A non-zero margin anticipates the expiration to take into account the time
+ *  needed to send the response to the client.
+ */
+#ifndef SOPC_SERVER_REQUEST_TIMEOUT_HINT_MARGIN_MS
+#define SOPC_SERVER_REQUEST_TIMEOUT_HINT_MARGIN_MS 0
+#endif
+
 /** @brief Elapsed time after which SC connection establishment is considered timeout
  * (elapsed time between socket connection and OPN response message)
  * */

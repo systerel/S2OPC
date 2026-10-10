@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 16/09/2026 08:15:25
+ Date                 : 03/11/2026 22:00:20
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -582,6 +582,7 @@ void service_mgr__decode_and_treat_session_service_req(
       constants__t_session_i service_mgr__l_session;
       constants__t_endpoint_config_idx_i service_mgr__l_endpoint_config_idx;
       t_bool service_mgr__l_is_valid_ep_config_idx;
+      t_bool service_mgr__l_is_expired_req;
       constants__t_msg_i service_mgr__l_req_msg;
       t_bool service_mgr__l_overwrite_req_msg;
       constants__t_msg_i service_mgr__l_new_req_msg;
@@ -604,48 +605,56 @@ void service_mgr__decode_and_treat_session_service_req(
          &service_mgr__l_is_valid_ep_config_idx);
       if (service_mgr__l_is_valid_req_on_session == true &&
          service_mgr__l_is_valid_ep_config_idx == true) {
-         message_in_bs__decode_msg(service_mgr__p_req_typ,
-            service_mgr__p_msg_buffer,
-            service_mgr__p_valid_req,
-            &service_mgr__l_req_msg);
-         service_mgr__l_new_req_msg = service_mgr__l_req_msg;
-         service_mgr__l_new_req_type = service_mgr__p_req_typ;
-         if (*service_mgr__p_valid_req == true) {
-            service_mgr__get_response_type(service_mgr__p_req_typ,
-               service_mgr__p_resp_typ);
-            message_out_bs__alloc_resp_msg(*service_mgr__p_resp_typ,
-               service_mgr__p_resp_header,
-               service_mgr__p_resp_msg);
-            if (*service_mgr__p_resp_msg != constants__c_msg_indet) {
-               app_overwrite_req_cb_bs__has_server_overwrite_req_cb(service_mgr__l_endpoint_config_idx,
-                  &service_mgr__l_overwrite_req_msg);
-               if (service_mgr__l_overwrite_req_msg == true) {
-                  app_overwrite_req_cb_bs__overwrite_service_request(service_mgr__l_req_msg,
-                     service_mgr__p_sc,
-                     &service_mgr__l_new_req_msg);
-                  message_in_bs__bless_msg_in(service_mgr__l_new_req_msg,
-                     &service_mgr__l_new_req_type);
-               }
-               if (*service_mgr__p_sc == constants_statuscodes_bs__e_sc_ok) {
-                  service_mgr__treat_session_service_req(service_mgr__l_endpoint_config_idx,
-                     service_mgr__l_session,
-                     service_mgr__l_new_req_type,
-                     service_mgr__p_req_handle,
-                     service_mgr__p_req_context,
-                     service_mgr__p_req_header,
-                     service_mgr__l_new_req_msg,
-                     *service_mgr__p_resp_msg,
-                     service_mgr__p_sc,
-                     service_mgr__p_async);
-               }
-            }
-            else {
-               *service_mgr__p_sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-            }
-            message_in_bs__dealloc_msg_in(service_mgr__l_new_req_msg);
+         message_in_bs__server_is_msg_req_header_timeout_expired(service_mgr__p_req_header,
+            &service_mgr__l_is_expired_req);
+         if (service_mgr__l_is_expired_req == true) {
+            *service_mgr__p_valid_req = true;
+            *service_mgr__p_sc = constants_statuscodes_bs__e_sc_bad_timeout;
          }
          else {
-            *service_mgr__p_sc = constants_statuscodes_bs__e_sc_bad_decoding_error;
+            message_in_bs__decode_msg(service_mgr__p_req_typ,
+               service_mgr__p_msg_buffer,
+               service_mgr__p_valid_req,
+               &service_mgr__l_req_msg);
+            service_mgr__l_new_req_msg = service_mgr__l_req_msg;
+            service_mgr__l_new_req_type = service_mgr__p_req_typ;
+            if (*service_mgr__p_valid_req == true) {
+               service_mgr__get_response_type(service_mgr__p_req_typ,
+                  service_mgr__p_resp_typ);
+               message_out_bs__alloc_resp_msg(*service_mgr__p_resp_typ,
+                  service_mgr__p_resp_header,
+                  service_mgr__p_resp_msg);
+               if (*service_mgr__p_resp_msg != constants__c_msg_indet) {
+                  app_overwrite_req_cb_bs__has_server_overwrite_req_cb(service_mgr__l_endpoint_config_idx,
+                     &service_mgr__l_overwrite_req_msg);
+                  if (service_mgr__l_overwrite_req_msg == true) {
+                     app_overwrite_req_cb_bs__overwrite_service_request(service_mgr__l_req_msg,
+                        service_mgr__p_sc,
+                        &service_mgr__l_new_req_msg);
+                     message_in_bs__bless_msg_in(service_mgr__l_new_req_msg,
+                        &service_mgr__l_new_req_type);
+                  }
+                  if (*service_mgr__p_sc == constants_statuscodes_bs__e_sc_ok) {
+                     service_mgr__treat_session_service_req(service_mgr__l_endpoint_config_idx,
+                        service_mgr__l_session,
+                        service_mgr__l_new_req_type,
+                        service_mgr__p_req_handle,
+                        service_mgr__p_req_context,
+                        service_mgr__p_req_header,
+                        service_mgr__l_new_req_msg,
+                        *service_mgr__p_resp_msg,
+                        service_mgr__p_sc,
+                        service_mgr__p_async);
+                  }
+               }
+               else {
+                  *service_mgr__p_sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+               }
+               message_in_bs__dealloc_msg_in(service_mgr__l_new_req_msg);
+            }
+            else {
+               *service_mgr__p_sc = constants_statuscodes_bs__e_sc_bad_decoding_error;
+            }
          }
       }
       else {

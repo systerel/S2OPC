@@ -20,6 +20,7 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -35,6 +36,8 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_services_request_timeout.h"
+#include "sopc_toolkit_config_constants.h"
 
 static SOPC_ExtensionObject nullAnonymousIdentityToken;
 
@@ -336,6 +339,33 @@ void message_in_bs__read_msg_req_header_session_token(const constants__t_msg_hea
     *message_in_bs__session_token = constants__c_session_token_indet;
     // TODO: IMPORTANT: if NULL token  => shall return an indet token !
     *message_in_bs__session_token = &((OpcUa_RequestHeader*) message_in_bs__msg_header)->AuthenticationToken;
+}
+
+void message_in_bs__server_is_msg_req_header_timeout_expired(const constants__t_msg_header_i message_in_bs__msg_header,
+                                                             t_bool* const message_in_bs__is_expired)
+{
+    const OpcUa_RequestHeader* reqHeader = (const OpcUa_RequestHeader*) message_in_bs__msg_header;
+    SOPC_TimeReference receptionTime = 0;
+    bool hasReceptionTime = false;
+
+    *message_in_bs__is_expired = false;
+    if (SOPC_SERVER_CHECK_REQUEST_TIMEOUT_HINT)
+    {
+        hasReceptionTime = SOPC_Services_GetCurrentMsgReceptionTime(&receptionTime);
+    }
+    if (hasReceptionTime)
+    {
+        *message_in_bs__is_expired = SOPC_Services_IsRequestTimeoutHintExpired(
+            receptionTime, SOPC_TimeReference_GetCurrent(), reqHeader->TimeoutHint,
+            SOPC_SERVER_REQUEST_TIMEOUT_HINT_MARGIN_MS);
+    }
+    if (*message_in_bs__is_expired)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Services: request with handle=%" PRIu32 " not treated since its TimeoutHint=%" PRIu32
+                                 "ms already elapsed",
+                                 reqHeader->RequestHandle, reqHeader->TimeoutHint);
+    }
 }
 
 void message_in_bs__read_msg_resp_header_service_status(

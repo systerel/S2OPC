@@ -822,6 +822,7 @@ OPERATIONS
         l_session,
         l_endpoint_config_idx,
         l_is_valid_ep_config_idx,
+        l_is_expired_req,
         l_req_msg,
         l_overwrite_req_msg,
         l_new_req_msg,
@@ -838,45 +839,54 @@ OPERATIONS
         l_is_valid_ep_config_idx <-- is_valid_endpoint_config_idx (l_endpoint_config_idx);
         IF l_is_valid_req_on_session = TRUE & l_is_valid_ep_config_idx = TRUE
         THEN
-            /* Decode message */
-            p_valid_req, l_req_msg <-- decode_msg (p_req_typ, p_msg_buffer);
-            l_new_req_msg := l_req_msg;
-            l_new_req_type := p_req_typ;
-            IF p_valid_req = TRUE
+            /* Check request TimeoutHint is not already elapsed before decoding and treating it */
+            l_is_expired_req <-- server_is_msg_req_header_timeout_expired (p_req_header);
+            IF l_is_expired_req = TRUE
             THEN
-                /* Allocate response message */
-                p_resp_typ <-- get_response_type (p_req_typ);
-                p_resp_header, p_resp_msg <-- alloc_resp_msg (p_resp_typ);
-                IF p_resp_msg /= c_msg_indet
-                THEN
-                    l_overwrite_req_msg <-- has_server_overwrite_req_cb (l_endpoint_config_idx);
-                    IF l_overwrite_req_msg = TRUE
-                    THEN
-                        p_sc, l_new_req_msg <-- overwrite_service_request (l_req_msg);
-                        // It is guaranteed by C code to be always the same type as original request
-                        l_new_req_type <-- bless_msg_in (l_new_req_msg)
-                    END
-                    ;
-                    IF p_sc = e_sc_ok
-                    THEN
-                        // Call local operation to dispatch the service request on right service
-                        p_sc, p_async <-- treat_session_service_req (l_endpoint_config_idx,
-                                                                     l_session,
-                                                                     l_new_req_type,
-                                                                     p_req_handle,
-                                                                     p_req_context,
-                                                                     p_req_header,
-                                                                     l_new_req_msg,
-                                                                     p_resp_msg)
-                    END
-                ELSE
-                    p_sc := e_sc_bad_out_of_memory
-                END;
-                /* request message not necessary anymore */
-                dealloc_msg_in (l_new_req_msg)
+                /* Request is not decoded nor treated: the client does not expect a response anymore */
+                p_valid_req := TRUE;
+                p_sc := e_sc_bad_timeout
             ELSE
-                p_sc := e_sc_bad_decoding_error
-            END /* DECODE REQ CHECK */
+                /* Decode message */
+                p_valid_req, l_req_msg <-- decode_msg (p_req_typ, p_msg_buffer);
+                l_new_req_msg := l_req_msg;
+                l_new_req_type := p_req_typ;
+                IF p_valid_req = TRUE
+                THEN
+                    /* Allocate response message */
+                    p_resp_typ <-- get_response_type (p_req_typ);
+                    p_resp_header, p_resp_msg <-- alloc_resp_msg (p_resp_typ);
+                    IF p_resp_msg /= c_msg_indet
+                    THEN
+                        l_overwrite_req_msg <-- has_server_overwrite_req_cb (l_endpoint_config_idx);
+                        IF l_overwrite_req_msg = TRUE
+                        THEN
+                            p_sc, l_new_req_msg <-- overwrite_service_request (l_req_msg);
+                            // It is guaranteed by C code to be always the same type as original request
+                            l_new_req_type <-- bless_msg_in (l_new_req_msg)
+                        END
+                        ;
+                        IF p_sc = e_sc_ok
+                        THEN
+                            // Call local operation to dispatch the service request on right service
+                            p_sc, p_async <-- treat_session_service_req (l_endpoint_config_idx,
+                                                                         l_session,
+                                                                         l_new_req_type,
+                                                                         p_req_handle,
+                                                                         p_req_context,
+                                                                         p_req_header,
+                                                                         l_new_req_msg,
+                                                                         p_resp_msg)
+                        END
+                    ELSE
+                        p_sc := e_sc_bad_out_of_memory
+                    END;
+                    /* request message not necessary anymore */
+                    dealloc_msg_in (l_new_req_msg)
+                ELSE
+                    p_sc := e_sc_bad_decoding_error
+                END /* DECODE REQ CHECK */
+            END /* EXPIRED REQ CHECK */
         ELSE // l_is_valid_req_on_session = FALSE:
             // Note: consider message valid if we do not evaluate it due to session invalid token but we will send a service fault anyway
             p_valid_req := TRUE

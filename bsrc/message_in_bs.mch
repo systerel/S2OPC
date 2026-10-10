@@ -230,6 +230,19 @@ OPERATIONS
     END
     ;
 
+    /* Server side: returns TRUE if the request TimeoutHint (header) is elapsed since the request reception.
+       The request reception time and current time are not modeled: result is not deterministic. */
+    is_expired <-- server_is_msg_req_header_timeout_expired (msg_header) =
+    PRE
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_in_header &
+        c_msg_in_header : t_msg_header &
+        a_msg_in_type : s_service_on_session_reqs
+    THEN
+        is_expired :: BOOL
+    END
+    ;
+
     handle <-- client_read_msg_header_req_handle (msg_header) =
     PRE
         msg_header : t_msg_header_i &
