@@ -24,8 +24,10 @@
 #include "sopc_async_queue.h"
 #include "sopc_atomic.h"
 #include "sopc_event_handler.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
+#include "sopc_time_reference.h"
 
 struct Event
 {
@@ -146,6 +148,50 @@ START_TEST(test_event_handler_post_as_next)
 }
 END_TEST
 
+static SOPC_TimeReference postTimeInCallback = 0;
+static SOPC_TimeReference processingTimeInCallback = 0;
+static int32_t postTimeCallbackCalled = 0;
+
+static void post_time_callback(SOPC_EventHandler* handler,
+                               int32_t event,
+                               uint32_t eltId,
+                               uintptr_t params,
+                               uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(event);
+    SOPC_UNUSED_ARG(eltId);
+    SOPC_UNUSED_ARG(params);
+    SOPC_UNUSED_ARG(auxParam);
+    postTimeInCallback = SOPC_EventHandler_GetCurrentEventPostTime(handler);
+    processingTimeInCallback = SOPC_TimeReference_GetCurrent();
+    SOPC_Atomic_Int_Set(&postTimeCallbackCalled, 1);
+}
+
+START_TEST(test_event_handler_post_time)
+{
+    SOPC_Looper* looper = SOPC_Looper_Create("test_post_time");
+    ck_assert_ptr_nonnull(looper);
+
+    SOPC_EventHandler* h1 = SOPC_EventHandler_Create(looper, post_time_callback);
+    ck_assert_ptr_nonnull(h1);
+    /* No event processed */
+    ck_assert_uint_eq(0, SOPC_EventHandler_GetCurrentEventPostTime(h1));
+    ck_assert_uint_eq(0, SOPC_EventHandler_GetCurrentEventPostTime(NULL));
+
+    SOPC_TimeReference beforePost = SOPC_TimeReference_GetCurrent();
+    ck_assert(SOPC_STATUS_OK == SOPC_EventHandler_Post(h1, 0, 0, 0, 0));
+    SOPC_TimeReference afterPost = SOPC_TimeReference_GetCurrent();
+    ck_assert(wait_value(&postTimeCallbackCalled, 1));
+
+    /* Post time recorded at post and available during callback */
+    ck_assert(postTimeInCallback >= beforePost);
+    ck_assert(postTimeInCallback <= afterPost);
+    ck_assert(postTimeInCallback <= processingTimeInCallback);
+
+    SOPC_Looper_Delete(looper);
+}
+END_TEST
+
 static void test_setup(void)
 {
     ck_assert(SOPC_AsyncQueue_Init(&queue, "") == SOPC_STATUS_OK);
@@ -167,6 +213,7 @@ Suite* tests_make_suite_event_handler(void)
     tcase_add_test(c, test_event_handler_create_prioritized);
     tcase_add_test(c, test_event_handler_post);
     tcase_add_test(c, test_event_handler_post_as_next);
+    tcase_add_test(c, test_event_handler_post_time);
     suite_add_tcase(s, c);
 
     return s;

@@ -98,4 +98,6 @@ Suite* tests_make_suite_write_value_pool(void);
 
 Suite* tests_make_suite_call_method_manager(void);
 
+Suite* tests_make_suite_services_request_timeout(void);
+
 #endif // CHECK_HELPERS_H
