@@ -41,6 +41,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_toolkit_config_constants.h"
 
 #include "util_variant.h"
 
@@ -109,6 +110,58 @@ static SOPC_SLinkedList* monitoredItemIdFreed = NULL;
 
 /* Highest id ever issued when the freed list is empty. */
 static uint32_t monitoredItemIdMax = 0;
+
+/* Limits on the number of MonitoredItems (0 = no limit), see SOPC_MAX_MONITORED_ITEMS(_PER_SUBSCRIPTION). */
+static uint32_t monitoredItemsLimit = 0;
+static uint32_t monitoredItemsPerSubscriptionLimit = 0;
+/* Number of live MonitoredItems: in the server and per subscription index (index 0 unused). */
+static uint32_t nbMonitoredItems = 0;
+static uint32_t nbMonitoredItemsPerSubscription[constants__t_subscription_i_max + 1];
+/* Avoids tracing a warning for each rejected item of a CreateMonitoredItems request: reset on successful creation. */
+static bool limitReachedTraced = false;
+
+static bool is_monitored_item_limit_reached(constants__t_subscription_i subscription)
+{
+    SOPC_ASSERT(subscription > 0 && subscription <= constants__t_subscription_i_max);
+    bool reached = (0 != monitoredItemsLimit && nbMonitoredItems >= monitoredItemsLimit);
+    if (!reached && 0 != monitoredItemsPerSubscriptionLimit)
+    {
+        reached = (nbMonitoredItemsPerSubscription[subscription] >= monitoredItemsPerSubscriptionLimit);
+    }
+    if (reached && !limitReachedTraced)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "MonitoredItem creation refused (BadTooManyMonitoredItems): subscriptionId=%" PRIu32
+                                 " has %" PRIu32 " MonitoredItems (max %" PRIu32 "), server has %" PRIu32
+                                 " MonitoredItems (max %" PRIu32 "), 0 meaning no limit",
+                                 subscription, nbMonitoredItemsPerSubscription[subscription],
+                                 monitoredItemsPerSubscriptionLimit, nbMonitoredItems, monitoredItemsLimit);
+        limitReachedTraced = true;
+    }
+    return reached;
+}
+
+void SOPC_MonitoredItemPointer_SetLimits(uint32_t maxMonitoredItems, uint32_t maxMonitoredItemsPerSubscription)
+{
+    monitoredItemsLimit = maxMonitoredItems;
+    monitoredItemsPerSubscriptionLimit = maxMonitoredItemsPerSubscription;
+    limitReachedTraced = false;
+}
+
+uint32_t SOPC_MonitoredItemPointer_GetNbMonitoredItems(void)
+{
+    return nbMonitoredItems;
+}
+
+uint32_t SOPC_MonitoredItemPointer_GetNbMonitoredItemsInSubscription(constants__t_subscription_i subscription)
+{
+    uint32_t result = 0;
+    if (subscription > 0 && subscription <= constants__t_subscription_i_max)
+    {
+        result = nbMonitoredItemsPerSubscription[subscription];
+    }
+    return result;
+}
 
 /**
  * \brief Ensures the MonitoredItemId table can hold \p id (index \p id - 1).
@@ -180,6 +233,8 @@ void monitored_item_pointer_bs__INITIALISATION(void)
     monitoredItemById = SOPC_Calloc(MI_TABLE_INITIAL_CAPACITY, sizeof(SOPC_InternalMonitoredItem*));
     SOPC_ASSERT(monitoredItemById != NULL);
     monitoredItemByIdCapacity = MI_TABLE_INITIAL_CAPACITY;
+
+    SOPC_MonitoredItemPointer_SetLimits(SOPC_MAX_MONITORED_ITEMS, SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION);
 }
 
 void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
@@ -207,6 +262,10 @@ void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
     }
 
     monitoredItemIdMax = 0;
+
+    nbMonitoredItems = 0;
+    memset(nbMonitoredItemsPerSubscription, 0, sizeof(nbMonitoredItemsPerSubscription));
+    limitReachedTraced = false;
 }
 
 /*--------------------
@@ -269,6 +328,17 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
             *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_index_range_invalid;
         }
     }
+    // Limits checked once the index range is known valid (B specification: invalid index range status first)
+    bool limitReached = false;
+    if (SOPC_STATUS_OK == retStatus)
+    {
+        limitReached = is_monitored_item_limit_reached(monitored_item_pointer_bs__p_subscription);
+    }
+    if (limitReached)
+    {
+        *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_too_many_monitored_items;
+        retStatus = SOPC_STATUS_NOK;
+    }
     if (SOPC_STATUS_OK == retStatus)
     {
         SOPC_ASSERT((constants__e_aid_EventNotifier != monitored_item_pointer_bs__p_aid &&
@@ -330,6 +400,9 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
         *monitored_item_pointer_bs__monitoredItemPointer = monitItem;
         *monitored_item_pointer_bs__monitoredItemId = monitItem->monitoredItemId;
+        nbMonitoredItems++;
+        nbMonitoredItemsPerSubscription[monitored_item_pointer_bs__p_subscription]++;
+        limitReachedTraced = false;
 
         char* nidStr = SOPC_NodeId_ToCString(nid);
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -418,6 +491,12 @@ void monitored_item_pointer_bs__delete_monitored_item_pointer(
 
     /* Copy id before free; callers must not dereference monitItem after this call. */
     uint32_t id = monitItem->monitoredItemId;
+    constants__t_subscription_i subId = monitItem->subId;
+    SOPC_ASSERT(nbMonitoredItems > 0);
+    SOPC_ASSERT(subId > 0 && subId <= constants__t_subscription_i_max);
+    SOPC_ASSERT(nbMonitoredItemsPerSubscription[subId] > 0);
+    nbMonitoredItems--;
+    nbMonitoredItemsPerSubscription[subId]--;
     SOPC_InternalMonitoredItem_Free(monitItem);
     /* Clear table slot so getall_monitoredItemId rejects this id until reuse. */
     if (id > 0 && id <= monitoredItemByIdCapacity)

@@ -73,6 +73,21 @@ typedef struct SOPC_InternalMonitoredItem
     bool queueOverflowEventTriggered;
 } SOPC_InternalMonitoredItem;
 
+/**
+ * \brief Sets the limits on the number of MonitoredItems, 0 meaning no limit.
+ *        The limits are initialized with ::SOPC_MAX_MONITORED_ITEMS and ::SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION
+ *        on module INITIALISATION. Already created MonitoredItems are kept when a limit is lowered.
+ *
+ * \note Internal use only (tests): shall be called from the Services thread or before it is started.
+ */
+void SOPC_MonitoredItemPointer_SetLimits(uint32_t maxMonitoredItems, uint32_t maxMonitoredItemsPerSubscription);
+
+/** \brief Returns the number of MonitoredItems currently created in the server. */
+uint32_t SOPC_MonitoredItemPointer_GetNbMonitoredItems(void);
+
+/** \brief Returns the number of MonitoredItems currently created in the given subscription. */
+uint32_t SOPC_MonitoredItemPointer_GetNbMonitoredItemsInSubscription(constants__t_subscription_i subscription);
+
 // Non-static because this inlined function is used in inlined extern one
 static SOPC_STRONG_INLINE bool is_eventMI(SOPC_InternalMonitoredItem* monitoredItemPointer)
 {

@@ -103,21 +103,29 @@ OPERATIONS
             monitoredItemId := c_monitoredItemId_indet
         ELSIF p_indexRange : t_IndexRange /* It is null or it can be parsed */
         THEN
-            ANY l_monitoredItem, l_monitoredItemId WHERE
-                l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer &
-                l_monitoredItemId : t_monitoredItemId - s_monitoredItemId
-            THEN
-                StatusCode := e_sc_ok ||
-                s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
-                s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
-                a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
-                a_monitoredItemSubs (l_monitoredItem) := p_subscription ||
-                a_monitoredItemNodeId (l_monitoredItem) := p_nid ||
-                a_monitoredItemAttributeId (l_monitoredItem) := p_aid ||
-                a_monitoredItemMonitMode (l_monitoredItem) := p_monitoringMode ||
-                a_monitoredItemQueueSize (l_monitoredItem) := p_queueSize ||
-                monitoredItemPointer := l_monitoredItem ||
-                monitoredItemId := l_monitoredItemId
+            CHOICE
+                ANY l_monitoredItem, l_monitoredItemId WHERE
+                    l_monitoredItem : t_monitoredItemPointer - s_monitoredItemPointer &
+                    l_monitoredItemId : t_monitoredItemId - s_monitoredItemId
+                THEN
+                    StatusCode := e_sc_ok ||
+                    s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
+                    s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
+                    a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
+                    a_monitoredItemSubs (l_monitoredItem) := p_subscription ||
+                    a_monitoredItemNodeId (l_monitoredItem) := p_nid ||
+                    a_monitoredItemAttributeId (l_monitoredItem) := p_aid ||
+                    a_monitoredItemMonitMode (l_monitoredItem) := p_monitoringMode ||
+                    a_monitoredItemQueueSize (l_monitoredItem) := p_queueSize ||
+                    monitoredItemPointer := l_monitoredItem ||
+                    monitoredItemId := l_monitoredItemId
+                END
+            OR
+                /* Not enough memory, or configured maximum number of MonitoredItems reached
+                   (in the server or in the subscription) */
+                StatusCode :: {e_sc_bad_out_of_memory, e_sc_bad_too_many_monitored_items} ||
+                monitoredItemPointer := c_monitoredItemPointer_indet ||
+                monitoredItemId := c_monitoredItemId_indet
             END
         ELSE
             StatusCode := e_sc_bad_index_range_invalid ||

@@ -141,6 +141,20 @@
 #error "Maximum number of heavy operations per messages cannot be < 0"
 #endif
 
+/* Maximum number of MonitoredItems (0 = no limit) */
+#if SOPC_MAX_MONITORED_ITEMS < 0 || SOPC_MAX_MONITORED_ITEMS > UINT32_MAX
+#error "Maximum number of MonitoredItems shall be in [0, UINT32_MAX]"
+#endif
+
+/* Maximum number of MonitoredItems per subscription (0 = no limit) */
+#if SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION < 0 || SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION > UINT32_MAX
+#error "Maximum number of MonitoredItems per subscription shall be in [0, UINT32_MAX]"
+#endif
+
+#if SOPC_MAX_MONITORED_ITEMS > 0 && SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION > SOPC_MAX_MONITORED_ITEMS
+#error "Maximum number of MonitoredItems per subscription cannot be > maximum number of MonitoredItems"
+#endif
+
 /* Maximum number of event notification queue size */
 #if SOPC_MAX_NOTIFICATION_QUEUE_SIZE <= 0
 #error "Maximum number of event notification queue size cannot be <= 0"

@@ -240,6 +240,23 @@
 #define SOPC_MAX_LIFETIME_PUBLISH_INTERVALS 300 /* >= 3 KeepAlive */
 #endif
 
+/** @brief Maximum number of MonitoredItems in the server (all subscriptions of all sessions).
+ *  A MonitoredItem creation beyond this limit fails with OpcUa_BadTooManyMonitoredItems.
+ *  0 means no limit (only the available memory limits the number of MonitoredItems).
+ *  Note: memory used by a MonitoredItem depends on its queue size, see ::SOPC_MAX_NOTIFICATION_QUEUE_SIZE.
+ */
+#ifndef SOPC_MAX_MONITORED_ITEMS
+#define SOPC_MAX_MONITORED_ITEMS 0
+#endif
+
+/** @brief Maximum number of MonitoredItems in one subscription.
+ *  A MonitoredItem creation beyond this limit fails with OpcUa_BadTooManyMonitoredItems.
+ *  0 means no limit.
+ */
+#ifndef SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION
+#define SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION 0
+#endif
+
 /** @brief Maximum size of a MonitoredItem notification queue */
 #ifndef SOPC_MAX_NOTIFICATION_QUEUE_SIZE
 #define SOPC_MAX_NOTIFICATION_QUEUE_SIZE 1000

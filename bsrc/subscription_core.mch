@@ -920,7 +920,8 @@ OPERATIONS
         ELSIF t_monitoredItemPointer = s_monitoredItemPointer or
             t_monitoredItemId = s_monitoredItemId
         THEN
-            /* We do not limit the number of MI in C code, so it means we do not have enough memory if it fails */
+            /* Abstract sets exhausted: it means we do not have enough memory
+               (configured limits on the number of MI are covered by the CHOICE below) */
             StatusCode_service := e_sc_bad_out_of_memory ||
             monitoredItemPointer := c_monitoredItemPointer_indet ||
             monitoredItemId := c_monitoredItemId_indet ||
@@ -959,7 +960,9 @@ OPERATIONS
                                               \/ {a_nodeToMonitoredItemQueue(p_nid) |-> l_monitoredItem}
                 END
             OR
-                StatusCode_service := e_sc_bad_out_of_memory ||
+                /* Not enough memory, or configured maximum number of MonitoredItems reached
+                   (in the server or in the subscription) */
+                StatusCode_service :: {e_sc_bad_out_of_memory, e_sc_bad_too_many_monitored_items} ||
                 filterResult :: t_filterResult_i ||
                 monitoredItemPointer := c_monitoredItemPointer_indet ||
                 monitoredItemId := c_monitoredItemId_indet
