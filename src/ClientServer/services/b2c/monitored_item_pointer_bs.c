@@ -44,7 +44,7 @@
 
 #include "util_variant.h"
 
-static void SOPC_InternalMonitoredFilter_Free(SOPC_InternalMonitoredItemFilterCtx* filterCtx)
+void SOPC_InternalMonitoredFilter_Free(SOPC_InternalMonitoredItemFilterCtx* filterCtx)
 {
     if (NULL != filterCtx)
     {
@@ -55,17 +55,28 @@ static void SOPC_InternalMonitoredFilter_Free(SOPC_InternalMonitoredItemFilterCt
         }
         else
         {
-            for (int32_t i = 0; i < filterCtx->Filter.Event.eventFilter->NoOfSelectClauses; i++)
+            OpcUa_EventFilter* eventFilter = filterCtx->Filter.Event.eventFilter;
+            if (NULL != eventFilter)
             {
-                SOPC_NumericRange_Delete(filterCtx->Filter.Event.indexRangeSelectClauses[i]);
-                SOPC_Free(filterCtx->Filter.Event.qnPathStrSelectClauses[i]);
+                // Select clauses arrays might not be allocated in a partially built context
+                for (int32_t i = 0; i < eventFilter->NoOfSelectClauses; i++)
+                {
+                    if (NULL != filterCtx->Filter.Event.indexRangeSelectClauses)
+                    {
+                        SOPC_NumericRange_Delete(filterCtx->Filter.Event.indexRangeSelectClauses[i]);
+                    }
+                    if (NULL != filterCtx->Filter.Event.qnPathStrSelectClauses)
+                    {
+                        SOPC_Free(filterCtx->Filter.Event.qnPathStrSelectClauses[i]);
+                    }
+                }
+                SOPC_ReturnStatus status = SOPC_EncodeableObject_Delete(eventFilter->encodeableType,
+                                                                        (void**) &filterCtx->Filter.Event.eventFilter);
+                SOPC_UNUSED_RESULT(status);
             }
             SOPC_Free(filterCtx->Filter.Event.indexRangeSelectClauses);
             SOPC_Free(filterCtx->Filter.Event.qnPathStrSelectClauses);
             SOPC_NodeId_Clear(&filterCtx->Filter.Event.whereClauseTypeId);
-            SOPC_ReturnStatus status = SOPC_EncodeableObject_Delete(filterCtx->Filter.Event.eventFilter->encodeableType,
-                                                                    (void**) &filterCtx->Filter.Event.eventFilter);
-            SOPC_UNUSED_RESULT(status);
         }
         SOPC_Free(filterCtx);
     }
@@ -237,7 +248,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         SOPC_Free(monitItem);
         SOPC_Free(nid);
         SOPC_Free(rangeStr);
-        SOPC_Free(filterCtx);
+        // Note: filterCtx is not freed on failure: it remains owned by the caller (deleted by subscription_core)
         return;
     }
 
@@ -330,7 +341,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     else
     {
         SOPC_NumericRange_Delete(range);
-        SOPC_Free(filterCtx);
+        // Note: filterCtx is not freed on failure: it remains owned by the caller (deleted by subscription_core)
         SOPC_Free(monitItem);
         SOPC_NodeId_Clear(nid);
         SOPC_Free(nid);

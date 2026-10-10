@@ -48,6 +48,13 @@ typedef struct SOPC_InternalMonitoredItemFilterCtx
     } Filter;
 } SOPC_InternalMonitoredItemFilterCtx;
 
+/**
+ * \brief Deletes a data or event filter context, including a partially built event filter context.
+ *
+ * \param filterCtx  The filter context to delete, might be NULL
+ */
+void SOPC_InternalMonitoredFilter_Free(SOPC_InternalMonitoredItemFilterCtx* filterCtx);
+
 typedef struct SOPC_InternalMonitoredItem
 {
     uint32_t monitoredItemId;

@@ -40,28 +40,6 @@ void monitored_item_event_filter_treatment_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 
-static void free_filter_ctx(SOPC_InternalMonitoredItemFilterCtx* filterCtx)
-{
-    if (NULL != filterCtx)
-    {
-        if (NULL != filterCtx->Filter.Event.eventFilter)
-        {
-            for (int32_t i = 0; i < filterCtx->Filter.Event.eventFilter->NoOfSelectClauses; i++)
-            {
-                SOPC_NumericRange_Delete(filterCtx->Filter.Event.indexRangeSelectClauses[i]);
-                SOPC_Free(filterCtx->Filter.Event.qnPathStrSelectClauses[i]);
-            }
-            SOPC_ReturnStatus status = SOPC_EncodeableObject_Delete(filterCtx->Filter.Event.eventFilter->encodeableType,
-                                                                    (void**) &filterCtx->Filter.Event.eventFilter);
-            SOPC_UNUSED_RESULT(status);
-        }
-        SOPC_Free(filterCtx->Filter.Event.indexRangeSelectClauses);
-        SOPC_Free(filterCtx->Filter.Event.qnPathStrSelectClauses);
-        SOPC_NodeId_Clear(&filterCtx->Filter.Event.whereClauseTypeId);
-        SOPC_Free(filterCtx);
-    }
-}
-
 void monitored_item_event_filter_treatment_bs__check_events_supported(
     constants_statuscodes_bs__t_StatusCode_i* const monitored_item_event_filter_treatment_bs__scEventsSupported)
 {
@@ -459,7 +437,8 @@ void monitored_item_event_filter_treatment_bs__delete_event_filter_context(
     if (NULL != monitored_item_event_filter_treatment_bs__p_filterCtx)
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        free_filter_ctx((SOPC_InternalMonitoredItemFilterCtx*) monitored_item_event_filter_treatment_bs__p_filterCtx);
+        SOPC_InternalMonitoredFilter_Free(
+            (SOPC_InternalMonitoredItemFilterCtx*) monitored_item_event_filter_treatment_bs__p_filterCtx);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 }
@@ -610,7 +589,7 @@ void monitored_item_event_filter_treatment_bs__init_event_filter_ctx_and_result(
     }
     else
     {
-        free_filter_ctx(filterCtx);
+        SOPC_InternalMonitoredFilter_Free(filterCtx);
         SOPC_EncodeableObject_Delete(&OpcUa_EventFilterResult_EncodeableType, (void**) &eventFilterResult);
     }
 }
