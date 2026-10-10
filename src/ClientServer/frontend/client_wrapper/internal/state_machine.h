@@ -269,6 +269,8 @@ typedef struct SOPC_CreateMonitoredItems_Ctx
     uintptr_t outCtxId; /* Contains unique identifier filled by ::SOPC_StaMac_NewCreateMonitoredItems*/
     OpcUa_CreateMonitoredItemsRequest*
         req; /* Contains the request sent to the server (internal use only, freed during treatment)*/
+    SOPC_StatusCode serviceFaultResult; /* Shall be initialized to Good (0): set to the ServiceResult when the
+                                           server answered with a ServiceFault (the request is then completed) */
 } SOPC_CreateMonitoredItems_Ctx;
 
 /**
@@ -340,6 +342,8 @@ typedef struct SOPC_DeleteMonitoredItems_Ctx
     uintptr_t outCtxId; /* Contains unique identifier filled by ::SOPC_StaMac_NewDeleteMonitoredItems */
     OpcUa_DeleteMonitoredItemsRequest*
         req; /* Contains the request sent to the server (internal use only, freed during treatment)*/
+    SOPC_StatusCode serviceFaultResult; /* Shall be initialized to Good (0): set to the ServiceResult when the
+                                           server answered with a ServiceFault (the request is then completed) */
 } SOPC_DeleteMonitoredItems_Ctx;
 
 /**

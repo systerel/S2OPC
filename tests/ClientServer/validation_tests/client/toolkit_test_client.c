@@ -663,6 +663,51 @@ static SOPC_ReturnStatus test_non_reg_issue_1428_create_MI(SOPC_ClientHelper_Sub
     return status;
 }
 
+/* A CreateMonitoredItems request answered with a ServiceFault (too many operations) shall be reported as a failure
+ * (SOPC_STATUS_NOK and ServiceResult in response header) without closing the connection: the subscription and the
+ * connection remain usable for the following requests. */
+static SOPC_ReturnStatus test_create_MI_service_fault(SOPC_ClientHelper_Subscription* subscription)
+{
+    SOPC_ASSERT(NULL != subscription);
+    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
+    const size_t nbItems = SOPC_MAX_OPERATIONS_PER_MSG + 1;
+    char nodeIdStr[] = "i=2258";
+    char** nodeIds = SOPC_Calloc(nbItems, sizeof(*nodeIds));
+    OpcUa_CreateMonitoredItemsRequest* createMonItReq = NULL;
+    if (NULL != nodeIds)
+    {
+        for (size_t i = 0; i < nbItems; i++)
+        {
+            nodeIds[i] = nodeIdStr;
+        }
+        createMonItReq = SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings(0, nbItems, nodeIds,
+                                                                                   OpcUa_TimestampsToReturn_Both);
+        SOPC_Free(nodeIds);
+    }
+    if (NULL != createMonItReq)
+    {
+        OpcUa_CreateMonitoredItemsResponse createMonItResp;
+        OpcUa_CreateMonitoredItemsResponse_Initialize(&createMonItResp);
+        SOPC_ReturnStatus createStatus =
+            SOPC_ClientHelper_Subscription_CreateMonitoredItems(subscription, createMonItReq, NULL, &createMonItResp);
+        if (SOPC_STATUS_NOK == createStatus &&
+            OpcUa_BadTooManyOperations == createMonItResp.ResponseHeader.ServiceResult)
+        {
+            status = SOPC_STATUS_OK;
+        }
+        else
+        {
+            printf(
+                ">>Test_Client_Toolkit: CreateMonitoredItems ServiceFault not reported as expected: status=%d "
+                "ServiceResult=0x%08" PRIX32 "\n",
+                (int) createStatus, createMonItResp.ResponseHeader.ServiceResult);
+            status = SOPC_STATUS_NOK;
+        }
+        OpcUa_CreateMonitoredItemsResponse_Clear(&createMonItResp);
+    }
+    return status;
+}
+
 static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
 {
     // Reset expected result
@@ -804,6 +849,12 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
                 }
             }
             OpcUa_DeleteMonitoredItemsResponse_Clear(&delMonItResp);
+        }
+
+        /* ServiceFault on CreateMonitoredItems shall not close the connection (checked by the next test) */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = test_create_MI_service_fault(subscription);
         }
 
         /* NON REGRESSSION TEST FOR ISSUE #1428: server fail due to buffer overflow without fix */

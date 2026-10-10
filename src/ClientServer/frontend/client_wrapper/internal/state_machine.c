@@ -2437,6 +2437,60 @@ static void LockedStaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Mac
     pSM->state = stActivated;
 }
 
+static void LockedStaMac_CompleteCreateMonItWithServiceFault(SOPC_StaMac_Machine* pSM,
+                                                             SOPC_CreateMonitoredItems_Ctx* MIappCtx,
+                                                             SOPC_StatusCode serviceResult)
+{
+    bool completed = false;
+    MIappCtx->serviceFaultResult = serviceResult;
+    if (NULL != MIappCtx->Results)
+    {
+        MIappCtx->Results->ResponseHeader.ServiceResult = serviceResult;
+    }
+    if (NULL != MIappCtx->req)
+    {
+        subscriptionCtx* subCtx =
+            (subscriptionCtx*) SOPC_SLinkedList_FindFromId(pSM->pListSubscriptions, MIappCtx->req->SubscriptionId);
+        if (NULL != subCtx)
+        {
+            // No MonitoredItem created (id 0): only marks the request as completed for the waiting caller
+            completed = (MIappCtx->outCtxId == SOPC_SLinkedList_Append(subCtx->pListMonIt, 0, MIappCtx->outCtxId));
+        }
+    }
+    SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &MIappCtx->req);
+    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                             "CreateMonitoredItems answered with ServiceFault 0x%08" PRIX32 ", request failed",
+                             serviceResult);
+    pSM->state = (completed ? stActivated : stError);
+}
+
+static void LockedStaMac_CompleteDeleteMonItWithServiceFault(SOPC_StaMac_Machine* pSM,
+                                                             SOPC_DeleteMonitoredItems_Ctx* MIappCtx,
+                                                             SOPC_StatusCode serviceResult)
+{
+    bool completed = false;
+    MIappCtx->serviceFaultResult = serviceResult;
+    if (NULL != MIappCtx->Results)
+    {
+        MIappCtx->Results->ResponseHeader.ServiceResult = serviceResult;
+    }
+    if (NULL != MIappCtx->req)
+    {
+        subscriptionCtx* subCtx =
+            (subscriptionCtx*) SOPC_SLinkedList_FindFromId(pSM->pListSubscriptions, MIappCtx->req->SubscriptionId);
+        if (NULL != subCtx)
+        {
+            // No MonitoredItem deleted (id 0): only marks the request as completed for the waiting caller
+            completed = (MIappCtx->outCtxId == SOPC_SLinkedList_Append(subCtx->pListDelMonIt, 0, MIappCtx->outCtxId));
+        }
+    }
+    SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &MIappCtx->req);
+    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                             "DeleteMonitoredItems answered with ServiceFault 0x%08" PRIX32 ", request failed",
+                             serviceResult);
+    pSM->state = (completed ? stActivated : stError);
+}
+
 static void LockedStaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
                                                  uint32_t arg,
                                                  void* pParam,
@@ -2469,18 +2523,23 @@ static void LockedStaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
         }
         break;
     default:
+        /* A ServiceFault answering a (Create|Delete)MonitoredItems request (e.g. Bad_Timeout when the request
+           TimeoutHint elapsed on server side) is reported to the waiting caller through its context: the session
+           and its subscriptions remain usable. Other cases go into error mode. */
         if (stCreatingMonIt == pSM->state && 0 != appCtx)
         {
-            SOPC_CreateMonitoredItems_Ctx* MIappCtx = (SOPC_CreateMonitoredItems_Ctx*) appCtx;
-            SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &MIappCtx->req);
+            LockedStaMac_CompleteCreateMonItWithServiceFault(pSM, (SOPC_CreateMonitoredItems_Ctx*) appCtx,
+                                                             servFault->ResponseHeader.ServiceResult);
         }
         else if (stDeletingMonIt == pSM->state && 0 != appCtx)
         {
-            SOPC_DeleteMonitoredItems_Ctx* MIappCtx = (SOPC_DeleteMonitoredItems_Ctx*) appCtx;
-            SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &MIappCtx->req);
+            LockedStaMac_CompleteDeleteMonItWithServiceFault(pSM, (SOPC_DeleteMonitoredItems_Ctx*) appCtx,
+                                                             servFault->ResponseHeader.ServiceResult);
         }
-        /* else go into error mode */
-        pSM->state = stError;
+        else
+        {
+            pSM->state = stError;
+        }
         break;
     }
 }

@@ -95,7 +95,9 @@
 #endif
 
 /** @brief Maximum time before a response shall be received after sending a request (0 means no limit).
- *  Note: the request timeoutHint parameter is set to SOPC_REQUEST_TIMEOUT_MS/2 to let a margin regarding timeoutHint.
+ *  Note: the request timeoutHint parameter is set to SOPC_REQUEST_TIMEOUT_MS/2 to let a margin regarding timeoutHint:
+ *  a server evaluating the TimeoutHint answers with a Bad_Timeout ServiceFault before the client timeout elapses,
+ *  which is reported as a request failure without closing the connection (whereas the client timeout does).
  */
 #ifndef SOPC_REQUEST_TIMEOUT_MS
 #define SOPC_REQUEST_TIMEOUT_MS 10000

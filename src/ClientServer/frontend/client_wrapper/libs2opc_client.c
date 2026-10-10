@@ -1773,8 +1773,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
                 SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
                 ++count;
             }
-            /* When the request timeoutHint is lower than SOPC_REQUEST_TIMEOUT_MS, the machine will go in error,
-             *  and NOK is returned. */
+            /* When the server answers with a ServiceFault (e.g. request TimeoutHint lower than
+             * SOPC_REQUEST_TIMEOUT_MS elapsed on server side), NOK is returned but the machine remains usable. */
             if (SOPC_StaMac_IsError(pSM))
             {
                 status = SOPC_STATUS_NOK;
@@ -1783,6 +1783,12 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
             {
                 status = SOPC_STATUS_TIMEOUT;
                 SOPC_StaMac_StopsWithError(pSM, OpcUa_BadTimeout);
+            }
+            else if (!SOPC_IsGoodStatus(appCtx->serviceFaultResult))
+            {
+                /* ServiceFault received (e.g. Bad_Timeout when TimeoutHint elapsed on server side):
+                   the request failed but the session remains usable */
+                status = SOPC_STATUS_NOK;
             }
         }
         SOPC_Free(appCtx);
@@ -1870,8 +1876,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
                 SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
                 ++count;
             }
-            /* When the request timeoutHint is lower than SOPC_REQUEST_TIMEOUT_MS, the machine will go in error,
-             *  and NOK is returned. */
+            /* When the server answers with a ServiceFault (e.g. request TimeoutHint lower than
+             * SOPC_REQUEST_TIMEOUT_MS elapsed on server side), NOK is returned but the machine remains usable. */
             if (SOPC_StaMac_IsError(pSM))
             {
                 status = SOPC_STATUS_NOK;
@@ -1880,6 +1886,12 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_DeleteMonitoredItems(
             {
                 status = SOPC_STATUS_TIMEOUT;
                 SOPC_StaMac_StopsWithError(pSM, OpcUa_BadTimeout);
+            }
+            else if (!SOPC_IsGoodStatus(appCtx->serviceFaultResult))
+            {
+                /* ServiceFault received (e.g. Bad_Timeout when TimeoutHint elapsed on server side):
+                   the request failed but the session remains usable */
+                status = SOPC_STATUS_NOK;
             }
         }
         SOPC_Free(appCtx);

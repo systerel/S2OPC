@@ -500,6 +500,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_GetSubscriptionId(const SOPC_ClientHelper_Su
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if creation failed.
+ *         SOPC_STATUS_NOK if the server answered with a ServiceFault (its status is set in the response header
+ *         ServiceResult when \p monitoredItemsResp is provided), the connection remains usable in this case.
  *
  * \note The provided \p monitoredItemsReq memory is managed by the function after this call (even in case of error)
  *       and shall not be accessed nor freed after call.
@@ -525,6 +527,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_Subscription_CreateMonitoredItems(
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if deletion failed.
+ *         SOPC_STATUS_NOK if the server answered with a ServiceFault (its status is set in the response header
+ *         ServiceResult when \p delMonitoredItemsResp is provided), the connection remains usable in this case.
  *
  * \note The provided \p delMonitoredItemsReq memory is managed by the function after this call (even in case of error)
  *       and shall not be accessed nor freed after call.
