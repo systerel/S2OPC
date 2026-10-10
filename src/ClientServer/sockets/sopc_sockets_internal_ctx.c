@@ -95,6 +95,18 @@ SOPC_InternalSocket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener)
     return result;
 }
 
+bool SOPC_SocketsInternalContext_IsFreeSocketAvailable(void)
+{
+    bool result = false;
+    uint32_t idx = 1; // index 0 is forbidden => reserved for invalid index
+    while (!result && idx < SOPC_MAX_SOCKETS)
+    {
+        result = !socketsArray[idx].isUsed;
+        idx++;
+    }
+    return result;
+}
+
 void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
 {
     SOPC_InternalSocket* sock = NULL;

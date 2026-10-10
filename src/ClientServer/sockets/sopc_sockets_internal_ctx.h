@@ -59,6 +59,8 @@ typedef struct SOPC_InternalSocket
     void* nextConnectAttemptAddr; // Next connection attempt address
     // number of connection for a listener (state = LISTENING)
     uint32_t listenerConnections;
+    // true when a listener (state = LISTENING) cannot accept new connections and is not waited for read events
+    bool isListenerSuspended;
     // define if isServerConnection != false
     uint32_t listenerSocketIdx;
     // socket address
@@ -83,6 +85,11 @@ void SOPC_SocketsInternalContext_Clear(void);
  *  Note: caller must lock the mutex before calling it
  */
 SOPC_InternalSocket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener);
+
+/** @brief Returns true if an unused socket is available in the array of sockets, false otherwise.
+ *         It does not reserve the socket.
+ */
+bool SOPC_SocketsInternalContext_IsFreeSocketAvailable(void);
 
 /** @brief Close the socket and set it as not used anymore.
  */

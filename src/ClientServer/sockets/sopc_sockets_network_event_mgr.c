@@ -139,6 +139,38 @@ static bool SOPC_Internal_ConsumeSigBytes(SOPC_Socket sigSocket, SOPC_SocketSet*
     return true;
 }
 
+/*
+ * Returns true if the listener can accept a new connection, false otherwise.
+ * When it cannot, the listener shall not be waited for read events: the pending connection would keep the listener
+ * readable and lead to a busy loop of the sockets thread. Connection attempts are kept in the listen backlog until a
+ * socket is freed: the listener is waited for read events again on the next sockets sets update.
+ *
+ * \param listener             The listener socket (state = LISTENING)
+ * \param freeSocketAvailable  Indicates if an unused socket is available in the array of sockets
+ */
+static bool SOPC_Internal_ListenerCanAccept(SOPC_InternalSocket* listener, bool freeSocketAvailable)
+{
+    const bool canAccept = freeSocketAvailable && listener->listenerConnections < SOPC_MAX_SOCKETS_CONNECTIONS;
+    if (!canAccept && !listener->isListenerSuspended)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "SocketsMgr: listener socketIdx=%" PRIu32
+                                 " stops accepting new connections since maximum number of socket reached (%" PRIu32
+                                 "/%d connections on listener, free socket available: %d)",
+                                 listener->socketIdx, listener->listenerConnections, SOPC_MAX_SOCKETS_CONNECTIONS,
+                                 (int) freeSocketAvailable);
+    }
+    else if (canAccept && listener->isListenerSuspended)
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                              "SocketsMgr: listener socketIdx=%" PRIu32 " accepts new connections again (%" PRIu32
+                              "/%d connections on listener)",
+                              listener->socketIdx, listener->listenerConnections, SOPC_MAX_SOCKETS_CONNECTIONS);
+    }
+    listener->isListenerSuspended = !canAccept;
+    return canAccept;
+}
+
 // Treat sockets events if some are present or wait for events (until timeout)
 static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_Socket sigSocket,
                                                            SOPC_SocketSet* readSet,
@@ -149,6 +181,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_Socket sigSocket
     uint32_t idx = 0;
     int32_t nbReady = 0;
     SOPC_InternalSocket* uaSock = NULL;
+    bool addToReadSet = false;
+    const bool freeSocketAvailable = SOPC_SocketsInternalContext_IsFreeSocketAvailable();
     SOPC_SocketSet_Clear(readSet);
     SOPC_SocketSet_Clear(writeSet);
     SOPC_SocketSet_Clear(exceptSet);
@@ -177,7 +211,16 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(SOPC_Socket sigSocket
             }
             else
             {
-                SOPC_SocketSet_Add(uaSock->sock, readSet);
+                addToReadSet = true;
+                if (uaSock->state == SOCKET_STATE_LISTENING)
+                {
+                    // Do not wait for connection attempts that cannot be accepted
+                    addToReadSet = SOPC_Internal_ListenerCanAccept(uaSock, freeSocketAvailable);
+                }
+                if (addToReadSet)
+                {
+                    SOPC_SocketSet_Add(uaSock->sock, readSet);
+                }
             }
             SOPC_SocketSet_Add(uaSock->sock, exceptSet);
         }
