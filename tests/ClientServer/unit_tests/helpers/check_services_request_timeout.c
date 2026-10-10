@@ -28,6 +28,7 @@
 #include "check_helpers.h"
 
 #include "message_in_bs.h"
+#include "msg_subscription_publish_ack_bs.h"
 #include "sopc_services_request_timeout.h"
 #include "sopc_time_reference.h"
 #include "sopc_types.h"
@@ -116,6 +117,43 @@ START_TEST(test_message_in_bs_timeout_expired)
 }
 END_TEST
 
+START_TEST(test_publish_expiration_time)
+{
+    OpcUa_RequestHeader header;
+    OpcUa_RequestHeader_Initialize(&header);
+    constants__t_timeref_i expiration = 0;
+
+    /* Reception time available: expiration = reception time + TimeoutHint, whatever the time spent in queue */
+    const SOPC_TimeReference rx = SOPC_TimeReference_GetCurrent() - 3000; // received 3s ago
+    SOPC_Services_SetCurrentMsgReceptionTime(rx);
+    header.TimeoutHint = 5000;
+    msg_subscription_publish_ack_bs__get_msg_header_expiration_time(&header, &expiration);
+    ck_assert_uint_eq(SOPC_TimeReference_AddMilliseconds(rx, 5000), expiration);
+
+    /* Waited in queue longer than the TimeoutHint: expiration time is already in the past */
+    header.TimeoutHint = 1000;
+    msg_subscription_publish_ack_bs__get_msg_header_expiration_time(&header, &expiration);
+    ck_assert_uint_eq(SOPC_TimeReference_AddMilliseconds(rx, 1000), expiration);
+    ck_assert(expiration < SOPC_TimeReference_GetCurrent());
+
+    /* TimeoutHint = 0 (no timeout): 1 year validity from reception time */
+    header.TimeoutHint = 0;
+    msg_subscription_publish_ack_bs__get_msg_header_expiration_time(&header, &expiration);
+    ck_assert_uint_eq(SOPC_TimeReference_AddMilliseconds(rx, 31536000000), expiration);
+
+    /* No reception time (unexpected, a warning is traced): fallback on current time */
+    SOPC_Services_ResetCurrentMsgReceptionTime();
+    header.TimeoutHint = 5000;
+    const SOPC_TimeReference before = SOPC_TimeReference_GetCurrent();
+    msg_subscription_publish_ack_bs__get_msg_header_expiration_time(&header, &expiration);
+    const SOPC_TimeReference after = SOPC_TimeReference_GetCurrent();
+    ck_assert(expiration >= SOPC_TimeReference_AddMilliseconds(before, 5000));
+    ck_assert(expiration <= SOPC_TimeReference_AddMilliseconds(after, 5000));
+
+    OpcUa_RequestHeader_Clear(&header);
+}
+END_TEST
+
 Suite* tests_make_suite_services_request_timeout(void)
 {
     Suite* s = suite_create("Services request TimeoutHint");
@@ -123,6 +161,7 @@ Suite* tests_make_suite_services_request_timeout(void)
     tcase_add_test(tc, test_timeout_hint_rule);
     tcase_add_test(tc, test_current_msg_reception_time);
     tcase_add_test(tc, test_message_in_bs_timeout_expired);
+    tcase_add_test(tc, test_publish_expiration_time);
     suite_add_tcase(s, tc);
     return s;
 }

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include <inttypes.h>
+
 #include "msg_subscription_publish_ack_bs.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_logger.h"
@@ -86,6 +88,12 @@ void msg_subscription_publish_ack_bs__get_msg_header_expiration_time(
     bool hasReceptionTime = SOPC_Services_GetCurrentMsgReceptionTime(&referenceTime);
     if (!hasReceptionTime)
     {
+        // Not expected: a PublishRequest is always treated in the context of its reception.
+        // Fallback to current time, i.e. the time spent in Services queue is not taken into account.
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Publish expiration time: request reception time unavailable, current time used "
+                                 "as reference for TimeoutHint=%" PRIu32 " ms",
+                                 pubReqHeader->TimeoutHint);
         referenceTime = SOPC_TimeReference_GetCurrent();
     }
 
