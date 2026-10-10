@@ -26,6 +26,7 @@
 #include "sopc_atomic.h"
 #include "sopc_date_time.h"
 #include "sopc_enums.h"
+#include "sopc_event_handler.h"
 #include "sopc_helper_string.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
@@ -35,6 +36,7 @@
 #include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"
 #include "sopc_services_api_internal.h"
+#include "sopc_services_request_timeout.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
 
@@ -100,7 +102,6 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
                                  uintptr_t params,
                                  uintptr_t auxParam)
 {
-    SOPC_UNUSED_ARG(handler);
     SOPC_SecureChannels_OutputEvent scEvent = (SOPC_SecureChannels_OutputEvent) event;
     bool bres = false;
     uint32_t channel_config_idx = 0;
@@ -206,8 +207,12 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // params = message content (byte buffer)
         // auxParam == requestId (server) / 0 (client)
         SOPC_ASSERT(NULL != (void*) params);
+        // Reception time = time at which the Secure Channels layer provided the message to the Services layer.
+        // It is used to evaluate the request header TimeoutHint during the message treatment.
+        SOPC_Services_SetCurrentMsgReceptionTime(SOPC_EventHandler_GetCurrentEventPostTime(handler));
         io_dispatch_mgr__receive_msg_buffer(id, (constants__t_byte_buffer_i) params,
                                             (constants__t_request_context_i) auxParam, &bres);
+        SOPC_Services_ResetCurrentMsgReceptionTime();
         if (!bres)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

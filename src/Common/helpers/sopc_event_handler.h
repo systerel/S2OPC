@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include "sopc_enums.h"
+#include "sopc_time_reference.h"
 
 /**
  * \brief Processes messages from a queue.
@@ -105,6 +106,22 @@ SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
  * \return the current pending number of events in queue
  */
 uint32_t SOPC_EventHandler_Get_QueueSize(SOPC_EventHandler* handler);
+
+/**
+ * \brief Returns the time reference at which the event currently processed by \p handler was posted.
+ *
+ * The post time is recorded (monotonic ::SOPC_TimeReference) when the event is posted with
+ * ::SOPC_EventHandler_Post or ::SOPC_EventHandler_PostAsNext. It allows the callback to know
+ * how long the event waited in the queue before being processed.
+ *
+ * \param handler  the event handler
+ *
+ * \return the post time of the event being processed by \p handler, or 0 if no event is being processed.
+ *
+ * \note This function shall only be called from the callback of \p handler (looper thread),
+ *       the value is only valid during the callback execution.
+ */
+SOPC_TimeReference SOPC_EventHandler_GetCurrentEventPostTime(const SOPC_EventHandler* handler);
 
 /**
  * \brief Posts an event to the front of the event handler's message queue

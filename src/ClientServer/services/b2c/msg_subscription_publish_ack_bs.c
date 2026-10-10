@@ -21,6 +21,7 @@
 #include "sopc_encodeabletype.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_services_request_timeout.h"
 #include "sopc_types.h"
 #include "util_b2c.h"
 
@@ -79,7 +80,14 @@ void msg_subscription_publish_ack_bs__get_msg_header_expiration_time(
     constants__t_timeref_i* const msg_subscription_publish_bs__req_expiration_time)
 {
     OpcUa_RequestHeader* pubReqHeader = msg_subscription_publish_bs__p_req_header;
-    *msg_subscription_publish_bs__req_expiration_time = SOPC_TimeReference_GetCurrent();
+    // The TimeoutHint is relative to the request reception time: use it when available
+    // (time spent in Services queue shall be taken into account), otherwise use current time.
+    SOPC_TimeReference referenceTime = 0;
+    bool hasReceptionTime = SOPC_Services_GetCurrentMsgReceptionTime(&referenceTime);
+    if (!hasReceptionTime)
+    {
+        referenceTime = SOPC_TimeReference_GetCurrent();
+    }
 
     uint64_t millisecondsToTarget = 0;
     if (0 == pubReqHeader->TimeoutHint)
@@ -89,11 +97,11 @@ void msg_subscription_publish_ack_bs__get_msg_header_expiration_time(
     }
     else
     {
-        // Keep only timeoutHint from current time
+        // Keep only timeoutHint from reception time
         millisecondsToTarget = pubReqHeader->TimeoutHint;
     }
     *msg_subscription_publish_bs__req_expiration_time =
-        SOPC_TimeReference_AddMilliseconds(*msg_subscription_publish_bs__req_expiration_time, millisecondsToTarget);
+        SOPC_TimeReference_AddMilliseconds(referenceTime, millisecondsToTarget);
 }
 
 void msg_subscription_publish_ack_bs__get_msg_publish_request_ack_params(

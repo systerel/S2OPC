@@ -22,6 +22,7 @@ cdef struct time_t
 ctypedef struct tm
 ctypedef struct _SOPC_Looper
 cdef struct _SOPC_EventHandler
+cdef struct SOPC_HighRes_TimeReference
 cdef struct _SOPC_AddressSpaceAccess
 cdef struct SOPC_SLinkedList_Elt
 cdef struct _SOPC_Dict

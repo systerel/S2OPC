@@ -31,6 +31,7 @@ struct _SOPC_EventHandler
 {
     SOPC_Looper* looper;
     SOPC_EventHandler_Callback* callback;
+    SOPC_TimeReference currentEventPostTime; // Post time of the event being processed (only accessed by looper thread)
 };
 
 struct _SOPC_Looper
@@ -47,6 +48,7 @@ struct Event
     uint32_t id;
     uintptr_t params;
     uintptr_t auxParam;
+    SOPC_TimeReference postTime;
 };
 
 static void event_handler_delete(SOPC_EventHandler** handler)
@@ -77,6 +79,7 @@ static SOPC_ReturnStatus post(SOPC_EventHandler* handler,
     ev->id = eltId;
     ev->params = params;
     ev->auxParam = auxParam;
+    ev->postTime = SOPC_TimeReference_GetCurrent();
 
     SOPC_ReturnStatus status = asNext ? SOPC_AsyncQueue_BlockingEnqueueFirstOut(handler->looper->queue, ev)
                                       : SOPC_AsyncQueue_BlockingEnqueue(handler->looper->queue, ev);
@@ -105,7 +108,9 @@ static void* looper_loop(void* user_data)
         }
 
         struct Event* ev = item;
+        ev->handler->currentEventPostTime = ev->postTime;
         ev->handler->callback(ev->handler, ev->code, ev->id, ev->params, ev->auxParam);
+        ev->handler->currentEventPostTime = 0;
         SOPC_Free(ev);
     }
 
@@ -136,6 +141,11 @@ SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandl
 uint32_t SOPC_EventHandler_Get_QueueSize(SOPC_EventHandler* handler)
 {
     return (NULL == handler ? 0 : SOPC_AsyncQueue_GetSize(handler->looper->queue));
+}
+
+SOPC_TimeReference SOPC_EventHandler_GetCurrentEventPostTime(const SOPC_EventHandler* handler)
+{
+    return (NULL == handler ? 0 : handler->currentEventPostTime);
 }
 
 SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
