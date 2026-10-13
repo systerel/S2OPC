@@ -706,16 +706,56 @@ void SOPC_ServerAlarmConditionMgr_Clear(void)
     SOPC_InternalAlarmConditionMgr_ClearMutex(&sopc_alarmConditionConfig.g_mutex);
 }
 
-void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
+/*
+ * Sets Retain to False before deletion of an enabled instance, with ac->mut locked.
+ * From part 9 section 5.5.2: an event is generated for the initial transition of the Retain field from True to False,
+ * so that clients stop displaying the condition. Nothing is done for a disabled instance.
+ */
+static void SOPC_InternalAlarmConditionNoLock_SetRetainFalseOnDelete(SOPC_AlarmCondition* ac)
+{
+    const SOPC_Variant* enabledVar = SOPC_Event_GetVariableFromStrPath(ac->data, cEnabledStatePaths.id);
+    bool enabled = (NULL != enabledVar && SOPC_Boolean_Id == enabledVar->BuiltInTypeId && enabledVar->Value.Boolean);
+    if (!enabled)
+    {
+        return;
+    }
+    const SOPC_Variant* retainVar = SOPC_Event_GetVariableFromStrPath(ac->data, cRetainPath);
+    bool retained = (NULL != retainVar && SOPC_Boolean_Id == retainVar->BuiltInTypeId && retainVar->Value.Boolean);
+    if (!retained)
+    {
+        return;
+    }
+    const SOPC_Variant retainFalse = {.DoNotClear = true,
+                                      .ArrayType = SOPC_VariantArrayType_SingleValue,
+                                      .BuiltInTypeId = SOPC_Boolean_Id,
+                                      .Value.Boolean = false};
+    SOPC_ReturnStatus status =
+        SOPC_InternalAlarmConditionNoLock_SetVariableFromStrPath(ac, cRetainPath, &retainFalse, true);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_InternalAlarmConditionNoLock_TriggerEvent(ac, false);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        char* conditionIdStr = SOPC_InternalConditionIdToString(ac);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "AlarmCondition %s Retain transition to False on deletion failed with status %d",
+                                 (conditionIdStr != NULL ? conditionIdStr : "<NULL>"), status);
+        SOPC_Free(conditionIdStr);
+    }
+}
+
+SOPC_ReturnStatus SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
 {
     if (NULL == ppAlarmCond || NULL == *ppAlarmCond)
     {
-        return;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     SOPC_AlarmCondition* pAlarmCond = *ppAlarmCond;
     bool registered = false;
 
+    // Registration check and unregistration done atomically with g_mutex locked
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
@@ -727,9 +767,10 @@ void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
     }
     if (registered)
     {
-        // Asynchronous treatments still holding a reference shall not use the instance anymore
         mutStatus = SOPC_Mutex_Lock(&pAlarmCond->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        SOPC_InternalAlarmConditionNoLock_SetRetainFalseOnDelete(pAlarmCond);
+        // Asynchronous treatments still holding a reference shall not use the instance anymore
         pAlarmCond->deleted = true;
         mutStatus = SOPC_Mutex_Unlock(&pAlarmCond->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -746,19 +787,12 @@ void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
 
         // Value-free path releases the registration reference (no lock taken on last release)
         SOPC_Dict_Remove(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &pAlarmCond->conditionNode);
+        *ppAlarmCond = NULL;
     }
     mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (registered)
-    {
-        *ppAlarmCond = NULL;
-    }
-    else
-    {
-        // Creation rollback before registration: release the creation reference
-        SOPC_InternalAlarmCondition_Release(ppAlarmCond);
-    }
+    return registered ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
 }
 
 /* Write use for init management */
@@ -1063,7 +1097,7 @@ static void SOPC_InternalTBP_GetAlarmCondition_Method_NodeIds(size_t indexOffset
 // on TBP response, write address space variables values
 void SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(SOPC_AlarmCondition* ac)
 {
-    // Note: no need of using the AC mutex as it has not been returned to application yet !
+    // Note: called with ac->mut locked, the instance being registered (reachable by method calls)
     SOPC_ASSERT(NULL != ac);
     size_t nbVars = SOPC_Event_GetNbVariables(ac->data);
     OpcUa_TranslateBrowsePathsToNodeIdsRequest* tbpReq =

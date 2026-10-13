@@ -77,15 +77,12 @@ SOPC_ReturnStatus SOPC_AlarmCondition_CreateFromEvent(const SOPC_NodeId* notifie
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    // Fast failure if an instance already exists, the authoritative check is done on registration
+    SOPC_AlarmCondition* existingAc = SOPC_InternalAlarmCondition_Acquire(conditionNode);
+    SOPC_ReturnStatus status = (NULL != existingAc ? SOPC_STATUS_INVALID_STATE : SOPC_STATUS_OK);
+    SOPC_InternalAlarmCondition_Release(&existingAc);
 
-    bool bAlreadyExistAC = false;
-    uintptr_t alreadyExistAC =
-        SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) conditionNode, &bAlreadyExistAC);
-    SOPC_UNUSED_RESULT(alreadyExistAC);
-    SOPC_ReturnStatus status = bAlreadyExistAC ? SOPC_STATUS_INVALID_STATE : SOPC_STATUS_OK;
-
+    // The instance is built without any global lock: it is not reachable until registration
     SOPC_AlarmCondition* ac = NULL;
     if (SOPC_STATUS_OK == status)
     {
@@ -152,31 +149,59 @@ SOPC_ReturnStatus SOPC_AlarmCondition_CreateFromEvent(const SOPC_NodeId* notifie
         ac->varChangedCbDict = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, uintptr_t_free, uintptr_t_free);
         status = (NULL == ac->varChangedCbDict) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
     }
-    // Inserts the AlarmCondition instance into the global dictionary
-    if (SOPC_STATUS_OK == status)
-    {
-        bool res = SOPC_Dict_Insert(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) conditionNode,
-                                    (uintptr_t) ac);
-        status = res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
-    }
     // Finalize creation, set default value and set well-known set states with associated text
     if (SOPC_STATUS_OK == status)
     {
         ac->data = conditionInst;
         status = SOPC_InternalAlarmConditionNoLock_InitFields(ac);
     }
-    // Try to retrieve the node ids of all the AlarmCondition fields/variables in address space
+    // Registers the instance (last fallible step): duplicate check and insertion with g_mutex locked.
+    // The dictionary key is owned by the instance (the caller conditionNode might not outlive it).
     if (SOPC_STATUS_OK == status)
     {
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        bool alreadyExist = false;
+        if (NULL == sopc_alarmConditionConfig.g_alarmConditionsDict)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        else
+        {
+            uintptr_t existing = SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict,
+                                               (uintptr_t) &ac->conditionNode, &alreadyExist);
+            SOPC_UNUSED_RESULT(existing);
+        }
+        if (SOPC_STATUS_OK == status && alreadyExist)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            bool res = SOPC_Dict_Insert(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &ac->conditionNode,
+                                        (uintptr_t) ac);
+            status = res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Retrieve the node ids of all the AlarmCondition fields/variables in address space.
+        // The instance is registered: lock it since method calls on its condition node may now access it.
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&ac->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(ac);
+        mutStatus = SOPC_Mutex_Unlock(&ac->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         *outAlarmCond = ac;
     }
-    else
+    else if (NULL != ac)
     {
-        SOPC_InternalServerAlarmCondition_Delete(&ac);
+        // Not registered: the caller keeps the ownership of conditionInst, release the creation reference
+        ac->data = NULL;
+        SOPC_InternalAlarmCondition_Release(&ac);
     }
-    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -716,25 +741,5 @@ SOPC_ReturnStatus SOPC_AlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCondit
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_AlarmCondition* ac = *ppAlarmCondition;
-    bool registered = false;
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
-    {
-        bool found = false;
-        SOPC_AlarmCondition* live = (SOPC_AlarmCondition*) SOPC_Dict_Get(
-            sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &ac->conditionNode, &found);
-        registered = found && live == ac;
-    }
-    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    if (!registered)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    SOPC_InternalServerAlarmCondition_Delete(ppAlarmCondition);
-    return SOPC_STATUS_OK;
+    return SOPC_InternalServerAlarmCondition_Delete(ppAlarmCondition);
 }

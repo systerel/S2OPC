@@ -26,6 +26,8 @@
  *        - Create then immediate Delete while async responses are in flight
  *        - TriggerEvent right after Create (A&C mutexes lock order, deadlock detected by CTest timeout)
  *        - Write responses in error treated after Delete (no access to the deleted instance data)
+ *        - creation with a condition NodeId not outliving the call (instance owns its registration key)
+ *        - Delete of a retained instance sets Retain to False in address space
  *        - client method calls (Enable / Disable) on a deleted instance and state change events
  *          still queued in the A&C looper when the instance is deleted (in-process OPC UA client)
  *
@@ -58,6 +60,7 @@
 #include "sopc_enums.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_threads.h"
 
@@ -69,6 +72,8 @@ static const SOPC_NodeId g_alarmConditionTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaI
 static const SOPC_NodeId g_disableInstMethodId = SOPC_NODEID_NUMERIC(1, 7064);
 static const SOPC_NodeId g_enableInstMethodId = SOPC_NODEID_NUMERIC(1, 7065);
 static const SOPC_NodeId g_disableTypeMethodId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_ConditionType_Disable);
+/* AlarmNoConf Retain variable */
+static const SOPC_NodeId g_retainNode = SOPC_NODEID_NUMERIC(1, 6442);
 
 /*
  * Fixed delays for async server/A&C work (test harness only).
@@ -347,6 +352,139 @@ static SOPC_ReturnStatus run_trigger_right_after_create_test(bool wrongMessageTy
     return status;
 }
 
+/*
+ * Creation with a condition NodeId freed right after the call: the instance registration shall not
+ * depend on the caller NodeId (duplicate detection and Delete still work).
+ *
+ * The A&C manager registers instances in a dictionary indexed by condition NodeId, the key being a
+ * pointer compared by value on each lookup (duplicate check, method call ObjectId, Delete).
+ * The instance shall use its own copy of the condition NodeId as key, not the caller pointer.
+ *
+ * Steps:
+ * 1. CreateFromEvent with a heap allocated copy of the condition NodeId (ns=1;i=5009).
+ * 2. The caller NodeId is cleared (SOPC_NodeId_Clear resets it to ns=0;i=0) and freed.
+ * 3. Duplicate CreateFromEvent with the static condition NodeId shall return SOPC_STATUS_INVALID_STATE:
+ *    If the key were the caller pointer, the lookup would read the freed NodeId:
+ *    reported as heap-use-after-free by ASan, and  without ASan the cleared content (ns=0;i=0) would not match.
+ * 4. Delete shall succeed: it looks up the same key to unregister the instance.
+ */
+static SOPC_ReturnStatus run_create_with_temporary_node_id_test(void)
+{
+    SOPC_NodeId* tmpConditionNode = SOPC_Calloc(1, sizeof(*tmpConditionNode));
+    SOPC_ReturnStatus status = (NULL == tmpConditionNode ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_NodeId_Copy(tmpConditionNode, &g_conditionNode);
+    }
+    SOPC_Event* event = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        event = make_condition_event(false);
+        status = (NULL == event ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    }
+    SOPC_AlarmCondition* ac = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_AlarmCondition_CreateFromEvent(&g_notifierNode, tmpConditionNode, event, &ac);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Event_Delete(&event);
+        }
+    }
+    // Step 2: caller NodeId content is reset to ns=0;i=0 and freed (instance shall not use it anymore)
+    SOPC_NodeId_Clear(tmpConditionNode);
+    SOPC_Free(tmpConditionNode);
+    printf("[tmp nodeId] CreateFromEvent status=%d\n", (int) status);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Step 3: duplicate detection needs the registration key to still be ns=1;i=5009
+        SOPC_AlarmCondition* dupAc = NULL;
+        SOPC_ReturnStatus dupStatus = create_condition(&dupAc);
+        printf("[tmp nodeId] duplicate CreateFromEvent status=%d\n", (int) dupStatus);
+        status = (SOPC_STATUS_INVALID_STATE == dupStatus && NULL == dupAc ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
+    }
+    if (NULL != ac)
+    {
+        // Step 4: unregistration also looks up the registration key
+        SOPC_ReturnStatus delStatus = SOPC_AlarmCondition_Delete(&ac);
+        printf("[tmp nodeId] Delete status=%d\n", (int) delStatus);
+        status = (SOPC_STATUS_OK == status ? delStatus : status);
+    }
+    SOPC_Sleep(LOOPER_DRAIN_MS);
+    return status;
+}
+
+/* Reads the Boolean value of the given node with a local service, returns false on failure */
+static bool read_boolean_node(const SOPC_NodeId* nodeId, bool* outValue)
+{
+    bool res = false;
+    OpcUa_ReadResponse* resp = NULL;
+    OpcUa_ReadRequest* req = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
+    SOPC_ReturnStatus status = (NULL == req ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ReadRequest_SetReadValue(req, 0, nodeId, SOPC_AttributeId_Value, NULL);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerHelper_LocalServiceSync(req, (void**) &resp);
+        req = NULL; // Memory managed by previous callee
+    }
+    if (SOPC_STATUS_OK == status && NULL != resp && 1 == resp->NoOfResults &&
+        SOPC_IsGoodStatus(resp->Results[0].Status) && SOPC_Boolean_Id == resp->Results[0].Value.BuiltInTypeId)
+    {
+        *outValue = resp->Results[0].Value.Value.Boolean;
+        res = true;
+    }
+    if (NULL != req)
+    {
+        SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(req->encodeableType, (void**) &req);
+        SOPC_UNUSED_RESULT(delStatus);
+    }
+    if (NULL != resp)
+    {
+        SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(resp->encodeableType, (void**) &resp);
+        SOPC_UNUSED_RESULT(delStatus);
+    }
+    return res;
+}
+
+/*
+ * Delete of an enabled and retained instance sets Retain to False (with the associated event),
+ * so that clients stop displaying the condition (part 9: event on Retain transition from True to False).
+ */
+static SOPC_ReturnStatus run_delete_retained_test(void)
+{
+    SOPC_AlarmCondition* ac = NULL;
+    SOPC_ReturnStatus status = create_condition(&ac);
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Step 1: wait for TBP to fill nodeIds so that Retain node is updated (see AC_CREATE_INIT_MS). */
+        SOPC_Sleep(AC_CREATE_INIT_MS);
+        /* Step 2: set Retain in instance data and write its node asynchronously, no event triggered */
+        status = SOPC_AlarmCondition_SetRetain(ac, true, false);
+        SOPC_Sleep(AFTER_TRIGGER_MS);
+    }
+    // Step 3: precondition, Retain node is True
+    bool retain = false;
+    bool res = (SOPC_STATUS_OK == status) && read_boolean_node(&g_retainNode, &retain) && retain;
+    printf("[retain] Retain node before Delete=%d (res=%d)\n", (int) retain, (int) res);
+    if (NULL != ac)
+    {
+        // Step 4: Retain released on Delete (instance enabled and retained)
+        status = SOPC_AlarmCondition_Delete(&ac);
+        res = res && (SOPC_STATUS_OK == status);
+    }
+    // Let the Retain node asynchronous Write be treated
+    SOPC_Sleep(LOOPER_DRAIN_MS);
+    // Step 5: Retain node is False
+    retain = true;
+    res = res && read_boolean_node(&g_retainNode, &retain) && !retain;
+    printf("[retain] Retain node after Delete=%d (res=%d)\n", (int) retain, (int) res);
+    return res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+}
+
 /*---------------------------------------------------------------------------
  *         In-process client used to call A&C methods (Call is not a local service)
  *---------------------------------------------------------------------------*/
@@ -583,6 +721,14 @@ static SOPC_ReturnStatus run_all_tests(void)
     if (SOPC_STATUS_OK == status)
     {
         status = run_trigger_right_after_create_test(true);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = run_create_with_temporary_node_id_test();
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = run_delete_retained_test();
     }
     if (SOPC_STATUS_OK == status)
     {

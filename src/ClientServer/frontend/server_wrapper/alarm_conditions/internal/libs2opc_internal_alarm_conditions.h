@@ -272,16 +272,20 @@ SOPC_ReturnStatus SOPC_InternalAlarmCondition_SetComment(SOPC_AlarmCondition* pA
                                                          const SOPC_String* userId);
 
 /**
- * \brief Deletes an A&C instance and related ConditionRefresh state.
+ * \brief Deletes a registered A&C instance and related ConditionRefresh state.
  *
- * When the instance is registered in g_alarmConditionsDict (pointer identity match), it is marked
- * as deleted, its ConditionRefresh event is removed and it is unregistered, which releases the
- * registration reference. Otherwise (create rollback before registration) the creation reference
- * is released. Memory is freed when the last reference is released (see ::_SOPC_AlarmCondition).
+ * With g_mutex locked: checks the instance is registered in g_alarmConditionsDict (pointer identity match),
+ * sets Retain to False with the associated event if the instance is enabled and retained, marks it as deleted,
+ * removes its ConditionRefresh event and unregisters it, which releases the registration reference.
+ * Memory is freed when the last reference is released (see ::_SOPC_AlarmCondition).
  *
- * \param[in, out] ppAlarmCond Address of the AC pointer; set to NULL on return
+ * \param[in, out] ppAlarmCond Address of the AC pointer; set to NULL on success
+ *
+ * \return SOPC_STATUS_OK if the instance was deleted,
+ *         SOPC_STATUS_INVALID_PARAMETERS if \p ppAlarmCond or \p *ppAlarmCond is NULL,
+ *         SOPC_STATUS_INVALID_STATE if the instance is not registered (nothing is done)
  */
-void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond);
+SOPC_ReturnStatus SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond);
 
 /**
  * \brief Returns the registered A&C instance for \p conditionNode with a new reference on it.
@@ -337,6 +341,7 @@ bool SOPC_InternalAlarmCondition_LockIfNotDeleted(SOPC_AlarmCondition* ac);
 SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_InitFields(SOPC_AlarmCondition* ac);
 
 // Get A&C variables node ids using TBPToNodeIds and then write address space variables values
+// (shall be called with ac->mut locked)
 void SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(SOPC_AlarmCondition* ac);
 
 // Set A&C variable from field path:

@@ -164,15 +164,18 @@ typedef struct _SOPC_AlarmCondition SOPC_AlarmCondition;
  * \param conditionNode      the NodeId of the node representing the AlarmCondition in address space
  * \param conditionInst      the event instance that contains inital data for the AlarmCondition fields,
  *                           it shall not be used anymore by caller after a successful call
- *                           (memory is managed by the server).
+ *                           (memory is managed by the server). In case of failure, it remains
+ *                           owned by the caller (its content might have been modified).
  * \param[out] outAlarmCond  the alarm condition instance created on successful call.
  *
  * \return SOPC_STATUS_OK creation succeeded,
- *         SOPC_STATUS_INVALID_STATE if module is not initialized or server not started,
- *         SOPC_STATUS_INVALID_PARAMETERS if argument is invalid (NULL instance),
- *         SOPC_STATUS_WOULD_BLOCK if \p conditionNode was already used to create an instance (and was never deleted),
- *         SOPC_OUT_OF_MEMORY in case allocation failed,
- *         SOPC_STATUS_NOK if module is not initialized,
+ *         SOPC_STATUS_INVALID_STATE if module is not initialized, server not started,
+ *                                   \p conditionNode is already used by an instance (not deleted)
+ *                                   or \p conditionInst has no condition NodeId field,
+ *         SOPC_STATUS_INVALID_PARAMETERS if argument is invalid (NULL instance) or \p conditionInst
+ *                                        does not contain a mandatory ConditionType field
+ *                                        (EnabledState/Id, Retain, Quality, LastSeverity),
+ *         SOPC_STATUS_OUT_OF_MEMORY in case allocation failed.
  *
  * \warning The server shall be started, thus ::SOPC_Server_Start or :: SOPC_Server_Serve shall have been called
  *
@@ -730,14 +733,18 @@ SOPC_ReturnStatus SOPC_AlarmCondition_SetConfirmedStateCallback(SOPC_AlarmCondit
 /**
  * \brief Deletes a previously created alarm condition instance.
  *
- * Unregisters the instance from the Alarm and Conditions manager and releases
- * associated resources (including ConditionRefresh cached events). Address-space
- * condition nodes are not removed.
+ * If the instance is enabled and its Retain field is True, Retain is first set to False and the
+ * corresponding event is triggered (from part 9: event for the transition of Retain from True to False),
+ * so that clients stop displaying the condition. Then the instance is unregistered from the Alarm and
+ * Conditions manager and associated resources are released (including ConditionRefresh cached events),
+ * pending internal treatments (method calls, state changed callbacks) on this instance are dropped.
+ * Address-space condition nodes are not removed and keep their latest values.
  *
  * \param[in,out] ppAlarmCondition Address of the instance pointer; set to NULL on success
  *
  * \warning The server shall be started, thus ::SOPC_Server_Start or ::SOPC_Server_Serve shall have been called
- * \warning The instance shall not be used after a successful call
+ * \warning The instance shall not be used after a successful call, using a copy of the deleted instance
+ *          pointer (including a second call to this function with it) leads to undefined behavior.
  *
  * \note After deletion, ::SOPC_AlarmCondition_CreateFromEvent may be called again for the same
  *       condition NodeId as at the original creation.
@@ -745,7 +752,7 @@ SOPC_ReturnStatus SOPC_AlarmCondition_SetConfirmedStateCallback(SOPC_AlarmCondit
  * \return SOPC_STATUS_OK if the instance was deleted,
  *         SOPC_STATUS_INVALID_PARAMETERS if \p ppAlarmCondition or \p *ppAlarmCondition is NULL,
  *         SOPC_STATUS_INVALID_STATE if the manager is not initialized, the server is not started,
- *         or the instance is not registered (stale pointer or double delete)
+ *                                   or the instance is not registered
  */
 SOPC_ReturnStatus SOPC_AlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCondition);
 
