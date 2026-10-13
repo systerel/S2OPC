@@ -25,6 +25,7 @@
  *        - duplicate creation on the same condition node is refused
  *        - Create then immediate Delete while async responses are in flight
  *        - TriggerEvent right after Create (A&C mutexes lock order, deadlock detected by CTest timeout)
+ *        - Write responses in error treated after Delete (no access to the deleted instance data)
  *
  * Uses demo alarms address space (EqtNoConf / AlarmNoConf, ns=1;i=5008/5009).
  * Run from build/bin with demo XML env vars (see CMake test properties).
@@ -37,6 +38,7 @@
  */
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -88,7 +90,8 @@ static const uint32_t LOOPER_DRAIN_MS = 500;
  * NB_CREATE_TRIGGER_ITERATIONS / NB_TRIGGER_PER_CREATE: TriggerEvent in a tight
  *   loop right after CreateFromEvent, while the looper treats the TBP response.
  *   Regression for the lock order between the A&C global mutex and ac->mut: a
- *   deadlock makes the test hang until the CTest timeout.
+ *   deadlock makes the test hang until the CTest timeout. Also run with a wrongly typed
+ *   condition field so that Write responses in error are treated after Delete.
  */
 static const uint32_t NB_CREATE_DELETE_ITERATIONS = 100;
 static const uint32_t NB_CREATE_TRIGGER_ITERATIONS = 20;
@@ -122,7 +125,12 @@ static SOPC_ReturnStatus load_config(void)
     return SOPC_ServerConfigHelper_ConfigureFromXML(xml_server, xml_as, xml_users, NULL);
 }
 
-static SOPC_Event* make_condition_event(void)
+/*
+ * Builds the condition event. When \p wrongMessageType is set, 0:Message is a String
+ * whereas the node DataType is LocalizedText: the Write of this field fails with
+ * Bad_TypeMismatch, which exercises the A&C Write response error path.
+ */
+static SOPC_Event* make_condition_event(bool wrongMessageType)
 {
     SOPC_Event* event = NULL;
     SOPC_ReturnStatus status = SOPC_ServerHelper_CreateEvent(&g_alarmConditionTypeId, &event);
@@ -135,6 +143,7 @@ static SOPC_Event* make_condition_event(void)
     const SOPC_Variant comment = SOPC_VARIANT_LOCALTEXT("", "");
     const SOPC_Variant suppressed = SOPC_VARIANT_BOOL(false);
     const SOPC_Variant message = SOPC_VARIANT_LOCALTEXT("en-US", "toolkit_test_server_alarm_condition_delete");
+    const SOPC_Variant wrongTypeMessage = SOPC_VARIANT_STRING("toolkit_test_server_alarm_condition_delete");
 
     status = SOPC_Event_SetVariableFromStrPath(event, "0:Quality", &quality);
     if (SOPC_STATUS_OK == status)
@@ -147,7 +156,7 @@ static SOPC_Event* make_condition_event(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Event_SetVariableFromStrPath(event, "0:Message", &message);
+        status = SOPC_Event_SetVariableFromStrPath(event, "0:Message", wrongMessageType ? &wrongTypeMessage : &message);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -157,9 +166,9 @@ static SOPC_Event* make_condition_event(void)
     return event;
 }
 
-static SOPC_ReturnStatus create_condition(SOPC_AlarmCondition** outAc)
+static SOPC_ReturnStatus create_condition_ext(bool wrongMessageType, SOPC_AlarmCondition** outAc)
 {
-    SOPC_Event* event = make_condition_event();
+    SOPC_Event* event = make_condition_event(wrongMessageType);
     if (NULL == event)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
@@ -170,6 +179,11 @@ static SOPC_ReturnStatus create_condition(SOPC_AlarmCondition** outAc)
         SOPC_Event_Delete(&event);
     }
     return status;
+}
+
+static SOPC_ReturnStatus create_condition(SOPC_AlarmCondition** outAc)
+{
+    return create_condition_ext(false, outAc);
 }
 
 static SOPC_ReturnStatus run_delete_lifecycle_test(void)
@@ -280,14 +294,19 @@ static SOPC_ReturnStatus run_create_delete_loop_test(void)
     return status;
 }
 
-/* TriggerEvent in a tight loop right after CreateFromEvent (see NB_CREATE_TRIGGER_ITERATIONS) */
-static SOPC_ReturnStatus run_trigger_right_after_create_test(void)
+/*
+ * TriggerEvent in a tight loop right after CreateFromEvent, then Delete (see NB_CREATE_TRIGGER_ITERATIONS).
+ * With \p wrongMessageType, Write responses in error are treated after Delete: their error
+ * logging shall not access variable paths owned by the deleted instance.
+ */
+static SOPC_ReturnStatus run_trigger_right_after_create_test(bool wrongMessageType)
 {
+    const char* testName = wrongMessageType ? "[create/trigger/write error]" : "[create/trigger]";
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     for (uint32_t i = 0; SOPC_STATUS_OK == status && i < NB_CREATE_TRIGGER_ITERATIONS; i++)
     {
         SOPC_AlarmCondition* ac = NULL;
-        status = create_condition(&ac);
+        status = create_condition_ext(wrongMessageType, &ac);
         for (uint32_t j = 0; SOPC_STATUS_OK == status && j < NB_TRIGGER_PER_CREATE; j++)
         {
             status = SOPC_AlarmCondition_TriggerEvent(ac);
@@ -299,10 +318,10 @@ static SOPC_ReturnStatus run_trigger_right_after_create_test(void)
         }
         if (SOPC_STATUS_OK != status)
         {
-            printf("[create/trigger] iteration %" PRIu32 " failed with status=%d\n", i, (int) status);
+            printf("%s iteration %" PRIu32 " failed with status=%d\n", testName, i, (int) status);
         }
     }
-    printf("[create/trigger] %" PRIu32 " iterations status=%d\n", NB_CREATE_TRIGGER_ITERATIONS, (int) status);
+    printf("%s %" PRIu32 " iterations status=%d\n", testName, NB_CREATE_TRIGGER_ITERATIONS, (int) status);
     SOPC_Sleep(LOOPER_DRAIN_MS);
     return status;
 }
@@ -320,7 +339,11 @@ static SOPC_ReturnStatus run_all_tests(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = run_trigger_right_after_create_test();
+        status = run_trigger_right_after_create_test(false);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = run_trigger_right_after_create_test(true);
     }
     return status;
 }

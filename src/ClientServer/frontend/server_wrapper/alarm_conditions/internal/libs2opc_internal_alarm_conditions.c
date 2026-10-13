@@ -42,7 +42,12 @@ typedef struct
     SOPC_AlarmCondition* ac;
     /* Owned copy of ac->conditionNode: used to detect stale async callbacks after AC free/overwrite */
     SOPC_NodeId conditionNode;
+    /* Variable paths of the request items.
+     * TBP context: borrowed from ac->data, only accessed when the AC is still registered (TryLockAC).
+     * Write context: owned copies (nbOwnedVarPaths entries), since the Write response may be treated
+     * after the source strings are freed (temporary path, application string or AC deleted). */
     const char** varPathArr;
+    size_t nbOwnedVarPaths;
 } SOPC_InternalLocalService_Ctx;
 
 #define QN_SRC_TS "0:SourceTimestamp"
@@ -63,9 +68,51 @@ static void SOPC_InternalLocalService_Ctx_Delete(SOPC_InternalLocalService_Ctx**
     }
     SOPC_InternalLocalService_Ctx* ctx = *ppCtx;
     SOPC_NodeId_Clear(&ctx->conditionNode);
+    for (size_t i = 0; NULL != ctx->varPathArr && i < ctx->nbOwnedVarPaths; i++)
+    {
+        // Owned copies allocated by SOPC_InternalLocalService_Ctx_SetOwnedVarPath
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        SOPC_Free((void*) ctx->varPathArr[i]);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+    }
     SOPC_Free((void*) ctx->varPathArr); /* MSVC 15 considers array is const otherwise */
     SOPC_Free(ctx);
     *ppCtx = NULL;
+}
+
+/**
+ * \brief Sets the paths array of a Write context, whose entries are owned copies.
+ *
+ * \param[in, out] ctx  Write async context
+ * \param varPathArr    Zero-initialized array of \p nbVarPaths entries, ownership transferred to \p ctx
+ * \param nbVarPaths    Number of entries of \p varPathArr
+ */
+static void SOPC_InternalLocalService_Ctx_SetOwnedVarPathArr(SOPC_InternalLocalService_Ctx* ctx,
+                                                             const char** varPathArr,
+                                                             size_t nbVarPaths)
+{
+    SOPC_ASSERT(NULL != ctx);
+    ctx->varPathArr = varPathArr;
+    ctx->nbOwnedVarPaths = nbVarPaths;
+}
+
+/**
+ * \brief Stores an owned copy of \p varPath at \p index of a Write context paths array.
+ *
+ * The copy is only used for error logging when the Write response is treated:
+ * on allocation failure the entry stays NULL.
+ *
+ * \param[in, out] ctx  Write async context set with ::SOPC_InternalLocalService_Ctx_SetOwnedVarPathArr
+ * \param index         Index of the request item, lower than ctx->nbOwnedVarPaths
+ * \param varPath       Variable path to copy
+ */
+static void SOPC_InternalLocalService_Ctx_SetOwnedVarPath(SOPC_InternalLocalService_Ctx* ctx,
+                                                          size_t index,
+                                                          const char* varPath)
+{
+    SOPC_ASSERT(NULL != ctx && NULL != ctx->varPathArr);
+    SOPC_ASSERT(index < ctx->nbOwnedVarPaths);
+    ctx->varPathArr[index] = SOPC_strdup(varPath);
 }
 
 /**
@@ -393,16 +440,19 @@ static void onLibEvt(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, 
     case SOPC_AC_EVT_WRITE_RESP:
         writeResp = (OpcUa_WriteResponse*) params;
         lsCtx = (SOPC_InternalLocalService_Ctx*) auxParam;
-        /* Use owned NodeId copy: AC may already have been freed or overwritten. */
+        /* Use owned NodeId and variable paths copies: AC may already have been freed or overwritten. */
         conditionIdStr = SOPC_NodeId_ToCString(&lsCtx->conditionNode);
         for (int32_t i = 0; i < writeResp->NoOfResults; i++)
         {
             if (!SOPC_IsGoodStatus(writeResp->Results[i]))
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "Error writing AlarmCondition %s variable %s with status 0x%08" PRIX32,
-                                       (conditionIdStr != NULL ? conditionIdStr : "<NULL>"), lsCtx->varPathArr[i],
-                                       writeResp->Results[i]);
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "Error writing AlarmCondition %s variable %s with status 0x%08" PRIX32,
+                    (conditionIdStr != NULL ? conditionIdStr : "<NULL>"),
+                    ((size_t) i < lsCtx->nbOwnedVarPaths && NULL != lsCtx->varPathArr[i] ? lsCtx->varPathArr[i]
+                                                                                         : "<NULL>"),
+                    writeResp->Results[i]);
             }
         }
         SOPC_Free(conditionIdStr);
@@ -712,6 +762,7 @@ static void SOPC_InternalWrite_InitAlarmCondition_Node_Values(SOPC_AlarmConditio
         SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
         return;
     }
+    SOPC_InternalLocalService_Ctx_SetOwnedVarPathArr(tbpCtx, varPathArr, noOfValidNodeIds);
     SOPC_DataValue dv;
     SOPC_DataValue_Initialize(&dv);
     size_t index = 0;
@@ -735,14 +786,14 @@ static void SOPC_InternalWrite_InitAlarmCondition_Node_Values(SOPC_AlarmConditio
                     (conditionIdStr != NULL ? conditionIdStr : "<NULL>"), prevVarPathArr[i], status);
                 SOPC_Free(conditionIdStr);
             }
-            varPathArr[index] = prevVarPathArr[i];
+            // prevVarPathArr entries are borrowed from ac->data: store a copy
+            SOPC_InternalLocalService_Ctx_SetOwnedVarPath(tbpCtx, index, prevVarPathArr[i]);
             index++;
         } // else it means it is not a valid Id (zeroed id)
     }
     mutStatus = SOPC_Mutex_Unlock(&ac->mut);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    tbpCtx->varPathArr = varPathArr;
     bool res = false;
     if (SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
     {
@@ -1228,7 +1279,7 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateVariableNode(SO
             SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
             return SOPC_STATUS_OUT_OF_MEMORY;
         }
-        tbpCtx->varPathArr = varPathArr;
+        SOPC_InternalLocalService_Ctx_SetOwnedVarPathArr(tbpCtx, varPathArr, 1);
         SOPC_DataValue dv;
         SOPC_DataValue_Initialize(&dv);
         dv.Value = *val;
@@ -1240,7 +1291,8 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateVariableNode(SO
         bool res = false;
         if (SOPC_STATUS_OK == status)
         {
-            *varPathArr = varPath;
+            // varPath may be a temporary or application string: store a copy
+            SOPC_InternalLocalService_Ctx_SetOwnedVarPath(tbpCtx, 0, varPath);
             if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1318,14 +1370,14 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateTwoStateVariabl
             SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
             return SOPC_STATUS_OUT_OF_MEMORY;
         }
-        tbpCtx->varPathArr = varPathArr;
+        SOPC_InternalLocalService_Ctx_SetOwnedVarPathArr(tbpCtx, varPathArr, nbWrites);
         size_t nbWriteIndex = 0;
         SOPC_DataValue dv;
         SOPC_DataValue_Initialize(&dv);
         dv.Value = *boolVal;
         status =
             SOPC_WriteRequest_SetWriteValue(writeReq, nbWriteIndex, stateIdNodeId, SOPC_AttributeId_Value, NULL, &dv);
-        varPathArr[nbWriteIndex] = stateVarPaths->id;
+        SOPC_InternalLocalService_Ctx_SetOwnedVarPath(tbpCtx, nbWriteIndex, stateVarPaths->id);
         nbWriteIndex = (SOPC_STATUS_OK == status ? nbWriteIndex + 1 : nbWriteIndex);
 
         if (SOPC_STATUS_OK == status && NULL != stateNodeId)
@@ -1333,7 +1385,7 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateTwoStateVariabl
             dv.Value = *textVal;
             status =
                 SOPC_WriteRequest_SetWriteValue(writeReq, nbWriteIndex, stateNodeId, SOPC_AttributeId_Value, NULL, &dv);
-            varPathArr[nbWriteIndex] = stateVarPaths->self;
+            SOPC_InternalLocalService_Ctx_SetOwnedVarPath(tbpCtx, nbWriteIndex, stateVarPaths->self);
             nbWriteIndex = (SOPC_STATUS_OK == status ? nbWriteIndex + 1 : nbWriteIndex);
         }
         if (SOPC_STATUS_OK == status && NULL != stateTimeNodeId)
@@ -1341,7 +1393,7 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateTwoStateVariabl
             dv.Value = *transTimeVal;
             status = SOPC_WriteRequest_SetWriteValue(writeReq, nbWriteIndex, stateTimeNodeId, SOPC_AttributeId_Value,
                                                      NULL, &dv);
-            varPathArr[nbWriteIndex] = stateVarPaths->transitionTime;
+            SOPC_InternalLocalService_Ctx_SetOwnedVarPath(tbpCtx, nbWriteIndex, stateVarPaths->transitionTime);
             nbWriteIndex = (SOPC_STATUS_OK == status ? nbWriteIndex + 1 : nbWriteIndex);
         }
         SOPC_UNUSED_RESULT(nbWriteIndex); // no further use
