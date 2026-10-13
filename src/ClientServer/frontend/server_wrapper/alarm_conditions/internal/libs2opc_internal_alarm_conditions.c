@@ -97,7 +97,7 @@ static bool SOPC_InternalLocalService_Ctx_SetAc(SOPC_InternalLocalService_Ctx* c
  *
  * \param ctx Async context with owned conditionNode and original ac pointer
  * \param[out] outAc Live AC when returning true; caller must Unlock(\p outAc->mut)
- * \return true if the AC is still registered and ac->mut is locked, false if stale
+ * \return true if the AC is still registered and ac->mut is locked, false otherwise
  */
 static bool SOPC_InternalLocalService_TryLockAC(SOPC_InternalLocalService_Ctx* ctx, SOPC_AlarmCondition** outAc)
 {
@@ -111,18 +111,20 @@ static bool SOPC_InternalLocalService_TryLockAC(SOPC_InternalLocalService_Ctx* c
     bool found = false;
     SOPC_AlarmCondition* live = (SOPC_AlarmCondition*) SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict,
                                                                      (uintptr_t) &ctx->conditionNode, &found);
-    if (!found || live != ctx->ac)
+    if (found && live == ctx->ac)
     {
-        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+        mutStatus = SOPC_Mutex_Lock(&live->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        return false;
+        *outAc = live;
     }
-    mutStatus = SOPC_Mutex_Lock(&live->mut);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    else
+    {
+        found = false;
+    }
     mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    *outAc = live;
-    return true;
+
+    return found;
 }
 
 const SOPC_InternalTwoStateVariableFieldsPaths cEnabledStatePaths = {
@@ -242,7 +244,7 @@ static void SOPC_RefreshEvent_Free(uintptr_t data)
  * \brief Frees alarm condition resources and removes related ConditionRefresh state.
  *
  * Does not update g_alarmConditionsDict. Used as the dict value-free path and when
- * ::SOPC_InternalServerAlarmCondition_Delete finds the instance is not registered.
+ * ::SOPC_InternalServerAlarmCondition_Delete finds that the instance is not registered.
  *
  * \param[in, out] ppAlarmCond Address of the AC pointer; set to NULL on return when non-NULL input.
  */
@@ -259,7 +261,7 @@ static void SOPC_InternalServerAlarmCondition_FreeInstance(SOPC_AlarmCondition**
             mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
-        // Drain any async callback that already passed TryLockAc and holds ac->mut
+        // Drain any async callback that already passed TryLockAC and holds ac->mut
         SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pAlarmCond->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         mutStatus = SOPC_Mutex_Unlock(&pAlarmCond->mut);
@@ -634,7 +636,12 @@ static void SOPC_InternalWrite_InitAlarmCondition_Node_Values(SOPC_AlarmConditio
     const char** varPathArr = SOPC_Calloc(noOfValidNodeIds, sizeof(*varPathArr));
     if (NULL == writeReq || NULL == tbpCtx || NULL == varPathArr)
     {
-        SOPC_Free(writeReq);
+        if (NULL != writeReq)
+        {
+            // Deep deallocation: the request contains the allocated array of values to write
+            SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(writeReq->encodeableType, (void**) &writeReq);
+            SOPC_UNUSED_RESULT(delStatus);
+        }
         SOPC_Free(tbpCtx);
         SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
         return;
@@ -670,17 +677,23 @@ static void SOPC_InternalWrite_InitAlarmCondition_Node_Values(SOPC_AlarmConditio
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     tbpCtx->varPathArr = varPathArr;
-    if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
+    bool res = false;
+    if (SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
     {
-        SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
-        return;
+        res = SOPC_ServerInternal_LocalServiceAsync(
+            &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
+            "Failure to treat Write to initialize A&C nodes from event.", false);
+        writeReq = NULL; // Memory managed by previous callee
     }
-    bool res = SOPC_ServerInternal_LocalServiceAsync(
-        &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
-        "Failure to treat Write to initialize A&C nodes from event.", false);
     if (!res)
     {
         SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
+        // Delete the write request if not NULL
+        if (NULL != writeReq)
+        {
+            SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(writeReq->encodeableType, (void**) &writeReq);
+            SOPC_UNUSED_RESULT(delStatus);
+        }
     }
 }
 
@@ -928,7 +941,12 @@ void SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(SOPC_AlarmCon
     bool reqNeedDealloc = true;
     if (NULL == tbpReq || NULL == tbpCtx || NULL == varPathArr)
     {
-        SOPC_Free(tbpReq);
+        if (NULL != tbpReq)
+        {
+            // Deep deallocation: the request contains the allocated array of browse paths
+            SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(tbpReq->encodeableType, (void**) &tbpReq);
+            SOPC_UNUSED_RESULT(delStatus);
+        }
         SOPC_Free(tbpCtx);
         SOPC_Free((void*) varPathArr);
         return;
@@ -950,7 +968,6 @@ void SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(SOPC_AlarmCon
         if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
         {
             SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
-            reqNeedDealloc = true;
         }
         else
         {
@@ -961,14 +978,13 @@ void SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(SOPC_AlarmCon
             if (!res)
             {
                 SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
-                reqNeedDealloc = true;
             }
         }
     } // else: log error
     if (reqNeedDealloc)
     {
         SOPC_EncodeableObject_Delete(tbpReq->encodeableType, (void**) &tbpReq);
-        /* tbpCtx already deleted on SetAc/async failure; only free leftover OOM / empty-path allocs */
+        /* tbpCtx already deleted on SetAc failure; only free leftover OOM / empty-path allocs */
         if (NULL != tbpCtx)
         {
             SOPC_Free(tbpCtx);
@@ -1135,7 +1151,13 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateVariableNode(SO
         const char** varPathArr = SOPC_Calloc(1, sizeof(*varPathArr));
         if (NULL == writeReq || NULL == tbpCtx || NULL == varPathArr)
         {
-            SOPC_Free(writeReq);
+            if (NULL != writeReq)
+            {
+                // Deep deallocation: the request contains the allocated array of values to write
+                SOPC_ReturnStatus delStatus =
+                    SOPC_EncodeableObject_Delete(writeReq->encodeableType, (void**) &writeReq);
+                SOPC_UNUSED_RESULT(delStatus);
+            }
             SOPC_Free(tbpCtx);
             SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
             return SOPC_STATUS_OUT_OF_MEMORY;
@@ -1162,12 +1184,20 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateVariableNode(SO
                 res = SOPC_ServerInternal_LocalServiceAsync(
                     &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
                     "Failure to treat Write to update value of variable A&C node", false);
+                writeReq = NULL; // Memory managed by previous callee
             }
         }
         if (!res)
         {
             SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
             status = (SOPC_STATUS_OK == status ? SOPC_STATUS_NOK : status);
+            if (NULL != writeReq)
+            {
+                // Delete the write request if not NULL
+                SOPC_ReturnStatus delStatus =
+                    SOPC_EncodeableObject_Delete(writeReq->encodeableType, (void**) &writeReq);
+                SOPC_UNUSED_RESULT(delStatus);
+            }
         }
     }
     return status;
@@ -1211,7 +1241,13 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateTwoStateVariabl
         const char** varPathArr = SOPC_Calloc(nbWrites, sizeof(*varPathArr));
         if (NULL == writeReq || NULL == tbpCtx || NULL == varPathArr)
         {
-            SOPC_Free(writeReq);
+            if (NULL != writeReq)
+            {
+                // Deep deallocation: the request contains the allocated array of values to write
+                SOPC_ReturnStatus delStatus =
+                    SOPC_EncodeableObject_Delete(writeReq->encodeableType, (void**) &writeReq);
+                SOPC_UNUSED_RESULT(delStatus);
+            }
             SOPC_Free(tbpCtx);
             SOPC_Free((void*) varPathArr); // MSVC 15 considers array is const otherwise
             return SOPC_STATUS_OUT_OF_MEMORY;
@@ -1256,12 +1292,20 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateTwoStateVariabl
                 res = SOPC_ServerInternal_LocalServiceAsync(
                     &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
                     "Failure to treat Write to update TwoState variable A&C nodes", false);
+                writeReq = NULL; // Memory managed by previous callee
             }
         }
         if (!res)
         {
             SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
             status = (SOPC_STATUS_OK == status ? SOPC_STATUS_NOK : status);
+            if (NULL != writeReq)
+            {
+                // Delete the write request if not NULL
+                SOPC_ReturnStatus delStatus =
+                    SOPC_EncodeableObject_Delete(writeReq->encodeableType, (void**) &writeReq);
+                SOPC_UNUSED_RESULT(delStatus);
+            }
         }
     }
     return status;

@@ -52,10 +52,9 @@ static const SOPC_NodeId g_alarmConditionTypeId = SOPC_NODEID_NS0_NUMERIC(OpcUaI
 
 /*
  * Fixed delays for async server/A&C work (test harness only).
- * ponytail: no readiness API on CreateFromEvent; bounded sleeps instead of poll.
  *
  * SERVER_START_SETTLE_MS: StartServer returns before address space and event
- *   types are fully usable; same pattern as reproducer_ac_refresh_uaf.
+ *   types are fully usable
  *
  * AC_CREATE_INIT_MS: CreateFromEvent posts TBP on the A&C looper and returns
  *   immediately. TriggerEvent writes 0:EventId via GetNodeId(ac->nodeIds);

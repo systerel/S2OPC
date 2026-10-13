@@ -83,7 +83,7 @@ SOPC_ReturnStatus SOPC_AlarmCondition_CreateFromEvent(const SOPC_NodeId* notifie
     uintptr_t alreadyExistAC =
         SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) conditionNode, &bAlreadyExistAC);
     SOPC_UNUSED_RESULT(alreadyExistAC);
-    SOPC_ReturnStatus status = bAlreadyExistAC ? SOPC_STATUS_WOULD_BLOCK : SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = bAlreadyExistAC ? SOPC_STATUS_INVALID_STATE : SOPC_STATUS_OK;
 
     SOPC_AlarmCondition* ac = NULL;
     if (SOPC_STATUS_OK == status)
