@@ -38,11 +38,21 @@
  * Global variables to manage A&C
  */
 
-// The singleton configuration structure
+/*
+ * The singleton configuration structure
+ *
+ * Lock order (a lock on the left may be held while taking a lock on the right, never the reverse):
+ *   g_mutex -> ac->mut -> { g_refreshMutex, g_looperMutex }
+ * g_refreshMutex and g_looperMutex are leaf locks: no other A&C lock is taken while holding one of them.
+ */
 struct _SOPC_AlarmConditionConfig
 {
-    // Mutex to protect the global variables
+    // Mutex protecting g_alarmConditionsDict only
     SOPC_Mutex g_mutex;
+    // Leaf mutex protecting g_refreshEventsDict
+    SOPC_Mutex g_refreshMutex;
+    // Leaf mutex protecting g_alarmCondLooperEvtHdlr against concurrent post and looper deletion
+    SOPC_Mutex g_looperMutex;
     // The looper used to execute internal event treatment in a dedicated thread for:
     // - Method call and service responses long treatment
     // - A&C states callback calls
@@ -150,6 +160,25 @@ extern const char* cRetainPath;
 
 // Check if A&C manager is initialized
 bool SOPC_InternalAlarmConditionMgr_IsInit(void);
+
+/**
+ * \brief Posts an event to the A&C looper.
+ *
+ * Only takes the leaf mutex g_looperMutex: may be called while holding g_mutex or an ac->mut.
+ *
+ * \param event     The ::SOPC_ServerAlarmCondLibEvent value
+ * \param eltId     Event element identifier
+ * \param params    Event parameter, ownership transferred to the looper on success only
+ * \param auxParam  Event auxiliary parameter, ownership transferred to the looper on success only
+ *
+ * \return SOPC_STATUS_OK if the event was posted,
+ *         SOPC_STATUS_INVALID_STATE if the manager is not initialized or is being cleared,
+ *         or the error status of the post otherwise
+ */
+SOPC_ReturnStatus SOPC_InternalAlarmConditionMgr_PostToLooper(int32_t event,
+                                                              uint32_t eltId,
+                                                              uintptr_t params,
+                                                              uintptr_t auxParam);
 
 // Get the flag value for automatic confirmable state on acked transitions
 bool SOPC_InternalAlarmCondition_GetAutoConfOnAcked(SOPC_AlarmCondition* ac);

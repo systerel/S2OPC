@@ -92,8 +92,9 @@ static bool SOPC_InternalLocalService_Ctx_SetAc(SOPC_InternalLocalService_Ctx* c
  * \brief Locks the AC mutex if \p ctx still refers to the registered instance.
  *
  * Compares \p ctx->ac to the value currently stored in g_alarmConditionsDict for
- * \p ctx->conditionNode (owned copy). Lock order is g_mutex then ac->mut so that
- * SOPC_InternalServerAlarmCondition_Delete can drain holders of ac->mut safely.
+ * \p ctx->conditionNode (owned copy). Lock order is g_mutex then ac->mut (see
+ * ::_SOPC_AlarmConditionConfig) so that SOPC_InternalServerAlarmCondition_Delete can drain
+ * holders of ac->mut safely.
  *
  * \param ctx Async context with owned conditionNode and original ac pointer
  * \param[out] outAc Live AC when returning true; caller must Unlock(\p outAc->mut)
@@ -101,7 +102,7 @@ static bool SOPC_InternalLocalService_Ctx_SetAc(SOPC_InternalLocalService_Ctx* c
  */
 static bool SOPC_InternalLocalService_TryLockAC(SOPC_InternalLocalService_Ctx* ctx, SOPC_AlarmCondition** outAc)
 {
-    if (NULL == ctx || NULL == outAc || NULL == sopc_alarmConditionConfig.g_alarmConditionsDict)
+    if (NULL == ctx || NULL == outAc)
     {
         return false;
     }
@@ -109,8 +110,12 @@ static bool SOPC_InternalLocalService_TryLockAC(SOPC_InternalLocalService_Ctx* c
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     bool found = false;
-    SOPC_AlarmCondition* live = (SOPC_AlarmCondition*) SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict,
-                                                                     (uintptr_t) &ctx->conditionNode, &found);
+    SOPC_AlarmCondition* live = NULL;
+    if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
+    {
+        live = (SOPC_AlarmCondition*) SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict,
+                                                    (uintptr_t) &ctx->conditionNode, &found);
+    }
     if (found && live == ctx->ac)
     {
         mutStatus = SOPC_Mutex_Lock(&live->mut);
@@ -166,6 +171,8 @@ const char* cRetainPath = "0:Retain";
 // The looper used to manage interaction between S2OPC thread (at least method call) and application callbacks ()
 struct _SOPC_AlarmConditionConfig sopc_alarmConditionConfig = {
     .g_mutex = SOPC_INVALID_MUTEX,
+    .g_refreshMutex = SOPC_INVALID_MUTEX,
+    .g_looperMutex = SOPC_INVALID_MUTEX,
     .g_alarmCondLooperEvtHdlr = NULL,
     .g_alarmConditionsDict = NULL, // Condition NodeId => AC
     .g_refreshEventsDict = NULL,   // Condition NodeId => latest event triggered by condition
@@ -182,6 +189,29 @@ static const SOPC_NodeId HasComponentRefType_NodeId = SOPC_NODEID_NS0_NUMERIC(Op
 bool SOPC_InternalAlarmConditionMgr_IsInit(void)
 {
     return SOPC_Atomic_Int_Get(&g_init);
+}
+
+SOPC_ReturnStatus SOPC_InternalAlarmConditionMgr_PostToLooper(int32_t event,
+                                                              uint32_t eltId,
+                                                              uintptr_t params,
+                                                              uintptr_t auxParam)
+{
+    if (!SOPC_InternalAlarmConditionMgr_IsInit())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_looperMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    // Event handler is reset to NULL by SOPC_ServerAlarmConditionMgr_Clear before looper deletion
+    if (NULL != sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr)
+    {
+        status =
+            SOPC_EventHandler_Post(sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr, event, eltId, params, auxParam);
+    }
+    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_looperMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    return status;
 }
 
 bool SOPC_InternalAlarmCondition_GetAutoConfOnAcked(SOPC_AlarmCondition* ac)
@@ -253,16 +283,17 @@ static void SOPC_InternalServerAlarmCondition_FreeInstance(SOPC_AlarmCondition**
     if (NULL != ppAlarmCond && NULL != *ppAlarmCond)
     {
         SOPC_AlarmCondition* pAlarmCond = *ppAlarmCond;
+        // Leaf lock: may be called with g_mutex held (dict value-free path)
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_refreshMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         if (NULL != sopc_alarmConditionConfig.g_refreshEventsDict)
         {
-            SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             SOPC_Dict_Remove(sopc_alarmConditionConfig.g_refreshEventsDict, (uintptr_t) &pAlarmCond->conditionNode);
-            mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
+        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_refreshMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         // Drain any async callback that already passed TryLockAC and holds ac->mut
-        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pAlarmCond->mut);
+        mutStatus = SOPC_Mutex_Lock(&pAlarmCond->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         mutStatus = SOPC_Mutex_Unlock(&pAlarmCond->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -470,17 +501,9 @@ static void SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct(SOPC_EncodeableT
     }
     if (postToLooper)
     {
-        res = SOPC_InternalAlarmConditionMgr_IsInit();
-        if (res)
-        {
-            SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-            SOPC_ReturnStatus status = SOPC_EventHandler_Post(sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr,
-                                                              (int32_t) libEvt, 0, params, helperCtx->userContext);
-            res = (SOPC_STATUS_OK == status);
-            mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        }
+        SOPC_ReturnStatus status =
+            SOPC_InternalAlarmConditionMgr_PostToLooper((int32_t) libEvt, 0, params, helperCtx->userContext);
+        res = (SOPC_STATUS_OK == status);
         if (!res)
         {
             SOPC_ReturnStatus ignoredStatus = SOPC_EncodeableObject_Delete(type, (void**) &params);
@@ -495,6 +518,22 @@ static void SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct(SOPC_EncodeableT
     }
 }
 
+/**
+ * \brief Clears \p mut if it is initialized, no-op if it is ::SOPC_INVALID_MUTEX.
+ *
+ * Allows a single cleanup path whatever the step at which manager initialization failed.
+ *
+ * \param[in, out] mut Mutex to clear; ::SOPC_INVALID_MUTEX on return (reset by ::SOPC_Mutex_Clear)
+ */
+static void SOPC_InternalAlarmConditionMgr_ClearMutex(SOPC_Mutex* mut)
+{
+    if (SOPC_INVALID_MUTEX != *mut)
+    {
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Clear(mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    }
+}
+
 SOPC_ReturnStatus SOPC_ServerAlarmConditionMgr_Initialize(SOPC_MethodCallManager* mcm)
 {
     if (NULL == mcm)
@@ -506,16 +545,20 @@ SOPC_ReturnStatus SOPC_ServerAlarmConditionMgr_Initialize(SOPC_MethodCallManager
         return SOPC_STATUS_INVALID_STATE;
     }
     SOPC_ReturnStatus status = SOPC_Mutex_Initialization(&sopc_alarmConditionConfig.g_mutex);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        return status;
+        status = SOPC_Mutex_Initialization(&sopc_alarmConditionConfig.g_refreshMutex);
     }
-    SOPC_ASSERT(NULL == g_alarmCondLooper);
-    g_alarmCondLooper =
-        SOPC_Helper_CreateLooperForComponent("ServerAlarmConditions", SOPC_THREAD_COMPONENT_SERVER_ALARM_CONDITIONS);
-    if (NULL == g_alarmCondLooper)
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
+        status = SOPC_Mutex_Initialization(&sopc_alarmConditionConfig.g_looperMutex);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ASSERT(NULL == g_alarmCondLooper);
+        g_alarmCondLooper = SOPC_Helper_CreateLooperForComponent("ServerAlarmConditions",
+                                                                 SOPC_THREAD_COMPONENT_SERVER_ALARM_CONDITIONS);
+        status = (NULL == g_alarmCondLooper ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -533,9 +576,9 @@ SOPC_ReturnStatus SOPC_ServerAlarmConditionMgr_Initialize(SOPC_MethodCallManager
             SOPC_Dict_SetTombstoneKey(sopc_alarmConditionConfig.g_refreshEventsDict, REFRESH_EVENTS_DICT_TOMBSTONE);
         }
     }
-    if (NULL == sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr ||
-        NULL == sopc_alarmConditionConfig.g_alarmConditionsDict ||
-        NULL == sopc_alarmConditionConfig.g_refreshEventsDict)
+    if (SOPC_STATUS_OK == status && (NULL == sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr ||
+                                     NULL == sopc_alarmConditionConfig.g_alarmConditionsDict ||
+                                     NULL == sopc_alarmConditionConfig.g_refreshEventsDict))
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -552,10 +595,15 @@ SOPC_ReturnStatus SOPC_ServerAlarmConditionMgr_Initialize(SOPC_MethodCallManager
     {
         sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr = NULL;
         SOPC_Looper_Delete(g_alarmCondLooper);
+        g_alarmCondLooper = NULL;
         SOPC_Dict_Delete(sopc_alarmConditionConfig.g_alarmConditionsDict);
+        sopc_alarmConditionConfig.g_alarmConditionsDict = NULL;
         SOPC_Dict_Delete(sopc_alarmConditionConfig.g_refreshEventsDict);
-        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Clear(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        sopc_alarmConditionConfig.g_refreshEventsDict = NULL;
+        // Mutexes may be partially initialized depending on the failing step
+        SOPC_InternalAlarmConditionMgr_ClearMutex(&sopc_alarmConditionConfig.g_looperMutex);
+        SOPC_InternalAlarmConditionMgr_ClearMutex(&sopc_alarmConditionConfig.g_refreshMutex);
+        SOPC_InternalAlarmConditionMgr_ClearMutex(&sopc_alarmConditionConfig.g_mutex);
     }
     return status;
 }
@@ -570,19 +618,36 @@ void SOPC_ServerAlarmConditionMgr_Clear(void)
         return;
     }
     SOPC_Atomic_Int_Set(&g_init, false);
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+    // Prevent any new post (see SOPC_InternalAlarmConditionMgr_PostToLooper) before deleting the looper.
+    // The looper is deleted without holding any lock: its thread may still be posting or taking A&C locks
+    // while treating its last events, which would deadlock with the join.
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_looperMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    // SOPC_ServerInternal_IsConfigClearable ? => seems a good idea to avoid possible method call trying to use the
-    // deallocated looper
     sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr = NULL;
+    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_looperMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     SOPC_Looper_Delete(g_alarmCondLooper);
+    g_alarmCondLooper = NULL;
+
+    // AC instances value-free path takes g_refreshMutex: respects g_mutex -> g_refreshMutex order
+    mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     SOPC_Dict_Delete(sopc_alarmConditionConfig.g_alarmConditionsDict);
-    SOPC_Dict_Delete(sopc_alarmConditionConfig.g_refreshEventsDict);
+    sopc_alarmConditionConfig.g_alarmConditionsDict = NULL;
     g_mcm = NULL;
     mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    mutStatus = SOPC_Mutex_Clear(&sopc_alarmConditionConfig.g_mutex);
+
+    mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_refreshMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    SOPC_Dict_Delete(sopc_alarmConditionConfig.g_refreshEventsDict);
+    sopc_alarmConditionConfig.g_refreshEventsDict = NULL;
+    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_refreshMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    SOPC_InternalAlarmConditionMgr_ClearMutex(&sopc_alarmConditionConfig.g_looperMutex);
+    SOPC_InternalAlarmConditionMgr_ClearMutex(&sopc_alarmConditionConfig.g_refreshMutex);
+    SOPC_InternalAlarmConditionMgr_ClearMutex(&sopc_alarmConditionConfig.g_mutex);
 }
 
 void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
@@ -595,21 +660,22 @@ void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
     SOPC_AlarmCondition* pAlarmCond = *ppAlarmCond;
     bool freedViaDictRemove = false;
 
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
     {
-        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         bool found = false;
         SOPC_AlarmCondition* live = (SOPC_AlarmCondition*) SOPC_Dict_Get(
             sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &pAlarmCond->conditionNode, &found);
         if (found && live == pAlarmCond)
         {
             freedViaDictRemove = true;
+            // Value-free path (FreeInstance) takes g_refreshMutex then ac->mut: allowed under g_mutex
             SOPC_Dict_Remove(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &pAlarmCond->conditionNode);
         }
-        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
+    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (freedViaDictRemove)
     {
@@ -1579,12 +1645,12 @@ SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_TriggerEvent(SOPC_AlarmCondi
         event = NULL;
         if (NULL != eventCopy)
         {
-            // No lock on alarm condition, but lock the global mutex for refresh dict update
-            SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+            // Caller holds ac->mut: only the leaf refresh mutex may be taken here (never g_mutex)
+            SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_refreshMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             insertRes = SOPC_Dict_Insert(sopc_alarmConditionConfig.g_refreshEventsDict,
                                          (uintptr_t) &pAlarmCondition->conditionNode, (uintptr_t) eventCopy);
-            mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+            mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_refreshMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
         status = (SOPC_STATUS_OK == status && insertRes) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
@@ -1668,21 +1734,9 @@ static void SOPC_InternalAlarmConditionNoLock_StateGenCallback(const SOPC_AlarmC
     }
     if (SOPC_STATUS_OK == status)
     {
-        // No need to global mutex lock as looper is thread safe, thus only check g_init for ongoing Clear call
-        if (SOPC_InternalAlarmConditionMgr_IsInit())
-        {
-            SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-            status =
-                SOPC_EventHandler_Post(sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr, SOPC_AC_EVT_STATE_CHANGED_CB,
-                                       0, (uintptr_t) fctCtx, (uintptr_t) prevNewVarCopy);
-            mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        }
-        else
-        {
-            status = SOPC_STATUS_INVALID_STATE;
-        }
+        // Caller holds ac->mut: the post only takes the leaf looper mutex (never g_mutex)
+        status = SOPC_InternalAlarmConditionMgr_PostToLooper(SOPC_AC_EVT_STATE_CHANGED_CB, 0, (uintptr_t) fctCtx,
+                                                             (uintptr_t) prevNewVarCopy);
     }
     if (SOPC_STATUS_OK != status)
     {

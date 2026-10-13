@@ -231,13 +231,16 @@ static void SOPC_InternalConditionRefresh_Replay_ForEach_Fct(const uintptr_t key
     if (SOPC_Boolean_Id == retainVar->BuiltInTypeId && retainVar->Value.Boolean)
     {
         bool found = false;
-        // Global mutex already locked by caller
-
+        // g_mutex (caller) and ac->mut held: leaf refresh mutex protects the refresh dict access
+        mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_refreshMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         event = (SOPC_Event*) SOPC_Dict_Get(sopc_alarmConditionConfig.g_refreshEventsDict, (uintptr_t) condId, &found);
         if (found)
         {
             eventCopy = SOPC_Event_CreateCopy(event, false);
         }
+        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_refreshMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
     if (NULL != eventCopy)
     {
@@ -376,13 +379,18 @@ static SOPC_StatusCode SOPC_MethodCall_ConditionRefresh(const SOPC_CallContext* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     if (SOPC_InternalAlarmConditionMgr_IsInit())
     {
-        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_refreshMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        const size_t nbRefreshEvents = (NULL != sopc_alarmConditionConfig.g_refreshEventsDict
+                                            ? SOPC_Dict_Size(sopc_alarmConditionConfig.g_refreshEventsDict)
+                                            : 0);
+        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_refreshMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         if (true == SOPC_Atomic_Int_Get(&g_atomic_refreshOnGoing))
         {
             opcStatus = OpcUa_BadRefreshInProgress;
         }
-        else if (0 == SOPC_Dict_Size(sopc_alarmConditionConfig.g_refreshEventsDict))
+        else if (0 == nbRefreshEvents)
         {
             // Note: "The ConditionRefresh Method was called on a SubscriptionId that has no event MonitoredItems."
             //       cannot be precisely verified as it requires introspection in services core.
@@ -399,11 +407,8 @@ static SOPC_StatusCode SOPC_MethodCall_ConditionRefresh(const SOPC_CallContext* 
             //        Bad_UserAccessDenied is never returned.
             opcStatus = OpcUa_BadSubscriptionIdInvalid;
         }
-        status = SOPC_EventHandler_Post(sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr,
-                                        SOPC_AC_EVT_METHOD_CALL_COND_REFRESH, 0, (uintptr_t) refreshCtx,
-                                        (uintptr_t) opcStatus);
-        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        status = SOPC_InternalAlarmConditionMgr_PostToLooper(SOPC_AC_EVT_METHOD_CALL_COND_REFRESH, 0,
+                                                             (uintptr_t) refreshCtx, (uintptr_t) opcStatus);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -434,17 +439,8 @@ static bool SOPC_InternalMethodCall_SetStateToLooper(SOPC_ServerAlarmCondMethods
             cmEvtCtx->optClientUserId = SOPC_InternalMethodCall_GetClientUserId(callCtx);
         } // else: cmEvtCtx is NULL, no comment will be set
     }
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    if (SOPC_InternalAlarmConditionMgr_IsInit())
-    {
-        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        status = SOPC_EventHandler_Post(sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr,
-                                        SOPC_AC_EVT_METHOD_CALL_SET_STATE, (uint32_t) acMethod, (uintptr_t) ac,
-                                        (uintptr_t) cmEvtCtx);
-        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    }
+    SOPC_ReturnStatus status = SOPC_InternalAlarmConditionMgr_PostToLooper(
+        SOPC_AC_EVT_METHOD_CALL_SET_STATE, (uint32_t) acMethod, (uintptr_t) ac, (uintptr_t) cmEvtCtx);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_LocalizedText_Clear(optComment);
@@ -496,17 +492,8 @@ static bool SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_ServerAlarmCondMet
         SOPC_Free(cmEvtCtx);
         cmEvtCtx = NULL;
     }
-    status = SOPC_STATUS_INVALID_STATE;
-    if (SOPC_InternalAlarmConditionMgr_IsInit())
-    {
-        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        status =
-            SOPC_EventHandler_Post(sopc_alarmConditionConfig.g_alarmCondLooperEvtHdlr, SOPC_AC_EVT_METHOD_CALL_FAILURE,
-                                   (uint32_t) acMethod, (uintptr_t) ac, (uintptr_t) cmEvtCtx);
-        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    }
+    status = SOPC_InternalAlarmConditionMgr_PostToLooper(SOPC_AC_EVT_METHOD_CALL_FAILURE, (uint32_t) acMethod,
+                                                         (uintptr_t) ac, (uintptr_t) cmEvtCtx);
     if (SOPC_STATUS_OK != status && NULL != cmEvtCtx)
     {
         SOPC_Free(cmEvtCtx->failedEventId);

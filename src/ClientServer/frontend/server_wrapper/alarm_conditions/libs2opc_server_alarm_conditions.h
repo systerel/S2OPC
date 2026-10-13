@@ -139,6 +139,8 @@ SOPC_ReturnStatus SOPC_ServerAlarmConditionMgr_Initialize(SOPC_MethodCallManager
  * \brief Clears the Alarm & Conditions manager after server stopped.
  *
  * \warning The server shall be stopped otherwise this call is ignored
+ * \warning No other Alarm & Conditions function shall be called concurrently to this call
+ *          (from another application thread or from a ::SOPC_AlarmCondition_StateChanged_Fct callback).
  * \warning Any previously created alarm condition instance using ::SOPC_AlarmCondition_CreateFromEvent
  *          shall not be used after this call, those are deallocated and become invalid.
  */
