@@ -129,28 +129,15 @@ static SOPC_String* SOPC_InternalMethodCall_GetClientUserId(const SOPC_CallConte
     return result;
 }
 
-static SOPC_AlarmCondition* SOPC_InternalMethodCall_RetrieveAC(void* param, const SOPC_NodeId* conditionNodeId)
+/*
+ * Returns the A&C instance targeted by a method call with a reference on it (NULL if none).
+ * Instance and type methods are both registered without parameter: the instance is always
+ * retrieved from the method call ObjectId, so that a deleted instance cannot be reached.
+ * The reference shall be released by the method call treatment.
+ */
+static SOPC_AlarmCondition* SOPC_InternalMethodCall_RetrieveAC(const SOPC_NodeId* conditionNodeId)
 {
-    SOPC_AlarmCondition* ac = (SOPC_AlarmCondition*) param;
-    uintptr_t foundAC = 0;
-    bool found = false;
-    if (NULL == ac && SOPC_InternalAlarmConditionMgr_IsInit())
-    {
-        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
-        {
-            foundAC =
-                SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) conditionNodeId, &found);
-        }
-        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        if (found)
-        {
-            ac = (SOPC_AlarmCondition*) foundAC;
-        }
-    }
-    return ac;
+    return SOPC_InternalAlarmCondition_Acquire(conditionNodeId);
 }
 
 static void SOPC_InternalConditionRefresh_ComputeNotifiers_ForEach_Fct(const uintptr_t key,
@@ -423,6 +410,27 @@ static SOPC_StatusCode SOPC_MethodCall_ConditionRefresh(const SOPC_CallContext* 
 
 /* Managing method calls for A&C States */
 
+/*
+ * Posts a method call event to the A&C looper with a new reference on ac (might be NULL).
+ * The reference is released by onMethodCallLibEvt after the event treatment, or here on post failure
+ * (never the last one: the caller holds its own reference).
+ */
+static SOPC_ReturnStatus SOPC_InternalMethodCall_PostToLooper(SOPC_ServerAlarmCondLibEvent event,
+                                                              SOPC_ServerAlarmCondMethods acMethod,
+                                                              SOPC_AlarmCondition* ac,
+                                                              SOPC_MethodCallEvt_Ctx* cmEvtCtx)
+{
+    SOPC_InternalAlarmCondition_AddRef(ac);
+    SOPC_ReturnStatus status = SOPC_InternalAlarmConditionMgr_PostToLooper((int32_t) event, (uint32_t) acMethod,
+                                                                           (uintptr_t) ac, (uintptr_t) cmEvtCtx);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_InternalAlarmCondition_Release(&ac);
+    }
+    return status;
+}
+
+// Posts the state change of a method call to the A&C looper (see SOPC_InternalMethodCall_PostToLooper)
 static bool SOPC_InternalMethodCall_SetStateToLooper(SOPC_ServerAlarmCondMethods acMethod,
                                                      SOPC_AlarmCondition* ac,
                                                      SOPC_LocalizedText* optComment,
@@ -439,8 +447,8 @@ static bool SOPC_InternalMethodCall_SetStateToLooper(SOPC_ServerAlarmCondMethods
             cmEvtCtx->optClientUserId = SOPC_InternalMethodCall_GetClientUserId(callCtx);
         } // else: cmEvtCtx is NULL, no comment will be set
     }
-    SOPC_ReturnStatus status = SOPC_InternalAlarmConditionMgr_PostToLooper(
-        SOPC_AC_EVT_METHOD_CALL_SET_STATE, (uint32_t) acMethod, (uintptr_t) ac, (uintptr_t) cmEvtCtx);
+    SOPC_ReturnStatus status =
+        SOPC_InternalMethodCall_PostToLooper(SOPC_AC_EVT_METHOD_CALL_SET_STATE, acMethod, ac, cmEvtCtx);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_LocalizedText_Clear(optComment);
@@ -454,6 +462,8 @@ static bool SOPC_InternalMethodCall_SetStateToLooper(SOPC_ServerAlarmCondMethods
     return (SOPC_STATUS_OK == status);
 }
 
+// Posts the failure trace of a method call to the A&C looper, ac might be NULL (see
+// SOPC_InternalMethodCall_PostToLooper)
 static bool SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_ServerAlarmCondMethods acMethod,
                                                          SOPC_AlarmCondition* ac,
                                                          const SOPC_ByteString* optFailedEventId,
@@ -492,8 +502,7 @@ static bool SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_ServerAlarmCondMet
         SOPC_Free(cmEvtCtx);
         cmEvtCtx = NULL;
     }
-    status = SOPC_InternalAlarmConditionMgr_PostToLooper(SOPC_AC_EVT_METHOD_CALL_FAILURE, (uint32_t) acMethod,
-                                                         (uintptr_t) ac, (uintptr_t) cmEvtCtx);
+    status = SOPC_InternalMethodCall_PostToLooper(SOPC_AC_EVT_METHOD_CALL_FAILURE, acMethod, ac, cmEvtCtx);
     if (SOPC_STATUS_OK != status && NULL != cmEvtCtx)
     {
         SOPC_Free(cmEvtCtx->failedEventId);
@@ -505,20 +514,10 @@ static bool SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_ServerAlarmCondMet
     return (SOPC_STATUS_OK == status);
 }
 
-static SOPC_StatusCode SOPC_MethodCall_Disable(const SOPC_CallContext* callContextPtr,
-                                               const SOPC_NodeId* objectId,
-                                               uint32_t nbInputArgs,
-                                               const SOPC_Variant* inputArgs,
-                                               uint32_t* nbOutputArgs,
-                                               SOPC_Variant** outputArgs,
-                                               void* param)
+// Disable method call treatment: ac (might be NULL) reference is managed by the caller
+static SOPC_StatusCode SOPC_InternalMethodCall_TreatDisable(SOPC_AlarmCondition* ac,
+                                                            const SOPC_CallContext* callContextPtr)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
-    SOPC_UNUSED_ARG(nbOutputArgs);
-    SOPC_UNUSED_ARG(outputArgs);
-    SOPC_AlarmCondition* ac = SOPC_InternalMethodCall_RetrieveAC(param, objectId);
     if (NULL == ac)
     {
         SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_AC_METHOD_DISABLE, ac, NULL, NULL, callContextPtr,
@@ -552,20 +551,30 @@ static SOPC_StatusCode SOPC_MethodCall_Disable(const SOPC_CallContext* callConte
     return SOPC_GoodGenericStatus;
 }
 
-static SOPC_StatusCode SOPC_MethodCall_Enable(const SOPC_CallContext* callContextPtr,
-                                              const SOPC_NodeId* objectId,
-                                              uint32_t nbInputArgs,
-                                              const SOPC_Variant* inputArgs,
-                                              uint32_t* nbOutputArgs,
-                                              SOPC_Variant** outputArgs,
-                                              void* param)
+static SOPC_StatusCode SOPC_MethodCall_Disable(const SOPC_CallContext* callContextPtr,
+                                               const SOPC_NodeId* objectId,
+                                               uint32_t nbInputArgs,
+                                               const SOPC_Variant* inputArgs,
+                                               uint32_t* nbOutputArgs,
+                                               SOPC_Variant** outputArgs,
+                                               void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(nbInputArgs);
     SOPC_UNUSED_ARG(inputArgs);
     SOPC_UNUSED_ARG(nbOutputArgs);
     SOPC_UNUSED_ARG(outputArgs);
-    SOPC_AlarmCondition* ac = SOPC_InternalMethodCall_RetrieveAC(param, objectId);
+    SOPC_UNUSED_ARG(param);
+    // Single reference scope for the method call treatment
+    SOPC_AlarmCondition* ac = SOPC_InternalMethodCall_RetrieveAC(objectId);
+    SOPC_StatusCode result = SOPC_InternalMethodCall_TreatDisable(ac, callContextPtr);
+    SOPC_InternalAlarmCondition_Release(&ac);
+    return result;
+}
+
+// Enable method call treatment: ac (might be NULL) reference is managed by the caller
+static SOPC_StatusCode SOPC_InternalMethodCall_TreatEnable(SOPC_AlarmCondition* ac,
+                                                           const SOPC_CallContext* callContextPtr)
+{
     if (NULL == ac)
     {
         SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_AC_METHOD_ENABLE, ac, NULL, NULL, callContextPtr,
@@ -597,6 +606,26 @@ static SOPC_StatusCode SOPC_MethodCall_Enable(const SOPC_CallContext* callContex
         return OpcUa_BadConditionAlreadyEnabled;
     }
     return SOPC_GoodGenericStatus;
+}
+
+static SOPC_StatusCode SOPC_MethodCall_Enable(const SOPC_CallContext* callContextPtr,
+                                              const SOPC_NodeId* objectId,
+                                              uint32_t nbInputArgs,
+                                              const SOPC_Variant* inputArgs,
+                                              uint32_t* nbOutputArgs,
+                                              SOPC_Variant** outputArgs,
+                                              void* param)
+{
+    SOPC_UNUSED_ARG(nbInputArgs);
+    SOPC_UNUSED_ARG(inputArgs);
+    SOPC_UNUSED_ARG(nbOutputArgs);
+    SOPC_UNUSED_ARG(outputArgs);
+    SOPC_UNUSED_ARG(param);
+    // Single reference scope for the method call treatment
+    SOPC_AlarmCondition* ac = SOPC_InternalMethodCall_RetrieveAC(objectId);
+    SOPC_StatusCode result = SOPC_InternalMethodCall_TreatEnable(ac, callContextPtr);
+    SOPC_InternalAlarmCondition_Release(&ac);
+    return result;
 }
 
 static bool SOPC_InternalMethodCall_CheckLatestEventIds(SOPC_AlarmCondition* ac, const SOPC_Variant* eventIdvar)
@@ -632,20 +661,15 @@ static bool SOPC_InternalMethodCall_CheckAckOrConfEventIds(SOPC_ServerAlarmCondM
     return res;
 }
 
-static SOPC_StatusCode SOPC_MethodCall_AddComment(const SOPC_CallContext* callContextPtr,
-                                                  const SOPC_NodeId* objectId,
-                                                  uint32_t nbInputArgs,
-                                                  const SOPC_Variant* inputArgs,
-                                                  uint32_t* nbOutputArgs,
-                                                  SOPC_Variant** outputArgs,
-                                                  void* param)
+// AddComment method call treatment: ac (might be NULL) reference is managed by the caller
+static SOPC_StatusCode SOPC_InternalMethodCall_TreatAddComment(SOPC_AlarmCondition* ac,
+                                                               const SOPC_CallContext* callContextPtr,
+                                                               uint32_t nbInputArgs,
+                                                               const SOPC_Variant* inputArgs)
 {
     SOPC_ASSERT(nbInputArgs == 2);
     SOPC_ASSERT(NULL != inputArgs);
-    SOPC_UNUSED_ARG(nbOutputArgs);
-    SOPC_UNUSED_ARG(outputArgs);
     SOPC_LocalizedText* ltComment = NULL;
-    SOPC_AlarmCondition* ac = SOPC_InternalMethodCall_RetrieveAC(param, objectId);
     const SOPC_Variant* eventIdVar = &inputArgs[0];
     // Argument type is already verified by services layer
     const SOPC_LocalizedText* ltCommentInput = inputArgs[1].Value.LocalizedText;
@@ -695,20 +719,34 @@ static SOPC_StatusCode SOPC_MethodCall_AddComment(const SOPC_CallContext* callCo
     return SOPC_GoodGenericStatus;
 }
 
-static SOPC_StatusCode SOPC_InternalMethodCall_AckOrConf(const SOPC_CallContext* callContextPtr,
-                                                         const SOPC_NodeId* objectId,
-                                                         uint32_t nbInputArgs,
-                                                         const SOPC_Variant* inputArgs,
-                                                         uint32_t* nbOutputArgs,
-                                                         SOPC_Variant** outputArgs,
-                                                         void* param,
-                                                         const char* ackOrConfStateIdPath,
-                                                         SOPC_ServerAlarmCondMethods ackOrConfMethodEnum)
+static SOPC_StatusCode SOPC_MethodCall_AddComment(const SOPC_CallContext* callContextPtr,
+                                                  const SOPC_NodeId* objectId,
+                                                  uint32_t nbInputArgs,
+                                                  const SOPC_Variant* inputArgs,
+                                                  uint32_t* nbOutputArgs,
+                                                  SOPC_Variant** outputArgs,
+                                                  void* param)
+{
+    SOPC_UNUSED_ARG(nbOutputArgs);
+    SOPC_UNUSED_ARG(outputArgs);
+    SOPC_UNUSED_ARG(param);
+    // Single reference scope for the method call treatment
+    SOPC_AlarmCondition* ac = SOPC_InternalMethodCall_RetrieveAC(objectId);
+    SOPC_StatusCode result = SOPC_InternalMethodCall_TreatAddComment(ac, callContextPtr, nbInputArgs, inputArgs);
+    SOPC_InternalAlarmCondition_Release(&ac);
+    return result;
+}
+
+// Acknowledge / Confirm method call treatment: ac (might be NULL) reference is managed by the caller
+static SOPC_StatusCode SOPC_InternalMethodCall_TreatAckOrConf(SOPC_AlarmCondition* ac,
+                                                              const SOPC_CallContext* callContextPtr,
+                                                              uint32_t nbInputArgs,
+                                                              const SOPC_Variant* inputArgs,
+                                                              const char* ackOrConfStateIdPath,
+                                                              SOPC_ServerAlarmCondMethods ackOrConfMethodEnum)
 {
     SOPC_ASSERT(nbInputArgs == 2);
     SOPC_ASSERT(NULL != inputArgs);
-    SOPC_UNUSED_ARG(nbOutputArgs);
-    SOPC_UNUSED_ARG(outputArgs);
     SOPC_ASSERT(NULL != ackOrConfStateIdPath);
     SOPC_ASSERT(SOPC_AC_METHOD_ACKNOWLEDGE == ackOrConfMethodEnum || SOPC_AC_METHOD_CONFIRM == ackOrConfMethodEnum);
     const SOPC_Variant* eventIdVar = &inputArgs[0];
@@ -721,7 +759,6 @@ static SOPC_StatusCode SOPC_InternalMethodCall_AckOrConf(const SOPC_CallContext*
     {
         ltCommentInput = NULL;
     }
-    SOPC_AlarmCondition* ac = SOPC_InternalMethodCall_RetrieveAC(param, objectId);
     if (NULL == ac)
     {
         SOPC_InternalMethodCall_TraceFailureToLooper(ackOrConfMethodEnum, ac, &eventIdVar->Value.Bstring,
@@ -799,8 +836,15 @@ static SOPC_StatusCode SOPC_MethodCall_Acknowledge(const SOPC_CallContext* callC
                                                    SOPC_Variant** outputArgs,
                                                    void* param)
 {
-    return SOPC_InternalMethodCall_AckOrConf(callContextPtr, objectId, nbInputArgs, inputArgs, nbOutputArgs, outputArgs,
-                                             param, cAckedStatePaths.id, SOPC_AC_METHOD_ACKNOWLEDGE);
+    SOPC_UNUSED_ARG(nbOutputArgs);
+    SOPC_UNUSED_ARG(outputArgs);
+    SOPC_UNUSED_ARG(param);
+    // Single reference scope for the method call treatment
+    SOPC_AlarmCondition* ac = SOPC_InternalMethodCall_RetrieveAC(objectId);
+    SOPC_StatusCode result = SOPC_InternalMethodCall_TreatAckOrConf(ac, callContextPtr, nbInputArgs, inputArgs,
+                                                                    cAckedStatePaths.id, SOPC_AC_METHOD_ACKNOWLEDGE);
+    SOPC_InternalAlarmCondition_Release(&ac);
+    return result;
 }
 
 static SOPC_StatusCode SOPC_MethodCall_Confirm(const SOPC_CallContext* callContextPtr,
@@ -811,8 +855,15 @@ static SOPC_StatusCode SOPC_MethodCall_Confirm(const SOPC_CallContext* callConte
                                                SOPC_Variant** outputArgs,
                                                void* param)
 {
-    return SOPC_InternalMethodCall_AckOrConf(callContextPtr, objectId, nbInputArgs, inputArgs, nbOutputArgs, outputArgs,
-                                             param, cConfirmedStatePaths.id, SOPC_AC_METHOD_CONFIRM);
+    SOPC_UNUSED_ARG(nbOutputArgs);
+    SOPC_UNUSED_ARG(outputArgs);
+    SOPC_UNUSED_ARG(param);
+    // Single reference scope for the method call treatment
+    SOPC_AlarmCondition* ac = SOPC_InternalMethodCall_RetrieveAC(objectId);
+    SOPC_StatusCode result = SOPC_InternalMethodCall_TreatAckOrConf(ac, callContextPtr, nbInputArgs, inputArgs,
+                                                                    cConfirmedStatePaths.id, SOPC_AC_METHOD_CONFIRM);
+    SOPC_InternalAlarmCondition_Release(&ac);
+    return result;
 }
 
 /*
@@ -853,6 +904,24 @@ SOPC_ReturnStatus SOPC_Internal_ConfigureMethodCallManager(SOPC_MethodCallManage
     return status;
 }
 
+/*
+ * Registers an instance method without parameter: the instance is retrieved from the call ObjectId
+ * (see SOPC_InternalMethodCall_RetrieveAC). A method already registered with the same function
+ * (instance re-created for the same condition node) is kept: replacing it would free the method
+ * wrapper possibly used by an ongoing call. Instance methods are only registered from the A&C looper.
+ */
+static SOPC_ReturnStatus SOPC_InternalMethod_AddInstanceMethod(SOPC_MethodCallManager* mcm,
+                                                               const SOPC_NodeId* methodId,
+                                                               SOPC_MethodCallFunc_Ptr* methodFunc)
+{
+    const SOPC_MethodCallFunc* registered = SOPC_MethodCallManager_GetMethod(mcm, methodId);
+    if (NULL != registered && methodFunc == registered->pMethodFunc && NULL == registered->pParam)
+    {
+        return SOPC_STATUS_OK;
+    }
+    return SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, NULL, NULL);
+}
+
 void SOPC_InternalMethod_InitAlarmCondition_Methods(SOPC_MethodCallManager* mcm, SOPC_AlarmCondition* ac)
 {
     for (size_t i = 0; i < SOPC_AC_METHOD_COUNT; i++)
@@ -865,21 +934,19 @@ void SOPC_InternalMethod_InitAlarmCondition_Methods(SOPC_MethodCallManager* mcm,
             switch (i)
             {
             case SOPC_AC_METHOD_DISABLE:
-                status = SOPC_MethodCallManager_AddMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_Disable, ac, NULL);
+                status = SOPC_InternalMethod_AddInstanceMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_Disable);
                 break;
             case SOPC_AC_METHOD_ENABLE:
-                status = SOPC_MethodCallManager_AddMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_Enable, ac, NULL);
+                status = SOPC_InternalMethod_AddInstanceMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_Enable);
                 break;
             case SOPC_AC_METHOD_ADD_COMMENT:
-                status =
-                    SOPC_MethodCallManager_AddMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_AddComment, ac, NULL);
+                status = SOPC_InternalMethod_AddInstanceMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_AddComment);
                 break;
             case SOPC_AC_METHOD_ACKNOWLEDGE:
-                status =
-                    SOPC_MethodCallManager_AddMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_Acknowledge, ac, NULL);
+                status = SOPC_InternalMethod_AddInstanceMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_Acknowledge);
                 break;
             case SOPC_AC_METHOD_CONFIRM:
-                status = SOPC_MethodCallManager_AddMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_Confirm, ac, NULL);
+                status = SOPC_InternalMethod_AddInstanceMethod(mcm, &ac->methodIds[i], &SOPC_MethodCall_Confirm);
                 break;
             default:
                 break;
@@ -903,6 +970,10 @@ void SOPC_InternalMethod_InitAlarmCondition_Methods(SOPC_MethodCallManager* mcm,
  * The method call only checked for treatment preconditions.
  */
 
+/*
+ * Applies the state change of a method call, unless the instance was deleted meanwhile.
+ * The instance reference is released by onMethodCallLibEvt.
+ */
 static void onMethodCallSetState(SOPC_ServerAlarmCondMethods acMethod,
                                  SOPC_AlarmCondition* ac,
                                  SOPC_MethodCallEvt_Ctx* optCtx)
@@ -915,27 +986,44 @@ static void onMethodCallSetState(SOPC_ServerAlarmCondMethods acMethod,
         optComment = optCtx->optComment;
         optClientUserId = optCtx->optClientUserId;
     }
-    switch (acMethod)
+    // ac->mut is kept locked during the state change (recursive mutex): instance cannot be deleted meanwhile
+    bool notDeleted = SOPC_InternalAlarmCondition_LockIfNotDeleted(ac);
+    if (notDeleted)
     {
-    case SOPC_AC_METHOD_DISABLE:
-        status = SOPC_InternalAlarmCondition_SetEnabledState(ac, false, true, optComment, true);
-        break;
-    case SOPC_AC_METHOD_ENABLE:
-        status = SOPC_InternalAlarmCondition_SetEnabledState(ac, true, false, optComment, true);
-        break;
-    case SOPC_AC_METHOD_ADD_COMMENT:
-        status = SOPC_InternalAlarmCondition_SetComment(ac, optComment, optClientUserId);
-        break;
-    case SOPC_AC_METHOD_ACKNOWLEDGE:
-        status = SOPC_InternalAlarmCondition_Acknowledge(ac, optComment, optClientUserId, true);
-        break;
-    case SOPC_AC_METHOD_CONFIRM:
-        status = SOPC_InternalAlarmCondition_Confirm(ac, optComment, optClientUserId, true);
-        break;
-    default:
-        SOPC_ASSERT(false);
+        switch (acMethod)
+        {
+        case SOPC_AC_METHOD_DISABLE:
+            status = SOPC_InternalAlarmCondition_SetEnabledState(ac, false, true, optComment, true);
+            break;
+        case SOPC_AC_METHOD_ENABLE:
+            status = SOPC_InternalAlarmCondition_SetEnabledState(ac, true, false, optComment, true);
+            break;
+        case SOPC_AC_METHOD_ADD_COMMENT:
+            status = SOPC_InternalAlarmCondition_SetComment(ac, optComment, optClientUserId);
+            break;
+        case SOPC_AC_METHOD_ACKNOWLEDGE:
+            status = SOPC_InternalAlarmCondition_Acknowledge(ac, optComment, optClientUserId, true);
+            break;
+        case SOPC_AC_METHOD_CONFIRM:
+            status = SOPC_InternalAlarmCondition_Confirm(ac, optComment, optClientUserId, true);
+            break;
+        default:
+            SOPC_ASSERT(false);
+        }
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Unlock(&ac->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
-    if (SOPC_STATUS_OK != status || SOPC_Logger_GetTraceLogLevel() >= SOPC_LOG_LEVEL_DEBUG)
+
+    if (!notDeleted)
+    {
+        // Instance deleted since the method call: state change dropped (traced below)
+        char* conditionIdStr = SOPC_InternalConditionIdToString(ac);
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                              "Method call %s state change dropped: AlarmCondition %s deleted meanwhile",
+                              SOPC_String_GetRawCString(&acMethodsNames[acMethod].Name), conditionIdStr);
+        SOPC_Free(conditionIdStr);
+    }
+    else if (SOPC_STATUS_OK != status || SOPC_Logger_GetTraceLogLevel() >= SOPC_LOG_LEVEL_DEBUG)
     {
         char* conditionIdStr = SOPC_InternalConditionIdToString(ac);
         const char* optUserStr =
@@ -977,8 +1065,12 @@ static void onMethodCallSetState(SOPC_ServerAlarmCondMethods acMethod,
     SOPC_Free(optCtx);
 }
 
+/*
+ * Traces the failure of a method call (ac might be NULL or deleted, only its condition NodeId is used).
+ * The instance reference is released by onMethodCallLibEvt.
+ */
 static void onMethodCallFailure(SOPC_ServerAlarmCondMethods acMethod,
-                                const SOPC_AlarmCondition* ac,
+                                SOPC_AlarmCondition* ac,
                                 SOPC_MethodCallEvt_Ctx* optCtx)
 {
     SOPC_LocalizedText* optComment = NULL;
@@ -1050,15 +1142,19 @@ static void onMethodCallFailure(SOPC_ServerAlarmCondMethods acMethod,
 void onMethodCallLibEvt(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, uintptr_t params, uintptr_t auxParam)
 {
     SOPC_UNUSED_ARG(handler);
+    // Instance reference taken by SOPC_InternalMethodCall_PostToLooper (SET_STATE and FAILURE events only)
+    SOPC_AlarmCondition* ac = NULL;
     switch ((SOPC_ServerAlarmCondLibEvent) event)
     {
     case SOPC_AC_EVT_METHOD_CALL_SET_STATE:
-        onMethodCallSetState((SOPC_ServerAlarmCondMethods) eltId, (SOPC_AlarmCondition*) params,
-                             (SOPC_MethodCallEvt_Ctx*) auxParam);
+        ac = (SOPC_AlarmCondition*) params;
+        onMethodCallSetState((SOPC_ServerAlarmCondMethods) eltId, ac, (SOPC_MethodCallEvt_Ctx*) auxParam);
+        SOPC_InternalAlarmCondition_Release(&ac);
         break;
     case SOPC_AC_EVT_METHOD_CALL_FAILURE:
-        onMethodCallFailure((SOPC_ServerAlarmCondMethods) eltId, (SOPC_AlarmCondition*) params,
-                            (SOPC_MethodCallEvt_Ctx*) auxParam);
+        ac = (SOPC_AlarmCondition*) params;
+        onMethodCallFailure((SOPC_ServerAlarmCondMethods) eltId, ac, (SOPC_MethodCallEvt_Ctx*) auxParam);
+        SOPC_InternalAlarmCondition_Release(&ac);
         break;
     case SOPC_AC_EVT_METHOD_CALL_COND_REFRESH:
         SOPC_Internal_ConditionRefresh((SOPC_InternalConditionRefresh_Ctx*) params, (SOPC_StatusCode) auxParam);

@@ -634,6 +634,15 @@ SOPC_ReturnStatus SOPC_AlarmCondition_TriggerEvent(SOPC_AlarmCondition* pAlarmCo
 /**
  * \brief Callback type for state changed event
  *
+ * The callback is called from the Alarm & Conditions dedicated thread, without any internal lock held:
+ * - it may call the Alarm & Conditions functions on \p alarmCond, including ::SOPC_AlarmCondition_Delete.
+ *   The instance memory remains valid until the callback returns, but \p alarmCond shall not be used
+ *   after its own call to ::SOPC_AlarmCondition_Delete.
+ * - it shall not block for a long time since it delays the treatment of other Alarm & Conditions events
+ *   (method calls state changes, other state changed callbacks).
+ * - it might be called once for an instance deleted concurrently by another thread
+ *   (deletion occurring just before the callback call).
+ *
  * \param userCbCtx  the user context provided when recording the callback
  * \param alarmCond  the alarm condition in which state changed
  * \param qnPath     the State variable path
@@ -657,9 +666,14 @@ typedef void SOPC_AlarmCondition_StateChanged_Fct(uintptr_t userCbCtx,
  * \param callback         Function pointer to the callback that will be called on state change
  * \param userCbCtx        User context that will be passed to the callback function
  *
+ * \note Only one callback can be set for a given state of an instance: it cannot be replaced
+ *       and a second call fails with SOPC_STATUS_INVALID_STATE.
+ * \note See ::SOPC_AlarmCondition_StateChanged_Fct for the constraints on the callback.
+ *
  * \return SOPC_STATUS_OK if the callback was successfully registered,
  *         SOPC_STATUS_INVALID_PARAMETERS if any argument is invalid (NULL instance or callback),
- *         SOPC_STATUS_INVALID_STATE if the module is not initialized.
+ *         SOPC_STATUS_INVALID_STATE if the module is not initialized or a callback is already set for this state,
+ *         SOPC_STATUS_OUT_OF_MEMORY in case of memory allocation failure.
  */
 SOPC_ReturnStatus SOPC_AlarmCondition_SetEnabledStateCallback(SOPC_AlarmCondition* pAlarmCondition,
                                                               SOPC_AlarmCondition_StateChanged_Fct* callback,
@@ -676,9 +690,14 @@ SOPC_ReturnStatus SOPC_AlarmCondition_SetEnabledStateCallback(SOPC_AlarmConditio
  * \param callback         Function pointer to the callback that will be called on state change
  * \param userCbCtx        User context that will be passed to the callback function
  *
+ * \note Only one callback can be set for a given state of an instance: it cannot be replaced
+ *       and a second call fails with SOPC_STATUS_INVALID_STATE.
+ * \note See ::SOPC_AlarmCondition_StateChanged_Fct for the constraints on the callback.
+ *
  * \return SOPC_STATUS_OK if the callback was successfully registered,
  *         SOPC_STATUS_INVALID_PARAMETERS if any argument is invalid (NULL instance or callback),
- *         SOPC_STATUS_INVALID_STATE if the module is not initialized.
+ *         SOPC_STATUS_INVALID_STATE if the module is not initialized or a callback is already set for this state,
+ *         SOPC_STATUS_OUT_OF_MEMORY in case of memory allocation failure.
  */
 SOPC_ReturnStatus SOPC_AlarmCondition_SetAckedStateCallback(SOPC_AlarmCondition* pAlarmCondition,
                                                             SOPC_AlarmCondition_StateChanged_Fct* callback,
@@ -695,9 +714,14 @@ SOPC_ReturnStatus SOPC_AlarmCondition_SetAckedStateCallback(SOPC_AlarmCondition*
  * \param callback         Function pointer to the callback that will be called on state change
  * \param userCbCtx        User context that will be passed to the callback function
  *
+ * \note Only one callback can be set for a given state of an instance: it cannot be replaced
+ *       and a second call fails with SOPC_STATUS_INVALID_STATE.
+ * \note See ::SOPC_AlarmCondition_StateChanged_Fct for the constraints on the callback.
+ *
  * \return SOPC_STATUS_OK if the callback was successfully registered,
  *         SOPC_STATUS_INVALID_PARAMETERS if any argument is invalid (NULL instance or callback),
- *         SOPC_STATUS_INVALID_STATE if the module is not initialized.
+ *         SOPC_STATUS_INVALID_STATE if the module is not initialized or a callback is already set for this state,
+ *         SOPC_STATUS_OUT_OF_MEMORY in case of memory allocation failure.
  */
 SOPC_ReturnStatus SOPC_AlarmCondition_SetConfirmedStateCallback(SOPC_AlarmCondition* pAlarmCondition,
                                                                 SOPC_AlarmCondition_StateChanged_Fct* callback,

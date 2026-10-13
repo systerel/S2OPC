@@ -23,6 +23,7 @@
 #include "libs2opc_server_internal.h"
 
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_enums.h"
 #include "sopc_event_manager.h"
@@ -90,6 +91,11 @@ SOPC_ReturnStatus SOPC_AlarmCondition_CreateFromEvent(const SOPC_NodeId* notifie
     {
         ac = SOPC_Calloc(1, sizeof(*ac));
         status = (NULL == ac ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Creation reference, which becomes the registration reference once inserted in g_alarmConditionsDict
+        SOPC_Atomic_Int_Set(&ac->refCount, 1);
     }
 
     if (SOPC_STATUS_OK == status)

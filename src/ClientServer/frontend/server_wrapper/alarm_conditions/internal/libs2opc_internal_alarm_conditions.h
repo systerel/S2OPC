@@ -44,6 +44,8 @@
  * Lock order (a lock on the left may be held while taking a lock on the right, never the reverse):
  *   g_mutex -> ac->mut -> { g_refreshMutex, g_looperMutex }
  * g_refreshMutex and g_looperMutex are leaf locks: no other A&C lock is taken while holding one of them.
+ * Mutexes are recursive: re-locking a mutex already held by the current thread is allowed, but an A&C instance
+ * (and its mutex) is never freed while the current thread holds its mutex (see ::SOPC_InternalAlarmCondition_Release).
  */
 struct _SOPC_AlarmConditionConfig
 {
@@ -69,10 +71,20 @@ extern struct _SOPC_AlarmConditionConfig sopc_alarmConditionConfig;
  * Internal structure to manage A&C instances
  */
 
-// A&C instance structure
-
+/*
+ * A&C instance structure
+ *
+ * Lifetime: the instance is reference counted (refCount). The registration in g_alarmConditionsDict
+ * holds one reference, each asynchronous context using the instance (local service TBP / Write context,
+ * looper event for method call or state changed callback) holds another one.
+ * ::SOPC_InternalServerAlarmCondition_Delete unregisters the instance and sets deleted, the memory is
+ * freed when the last reference is released. Asynchronous treatments shall check deleted with ac->mut
+ * locked before using the instance (see ::SOPC_InternalAlarmCondition_LockIfNotDeleted).
+ */
 struct _SOPC_AlarmCondition
 {
+    int32_t refCount;            // Number of references on the instance, atomic access only
+    bool deleted;                // Set when unregistered by delete, protected by mut
     SOPC_Mutex mut;              // Mutex to protect the A&C content during modification / access
     SOPC_NodeId notifierNode;    // Id of the node used to trigger events in address space
     SOPC_NodeId conditionNode;   // Id of the A&C node
@@ -262,15 +274,51 @@ SOPC_ReturnStatus SOPC_InternalAlarmCondition_SetComment(SOPC_AlarmCondition* pA
 /**
  * \brief Deletes an A&C instance and related ConditionRefresh state.
  *
- * When the instance is registered in g_alarmConditionsDict (pointer identity match),
- * it is removed from that dictionary first; the dict value-free path releases
- * resources. Otherwise resources are released directly (e.g. create rollback before
- * dict insert). In both cases g_refreshEventsDict is cleaned up and ac->mut is
- * drained so in-flight async TBP/Write callbacks observe the instance as stale.
+ * When the instance is registered in g_alarmConditionsDict (pointer identity match), it is marked
+ * as deleted, its ConditionRefresh event is removed and it is unregistered, which releases the
+ * registration reference. Otherwise (create rollback before registration) the creation reference
+ * is released. Memory is freed when the last reference is released (see ::_SOPC_AlarmCondition).
  *
  * \param[in, out] ppAlarmCond Address of the AC pointer; set to NULL on return
  */
 void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond);
+
+/**
+ * \brief Returns the registered A&C instance for \p conditionNode with a new reference on it.
+ *
+ * \param conditionNode  Condition NodeId of the instance
+ *
+ * \return the instance, or NULL if no instance is registered for \p conditionNode.
+ *         The reference shall be released with ::SOPC_InternalAlarmCondition_Release.
+ */
+SOPC_AlarmCondition* SOPC_InternalAlarmCondition_Acquire(const SOPC_NodeId* conditionNode);
+
+/**
+ * \brief Takes a new reference on \p ac, the caller shall already hold a valid reference on it
+ *        (or a valid pointer as an application, or be called with g_mutex locked on a registered instance).
+ *
+ * \param ac  The A&C instance, nothing is done if NULL
+ */
+void SOPC_InternalAlarmCondition_AddRef(SOPC_AlarmCondition* ac);
+
+/**
+ * \brief Releases a reference on the A&C instance, the instance is freed on last reference release.
+ *
+ * \warning The calling thread shall not hold \p (*ppAc)->mut when the last reference may be released.
+ *
+ * \param[in, out] ppAc  Address of the A&C instance pointer, set to NULL on return. Nothing is done if NULL.
+ */
+void SOPC_InternalAlarmCondition_Release(SOPC_AlarmCondition** ppAc);
+
+/**
+ * \brief Locks \p ac->mut if the instance has not been deleted.
+ *
+ * \param ac  The A&C instance on which the caller holds a reference
+ *
+ * \return true if the instance is not deleted and \p ac->mut is locked (caller shall unlock it),
+ *         false if the instance is deleted (\p ac->mut is not locked)
+ */
+bool SOPC_InternalAlarmCondition_LockIfNotDeleted(SOPC_AlarmCondition* ac);
 
 /*
  * Internal functions to manage A&C instances with mutex locked prior to call

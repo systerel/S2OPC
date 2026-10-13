@@ -39,13 +39,12 @@
 
 typedef struct
 {
+    /* Instance on which the context holds a reference (see SOPC_InternalLocalService_Ctx_SetAc) */
     SOPC_AlarmCondition* ac;
-    /* Owned copy of ac->conditionNode: used to detect stale async callbacks after AC free/overwrite */
-    SOPC_NodeId conditionNode;
     /* Variable paths of the request items.
-     * TBP context: borrowed from ac->data, only accessed when the AC is still registered (TryLockAC).
+     * TBP context: borrowed from ac->data, only accessed when the AC is not deleted (ac->mut locked).
      * Write context: owned copies (nbOwnedVarPaths entries), since the Write response may be treated
-     * after the source strings are freed (temporary path, application string or AC deleted). */
+     * after the source strings are freed (temporary path or application string). */
     const char** varPathArr;
     size_t nbOwnedVarPaths;
 } SOPC_InternalLocalService_Ctx;
@@ -57,7 +56,11 @@ static const uintptr_t ALARM_CONDITIONS_DICT_TOMBSTONE = UINTPTR_MAX;
 static const uintptr_t REFRESH_EVENTS_DICT_TOMBSTONE = UINTPTR_MAX;
 
 /**
- * \brief Frees a local-service async context and its owned resources.
+ * \brief Frees a local-service async context, its owned resources and releases its AC reference.
+ *
+ * \warning The AC reference held by the context is never the last one when the calling thread holds ac->mut:
+ *          the caller then holds its own reference or the instance is still registered.
+ *
  * \param[in, out] ppCtx Context pointer; set to NULL on return.
  */
 static void SOPC_InternalLocalService_Ctx_Delete(SOPC_InternalLocalService_Ctx** ppCtx)
@@ -67,7 +70,7 @@ static void SOPC_InternalLocalService_Ctx_Delete(SOPC_InternalLocalService_Ctx**
         return;
     }
     SOPC_InternalLocalService_Ctx* ctx = *ppCtx;
-    SOPC_NodeId_Clear(&ctx->conditionNode);
+    SOPC_InternalAlarmCondition_Release(&ctx->ac);
     for (size_t i = 0; NULL != ctx->varPathArr && i < ctx->nbOwnedVarPaths; i++)
     {
         // Owned copies allocated by SOPC_InternalLocalService_Ctx_SetOwnedVarPath
@@ -116,67 +119,19 @@ static void SOPC_InternalLocalService_Ctx_SetOwnedVarPath(SOPC_InternalLocalServ
 }
 
 /**
- * \brief Binds \p ctx to \p ac and stores an owned copy of \p ac->conditionNode.
- *
- * The copy is required so async callbacks can detect overwrite/free without
- * dereferencing a dangling AC pointer (Dict lookup key must outlive \p ac).
+ * \brief Binds \p ctx to \p ac and takes a reference on \p ac, released by ::SOPC_InternalLocalService_Ctx_Delete.
  *
  * \param[in, out] ctx Async context to update
- * \param ac Alarm condition instance referenced by the pending local service
- * \return true on success, false if the NodeId copy failed
+ * \param ac Alarm condition instance referenced by the pending local service, the caller holds a valid
+ *           pointer or reference on it
  */
-static bool SOPC_InternalLocalService_Ctx_SetAc(SOPC_InternalLocalService_Ctx* ctx, SOPC_AlarmCondition* ac)
+static void SOPC_InternalLocalService_Ctx_SetAc(SOPC_InternalLocalService_Ctx* ctx, SOPC_AlarmCondition* ac)
 {
     SOPC_ASSERT(NULL != ctx);
     SOPC_ASSERT(NULL != ac);
+    SOPC_ASSERT(NULL == ctx->ac);
+    SOPC_InternalAlarmCondition_AddRef(ac);
     ctx->ac = ac;
-    SOPC_NodeId_Clear(&ctx->conditionNode);
-    SOPC_NodeId_Initialize(&ctx->conditionNode);
-    return (SOPC_STATUS_OK == SOPC_NodeId_Copy(&ctx->conditionNode, &ac->conditionNode));
-}
-
-/**
- * \brief Locks the AC mutex if \p ctx still refers to the registered instance.
- *
- * Compares \p ctx->ac to the value currently stored in g_alarmConditionsDict for
- * \p ctx->conditionNode (owned copy). Lock order is g_mutex then ac->mut (see
- * ::_SOPC_AlarmConditionConfig) so that SOPC_InternalServerAlarmCondition_Delete can drain
- * holders of ac->mut safely.
- *
- * \param ctx Async context with owned conditionNode and original ac pointer
- * \param[out] outAc Live AC when returning true; caller must Unlock(\p outAc->mut)
- * \return true if the AC is still registered and ac->mut is locked, false otherwise
- */
-static bool SOPC_InternalLocalService_TryLockAC(SOPC_InternalLocalService_Ctx* ctx, SOPC_AlarmCondition** outAc)
-{
-    if (NULL == ctx || NULL == outAc)
-    {
-        return false;
-    }
-    *outAc = NULL;
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    bool found = false;
-    SOPC_AlarmCondition* live = NULL;
-    if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
-    {
-        live = (SOPC_AlarmCondition*) SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict,
-                                                    (uintptr_t) &ctx->conditionNode, &found);
-    }
-    if (found && live == ctx->ac)
-    {
-        mutStatus = SOPC_Mutex_Lock(&live->mut);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        *outAc = live;
-    }
-    else
-    {
-        found = false;
-    }
-    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    return found;
 }
 
 const SOPC_InternalTwoStateVariableFieldsPaths cEnabledStatePaths = {
@@ -318,10 +273,10 @@ static void SOPC_RefreshEvent_Free(uintptr_t data)
 }
 
 /**
- * \brief Frees alarm condition resources and removes related ConditionRefresh state.
+ * \brief Frees alarm condition resources.
  *
- * Does not update g_alarmConditionsDict. Used as the dict value-free path and when
- * ::SOPC_InternalServerAlarmCondition_Delete finds that the instance is not registered.
+ * Only called on last reference release (see ::SOPC_InternalAlarmCondition_Release):
+ * no other thread may access the instance anymore, no lock is taken.
  *
  * \param[in, out] ppAlarmCond Address of the AC pointer; set to NULL on return when non-NULL input.
  */
@@ -330,22 +285,11 @@ static void SOPC_InternalServerAlarmCondition_FreeInstance(SOPC_AlarmCondition**
     if (NULL != ppAlarmCond && NULL != *ppAlarmCond)
     {
         SOPC_AlarmCondition* pAlarmCond = *ppAlarmCond;
-        // Leaf lock: may be called with g_mutex held (dict value-free path)
-        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_refreshMutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        if (NULL != sopc_alarmConditionConfig.g_refreshEventsDict)
+        if (SOPC_INVALID_MUTEX != pAlarmCond->mut) // Might fail during creation
         {
-            SOPC_Dict_Remove(sopc_alarmConditionConfig.g_refreshEventsDict, (uintptr_t) &pAlarmCond->conditionNode);
+            SOPC_ReturnStatus mutStatus = SOPC_Mutex_Clear(&pAlarmCond->mut);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
-        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_refreshMutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        // Drain any async callback that already passed TryLockAC and holds ac->mut
-        mutStatus = SOPC_Mutex_Lock(&pAlarmCond->mut);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        mutStatus = SOPC_Mutex_Unlock(&pAlarmCond->mut);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-        SOPC_Mutex_Clear(&pAlarmCond->mut);
         SOPC_NodeId_Clear(&pAlarmCond->notifierNode);
         SOPC_NodeId_Clear(&pAlarmCond->conditionNode);
         SOPC_Event_Delete(&pAlarmCond->data);
@@ -362,9 +306,71 @@ static void SOPC_InternalServerAlarmCondition_FreeInstance(SOPC_AlarmCondition**
     }
 }
 
+// Value free of g_alarmConditionsDict: releases the registration reference
 static void SOPC_AlarmConditionValue_Free(uintptr_t ac)
 {
-    SOPC_InternalServerAlarmCondition_FreeInstance((SOPC_AlarmCondition**) &ac);
+    SOPC_InternalAlarmCondition_Release((SOPC_AlarmCondition**) &ac);
+}
+
+SOPC_AlarmCondition* SOPC_InternalAlarmCondition_Acquire(const SOPC_NodeId* conditionNode)
+{
+    if (NULL == conditionNode || !SOPC_InternalAlarmConditionMgr_IsInit())
+    {
+        return NULL;
+    }
+    SOPC_AlarmCondition* ac = NULL;
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (NULL != sopc_alarmConditionConfig.g_alarmConditionsDict)
+    {
+        bool found = false;
+        ac = (SOPC_AlarmCondition*) SOPC_Dict_Get(sopc_alarmConditionConfig.g_alarmConditionsDict,
+                                                  (uintptr_t) conditionNode, &found);
+        ac = (found ? ac : NULL);
+        // Registration reference kept alive by g_mutex: the new reference can be safely taken
+        SOPC_InternalAlarmCondition_AddRef(ac);
+    }
+    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    return ac;
+}
+
+void SOPC_InternalAlarmCondition_AddRef(SOPC_AlarmCondition* ac)
+{
+    if (NULL != ac)
+    {
+        int32_t prevCount = SOPC_Atomic_Int_Add(&ac->refCount, 1);
+        SOPC_ASSERT(prevCount > 0);
+    }
+}
+
+void SOPC_InternalAlarmCondition_Release(SOPC_AlarmCondition** ppAc)
+{
+    if (NULL == ppAc || NULL == *ppAc)
+    {
+        return;
+    }
+    int32_t prevCount = SOPC_Atomic_Int_Add(&(*ppAc)->refCount, -1);
+    SOPC_ASSERT(prevCount > 0);
+    if (1 == prevCount)
+    {
+        SOPC_InternalServerAlarmCondition_FreeInstance(ppAc);
+    }
+    *ppAc = NULL;
+}
+
+bool SOPC_InternalAlarmCondition_LockIfNotDeleted(SOPC_AlarmCondition* ac)
+{
+    SOPC_ASSERT(NULL != ac);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&ac->mut);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (ac->deleted)
+    {
+        mutStatus = SOPC_Mutex_Unlock(&ac->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        return false;
+    }
+    return true;
 }
 
 char* SOPC_InternalVarToString(const SOPC_Variant* var)
@@ -440,8 +446,8 @@ static void onLibEvt(SOPC_EventHandler* handler, int32_t event, uint32_t eltId, 
     case SOPC_AC_EVT_WRITE_RESP:
         writeResp = (OpcUa_WriteResponse*) params;
         lsCtx = (SOPC_InternalLocalService_Ctx*) auxParam;
-        /* Use owned NodeId and variable paths copies: AC may already have been freed or overwritten. */
-        conditionIdStr = SOPC_NodeId_ToCString(&lsCtx->conditionNode);
+        /* AC memory is kept by the context reference (even if deleted), variable paths are owned copies */
+        conditionIdStr = SOPC_InternalConditionIdToString(lsCtx->ac);
         for (int32_t i = 0; i < writeResp->NoOfResults; i++)
         {
             if (!SOPC_IsGoodStatus(writeResp->Results[i]))
@@ -708,7 +714,7 @@ void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
     }
 
     SOPC_AlarmCondition* pAlarmCond = *ppAlarmCond;
-    bool freedViaDictRemove = false;
+    bool registered = false;
 
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -717,23 +723,41 @@ void SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition** ppAlarmCond)
         bool found = false;
         SOPC_AlarmCondition* live = (SOPC_AlarmCondition*) SOPC_Dict_Get(
             sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &pAlarmCond->conditionNode, &found);
-        if (found && live == pAlarmCond)
+        registered = (found && live == pAlarmCond);
+    }
+    if (registered)
+    {
+        // Asynchronous treatments still holding a reference shall not use the instance anymore
+        mutStatus = SOPC_Mutex_Lock(&pAlarmCond->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        pAlarmCond->deleted = true;
+        mutStatus = SOPC_Mutex_Unlock(&pAlarmCond->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        // Removed here and not on free: a new instance may be created meanwhile for the same condition node
+        mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_refreshMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        if (NULL != sopc_alarmConditionConfig.g_refreshEventsDict)
         {
-            freedViaDictRemove = true;
-            // Value-free path (FreeInstance) takes g_refreshMutex then ac->mut: allowed under g_mutex
-            SOPC_Dict_Remove(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &pAlarmCond->conditionNode);
+            SOPC_Dict_Remove(sopc_alarmConditionConfig.g_refreshEventsDict, (uintptr_t) &pAlarmCond->conditionNode);
         }
+        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_refreshMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        // Value-free path releases the registration reference (no lock taken on last release)
+        SOPC_Dict_Remove(sopc_alarmConditionConfig.g_alarmConditionsDict, (uintptr_t) &pAlarmCond->conditionNode);
     }
     mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (freedViaDictRemove)
+    if (registered)
     {
         *ppAlarmCond = NULL;
     }
     else
     {
-        SOPC_InternalServerAlarmCondition_FreeInstance(ppAlarmCond);
+        // Creation rollback before registration: release the creation reference
+        SOPC_InternalAlarmCondition_Release(ppAlarmCond);
     }
 }
 
@@ -794,23 +818,14 @@ static void SOPC_InternalWrite_InitAlarmCondition_Node_Values(SOPC_AlarmConditio
     mutStatus = SOPC_Mutex_Unlock(&ac->mut);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    bool res = false;
-    if (SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
-    {
-        res = SOPC_ServerInternal_LocalServiceAsync(
-            &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
-            "Failure to treat Write to initialize A&C nodes from event.", false);
-        writeReq = NULL; // Memory managed by previous callee
-    }
+    SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac);
+    bool res = SOPC_ServerInternal_LocalServiceAsync(
+        &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
+        "Failure to treat Write to initialize A&C nodes from event.", false);
     if (!res)
     {
+        // The write request memory has been managed by LocalServiceAsync
         SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
-        // Delete the write request if not NULL
-        if (NULL != writeReq)
-        {
-            SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(writeReq->encodeableType, (void**) &writeReq);
-            SOPC_UNUSED_RESULT(delStatus);
-        }
     }
 }
 
@@ -818,15 +833,15 @@ static void SOPC_InternalWrite_InitAlarmCondition_Node_Values(SOPC_AlarmConditio
 
 static void onTranslateBPresp(SOPC_InternalLocalService_Ctx* lsCtx, OpcUa_TranslateBrowsePathsToNodeIdsResponse* resp)
 {
-    SOPC_AlarmCondition* ac = NULL;
-    if (!SOPC_InternalLocalService_TryLockAC(lsCtx, &ac))
+    SOPC_AlarmCondition* ac = lsCtx->ac;
+    if (!SOPC_InternalAlarmCondition_LockIfNotDeleted(ac))
     {
-        /* AC was overwritten or freed while TBP was in flight: drop the stale response. */
+        /* AC was deleted while TBP was in flight: drop the stale response. */
         SOPC_InternalLocalService_Ctx_Delete(&lsCtx);
         SOPC_EncodeableObject_Delete(resp->encodeableType, (void**) &resp);
         return;
     }
-    // else: SOPC_Mutex_Lock(&ac->mut) ongoing due to SOPC_InternalLocalService_TryLockAC
+    // else: ac->mut locked by SOPC_InternalAlarmCondition_LockIfNotDeleted
 
     // nodeId array to prepare the write request to initialize the node values
     SOPC_NodeId* nodeIdArr = NULL;
@@ -1082,26 +1097,20 @@ void SOPC_Internal_GetAlarmCondition_Vars_NodeIds_And_Write_Values(SOPC_AlarmCon
         // Fill TBP request for each supported AandC method
         SOPC_InternalTBP_GetAlarmCondition_Method_NodeIds(fillCtx.index, ac, tbpReq);
         tbpCtx->varPathArr = varPathArr;
-        if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
+        SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac);
+        reqNeedDealloc = false;
+        bool res = SOPC_ServerInternal_LocalServiceAsync(
+            &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, tbpReq, (uintptr_t) tbpCtx,
+            "Failure to treat TBP to initialize A&C nodes from event.", false);
+        if (!res)
         {
             SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
-        }
-        else
-        {
-            reqNeedDealloc = false;
-            bool res = SOPC_ServerInternal_LocalServiceAsync(
-                &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, tbpReq, (uintptr_t) tbpCtx,
-                "Failure to treat TBP to initialize A&C nodes from event.", false);
-            if (!res)
-            {
-                SOPC_InternalLocalService_Ctx_Delete(&tbpCtx);
-            }
         }
     } // else: log error
     if (reqNeedDealloc)
     {
         SOPC_EncodeableObject_Delete(tbpReq->encodeableType, (void**) &tbpReq);
-        /* tbpCtx already deleted on SetAc failure; only free leftover OOM / empty-path allocs */
+        /* No browse path to translate: tbpCtx was not bound to the AC */
         if (NULL != tbpCtx)
         {
             SOPC_Free(tbpCtx);
@@ -1293,17 +1302,11 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateVariableNode(SO
         {
             // varPath may be a temporary or application string: store a copy
             SOPC_InternalLocalService_Ctx_SetOwnedVarPath(tbpCtx, 0, varPath);
-            if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            else
-            {
-                res = SOPC_ServerInternal_LocalServiceAsync(
-                    &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
-                    "Failure to treat Write to update value of variable A&C node", false);
-                writeReq = NULL; // Memory managed by previous callee
-            }
+            SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac);
+            res = SOPC_ServerInternal_LocalServiceAsync(
+                &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
+                "Failure to treat Write to update value of variable A&C node", false);
+            writeReq = NULL; // Memory managed by previous callee
         }
         if (!res)
         {
@@ -1401,17 +1404,11 @@ static SOPC_ReturnStatus SOPC_InternalAlarmConditionNoLock_UpdateTwoStateVariabl
         bool res = false;
         if (SOPC_STATUS_OK == status)
         {
-            if (!SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac))
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            else
-            {
-                res = SOPC_ServerInternal_LocalServiceAsync(
-                    &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
-                    "Failure to treat Write to update TwoState variable A&C nodes", false);
-                writeReq = NULL; // Memory managed by previous callee
-            }
+            SOPC_InternalLocalService_Ctx_SetAc(tbpCtx, ac);
+            res = SOPC_ServerInternal_LocalServiceAsync(
+                &SOPC_ServerAlarmCondition_LocalServiceAsyncResp_Fct, writeReq, (uintptr_t) tbpCtx,
+                "Failure to treat Write to update TwoState variable A&C nodes", false);
+            writeReq = NULL; // Memory managed by previous callee
         }
         if (!res)
         {
@@ -1754,12 +1751,23 @@ SOPC_ReturnStatus SOPC_InternalAlarmConditionWithLock_TriggerEvent(SOPC_AlarmCon
 
 /* Manage states change  */
 
+// Calls the application callback unless the instance was deleted, releases the reference taken on post
 static void onStateChangeCbTrigger(SOPC_AlarmCondition_StateChanged_Fct_Ctx* fctCtx,
                                    const SOPC_Variant* prevVal,
                                    const SOPC_Variant* newVal)
 {
     SOPC_ASSERT(NULL != fctCtx);
-    fctCtx->callback(fctCtx->userCtx, fctCtx->ac, fctCtx->qnPath, prevVal, newVal);
+    // fctCtx is owned by ac->varChangedCbDict: valid as long as the reference is held
+    SOPC_AlarmCondition* ac = fctCtx->ac;
+    if (SOPC_InternalAlarmCondition_LockIfNotDeleted(ac))
+    {
+        // Callback is not called with ac->mut locked: the application may delete the instance meanwhile,
+        // the instance memory remains valid until the reference is released.
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Unlock(&ac->mut);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        fctCtx->callback(fctCtx->userCtx, ac, fctCtx->qnPath, prevVal, newVal);
+    }
+    SOPC_InternalAlarmCondition_Release(&ac);
 }
 
 static void SOPC_InternalAlarmConditionNoLock_StateGenCallback(const SOPC_AlarmCondition* pAlarmCondition,
@@ -1786,12 +1794,22 @@ static void SOPC_InternalAlarmConditionNoLock_StateGenCallback(const SOPC_AlarmC
     }
     if (SOPC_STATUS_OK == status)
     {
+        // Reference released by the looper event treatment (onStateChangeCbTrigger) or on post failure.
+        // Caller holds a valid reference (or pointer) on the instance: not the last release on failure.
+        SOPC_InternalAlarmCondition_AddRef(fctCtx->ac);
         // Caller holds ac->mut: the post only takes the leaf looper mutex (never g_mutex)
         status = SOPC_InternalAlarmConditionMgr_PostToLooper(SOPC_AC_EVT_STATE_CHANGED_CB, 0, (uintptr_t) fctCtx,
                                                              (uintptr_t) prevNewVarCopy);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_AlarmCondition* ac = fctCtx->ac;
+            SOPC_InternalAlarmCondition_Release(&ac);
+        }
     }
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK != status && NULL != prevNewVarCopy)
     {
+        SOPC_Variant_Clear(&prevNewVarCopy[0]);
+        SOPC_Variant_Clear(&prevNewVarCopy[1]);
         SOPC_Free(prevNewVarCopy);
     }
 }
