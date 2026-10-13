@@ -20,6 +20,7 @@
 #include "check_helpers.h"
 
 #include <check.h>
+#include <math.h>
 #include <string.h>
 
 #include "sopc_builtintypes.h"
@@ -358,7 +359,7 @@ START_TEST(test_variant_equal_float_double_nan_parity_with_compare)
 {
     SOPC_Variant* a = make_scalar_variant(SOPC_Double_Id);
     SOPC_Variant* b = make_scalar_variant(SOPC_Double_Id);
-    double nan_val = 0.0 / 0.0;
+    double nan_val = nan("");
     a->Value.Doublev = nan_val;
     b->Value.Doublev = 3.0;
 
