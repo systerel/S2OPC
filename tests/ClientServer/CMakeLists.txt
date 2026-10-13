@@ -957,7 +957,9 @@ if(expat_FOUND AND S2OPC_EVENT_MANAGEMENT)
   target_compile_definitions(toolkit_test_server_alarm_condition_delete PRIVATE ${S2OPC_DEFINITIONS})
 
   s2opc_unit_test(toolkit_test_server_alarm_condition_delete GENERATE_TAP)
+  # TIMEOUT: a deadlock in A&C stress tests shall fail the test instead of blocking CI
   set_tests_properties("unit::toolkit_test_server_alarm_condition_delete" PROPERTIES
+    TIMEOUT 120
     ENVIRONMENT "CK_TAP_LOG_FILE_NAME=toolkit_test_server_alarm_condition_delete.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Alarms_NodeSet.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml;TEST_PASSWORD_PRIVATE_KEY=password")
 endif()
 

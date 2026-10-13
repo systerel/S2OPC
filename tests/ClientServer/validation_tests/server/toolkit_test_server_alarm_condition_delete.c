@@ -20,18 +20,23 @@
 /**
  * \file
  *
- * \brief Validates ::SOPC_AlarmCondition_Delete (Create, TriggerEvent, Delete, recreate).
+ * \brief Validates ::SOPC_AlarmCondition_Delete and A&C instance lifecycle robustness:
+ *        - nominal lifecycle: Create, TriggerEvent, Delete, recreate
+ *        - duplicate creation on the same condition node is refused
+ *        - Create then immediate Delete while async responses are in flight
+ *        - TriggerEvent right after Create (A&C mutexes lock order, deadlock detected by CTest timeout)
  *
  * Uses demo alarms address space (EqtNoConf / AlarmNoConf, ns=1;i=5008/5009).
  * Run from build/bin with demo XML env vars (see CMake test properties).
  *
  * CreateFromEvent returns before async TranslateBrowsePathsToNodeIds completes.
  * TriggerEvent needs 0:EventId in ac->nodeIds; calling it too early logs
- * SOPC_STATUS_INVALID_STATE on the EventId node write. This test uses fixed
- * sleeps (test harness only, not library code) until a readiness API exists.
- * See AC_CREATE_INIT_MS and sibling constants below.
+ * SOPC_STATUS_INVALID_STATE on the EventId node write. The nominal lifecycle test
+ * uses fixed sleeps (test harness only, not library code) until a readiness API exists,
+ * see AC_CREATE_INIT_MS and sibling constants below. Stress tests deliberately do not wait.
  */
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -71,6 +76,23 @@ static const uint32_t SERVER_START_SETTLE_MS = 200;
 static const uint32_t AC_CREATE_INIT_MS = 500;
 static const uint32_t AFTER_TRIGGER_MS = 200;
 static const uint32_t LOOPER_DRAIN_MS = 500;
+
+/*
+ * Stress loops run without any sleep, so that async TBP / Write responses are
+ * still in flight when the instance is triggered or deleted.
+ *
+ * NB_CREATE_DELETE_ITERATIONS: CreateFromEvent then immediate Delete on the same
+ *   condition node (TBP response must be dropped as stale, the same address may
+ *   be reused by the next creation).
+ *
+ * NB_CREATE_TRIGGER_ITERATIONS / NB_TRIGGER_PER_CREATE: TriggerEvent in a tight
+ *   loop right after CreateFromEvent, while the looper treats the TBP response.
+ *   Regression for the lock order between the A&C global mutex and ac->mut: a
+ *   deadlock makes the test hang until the CTest timeout.
+ */
+static const uint32_t NB_CREATE_DELETE_ITERATIONS = 100;
+static const uint32_t NB_CREATE_TRIGGER_ITERATIONS = 20;
+static const uint32_t NB_TRIGGER_PER_CREATE = 50;
 
 static int32_t g_stopped = 0;
 
@@ -112,7 +134,7 @@ static SOPC_Event* make_condition_event(void)
     const SOPC_Variant quality = SOPC_VARIANT_STATUSCODE(SOPC_GoodGenericStatus);
     const SOPC_Variant comment = SOPC_VARIANT_LOCALTEXT("", "");
     const SOPC_Variant suppressed = SOPC_VARIANT_BOOL(false);
-    const SOPC_Variant message = SOPC_VARIANT_STRING("toolkit_test_server_alarm_condition_delete");
+    const SOPC_Variant message = SOPC_VARIANT_LOCALTEXT("en-US", "toolkit_test_server_alarm_condition_delete");
 
     status = SOPC_Event_SetVariableFromStrPath(event, "0:Quality", &quality);
     if (SOPC_STATUS_OK == status)
@@ -213,6 +235,96 @@ static SOPC_ReturnStatus run_delete_lifecycle_test(void)
     return SOPC_STATUS_OK;
 }
 
+/* A second creation on a condition node already used by a live instance shall be refused */
+static SOPC_ReturnStatus run_duplicate_create_test(void)
+{
+    SOPC_AlarmCondition* ac = NULL;
+    SOPC_ReturnStatus status = create_condition(&ac);
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("[dup] first CreateFromEvent status=%d\n", (int) status);
+        return status;
+    }
+
+    SOPC_AlarmCondition* dupAc = NULL;
+    SOPC_ReturnStatus dupStatus = create_condition(&dupAc);
+    printf("[dup] second CreateFromEvent status=%d ac=%p\n", (int) dupStatus, (void*) dupAc);
+
+    status = SOPC_AlarmCondition_Delete(&ac);
+    if (SOPC_STATUS_INVALID_STATE != dupStatus || NULL != dupAc)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    return status;
+}
+
+/* CreateFromEvent then immediate Delete, the TBP response of each instance being still in flight */
+static SOPC_ReturnStatus run_create_delete_loop_test(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    for (uint32_t i = 0; SOPC_STATUS_OK == status && i < NB_CREATE_DELETE_ITERATIONS; i++)
+    {
+        SOPC_AlarmCondition* ac = NULL;
+        status = create_condition(&ac);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_AlarmCondition_Delete(&ac);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("[create/delete] iteration %" PRIu32 " failed with status=%d\n", i, (int) status);
+        }
+    }
+    printf("[create/delete] %" PRIu32 " iterations status=%d\n", NB_CREATE_DELETE_ITERATIONS, (int) status);
+    SOPC_Sleep(LOOPER_DRAIN_MS);
+    return status;
+}
+
+/* TriggerEvent in a tight loop right after CreateFromEvent (see NB_CREATE_TRIGGER_ITERATIONS) */
+static SOPC_ReturnStatus run_trigger_right_after_create_test(void)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    for (uint32_t i = 0; SOPC_STATUS_OK == status && i < NB_CREATE_TRIGGER_ITERATIONS; i++)
+    {
+        SOPC_AlarmCondition* ac = NULL;
+        status = create_condition(&ac);
+        for (uint32_t j = 0; SOPC_STATUS_OK == status && j < NB_TRIGGER_PER_CREATE; j++)
+        {
+            status = SOPC_AlarmCondition_TriggerEvent(ac);
+        }
+        if (NULL != ac)
+        {
+            SOPC_ReturnStatus delStatus = SOPC_AlarmCondition_Delete(&ac);
+            status = (SOPC_STATUS_OK == status ? delStatus : status);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("[create/trigger] iteration %" PRIu32 " failed with status=%d\n", i, (int) status);
+        }
+    }
+    printf("[create/trigger] %" PRIu32 " iterations status=%d\n", NB_CREATE_TRIGGER_ITERATIONS, (int) status);
+    SOPC_Sleep(LOOPER_DRAIN_MS);
+    return status;
+}
+
+static SOPC_ReturnStatus run_all_tests(void)
+{
+    SOPC_ReturnStatus status = run_delete_lifecycle_test();
+    if (SOPC_STATUS_OK == status)
+    {
+        status = run_duplicate_create_test();
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = run_create_delete_loop_test();
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = run_trigger_right_after_create_test();
+    }
+    return status;
+}
+
 int main(int argc, char* argv[])
 {
     SOPC_UNUSED_ARG(argc);
@@ -255,7 +367,7 @@ int main(int argc, char* argv[])
     {
         /* Address space / event types ready before first CreateFromEvent. */
         SOPC_Sleep(SERVER_START_SETTLE_MS);
-        status = run_delete_lifecycle_test();
+        status = run_all_tests();
         (void) SOPC_ServerHelper_StopServer();
         while (0 == SOPC_Atomic_Int_Get(&g_stopped))
         {
