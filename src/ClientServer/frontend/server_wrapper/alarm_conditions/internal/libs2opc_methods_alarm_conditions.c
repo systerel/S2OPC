@@ -906,19 +906,13 @@ SOPC_ReturnStatus SOPC_Internal_ConfigureMethodCallManager(SOPC_MethodCallManage
 
 /*
  * Registers an instance method without parameter: the instance is retrieved from the call ObjectId
- * (see SOPC_InternalMethodCall_RetrieveAC). A method already registered with the same function
- * (instance re-created for the same condition node) is kept: replacing it would free the method
- * wrapper possibly used by an ongoing call. Instance methods are only registered from the A&C looper.
+ * (see SOPC_InternalMethodCall_RetrieveAC). Instance methods are removed from the method call manager
+ * when the instance is deleted, a re-created instance registers them again.
  */
 static SOPC_ReturnStatus SOPC_InternalMethod_AddInstanceMethod(SOPC_MethodCallManager* mcm,
                                                                const SOPC_NodeId* methodId,
                                                                SOPC_MethodCallFunc_Ptr* methodFunc)
 {
-    const SOPC_MethodCallFunc* registered = SOPC_MethodCallManager_GetMethod(mcm, methodId);
-    if (NULL != registered && methodFunc == registered->pMethodFunc && NULL == registered->pParam)
-    {
-        return SOPC_STATUS_OK;
-    }
     return SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, NULL, NULL);
 }
 
@@ -961,6 +955,21 @@ void SOPC_InternalMethod_InitAlarmCondition_Methods(SOPC_MethodCallManager* mcm,
                     conditionIdStr, (uint32_t) i, status);
                 SOPC_Free(conditionIdStr);
             }
+        }
+    }
+}
+
+void SOPC_InternalMethod_ClearAlarmCondition_Methods(SOPC_MethodCallManager* mcm, SOPC_AlarmCondition* ac)
+{
+    for (size_t i = 0; NULL != mcm && i < SOPC_AC_METHOD_COUNT; i++)
+    {
+        bool isDefined =
+            !(SOPC_IdentifierType_Numeric == ac->methodIds[i].IdentifierType && 0 == ac->methodIds[i].Data.Numeric);
+        if (isDefined)
+        {
+            // Not registered if the method registration failed: nothing to remove in this case
+            SOPC_ReturnStatus status = SOPC_MethodCallManager_RemoveMethod(mcm, &ac->methodIds[i]);
+            SOPC_UNUSED_RESULT(status);
         }
     }
 }

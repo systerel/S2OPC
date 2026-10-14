@@ -217,15 +217,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
         return;
     }
 
-    /* Get the C function corresponding to the method */
     const SOPC_NodeId* methodId = &methodToCall->MethodId;
-    SOPC_MethodCallFunc* method_c = SOPC_MethodCallManager_GetMethod(mcm, methodId);
-    if (NULL == method_c)
-    {
-        *address_space_bs__p_rawStatusCode = OpcUa_BadNotImplemented;
-        return;
-    }
-
     const SOPC_NodeId* objectId = &methodToCall->ObjectId;
     uint32_t nbInputArgs = (0 < methodToCall->NoOfInputArguments) ? (uint32_t) methodToCall->NoOfInputArguments
                                                                   : 0; /* convert to avoid compilator error */
@@ -240,11 +232,21 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
         *address_space_bs__p_rawStatusCode = OpcUa_BadOutOfMemory;
         return;
     }
-    *address_space_bs__p_rawStatusCode =
-        method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput, &outputArgs, method_c->pParam);
-    generate_notifs_after_address_space_access(SOPC_AddressSpaceAccess_GetOperations(cc->addressSpaceForMethodCall));
+    /* Call the C function corresponding to the method (safe even if the method is removed concurrently) */
+    bool methodFound = SOPC_MethodCallManager_CallMethod(mcm, methodId, cc, objectId, nbInputArgs, inputArgs,
+                                                         &noOfOutput, &outputArgs, address_space_bs__p_rawStatusCode);
+    if (methodFound)
+    {
+        generate_notifs_after_address_space_access(
+            SOPC_AddressSpaceAccess_GetOperations(cc->addressSpaceForMethodCall));
+    }
     SOPC_AddressSpaceAccess_Delete(&cc->addressSpaceForMethodCall);
     SOPC_CallContext_FreeCopy(cc);
+    if (!methodFound)
+    {
+        *address_space_bs__p_rawStatusCode = OpcUa_BadNotImplemented;
+        return;
+    }
     if (0 != noOfOutput && NULL == outputArgs)
     {
         char* mNodeId = SOPC_NodeId_ToCString(methodId);

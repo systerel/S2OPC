@@ -770,6 +770,8 @@ SOPC_ReturnStatus SOPC_InternalServerAlarmCondition_Delete(SOPC_AlarmCondition**
         mutStatus = SOPC_Mutex_Lock(&pAlarmCond->mut);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         SOPC_InternalAlarmConditionNoLock_SetRetainFalseOnDelete(pAlarmCond);
+        // Instance methods cannot be called anymore (method call manager lock is a leaf lock)
+        SOPC_InternalMethod_ClearAlarmCondition_Methods(g_mcm, pAlarmCond);
         // Asynchronous treatments still holding a reference shall not use the instance anymore
         pAlarmCond->deleted = true;
         mutStatus = SOPC_Mutex_Unlock(&pAlarmCond->mut);

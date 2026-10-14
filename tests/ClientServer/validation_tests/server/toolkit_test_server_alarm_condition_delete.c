@@ -25,9 +25,9 @@
  *        - duplicate creation on the same condition node is refused
  *        - Create then immediate Delete while async responses are in flight
  *        - TriggerEvent right after Create (A&C mutexes lock order, deadlock detected by CTest timeout)
- *        - Write responses in error treated after Delete (no access to the deleted instance data)
  *        - creation with a condition NodeId not outliving the call (instance owns its registration key)
  *        - Delete of a retained instance sets Retain to False in address space
+ *        - Write error response treated after Delete (deterministic ordering, error log checked)
  *        - client method calls (Enable / Disable) on a deleted instance and state change events
  *          still queued in the A&C looper when the instance is deleted (in-process OPC UA client)
  *
@@ -45,6 +45,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "libs2opc_client.h"
 #include "libs2opc_client_config.h"
@@ -55,10 +56,13 @@
 #include "libs2opc_server_alarm_conditions.h"
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_array.h"
 #include "sopc_atomic.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_enums.h"
+#include "sopc_filesystem.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -108,8 +112,7 @@ static const uint32_t LOOPER_DRAIN_MS = 500;
  * NB_CREATE_TRIGGER_ITERATIONS / NB_TRIGGER_PER_CREATE: TriggerEvent in a tight
  *   loop right after CreateFromEvent, while the looper treats the TBP response.
  *   Regression for the lock order between the A&C global mutex and ac->mut: a
- *   deadlock makes the test hang until the CTest timeout. Also run with a wrongly typed
- *   condition field so that Write responses in error are treated after Delete.
+ *   deadlock makes the test hang until the CTest timeout.
  */
 static const uint32_t NB_CREATE_DELETE_ITERATIONS = 100;
 static const uint32_t NB_CREATE_TRIGGER_ITERATIONS = 20;
@@ -122,6 +125,11 @@ static const uint32_t NB_TRIGGER_PER_CREATE = 50;
  */
 static const uint32_t STATE_CB_BLOCK_MS = 500;
 static const uint32_t STATE_CB_WAIT_MS = 5000;
+
+/* Test log directory, read to check Write error responses are actually treated */
+static const char* LOG_DIR_PATH = "./toolkit_test_server_alarm_condition_delete_logs/";
+/* Error logged when the Write response of AlarmNoConf 0:Message node is treated with an error */
+static const char* MESSAGE_WRITE_ERROR_LOG = "Error writing AlarmCondition ns=1;i=5009 variable 0:Message";
 
 static int32_t g_stopped = 0;
 
@@ -151,12 +159,7 @@ static SOPC_ReturnStatus load_config(void)
     return SOPC_ServerConfigHelper_ConfigureFromXML(xml_server, xml_as, xml_users, NULL);
 }
 
-/*
- * Builds the condition event. When \p wrongMessageType is set, 0:Message is a String
- * whereas the node DataType is LocalizedText: the Write of this field fails with
- * Bad_TypeMismatch, which exercises the A&C Write response error path.
- */
-static SOPC_Event* make_condition_event(bool wrongMessageType)
+static SOPC_Event* make_condition_event(void)
 {
     SOPC_Event* event = NULL;
     SOPC_ReturnStatus status = SOPC_ServerHelper_CreateEvent(&g_alarmConditionTypeId, &event);
@@ -169,7 +172,6 @@ static SOPC_Event* make_condition_event(bool wrongMessageType)
     const SOPC_Variant comment = SOPC_VARIANT_LOCALTEXT("", "");
     const SOPC_Variant suppressed = SOPC_VARIANT_BOOL(false);
     const SOPC_Variant message = SOPC_VARIANT_LOCALTEXT("en-US", "toolkit_test_server_alarm_condition_delete");
-    const SOPC_Variant wrongTypeMessage = SOPC_VARIANT_STRING("toolkit_test_server_alarm_condition_delete");
 
     status = SOPC_Event_SetVariableFromStrPath(event, "0:Quality", &quality);
     if (SOPC_STATUS_OK == status)
@@ -182,7 +184,7 @@ static SOPC_Event* make_condition_event(bool wrongMessageType)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Event_SetVariableFromStrPath(event, "0:Message", wrongMessageType ? &wrongTypeMessage : &message);
+        status = SOPC_Event_SetVariableFromStrPath(event, "0:Message", &message);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -192,9 +194,9 @@ static SOPC_Event* make_condition_event(bool wrongMessageType)
     return event;
 }
 
-static SOPC_ReturnStatus create_condition_ext(bool wrongMessageType, SOPC_AlarmCondition** outAc)
+static SOPC_ReturnStatus create_condition(SOPC_AlarmCondition** outAc)
 {
-    SOPC_Event* event = make_condition_event(wrongMessageType);
+    SOPC_Event* event = make_condition_event();
     if (NULL == event)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
@@ -205,11 +207,6 @@ static SOPC_ReturnStatus create_condition_ext(bool wrongMessageType, SOPC_AlarmC
         SOPC_Event_Delete(&event);
     }
     return status;
-}
-
-static SOPC_ReturnStatus create_condition(SOPC_AlarmCondition** outAc)
-{
-    return create_condition_ext(false, outAc);
 }
 
 static SOPC_ReturnStatus run_delete_lifecycle_test(void)
@@ -320,19 +317,15 @@ static SOPC_ReturnStatus run_create_delete_loop_test(void)
     return status;
 }
 
-/*
- * TriggerEvent in a tight loop right after CreateFromEvent, then Delete (see NB_CREATE_TRIGGER_ITERATIONS).
- * With \p wrongMessageType, Write responses in error are treated after Delete: their error
- * logging shall not access variable paths owned by the deleted instance.
- */
-static SOPC_ReturnStatus run_trigger_right_after_create_test(bool wrongMessageType)
+/* TriggerEvent in a tight loop right after CreateFromEvent, then Delete (see NB_CREATE_TRIGGER_ITERATIONS) */
+static SOPC_ReturnStatus run_trigger_right_after_create_test(void)
 {
-    const char* testName = wrongMessageType ? "[create/trigger/write error]" : "[create/trigger]";
+    const char* testName = "[create/trigger]";
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     for (uint32_t i = 0; SOPC_STATUS_OK == status && i < NB_CREATE_TRIGGER_ITERATIONS; i++)
     {
         SOPC_AlarmCondition* ac = NULL;
-        status = create_condition_ext(wrongMessageType, &ac);
+        status = create_condition(&ac);
         for (uint32_t j = 0; SOPC_STATUS_OK == status && j < NB_TRIGGER_PER_CREATE; j++)
         {
             status = SOPC_AlarmCondition_TriggerEvent(ac);
@@ -379,7 +372,7 @@ static SOPC_ReturnStatus run_create_with_temporary_node_id_test(void)
     SOPC_Event* event = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        event = make_condition_event(false);
+        event = make_condition_event();
         status = (NULL == event ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
     }
     SOPC_AlarmCondition* ac = NULL;
@@ -629,7 +622,8 @@ static bool wait_enabled_cb_call(void)
  * Method calls and Delete:
  * - a method call state change still queued in the A&C looper when the instance is deleted
  *   shall be dropped (the looper is blocked in the EnabledState callback meanwhile)
- * - instance and type method calls on a deleted instance shall fail with Bad_NodeIdInvalid
+ * - instance method calls on a deleted instance shall fail with Bad_NotImplemented (instance methods removed
+ *   from the method call manager) and type method calls with Bad_NodeIdInvalid (no instance for ObjectId)
  * - instance methods shall be usable again after re-creation of the instance
  */
 static SOPC_ReturnStatus run_method_call_after_delete_test(SOPC_ClientConnection* conn)
@@ -660,8 +654,8 @@ static SOPC_ReturnStatus run_method_call_after_delete_test(SOPC_ClientConnection
     // Queued Enable state change dropped: no callback call for it
     res = res && (1 == SOPC_Atomic_Int_Get(&g_enabledCbCalls));
 
-    res =
-        res && check_call(conn, "Disable instance method after Delete", &g_disableInstMethodId, OpcUa_BadNodeIdInvalid);
+    res = res &&
+          check_call(conn, "Disable instance method after Delete", &g_disableInstMethodId, OpcUa_BadNotImplemented);
     res = res && check_call(conn, "Disable type method after Delete", &g_disableTypeMethodId, OpcUa_BadNodeIdInvalid);
 
     if (res)
@@ -683,6 +677,87 @@ static SOPC_ReturnStatus run_method_call_after_delete_test(SOPC_ClientConnection
     return res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
+/* Counts the lines containing \p pattern in the test log files (log lines are flushed when written) */
+static size_t count_log_lines(const char* pattern)
+{
+    size_t count = 0;
+    SOPC_Array* filePaths = NULL;
+    if (SOPC_FileSystem_GetDir_OK != SOPC_FileSystem_GetDirFilePaths(LOG_DIR_PATH, &filePaths))
+    {
+        return 0;
+    }
+    for (size_t i = 0; i < SOPC_Array_Size(filePaths); i++)
+    {
+        FILE* file = fopen(SOPC_Array_Get(filePaths, char*, i), "r");
+        char line[1024];
+        while (NULL != file && NULL != fgets(line, (int) sizeof(line), file))
+        {
+            count = (NULL != strstr(line, pattern) ? count + 1 : count);
+        }
+        if (NULL != file)
+        {
+            fclose(file);
+        }
+    }
+    SOPC_Array_Delete(filePaths);
+    return count;
+}
+
+/*
+ * Write error response treated after Delete, with a deterministic ordering:
+ * 1. CreateFromEvent, wait for initialization and set the EnabledState callback (blocks the looper on first call).
+ * 2. Disable through the client: the A&C looper is blocked in the EnabledState callback.
+ * 3. Set 0:Message with a String value whereas the node DataType is LocalizedText: the node Write fails with
+ *    Bad_TypeMismatch and its response is queued in the looper behind the blocked callback. The variable path
+ *    is an application string freed right after the call: the error logging shall use its own copy.
+ * 4. Delete the instance while the looper is still blocked: the Write error response is treated after Delete.
+ * 5. The Write error shall be logged once (response actually treated), without access to the deleted instance data
+ *    (checked by ASan).
+ */
+static SOPC_ReturnStatus run_write_error_after_delete_test(SOPC_ClientConnection* conn)
+{
+    SOPC_Atomic_Int_Set(&g_enabledCbCalls, 0);
+    // Step 1
+    SOPC_AlarmCondition* ac = NULL;
+    SOPC_ReturnStatus status = create_condition(&ac);
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Sleep(AC_CREATE_INIT_MS);
+        status = SOPC_AlarmCondition_SetEnabledStateCallback(ac, &enabled_state_cb, 0);
+    }
+    // Step 2
+    bool res = (SOPC_STATUS_OK == status);
+    res = res && check_call(conn, "Disable (blocks looper)", &g_disableInstMethodId, SOPC_GoodGenericStatus);
+    res = res && wait_enabled_cb_call();
+    // Step 3
+    const size_t nbErrorsBefore = count_log_lines(MESSAGE_WRITE_ERROR_LOG);
+    if (res)
+    {
+        const SOPC_Variant wrongTypeMessage = SOPC_VARIANT_STRING("wrong type message");
+        char* messagePath = SOPC_strdup("0:Message");
+        status = (NULL == messagePath ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_AlarmCondition_SetVariableFromStrPath(ac, messagePath, &wrongTypeMessage);
+        }
+        SOPC_Free(messagePath);
+        res = (SOPC_STATUS_OK == status);
+    }
+    // Step 4
+    if (NULL != ac)
+    {
+        status = SOPC_AlarmCondition_Delete(&ac);
+        res = res && (SOPC_STATUS_OK == status);
+    }
+    // Step 5: let the looper treat the Write error response once unblocked
+    SOPC_Sleep(STATE_CB_BLOCK_MS + LOOPER_DRAIN_MS);
+    const size_t nbErrorsAfter = count_log_lines(MESSAGE_WRITE_ERROR_LOG);
+    printf("[write error] Message Write errors logged before=%" PRIu64 " after=%" PRIu64 "\n",
+           (uint64_t) nbErrorsBefore, (uint64_t) nbErrorsAfter);
+    res = res && (nbErrorsBefore + 1 == nbErrorsAfter);
+    return res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+}
+
 static SOPC_ReturnStatus run_client_tests(void)
 {
     SOPC_SecureConnection_Config* scConfig = NULL;
@@ -696,6 +771,10 @@ static SOPC_ReturnStatus run_client_tests(void)
     if (SOPC_STATUS_OK == status)
     {
         status = run_method_call_after_delete_test(conn);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = run_write_error_after_delete_test(conn);
+        }
         SOPC_ReturnStatus discStatus = SOPC_ClientHelper_Disconnect(&conn);
         SOPC_UNUSED_RESULT(discStatus);
     }
@@ -716,11 +795,7 @@ static SOPC_ReturnStatus run_all_tests(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = run_trigger_right_after_create_test(false);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = run_trigger_right_after_create_test(true);
+        status = run_trigger_right_after_create_test();
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -744,7 +819,7 @@ int main(int argc, char* argv[])
 
     SOPC_Log_Configuration logConfig = SOPC_Common_GetDefaultLogConfiguration();
     logConfig.logLevel = SOPC_LOG_LEVEL_WARNING;
-    logConfig.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_server_alarm_condition_delete_logs/";
+    logConfig.logSysConfig.fileSystemLogConfig.logDirPath = LOG_DIR_PATH;
 
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfig, NULL);
     if (SOPC_STATUS_OK == status)

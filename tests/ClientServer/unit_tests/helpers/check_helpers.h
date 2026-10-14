@@ -96,4 +96,6 @@ Suite* tests_make_suite_event_variables(void);
 
 Suite* tests_make_suite_write_value_pool(void);
 
+Suite* tests_make_suite_call_method_manager(void);
+
 #endif // CHECK_HELPERS_H

@@ -738,6 +738,8 @@ SOPC_ReturnStatus SOPC_AlarmCondition_SetConfirmedStateCallback(SOPC_AlarmCondit
  * so that clients stop displaying the condition. Then the instance is unregistered from the Alarm and
  * Conditions manager and associated resources are released (including ConditionRefresh cached events),
  * pending internal treatments (method calls, state changed callbacks) on this instance are dropped.
+ * The instance methods (Enable, Disable, AddComment, Acknowledge, Confirm) are removed from the method call
+ * manager: a call to one of them fails with Bad_NotImplemented, until the instance is created again.
  * Address-space condition nodes are not removed and keep their latest values.
  *
  * \param[in,out] ppAlarmCondition Address of the instance pointer; set to NULL on success

@@ -42,8 +42,9 @@
  * The singleton configuration structure
  *
  * Lock order (a lock on the left may be held while taking a lock on the right, never the reverse):
- *   g_mutex -> ac->mut -> { g_refreshMutex, g_looperMutex }
- * g_refreshMutex and g_looperMutex are leaf locks: no other A&C lock is taken while holding one of them.
+ *   g_mutex -> ac->mut -> { g_refreshMutex, g_looperMutex, method call manager mutex }
+ * Right side locks are leaf locks: no other A&C lock is taken while holding one of them (the method call manager
+ * does not call methods with its mutex locked).
  * Mutexes are recursive: re-locking a mutex already held by the current thread is allowed, but an A&C instance
  * (and its mutex) is never freed while the current thread holds its mutex (see ::SOPC_InternalAlarmCondition_Release).
  */
@@ -374,6 +375,10 @@ SOPC_ReturnStatus SOPC_Internal_ConfigureMethodCallManager(SOPC_MethodCallManage
 
 // Initialize A&C methods
 void SOPC_InternalMethod_InitAlarmCondition_Methods(SOPC_MethodCallManager* mcm, SOPC_AlarmCondition* ac);
+
+// Remove the A&C instance methods (registered by SOPC_InternalMethod_InitAlarmCondition_Methods) from the method call
+// manager, shall be called with ac->mut locked. Method type entries shared by all instances are not removed.
+void SOPC_InternalMethod_ClearAlarmCondition_Methods(SOPC_MethodCallManager* mcm, SOPC_AlarmCondition* ac);
 
 // Treats internal A&C library events
 void onMethodCallLibEvt(SOPC_EventHandler* handler,

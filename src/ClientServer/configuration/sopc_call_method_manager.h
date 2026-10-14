@@ -20,7 +20,7 @@
 /** \file
  *
  * \brief Contains the types to be used by the method call manager to configure the Call service.
- *        ::SOPC_MethodCallManager is thread-safe for adding methods at runtime.
+ *        ::SOPC_MethodCallManager is thread-safe for adding, replacing and removing methods at runtime.
  *
  * \warning Methods call are blocking for server services treatment,
  *          methods implementation should be lightweight functions (see Part 3 §4.7).
@@ -120,6 +120,10 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
  * \param param           a pointer on data to give as parameter when calling methodFunc. It might be NULL.
  * \param fnFree          a pointer on a C function to free param. Can be NULL.
  *
+ * \note If a C function was already associated to \p methodId, it is replaced
+ *       (see ::SOPC_MethodCallManager_RemoveMethod for the previous parameter release).
+ * \note In case of failure, \p param is not freed (it remains owned by the caller).
+ *
  * \return SOPC_STATUS_OK when the function succeeded, otherwise SOPC_STATUS_INVALID_PARAMETERS or
  * SOPC_STATUS_OUT_OF_MEMORY.
  */
@@ -143,6 +147,11 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
  * \param param            a pointer on data to give as parameter when calling methodFunc. It might be NULL.
  * \param fnFree           a pointer on a C function to free param. Can be NULL.
  *
+ * \note \p param is shared by both associations: it is freed by \p fnFree once, when both associations are
+ *       removed (or the manager freed) and no call is ongoing.
+ * \note In case of failure, \p param is not freed (it remains owned by the caller)
+ *       and none of the two NodeIds is associated.
+ *
  * \return SOPC_STATUS_OK when the function succeeded, otherwise SOPC_STATUS_INVALID_PARAMETERS or
  * SOPC_STATUS_OUT_OF_MEMORY.
  */
@@ -153,6 +162,58 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethodWithType(SOPC_MethodCallManage
                                                            void* param,
                                                            SOPC_MethodCallFunc_Free_Func* fnFree);
 
+/**
+ * \brief Removes the C function associated to a NodeId of a Method.
+ *        The parameter given on association is freed by its free function if any, once no other association
+ *        (see ::SOPC_MethodCallManager_AddMethodWithType) nor ongoing call uses it.
+ *
+ * \param mcm       a valid pointer on a ::SOPC_MethodCallManager returned by ::SOPC_MethodCallManager_Create.
+ * \param methodId  a valid pointer on a ::SOPC_NodeId of the method.
+ *
+ * \return SOPC_STATUS_OK when the method was removed, SOPC_STATUS_INVALID_PARAMETERS in case of NULL pointer,
+ *         SOPC_STATUS_INVALID_STATE if no C function is associated to \p methodId.
+ */
+SOPC_ReturnStatus SOPC_MethodCallManager_RemoveMethod(SOPC_MethodCallManager* mcm, const SOPC_NodeId* methodId);
+
+/**
+ * \brief Calls the C function associated to a NodeId of a Method with its parameter.
+ *        The manager is not locked during the call (the method might add or remove methods), the parameter
+ *        remains valid until the call returns even if the method is removed or replaced concurrently.
+ *
+ * \param mcm             a valid pointer on a ::SOPC_MethodCallManager returned by ::SOPC_MethodCallManager_Create.
+ * \param methodId        a valid pointer on a ::SOPC_NodeId of the method.
+ * \param callContextPtr  context given to the method (see ::SOPC_MethodCallFunc_Ptr).
+ * \param objectId        object on which the method is called (see ::SOPC_MethodCallFunc_Ptr).
+ * \param nbInputArgs     number of input arguments (see ::SOPC_MethodCallFunc_Ptr).
+ * \param inputArgs       input arguments (see ::SOPC_MethodCallFunc_Ptr).
+ * \param[out] nbOutputArgs   number of output arguments (see ::SOPC_MethodCallFunc_Ptr).
+ * \param[out] outputArgs     output arguments (see ::SOPC_MethodCallFunc_Ptr).
+ * \param[out] outCallStatus  status code returned by the method when it was called.
+ *
+ * \return true if a C function is associated to \p methodId and was called, false otherwise.
+ */
+bool SOPC_MethodCallManager_CallMethod(SOPC_MethodCallManager* mcm,
+                                       const SOPC_NodeId* methodId,
+                                       const SOPC_CallContext* callContextPtr,
+                                       const SOPC_NodeId* objectId,
+                                       uint32_t nbInputArgs,
+                                       const SOPC_Variant* inputArgs,
+                                       uint32_t* nbOutputArgs,
+                                       SOPC_Variant** outputArgs,
+                                       SOPC_StatusCode* outCallStatus);
+
+/**
+ * \brief Gets the method description associated to a NodeId of a Method.
+ *
+ * \deprecated Not safe anymore since methods can be removed or replaced at runtime: the returned structure
+ *             and its parameter are owned by the manager and might be freed while used (its free function
+ *             shall not be called). Use ::SOPC_MethodCallManager_CallMethod.
+ *
+ * \param mcm       a valid pointer on a ::SOPC_MethodCallManager returned by ::SOPC_MethodCallManager_Create.
+ * \param methodId  a valid pointer on a ::SOPC_NodeId of the method.
+ *
+ * \return the method description associated to \p methodId, NULL if none.
+ */
 SOPC_MethodCallFunc* SOPC_MethodCallManager_GetMethod(SOPC_MethodCallManager* mcm, const SOPC_NodeId* methodId);
 
 #endif /* SOPC_CALL_METHOD_MANAGER_H_ */
