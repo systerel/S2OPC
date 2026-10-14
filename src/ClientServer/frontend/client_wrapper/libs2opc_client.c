@@ -210,7 +210,6 @@ static void SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(SOPC_ClientHelper_R
     SOPC_ServiceResponse_DeleteRequestContext(&genReqCtx->validationCtx);
     /* Avoid "warning: potential null pointer dereference [-Werror=null-dereference]"
      * genReqCtx is not NULL, this is checked by SOPC_ASSERT at the start of this function*/
-    SOPC_GCC_DIAGNOSTIC_PUSH
     SOPC_GCC_DIAGNOSTIC_IGNORE_POTENTIAL_NULL_POINTER_DEREF
     genReqCtx->responseResultCtx = NULL; // shall be freed by caller or previously
     SOPC_GCC_DIAGNOSTIC_RESTORE

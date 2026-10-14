@@ -528,7 +528,6 @@ static void** retrieveAddressPtr(void* pValue, const SOPC_EncodeableType_FieldDe
      * address due to alignment normalization (e.g.: when casting a char* to a int*, char* might not be aligned on
      * multiple of 4 bytes and then its address can be normalized to comply to this alignment after the cast
      * operation | see EXP36-C SEI CERT rule).*/
-    SOPC_GCC_DIAGNOSTIC_PUSH
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN
     return (void**) ((char*) pValue + desc->offset);
     SOPC_GCC_DIAGNOSTIC_RESTORE
@@ -537,7 +536,6 @@ static void** retrieveAddressPtr(void* pValue, const SOPC_EncodeableType_FieldDe
 static const void* const* retrieveConstAddressPtr(const void* pValue, const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     /* See retrieveAddressPtr comment */
-    SOPC_GCC_DIAGNOSTIC_PUSH
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN
     return (const void* const*) ((const char*) pValue + desc->offset);
     SOPC_GCC_DIAGNOSTIC_RESTORE

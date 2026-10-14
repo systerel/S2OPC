@@ -26,31 +26,47 @@
 #ifndef SOPC_MACROS_H_
 #define SOPC_MACROS_H_
 
-#if defined(__GNUC__) && (__GNUC__ > 4)
+/*
+ * Local warning suppression for GCC and clang.
+ *
+ * Each SOPC_GCC_DIAGNOSTIC_IGNORE_* macro saves the current diagnostic state before disabling its warning,
+ * and shall be matched by one SOPC_GCC_DIAGNOSTIC_RESTORE in the same scope, restoring the saved state.
+ * Several IGNORE macros need as many RESTORE, in reverse order, e.g.:
+ *
+ *     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+ *     SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
+ *     <code>
+ *     SOPC_GCC_DIAGNOSTIC_RESTORE
+ *     SOPC_GCC_DIAGNOSTIC_RESTORE
+ *
+ * SOPC_GCC_DIAGNOSTIC_PUSH is kept for compatibility and is not needed anymore.
+ */
+#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4))
 #define SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic push")
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST _Pragma("GCC diagnostic ignored \"-Wcast-qual\"")
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN _Pragma("GCC diagnostic ignored \"-Wcast-align\"")
 #define SOPC_GCC_DIAGNOSTIC_RESTORE _Pragma("GCC diagnostic pop")
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic ignored \"-Wcast-qual\"")
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN \
+    SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic ignored \"-Wcast-align\"")
+#if defined(__clang__)
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER \
+    SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic ignored \"-Wincompatible-pointer-types-discards-qualifiers\"")
+#else
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER \
+    SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic ignored \"-Wdiscarded-qualifiers\"")
+#endif
+#if defined(__clang__) || (__GNUC__ >= 6)
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_POTENTIAL_NULL_POINTER_DEREF \
+    SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic ignored \"-Wnull-dereference\"")
+#else
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_POTENTIAL_NULL_POINTER_DEREF SOPC_GCC_DIAGNOSTIC_PUSH
+#endif
 #else
 #define SOPC_GCC_DIAGNOSTIC_PUSH
+#define SOPC_GCC_DIAGNOSTIC_RESTORE
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN
-#define SOPC_GCC_DIAGNOSTIC_RESTORE
-#endif
-
-#if defined(__GNUC__) && (__GNUC__ >= 6)
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_POTENTIAL_NULL_POINTER_DEREF _Pragma("GCC diagnostic ignored \"-Wnull-dereference\"")
-#else
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_POTENTIAL_NULL_POINTER_DEREF
-#endif
-
-#if defined(__GNUC__) && (__GNUC__ > 4) && !defined(__clang__)
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER _Pragma("GCC diagnostic ignored \"-Wdiscarded-qualifiers\"")
-#elif defined(__clang__)
-#define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER \
-    _Pragma("GCC diagnostic ignored \"-Wincompatible-pointer-types-discards-qualifiers\"")
-#else
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_POTENTIAL_NULL_POINTER_DEREF
 #endif
 
 #if defined(_MSC_VER)
