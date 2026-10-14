@@ -21,7 +21,12 @@
 
 uint64_t SOPC_DJBHash(const uint8_t* data, size_t len)
 {
-    return SOPC_DJBHash_Step(5381, data, len);
+    SOPC_GCC_DIAGNOSTIC_IGNORE_DEPRECATED
+    SOPC_MSVC_WARNING_DISABLE(4996)
+    uint64_t result = SOPC_DJBHash_Step(5381, data, len);
+    SOPC_MSVC_WARNING_RESTORE
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+    return result;
 }
 
 uint64_t SOPC_DJBHash_Step(uint64_t current, const uint8_t* data, size_t len)

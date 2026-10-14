@@ -21,6 +21,7 @@
 #define SOPC_ADDSPACE_LOADER_H_
 
 #include "sopc_address_space.h"
+#include "sopc_macros.h"
 
 /**
  * \brief Load the embedded address space defined as a C structure.
@@ -49,6 +50,7 @@ SOPC_AddressSpace* SOPC_Embedded_AddressSpace_LoadWithAlloc(bool allocNodes);
  *
  * \return The loaded address space in case of success, NULL otherwise.
  */
+SOPC_DEPRECATED("Use SOPC_Embedded_AddressSpace_LoadWithAlloc(false) instead")
 SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void);
 
 #endif /* SOPC_ADDSPACE_LOADER_H_ */

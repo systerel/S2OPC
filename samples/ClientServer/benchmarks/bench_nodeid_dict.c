@@ -273,7 +273,11 @@ static void hash_nodeid_fields(const SOPC_NodeId* nodeId,
  * SOPC_DJBHash. */
 static void nodeid_hash_djb(const SOPC_NodeId* nodeId, uint64_t* hash)
 {
+    SOPC_GCC_DIAGNOSTIC_IGNORE_DEPRECATED
+    SOPC_MSVC_WARNING_DISABLE(4996)
     hash_nodeid_fields(nodeId, 5381, &SOPC_DJBHash_Step, hash);
+    SOPC_MSVC_WARNING_RESTORE
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 
 /* What SOPC_NodeId_Dict_Create actually uses today. */

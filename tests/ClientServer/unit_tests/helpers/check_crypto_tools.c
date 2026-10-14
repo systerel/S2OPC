@@ -28,6 +28,7 @@
 #include "sopc_enums.h"
 #include "sopc_key_cert_pair.h"
 #include "sopc_key_manager.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 #include "common_static_security_data.h"
@@ -129,8 +130,12 @@ START_TEST(test_crypto_gen_rsa_export_import_public)
     SOPC_ExposedBuffer* pRawImpPubKeyWithHeader = NULL;
     uint32_t impKeyPubWithHeaderLen = 0;
     SOPC_AsymmetricKey* pImpPubKey = NULL;
+    SOPC_GCC_DIAGNOSTIC_IGNORE_DEPRECATED
+    SOPC_MSVC_WARNING_DISABLE(4996)
     status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile("./crypto_tools_gen_public_key.pem",
                                                                     &pSerImpPubKeyWithHeader);
+    SOPC_MSVC_WARNING_RESTORE
+    SOPC_GCC_DIAGNOSTIC_RESTORE
     ck_assert(SOPC_STATUS_OK == status);
     impKeyPubWithHeaderLen = SOPC_SecretBuffer_GetLength(pSerImpPubKeyWithHeader);
     pRawImpPubKeyWithHeader = SOPC_SecretBuffer_ExposeModify(pSerImpPubKeyWithHeader);

@@ -31,6 +31,7 @@
 #define SOPC_KEY_MANAGER_H_
 
 #include "sopc_crypto_decl.h"
+#include "sopc_macros.h"
 
 // Must be included last
 #include "sopc_key_manager_lib_itf.h"
@@ -59,10 +60,14 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const u
  * \param path     path to the file
  * \param[out] key the created serialized key
  *
- * \deprecated  Use ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd instead
+ * \deprecated  Use ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd instead to decode the key,
+ *              or ::SOPC_SecretBuffer_NewFromFile to keep the raw file content (e.g. an encrypted PEM).
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
+SOPC_DEPRECATED(
+    "Use SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd instead, "
+    "or SOPC_SecretBuffer_NewFromFile to keep the raw file content")
 SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const char* path,
                                                                          SOPC_SerializedAsymmetricKey** key);
 

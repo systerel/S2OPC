@@ -30,6 +30,7 @@
 #ifndef SOPC_PUBSUB_SKS_H_
 #define SOPC_PUBSUB_SKS_H_
 
+#include "sopc_macros.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_sk_builder.h"
@@ -113,6 +114,7 @@ bool SOPC_PubSubSKS_AddSkManager(SOPC_SKManager* skm);
  * \return tokenid and group keys
  *
  */
+SOPC_DEPRECATED("Use SOPC_PubSubSKS_GetUpdateSecurityKeys instead")
 SOPC_PubSubSKS_Keys* SOPC_PubSubSKS_GetSecurityKeys(const char* securityGroupId, uint32_t tokenId);
 
 /**  \brief Update security keys if required security group is available otherwise keep security group.

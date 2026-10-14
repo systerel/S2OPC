@@ -65,8 +65,6 @@ void* SOPC_Calloc(size_t nmemb, size_t size);
 
 /** \brief Re-allocates memory.
  *
- * \warning Deprecated. New implementations should not use this function.
- *
  * This function acts as realloc. However, realloc may not exist on the targetted architecture.
  * In these cases, SOPC_Realloc maps to malloc + memcpy.
  * For this operation, the current size of the buffer is required.

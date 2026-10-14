@@ -1195,7 +1195,9 @@ SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx
     /* Get the old key */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(pGroupCtx->pKeyPath, &pOldKey);
+        /* Raw file content (possibly an encrypted PEM) is kept to restore the old key file as is */
+        pOldKey = SOPC_SecretBuffer_NewFromFile(pGroupCtx->pKeyPath);
+        status = (NULL == pOldKey) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }
     if (SOPC_STATUS_OK == status)
     {

@@ -1250,7 +1250,8 @@ static SOPC_PubSub_SecurityStatus SOPC_SubScheduler_Get_Security_Infos(uint32_t 
     /* Keys is not set or new token id used by this publisher */
     if (NULL == readerCtx->security.groupKeys || tokenId > readerCtx->security.groupKeys->tokenId)
     {
-        SOPC_PubSubSKS_Keys* keys = SOPC_PubSubSKS_GetSecurityKeys(readerCtx->security.securityGroupId, tokenId);
+        SOPC_PubSubSKS_Keys* keys = NULL;
+        SOPC_PubSubSKS_GetUpdateSecurityKeys(readerCtx->security.securityGroupId, tokenId, &keys);
         if (NULL != keys && tokenId == keys->tokenId)
         {
             SOPC_PubSubSKS_Keys_Delete(readerCtx->security.groupKeys);

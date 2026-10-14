@@ -47,6 +47,8 @@
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic ignored \"-Wcast-qual\"")
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN \
     SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic ignored \"-Wcast-align\"")
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_DEPRECATED \
+    SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
 #if defined(__clang__)
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER \
     SOPC_GCC_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic ignored \"-Wincompatible-pointer-types-discards-qualifiers\"")
@@ -65,6 +67,7 @@
 #define SOPC_GCC_DIAGNOSTIC_RESTORE
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN
+#define SOPC_GCC_DIAGNOSTIC_IGNORE_DEPRECATED
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
 #define SOPC_GCC_DIAGNOSTIC_IGNORE_POTENTIAL_NULL_POINTER_DEREF
 #endif
@@ -130,6 +133,35 @@
 #define SOPC_STRONG_INLINE __forceinline
 #else
 #define SOPC_STRONG_INLINE inline
+#endif
+
+/**
+ * \brief Marks a function, variable or type declaration as deprecated:
+ *        the compiler emits a warning, including \p msg when supported, at each use.
+ *
+ * To be placed at the beginning of the declaration, e.g.:
+ * \code
+ * SOPC_DEPRECATED("Use SOPC_NewFunction instead") void SOPC_OldFunction(void);
+ * \endcode
+ *
+ * It is defined away for compilers that do not support it.
+ * Internal uses of a deprecated API can be enclosed between ::SOPC_GCC_DIAGNOSTIC_IGNORE_DEPRECATED
+ * and ::SOPC_GCC_DIAGNOSTIC_RESTORE (respectively SOPC_MSVC_WARNING_DISABLE(4996) and
+ * ::SOPC_MSVC_WARNING_RESTORE for MSVC).
+ *
+ * \param msg  String literal explaining the replacement to use.
+ */
+#if defined(S2OPC_AUTOPXD)
+/* PyS2OPC declarations generation: attributes are not supported by its C parser (pycparser) */
+#define SOPC_DEPRECATED(msg)
+#elif defined(__clang__) || (defined(__GNUC__) && ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)))
+#define SOPC_DEPRECATED(msg) __attribute__((__deprecated__(msg)))
+#elif defined(__GNUC__) && ((__GNUC__ > 3) || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+#define SOPC_DEPRECATED(msg) __attribute__((__deprecated__))
+#elif defined(_MSC_VER)
+#define SOPC_DEPRECATED(msg) __declspec(deprecated(msg))
+#else
+#define SOPC_DEPRECATED(msg)
 #endif
 
 #endif // SOPC_MACROS_H_

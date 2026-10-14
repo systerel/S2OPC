@@ -28,6 +28,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "sopc_macros.h"
+
 /**
  * \brief Hashes some data using DJB hash.
  * \deprecated Deprecated, planned for removal in toolkit version >= 2.1.0.
@@ -36,7 +38,7 @@
  * \param len   The length of the data, in bytes.
  * \return The resulting hash.
  */
-uint64_t SOPC_DJBHash(const uint8_t* data, size_t len);
+SOPC_DEPRECATED("Use SOPC_FNV1aHash instead") uint64_t SOPC_DJBHash(const uint8_t* data, size_t len);
 
 /**
  * \brief Appends some data to a DJB hash.
@@ -50,6 +52,7 @@ uint64_t SOPC_DJBHash(const uint8_t* data, size_t len);
  * This interface allows computing a hash over various pieces of data in several
  * calls.
  */
+SOPC_DEPRECATED("Use SOPC_FNV1aHash_Step instead")
 uint64_t SOPC_DJBHash_Step(uint64_t current, const uint8_t* data, size_t len);
 
 /**
