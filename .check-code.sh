@@ -253,6 +253,15 @@ if [[ $? != 0 ]]; then
     FAILURES+=("Standard memory allocation functions (malloc/free/...) used in sample sources")
 fi
 
+#### Check SOPC_GCC_DIAGNOSTIC_* macros are balanced ####
+echo "Checking each SOPC_GCC_DIAGNOSTIC_IGNORE_* is matched by a SOPC_GCC_DIAGNOSTIC_RESTORE" | tee -a $LOGPATH
+./.check-diagnostic-macros.py $CSRC $TST $DEMO 2>&1 | tee -a $LOGPATH
+if [[ ${PIPESTATUS[0]} != 0 ]]; then
+    EXITCODE=1
+    FAILURES+=("Unbalanced SOPC_GCC_DIAGNOSTIC_IGNORE_*/SOPC_GCC_DIAGNOSTIC_RESTORE macros found in sources")
+    echo "ERROR: checking SOPC_GCC_DIAGNOSTIC_* macros balance" | tee -a $LOGPATH
+fi
+
 #### Clang static analyzer ####
 echo "Compilation with Clang static analyzer" | tee -a $LOGPATH
 rm -fr build-analyzer && ./.run-clang-static-analyzer.sh 2>&1 | tee -a $LOGPATH
