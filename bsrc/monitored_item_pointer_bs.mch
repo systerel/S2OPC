@@ -161,9 +161,11 @@ OPERATIONS
     THEN
         s_monitoredItemPointer := s_monitoredItemPointer - {p_monitoredItemPointer} ||
         s_monitoredItemId := s_monitoredItemId - {a_monitoredItemId(p_monitoredItemPointer)} ||
-        a_monitoredItemId := a_monitoredItemId - {p_monitoredItemPointer |-> a_monitoredItemId(p_monitoredItemPointer)} ||
+        a_monitoredItemId := {p_monitoredItemPointer} <<| a_monitoredItemId ||
         a_monitoredItemSubs := {p_monitoredItemPointer} <<| a_monitoredItemSubs ||
         a_monitoredItemNodeId := {p_monitoredItemPointer} <<| a_monitoredItemNodeId ||
+        a_monitoredItemAttributeId := {p_monitoredItemPointer} <<| a_monitoredItemAttributeId ||
+        a_monitoredItemMonitMode := {p_monitoredItemPointer} <<| a_monitoredItemMonitMode ||
         a_monitoredItemQueueSize := {p_monitoredItemPointer} <<| a_monitoredItemQueueSize
     END
     ;
