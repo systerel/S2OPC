@@ -60,6 +60,12 @@ static SOPC_ClientHelper_Subscription* check_subscription_callback = NULL;
 static SOPC_Mutex check_counter_mutex;
 static SOPC_Condition check_counter_condition;
 static SOPC_DataValue check_counter_data_value;
+static SOPC_Mutex check_async_resp_mutex;
+static SOPC_Condition check_async_resp_condition;
+static bool check_async_resp_received = false;
+static SOPC_EncodeableType* check_async_resp_type = NULL;
+static SOPC_StatusCode check_async_resp_service_result = SOPC_GoodGenericStatus;
+static uintptr_t check_async_resp_context = 0;
 
 /************************************************/
 /*             Client Callback getter           */
@@ -121,6 +127,22 @@ static void handle_subscriptionNotification_datachange(const SOPC_ClientHelper_S
 
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_counter_mutex));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_SignalAll(&check_counter_condition));
+}
+
+/* Records the asynchronous response data since the response is freed by the client wrapper after the call */
+static void handle_asyncSubscriptionResponse(SOPC_EncodeableType* type, const void* response, uintptr_t userContext)
+{
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&check_async_resp_mutex));
+    check_async_resp_type = type;
+    check_async_resp_context = userContext;
+    if (&OpcUa_ModifySubscriptionResponse_EncodeableType == type && NULL != response)
+    {
+        check_async_resp_service_result =
+            ((const OpcUa_ModifySubscriptionResponse*) response)->ResponseHeader.ServiceResult;
+    }
+    check_async_resp_received = true;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_async_resp_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_SignalAll(&check_async_resp_condition));
 }
 
 /************************************************/
@@ -826,6 +848,241 @@ START_TEST(test_wrapper_unsubscribe)
 }
 END_TEST
 
+START_TEST(test_wrapper_subscription_services)
+{
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientConfigHelper_Initialize());
+
+    /* Connecting to a valid endpoint */
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
+        "Test", VALID_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+    ck_assert_ptr_nonnull(secureConnConfig);
+    SOPC_ClientConnection* scConnection = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+
+    /* create a valid subscription with one monitored item */
+    OpcUa_CreateSubscriptionRequest* subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
+    ck_assert_ptr_nonnull(subscriptionRequest);
+    SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelper_CreateSubscription(
+        scConnection, subscriptionRequest, handle_subscriptionNotification, (uintptr_t) NULL);
+    ck_assert_ptr_nonnull(subscription);
+
+    char* nodeIds[1] = {"ns=0;s=Counter"};
+    OpcUa_CreateMonitoredItemsRequest* createMIrequest =
+        SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings(0, 1, nodeIds, OpcUa_TimestampsToReturn_Both);
+    ck_assert_ptr_nonnull(createMIrequest);
+    OpcUa_CreateMonitoredItemsResponse createMIresponse;
+    OpcUa_CreateMonitoredItemsResponse_Initialize(&createMIresponse);
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Subscription_CreateMonitoredItems(subscription, createMIrequest,
+                                                                                         NULL, &createMIresponse));
+    ck_assert_int_eq(1, createMIresponse.NoOfResults);
+    ck_assert(SOPC_IsGoodStatus(createMIresponse.Results[0].StatusCode));
+    uint32_t monitoredItemId = createMIresponse.Results[0].MonitoredItemId;
+    OpcUa_CreateMonitoredItemsResponse_Clear(&createMIresponse);
+
+    /* ModifySubscription on the subscription managed by the client wrapper */
+    OpcUa_ModifySubscriptionRequest* modifySubRequest = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EncodeableObject_Create(&OpcUa_ModifySubscriptionRequest_EncodeableType,
+                                                                  (void**) &modifySubRequest));
+    modifySubRequest->RequestedPublishingInterval = 1000.0;
+    modifySubRequest->RequestedLifetimeCount = 30;
+    modifySubRequest->RequestedMaxKeepAliveCount = 10;
+    modifySubRequest->MaxNotificationsPerPublish = 1000;
+    OpcUa_ModifySubscriptionResponse* modifySubResponse = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Subscription_SyncService(subscription, modifySubRequest,
+                                                                                (void**) &modifySubResponse));
+    ck_assert_ptr_nonnull(modifySubResponse);
+    ck_assert_ptr_eq(&OpcUa_ModifySubscriptionResponse_EncodeableType, modifySubResponse->encodeableType);
+    ck_assert(SOPC_IsGoodStatus(modifySubResponse->ResponseHeader.ServiceResult));
+    ck_assert(modifySubResponse->RevisedPublishingInterval > 0);
+    SOPC_EncodeableObject_Delete(modifySubResponse->encodeableType, (void**) &modifySubResponse);
+
+    /* SetPublishingMode on the subscription managed by the client wrapper */
+    OpcUa_SetPublishingModeRequest* setPubModeRequest = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EncodeableObject_Create(&OpcUa_SetPublishingModeRequest_EncodeableType,
+                                                                  (void**) &setPubModeRequest));
+    setPubModeRequest->PublishingEnabled = true;
+    setPubModeRequest->NoOfSubscriptionIds = 1;
+    setPubModeRequest->SubscriptionIds = SOPC_Calloc(1, sizeof(*setPubModeRequest->SubscriptionIds));
+    ck_assert_ptr_nonnull(setPubModeRequest->SubscriptionIds);
+    OpcUa_SetPublishingModeResponse* setPubModeResponse = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Subscription_SyncService(subscription, setPubModeRequest,
+                                                                                (void**) &setPubModeResponse));
+    ck_assert_ptr_nonnull(setPubModeResponse);
+    ck_assert_ptr_eq(&OpcUa_SetPublishingModeResponse_EncodeableType, setPubModeResponse->encodeableType);
+    ck_assert(SOPC_IsGoodStatus(setPubModeResponse->ResponseHeader.ServiceResult));
+    ck_assert_int_eq(1, setPubModeResponse->NoOfResults);
+    ck_assert(SOPC_IsGoodStatus(setPubModeResponse->Results[0]));
+    SOPC_EncodeableObject_Delete(setPubModeResponse->encodeableType, (void**) &setPubModeResponse);
+
+    /* SetMonitoringMode on the subscription managed by the client wrapper
+     * (note: ModifyMonitoredItems is not decoded correctly by the FreeOpcUa test server) */
+    OpcUa_SetMonitoringModeRequest* setMonModeRequest = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EncodeableObject_Create(&OpcUa_SetMonitoringModeRequest_EncodeableType,
+                                                                  (void**) &setMonModeRequest));
+    setMonModeRequest->MonitoringMode = OpcUa_MonitoringMode_Reporting;
+    setMonModeRequest->NoOfMonitoredItemIds = 1;
+    setMonModeRequest->MonitoredItemIds = SOPC_Calloc(1, sizeof(*setMonModeRequest->MonitoredItemIds));
+    ck_assert_ptr_nonnull(setMonModeRequest->MonitoredItemIds);
+    setMonModeRequest->MonitoredItemIds[0] = monitoredItemId;
+    OpcUa_SetMonitoringModeResponse* setMonModeResponse = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Subscription_SyncService(subscription, setMonModeRequest,
+                                                                                (void**) &setMonModeResponse));
+    ck_assert_ptr_nonnull(setMonModeResponse);
+    ck_assert_ptr_eq(&OpcUa_SetMonitoringModeResponse_EncodeableType, setMonModeResponse->encodeableType);
+    ck_assert(SOPC_IsGoodStatus(setMonModeResponse->ResponseHeader.ServiceResult));
+    SOPC_EncodeableObject_Delete(setMonModeResponse->encodeableType, (void**) &setMonModeResponse);
+
+    /* Services not related to the subscription are rejected */
+    OpcUa_ReadRequest* readRequest = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
+    ck_assert_ptr_nonnull(readRequest);
+    void* readResponse = NULL;
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS,
+                     SOPC_ClientHelper_Subscription_SyncService(subscription, readRequest, &readResponse));
+    ck_assert_ptr_null(readResponse);
+
+    /* Generic service API still forbids services on the subscription managed by the client wrapper */
+    uint32_t subscriptionId = 0;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_GetSubscriptionId(subscription, &subscriptionId));
+    modifySubRequest = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EncodeableObject_Create(&OpcUa_ModifySubscriptionRequest_EncodeableType,
+                                                                  (void**) &modifySubRequest));
+    modifySubRequest->SubscriptionId = subscriptionId;
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS,
+                     SOPC_ClientHelper_ServiceSync(scConnection, modifySubRequest, (void**) &modifySubResponse));
+    ck_assert_ptr_null(modifySubResponse);
+
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_DeleteSubscription(&subscription));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&scConnection));
+    SOPC_ClientConfigHelper_Clear();
+}
+END_TEST
+
+/* Generic service API filter only forbids services on the subscriptions managed by the client wrapper:
+ * services on a subscription created through the generic service API are not filtered. */
+START_TEST(test_wrapper_generic_subscription_services_not_filtered)
+{
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientConfigHelper_Initialize());
+
+    /* Connecting to a valid endpoint */
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
+        "Test", VALID_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+    ck_assert_ptr_nonnull(secureConnConfig);
+    SOPC_ClientConnection* scConnection = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+
+    /* Subscription created through the generic service API */
+    OpcUa_CreateSubscriptionRequest* subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
+    ck_assert_ptr_nonnull(subscriptionRequest);
+    OpcUa_CreateSubscriptionResponse* createSubResponse = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_ClientHelper_ServiceSync(scConnection, subscriptionRequest, (void**) &createSubResponse));
+    ck_assert_ptr_nonnull(createSubResponse);
+    ck_assert_ptr_eq(&OpcUa_CreateSubscriptionResponse_EncodeableType, createSubResponse->encodeableType);
+    ck_assert(SOPC_IsGoodStatus(createSubResponse->ResponseHeader.ServiceResult));
+    uint32_t genericSubscriptionId = createSubResponse->SubscriptionId;
+    SOPC_EncodeableObject_Delete(createSubResponse->encodeableType, (void**) &createSubResponse);
+
+    /* ModifySubscription through the generic service API is not filtered */
+    OpcUa_ModifySubscriptionRequest* modifySubRequest = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EncodeableObject_Create(&OpcUa_ModifySubscriptionRequest_EncodeableType,
+                                                                  (void**) &modifySubRequest));
+    modifySubRequest->SubscriptionId = genericSubscriptionId;
+    modifySubRequest->RequestedPublishingInterval = 1000.0;
+    modifySubRequest->RequestedLifetimeCount = 30;
+    modifySubRequest->RequestedMaxKeepAliveCount = 10;
+    modifySubRequest->MaxNotificationsPerPublish = 1000;
+    OpcUa_ModifySubscriptionResponse* modifySubResponse = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_ClientHelper_ServiceSync(scConnection, modifySubRequest, (void**) &modifySubResponse));
+    ck_assert_ptr_nonnull(modifySubResponse);
+    ck_assert_ptr_eq(&OpcUa_ModifySubscriptionResponse_EncodeableType, modifySubResponse->encodeableType);
+    ck_assert(SOPC_IsGoodStatus(modifySubResponse->ResponseHeader.ServiceResult));
+    SOPC_EncodeableObject_Delete(modifySubResponse->encodeableType, (void**) &modifySubResponse);
+
+    /* Delete the subscription created through the generic service API */
+    OpcUa_DeleteSubscriptionsRequest* deleteSubRequest = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EncodeableObject_Create(&OpcUa_DeleteSubscriptionsRequest_EncodeableType,
+                                                                  (void**) &deleteSubRequest));
+    deleteSubRequest->NoOfSubscriptionIds = 1;
+    deleteSubRequest->SubscriptionIds = SOPC_Calloc(1, sizeof(*deleteSubRequest->SubscriptionIds));
+    ck_assert_ptr_nonnull(deleteSubRequest->SubscriptionIds);
+    deleteSubRequest->SubscriptionIds[0] = genericSubscriptionId;
+    OpcUa_DeleteSubscriptionsResponse* deleteSubResponse = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_ClientHelper_ServiceSync(scConnection, deleteSubRequest, (void**) &deleteSubResponse));
+    ck_assert_ptr_nonnull(deleteSubResponse);
+    ck_assert_ptr_eq(&OpcUa_DeleteSubscriptionsResponse_EncodeableType, deleteSubResponse->encodeableType);
+    ck_assert(SOPC_IsGoodStatus(deleteSubResponse->ResponseHeader.ServiceResult));
+    SOPC_EncodeableObject_Delete(deleteSubResponse->encodeableType, (void**) &deleteSubResponse);
+
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&scConnection));
+    SOPC_ClientConfigHelper_Clear();
+}
+END_TEST
+
+START_TEST(test_wrapper_subscription_async_service)
+{
+    const uintptr_t asyncUserContext = 0x1829;
+
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientConfigHelper_Initialize());
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Initialization(&check_async_resp_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_Init(&check_async_resp_condition));
+    /* Asynchronous response callback shall be defined before connection */
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientConfigHelper_SetServiceAsyncResponse(handle_asyncSubscriptionResponse));
+
+    /* Connecting to a valid endpoint */
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
+        "Test", VALID_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+    ck_assert_ptr_nonnull(secureConnConfig);
+    SOPC_ClientConnection* scConnection = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+
+    /* create a valid subscription */
+    OpcUa_CreateSubscriptionRequest* subscriptionRequest = SOPC_CreateSubscriptionRequest_CreateDefault();
+    ck_assert_ptr_nonnull(subscriptionRequest);
+    SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelper_CreateSubscription(
+        scConnection, subscriptionRequest, handle_subscriptionNotification, (uintptr_t) NULL);
+    ck_assert_ptr_nonnull(subscription);
+
+    /* ModifySubscription on the subscription managed by the client wrapper: response received in the callback */
+    OpcUa_ModifySubscriptionRequest* modifySubRequest = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EncodeableObject_Create(&OpcUa_ModifySubscriptionRequest_EncodeableType,
+                                                                  (void**) &modifySubRequest));
+    modifySubRequest->RequestedPublishingInterval = 1000.0;
+    modifySubRequest->RequestedLifetimeCount = 30;
+    modifySubRequest->RequestedMaxKeepAliveCount = 10;
+    modifySubRequest->MaxNotificationsPerPublish = 1000;
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_ClientHelper_Subscription_AsyncService(subscription, modifySubRequest, asyncUserContext));
+    /* wait for the response (use a 1.2 sec timeout) */
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&check_async_resp_mutex));
+    while (!check_async_resp_received)
+    {
+        ck_assert_int_eq(SOPC_STATUS_OK,
+                         SOPC_Mutex_UnlockAndTimedWaitCond(&check_async_resp_condition, &check_async_resp_mutex, 1200));
+    }
+    ck_assert_ptr_eq(&OpcUa_ModifySubscriptionResponse_EncodeableType, check_async_resp_type);
+    ck_assert(SOPC_IsGoodStatus(check_async_resp_service_result));
+    ck_assert_uint_eq(asyncUserContext, check_async_resp_context);
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_async_resp_mutex));
+
+    /* Services not related to the subscription are rejected: request not sent */
+    OpcUa_ReadRequest* readRequest = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
+    ck_assert_ptr_nonnull(readRequest);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS,
+                     SOPC_ClientHelper_Subscription_AsyncService(subscription, readRequest, asyncUserContext));
+
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_DeleteSubscription(&subscription));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&scConnection));
+    SOPC_ClientConfigHelper_Clear();
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_Clear(&check_async_resp_condition));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Clear(&check_async_resp_mutex));
+}
+END_TEST
+
 START_TEST(test_wrapper_read)
 {
     char* nodeIds1[1] = {"ns=0;s=Counter"};
@@ -1276,6 +1533,9 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_add_monitored_items);
     tcase_add_test(tc_wrapper, test_wrapper_add_monitored_items_callback_called);
     tcase_add_test(tc_wrapper, test_wrapper_unsubscribe);
+    tcase_add_test(tc_wrapper, test_wrapper_subscription_services);
+    tcase_add_test(tc_wrapper, test_wrapper_generic_subscription_services_not_filtered);
+    tcase_add_test(tc_wrapper, test_wrapper_subscription_async_service);
     tcase_add_test(tc_wrapper, test_wrapper_read);
     tcase_add_test(tc_wrapper, test_wrapper_write);
     tcase_add_test(tc_wrapper, test_wrapper_browse);

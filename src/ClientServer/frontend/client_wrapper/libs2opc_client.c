@@ -1254,7 +1254,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
                                                            void* request,
                                                            void** response,
                                                            uintptr_t userContext,
-                                                           SOPC_ServiceAsyncResp_Fct* asyncRespCb)
+                                                           SOPC_ServiceAsyncResp_Fct* asyncRespCb,
+                                                           bool filterService)
 {
     SOPC_StaMac_Machine* pSM = NULL;
     SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
@@ -1286,7 +1287,10 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
         SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        status = SOPC_ClientHelperInternal_FilterService(secureConnection, request);
+        if (filterService)
+        {
+            status = SOPC_ClientHelperInternal_FilterService(secureConnection, request);
+        }
 
         if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx] ||
             (!isSynchronous && NULL == customAsyncRespCb))
@@ -1387,7 +1391,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureCo
                                                  void* request,
                                                  uintptr_t userContext)
 {
-    return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext, NULL);
+    return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext, NULL, true);
 }
 
 SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsyncCustom(SOPC_ClientConnection* secureConnection,
@@ -1395,12 +1399,12 @@ SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsyncCustom(SOPC_ClientConnection* se
                                                        uintptr_t userContext,
                                                        SOPC_ServiceAsyncResp_Fct* asyncRespCb)
 {
-    return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext, asyncRespCb);
+    return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext, asyncRespCb, true);
 }
 
 SOPC_ReturnStatus SOPC_ClientHelper_ServiceSync(SOPC_ClientConnection* secureConnection, void* request, void** response)
 {
-    return SOPC_ClientHelperInternal_Service(true, secureConnection, request, response, 0, NULL);
+    return SOPC_ClientHelperInternal_Service(true, secureConnection, request, response, 0, NULL, true);
 }
 
 struct SOPC_ClientHelper_Subscription
@@ -2059,31 +2063,30 @@ static SOPC_ReturnStatus SOPC_ClientHelper_Subscription_SyncAndAsyncRequest(
         }
 
         void* request = NULL;
+        SOPC_ClientConnection* secureConnection = subscription->secureConnection;
 
         if (SOPC_STATUS_OK == status)
         {
             request = SOPC_ClientHelperInternal_ConfigAndFilterService(subscription, subOrMIrequest);
-
-            if (NULL != request)
-            {
-                if (isSync)
-                {
-                    status = SOPC_ClientHelper_ServiceSync(subscription->secureConnection, request, subOrMIresponse);
-                }
-                else
-                {
-                    status = SOPC_ClientHelper_ServiceAsync(subscription->secureConnection, request, asyncUserCtx);
-                }
-                requestServiceCalled = true;
-            }
-            else
+            if (NULL == request)
             {
                 status = SOPC_STATUS_INVALID_PARAMETERS;
             }
         }
 
+        /* Release the lock before calling the service:
+         * the event handler needs it to process the response while waiting for it (synchronous case) */
         mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            /* Do not apply the generic service filter: it forbids the services on subscriptions managed by the
+             * client wrapper, whereas the request was already filtered and configured for this subscription */
+            status = SOPC_ClientHelperInternal_Service(isSync, secureConnection, request, subOrMIresponse, asyncUserCtx,
+                                                       NULL, false);
+            requestServiceCalled = true;
+        }
     }
 
     // Free the provided request if the deletion failed and request not provided to Service* function
