@@ -135,18 +135,16 @@ static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
     }
 }
 
+// Caller shall have removed the timer from the timers list
 static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventTimer* timer)
 {
-    SOPC_EventTimer* removed = NULL;
-
-    removed = (SOPC_EventTimer*) SOPC_SLinkedList_RemoveFromId(timers, timer->id);
-    SOPC_ASSERT(removed == timer);
+    SOPC_EventTimer* inserted = NULL;
 
     // Reinsert timer for sorting it by endTime
-    removed = (SOPC_EventTimer*) SOPC_SLinkedList_SortedInsert(timers, timer->id, (uintptr_t) timer,
-                                                               SOPC_Internal_SLinkedList_EventTimerCompare);
+    inserted = (SOPC_EventTimer*) SOPC_SLinkedList_SortedInsert(timers, timer->id, (uintptr_t) timer,
+                                                                SOPC_Internal_SLinkedList_EventTimerCompare);
 
-    if (removed != timer)
+    if (inserted != timer)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
                                "EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
@@ -236,6 +234,16 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
             compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
         }
     }
+    // Remove all the triggered periodic timers from the timers list before re-inserting them:
+    // their endTime has already been updated, the timers list would not be sorted anymore during re-insertion otherwise
+    SOPC_SLinkedListIterator restartIt = SOPC_SLinkedList_GetIterator(periodicTimersToRestart);
+    while (SOPC_SLinkedList_HasNext(&restartIt))
+    {
+        timer = (SOPC_EventTimer*) SOPC_SLinkedList_Next(&restartIt);
+        SOPC_EventTimer* removed = (SOPC_EventTimer*) SOPC_SLinkedList_RemoveFromId(timers, timer->id);
+        SOPC_ASSERT(removed == timer);
+    }
+    // Then restart the timers that will be reinserted one by one in a sorted way
     while (SOPC_SLinkedList_GetLength(periodicTimersToRestart) > 0)
     {
         timer = (SOPC_EventTimer*) SOPC_SLinkedList_PopHead(periodicTimersToRestart);
