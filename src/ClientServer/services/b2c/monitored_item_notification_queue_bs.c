@@ -46,7 +46,12 @@ typedef struct SOPC_InternalNotificationElement
     bool isQueueOverflowEvent;
 } SOPC_InternalNotificationElement;
 
+#if SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE > 0
 static SOPC_InternalNotificationElement sopc_notifEltPoolBuffer[SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE];
+#else
+/* No static pool: all notification elements are heap allocated */
+static SOPC_InternalNotificationElement* const sopc_notifEltPoolBuffer = NULL;
+#endif
 static SOPC_StaticPool sopc_notifEltPool;
 
 size_t getNotifEltsPoolTotalFallback(void)

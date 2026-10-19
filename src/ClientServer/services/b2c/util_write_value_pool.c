@@ -28,7 +28,12 @@
 #include "sopc_toolkit_config_constants.h"
 #include "util_fast_init_clear.h"
 
+#if SOPC_WRITE_VALUES_POOL_SIZE > 0
 static OpcUa_WriteValue sopc_writeValuePoolBuffer[SOPC_WRITE_VALUES_POOL_SIZE];
+#else
+/* No static pool: all write values are heap allocated */
+static OpcUa_WriteValue* const sopc_writeValuePoolBuffer = NULL;
+#endif
 static SOPC_StaticPool sopc_writeValuePool;
 
 void SOPC_WriteValuePool_Initialize(void)

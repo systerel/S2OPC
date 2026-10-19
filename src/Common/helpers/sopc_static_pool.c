@@ -32,9 +32,9 @@
 void SOPC_StaticPool_Init(SOPC_StaticPool* pool, void* buffer, size_t block_size, size_t capacity)
 {
     SOPC_ASSERT(NULL != pool);
-    SOPC_ASSERT(NULL != buffer);
+    /* No backing buffer if and only if capacity is 0 (heap allocation only) */
+    SOPC_ASSERT((NULL == buffer) == (0 == capacity));
     SOPC_ASSERT(block_size >= sizeof(void*));
-    SOPC_ASSERT(capacity > 0);
     SOPC_ASSERT(0 == ((uintptr_t) buffer) % sizeof(void*));
 
     pool->buffer = (uint8_t*) buffer;
@@ -93,6 +93,13 @@ void SOPC_StaticPool_Free(SOPC_StaticPool* pool, void* block)
 
     if (NULL == block)
     {
+        return;
+    }
+
+    if (0 == pool->capacity)
+    {
+        /* No backing buffer: every block comes from the malloc fallback. */
+        SOPC_Free(block);
         return;
     }
 

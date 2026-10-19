@@ -165,9 +165,23 @@
 #error "Initial capacity of the Node MonitoredItem queue cannot be <= 0"
 #endif
 
-/* Maximum number of tranlate browse path matches */
+/* Static memory pools sizes for MonitoredItem notifications */
+#if SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE < 0
+#error "Notification elements static memory pool size cannot be < 0"
+#endif
+
+#if SOPC_WRITE_VALUES_POOL_SIZE < 0
+#error "Write values static memory pool size cannot be < 0"
+#endif
+
+/* At least one write value per data notification element (if write values pool is used) */
+#if SOPC_WRITE_VALUES_POOL_SIZE > 0 && SOPC_WRITE_VALUES_POOL_SIZE < SOPC_NOTIF_ELTS_STATIC_MEM_POOL_SIZE
+#error "Write values static memory pool size cannot be < notification elements static memory pool size"
+#endif
+
+/* Maximum number of translate browse path matches */
 #if SOPC_MAX_TRANSLATE_BROWSE_PATH_MATCHES < 0
-#error "Maximum number of tranlate browse path matches cannot be < 0"
+#error "Maximum number of translate browse path matches cannot be < 0"
 #endif
 
 /** Check Node management services activation for clients is set only in case of nano extended services */

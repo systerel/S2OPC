@@ -114,6 +114,35 @@ START_TEST(test_static_pool_alloc_is_zeroed)
 }
 END_TEST
 
+START_TEST(test_static_pool_zero_capacity_heap_only)
+{
+    /* No backing buffer: every block comes from the malloc fallback */
+    SOPC_StaticPool pool;
+    SOPC_StaticPool_Init(&pool, NULL, sizeof(test_block_t), 0);
+
+    test_block_t* b1 = (test_block_t*) SOPC_StaticPool_Alloc(&pool);
+    test_block_t* b2 = (test_block_t*) SOPC_StaticPool_Alloc(&pool);
+    ck_assert_ptr_nonnull(b1);
+    ck_assert_ptr_nonnull(b2);
+    ck_assert_ptr_ne(b1, b2);
+    ck_assert_int_eq(0, b1->a);
+    ck_assert_int_eq(0, b1->b);
+    ck_assert_uint_eq(2, SOPC_StaticPool_GetNbFallbackAllocsStat(&pool));
+
+    SOPC_StaticPool_Free(&pool, b1);
+    SOPC_StaticPool_Free(&pool, b2);
+    SOPC_StaticPool_Free(&pool, NULL); /* no-op */
+}
+END_TEST
+
+START_TEST(test_static_pool_init_null_buffer_with_capacity_aborts)
+{
+    /* A NULL buffer is only allowed with a 0 capacity: SOPC_ASSERT (raises SIGABRT). */
+    SOPC_StaticPool pool;
+    SOPC_StaticPool_Init(&pool, NULL, sizeof(test_block_t), 2);
+}
+END_TEST
+
 START_TEST(test_static_pool_free_misaligned_pointer_aborts)
 {
     /* Properly aligned buffer: Init shall succeed so that only Free can abort */
@@ -135,11 +164,13 @@ Suite* tests_make_suite_static_pool(SRunner* sr)
     tcase_add_test(tc, test_static_pool_init_alloc_free);
     tcase_add_test(tc, test_static_pool_fallback_on_exhaustion);
     tcase_add_test(tc, test_static_pool_alloc_is_zeroed);
+    tcase_add_test(tc, test_static_pool_zero_capacity_heap_only);
 
     if (srunner_fork_status(sr) != CK_NOFORK)
     {
         // 6 == SIGABRT
         tcase_add_test_raise_signal(tc, test_static_pool_free_misaligned_pointer_aborts, 6);
+        tcase_add_test_raise_signal(tc, test_static_pool_init_null_buffer_with_capacity_aborts, 6);
     }
 
     suite_add_tcase(s, tc);

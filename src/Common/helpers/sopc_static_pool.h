@@ -70,7 +70,7 @@ typedef struct SOPC_StaticPool
  * \brief Initializes a pool over a caller-provided buffer.
  * \param[in, out] pool  The pool to initialize (caller-owned storage, e.g. `static`).
  * \param buffer         Backing storage, at least `block_size * capacity` bytes
- *                       (caller-owned storage, e.g. `static`).
+ *                       (caller-owned storage, e.g. `static`), or NULL if `capacity` is 0.
  *                       The caller is responsible for ensuring `buffer` is suitably
  *                       aligned for the block type it will store: declare it as a
  *                       `static` array of that type (e.g.
@@ -84,7 +84,8 @@ typedef struct SOPC_StaticPool
  *                       alignment for the actual stored type, which remains the
  *                       caller's responsibility.
  * \param block_size     Size in bytes of each block. Must be >= sizeof(void*).
- * \param capacity       Number of blocks in `buffer`. Must be > 0.
+ * \param capacity       Number of blocks in `buffer`. If 0, `buffer` shall be NULL
+ *                       and every ::SOPC_StaticPool_Alloc falls back to ::SOPC_Malloc.
  */
 void SOPC_StaticPool_Init(SOPC_StaticPool* pool, void* buffer, size_t block_size, size_t capacity);
 
