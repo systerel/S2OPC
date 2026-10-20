@@ -45,10 +45,12 @@ START_TEST(test_static_pool_init_alloc_free)
     ck_assert_ptr_ne(b1, b2);
     ck_assert_uint_eq(0, SOPC_StaticPool_GetNbFallbackAllocsStat(&pool));
 
+    /* Keep b1 address as an integer: b1 shall not be used once freed */
+    const uintptr_t b1Addr = (uintptr_t) b1;
     SOPC_StaticPool_Free(&pool, b1);
     void* b3 = SOPC_StaticPool_Alloc(&pool);
     /* LIFO: the block just freed (b1) must be the next one returned */
-    ck_assert_ptr_eq(b1, b3);
+    ck_assert_uint_eq(b1Addr, (uintptr_t) b3);
 
     SOPC_StaticPool_Free(&pool, b2);
     SOPC_StaticPool_Free(&pool, b3);
@@ -101,12 +103,14 @@ START_TEST(test_static_pool_alloc_is_zeroed)
     test_block_t* b1 = (test_block_t*) SOPC_StaticPool_Alloc(&pool);
     b1->a = 42;
     b1->b = 43;
+    /* Keep b1 address as an integer: b1 shall not be used once freed */
+    const uintptr_t b1Addr = (uintptr_t) b1;
     SOPC_StaticPool_Free(&pool, b1);
 
     /* Re-allocating the same physical block must yield zeroed content, not
      * the previous 42/43 values (this is the LIFO block, so it is b1 again) */
     test_block_t* b2 = (test_block_t*) SOPC_StaticPool_Alloc(&pool);
-    ck_assert_ptr_eq(b1, b2);
+    ck_assert_uint_eq(b1Addr, (uintptr_t) b2);
     ck_assert_int_eq(0, b2->a);
     ck_assert_int_eq(0, b2->b);
 
@@ -151,7 +155,9 @@ START_TEST(test_static_pool_free_misaligned_pointer_aborts)
     SOPC_StaticPool_Init(&pool, buffer, sizeof(test_block_t), 2);
 
     /* buffer + 1 byte is inside the pool's range but not on a block boundary:
-     * SOPC_StaticPool_Free must SOPC_ASSERT (raises SIGABRT). */
+     * SOPC_StaticPool_Free must SOPC_ASSERT (raises SIGABRT) before any free.
+     * Intentional invalid pointer for this negative test. */
+    /* coverity[bad_free] */
     SOPC_StaticPool_Free(&pool, (uint8_t*) buffer + 1);
 }
 END_TEST
