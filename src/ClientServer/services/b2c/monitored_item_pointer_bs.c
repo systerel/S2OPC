@@ -459,30 +459,6 @@ void monitored_item_pointer_bs__getall_monitoredItemId(
     }
 }
 
-void monitored_item_pointer_bs__getall_monitoredItemPointer(
-    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
-    constants__t_monitoredItemId_i* const monitored_item_pointer_bs__p_monitoredItemId,
-    constants__t_subscription_i* const monitored_item_pointer_bs__p_subscription,
-    constants__t_NodeId_i* const monitored_item_pointer_bs__p_nid,
-    constants__t_AttributeId_i* const monitored_item_pointer_bs__p_aid,
-    constants__t_IndexRange_i* const monitored_item_pointer_bs__p_indexRange,
-    constants__t_TimestampsToReturn_i* const monitored_item_pointer_bs__p_timestampToReturn,
-    constants__t_monitoringMode_i* const monitored_item_pointer_bs__p_monitoringMode,
-    constants__t_client_handle_i* const monitored_item_pointer_bs__p_clientHandle)
-{
-    SOPC_ASSERT(NULL != monitored_item_pointer_bs__p_monitoredItemPointer); // Guaranteed by B model
-    SOPC_InternalMonitoredItem* monitItem =
-        (SOPC_InternalMonitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
-    *monitored_item_pointer_bs__p_monitoredItemId = monitItem->monitoredItemId;
-    *monitored_item_pointer_bs__p_subscription = monitItem->subId;
-    *monitored_item_pointer_bs__p_nid = monitItem->nid;
-    *monitored_item_pointer_bs__p_aid = monitItem->aid;
-    *monitored_item_pointer_bs__p_indexRange = monitItem->indexRangeString;
-    *monitored_item_pointer_bs__p_timestampToReturn = monitItem->timestampToReturn;
-    *monitored_item_pointer_bs__p_monitoringMode = monitItem->monitoringMode;
-    *monitored_item_pointer_bs__p_clientHandle = monitItem->clientHandle;
-}
-
 /**
  * \brief Retrieve the subscription owning a monitored item and its current monitoring mode.
  * \param monitored_item_pointer_bs__p_monitoredItemPointer the monitored item

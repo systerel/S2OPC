@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 19/10/2026 14:18:20
+ Date                 : 27/10/2026 16:04:51
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -294,7 +294,7 @@ void subscription_core__local_fill_notification_message_for_data_monitored_item(
             subscription_core__l_notifQueue,
             &subscription_core__l_continue,
             &subscription_core__l_writeValuePointer);
-         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__p_monitoredItemPointer,
+         monitored_item_pointer_bs_inlined__getall_monitoredItemPointer(subscription_core__p_monitoredItemPointer,
             &subscription_core__l_monitoredItemId,
             &subscription_core__l_subscription,
             &subscription_core__l_nid,
@@ -349,7 +349,7 @@ void subscription_core__local_fill_data_notification_message(
             subscription_core__l_monitored_item_queue,
             &subscription_core__l_continue_mi,
             &subscription_core__l_monitoredItemPointer);
-         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
+         monitored_item_pointer_bs_inlined__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_monitoredItemId,
             &subscription_core__l_subscription,
             &subscription_core__l_nid,
@@ -412,7 +412,7 @@ void subscription_core__local_fill_notification_message_for_event_monitored_item
             subscription_core__l_notifQueue,
             &subscription_core__l_continue,
             &subscription_core__l_eventFieldList);
-         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__p_monitoredItemPointer,
+         monitored_item_pointer_bs_inlined__getall_monitoredItemPointer(subscription_core__p_monitoredItemPointer,
             &subscription_core__l_monitoredItemId,
             &subscription_core__l_subscription,
             &subscription_core__l_nid,
@@ -466,7 +466,7 @@ void subscription_core__local_fill_event_notification_message(
             subscription_core__l_monitored_item_queue,
             &subscription_core__l_continue_mi,
             &subscription_core__l_monitoredItemPointer);
-         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
+         monitored_item_pointer_bs_inlined__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_monitoredItemId,
             &subscription_core__l_subscription,
             &subscription_core__l_nid,
@@ -531,7 +531,7 @@ void subscription_core__local_close_subscription(
             subscription_core__l_monitored_item_queue,
             &subscription_core__l_continue_mi,
             &subscription_core__l_monitoredItemPointer);
-         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
+         monitored_item_pointer_bs_inlined__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_monitoredItemId,
             &subscription_core__l_subscription,
             &subscription_core__l_nid,
@@ -1290,7 +1290,7 @@ void subscription_core__modify_monitored_item(
       *subscription_core__p_revQueueSize = 0;
       subscription_core__l_isEvent = false;
       if (subscription_core__bres == true) {
-         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
+         monitored_item_pointer_bs_inlined__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_monitoredItemId,
             &subscription_core__l_subscription,
             &subscription_core__l_nid,
@@ -1379,7 +1379,7 @@ void subscription_core__delete_monitored_item(
          &subscription_core__l_isMonitoredItemFound,
          &subscription_core__l_monitoredItemPointer);
       if (subscription_core__l_isMonitoredItemFound == true) {
-         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
+         monitored_item_pointer_bs_inlined__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_monitoredItemId,
             &subscription_core__l_subscription,
             &subscription_core__l_nid,
@@ -1459,7 +1459,7 @@ void subscription_core__set_monit_mode_monitored_item(
          &subscription_core__l_monitoredItemPointer);
       if (subscription_core__l_isMonitoredItemFound == true) {
          *subscription_core__p_mi_pointer = subscription_core__l_monitoredItemPointer;
-         monitored_item_pointer_bs__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
+         monitored_item_pointer_bs_inlined__getall_monitoredItemPointer(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_monitoredItemId,
             &subscription_core__l_subscription,
             &subscription_core__l_nid,

@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 20/10/2026 12:08:25
+ Date                 : 27/10/2026 16:04:51
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -41,6 +41,7 @@
 #include "monitored_item_filter_treatment.h"
 #include "monitored_item_notification_queue_bs.h"
 #include "monitored_item_pointer_bs.h"
+#include "monitored_item_pointer_bs_inlined.h"
 #include "monitored_item_queue_bs.h"
 #include "msg_subscription_publish_bs.h"
 #include "notification_republish_queue_bs.h"
@@ -100,7 +101,7 @@ extern void subscription_core__INITIALISATION(void);
 #define subscription_core__get_nodeToMonitoredItemQueue subscription_core_bs__get_nodeToMonitoredItemQueue
 #define subscription_core__get_republish_notif_from_queue notification_republish_queue_bs__get_republish_notif_from_queue
 #define subscription_core__get_subscription_notifRepublishQueue subscription_core_1__get_subscription_notifRepublishQueue
-#define subscription_core__getall_monitoredItemPointer monitored_item_pointer_bs__getall_monitoredItemPointer
+#define subscription_core__getall_monitoredItemPointer monitored_item_pointer_bs_inlined__getall_monitoredItemPointer
 #define subscription_core__getall_session subscription_core_1__getall_session
 #define subscription_core__init_iter_monitored_item monitored_item_queue_it_bs__init_iter_monitored_item
 #define subscription_core__init_iter_notif_republish notification_republish_queue_it_bs__init_iter_notif_republish

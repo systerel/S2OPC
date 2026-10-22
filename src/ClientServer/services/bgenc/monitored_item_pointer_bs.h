@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_pointer_bs.h
 
- Date                 : 20/10/2026 12:08:35
+ Date                 : 27/10/2026 16:05:00
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -76,16 +76,6 @@ extern void monitored_item_pointer_bs__getall_monitoredItemId(
    const constants__t_monitoredItemId_i monitored_item_pointer_bs__p_monitoredItemId,
    t_bool * const monitored_item_pointer_bs__bres,
    constants__t_monitoredItemPointer_i * const monitored_item_pointer_bs__p_monitoredItemPointer);
-extern void monitored_item_pointer_bs__getall_monitoredItemPointer(
-   const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
-   constants__t_monitoredItemId_i * const monitored_item_pointer_bs__p_monitoredItemId,
-   constants__t_subscription_i * const monitored_item_pointer_bs__p_subscription,
-   constants__t_NodeId_i * const monitored_item_pointer_bs__p_nid,
-   constants__t_AttributeId_i * const monitored_item_pointer_bs__p_aid,
-   constants__t_IndexRange_i * const monitored_item_pointer_bs__p_indexRange,
-   constants__t_TimestampsToReturn_i * const monitored_item_pointer_bs__p_timestampToReturn,
-   constants__t_monitoringMode_i * const monitored_item_pointer_bs__p_monitoringMode,
-   constants__t_client_handle_i * const monitored_item_pointer_bs__p_clientHandle);
 extern void monitored_item_pointer_bs__is_event_monitoredItem(
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
    t_bool * const monitored_item_pointer_bs__p_isEvent);

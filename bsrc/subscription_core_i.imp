@@ -38,6 +38,7 @@ IMPORTS
     monitored_item_notification_queue_bs,
     monitored_item_queue_bs,
     monitored_item_pointer_bs,
+    monitored_item_pointer_bs_inlined,
     publish_request_queue_bs,
     notification_republish_queue_bs,
     msg_subscription_publish_bs,
@@ -65,6 +66,7 @@ PROMOTES
     async_close_subscription,
     /* monitored_item_pointer_bs*/
     is_notification_triggered,
+    /* monitored_item_pointer_bs_inlined */
     getall_monitoredItemPointer,
     /* msg_subscription_publish_bs */
     set_msg_publish_resp_subscription,

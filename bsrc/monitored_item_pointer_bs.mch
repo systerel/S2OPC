@@ -181,45 +181,6 @@ OPERATIONS
     END
     ;
 
-    p_monitoredItemId,
-    p_subscription,
-    p_nid,
-    p_aid,
-    p_indexRange,
-    p_timestampToReturn,
-    p_monitoringMode,
-    p_clientHandle
-      <-- getall_monitoredItemPointer (p_monitoredItemPointer) =
-    PRE
-        p_monitoredItemPointer : t_monitoredItemPointer_i &
-        p_monitoredItemPointer : s_monitoredItemPointer
-    THEN
-        p_monitoredItemId,
-        p_subscription,
-        p_nid,
-        p_aid,
-        p_indexRange,
-        p_timestampToReturn,
-        p_monitoringMode,
-        p_clientHandle
-        :(p_monitoredItemId : t_monitoredItemId_i &
-          p_monitoredItemId = a_monitoredItemId(p_monitoredItemPointer) &
-          p_subscription : t_subscription_i &
-          p_subscription = a_monitoredItemSubs(p_monitoredItemPointer) &
-          p_nid : t_NodeId_i &
-          p_nid = a_monitoredItemNodeId(p_monitoredItemPointer) &
-          p_aid : t_AttributeId_i &
-          p_aid = a_monitoredItemAttributeId(p_monitoredItemPointer) &
-          p_indexRange : t_IndexRange_i &
-          p_timestampToReturn : t_TimestampsToReturn_i &
-          p_timestampToReturn : t_TimestampsToReturn &
-          p_monitoringMode : t_monitoringMode_i &
-          p_monitoringMode = a_monitoredItemMonitMode(p_monitoredItemPointer) &
-          p_clientHandle : t_client_handle_i
-        )
-    END
-    ;
-
     p_subscription, p_monitoringMode <-- get_monitoredItemPointer_subscription_monitMode (p_monitoredItemPointer) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
