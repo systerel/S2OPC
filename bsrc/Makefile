@@ -43,7 +43,8 @@ PROJECT: $(SOURCE_FILES)
 
 TC: $(SOURCE_FILES)
 	m -lonely -incomplete -pchk -tc -b0 | tee tc.log
-	grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b)' tc.log | xargs test 0 -eq
+#	# *_bs_inlined machines are basic machines implemented by a manual header (not translated, see b2c/)
+	grep -vE '^warning: [_A-Za-z0-9]+_bs_inlined$$' tc.log | grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b)' | xargs test 0 -eq
 
 $(TARGET_GENERATED_FILES): $(SOURCE_FILES)
 	$(RM) tc.log
