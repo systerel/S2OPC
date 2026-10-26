@@ -117,21 +117,27 @@ static int8_t SOPC_Internal_SLinkedList_EventTimerCompare(uintptr_t left, uintpt
     return result;
 }
 
+// Timer shall not be in the timers list
+static void SOPC_Internal_EventTimer_Free_WithoutLock(SOPC_EventTimer* timer)
+{
+    uint32_t timerId = timer->id;
+    // Release identifier for reuse
+    uintptr_t appended = SOPC_SLinkedList_Append(timerIdsFreed, timerId, (uintptr_t) timerId);
+    if (appended != (uintptr_t) timerId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "EventTimerManager: failed to add freed timer id=%" PRIu32 " to freed list", timerId);
+    }
+    SOPC_Free(timer);
+}
+
 static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
 {
     SOPC_EventTimer* timer = NULL;
     timer = (SOPC_EventTimer*) SOPC_SLinkedList_RemoveFromId(timers, timerId);
     if (timer != NULL)
     {
-        // Release identifier for reuse
-        uintptr_t appended = SOPC_SLinkedList_Append(timerIdsFreed, timerId, (uintptr_t) timerId);
-        if (appended != (uintptr_t) timerId)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "EventTimerManager: failed to add freed timer id=%" PRIu32 " to freed list",
-                                   timerId);
-        }
-        SOPC_Free(timer);
+        SOPC_Internal_EventTimer_Free_WithoutLock(timer);
     }
 }
 
@@ -150,7 +156,8 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
                                "EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
                                " with event=%" PRIi32 " and associated id=%" PRIu32,
                                timer->id, timer->event.event, timer->event.eltId);
-        SOPC_Internal_EventTimer_Cancel_WithoutLock(timer->id);
+        // Timer is not in the timers list anymore: free it directly
+        SOPC_Internal_EventTimer_Free_WithoutLock(timer);
     }
 }
 
