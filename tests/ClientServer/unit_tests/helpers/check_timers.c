@@ -35,6 +35,7 @@
 #include "sopc_event_timer_manager.h"
 #include "sopc_macros.h"
 #include "sopc_threads.h"
+#include "sopc_time_reference.h"
 
 #define NB_TIMERS 5
 #define EVENT 1000
@@ -209,6 +210,112 @@ START_TEST(test_timers_with_cancellation)
 }
 END_TEST
 
+// Periodic timers expiring during the same evaluation
+#define NB_SIMULTANEOUS_PERIODIC_TIMERS 3
+#define SIMULTANEOUS_PERIOD_MS 400
+#define VICTIM_TIMER_ELT_ID NB_SIMULTANEOUS_PERIODIC_TIMERS
+// Victim timer expires after the first expiration of the periodic timers and before their second one
+#define VICTIM_TIMER_DELAY_MS (SIMULTANEOUS_PERIOD_MS + 100)
+// Maximum lateness of the victim timer: timer resolution (evaluation cycle) + margin for scheduling
+#define VICTIM_TIMER_MAX_LATENESS_MS (SOPC_TIMER_RESOLUTION_MS + 100)
+// Victim timer is expected after VICTIM_TIMER_DELAY_MS (fixed) or 2 * SIMULTANEOUS_PERIOD_MS (defect)
+#define VICTIM_TIMER_WAIT_MAX_MS (2 * SIMULTANEOUS_PERIOD_MS + 500)
+
+static int32_t victimTimerTriggered = 0;
+static int64_t victimTimerEventMs = 0;
+
+static void simultaneous_timeout_event(SOPC_EventHandler* handler,
+                                       int32_t event,
+                                       uint32_t eltId,
+                                       uintptr_t params,
+                                       uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(handler);
+    SOPC_UNUSED_ARG(params);
+    SOPC_UNUSED_ARG(auxParam);
+
+    ck_assert(EVENT == event);
+    if (VICTIM_TIMER_ELT_ID == eltId)
+    {
+        victimTimerEventMs = (int64_t) SOPC_TimeReference_GetCurrent();
+        SOPC_Atomic_Int_Set(&victimTimerTriggered, 1);
+    }
+}
+
+/* Non-regression test: a timer shall not be delayed by periodic timers expiring during the same evaluation.
+ *
+ * Evaluation walks the timers list from its head and stops at the first timer not expired: the list shall be
+ * sorted by endTime. Sorted insertion inserts before the first strictly greater element, starting from the head.
+ *
+ * Scenario (times in ms relative to S1 creation):
+ * - periodic timers S1, S2, S3 (period 400) created 1 ms apart: endTime 400, 401, 402.
+ *   They expire within less than a timer resolution (50), so at least 2 of them expire in the same evaluation,
+ * - non-periodic victim timer V (delay 500) created just after: endTime 503.
+ *   Initial list: [S1(400), S2(401), S3(402), V(503)]
+ *
+ * Regression (re-insertion one by one while the other triggered timers are still in the list):
+ * - evaluation at t~410: S1, S2, S3 expire, their endTime is updated in place:
+ *   [S1(800), S2(801), S3(802), V(503)] (head not sorted anymore)
+ * - S1 removed then inserted: 800 < 801 (S2 already updated) => inserted at head:
+ *   [S1(800), S2(801), S3(802), V(503)]
+ * - S2 removed then inserted before S3: [S1(800), S2(801), S3(802), V(503)]
+ * - S3 removed then appended: [S1(800), S2(801), V(503), S3(802)]
+ * - at t=503 the head S1(800) is not expired: evaluation stops and V is not even evaluated.
+ *   V is only triggered at t>=800: delayed by ~300 ms (+ up to one timer resolution).
+ * The same occurs when only 2 of the periodic timers expire in the same evaluation.
+ *
+ * Expected behavior (fix): all the triggered periodic timers are removed before re-insertion.
+ * The list is [V(503)] (sorted), insertions give [V(503), S1(800), S2(801), S3(802)] and V is triggered at t=503.
+ *
+ * Note: the victim is non-periodic only to make the test deterministic, the defect impacts any timer located behind
+ * a wrongly re-inserted timer, including periodic ones (e.g. 100 ms subscriptions delayed by 1000 ms ones). */
+START_TEST(test_periodic_timers_simultaneous_expiration)
+{
+    SOPC_LooperEvent event;
+    uint32_t timerIds[NB_SIMULTANEOUS_PERIODIC_TIMERS];
+    SOPC_Looper* looper = SOPC_Looper_Create("timers");
+    ck_assert_ptr_nonnull(looper);
+
+    SOPC_EventHandler* eventHandler = SOPC_EventHandler_Create(looper, simultaneous_timeout_event);
+    ck_assert_ptr_nonnull(eventHandler);
+
+    SOPC_EventTimer_Initialize();
+    memset(&event, 0, sizeof(SOPC_LooperEvent));
+    event.event = EVENT;
+
+    for (uint32_t i = 0; i < NB_SIMULTANEOUS_PERIODIC_TIMERS; i++)
+    {
+        if (i > 0)
+        {
+            SOPC_Sleep(1);
+        }
+        event.eltId = i;
+        timerIds[i] = SOPC_EventTimer_CreatePeriodic(eventHandler, event, SIMULTANEOUS_PERIOD_MS);
+        ck_assert_uint_ne(0, timerIds[i]);
+    }
+    event.eltId = VICTIM_TIMER_ELT_ID;
+    int64_t victimTimerStartMs = (int64_t) SOPC_TimeReference_GetCurrent();
+    ck_assert_uint_ne(0, SOPC_EventTimer_Create(eventHandler, event, VICTIM_TIMER_DELAY_MS));
+
+    int64_t elapsedMs = 0;
+    while (0 == SOPC_Atomic_Int_Get(&victimTimerTriggered) && elapsedMs < VICTIM_TIMER_WAIT_MAX_MS)
+    {
+        SOPC_Sleep(10);
+        elapsedMs = (int64_t) SOPC_TimeReference_GetCurrent() - victimTimerStartMs;
+    }
+
+    for (uint32_t i = 0; i < NB_SIMULTANEOUS_PERIODIC_TIMERS; i++)
+    {
+        SOPC_EventTimer_Cancel(timerIds[i]);
+    }
+    SOPC_Looper_Delete(looper);
+    SOPC_EventTimer_Clear();
+
+    ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&victimTimerTriggered));
+    ck_assert_int_le(victimTimerEventMs - victimTimerStartMs - VICTIM_TIMER_DELAY_MS, VICTIM_TIMER_MAX_LATENESS_MS);
+}
+END_TEST
+
 Suite* tests_make_suite_timers(void)
 {
     Suite* s;
@@ -218,6 +325,7 @@ Suite* tests_make_suite_timers(void)
     tc_timers = tcase_create("Timeouts");
     tcase_add_test(tc_timers, test_timers);
     tcase_add_test(tc_timers, test_timers_with_cancellation);
+    tcase_add_test(tc_timers, test_periodic_timers_simultaneous_expiration);
     suite_add_tcase(s, tc_timers);
 
     return s;
