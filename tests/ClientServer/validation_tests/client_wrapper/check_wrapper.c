@@ -915,6 +915,32 @@ START_TEST(test_wrapper_subscription_services)
     ck_assert(SOPC_IsGoodStatus(setPubModeResponse->Results[0]));
     SOPC_EncodeableObject_Delete(setPubModeResponse->encodeableType, (void**) &setPubModeResponse);
 
+    /* SetPublishingMode without subscription identifier: identifier set by the client wrapper */
+    setPubModeRequest = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EncodeableObject_Create(&OpcUa_SetPublishingModeRequest_EncodeableType,
+                                                                  (void**) &setPubModeRequest));
+    setPubModeRequest->PublishingEnabled = true;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Subscription_SyncService(subscription, setPubModeRequest,
+                                                                                (void**) &setPubModeResponse));
+    ck_assert_ptr_nonnull(setPubModeResponse);
+    ck_assert_ptr_eq(&OpcUa_SetPublishingModeResponse_EncodeableType, setPubModeResponse->encodeableType);
+    ck_assert(SOPC_IsGoodStatus(setPubModeResponse->ResponseHeader.ServiceResult));
+    ck_assert_int_eq(1, setPubModeResponse->NoOfResults);
+    ck_assert(SOPC_IsGoodStatus(setPubModeResponse->Results[0]));
+    SOPC_EncodeableObject_Delete(setPubModeResponse->encodeableType, (void**) &setPubModeResponse);
+
+    /* SetPublishingMode with several subscription identifiers is rejected */
+    setPubModeRequest = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EncodeableObject_Create(&OpcUa_SetPublishingModeRequest_EncodeableType,
+                                                                  (void**) &setPubModeRequest));
+    setPubModeRequest->NoOfSubscriptionIds = 2;
+    setPubModeRequest->SubscriptionIds = SOPC_Calloc(2, sizeof(*setPubModeRequest->SubscriptionIds));
+    ck_assert_ptr_nonnull(setPubModeRequest->SubscriptionIds);
+    ck_assert_int_eq(
+        SOPC_STATUS_INVALID_PARAMETERS,
+        SOPC_ClientHelper_Subscription_SyncService(subscription, setPubModeRequest, (void**) &setPubModeResponse));
+    ck_assert_ptr_null(setPubModeResponse);
+
     /* SetMonitoringMode on the subscription managed by the client wrapper
      * (note: ModifyMonitoredItems is not decoded correctly by the FreeOpcUa test server) */
     OpcUa_SetMonitoringModeRequest* setMonModeRequest = NULL;

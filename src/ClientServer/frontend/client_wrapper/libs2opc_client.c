@@ -2004,7 +2004,18 @@ static void* SOPC_ClientHelperInternal_ConfigAndFilterService(const SOPC_ClientH
     else if (&OpcUa_SetPublishingModeRequest_EncodeableType == encType)
     {
         OpcUa_SetPublishingModeRequest* setPubModeReq = (OpcUa_SetPublishingModeRequest*) request;
-        if (setPubModeReq->NoOfSubscriptionIds > 1)
+        if (setPubModeReq->NoOfSubscriptionIds <= 0 && NULL == setPubModeReq->SubscriptionIds)
+        {
+            // No subscription identifier provided: allocate it (allocation failure reported as invalid parameters)
+            setPubModeReq->SubscriptionIds = SOPC_Calloc(1, sizeof(*setPubModeReq->SubscriptionIds));
+            if (NULL == setPubModeReq->SubscriptionIds)
+            {
+                return NULL;
+            }
+            setPubModeReq->NoOfSubscriptionIds = 1;
+        }
+        // Only the subscription identifier is expected
+        if (1 != setPubModeReq->NoOfSubscriptionIds || NULL == setPubModeReq->SubscriptionIds)
         {
             return NULL;
         }
