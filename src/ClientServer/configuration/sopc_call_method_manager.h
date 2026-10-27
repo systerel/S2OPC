@@ -30,6 +30,7 @@
 #define SOPC_CALL_METHOD_MANAGER_H_
 
 #include "sopc_builtintypes.h"
+#include "sopc_macros.h"
 #include "sopc_service_call_context.h"
 
 typedef struct SOPC_MethodCallManager SOPC_MethodCallManager;
@@ -214,6 +215,7 @@ bool SOPC_MethodCallManager_CallMethod(SOPC_MethodCallManager* mcm,
  *
  * \return the method description associated to \p methodId, NULL if none.
  */
+SOPC_DEPRECATED("Use SOPC_MethodCallManager_CallMethod instead")
 SOPC_MethodCallFunc* SOPC_MethodCallManager_GetMethod(SOPC_MethodCallManager* mcm, const SOPC_NodeId* methodId);
 
 #endif /* SOPC_CALL_METHOD_MANAGER_H_ */
