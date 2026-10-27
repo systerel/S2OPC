@@ -238,6 +238,63 @@ START_TEST(test_cq_iterator_head_to_tail)
 }
 END_TEST
 
+START_TEST(test_cq_wrap_around_all_operations)
+{
+    /* Capacity 1: every head move wraps immediately. */
+    SOPC_CircularQueue* single = SOPC_CircularQueue_Create(1);
+    ck_assert_ptr_nonnull(single);
+    for (uintptr_t v = 1; v <= 3; v++)
+    {
+        ck_assert_uint_eq(v, SOPC_CircularQueue_Append(single, v));
+        ck_assert_uint_eq(v, SOPC_CircularQueue_PopHead(single));
+        ck_assert_uint_eq(v, SOPC_CircularQueue_Prepend(single, v));
+        ck_assert_uint_eq(v, SOPC_CircularQueue_PopLast(single));
+    }
+    SOPC_CircularQueue_Delete(single);
+
+    /* Rotate head over every slot and check all accessors on the wrapped ring. */
+    SOPC_CircularQueue* queue = SOPC_CircularQueue_Create(3);
+    ck_assert_ptr_nonnull(queue);
+    for (uintptr_t round = 0; round < 3; round++)
+    {
+        ck_assert_uint_eq(10, SOPC_CircularQueue_Append(queue, 10));
+        ck_assert_uint_eq(20, SOPC_CircularQueue_Append(queue, 20));
+        ck_assert_uint_eq(30, SOPC_CircularQueue_Append(queue, 30));
+        ck_assert_uint_eq(10, SOPC_CircularQueue_GetHead(queue));
+        ck_assert_uint_eq(30, SOPC_CircularQueue_GetLast(queue));
+
+        SOPC_CircularQueueIterator it = SOPC_CircularQueue_GetIterator(queue);
+        ck_assert_uint_eq(10, SOPC_CircularQueue_Next(&it));
+        ck_assert_uint_eq(20, SOPC_CircularQueue_Next(&it));
+        ck_assert_uint_eq(30, SOPC_CircularQueue_Next(&it));
+        ck_assert(!SOPC_CircularQueue_HasNext(&it));
+
+        ck_assert_uint_eq(20, SOPC_CircularQueue_RemoveAt(queue, 1));
+        ck_assert_uint_eq(30, SOPC_CircularQueue_PopLast(queue));
+        ck_assert_uint_eq(5, SOPC_CircularQueue_Prepend(queue, 5));
+        ck_assert_uint_eq(5, SOPC_CircularQueue_PopHead(queue));
+        /* Empty the queue through the head so that head moves forward each round. */
+        ck_assert_uint_eq(10, SOPC_CircularQueue_PopHead(queue));
+        ck_assert_uint_eq(40 + round, SOPC_CircularQueue_Append(queue, 40 + round));
+        ck_assert_uint_eq(40 + round, SOPC_CircularQueue_PopHead(queue));
+        ck_assert_uint_eq(0, SOPC_CircularQueue_GetLength(queue));
+    }
+
+    /* Grow while wrapped: logical order must be kept. */
+    ck_assert_uint_eq(1, SOPC_CircularQueue_Append(queue, 1));
+    ck_assert_uint_eq(2, SOPC_CircularQueue_Append(queue, 2));
+    ck_assert_uint_eq(3, SOPC_CircularQueue_Prepend(queue, 3));
+    ck_assert(SOPC_CircularQueue_SetCapacity(queue, 5));
+    ck_assert_uint_eq(4, SOPC_CircularQueue_Append(queue, 4));
+    ck_assert_uint_eq(3, SOPC_CircularQueue_PopHead(queue));
+    ck_assert_uint_eq(1, SOPC_CircularQueue_PopHead(queue));
+    ck_assert_uint_eq(2, SOPC_CircularQueue_PopHead(queue));
+    ck_assert_uint_eq(4, SOPC_CircularQueue_PopHead(queue));
+
+    SOPC_CircularQueue_Delete(queue);
+}
+END_TEST
+
 START_TEST(test_cq_remove_at)
 {
     SOPC_CircularQueue* queue = SOPC_CircularQueue_Create(5);
@@ -277,6 +334,7 @@ Suite* tests_make_suite_circular_queue(void)
     tcase_add_test(tc, test_cq_clear_then_reuse);
     tcase_add_test(tc, test_cq_iterator_head_to_tail);
     tcase_add_test(tc, test_cq_remove_at);
+    tcase_add_test(tc, test_cq_wrap_around_all_operations);
 
     suite_add_tcase(s, tc);
     return s;

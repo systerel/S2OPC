@@ -94,6 +94,22 @@ typedef struct SOPC_CircularQueueIterator
 } SOPC_CircularQueueIterator;
 
 /**
+ * \brief Internal: physical slot index of the element at logical \p offset from head.
+ *
+ * Replaces a modulo by \c allocatedCap (software division on some targets) and cannot overflow.
+ *
+ * \param queue   The queue (non-NULL), with \c head < \c allocatedCap.
+ * \param offset  Logical offset from head, must be <= \c allocatedCap.
+ * \return        Slot index in [0, \c allocatedCap - 1].
+ */
+static SOPC_STRONG_INLINE uint32_t SOPC_CircularQueue_Internal_SlotIndex(const SOPC_CircularQueue* queue,
+                                                                         uint32_t offset)
+{
+    uint32_t slotsToEnd = queue->allocatedCap - queue->head;
+    return (offset < slotsToEnd) ? queue->head + offset : offset - slotsToEnd;
+}
+
+/**
  * \brief Create a queue with the given maximum number of elements.
  *
  * \param sizeMax  Maximum number of elements; must be > 0 and <= UINT32_MAX.
@@ -174,15 +190,14 @@ SOPC_CircularQueueIterator SOPC_CircularQueue_GetIterator(SOPC_CircularQueue* qu
  * \param it  Iterator from ::SOPC_CircularQueue_GetIterator.
  * \return    true if a next element is available, false otherwise.
  */
-bool SOPC_CircularQueue_HasNext(const SOPC_CircularQueueIterator* it);
-
-/**
- * \brief Return the next value and advance the iterator toward the tail.
- *
- * \param it  Iterator from ::SOPC_CircularQueue_GetIterator.
- * \return    Next value, or 0 if exhausted / invalid.
- */
-uintptr_t SOPC_CircularQueue_Next(SOPC_CircularQueueIterator* it);
+static SOPC_STRONG_INLINE bool SOPC_CircularQueue_HasNext(const SOPC_CircularQueueIterator* it)
+{
+    if (NULL == it || NULL == it->queue)
+    {
+        return false;
+    }
+    return it->nextOffset < it->queue->length;
+}
 
 /**
  * \brief Return the next value, its logical index from head, and advance the iterator.
@@ -193,7 +208,32 @@ uintptr_t SOPC_CircularQueue_Next(SOPC_CircularQueueIterator* it);
  * \param[out] pIndex  If non-NULL, set to the logical index (0 = head) of the returned value.
  * \return             Next value, or 0 if exhausted / invalid (\p pIndex unchanged then).
  */
-uintptr_t SOPC_CircularQueue_NextWithIndex(SOPC_CircularQueueIterator* it, uint32_t* pIndex);
+static SOPC_STRONG_INLINE uintptr_t SOPC_CircularQueue_NextWithIndex(SOPC_CircularQueueIterator* it, uint32_t* pIndex)
+{
+    if (!SOPC_CircularQueue_HasNext(it))
+    {
+        return 0;
+    }
+    uint32_t logicalIndex = it->nextOffset;
+    uint32_t idx = SOPC_CircularQueue_Internal_SlotIndex(it->queue, logicalIndex);
+    it->nextOffset++;
+    if (NULL != pIndex)
+    {
+        *pIndex = logicalIndex;
+    }
+    return it->queue->slots[idx];
+}
+
+/**
+ * \brief Return the next value and advance the iterator toward the tail.
+ *
+ * \param it  Iterator from ::SOPC_CircularQueue_GetIterator.
+ * \return    Next value, or 0 if exhausted / invalid.
+ */
+static SOPC_STRONG_INLINE uintptr_t SOPC_CircularQueue_Next(SOPC_CircularQueueIterator* it)
+{
+    return SOPC_CircularQueue_NextWithIndex(it, NULL);
+}
 
 /**
  * \brief Remove the element at the given logical index (0 = head).

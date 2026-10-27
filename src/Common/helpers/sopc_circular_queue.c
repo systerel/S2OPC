@@ -23,7 +23,7 @@
  *
  * Layout of the ring (indices into \c slots, modulo \c allocatedCap):
  * - Occupied range is \c length consecutive slots starting at \c head
- * - Append writes at index (head + length) % allocatedCap
+ * - Append writes at index (head + length) modulo allocatedCap (computed without division)
  * - Prepend moves head one step backward then writes at the new head
  * - Logical order head -> tail wraps when head + length exceeds allocatedCap
  */
@@ -66,8 +66,8 @@ uintptr_t SOPC_CircularQueue_Prepend(SOPC_CircularQueue* queue, uintptr_t value)
         return 0;
     }
 
-    /* Move head one step backward in the ring (wrap with + allocatedCap - 1). */
-    queue->head = (queue->head + queue->allocatedCap - 1) % queue->allocatedCap;
+    /* Move head one step backward in the ring (wrap to the last slot). */
+    queue->head = (0 == queue->head) ? queue->allocatedCap - 1 : queue->head - 1;
     queue->slots[queue->head] = value;
     queue->length++;
     return value;
@@ -81,7 +81,7 @@ uintptr_t SOPC_CircularQueue_Append(SOPC_CircularQueue* queue, uintptr_t value)
     }
 
     /* Next free slot is immediately after the last live element (may wrap). */
-    uint32_t idx = (queue->head + queue->length) % queue->allocatedCap;
+    uint32_t idx = SOPC_CircularQueue_Internal_SlotIndex(queue, queue->length);
     queue->slots[idx] = value;
     queue->length++;
     return value;
@@ -97,7 +97,7 @@ uintptr_t SOPC_CircularQueue_PopHead(SOPC_CircularQueue* queue)
     uintptr_t value = queue->slots[queue->head];
     queue->slots[queue->head] = 0;
     /* Advance head past the removed element; wrap at allocatedCap. */
-    queue->head = (queue->head + 1) % queue->allocatedCap;
+    queue->head = SOPC_CircularQueue_Internal_SlotIndex(queue, 1);
     queue->length--;
     return value;
 }
@@ -110,7 +110,7 @@ uintptr_t SOPC_CircularQueue_PopLast(SOPC_CircularQueue* queue)
     }
 
     /* Tail index is the last occupied slot: head + length - 1 (modulo). */
-    uint32_t idx = (queue->head + queue->length - 1) % queue->allocatedCap;
+    uint32_t idx = SOPC_CircularQueue_Internal_SlotIndex(queue, queue->length - 1);
     uintptr_t value = queue->slots[idx];
     queue->slots[idx] = 0;
     queue->length--;
@@ -132,7 +132,7 @@ uintptr_t SOPC_CircularQueue_GetLast(SOPC_CircularQueue* queue)
     {
         return 0;
     }
-    uint32_t idx = (queue->head + queue->length - 1) % queue->allocatedCap;
+    uint32_t idx = SOPC_CircularQueue_Internal_SlotIndex(queue, queue->length - 1);
     return queue->slots[idx];
 }
 
@@ -146,7 +146,7 @@ void SOPC_CircularQueue_Apply(SOPC_CircularQueue* queue, void (*pFn)(uintptr_t v
     /* Walk logical order from oldest to newest; id is always 0 (not stored). */
     for (uint32_t i = 0; i < queue->length; i++)
     {
-        uint32_t idx = (queue->head + i) % queue->allocatedCap;
+        uint32_t idx = SOPC_CircularQueue_Internal_SlotIndex(queue, i);
         pFn(queue->slots[idx]);
     }
 }
@@ -157,36 +157,6 @@ SOPC_CircularQueueIterator SOPC_CircularQueue_GetIterator(SOPC_CircularQueue* qu
     return it;
 }
 
-bool SOPC_CircularQueue_HasNext(const SOPC_CircularQueueIterator* it)
-{
-    if (NULL == it || NULL == it->queue)
-    {
-        return false;
-    }
-    return it->nextOffset < it->queue->length;
-}
-
-uintptr_t SOPC_CircularQueue_Next(SOPC_CircularQueueIterator* it)
-{
-    return SOPC_CircularQueue_NextWithIndex(it, NULL);
-}
-
-uintptr_t SOPC_CircularQueue_NextWithIndex(SOPC_CircularQueueIterator* it, uint32_t* pIndex)
-{
-    if (!SOPC_CircularQueue_HasNext(it))
-    {
-        return 0;
-    }
-    uint32_t logicalIndex = it->nextOffset;
-    uint32_t idx = (it->queue->head + logicalIndex) % it->queue->allocatedCap;
-    it->nextOffset++;
-    if (NULL != pIndex)
-    {
-        *pIndex = logicalIndex;
-    }
-    return it->queue->slots[idx];
-}
-
 uintptr_t SOPC_CircularQueue_RemoveAt(SOPC_CircularQueue* queue, uint32_t index)
 {
     if (NULL == queue || index >= queue->length)
@@ -194,17 +164,17 @@ uintptr_t SOPC_CircularQueue_RemoveAt(SOPC_CircularQueue* queue, uint32_t index)
         return 0;
     }
 
-    uint32_t slot = (queue->head + index) % queue->allocatedCap;
+    uint32_t slot = SOPC_CircularQueue_Internal_SlotIndex(queue, index);
     uintptr_t value = queue->slots[slot];
 
     /* Close the gap: shift later elements one step toward the head. */
     for (uint32_t j = index; j + 1 < queue->length; j++)
     {
-        uint32_t cur = (queue->head + j) % queue->allocatedCap;
-        uint32_t nxt = (queue->head + j + 1) % queue->allocatedCap;
+        uint32_t cur = SOPC_CircularQueue_Internal_SlotIndex(queue, j);
+        uint32_t nxt = SOPC_CircularQueue_Internal_SlotIndex(queue, j + 1);
         queue->slots[cur] = queue->slots[nxt];
     }
-    uint32_t last = (queue->head + queue->length - 1) % queue->allocatedCap;
+    uint32_t last = SOPC_CircularQueue_Internal_SlotIndex(queue, queue->length - 1);
     queue->slots[last] = 0;
     queue->length--;
     return value;
@@ -267,7 +237,7 @@ bool SOPC_CircularQueue_SetCapacity(SOPC_CircularQueue* queue, size_t sizeMax)
         }
         for (uint32_t i = 0; i < queue->length; i++)
         {
-            newSlots[i] = queue->slots[(queue->head + i) % queue->allocatedCap];
+            newSlots[i] = queue->slots[SOPC_CircularQueue_Internal_SlotIndex(queue, i)];
         }
         SOPC_Free(queue->slots);
         queue->slots = newSlots;
