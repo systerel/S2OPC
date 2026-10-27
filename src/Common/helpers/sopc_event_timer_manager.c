@@ -181,57 +181,60 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
     // Trigger timeout if currentTime >= timeoutTime
     while (timer != NULL && compareResult >= 0)
     {
-        // Trigger timeout event to dispatch event manager
         timerId = timer->id;
-        SOPC_ReturnStatus status = SOPC_EventHandler_Post(timer->eventHandler, timer->event.event, timer->event.eltId,
-                                                          timer->event.params, timer->event.auxParam);
-        SOPC_UNUSED_RESULT(status);
-        SOPC_ASSERT(status == SOPC_STATUS_OK);
-
-        if (timer->isPeriodicTimer)
+        // Add periodic timer to list of timers to restart before any modification:
+        // in case of failure the timer is left untouched (timers list remains sorted) and evaluated on next cycle
+        if (timer->isPeriodicTimer &&
+            timer != (SOPC_EventTimer*) SOPC_SLinkedList_Append(periodicTimersToRestart, timer->id, (uintptr_t) timer))
         {
-            // Set next target time reference
-            SOPC_ASSERT(timer->periodMs > 0 && "A periodic timer cannot have a period of 0 ms");
-            timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
-            compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
-
-            uint16_t loopLimit = SOPC_TIMER_RESOLUTION_MS;
-            // Generate missed events until target time is greater than current time
-            while (compareResult >= 0 && loopLimit > 0)
-            {
-                loopLimit--;
-                status = SOPC_EventHandler_Post(timer->eventHandler, timer->event.event, timer->event.eltId,
-                                                timer->event.params, timer->event.auxParam);
-                SOPC_ASSERT(status == SOPC_STATUS_OK);
-                // Set next target time reference
-                timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
-                compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
-            }
-            if (compareResult >= 0)
-            {
-                SOPC_Logger_TraceWarning(
-                    SOPC_LOG_MODULE_COMMON,
-                    "EventTimerManager: limit number of generated events during 1 timer evaluation "
-                    "reached, some expiration events will not be generated: id=%" PRIu32 " with event=%" PRIi32
-                    ", period=%" PRIu64 " and associated id=%" PRIu32,
-                    timer->id, timer->event.event, timer->periodMs, timer->event.eltId);
-            }
-
-            // Add to list of timers to restart it
-            if (timer !=
-                (SOPC_EventTimer*) SOPC_SLinkedList_Append(periodicTimersToRestart, timer->id, (uintptr_t) timer))
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_COMMON,
-                    "EventTimerManager: failed to restart the periodic timer on insertion id=%" PRIu32
-                    " with event=%" PRIi32 " and associated id=%" PRIu32,
-                    timer->id, timer->event.event, timer->event.eltId);
-            }
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "EventTimerManager: failed to restart the periodic timer, retried on next "
+                                   "evaluation id=%" PRIu32 " with event=%" PRIi32 " and associated id=%" PRIu32,
+                                   timer->id, timer->event.event, timer->event.eltId);
         }
         else
         {
-            // Remove the triggered timer (possible during iteration since we remove already iterated item)
-            SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
+            // Trigger timeout event to dispatch event manager
+            SOPC_ReturnStatus status =
+                SOPC_EventHandler_Post(timer->eventHandler, timer->event.event, timer->event.eltId, timer->event.params,
+                                       timer->event.auxParam);
+            SOPC_UNUSED_RESULT(status);
+            SOPC_ASSERT(status == SOPC_STATUS_OK);
+
+            if (timer->isPeriodicTimer)
+            {
+                // Set next target time reference
+                SOPC_ASSERT(timer->periodMs > 0 && "A periodic timer cannot have a period of 0 ms");
+                timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
+                compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
+
+                uint16_t loopLimit = SOPC_TIMER_RESOLUTION_MS;
+                // Generate missed events until target time is greater than current time
+                while (compareResult >= 0 && loopLimit > 0)
+                {
+                    loopLimit--;
+                    status = SOPC_EventHandler_Post(timer->eventHandler, timer->event.event, timer->event.eltId,
+                                                    timer->event.params, timer->event.auxParam);
+                    SOPC_ASSERT(status == SOPC_STATUS_OK);
+                    // Set next target time reference
+                    timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
+                    compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
+                }
+                if (compareResult >= 0)
+                {
+                    SOPC_Logger_TraceWarning(
+                        SOPC_LOG_MODULE_COMMON,
+                        "EventTimerManager: limit number of generated events during 1 timer evaluation "
+                        "reached, some expiration events will not be generated: id=%" PRIu32 " with event=%" PRIi32
+                        ", period=%" PRIu64 " and associated id=%" PRIu32,
+                        timer->id, timer->event.event, timer->periodMs, timer->event.eltId);
+                }
+            }
+            else
+            {
+                // Remove the triggered timer (possible during iteration since we remove already iterated item)
+                SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
+            }
         }
 
         // Prepare next timeout evaluation
