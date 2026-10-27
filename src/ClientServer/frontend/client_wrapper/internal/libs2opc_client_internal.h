@@ -89,13 +89,6 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(SOPC_C
 bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword);
 
 /**
- * \brief Function to know if the callback has been defined ::SOPC_ClientConfigHelper_SetClientKeyPasswordCallback (i.e.
- * the client's key is encrypted).
- * TODO: remove when deprecated API removed
- */
-bool SOPC_ClientInternal_IsEncryptedClientKey(void);
-
-/**
  * \brief Function to call the callback to retrieve password for decryption of the user private key associated to given
  *        cert Sha1.
  *

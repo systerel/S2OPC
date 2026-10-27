@@ -858,11 +858,6 @@ bool SOPC_ClientInternal_GetUserNamePassword(const SOPC_SecureConnection_Config*
     return sopc_client_helper_config.getUserNamePasswordCb(secConnConfig, outUserName, outPassword);
 }
 
-bool SOPC_ClientInternal_IsEncryptedClientKey(void)
-{
-    return NULL != sopc_client_helper_config.getClientKeyPasswordCb;
-}
-
 uint32_t SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(SOPC_ReverseEndpointConfigIdx rEPcfgIdx)
 {
     if (rEPcfgIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
