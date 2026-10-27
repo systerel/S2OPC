@@ -19,7 +19,8 @@
 
 /** \file
  *
- * Hand-modified _bs.h to specify some types
+ * Hand-modified _bs.h to specify some types.
+ * Performance critical accessors are defined here as strongly inlined functions instead of being declared extern.
  */
 
 #ifndef CONSTANTS_BS_H_
@@ -37,11 +38,13 @@
 #include "opcua_identifiers.h"
 #include "service_discovery_servers_internal.h"
 #include "sopc_address_space.h"
+#include "sopc_assert.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_circular_queue.h"
 #include "sopc_circular_queue_autogrow.h"
 #include "sopc_enum_types.h"
+#include "sopc_macros.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_time_reference.h"
@@ -326,8 +329,13 @@ extern void constants_bs__free_roles(const constants_bs__t_sessionRoles_i consta
 extern void constants_bs__free_SessionName(const constants_bs__t_SessionName_i constants_bs__p_in);
 extern void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in);
 extern void constants_bs__get_CurrentTimestamp(constants_bs__t_Timestamp* const constants_bs__p_currentTs);
-extern void constants_bs__get_NodeId_NamespaceIndex(const constants_bs__t_NodeId_i constants_bs__p_nodeId,
-                                                    constants_bs__t_NamespaceIdx* const constants_bs__p_idx);
+static SOPC_STRONG_INLINE void constants_bs__get_NodeId_NamespaceIndex(
+    const constants_bs__t_NodeId_i constants_bs__p_nodeId,
+    constants_bs__t_NamespaceIdx* const constants_bs__p_idx)
+{
+    SOPC_ASSERT(NULL != constants_bs__p_nodeId);
+    *constants_bs__p_idx = constants_bs__p_nodeId->Namespace;
+}
 extern void constants_bs__get_SupportedLocales(const constants_bs__t_endpoint_config_idx_i constants_bs__p_in,
                                                constants_bs__t_LocaleIds_i* const constants_bs__p_localeIds);
 extern void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel);

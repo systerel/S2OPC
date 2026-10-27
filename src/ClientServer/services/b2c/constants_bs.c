@@ -442,10 +442,3 @@ void constants_bs__get_reverse_cast_t_subscription(const constants_bs__t_subscri
         *constants_bs__p_ind = constants_bs__c_subscription_indet;
     }
 }
-
-void constants_bs__get_NodeId_NamespaceIndex(const constants_bs__t_NodeId_i constants_bs__p_nodeId,
-                                             constants_bs__t_NamespaceIdx* const constants_bs__p_idx)
-{
-    SOPC_ASSERT(NULL != constants_bs__p_nodeId);
-    *constants_bs__p_idx = constants_bs__p_nodeId->Namespace;
-}
