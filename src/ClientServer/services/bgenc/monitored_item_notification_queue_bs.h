@@ -21,9 +21,9 @@
 
  File Name            : monitored_item_notification_queue_bs.h
 
- Date                 : 30/07/2026 13:42:46
+ Date                 : 27/10/2026 14:02:07
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -94,22 +94,11 @@ extern void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item
    constants__t_eventFieldList_i * const monitored_item_notification_queue_bs__p_eventFieldList);
 extern void monitored_item_notification_queue_bs__free_first_monitored_item_notification_value(
    const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer);
-extern void monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(
-   const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_mi_notif_queue,
-   t_entier4 * const monitored_item_notification_queue_bs__p_nb_available_notifs);
-extern void monitored_item_notification_queue_bs__get_monitored_item_notification_queue(
-   const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
-   t_bool * const monitored_item_notification_queue_bs__bres,
-   constants__t_notificationQueue_i * const monitored_item_notification_queue_bs__queue);
 extern void monitored_item_notification_queue_bs__init_iter_monitored_item_notification(
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
    t_bool * const monitored_item_notification_queue_bs__p_continue,
    t_bool * const monitored_item_notification_queue_bs__p_isEvent);
-extern void monitored_item_notification_queue_bs__is_event_monitored_item_notification_queue(
-   const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
-   const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_mi_notif_queue,
-   t_bool * const monitored_item_notification_queue_bs__p_is_event_queue);
 extern void monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem);
 

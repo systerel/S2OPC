@@ -660,38 +660,6 @@ void monitored_item_notification_queue_bs__free_first_monitored_item_notificatio
     SOPC_Free(monitored_item_notification_queue_bs__p_VariantValuePointer);
 }
 
-void monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(
-    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_mi_notif_queue,
-    t_entier4* const monitored_item_notification_queue_bs__p_nb_available_notifs)
-{
-    SOPC_ASSERT(NULL != monitored_item_notification_queue_bs__p_mi_notif_queue);
-    uint32_t length = SOPC_CircularQueue_GetLength(monitored_item_notification_queue_bs__p_mi_notif_queue);
-    SOPC_ASSERT(length <= INT32_MAX); // Guaranteed by add functions
-    *monitored_item_notification_queue_bs__p_nb_available_notifs = (int32_t) length;
-}
-
-void monitored_item_notification_queue_bs__get_monitored_item_notification_queue(
-    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
-    t_bool* const monitored_item_notification_queue_bs__bres,
-    constants__t_notificationQueue_i* const monitored_item_notification_queue_bs__queue)
-{
-    *monitored_item_notification_queue_bs__bres = false;
-    *monitored_item_notification_queue_bs__queue = NULL;
-    SOPC_InternalMonitoredItem* monitoredItemPointer =
-        (SOPC_InternalMonitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
-    if (NULL != monitoredItemPointer->notifQueue)
-    {
-        *monitored_item_notification_queue_bs__bres = true;
-        *monitored_item_notification_queue_bs__queue = monitoredItemPointer->notifQueue;
-    }
-    else
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "MonitoredItem (%" PRIu32 ") notification queue is not allocated",
-                               monitoredItemPointer->monitoredItemId);
-    }
-}
-
 void monitored_item_notification_queue_bs__init_iter_monitored_item_notification(
     const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
@@ -703,16 +671,6 @@ void monitored_item_notification_queue_bs__init_iter_monitored_item_notification
     *monitored_item_notification_queue_bs__p_isEvent = is_eventMI(monitoredItemPointer);
     *monitored_item_notification_queue_bs__p_continue =
         SOPC_CircularQueue_GetLength(monitored_item_notification_queue_bs__p_queue) > 0;
-}
-
-void monitored_item_notification_queue_bs__is_event_monitored_item_notification_queue(
-    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
-    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_mi_notif_queue,
-    t_bool* const monitored_item_notification_queue_bs__p_is_event_queue)
-{
-    SOPC_UNUSED_ARG(monitored_item_notification_queue_bs__p_mi_notif_queue);
-    *monitored_item_notification_queue_bs__p_is_event_queue =
-        is_eventMI(monitored_item_notification_queue_bs__p_monitoredItem);
 }
 
 static void resize_data_notif_queue(SOPC_InternalMonitoredItem* monitoredItemPointer)

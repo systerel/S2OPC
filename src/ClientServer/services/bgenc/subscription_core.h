@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 27/10/2026 16:07:22
+ Date                 : 27/10/2026 16:09:50
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -40,6 +40,7 @@
   -----------------*/
 #include "monitored_item_filter_treatment.h"
 #include "monitored_item_notification_queue_bs.h"
+#include "monitored_item_notification_queue_bs_inlined.h"
 #include "monitored_item_pointer_bs.h"
 #include "monitored_item_pointer_bs_inlined.h"
 #include "monitored_item_queue_bs.h"

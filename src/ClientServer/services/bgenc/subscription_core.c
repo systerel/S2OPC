@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 27/10/2026 16:07:23
+ Date                 : 27/10/2026 16:09:50
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -278,7 +278,7 @@ void subscription_core__local_fill_notification_message_for_data_monitored_item(
       
       subscription_core__l_isEvent = true;
       *subscription_core__p_next_index = subscription_core__p_cur_index;
-      monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+      monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
          &subscription_core__l_continue,
          &subscription_core__l_notifQueue);
       if (subscription_core__l_continue == true) {
@@ -396,7 +396,7 @@ void subscription_core__local_fill_notification_message_for_event_monitored_item
       
       subscription_core__l_isEvent = false;
       *subscription_core__p_next_index = subscription_core__p_cur_index;
-      monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+      monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
          &subscription_core__l_continue,
          &subscription_core__l_notifQueue);
       if (subscription_core__l_continue == true) {
@@ -548,7 +548,7 @@ void subscription_core__local_close_subscription(
                subscription_core__l_monitoredItemPointer,
                &subscription_core__l_bres);
          }
-         monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
+         monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
             &subscription_core__l_bres,
             &subscription_core__l_notification_queue);
          if (subscription_core__l_bres == true) {
@@ -1206,7 +1206,7 @@ void subscription_core__create_monitored_item(
                         subscription_core__l_ts_srv = subscription_core__p_val_ts_srv;
                         break;
                      }
-                     monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_sub_notif_queue,
+                     monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_sub_notif_queue,
                         &subscription_core__l_lenBefore);
                      monitored_item_notification_queue_bs__add_first_monitored_item_notification_to_queue(*subscription_core__monitoredItemPointer,
                         subscription_core__l_sub_notif_queue,
@@ -1218,7 +1218,7 @@ void subscription_core__create_monitored_item(
                         subscription_core__l_ts_srv,
                         &subscription_core__l_bres);
                      if (subscription_core__l_bres == true) {
-                        monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_sub_notif_queue,
+                        monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_sub_notif_queue,
                            &subscription_core__l_lenAfter);
                         subscription_core__local_update_available_notifs(*subscription_core__monitoredItemPointer,
                            subscription_core__l_isEvent,
@@ -1324,14 +1324,14 @@ void subscription_core__modify_monitored_item(
                *subscription_core__p_revQueueSize,
                subscription_core__p_sc);
             if (*subscription_core__p_sc == constants_statuscodes_bs__e_sc_ok) {
-               monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
+               monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
                   &subscription_core__l_bresNQ,
                   &subscription_core__l_notifQueue);
                if (subscription_core__l_bresNQ == true) {
-                  monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notifQueue,
+                  monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notifQueue,
                      &subscription_core__l_lenBefore);
                   monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer);
-                  monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notifQueue,
+                  monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notifQueue,
                      &subscription_core__l_lenAfter);
                   subscription_core__local_update_available_notifs(subscription_core__l_monitoredItemPointer,
                      subscription_core__l_isEvent,
@@ -1406,13 +1406,13 @@ void subscription_core__delete_monitored_item(
                   subscription_core__l_monitoredItemPointer,
                   &subscription_core__l_bres);
             }
-            monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
+            monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
                &subscription_core__l_bres,
                &subscription_core__l_notificationQueue);
             if (subscription_core__l_bres == true) {
-               monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notificationQueue,
+               monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notificationQueue,
                   &subscription_core__l_lenBefore);
-               monitored_item_notification_queue_bs__is_event_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
+               monitored_item_notification_queue_bs_inlined__is_event_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
                   subscription_core__l_notificationQueue,
                   &subscription_core__l_isEvent);
                monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
@@ -1472,13 +1472,13 @@ void subscription_core__set_monit_mode_monitored_item(
          if (subscription_core__l_isMonitoredItemFound == true) {
             subscription_core__l_len = 0;
             subscription_core__l_isEvent = false;
-            monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
+            monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
                &subscription_core__l_bres,
                &subscription_core__l_notifQueue);
             if (subscription_core__l_bres == true) {
-               monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notifQueue,
+               monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notifQueue,
                   &subscription_core__l_len);
-               monitored_item_notification_queue_bs__is_event_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
+               monitored_item_notification_queue_bs_inlined__is_event_monitored_item_notification_queue(subscription_core__l_monitoredItemPointer,
                   subscription_core__l_notifQueue,
                   &subscription_core__l_isEvent);
             }
@@ -1506,13 +1506,13 @@ void subscription_core__clear_monitored_item_notifications(
       t_entier4 subscription_core__l_lenBefore;
       t_bool subscription_core__l_isEvent;
       
-      monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+      monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
          &subscription_core__l_bres,
          &subscription_core__l_notifQueue);
       if (subscription_core__l_bres == true) {
-         monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notifQueue,
+         monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notifQueue,
             &subscription_core__l_lenBefore);
-         monitored_item_notification_queue_bs__is_event_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+         monitored_item_notification_queue_bs_inlined__is_event_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
             subscription_core__l_notifQueue,
             &subscription_core__l_isEvent);
          monitored_item_notification_queue_bs__clear_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
@@ -1986,18 +1986,18 @@ void subscription_core__server_subscription_add_notification_on_event_if_trigger
          subscription_core__p_event,
          &subscription_core__l_triggered,
          &subscription_core__l_event_notif);
-      monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+      monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
          &subscription_core__l_bres,
          &subscription_core__l_notif_queue);
       if (subscription_core__l_triggered == true &&
          subscription_core__l_bres == true) {
-         monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
+         monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
             &subscription_core__l_lenBefore);
          monitored_item_notification_queue_bs__add_monitored_item_event_notification_to_queue(subscription_core__p_monitoredItemPointer,
             subscription_core__l_notif_queue,
             subscription_core__l_event_notif,
             &subscription_core__l_bres);
-         monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
+         monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
             &subscription_core__l_lenAfter);
          subscription_core__local_update_available_notifs(subscription_core__p_monitoredItemPointer,
             true,
@@ -2019,15 +2019,15 @@ void subscription_core__server_subscription_add_notification_on_value_change(
       t_entier4 subscription_core__l_lenBefore;
       t_entier4 subscription_core__l_lenAfter;
       
-      monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+      monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
          &subscription_core__l_bres,
          &subscription_core__l_notif_queue);
       if (subscription_core__l_bres == true) {
-         monitored_item_notification_queue_bs__is_event_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+         monitored_item_notification_queue_bs_inlined__is_event_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
             subscription_core__l_notif_queue,
             &subscription_core__l_is_event);
          if (subscription_core__l_is_event == false) {
-            monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
+            monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
                &subscription_core__l_lenBefore);
             monitored_item_notification_queue_bs__add_monitored_item_data_notification_to_queue(subscription_core__p_localeIds,
                subscription_core__p_monitoredItemPointer,
@@ -2036,7 +2036,7 @@ void subscription_core__server_subscription_add_notification_on_value_change(
                subscription_core__p_writeValuePointer,
                &subscription_core__l_bres);
             if (subscription_core__l_bres == true) {
-               monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
+               monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
                   &subscription_core__l_lenAfter);
                subscription_core__local_update_available_notifs(subscription_core__p_monitoredItemPointer,
                   false,
@@ -2063,11 +2063,11 @@ void subscription_core__server_subscription_add_notification_on_node_or_monitMod
       t_entier4 subscription_core__l_lenBefore;
       t_entier4 subscription_core__l_lenAfter;
       
-      monitored_item_notification_queue_bs__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+      monitored_item_notification_queue_bs_inlined__get_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
          subscription_core__bres,
          &subscription_core__l_notif_queue);
       if (*subscription_core__bres == true) {
-         monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
+         monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
             &subscription_core__l_lenBefore);
          monitored_item_notification_queue_bs__add_first_monitored_item_notification_to_queue(subscription_core__p_monitoredItemPointer,
             subscription_core__l_notif_queue,
@@ -2079,9 +2079,9 @@ void subscription_core__server_subscription_add_notification_on_node_or_monitMod
             subscription_core__p_val_ts_srv,
             subscription_core__bres);
          if (*subscription_core__bres == true) {
-            monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
+            monitored_item_notification_queue_bs_inlined__get_length_monitored_item_notification_queue(subscription_core__l_notif_queue,
                &subscription_core__l_lenAfter);
-            monitored_item_notification_queue_bs__is_event_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
+            monitored_item_notification_queue_bs_inlined__is_event_monitored_item_notification_queue(subscription_core__p_monitoredItemPointer,
                subscription_core__l_notif_queue,
                &subscription_core__l_isEvent);
             subscription_core__local_update_available_notifs(subscription_core__p_monitoredItemPointer,

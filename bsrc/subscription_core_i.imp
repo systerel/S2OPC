@@ -36,6 +36,7 @@ IMPORTS
     subscription_core_it,
     subscription_diagnostics_bs,
     monitored_item_notification_queue_bs,
+    monitored_item_notification_queue_bs_inlined,
     monitored_item_queue_bs,
     monitored_item_pointer_bs,
     monitored_item_pointer_bs_inlined,
