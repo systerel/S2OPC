@@ -46,7 +46,7 @@ IMPORTS
 
 EXTENDS
     notification_republish_queue_it_bs,
-    monitored_item_queue_it_bs
+    monitored_item_queue_it_bs_inlined
 
 PROMOTES
     /* subscription_core_1 */

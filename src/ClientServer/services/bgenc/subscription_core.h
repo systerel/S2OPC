@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 27/10/2026 16:04:51
+ Date                 : 27/10/2026 16:07:22
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -54,7 +54,7 @@
 /*-----------------
    EXTENDS Clause
   -----------------*/
-#include "monitored_item_queue_it_bs.h"
+#include "monitored_item_queue_it_bs_inlined.h"
 #include "notification_republish_queue_it_bs.h"
 
 /*--------------
@@ -87,10 +87,10 @@ extern void subscription_core__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define subscription_core__async_close_subscription subscription_core_bs__async_close_subscription
-#define subscription_core__clear_iter_monitored_item monitored_item_queue_it_bs__clear_iter_monitored_item
+#define subscription_core__clear_iter_monitored_item monitored_item_queue_it_bs_inlined__clear_iter_monitored_item
 #define subscription_core__clear_notif_republish_iterator notification_republish_queue_it_bs__clear_notif_republish_iterator
 #define subscription_core__compute_create_subscription_revised_params subscription_core_bs__compute_create_subscription_revised_params
-#define subscription_core__continue_iter_monitored_item monitored_item_queue_it_bs__continue_iter_monitored_item
+#define subscription_core__continue_iter_monitored_item monitored_item_queue_it_bs_inlined__continue_iter_monitored_item
 #define subscription_core__continue_iter_notif_republish notification_republish_queue_it_bs__continue_iter_notif_republish
 #define subscription_core__flush_internal_multi_send_publish_response_events msg_subscription_publish_bs__flush_internal_multi_send_publish_response_events
 #define subscription_core__generate_internal_multi_send_publish_response_event msg_subscription_publish_bs__generate_internal_multi_send_publish_response_event
@@ -103,7 +103,7 @@ extern void subscription_core__INITIALISATION(void);
 #define subscription_core__get_subscription_notifRepublishQueue subscription_core_1__get_subscription_notifRepublishQueue
 #define subscription_core__getall_monitoredItemPointer monitored_item_pointer_bs_inlined__getall_monitoredItemPointer
 #define subscription_core__getall_session subscription_core_1__getall_session
-#define subscription_core__init_iter_monitored_item monitored_item_queue_it_bs__init_iter_monitored_item
+#define subscription_core__init_iter_monitored_item monitored_item_queue_it_bs_inlined__init_iter_monitored_item
 #define subscription_core__init_iter_notif_republish notification_republish_queue_it_bs__init_iter_notif_republish
 #define subscription_core__is_notification_triggered monitored_item_pointer_bs__is_notification_triggered
 #define subscription_core__is_valid_subscription subscription_core_1__is_valid_subscription

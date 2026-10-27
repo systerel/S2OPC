@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 27/10/2026 16:04:51
+ Date                 : 27/10/2026 16:07:23
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -340,12 +340,12 @@ void subscription_core__local_fill_data_notification_message(
       subscription_core__l_index = 1;
       subscription_core_1__get_subscription_monitoredItemQueue(subscription_core__p_subscription,
          &subscription_core__l_monitored_item_queue);
-      monitored_item_queue_it_bs__init_iter_monitored_item(subscription_core__l_monitored_item_queue,
+      monitored_item_queue_it_bs_inlined__init_iter_monitored_item(subscription_core__l_monitored_item_queue,
          &subscription_core__l_continue_mi,
          &subscription_core__l_iterator);
       while (subscription_core__l_continue_mi == true &&
          subscription_core__l_index <= subscription_core__p_nb_data_notifs) {
-         monitored_item_queue_it_bs__continue_iter_monitored_item(subscription_core__l_iterator,
+         monitored_item_queue_it_bs_inlined__continue_iter_monitored_item(subscription_core__l_iterator,
             subscription_core__l_monitored_item_queue,
             &subscription_core__l_continue_mi,
             &subscription_core__l_monitoredItemPointer);
@@ -370,7 +370,7 @@ void subscription_core__local_fill_data_notification_message(
             subscription_core__l_index = subscription_core__l_new_index;
          }
       }
-      monitored_item_queue_it_bs__clear_iter_monitored_item(subscription_core__l_iterator);
+      monitored_item_queue_it_bs_inlined__clear_iter_monitored_item(subscription_core__l_iterator);
    }
 }
 
@@ -457,12 +457,12 @@ void subscription_core__local_fill_event_notification_message(
       subscription_core__l_index = 1;
       subscription_core_1__get_subscription_monitoredItemQueue(subscription_core__p_subscription,
          &subscription_core__l_monitored_item_queue);
-      monitored_item_queue_it_bs__init_iter_monitored_item(subscription_core__l_monitored_item_queue,
+      monitored_item_queue_it_bs_inlined__init_iter_monitored_item(subscription_core__l_monitored_item_queue,
          &subscription_core__l_continue_mi,
          &subscription_core__l_iterator);
       while (subscription_core__l_continue_mi == true &&
          subscription_core__l_index <= subscription_core__p_nb_event_notifs) {
-         monitored_item_queue_it_bs__continue_iter_monitored_item(subscription_core__l_iterator,
+         monitored_item_queue_it_bs_inlined__continue_iter_monitored_item(subscription_core__l_iterator,
             subscription_core__l_monitored_item_queue,
             &subscription_core__l_continue_mi,
             &subscription_core__l_monitoredItemPointer);
@@ -487,7 +487,7 @@ void subscription_core__local_fill_event_notification_message(
             subscription_core__l_index = subscription_core__l_new_index;
          }
       }
-      monitored_item_queue_it_bs__clear_iter_monitored_item(subscription_core__l_iterator);
+      monitored_item_queue_it_bs_inlined__clear_iter_monitored_item(subscription_core__l_iterator);
    }
 }
 
@@ -523,11 +523,11 @@ void subscription_core__local_close_subscription(
       notification_republish_queue_bs__clear_and_deallocate_republish_queue(subscription_core__l_republish_queue);
       subscription_core_1__get_subscription_monitoredItemQueue(subscription_core__p_subscription,
          &subscription_core__l_monitored_item_queue);
-      monitored_item_queue_it_bs__init_iter_monitored_item(subscription_core__l_monitored_item_queue,
+      monitored_item_queue_it_bs_inlined__init_iter_monitored_item(subscription_core__l_monitored_item_queue,
          &subscription_core__l_continue_mi,
          &subscription_core__l_iterator);
       while (subscription_core__l_continue_mi == true) {
-         monitored_item_queue_it_bs__continue_iter_monitored_item(subscription_core__l_iterator,
+         monitored_item_queue_it_bs_inlined__continue_iter_monitored_item(subscription_core__l_iterator,
             subscription_core__l_monitored_item_queue,
             &subscription_core__l_continue_mi,
             &subscription_core__l_monitoredItemPointer);
@@ -557,7 +557,7 @@ void subscription_core__local_close_subscription(
          }
          monitored_item_pointer_bs__delete_monitored_item_pointer(subscription_core__l_monitoredItemPointer);
       }
-      monitored_item_queue_it_bs__clear_iter_monitored_item(subscription_core__l_iterator);
+      monitored_item_queue_it_bs_inlined__clear_iter_monitored_item(subscription_core__l_iterator);
       monitored_item_queue_bs__clear_and_deallocate_monitored_item_queue(subscription_core__l_monitored_item_queue);
       subscription_core_1__delete_subscription(subscription_core__p_subscription);
       subscription_core__a_subscription_available_data_notifs[subscription_core__p_subscription] = 0;

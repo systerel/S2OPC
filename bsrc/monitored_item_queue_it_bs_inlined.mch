@@ -18,7 +18,7 @@
  */
 
 MACHINE
-    monitored_item_queue_it_bs
+    monitored_item_queue_it_bs_inlined
 
 SEES
     constants
