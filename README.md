@@ -18,9 +18,7 @@ For S2OPC commercial support, please contact us at `s2opc@systerel.fr`.
 
 ### Security Policy
 
-Security fixes are only applied to the main branch. Users are therefore advised to always base their work on the latest release or the most recent commit.
-
-If you believe you have found a cybersecurity vulnerability in S2OPC, please report it responsibly by opening a confidential issue on the project's issue tracker and sending a notification email to `support.cyber@systerel.fr`. The S2OPC team will handle the analysis and, if necessary, the creation and processing of the associated CVE.
+Find more detail on security policy for S2OPC project in `SECURITY.md` file
 
 ### Call for users feedback
 
