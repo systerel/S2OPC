@@ -21,9 +21,9 @@
 
  File Name            : subscription_create_monitored_item_it.h
 
- Date                 : 04/08/2022 14:53:21
+ Date                 : 28/10/2026 13:53:20
 
- C Translator Version : tradc Java V1.2 (06/02/2022)
+ C Translator Version : tradc Java V2.0 (2026-09-14)
 
 ******************************************************************************/
 
@@ -44,6 +44,7 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 extern t_entier4 subscription_create_monitored_item_it__rreqs_i;
+extern t_entier4 subscription_create_monitored_item_it__rreqs_nb_reqs_i;
 
 /*------------------------
    INITIALISATION Clause

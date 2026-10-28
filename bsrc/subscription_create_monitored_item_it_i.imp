@@ -27,29 +27,36 @@ SEES
     constants
 
 CONCRETE_VARIABLES
-    rreqs_i
+    rreqs_i,
+    rreqs_nb_reqs_i
 
 INVARIANT
     rreqs_i : NAT &
-    rreqs_i : 0 .. k_n_monitoredItem_max &
-    rreqs_to_iterate = 1..rreqs_i
+    rreqs_nb_reqs_i : NAT &
+    rreqs_nb_reqs_i = rreqs_nb_reqs &
+    rreqs_i : 0 .. rreqs_nb_reqs_i &
+    rreqs_to_iterate = rreqs_i + 1 .. rreqs_nb_reqs_i &
+    rreqs_iterated = 1 .. rreqs_i
 
 INITIALISATION
-    rreqs_i := 0
+    rreqs_i := 0;
+    rreqs_nb_reqs_i := 0
 
 OPERATIONS
+    /* Requests are iterated in ascending index order */
     continue <-- init_iter_monitored_item_request(nb_req) =
     BEGIN
-        rreqs_i := nb_req;
+        rreqs_nb_reqs_i := nb_req;
+        rreqs_i := 0;
         continue := bool(0 < nb_req)
     END
     ;
 
     continue, index <-- continue_iter_monitored_item_request =
     BEGIN
+        rreqs_i := rreqs_i + 1;
         index := rreqs_i;
-        rreqs_i := rreqs_i - 1;
-        continue := bool(0 < rreqs_i)
+        continue := bool(rreqs_i < rreqs_nb_reqs_i)
     END
 
 END
