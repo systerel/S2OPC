@@ -155,9 +155,9 @@
 #error "Maximum number of MonitoredItems per subscription cannot be > maximum number of MonitoredItems"
 #endif
 
-/* Maximum number of event notification queue size */
+/* Maximum number of data notification queue size */
 #if SOPC_MAX_NOTIFICATION_QUEUE_SIZE <= 0
-#error "Maximum number of event notification queue size cannot be <= 0"
+#error "Maximum number of data notification queue size cannot be <= 0"
 #endif
 
 /* Minimum number of event notification queue size */
@@ -168,6 +168,16 @@
 /* Default number of event notification queue size */
 #if SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE <= 0
 #error "Default number of event notification queue size cannot be <= 0"
+#endif
+
+/* Maximum number of event notification queue size */
+#if SOPC_MAX_EVENT_NOTIFICATION_QUEUE_SIZE <= 0
+#error "Maximum number of event notification queue size cannot be <= 0"
+#endif
+
+#if SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE > SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE || \
+    SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE > SOPC_MAX_EVENT_NOTIFICATION_QUEUE_SIZE
+#error "Event notification queue sizes shall verify minimum <= default <= maximum"
 #endif
 
 /* Initial capacities of the auto-growing MonitoredItem queues */

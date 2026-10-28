@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 27/10/2026 16:09:50
+ Date                 : 29/10/2026 13:06:57
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -93,8 +93,8 @@ void subscription_core__local_compute_create_monitored_item_revised_params(
       else if (subscription_core__p_reqQueueSize == 1) {
          *subscription_core__revisedQueueSize = constants__k_n_notifEventQueueSize_min;
       }
-      else if (subscription_core__p_reqQueueSize > constants__k_n_notifQueueSize_max) {
-         *subscription_core__revisedQueueSize = constants__k_n_notifQueueSize_max;
+      else if (subscription_core__p_reqQueueSize > constants__k_n_notifEventQueueSize_max) {
+         *subscription_core__revisedQueueSize = constants__k_n_notifEventQueueSize_max;
       }
       else {
          *subscription_core__revisedQueueSize = subscription_core__p_reqQueueSize;

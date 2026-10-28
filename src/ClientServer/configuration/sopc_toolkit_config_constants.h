@@ -252,25 +252,33 @@
  *  A MonitoredItem creation beyond this limit fails with OpcUa_BadTooManyMonitoredItems.
  *  0 means no limit (only the available memory limits the number of MonitoredItems).
  *  Default value is the maximum number of subscriptions times the maximum number of MonitoredItems per subscription.
- *  Note: memory used by a MonitoredItem depends on its queue size, see ::SOPC_MAX_NOTIFICATION_QUEUE_SIZE.
+ *  Note: memory used by a MonitoredItem depends on its queue size, see ::SOPC_MAX_NOTIFICATION_QUEUE_SIZE
+ *  and ::SOPC_MAX_EVENT_NOTIFICATION_QUEUE_SIZE.
  */
 #ifndef SOPC_MAX_MONITORED_ITEMS
 #define SOPC_MAX_MONITORED_ITEMS (SOPC_MAX_SUBSCRIPTIONS * SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION)
 #endif
 
-/** @brief Maximum size of a MonitoredItem notification queue */
+/** @brief Maximum size of a MonitoredItem data notification queue */
 #ifndef SOPC_MAX_NOTIFICATION_QUEUE_SIZE
-#define SOPC_MAX_NOTIFICATION_QUEUE_SIZE 1000
+#define SOPC_MAX_NOTIFICATION_QUEUE_SIZE 50
 #endif
 
-/** @brief Minimum size of a MonitoredItem event notification queue */
+/** @brief Minimum size of a MonitoredItem event notification queue.
+ *  Note: size used when a client requests a queue size of 1 (e.g. UACTT for Auditing tests).
+ */
 #ifndef SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE
-#define SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE 100
+#define SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE 50
 #endif
 
 /** @brief Default size of a MonitoredItem event notification queue */
 #ifndef SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE
-#define SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE (SOPC_MAX_NOTIFICATION_QUEUE_SIZE / 2)
+#define SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE 100
+#endif
+
+/** @brief Maximum size of a MonitoredItem event notification queue */
+#ifndef SOPC_MAX_EVENT_NOTIFICATION_QUEUE_SIZE
+#define SOPC_MAX_EVENT_NOTIFICATION_QUEUE_SIZE 500
 #endif
 
 /** @brief Initial capacity of the MonitoredItem queue of a Subscription (auto-grows, doubling,

@@ -1414,7 +1414,7 @@ int main(void)
         // Requested queue size INT32_MAX => maximum queue size
         miRespServer = create_monitored_item_event(sub, false, INT32_MAX, &alarmConditionTypeId, validSelectClausesOnly,
                                                    invalidSelectClausesOnly);
-        revisedQueueSizeExp = SOPC_MAX_NOTIFICATION_QUEUE_SIZE;
+        revisedQueueSizeExp = SOPC_MAX_EVENT_NOTIFICATION_QUEUE_SIZE;
         status = (NULL == miRespServer ? SOPC_STATUS_NOK : status);
     }
     if (SOPC_STATUS_OK == status)

@@ -639,10 +639,10 @@ OPERATIONS
             THEN
                 /* Minimum value */
                 revisedQueueSize := k_n_notifEventQueueSize_min
-            ELSIF p_reqQueueSize > k_n_notifQueueSize_max
+            ELSIF p_reqQueueSize > k_n_notifEventQueueSize_max
             THEN
                 /* Maximum value */
-                revisedQueueSize := k_n_notifQueueSize_max
+                revisedQueueSize := k_n_notifEventQueueSize_max
             ELSE
                 revisedQueueSize := p_reqQueueSize
             END

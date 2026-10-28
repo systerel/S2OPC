@@ -40,6 +40,7 @@
 #include "sopc_pki_stack.h"
 #include "sopc_threads.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
 
 #include "test_results.h"
@@ -750,8 +751,11 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
                     }
                     else
                     {
-                        // Check revised queue size are the one requested (1, 10 and 100)
-                        if (createMonItResp.Results[i].RevisedQueueSize != queueSize)
+                        // Check revised queue size are the one requested (1, 10 and 100) bounded by the server maximum
+                        uint32_t expectedQueueSize =
+                            (queueSize > SOPC_MAX_NOTIFICATION_QUEUE_SIZE ? SOPC_MAX_NOTIFICATION_QUEUE_SIZE
+                                                                          : queueSize);
+                        if (createMonItResp.Results[i].RevisedQueueSize != expectedQueueSize)
                         {
                             status = SOPC_STATUS_NOK;
                         }

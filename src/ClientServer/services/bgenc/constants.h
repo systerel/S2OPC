@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 20/10/2026 12:22:13
+ Date                 : 28/10/2026 13:18:02
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -597,6 +597,7 @@ typedef enum {
 #define constants__k_n_nodesToAdd_max constants_bs__k_n_nodesToAdd_max
 #define constants__k_n_nodesToDelete_max constants_bs__k_n_nodesToDelete_max
 #define constants__k_n_notifEventQueueSize_default constants_bs__k_n_notifEventQueueSize_default
+#define constants__k_n_notifEventQueueSize_max constants_bs__k_n_notifEventQueueSize_max
 #define constants__k_n_notifEventQueueSize_min constants_bs__k_n_notifEventQueueSize_min
 #define constants__k_n_notifQueueSize_max constants_bs__k_n_notifQueueSize_max
 #define constants__k_n_publishRequestPerSession_max constants_bs__k_n_publishRequestPerSession_max

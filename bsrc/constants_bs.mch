@@ -133,6 +133,7 @@ CONCRETE_CONSTANTS
     k_n_monitoredItemNotif_max,
     k_n_notifEventQueueSize_min,
     k_n_notifEventQueueSize_default,
+    k_n_notifEventQueueSize_max,
     k_n_notifQueueSize_max,
     k_n_publishRequestPerSession_max,
     k_n_republishNotifPerSub_max,
@@ -376,6 +377,8 @@ PROPERTIES
     k_n_notifEventQueueSize_min > 0 &
     k_n_notifEventQueueSize_default : NAT &
     k_n_notifEventQueueSize_default > 0 &
+    k_n_notifEventQueueSize_max : NAT &
+    k_n_notifEventQueueSize_max > 0 &
     k_n_notifQueueSize_max : NAT &
     k_n_notifQueueSize_max > 0 &
     k_n_publishRequestPerSession_max : NAT &
