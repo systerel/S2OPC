@@ -28,7 +28,6 @@
 #include "sopc_time_reference.h"
 
 #define SOPC_SECOND_TO_NANOSECONDS 1000000000
-#define SOPC_MILLISECOND_TO_NANOSECONDS 1000000
 #define SOPC_SECONDS_TO_MICROSECONDS 1000000
 #define SOPC_MICROSECOND_TO_NANOSECONDS 1000
 
@@ -58,8 +57,6 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
 
     int gettimeResult;
     struct timespec currentTime;
-    SOPC_TimeReference result = 0;
-    uint64_t nanosecs = 0;
 
     gettimeResult = clock_gettime(CLOCK_MONOTONIC, &currentTime);
     if (gettimeResult != 0)
@@ -75,27 +72,7 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
     // At least realtime clock shall always be available
     SOPC_ASSERT(0 == gettimeResult);
 
-    if (currentTime.tv_sec > 0 && UINT64_MAX / 1000 > (uint64_t) currentTime.tv_sec)
-    {
-        result = (uint64_t) currentTime.tv_sec * 1000; // Add seconds to results
-
-        if (currentTime.tv_nsec > 0 && (uint64_t) currentTime.tv_nsec < SOPC_SECOND_TO_NANOSECONDS)
-        {
-            nanosecs = (uint64_t) currentTime.tv_nsec;
-        }
-        else
-        {
-            nanosecs = SOPC_SECOND_TO_NANOSECONDS - 1; // Use maximum nanoseconds representable (< 1 second)
-        }
-        // Since nanosecs < 1 second no overflow possible
-        result = result + nanosecs / SOPC_MILLISECOND_TO_NANOSECONDS; // Add milliseconds to result
-    }
-    else
-    {
-        result = UINT64_MAX; // Use maximum representable value
-    }
-
-    return result;
+    return SOPC_TimeReference_FromSecondsAndNanoseconds((int64_t) currentTime.tv_sec, (int64_t) currentTime.tv_nsec);
 }
 
 SOPC_HighRes_TimeReference* SOPC_HighRes_TimeReference_Create(void)

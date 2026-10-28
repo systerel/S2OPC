@@ -24,6 +24,10 @@
 
 #include "sopc_time_reference.h"
 
+#define SOPC_SECOND_TO_MILLISECONDS 1000
+#define SOPC_SECOND_TO_NANOSECONDS 1000000000
+#define SOPC_MILLISECOND_TO_NANOSECONDS 1000000
+
 SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef, uint64_t ms)
 {
     SOPC_TimeReference result = 0;
@@ -36,6 +40,35 @@ SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef
     {
         // Set maximum representable value
         result = UINT64_MAX;
+    }
+
+    return result;
+}
+
+SOPC_TimeReference SOPC_TimeReference_FromSecondsAndNanoseconds(int64_t seconds, int64_t nanoseconds)
+{
+    SOPC_TimeReference result = 0;
+    uint64_t nanosecs = 0;
+
+    if (seconds >= 0 && UINT64_MAX / SOPC_SECOND_TO_MILLISECONDS > (uint64_t) seconds)
+    {
+        result = (uint64_t) seconds * SOPC_SECOND_TO_MILLISECONDS; // Add seconds to results
+
+        // Note: 0 is a valid value (e.g. during the first tick of each second with a tick-based clock)
+        if (nanoseconds >= 0 && nanoseconds < SOPC_SECOND_TO_NANOSECONDS)
+        {
+            nanosecs = (uint64_t) nanoseconds;
+        }
+        else
+        {
+            nanosecs = SOPC_SECOND_TO_NANOSECONDS - 1; // Use maximum nanoseconds representable (< 1 second)
+        }
+        // Since nanosecs < 1 second no overflow possible
+        result = result + nanosecs / SOPC_MILLISECOND_TO_NANOSECONDS; // Add milliseconds to result
+    }
+    else
+    {
+        result = UINT64_MAX; // Use maximum representable value
     }
 
     return result;

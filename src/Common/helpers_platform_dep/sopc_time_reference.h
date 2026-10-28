@@ -93,6 +93,22 @@ SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef
 int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference right);
 
 /**
+ * \brief return the time reference (in milliseconds) corresponding to a time expressed in seconds and nanoseconds
+ *        (e.g. a timespec value returned by clock_gettime)
+ *
+ * \param seconds     the seconds part, shall be >= 0
+ * \param nanoseconds the nanoseconds part, shall be in [0, 1000000000[
+ *
+ * \return the corresponding time reference in milliseconds. If \p nanoseconds is out of range, it is considered as
+ *         the maximum nanoseconds value (< 1 second). If \p seconds is negative or the result overflows,
+ *         the maximum representable value is returned.
+ *
+ * \note 0 is a valid value for both \p seconds and \p nanoseconds: a clock with a coarse resolution (e.g. system tick)
+ *       returns 0 nanoseconds during the first tick of each second.
+ */
+SOPC_TimeReference SOPC_TimeReference_FromSecondsAndNanoseconds(int64_t seconds, int64_t nanoseconds);
+
+/**
  * \brief Store the current time in t.
  *
  * \param t A time reference object. Nothing is done if NULL is passed.
