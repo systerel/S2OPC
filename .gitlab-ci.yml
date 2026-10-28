@@ -508,7 +508,7 @@ build-zephyr:
     entrypoint: [""] # Needs cause of issue with `sh` https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3622
   needs: []
   script:
-    - "(cd /zephyrproject && west zephyr-export)"
+    - "west zephyr-export"
     - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client"
     - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh nucleo_h745zi_q/stm32h745xx/m7 cli_client -DCONFIG_NET_GPTP=y"
     - "samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server"
