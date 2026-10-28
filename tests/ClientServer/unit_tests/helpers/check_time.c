@@ -113,6 +113,44 @@ START_TEST(test_elapsed_time)
 }
 END_TEST
 
+/* Conversion of a (seconds, nanoseconds) clock value into a time reference in milliseconds.
+ * Non-regression: 0 nanoseconds was considered invalid and converted as 999 ms. With a tick-based clock
+ * (e.g. VxWorks CLOCK_MONOTONIC) the nanoseconds are 0 during the first tick of each second:
+ * the time reference was then increased by 999 ms during that tick and decreased on next call. */
+START_TEST(test_time_reference_from_seconds_and_nanoseconds)
+{
+    const int64_t nsInOneSecond = 1000000000;
+    const int64_t nsInOneMs = 1000000;
+
+    // Nominal values
+    ck_assert_uint_eq(5000, SOPC_TimeReference_FromSecondsAndNanoseconds(5, 999999));
+    ck_assert_uint_eq(5001, SOPC_TimeReference_FromSecondsAndNanoseconds(5, nsInOneMs));
+    ck_assert_uint_eq(5999, SOPC_TimeReference_FromSecondsAndNanoseconds(5, nsInOneSecond - 1));
+
+    // 0 is a valid value for nanoseconds and seconds
+    ck_assert_uint_eq(1000, SOPC_TimeReference_FromSecondsAndNanoseconds(1, 0));
+    ck_assert_uint_eq(0, SOPC_TimeReference_FromSecondsAndNanoseconds(0, 0));
+    ck_assert_uint_eq(1, SOPC_TimeReference_FromSecondsAndNanoseconds(0, nsInOneMs));
+
+    // Out of range nanoseconds: maximum nanoseconds value (< 1 second) used
+    ck_assert_uint_eq(5999, SOPC_TimeReference_FromSecondsAndNanoseconds(5, -1));
+    ck_assert_uint_eq(5999, SOPC_TimeReference_FromSecondsAndNanoseconds(5, nsInOneSecond));
+
+    // Negative seconds or overflow: maximum representable value
+    ck_assert_uint_eq(UINT64_MAX, SOPC_TimeReference_FromSecondsAndNanoseconds(-1, 0));
+    ck_assert_uint_eq(UINT64_MAX, SOPC_TimeReference_FromSecondsAndNanoseconds(INT64_MAX, 0));
+
+    // Time reference is monotonic across a second boundary with a 1 ms tick-based clock
+    SOPC_TimeReference previous = SOPC_TimeReference_FromSecondsAndNanoseconds(41, nsInOneSecond - nsInOneMs);
+    for (int64_t tick = 0; tick < 3; tick++)
+    {
+        SOPC_TimeReference current = SOPC_TimeReference_FromSecondsAndNanoseconds(42, tick * nsInOneMs);
+        ck_assert_uint_eq(previous + 1, current);
+        previous = current;
+    }
+}
+END_TEST
+
 Suite* tests_make_suite_time(void)
 {
     Suite* s;
@@ -121,6 +159,7 @@ Suite* tests_make_suite_time(void)
     s = suite_create("Time tests");
     tc_time = tcase_create("Time");
     tcase_add_test(tc_time, test_current_time);
+    tcase_add_test(tc_time, test_time_reference_from_seconds_and_nanoseconds);
     suite_add_tcase(s, tc_time);
     tc_elapsed_time = tcase_create("Elapsed Time");
     tcase_add_test(tc_elapsed_time, test_elapsed_time);
