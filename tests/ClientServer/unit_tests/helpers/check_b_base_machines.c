@@ -21,8 +21,12 @@
 
 #include <check.h>
 #include <inttypes.h>
+#include <math.h>
 
 #include "request_handle_bs.h"
+#include "sopc_event_timer_manager.h"
+#include "sopc_toolkit_config_constants.h"
+#include "subscription_core_bs.h"
 
 START_TEST(test_request_handle_bs)
 {
@@ -121,16 +125,56 @@ START_TEST(test_request_handle_bs)
 }
 END_TEST
 
+START_TEST(test_subscription_revised_publish_interval)
+{
+    const double res = SOPC_TIMER_RESOLUTION_MS;
+    const double min = SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION;
+    const double max = SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION;
+    // Requested publish interval and expected revised value (nearest multiple of resolution in [min, max])
+    const double cases[][2] = {
+        {min, min},                     // multiple kept
+        {min + 3 * res, min + 3 * res}, // multiple kept
+        {min + 0.5 * res - 0.5, min},   // just below tie (fractional if res > 1), round down
+        {min + 0.4 * res, min},         // round down
+        {min + 0.6 * res, min + res},   // round up
+        {min + 0.5 * res, min + res},   // tie: upper multiple
+        {max - 0.4 * res, max},         // round up
+        {max, max},                     // multiple kept
+        {max + 1, max},                 // above max
+        {min - 1, min},                 // below min
+        {0, min},                       // zero
+        {-1, min},                      // negative
+        {NAN, min},                     // NaN
+    };
+
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++)
+    {
+        constants__t_opcua_duration_i revisedPublishInterval = 0;
+        t_entier4 revisedLifetimeCount = 0;
+        t_entier4 revisedMaxKeepAlive = 0;
+        t_entier4 revisedMaxNotificationsPerPublish = 0;
+        subscription_core_bs__compute_create_subscription_revised_params(
+            cases[i][0], 30, 10, 0, &revisedPublishInterval, &revisedLifetimeCount, &revisedMaxKeepAlive,
+            &revisedMaxNotificationsPerPublish);
+        ck_assert_double_eq(cases[i][1], revisedPublishInterval);
+    }
+}
+END_TEST
+
 Suite* tests_make_suite_B_base_machines(void)
 {
     Suite* s;
     TCase* tc_request_handle;
+    TCase* tc_subscription;
 
     s = suite_create("B base machine tests");
     tc_request_handle = tcase_create("Request handle");
+    tc_subscription = tcase_create("Subscription revised parameters");
 
     tcase_add_test(tc_request_handle, test_request_handle_bs);
     suite_add_tcase(s, tc_request_handle);
+    tcase_add_test(tc_subscription, test_subscription_revised_publish_interval);
+    suite_add_tcase(s, tc_subscription);
 
     return s;
 }

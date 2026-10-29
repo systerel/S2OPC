@@ -101,6 +101,16 @@
 #error "Minimum publish interval < 2 * SOPC_TIMER_RESOLUTION_MS"
 #endif
 
+/** Minimum and maximum publish intervals shall be multiples of the event timer resolution
+ * (revised publish intervals are rounded to a multiple of the resolution within these bounds) */
+#if SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION % SOPC_TIMER_RESOLUTION_MS != 0
+#error "Minimum publish interval is not a multiple of SOPC_TIMER_RESOLUTION_MS"
+#endif
+
+#if SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION % SOPC_TIMER_RESOLUTION_MS != 0
+#error "Maximum publish interval is not a multiple of SOPC_TIMER_RESOLUTION_MS"
+#endif
+
 /** Minimum number of publish intervals before a keep alive is sent (server to client) */
 #if SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS < 1
 #error "Minimum subscription keep alive intervals < 1"

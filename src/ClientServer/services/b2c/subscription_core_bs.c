@@ -26,8 +26,6 @@
   --------------*/
 #include "constants.h"
 
-#include <math.h>
-
 #include "address_space_impl.h"
 #include "inttypes.h"
 #include "sopc_assert.h"
@@ -85,7 +83,7 @@ void subscription_core_bs__compute_create_subscription_revised_params(
     *subscription_core_bs__revisedPublishInterval = SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION;
 
     // IMPORTANT NOTE: if RequestedPublishingInterval is NaN, all comparisons will fail.
-    //                 It means we shall keep SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION as default value in this case.
+    //                 It means we shall keep SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION as default value in this case.
     if (subscription_core_bs__p_reqPublishInterval <= SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION &&
         subscription_core_bs__p_reqPublishInterval >= SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION)
     {
@@ -95,6 +93,14 @@ void subscription_core_bs__compute_create_subscription_revised_params(
     {
         *subscription_core_bs__revisedPublishInterval = SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION;
     } // else SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION value kept
+
+    /* Round to the nearest multiple of the event timer resolution (upper one on tie) to avoid a jittering publish
+       cycle. The result remains in [MIN, MAX] since both are multiples of SOPC_TIMER_RESOLUTION_MS.
+       Equivalent to round(x) since x is positive here (clamped, NaN replaced by MIN): the cast truncates toward
+       zero, so adding 0.5 computes floor(x + 0.5). round() is not used to avoid a libm dependency.
+    */
+    uint64_t nbTimerSteps = (uint64_t)(*subscription_core_bs__revisedPublishInterval / SOPC_TIMER_RESOLUTION_MS + 0.5);
+    *subscription_core_bs__revisedPublishInterval = (double) (nbTimerSteps * SOPC_TIMER_RESOLUTION_MS);
 
     if (subscription_core_bs__p_reqMaxKeepAlive < SOPC_MIN_KEEPALIVE_PUBLISH_INTERVALS)
     {

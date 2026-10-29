@@ -233,12 +233,18 @@
 #define SOPC_MAX_SUBSCRIPTION_REPUBLISH_MESSAGES (2 * SOPC_MAX_SESSION_PUBLISH_REQUESTS)
 #endif
 
-/** @brief Minimum publish interval of a subscription in milliseconds */
+/** @brief Minimum publish interval of a subscription in milliseconds.
+ *         Shall be a multiple of ::SOPC_TIMER_RESOLUTION_MS: the requested publish interval is revised within
+ *         [::SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION, ::SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION] to the nearest
+ *         multiple of ::SOPC_TIMER_RESOLUTION_MS (upper one on tie).
+ */
 #ifndef SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION
 #define SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION 100 /* 100 ms */
 #endif
 
-/** @brief Maximum publish interval of a subscription in milliseconds */
+/** @brief Maximum publish interval of a subscription in milliseconds.
+ *         Shall be a multiple of ::SOPC_TIMER_RESOLUTION_MS (see ::SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION).
+ */
 #ifndef SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION
 #define SOPC_MAX_SUBSCRIPTION_INTERVAL_DURATION 3600000 /* 1 hour */
 #endif
