@@ -111,9 +111,9 @@ static SOPC_SLinkedList* monitoredItemIdFreed = NULL;
 /* Highest id ever issued when the freed list is empty. */
 static uint32_t monitoredItemIdMax = 0;
 
-/* Limits on the number of MonitoredItems (0 = no limit), see SOPC_MAX_MONITORED_ITEMS(_PER_SUBSCRIPTION). */
-static uint32_t monitoredItemsLimit = 0;
-static uint32_t monitoredItemsPerSubscriptionLimit = 0;
+/* Limits on the number of MonitoredItems (0 = no limit) */
+static const uint32_t monitoredItemsLimit = SOPC_MAX_MONITORED_ITEMS;
+static const uint32_t monitoredItemsPerSubscriptionLimit = SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION;
 /* Number of live MonitoredItems: in the server and per subscription index (index 0 unused). */
 static uint32_t nbMonitoredItems = 0;
 static uint32_t nbMonitoredItemsPerSubscription[constants__t_subscription_i_max + 1];
@@ -139,28 +139,6 @@ static bool is_monitored_item_limit_reached(constants__t_subscription_i subscrip
         limitReachedTraced = true;
     }
     return reached;
-}
-
-void SOPC_MonitoredItemPointer_SetLimits(uint32_t maxMonitoredItems, uint32_t maxMonitoredItemsPerSubscription)
-{
-    monitoredItemsLimit = maxMonitoredItems;
-    monitoredItemsPerSubscriptionLimit = maxMonitoredItemsPerSubscription;
-    limitReachedTraced = false;
-}
-
-uint32_t SOPC_MonitoredItemPointer_GetNbMonitoredItems(void)
-{
-    return nbMonitoredItems;
-}
-
-uint32_t SOPC_MonitoredItemPointer_GetNbMonitoredItemsInSubscription(constants__t_subscription_i subscription)
-{
-    uint32_t result = 0;
-    if (subscription > 0 && subscription <= constants__t_subscription_i_max)
-    {
-        result = nbMonitoredItemsPerSubscription[subscription];
-    }
-    return result;
 }
 
 /**
@@ -233,8 +211,6 @@ void monitored_item_pointer_bs__INITIALISATION(void)
     monitoredItemById = SOPC_Calloc(MI_TABLE_INITIAL_CAPACITY, sizeof(SOPC_InternalMonitoredItem*));
     SOPC_ASSERT(monitoredItemById != NULL);
     monitoredItemByIdCapacity = MI_TABLE_INITIAL_CAPACITY;
-
-    SOPC_MonitoredItemPointer_SetLimits(SOPC_MAX_MONITORED_ITEMS, SOPC_MAX_MONITORED_ITEMS_PER_SUBSCRIPTION);
 }
 
 void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
