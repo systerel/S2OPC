@@ -24,6 +24,8 @@
  *        - EnabledFlag without value in address space: diagnostics disabled, nodes have OpcUa_BadNotReadable status,
  *        - diagnostics values kept up to date while disabled but address space not updated,
  *        - EnabledFlag written to TRUE: nodes updated with current values,
+ *        - CurrentSessionCount: session opened while disabled counted once enabled, 2 simultaneous sessions
+ *          counted, value decremented on each session closure,
  *        - EnabledFlag written to FALSE: nodes set to 0 with OpcUa_BadNotReadable status,
  *        - counters reset on server stop: a client creates a session, a subscription and a rejected request
  *          (ServiceFault), then the server is restarted: EnabledFlag state is kept and cumulated counters restart
@@ -65,6 +67,9 @@
 #define SLEEP_TIMEOUT_MS 50
 #define WAIT_TIMEOUT_MS 5000
 
+// Number of client connections (one session each) used simultaneously
+#define NB_CLIENT_CONNECTIONS 2
+
 // AccessLevel values of EnabledFlag node: CurrentRead and CurrentRead | CurrentWrite
 #define ACCESS_LEVEL_READ 1
 #define ACCESS_LEVEL_READ_WRITE 3
@@ -82,6 +87,8 @@ static const SOPC_NodeId rejectedRequestsNodeId =
     SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount);
 static const SOPC_NodeId securityRejectedRequestsNodeId =
     SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedRequestsCount);
+static const SOPC_NodeId currentSessionCountNodeId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount);
 
 // Cumulated counters incremented once by the client activity
 static const SOPC_NodeId cumulatedCountersNodeIds[] = {
@@ -89,6 +96,27 @@ static const SOPC_NodeId cumulatedCountersNodeIds[] = {
     SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CumulatedSubscriptionCount),
     SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount)};
 #define NB_CUMULATED_COUNTERS (sizeof(cumulatedCountersNodeIds) / sizeof(cumulatedCountersNodeIds[0]))
+
+// Expected status and value of a UInt32 diagnostic node
+typedef struct
+{
+    const SOPC_NodeId* nodeId;
+    SOPC_StatusCode status;
+    uint32_t value;
+} ExpectedNode;
+
+// Expected diagnostic nodes evaluated by wait_for
+typedef struct
+{
+    const ExpectedNode* nodes;
+    size_t nbNodes;
+} ExpectedNodes;
+
+// Diagnostic nodes expected when diagnostics are disabled: value 0 with OpcUa_BadNotReadable status
+static const ExpectedNode disabledNodes[] = {{&rejectedRequestsNodeId, OpcUa_BadNotReadable, 0},
+                                             {&securityRejectedRequestsNodeId, OpcUa_BadNotReadable, 0},
+                                             {&currentSessionCountNodeId, OpcUa_BadNotReadable, 0}};
+#define NB_DISABLED_NODES (sizeof(disabledNodes) / sizeof(disabledNodes[0]))
 
 // Defined in the generated embedded address space: true if generated as constant (WITH_CONST_ADDSPACE)
 extern const bool sopc_embedded_is_const_addspace;
@@ -306,20 +334,16 @@ static SOPC_ReturnStatus write_enabled_flag_sync(bool enabled)
     return status;
 }
 
-// Returns true if the rejected requests diagnostic nodes have the expected status and values
-static bool check_rejected_requests_nodes(SOPC_StatusCode expStatus, uint32_t expRejected, uint32_t expSecurityRejected)
+/* Returns true if all the given UInt32 diagnostic nodes have the expected value and status:
+ * a Good expected status matches any Good status, any other expected status shall be equal */
+static bool check_nodes(const ExpectedNode* nodes, size_t nbNodes)
 {
-    OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(2, OpcUa_TimestampsToReturn_Neither);
+    OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(nbNodes, OpcUa_TimestampsToReturn_Neither);
     OpcUa_ReadResponse* readResp = NULL;
     SOPC_ReturnStatus status = (NULL == readReq) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
-    if (SOPC_STATUS_OK == status)
+    for (size_t i = 0; SOPC_STATUS_OK == status && i < nbNodes; i++)
     {
-        status = SOPC_ReadRequest_SetReadValue(readReq, 0, &rejectedRequestsNodeId, SOPC_AttributeId_Value, NULL);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status =
-            SOPC_ReadRequest_SetReadValue(readReq, 1, &securityRejectedRequestsNodeId, SOPC_AttributeId_Value, NULL);
+        status = SOPC_ReadRequest_SetReadValue(readReq, i, nodes[i].nodeId, SOPC_AttributeId_Value, NULL);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -327,13 +351,15 @@ static bool check_rejected_requests_nodes(SOPC_StatusCode expStatus, uint32_t ex
         readReq = NULL; // freed by toolkit
     }
     bool result = SOPC_STATUS_OK == status && &OpcUa_ReadResponse_EncodeableType == readResp->encodeableType &&
-                  SOPC_IsGoodStatus(readResp->ResponseHeader.ServiceResult) && 2 == readResp->NoOfResults;
+                  SOPC_IsGoodStatus(readResp->ResponseHeader.ServiceResult) &&
+                  nbNodes == (size_t) readResp->NoOfResults;
     for (int32_t i = 0; result && i < readResp->NoOfResults; i++)
     {
         const SOPC_DataValue* dv = &readResp->Results[i];
-        const uint32_t expValue = (0 == i) ? expRejected : expSecurityRejected;
-        result =
-            expStatus == dv->Status && SOPC_UInt32_Id == dv->Value.BuiltInTypeId && expValue == dv->Value.Value.Uint32;
+        const ExpectedNode* expected = &nodes[i];
+        const bool statusOk =
+            SOPC_IsGoodStatus(expected->status) ? SOPC_IsGoodStatus(dv->Status) : expected->status == dv->Status;
+        result = statusOk && SOPC_UInt32_Id == dv->Value.BuiltInTypeId && expected->value == dv->Value.Value.Uint32;
     }
     if (NULL != readResp)
     {
@@ -343,13 +369,47 @@ static bool check_rejected_requests_nodes(SOPC_StatusCode expStatus, uint32_t ex
     return result;
 }
 
-// Expected rejected requests diagnostic nodes status and values
-typedef struct
+static bool are_nodes(void* context)
 {
-    SOPC_StatusCode status;
-    uint32_t rejected;
-    uint32_t securityRejected;
-} RejectedRequestsNodes;
+    const ExpectedNodes* expected = (const ExpectedNodes*) context;
+    return check_nodes(expected->nodes, expected->nbNodes);
+}
+
+// Waits until all the given UInt32 diagnostic nodes have the expected value and status, returns false on timeout
+static bool wait_nodes(const ExpectedNode* nodes, size_t nbNodes)
+{
+    ExpectedNodes expected = {nodes, nbNodes};
+    return wait_for(are_nodes, &expected);
+}
+
+// Returns true if the diagnostic nodes have the disabled diagnostics value 0 with OpcUa_BadNotReadable status
+static bool check_disabled_nodes(void)
+{
+    return check_nodes(disabledNodes, NB_DISABLED_NODES);
+}
+
+// Waits until the diagnostic nodes have the disabled diagnostics value 0 with OpcUa_BadNotReadable status
+static bool wait_disabled_nodes(void)
+{
+    return wait_nodes(disabledNodes, NB_DISABLED_NODES);
+}
+
+/* Returns SOPC_STATUS_OK if all the cumulated counters reach the expected cumulated value and CurrentSessionCount
+ * reaches the expected current sessions value, with a Good status */
+static SOPC_ReturnStatus wait_counters(uint32_t cumulated, uint32_t currentSessions)
+{
+    ExpectedNode nodes[NB_CUMULATED_COUNTERS + 1];
+    for (size_t i = 0; i < NB_CUMULATED_COUNTERS; i++)
+    {
+        nodes[i].nodeId = &cumulatedCountersNodeIds[i];
+        nodes[i].status = SOPC_GoodGenericStatus;
+        nodes[i].value = cumulated;
+    }
+    nodes[NB_CUMULATED_COUNTERS].nodeId = &currentSessionCountNodeId;
+    nodes[NB_CUMULATED_COUNTERS].status = SOPC_GoodGenericStatus;
+    nodes[NB_CUMULATED_COUNTERS].value = currentSessions;
+    return wait_nodes(nodes, NB_CUMULATED_COUNTERS + 1) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+}
 
 // Returns true if all the unmanaged diagnostic nodes have the OpcUa_BadNotReadable status
 static bool check_unmanaged_nodes(void)
@@ -389,65 +449,22 @@ static bool check_unmanaged_nodes(void)
     return result;
 }
 
-static bool are_rejected_requests_nodes(void* context)
+static SOPC_ReturnStatus configure_client(SOPC_SecureConnection_Config* secureConnConfigs[NB_CLIENT_CONNECTIONS])
 {
-    const RejectedRequestsNodes* expected = (const RejectedRequestsNodes*) context;
-    return check_rejected_requests_nodes(expected->status, expected->rejected, expected->securityRejected);
-}
-
-static bool wait_rejected_requests_nodes(SOPC_StatusCode expStatus, uint32_t expRejected, uint32_t expSecurityRejected)
-{
-    RejectedRequestsNodes expected = {expStatus, expRejected, expSecurityRejected};
-    return wait_for(are_rejected_requests_nodes, &expected);
-}
-
-static SOPC_ReturnStatus configure_client(SOPC_SecureConnection_Config** secureConnConfig)
-{
+    const char* userIds[NB_CLIENT_CONNECTIONS] = {"1", "2"};
     SOPC_ReturnStatus status = SOPC_ClientConfigHelper_SetApplicationDescription(
         CLIENT_APPLICATION_URI, CLIENT_APPLICATION_URI, "S2OPC diagnostics enabled flag test client", NULL,
         OpcUa_ApplicationType_Client);
-    if (SOPC_STATUS_OK == status)
+    // One secure connection configuration per simultaneous connection
+    for (size_t i = 0; SOPC_STATUS_OK == status && i < NB_CLIENT_CONNECTIONS; i++)
     {
-        *secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
-            "1", DEFAULT_ENDPOINT_URL, OpcUa_MessageSecurityMode_None, SOPC_SecurityPolicy_None);
-        status = (NULL == *secureConnConfig) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+        secureConnConfigs[i] = SOPC_ClientConfigHelper_CreateSecureConnection(
+            userIds[i], DEFAULT_ENDPOINT_URL, OpcUa_MessageSecurityMode_None, SOPC_SecurityPolicy_None);
+        status = (NULL == secureConnConfigs[i]) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }
     printf("<Test_Server_Diagnostics_Enabled_Flag: client configuration: %s\n",
            SOPC_STATUS_OK == status ? "OK" : "NOK");
     return status;
-}
-
-// Returns true if all the cumulated counters have the expected value with a Good status
-static bool are_cumulated_counters(void* context)
-{
-    const uint32_t expValue = *(const uint32_t*) context;
-    OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(NB_CUMULATED_COUNTERS, OpcUa_TimestampsToReturn_Neither);
-    OpcUa_ReadResponse* readResp = NULL;
-    SOPC_ReturnStatus status = (NULL == readReq) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
-    for (size_t i = 0; SOPC_STATUS_OK == status && i < NB_CUMULATED_COUNTERS; i++)
-    {
-        status = SOPC_ReadRequest_SetReadValue(readReq, i, &cumulatedCountersNodeIds[i], SOPC_AttributeId_Value, NULL);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ServerHelper_LocalServiceSync(readReq, (void**) &readResp);
-        readReq = NULL; // freed by toolkit
-    }
-    bool result = SOPC_STATUS_OK == status && &OpcUa_ReadResponse_EncodeableType == readResp->encodeableType &&
-                  SOPC_IsGoodStatus(readResp->ResponseHeader.ServiceResult) &&
-                  NB_CUMULATED_COUNTERS == (size_t) readResp->NoOfResults;
-    for (int32_t i = 0; result && i < readResp->NoOfResults; i++)
-    {
-        const SOPC_DataValue* dv = &readResp->Results[i];
-        result = SOPC_IsGoodStatus(dv->Status) && SOPC_UInt32_Id == dv->Value.BuiltInTypeId &&
-                 expValue == dv->Value.Value.Uint32;
-    }
-    if (NULL != readResp)
-    {
-        SOPC_EncodeableObject_Delete(readResp->encodeableType, (void**) &readResp);
-    }
-    SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &readReq);
-    return result;
 }
 
 // Sends a request rejected by the server with a ServiceFault (Read request without node: BadNothingToDo)
@@ -475,20 +492,13 @@ static SOPC_ReturnStatus send_rejected_request(SOPC_ClientConnection* connection
     return status;
 }
 
-/* Connects a client (1 session), creates a subscription, sends a rejected request and disconnects:
- * each cumulated counter is incremented by 1.
- * Note: diagnostics nodes update is enqueued as priority request by the services thread before the next event. */
-static SOPC_ReturnStatus run_client_activity(SOPC_SecureConnection_Config* secureConnConfig)
+/* Creates a subscription, sends a rejected request and deletes the subscription in the given session:
+ * cumulated subscription and rejected requests counters are incremented by 1 */
+static SOPC_ReturnStatus run_session_activity(SOPC_ClientConnection* connection)
 {
-    SOPC_ClientConnection* connection = NULL;
-    SOPC_ClientHelper_Subscription* subscription = NULL;
-    SOPC_ReturnStatus status = SOPC_ClientHelper_Connect(secureConnConfig, SOPC_ClientConnectionEventCb, &connection);
-    if (SOPC_STATUS_OK == status)
-    {
-        subscription = SOPC_ClientHelper_CreateSubscription(connection, SOPC_CreateSubscriptionRequest_CreateDefault(),
-                                                            SOPC_ClientSubscriptionNotificationCb, 0);
-        status = (NULL == subscription) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
-    }
+    SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelper_CreateSubscription(
+        connection, SOPC_CreateSubscriptionRequest_CreateDefault(), SOPC_ClientSubscriptionNotificationCb, 0);
+    SOPC_ReturnStatus status = (NULL == subscription) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     if (SOPC_STATUS_OK == status)
     {
         status = send_rejected_request(connection);
@@ -498,12 +508,33 @@ static SOPC_ReturnStatus run_client_activity(SOPC_SecureConnection_Config* secur
         SOPC_ReturnStatus delStatus = SOPC_ClientHelper_DeleteSubscription(&subscription);
         status = (SOPC_STATUS_OK == status) ? delStatus : status;
     }
-    if (NULL != connection)
+    return status;
+}
+
+/* Disconnects the client if connected (even if the given status is not OK):
+ * returns the given status if not OK, the disconnection status otherwise */
+static SOPC_ReturnStatus disconnect_client(SOPC_ClientConnection** connection, SOPC_ReturnStatus status)
+{
+    if (NULL != *connection)
     {
-        SOPC_ReturnStatus discoStatus = SOPC_ClientHelper_Disconnect(&connection);
+        SOPC_ReturnStatus discoStatus = SOPC_ClientHelper_Disconnect(connection);
         status = (SOPC_STATUS_OK == status) ? discoStatus : status;
     }
     return status;
+}
+
+/* Connects a client (1 session), creates a subscription, sends a rejected request and disconnects:
+ * each cumulated counter is incremented by 1.
+ * Note: diagnostics nodes update is enqueued as priority request by the services thread before the next event. */
+static SOPC_ReturnStatus run_client_activity(SOPC_SecureConnection_Config* secureConnConfig)
+{
+    SOPC_ClientConnection* connection = NULL;
+    SOPC_ReturnStatus status = SOPC_ClientHelper_Connect(secureConnConfig, SOPC_ClientConnectionEventCb, &connection);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = run_session_activity(connection);
+    }
+    return disconnect_client(&connection, status);
 }
 
 static SOPC_ReturnStatus stop_server(void)
@@ -528,48 +559,79 @@ static SOPC_ReturnStatus restart_server(void)
     return status;
 }
 
-// Returns SOPC_STATUS_OK if all the cumulated counters reach the expected value with a Good status
-static SOPC_ReturnStatus wait_cumulated_counters(uint32_t expValue)
+/* Shall be called in server started state.
+ * Each client connection has a session activity: cumulated counters equal to 2 on return. */
+static SOPC_ReturnStatus check_enabled_flag_started(
+    SOPC_SecureConnection_Config* secureConnConfigs[NB_CLIENT_CONNECTIONS])
 {
-    return wait_for(are_cumulated_counters, &expValue) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-}
+    SOPC_ClientConnection* connections[NB_CLIENT_CONNECTIONS] = {NULL, NULL};
 
-// Shall be called in server started state
-static SOPC_ReturnStatus check_enabled_flag_started(SOPC_SecureConnection_Config* secureConnConfig)
-{
     // Initial state: diagnostics disabled
-    SOPC_ReturnStatus status =
-        wait_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status = wait_disabled_nodes() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     printf("<Test_Server_Diagnostics_Enabled_Flag: initial disabled state: %s\n",
            SOPC_STATUS_OK == status ? "OK" : "NOK");
 
-    // Diagnostics values updated while disabled: address space not updated
+    // Diagnostics values updated while disabled (session kept active): address space not updated
     if (SOPC_STATUS_OK == status)
     {
-        status = run_client_activity(secureConnConfig);
+        status = SOPC_ClientHelper_Connect(secureConnConfigs[0], SOPC_ClientConnectionEventCb, &connections[0]);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = run_session_activity(connections[0]);
     }
     if (SOPC_STATUS_OK == status)
     {
         // Diagnostics nodes update is a priority request: a local read is treated after any address space update
-        status = check_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        status = check_disabled_nodes() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: no update while disabled: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
 
-    // Enable diagnostics: address space updated with values counted while disabled
+    // Enable diagnostics: address space updated with values counted while disabled, including the active session
     if (SOPC_STATUS_OK == status)
     {
         status = write_enabled_flag_sync(true);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = wait_cumulated_counters(1);
+        status = wait_counters(1, 1);
         printf("<Test_Server_Diagnostics_Enabled_Flag: enabled: %s\n", SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
     // Unmanaged nodes are not readable even if diagnostics are enabled
     if (SOPC_STATUS_OK == status)
     {
         status = check_unmanaged_nodes() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
+
+    // Second simultaneous session
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_Connect(secureConnConfigs[1], SOPC_ClientConnectionEventCb, &connections[1]);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = run_session_activity(connections[1]);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = wait_counters(2, 2);
+        printf("<Test_Server_Diagnostics_Enabled_Flag: 2 current sessions: %s\n",
+               SOPC_STATUS_OK == status ? "OK" : "NOK");
+    }
+
+    // CurrentSessionCount decremented on each session closure
+    status = disconnect_client(&connections[1], status);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = wait_counters(2, 1);
+    }
+    status = disconnect_client(&connections[0], status);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = wait_counters(2, 0);
+        printf("<Test_Server_Diagnostics_Enabled_Flag: current sessions decremented: %s\n",
+               SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
 
     // Disable diagnostics: address space values set to 0 with BadNotReadable status
@@ -579,7 +641,7 @@ static SOPC_ReturnStatus check_enabled_flag_started(SOPC_SecureConnection_Config
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = wait_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        status = wait_disabled_nodes() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: disabled: %s\n", SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
     return status;
@@ -589,9 +651,7 @@ static SOPC_ReturnStatus check_enabled_flag_started(SOPC_SecureConnection_Config
 static SOPC_ReturnStatus check_inhibited_started(void)
 {
     SOPC_ReturnStatus status =
-        (!SOPC_ServerInternal_IsDiagnosticsSupported() && wait_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0))
-            ? SOPC_STATUS_OK
-            : SOPC_STATUS_NOK;
+        (!SOPC_ServerInternal_IsDiagnosticsSupported() && wait_disabled_nodes()) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     printf("<Test_Server_Diagnostics_Enabled_Flag: initial inhibited state: %s\n",
            SOPC_STATUS_OK == status ? "OK" : "NOK");
     if (SOPC_STATUS_OK == status)
@@ -609,20 +669,18 @@ static SOPC_ReturnStatus check_inhibited_started(void)
     if (SOPC_STATUS_OK == status)
     {
         status =
-            (!SOPC_ServerInternal_IsDiagnosticsEnabled() && check_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0))
-                ? SOPC_STATUS_OK
-                : SOPC_STATUS_NOK;
+            (!SOPC_ServerInternal_IsDiagnosticsEnabled() && check_disabled_nodes()) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: local write without effect: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
     return status;
 }
 
-/* Shall be called after ::check_enabled_flag_started (cumulated counters equal to 1):
+/* Shall be called after ::check_enabled_flag_started (cumulated counters equal to 2):
  * checks counters are reset on server stop and EnabledFlag state is kept on server restart */
 static SOPC_ReturnStatus check_reset_on_restart(SOPC_SecureConnection_Config* secureConnConfig)
 {
-    // Enable diagnostics and generate client activity: cumulated counters equal to 2
+    // Enable diagnostics and generate client activity: cumulated counters equal to 3
     SOPC_ReturnStatus status = write_enabled_flag_sync(true);
     if (SOPC_STATUS_OK == status)
     {
@@ -630,7 +688,7 @@ static SOPC_ReturnStatus check_reset_on_restart(SOPC_SecureConnection_Config* se
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = wait_cumulated_counters(2);
+        status = wait_counters(3, 0);
         printf("<Test_Server_Diagnostics_Enabled_Flag: counters incremented: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
@@ -641,18 +699,18 @@ static SOPC_ReturnStatus check_reset_on_restart(SOPC_SecureConnection_Config* se
     // EnabledFlag state kept on restart and cumulated counters reset to 0
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ServerInternal_IsDiagnosticsEnabled() ? wait_cumulated_counters(0) : SOPC_STATUS_NOK;
+        status = SOPC_ServerInternal_IsDiagnosticsEnabled() ? wait_counters(0, 0) : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: counters reset on restart: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
-    // Same client activity after restart: cumulated counters equal to 1 (not 3)
+    // Same client activity after restart: cumulated counters equal to 1 (not 4)
     if (SOPC_STATUS_OK == status)
     {
         status = run_client_activity(secureConnConfig);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = wait_cumulated_counters(1);
+        status = wait_counters(1, 0);
         printf("<Test_Server_Diagnostics_Enabled_Flag: counters incremented after restart: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
@@ -666,7 +724,7 @@ static SOPC_ReturnStatus check_inhibited_on_restart(void)
     if (SOPC_STATUS_OK == status)
     {
         status = (!SOPC_ServerInternal_IsDiagnosticsSupported() && !SOPC_ServerInternal_IsDiagnosticsEnabled() &&
-                  wait_rejected_requests_nodes(OpcUa_BadNotReadable, 0, 0))
+                  wait_disabled_nodes())
                      ? SOPC_STATUS_OK
                      : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: inhibited after restart: %s\n",
@@ -688,7 +746,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    SOPC_SecureConnection_Config* secureConnConfig = NULL;
+    SOPC_SecureConnection_Config* secureConnConfigs[NB_CLIENT_CONNECTIONS] = {NULL, NULL};
 
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath =
@@ -722,7 +780,7 @@ int main(int argc, char* argv[])
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = configure_client(&secureConnConfig);
+        status = configure_client(secureConnConfigs);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -730,11 +788,11 @@ int main(int argc, char* argv[])
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = expSupported ? check_enabled_flag_started(secureConnConfig) : check_inhibited_started();
+        status = expSupported ? check_enabled_flag_started(secureConnConfigs) : check_inhibited_started();
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = expSupported ? check_reset_on_restart(secureConnConfig) : check_inhibited_on_restart();
+        status = expSupported ? check_reset_on_restart(secureConnConfigs[0]) : check_inhibited_on_restart();
     }
 
     SOPC_ReturnStatus stopStatus = stop_server();
