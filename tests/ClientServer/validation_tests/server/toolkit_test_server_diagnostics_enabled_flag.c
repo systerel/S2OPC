@@ -32,6 +32,9 @@
  *          from 0,
  *        - unmanaged diagnostics nodes always have OpcUa_BadNotReadable status.
  *
+ *        Each check covers the 12 ServerDiagnosticsSummary counters variables and the ServerDiagnosticsSummary
+ *        structure variable (status, DataType and value of each field).
+ *
  *        When compiled with TEST_DIAGNOSTICS_INHIBITED, the server is started with a FALSE and not writable
  *        EnabledFlag: diagnostics are inhibited, a local write of EnabledFlag has no effect and diagnostics remain
  *        inhibited after a server restart.
@@ -55,7 +58,6 @@
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
 #include "libs2opc_server_diagnostics.h"
-#include "libs2opc_server_internal.h"
 
 #include "embedded/sopc_addspace_loader.h"
 
@@ -83,19 +85,30 @@ typedef enum
 } EnabledFlagValue;
 
 static const SOPC_NodeId enabledFlagNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_EnabledFlag);
-static const SOPC_NodeId rejectedRequestsNodeId =
-    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount);
-static const SOPC_NodeId securityRejectedRequestsNodeId =
-    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedRequestsCount);
-static const SOPC_NodeId currentSessionCountNodeId =
-    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount);
+static const SOPC_NodeId summaryNodeId =
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary);
 
-// Cumulated counters incremented once by the client activity
-static const SOPC_NodeId cumulatedCountersNodeIds[] = {
+// ServerDiagnosticsSummary counters variables, in the order of the ServerDiagnosticsSummaryDataType fields
+#define NB_SUMMARY_COUNTERS 12
+static const SOPC_NodeId summaryCountersNodeIds[NB_SUMMARY_COUNTERS] = {
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_ServerViewCount),
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSessionCount),
     SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CumulatedSessionCount),
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedSessionCount),
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedSessionCount),
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SessionTimeoutCount),
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SessionAbortCount),
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CurrentSubscriptionCount),
     SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_CumulatedSubscriptionCount),
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_PublishingIntervalCount),
+    SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_SecurityRejectedRequestsCount),
     SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_ServerDiagnosticsSummary_RejectedRequestsCount)};
-#define NB_CUMULATED_COUNTERS (sizeof(cumulatedCountersNodeIds) / sizeof(cumulatedCountersNodeIds[0]))
+
+// Indexes in summaryCountersNodeIds of the counters modified by the client activity
+#define CURRENT_SESSION_IDX 1
+#define CUMULATED_SESSION_IDX 2
+#define CUMULATED_SUBSCRIPTION_IDX 8
+#define REJECTED_REQUESTS_IDX 11
 
 // Expected status and value of a UInt32 diagnostic node
 typedef struct
@@ -104,19 +117,6 @@ typedef struct
     SOPC_StatusCode status;
     uint32_t value;
 } ExpectedNode;
-
-// Expected diagnostic nodes evaluated by wait_for
-typedef struct
-{
-    const ExpectedNode* nodes;
-    size_t nbNodes;
-} ExpectedNodes;
-
-// Diagnostic nodes expected when diagnostics are disabled: value 0 with OpcUa_BadNotReadable status
-static const ExpectedNode disabledNodes[] = {{&rejectedRequestsNodeId, OpcUa_BadNotReadable, 0},
-                                             {&securityRejectedRequestsNodeId, OpcUa_BadNotReadable, 0},
-                                             {&currentSessionCountNodeId, OpcUa_BadNotReadable, 0}};
-#define NB_DISABLED_NODES (sizeof(disabledNodes) / sizeof(disabledNodes[0]))
 
 // Defined in the generated embedded address space: true if generated as constant (WITH_CONST_ADDSPACE)
 extern const bool sopc_embedded_is_const_addspace;
@@ -334,8 +334,13 @@ static SOPC_ReturnStatus write_enabled_flag_sync(bool enabled)
     return status;
 }
 
-/* Returns true if all the given UInt32 diagnostic nodes have the expected value and status:
- * a Good expected status matches any Good status, any other expected status shall be equal */
+// Returns true if the status matches the expected one: a Good expected status matches any Good status
+static bool is_expected_status(SOPC_StatusCode expected, SOPC_StatusCode actual)
+{
+    return SOPC_IsGoodStatus(expected) ? SOPC_IsGoodStatus(actual) : expected == actual;
+}
+
+// Returns true if all the given UInt32 diagnostic nodes have the expected value and status
 static bool check_nodes(const ExpectedNode* nodes, size_t nbNodes)
 {
     OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(nbNodes, OpcUa_TimestampsToReturn_Neither);
@@ -357,9 +362,8 @@ static bool check_nodes(const ExpectedNode* nodes, size_t nbNodes)
     {
         const SOPC_DataValue* dv = &readResp->Results[i];
         const ExpectedNode* expected = &nodes[i];
-        const bool statusOk =
-            SOPC_IsGoodStatus(expected->status) ? SOPC_IsGoodStatus(dv->Status) : expected->status == dv->Status;
-        result = statusOk && SOPC_UInt32_Id == dv->Value.BuiltInTypeId && expected->value == dv->Value.Value.Uint32;
+        result = is_expected_status(expected->status, dv->Status) && SOPC_UInt32_Id == dv->Value.BuiltInTypeId &&
+                 expected->value == dv->Value.Value.Uint32;
     }
     if (NULL != readResp)
     {
@@ -369,46 +373,111 @@ static bool check_nodes(const ExpectedNode* nodes, size_t nbNodes)
     return result;
 }
 
-static bool are_nodes(void* context)
+/* Returns true if the ServerDiagnosticsSummary structure variable has the status of the expected counters and its
+ * fields have the expected counters values */
+static bool check_summary(const ExpectedNode counters[NB_SUMMARY_COUNTERS])
 {
-    const ExpectedNodes* expected = (const ExpectedNodes*) context;
-    return check_nodes(expected->nodes, expected->nbNodes);
+    OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
+    OpcUa_ReadResponse* readResp = NULL;
+    SOPC_ReturnStatus status = (NULL == readReq) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ReadRequest_SetReadValue(readReq, 0, &summaryNodeId, SOPC_AttributeId_Value, NULL);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerHelper_LocalServiceSync(readReq, (void**) &readResp);
+        readReq = NULL; // freed by toolkit
+    }
+    bool result = SOPC_STATUS_OK == status && &OpcUa_ReadResponse_EncodeableType == readResp->encodeableType &&
+                  SOPC_IsGoodStatus(readResp->ResponseHeader.ServiceResult) && 1 == readResp->NoOfResults;
+    const SOPC_Variant* value = result ? &readResp->Results[0].Value : NULL;
+    result = result && is_expected_status(counters[0].status, readResp->Results[0].Status) &&
+             SOPC_ExtensionObject_Id == value->BuiltInTypeId && SOPC_VariantArrayType_SingleValue == value->ArrayType &&
+             NULL != value->Value.ExtObject && SOPC_ExtObjBodyEncoding_Object == value->Value.ExtObject->Encoding &&
+             &OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType == value->Value.ExtObject->Body.Object.ObjType &&
+             NULL != value->Value.ExtObject->Body.Object.Value;
+    if (result)
+    {
+        const OpcUa_ServerDiagnosticsSummaryDataType* summary =
+            (const OpcUa_ServerDiagnosticsSummaryDataType*) value->Value.ExtObject->Body.Object.Value;
+        // Same order as summaryCountersNodeIds
+        const uint32_t fields[NB_SUMMARY_COUNTERS] = {summary->ServerViewCount,
+                                                      summary->CurrentSessionCount,
+                                                      summary->CumulatedSessionCount,
+                                                      summary->SecurityRejectedSessionCount,
+                                                      summary->RejectedSessionCount,
+                                                      summary->SessionTimeoutCount,
+                                                      summary->SessionAbortCount,
+                                                      summary->CurrentSubscriptionCount,
+                                                      summary->CumulatedSubscriptionCount,
+                                                      summary->PublishingIntervalCount,
+                                                      summary->SecurityRejectedRequestsCount,
+                                                      summary->RejectedRequestsCount};
+        for (size_t i = 0; result && i < NB_SUMMARY_COUNTERS; i++)
+        {
+            result = counters[i].value == fields[i];
+        }
+    }
+    if (NULL != readResp)
+    {
+        SOPC_EncodeableObject_Delete(readResp->encodeableType, (void**) &readResp);
+    }
+    SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &readReq);
+    return result;
 }
 
-// Waits until all the given UInt32 diagnostic nodes have the expected value and status, returns false on timeout
-static bool wait_nodes(const ExpectedNode* nodes, size_t nbNodes)
+// Initializes the expected ServerDiagnosticsSummary counters with the given status and value 0
+static void init_expected_counters(ExpectedNode counters[NB_SUMMARY_COUNTERS], SOPC_StatusCode status)
 {
-    ExpectedNodes expected = {nodes, nbNodes};
-    return wait_for(are_nodes, &expected);
+    for (size_t i = 0; i < NB_SUMMARY_COUNTERS; i++)
+    {
+        counters[i].nodeId = &summaryCountersNodeIds[i];
+        counters[i].status = status;
+        counters[i].value = 0;
+    }
 }
 
-// Returns true if the diagnostic nodes have the disabled diagnostics value 0 with OpcUa_BadNotReadable status
+/* Returns true if the ServerDiagnosticsSummary counters variables and structure variable fields have the expected
+ * status and values */
+static bool check_counters(const ExpectedNode counters[NB_SUMMARY_COUNTERS])
+{
+    return check_nodes(counters, NB_SUMMARY_COUNTERS) && check_summary(counters);
+}
+
+static bool are_counters(void* context)
+{
+    return check_counters((const ExpectedNode*) context);
+}
+
+// Returns true if the ServerDiagnosticsSummary nodes have the value 0 with OpcUa_BadNotReadable status
 static bool check_disabled_nodes(void)
 {
-    return check_nodes(disabledNodes, NB_DISABLED_NODES);
+    ExpectedNode counters[NB_SUMMARY_COUNTERS];
+    init_expected_counters(counters, OpcUa_BadNotReadable);
+    return check_counters(counters);
 }
 
-// Waits until the diagnostic nodes have the disabled diagnostics value 0 with OpcUa_BadNotReadable status
+// Waits until the ServerDiagnosticsSummary nodes have the value 0 with OpcUa_BadNotReadable status
 static bool wait_disabled_nodes(void)
 {
-    return wait_nodes(disabledNodes, NB_DISABLED_NODES);
+    ExpectedNode counters[NB_SUMMARY_COUNTERS];
+    init_expected_counters(counters, OpcUa_BadNotReadable);
+    return wait_for(are_counters, counters);
 }
 
-/* Returns SOPC_STATUS_OK if all the cumulated counters reach the expected cumulated value and CurrentSessionCount
- * reaches the expected current sessions value, with a Good status */
+/* Returns SOPC_STATUS_OK if the ServerDiagnosticsSummary nodes reach a Good status with the expected values:
+ * cumulated session, cumulated subscription and rejected requests counters equal to the cumulated value,
+ * current session counter equal to the current sessions value and other counters equal to 0 */
 static SOPC_ReturnStatus wait_counters(uint32_t cumulated, uint32_t currentSessions)
 {
-    ExpectedNode nodes[NB_CUMULATED_COUNTERS + 1];
-    for (size_t i = 0; i < NB_CUMULATED_COUNTERS; i++)
-    {
-        nodes[i].nodeId = &cumulatedCountersNodeIds[i];
-        nodes[i].status = SOPC_GoodGenericStatus;
-        nodes[i].value = cumulated;
-    }
-    nodes[NB_CUMULATED_COUNTERS].nodeId = &currentSessionCountNodeId;
-    nodes[NB_CUMULATED_COUNTERS].status = SOPC_GoodGenericStatus;
-    nodes[NB_CUMULATED_COUNTERS].value = currentSessions;
-    return wait_nodes(nodes, NB_CUMULATED_COUNTERS + 1) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    ExpectedNode counters[NB_SUMMARY_COUNTERS];
+    init_expected_counters(counters, SOPC_GoodGenericStatus);
+    counters[CURRENT_SESSION_IDX].value = currentSessions;
+    counters[CUMULATED_SESSION_IDX].value = cumulated;
+    counters[CUMULATED_SUBSCRIPTION_IDX].value = cumulated;
+    counters[REJECTED_REQUESTS_IDX].value = cumulated;
+    return wait_for(are_counters, counters) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 // Returns true if all the unmanaged diagnostic nodes have the OpcUa_BadNotReadable status
