@@ -130,7 +130,7 @@ workflow:
 
 generation:
   stage: gen
-  image: com.systerel.fr:5000/c838/gen-ext@sha256:ad8f3a436af38146059c81d490d27ca93ccb06bbbb8f3a9aee29f45fb78d4b68 # digest of gen-ext:1.5
+  image: com.systerel.fr:5000/c838/gen-ext@sha256:a646438e6b77498b49f233015140dabb79e75873f2148084f5d50621cfbcfd39 # digest of gen-ext:1.6
   script:
     - ./clean.sh gen
     - ./.validates_xml_schemas.sh
