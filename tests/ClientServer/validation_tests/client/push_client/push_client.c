@@ -24,6 +24,7 @@
 #include "libs2opc_common_config.h"
 #include "push_client_connection_helper.h"
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
@@ -49,7 +50,7 @@ static const SOPC_NodeId gCertificateTypeIdInvalid = {0};
 #define SIG_UPDATE_TIMEOUT_MS 500
 
 // Flag used on sig stop
-static bool connectionEventReceived = false;
+static int32_t connectionEventReceived = 0;
 
 static void SOPC_Client_ConnEventCb(SOPC_ClientConnection* config,
                                     SOPC_ClientConnectionEvent event,
@@ -58,7 +59,7 @@ static void SOPC_Client_ConnEventCb(SOPC_ClientConnection* config,
     SOPC_UNUSED_ARG(config);
     SOPC_UNUSED_ARG(event);
     SOPC_UNUSED_ARG(status);
-    connectionEventReceived = true;
+    SOPC_Atomic_Int_Set(&connectionEventReceived, 1);
 }
 
 /*---------------------------------------------------------------------------
@@ -778,7 +779,7 @@ int main(int argc, char* const argv[])
             // The client sleeps as long as it did not receive any connection event.
             else if (0 == strcmp(argv[i], "sleep"))
             {
-                while (!connectionEventReceived)
+                while (0 == SOPC_Atomic_Int_Get(&connectionEventReceived))
                 {
                     SOPC_Sleep(SIG_UPDATE_TIMEOUT_MS);
                 }
@@ -884,7 +885,7 @@ int main(int argc, char* const argv[])
     SOPC_ClientConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 
-    if (connectionEventReceived)
+    if (0 != SOPC_Atomic_Int_Get(&connectionEventReceived))
     {
         if (bUpdateCertificateSucceeded)
         {

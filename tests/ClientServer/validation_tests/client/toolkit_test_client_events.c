@@ -32,6 +32,7 @@
 #include "opcua_statuscodes.h"
 
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_helper_statuscodes.h"
@@ -79,8 +80,9 @@ static const SOPC_StatusCode selectClausesResult[NB_SELECT_CLAUSES] = {
     SOPC_GoodGenericStatus, SOPC_GoodGenericStatus, SOPC_GoodGenericStatus, SOPC_GoodGenericStatus,
     SOPC_GoodGenericStatus, SOPC_GoodGenericStatus, SOPC_GoodGenericStatus};
 
-static bool notifEventFieldSetResult[NB_SELECT_CLAUSES] = {true, false, false, false, true, true,
-                                                           true, true,  true,  false, true};
+/* Main thread configures expected event fields, callback reads them. */
+static int32_t notifEventFieldSetResult[NB_SELECT_CLAUSES] = {true, false, false, false, true, true,
+                                                              true, true,  true,  false, true};
 
 #define NB_SELECT_CLAUSES_INDEX_RANGE 3
 /*
@@ -95,16 +97,17 @@ static const SOPC_StatusCode selectClausesIndexRangeResult[NB_SELECT_CLAUSES_IND
     OpcUa_BadTypeMismatch, SOPC_GoodGenericStatus, OpcUa_BadIndexRangeInvalid};
 static const bool notifEventFieldSetIndexRangeResult[NB_SELECT_CLAUSES_INDEX_RANGE] = {false, true, false};
 
-static bool eventNotifReceived = false;
-static bool eventNotifReceived2 = false;
-static bool expectedContentReceived = false;
-static bool expectedContentReceived2 = false;
+static int32_t eventNotifReceived = false;
+static int32_t eventNotifReceived2 = false;
+static int32_t expectedContentReceived = false;
+static int32_t expectedContentReceived2 = false;
 
-static bool expectOverflow = false;
-static bool overflowReceived = false;
+static int32_t expectOverflow = false;
+static int32_t overflowReceived = false;
 static const uint32_t nbEventsBeforeOverflow = SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE;
-static uint32_t nbEventsReceived = 0;
-static bool expNbEventsReceivedWhenOverflow = false;
+/* Event count is shared with the callback; int32_t for SOPC atomic operations. */
+static int32_t nbEventsReceived = 0;
+static int32_t expNbEventsReceivedWhenOverflow = false;
 
 static bool is_eventQueueOverflowTypeId(SOPC_Variant* var)
 {
@@ -149,14 +152,15 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                         SOPC_CONSOLE_PRINTF("\nEventField[%" PRIi32 "]('%s'):\n", j, currentSelectClause);
                         SOPC_Variant_Print(&event->EventFields[j]);
                         // Check if event field is NULL only when expected not to be set
-                        if (!(notifEventFieldSetResult[j] == (event->EventFields[j].BuiltInTypeId != SOPC_Null_Id)) &&
-                            (!expectOverflow || CONDITION_TYPE_FIELD_IDX != j))
+                        if (!(SOPC_Atomic_Int_Get(&notifEventFieldSetResult[j]) ==
+                              (event->EventFields[j].BuiltInTypeId != SOPC_Null_Id)) &&
+                            (!SOPC_Atomic_Int_Get(&expectOverflow) || CONDITION_TYPE_FIELD_IDX != j))
                         {
                             localExpectedContentReceived = false;
                             SOPC_CONSOLE_PRINTF(
                                 "ERROR: unexpected event field [idx=%" PRIi32 "] state (set/unset): %s instead of %s\n",
                                 j, (event->EventFields[j].BuiltInTypeId != SOPC_Null_Id ? "SET" : "UNSET"),
-                                (notifEventFieldSetResult[j] ? "SET" : "UNSET"));
+                                (SOPC_Atomic_Int_Get(&notifEventFieldSetResult[j]) ? "SET" : "UNSET"));
                         }
                     }
                 }
@@ -192,34 +196,35 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                     if (monitoredItemNames[0] == (char*) monitoredItemCtxArray[i])
                     {
                         // Nominal case for first MI: record received flag + expected content flag
-                        if (!expectOverflow)
+                        if (!SOPC_Atomic_Int_Get(&expectOverflow))
                         {
-                            expectedContentReceived = localExpectedContentReceived;
-                            eventNotifReceived = true;
+                            SOPC_Atomic_Int_Set(&expectedContentReceived, localExpectedContentReceived);
+                            SOPC_Atomic_Int_Set(&eventNotifReceived, true);
                         }
                         // EventQueueOverflowCase case for first MI: record overflow Event and number of events received
-                        else if (0 == nbEventsReceived &&
+                        else if (0 == SOPC_Atomic_Int_Get(&nbEventsReceived) &&
                                  is_eventQueueOverflowTypeId(&event->EventFields[EVENT_TYPE_FIELD_IDX]))
                         {
-                            overflowReceived = true;
-                            nbEventsReceived++;
+                            SOPC_Atomic_Int_Set(&overflowReceived, true);
+                            SOPC_Atomic_Int_Add(&nbEventsReceived, 1);
                         }
                         // EventQueueOverflowCase case for first MI: record number of events received which are not
                         // overflow event
                         else if (!is_eventQueueOverflowTypeId(&event->EventFields[EVENT_TYPE_FIELD_IDX]))
                         {
-                            nbEventsReceived++;
+                            SOPC_Atomic_Int_Add(&nbEventsReceived, 1);
                         }
                     }
                     else if (monitoredItemNames[1] == (char*) monitoredItemCtxArray[i])
                     {
                         // Nominal case for second MI: record received flag + expected content flag
-                        expectedContentReceived2 = localExpectedContentReceived;
-                        eventNotifReceived2 = true;
+                        SOPC_Atomic_Int_Set(&expectedContentReceived2, localExpectedContentReceived);
+                        SOPC_Atomic_Int_Set(&eventNotifReceived2, true);
                     }
                 }
             }
-            expNbEventsReceivedWhenOverflow = (nbEventsBeforeOverflow + 1 == nbEventsReceived);
+            SOPC_Atomic_Int_Set(&expNbEventsReceivedWhenOverflow,
+                                (nbEventsBeforeOverflow + 1 == (uint32_t) SOPC_Atomic_Int_Get(&nbEventsReceived)));
         }
     }
 }
@@ -949,10 +954,10 @@ static SOPC_ReturnStatus call_gen_events_method(SOPC_ClientConnection* secureCon
                                                 uint32_t optSub,
                                                 uint32_t optMIid)
 {
-    eventNotifReceived = false;
-    eventNotifReceived2 = false;
-    expectedContentReceived = false;
-    expectedContentReceived2 = false;
+    SOPC_Atomic_Int_Set(&eventNotifReceived, false);
+    SOPC_Atomic_Int_Set(&eventNotifReceived2, false);
+    SOPC_Atomic_Int_Set(&expectedContentReceived, false);
+    SOPC_Atomic_Int_Set(&expectedContentReceived2, false);
 
     SOPC_Variant* inputArgs = NULL;
     OpcUa_CallRequest* callMethod = SOPC_CallRequest_Create(1);
@@ -1072,7 +1077,7 @@ static int32_t waitEventReceivedAndResult(const bool expectSuccessFirstMI,
     {
         localLoopTimeoutMs = failureLoopTimeout;
     }
-    while ((!eventNotifReceived || (hasSecondMI && !eventNotifReceived2)) &&
+    while ((!SOPC_Atomic_Int_Get(&eventNotifReceived) || (hasSecondMI && !SOPC_Atomic_Int_Get(&eventNotifReceived2))) &&
            loopCpt * sleepTimeout <= localLoopTimeoutMs)
     {
         loopCpt++;
@@ -1086,16 +1091,16 @@ static int32_t waitEventReceivedAndResult(const bool expectSuccessFirstMI,
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (expectSuccessFirstMI != expectedContentReceived ||
-            (hasSecondMI && expectSuccessSecondMI != expectedContentReceived2))
+        if (expectSuccessFirstMI != SOPC_Atomic_Int_Get(&expectedContentReceived) ||
+            (hasSecondMI && expectSuccessSecondMI != SOPC_Atomic_Int_Get(&expectedContentReceived2)))
         {
             status = SOPC_STATUS_NOK;
         }
     }
     else if (SOPC_STATUS_TIMEOUT == status)
     {
-        if (expectSuccessFirstMI == expectedContentReceived &&
-            (!hasSecondMI || expectSuccessSecondMI == expectedContentReceived2))
+        if (expectSuccessFirstMI == SOPC_Atomic_Int_Get(&expectedContentReceived) &&
+            (!hasSecondMI || expectSuccessSecondMI == SOPC_Atomic_Int_Get(&expectedContentReceived2)))
         {
             status = SOPC_STATUS_OK;
         }
@@ -1111,13 +1116,15 @@ static int32_t waitEventReceivedAndResult(const bool expectSuccessFirstMI,
     else
     {
         SOPC_CONSOLE_PRINTF("\n///////////////> NOK (%s, %s)\n",
-                            (expectSuccessFirstMI == expectedContentReceived ? "true" : "false"),
-                            (!hasSecondMI || expectSuccessSecondMI == expectedContentReceived2) ? "true" : "false");
+                            (expectSuccessFirstMI == SOPC_Atomic_Int_Get(&expectedContentReceived) ? "true" : "false"),
+                            (!hasSecondMI || expectSuccessSecondMI == SOPC_Atomic_Int_Get(&expectedContentReceived2))
+                                ? "true"
+                                : "false");
     }
-    eventNotifReceived = false;
-    eventNotifReceived2 = false;
-    expectedContentReceived = false;
-    expectedContentReceived2 = false;
+    SOPC_Atomic_Int_Set(&eventNotifReceived, false);
+    SOPC_Atomic_Int_Set(&eventNotifReceived2, false);
+    SOPC_Atomic_Int_Set(&expectedContentReceived, false);
+    SOPC_Atomic_Int_Set(&expectedContentReceived2, false);
     return (SOPC_STATUS_OK == status ? 0 : 1);
 }
 
@@ -1125,11 +1132,12 @@ static int32_t waitOverflowEventReceived(void)
 {
     /* Wait until event received */
     uint32_t loopCpt = 0;
-    if (!expectOverflow)
+    if (!SOPC_Atomic_Int_Get(&expectOverflow))
     {
         return 1;
     }
-    while ((!overflowReceived || !expNbEventsReceivedWhenOverflow) && loopCpt * sleepTimeout <= loopTimeout)
+    while ((!SOPC_Atomic_Int_Get(&overflowReceived) || !SOPC_Atomic_Int_Get(&expNbEventsReceivedWhenOverflow)) &&
+           loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
@@ -1143,10 +1151,11 @@ static int32_t waitOverflowEventReceived(void)
     if (SOPC_STATUS_OK != status)
     {
         SOPC_CONSOLE_PRINTF("\n///////////////> NOK (overflowReceived: %s, nbEventsReceived: %" PRIu32 ")\n",
-                            overflowReceived ? "true" : "false", nbEventsReceived);
+                            SOPC_Atomic_Int_Get(&overflowReceived) ? "true" : "false",
+                            (uint32_t) SOPC_Atomic_Int_Get(&nbEventsReceived));
     }
-    expectOverflow = false;
-    nbEventsReceived = 0;
+    SOPC_Atomic_Int_Set(&expectOverflow, false);
+    SOPC_Atomic_Int_Set(&nbEventsReceived, 0);
     return (SOPC_STATUS_OK == status ? 0 : 1);
 }
 
@@ -1232,7 +1241,7 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         // activate condition type event field expected
-        notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = true;
+        SOPC_Atomic_Int_Set(&notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX], true);
         status = call_gen_events_method(secureConnection, 1, &conditionTypeId, 0, 0);
     }
 
@@ -1265,7 +1274,7 @@ int main(void)
     {
         secondMIid = miRespServer->Results[0].MonitoredItemId;
         // activate alarm condition type event field expected (in addition to condition with is parent type)
-        notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = true;
+        SOPC_Atomic_Int_Set(&notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX], true);
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, 0, 0);
     }
 
@@ -1428,8 +1437,8 @@ int main(void)
     {
         secondMIid = miRespServer->Results[0].MonitoredItemId;
         // de-activate condition type and alarm condition type event field
-        notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = false;
-        notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = false;
+        SOPC_Atomic_Int_Set(&notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX], false);
+        SOPC_Atomic_Int_Set(&notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX], false);
         // Generate events without specific type and with default parameters
         status = call_gen_events_method(secureConnection, 0, NULL, 0, 0);
     }
@@ -1447,7 +1456,7 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         // activate condition type event field expected
-        notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = true;
+        SOPC_Atomic_Int_Set(&notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX], true);
         // Generate events with specific type ConditionType
         status = call_gen_events_method(secureConnection, 0, &conditionTypeId, 0, 0);
     }
@@ -1463,7 +1472,7 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         // activate alarm condition type event field expected
-        notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = true;
+        SOPC_Atomic_Int_Set(&notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX], true);
         // Generate events with specific type AlarmConditionType
         status = call_gen_events_method(secureConnection, 0, &alarmConditionTypeId, 0, 0);
     }
@@ -1518,11 +1527,11 @@ int main(void)
         firstMIcreated = true;
         firstMIid = miRespTestObj->Results[0].MonitoredItemId;
         // activate condition type event field expected and deactivate alarm condition type event field
-        notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX] = true;
-        notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX] = false;
-        expectOverflow = true;
-        nbEventsReceived = 0;
-        expNbEventsReceivedWhenOverflow = false;
+        SOPC_Atomic_Int_Set(&notifEventFieldSetResult[CONDITION_TYPE_FIELD_IDX], true);
+        SOPC_Atomic_Int_Set(&notifEventFieldSetResult[ALARM_CONDITION_TYPE_FIELD_IDX], false);
+        SOPC_Atomic_Int_Set(&expectOverflow, true);
+        SOPC_Atomic_Int_Set(&nbEventsReceived, 0);
+        SOPC_Atomic_Int_Set(&expNbEventsReceivedWhenOverflow, false);
         status = call_gen_events_method(secureConnection, nbEventsBeforeOverflow + 1, &conditionTypeId, 0, 0);
     }
 
@@ -1530,9 +1539,9 @@ int main(void)
     if (SOPC_STATUS_OK == status)
     {
         unexpectedResults += waitOverflowEventReceived();
-        expectOverflow = true;
-        nbEventsReceived = 0;
-        expNbEventsReceivedWhenOverflow = false;
+        SOPC_Atomic_Int_Set(&expectOverflow, true);
+        SOPC_Atomic_Int_Set(&nbEventsReceived, 0);
+        SOPC_Atomic_Int_Set(&expNbEventsReceivedWhenOverflow, false);
     }
 
     if (SOPC_STATUS_OK == status)

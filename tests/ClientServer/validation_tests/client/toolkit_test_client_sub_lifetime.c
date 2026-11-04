@@ -50,6 +50,7 @@
 #include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -86,6 +87,8 @@ static int32_t badNoSubscription = 0;
 static int32_t pendingResponses = 0;
 static int32_t lastServiceResultGood = 0;
 
+/* The CreateSubscription callback publishes these values to the main thread. */
+static SOPC_Mutex subscriptionDataMutex = SOPC_INVALID_MUTEX;
 static uint32_t subscriptionId = 0;
 static double revisedPublishingInterval = 0.0;
 static uint32_t revisedLifetimeCount = 0;
@@ -166,10 +169,12 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
             set_unexpected();
             return;
         }
+        SOPC_Mutex_Lock(&subscriptionDataMutex);
         subscriptionId = resp->SubscriptionId;
         revisedPublishingInterval = resp->RevisedPublishingInterval;
         revisedLifetimeCount = resp->RevisedLifetimeCount;
         revisedMaxKeepAliveCount = resp->RevisedMaxKeepAliveCount;
+        SOPC_Mutex_Unlock(&subscriptionDataMutex);
         printf(">>Test_Client_Sub_Lifetime: CreateSubscription ok sub=%" PRIu32 " pubItv=%f lifetime=%" PRIu32
                " keepAlive=%" PRIu32 "\n",
                subscriptionId, revisedPublishingInterval, revisedLifetimeCount, revisedMaxKeepAliveCount);
@@ -324,11 +329,15 @@ int main(void)
         return EXIT_FAILURE;
     }
 
+    SOPC_ReturnStatus mutexStatus = SOPC_Mutex_Initialization(&subscriptionDataMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutexStatus);
+
     channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
     if (0 == channel_config_idx)
     {
         printf(">>Test_Client_Sub_Lifetime: Secure channel configuration failed\n");
         SOPC_Toolkit_Clear();
+        SOPC_Mutex_Clear(&subscriptionDataMutex);
         SOPC_Common_Clear();
         return EXIT_FAILURE;
     }
@@ -358,18 +367,28 @@ int main(void)
         }
     }
 
+    /* Main-thread snapshot of the subscription metadata published by the callback. */
+    uint32_t localSubscriptionId = 0;
+    uint32_t localRevisedLifetimeCount = 0;
+    uint32_t localRevisedMaxKeepAliveCount = 0;
+
     /* CreateSubscription with short lifetime/keepalive. */
     if (ok)
     {
         OpcUa_CreateSubscriptionRequest* createSubReq = SOPC_CreateSubscriptionRequest_Create(
             REQ_PUBLISHING_INTERVAL_MS, REQ_LIFETIME_COUNT, REQ_MAX_KEEPALIVE_COUNT, 1000, true, 0);
         ok = send_request(createSubReq, "CreateSubscriptionRequest") && wait_pending_cleared("CreateSubscription");
-        if (ok && (0 == subscriptionId || 9 != revisedLifetimeCount || 3 != revisedMaxKeepAliveCount))
+        SOPC_Mutex_Lock(&subscriptionDataMutex);
+        localSubscriptionId = subscriptionId;
+        localRevisedLifetimeCount = revisedLifetimeCount;
+        localRevisedMaxKeepAliveCount = revisedMaxKeepAliveCount;
+        SOPC_Mutex_Unlock(&subscriptionDataMutex);
+        if (ok && (0 == localSubscriptionId || 9 != localRevisedLifetimeCount || 3 != localRevisedMaxKeepAliveCount))
         {
             printf(
                 ">>Test_Client_Sub_Lifetime: unexpected revised params (need lifetime=9 keepAlive=3, got "
                 "lifetime=%" PRIu32 " keepAlive=%" PRIu32 ")\n",
-                revisedLifetimeCount, revisedMaxKeepAliveCount);
+                localRevisedLifetimeCount, localRevisedMaxKeepAliveCount);
             ok = false;
         }
     }
@@ -379,7 +398,7 @@ int main(void)
     {
         char* nodeIds[1] = {STATIC_NODE_ID};
         OpcUa_CreateMonitoredItemsRequest* createMiReq = SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings(
-            subscriptionId, 1, nodeIds, OpcUa_TimestampsToReturn_Both);
+            localSubscriptionId, 1, nodeIds, OpcUa_TimestampsToReturn_Both);
         ok = send_request(createMiReq, "CreateMonitoredItemsRequest") && wait_pending_cleared("CreateMonitoredItems");
     }
 
@@ -432,7 +451,7 @@ int main(void)
     }
 
     /* Best-effort cleanup (do not fail the test on cleanup errors). */
-    if (0 != SOPC_Atomic_Int_Get(&sessionId) && 0 != subscriptionId && ok)
+    if (0 != SOPC_Atomic_Int_Get(&sessionId) && 0 != localSubscriptionId && ok)
     {
         OpcUa_DeleteSubscriptionsRequest* delReq = NULL;
         if (SOPC_STATUS_OK ==
@@ -443,7 +462,7 @@ int main(void)
             delReq->SubscriptionIds = SOPC_Calloc(1, sizeof(uint32_t));
             if (NULL != delReq->SubscriptionIds)
             {
-                delReq->SubscriptionIds[0] = subscriptionId;
+                delReq->SubscriptionIds[0] = localSubscriptionId;
                 if (send_request(delReq, "DeleteSubscriptionsRequest"))
                 {
                     (void) wait_pending_cleared("DeleteSubscriptions");
@@ -479,6 +498,8 @@ int main(void)
     }
 
     SOPC_Toolkit_Clear();
+    mutexStatus = SOPC_Mutex_Clear(&subscriptionDataMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutexStatus);
     SOPC_Common_Clear();
     return mainResult;
 }

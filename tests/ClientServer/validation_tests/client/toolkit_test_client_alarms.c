@@ -58,18 +58,18 @@ static const uint32_t loopTimeout = 50000;
 // Boolean flags for TC 1
 static int32_t nbrOfCyclesConfirmationCompleted = 0;   // read by main thread, written by callback thread
 static int32_t nbrOfCyclesNoConfirmationCompleted = 0; // read by main thread, written by callback thread
-static bool playTest1 = false;                         // written by main thread, read only by callback thread
+static int32_t playTest1 = false;                      // written by main thread, read only by callback thread
 
 static int32_t nbrOfDisabledAlarms = 0; // read by main thread, written by callback thread
-static bool playTest2Part1 = false;     // written by main thread, read only by callback thread
+static int32_t playTest2Part1 = false;  // written by main thread, read only by callback thread
 
-static bool oneAlarmUpdated = false; // read by main thread, written by callback thread
-static bool playTest2Part3 = false;  // written by main thread, read only by callback thread
+static int32_t oneAlarmUpdated = false; // read by main thread, written by callback thread
+static int32_t playTest2Part3 = false;  // written by main thread, read only by callback thread
 
-static int32_t nbrOfEnabledAlarms = 0;   // read by main thread, written by callback thread
-static bool playTest3 = false;           // written by main thread, read only by callback thread
-static bool clearArrayOfEnabled = false; // written by main thread, read only by callback thread
-static bool arrayCleared = false;        // read by main thread, written by callback thread
+static int32_t nbrOfEnabledAlarms = 0;      // read by main thread, written by callback thread
+static int32_t playTest3 = false;           // written by main thread, read only by callback thread
+static int32_t clearArrayOfEnabled = false; // written by main thread, read only by callback thread
+static int32_t arrayCleared = false;        // read by main thread, written by callback thread
 
 // ConditionsIds of the servers alarms, used for enabling from ConditionId
 static const SOPC_NodeId alarm1_demo_server = SOPC_NODEID_NUMERIC(1, 5009);
@@ -290,7 +290,7 @@ static void SOPC_MonitoredAlarm_Event_Cb(SOPC_MonitoredAlarmsGroup* group,
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     printf("- active: %s\n", activeState ? "true" : "false");
 
-    if (playTest1)
+    if (SOPC_Atomic_Int_Get(&playTest1))
     {
         if (!confirmableAlarm)
         {
@@ -347,7 +347,7 @@ static void SOPC_MonitoredAlarm_Event_Cb(SOPC_MonitoredAlarmsGroup* group,
         }
     }
 
-    if (playTest2Part1)
+    if (SOPC_Atomic_Int_Get(&playTest2Part1))
     {
         // Test if the alarm is a good candidate for the test
         bool enabledState = false;
@@ -365,12 +365,12 @@ static void SOPC_MonitoredAlarm_Event_Cb(SOPC_MonitoredAlarmsGroup* group,
         }
     }
 
-    if (playTest2Part3)
+    if (SOPC_Atomic_Int_Get(&playTest2Part3))
     {
-        oneAlarmUpdated = true;
+        SOPC_Atomic_Int_Set(&oneAlarmUpdated, true);
     }
 
-    if (playTest3)
+    if (SOPC_Atomic_Int_Get(&playTest3))
     {
         SOPC_NodeId* conditionIdNodeIdCpy = SOPC_Malloc(sizeof(SOPC_NodeId));
         status = SOPC_NodeId_Copy(conditionIdNodeIdCpy, conditionIdNodeId);
@@ -389,13 +389,13 @@ static void SOPC_MonitoredAlarm_Event_Cb(SOPC_MonitoredAlarmsGroup* group,
         }
     }
 
-    if (clearArrayOfEnabled)
+    if (SOPC_Atomic_Int_Get(&clearArrayOfEnabled))
     {
         for (size_t i = 0; i < MAX_DIFFERENT_ALARMS; i++)
         {
             SOPC_NodeId_Clear(enabledAlarmsArray[i]);
         }
-        arrayCleared = true;
+        SOPC_Atomic_Int_Set(&arrayCleared, true);
     }
 
     SOPC_Event_Delete(&rcvEvent);
@@ -483,7 +483,7 @@ int main(int argc, char** argv)
         uint32_t loopCpt = 0;
         int32_t nbrOfCompleteCyclesWanted = numberOfAlarmsToTest;
         SOPC_CONSOLE_PRINTF("\n=========== TC 1: Complete %d full cycles ===========\n", nbrOfCompleteCyclesWanted);
-        playTest1 = true;
+        SOPC_Atomic_Int_Set(&playTest1, true);
         /* Wait until the wished number of complete cycles (nbrOfCompleteCyclesWanted) has been reached */
         // X full no-confirmation alarm cycles + X full confirmation cycles for demo server
         // X full confirmation cycles for test server
@@ -495,7 +495,7 @@ int main(int argc, char** argv)
             loopCpt++;
             SOPC_Sleep(sleepTimeout);
         }
-        playTest1 = false;
+        SOPC_Atomic_Int_Set(&playTest1, false);
         if (loopCpt * sleepTimeout > loopTimeout)
         {
             SOPC_CONSOLE_PRINTF(
@@ -517,7 +517,7 @@ int main(int argc, char** argv)
         // Check that at least numberOfAlarmsToTest that alarms have been disabled.
         SOPC_CONSOLE_PRINTF(
             "\n=========== TC 2: Disable all alarms. No further update should be received  ===========\n");
-        playTest2Part1 = true;
+        SOPC_Atomic_Int_Set(&playTest2Part1, true);
         loopCpt = 0;
         int32_t nbrOfDisabledAlarmsExpected = numberOfAlarmsToTest;
         /* Wait until the wished number of disabled alarms (nbrOfDisabledAlarmsExpected) has been reached */
@@ -527,7 +527,7 @@ int main(int argc, char** argv)
             loopCpt++;
             SOPC_Sleep(sleepTimeout);
         }
-        playTest2Part1 = false;
+        SOPC_Atomic_Int_Set(&playTest2Part1, false);
         if (loopCpt * sleepTimeout > loopTimeout)
         {
             SOPC_CONSOLE_PRINTF("TC 2 Part 1 Failed. Disabled %d alarms, was expecting %d disabled alarms.\n",
@@ -551,10 +551,10 @@ int main(int argc, char** argv)
             // Wait for refresh to take effect on received alarm updates.
             // TODO: wait for the event ConditionRefreshEnd instead.
             SOPC_Sleep(sleepTimeout * 10);
-            playTest2Part3 = true;
+            SOPC_Atomic_Int_Set(&playTest2Part3, true);
             SOPC_Sleep(sleepTimeout * 10); // wait to see if we receive some updates
-            playTest2Part3 = false;
-            if (!oneAlarmUpdated)
+            SOPC_Atomic_Int_Set(&playTest2Part3, false);
+            if (!SOPC_Atomic_Int_Get(&oneAlarmUpdated))
             {
                 SOPC_CONSOLE_PRINTF(
                     "TC 2 Part 3 Success. No more alarm notification received after disabling all of them.\n");
@@ -594,7 +594,7 @@ int main(int argc, char** argv)
 
         loopCpt = 0;
         int32_t nbrOfEnabledAlarmsExpected = numberOfAlarmsToTest;
-        playTest3 = true;
+        SOPC_Atomic_Int_Set(&playTest3, true);
         /* Wait until the wished number of enabled alarms (nbrOfEnabledAlarmsExpected) has been reached */
         while (SOPC_Atomic_Int_Get(&nbrOfEnabledAlarms) < nbrOfEnabledAlarmsExpected &&
                loopCpt * sleepTimeout <= loopTimeout)
@@ -602,7 +602,7 @@ int main(int argc, char** argv)
             loopCpt++;
             SOPC_Sleep(sleepTimeout);
         }
-        playTest3 = false;
+        SOPC_Atomic_Int_Set(&playTest3, false);
         if (loopCpt * sleepTimeout > loopTimeout)
         {
             SOPC_CONSOLE_PRINTF("TC 3 Failed. Only %d alarms enabled, was expecting %d.\n",
@@ -612,17 +612,17 @@ int main(int argc, char** argv)
         else
         {
             loopCpt = 0;
-            clearArrayOfEnabled = true;
+            SOPC_Atomic_Int_Set(&clearArrayOfEnabled, true);
             /* Wait for the clear of ConditionIds array necessary for previous test */
             // NOTE: if the client does not receive any notification from now, it will be memory leak.
             // But since we just enabled all alarms and server changes states frequently, we should
             // receive new notifications (it may be considered as part of the test to receive new notifications).
-            while (!arrayCleared && loopCpt * sleepTimeout <= loopTimeout)
+            while (!SOPC_Atomic_Int_Get(&arrayCleared) && loopCpt * sleepTimeout <= loopTimeout)
             {
                 loopCpt++;
                 SOPC_Sleep(sleepTimeout);
             }
-            clearArrayOfEnabled = false;
+            SOPC_Atomic_Int_Set(&clearArrayOfEnabled, false);
             if (loopCpt * sleepTimeout > loopTimeout)
             {
                 SOPC_CONSOLE_PRINTF("TC 3 Failed. Timeout when waiting for new updates after enabling alarms.");

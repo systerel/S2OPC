@@ -125,8 +125,8 @@ static void handle_subscriptionNotification_datachange(const SOPC_ClientHelper_S
     ck_assert_int_eq(SOPC_STATUS_OK,
                      SOPC_DataValue_Copy(&check_counter_data_value, &dataChange->MonitoredItems[0].Value));
 
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_counter_mutex));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_SignalAll(&check_counter_condition));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_counter_mutex));
 }
 
 /* Records the asynchronous response data since the response is freed by the client wrapper after the call */
@@ -141,8 +141,8 @@ static void handle_asyncSubscriptionResponse(SOPC_EncodeableType* type, const vo
             ((const OpcUa_ModifySubscriptionResponse*) response)->ResponseHeader.ServiceResult;
     }
     check_async_resp_received = true;
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_async_resp_mutex));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_SignalAll(&check_async_resp_condition));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_async_resp_mutex));
 }
 
 /************************************************/

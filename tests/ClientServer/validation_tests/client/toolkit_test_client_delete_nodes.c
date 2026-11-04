@@ -38,6 +38,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
@@ -52,8 +53,8 @@
 #ifdef WITH_EXPAT
 #if 0 != S2OPC_NODE_MANAGEMENT
 
-static bool received_notif_badNodeIdUnknow = false;
-static bool received_notif_goodOrUncertainStatus = false;
+static int32_t received_notif_badNodeIdUnknow = false;
+static int32_t received_notif_goodOrUncertainStatus = false;
 // Sleep timeout in milliseconds
 static const uint32_t sleepTimeout = 200;
 // Loop timeout in milliseconds
@@ -76,11 +77,11 @@ static void SubscriptionNotification_Cb(const SOPC_ClientHelper_Subscription* su
         {
             if (OpcUa_BadNodeIdUnknown == notifs->MonitoredItems[i].Value.Status)
             {
-                received_notif_badNodeIdUnknow = true;
+                SOPC_Atomic_Int_Set(&received_notif_badNodeIdUnknow, true);
             }
             else if (SOPC_IsGoodOrUncertainStatus(notifs->MonitoredItems[i].Value.Status))
             {
-                received_notif_goodOrUncertainStatus = true;
+                SOPC_Atomic_Int_Set(&received_notif_goodOrUncertainStatus, true);
             }
         }
     }
@@ -230,24 +231,26 @@ static SOPC_ReturnStatus wait_for_notification_node(bool goodStatus, const char*
 {
     uint32_t loopCpt = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    while (!received_notif_badNodeIdUnknow && !received_notif_goodOrUncertainStatus &&
+    while (!SOPC_Atomic_Int_Get(&received_notif_badNodeIdUnknow) &&
+           !SOPC_Atomic_Int_Get(&received_notif_goodOrUncertainStatus) &&
            loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
         // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
     }
-    if (received_notif_badNodeIdUnknow && !goodStatus)
+    if (SOPC_Atomic_Int_Get(&received_notif_badNodeIdUnknow) && !goodStatus)
     {
         printf("%s. Notif BadNodeIdUnknow well received!\n", tcStepStr);
         status = SOPC_STATUS_OK;
     }
-    else if (received_notif_goodOrUncertainStatus && goodStatus)
+    else if (SOPC_Atomic_Int_Get(&received_notif_goodOrUncertainStatus) && goodStatus)
     {
         printf("%s. Notif GoodOrUncertainStatus well received!\n", tcStepStr);
         status = SOPC_STATUS_OK;
     }
-    else if (received_notif_badNodeIdUnknow || received_notif_goodOrUncertainStatus)
+    else if (SOPC_Atomic_Int_Get(&received_notif_badNodeIdUnknow) ||
+             SOPC_Atomic_Int_Get(&received_notif_goodOrUncertainStatus))
     {
         printf("%s. UNEXPECTED notif BadNodeIdUnknow or GoodStatus received!\n", tcStepStr);
         status = SOPC_STATUS_NOK;
@@ -256,8 +259,8 @@ static SOPC_ReturnStatus wait_for_notification_node(bool goodStatus, const char*
     {
         printf("%s. Timeout waiting for the notif BadNodeIdUnknow or GoodStatus.\n", tcStepStr);
     }
-    received_notif_badNodeIdUnknow = false;
-    received_notif_goodOrUncertainStatus = false;
+    SOPC_Atomic_Int_Set(&received_notif_badNodeIdUnknow, false);
+    SOPC_Atomic_Int_Set(&received_notif_goodOrUncertainStatus, false);
     return status;
 }
 
@@ -610,8 +613,8 @@ int main(void)
         const char* objectNodeToDelete = "ns=1;s=TestObject";
         const char* nodeMethodI = "ns=1;s=MethodI";
         const char* nodeMethodI_Input = "ns=1;s=MethodI_Input";
-        received_notif_badNodeIdUnknow = false;
-        received_notif_goodOrUncertainStatus = false;
+        SOPC_Atomic_Int_Set(&received_notif_badNodeIdUnknow, false);
+        SOPC_Atomic_Int_Set(&received_notif_goodOrUncertainStatus, false);
         deleteNodesResp = delete_one_node(secureConnection, objectNodeToDelete, true);
         // Wait for 3.2. success before next
         status = wait_for_notification_node(false, "3.2");
@@ -722,8 +725,8 @@ int main(void)
             }
             OpcUa_CreateMonitoredItemsResponse_Clear(&createMIresp);
         }
-        received_notif_badNodeIdUnknow = false;
-        received_notif_goodOrUncertainStatus = false;
+        SOPC_Atomic_Int_Set(&received_notif_badNodeIdUnknow, false);
+        SOPC_Atomic_Int_Set(&received_notif_goodOrUncertainStatus, false);
         deleteNodesResp = delete_one_node(secureConnection, thirdNodeToDelete, true);
         // Wait for 5.2. success before next
         status = wait_for_notification_node(false, "5.2");
@@ -778,8 +781,8 @@ int main(void)
         /* 5.5. Add the variable node again and wait for GoodStatus notification */
         if (SOPC_STATUS_OK == status)
         {
-            received_notif_badNodeIdUnknow = false;
-            received_notif_goodOrUncertainStatus = false;
+            SOPC_Atomic_Int_Set(&received_notif_badNodeIdUnknow, false);
+            SOPC_Atomic_Int_Set(&received_notif_goodOrUncertainStatus, false);
             status = client_add_node_variable(secureConnection, thirdNodeToDelete, thirdNodeToDeleteParent, "Int32");
             if (SOPC_STATUS_OK != status)
             {

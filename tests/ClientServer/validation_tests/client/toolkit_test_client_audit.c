@@ -62,6 +62,7 @@
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_threads.h"
 
@@ -174,6 +175,8 @@ static void EventContent_Clear(EventContent* evt)
 }
 // Current list of received event notifications (Contains some EventContent*)
 static SOPC_SLinkedList* sEvtReceived;
+/* Protect event queue shared by the application callback and main/test thread. */
+static SOPC_Mutex sEvtReceivedMutex = SOPC_INVALID_MUTEX;
 
 // Current memorized jokers values
 static char* sJokers[256] = {0};
@@ -243,7 +246,13 @@ static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subs
                 newEvt->at[iField].clause = selectClauses[iField].path; // Shallow copy
                 newEvt->at[iField].value = SOPC_strdup((const char*) buf->data);
             }
-            SOPC_SLinkedList_Append(sEvtReceived, 0, (uintptr_t) newEvt);
+            SOPC_Mutex_Lock(&sEvtReceivedMutex);
+            uintptr_t inserted = SOPC_SLinkedList_Append(sEvtReceived, 0, (uintptr_t) newEvt);
+            SOPC_Mutex_Unlock(&sEvtReceivedMutex);
+            if (0 == inserted)
+            {
+                EventContent_Clear(newEvt);
+            }
         }
     }
     SOPC_Buffer_Delete(buf);
@@ -699,7 +708,9 @@ static SOPC_ReturnStatus exec_audit_test(const Test_ExpectedValue** expectedEven
         bool found = false;
         while (!found && nb100ms > 0)
         {
+            SOPC_Mutex_Lock(&sEvtReceivedMutex);
             EventContent* evt = (EventContent*) SOPC_SLinkedList_PopHead(sEvtReceived);
+            SOPC_Mutex_Unlock(&sEvtReceivedMutex);
             if (evt == NULL)
             {
                 SOPC_Sleep(100);
@@ -736,7 +747,10 @@ int main(void)
 
     SOPC_ReturnStatus status = Client_Initialize();
 
+    SOPC_ReturnStatus mutexStatus = SOPC_Mutex_Initialization(&sEvtReceivedMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutexStatus);
     sEvtReceived = SOPC_SLinkedList_Create(256);
+    SOPC_ASSERT(NULL != sEvtReceived);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -889,6 +903,8 @@ int main(void)
         EventContent_Clear(evt);
     }
     SOPC_SLinkedList_Clear(sEvtReceived);
+    mutexStatus = SOPC_Mutex_Clear(&sEvtReceivedMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutexStatus);
 
     if (SOPC_STATUS_OK == status && 0 == nbFailures)
     {
