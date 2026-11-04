@@ -46,6 +46,7 @@
 #include "libs2opc_server_config.h"
 #include "sopc_askpass.h"
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
 #include "sopc_enums.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
@@ -75,7 +76,8 @@ typedef struct DemoPushSrv_AppCtx
 } DemoPushSrv_AppCtx;
 
 static DemoPushSrv_AppCtx gAppCtx = {0};
-static bool gSignalHandler = false;
+static int32_t gSignalHandler = 0;
+static int32_t gStopServerThreadRequested = 0;
 static SOPC_Thread stopServerThread;
 
 /*---------------------------------------------------------------------------
@@ -118,18 +120,21 @@ static void DemoPushSrv_StoppedCb(SOPC_ReturnStatus status)
 static void DemoPushSrv_StopSignal(int arg)
 {
     SOPC_UNUSED_ARG(arg);
-    gSignalHandler = true;
+    SOPC_Atomic_Int_Set(&gSignalHandler, 1);
 }
 
 /***************************************************/
 static void* DemoPushSrv_StopServerThread(void* arg)
 {
     SOPC_UNUSED_ARG(arg);
-    while (!gSignalHandler)
+    while (0 == SOPC_Atomic_Int_Get(&gSignalHandler) && 0 == SOPC_Atomic_Int_Get(&gStopServerThreadRequested))
     {
         SOPC_Sleep(SLEEP_LENGTH_MS);
     }
-    SOPC_UNUSED_RESULT(SOPC_ServerHelper_StopServer());
+    if (0 == SOPC_Atomic_Int_Get(&gStopServerThreadRequested))
+    {
+        SOPC_UNUSED_RESULT(SOPC_ServerHelper_StopServer());
+    }
     return NULL;
 }
 
@@ -370,6 +375,7 @@ static SOPC_ReturnStatus DemoPushSrv_MainCommon(const char* logName)
     if (SOPC_STATUS_OK == status)
     {
         /* Create thread to stop the server when a signal is triggered (gSignalHandler flag)*/
+        SOPC_Atomic_Int_Set(&gStopServerThreadRequested, 0);
         status = SOPC_Thread_Create(&stopServerThread, &DemoPushSrv_StopServerThread, NULL, "StopSrv");
         /* Signals configuration to set gSignalHandler flag */
         signal(SIGINT, DemoPushSrv_StopSignal);
@@ -404,6 +410,19 @@ static SOPC_ReturnStatus DemoPushSrv_MainCommon(const char* logName)
     if (SOPC_STATUS_OK == status)
     {
         status = DemoPushSrv_WaitUntilStop();
+    }
+
+    /* Stop and join StopSrv before clearing the server, also in case of TOFU reboot. */
+    if (SOPC_INVALID_THREAD != stopServerThread)
+    {
+        SOPC_Atomic_Int_Set(&gStopServerThreadRequested, true);
+        /* Do not hold the application mutex while waiting for StopSrv to finish. */
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Unlock(&gAppCtx.mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        SOPC_ReturnStatus threadStatus = SOPC_Thread_Join(&stopServerThread);
+        SOPC_ASSERT(SOPC_STATUS_OK == threadStatus);
+        mutStatus = SOPC_Mutex_Lock(&gAppCtx.mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
     /* Clear the server library (stop all library threads) and server configuration */
@@ -507,7 +526,7 @@ int main(int argc, char* argv[])
         printf("<Demo_Push_Server: Server reboot with a new configuration\n");
         gAppCtx.isTOFU = false;
         gAppCtx.stopFlag = false;
-        gSignalHandler = false;
+        SOPC_Atomic_Int_Set(&gSignalHandler, 0);
         status = DemoPushSrv_MainCommon(argv[0]);
     }
 

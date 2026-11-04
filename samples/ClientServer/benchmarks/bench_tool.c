@@ -224,7 +224,9 @@ static double stddev(uint64_t* data, uint64_t n, double mean)
     return sqrt(var);
 }
 
-static bool bench_cycle_end(struct app_ctx_t* ctx)
+/* Return whether another measurement is needed; report terminal status to the caller.
+ * The caller publishes the status under run_mutex immediately before waking main. */
+static bool bench_cycle_end(struct app_ctx_t* ctx, bench_status_t* completedStatus)
 {
     if (ctx->n_measurements % 10 == 0)
     {
@@ -237,7 +239,7 @@ static bool bench_cycle_end(struct app_ctx_t* ctx)
         printf("\n");
         fflush(stdout);
         fprintf(stderr, "Could not reach a stable measure in %d measurements.\n", MAX_N_MEASUREMENTS);
-        ctx->status = BENCH_FINISHED_ERROR;
+        *completedStatus = BENCH_FINISHED_ERROR;
         return false;
     }
 
@@ -280,7 +282,7 @@ static bool bench_cycle_end(struct app_ctx_t* ctx)
     {
         printf("\n");
         fflush(stdout);
-        ctx->status = BENCH_FINISHED_OK;
+        *completedStatus = BENCH_FINISHED_OK;
         return false;
     }
     else
@@ -294,6 +296,7 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
     struct app_ctx_t* ctx = (struct app_ctx_t*) smCtx;
     bool shutdown = false;
     bool more_needed = false;
+    bench_status_t completedStatus = BENCH_RUNNING;
     OpcUa_ReadResponse* res = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
@@ -308,6 +311,8 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
         if (arg != ctx->session_id)
         {
             fprintf(stderr, "Received a session response for an unknown session ID %d\n", arg);
+            completedStatus = BENCH_FINISHED_ERROR;
+            shutdown = true;
             break;
         }
 
@@ -316,10 +321,12 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
         if (res->ResponseHeader.ServiceResult != SOPC_GoodGenericStatus)
         {
             fprintf(stderr, "Response with unexpected code %d\n", res->ResponseHeader.ServiceResult);
+            completedStatus = BENCH_FINISHED_ERROR;
+            shutdown = true;
             break;
         }
 
-        more_needed = bench_cycle_end(ctx);
+        more_needed = bench_cycle_end(ctx, &completedStatus);
 
         if (more_needed)
         {
@@ -327,29 +334,29 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
         }
         else
         {
-            SOPC_ASSERT(ctx->status != BENCH_RUNNING);
+            SOPC_ASSERT(completedStatus != BENCH_RUNNING);
             shutdown = true;
         }
 
         break;
     case SE_SESSION_ACTIVATION_FAILURE:
         fprintf(stderr, "Could not activate session\n");
-        ctx->status = BENCH_FINISHED_ERROR;
+        completedStatus = BENCH_FINISHED_ERROR;
         shutdown = true;
         break;
     case SE_CLOSED_SESSION:
         fprintf(stderr, "Session closed\n");
-        ctx->status = BENCH_FINISHED_ERROR;
+        completedStatus = BENCH_FINISHED_ERROR;
         shutdown = true;
         break;
     case SE_CLOSED_CHANNEL:
         fprintf(stderr, "Channel closed\n");
-        ctx->status = BENCH_FINISHED_ERROR;
+        completedStatus = BENCH_FINISHED_ERROR;
         shutdown = true;
         break;
     case SE_SND_REQUEST_FAILED:
         fprintf(stderr, "Request failed\n");
-        ctx->status = BENCH_FINISHED_ERROR;
+        completedStatus = BENCH_FINISHED_ERROR;
         shutdown = true;
         break;
     default:
@@ -358,8 +365,19 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
 
     if (shutdown)
     {
-        SOPC_ASSERT(ctx->status != BENCH_RUNNING);
-        status = SOPC_Condition_SignalAll(&ctx->run_cond);
+        SOPC_ASSERT(completedStatus != BENCH_RUNNING);
+
+        /* Publish the completion and signal while holding the mutex, so main
+         * cannot destroy the condition before this callback has finished using it. */
+        status = SOPC_Mutex_Lock(&ctx->run_mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        if (BENCH_RUNNING == ctx->status)
+        {
+            ctx->status = completedStatus;
+            status = SOPC_Condition_SignalAll(&ctx->run_cond);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+        }
+        status = SOPC_Mutex_Unlock(&ctx->run_mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 }
@@ -669,9 +687,17 @@ int main(int argc, char** argv)
     SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(configIdx);
     SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, (uintptr_t) &ctx, "anonymous");
 
-    mutStatus = SOPC_Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex);
+    /* Check the predicate under the mutex: this also handles an early signal
+     * (before entering the wait) and spurious condition wakeups. */
+    while (BENCH_RUNNING == ctx.status)
+    {
+        mutStatus = SOPC_Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    }
+    mutStatus = SOPC_Mutex_Unlock(&ctx.run_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
+    /* Stop/join the application callbacks before destroying run_cond and run_mutex. */
     SOPC_Toolkit_Clear();
     SOPC_PKIProvider_Free(&pki);
     SOPC_KeyCertPair_Delete(&cliKeyCertPair);
@@ -679,8 +705,10 @@ int main(int argc, char** argv)
     SOPC_KeyManager_Certificate_Free(ca);
     SOPC_KeyManager_CRL_Free(cacrl);
 
-    SOPC_Mutex_Clear(&ctx.run_mutex);
-    SOPC_Condition_Clear(&ctx.run_cond);
+    mutStatus = SOPC_Condition_Clear(&ctx.run_cond);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = SOPC_Mutex_Clear(&ctx.run_mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (ctx.status == BENCH_FINISHED_OK)
     {
