@@ -37,7 +37,6 @@ run_ctest_suite() {
 MY_DIR="$(cd "$(dirname "$0")" && pwd)"
 BIN_DIR="${MY_DIR}/bin"
 BUILD_DIR="${MY_DIR}/build"
-PYS2OPC_TESTS_DIR="${MY_DIR}/tests/ClientServer/validation_tests/pys2opc"
 PYS2OPC_LIB_IS_PRESENT=$(ls ${BUILD_DIR}/lib/pys2opc*.whl 2> /dev/null | wc -l)
 CLIENTSERVER_TEST_DIR=${BUILD_DIR}/tests/ClientServer
 CLIENTSERVER_SAMPLE_DIR=${BUILD_DIR}/samples/ClientServer
@@ -185,7 +184,6 @@ if [ -z $S2OPC_PUBSUB_ONLY ]; then
        EXPECTED_TAP_FILES=$EXPECTED_TAP_FILES$PYS2OPC_TAP_FILES
        run_ctest_suite ClientServer
        CTEST_RET1=$?
-       mv "${PYS2OPC_TESTS_DIR}"/*.tap "${TAP_DIR}"/
    fi
 
     # Manage tests in samples/ directory
