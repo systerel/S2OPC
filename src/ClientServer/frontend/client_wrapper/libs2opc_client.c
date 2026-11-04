@@ -313,10 +313,10 @@ static void SOPC_ClientInternal_EventCbk(uint32_t c_id,
     genCtx->status = status;
 
     genCtx->finished = true;
-    statusMutex = SOPC_Mutex_Unlock(&genCtx->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
     /* Signal that the response is available */
     statusMutex = SOPC_Condition_SignalAll(&genCtx->condition);
+    SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
+    statusMutex = SOPC_Mutex_Unlock(&genCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
     if (isAsync)
@@ -365,19 +365,17 @@ static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event
         if (isSyncConnDiscon)
         {
             cc->syncConnDisconEventRcvd = true;
-        }
 
-        SOPC_Mutex_Unlock(&cc->syncConnMutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
-
-        if (isSyncConnDiscon)
-        {
             /* Synchronous connection operation:
                Signal that the disconnection is done */
             statusMutex = SOPC_Condition_SignalAll(&cc->syncCond);
             SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         }
-        else
+
+        statusMutex = SOPC_Mutex_Unlock(&cc->syncConnMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
+
+        if (!isSyncConnDiscon)
         {
             /* Unexpected connection event
                or asynchronous connection operation response (NOT IMPLEMENTED YET) */
@@ -967,8 +965,15 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
     }
     else if (!connectionAlreadyExists)
     {
-        // Only clear connection if it was created in this function call
+        // Only clear connection if it was created in this function call.
+        // Clear under configMutex (as on disconnection): serialized with the connection events treatment.
+        mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
         SOPC_ClientHelperInternal_ClearClientConnection(res);
+
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
     return status;
