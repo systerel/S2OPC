@@ -66,6 +66,11 @@ static bool check_async_resp_received = false;
 static SOPC_EncodeableType* check_async_resp_type = NULL;
 static SOPC_StatusCode check_async_resp_service_result = SOPC_GoodGenericStatus;
 static uintptr_t check_async_resp_context = 0;
+// Application thread blocked in an asynchronous response callback until released by the test
+static SOPC_Mutex check_blocking_cb_mutex;
+static SOPC_Condition check_blocking_cb_condition;
+static bool check_blocking_cb_entered = false;
+static bool check_blocking_cb_released = false;
 
 /************************************************/
 /*             Client Callback getter           */
@@ -143,6 +148,23 @@ static void handle_asyncSubscriptionResponse(SOPC_EncodeableType* type, const vo
     check_async_resp_received = true;
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_SignalAll(&check_async_resp_condition));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_async_resp_mutex));
+}
+
+/* Blocks the application thread until released by the test (use a 60 sec timeout) */
+static void handle_blockingAsyncResponse(SOPC_EncodeableType* type, const void* response, uintptr_t userContext)
+{
+    SOPC_UNUSED_ARG(type);
+    SOPC_UNUSED_ARG(response);
+    SOPC_UNUSED_ARG(userContext);
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&check_blocking_cb_mutex));
+    check_blocking_cb_entered = true;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_SignalAll(&check_blocking_cb_condition));
+    while (!check_blocking_cb_released)
+    {
+        ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_UnlockAndTimedWaitCond(&check_blocking_cb_condition,
+                                                                           &check_blocking_cb_mutex, 60000));
+    }
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_blocking_cb_mutex));
 }
 
 /************************************************/
@@ -1523,6 +1545,65 @@ START_TEST(test_wrapper_get_endpoints)
 }
 END_TEST
 
+/* Synchronous service call whose wait expires while the application thread is blocked: the late response is then
+ * treated on the request context abandoned by the caller (duration: twice the request timeout) */
+START_TEST(test_wrapper_sync_service_wait_expiry)
+{
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientConfigHelper_Initialize());
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Initialization(&check_blocking_cb_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_Init(&check_blocking_cb_condition));
+    check_blocking_cb_entered = false;
+    check_blocking_cb_released = false;
+
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
+        "Test", VALID_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+    ck_assert_ptr_nonnull(secureConnConfig);
+    SOPC_ClientConnection* scConnection = NULL;
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_ClientHelper_Connect(secureConnConfig, &handle_failedConnEvent, &scConnection));
+
+    /* Block the application thread in the response callback of an asynchronous request */
+    OpcUa_GetEndpointsRequest* getEndpointsRequest = SOPC_GetEndpointsRequest_Create(VALID_ENDPOINT_URL);
+    ck_assert_ptr_nonnull(getEndpointsRequest);
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_ServiceAsyncCustom(scConnection, getEndpointsRequest, 0,
+                                                                          &handle_blockingAsyncResponse));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&check_blocking_cb_mutex));
+    while (!check_blocking_cb_entered)
+    {
+        ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_UnlockAndTimedWaitCond(&check_blocking_cb_condition,
+                                                                           &check_blocking_cb_mutex, 10000));
+    }
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_blocking_cb_mutex));
+
+    /* Synchronous call: its response is queued behind the blocked callback and the wait expires */
+    getEndpointsRequest = SOPC_GetEndpointsRequest_Create(VALID_ENDPOINT_URL);
+    ck_assert_ptr_nonnull(getEndpointsRequest);
+    OpcUa_GetEndpointsResponse* response = NULL;
+    ck_assert_int_eq(SOPC_STATUS_TIMEOUT,
+                     SOPC_ClientHelper_ServiceSync(scConnection, getEndpointsRequest, (void**) &response));
+    ck_assert_ptr_null(response);
+
+    /* Release the application thread: the late response is treated on the abandoned request context */
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&check_blocking_cb_mutex));
+    check_blocking_cb_released = true;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_SignalAll(&check_blocking_cb_condition));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_blocking_cb_mutex));
+
+    /* The connection is still usable */
+    getEndpointsRequest = SOPC_GetEndpointsRequest_Create(VALID_ENDPOINT_URL);
+    ck_assert_ptr_nonnull(getEndpointsRequest);
+    ck_assert_int_eq(SOPC_STATUS_OK,
+                     SOPC_ClientHelper_ServiceSync(scConnection, getEndpointsRequest, (void**) &response));
+    ck_assert_ptr_nonnull(response);
+    SOPC_EncodeableObject_Delete(response->encodeableType, (void**) &response);
+
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_Disconnect(&scConnection));
+    SOPC_ClientConfigHelper_Clear();
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_Clear(&check_blocking_cb_condition));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Clear(&check_blocking_cb_mutex));
+}
+END_TEST
+
 static void setup(void)
 {
     // Get default log config and set the custom path
@@ -1566,6 +1647,7 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_write);
     tcase_add_test(tc_wrapper, test_wrapper_browse);
     tcase_add_test(tc_wrapper, test_wrapper_get_endpoints);
+    tcase_add_test(tc_wrapper, test_wrapper_sync_service_wait_expiry);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);
 

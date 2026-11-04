@@ -79,7 +79,8 @@ typedef struct
 
     SOPC_Mutex mutex; /* protect this context */
     SOPC_Condition condition;
-    bool finished; /* set when treatment is done */
+    bool finished;  /* set when treatment is done */
+    bool abandoned; /* set when a synchronous caller returned on wait expiry: the context is freed on completion */
 
     bool isDiscoveryModeService;                    /* Set if the endpoint service API was used */
     void* responseResultCtx;                        /* Context dedicated to the request type */
@@ -216,8 +217,10 @@ static void SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(SOPC_ClientHelper_R
     SOPC_Free(genReqCtx);
 }
 
-// Wait for condition signaled and finished flag set
-// When returns OK, operationStatus is set to the global service response status
+// Wait for condition signaled and finished flag set (context mutex locked by caller)
+// When returns OK, operationStatus is set to the global service response status.
+// On wait expiry, the context is marked as abandoned: it shall not be freed by the caller since the request
+// completion (response treatment or connection clear) may still access it and then frees it.
 static SOPC_ReturnStatus SOPC_ClientHelperInternal_GenReqCtx_WaitFinishedOrTimeout(SOPC_ClientHelper_ReqCtx* genReqCtx)
 {
     SOPC_ASSERT(NULL != genReqCtx);
@@ -231,7 +234,14 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_GenReqCtx_WaitFinishedOrTimeo
             SOPC_Mutex_UnlockAndTimedWaitCond(&genReqCtx->condition, &genReqCtx->mutex, 2 * SOPC_REQUEST_TIMEOUT_MS);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus || SOPC_STATUS_TIMEOUT == mutStatus);
     }
-    return (SOPC_STATUS_OK == mutStatus ? genReqCtx->status : SOPC_STATUS_TIMEOUT);
+    if (!genReqCtx->finished)
+    {
+        // The caller response variable is no longer valid once the caller returned
+        genReqCtx->abandoned = true;
+        genReqCtx->responseResultCtx = NULL;
+        return SOPC_STATUS_TIMEOUT;
+    }
+    return genReqCtx->status;
 }
 
 static bool SOPC_ClientHelperInternal_CheckConnectionValid(const SOPC_S2OPC_Config* config,
@@ -266,14 +276,20 @@ static void SOPC_ClientInternal_EventCbk(uint32_t c_id,
 {
     SOPC_UNUSED_ARG(c_id); // managed by caller
 
-    bool isAsync = false;
+    // Set when the context is no longer used by the request caller and shall be freed here
+    bool freeContext = false;
     SOPC_ClientHelper_ReqCtx* genCtx = (SOPC_ClientHelper_ReqCtx*) genContext;
     SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
-    if (genCtx->isAsyncCall)
+    if (genCtx->abandoned)
     {
-        isAsync = true;
+        // Synchronous caller returned on wait expiry: the response is not moved and thus freed by the toolkit
+        freeContext = true;
+    }
+    else if (genCtx->isAsyncCall)
+    {
+        freeContext = true;
         SOPC_EncodeableType* pEncType = NULL;
         if (SOPC_StaMac_ApplicativeEvent_Response == event)
         {
@@ -313,13 +329,17 @@ static void SOPC_ClientInternal_EventCbk(uint32_t c_id,
     genCtx->status = status;
 
     genCtx->finished = true;
-    /* Signal that the response is available */
-    statusMutex = SOPC_Condition_SignalAll(&genCtx->condition);
-    SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
+    if (!freeContext)
+    {
+        /* Signal that the response is available: signal before unlocking since the waiting caller frees the
+         * context as soon as it can lock the mutex */
+        statusMutex = SOPC_Condition_SignalAll(&genCtx->condition);
+        SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
+    }
     statusMutex = SOPC_Mutex_Unlock(&genCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
-    if (isAsync)
+    if (freeContext)
     {
         // Context is not necessary anymore
         SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(genCtx);
@@ -794,10 +814,12 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             }
         }
 
+        // Abandoned context (wait expiry) is freed on request completion
+        const bool reqCtxAbandoned = reqCtx->abandoned;
         statusMutex = SOPC_Mutex_Unlock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
-        if (isSynchronous && NULL != reqCtx)
+        if (isSynchronous && !reqCtxAbandoned)
         {
             SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
         }
@@ -1098,8 +1120,20 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Disconnect(SOPC_ClientConnect
 
     if (SOPC_STATUS_OK == status)
     {
+        // Application requests still pending: taken back from the state machine before its deletion
+        SOPC_SLinkedList* pendingAppReqCtxList = SOPC_SLinkedList_Create(0);
+        const uint16_t secureConnectionIdx = pSc->secureConnectionIdx;
+
         mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        if (NULL != pendingAppReqCtxList && NULL != pSc->stateMachine &&
+            SOPC_STATUS_OK != SOPC_StaMac_PopApplicativeRequests(pSc->stateMachine, pendingAppReqCtxList))
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Disconnect: unable to complete all pending requests of connection %" PRIu16,
+                                   secureConnectionIdx);
+        }
 
         SOPC_ClientHelperInternal_ClearClientConnection(pSc);
 
@@ -1107,6 +1141,19 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Disconnect(SOPC_ClientConnect
 
         mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        // Complete pending requests as closed outside configMutex since the asynchronous response callback is called
+        if (NULL != pendingAppReqCtxList)
+        {
+            uintptr_t genCtx = SOPC_SLinkedList_PopHead(pendingAppReqCtxList);
+            while (0 != genCtx)
+            {
+                SOPC_ClientInternal_EventCbk(secureConnectionIdx, SOPC_StaMac_ApplicativeEvent_SendFailed,
+                                             (SOPC_StatusCode) SOPC_STATUS_CLOSED, NULL, genCtx);
+                genCtx = SOPC_SLinkedList_PopHead(pendingAppReqCtxList);
+            }
+            SOPC_SLinkedList_Delete(pendingAppReqCtxList);
+        }
     }
 
     return status;
@@ -1377,10 +1424,12 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
             }
         }
 
+        // Abandoned context (wait expiry) is freed on request completion
+        const bool reqCtxAbandoned = reqCtx->abandoned;
         statusMutex = SOPC_Mutex_Unlock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
-        if ((SOPC_STATUS_OK != status || isSynchronous) && NULL != reqCtx)
+        if ((SOPC_STATUS_OK != status || isSynchronous) && !reqCtxAbandoned)
         {
             SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
         }

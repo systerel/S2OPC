@@ -378,6 +378,50 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
     }
 }
 
+SOPC_ReturnStatus SOPC_StaMac_PopApplicativeRequests(SOPC_StaMac_Machine* pSM, SOPC_SLinkedList* appCtxList)
+{
+    if (NULL == pSM || NULL == appCtxList)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    // Pop each pending request once: application ones are moved to appCtxList, others are appended back
+    const uint32_t nbReqs = SOPC_SLinkedList_GetLength(pSM->pListReqCtx);
+    for (uint32_t i = 0; i < nbReqs; i++)
+    {
+        SOPC_StaMac_ReqCtx* reqCtx = (SOPC_StaMac_ReqCtx*) SOPC_SLinkedList_PopHead(pSM->pListReqCtx);
+        SOPC_ASSERT(NULL != reqCtx);
+        bool moved = false;
+        if (SOPC_REQUEST_SCOPE_APPLICATION == reqCtx->requestScope)
+        {
+            moved = (SOPC_SLinkedList_Append(appCtxList, 0, reqCtx->appCtx) == reqCtx->appCtx);
+            if (!moved)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        if (moved)
+        {
+            SOPC_Free(reqCtx);
+        }
+        else if ((SOPC_StaMac_ReqCtx*) SOPC_SLinkedList_Append(pSM->pListReqCtx, 0, (uintptr_t) reqCtx) != reqCtx)
+        {
+            // Keep the context allocated: a response received later can still be compared to it (see SendRequest)
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "StaMac: unable to keep a pending request context, its response will be ignored");
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
+    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
 {
     if (NULL == pSM)

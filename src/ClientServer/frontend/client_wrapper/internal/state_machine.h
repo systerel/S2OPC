@@ -46,6 +46,7 @@
 #include <stdbool.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_singly_linked_list.h"
 #include "sopc_types.h"
 
 /**
@@ -171,6 +172,20 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
  * \brief Deletes and deallocate the machine.
  */
 void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM);
+
+/**
+ * \brief Removes the pending requests of scope ::SOPC_REQUEST_SCOPE_APPLICATION from the machine and appends their
+ *        application contexts to \p appCtxList. The responses or failures received later for these requests are
+ *        ignored by the machine.
+ *
+ * \param pSM         The state machine
+ * \param appCtxList  The list receiving the application contexts (values of the list)
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS if a parameter is NULL,
+ *         SOPC_STATUS_OUT_OF_MEMORY if a context could not be appended to \p appCtxList
+ *         (the request is then kept in the machine).
+ */
+SOPC_ReturnStatus SOPC_StaMac_PopApplicativeRequests(SOPC_StaMac_Machine* pSM, SOPC_SLinkedList* appCtxList);
 
 /**
  * \brief Creates a session asynchronously.
