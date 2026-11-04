@@ -760,25 +760,25 @@ static SOPC_ReturnStatus Helpers_NewDeleteSubscriptionRequest(uint32_t subscript
 
 SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM, uint32_t subscriptionId)
 {
+    if (NULL == pSM)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     void* pRequest = NULL;
 
-    if (NULL == pSM)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
+    /* Keep the subscription check, request submission and state transition atomic with respect
+     * to the application thread processing responses. */
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
     if (SOPC_StaMac_HasSubscriptionId(pSM, subscriptionId) && stActivated == pSM->state)
     {
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Deleting subscription.");
         pSM->subscrServiceFault = SOPC_GoodGenericStatus;
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = Helpers_NewDeleteSubscriptionRequest(subscriptionId, &pRequest);
-        }
+        status = Helpers_NewDeleteSubscriptionRequest(subscriptionId, &pRequest);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_StaMac_SendRequest(pSM, pRequest, (uintptr_t) subscriptionId,
@@ -793,6 +793,7 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM, uint3
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
+
     mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
@@ -1209,7 +1210,12 @@ bool SOPC_StaMac_HasAnySubscription(SOPC_StaMac_Machine* pSM)
         return false;
     }
 
-    return (0 < SOPC_SLinkedList_GetLength(pSM->pListSubscriptions));
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    bool hasSubscription = (0 < SOPC_SLinkedList_GetLength(pSM->pListSubscriptions));
+    status = SOPC_Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    return hasSubscription;
 }
 
 bool SOPC_StaMac_PopMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitoredItems_Ctx* pAppCtx)
@@ -1727,6 +1733,15 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             }
         }
 
+        /* The mutex was released before invoking the application callback to prevent deadlocks.
+         * Reacquire it before touching the state machine again: the callback may have woken
+         * another thread which changed the state (e.g. StopSession or DeleteSubscription). */
+        if (unlockedMutex)
+        {
+            mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+            unlockedMutex = false;
+        }
         LockedStaMac_PostProcessActions(pSM, oldState);
         // Note: bProcess now only reflects if the connection callback in client layer will be called or not,
         //       i.e. in case of connection or disconnection events.
