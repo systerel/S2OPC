@@ -63,8 +63,9 @@ struct SOPC_ClientConnection
 
     // Reference on client's subscriptions (used in case of Disconnect call)
     SOPC_SLinkedList* subscriptions; // list of SOPC_ClientHelper_Subscription*
-    // Reference on client's discovery requests context
-    SOPC_SLinkedList* discoveryReqCtxList; // list of SOPC_StaMac_ReqCtx**
+    // Discovery requests sent and not yet taken by the response treatment (list of SOPC_StaMac_ReqCtx*).
+    // Accessed under configMutex only: the list owns its entries, released on connection clear.
+    SOPC_SLinkedList* discoveryReqCtxList;
 };
 
 /* The request context is used to manage
@@ -501,16 +502,29 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
                 // set param to NULL to keep same behavior as non discovery service failure
                 param = NULL;
             }
+            // Take ownership of the request contexts under configMutex: a connection clear can no longer free them
+            uintptr_t removedContext = 0;
+            if (NULL != cc)
+            {
+                removedContext = SOPC_SLinkedList_RemoveFromValuePtr(cc->discoveryReqCtxList, appContext);
+            }
             // Release mutex to avoid possible deadlock in user callback
             mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             unlockedMutex = true;
-            SOPC_ClientInternal_EventCbk(serviceReqCtx->secureConnectionIdx, libsubEvent, status, param,
-                                         (uintptr_t) serviceReqCtx);
-            // Delete the discovery request context
-            uintptr_t removedContext = SOPC_SLinkedList_RemoveFromValuePtr(cc->discoveryReqCtxList, appContext);
-            SOPC_UNUSED_RESULT(removedContext);
-            SOPC_Free((void*) appContext);
+            if (appContext == removedContext)
+            {
+                SOPC_ClientInternal_EventCbk(serviceReqCtx->secureConnectionIdx, libsubEvent, status, param,
+                                             (uintptr_t) serviceReqCtx);
+                SOPC_Free((void*) appContext);
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "ClientInternal_ToolkitEventCallback: unknown discovery request context for "
+                                       "event %d, ignored.",
+                                       event);
+            }
         }
         else if (event !=
                  SE_REVERSE_ENDPOINT_CLOSED) // state machine does not manage reverse EPs (excluded from treatment)
@@ -632,12 +646,39 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
     return status;
 }
 
+/* Releases a discovery request left unanswered in the connection discovery request list on connection clear
+ * (called with configMutex locked). A synchronous caller still waits on its context: the context is completed
+ * as closed and freed by the caller, unless the caller abandoned it on wait expiry. */
 static void SOPC_ClientHelperInternal_ClearDiscoveryReqCtx(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
     SOPC_StaMac_ReqCtx* reqCtx = (SOPC_StaMac_ReqCtx*) val;
     SOPC_ASSERT(NULL != reqCtx);
-    SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree((SOPC_ClientHelper_ReqCtx*) reqCtx->appCtx);
+    SOPC_ClientHelper_ReqCtx* genReqCtx = (SOPC_ClientHelper_ReqCtx*) reqCtx->appCtx;
+    SOPC_ASSERT(NULL != genReqCtx);
+    if (genReqCtx->isAsyncCall)
+    {
+        SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(genReqCtx);
+    }
+    else
+    {
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&genReqCtx->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        const bool abandoned = genReqCtx->abandoned;
+        if (!abandoned)
+        {
+            genReqCtx->status = SOPC_STATUS_CLOSED;
+            genReqCtx->finished = true;
+            mutStatus = SOPC_Condition_SignalAll(&genReqCtx->condition);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        }
+        mutStatus = SOPC_Mutex_Unlock(&genReqCtx->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        if (abandoned)
+        {
+            SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(genReqCtx);
+        }
+    }
     SOPC_Free(reqCtx);
 }
 
@@ -751,7 +792,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             if (NULL == smReqCtx || NULL == reqCtx)
             {
                 SOPC_Free(smReqCtx);
-                SOPC_Free(reqCtx);
+                smReqCtx = NULL;
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
             else
@@ -759,6 +800,45 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
                 smReqCtx->appCtx = (uintptr_t) reqCtx;
                 smReqCtx->requestScope = SOPC_REQUEST_SCOPE_DISCOVERY;
                 smReqCtx->requestType = SOPC_REQUEST_TYPE_GET_ENDPOINTS;
+            }
+        }
+
+        /* Register then send the request under configMutex: once registered, the contexts are owned by the
+         * connection discovery request list until the response treatment or the connection clear removes them */
+        if (SOPC_STATUS_OK == status)
+        {
+            uintptr_t addedCtx = SOPC_SLinkedList_Append(res->discoveryReqCtxList, 0, (uintptr_t) smReqCtx);
+            if (addedCtx != (uintptr_t) smReqCtx)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                SOPC_EndpointConnectionCfg endpointConnectionCfg = {
+                    .reverseEndpointConfigIdx = secConnConfig->reverseEndpointConfigIdx,
+                    .secureChannelConfigIdx = secConnConfig->secureChannelConfigIdx};
+
+                status =
+                    SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, request, (uintptr_t) smReqCtx);
+                if (SOPC_STATUS_OK == status)
+                {
+                    requestSentToServices = true;
+                }
+                else
+                {
+                    addedCtx = SOPC_SLinkedList_RemoveFromValuePtr(res->discoveryReqCtxList, (uintptr_t) smReqCtx);
+                    SOPC_ASSERT(addedCtx == (uintptr_t) smReqCtx);
+                }
+            }
+        }
+
+        if (SOPC_STATUS_OK != status)
+        {
+            // Request not sent: contexts still owned by this function
+            SOPC_Free(smReqCtx);
+            if (NULL != reqCtx)
+            {
+                SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
             }
         }
 
@@ -771,55 +851,22 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
-    /* send the request and wait for the result if sync operation */
-    if (SOPC_STATUS_OK == status)
+    /* Wait for the result if sync operation: the context is completed either by the response treatment or by the
+     * connection clear, then freed here */
+    if (isSynchronous && SOPC_STATUS_OK == status)
     {
         SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
-        /* send the request */
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_EndpointConnectionCfg endpointConnectionCfg = {
-                .reverseEndpointConfigIdx = secConnConfig->reverseEndpointConfigIdx,
-                .secureChannelConfigIdx = secConnConfig->secureChannelConfigIdx};
-
-            status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, request, (uintptr_t) smReqCtx);
-            if (SOPC_STATUS_OK == status)
-            {
-                requestSentToServices = true;
-            }
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            uintptr_t addedCtx = SOPC_SLinkedList_Append(res->discoveryReqCtxList, 0, (uintptr_t) smReqCtx);
-            if (addedCtx != (uintptr_t) smReqCtx)
-            {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "Unable to add discovery request context to list of connectionConfigIdx %" PRIu16,
-                    secConnConfig->secureConnectionIdx);
-            }
-        }
-
-        if (isSynchronous && SOPC_STATUS_OK == status)
-        {
-            /* Wait for the response => status OK (response received) */
-            status = SOPC_ClientHelperInternal_GenReqCtx_WaitFinishedOrTimeout(reqCtx);
-
-            if (SOPC_STATUS_OK == status)
-            {
-                status = reqCtx->status;
-            }
-        }
+        /* Wait for the response => status OK (response received) */
+        status = SOPC_ClientHelperInternal_GenReqCtx_WaitFinishedOrTimeout(reqCtx);
 
         // Abandoned context (wait expiry) is freed on request completion
         const bool reqCtxAbandoned = reqCtx->abandoned;
         statusMutex = SOPC_Mutex_Unlock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
-        if (isSynchronous && !reqCtxAbandoned)
+        if (!reqCtxAbandoned)
         {
             SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
         }

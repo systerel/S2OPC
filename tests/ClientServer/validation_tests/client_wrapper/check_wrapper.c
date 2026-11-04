@@ -72,6 +72,13 @@ static SOPC_Condition check_blocking_cb_condition;
 static bool check_blocking_cb_entered = false;
 static bool check_blocking_cb_released = false;
 
+// Number of asynchronous discovery requests sent in a row on the same connection
+#define NB_DISCOVERY_ASYNC_REQUESTS 20
+static SOPC_Mutex check_discovery_mutex;
+static SOPC_Condition check_discovery_condition;
+static uint32_t check_discovery_nb_responses = 0;
+static uint32_t check_discovery_nb_good_responses = 0;
+
 /************************************************/
 /*             Client Callback getter           */
 /************************************************/
@@ -165,6 +172,21 @@ static void handle_blockingAsyncResponse(SOPC_EncodeableType* type, const void* 
                                                                            &check_blocking_cb_mutex, 60000));
     }
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_blocking_cb_mutex));
+}
+
+/* Counts the asynchronous discovery responses and the good ones */
+static void handle_asyncDiscoveryResponse(SOPC_EncodeableType* type, const void* response, uintptr_t userContext)
+{
+    SOPC_UNUSED_ARG(userContext);
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&check_discovery_mutex));
+    check_discovery_nb_responses++;
+    if (&OpcUa_GetEndpointsResponse_EncodeableType == type && NULL != response &&
+        SOPC_IsGoodStatus(((const OpcUa_GetEndpointsResponse*) response)->ResponseHeader.ServiceResult))
+    {
+        check_discovery_nb_good_responses++;
+    }
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_SignalAll(&check_discovery_condition));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_discovery_mutex));
 }
 
 /************************************************/
@@ -1604,6 +1626,52 @@ START_TEST(test_wrapper_sync_service_wait_expiry)
 }
 END_TEST
 
+/* Asynchronous discovery requests sent in a row on the same connection: responses are treated by the application
+ * thread while the next requests are sent (concurrent update of the pending discovery requests) */
+START_TEST(test_wrapper_discovery_async_requests_in_row)
+{
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientConfigHelper_Initialize());
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Initialization(&check_discovery_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_Init(&check_discovery_condition));
+    check_discovery_nb_responses = 0;
+    check_discovery_nb_good_responses = 0;
+
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
+        "Test", VALID_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+    ck_assert_ptr_nonnull(secureConnConfig);
+
+    /* Wait for the 1st response: requests waiting for the channel connection are limited
+     * (SOPC_MAX_WAITING_DISCOVERY_REQUESTS). Then no wait, so that responses are treated while requests are still
+     * sent (concurrent accesses to the pending discovery requests list). Wait for all the responses before checking
+     * them and closing the connection. */
+    for (uint32_t i = 0; i < NB_DISCOVERY_ASYNC_REQUESTS; i++)
+    {
+        OpcUa_GetEndpointsRequest* getEndpointsRequest = SOPC_GetEndpointsRequest_Create(VALID_ENDPOINT_URL);
+        ck_assert_ptr_nonnull(getEndpointsRequest);
+        ck_assert_int_eq(SOPC_STATUS_OK,
+                         SOPC_ClientHelper_DiscoveryServiceAsyncCustom(secureConnConfig, getEndpointsRequest,
+                                                                       (uintptr_t) i, &handle_asyncDiscoveryResponse));
+        if (0 == i || NB_DISCOVERY_ASYNC_REQUESTS - 1 == i)
+        {
+            /* Wait for the responses to the requests sent (5 sec timeout between 2 responses) */
+            ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&check_discovery_mutex));
+            while (check_discovery_nb_responses < i + 1)
+            {
+                ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_UnlockAndTimedWaitCond(&check_discovery_condition,
+                                                                                   &check_discovery_mutex, 5000));
+            }
+            ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_discovery_mutex));
+        }
+    }
+    ck_assert_uint_eq(NB_DISCOVERY_ASYNC_REQUESTS, check_discovery_nb_good_responses);
+
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_ClientHelper_DiscoveryAsyncCloseConnection(secureConnConfig));
+    SOPC_ClientConfigHelper_Clear();
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_Clear(&check_discovery_condition));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Clear(&check_discovery_mutex));
+}
+END_TEST
+
 static void setup(void)
 {
     // Get default log config and set the custom path
@@ -1648,6 +1716,7 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_browse);
     tcase_add_test(tc_wrapper, test_wrapper_get_endpoints);
     tcase_add_test(tc_wrapper, test_wrapper_sync_service_wait_expiry);
+    tcase_add_test(tc_wrapper, test_wrapper_discovery_async_requests_in_row);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);
 
