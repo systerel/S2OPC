@@ -543,7 +543,11 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
         }
         else
         {
-            status = SOPC_ToolkitServer_UsingLockedConfig(bParam);
+            /* On configuration, register the Services layer as used before forwarding the event to SC. */
+            if (bParam)
+            {
+                status = SOPC_ToolkitServer_UsingLockedConfig(true);
+            }
             if (SOPC_STATUS_OK == status)
             {
                 isServerConfigurationLocked = bParam;
@@ -562,6 +566,21 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
             {
                 // Clear server context in B model if configuration is unlocked (not configured anymore)
                 io_dispatch_mgr__clear_server_configuration_context();
+                if (!bParam)
+                {
+                    /* Release the Services layer only after the B-model reset is complete. Otherwise
+                     * SOPC_ToolkitServer_UnConfigure() could return as soon as SecureChannels releases its
+                     * reference, allowing a new AddressSpace to be configured during the reset. */
+                    status = SOPC_ToolkitServer_UsingLockedConfig(false);
+                    if (SOPC_STATUS_OK != status)
+                    {
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "Failed to release the Services layer reference to the locked server "
+                                               "configuration after clearing the B-model server configuration context "
+                                               "(status: %d).",
+                                               status);
+                    }
+                }
             }
         }
         break;
