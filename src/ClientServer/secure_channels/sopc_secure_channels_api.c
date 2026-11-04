@@ -287,6 +287,11 @@ void SOPC_SecureChannels_SetEventHandler(SOPC_EventHandler* handler)
     SOPC_Atomic_Ptr_Set((void**) &secureChannelsEventHandler, handler);
 }
 
+void SOPC_SecureChannels_PreClear(void)
+{
+    SOPC_SecureChannelsInternalContext_PreClear();
+}
+
 void SOPC_SecureChannels_Clear(void)
 {
     SOPC_SecureChannelsInternalContext_Clear();

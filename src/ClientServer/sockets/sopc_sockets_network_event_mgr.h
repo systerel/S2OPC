@@ -21,6 +21,7 @@
 #define SOPC_SOCKETS_NETWORK_EVENT_MGR_H_
 
 void SOPC_SocketsNetworkEventMgr_Initialize(void);
+/** \brief Stops the sockets thread, no effect if already stopped */
 void SOPC_SocketsNetworkEventMgr_Clear(void);
 void SOPC_SocketsNetworkEventMgr_InterruptForInputEvent(void);
 

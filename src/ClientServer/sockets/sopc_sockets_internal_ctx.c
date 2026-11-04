@@ -17,12 +17,14 @@
  * under the License.
  */
 
+#include <inttypes.h>
 #include <stddef.h>
 #include <string.h>
 
 #include "sopc_assert.h"
 #include "sopc_async_queue.h"
 #include "sopc_buffer.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_sockets_event_mgr.h"
@@ -69,6 +71,13 @@ void SOPC_SocketsInternalContext_Clear(void)
         }
     }
 
+    // Events enqueued after the sockets thread stop
+    const uint32_t nbUntreated = SOPC_AsyncQueue_GetSize(socketsInputEventQueue);
+    if (nbUntreated > 0)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Sockets cleared with %" PRIu32 " untreated event(s)",
+                                 nbUntreated);
+    }
     SOPC_AsyncQueue_Free(&socketsInputEventQueue);
 }
 

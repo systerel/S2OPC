@@ -77,7 +77,7 @@ extern uint32_t maxBufferSize;
 /** @brief Initialize the array of sockets */
 void SOPC_SocketsInternalContext_Initialize(void);
 
-/** @brief Clear the array of sockets */
+/** @brief Clear the array of sockets and the input events queue, the sockets thread shall be stopped */
 void SOPC_SocketsInternalContext_Clear(void);
 
 /** @brief Returns an unused socket from the array of sockets or NULL if none available

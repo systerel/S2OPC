@@ -19,10 +19,14 @@
 
 #include "sopc_event_handler.h"
 
+#include <inttypes.h>
+#include <stdbool.h>
+
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_async_queue.h"
 #include "sopc_atomic.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
@@ -38,7 +42,9 @@ struct _SOPC_EventHandler
 
 struct _SOPC_Looper
 {
+    const char* name;
     SOPC_Thread thread;
+    bool stopped; /* Thread joined: only accessed by the thread calling SOPC_Looper_Stop/Delete */
     SOPC_AsyncQueue* queue;
     SOPC_Array* handlers;
     /* Pending events per category (atomic): incremented before enqueue, decremented once dequeued */
@@ -239,6 +245,7 @@ SOPC_Looper* SOPC_Looper_CreatePrioritized(const char* threadName, int threadPri
     if (SOPC_STATUS_OK == status)
     {
         // Set before the thread creation: the looper thread uses its queue and pending counters
+        looper->name = threadName;
         looper->queue = queue;
         looper->handlers = handlers;
         status = SOPC_Thread_CreatePrioritized(&looper->thread, looper_loop, looper, threadPriority, cpuAffinity,
@@ -261,9 +268,9 @@ SOPC_Looper* SOPC_Looper_Create(const char* threadName)
     return SOPC_Looper_CreatePrioritized(threadName, 0, -1);
 }
 
-void SOPC_Looper_Delete(SOPC_Looper* looper)
+void SOPC_Looper_Stop(SOPC_Looper* looper)
 {
-    if (looper == NULL)
+    if (NULL == looper || looper->stopped)
     {
         return;
     }
@@ -273,6 +280,26 @@ void SOPC_Looper_Delete(SOPC_Looper* looper)
 
     status = SOPC_Thread_Join(&looper->thread);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
+
+    looper->stopped = true;
+}
+
+void SOPC_Looper_Delete(SOPC_Looper* looper)
+{
+    if (looper == NULL)
+    {
+        return;
+    }
+
+    SOPC_Looper_Stop(looper);
+
+    // The poison pill has been dequeued: remaining events were posted after it
+    const uint32_t nbUntreated = SOPC_AsyncQueue_GetSize(looper->queue);
+    if (nbUntreated > 0)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON, "Looper %s deleted with %" PRIu32 " untreated event(s)",
+                                 looper->name, nbUntreated);
+    }
 
     SOPC_AsyncQueue_Free(&looper->queue);
     SOPC_Array_Delete(looper->handlers);

@@ -138,6 +138,8 @@ uint32_t SOPC_EventHandler_Get_PendingCountByCategory(SOPC_EventHandler* handler
  * \param auxParam  event specific data
  *
  * \return \c SOPC_STATUS_OK on success, or an error code on failure.
+ *
+ * \note An event posted after ::SOPC_Looper_Stop is accepted but never treated: its parameters are not freed.
  */
 SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
                                          int32_t event,
@@ -207,16 +209,26 @@ SOPC_Looper* SOPC_Looper_Create(const char* threadName);
 SOPC_Looper* SOPC_Looper_CreatePrioritized(const char* threadName, int threadPriority, int cpuAffinity);
 
 /**
- * \brief Stops a looper and releases all resources allocated to it.
+ * \brief Stops the thread of a looper without releasing its resources.
  *
  * \param looper  the looper
  *
- * The queues of the attached handlers will be processed before the thread of
- * the looper is stopped.
+ * The events posted before this call are treated, then the thread of the looper is joined.
+ * Its event handlers remain valid: an event posted afterwards is accepted but never treated.
+ * Calling it on a stopped looper has no effect.
  *
- * \warning All event handlers are deallocated by this function.
- *          Thus each pointer returned by ::SOPC_EventHandler_Create
- *          should be set to NULL prior to this call to avoid any possible invalid memory access.
+ * \note Not thread-safe with ::SOPC_Looper_Stop and ::SOPC_Looper_Delete on the same looper.
+ */
+void SOPC_Looper_Stop(SOPC_Looper* looper);
+
+/**
+ * \brief Stops a looper if not already done (see ::SOPC_Looper_Stop) and releases all resources allocated to it.
+ *
+ * \param looper  the looper
+ *
+ * The events posted after the stop are freed without being treated, their number is logged as a warning.
+ *
+ * \warning All event handlers are deallocated by this function: no thread shall use them anymore.
  */
 void SOPC_Looper_Delete(SOPC_Looper* looper);
 

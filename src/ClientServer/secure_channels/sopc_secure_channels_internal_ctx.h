@@ -246,7 +246,10 @@ extern SOPC_EventHandler* secureChannelsEventHandler;
 /** @brief Initialize the array of secure listeners/connections */
 void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc* setSocketsListener);
 
-/** @brief Clear the array of secure listeners/connections */
+/** @brief Stop the secure channels looper thread, handlers remain valid */
+void SOPC_SecureChannelsInternalContext_PreClear(void);
+
+/** @brief Stop the secure channels looper thread if not already done and release its handlers */
 void SOPC_SecureChannelsInternalContext_Clear(void);
 
 SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx);

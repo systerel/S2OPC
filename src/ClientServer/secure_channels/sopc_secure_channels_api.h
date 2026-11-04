@@ -167,6 +167,19 @@ void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc* setSocketsListener);
 
 void SOPC_SecureChannels_SetEventHandler(SOPC_EventHandler* handler);
 
+/**
+ * \brief Stops the secure channels thread without releasing its resources.
+ *
+ * Events posted afterwards are accepted but never treated, their parameters are not freed.
+ */
+void SOPC_SecureChannels_PreClear(void);
+
+/**
+ * \brief Stops the secure channels thread if not already done (see ::SOPC_SecureChannels_PreClear) and releases
+ *        its resources.
+ *
+ * \warning No other thread shall use the secure channels API anymore.
+ */
 void SOPC_SecureChannels_Clear(void);
 
 #endif /* SOPC_SECURE_CHANNELS_API_H_ */

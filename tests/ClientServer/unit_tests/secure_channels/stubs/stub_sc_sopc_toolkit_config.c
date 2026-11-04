@@ -191,9 +191,14 @@ void SOPC_Toolkit_Clear(void)
 {
     if (tConfig.initDone != false)
     {
+        // Stop all threads before releasing any resource (see SOPC_Toolkit_Clear)
+        SOPC_EventTimer_PreClear();
+        SOPC_Sockets_PreClear();
+        SOPC_SecureChannels_PreClear();
+
+        SOPC_SecureChannels_Clear();
         SOPC_Sockets_Clear();
         SOPC_EventTimer_Clear();
-        SOPC_SecureChannels_Clear();
 
         SOPC_Mutex_Lock(&tConfig.mut);
 

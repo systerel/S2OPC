@@ -399,9 +399,16 @@ void SOPC_Toolkit_Clear(void)
         // Ensure no new events are triggered by timers
         SOPC_EventTimer_PreClear();
 
-        SOPC_Sockets_Clear();
-        SOPC_SecureChannels_Clear();
+        /* Stop all toolkit threads before releasing any resource: they post to each other's handlers.
+         * An event posted to a stopped thread is never treated. */
+        SOPC_Sockets_PreClear();
+        SOPC_SecureChannels_PreClear();
+        SOPC_Services_PreClear(); // Uninitializes services: application thread still running
+        SOPC_App_PreClear();
+
         SOPC_Services_Clear();
+        SOPC_SecureChannels_Clear();
+        SOPC_Sockets_Clear();
         SOPC_App_Clear();
         SOPC_EventTimer_Clear();
 
@@ -420,7 +427,7 @@ void SOPC_Toolkit_Clear(void)
             tConfig.reverseEpConfigIdxMax = 0;
             tConfig.serverScLastConfigIdx = 0;
             tConfig.epConfigIdxMax = 0;
-            // Note: done by APP_TO_SE_UNINITIALIZE_SERVICES event/ io_dispatch_mgr__UNINITIALISATION operation
+            // Note: done by SOPC_Services_PreClear / io_dispatch_mgr__UNINITIALISATION operation
             // address_space_bs__nodes = NULL;
         }
         SOPC_Mutex_Unlock(&tConfig.mut);

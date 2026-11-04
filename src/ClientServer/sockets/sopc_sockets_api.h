@@ -127,6 +127,19 @@ void SOPC_Sockets_Initialize(void);
 
 void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler);
 
+/**
+ * \brief Stops the sockets thread without releasing the sockets resources.
+ *
+ * Input events enqueued afterwards are accepted but never treated, their parameters are not freed.
+ */
+void SOPC_Sockets_PreClear(void);
+
+/**
+ * \brief Stops the sockets thread if not already done (see ::SOPC_Sockets_PreClear) and releases the sockets
+ *        resources.
+ *
+ * \warning No other thread shall use the sockets API anymore.
+ */
 void SOPC_Sockets_Clear(void);
 
 #endif /* SOPC_SOCKETS_API_H_ */

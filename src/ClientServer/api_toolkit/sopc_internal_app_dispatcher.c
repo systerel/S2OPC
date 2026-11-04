@@ -232,10 +232,16 @@ SOPC_Looper* SOPC_App_GetLooper(void)
     return sopc_appLooper;
 }
 
+void SOPC_App_PreClear(void)
+{
+    SOPC_Looper_Stop(sopc_appLooper);
+}
+
 void SOPC_App_Clear(void)
 {
     SOPC_Looper_Delete(sopc_appLooper);
     sopc_appLooper = NULL;
+    // Handlers deallocated by SOPC_Looper_Delete call
     appComEventHandler = NULL;
     appAddressSpaceNotificationHandler = NULL;
 }

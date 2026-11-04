@@ -28,6 +28,9 @@ extern SOPC_ComEvent_Fct* sopc_appEventCallback;
 
 void SOPC_App_Initialize(void);
 SOPC_Looper* SOPC_App_GetLooper(void);
+/** \brief Stops the application thread, its handlers remain valid: events posted afterwards are never treated */
+void SOPC_App_PreClear(void);
+/** \brief Stops the application thread if not already done and releases its handlers */
 void SOPC_App_Clear(void);
 
 SOPC_ReturnStatus SOPC_App_EnqueueComEvent(SOPC_App_Com_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam);

@@ -79,16 +79,24 @@ SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
     return scConnection;
 }
 
+void SOPC_SecureChannelsInternalContext_PreClear(void)
+{
+    SOPC_Looper_Stop(secureChannelsLooper);
+}
+
 void SOPC_SecureChannelsInternalContext_Clear(void)
 {
-    // Set to NULL handlers deallocated by SOPC_Looper_Delete call
+    /* Other toolkit threads may post to the handlers until they are stopped (see SOPC_Toolkit_Clear):
+     * handlers shall only be deallocated once all of them are stopped. */
+    SOPC_Looper_Delete(secureChannelsLooper);
+    secureChannelsLooper = NULL;
+
+    // Handlers deallocated by SOPC_Looper_Delete call
     secureChannelsInputEventHandler = NULL;
     secureChannelsInternalEventHandler = NULL;
     secureChannelsSocketsEventHandler = NULL;
     secureChannelsTimerEventHandler = NULL;
     secureChannelsEventHandler = NULL;
-    SOPC_Looper_Delete(secureChannelsLooper);
-    secureChannelsLooper = NULL;
 }
 
 const SOPC_CertificateList* SC_OwnCertificate(SOPC_SecureConnection* conn)

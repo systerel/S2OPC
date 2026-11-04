@@ -59,6 +59,7 @@
 static bool isServerConfigurationLocked = false;
 
 static SOPC_Looper* servicesLooper = NULL;
+static bool servicesPreCleared = false; // Only accessed by the thread calling SOPC_Services_PreClear/Clear
 static SOPC_EventHandler* secureChannelsEventHandler = NULL;
 static SOPC_EventHandler* servicesEventHandler = NULL;
 
@@ -1167,10 +1168,6 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_EVAL_USR_CRT_SESSION");
         io_dispatch_mgr__internal_server_evaluate_all_session_user_cert();
         break;
-    case APP_TO_SE_UNINITIALIZE_SERVICES:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_UNINITIALIZE_SERVICES");
-        io_dispatch_mgr__UNINITIALISATION();
-        break;
     case APP_TO_SE_CLOSE_SERVER_SESSIONS:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: APP_TO_SE_CLOSE_SERVER_SESSIONS exceptSessionId=%" PRIu32 " isShutdown=%s",
@@ -1274,15 +1271,32 @@ void SOPC_Services_CloseAllSCs(bool clientOnly)
     SOPC_Mutex_Unlock(&closeAllConnectionsSync.mutex);
 }
 
+void SOPC_Services_PreClear(void)
+{
+    if (servicesPreCleared)
+    {
+        return;
+    }
+    SOPC_Looper_Stop(servicesLooper);
+
+    /* B model uninitialized by the calling thread. Hypotheses:
+     * - sockets, secure channels and services threads stopped: no concurrent B model execution,
+     * - timers evaluation stopped but timers not cleared: session and publish timers are cancelled,
+     * - application thread running: client session closures are notified to the application,
+     * - services handlers not deallocated: server session closures post an untreated event. */
+    io_dispatch_mgr__UNINITIALISATION();
+    servicesPreCleared = true;
+}
+
 void SOPC_Services_Clear(void)
 {
-    SOPC_EventHandler_Post(servicesEventHandler, APP_TO_SE_UNINITIALIZE_SERVICES, 0, 0, 0);
-
-    // Set to NULL handlers deallocated by SOPC_Looper_Delete call
-    servicesEventHandler = NULL;
-    secureChannelsEventHandler = NULL;
+    SOPC_Services_PreClear();
     SOPC_Looper_Delete(servicesLooper);
     servicesLooper = NULL;
+    // Handlers deallocated by SOPC_Looper_Delete call
+    servicesEventHandler = NULL;
+    secureChannelsEventHandler = NULL;
+    servicesPreCleared = false;
     SOPC_Atomic_Ptr_Set(&servicesHooks, NULL);
 
     closeAllConnectionsSync.allDisconnectedFlag = false;

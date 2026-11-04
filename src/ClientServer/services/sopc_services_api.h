@@ -205,9 +205,6 @@ typedef enum SOPC_Services_Event
                                           If an user certificate is not valid or trusted anymore,
                                           the associated session is closed.<BR/>
                                       */
-    APP_TO_SE_UNINITIALIZE_SERVICES, /**< Server and client sides:<BR/>
-                                          Calls io_dispatch_mgr__UNINITIALISATION() function.
-                                     */
     APP_TO_SE_CLOSE_SERVER_SESSIONS, /**< Server side only:<BR/>
                                           Requests to close all server sessions except the one provided (optional)<BR/>
                                           id = session id of the session to keep open, or 0 to close all sessions.<BR/>
@@ -267,12 +264,24 @@ void SOPC_Services_Initialize(SOPC_SetListenerFunc* setSecureChannelsListener);
  *  \param clientOnly  If flag is set, only the Secure Channels established as a client are closed.
  *                     Otherwise both Secure Channels established as a server and as client are closed.
  *
- *  \warning   It is a pre-requisite to call SOPC_Services_CloseAllSCs(false) prior to ::SOPC_Services_Clear
+ *  \warning   It is a pre-requisite to call SOPC_Services_CloseAllSCs(false) prior to ::SOPC_Services_PreClear
  */
 void SOPC_Services_CloseAllSCs(bool clientOnly);
 
 /**
- *  \brief Stop and clear the services and application event dispatcher threads
+ *  \brief Stops the services thread and uninitializes the services, without releasing the services handlers.
+ *
+ *  Events posted afterwards are accepted but never treated, their parameters are not freed.
+ *
+ *  \pre The sockets and secure channels threads are stopped (see ::SOPC_SecureChannels_PreClear), the timers
+ *       evaluation is stopped and the application thread is running (see SOPC_Toolkit_Clear).
+ */
+void SOPC_Services_PreClear(void);
+
+/**
+ *  \brief Stops the services if not already done (see ::SOPC_Services_PreClear) and releases the services handlers.
+ *
+ *  \warning No other thread shall use the services API anymore.
  */
 void SOPC_Services_Clear(void);
 

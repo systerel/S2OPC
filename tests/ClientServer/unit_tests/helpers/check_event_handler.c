@@ -277,6 +277,87 @@ START_TEST(test_event_handler_pending_count_by_category)
 }
 END_TEST
 
+START_TEST(test_looper_stop)
+{
+    SOPC_Looper* looper = SOPC_Looper_Create("test_stop");
+    ck_assert_ptr_nonnull(looper);
+    SOPC_EventHandler* handler = SOPC_EventHandler_Create(looper, test_callback);
+    ck_assert_ptr_nonnull(handler);
+
+    // Events posted before the stop are treated
+    SOPC_EventHandler_Post(handler, 1, 1, 0x01, 1);
+    SOPC_EventHandler_Post(handler, 2, 2, 0x02, 2);
+    SOPC_Looper_Stop(looper);
+    ck_assert_uint_eq(2, SOPC_AsyncQueue_GetSize(queue));
+    expect_event(handler, 1, 1, 0x01, 1);
+    expect_event(handler, 2, 2, 0x02, 2);
+
+    // An event posted after the stop is accepted but never treated, handlers remain valid
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EventHandler_Post(handler, 3, 3, 0x03, 3));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EventHandler_PostAsNext(handler, 4, 4, 0x04, 4));
+    SOPC_Looper_Stop(looper);
+    ck_assert_uint_eq(2, SOPC_EventHandler_Get_QueueSize(handler));
+    ck_assert_uint_eq(0, SOPC_AsyncQueue_GetSize(queue));
+
+    // Untreated events are freed
+    SOPC_Looper_Delete(looper);
+}
+END_TEST
+
+static SOPC_EventHandler* chainHandler = NULL;
+
+// Posts event 2 once the treatment of event 1 is unblocked
+static void chain_callback(SOPC_EventHandler* handler,
+                           int32_t event,
+                           uint32_t eltId,
+                           uintptr_t params,
+                           uintptr_t auxParam)
+{
+    test_callback(handler, event, eltId, params, auxParam);
+    if (1 == event)
+    {
+        ck_assert_int_eq(SOPC_STATUS_OK, SOPC_EventHandler_Post(chainHandler, 2, 2, 0x02, 2));
+    }
+}
+
+static void* stop_looper(void* looper)
+{
+    SOPC_Looper_Stop((SOPC_Looper*) looper);
+    return NULL;
+}
+
+START_TEST(test_looper_stop_post_from_callback)
+{
+    SOPC_Looper* looper = SOPC_Looper_Create("test_stop_chain");
+    ck_assert_ptr_nonnull(looper);
+    chainHandler = SOPC_EventHandler_Create(looper, chain_callback);
+    ck_assert_ptr_nonnull(chainHandler);
+
+    // Block the treatment of event 1
+    SOPC_Atomic_Int_Set(&block_queue, 1);
+    SOPC_EventHandler_Post(chainHandler, 1, 1, 0x01, 1);
+    expect_event(chainHandler, 1, 1, 0x01, 1);
+
+    // Stop the looper during the treatment: wait for the stop request to be queued
+    SOPC_Thread stopThread;
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Create(&stopThread, stop_looper, looper, "test_stop"));
+    // Event 1 already dequeued: the only possible queued element is the poison pill enqueued by SOPC_Looper_Stop
+    while (0 == SOPC_EventHandler_Get_QueueSize(chainHandler))
+    {
+        SOPC_Sleep(10);
+    }
+    SOPC_Atomic_Int_Set(&block_queue, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(&stopThread));
+
+    // Event 2 posted after the stop request is never treated
+    ck_assert_uint_eq(1, SOPC_EventHandler_Get_QueueSize(chainHandler));
+    ck_assert_uint_eq(0, SOPC_AsyncQueue_GetSize(queue));
+
+    SOPC_Looper_Delete(looper);
+    chainHandler = NULL;
+}
+END_TEST
+
 static void test_setup(void)
 {
     ck_assert(SOPC_AsyncQueue_Init(&queue, "") == SOPC_STATUS_OK);
@@ -300,6 +381,8 @@ Suite* tests_make_suite_event_handler(void)
     tcase_add_test(c, test_event_handler_post_as_next);
     tcase_add_test(c, test_event_handler_post_time);
     tcase_add_test(c, test_event_handler_pending_count_by_category);
+    tcase_add_test(c, test_looper_stop);
+    tcase_add_test(c, test_looper_stop_post_from_callback);
     suite_add_tcase(s, c);
 
     return s;

@@ -52,6 +52,11 @@ void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler)
     SOPC_Atomic_Ptr_Set((void**) &socketsEventHandler, handler);
 }
 
+void SOPC_Sockets_PreClear(void)
+{
+    SOPC_SocketsNetworkEventMgr_Clear();
+}
+
 void SOPC_Sockets_Clear(void)
 {
     SOPC_SocketsNetworkEventMgr_Clear();

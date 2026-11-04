@@ -54,6 +54,11 @@ void SOPC_Sockets_Initialize(void)
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 }
 
+void SOPC_Sockets_PreClear(void)
+{
+    // No sockets thread in the stub
+}
+
 void SOPC_Sockets_Clear(void)
 {
     SOPC_AsyncQueue_Free(&socketsInputEvents);
