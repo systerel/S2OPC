@@ -337,6 +337,7 @@ static void SOPC_Internal_StopSignal(int sig)
 }
 
 static int32_t atomicStopped = false;
+static int32_t atomicAsyncStop = false;
 
 static void SOPC_ServerStopped_Cb(SOPC_ReturnStatus status)
 {
@@ -393,7 +394,7 @@ static void SOPC_LocalServiceAsyncResp(SOPC_EncodeableType* encType, void* respo
 static void* AsyncReadThread(void* args)
 {
     SOPC_UNUSED_ARG(args);
-    while (0 == stopRequested && false == SOPC_Atomic_Int_Get(&atomicStopped))
+    while (0 == stopRequested && false == SOPC_Atomic_Int_Get(&atomicAsyncStop))
     {
         SOPC_ReturnStatus status = SOPC_STATUS_OK;
         OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Both);
@@ -753,7 +754,6 @@ int main(int argc, char* argv[])
     char* logDirPath = Server_ConfigLogPath(argc, argv);
 
     /* Start a dedicated thread to do local services */
-    status = SOPC_Thread_Create(&g_async_local_services_thread, &AsyncReadThread, NULL, "AsyncLocalServices");
 
     /* Client secure channel configurations */
     SOPC_SecureConnection_Config** secureConnConfigArray = NULL;
@@ -878,13 +878,18 @@ int main(int argc, char* argv[])
             while (nbRestartCountRem < NB_SERVER_RESTART)
             {
                 nbRestartCountRem++;
+                bool asyncThreadStarted = false;
                 if (SOPC_STATUS_OK == status)
                 {
                     /* Run the server until error, stop server signal detected (Ctrl-C) or StopServer called */
+                    SOPC_Atomic_Int_Set(&atomicStopped, false);
                     status = SOPC_ServerHelper_StartServer(&SOPC_ServerStopped_Cb);
                     if (SOPC_STATUS_OK == status)
                     {
-                        SOPC_Atomic_Int_Set(&atomicStopped, false);
+                        SOPC_Atomic_Int_Set(&atomicAsyncStop, false);
+                        status = SOPC_Thread_Create(&g_async_local_services_thread, &AsyncReadThread, NULL,
+                                                    "AsyncLocalServices");
+                        asyncThreadStarted = (SOPC_STATUS_OK == status);
                         printf("<Test_Server_Restart: Server STARTED #%" PRIu8 ".%" PRIu8 ".%" PRIu8 "\n",
                                nbFullConfigCount, nbServerConfigCount, nbRestartCountRem);
                     }
@@ -948,6 +953,15 @@ int main(int argc, char* argv[])
                         nbReConnectCountRem++;
                     }
 
+                    /* Stop producing local services and wait for the worker before
+                     * stopping/clearing the server configuration. */
+                    if (asyncThreadStarted)
+                    {
+                        SOPC_Atomic_Int_Set(&atomicAsyncStop, true);
+                        SOPC_ReturnStatus joinStatus = SOPC_Thread_Join(&g_async_local_services_thread);
+                        SOPC_ASSERT(SOPC_STATUS_OK == joinStatus);
+                        asyncThreadStarted = false;
+                    }
                     if (SOPC_STATUS_OK == status)
                     {
                         status = SOPC_ServerHelper_StopServer();

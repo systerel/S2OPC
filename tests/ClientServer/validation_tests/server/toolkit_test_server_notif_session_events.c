@@ -119,28 +119,28 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
 
 static int32_t nbFailures = 0;
 static int32_t nbReceivedEvents = 0;
-static const Test_ExpectedEvent** expectedEvents = NULL;
+static void* expectedEvents = NULL;
 static int32_t nbExpectedEvents = 0;
 
 static int32_t currentNbFailures = 0;
 
 static void set_expected_session_events_test(const Test_ExpectedEvent** expectedEventsList, size_t nbEvents)
 {
+    SOPC_Atomic_Ptr_Set(&expectedEvents, (void*) expectedEventsList);
     SOPC_Atomic_Int_Set(&nbReceivedEvents, 0);
-    nbExpectedEvents = (int32_t) nbEvents;
-    expectedEvents = expectedEventsList;
+    SOPC_Atomic_Int_Set(&nbExpectedEvents, (int32_t) nbEvents);
     currentNbFailures = SOPC_Atomic_Int_Get(&nbFailures);
 }
 
 static SOPC_ReturnStatus check_session_events_test(uint32_t maxWait_ms)
 {
     uint32_t nb100ms = maxWait_ms / 100;
-    while (nb100ms > 0 && SOPC_Atomic_Int_Get(&nbReceivedEvents) < nbExpectedEvents)
+    while (nb100ms > 0 && SOPC_Atomic_Int_Get(&nbReceivedEvents) < SOPC_Atomic_Int_Get(&nbExpectedEvents))
     {
         SOPC_Sleep(100);
         nb100ms -= 1;
     }
-    return (SOPC_Atomic_Int_Get(&nbReceivedEvents) == nbExpectedEvents &&
+    return (SOPC_Atomic_Int_Get(&nbReceivedEvents) == SOPC_Atomic_Int_Get(&nbExpectedEvents) &&
             currentNbFailures == SOPC_Atomic_Int_Get(&nbFailures))
                ? SOPC_STATUS_OK
                : SOPC_STATUS_NOK;
@@ -258,13 +258,14 @@ static void Test_SessionEventCallback(const SOPC_CallContext* callCtxPtr,
                                       SOPC_StatusCode opStatus)
 {
     int32_t localNbReceivedEvents = SOPC_Atomic_Int_Get(&nbReceivedEvents);
-    if (localNbReceivedEvents >= nbExpectedEvents)
+    if (localNbReceivedEvents >= SOPC_Atomic_Int_Get(&nbExpectedEvents))
     {
         printf("Received unexpected number of session events: unexpected %s\n", getSessionEventName(sessionEvent));
-        nbFailures++;
+        SOPC_Atomic_Int_Add(&nbFailures, 1);
         return;
     }
-    const Test_ExpectedEvent* expectedEvent = expectedEvents[localNbReceivedEvents];
+    const Test_ExpectedEvent* const* expected = (const Test_ExpectedEvent* const*) SOPC_Atomic_Ptr_Get(&expectedEvents);
+    const Test_ExpectedEvent* expectedEvent = expected[localNbReceivedEvents];
 
     const char* peerInfo = SOPC_CallContext_GetClientIpPort(callCtxPtr);
     const OpcUa_ApplicationDescription* appDesc = SOPC_CallContext_GetClientApplicationDesc(callCtxPtr);
@@ -398,7 +399,7 @@ int main(int argc, char* argv[])
         {
             SOPC_CONSOLE_PRINTF("\n=========== Test setup complete. Starting tests\n");
 
-            nbFailures = 0;
+            SOPC_Atomic_Int_Set(&nbFailures, 0);
 #ifdef _WIN32
             const char* cmdTc1 = "s2opc_read --none -n i=2259 -a 13";
             const char* cmdTc2 =

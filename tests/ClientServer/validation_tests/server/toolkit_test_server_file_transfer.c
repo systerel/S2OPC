@@ -194,9 +194,9 @@ int main(int argc, char* argv[])
         SOPC_Sleep(1);
     }
 
-    SOPC_Free(gLogDirPath);
-
     SOPC_FileTransfer_Clear();
+    SOPC_Free(gLogDirPath);
+    gLogDirPath = NULL;
     printf("<test_server_file_transfer: Server ended to serve\n");
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }
