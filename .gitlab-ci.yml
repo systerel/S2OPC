@@ -143,7 +143,8 @@ generation: &gen
         $ALL_BUILDS == null && \
         $ALL_TESTS == null && \
         $WITH_DOC == null && \
-        $WITH_SONAR == null"
+        $WITH_SONAR == null && \
+        $RUN_TSAN == null"
       when: on_success
 
 proof_obligations:
@@ -223,7 +224,7 @@ build-linux64-ASan: &build_linux64_ASan
         $GEN_PROOF_OBLIGATIONS == null && \
         $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
         $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null  && \
-        $WITH_SONAR == null" # avoid ASAN build in most of nightly builds
+        $WITH_SONAR == null && $RUN_TSAN == null" # avoid ASAN build in most of nightly builds
       when: on_success
 
 # Build only S2OPC libs and toolkit_test_server for UACTT tests
@@ -250,7 +251,21 @@ build-linux64-ASan-light:
         $GEN_PROOF_OBLIGATIONS == null && \
         $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
         $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null  && \
-        $WITH_SONAR == null && $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null"
+        $WITH_SONAR == null && $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
+        $RUN_TSAN == null"
+      when: on_success
+
+# Build S2OPC with Thread Sanitizer
+build-linux64-TSan:
+  <<: *build_linux
+  variables:
+    <<: [*build_linux_variables, *nominal_build_variables]
+    WITH_TSAN: "1"
+    BUILD_SHARED_LIBS: "false"
+    POSITION_INDEPENDENT_CODE: "true"
+  needs: []
+  rules: &tsan_rules
+    - if: "$RUN_TSAN != null"
       when: on_success
 
 build-linux-faulty-packet:
@@ -603,7 +618,7 @@ test-build-from-export:
         $WITH_COVERAGE == null && $WITH_DOC == null && \
         $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
         $ALL_BUILDS == null && $ALL_TESTS == null  && \
-        $WITH_SONAR == null"
+        $WITH_SONAR == null && $RUN_TSAN == null"
       when: on_success
 
 .test-linux: &test_linux
@@ -638,7 +653,7 @@ test-check:
         $WITH_COVERITY == null && \
         $WITH_COVERAGE == null && $WITH_DOC == null && \
         $ALL_TESTS == null && $ALL_BUILDS == null  && \
-        $WITH_SONAR == null"
+        $WITH_SONAR == null && $RUN_TSAN == null"
       when: on_success
 
 .test-unit: &test_unit
@@ -688,7 +703,7 @@ test-unit:
         $CROSS_COMPILE == null && $GEN_PROOF_OBLIGATIONS == null && \
         $WITH_COVERITY == null && $WITH_DOC == null && \
         $ALL_TESTS == null && $ALL_BUILDS == null && \
-        $WITH_SONAR == null" # + excludes ALL_TESTS, and ALL_BUILDS since it has a special test job
+        $WITH_SONAR == null && $RUN_TSAN == null" # + excludes ALL_TESTS, and ALL_BUILDS since it has a special test job
       when: on_success
 
 # Test unit for (ALL_BUILDS && NOT ALL_TESTS) variables
@@ -700,6 +715,15 @@ test-unit-all-builds:
   rules:
     - if: "$ALL_BUILDS != null && $ALL_TESTS == null"
       when: on_success
+
+# Test unit with ThreadSanitizer
+test-unit-TSan:
+  <<: *test_unit
+  needs: [build-linux64-TSan]
+  variables:
+    <<: [*nominal_build_variables, *nominal_test_variables]
+    TSAN_OPTIONS: "second_deadlock_stack=1"
+  rules: *tsan_rules
 
 .test-uactt: &test_uactt
   <<: *test_linux
@@ -781,6 +805,35 @@ test-uactt-server-diags:
         $CI_COMMIT_TAG || \
         $RUN_UACTT != null"
       when: on_success
+
+# Test uactt with ThreadSanitizer (RUN_TSAN pipelines only)
+test-uactt-TSan:
+  <<: *test_uactt
+  needs: [build-linux64-TSan]
+  timeout: 2h  # longer timeouts: TSan slows the server down
+  retry: 0
+  variables:
+    <<: [*nominal_test_variables, *nominal_build_variables]
+    LINUX_UACTT: 1
+    RUNNER_SCRIPT_TIMEOUT: 110m
+    UACTT_TIMEOUT: 100m
+    TSAN_OPTIONS: "second_deadlock_stack=1"
+  rules: *tsan_rules
+
+# Server diagnostics uactt tests with ThreadSanitizer (RUN_TSAN pipelines only)
+test-uactt-server-diags-TSan:
+  <<: *test_uactt
+  needs: [build-linux64-TSan]
+  timeout: 2h  # longer timeouts: TSan slows the server dow
+  variables:
+    <<: [*nominal_test_variables, *nominal_build_variables]
+    LINUX_UACTT: 1
+    TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Server_Diagnostics_NodeSet.xml
+    S2OPC_UACTT_SELECTION_FILE: Acceptation_S2OPC.server_diags.selection.xml
+    RUNNER_SCRIPT_TIMEOUT: 110m
+    UACTT_TIMEOUT: 100m
+    TSAN_OPTIONS: "second_deadlock_stack=1"
+  rules: *tsan_rules
 
 test-faulty-packets:
   stage: test-others
