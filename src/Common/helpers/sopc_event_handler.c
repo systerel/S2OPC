@@ -22,6 +22,7 @@
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_async_queue.h"
+#include "sopc_atomic.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
@@ -32,6 +33,7 @@ struct _SOPC_EventHandler
     SOPC_Looper* looper;
     SOPC_EventHandler_Callback* callback;
     SOPC_TimeReference currentEventPostTime; // Post time of the event being processed (only accessed by looper thread)
+    SOPC_EventHandler_CategoryFct* categoryFct; /* NULL if the posted events are not counted */
 };
 
 struct _SOPC_Looper
@@ -39,6 +41,8 @@ struct _SOPC_Looper
     SOPC_Thread thread;
     SOPC_AsyncQueue* queue;
     SOPC_Array* handlers;
+    /* Pending events per category (atomic): incremented before enqueue, decremented once dequeued */
+    int32_t pendingByCategory[SOPC_EVENT_HANDLER_NB_CATEGORIES];
 };
 
 struct Event
@@ -49,6 +53,7 @@ struct Event
     uintptr_t params;
     uintptr_t auxParam;
     SOPC_TimeReference postTime;
+    int32_t category; /* SOPC_EVENT_HANDLER_NO_CATEGORY if not counted */
 };
 
 static void event_handler_delete(SOPC_EventHandler** handler)
@@ -80,12 +85,28 @@ static SOPC_ReturnStatus post(SOPC_EventHandler* handler,
     ev->params = params;
     ev->auxParam = auxParam;
     ev->postTime = SOPC_TimeReference_GetCurrent();
+    ev->category = SOPC_EVENT_HANDLER_NO_CATEGORY;
+    if (NULL != handler->categoryFct)
+    {
+        ev->category = handler->categoryFct(event, eltId, params, auxParam);
+        SOPC_ASSERT(SOPC_EVENT_HANDLER_NO_CATEGORY == ev->category ||
+                    (ev->category >= 0 && ev->category < SOPC_EVENT_HANDLER_NB_CATEGORIES));
+    }
+    // Counted before the enqueue: the counter never becomes negative once the event is dequeued
+    if (SOPC_EVENT_HANDLER_NO_CATEGORY != ev->category)
+    {
+        SOPC_Atomic_Int_Add(&handler->looper->pendingByCategory[ev->category], 1);
+    }
 
     SOPC_ReturnStatus status = asNext ? SOPC_AsyncQueue_BlockingEnqueueFirstOut(handler->looper->queue, ev)
                                       : SOPC_AsyncQueue_BlockingEnqueue(handler->looper->queue, ev);
 
     if (status != SOPC_STATUS_OK)
     {
+        if (SOPC_EVENT_HANDLER_NO_CATEGORY != ev->category)
+        {
+            SOPC_Atomic_Int_Add(&handler->looper->pendingByCategory[ev->category], -1);
+        }
         SOPC_Free(ev);
     }
 
@@ -94,7 +115,8 @@ static SOPC_ReturnStatus post(SOPC_EventHandler* handler,
 
 static void* looper_loop(void* user_data)
 {
-    SOPC_AsyncQueue* queue = user_data;
+    SOPC_Looper* looper = user_data;
+    SOPC_AsyncQueue* queue = looper->queue;
 
     while (true)
     {
@@ -109,12 +131,43 @@ static void* looper_loop(void* user_data)
 
         struct Event* ev = item;
         ev->handler->currentEventPostTime = ev->postTime;
+        // No longer pending once dequeued: the treatment of the event sees the remaining pending events
+        if (SOPC_EVENT_HANDLER_NO_CATEGORY != ev->category)
+        {
+            SOPC_Atomic_Int_Add(&looper->pendingByCategory[ev->category], -1);
+        }
         ev->handler->callback(ev->handler, ev->code, ev->id, ev->params, ev->auxParam);
         ev->handler->currentEventPostTime = 0;
         SOPC_Free(ev);
     }
 
     return NULL;
+}
+
+SOPC_EventHandler* SOPC_EventHandler_CreateWithCategory(SOPC_Looper* looper,
+                                                        SOPC_EventHandler_Callback* callback,
+                                                        SOPC_EventHandler_CategoryFct* categoryFct)
+{
+    if (NULL == categoryFct)
+    {
+        return NULL;
+    }
+    SOPC_EventHandler* handler = SOPC_EventHandler_Create(looper, callback);
+    if (NULL != handler)
+    {
+        handler->categoryFct = categoryFct;
+    }
+    return handler;
+}
+
+uint32_t SOPC_EventHandler_Get_PendingCountByCategory(SOPC_EventHandler* handler, int32_t category)
+{
+    if (NULL == handler || category < 0 || category >= SOPC_EVENT_HANDLER_NB_CATEGORIES)
+    {
+        return 0;
+    }
+    const int32_t count = SOPC_Atomic_Int_Get(&handler->looper->pendingByCategory[category]);
+    return (count > 0) ? (uint32_t) count : 0;
 }
 
 SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandler_Callback* callback)
@@ -185,8 +238,11 @@ SOPC_Looper* SOPC_Looper_CreatePrioritized(const char* threadName, int threadPri
 
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            SOPC_Thread_CreatePrioritized(&looper->thread, looper_loop, queue, threadPriority, cpuAffinity, threadName);
+        // Set before the thread creation: the looper thread uses its queue and pending counters
+        looper->queue = queue;
+        looper->handlers = handlers;
+        status = SOPC_Thread_CreatePrioritized(&looper->thread, looper_loop, looper, threadPriority, cpuAffinity,
+                                               threadName);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -196,9 +252,6 @@ SOPC_Looper* SOPC_Looper_CreatePrioritized(const char* threadName, int threadPri
         SOPC_Free(looper);
         return NULL;
     }
-
-    looper->queue = queue;
-    looper->handlers = handlers;
 
     return looper;
 }

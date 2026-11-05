@@ -152,10 +152,18 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #define SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL 50
 #endif /* SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL */
 
-/** \brief Maximum number of elements in Async Queue */
+/** \brief Maximum number of elements in Async Queue, also used to define limit of service event queue.
+ *  \warning By default This value is also used to derive the busy watermarks of the Services event queue,
+ *           see ::SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL, ::SOPC_SERVICES_QUEUE_BUSY_LOW_LOCAL,
+ *           ::SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL and ::SOPC_SERVICES_QUEUE_BUSY_LOW_EXTERNAL.
+ */
 #ifndef SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE
-#define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE 5000
+#define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE 500
 #endif /* SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE */
+
+#if SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE < 15
+#error "SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE shall be >= 15"
+#endif
 
 /** \brief Action triggered when the Maximum number of elements in Async Queue exceeds
  *  ::SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE .
@@ -167,6 +175,44 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #ifndef SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY
 #define SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY true
 #endif /* SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY */
+
+/**
+ * \brief Services event queue busy watermarks: when the number of requests of a category pending in the Services
+ *        looper queue reaches the HIGH watermark of that category, new requests of that category are refused with
+ *        OpcUa_BadServerTooBusy until this number falls back to the LOW watermark of that category (hysteresis). This
+ *        mechanism is always active: it is driven only by these watermarks, there is no way to disable it.
+ *
+ * Two independent categories are distinguished, each one counting only its own pending requests (the other Services
+ * events and the requests of the other category are not counted):
+ * - `_LOCAL`: local service requests submitted by the application (see local service API), prioritized ones included.
+ * - `_EXTERNAL`: service requests received from OPC UA clients over the network (server side).
+ *
+ * A warning is logged when a category enters and leaves the busy state, the latter with the number of requests refused
+ * while busy. Each refused request is only logged at debug level.
+ */
+#ifndef SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL
+#define SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL (SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE / 5)
+#endif /* SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL */
+
+#ifndef SOPC_SERVICES_QUEUE_BUSY_LOW_LOCAL
+#define SOPC_SERVICES_QUEUE_BUSY_LOW_LOCAL (SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE / 10)
+#endif /* SOPC_SERVICES_QUEUE_BUSY_LOW_LOCAL */
+
+#if SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL <= SOPC_SERVICES_QUEUE_BUSY_LOW_LOCAL
+#error "SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL shall be greater than SOPC_SERVICES_QUEUE_BUSY_LOW_LOCAL"
+#endif
+
+#ifndef SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL
+#define SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL (SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE / 5)
+#endif /* SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL */
+
+#ifndef SOPC_SERVICES_QUEUE_BUSY_LOW_EXTERNAL
+#define SOPC_SERVICES_QUEUE_BUSY_LOW_EXTERNAL (SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE / 10)
+#endif /* SOPC_SERVICES_QUEUE_BUSY_LOW_EXTERNAL */
+
+#if SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL <= SOPC_SERVICES_QUEUE_BUSY_LOW_EXTERNAL
+#error "SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL shall be greater than SOPC_SERVICES_QUEUE_BUSY_LOW_EXTERNAL"
+#endif
 
 /** \brief Maximum length of a User-defined log line. */
 #ifndef SOPC_LOG_MAX_USER_LINE_LENGTH

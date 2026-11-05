@@ -38,6 +38,12 @@ SOPC_CommonMonitoring_QueueSize SOPC_CommonMonitoring_GetQueueSize(SOPC_CommonMo
     case SOPC_CommonMonitoring_QueueType_Sockets:
         result = SOPC_Sockets_Get_QueueSize();
         break;
+    case SOPC_CommonMonitoring_QueueType_ServicesLocalRequests:
+        result = SOPC_Services_Get_PendingLocalRequests();
+        break;
+    case SOPC_CommonMonitoring_QueueType_ServicesExternalRequests:
+        result = SOPC_Services_Get_PendingExternalRequests();
+        break;
     default:
         break;
     }

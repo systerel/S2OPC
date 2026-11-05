@@ -21,10 +21,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "opcua_statuscodes.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_buffer.h"
+#include "sopc_common_constants.h"
 #include "sopc_date_time.h"
+#include "sopc_encoder.h"
 #include "sopc_enums.h"
 #include "sopc_event_handler.h"
 #include "sopc_helper_string.h"
@@ -32,11 +36,14 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_missing_c99.h"
 #include "sopc_mutexes.h"
+#include "sopc_protocol_constants.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_services_api.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_services_request_timeout.h"
+#include "sopc_time_reference.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
 
@@ -69,6 +76,234 @@ static struct
     bool requestedFlag;
     bool clientOnlyFlag;
 } closeAllConnectionsSync = {.allDisconnectedFlag = false, .requestedFlag = false, .clientOnlyFlag = false};
+
+/** Initial size of the buffer of a ServiceFault sent to refuse an external request when the Services queue is busy */
+#define SOPC_SERVICES_BUSY_FAULT_INITIAL_BUFFER_SIZE 256u
+
+/** Hysteresis state of a Services queue load shedding category (HIGH enter / LOW leave) */
+typedef struct
+{
+    bool isBusy;
+    uint32_t nbRefused;           /**< Requests refused since the busy state was entered */
+    SOPC_TimeReference busyStart; /**< Time the busy state was entered */
+} SOPC_Services_BusyState;
+
+/** Services queue load shedding states, one per request category */
+static SOPC_Services_BusyState servicesBusyLocal = {false, 0, 0};
+static SOPC_Services_BusyState servicesBusyExternal = {false, 0, 0};
+
+/**
+ * \brief Updates and returns whether the Services looper queues measured by a given category (\p queueSize pending
+ *        events) are considered busy. Enter busy at \p high, leave at \p low. \p state holds the category
+ *        hysteresis state. A warning is logged on each state change only, the one leaving the busy state reports the
+ *        number of requests refused while busy.
+ */
+static bool SOPC_Services_UpdateQueueBusyState(SOPC_Services_BusyState* state,
+                                               uint32_t queueSize,
+                                               uint32_t high,
+                                               uint32_t low,
+                                               const char* label)
+{
+    if (!state->isBusy)
+    {
+        if (queueSize >= high)
+        {
+            state->isBusy = true;
+            state->nbRefused = 0;
+            state->busyStart = SOPC_TimeReference_GetCurrent();
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "ServicesMgr: Services queue busy for %s (size=%" PRIu32 " >= HIGH=%" PRIu32
+                                     "), refusing new requests until size <= LOW=%" PRIu32,
+                                     label, queueSize, high, low);
+        }
+    }
+    else if (queueSize <= low)
+    {
+        state->isBusy = false;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "ServicesMgr: Services queue no longer busy for %s (size=%" PRIu32 " <= LOW=%" PRIu32
+                                 "): %" PRIu32 " requests refused in %" PRIu64 " ms",
+                                 label, queueSize, low, state->nbRefused,
+                                 (uint64_t)(SOPC_TimeReference_GetCurrent() - state->busyStart));
+    }
+
+    return state->isBusy;
+}
+
+/** Categories of the Services looper pending events counted for the busy watermarks (see SOPC_EventHandler) */
+#define SOPC_SERVICES_PENDING_LOCAL_REQUESTS 0
+#define SOPC_SERVICES_PENDING_EXTERNAL_REQUESTS 1
+
+/** \brief ::SOPC_EventHandler_CategoryFct of the Services events: local service requests are counted */
+static int32_t SOPC_Services_ServicesEventCategory(int32_t event, uint32_t eltId, uintptr_t params, uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(eltId);
+    SOPC_UNUSED_ARG(params);
+    SOPC_UNUSED_ARG(auxParam);
+    return (APP_TO_SE_LOCAL_SERVICE_REQUEST == (SOPC_Services_Event) event) ? SOPC_SERVICES_PENDING_LOCAL_REQUESTS
+                                                                            : SOPC_EVENT_HANDLER_NO_CATEGORY;
+}
+
+/** \brief ::SOPC_EventHandler_CategoryFct of the SecureChannels events: requests received on server side are counted */
+static int32_t SOPC_Services_SecureChannelsEventCategory(int32_t event,
+                                                         uint32_t eltId,
+                                                         uintptr_t params,
+                                                         uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(eltId);
+    SOPC_UNUSED_ARG(params);
+    SOPC_UNUSED_ARG(auxParam);
+    return (SC_SERVICE_RCV_REQUEST == (SOPC_SecureChannels_OutputEvent) event) ? SOPC_SERVICES_PENDING_EXTERNAL_REQUESTS
+                                                                               : SOPC_EVENT_HANDLER_NO_CATEGORY;
+}
+
+/**
+ * \brief Updates and returns whether the Services looper queue is considered busy for local (application-originated)
+ *        service requests, measured by the number of pending local service requests (prioritized ones included).
+ *        Enter busy at ::SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL, leave at ::SOPC_SERVICES_QUEUE_BUSY_LOW_LOCAL.
+ */
+static bool SOPC_Services_IsQueueBusyLocal(void)
+{
+    return SOPC_Services_UpdateQueueBusyState(
+        &servicesBusyLocal,
+        SOPC_EventHandler_Get_PendingCountByCategory(servicesEventHandler, SOPC_SERVICES_PENDING_LOCAL_REQUESTS),
+        (uint32_t) SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL, (uint32_t) SOPC_SERVICES_QUEUE_BUSY_LOW_LOCAL, "local");
+}
+
+/**
+ * \brief Updates and returns whether the Services looper queue is considered busy for external (OPC UA client)
+ *        service requests, measured by the number of pending requests received on server side. Enter busy at
+ *        ::SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL, leave at ::SOPC_SERVICES_QUEUE_BUSY_LOW_EXTERNAL.
+ */
+static bool SOPC_Services_IsQueueBusyExternal(void)
+{
+    return SOPC_Services_UpdateQueueBusyState(
+        &servicesBusyExternal,
+        SOPC_EventHandler_Get_PendingCountByCategory(servicesEventHandler, SOPC_SERVICES_PENDING_EXTERNAL_REQUESTS),
+        (uint32_t) SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL, (uint32_t) SOPC_SERVICES_QUEUE_BUSY_LOW_EXTERNAL,
+        "external");
+}
+
+/**
+ * \brief Frees the local request and returns a ServiceFault with OpcUa_BadServerTooBusy to the application.
+ */
+static void SOPC_Services_RefuseLocalServiceRequestBusy(uint32_t endpointConfigIdx,
+                                                        uintptr_t requestParams,
+                                                        uintptr_t appContext)
+{
+    void* msg = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_EncodeableType* encType = NULL;
+
+    if (NULL != (void*) requestParams)
+    {
+        encType = *(SOPC_EncodeableType**) requestParams;
+        SOPC_EncodeableObject_Delete(encType, (void**) &requestParams);
+    }
+
+    status = SOPC_EncodeableObject_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
+    if (SOPC_STATUS_OK == status && NULL != msg)
+    {
+        ((OpcUa_ServiceFault*) msg)->ResponseHeader.ServiceResult = OpcUa_BadServerTooBusy;
+    }
+    else
+    {
+        msg = NULL;
+    }
+
+    status = SOPC_App_EnqueueComEvent(SE_LOCAL_SERVICE_RESPONSE, endpointConfigIdx, (uintptr_t) msg, appContext);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                           "ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST refused (server too busy) epCfgIdx=%" PRIu32
+                           " msgType=%s ctx=%" PRIuPTR,
+                           endpointConfigIdx, SOPC_EncodeableType_GetName(encType), appContext);
+}
+
+/**
+ * \brief Replies to an external service request with ServiceFault OpcUa_BadServerTooBusy and frees the request buffer.
+ */
+static void SOPC_Services_RefuseExternalServiceRequestBusy(uint32_t scConnectionIdx,
+                                                           SOPC_Buffer* requestBuffer,
+                                                           uintptr_t requestId)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_EncodeableType* encType = NULL;
+    OpcUa_RequestHeader* reqHeader = NULL;
+    OpcUa_ResponseHeader respHeader;
+    SOPC_Buffer* respBuffer = NULL;
+    uint32_t requestHandle = 0;
+
+    SOPC_ASSERT(NULL != requestBuffer);
+
+    status = SOPC_MsgBodyType_Read(requestBuffer, &encType);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_DecodeMsg_HeaderOrBody(requestBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+    }
+    if (SOPC_STATUS_OK == status && NULL != reqHeader)
+    {
+        requestHandle = reqHeader->RequestHandle;
+        SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+        reqHeader = NULL;
+
+        OpcUa_ResponseHeader_Initialize(&respHeader);
+        respHeader.Timestamp = SOPC_Time_GetCurrentTimeUTC();
+        respHeader.RequestHandle = requestHandle;
+        respHeader.ServiceResult = OpcUa_BadServerTooBusy;
+
+        // Small resizable buffer: the ServiceFault is a few bytes long, and the maximum is the minimum buffer size
+        // accepted by OPC UA, thus never above the negotiated send buffer size of the channel
+        respBuffer =
+            SOPC_Buffer_CreateResizable(SOPC_SERVICES_BUSY_FAULT_INITIAL_BUFFER_SIZE, SOPC_TCP_UA_MIN_BUFFER_SIZE);
+        if (NULL != respBuffer)
+        {
+            status = SOPC_Buffer_SetDataLength(respBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_Buffer_SetPosition(respBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status =
+                    SOPC_EncodeMsg_Type_Header_Body(respBuffer, &OpcUa_ServiceFault_EncodeableType,
+                                                    &OpcUa_ResponseHeader_EncodeableType, (void*) &respHeader, NULL);
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionIdx, (uintptr_t) respBuffer,
+                                                          requestId);
+                if (SOPC_STATUS_OK == status)
+                {
+                    respBuffer = NULL; /* ownership transferred to SC layer */
+                }
+            }
+            SOPC_Buffer_Delete(respBuffer);
+            OpcUa_ResponseHeader_Clear(&respHeader);
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+            OpcUa_ResponseHeader_Clear(&respHeader);
+        }
+    }
+
+    SOPC_Buffer_Delete(requestBuffer);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: failed to send BadServerTooBusy ServiceFault scIdx=%" PRIu32
+                               " reqId=%" PRIuPTR " status=%d",
+                               scConnectionIdx, requestId, (int) status);
+    }
+    else
+    {
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: SC_SERVICE_RCV_REQUEST refused (server too busy) scIdx=%" PRIu32
+                               " reqId=%" PRIuPTR " msgType=%s",
+                               scConnectionIdx, requestId, SOPC_EncodeableType_GetName(encType));
+    }
+}
 
 SOPC_EventHandler* SOPC_Services_GetEventHandler(void)
 {
@@ -235,8 +470,17 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // params = message content (byte buffer)
         // auxParam == requestId (server side, chosen by the client)
         SOPC_ASSERT(NULL != (void*) params);
-        SOPC_Services_ReceiveMsgBuffer(id, (SOPC_Buffer*) params, auxParam,
-                                       SOPC_EventHandler_GetCurrentEventPostTime(handler));
+        // Server side request: shed when the Services queue is busy
+        if (SOPC_Services_IsQueueBusyExternal())
+        {
+            SOPC_Services_RefuseExternalServiceRequestBusy(id, (SOPC_Buffer*) params, auxParam);
+            servicesBusyExternal.nbRefused++;
+        }
+        else
+        {
+            SOPC_Services_ReceiveMsgBuffer(id, (SOPC_Buffer*) params, auxParam,
+                                           SOPC_EventHandler_GetCurrentEventPostTime(handler));
+        }
         // params is freed by services manager
         break;
     case SC_SERVICE_RCV_MSG:
@@ -690,25 +934,33 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         // auxParam = user application session context
         SOPC_ASSERT(id <= INT32_MAX);
 
-        io_dispatch_mgr__server_treat_local_service_request(id, (constants__t_msg_i) params, auxParam, &sCode);
-        if (constants_statuscodes_bs__e_sc_ok != sCode)
+        if (SOPC_Services_IsQueueBusyLocal())
         {
-            // Error case
-            status = SOPC_EncodeableObject_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
-            if (SOPC_STATUS_OK == status && NULL != msg)
+            SOPC_Services_RefuseLocalServiceRequestBusy(id, params, auxParam);
+            servicesBusyLocal.nbRefused++;
+        }
+        else
+        {
+            io_dispatch_mgr__server_treat_local_service_request(id, (constants__t_msg_i) params, auxParam, &sCode);
+            if (constants_statuscodes_bs__e_sc_ok != sCode)
             {
-                util_status_code__B_to_C(sCode, &((OpcUa_ServiceFault*) msg)->ResponseHeader.ServiceResult);
+                // Error case
+                status = SOPC_EncodeableObject_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
+                if (SOPC_STATUS_OK == status && NULL != msg)
+                {
+                    util_status_code__B_to_C(sCode, &((OpcUa_ServiceFault*) msg)->ResponseHeader.ServiceResult);
+                }
+                else
+                {
+                    msg = NULL;
+                }
+                status = SOPC_App_EnqueueComEvent(SE_LOCAL_SERVICE_RESPONSE, id, (uintptr_t) msg, auxParam);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST failed epCfgIdx=%" PRIu32
+                                         " msgType=%s ctx=%" PRIuPTR,
+                                         id, SOPC_EncodeableType_GetName(encType), auxParam);
             }
-            else
-            {
-                msg = NULL;
-            }
-            status = SOPC_App_EnqueueComEvent(SE_LOCAL_SERVICE_RESPONSE, id, (uintptr_t) msg, auxParam);
-            SOPC_ASSERT(SOPC_STATUS_OK == status);
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST failed epCfgIdx=%" PRIu32
-                                     " msgType=%s ctx=%" PRIuPTR,
-                                     id, SOPC_EncodeableType_GetName(encType), auxParam);
         }
         break;
     case APP_TO_SE_TRIGGER_EVENT:
@@ -954,20 +1206,35 @@ uint32_t SOPC_Services_Get_QueueSize(void)
     return SOPC_EventHandler_Get_QueueSize(servicesEventHandler);
 }
 
+uint32_t SOPC_Services_Get_PendingLocalRequests(void)
+{
+    return SOPC_EventHandler_Get_PendingCountByCategory(servicesEventHandler, SOPC_SERVICES_PENDING_LOCAL_REQUESTS);
+}
+
+uint32_t SOPC_Services_Get_PendingExternalRequests(void)
+{
+    return SOPC_EventHandler_Get_PendingCountByCategory(servicesEventHandler, SOPC_SERVICES_PENDING_EXTERNAL_REQUESTS);
+}
+
 void SOPC_Services_Initialize(SOPC_SetListenerFunc* setSecureChannelsListener)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int priority = 0;
     int cpuAffinity = -1;
+    servicesBusyLocal = (SOPC_Services_BusyState){false, 0, 0};
+    servicesBusyExternal = (SOPC_Services_BusyState){false, 0, 0};
 
     SOPC_ToolkitInternal_GetThreadProperties(SOPC_TOOLKIT_THREAD_SERVICES, &priority, &cpuAffinity);
     servicesLooper = SOPC_Looper_CreatePrioritized("Services", priority, cpuAffinity);
     SOPC_ASSERT(servicesLooper != NULL);
 
-    servicesEventHandler = SOPC_EventHandler_Create(servicesLooper, onServiceEvent);
+    // Pending local and external requests are counted for the busy watermarks
+    servicesEventHandler =
+        SOPC_EventHandler_CreateWithCategory(servicesLooper, onServiceEvent, SOPC_Services_ServicesEventCategory);
     SOPC_ASSERT(servicesEventHandler != NULL);
 
-    secureChannelsEventHandler = SOPC_EventHandler_Create(servicesLooper, onSecureChannelEvent);
+    secureChannelsEventHandler = SOPC_EventHandler_CreateWithCategory(servicesLooper, onSecureChannelEvent,
+                                                                      SOPC_Services_SecureChannelsEventCategory);
     SOPC_ASSERT(secureChannelsEventHandler != NULL);
 
     // Init async close management flag

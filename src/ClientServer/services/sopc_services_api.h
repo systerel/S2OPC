@@ -225,6 +225,15 @@ void SOPC_Services_EnqueueEventAsNext(SOPC_Services_Event seEvent, uint32_t id, 
 /** \brief Returns the current pending number of events in Services queue */
 uint32_t SOPC_Services_Get_QueueSize(void);
 
+/** \brief Returns the current pending number of local service requests in Services queue (LOCAL busy measure) */
+uint32_t SOPC_Services_Get_PendingLocalRequests(void);
+
+/**
+ * \brief Returns the current pending number of requests received on server side in Services queue (EXTERNAL busy
+ *        measure)
+ */
+uint32_t SOPC_Services_Get_PendingExternalRequests(void);
+
 /**
  * \brief Hook called by the services thread after each services event treatment
  *        (including secure channels events treated by the services thread).

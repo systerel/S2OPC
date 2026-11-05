@@ -192,6 +192,91 @@ START_TEST(test_event_handler_post_time)
 }
 END_TEST
 
+/* Events 10 to 19 are of category 0, 20 to 29 of category 1, the other ones are not counted */
+static int32_t category_by_event(int32_t event, uint32_t eltId, uintptr_t params, uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(eltId);
+    SOPC_UNUSED_ARG(params);
+    SOPC_UNUSED_ARG(auxParam);
+    if (event >= 10 && event < 20)
+    {
+        return 0;
+    }
+    if (event >= 20 && event < 30)
+    {
+        return 1;
+    }
+    return SOPC_EVENT_HANDLER_NO_CATEGORY;
+}
+
+/* Pending events of category 0 at the treatment of the event (index = event code) */
+#define NB_RECORDED_EVENTS 32
+static uint32_t pendingCat0AtTreatment[NB_RECORDED_EVENTS];
+
+static void counting_callback(SOPC_EventHandler* handler,
+                              int32_t event,
+                              uint32_t eltId,
+                              uintptr_t params,
+                              uintptr_t auxParam)
+{
+    if (event >= 0 && event < NB_RECORDED_EVENTS)
+    {
+        pendingCat0AtTreatment[event] = SOPC_EventHandler_Get_PendingCountByCategory(handler, 0);
+    }
+    test_callback(handler, event, eltId, params, auxParam);
+}
+
+START_TEST(test_event_handler_pending_count_by_category)
+{
+    SOPC_Looper* looper = SOPC_Looper_Create("test events");
+    ck_assert_ptr_nonnull(looper);
+
+    ck_assert_ptr_null(SOPC_EventHandler_CreateWithCategory(looper, test_callback, NULL));
+    SOPC_EventHandler* hCounted = SOPC_EventHandler_CreateWithCategory(looper, counting_callback, category_by_event);
+    SOPC_EventHandler* hOther = SOPC_EventHandler_Create(looper, test_callback);
+    ck_assert_ptr_nonnull(hCounted);
+    ck_assert_ptr_nonnull(hOther);
+
+    // Block the looper thread on a first event so that the next posted events stay pending
+    SOPC_Atomic_Int_Set(&block_queue, 1);
+    SOPC_EventHandler_Post(hCounted, 0, 0, 0, 0);
+    expect_event(hCounted, 0, 0, 0, 0);
+
+    SOPC_EventHandler_Post(hCounted, 10, 0, 0, 0);
+    SOPC_EventHandler_Post(hCounted, 11, 0, 0, 0);
+    SOPC_EventHandler_PostAsNext(hCounted, 12, 0, 0, 0);
+    SOPC_EventHandler_Post(hCounted, 20, 0, 0, 0);
+    SOPC_EventHandler_Post(hCounted, 1, 0, 0, 0);
+    // Not counted: handler without category function
+    SOPC_EventHandler_Post(hOther, 13, 0, 0, 0);
+
+    // Counters are shared by the handlers of the looper
+    ck_assert_uint_eq(3, SOPC_EventHandler_Get_PendingCountByCategory(hCounted, 0));
+    ck_assert_uint_eq(1, SOPC_EventHandler_Get_PendingCountByCategory(hOther, 1));
+    ck_assert_uint_eq(0, SOPC_EventHandler_Get_PendingCountByCategory(hCounted, 2));
+    ck_assert_uint_eq(0, SOPC_EventHandler_Get_PendingCountByCategory(hCounted, -1));
+    ck_assert_uint_eq(0, SOPC_EventHandler_Get_PendingCountByCategory(hCounted, SOPC_EVENT_HANDLER_NB_CATEGORIES));
+    ck_assert_uint_eq(0, SOPC_EventHandler_Get_PendingCountByCategory(NULL, 0));
+    SOPC_Atomic_Int_Set(&block_queue, 0);
+
+    expect_event(hCounted, 12, 0, 0, 0);
+    expect_event(hCounted, 10, 0, 0, 0);
+    expect_event(hCounted, 11, 0, 0, 0);
+    expect_event(hCounted, 20, 0, 0, 0);
+    expect_event(hCounted, 1, 0, 0, 0);
+    expect_event(hOther, 13, 0, 0, 0);
+
+    // An event is no longer pending at its treatment
+    ck_assert_uint_eq(2, pendingCat0AtTreatment[12]);
+    ck_assert_uint_eq(1, pendingCat0AtTreatment[10]);
+    ck_assert_uint_eq(0, pendingCat0AtTreatment[11]);
+    ck_assert_uint_eq(0, SOPC_EventHandler_Get_PendingCountByCategory(hCounted, 0));
+    ck_assert_uint_eq(0, SOPC_EventHandler_Get_PendingCountByCategory(hCounted, 1));
+
+    SOPC_Looper_Delete(looper);
+}
+END_TEST
+
 static void test_setup(void)
 {
     ck_assert(SOPC_AsyncQueue_Init(&queue, "") == SOPC_STATUS_OK);
@@ -214,6 +299,7 @@ Suite* tests_make_suite_event_handler(void)
     tcase_add_test(c, test_event_handler_post);
     tcase_add_test(c, test_event_handler_post_as_next);
     tcase_add_test(c, test_event_handler_post_time);
+    tcase_add_test(c, test_event_handler_pending_count_by_category);
     suite_add_tcase(s, c);
 
     return s;

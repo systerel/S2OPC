@@ -71,6 +71,24 @@ typedef void SOPC_EventHandler_Callback(SOPC_EventHandler* handler,
                                         uintptr_t params,
                                         uintptr_t auxParam);
 
+/** \brief Number of categories of pending events counted by a looper, see ::SOPC_EventHandler_CreateWithCategory */
+#define SOPC_EVENT_HANDLER_NB_CATEGORIES 4
+
+/** \brief Category of an event which is not counted, see ::SOPC_EventHandler_CategoryFct */
+#define SOPC_EVENT_HANDLER_NO_CATEGORY (-1)
+
+/**
+ * \brief Function prototype returning the category of an event posted to an event handler: the looper counts the
+ *        pending events of each category (see ::SOPC_EventHandler_Get_PendingCountByCategory).
+ *
+ * Called by the posting thread with the parameters of the posted event: it shall be short and shall not call any
+ * event handler function.
+ *
+ * \return The category of the event in [0, ::SOPC_EVENT_HANDLER_NB_CATEGORIES[, or ::SOPC_EVENT_HANDLER_NO_CATEGORY
+ *         if the event is not counted.
+ */
+typedef int32_t SOPC_EventHandler_CategoryFct(int32_t event, uint32_t eltId, uintptr_t params, uintptr_t auxParam);
+
 /**
  * \brief Creates a new event handler and attaches it to an existing looper.
  *
@@ -82,6 +100,33 @@ typedef void SOPC_EventHandler_Callback(SOPC_EventHandler* handler,
  * \return The created event handler, or \c NULL on memory allocation failure.
  */
 SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandler_Callback* callback);
+
+/**
+ * \brief Creates a new event handler whose posted events are counted by category while pending, and attaches it to
+ *        an existing looper.
+ *
+ * \param looper       the looper to attach the event handler to
+ * \param callback     the callback to call to process incoming messages
+ * \param categoryFct  the function returning the category of a posted event
+ *
+ * The returned handler belongs to the looper, and will be freed with it.
+ *
+ * \return The created event handler, or \c NULL on invalid parameter or memory allocation failure.
+ */
+SOPC_EventHandler* SOPC_EventHandler_CreateWithCategory(SOPC_Looper* looper,
+                                                        SOPC_EventHandler_Callback* callback,
+                                                        SOPC_EventHandler_CategoryFct* categoryFct);
+
+/**
+ * \brief Returns the number of pending events of a category in the queue of the looper of \p handler: posted (by
+ *        any handler of the looper) and not dequeued yet, an event being dequeued before its treatment.
+ *
+ * \param handler   an event handler of the looper
+ * \param category  the category in [0, ::SOPC_EVENT_HANDLER_NB_CATEGORIES[
+ *
+ * \return The number of pending events of \p category, 0 on invalid parameter.
+ */
+uint32_t SOPC_EventHandler_Get_PendingCountByCategory(SOPC_EventHandler* handler, int32_t category);
 
 /**
  * \brief Posts an event to the back of the event handler's message queue.

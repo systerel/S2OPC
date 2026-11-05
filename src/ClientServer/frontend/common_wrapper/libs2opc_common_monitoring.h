@@ -34,9 +34,14 @@
  */
 typedef enum
 {
-    SOPC_CommonMonitoring_QueueType_Services,        /**< The "Services" processing Queue*/
-    SOPC_CommonMonitoring_QueueType_SecuredChannels, /**< The "SecuredChannels" processing Queue*/
-    SOPC_CommonMonitoring_QueueType_Sockets          /**< The "Sockets" processing Queue*/
+    SOPC_CommonMonitoring_QueueType_Services,                /**< The "Services" processing Queue*/
+    SOPC_CommonMonitoring_QueueType_SecuredChannels,         /**< The "SecuredChannels" processing Queue*/
+    SOPC_CommonMonitoring_QueueType_Sockets,                 /**< The "Sockets" processing Queue*/
+    SOPC_CommonMonitoring_QueueType_ServicesLocalRequests,   /**< Local service requests pending in the "Services"
+                                                                  Queue (see ::SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL) */
+    SOPC_CommonMonitoring_QueueType_ServicesExternalRequests /**< Requests received from OPC UA clients pending in the
+                                                                  "Services" Queue (see
+                                                                  ::SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL) */
 } SOPC_CommonMonitoring_QueueType;
 
 /** Number of pending items in a processing queue */
@@ -48,7 +53,9 @@ typedef uint32_t SOPC_CommonMonitoring_QueueSize;
  * returns, since the queues are processed in independent threads.
  * Shall be called between ::SOPC_CommonHelper_Initialize and ::SOPC_CommonHelper_Clear.
  *
- * \note See also ::SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE and ::SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY.
+ * \note See also ::SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE, ::SOPC_MAX_NB_ELEMENTS_ASYNC_QUEUE_WARNING_ONLY,
+ *       ::SOPC_SERVICES_QUEUE_BUSY_HIGH_LOCAL, ::SOPC_SERVICES_QUEUE_BUSY_LOW_LOCAL,
+ *       ::SOPC_SERVICES_QUEUE_BUSY_HIGH_EXTERNAL and ::SOPC_SERVICES_QUEUE_BUSY_LOW_EXTERNAL.
  *
  * \param queueType the queue to fetch.
  *
