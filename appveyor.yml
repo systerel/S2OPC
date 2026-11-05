@@ -73,8 +73,9 @@ install:
         }
 
         # Dependencies built by build_s2opc.bat: archive root folder => archive.
-        # Extracted only once in the dependencies cache, using Windows tar (bsdtar, which handles
-        # zip and bzip2 without an external program). They are then built in this folder.
+        # Extracted only once in the dependencies cache, then built in this folder.
+        # zip archives are extracted with Windows tar (bsdtar). tar.bz2 archives are extracted with
+        # 7-Zip, as Windows tar relies on an external bzip2 program for them, which may hang.
         $depArchives = [ordered]@{
           "check-$env:CHECK_VERSION" = "check-$env:CHECK_VERSION.zip"
           "mbedtls-$env:MBEDTLS_VERSION" = "mbedtls-$env:MBEDTLS_VERSION.tar.bz2"
@@ -82,6 +83,7 @@ install:
           "paho.mqtt.c-$env:PAHO_VERSION" = "paho.mqtt.c-$env:PAHO_VERSION.zip"
         }
         $tar = Join-Path $env:SystemRoot 'System32\tar.exe'
+        $sevenZip = Join-Path $env:ProgramFiles '7-Zip\7z.exe'
         $tmpDir = Join-Path $deps 'extract.tmp'
         foreach ($dir in $depArchives.Keys) {
           $target = Join-Path $deps $dir
@@ -91,10 +93,22 @@ install:
           for ($i = 1; $i -le 3; $i++) {
             Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
             New-Item -ItemType Directory $tmpDir | Out-Null
-            # tar may write to stderr: do not let it stop the script, rely on its exit code instead
+            # tar and 7-Zip may write to stderr: do not let it stop the script, rely on their exit code instead
             $ErrorActionPreference = 'Continue'
-            & $tar -xf $archive -C $tmpDir
-            $code = $LASTEXITCODE
+            if ($archive.EndsWith('.tar.bz2')) {
+              # 2 steps without pipe: .tar.bz2 -> .tar -> folder
+              & $sevenZip x $archive "-o$tmpDir" -y -bso0 -bsp0
+              $code = $LASTEXITCODE
+              $inner = Join-Path $tmpDir ([IO.Path]::GetFileNameWithoutExtension($archive))
+              if ($code -eq 0) {
+                & $sevenZip x $inner "-o$tmpDir" -y -bso0 -bsp0
+                $code = $LASTEXITCODE
+              }
+              Remove-Item $inner -Force -ErrorAction SilentlyContinue
+            } else {
+              & $tar -xf $archive -C $tmpDir
+              $code = $LASTEXITCODE
+            }
             $ErrorActionPreference = 'Stop'
             if ($code -eq 0 -and (Test-Path (Join-Path $tmpDir $dir))) {
               Move-Item (Join-Path $tmpDir $dir) $target
