@@ -1,24 +1,25 @@
 @set CURRENT_DIR=%~dp0
 @pushd .
 @REM Adapt path to S2OPC root directory if script is not in S2OPC root directory
-@IF NOT DEFINED S2OPC_DIR (set S2OPC_DIR=%CURRENT_DIR%)
+@REM Note: default paths are set without parenthesized block, as a ")" in the script directory path would end it
+@IF NOT DEFINED S2OPC_DIR set "S2OPC_DIR=%CURRENT_DIR%"
 @REM Adapt path to extracted check library CMakeLists.txt directory path
 @REM Note: check only needed if ENABLE_TESTING is not OFF
-@IF NOT DEFINED CHECK_DIR (set CHECK_DIR=%CURRENT_DIR%..\check-0.14.0)
+@IF NOT DEFINED CHECK_DIR set "CHECK_DIR=%CURRENT_DIR%..\check-0.14.0"
 @set CHECK_INSTALL_DIR="%CHECK_DIR%\install"
 @IF not %ERRORLEVEL% == 0 exit /B
 @
 @REM Adapt path to extracted expat library CMakeLists.txt directory path
-@IF NOT DEFINED EXPAT_DIR (set EXPAT_DIR=%CURRENT_DIR%..\libexpat-R_2_9_0\expat)
+@IF NOT DEFINED EXPAT_DIR set "EXPAT_DIR=%CURRENT_DIR%..\libexpat-R_2_9_0\expat"
 @set EXPAT_INSTALL_DIR="%EXPAT_DIR%\install"
 @
 @REM Adapt path to extracted mbedtls library CMakeLists.txt directory path
-@IF NOT DEFINED MBEDTLS_DIR (set MBEDTLS_DIR=%CURRENT_DIR%..\mbedtls-3.6.7)
+@IF NOT DEFINED MBEDTLS_DIR set "MBEDTLS_DIR=%CURRENT_DIR%..\mbedtls-3.6.7"
 @set MBEDTLS_INSTALL_DIR="%MBEDTLS_DIR%\install"
 @IF not %ERRORLEVEL% == 0 exit /B
 @
 @REM Adapt path to extracted paho library CMakeLists.txt directory path
-@IF NOT DEFINED PAHO_DIR (set PAHO_DIR=%CURRENT_DIR%..\paho.mqtt.c-1.3.15)
+@IF NOT DEFINED PAHO_DIR set "PAHO_DIR=%CURRENT_DIR%..\paho.mqtt.c-1.3.15"
 @set PAHO_INSTALL_DIR="%PAHO_DIR%\install"
 @IF not %ERRORLEVEL% == 0 exit /B
 @
@@ -48,7 +49,7 @@
 @IF NOT "%ENABLE_TESTING%" == "off" IF NOT "%BUILD_SHARED_LIBS%" == "off" (echo ERROR: cannot build tests ENABLE_TESTING=on with shared libraries BUILD_SHARED_LIBS=on & goto :EXIT_FAIL)
 @IF NOT "%ENABLE_TESTING%" == "off" IF NOT "%ENABLE_SAMPLES%" == "on" (echo ERROR: cannot build tests ENABLE_TESTING=on without samples ENABLE_SAMPLES=off & goto :EXIT_FAIL)
 @
-@IF NOT DEFINED S2OPC_INSTALL (set S2OPC_INSTALL=%S2OPC_DIR%/install)
+@IF NOT DEFINED S2OPC_INSTALL set "S2OPC_INSTALL=%S2OPC_DIR%/install"
 @
 @REM Paths of library providing the CMake export feature
 @set CMAKE_LIBS_DIRS=%MBEDTLS_INSTALL_DIR%;%EXPAT_INSTALL_DIR%;%CHECK_INSTALL_DIR%;%PAHO_INSTALL_DIR%
@@ -103,24 +104,25 @@ cmake --install .
 @REM %1: dependency name (CMake\build_%1.bat), %2: dependency directory,
 @REM %3: "optional" if S2OPC can be built without the dependency
 @REM Returns 0 if the dependency is built, already built or optional and absent, 1 otherwise
-@IF NOT EXIST "%~2\" IF "%~3" == "optional" (
-    @echo %1 not found in %~2, build skipped as this dependency is optional
-    @exit /B 0
-)
-@IF "%REBUILD_DEPS%" == "off" IF EXIST "%~2\install\.s2opc_built" (
-    @echo %1 already built in %~2, build skipped
-    @exit /B 0
-)
+@REM Note: no parenthesized block below, as a ")" in the expanded %~2 path would end it
+@IF NOT EXIST "%~2\" IF "%~3" == "optional" goto :BUILD_DEP_ABSENT
+@IF "%REBUILD_DEPS%" == "off" IF EXIST "%~2\install\.s2opc_built" goto :BUILD_DEP_ALREADY_BUILT
 @REM Remove a previous marker so that a failed rebuild is never considered as built
 @IF EXIST "%~2\install\.s2opc_built" del "%~2\install\.s2opc_built"
 @call CMake\build_%1.bat
-@IF NOT %ERRORLEVEL% == 0 (
-    @echo ERROR: build of %1 failed
-    @exit /B 1
-)
-@IF NOT EXIST "%~2\install\" (
-    @echo ERROR: build of %1 did not produce %~2\install
-    @exit /B 1
-)
+@IF NOT %ERRORLEVEL% == 0 goto :BUILD_DEP_FAILED
+@IF NOT EXIST "%~2\install\" goto :BUILD_DEP_NO_INSTALL
 @echo built> "%~2\install\.s2opc_built"
 @exit /B 0
+:BUILD_DEP_ABSENT
+@echo %1 not found in %~2, build skipped as this dependency is optional
+@exit /B 0
+:BUILD_DEP_ALREADY_BUILT
+@echo %1 already built in %~2, build skipped
+@exit /B 0
+:BUILD_DEP_FAILED
+@echo ERROR: build of %1 failed
+@exit /B 1
+:BUILD_DEP_NO_INSTALL
+@echo ERROR: build of %1 did not produce %~2\install
+@exit /B 1
