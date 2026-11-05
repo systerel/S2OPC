@@ -23,7 +23,7 @@
  *  \brief Services layer internal helpers to evaluate the request header TimeoutHint on server side.
  *
  *  The reception time of the message currently processed by the Services layer is the time at which the
- *  Secure Channels layer posted it to the Services layer (::SC_SERVICE_RCV_MSG event post time).
+ *  Secure Channels layer posted it to the Services layer (::SC_SERVICE_RCV_REQUEST event post time).
  *  It is set by the Services layer before the message is provided to the B model and reset after,
  *  thus it is only available in the Services thread during the treatment of a received message.
  */

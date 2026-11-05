@@ -99,53 +99,58 @@ typedef enum
  */
 typedef enum
 {
-    EP_CONNECTED = 0x300,  /**< (Server only) Notification of new SC connected on SC connection listener.<br/>
-                              id = endpoint description config index<br/>
-                              params = (uint32_t) secure channel config index<br/>
-                              auxParams = (uint32_t) secure channel connection index */
-    EP_CLOSED,             /**< Notification of closed endpoint connection listener.<br/>
-                              id = endpoint description config index<br/>
-                              auxParams = SOPC_ReturnStatus */
-    EP_REVERSE_CLOSED,     /**<
-                              Notifies the SC reverse listener is closed for the given endpoint configuration index<br/>
-                              id = reverse endpoint config index<br/>
-                              auxParams = SOPC_ReturnStatus */
-    SC_CONNECTED,          /**< (Client only) Notify secure channel in connected state.
-                              Treats actions waiting for connection to be established.<br/>
-                              id = secure channel connection index<br/>
-                              auxParams = (uint32_t) secure channel configuration index */
-    SC_REVERSE_CONNECTED,  /**< (Client only) Notify secure channel in connected state for a reverse connection.
-                              Treats actions waiting for connection to be established.<br/>
-                              id = secure channel connection index<br/>
-                              params = (uint32_t) secure channel configuration index<br/>
-                              auxParams = (uint32_t) reverse endpoint configuration index
-                            */
-    SC_CONNECTION_TIMEOUT, /**< Notification that secure channel connection attempt failed for the given SC connection
-                              configuration index. Notifies failure for actions waiting for connection to be
-                              established.<br/>
-                              id = secure channel config index */
-    SC_DISCONNECTED,       /**< Notify secure channel previously in connected state is now disconnected.
-                              It shall be acknowledged by raising back a SC_DISCONNECTED_ACK event.<br/>
-                              id = secure channel connection index<br/>
-                              params = (uint32_t) secure channel config index (SERVER SIDE ONLY) or 0 (CLIENT SIDE)<br/>
-                              auxParam = SOPC_StatusCode
-                            */
-    SC_SERVICE_RCV_MSG,    /**< Received message on the secure channel for the given SC connection index and with the
-                              provided OPC UA message encoded as bytes buffer. When triggered on Server side, the request
-                              Id context is provided in addition to other parameters so it can be returned in the
-                              response.<br/>
+    EP_CONNECTED = 0x300,   /**< (Server only) Notification of new SC connected on SC connection listener.<br/>
+                               id = endpoint description config index<br/>
+                               params = (uint32_t) secure channel config index<br/>
+                               auxParams = (uint32_t) secure channel connection index */
+    EP_CLOSED,              /**< Notification of closed endpoint connection listener.<br/>
+                               id = endpoint description config index<br/>
+                               auxParams = SOPC_ReturnStatus */
+    EP_REVERSE_CLOSED,      /**<
+                               Notifies the SC reverse listener is closed for the given endpoint configuration index<br/>
+                               id = reverse endpoint config index<br/>
+                               auxParams = SOPC_ReturnStatus */
+    SC_CONNECTED,           /**< (Client only) Notify secure channel in connected state.
+                               Treats actions waiting for connection to be established.<br/>
+                               id = secure channel connection index<br/>
+                               auxParams = (uint32_t) secure channel configuration index */
+    SC_REVERSE_CONNECTED,   /**< (Client only) Notify secure channel in connected state for a reverse connection.
+                               Treats actions waiting for connection to be established.<br/>
+                               id = secure channel connection index<br/>
+                               params = (uint32_t) secure channel configuration index<br/>
+                               auxParams = (uint32_t) reverse endpoint configuration index
+                             */
+    SC_CONNECTION_TIMEOUT,  /**< Notification that secure channel connection attempt failed for the given SC connection
+                               configuration index. Notifies failure for actions waiting for connection to be
+                               established.<br/>
+                               id = secure channel config index */
+    SC_DISCONNECTED,        /**< Notify secure channel previously in connected state is now disconnected.
+                               It shall be acknowledged by raising back a SC_DISCONNECTED_ACK event.<br/>
+                               id = secure channel connection index<br/>
+                               params = (uint32_t) secure channel config index (SERVER SIDE ONLY) or 0 (CLIENT SIDE)<br/>
+                               auxParam = SOPC_StatusCode
+                             */
+    SC_SERVICE_RCV_MSG,     /**< Client side only: received message on the secure channel for the given SC connection
+                               index and with the provided OPC UA message encoded as bytes buffer.<br/>
+                               id = secure channel connection index<br/>
+                               params = (SOPC_Buffer*) OPC UA message payload buffer<br/>
+                               auxParam = 0
+                             */
+    SC_SERVICE_RCV_REQUEST, /**< Server side only: received message (request) on the secure channel for the given SC
+                              connection index and with the provided OPC UA message encoded as bytes buffer. The request
+                              Id context is provided so it can be returned in the response.<br/>
                               id = secure channel connection index<br/>
                               params = (SOPC_Buffer*) OPC UA message payload buffer<br/>
-                              auxParam = (uint32_t) request Id context (server side only, 0 if client)
+                              auxParam = (uint32_t) request Id context (chosen by the client, might be 0)
                             */
-    SC_SND_FAILURE,        /**< Notifies a message which was provided through the output event SC_SERVICE_SND_MSG failed
-                              to be sent.<br/>
-                              id = secure channel connection index<br/>
-                              params = (uint32_t) requestHandle for client / requestId for server (unused)<br/>
-                              auxParam = SOPC_StatusCode */
-    SC_REQUEST_TIMEOUT,    /**< When an OPN or MSG sent message did not receive any answer.<br/>
-                              id = secure channel connection index<br/>
-                              auxParam = (uint32_t) request handle */
+    SC_SND_FAILURE,     /**< Notifies a message which was provided through the output event SC_SERVICE_SND_MSG failed
+                           to be sent.<br/>
+                           id = secure channel connection index<br/>
+                           params = (uint32_t) requestHandle for client / requestId for server (unused)<br/>
+                           auxParam = SOPC_StatusCode */
+    SC_REQUEST_TIMEOUT, /**< When an OPN or MSG sent message did not receive any answer.<br/>
+                           id = secure channel connection index<br/>
+                           auxParam = (uint32_t) request handle */
 } SOPC_SecureChannels_OutputEvent;
 
 /* Secure channel external event enqueue function

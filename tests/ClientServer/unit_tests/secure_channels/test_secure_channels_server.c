@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
         // Wait for a service level message reception
         WaitEvent(servicesEvents->events, (void**) &serviceEvent);
 
-        if (serviceEvent->event == SC_SERVICE_RCV_MSG)
+        if (serviceEvent->event == SC_SERVICE_RCV_REQUEST)
         {
             if (serviceEvent->eltId == scConnectionId && (void*) serviceEvent->params != NULL &&
                 serviceEvent->auxParam != 0) // request context

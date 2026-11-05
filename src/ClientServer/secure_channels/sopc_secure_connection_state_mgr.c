@@ -3191,17 +3191,23 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
                 scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
             {
                 SOPC_ASSERT((void*) params != NULL);
-                // Do not delete buffer since it is provided to services:
-                if (!scConnection->isServerConnection)
+                // Do not delete buffer since it is provided to services.
+                // Server side: request received, its request Id is provided to be returned in the response.
+                // Client side: response received, no request Id provided (no response to send).
+                if (scConnection->isServerConnection)
                 {
-                    // Do not provide request Id since it is client side (no response to send)
-                    auxParam = 0;
+                    SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SERVICE_RCV_REQUEST,
+                                           eltId,     // secure connection id
+                                           params,    // buffer
+                                           auxParam); // request Id
                 }
-                // No server / client differentiation at this level
-                SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SERVICE_RCV_MSG,
-                                       eltId,     // secure connection id
-                                       params,    // buffer
-                                       auxParam); // request Id
+                else
+                {
+                    SOPC_EventHandler_Post(secureChannelsEventHandler, SC_SERVICE_RCV_MSG,
+                                           eltId,  // secure connection id
+                                           params, // buffer
+                                           0);
+                }
             }
             else
             {

@@ -96,6 +96,34 @@ static SOPC_STRONG_INLINE void call_event_treated_hook(void)
     }
 }
 
+/**
+ * \brief Provides a message received on a secure channel to the B model (client side response or server side request)
+ *
+ * \param scConnectionIdx  secure channel connection index
+ * \param buffer           received message buffer, freed by the B model
+ * \param requestContext   request Id of a server side request, 0 for a client side response
+ * \param receptionTime    time at which the Secure Channels layer provided the message to the Services layer, used to
+ *                         evaluate the request header TimeoutHint during the message treatment
+ */
+static void SOPC_Services_ReceiveMsgBuffer(uint32_t scConnectionIdx,
+                                           SOPC_Buffer* buffer,
+                                           uintptr_t requestContext,
+                                           SOPC_TimeReference receptionTime)
+{
+    bool bres = false;
+    SOPC_Services_SetCurrentMsgReceptionTime(receptionTime);
+    io_dispatch_mgr__receive_msg_buffer(scConnectionIdx, (constants__t_byte_buffer_i) buffer,
+                                        (constants__t_request_context_i) requestContext, &bres);
+    SOPC_Services_ResetCurrentMsgReceptionTime();
+    if (!bres)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: message received on scIdx=%" PRIu32 " reqId/0=%" PRIuPTR
+                               " considered invalid",
+                               scConnectionIdx, requestContext);
+    }
+}
+
 static void onSecureChannelEvent(SOPC_EventHandler* handler,
                                  int32_t event,
                                  uint32_t id,
@@ -199,27 +227,27 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // Acknowledge the disconnected state is set in service layer to free the connection index
         SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECTED_ACK, id, params, 0);
         break;
-    case SC_SERVICE_RCV_MSG:
+    case SC_SERVICE_RCV_REQUEST:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ServicesMgr: SC_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId/0=%" PRIuPTR, id, auxParam);
+                               "ServicesMgr: SC_SERVICE_RCV_REQUEST scIdx=%" PRIu32 " reqId=%" PRIuPTR, id, auxParam);
 
         // id ==  connection Id
         // params = message content (byte buffer)
-        // auxParam == requestId (server) / 0 (client)
+        // auxParam == requestId (server side, chosen by the client)
         SOPC_ASSERT(NULL != (void*) params);
-        // Reception time = time at which the Secure Channels layer provided the message to the Services layer.
-        // It is used to evaluate the request header TimeoutHint during the message treatment.
-        SOPC_Services_SetCurrentMsgReceptionTime(SOPC_EventHandler_GetCurrentEventPostTime(handler));
-        io_dispatch_mgr__receive_msg_buffer(id, (constants__t_byte_buffer_i) params,
-                                            (constants__t_request_context_i) auxParam, &bres);
-        SOPC_Services_ResetCurrentMsgReceptionTime();
-        if (!bres)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "ServicesMgr: SC_SC_SERVICE_RCV_MSG scIdx=%" PRIu32 " reqId/0=%" PRIuPTR
-                                   " received message considered invalid",
-                                   id, auxParam);
-        }
+        SOPC_Services_ReceiveMsgBuffer(id, (SOPC_Buffer*) params, auxParam,
+                                       SOPC_EventHandler_GetCurrentEventPostTime(handler));
+        // params is freed by services manager
+        break;
+    case SC_SERVICE_RCV_MSG:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: SC_SERVICE_RCV_MSG scIdx=%" PRIu32, id);
+
+        // id ==  connection Id
+        // params = message content (byte buffer)
+        // auxParam == 0 (client side)
+        SOPC_ASSERT(NULL != (void*) params);
+        SOPC_Services_ReceiveMsgBuffer(id, (SOPC_Buffer*) params, 0,
+                                       SOPC_EventHandler_GetCurrentEventPostTime(handler));
         // params is freed by services manager
         break;
     case SC_SND_FAILURE:
