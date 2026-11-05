@@ -41,6 +41,8 @@
 @IF NOT DEFINED ENABLE_SAMPLES (set ENABLE_SAMPLES=off)
 @IF NOT DEFINED WITH_ASAN (set WITH_ASAN=off)
 @IF NOT DEFINED WITH_PYS2OPC (set WITH_PYS2OPC=off)
+@REM REBUILD_DEPS=off skips building a dependency already built by this script (marker file in its install directory)
+@IF NOT DEFINED REBUILD_DEPS (set REBUILD_DEPS=on)
 @IF NOT DEFINED PYS2OPC_VERSION (set PYS2OPC_VERSION="pys2opc-X.X.X")
 @IF NOT DEFINED PYS2OPC_WHEEL_NAME (set PYS2OPC_WHEEL_NAME="%PYS2OPC_VERSION%-cp3XX-cp3XX-win_amd64.whl")
 @IF NOT "%ENABLE_TESTING%" == "off" IF NOT "%BUILD_SHARED_LIBS%" == "off" (echo ERROR: cannot build tests ENABLE_TESTING=on with shared libraries BUILD_SHARED_LIBS=on & goto :EXIT_FAIL)
@@ -59,19 +61,17 @@
 @
 @REM Comment if ENABLED_TESTING=off or if already built
 @REM Build Check
-@IF NOT "%ENABLE_TESTING%" == "off" (@call CMake\build_check.bat)
+@IF NOT "%ENABLE_TESTING%" == "off" ( call :BUILD_DEP check "%CHECK_DIR%" || goto :EXIT_FAIL )
 @
-@REM Comment if XML parsing is not needed or if already built
-@REM Build Expat
-@call CMake\build_expat.bat
+@REM Build Expat (optional: skipped if EXPAT_DIR does not exist, only needed for XML parsing)
+@call :BUILD_DEP expat "%EXPAT_DIR%" optional || goto :EXIT_FAIL
 @
 @REM Comment if already built
 @REM Build MbedTLS
-@call CMake\build_mbedtls.bat
+@call :BUILD_DEP mbedtls "%MBEDTLS_DIR%" || goto :EXIT_FAIL
 @
-@REM Comment if already built
-@REM Build Paho
-@call CMake\build_paho.bat
+@REM Build Paho (optional: skipped if PAHO_DIR does not exist, only needed for PubSub MQTT)
+@call :BUILD_DEP paho "%PAHO_DIR%" optional || goto :EXIT_FAIL
 @
 REM Configure S2OPC Project
 @cd /D %S2OPC_DIR%
@@ -98,3 +98,29 @@ cmake --install .
 @echo S2OPC build failed
 @popd
 @exit /B 1
+
+:BUILD_DEP
+@REM %1: dependency name (CMake\build_%1.bat), %2: dependency directory,
+@REM %3: "optional" if S2OPC can be built without the dependency
+@REM Returns 0 if the dependency is built, already built or optional and absent, 1 otherwise
+@IF NOT EXIST "%~2\" IF "%~3" == "optional" (
+    @echo %1 not found in %~2, build skipped as this dependency is optional
+    @exit /B 0
+)
+@IF "%REBUILD_DEPS%" == "off" IF EXIST "%~2\install\.s2opc_built" (
+    @echo %1 already built in %~2, build skipped
+    @exit /B 0
+)
+@REM Remove a previous marker so that a failed rebuild is never considered as built
+@IF EXIST "%~2\install\.s2opc_built" del "%~2\install\.s2opc_built"
+@call CMake\build_%1.bat
+@IF NOT %ERRORLEVEL% == 0 (
+    @echo ERROR: build of %1 failed
+    @exit /B 1
+)
+@IF NOT EXIST "%~2\install\" (
+    @echo ERROR: build of %1 did not produce %~2\install
+    @exit /B 1
+)
+@echo built> "%~2\install\.s2opc_built"
+@exit /B 0
