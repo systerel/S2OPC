@@ -30,6 +30,10 @@
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_protocol_constants.h"
+
+/** Initial size of the buffer allocated to encode a ServiceFault (resized when needed) */
+#define SOPC_ENCODER_SERVICE_FAULT_INITIAL_BUFFER_SIZE 256u
 
 SOPC_ReturnStatus SOPC_Byte_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
@@ -3156,6 +3160,54 @@ SOPC_ReturnStatus SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer* buf,
     if (SOPC_STATUS_OK == status && encType->TypeId != OpcUaId_ServiceFault)
     {
         status = SOPC_EncodeableObject_Encode(encType, msgBody, buf, 0);
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EncodeMsg_NewBuffer(uint32_t maxSize,
+                                           SOPC_EncodeableType* encType,
+                                           SOPC_EncodeableType* headerType,
+                                           void* msgHeader,
+                                           void* msgBody,
+                                           SOPC_Buffer** buffer)
+{
+    if (NULL == encType || NULL == buffer || maxSize <= SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    *buffer = NULL;
+    // A ServiceFault only contains the response header: a small initial buffer is enough
+    uint32_t initialSize = SOPC_DEFAULT_INITIAL_SEND_MESSAGE_LENGTH;
+    if (OpcUaId_ServiceFault == encType->TypeId)
+    {
+        initialSize = SOPC_ENCODER_SERVICE_FAULT_INITIAL_BUFFER_SIZE;
+    }
+    if (initialSize > maxSize)
+    {
+        initialSize = maxSize;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
+    SOPC_Buffer* buf = SOPC_Buffer_CreateResizable(initialSize, maxSize);
+    if (NULL != buf)
+    {
+        // Let the secure message headers space to be filled by the secure channel layer
+        status = SOPC_Buffer_SetDataLength(buf, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_SetPosition(buf, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_EncodeMsg_Type_Header_Body(buf, encType, headerType, msgHeader, msgBody);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *buffer = buf;
+    }
+    else
+    {
+        SOPC_Buffer_Delete(buf);
     }
     return status;
 }

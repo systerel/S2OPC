@@ -77,9 +77,6 @@ static struct
     bool clientOnlyFlag;
 } closeAllConnectionsSync = {.allDisconnectedFlag = false, .requestedFlag = false, .clientOnlyFlag = false};
 
-/** Initial size of the buffer of a ServiceFault sent to refuse an external request when the Services queue is busy */
-#define SOPC_SERVICES_BUSY_FAULT_INITIAL_BUFFER_SIZE 256u
-
 /** Hysteresis state of a Services queue load shedding category (HIGH enter / LOW leave) */
 typedef struct
 {
@@ -251,40 +248,21 @@ static void SOPC_Services_RefuseExternalServiceRequestBusy(uint32_t scConnection
         respHeader.RequestHandle = requestHandle;
         respHeader.ServiceResult = OpcUa_BadServerTooBusy;
 
-        // Small resizable buffer: the ServiceFault is a few bytes long, and the maximum is the minimum buffer size
-        // accepted by OPC UA, thus never above the negotiated send buffer size of the channel
-        respBuffer =
-            SOPC_Buffer_CreateResizable(SOPC_SERVICES_BUSY_FAULT_INITIAL_BUFFER_SIZE, SOPC_TCP_UA_MIN_BUFFER_SIZE);
-        if (NULL != respBuffer)
+        // The maximum is the minimum buffer size accepted by OPC UA, thus never above the negotiated send buffer size
+        // of the channel
+        status = SOPC_EncodeMsg_NewBuffer(SOPC_TCP_UA_MIN_BUFFER_SIZE, &OpcUa_ServiceFault_EncodeableType,
+                                          &OpcUa_ResponseHeader_EncodeableType, (void*) &respHeader, NULL, &respBuffer);
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_Buffer_SetDataLength(respBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+            status = SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionIdx, (uintptr_t) respBuffer,
+                                                      requestId);
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_Buffer_SetPosition(respBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
+                respBuffer = NULL; /* ownership transferred to SC layer */
             }
-            if (SOPC_STATUS_OK == status)
-            {
-                status =
-                    SOPC_EncodeMsg_Type_Header_Body(respBuffer, &OpcUa_ServiceFault_EncodeableType,
-                                                    &OpcUa_ResponseHeader_EncodeableType, (void*) &respHeader, NULL);
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                status = SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionIdx, (uintptr_t) respBuffer,
-                                                          requestId);
-                if (SOPC_STATUS_OK == status)
-                {
-                    respBuffer = NULL; /* ownership transferred to SC layer */
-                }
-            }
-            SOPC_Buffer_Delete(respBuffer);
-            OpcUa_ResponseHeader_Clear(&respHeader);
         }
-        else
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-            OpcUa_ResponseHeader_Clear(&respHeader);
-        }
+        SOPC_Buffer_Delete(respBuffer);
+        OpcUa_ResponseHeader_Clear(&respHeader);
     }
 
     SOPC_Buffer_Delete(requestBuffer);

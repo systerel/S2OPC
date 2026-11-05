@@ -219,6 +219,28 @@ SOPC_ReturnStatus SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer* buf,
                                                   void* msgHeader,
                                                   void* msgBody);
 
+/**
+ * \brief Allocates a resizable buffer, reserves the secure message headers space and encodes the message in it
+ *        using ::SOPC_EncodeMsg_Type_Header_Body.
+ *        The initial buffer size is reduced for a ServiceFault message.
+ *
+ * \param maxSize     Maximum size of the buffer including secure message headers
+ * \param encType     Encodeable type of the message body
+ * \param headerType  Encodeable type of the message header
+ * \param msgHeader   Message header to encode
+ * \param msgBody     Message body to encode (may be NULL for a ServiceFault)
+ * \param[out] buffer The allocated buffer containing the encoded message, NULL in case of failure
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_WOULD_BLOCK if \p maxSize is reached,
+ *         another status otherwise
+ */
+SOPC_ReturnStatus SOPC_EncodeMsg_NewBuffer(uint32_t maxSize,
+                                           SOPC_EncodeableType* encType,
+                                           SOPC_EncodeableType* headerType,
+                                           void* msgHeader,
+                                           void* msgBody,
+                                           SOPC_Buffer** buffer);
+
 // Read the msg body type from buffer and return the encodeable type of the msg body
 SOPC_ReturnStatus SOPC_MsgBodyType_Read(SOPC_Buffer* buf, SOPC_EncodeableType** receivedEncType);
 

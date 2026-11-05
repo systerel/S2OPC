@@ -332,56 +332,32 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
 
     const uint32_t sendMessageMaxSize = (uint32_t) chConfig->internalProtocolData;
     const uint32_t maxBufferSize = sendMessageMaxSize + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH;
-    // Initial size shall not exceed the negotiated maximum for this channel.
-    uint32_t initialBufferSize = SOPC_DEFAULT_INITIAL_SEND_MESSAGE_LENGTH;
-    if (initialBufferSize > maxBufferSize)
+    // Encodeable type: either msg_type = service fault type or it is the type provided by the msg
+    if (message_out_bs__msg_type == constants__e_msg_service_fault_resp)
     {
-        initialBufferSize = maxBufferSize;
+        encType = &OpcUa_ServiceFault_EncodeableType;
     }
-    SOPC_Buffer* buffer = SOPC_Buffer_CreateResizable(initialBufferSize, maxBufferSize);
-    if (NULL != buffer)
-    {
-        status = SOPC_STATUS_OK;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        // Encodeable type: either msg_type = service fault type or it is the type provided by the msg
-        if (message_out_bs__msg_type == constants__e_msg_service_fault_resp)
-        {
-            encType = &OpcUa_ServiceFault_EncodeableType;
-        }
 
-        status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-    }
-    if (SOPC_STATUS_OK == status)
+    // Encode req/resp header content not dependent on message content
+    if (&OpcUa_RequestHeader_EncodeableType == headerType)
     {
-        // Encode req/resp header content not dependent on message content
-        if (&OpcUa_RequestHeader_EncodeableType == headerType)
-        {
-            reqHeader = (OpcUa_RequestHeader*) message_out_bs__msg_header;
-            reqHeader->Timestamp = SOPC_Time_GetCurrentTimeUTC();
-            // TODO: reqHeader->AuditEntryId ?
-            reqHeader->TimeoutHint = SOPC_REQUEST_TIMEOUT_MS / 2; // TODO: to be configured by each service ?
-        }
-        else if (&OpcUa_ResponseHeader_EncodeableType == headerType)
-        {
-            respHeader = (OpcUa_ResponseHeader*) message_out_bs__msg_header;
-            respHeader->Timestamp = SOPC_Time_GetCurrentTimeUTC();
-        }
-        else
-        {
-            SOPC_ASSERT(false);
-        }
+        reqHeader = (OpcUa_RequestHeader*) message_out_bs__msg_header;
+        reqHeader->Timestamp = SOPC_Time_GetCurrentTimeUTC();
+        // TODO: reqHeader->AuditEntryId ?
+        reqHeader->TimeoutHint = SOPC_REQUEST_TIMEOUT_MS / 2; // TODO: to be configured by each service ?
     }
-    if (SOPC_STATUS_OK == status)
+    else if (&OpcUa_ResponseHeader_EncodeableType == headerType)
     {
-        status = SOPC_EncodeMsg_Type_Header_Body(buffer, encType, headerType, message_out_bs__msg_header,
-                                                 message_out_bs__msg);
+        respHeader = (OpcUa_ResponseHeader*) message_out_bs__msg_header;
+        respHeader->Timestamp = SOPC_Time_GetCurrentTimeUTC();
     }
+    else
+    {
+        SOPC_ASSERT(false);
+    }
+    SOPC_Buffer* buffer = NULL;
+    status = SOPC_EncodeMsg_NewBuffer(maxBufferSize, encType, headerType, message_out_bs__msg_header,
+                                      message_out_bs__msg, &buffer);
     if (SOPC_STATUS_OK == status)
     {
         *message_out_bs__sc = constants_statuscodes_bs__e_sc_ok;
@@ -410,7 +386,7 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "Services: encoding of message failed (type = '%s') because it is too large: max size %" PRIu32
                 " reached",
-                SOPC_EncodeableType_GetName(encType), buffer->maximum_size);
+                SOPC_EncodeableType_GetName(encType), maxBufferSize);
 
             // Limit of buffer reached
             switch (message_out_bs__header_type)
@@ -442,10 +418,6 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
 
             *message_out_bs__sc = constants_statuscodes_bs__e_sc_bad_encoding_error;
         }
-
-        // if buffer is not used, it must be freed
-        SOPC_Buffer_Delete(buffer);
-        buffer = NULL;
     }
 }
 
