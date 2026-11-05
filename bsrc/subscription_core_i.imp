@@ -1432,7 +1432,9 @@ OPERATIONS
                     l_moreNotifs)
             END
         END;
-        subscription_modified(l_oldPublishInterval, p_revPublishInterval)
+        IF p_StatusCode_service = e_sc_ok THEN
+            subscription_modified(l_oldPublishInterval, p_revPublishInterval)
+        END
     END
     ;
 

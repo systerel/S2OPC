@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 05/11/2026 10:21:23
+ Date                 : 05/11/2026 13:16:02
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -856,8 +856,10 @@ void subscription_core__modify_subscription(
                subscription_core__l_moreNotifs);
          }
       }
-      subscription_diagnostics_bs__subscription_modified(subscription_core__l_oldPublishInterval,
-         subscription_core__p_revPublishInterval);
+      if (*subscription_core__p_StatusCode_service == constants_statuscodes_bs__e_sc_ok) {
+         subscription_diagnostics_bs__subscription_modified(subscription_core__l_oldPublishInterval,
+            subscription_core__p_revPublishInterval);
+      }
    }
 }
 
