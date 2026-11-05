@@ -1,30 +1,141 @@
 environment:
+    # Versions of downloaded items (used to build URLs and cached file names)
     MOSQUITTO_VERSION: 2.0.22
-    MOSQUITTO_URL: https://mosquitto.org/files/binary/win64/mosquitto-%MOSQUITTO_VERSION%-install-windows-x64.exe
+    FREEOPCUA_VERSION: 0.98.13
+    AUTOPXD2_VERSION: 2.3.0
+    CHECK_VERSION: 0.14.0
+    MBEDTLS_VERSION: 3.6.7
+    EXPAT_VERSION: 2.9.0
+    PAHO_VERSION: 1.3.15
+    # Folder of extracted and built dependencies (must match the cache entry)
+    DEPS_DIR: C:\deps_cache
+    # build_s2opc.bat does not rebuild a dependency already built (marker file in its install folder)
+    REBUILD_DEPS: "off"
+    # Save the cache even if the build fails (avoids downloading everything again after a failing test)
+    APPVEYOR_SAVE_CACHE_ON_ERROR: true
     matrix:
         - PYTHON: "C:\\Python314-x64"
 image:
     - Visual Studio 2022
 
+cache:
+    # Downloaded archives and installers. File names contain the version,
+    # and the install script removes files that are no longer used.
+    - C:\dl_cache
+    # check, mbedtls, expat and paho extracted and built. Invalidated when a build script changes.
+    # Folder names contain the version, and the install script removes obsolete folders.
+    - C:\deps_cache -> build_s2opc.bat, CMake\build_check.bat, CMake\build_expat.bat, CMake\build_mbedtls.bat, CMake\build_paho.bat
+    # pip cache shared by all Python versions (reset when appveyor.yml changes)
+    - '%LOCALAPPDATA%\pip\Cache -> appveyor.yml'
+
 install:
     - set ROOT_DIR=%APPVEYOR_BUILD_FOLDER%
     - cd %ROOT_DIR%
+    # Download (with retries) the files missing from the cache, extract the dependencies missing
+    # from the dependencies cache, then copy the other files to the build folder
+    - ps: |
+        $ErrorActionPreference = 'Stop'
+        $ProgressPreference = 'SilentlyContinue'
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        $dl = 'C:\dl_cache'
+        $deps = $env:DEPS_DIR
+        New-Item -ItemType Directory -Force $dl, $deps | Out-Null
+        $expatTag = 'R_' + $env:EXPAT_VERSION.Replace('.', '_')
+
+        # Files to download: name in cache => URL
+        $files = [ordered]@{
+          "mosquitto-$env:MOSQUITTO_VERSION-install-windows-x64.exe" = "https://mosquitto.org/files/binary/win64/mosquitto-$env:MOSQUITTO_VERSION-install-windows-x64.exe"
+          "python-opcua-$env:FREEOPCUA_VERSION.zip" = "https://github.com/FreeOpcUa/python-opcua/archive/refs/tags/$env:FREEOPCUA_VERSION.zip"
+          "python-autopxd2-$env:AUTOPXD2_VERSION.zip" = "https://github.com/elijahr/python-autopxd2/archive/refs/tags/v$env:AUTOPXD2_VERSION.zip"
+          "check-$env:CHECK_VERSION.zip" = "https://github.com/libcheck/check/archive/$env:CHECK_VERSION.zip"
+          "mbedtls-$env:MBEDTLS_VERSION.tar.bz2" = "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-$env:MBEDTLS_VERSION/mbedtls-$env:MBEDTLS_VERSION.tar.bz2"
+          "expat-$env:EXPAT_VERSION.zip" = "https://github.com/libexpat/libexpat/archive/refs/tags/$expatTag.zip"
+          "paho.mqtt.c-$env:PAHO_VERSION.zip" = "https://github.com/eclipse-paho/paho.mqtt.c/archive/refs/tags/v$env:PAHO_VERSION.zip"
+        }
+        foreach ($name in $files.Keys) {
+          $dest = Join-Path $dl $name
+          if (Test-Path $dest) { Write-Host "From cache: $name"; continue }
+          # Download to a temporary file so that an interrupted download never ends up in the cache
+          $tmp = "$dest.part"
+          for ($i = 1; $i -le 5; $i++) {
+            try {
+              Invoke-WebRequest $files[$name] -OutFile $tmp -UseBasicParsing
+              Move-Item $tmp $dest -Force
+              Write-Host "Downloaded: $name"
+              break
+            } catch {
+              Write-Host "Attempt $i failed for ${name}: $($_.Exception.Message)"
+              Remove-Item $tmp -ErrorAction SilentlyContinue
+              Start-Sleep -Seconds (5 * $i)
+            }
+          }
+          if (-not (Test-Path $dest)) { throw "Failed to download $name" }
+        }
+
+        # Dependencies built by build_s2opc.bat: archive root folder => archive.
+        # Extracted only once in the dependencies cache, using Windows tar (bsdtar, which handles
+        # zip and bzip2 without an external program). They are then built in this folder.
+        $depArchives = [ordered]@{
+          "check-$env:CHECK_VERSION" = "check-$env:CHECK_VERSION.zip"
+          "mbedtls-$env:MBEDTLS_VERSION" = "mbedtls-$env:MBEDTLS_VERSION.tar.bz2"
+          "libexpat-$expatTag" = "expat-$env:EXPAT_VERSION.zip"
+          "paho.mqtt.c-$env:PAHO_VERSION" = "paho.mqtt.c-$env:PAHO_VERSION.zip"
+        }
+        $tar = Join-Path $env:SystemRoot 'System32\tar.exe'
+        $tmpDir = Join-Path $deps 'extract.tmp'
+        foreach ($dir in $depArchives.Keys) {
+          $target = Join-Path $deps $dir
+          if (Test-Path $target) { Write-Host "From dependencies cache: $dir"; continue }
+          $archive = Join-Path $dl $depArchives[$dir]
+          # Extract to a temporary folder, moved to its final name only on success
+          for ($i = 1; $i -le 3; $i++) {
+            Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
+            New-Item -ItemType Directory $tmpDir | Out-Null
+            # tar may write to stderr: do not let it stop the script, rely on its exit code instead
+            $ErrorActionPreference = 'Continue'
+            & $tar -xf $archive -C $tmpDir
+            $code = $LASTEXITCODE
+            $ErrorActionPreference = 'Stop'
+            if ($code -eq 0 -and (Test-Path (Join-Path $tmpDir $dir))) {
+              Move-Item (Join-Path $tmpDir $dir) $target
+              Write-Host "Extracted: $dir"
+              break
+            }
+            Write-Host "Extraction of $dir failed (attempt $i, exit code $code)"
+            Start-Sleep -Seconds 5
+          }
+          Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
+          if (-not (Test-Path $target)) {
+            # The archive may be corrupted: remove it so that it is downloaded again next build
+            Remove-Item $archive -Force -ErrorAction SilentlyContinue
+            throw "Unable to extract $dir"
+          }
+        }
+
+        # Remove from the caches what no longer matches the versions in use
+        Get-ChildItem $dl | Where-Object { -not $files.Contains($_.Name) } | Remove-Item -Recurse -Force -Verbose
+        Get-ChildItem $deps | Where-Object { -not $depArchives.Contains($_.Name) } | Remove-Item -Recurse -Force -Verbose
+
+        # Copy to the build folder the files that are not built dependencies
+        foreach ($name in $files.Keys) {
+          if ($depArchives.Values -notcontains $name) {
+            Copy-Item (Join-Path $dl $name) $env:APPVEYOR_BUILD_FOLDER -Force
+          }
+        }
     # Prepend chosen Python to the PATH of this build
     - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
     # Check that we have the expected version and architecture for Python
     - "pip --version"
     - "python.exe -m pip install -U pip setuptools==81.0.0 build wheel"
     - "pip install wexpect==4.0.0 cryptography pycparser six==1.11.0 asn1crypto==0.23.0 click cython==3.0.10 python_dateutil==2.6.1 argparse==1.4.0 pytz==2025.2 idna==2.6 lxml"
-    - set FREEOPCUA_DIR_NAME=python-opcua-0.98.13
-    - "appveyor.exe DownloadFile https://github.com/FreeOpcUa/python-opcua/archive/refs/tags/0.98.13.zip -FileName %FREEOPCUA_DIR_NAME%.zip"
+    - set FREEOPCUA_DIR_NAME=python-opcua-%FREEOPCUA_VERSION%
     - "unzip %FREEOPCUA_DIR_NAME%.zip"
     # Patch free opcua server
     - cd %FREEOPCUA_DIR_NAME%
     - ps: (get-content opcua/server/internal_server.py) | %{$_ -replace "result.MaxRequestMessageSize =.*","result.MaxRequestMessageSize = 65536 * 10"}  | set-content opcua/server/internal_server.py
     - "pip install ."
     - cd %ROOT_DIR%
-    - set AUTOPXD2_DIR_NAME=python-autopxd2-2.3.0
-    - "appveyor.exe DownloadFile https://github.com/elijahr/python-autopxd2/archive/refs/tags/v2.3.0.zip -FileName %AUTOPXD2_DIR_NAME%.zip"
+    - set AUTOPXD2_DIR_NAME=python-autopxd2-%AUTOPXD2_VERSION%
     - "unzip %AUTOPXD2_DIR_NAME%.zip"
     # Patch autopxd2
     - cd %AUTOPXD2_DIR_NAME%
@@ -34,40 +145,35 @@ install:
     - ps: (get-content autopxd/__init__.py) | %{$_ -replace '"-latest",','"-latest", "-products", "*",'}  | set-content autopxd/__init__.py
     - python setup.py install
     - cd %ROOT_DIR%
-    # Install mosquitto
-    - echo "Téléchargement de Mosquitto version %MOSQUITTO_VERSION%"
-    - curl -L -o mosquitto_installer.exe %MOSQUITTO_URL%
+    # Install mosquitto (installer already copied from the cache)
     - mkdir C:\mosquitto
-    - ps: Start-Process -FilePath ".\mosquitto_installer.exe" -ArgumentList "/S /D=C:\mosquitto" -Wait
+    - ps: Start-Process -FilePath ".\mosquitto-$env:MOSQUITTO_VERSION-install-windows-x64.exe" -ArgumentList "/S /D=C:\mosquitto" -Wait
     # Add mosquitto in PATH
     - set PATH=C:\mosquitto;%PATH%
-    - echo "Mosquitto installé dans C:\mosquitto"
+    - echo "Mosquitto installed in C:\mosquitto"
     - mosquitto --version
 
 test_script:
     - echo %APPVEYOR_BUILD_FOLDER%
     - cd %APPVEYOR_BUILD_FOLDER%
     - set ROOT_DIR=%APPVEYOR_BUILD_FOLDER%
-    - set CHECK_DIR_NAME=check-0.14.0
-    - set CHECK_DIR=%ROOT_DIR%\%CHECK_DIR_NAME%
+    - set CHECK_DIR_NAME=check-%CHECK_VERSION%
+    - set CHECK_DIR=%DEPS_DIR%\%CHECK_DIR_NAME%
     - set CHECK_BUILD_DIR=%CHECK_DIR%\build
-    - set MBEDTLS_VERSION=3.6.7
     - set MBEDTLS_DIR_NAME=mbedtls-%MBEDTLS_VERSION%
-    - set MBEDTLS_DIR=%ROOT_DIR%\%MBEDTLS_DIR_NAME%
+    - set MBEDTLS_DIR=%DEPS_DIR%\%MBEDTLS_DIR_NAME%
     - set MBEDTLS_BUILD_DIR=%MBEDTLS_DIR%\build
     - set MBEDTLS_INSTALL_DIR=%MBEDTLS_DIR%\install
-    - set EXPAT_DIR_NAME=expat-2.9.0
-    - set EXPAT_FILE_NAME=R_2_9_0
-    - set EXPAT_DIR=%ROOT_DIR%\libexpat-%EXPAT_FILE_NAME%\expat
+    - set EXPAT_FILE_NAME=R_%EXPAT_VERSION:.=_%
+    - set EXPAT_DIR=%DEPS_DIR%\libexpat-%EXPAT_FILE_NAME%\expat
     - set EXPAT_INSTALL_DIR=%EXPAT_DIR%\install
-    - set PAHO_VERSION=1.3.15
     - set PAHO_DIR_NAME=paho.mqtt.c-%PAHO_VERSION%
-    - set PAHO_DIR=%ROOT_DIR%\%PAHO_DIR_NAME%
+    - set PAHO_DIR=%DEPS_DIR%\%PAHO_DIR_NAME%
     - set PAHO_BUILD_DIR=%PAHO_DIR%\build
     - set PAHO_INSTALL_DIR=%PAHO_DIR%\install
     - set CONFIG=RelWithDebInfo
-    - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%;%MBEDTLS_INSTALL_DIR%;%PAHO_INSTALL_DIR%
-    - set AUTOPXD2_DIR_NAME=python-autopxd2-2.3.0
+    - set LIBS_DIRS=%CHECK_BUILD_DIR%;%CHECK_DIR%\install;%EXPAT_INSTALL_DIR%;%MBEDTLS_INSTALL_DIR%;%PAHO_INSTALL_DIR%
+    - set AUTOPXD2_DIR_NAME=python-autopxd2-%AUTOPXD2_VERSION%
     - set PYS2OPC_VERSION=pys2opc-1.7.3
     - set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp314-cp314-win_amd64.whl
     - set VS_VERSION="Visual Studio 17 2022"
@@ -83,25 +189,8 @@ test_script:
     - set TEST_PASSWORD_USER=password
     - set TEST_CLIENT_XML_CONFIG=S2OPC_Client_Test_Config.xml
 
-    # download and extract libcheck
-    - cd %ROOT_DIR%
-    - "appveyor.exe DownloadFile https://github.com/libcheck/check/archive/0.14.0.zip -FileName %CHECK_DIR_NAME%.zip"
-    - "unzip %CHECK_DIR_NAME%.zip"
-
-    # download and extract mbedtls
-    - cd %ROOT_DIR%
-    - "appveyor.exe DownloadFile https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-%MBEDTLS_VERSION%/mbedtls-%MBEDTLS_VERSION%.tar.bz2 -FileName %MBEDTLS_DIR_NAME%.tar.bz2"
-    - "tar -jxvf %MBEDTLS_DIR_NAME%.tar.bz2"
-
-    # download and extractbuild expat
-    - cd %ROOT_DIR%
-    - "appveyor.exe DownloadFile https://github.com/libexpat/libexpat/archive/refs/tags/%EXPAT_FILE_NAME%.zip -FileName %EXPAT_DIR_NAME%.zip"
-    - "unzip %EXPAT_DIR_NAME%.zip"
-
-    # download and extractbuild paho
-    - cd %ROOT_DIR%
-    - "appveyor.exe DownloadFile https://github.com/eclipse-paho/paho.mqtt.c/archive/refs/tags/v%PAHO_VERSION%.zip -FileName %PAHO_DIR_NAME%.zip"
-    - "unzip %PAHO_DIR_NAME%.zip"
+    # check, mbedtls, expat and paho: extracted in %DEPS_DIR% during install (cached),
+    # built by build_s2opc.bat only if not already built (REBUILD_DEPS=off)
 
     # configure, build dependencies and build S2OPC project as shared DLL
     - cd %ROOT_DIR%
