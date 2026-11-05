@@ -22,9 +22,10 @@ cache:
     # Downloaded archives and installers. File names contain the version,
     # and the install script removes files that are no longer used.
     - C:\dl_cache
-    # check, mbedtls, expat and paho extracted and built. Invalidated when a build script changes.
+    # check, mbedtls, expat and paho extracted and built. Invalidated when a build script or
+    # appveyor.yml changes (it defines CONFIG, VS_VERSION and the image used to build them).
     # Folder names contain the version, and the install script removes obsolete folders.
-    - C:\deps_cache -> build_s2opc.bat, CMake\build_check.bat, CMake\build_expat.bat, CMake\build_mbedtls.bat, CMake\build_paho.bat
+    - C:\deps_cache -> appveyor.yml, build_s2opc.bat, CMake\build_check.bat, CMake\build_expat.bat, CMake\build_mbedtls.bat, CMake\build_paho.bat
     # pip cache shared by all Python versions (reset when appveyor.yml changes)
     - '%LOCALAPPDATA%\pip\Cache -> appveyor.yml'
 
