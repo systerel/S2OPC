@@ -148,7 +148,7 @@ DEFINITIONS
 
     s_republishQueue := {} ||
     a_republish_notification := {} ||
-    a_notification_seq_num :(a_notification_seq_num : t_notif_msg --> t_sub_seq_num) ||
+    a_notification_seq_num :(a_notification_seq_num : t_notif_msg +-> t_sub_seq_num) ||
 
     s_to_iterate_sub_seq_num :(s_to_iterate_sub_seq_num = {}) ||
     s_iterated_sub_seq_num :(s_iterated_sub_seq_num = {}) ||
@@ -245,7 +245,7 @@ DEFINITIONS
     /* Notification republish queue content */
     s_republishQueue <: t_notifRepublishQueue &
     a_republish_notification : t_notif_msg +-> t_notifRepublishQueue &
-    a_notification_seq_num : t_notif_msg --> t_sub_seq_num &
+    a_notification_seq_num : t_notif_msg +-> t_sub_seq_num &
 
     a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
     a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
@@ -324,7 +324,7 @@ DEFINITIONS
       p_moreNotifs : BOOL &
       a_republish_notification : t_notif_msg +-> t_notifRepublishQueue &
       a_republish_notification |>> {l_republishQueue} = a_republish_notification$0 |>> {l_republishQueue} &
-      a_notification_seq_num : t_notif_msg --> t_sub_seq_num &
+      a_notification_seq_num : t_notif_msg +-> t_sub_seq_num &
       // OK CASE
       (p_msg_sc = e_sc_ok =>
        {p_subscription} <<| a_SeqNum = {p_subscription} <<| a_SeqNum$0 &
@@ -702,7 +702,7 @@ OPERATIONS
 
         /* Republish queue deleted */
         a_republish_notification := a_republish_notification |>> {a_notifRepublishQueue(p_subscription)} ||
-        a_notification_seq_num :: t_notif_msg --> t_sub_seq_num ||
+        a_notification_seq_num :: t_notif_msg +-> t_sub_seq_num ||
 
         s_republishQueue := s_republishQueue - {a_notifRepublishQueue(p_subscription)} ||
 

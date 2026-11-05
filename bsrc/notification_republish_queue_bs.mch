@@ -31,7 +31,7 @@ ABSTRACT_VARIABLES
 INVARIANT
     s_republishQueue <: t_notifRepublishQueue &
     a_republish_notification : t_notif_msg +-> t_notifRepublishQueue &
-    a_notification_seq_num : t_notif_msg --> t_sub_seq_num
+    a_notification_seq_num : t_notif_msg +-> t_sub_seq_num
 
 INITIALISATION
     s_republishQueue := {} ||
@@ -112,8 +112,11 @@ OPERATIONS
             bres := FALSE
         OR
             bres := TRUE ||
-            a_republish_notification := a_republish_notification \/ {p_notif_msg |-> p_queue} ||
-            a_notification_seq_num := a_notification_seq_num \/ {p_notif_msg |-> p_seq_num}
+            a_republish_notification,a_notification_seq_num :(
+                a_republish_notification : t_notif_msg +-> t_notifRepublishQueue &
+                a_notification_seq_num : t_notif_msg +-> t_sub_seq_num &
+                a_republish_notification = a_republish_notification$0 <+ {p_notif_msg |-> p_queue} &
+                a_notification_seq_num = a_notification_seq_num$0 <+ {p_notif_msg |-> p_seq_num})
         END
     END
     ;
