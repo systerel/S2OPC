@@ -388,6 +388,12 @@ bool SOPC_StaMac_IsSubscriptionInProgress(SOPC_StaMac_Machine* pSM);
 // Returns true if the subscription has been successfully created
 bool SOPC_StaMac_IsSubscriptionInProgressCreated(SOPC_StaMac_Machine* pSM);
 
+/**
+ * \brief Returns the ServiceResult of the ServiceFault that answered the last (Create|Delete)Subscription request,
+ *        a Good status if there was no ServiceFault.
+ */
+SOPC_StatusCode SOPC_StaMac_GetSubscriptionServiceFault(SOPC_StaMac_Machine* pSM);
+
 // Get Subscriptionid of the last created subscription
 uint32_t SOPC_StaMac_GetLatestSubscriptionId(SOPC_StaMac_Machine* pSM);
 

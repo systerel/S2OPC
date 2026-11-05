@@ -1536,6 +1536,7 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
             else
             {
                 // Creation of the sub failed: there's no more sub in progress && sub in progress created = false
+                // (e.g. ServiceFault received, the connection remains usable)
                 status = SOPC_STATUS_NOK;
             }
         }
@@ -1962,8 +1963,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
-        /* When the request timeoutHint is lower than SOPC_REQUEST_TIMEOUT_MS, the machine will go in error,
-         *  and NOK is returned. */
+        /* When the server answers with a ServiceFault (e.g. request TimeoutHint lower than
+         * SOPC_REQUEST_TIMEOUT_MS elapsed on server side), NOK is returned but the machine remains usable. */
         if (SOPC_StaMac_IsError(pSM))
         {
             status = SOPC_STATUS_NOK;
@@ -1973,7 +1974,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
             status = SOPC_STATUS_TIMEOUT;
             SOPC_StaMac_StopsWithError(pSM, OpcUa_BadTimeout);
         }
-        else if (SOPC_StaMac_HasSubscriptionId(pSM, subscription->subscriptionId))
+        else if (SOPC_StaMac_HasSubscriptionId(pSM, subscription->subscriptionId) ||
+                 !SOPC_IsGoodStatus(SOPC_StaMac_GetSubscriptionServiceFault(pSM)))
         {
             status = SOPC_STATUS_NOK;
         }

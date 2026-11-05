@@ -708,6 +708,49 @@ static SOPC_ReturnStatus test_create_MI_service_fault(SOPC_ClientHelper_Subscrip
     return status;
 }
 
+/* A CreateSubscription request answered with a ServiceFault (too many subscriptions in session) shall be reported as a
+ * failure (NULL subscription) without closing the connection: the created subscriptions shall remain deletable and the
+ * connection usable for the following requests. One subscription shall already exist in the session. */
+static SOPC_ReturnStatus test_create_sub_service_fault(SOPC_ClientConnection* connection)
+{
+    SOPC_ClientHelper_Subscription* subscriptions[SOPC_MAX_SESSION_SUBSCRIPTIONS] = {NULL};
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool rejected = false;
+    // The last creation exceeds the maximum number of subscriptions per session (one already exists)
+    for (size_t i = 0; SOPC_STATUS_OK == status && !rejected && i < SOPC_MAX_SESSION_SUBSCRIPTIONS; i++)
+    {
+        OpcUa_CreateSubscriptionRequest* createSubReq = SOPC_CreateSubscriptionRequest_Create(500, 6, 2, 1000, true, 0);
+        if (NULL == createSubReq)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            subscriptions[i] = SOPC_ClientHelper_CreateSubscription(connection, createSubReq,
+                                                                    SOPC_Client_SubscriptionNotification_Cb, 12);
+            rejected = (NULL == subscriptions[i]);
+        }
+    }
+    if (SOPC_STATUS_OK == status && !rejected)
+    {
+        printf(">>Test_Client_Toolkit: CreateSubscription beyond maximum per session not rejected\n");
+        status = SOPC_STATUS_NOK;
+    }
+    for (size_t i = 0; i < SOPC_MAX_SESSION_SUBSCRIPTIONS; i++)
+    {
+        if (NULL != subscriptions[i])
+        {
+            SOPC_ReturnStatus delStatus = SOPC_ClientHelper_DeleteSubscription(&subscriptions[i]);
+            if (SOPC_STATUS_OK == status && SOPC_STATUS_OK != delStatus)
+            {
+                printf(">>Test_Client_Toolkit: DeleteSubscription failed after CreateSubscription ServiceFault\n");
+                status = delStatus;
+            }
+        }
+    }
+    return status;
+}
+
 static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
 {
     // Reset expected result
@@ -855,6 +898,12 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
         if (SOPC_STATUS_OK == status)
         {
             status = test_create_MI_service_fault(subscription);
+        }
+
+        /* ServiceFault on CreateSubscription shall not close the connection (checked by the next test) */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = test_create_sub_service_fault(connection);
         }
 
         /* NON REGRESSSION TEST FOR ISSUE #1428: server fail due to buffer overflow without fix */

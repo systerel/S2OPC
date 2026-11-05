@@ -72,6 +72,8 @@ struct SOPC_StaMac_Machine
     bool bSubscriptionInProgress;         /* Flag active when a subscription is in creation progress */
     bool bSubscriptionInProgressCreated;  /* Flag active when the subscription in progress has been created */
     uint32_t latestSubscriptionId;        /* The id of latest created subscription */
+    SOPC_StatusCode subscrServiceFault;   /* ServiceResult of the ServiceFault answering the last
+                                           * (Create|Delete)Subscription request, Good otherwise */
     uint32_t nMonItClientHandle;          /* Latest client handle generated for monitored items,
                                            * used as unique identifier */
     uint32_t nTokenTarget;                /* Target number of available tokens */
@@ -240,6 +242,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->bSubscriptionInProgress = false;
         pSM->bSubscriptionInProgressCreated = false;
         pSM->latestSubscriptionId = 0;
+        pSM->subscrServiceFault = SOPC_GoodGenericStatus;
         pSM->nMonItClientHandle = 0;
         pSM->nTokenTarget = iTokenTarget;
         pSM->tooManyTokenRcvd = false;
@@ -612,6 +615,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
         {
             pSM->bSubscriptionInProgress = true;
             pSM->bSubscriptionInProgressCreated = false;
+            pSM->subscrServiceFault = SOPC_GoodGenericStatus;
             SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Creating subscription using provided request.");
             if (SOPC_STATUS_OK == status)
             {
@@ -759,9 +763,17 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM, uint3
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     void* pRequest = NULL;
 
+    if (NULL == pSM)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (SOPC_StaMac_HasSubscriptionId(pSM, subscriptionId) && stActivated == pSM->state)
     {
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Deleting subscription.");
+        pSM->subscrServiceFault = SOPC_GoodGenericStatus;
 
         if (SOPC_STATUS_OK == status)
         {
@@ -781,6 +793,8 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM, uint3
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
+    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
 }
 
@@ -1137,6 +1151,22 @@ bool SOPC_StaMac_IsSubscriptionInProgressCreated(SOPC_StaMac_Machine* pSM)
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return return_code;
+}
+
+SOPC_StatusCode SOPC_StaMac_GetSubscriptionServiceFault(SOPC_StaMac_Machine* pSM)
+{
+    if (NULL == pSM)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_StatusCode result = pSM->subscrServiceFault;
+    status = SOPC_Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    return result;
 }
 
 uint32_t SOPC_StaMac_GetLatestSubscriptionId(SOPC_StaMac_Machine* pSM)
@@ -2190,25 +2220,9 @@ static void LockedStaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machi
     pSM->state = stActivated;
 }
 
-static void LockedStaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pSM,
-                                                               uint32_t arg,
-                                                               void* pParam,
-                                                               uintptr_t appCtx)
+/* Removes the subscription and its context from the machine */
+static void LockedStaMac_RemoveSubscription(SOPC_StaMac_Machine* pSM, uint32_t subscriptionId)
 {
-    SOPC_UNUSED_ARG(arg);
-    uint32_t subscriptionId = (uint32_t) appCtx;
-
-    if (1 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->NoOfResults)
-    {
-        /* we should have deleted only one subscription */
-        pSM->state = stError;
-    }
-    else if (0 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->Results[0])
-    {
-        /* delete subscription went wrong */
-        pSM->state = stError;
-    }
-
     // Clear the value (= subCtx)
     subscriptionCtx* subCtx = (subscriptionCtx*) SOPC_SLinkedList_FindFromId(pSM->pListSubscriptions, subscriptionId);
     if (NULL != subCtx)
@@ -2242,6 +2256,28 @@ static void LockedStaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machi
         pSM->nTokenUsable = 0;
         pSM->tooManyTokenRcvd = false;
     }
+}
+
+static void LockedStaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pSM,
+                                                               uint32_t arg,
+                                                               void* pParam,
+                                                               uintptr_t appCtx)
+{
+    SOPC_UNUSED_ARG(arg);
+    uint32_t subscriptionId = (uint32_t) appCtx;
+
+    if (1 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->NoOfResults)
+    {
+        /* we should have deleted only one subscription */
+        pSM->state = stError;
+    }
+    else if (0 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->Results[0])
+    {
+        /* delete subscription went wrong */
+        pSM->state = stError;
+    }
+
+    LockedStaMac_RemoveSubscription(pSM, subscriptionId);
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Subscription deleted.");
     pSM->state = stActivated;
@@ -2491,6 +2527,35 @@ static void LockedStaMac_CompleteDeleteMonItWithServiceFault(SOPC_StaMac_Machine
     pSM->state = (completed ? stActivated : stError);
 }
 
+static void LockedStaMac_CompleteCreateSubscrWithServiceFault(SOPC_StaMac_Machine* pSM, SOPC_StatusCode serviceResult)
+{
+    SOPC_ASSERT(pSM->bSubscriptionInProgress);
+    pSM->subscrServiceFault = serviceResult;
+    // Subscription not created: ends the creation in progress for the waiting caller
+    pSM->bSubscriptionInProgressCreated = false;
+    pSM->bSubscriptionInProgress = false;
+    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                             "CreateSubscription answered with ServiceFault 0x%08" PRIX32 ", request failed",
+                             serviceResult);
+    pSM->state = stActivated;
+}
+
+static void LockedStaMac_CompleteDeleteSubscrWithServiceFault(SOPC_StaMac_Machine* pSM,
+                                                              uint32_t subscriptionId,
+                                                              SOPC_StatusCode serviceResult)
+{
+    pSM->subscrServiceFault = serviceResult;
+    /* The subscription context is removed anyway: the caller releases the subscription and its context
+       whatever the result. The subscription remaining on server side is ignored (unknown SubscriptionId
+       in PublishResponse) until it is deleted with the session or expires. */
+    LockedStaMac_RemoveSubscription(pSM, subscriptionId);
+    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                             "DeleteSubscriptions answered with ServiceFault 0x%08" PRIX32 ", subscription %" PRIu32
+                             " only removed on client side",
+                             serviceResult, subscriptionId);
+    pSM->state = stActivated;
+}
+
 static void LockedStaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
                                                  uint32_t arg,
                                                  void* pParam,
@@ -2523,10 +2588,19 @@ static void LockedStaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
         }
         break;
     default:
-        /* A ServiceFault answering a (Create|Delete)MonitoredItems request (e.g. Bad_Timeout when the request
-           TimeoutHint elapsed on server side) is reported to the waiting caller through its context: the session
-           and its subscriptions remain usable. Other cases go into error mode. */
-        if (stCreatingMonIt == pSM->state && 0 != appCtx)
+        /* A ServiceFault answering a (Create|Delete)MonitoredItems or (Create|Delete)Subscription request (e.g.
+           Bad_Timeout when the request TimeoutHint elapsed on server side) is reported to the waiting caller:
+           the session and its subscriptions remain usable. Other cases go into error mode. */
+        if (stCreatingSubscr == pSM->state)
+        {
+            LockedStaMac_CompleteCreateSubscrWithServiceFault(pSM, servFault->ResponseHeader.ServiceResult);
+        }
+        else if (stDeletingSubscr == pSM->state)
+        {
+            LockedStaMac_CompleteDeleteSubscrWithServiceFault(pSM, (uint32_t) appCtx,
+                                                              servFault->ResponseHeader.ServiceResult);
+        }
+        else if (stCreatingMonIt == pSM->state && 0 != appCtx)
         {
             LockedStaMac_CompleteCreateMonItWithServiceFault(pSM, (SOPC_CreateMonitoredItems_Ctx*) appCtx,
                                                              servFault->ResponseHeader.ServiceResult);

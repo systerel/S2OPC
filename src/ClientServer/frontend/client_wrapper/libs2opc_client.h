@@ -386,7 +386,8 @@ typedef void SOPC_ClientSubscriptionNotification_Fct(const SOPC_ClientHelper_Sub
  * \param userParam        The user parameter associated to the subscription that can be accessed using
  *                         ::SOPC_ClientHelper_Subscription_GetUserParam
  *
- * \return The subscription instance or NULL in case of error (invalid parameters, etc.)
+ * \return The subscription instance or NULL in case of error (invalid parameters, etc.).
+ *         When the server answered with a ServiceFault, NULL is returned and the connection remains usable.
  *
  * \note The provided \p subParams memory is managed by the function after this call (even in case of error)
  *       and shall not be accessed nor freed after call.
@@ -405,6 +406,11 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client or subscription is not running.
+ *         SOPC_STATUS_NOK if the server answered with a ServiceFault: the subscription is removed on client side
+ *         only and the connection remains usable.
+ *
+ * \note Unless parameters are invalid or the client is not initialized, the subscription instance is freed
+ *       and \p *subscription set to NULL whatever the result.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscription** subscription);
 
