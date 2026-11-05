@@ -60,14 +60,12 @@
 @IF NOT DEFINED CONFIG (set CONFIG=Release)
 @IF NOT "%WITH_ASAN%" == "off" IF NOT "%CONFIG%" == "Debug" (echo ERROR: cannot compile WITH_ASAN="on" without CONFIG="Debug". & goto :EXIT_FAIL)
 @
-@REM Comment if ENABLED_TESTING=off or if already built
-@REM Build Check
+@REM Build Check (only needed if ENABLE_TESTING is not off)
 @IF NOT "%ENABLE_TESTING%" == "off" ( call :BUILD_DEP check "%CHECK_DIR%" || goto :EXIT_FAIL )
 @
 @REM Build Expat (optional: skipped if EXPAT_DIR does not exist, only needed for XML parsing)
 @call :BUILD_DEP expat "%EXPAT_DIR%" optional || goto :EXIT_FAIL
 @
-@REM Comment if already built
 @REM Build MbedTLS
 @call :BUILD_DEP mbedtls "%MBEDTLS_DIR%" || goto :EXIT_FAIL
 @
@@ -89,6 +87,8 @@ cmake -DWARNINGS_AS_ERRORS=%WARNINGS_AS_ERRORS% -DCMAKE_INSTALL_PREFIX=%S2OPC_IN
 @IF not %ERRORLEVEL% == 0 goto :EXIT_FAIL
 REM Build S2OPC Project
 cmake --build . --config %CONFIG% -j %NUMBER_OF_PROCESSORS%
+@REM Checked here as tests and samples are not installed: their build failure is not detected by install
+@IF not %ERRORLEVEL% == 0 goto :EXIT_FAIL
 cmake --install .
 @IF not %ERRORLEVEL% == 0 goto :EXIT_FAIL
 :EXIT_OK
@@ -109,7 +109,8 @@ cmake --install .
 @IF "%REBUILD_DEPS%" == "off" IF EXIST "%~2\install\.s2opc_built" goto :BUILD_DEP_ALREADY_BUILT
 @REM Remove a previous marker so that a failed rebuild is never considered as built
 @IF EXIST "%~2\install\.s2opc_built" del "%~2\install\.s2opc_built"
-@call CMake\build_%1.bat
+@REM Script path based on S2OPC_DIR so that the build does not depend on the current directory
+@call "%S2OPC_DIR%\CMake\build_%1.bat"
 @IF NOT %ERRORLEVEL% == 0 goto :BUILD_DEP_FAILED
 @IF NOT EXIST "%~2\install\" goto :BUILD_DEP_NO_INSTALL
 @echo built> "%~2\install\.s2opc_built"
