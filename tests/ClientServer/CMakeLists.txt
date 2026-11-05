@@ -49,6 +49,10 @@ set(S2OPC_CLIENTSERVER_INTERNAL_INCLUDES
 # Get the helpers for unit and validation tests
 set(S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES ${S2OPC_ROOT_PATH}/tests/ClientServer/helpers)
 file(GLOB S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES CONFIGURE_DEPENDS "${S2OPC_ROOT_PATH}/tests/ClientServer/helpers/*.c")
+# Busy-refusal helpers need the frontend monitoring API; keep them out of the shared GLOB.
+list(FILTER S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES EXCLUDE REGEX "sopc_test_services_queue_busy\\.c$")
+set(S2OPC_TEST_SERVICES_QUEUE_BUSY_SOURCES
+  "${S2OPC_ROOT_PATH}/tests/ClientServer/helpers/sopc_test_services_queue_busy.c")
 
 enable_testing()
 
@@ -380,6 +384,53 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/self-signed/ca_selfsigned_pathLen0_expired.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/certs/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/expired_certs/self-signed/ca_selfsigned_pathLen0_expired_caFalse.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Tests_Expired_Certs_PKI/trusted/certs/
 )
+# Services queue busy refusal: local requests
+add_executable(toolkit_test_server_local_busy
+  "validation_tests/server/toolkit_test_server_local_busy.c"
+  ${TEST_LIGHT_ADDRESS_SPACE_C}
+  ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
+  ${S2OPC_TEST_SERVICES_QUEUE_BUSY_SOURCES})
+add_dependencies(toolkit_test_server_local_busy make-light-address-space)
+target_link_libraries(toolkit_test_server_local_busy PRIVATE
+  s2opc_clientserver
+  s2opc_clientserver-loader-embedded)
+# Internal includes: Services event treated hook of the busy test helpers
+target_include_directories(toolkit_test_server_local_busy PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
+  ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+target_compile_options(toolkit_test_server_local_busy PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_server_local_busy PRIVATE ${S2OPC_DEFINITIONS})
+s2opc_unit_test(toolkit_test_server_local_busy GENERATE_TAP)
+
+# Services queue busy refusal: external (client) requests
+add_executable(toolkit_test_server_client_busy
+  "validation_tests/client/toolkit_test_server_client_busy.c"
+  ${TEST_LIGHT_ADDRESS_SPACE_C}
+  ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
+  ${S2OPC_TEST_SERVICES_QUEUE_BUSY_SOURCES})
+add_dependencies(toolkit_test_server_client_busy make-light-address-space)
+target_link_libraries(toolkit_test_server_client_busy PRIVATE
+  s2opc_clientserver
+  s2opc_clientserver-loader-embedded)
+# Internal includes: Services event treated hook of the busy test helpers
+target_include_directories(toolkit_test_server_client_busy PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
+  ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+target_compile_options(toolkit_test_server_client_busy PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_server_client_busy PRIVATE ${S2OPC_DEFINITIONS})
+
+# Server of the external busy test (separate process blocking its Services thread for each request batch)
+add_executable(toolkit_test_server_busy_external
+  "validation_tests/server/toolkit_test_server_busy_external.c"
+  ${TEST_LIGHT_ADDRESS_SPACE_C}
+  ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
+  ${S2OPC_TEST_SERVICES_QUEUE_BUSY_SOURCES})
+add_dependencies(toolkit_test_server_busy_external make-light-address-space)
+target_link_libraries(toolkit_test_server_busy_external PRIVATE
+  s2opc_clientserver
+  s2opc_clientserver-loader-embedded)
+target_include_directories(toolkit_test_server_busy_external PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
+  ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+target_compile_options(toolkit_test_server_busy_external PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_server_busy_external PRIVATE ${S2OPC_DEFINITIONS})
 
 # Server running local services
 add_executable(toolkit_test_server_local_service "validation_tests/server/toolkit_test_server_local_service.c"
@@ -941,6 +992,19 @@ s2opc_validation_test(client_server_test_delete_nodes toolkit_test_client_delete
 s2opc_validation_test(client_service_faults_test toolkit_test_client_service_faults)
 s2opc_validation_test(client_sub_lifetime_test toolkit_test_client_sub_lifetime)
 s2opc_validation_test(client_RHE_faults_test toolkit_test_client_rhe_faults)
+
+# External busy test: client toolkit_test_server_client_busy with the server toolkit_test_server_busy_external
+add_test(NAME "validation::toolkit_test_server_client_busy"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--wait-server-timeout" "${S2OPC_WITH_OPC_SERVER_READY_TIMEOUT}"
+  "--server-wd" $<TARGET_FILE_DIR:toolkit_test_server_busy_external>
+  "--server-cmd" $<TARGET_FILE:toolkit_test_server_busy_external>
+  $<TARGET_FILE:toolkit_test_server_client_busy>)
+set_tests_properties("validation::toolkit_test_server_client_busy" PROPERTIES
+  ENVIRONMENT "CK_TAP_LOG_FILE_NAME=toolkit_test_server_client_busy.tap")
 
 if(expat_FOUND AND S2OPC_EVENT_MANAGEMENT)
   s2opc_validation_test(client_server_events_test toolkit_test_client_events events)
