@@ -31,7 +31,7 @@ SONARQUBE_DIGEST=registry.gitlab.com/systerel/s2opc/sonarqube@sha256:b3ff9482ea2
 MUSL_DIGEST=registry.gitlab.com/systerel/s2opc/build-musl@sha256:c4aebefcbd437cb1259e947ed99beb61848ee6dcd13052c8485278dbb3f7c431 # build-musl:v3.0
 
 # Private images
-GEN_DIGEST=docker.aix.systerel.fr/c838/gen@sha256:cbad211f0424f83b59f7d9a90ec68aae0b7ab0dd99c05d9dc5bd4e3117cfada0 # docker.aix.systerel.fr/c838/gen:1.6
+GEN_DIGEST=docker.aix.systerel.fr/c838/gen@sha256:48eacc40c4405030affdf79c3eeb0b213bc8e23829db44f9a9e2f3f74212e2ca # docker.aix.systerel.fr/c838/gen:1.7
 UACTT_WIN_DIGEST=com.systerel.fr:5000/c838/uactt-win@sha256:98b4488aa85310d1e668af8f42be4973e2e7494fe9f44adbaf81896f794db794 # com.systerel.fr:5000/c838/uactt-win:2.3
 UACTT_LINUX_DIGEST=com.systerel.fr:5000/c838/uactt-linux@sha256:3f1eb2312da5cd6b8ff031773c6860bc456ada6a6e93d4addbc8277408c56da6 # com.systerel.fr:5000/c838/uactt-linux:1.11
 NETWORK_FUZZING_DIGEST=docker.aix.systerel.fr/c838/opcua-network-fuzzer@sha256:35e40ba847bdfe5f3e7112f465adb2c70d1f0694521f6ba8d018c55f651ef205 # docker.aix.systerel.fr/c838/opcua-network-fuzzer:3.3
