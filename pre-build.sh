@@ -57,12 +57,11 @@ if [[ -z $TOOLING_DIR ]]; then
     # If tooling directory is not defined, only call make target
     echo "Environment variable TOOLING_DIR not set (CAUTION: no generation from B model possible)" | tee -a $LOGPATH
     echo "Check C sources files from B model are up to date" | tee -a $LOGPATH
-    make VERBOSE=1 -C $BMODEL_DIR >> $LOGPATH
+    make VERBOSE=1 -C $BMODEL_DIR >> $LOGPATH 2>&1
 else
     echo "Prepare B project and tools configuration" | tee -a $LOGPATH
     # Set a pre-build local environment for "m" script
 
-    export ATELIERB_VERSION="4.2.1"
     export STARTBB=startBB
     export BASE=$(pwd)/$PREBUILD
     # Create pre-build directory to check B modle and generate C code
@@ -80,8 +79,14 @@ else
 	# Change Atelier B database path to make the project persistent
 	echo "Changing Atelier B database path to $BASE/bdb" | tee -a $LOGPATH
 	mkdir -p $BASE/bdb
+	# Atelier B resource file is next to startBB (installation directory)
+	ATB_RESOURCE="$(dirname "$(command -v startBB)")/AtelierB"
+	if [[ ! -f $ATB_RESOURCE ]]; then
+	    echo "ERROR: Atelier B resource file not found ($ATB_RESOURCE)" | tee -a $LOGPATH
+	    exit 1
+	fi
 	sed "/Atelier_Database_Directory/ s;/home/.*;$BASE/bdb;" \
-	    /opt/atelierb-4.2/AtelierB > $BASE/AtelierB
+	    "$ATB_RESOURCE" > $BASE/AtelierB
 	export STARTBB="startBB -r=$BASE/AtelierB"
     fi
 
@@ -91,12 +96,14 @@ else
 	true # Prevent any error reporting
     else
 	echo "Generate C sources files from B model" | tee -a $LOGPATH
-	make VERBOSE=1 -C $BASE >> $LOGPATH
+	make VERBOSE=1 -C $BASE >> $LOGPATH 2>&1
     fi
 fi
 
 if [[ $? != 0 ]]; then
     echo "ERROR: generating C source files from B model" | tee -a $LOGPATH
+    # stderr is redirected to the log: show its end to give the error context
+    tail -n 30 $LOGPATH
     EXITCODE=1
 fi
 # NO_PREBUILD_RM might be used during B model development to keep pre-build directory and use incremental build

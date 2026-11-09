@@ -42,16 +42,16 @@ PROJECT: $(SOURCE_FILES)
 	fi
 
 TC: $(SOURCE_FILES)
-	m -lonely -incomplete -pchk -tc -b0 | tee tc.log
+	m -lonely -incomplete -pchk -tc -b0 2>&1 | tee tc.log
 #	# *_bs_inlined machines are basic machines implemented by a manual header (not translated, see b2c/)
-	grep -vE '^warning: [_A-Za-z0-9]+_bs_inlined$$' tc.log | grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b)' | xargs test 0 -eq
+	grep -vE '^warning: [_A-Za-z0-9]+_bs_inlined$$' tc.log | grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b|\bfault\b)' | xargs test 0 -eq
 
 $(TARGET_GENERATED_FILES): $(SOURCE_FILES)
 	$(RM) tc.log
 	$(RM) -fr ./$(PATHTRAD)
 	$(RM) -fr ./$(PATHGENTRAD)
-	m -tr | tee tr.log
-	grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b)' tr.log | xargs test 0 -eq
+	m -tr 2>&1 | tee tr.log
+	grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b|\bfault\b)' tr.log | xargs test 0 -eq
 	$(RM) tr.log
 #	# Copy files and prepend them with copyright
 	mkdir $(PATHTRAD)

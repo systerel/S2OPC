@@ -55,7 +55,6 @@ EXITCODE=0
 echo "Prepare B project and tools configuration" | tee -a "$LOGPATH"
 # Set a pre-build local environment for "m" script
 
-export ATELIERB_VERSION="4.2.1"
 export STARTBB=startBB
 BASE="$(pwd)/$PREBUILD"
 export BASE
@@ -77,9 +76,11 @@ PATH="$TOOLING_DIR"/bin/m:"$TOOLING_DIR"/bin/trad:"$PATH"
 if [[ $POs != "POs" ]]
 then
     echo "Generate C sources files from B model" | tee -a "$LOGPATH"
-    if ! make VERBOSE=1 -C "$BASE" >> "$LOGPATH";
+    if ! make VERBOSE=1 -C "$BASE" >> "$LOGPATH" 2>&1;
     then
         echo "ERROR: generating C source files from B model" | tee -a "$LOGPATH"
+        # stderr is redirected to the log: show its end to give the error context
+        tail -n 30 "$LOGPATH"
         EXITCODE=1
     fi
 else
