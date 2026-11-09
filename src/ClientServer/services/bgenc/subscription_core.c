@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 05/11/2026 13:16:02
+ Date                 : 09/11/2026 09:17:25
 
  C Translator Version : tradc Java V2.0 (2026-09-14)
 
@@ -692,6 +692,9 @@ void subscription_core__create_subscription(
       constants__t_timer_id_i subscription_core__l_timerId;
       constants__t_prioritySubQueue_i subscription_core__l_prio_subs_queue;
       
+      subscription_core__l_bres_repub = false;
+      subscription_core__l_bres_monitored = false;
+      subscription_core__l_bres_timer = false;
       *subscription_core__StatusCode_service = constants_statuscodes_bs__c_StatusCode_indet;
       subscription_core__get_fresh_subscription(&subscription_core__l_bres,
          subscription_core__subscription);
@@ -742,6 +745,8 @@ void subscription_core__create_subscription(
          else {
             *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
             *subscription_core__subscription = constants__c_subscription_indet;
+         }
+         if (*subscription_core__StatusCode_service != constants_statuscodes_bs__e_sc_ok) {
             if (subscription_core__l_bres_repub == true) {
                notification_republish_queue_bs__clear_and_deallocate_republish_queue(subscription_core__l_newRepublishQueue);
             }

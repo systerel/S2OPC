@@ -1304,6 +1304,9 @@ OPERATIONS
         l_timerId,
         l_prio_subs_queue
     IN
+        l_bres_repub := FALSE;
+        l_bres_monitored := FALSE;
+        l_bres_timer := FALSE;
         StatusCode_service := c_StatusCode_indet;
         l_bres, subscription <-- get_fresh_subscription;
         IF l_bres = TRUE
@@ -1341,7 +1344,12 @@ OPERATIONS
                 END
             ELSE
                 StatusCode_service := e_sc_bad_out_of_memory;
-                subscription := c_subscription_indet;
+                subscription := c_subscription_indet
+            END
+            ;
+            /* In case of failure, free allocated queues and timer */
+            IF StatusCode_service /= e_sc_ok
+            THEN
                 IF l_bres_repub = TRUE
                 THEN
                     clear_and_deallocate_republish_queue (l_newRepublishQueue)
