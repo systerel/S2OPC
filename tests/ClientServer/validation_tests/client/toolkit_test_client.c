@@ -751,6 +751,89 @@ static SOPC_ReturnStatus test_create_sub_service_fault(SOPC_ClientConnection* co
     return status;
 }
 
+/* Number of CreateSubscription / DeleteSubscription cycles done while PublishResponses are received.
+ * The client wrapper waits for responses by steps of 50 ms and the server publishing cycles are periodic too: without
+ * shifting, requests are always sent at the same phase and may never be pending when PublishResponses are received.
+ * Each cycle is delayed by 1 ms more than the previous one, so the cycles sweep a full 50 ms period. */
+#define TEST_CREATE_SUB_WHILE_PUBLISHING_CYCLES 60
+
+/* Creating a subscription while PublishResponses of the existing subscriptions are received shall succeed: a
+ * PublishResponse received while a CreateSubscription request is pending shall not switch the connection in error.
+ * Fast subscriptions (minimum publishing interval, keep-alive at each publishing cycle) are created to receive
+ * PublishResponses continuously, then a subscription is created and deleted several times.
+ * One subscription shall already exist in the session. */
+static SOPC_ReturnStatus test_create_sub_while_publishing(SOPC_ClientConnection* connection)
+{
+    // Keep one free subscription slot in the session for the created / deleted subscription
+    SOPC_ClientHelper_Subscription* fastSubscriptions[SOPC_MAX_SESSION_SUBSCRIPTIONS - 2] = {NULL};
+    const size_t nbFastSubscriptions = sizeof(fastSubscriptions) / sizeof(fastSubscriptions[0]);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    for (size_t i = 0; SOPC_STATUS_OK == status && i < nbFastSubscriptions; i++)
+    {
+        OpcUa_CreateSubscriptionRequest* createSubReq =
+            SOPC_CreateSubscriptionRequest_Create(SOPC_MIN_SUBSCRIPTION_INTERVAL_DURATION, 3, 1, 1000, true, 0);
+        if (NULL == createSubReq)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            fastSubscriptions[i] = SOPC_ClientHelper_CreateSubscription(connection, createSubReq,
+                                                                        SOPC_Client_SubscriptionNotification_Cb, 13);
+            if (NULL == fastSubscriptions[i])
+            {
+                printf(">>Test_Client_Toolkit: creation of fast subscription %zu failed\n", i);
+                status = SOPC_STATUS_NOK;
+            }
+        }
+    }
+    for (size_t i = 0; SOPC_STATUS_OK == status && i < TEST_CREATE_SUB_WHILE_PUBLISHING_CYCLES; i++)
+    {
+        OpcUa_CreateSubscriptionRequest* createSubReq = SOPC_CreateSubscriptionRequest_Create(500, 6, 2, 1000, true, 0);
+        SOPC_ClientHelper_Subscription* subscription = NULL;
+        if (NULL == createSubReq)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            SOPC_Sleep(
+                (unsigned int) i); // Shift the phase of the request (see TEST_CREATE_SUB_WHILE_PUBLISHING_CYCLES)
+            subscription = SOPC_ClientHelper_CreateSubscription(connection, createSubReq,
+                                                                SOPC_Client_SubscriptionNotification_Cb, 14);
+        }
+        if (SOPC_STATUS_OK == status && NULL == subscription)
+        {
+            printf(">>Test_Client_Toolkit: CreateSubscription failed while receiving PublishResponses (cycle %zu)\n",
+                   i);
+            status = SOPC_STATUS_NOK;
+        }
+        if (NULL != subscription)
+        {
+            status = SOPC_ClientHelper_DeleteSubscription(&subscription);
+            if (SOPC_STATUS_OK != status)
+            {
+                printf(
+                    ">>Test_Client_Toolkit: DeleteSubscription failed while receiving PublishResponses (cycle %zu)\n",
+                    i);
+            }
+        }
+    }
+    for (size_t i = 0; i < nbFastSubscriptions; i++)
+    {
+        if (NULL != fastSubscriptions[i])
+        {
+            SOPC_ReturnStatus delStatus = SOPC_ClientHelper_DeleteSubscription(&fastSubscriptions[i]);
+            if (SOPC_STATUS_OK == status && SOPC_STATUS_OK != delStatus)
+            {
+                printf(">>Test_Client_Toolkit: DeleteSubscription of fast subscription %zu failed\n", i);
+                status = delStatus;
+            }
+        }
+    }
+    return status;
+}
+
 static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
 {
     // Reset expected result
@@ -904,6 +987,12 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
         if (SOPC_STATUS_OK == status)
         {
             status = test_create_sub_service_fault(connection);
+        }
+
+        /* PublishResponses received during CreateSubscription shall not close the connection */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = test_create_sub_while_publishing(connection);
         }
 
         /* NON REGRESSSION TEST FOR ISSUE #1428: server fail due to buffer overflow without fix */

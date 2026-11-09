@@ -1376,7 +1376,9 @@ static bool LockedStaMac_GiveAuthorization_stCreatingSubscr(SOPC_StaMac_Machine*
     switch (event)
     {
     case SE_RCV_SESSION_RESPONSE:
-        if (&OpcUa_CreateSubscriptionResponse_EncodeableType == pEncType)
+        /* PublishResponses of the already existing subscriptions may be received while the creation is in progress */
+        if (&OpcUa_CreateSubscriptionResponse_EncodeableType == pEncType ||
+            &OpcUa_PublishResponse_EncodeableType == pEncType)
         {
             authorization = true;
         }
@@ -2546,8 +2548,10 @@ static void LockedStaMac_CompleteDeleteSubscrWithServiceFault(SOPC_StaMac_Machin
 {
     pSM->subscrServiceFault = serviceResult;
     /* The subscription context is removed anyway: the caller releases the subscription and its context
-       whatever the result. The subscription remaining on server side is ignored (unknown SubscriptionId
-       in PublishResponse) until it is deleted with the session or expires. */
+       whatever the result. The subscription may remain on server side: its PublishResponses are ignored
+       (unknown SubscriptionId, not acknowledged) but still consume publish tokens. It only expires if no
+       PublishRequest is available during its lifetime, i.e. never while other subscriptions remain on the
+       connection, otherwise it is deleted with the session (see SOPC_ClientHelper_DeleteSubscription). */
     LockedStaMac_RemoveSubscription(pSM, subscriptionId);
     SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                              "DeleteSubscriptions answered with ServiceFault 0x%08" PRIX32 ", subscription %" PRIu32
