@@ -411,6 +411,15 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
  *
  * \note Unless parameters are invalid or the client is not initialized, the subscription instance is freed
  *       and \p *subscription set to NULL whatever the result.
+ *
+ * \warning When SOPC_STATUS_NOK is returned because of a ServiceFault (e.g. Bad_Timeout when the server did not treat
+ *          the request in time), the subscription may still exist on server side. A server subscription expires only
+ *          when no PublishRequest is available during its lifetime (revised lifetime count x publishing interval).
+ *          While other subscriptions remain on the same connection, the client keeps sending PublishRequests: the
+ *          remaining server subscription does not expire, keeps consuming server resources and publish tokens of the
+ *          connection, and its notifications are neither acknowledged nor reported (an error is traced for each
+ *          one). It is released on server side when the session is closed, e.g. using
+ *          ::SOPC_ClientHelper_Disconnect.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscription** subscription);
 
