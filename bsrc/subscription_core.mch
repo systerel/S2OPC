@@ -595,7 +595,9 @@ OPERATIONS
                         =>
                         subscription = c_subscription_indet &
                         s_subscription = s_subscription$0 &
-                        a_subscription_session = a_subscription_session$0
+                        a_subscription_session = a_subscription_session$0 &
+                        s_monitoredItemQueue = s_monitoredItemQueue$0 &
+                        s_republishQueue = s_republishQueue$0
                     )
                 ) &
                 /* Transition #1 + #2 */
@@ -605,7 +607,9 @@ OPERATIONS
                     StatusCode_service = e_sc_bad_out_of_memory &
                     subscription = c_subscription_indet &
                     s_subscription = s_subscription$0 &
-                    a_subscription_session = a_subscription_session$0
+                    a_subscription_session = a_subscription_session$0 &
+                    s_monitoredItemQueue = s_monitoredItemQueue$0 &
+                    s_republishQueue = s_republishQueue$0
                 )
             )
         END
