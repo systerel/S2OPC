@@ -29,8 +29,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h> /* EXIT_* */
+#include <string.h>
 
 #include "sopc_async_queue.h"
+#include "sopc_atomic.h"
 #include "sopc_buffer.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"
@@ -40,6 +42,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_sockets_api.h"
+#include "sopc_threads.h"
 #include "sopc_toolkit_config_constants.h"
 
 const char* uri = "opc.tcp://localhost:4841/myEndPoint";
@@ -347,6 +350,132 @@ START_TEST(test_sockets)
 }
 END_TEST
 
+/* Number of occurrences of log lines of interest for test_listener_max_connections_no_busy_loop */
+static int32_t nbRefusedConnectionLogs = 0;
+static int32_t nbListenerSuspendedLogs = 0;
+static int32_t nbListenerResumedLogs = 0;
+
+static void onLog(const char* timestampUtc, const char* category, const SOPC_Log_Level level, const char* const line)
+{
+    SOPC_UNUSED_ARG(timestampUtc);
+    SOPC_UNUSED_ARG(category);
+    SOPC_UNUSED_ARG(level);
+    if (NULL != strstr(line, "refusing new connection since maximum number of socket reached"))
+    {
+        SOPC_Atomic_Int_Add(&nbRefusedConnectionLogs, 1);
+    }
+    else if (NULL != strstr(line, "stops accepting new connections"))
+    {
+        SOPC_Atomic_Int_Add(&nbListenerSuspendedLogs, 1);
+    }
+    else if (NULL != strstr(line, "accepts new connections again"))
+    {
+        SOPC_Atomic_Int_Add(&nbListenerResumedLogs, 1);
+    }
+}
+
+/* Opens a blocking raw TCP connection to the given host and port, trying each resolved address */
+static SOPC_Socket raw_connect(const char* host, const char* port)
+{
+    SOPC_Socket sock = SOPC_INVALID_SOCKET;
+    SOPC_Socket_AddressInfo* addrs = NULL;
+    SOPC_ReturnStatus status = SOPC_Socket_AddrInfo_Get(host, port, &addrs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_STATUS_NOK;
+    for (SOPC_Socket_AddressInfo* p = addrs; NULL != p && SOPC_STATUS_OK != status;
+         p = SOPC_Socket_AddrInfo_IterNext(p))
+    {
+        status = SOPC_Socket_CreateNew(p, false, false, &sock);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Socket_Connect(sock, p);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Socket_Close(&sock);
+            }
+        }
+    }
+    SOPC_Socket_AddrInfoDelete(&addrs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    return sock;
+}
+
+/* Non-regression test: when a listener cannot accept new connections (SOPC_MAX_SOCKETS_CONNECTIONS reached or no free
+ * socket), a pending connection attempt shall not make the sockets thread loop on the listener read event (100% CPU and
+ * "refusing new connection" warning flooding). The pending connection shall be accepted once a socket is freed. */
+START_TEST(test_listener_max_connections_no_busy_loop)
+{
+    // Number of connections the listener can accept: limited by the connections per listener or by the free sockets
+    // (index 0 is reserved and 1 socket is used by the listener itself)
+    const uint32_t maxAccepted =
+        (SOPC_MAX_SOCKETS - 2 < SOPC_MAX_SOCKETS_CONNECTIONS) ? SOPC_MAX_SOCKETS - 2 : SOPC_MAX_SOCKETS_CONNECTIONS;
+    SOPC_Socket clientSockets[SOPC_MAX_SOCKETS_CONNECTIONS + 1];
+    uint32_t firstServerSocketIdx = 0;
+    SOPC_Log_Configuration logConfiguration = {.logLevel = SOPC_LOG_LEVEL_INFO,
+                                               .logSystem = SOPC_LOG_SYSTEM_USER,
+                                               .logSysConfig = {.userSystemLogConfig = {.doLog = onLog}}};
+
+    SOPC_EventTimer_Initialize();
+    SOPC_Sockets_Initialize();
+    ck_assert(SOPC_Logger_Initialize(&logConfiguration));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_Init(&socketEvents, ""));
+    SOPC_Looper* looper = SOPC_Looper_Create("test_listener");
+    ck_assert_ptr_nonnull(looper);
+    SOPC_EventHandler* event_handler = SOPC_EventHandler_Create(looper, onSocketEvent);
+    ck_assert_ptr_nonnull(event_handler);
+    SOPC_Sockets_SetEventHandler(event_handler);
+
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, endpointDescConfigId, (uintptr_t) SOPC_strdup(uri),
+                              (uint32_t) true);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+    SOPC_Free(expect_event(SOCKET_LISTENER_OPENED, endpointDescConfigId));
+
+    /* Reach the maximum number of connections accepted by the listener */
+    for (uint32_t i = 0; i < maxAccepted; i++)
+    {
+        clientSockets[i] = raw_connect("localhost", "4841");
+        SOPC_LooperEvent* ev = expect_event(SOCKET_LISTENER_CONNECTION, endpointDescConfigId);
+        SOPC_Free((void*) ev->params);
+        if (0 == i)
+        {
+            firstServerSocketIdx = (uint32_t) ev->auxParam;
+        }
+        SOPC_Free(ev);
+    }
+
+    /* One more connection: established by the OS (listen backlog) but cannot be accepted by the listener */
+    clientSockets[maxAccepted] = raw_connect("localhost", "4841");
+    SOPC_Sleep(1000);
+
+    // Before fix: the listener stayed readable, connection was refused in loop and logged thousands of times
+    ck_assert_int_eq(0, SOPC_Atomic_Int_Get(&nbRefusedConnectionLogs));
+    ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&nbListenerSuspendedLogs));
+    ck_assert_int_eq(0, SOPC_Atomic_Int_Get(&nbListenerResumedLogs));
+
+    /* Free a socket: the pending connection shall now be accepted */
+    // Note: connection id is 0 since SOCKET_ACCEPTED_CONNECTION was not sent for the accepted sockets
+    SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, firstServerSocketIdx, (uintptr_t) NULL, 0);
+    {
+        SOPC_LooperEvent* ev = expect_event(SOCKET_LISTENER_CONNECTION, endpointDescConfigId);
+        SOPC_Free((void*) ev->params);
+        SOPC_Free(ev);
+    }
+    ck_assert_int_eq(0, SOPC_Atomic_Int_Get(&nbRefusedConnectionLogs));
+    ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&nbListenerResumedLogs));
+
+    SOPC_Sockets_Clear();
+    SOPC_EventTimer_Clear();
+    for (uint32_t i = 0; i <= maxAccepted; i++)
+    {
+        SOPC_Socket_Close(&clientSockets[i]);
+    }
+    SOPC_Looper_Delete(looper);
+    SOPC_AsyncQueue_Free(&socketEvents);
+    SOPC_Logger_Clear();
+}
+END_TEST
+
 /* Non-regression test for the cross-platform uniformization of display of IPv4-mapped addresses into IPv6 addresses */
 START_TEST(test_socket_address_getnameinfo_ipv4_mapped)
 {
@@ -404,6 +533,7 @@ static Suite* tests_make_suite_sockets(void)
     s = suite_create("Sockets");
     tc_sockets = tcase_create("Sockets");
     tcase_add_test(tc_sockets, test_sockets);
+    tcase_add_test(tc_sockets, test_listener_max_connections_no_busy_loop);
     suite_add_tcase(s, tc_sockets);
 
     tc_socket_address = tcase_create("SocketAddress");
