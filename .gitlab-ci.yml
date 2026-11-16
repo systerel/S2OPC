@@ -487,7 +487,7 @@ build-rpi:
 
 build-linux64-coverity:
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:2ac0503b8893f4188074871a193ade5cd8ca6ec6a7b77e37c3e3d6f75500b0c2 # digest of coverity:2.0
+  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:d06e79266e5a2e632ac99095a0159fcdb026aada3f15f1e830f39561a7fac20a # digest of coverity:2.1
   needs: []
   script: |-
     python3 .systerel/patch-generate-empty-address-space.py scripts/generate-s2opc-address-space.py
@@ -496,7 +496,7 @@ build-linux64-coverity:
     cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DS2OPC_NODE_MANAGEMENT=1 -DS2OPC_EVENT_MANAGEMENT=1 -DS2OPC_HAS_AUDITING=1 -DS2OPC_EXTERNAL_HISTORY_RAW_READ_SERVICE=1 ..
     /opt/cov-analysis-linux64/bin/cov-build --dir cov-int make
     tar czf cov-int.tar.gz cov-int
-    curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC
+    curl --fail --form "token=${COVERITY_TOKEN}" --form "email=${COVERITY_EMAIL}" --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz "https://scan.coverity.com/builds?project=S2OPC"
   rules:
     - if: "$WITH_COVERITY != null"
 
