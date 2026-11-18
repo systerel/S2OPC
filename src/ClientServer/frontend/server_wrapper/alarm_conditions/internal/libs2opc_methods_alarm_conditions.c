@@ -74,7 +74,8 @@ static const SOPC_NodeId ConfirmMethodType_NodeId =
 
 /* Global variables used for method calls */
 
-static int32_t g_atomic_refreshOnGoing = false; // Atomic accessed value for ConditionRefresh ongoing status
+// ConditionRefresh ongoing status: set under g_refreshMutex before posting the refresh, reset by the looper
+static int32_t g_atomic_refreshOnGoing = false;
 
 // TODO: factorize with ClientUserId computation from Audit (getClientUserId) ?
 static SOPC_String* SOPC_InternalMethodCall_GetClientUserId(const SOPC_CallContext* callContext)
@@ -279,20 +280,22 @@ static void SOPC_Internal_ConditionRefresh(SOPC_InternalConditionRefresh_Ctx* re
                                refreshCtx->sessionId, refreshCtx->subId, refreshCtx->miId);
     }
 
+    SOPC_ReturnStatus mutStatus = SOPC_STATUS_OK;
     SOPC_Dict* notifiers = SOPC_NodeId_Dict_Create(false, NULL);
-    if (NULL == notifiers)
+    SOPC_ReturnStatus status = (NULL != notifiers ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY);
+    if (SOPC_STATUS_OK == status)
     {
-        return;
-    }
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    SOPC_Dict_ForEach(sopc_alarmConditionConfig.g_alarmConditionsDict,
-                      SOPC_InternalConditionRefresh_ComputeNotifiers_ForEach_Fct, (uintptr_t) notifiers);
-    mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        SOPC_Dict_ForEach(sopc_alarmConditionConfig.g_alarmConditionsDict,
+                          SOPC_InternalConditionRefresh_ComputeNotifiers_ForEach_Fct, (uintptr_t) notifiers);
+        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    // Note: types of input arguments already checked by services layer but conversion needed since it is an IntegerId
-    SOPC_ReturnStatus status = SOPC_ServerHelper_CreateEvent(&RefreshStartType_NodeId, &refreshStart);
+        // Note: types of input arguments already checked by services layer but conversion needed since it is an
+        // IntegerId
+        status = SOPC_ServerHelper_CreateEvent(&RefreshStartType_NodeId, &refreshStart);
+    }
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerHelper_CreateEvent(&RefreshEndType_NodeId, &refreshEnd);
@@ -323,8 +326,15 @@ static void SOPC_Internal_ConditionRefresh(SOPC_InternalConditionRefresh_Ctx* re
         SOPC_Dict_ForEach(notifiers, SOPC_InternalConditionRefresh_StartEndNotifiers_ForEach_Fct,
                           (uintptr_t) &startEndNotifierCtx);
     }
-    // Refresh is not ongoing anymore
+    // Refresh is not ongoing anymore (set by SOPC_MethodCall_ConditionRefresh before posting it)
     SOPC_Atomic_Int_Set(&g_atomic_refreshOnGoing, false);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Method call ConditionRefresh for SessionId=%" PRIu32 " SubId=%" PRIu32 " MIid=%" PRIu32
+                               " failed with status %d",
+                               refreshCtx->sessionId, refreshCtx->subId, refreshCtx->miId, status);
+    }
     SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                            "Method call ConditionRefresh for SessionId=%" PRIu32 " SubId=%" PRIu32 " MIid=%" PRIu32
                            " terminated",
@@ -366,13 +376,12 @@ static SOPC_StatusCode SOPC_MethodCall_ConditionRefresh(const SOPC_CallContext* 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     if (SOPC_InternalAlarmConditionMgr_IsInit())
     {
+        // The ongoing check and set are done under g_refreshMutex, before posting to the looper which resets the flag
         SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_alarmConditionConfig.g_refreshMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         const size_t nbRefreshEvents = (NULL != sopc_alarmConditionConfig.g_refreshEventsDict
                                             ? SOPC_Dict_Size(sopc_alarmConditionConfig.g_refreshEventsDict)
                                             : 0);
-        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_refreshMutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         if (true == SOPC_Atomic_Int_Get(&g_atomic_refreshOnGoing))
         {
             opcStatus = OpcUa_BadRefreshInProgress;
@@ -394,16 +403,22 @@ static SOPC_StatusCode SOPC_MethodCall_ConditionRefresh(const SOPC_CallContext* 
             //        Bad_UserAccessDenied is never returned.
             opcStatus = OpcUa_BadSubscriptionIdInvalid;
         }
+        if (SOPC_GoodGenericStatus == opcStatus)
+        {
+            SOPC_Atomic_Int_Set(&g_atomic_refreshOnGoing, true);
+        }
+        mutStatus = SOPC_Mutex_Unlock(&sopc_alarmConditionConfig.g_refreshMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         status = SOPC_InternalAlarmConditionMgr_PostToLooper(SOPC_AC_EVT_METHOD_CALL_COND_REFRESH, 0,
                                                              (uintptr_t) refreshCtx, (uintptr_t) opcStatus);
+        if (SOPC_STATUS_OK != status && SOPC_GoodGenericStatus == opcStatus)
+        {
+            SOPC_Atomic_Int_Set(&g_atomic_refreshOnGoing, false);
+        }
     }
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Free(refreshCtx);
-    }
-    else if (SOPC_GoodGenericStatus == opcStatus)
-    {
-        SOPC_Atomic_Int_Set(&g_atomic_refreshOnGoing, true);
     }
     return opcStatus;
 }

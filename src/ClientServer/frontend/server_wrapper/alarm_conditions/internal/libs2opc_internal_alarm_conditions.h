@@ -52,7 +52,7 @@ struct _SOPC_AlarmConditionConfig
 {
     // Mutex protecting g_alarmConditionsDict only
     SOPC_Mutex g_mutex;
-    // Leaf mutex protecting g_refreshEventsDict
+    // Leaf mutex protecting g_refreshEventsDict and the ConditionRefresh ongoing status check-and-set
     SOPC_Mutex g_refreshMutex;
     // Leaf mutex protecting g_alarmCondLooperEvtHdlr against concurrent post and looper deletion
     SOPC_Mutex g_looperMutex;

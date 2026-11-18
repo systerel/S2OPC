@@ -64,7 +64,7 @@ static int32_t nbrOfDisabledAlarms = 0; // read by main thread, written by callb
 static bool playTest2Part1 = false;     // written by main thread, read only by callback thread
 
 static bool oneAlarmUpdated = false; // read by main thread, written by callback thread
-static bool playTest2Part2 = false;  // written by main thread, read only by callback thread
+static bool playTest2Part3 = false;  // written by main thread, read only by callback thread
 
 static int32_t nbrOfEnabledAlarms = 0;   // read by main thread, written by callback thread
 static bool playTest3 = false;           // written by main thread, read only by callback thread
@@ -365,7 +365,7 @@ static void SOPC_MonitoredAlarm_Event_Cb(SOPC_MonitoredAlarmsGroup* group,
         }
     }
 
-    if (playTest2Part2)
+    if (playTest2Part3)
     {
         oneAlarmUpdated = true;
     }
@@ -544,20 +544,24 @@ int main(int argc, char** argv)
                 SOPC_CONSOLE_PRINTF("TC 2 Part 2 Failed at refreshing alarms.\n");
                 globTestResult = false;
             }
+            else
+            {
+                SOPC_CONSOLE_PRINTF("TC 2 Part 2 Success. Refresh accepted after disabling all alarms.\n");
+            }
             // Wait for refresh to take effect on received alarm updates.
             // TODO: wait for the event ConditionRefreshEnd instead.
             SOPC_Sleep(sleepTimeout * 10);
-            playTest2Part2 = true;
+            playTest2Part3 = true;
             SOPC_Sleep(sleepTimeout * 10); // wait to see if we receive some updates
-            playTest2Part2 = false;
+            playTest2Part3 = false;
             if (!oneAlarmUpdated)
             {
                 SOPC_CONSOLE_PRINTF(
-                    "TC 2 Part 2 Success. No more alarm notification received after disabling all of them.\n");
+                    "TC 2 Part 3 Success. No more alarm notification received after disabling all of them.\n");
             }
             else
             {
-                SOPC_CONSOLE_PRINTF("TC 2 Part 2 Failed: received one alarm update after disabling all of them.\n");
+                SOPC_CONSOLE_PRINTF("TC 2 Part 3 Failed: received one alarm update after disabling all of them.\n");
                 globTestResult = false;
             }
         }
