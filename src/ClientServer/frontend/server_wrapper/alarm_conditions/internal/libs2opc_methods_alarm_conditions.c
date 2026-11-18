@@ -450,12 +450,17 @@ static SOPC_ReturnStatus SOPC_InternalMethodCall_PostToLooper(SOPC_ServerAlarmCo
     return status;
 }
 
-// Posts the state change of a method call to the A&C looper (see SOPC_InternalMethodCall_PostToLooper)
-static bool SOPC_InternalMethodCall_SetStateToLooper(SOPC_ServerAlarmCondMethods acMethod,
-                                                     SOPC_AlarmCondition* ac,
-                                                     SOPC_LocalizedText* optComment,
-                                                     const SOPC_CallContext* callCtx)
+/*
+ * Posts the state change of a method call to the A&C looper (see SOPC_InternalMethodCall_PostToLooper).
+ * Takes ownership of optComment (might be NULL) in all cases.
+ * Returns Good, OpcUa_BadOutOfMemory or OpcUa_BadInternalError (post failure).
+ */
+static SOPC_StatusCode SOPC_InternalMethodCall_SetStateToLooper(SOPC_ServerAlarmCondMethods acMethod,
+                                                                SOPC_AlarmCondition* ac,
+                                                                SOPC_LocalizedText* optComment,
+                                                                const SOPC_CallContext* callCtx)
 {
+    SOPC_StatusCode result = SOPC_GoodGenericStatus;
     SOPC_MethodCallEvt_Ctx* cmEvtCtx = NULL;
     if (NULL != optComment)
     {
@@ -465,11 +470,22 @@ static bool SOPC_InternalMethodCall_SetStateToLooper(SOPC_ServerAlarmCondMethods
             // Note: 0 is the Good value for resultStatus
             cmEvtCtx->optComment = optComment;
             cmEvtCtx->optClientUserId = SOPC_InternalMethodCall_GetClientUserId(callCtx);
-        } // else: cmEvtCtx is NULL, no comment will be set
+        }
+        else
+        {
+            result = OpcUa_BadOutOfMemory;
+        }
     }
-    SOPC_ReturnStatus status =
-        SOPC_InternalMethodCall_PostToLooper(SOPC_AC_EVT_METHOD_CALL_SET_STATE, acMethod, ac, cmEvtCtx);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_GoodGenericStatus == result)
+    {
+        SOPC_ReturnStatus status =
+            SOPC_InternalMethodCall_PostToLooper(SOPC_AC_EVT_METHOD_CALL_SET_STATE, acMethod, ac, cmEvtCtx);
+        if (SOPC_STATUS_OK != status)
+        {
+            result = OpcUa_BadInternalError;
+        }
+    }
+    if (SOPC_GoodGenericStatus != result)
     {
         SOPC_LocalizedText_Clear(optComment);
         SOPC_Free(optComment);
@@ -479,7 +495,33 @@ static bool SOPC_InternalMethodCall_SetStateToLooper(SOPC_ServerAlarmCondMethods
             SOPC_Free(cmEvtCtx);
         }
     }
-    return (SOPC_STATUS_OK == status);
+    return result;
+}
+
+// Copies the method input comment (might be NULL) into a new comment: returns Good or OpcUa_BadOutOfMemory
+static SOPC_StatusCode SOPC_InternalMethodCall_CopyComment(const SOPC_LocalizedText* optCommentInput,
+                                                           SOPC_LocalizedText** optComment)
+{
+    *optComment = NULL;
+    if (NULL == optCommentInput)
+    {
+        return SOPC_GoodGenericStatus;
+    }
+    SOPC_LocalizedText* comment = SOPC_Calloc(1, sizeof(*comment));
+    if (NULL == comment)
+    {
+        return OpcUa_BadOutOfMemory;
+    }
+    SOPC_LocalizedText_Initialize(comment);
+    SOPC_ReturnStatus status = SOPC_LocalizedText_Copy(comment, optCommentInput);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_LocalizedText_Clear(comment);
+        SOPC_Free(comment);
+        return OpcUa_BadOutOfMemory;
+    }
+    *optComment = comment;
+    return SOPC_GoodGenericStatus;
 }
 
 // Posts the failure trace of a method call to the A&C looper, ac might be NULL (see
@@ -556,19 +598,17 @@ static SOPC_StatusCode SOPC_InternalMethodCall_TreatDisable(SOPC_AlarmCondition*
     bool disabled = (SOPC_Boolean_Id == enabledVar->BuiltInTypeId && !enabledVar->Value.Boolean);
     SOPC_Mutex_Unlock(&ac->mut);
 
-    bool res = !disabled;
-    if (res)
+    SOPC_StatusCode result = OpcUa_BadConditionAlreadyDisabled;
+    if (!disabled)
     {
-        res = SOPC_InternalMethodCall_SetStateToLooper(SOPC_AC_METHOD_DISABLE, ac, NULL, callContextPtr);
+        result = SOPC_InternalMethodCall_SetStateToLooper(SOPC_AC_METHOD_DISABLE, ac, NULL, callContextPtr);
     }
 
-    if (!res)
+    if (SOPC_GoodGenericStatus != result)
     {
-        SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_AC_METHOD_DISABLE, ac, NULL, NULL, callContextPtr,
-                                                     OpcUa_BadConditionAlreadyEnabled);
-        return OpcUa_BadConditionAlreadyDisabled;
+        SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_AC_METHOD_DISABLE, ac, NULL, NULL, callContextPtr, result);
     }
-    return SOPC_GoodGenericStatus;
+    return result;
 }
 
 static SOPC_StatusCode SOPC_MethodCall_Disable(const SOPC_CallContext* callContextPtr,
@@ -613,19 +653,17 @@ static SOPC_StatusCode SOPC_InternalMethodCall_TreatEnable(SOPC_AlarmCondition* 
     bool disabled = (SOPC_Boolean_Id == enabledVar->BuiltInTypeId && !enabledVar->Value.Boolean);
     SOPC_Mutex_Unlock(&ac->mut);
 
-    bool res = disabled;
-    if (res)
+    SOPC_StatusCode result = OpcUa_BadConditionAlreadyEnabled;
+    if (disabled)
     {
-        res = SOPC_InternalMethodCall_SetStateToLooper(SOPC_AC_METHOD_ENABLE, ac, NULL, callContextPtr);
+        result = SOPC_InternalMethodCall_SetStateToLooper(SOPC_AC_METHOD_ENABLE, ac, NULL, callContextPtr);
     }
 
-    if (!res)
+    if (SOPC_GoodGenericStatus != result)
     {
-        SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_AC_METHOD_ENABLE, ac, NULL, NULL, callContextPtr,
-                                                     OpcUa_BadConditionAlreadyEnabled);
-        return OpcUa_BadConditionAlreadyEnabled;
+        SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_AC_METHOD_ENABLE, ac, NULL, NULL, callContextPtr, result);
     }
-    return SOPC_GoodGenericStatus;
+    return result;
 }
 
 static SOPC_StatusCode SOPC_MethodCall_Enable(const SOPC_CallContext* callContextPtr,
@@ -719,24 +757,17 @@ static SOPC_StatusCode SOPC_InternalMethodCall_TreatAddComment(SOPC_AlarmConditi
         return OpcUa_BadEventIdUnknown;
     }
     // Manage non-empty comment
-    if (NULL != ltCommentInput)
+    SOPC_StatusCode result = SOPC_InternalMethodCall_CopyComment(ltCommentInput, &ltComment);
+    if (SOPC_GoodGenericStatus == result)
     {
-        ltComment = SOPC_Calloc(1, sizeof(*ltComment));
-        if (NULL != ltComment)
-        {
-            SOPC_LocalizedText_Initialize(ltComment);
-            SOPC_ReturnStatus status = SOPC_LocalizedText_Copy(ltComment, ltCommentInput);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Free(ltComment);
-                ltComment = NULL;
-            }
-        }
+        result = SOPC_InternalMethodCall_SetStateToLooper(SOPC_AC_METHOD_ADD_COMMENT, ac, ltComment, callContextPtr);
     }
-    bool res = SOPC_InternalMethodCall_SetStateToLooper(SOPC_AC_METHOD_ADD_COMMENT, ac, ltComment, callContextPtr);
-    SOPC_UNUSED_RESULT(res);
-
-    return SOPC_GoodGenericStatus;
+    if (SOPC_GoodGenericStatus != result)
+    {
+        SOPC_InternalMethodCall_TraceFailureToLooper(SOPC_AC_METHOD_ADD_COMMENT, ac, &eventIdVar->Value.Bstring,
+                                                     ltCommentInput, callContextPtr, result);
+    }
+    return result;
 }
 
 static SOPC_StatusCode SOPC_MethodCall_AddComment(const SOPC_CallContext* callContextPtr,
@@ -814,38 +845,29 @@ static SOPC_StatusCode SOPC_InternalMethodCall_TreatAckOrConf(SOPC_AlarmConditio
             (SOPC_Boolean_Id == ackedOrConfirmedVar->BuiltInTypeId && !ackedOrConfirmedVar->Value.Boolean);
     }
     SOPC_Mutex_Unlock(&ac->mut);
-    bool res = unackedOrUnconfirmed;
+    SOPC_StatusCode result = SOPC_GoodGenericStatus;
+    if (!unackedOrUnconfirmed)
+    {
+        result = (SOPC_AC_METHOD_ACKNOWLEDGE == ackOrConfMethodEnum) ? OpcUa_BadConditionBranchAlreadyAcked
+                                                                     : OpcUa_BadConditionBranchAlreadyConfirmed;
+    }
     SOPC_LocalizedText* ltComment = NULL;
     // Copy Comment from input args if necessary
-    if (res && NULL != ltCommentInput)
+    if (SOPC_GoodGenericStatus == result)
     {
-        ltComment = SOPC_Calloc(1, sizeof(*ltComment));
-        if (NULL != ltComment)
-        {
-            SOPC_LocalizedText_Initialize(ltComment);
-            SOPC_ReturnStatus status = SOPC_LocalizedText_Copy(ltComment, ltCommentInput);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Free(ltComment);
-                ltComment = NULL;
-            }
-        }
+        result = SOPC_InternalMethodCall_CopyComment(ltCommentInput, &ltComment);
     }
     // Send event to looper to treat the state change
-    if (res)
+    if (SOPC_GoodGenericStatus == result)
     {
-        res = SOPC_InternalMethodCall_SetStateToLooper(ackOrConfMethodEnum, ac, ltComment, callContextPtr);
+        result = SOPC_InternalMethodCall_SetStateToLooper(ackOrConfMethodEnum, ac, ltComment, callContextPtr);
     }
-    if (!res)
+    if (SOPC_GoodGenericStatus != result)
     {
-        SOPC_StatusCode badAlreadyAckedOrConfirmed = (SOPC_AC_METHOD_ACKNOWLEDGE == ackOrConfMethodEnum)
-                                                         ? OpcUa_BadConditionBranchAlreadyAcked
-                                                         : OpcUa_BadConditionBranchAlreadyConfirmed;
         SOPC_InternalMethodCall_TraceFailureToLooper(ackOrConfMethodEnum, ac, &eventIdVar->Value.Bstring,
-                                                     ltCommentInput, callContextPtr, badAlreadyAckedOrConfirmed);
-        return badAlreadyAckedOrConfirmed;
+                                                     ltCommentInput, callContextPtr, result);
     }
-    return SOPC_GoodGenericStatus;
+    return result;
 }
 
 static SOPC_StatusCode SOPC_MethodCall_Acknowledge(const SOPC_CallContext* callContextPtr,
