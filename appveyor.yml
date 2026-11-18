@@ -75,15 +75,17 @@ install:
 
         # Dependencies built by build_s2opc.bat: archive root folder => archive.
         # Extracted only once in the dependencies cache, then built in this folder.
-        # zip archives are extracted with Windows tar (bsdtar). tar.bz2 archives are extracted with
-        # 7-Zip, as Windows tar relies on an external bzip2 program for them, which may hang.
+        # zip archives are extracted with .NET, which extracts their symbolic links as regular files
+        # (creating links needs a privilege the build may not have, Windows tar then fails).
+        # tar.bz2 archives are extracted with 7-Zip, as Windows tar relies on an external bzip2
+        # program for them, which may hang.
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
         $depArchives = [ordered]@{
           "check-$env:CHECK_VERSION" = "check-$env:CHECK_VERSION.zip"
           "mbedtls-$env:MBEDTLS_VERSION" = "mbedtls-$env:MBEDTLS_VERSION.tar.bz2"
           "libexpat-$expatTag" = "expat-$env:EXPAT_VERSION.zip"
           "paho.mqtt.c-$env:PAHO_VERSION" = "paho.mqtt.c-$env:PAHO_VERSION.zip"
         }
-        $tar = Join-Path $env:SystemRoot 'System32\tar.exe'
         $sevenZip = Join-Path $env:ProgramFiles '7-Zip\7z.exe'
         $tmpDir = Join-Path $deps 'extract.tmp'
         foreach ($dir in $depArchives.Keys) {
@@ -94,7 +96,7 @@ install:
           for ($i = 1; $i -le 3; $i++) {
             Remove-Item $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
             New-Item -ItemType Directory $tmpDir | Out-Null
-            # tar and 7-Zip may write to stderr: do not let it stop the script, rely on their exit code instead
+            # 7-Zip may write to stderr: do not let it stop the script, rely on its exit code instead
             $ErrorActionPreference = 'Continue'
             if ($archive.EndsWith('.tar.bz2')) {
               # 2 steps without pipe: .tar.bz2 -> .tar -> folder
@@ -107,8 +109,13 @@ install:
               }
               Remove-Item $inner -Force -ErrorAction SilentlyContinue
             } else {
-              & $tar -xf $archive -C $tmpDir
-              $code = $LASTEXITCODE
+              try {
+                [IO.Compression.ZipFile]::ExtractToDirectory($archive, $tmpDir)
+                $code = 0
+              } catch {
+                Write-Host "Extraction error: $($_.Exception.Message)"
+                $code = 1
+              }
             }
             $ErrorActionPreference = 'Stop'
             if ($code -eq 0 -and (Test-Path (Join-Path $tmpDir $dir))) {
