@@ -419,6 +419,11 @@ static SOPC_StatusCode SOPC_MethodCall_ConditionRefresh(const SOPC_CallContext* 
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Free(refreshCtx);
+        if (SOPC_GoodGenericStatus == opcStatus)
+        {
+            // The refresh was not posted to the looper: RefreshStart/RefreshEnd events will never be sent
+            opcStatus = OpcUa_BadInternalError;
+        }
     }
     return opcStatus;
 }
