@@ -674,6 +674,14 @@ void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus 
     }
     if (allEndpointsClosed)
     {
+        if (SOPC_ServerInternal_IsStarted())
+        {
+            /* All endpoints closed without stop request (e.g. listener failure): close the sessions as on shutdown.
+             * Requested prior to stopped state and callback: a new start is treated after it by services. */
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "All endpoints closed without stop request: closing all sessions.");
+            SOPC_ToolkitServer_AsyncCloseSessions(0, true);
+        }
         // Server is considered stopped when no client connection possible anymore
         SOPC_UNUSED_RESULT(SOPC_ServerInternal_SetStoppedState());
         SOPC_ServerInternal_SyncServerStoppedCb(sopc_server_helper_config.serverStoppedStatus);

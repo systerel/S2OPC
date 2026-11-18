@@ -61,6 +61,9 @@ typedef void SOPC_ServerStopped_Fct(SOPC_ReturnStatus status);
  * \param stoppedCb  callback called when server will stop (on purpose or due to endpoint opening issue), it is
  *                   mandatory to define it to be notified for unexpected or programmed server stop.
  *
+ * \note When all the endpoints are closed without stop request (endpoint opening issue or listener failure),
+ *       all the sessions are closed as on a programmed server stop.
+ *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE
  *         if the configuration is not possible (toolkit not initialized, server already started).
  */

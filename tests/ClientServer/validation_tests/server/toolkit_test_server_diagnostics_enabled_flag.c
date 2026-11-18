@@ -30,8 +30,9 @@
  *        - counters reset on server stop: a client creates a session, a subscription and a rejected request
  *          (ServiceFault), then the server is restarted: EnabledFlag state is kept and cumulated counters restart
  *          from 0,
- *        - server restarted while a session with an active subscription is open: the session and subscription are
- *          closed by the server, cumulated counters are reset and the deferred subscription closure keeps counters
+ *        - server restarted while a session with an active subscription is open, after a server stop or after all
+ *          endpoints are closed without stop request (e.g. listener failure): the session and subscription are closed
+ *          by the server, cumulated counters are reset and the deferred subscription closure keeps counters
  *          consistent,
  *        - unmanaged diagnostics nodes always have OpcUa_BadNotReadable status.
  *
@@ -61,6 +62,8 @@
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
 #include "libs2opc_server_diagnostics.h"
+#include "libs2opc_server_internal.h"
+#include "sopc_toolkit_async_api.h"
 
 #include "embedded/sopc_addspace_loader.h"
 
@@ -789,12 +792,28 @@ static SOPC_ReturnStatus check_reset_on_restart(SOPC_SecureConnection_Config* se
     return status;
 }
 
-/* Shall be called with all counters equal to 0 except cumulated ones: the server is stopped while a session with an
- * active subscription is open, then restarted.
+// Server stop function used by ::check_restart_with_active_subscription, returns once server is stopped
+typedef SOPC_ReturnStatus StopServer_Fct(void);
+
+/* Closes all the server endpoints with the toolkit API (no stop request through the server wrapper API) as a listener
+ * failure would do: server is stopped when all endpoints are closed */
+static SOPC_ReturnStatus close_all_endpoints(void)
+{
+    for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
+    {
+        SOPC_ToolkitServer_AsyncCloseEndpoint(sopc_server_helper_config.endpointIndexes[i]);
+    }
+    return wait_for(is_server_stopped, NULL) ? SOPC_STATUS_OK : SOPC_STATUS_TIMEOUT;
+}
+
+/* Shall be called with all counters equal to 0 except cumulated ones: the server is stopped with the given function
+ * while a session with an active subscription is open, then restarted.
  * The session and subscription are closed by the server on stop, after the reset of the cumulated counters (deferred
  * subscription closure): the closure shall not decrement the current subscription counter below 0 (assertion failure
  * in subscription_diagnostics_bs__subscription_deleted otherwise). */
-static SOPC_ReturnStatus check_restart_with_active_subscription(SOPC_SecureConnection_Config* secureConnConfig)
+static SOPC_ReturnStatus check_restart_with_active_subscription(SOPC_SecureConnection_Config* secureConnConfig,
+                                                                StopServer_Fct* stopServerFct,
+                                                                const char* stopDescription)
 {
     SOPC_ClientConnection* connection = NULL;
     SOPC_ClientHelper_Subscription* subscription = NULL;
@@ -807,8 +826,8 @@ static SOPC_ReturnStatus check_restart_with_active_subscription(SOPC_SecureConne
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = stop_server();
-        printf("<Test_Server_Diagnostics_Enabled_Flag: server stop with active subscription: %s\n",
+        status = stopServerFct();
+        printf("<Test_Server_Diagnostics_Enabled_Flag: %s with active subscription: %s\n", stopDescription,
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
     /* Session and subscription closed by the server: client disconnection (and deletion of the subscription it
@@ -826,7 +845,7 @@ static SOPC_ReturnStatus check_restart_with_active_subscription(SOPC_SecureConne
     if (SOPC_STATUS_OK == status)
     {
         status = wait_counters(0, 0);
-        printf("<Test_Server_Diagnostics_Enabled_Flag: counters reset on restart after server stop: %s\n",
+        printf("<Test_Server_Diagnostics_Enabled_Flag: counters reset on restart after %s: %s\n", stopDescription,
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
     return status;
@@ -911,7 +930,12 @@ int main(int argc, char* argv[])
     }
     if (SOPC_STATUS_OK == status && expSupported)
     {
-        status = check_restart_with_active_subscription(secureConnConfigs[0]);
+        status = check_restart_with_active_subscription(secureConnConfigs[0], stop_server, "server stop");
+    }
+    if (SOPC_STATUS_OK == status && expSupported)
+    {
+        status = check_restart_with_active_subscription(secureConnConfigs[0], close_all_endpoints,
+                                                        "endpoints closure without stop request");
     }
 
     SOPC_ReturnStatus stopStatus = stop_server();
