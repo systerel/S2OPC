@@ -171,7 +171,10 @@ INVARIANT
                        mi : dom(a_monitored_item_notification_queue) &
                        a_monitored_item_notification_queue(mi) : s_event_notification_queue |
                 card(a_notification_queue_notifications[{a_monitored_item_notification_queue(mi)}]))})
-    )
+    ) &
+
+    // Current subscriptions diagnostics counter is the number of existing subscriptions
+    currentSubscriptionCount = card(s_subscription)
 
 INITIALISATION
     next_idx_iter_prio := 0;

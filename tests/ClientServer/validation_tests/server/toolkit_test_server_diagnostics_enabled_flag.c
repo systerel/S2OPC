@@ -30,6 +30,9 @@
  *        - counters reset on server stop: a client creates a session, a subscription and a rejected request
  *          (ServiceFault), then the server is restarted: EnabledFlag state is kept and cumulated counters restart
  *          from 0,
+ *        - server restarted while a session with an active subscription is open: the session and subscription are
+ *          closed by the server, cumulated counters are reset and the deferred subscription closure keeps counters
+ *          consistent,
  *        - unmanaged diagnostics nodes always have OpcUa_BadNotReadable status.
  *
  *        Each check covers the 12 ServerDiagnosticsSummary counters variables and the ServerDiagnosticsSummary
@@ -786,6 +789,49 @@ static SOPC_ReturnStatus check_reset_on_restart(SOPC_SecureConnection_Config* se
     return status;
 }
 
+/* Shall be called with all counters equal to 0 except cumulated ones: the server is stopped while a session with an
+ * active subscription is open, then restarted.
+ * The session and subscription are closed by the server on stop, after the reset of the cumulated counters (deferred
+ * subscription closure): the closure shall not decrement the current subscription counter below 0 (assertion failure
+ * in subscription_diagnostics_bs__subscription_deleted otherwise). */
+static SOPC_ReturnStatus check_restart_with_active_subscription(SOPC_SecureConnection_Config* secureConnConfig)
+{
+    SOPC_ClientConnection* connection = NULL;
+    SOPC_ClientHelper_Subscription* subscription = NULL;
+    SOPC_ReturnStatus status = SOPC_ClientHelper_Connect(secureConnConfig, SOPC_ClientConnectionEventCb, &connection);
+    if (SOPC_STATUS_OK == status)
+    {
+        subscription = SOPC_ClientHelper_CreateSubscription(connection, SOPC_CreateSubscriptionRequest_CreateDefault(),
+                                                            SOPC_ClientSubscriptionNotificationCb, 0);
+        status = (NULL == subscription) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = stop_server();
+        printf("<Test_Server_Diagnostics_Enabled_Flag: server stop with active subscription: %s\n",
+               SOPC_STATUS_OK == status ? "OK" : "NOK");
+    }
+    /* Session and subscription closed by the server: client disconnection (and deletion of the subscription it
+     * still references) is done while server is stopped to avoid a new session on restart, its status is ignored */
+    if (NULL != connection)
+    {
+        SOPC_UNUSED_RESULT(SOPC_ClientHelper_Disconnect(&connection));
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Atomic_Int_Set(&serverStopped, 0);
+        status = SOPC_ServerHelper_StartServer(SOPC_ServerStoppedCallback);
+    }
+    // Session and subscription closed, cumulated counters reset on stop
+    if (SOPC_STATUS_OK == status)
+    {
+        status = wait_counters(0, 0);
+        printf("<Test_Server_Diagnostics_Enabled_Flag: counters reset on restart after server stop: %s\n",
+               SOPC_STATUS_OK == status ? "OK" : "NOK");
+    }
+    return status;
+}
+
 // Shall be called in server started state with diagnostics inhibited: diagnostics remain inhibited after restart
 static SOPC_ReturnStatus check_inhibited_on_restart(void)
 {
@@ -862,6 +908,10 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         status = expSupported ? check_reset_on_restart(secureConnConfigs[0]) : check_inhibited_on_restart();
+    }
+    if (SOPC_STATUS_OK == status && expSupported)
+    {
+        status = check_restart_with_active_subscription(secureConnConfigs[0]);
     }
 
     SOPC_ReturnStatus stopStatus = stop_server();

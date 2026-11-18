@@ -43,8 +43,7 @@ INVARIANT
     // Number of subscriptions associated to each currently used publishing interval
     a_publishingIntervalNbSubscriptions : t_opcua_duration_i --> NAT &
 
-    publishingIntervalCount = card(a_publishingIntervalNbSubscriptions|>>{0}) &
-    currentSubscriptionCount <= cumulatedSubscriptionCount
+    publishingIntervalCount = card(a_publishingIntervalNbSubscriptions|>>{0})
 
 INITIALISATION
     d_init
@@ -97,9 +96,11 @@ OPERATIONS
     END
     ;
 
+    /* Only the cumulated counter is reset: current counters reflect existing subscriptions,
+       which may be closed after this operation (e.g. on inactive session event) */
     subscription_diagnostics_server_stopped =
     BEGIN
-        d_init
+        cumulatedSubscriptionCount := 0
     END
     ;
 

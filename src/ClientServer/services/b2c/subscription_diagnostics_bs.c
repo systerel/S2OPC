@@ -148,11 +148,8 @@ void subscription_diagnostics_bs__INITIALISATION(void)
 void subscription_diagnostics_bs__subscription_created(
     const constants__t_opcua_duration_i subscription_diagnostics_bs__p_publishInterval)
 {
-    // Diagnostics support state is constant while server runs: bookkeeping is consistently skipped when inhibited
-    if (!SOPC_ServerInternal_IsDiagnosticsSupported())
-    {
-        return;
-    }
+    /* Bookkeeping is done even if diagnostics are not supported: the support state may change between subscription
+     * creation and deletion (server configuration cleared and set again), only the notification depends on it */
     SOPC_ASSERT(currentSubscriptionCount < SOPC_MAX_SUBSCRIPTIONS);
 
     increment_publish_interval_usage(subscription_diagnostics_bs__p_publishInterval);
@@ -165,10 +162,6 @@ void subscription_diagnostics_bs__subscription_created(
 void subscription_diagnostics_bs__subscription_deleted(
     const constants__t_opcua_duration_i subscription_diagnostics_bs__p_publishInterval)
 {
-    if (!SOPC_ServerInternal_IsDiagnosticsSupported())
-    {
-        return;
-    }
     SOPC_ASSERT(currentSubscriptionCount > 0);
 
     decrement_publish_interval_usage(subscription_diagnostics_bs__p_publishInterval);
@@ -181,10 +174,6 @@ void subscription_diagnostics_bs__subscription_modified(
     const constants__t_opcua_duration_i subscription_diagnostics_bs__p_oldPublishInterval,
     const constants__t_opcua_duration_i subscription_diagnostics_bs__p_newPublishInterval)
 {
-    if (!SOPC_ServerInternal_IsDiagnosticsSupported())
-    {
-        return;
-    }
     if (!publish_interval_values_equal(subscription_diagnostics_bs__p_oldPublishInterval,
                                        subscription_diagnostics_bs__p_newPublishInterval))
     {
@@ -198,7 +187,11 @@ void subscription_diagnostics_bs__subscription_modified(
 
 void subscription_diagnostics_bs__subscription_diagnostics_server_stopped(void)
 {
-    internal_init_reset_counters();
+    /* Only the cumulated counter is reset: current counters reflect the existing subscriptions, which are closed after
+     * this operation (deferred closure on inactive session event) */
+    cumulatedSubscriptionCount = 0;
+
+    notify_server_diagnostics_update();
 }
 
 void subscription_diagnostics_bs__subscription_diagnostics_bs_UNINITIALISATION(void)
