@@ -329,7 +329,7 @@ static void SOPC_TestBusy_BlockingHook(void)
     SOPC_Atomic_Int_Add(&gHookCalls, 1);
 }
 
-static SOPC_Services_EventTreatedHook gBlockingHook = {.eventTreatedCb = SOPC_TestBusy_BlockingHook};
+static SOPC_Services_Hooks gBlockingHook = {.eventTreatedCb = SOPC_TestBusy_BlockingHook, .serverStoppedCb = NULL};
 
 void SOPC_TestBusy_SetBlockingHook(bool install)
 {
@@ -337,7 +337,7 @@ void SOPC_TestBusy_SetBlockingHook(bool install)
     {
         SOPC_TestBusy_ReleaseServices();
     }
-    SOPC_Services_SetEventTreatedHook(install ? &gBlockingHook : NULL);
+    SOPC_Services_SetHooks(install ? &gBlockingHook : NULL);
 }
 
 /* Waits until the atomic *value equals expected, returns false on timeout */

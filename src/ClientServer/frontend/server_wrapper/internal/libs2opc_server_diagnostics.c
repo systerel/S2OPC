@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include <string.h>
+
 #include "libs2opc_server_diagnostics.h"
 
 #include "libs2opc_server_internal.h"
@@ -42,10 +44,6 @@ static bool diagSupported = false;
  * the event treatment (see SOPC_ServerInternal_DiagnosticsMayUpdateVariables). Only accessed from the services thread
  * once server is started. */
 static bool updatePending = false;
-
-// Services event treated hook, only set when diagnostics are supported
-static SOPC_Services_EventTreatedHook diagnosticsHook = {.eventTreatedCb =
-                                                             SOPC_ServerInternal_DiagnosticsMayUpdateVariables};
 
 static const SOPC_NodeId enabledFlagNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_EnabledFlag);
 
@@ -97,6 +95,24 @@ static void update_enabled_flag(bool newValue)
        up to date values are written when enabled, 0 with OpcUa_BadNotReadable when disabled */
     updatePending = true;
 }
+
+/* Called from the services thread on server shutdown once all sessions are closed (and their closure counted):
+ * only cumulated session values are reset, the current session count reflects the existing sessions */
+static void diagnostics_server_stopped(void)
+{
+    SOPC_Server_RuntimeVariablesDiagnostics* diagnostics = &sopc_server_helper_config.runtimeVariables.diagnostics;
+    diagnostics->cumulatedSessionCount = 0;
+    diagnostics->securityRejectedSessionCount = 0;
+    diagnostics->rejectedSessionCount = 0;
+    diagnostics->sessionTimeoutCount = 0;
+    diagnostics->sessionAbortCount = 0;
+
+    update_server_diagnostics();
+}
+
+// Services hooks, only set when diagnostics are supported
+static SOPC_Services_Hooks diagnosticsHooks = {.eventTreatedCb = SOPC_ServerInternal_DiagnosticsMayUpdateVariables,
+                                               .serverStoppedCb = diagnostics_server_stopped};
 
 static bool get_enabled_flag_value(const SOPC_Variant* value, bool* enabled)
 {
@@ -159,6 +175,10 @@ SOPC_ReturnStatus SOPC_ServerInternal_DiagnosticsConfigure(SOPC_AddressSpace* ad
     // Initialize and computes those 2 internal variable values
     diagSupported = false;
     diagEnabledFlag = false;
+    /* Diagnostics values are only reset on configuration: no session nor subscription exists and the services thread
+     * does not modify them anymore. They are kept on server restart (only cumulated values are reset on stop). */
+    memset(&sopc_server_helper_config.runtimeVariables.diagnostics, 0,
+           sizeof(sopc_server_helper_config.runtimeVariables.diagnostics));
 
     // Retrieve the node in address space configured
     bool found = false;
@@ -204,7 +224,7 @@ void SOPC_ServerInternal_DiagnosticsStart(void)
     updatePending = false;
     if (diagSupported)
     {
-        SOPC_Services_SetEventTreatedHook(&diagnosticsHook);
+        SOPC_Services_SetHooks(&diagnosticsHooks);
     }
 }
 
@@ -229,14 +249,11 @@ bool SOPC_ServerInternal_IsDiagnosticsSupported(void)
 
 void SOPC_ServerInternal_DiagnosticsUpdateSessionCounts(SOPC_ServerSessionEvent event, SOPC_StatusCode status)
 {
-    if (!diagSupported)
-    {
-        return;
-    }
-
     SOPC_Server_RuntimeVariablesDiagnostics* diagnostics = &sopc_server_helper_config.runtimeVariables.diagnostics;
 
-    // Session diagnostics are counted even if disabled: AddressSpace update is inhibited when diagnostics are disabled
+    /* Session diagnostics are counted even if disabled or not supported: the support state may change between a session
+     * creation and its closure (server configuration cleared and set again). AddressSpace update is inhibited when
+     * diagnostics are disabled (always the case when not supported). */
     bool diagnosticsChanged = true;
 
     switch (event)
@@ -331,7 +348,7 @@ void SOPC_ServerInternal_DiagnosticsClear(void)
 {
     if (diagSupported)
     {
-        SOPC_Services_SetEventTreatedHook(NULL);
+        SOPC_Services_SetHooks(NULL);
     }
     diagSupported = false;
     diagEnabledFlag = false;

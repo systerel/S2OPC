@@ -76,40 +76,42 @@ static SOPC_Unix_Time parse_build_date(const char* build_date)
     return (SOPC_Unix_Time)(mktime(&time));
 }
 
-SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Build_Info build_info,
-                                                                SOPC_Server_Config* server_config)
+void SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Build_Info build_info,
+                                        SOPC_Server_Config* server_config,
+                                        SOPC_Server_RuntimeVariables* runtimeVariables)
 {
+    SOPC_ASSERT(NULL != server_config);
+    SOPC_ASSERT(NULL != runtimeVariables);
+
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    SOPC_Server_RuntimeVariables runtimeVariables;
+    runtimeVariables->serverConfig = server_config;
 
-    runtimeVariables.serverConfig = server_config;
+    runtimeVariables->secondsTillShutdown = 0;
+    runtimeVariables->server_state = OpcUa_ServerState_Running;
+    runtimeVariables->startTime = SOPC_Time_GetCurrentTimeUTC();
+    SOPC_LocalizedText_Initialize(&runtimeVariables->shutdownReason);
 
-    runtimeVariables.secondsTillShutdown = 0;
-    runtimeVariables.server_state = OpcUa_ServerState_Running;
-    runtimeVariables.startTime = SOPC_Time_GetCurrentTimeUTC();
-    SOPC_LocalizedText_Initialize(&runtimeVariables.shutdownReason);
-
-    OpcUa_BuildInfo_Initialize(&runtimeVariables.build_info);
+    OpcUa_BuildInfo_Initialize(&runtimeVariables->build_info);
 
     status =
-        SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductUri, &server_config->serverDescription.ProductUri);
+        SOPC_String_AttachFrom(&runtimeVariables->build_info.ProductUri, &server_config->serverDescription.ProductUri);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ManufacturerName, "Systerel");
+    status = SOPC_String_AttachFromCstring(&runtimeVariables->build_info.ManufacturerName, "Systerel");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductName,
+    status = SOPC_String_AttachFrom(&runtimeVariables->build_info.ProductName,
                                     &server_config->serverDescription.ApplicationName.defaultText);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     int cmp_res = strcmp(build_info.commonBuildInfo.buildVersion, build_info.clientServerBuildInfo.buildVersion);
     SOPC_ASSERT(0 == cmp_res);
-    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.SoftwareVersion,
+    status = SOPC_String_AttachFromCstring(&runtimeVariables->build_info.SoftwareVersion,
                                            build_info.clientServerBuildInfo.buildVersion);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.BuildNumber,
+    status = SOPC_String_AttachFromCstring(&runtimeVariables->build_info.BuildNumber,
                                            build_info.clientServerBuildInfo.buildSrcCommit);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
@@ -118,60 +120,61 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Bui
     status = SOPC_Time_FromUnixTime(buildDateAsUnixTime, &buildDate);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    runtimeVariables.build_info.BuildDate = buildDate;
+    runtimeVariables->build_info.BuildDate = buildDate;
 
-    runtimeVariables.service_level = 255;
-    runtimeVariables.auditing = SOPC_Audit_IsAuditing();
+    runtimeVariables->service_level = 255;
+    runtimeVariables->auditing = SOPC_Audit_IsAuditing();
 
-    runtimeVariables.maximum_operations_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
-    runtimeVariables.maximum_heavy_operations_per_request = SOPC_MAX_HEAVY_OPERATIONS_PER_MSG;
+    runtimeVariables->maximum_operations_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
+    runtimeVariables->maximum_heavy_operations_per_request = SOPC_MAX_HEAVY_OPERATIONS_PER_MSG;
 
-    memset(&runtimeVariables.diagnostics, 0, sizeof(runtimeVariables.diagnostics));
-
-    return runtimeVariables;
+    /* Note: diagnostics are not modified, they are owned by the diagnostics module and kept across server restarts
+     * (reset on server configuration) */
 }
 
-SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_info, SOPC_Server_Config* server_config)
+void SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_info,
+                                 SOPC_Server_Config* server_config,
+                                 SOPC_Server_RuntimeVariables* runtimeVariables)
 {
+    SOPC_ASSERT(NULL != build_info);
+    SOPC_ASSERT(NULL != runtimeVariables);
+
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    SOPC_Server_RuntimeVariables runtimeVariables;
+    runtimeVariables->serverConfig = server_config;
 
-    runtimeVariables.serverConfig = server_config;
+    runtimeVariables->secondsTillShutdown = 0;
+    runtimeVariables->server_state = OpcUa_ServerState_Running;
+    runtimeVariables->startTime = SOPC_Time_GetCurrentTimeUTC();
+    SOPC_LocalizedText_Initialize(&runtimeVariables->shutdownReason);
 
-    runtimeVariables.secondsTillShutdown = 0;
-    runtimeVariables.server_state = OpcUa_ServerState_Running;
-    runtimeVariables.startTime = SOPC_Time_GetCurrentTimeUTC();
-    SOPC_LocalizedText_Initialize(&runtimeVariables.shutdownReason);
+    OpcUa_BuildInfo_Initialize(&runtimeVariables->build_info);
 
-    OpcUa_BuildInfo_Initialize(&runtimeVariables.build_info);
-
-    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductUri, &build_info->ProductUri);
+    status = SOPC_String_AttachFrom(&runtimeVariables->build_info.ProductUri, &build_info->ProductUri);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ManufacturerName, &build_info->ManufacturerName);
+    status = SOPC_String_AttachFrom(&runtimeVariables->build_info.ManufacturerName, &build_info->ManufacturerName);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductName, &build_info->ProductName);
+    status = SOPC_String_AttachFrom(&runtimeVariables->build_info.ProductName, &build_info->ProductName);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.SoftwareVersion, &build_info->SoftwareVersion);
+    status = SOPC_String_AttachFrom(&runtimeVariables->build_info.SoftwareVersion, &build_info->SoftwareVersion);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_String_AttachFrom(&runtimeVariables.build_info.BuildNumber, &build_info->BuildNumber);
+    status = SOPC_String_AttachFrom(&runtimeVariables->build_info.BuildNumber, &build_info->BuildNumber);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    runtimeVariables.build_info.BuildDate = build_info->BuildDate;
+    runtimeVariables->build_info.BuildDate = build_info->BuildDate;
 
-    runtimeVariables.service_level = 255;
-    runtimeVariables.auditing = SOPC_Audit_IsAuditing();
+    runtimeVariables->service_level = 255;
+    runtimeVariables->auditing = SOPC_Audit_IsAuditing();
 
-    runtimeVariables.maximum_operations_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
-    runtimeVariables.maximum_heavy_operations_per_request = SOPC_MAX_HEAVY_OPERATIONS_PER_MSG;
+    runtimeVariables->maximum_operations_per_request = SOPC_MAX_OPERATIONS_PER_MSG;
+    runtimeVariables->maximum_heavy_operations_per_request = SOPC_MAX_HEAVY_OPERATIONS_PER_MSG;
 
-    memset(&runtimeVariables.diagnostics, 0, sizeof(runtimeVariables.diagnostics));
-
-    return runtimeVariables;
+    /* Note: diagnostics are not modified, they are owned by the diagnostics module and kept across server restarts
+     * (reset on server configuration) */
 }
 
 static void set_write_value_id(OpcUa_WriteValue* wv, uint32_t id)

@@ -475,6 +475,8 @@ void message_out_bs__copy_msg_resp_header_into_msg_out(const constants__t_msg_he
 void message_out_bs__msg_diagnostics_server_stopped(void)
 {
     message_util_diag_requests__reset_counters();
+    // Server diagnostics values are kept across server restarts: notify the reset
+    SOPC_ServerInternal_DiagnosticsUpdateRequestCounts(rejectedRequestsCount, securityRejectedRequestsCount);
 }
 
 void message_out_bs__server_write_msg_out_header_req_handle(

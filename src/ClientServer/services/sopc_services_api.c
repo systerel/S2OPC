@@ -62,9 +62,8 @@ static SOPC_Looper* servicesLooper = NULL;
 static SOPC_EventHandler* secureChannelsEventHandler = NULL;
 static SOPC_EventHandler* servicesEventHandler = NULL;
 
-/* Hook called after each event treatment (SOPC_Services_EventTreatedHook*): set from any thread, read from the services
- * thread */
-static void* eventTreatedHook = NULL;
+/* Hooks called by the services thread (SOPC_Services_Hooks*): set from any thread, read from the services thread */
+static void* servicesHooks = NULL;
 
 // Structure used to close all connections in a synchronous way
 // (necessary on toolkit clear)
@@ -302,10 +301,19 @@ static void SOPC_Internal_AllClientSecureChannelsDisconnected(bool clientOnly)
 
 static SOPC_STRONG_INLINE void call_event_treated_hook(void)
 {
-    SOPC_Services_EventTreatedHook* hook = (SOPC_Services_EventTreatedHook*) SOPC_Atomic_Ptr_Get(&eventTreatedHook);
-    if (NULL != hook && NULL != hook->eventTreatedCb)
+    SOPC_Services_Hooks* hooks = (SOPC_Services_Hooks*) SOPC_Atomic_Ptr_Get(&servicesHooks);
+    if (NULL != hooks && NULL != hooks->eventTreatedCb)
     {
-        hook->eventTreatedCb();
+        hooks->eventTreatedCb();
+    }
+}
+
+static void call_server_stopped_hook(void)
+{
+    SOPC_Services_Hooks* hooks = (SOPC_Services_Hooks*) SOPC_Atomic_Ptr_Get(&servicesHooks);
+    if (NULL != hooks && NULL != hooks->serverStoppedCb)
+    {
+        hooks->serverStoppedCb();
     }
 }
 
@@ -1152,6 +1160,8 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         if ((bool) params)
         {
             io_dispatch_mgr__server_stopped();
+            // Sessions closures are already counted: hooked server cumulated values can be reset
+            call_server_stopped_hook();
         }
         break;
     default:
@@ -1174,9 +1184,9 @@ void SOPC_Services_EnqueueEventAsNext(SOPC_Services_Event seEvent, uint32_t id, 
     SOPC_EventHandler_PostAsNext(servicesEventHandler, (int32_t) seEvent, id, params, auxParam);
 }
 
-void SOPC_Services_SetEventTreatedHook(SOPC_Services_EventTreatedHook* hook)
+void SOPC_Services_SetHooks(SOPC_Services_Hooks* hooks)
 {
-    SOPC_Atomic_Ptr_Set(&eventTreatedHook, (void*) hook);
+    SOPC_Atomic_Ptr_Set(&servicesHooks, (void*) hooks);
 }
 
 uint32_t SOPC_Services_Get_QueueSize(void)
@@ -1254,7 +1264,7 @@ void SOPC_Services_Clear(void)
     secureChannelsEventHandler = NULL;
     SOPC_Looper_Delete(servicesLooper);
     servicesLooper = NULL;
-    SOPC_Atomic_Ptr_Set(&eventTreatedHook, NULL);
+    SOPC_Atomic_Ptr_Set(&servicesHooks, NULL);
 
     closeAllConnectionsSync.allDisconnectedFlag = false;
     closeAllConnectionsSync.clientOnlyFlag = false;

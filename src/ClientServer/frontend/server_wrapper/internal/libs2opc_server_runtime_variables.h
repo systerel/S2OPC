@@ -36,7 +36,8 @@
  *
  * Values are always kept up to date, whatever the ServerDiagnostics EnabledFlag value is:
  * the EnabledFlag only inhibits their update in the address space.
- * They shall only be modified from the application looper thread.
+ * They are only modified by the diagnostics module: reset on server configuration, then updated from the services
+ * thread and kept across server restarts (cumulated values are reset on server stop).
  */
 typedef struct
 {
@@ -79,29 +80,31 @@ typedef struct SOPC_Server_RuntimeVariables
  * Information on software are extracted from server configuration. Manufacturer and build date and version are those of
  * S2OPC by default. Otherwise ::SOPC_RuntimeVariables_Build should be used with custom ::OpcUa_BuildInfo.
  *
- * \param build_info  Toolkit build information structure
- * \param server_config Server configuration data
- *
- * \return structure containing all runtime variables.
+ * \param build_info        Toolkit build information structure
+ * \param server_config     Server configuration data
+ * \param runtimeVariables  Runtime variables structure to fill, its diagnostics field is not modified
+ *                          (owned by the diagnostics module, see ::SOPC_ServerInternal_DiagnosticsConfigure)
  */
-SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Build_Info build_info,
-                                                                SOPC_Server_Config* server_config);
+void SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Build_Info build_info,
+                                        SOPC_Server_Config* server_config,
+                                        SOPC_Server_RuntimeVariables* runtimeVariables);
 
 /**
  * \brief Builds the structure containing the values for runtime variables in the address space.
  *
  * Use the custom ::OpcUa_BuildInfo structure content provided, content is copied.
  *
- * \param build_info  Server custom build information
- * \param server_config Server configuration data
- *
- * \return structure containing all runtime variables.
+ * \param build_info        Server custom build information
+ * \param server_config     Server configuration data
+ * \param runtimeVariables  Runtime variables structure to fill, its diagnostics field is not modified
+ *                          (owned by the diagnostics module, see ::SOPC_ServerInternal_DiagnosticsConfigure)
  *
  * \warning Coherence between build information and server configuration (application description, etc.) is not enforced
  *
  */
-SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_info,
-                                                         SOPC_Server_Config* server_config);
+void SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_info,
+                                 SOPC_Server_Config* server_config,
+                                 SOPC_Server_RuntimeVariables* runtimeVariables);
 
 /**
  * \brief Build a write request to write the values for runtime variables in the address space.

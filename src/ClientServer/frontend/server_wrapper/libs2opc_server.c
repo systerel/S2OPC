@@ -482,15 +482,17 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
 
+    /* Note: runtime variables diagnostics are not modified, they are kept across server restarts and may still be
+     * updated by the services thread (subscriptions closed after a server stop) */
     if (NULL == sopc_server_helper_config.buildInfo)
     {
-        sopc_server_helper_config.runtimeVariables =
-            SOPC_RuntimeVariables_BuildDefault(SOPC_ToolkitConfig_GetBuildInfo(), &pConfig->serverConfig);
+        SOPC_RuntimeVariables_BuildDefault(SOPC_ToolkitConfig_GetBuildInfo(), &pConfig->serverConfig,
+                                           &sopc_server_helper_config.runtimeVariables);
     }
     else
     {
-        sopc_server_helper_config.runtimeVariables =
-            SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &pConfig->serverConfig);
+        SOPC_RuntimeVariables_Build(sopc_server_helper_config.buildInfo, &pConfig->serverConfig,
+                                    &sopc_server_helper_config.runtimeVariables);
     }
 
     // Start diagnostics prior to runtime variables write: EnabledFlag value is part of the runtime variables

@@ -25,12 +25,15 @@
  *        It should not be used outside of the server wrapper and services implementation.
  *
  * Threading model:
- * - the diagnostics support and EnabledFlag states are initialized during server configuration
- *   (::SOPC_ServerInternal_DiagnosticsConfigure),
+ * - the diagnostics support and EnabledFlag states are initialized and the runtime variables diagnostics are reset
+ *   during server configuration (::SOPC_ServerInternal_DiagnosticsConfigure),
  * - the EnabledFlag state is copied into the server runtime variables before endpoints are opened
  *   (::SOPC_ServerInternal_DiagnosticsStart),
  * - then the diagnostics support state is read-only, the EnabledFlag state and the runtime variables diagnostics are
  *   only accessed from the services thread.
+ *
+ * Diagnostics values are kept across server restarts: on server stop only the cumulated values are reset
+ * (services thread), current values reflect the existing sessions and subscriptions.
  *
  * The ServerDiagnostics nodes are updated by the services thread: diagnostics updates only record that an update is
  * needed during a services event treatment, then a single priority local WriteRequest is enqueued at the end of the
@@ -62,6 +65,7 @@
  *       a local write of EnabledFlag remains possible but has no effect on diagnostics.
  * \note The EnabledFlag value is part of the runtime variables written on server start: its write behavior callback
  *       is then called and enqueues the ServerDiagnostics nodes update.
+ * \note The runtime variables diagnostics values are reset.
  * \note Shall be called in server configuring state.
  *
  * \param addSpace  The server address space
@@ -73,7 +77,8 @@ SOPC_ReturnStatus SOPC_ServerInternal_DiagnosticsConfigure(SOPC_AddressSpace* ad
 /**
  * \brief Starts the ServerDiagnostics management on server start:
  *        copies the EnabledFlag state into the server runtime variables diagnostics and, if diagnostics are supported,
- *        sets ::SOPC_ServerInternal_DiagnosticsMayUpdateVariables as services event treated hook.
+ *        sets the services hooks: ::SOPC_ServerInternal_DiagnosticsMayUpdateVariables after each event treatment and
+ *        the reset of the cumulated session values on server stop.
  *
  * \note Shall be called after the server runtime variables are built, before they are written and before endpoints
  *       are opened.
@@ -84,7 +89,7 @@ void SOPC_ServerInternal_DiagnosticsStart(void);
  * \brief Writes the ServerDiagnostics nodes in the AddressSpace with a priority local WriteRequest if an update was
  *        requested during the services event treatment (diagnostics values or EnabledFlag changed).
  *
- * \note Services event treated hook (see ::SOPC_Services_SetEventTreatedHook): called from the services thread at the
+ * \note Services event treated hook (see ::SOPC_Services_SetHooks): called from the services thread at the
  *       end of each event treatment.
  */
 void SOPC_ServerInternal_DiagnosticsMayUpdateVariables(void);
@@ -100,7 +105,8 @@ bool SOPC_ServerInternal_IsDiagnosticsEnabled(void);
 
 /**
  * \brief Returns whether the ServerDiagnostics are supported by the server.
- *        When not supported, all the diagnostics code is inhibited (no counting, no AddressSpace update, no callback).
+ *        When not supported, the diagnostics are inhibited (no AddressSpace update, no callback). Only sessions and
+ *        subscriptions are still counted, the support state may change between their creation and their closure.
  *
  * \note Set during server configuration by ::SOPC_ServerInternal_DiagnosticsConfigure and read-only afterwards.
  *
@@ -111,8 +117,8 @@ bool SOPC_ServerInternal_IsDiagnosticsSupported(void);
 /**
  * \brief Updates the session diagnostics on a session event and requests the ServerDiagnostics nodes update
  *        at the end of the services event treatment.
- *        Session diagnostics are counted even if diagnostics are disabled (only the AddressSpace update is
- *        inhibited) and are not counted if diagnostics are not supported.
+ *        Session diagnostics are counted even if diagnostics are disabled or not supported (only the AddressSpace
+ *        update is inhibited).
  *
  * \note Shall be called from the services thread.
  *
@@ -152,7 +158,7 @@ void SOPC_ServerInternal_DiagnosticsUpdateRequestCounts(uint32_t rejectedRequest
                                                         uint32_t securityRejectedRequestsCount);
 
 /**
- * \brief Resets the ServerDiagnostics state: diagnostics not supported and disabled, services event treated hook reset.
+ * \brief Resets the ServerDiagnostics state: diagnostics not supported and disabled, services hooks reset.
  *
  * \note Shall be called on server configuration clear.
  */

@@ -235,23 +235,26 @@ uint32_t SOPC_Services_Get_PendingLocalRequests(void);
 uint32_t SOPC_Services_Get_PendingExternalRequests(void);
 
 /**
- * \brief Hook called by the services thread after each services event treatment
- *        (including secure channels events treated by the services thread).
+ * \brief Hooks called by the services thread. Each callback is optional (NULL if not used),
+ *        called from the services thread and shall not be blocking.
  */
-typedef struct SOPC_Services_EventTreatedHook
+typedef struct SOPC_Services_Hooks
 {
-    void (*eventTreatedCb)(void); /**< Called from the services thread, shall not be blocking */
-} SOPC_Services_EventTreatedHook;
+    /** Called after each services event treatment (including secure channels events treated by the services thread) */
+    void (*eventTreatedCb)(void);
+    /** Called on server shutdown once all the server sessions are closed (subscriptions closure may be pending) */
+    void (*serverStoppedCb)(void);
+} SOPC_Services_Hooks;
 
 /**
- * \brief Sets the hook called by the services thread after each services event treatment.
+ * \brief Sets the hooks called by the services thread.
  *
- * \note Only one hook can be set, setting a new one replaces the previous one.
- * \note The hook shall remain valid until it is reset (static storage is recommended).
+ * \note Only one set of hooks can be defined, setting a new one replaces the previous one.
+ * \note The hooks shall remain valid until they are reset (static storage is recommended).
  *
- * \param hook  The hook to set, or NULL to reset it
+ * \param hooks  The hooks to set, or NULL to reset them
  */
-void SOPC_Services_SetEventTreatedHook(SOPC_Services_EventTreatedHook* hook);
+void SOPC_Services_SetHooks(SOPC_Services_Hooks* hooks);
 
 /**
  *  \brief Initializes the services and application event dispatcher threads
