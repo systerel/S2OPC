@@ -38,6 +38,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
+#include "sopc_toolkit_config_constants.h"
 
 #define VALID_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define INVALID_ENDPOINT_URL "opc.tcp://localhost:5841"
@@ -157,7 +158,8 @@ static void handle_asyncSubscriptionResponse(SOPC_EncodeableType* type, const vo
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_async_resp_mutex));
 }
 
-/* Blocks the application thread until released by the test (use a 60 sec timeout) */
+/* Blocks the application thread until released by the test (timeout longer than the synchronous call wait, i.e.
+ * twice the request timeout) */
 static void handle_blockingAsyncResponse(SOPC_EncodeableType* type, const void* response, uintptr_t userContext)
 {
     SOPC_UNUSED_ARG(type);
@@ -168,8 +170,9 @@ static void handle_blockingAsyncResponse(SOPC_EncodeableType* type, const void* 
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_SignalAll(&check_blocking_cb_condition));
     while (!check_blocking_cb_released)
     {
-        ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_UnlockAndTimedWaitCond(&check_blocking_cb_condition,
-                                                                           &check_blocking_cb_mutex, 60000));
+        ck_assert_int_eq(SOPC_STATUS_OK,
+                         SOPC_Mutex_UnlockAndTimedWaitCond(&check_blocking_cb_condition, &check_blocking_cb_mutex,
+                                                           4 * SOPC_REQUEST_TIMEOUT_MS));
     }
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_blocking_cb_mutex));
 }
@@ -1715,8 +1718,9 @@ static Suite* tests_make_suite_wrapper(void)
     tcase_add_test(tc_wrapper, test_wrapper_write);
     tcase_add_test(tc_wrapper, test_wrapper_browse);
     tcase_add_test(tc_wrapper, test_wrapper_get_endpoints);
-    tcase_add_test(tc_wrapper, test_wrapper_sync_service_wait_expiry);
     tcase_add_test(tc_wrapper, test_wrapper_discovery_async_requests_in_row);
+    // Last test: lasts twice the request timeout (server lifetime set accordingly)
+    tcase_add_test(tc_wrapper, test_wrapper_sync_service_wait_expiry);
     tcase_set_timeout(tc_wrapper, 0);
     suite_add_tcase(s, tc_wrapper);
 

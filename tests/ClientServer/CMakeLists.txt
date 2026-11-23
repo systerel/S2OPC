@@ -1077,15 +1077,20 @@ function(s2opc_server_validation_test name)
 endfunction()
 
 # Function to run a validation of the given S2OPC client scenario with another server
+# Optional 2nd argument: server lifetime in ms (default 25000), the server is stopped at the end of the test anyway
 function(s2opc_client_validation_test name)
   set(test_name "validation::${name}")
+  set(server_lifetime_ms 25000)
+  if(ARGC GREATER 1)
+    set(server_lifetime_ms ${ARGV1})
+  endif()
   add_test(NAME "${test_name}"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
     "${Python3_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--wait-server-timeout" "${S2OPC_WITH_OPC_SERVER_READY_TIMEOUT}"
     "--server-wd" "${CMAKE_CURRENT_SOURCE_DIR}/interop_tools"
-    "--server-cmd" "${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/server.py 25000"
+    "--server-cmd" "${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/server.py ${server_lifetime_ms}"
     "./${name}")
   set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${name}.tap")
 endfunction()
@@ -1143,7 +1148,8 @@ target_include_directories(check_wrapper PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPE
 target_compile_options(check_wrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(check_wrapper PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(check_wrapper PRIVATE s2opc_clientserver Check::check)
-s2opc_client_validation_test(check_wrapper)
+# Set timeout: server stopped at the end of the test anyway, 200s lifetime covers the wait expiry test.
+s2opc_client_validation_test(check_wrapper 200000)
 
 ## PyS2OPC library validation tests ##
 

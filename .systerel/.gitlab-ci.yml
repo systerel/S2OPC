@@ -232,7 +232,6 @@ hil-test:
   variables: &build_linux_variables
     DOCKER_DIGEST: 'sha256:4417afb168c67891a2c523d03e659e957e88b1e339b85800e6443a61a85b0d1a'
     BUILD_DIR: build
-    CMAKE_C_FLAGS: "-DSOPC_REQUEST_TIMEOUT_MS=40000" # increase timeout for CI tests
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
