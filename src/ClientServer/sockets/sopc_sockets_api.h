@@ -130,7 +130,7 @@ void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler);
 /**
  * \brief Stops the sockets thread without releasing the sockets resources.
  *
- * Input events enqueued afterwards are accepted but never treated, their parameters are not freed.
+ * Input events enqueued afterwards are accepted but never treated, they are freed by ::SOPC_Sockets_Clear.
  */
 void SOPC_Sockets_PreClear(void);
 

@@ -37,7 +37,8 @@ struct _SOPC_EventHandler
     SOPC_Looper* looper;
     SOPC_EventHandler_Callback* callback;
     SOPC_TimeReference currentEventPostTime; // Post time of the event being processed (only accessed by looper thread)
-    SOPC_EventHandler_CategoryFct* categoryFct; /* NULL if the posted events are not counted */
+    SOPC_EventHandler_CategoryFct* categoryFct;   /* NULL if the posted events are not counted */
+    SOPC_EventHandler_FreeEventFct* freeEventFct; /* NULL if the untreated events parameters are not freed */
 };
 
 struct _SOPC_Looper
@@ -176,6 +177,14 @@ uint32_t SOPC_EventHandler_Get_PendingCountByCategory(SOPC_EventHandler* handler
     return (count > 0) ? (uint32_t) count : 0;
 }
 
+void SOPC_EventHandler_SetFreeEventFct(SOPC_EventHandler* handler, SOPC_EventHandler_FreeEventFct* freeFct)
+{
+    if (NULL != handler)
+    {
+        handler->freeEventFct = freeFct;
+    }
+}
+
 SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandler_Callback* callback)
 {
     SOPC_EventHandler* handler = SOPC_Calloc(1, sizeof(SOPC_EventHandler));
@@ -293,8 +302,19 @@ void SOPC_Looper_Delete(SOPC_Looper* looper)
 
     SOPC_Looper_Stop(looper);
 
-    // The poison pill has been dequeued: remaining events were posted after it
-    const uint32_t nbUntreated = SOPC_AsyncQueue_GetSize(looper->queue);
+    // The poison pill has been dequeued: remaining events were posted after it, handlers are still allocated
+    uint32_t nbUntreated = 0;
+    struct Event* ev = NULL;
+    while (SOPC_STATUS_OK == SOPC_AsyncQueue_NonBlockingDequeue(looper->queue, (void**) &ev) && NULL != ev)
+    {
+        if (NULL != ev->handler->freeEventFct)
+        {
+            ev->handler->freeEventFct(ev->code, ev->id, ev->params, ev->auxParam);
+        }
+        SOPC_Free(ev);
+        ev = NULL;
+        nbUntreated++;
+    }
     if (nbUntreated > 0)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON, "Looper %s deleted with %" PRIu32 " untreated event(s)",

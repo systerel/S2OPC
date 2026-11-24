@@ -66,6 +66,11 @@ void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc* setSock
     secureChannelsTimerEventHandler = SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnTimerEvent);
     SOPC_ASSERT(secureChannelsTimerEventHandler != NULL);
 
+    // Timer events have no parameter to free
+    SOPC_EventHandler_SetFreeEventFct(secureChannelsInputEventHandler, SOPC_SecureChannels_FreeInputEvent);
+    SOPC_EventHandler_SetFreeEventFct(secureChannelsInternalEventHandler, SOPC_SecureChannels_FreeInternalEvent);
+    SOPC_EventHandler_SetFreeEventFct(secureChannelsSocketsEventHandler, SOPC_SecureChannels_FreeSocketsEvent);
+
     setSocketsListener(secureChannelsSocketsEventHandler);
 }
 

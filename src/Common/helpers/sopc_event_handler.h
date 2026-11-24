@@ -90,6 +90,12 @@ typedef void SOPC_EventHandler_Callback(SOPC_EventHandler* handler,
 typedef int32_t SOPC_EventHandler_CategoryFct(int32_t event, uint32_t eltId, uintptr_t params, uintptr_t auxParam);
 
 /**
+ * \brief Function prototype freeing the parameters of an event posted to an event handler and never treated
+ *        (see ::SOPC_Looper_Delete).
+ */
+typedef void SOPC_EventHandler_FreeEventFct(int32_t event, uint32_t eltId, uintptr_t params, uintptr_t auxParam);
+
+/**
  * \brief Creates a new event handler and attaches it to an existing looper.
  *
  * \param looper    the looper to attach the event handler to
@@ -129,6 +135,16 @@ SOPC_EventHandler* SOPC_EventHandler_CreateWithCategory(SOPC_Looper* looper,
 uint32_t SOPC_EventHandler_Get_PendingCountByCategory(SOPC_EventHandler* handler, int32_t category);
 
 /**
+ * \brief Sets the function freeing the parameters of the events posted to \p handler and never treated.
+ *
+ * \param handler  the event handler
+ * \param freeFct  the function called by ::SOPC_Looper_Delete for each untreated event of \p handler
+ *
+ * \note Shall be called before any event is posted to \p handler.
+ */
+void SOPC_EventHandler_SetFreeEventFct(SOPC_EventHandler* handler, SOPC_EventHandler_FreeEventFct* freeFct);
+
+/**
  * \brief Posts an event to the back of the event handler's message queue.
  *
  * \param handler   the event handler
@@ -139,7 +155,8 @@ uint32_t SOPC_EventHandler_Get_PendingCountByCategory(SOPC_EventHandler* handler
  *
  * \return \c SOPC_STATUS_OK on success, or an error code on failure.
  *
- * \note An event posted after ::SOPC_Looper_Stop is accepted but never treated: its parameters are not freed.
+ * \note An event posted after ::SOPC_Looper_Stop is accepted but never treated: its parameters are freed by
+ *       ::SOPC_Looper_Delete if a free function is set (see ::SOPC_EventHandler_SetFreeEventFct).
  */
 SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
                                          int32_t event,
@@ -214,7 +231,8 @@ SOPC_Looper* SOPC_Looper_CreatePrioritized(const char* threadName, int threadPri
  * \param looper  the looper
  *
  * The events posted before this call are treated, then the thread of the looper is joined.
- * Its event handlers remain valid: an event posted afterwards is accepted but never treated.
+ * Its event handlers remain valid: an event posted afterwards is accepted but never treated (see
+ * ::SOPC_Looper_Delete).
  * Calling it on a stopped looper has no effect.
  *
  * \note Not thread-safe with ::SOPC_Looper_Stop and ::SOPC_Looper_Delete on the same looper.
@@ -226,7 +244,8 @@ void SOPC_Looper_Stop(SOPC_Looper* looper);
  *
  * \param looper  the looper
  *
- * The events posted after the stop are freed without being treated, their number is logged as a warning.
+ * The events posted after the stop are freed without being treated, with their parameters when the handler has a free
+ * function (see ::SOPC_EventHandler_SetFreeEventFct). Their number is logged as a warning.
  *
  * \warning All event handlers are deallocated by this function: no thread shall use them anymore.
  */

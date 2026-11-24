@@ -304,6 +304,47 @@ START_TEST(test_looper_stop)
 }
 END_TEST
 
+static int32_t freedEventsSum = 0;
+static int32_t freedEventsCount = 0;
+
+static void free_event(int32_t event, uint32_t eltId, uintptr_t params, uintptr_t auxParam)
+{
+    ck_assert_uint_eq((uint32_t) event, eltId);
+    ck_assert_uint_eq((uintptr_t) event, auxParam);
+    SOPC_Free((void*) params);
+    freedEventsSum += event;
+    freedEventsCount++;
+}
+
+START_TEST(test_looper_delete_frees_untreated_events)
+{
+    SOPC_Looper* looper = SOPC_Looper_Create("test_free");
+    ck_assert_ptr_nonnull(looper);
+    SOPC_EventHandler* handler = SOPC_EventHandler_Create(looper, test_callback);
+    SOPC_EventHandler* hNoFree = SOPC_EventHandler_Create(looper, test_callback);
+    ck_assert_ptr_nonnull(handler);
+    ck_assert_ptr_nonnull(hNoFree);
+    SOPC_EventHandler_SetFreeEventFct(handler, free_event);
+    freedEventsSum = 0;
+    freedEventsCount = 0;
+
+    // Treated event: not freed by the free function
+    SOPC_EventHandler_Post(handler, 1, 1, 0x01, 1);
+    SOPC_Looper_Stop(looper);
+    expect_event(handler, 1, 1, 0x01, 1);
+
+    // Untreated events: parameters freed by the handler free function only
+    SOPC_EventHandler_Post(handler, 2, 2, (uintptr_t) SOPC_Malloc(4), 2);
+    SOPC_EventHandler_PostAsNext(handler, 3, 3, (uintptr_t) SOPC_Malloc(4), 3);
+    SOPC_EventHandler_Post(hNoFree, 4, 4, 0x04, 4);
+    SOPC_Looper_Delete(looper);
+
+    ck_assert_int_eq(2, freedEventsCount);
+    ck_assert_int_eq(5, freedEventsSum);
+    ck_assert_uint_eq(0, SOPC_AsyncQueue_GetSize(queue));
+}
+END_TEST
+
 static SOPC_EventHandler* chainHandler = NULL;
 
 // Posts event 2 once the treatment of event 1 is unblocked
@@ -383,6 +424,7 @@ Suite* tests_make_suite_event_handler(void)
     tcase_add_test(c, test_event_handler_pending_count_by_category);
     tcase_add_test(c, test_looper_stop);
     tcase_add_test(c, test_looper_stop_post_from_callback);
+    tcase_add_test(c, test_looper_delete_frees_untreated_events);
     suite_add_tcase(s, c);
 
     return s;

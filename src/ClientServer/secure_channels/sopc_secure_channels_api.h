@@ -170,7 +170,7 @@ void SOPC_SecureChannels_SetEventHandler(SOPC_EventHandler* handler);
 /**
  * \brief Stops the secure channels thread without releasing its resources.
  *
- * Events posted afterwards are accepted but never treated, their parameters are not freed.
+ * Events posted afterwards are accepted but never treated, they are freed by ::SOPC_SecureChannels_Clear.
  */
 void SOPC_SecureChannels_PreClear(void);
 

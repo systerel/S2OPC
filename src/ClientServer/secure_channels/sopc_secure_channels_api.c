@@ -24,9 +24,11 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_buffer.h"
 #include "sopc_chunks_mgr.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_secure_connection_state_mgr.h"
 #include "sopc_secure_listener_state_mgr.h"
@@ -155,6 +157,100 @@ void SOPC_SecureChannels_OnTimerEvent(SOPC_EventHandler* handler,
         break;
     default:
         SOPC_ASSERT(false && "Unknown timer event.");
+    }
+}
+
+void SOPC_SecureChannels_FreeInternalEvent(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(id);
+    switch ((SOPC_SecureChannels_InternalEvent) event)
+    {
+    case INT_EP_SC_CREATE:
+        SOPC_Free((void*) params); // Peer info
+        break;
+    case INT_EP_SC_RHE_DECODED:
+        SOPC_Free((void*) params);   // Server URI
+        SOPC_Free((void*) auxParam); // Server endpoint URL
+        break;
+    case INT_SC_RCV_HEL:
+    case INT_SC_RCV_ACK:
+    case INT_SC_RCV_ERR:
+    case INT_SC_RCV_RHE:
+    case INT_SC_RCV_OPN:
+    case INT_SC_RCV_CLO:
+    case INT_SC_RCV_MSG_CHUNKS:
+    case INT_SC_RCV_MSG_CHUNK_ABORT:
+    case INT_SC_SND_HEL:
+    case INT_SC_SND_ACK:
+    case INT_SC_SND_ERR:
+    case INT_SC_SND_RHE:
+    case INT_SC_SND_OPN:
+    case INT_SC_SND_CLO:
+    case INT_SC_SND_MSG_CHUNKS:
+        SOPC_Buffer_Delete((SOPC_Buffer*) params);
+        break;
+    case INT_EP_SC_CLOSE:
+    case INT_EP_SC_REVERSE_CONNECT:
+    case INT_SC_RCV_RHE_TRANSITION:
+    case INT_EP_SC_CREATED:
+    case INT_EP_SC_DISCONNECTED:
+    case INT_REVERSE_EP_REQ_CONNECTION:
+    case INT_SC_RCV_FAILURE:
+    case INT_SC_SND_FATAL_FAILURE:
+    case INT_SC_SENT_ABORT_FAILURE:
+    case INT_SC_CLOSE:
+    default:
+        // No parameter to free (INT_SC_CLOSE reason is a constant string)
+        break;
+    }
+}
+
+void SOPC_SecureChannels_FreeSocketsEvent(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(id);
+    SOPC_UNUSED_ARG(auxParam);
+    switch ((SOPC_Sockets_OutputEvent) event)
+    {
+    case SOCKET_LISTENER_CONNECTION:
+        SOPC_Free((void*) params); // Peer info
+        break;
+    case SOCKET_RCV_BYTES:
+        SOPC_Buffer_Delete((SOPC_Buffer*) params);
+        break;
+    case SOCKET_LISTENER_OPENED:
+    case SOCKET_LISTENER_FAILURE:
+    case SOCKET_CREATED:
+    case SOCKET_CONNECTION:
+    case SOCKET_FAILURE:
+    default:
+        // No parameter to free
+        break;
+    }
+}
+
+void SOPC_SecureChannels_FreeInputEvent(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(id);
+    SOPC_UNUSED_ARG(auxParam);
+    switch ((SOPC_SecureChannels_InputEvent) event)
+    {
+    case SC_SERVICE_SND_MSG:
+        SOPC_Buffer_Delete((SOPC_Buffer*) params);
+        break;
+    case EP_OPEN:
+    case EP_CLOSE:
+    case REVERSE_EP_OPEN:
+    case REVERSE_EP_CLOSE:
+    case SC_CONNECT:
+    case SC_REVERSE_CONNECT:
+    case SC_DISCONNECT:
+    case SC_SERVICE_SND_ERR:
+    case SC_DISCONNECTED_ACK:
+    case SCS_REEVALUATE_SCS:
+    case SE_TO_SCS_SERVER_CONFIGURED:
+    default:
+        // No parameter to free
+        break;
     }
 }
 

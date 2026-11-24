@@ -271,7 +271,7 @@ void SOPC_Services_CloseAllSCs(bool clientOnly);
 /**
  *  \brief Stops the services thread and uninitializes the services, without releasing the services handlers.
  *
- *  Events posted afterwards are accepted but never treated, their parameters are not freed.
+ *  Events posted afterwards are accepted but never treated, they are freed by ::SOPC_Services_Clear.
  *
  *  \pre The sockets and secure channels threads are stopped (see ::SOPC_SecureChannels_PreClear), the timers
  *       evaluation is stopped and the application thread is running (see SOPC_Toolkit_Clear).

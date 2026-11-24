@@ -58,6 +58,28 @@ void SOPC_SocketsInternalContext_Initialize(void)
     maxBufferSize = SOPC_Internal_Common_GetEncodingConstants()->buffer_size;
 }
 
+// Frees the parameters of an input event never treated (see SOPC_SocketsEventMgr_Dispatcher)
+static void SOPC_SocketsInternalContext_FreeInputEvent(struct Event* ev)
+{
+    switch (ev->event)
+    {
+    case SOCKET_CREATE_LISTENER:
+    case SOCKET_CREATE_CONNECTION:
+        SOPC_Free((void*) ev->params);
+        break;
+    case SOCKET_WRITE:
+        SOPC_Buffer_Delete((SOPC_Buffer*) ev->params);
+        break;
+    case SOCKET_ACCEPTED_CONNECTION:
+    case SOCKET_CLOSE:
+    case SOCKET_CLOSE_LISTENER:
+    default:
+        // No parameter to free
+        break;
+    }
+    SOPC_Free(ev);
+}
+
 void SOPC_SocketsInternalContext_Clear(void)
 {
     // Close any not closed remaining socket
@@ -72,7 +94,14 @@ void SOPC_SocketsInternalContext_Clear(void)
     }
 
     // Events enqueued after the sockets thread stop
-    const uint32_t nbUntreated = SOPC_AsyncQueue_GetSize(socketsInputEventQueue);
+    uint32_t nbUntreated = 0;
+    struct Event* ev = NULL;
+    while (SOPC_STATUS_OK == SOPC_AsyncQueue_NonBlockingDequeue(socketsInputEventQueue, (void**) &ev) && NULL != ev)
+    {
+        SOPC_SocketsInternalContext_FreeInputEvent(ev);
+        ev = NULL;
+        nbUntreated++;
+    }
     if (nbUntreated > 0)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Sockets cleared with %" PRIu32 " untreated event(s)",

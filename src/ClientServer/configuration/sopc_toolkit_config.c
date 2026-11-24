@@ -400,7 +400,7 @@ void SOPC_Toolkit_Clear(void)
         SOPC_EventTimer_PreClear();
 
         /* Stop all toolkit threads before releasing any resource: they post to each other's handlers.
-         * An event posted to a stopped thread is never treated. */
+         * An event posted to a stopped thread is never treated, it is freed when its layer is cleared. */
         SOPC_Sockets_PreClear();
         SOPC_SecureChannels_PreClear();
         SOPC_Services_PreClear(); // Uninitializes services: application thread still running

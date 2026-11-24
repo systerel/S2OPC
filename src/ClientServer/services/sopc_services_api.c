@@ -33,6 +33,7 @@
 #include "sopc_event_handler.h"
 #include "sopc_helper_string.h"
 #include "sopc_internal_app_dispatcher.h"
+#include "sopc_key_manager.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -522,10 +523,120 @@ static void SOPC_Array_Free_NodeChanged(void* data)
     SOPC_Free(nodeChanged->nodeId);
 }
 
-static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam)
+// Frees the parameters of a services event filtered or never treated (see ::SOPC_EventHandler_FreeEventFct)
+static void SOPC_Services_FreeServicesEvent(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(id);
+    SOPC_Internal_AsyncSendMsgData* msg_data = NULL;
+    SOPC_Internal_EventContext* eventContext = NULL;
+    SOPC_Internal_SessionAppContext* sessionContext = NULL;
+    SOPC_Internal_DiscoveryContext* discoveryContext = NULL;
+    void* msg = (void*) params;
+
+    switch ((SOPC_Services_Event) event)
+    {
+    case SE_TO_SE_SERVER_DATA_CHANGED:
+        SOPC_Array_Set_Free_Func((SOPC_Array*) params, &SOPC_Array_Free_WriteDataChanged);
+        SOPC_Array_Delete((SOPC_Array*) params);
+        break;
+    case SE_TO_SE_SERVER_NODE_CHANGED:
+        SOPC_Array_Set_Free_Func((SOPC_Array*) params, &SOPC_Array_Free_NodeChanged);
+        SOPC_Array_Delete((SOPC_Array*) params);
+        break;
+    case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
+        msg_data = (SOPC_Internal_AsyncSendMsgData*) params;
+        SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) msg_data->msgToSend, (void**) &msg_data->msgToSend);
+        SOPC_Free(msg_data);
+        break;
+    case APP_TO_SE_LOCAL_SERVICE_REQUEST:
+    case APP_TO_SE_SEND_SESSION_REQUEST:
+        // Note: the request context is not returned to the application
+        if (NULL != msg)
+        {
+            SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) msg, &msg);
+        }
+        break;
+    case APP_TO_SE_TRIGGER_EVENT:
+        eventContext = (SOPC_Internal_EventContext*) params;
+        SOPC_ASSERT(NULL != eventContext);
+        SOPC_NodeId_Clear(&eventContext->notifierNodeId);
+        SOPC_Event_Delete(&eventContext->event);
+        SOPC_Free(eventContext);
+        break;
+    case APP_TO_SE_ACTIVATE_SESSION:
+        sessionContext = (SOPC_Internal_SessionAppContext*) auxParam;
+        SOPC_ASSERT(NULL != sessionContext);
+        SOPC_ExtensionObject_Clear(sessionContext->userToken);
+        SOPC_Free(sessionContext->userToken);
+        SOPC_KeyManager_SerializedAsymmetricKey_Delete(sessionContext->userTokenKey);
+        SOPC_Free(sessionContext->sessionName);
+        SOPC_Free(sessionContext);
+        break;
+    case APP_TO_SE_SEND_DISCOVERY_REQUEST:
+        discoveryContext = (SOPC_Internal_DiscoveryContext*) auxParam;
+        SOPC_ASSERT(NULL != discoveryContext);
+        if (NULL != discoveryContext->opcuaMessage)
+        {
+            SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) discoveryContext->opcuaMessage,
+                                         &discoveryContext->opcuaMessage);
+        }
+        SOPC_Free(discoveryContext);
+        break;
+    case APP_TO_SE_CLOSE_CONNECTION:
+        SOPC_Free((void*) auxParam); // Encapsulated application context
+        break;
+    case SE_TO_SE_SC_ALL_DISCONNECTED:
+    case SE_TO_SE_ACTIVATE_ORPHANED_SESSION:
+    case SE_TO_SE_CREATE_SESSION:
+    case SE_TO_SE_ACTIVATE_SESSION:
+    case SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO:
+    case SE_TO_SE_SERVER_ASYNC_CLOSE_SUBSCRIPTION:
+    case TIMER_SE_EVAL_SESSION_TIMEOUT:
+    case TIMER_SE_PUBLISH_CYCLE_TIMEOUT:
+    case APP_TO_SE_SERVER_CONFIGURED:
+    case APP_TO_SE_OPEN_ENDPOINT:
+    case APP_TO_SE_CLOSE_ENDPOINT:
+    case APP_TO_SE_OPEN_REVERSE_ENDPOINT:
+    case APP_TO_SE_CLOSE_REVERSE_ENDPOINT:
+    case APP_TO_SE_CLOSE_SESSION:
+    case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
+    case APP_TO_SE_REEVALUATE_SCS:
+    case APP_TO_SE_EVAL_USR_CRT_SESSIONS:
+    case APP_TO_SE_CLOSE_SERVER_SESSIONS:
+    default:
+        // No parameter to free (SE_TO_SE_ACTIVATE_SESSION user token belongs to the session)
+        break;
+    }
+}
+
+// Frees the parameters of a secure channels event never treated (see ::SOPC_EventHandler_FreeEventFct)
+static void SOPC_Services_FreeSecureChannelsEvent(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     SOPC_UNUSED_ARG(id);
     SOPC_UNUSED_ARG(auxParam);
+    switch ((SOPC_SecureChannels_OutputEvent) event)
+    {
+    case SC_SERVICE_RCV_MSG:
+    case SC_SERVICE_RCV_REQUEST:
+        SOPC_Buffer_Delete((SOPC_Buffer*) params);
+        break;
+    case EP_CONNECTED:
+    case EP_CLOSED:
+    case EP_REVERSE_CLOSED:
+    case SC_CONNECTED:
+    case SC_REVERSE_CONNECTED:
+    case SC_CONNECTION_TIMEOUT:
+    case SC_DISCONNECTED:
+    case SC_SND_FAILURE:
+    case SC_REQUEST_TIMEOUT:
+    default:
+        // No parameter to free
+        break;
+    }
+}
+
+static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam)
+{
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool bParam = false;
     bool treatEvent = false;
@@ -636,47 +747,11 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
         treatEvent = true;
         break;
     }
-    SOPC_Internal_EventContext* eventContext = NULL;
-    SOPC_Internal_AsyncSendMsgData* msg_data = NULL;
     if (!treatEvent)
     {
-        // Clear provided data
-        switch (event)
-        {
-        case SE_TO_SE_SERVER_DATA_CHANGED:
-            SOPC_Array_Set_Free_Func((SOPC_Array*) params, &SOPC_Array_Free_WriteDataChanged);
-            SOPC_Array_Delete((SOPC_Array*) params);
-            break;
-        case SE_TO_SE_SERVER_NODE_CHANGED:
-            SOPC_Array_Set_Free_Func((SOPC_Array*) params, &SOPC_Array_Free_NodeChanged);
-            SOPC_Array_Delete((SOPC_Array*) params);
-            break;
-        case SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO:
-            msg_data = (SOPC_Internal_AsyncSendMsgData*) params;
-            SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) msg_data->msgToSend, (void**) &msg_data->msgToSend);
-            SOPC_Free(msg_data);
-            break;
-        case APP_TO_SE_EVAL_USR_CRT_SESSIONS:
-            break; // Nothing to clear
-        case APP_TO_SE_OPEN_ENDPOINT:
-        case APP_TO_SE_CLOSE_ENDPOINT:
-            break; // Nothing to clear
-        case APP_TO_SE_LOCAL_SERVICE_REQUEST:
-            SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) params, (void**) &params);
-            // Note: the response context is not returned to application,
-            // this is managed in server wrapper by using the waiting request context list
-            break;
-        case APP_TO_SE_TRIGGER_EVENT:
-            // params =  (SOPC_Internal_EventContext*)
-            eventContext = (SOPC_Internal_EventContext*) params;
-            SOPC_ASSERT(NULL != eventContext);
-            SOPC_NodeId_Clear(&eventContext->notifierNodeId);
-            SOPC_Event_Delete(&eventContext->event);
-            SOPC_Free(eventContext);
-            break;
-        default:
-            break;
-        }
+        // Note: for APP_TO_SE_LOCAL_SERVICE_REQUEST, the response context is not returned to application,
+        // this is managed in server wrapper by using the waiting request context list
+        SOPC_Services_FreeServicesEvent((int32_t) event, id, params, auxParam);
     }
     return treatEvent;
 }
@@ -1240,6 +1315,9 @@ void SOPC_Services_Initialize(SOPC_SetListenerFunc* setSecureChannelsListener)
     secureChannelsEventHandler = SOPC_EventHandler_CreateWithCategory(servicesLooper, onSecureChannelEvent,
                                                                       SOPC_Services_SecureChannelsEventCategory);
     SOPC_ASSERT(secureChannelsEventHandler != NULL);
+
+    SOPC_EventHandler_SetFreeEventFct(servicesEventHandler, SOPC_Services_FreeServicesEvent);
+    SOPC_EventHandler_SetFreeEventFct(secureChannelsEventHandler, SOPC_Services_FreeSecureChannelsEvent);
 
     // Init async close management flag
     status = SOPC_Mutex_Initialization(&closeAllConnectionsSync.mutex);

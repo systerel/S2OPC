@@ -298,4 +298,9 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
                                       uintptr_t params,
                                       uintptr_t auxParam);
 
+/* Free the parameters of untreated events (see ::SOPC_EventHandler_FreeEventFct) */
+void SOPC_SecureChannels_FreeInternalEvent(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam);
+void SOPC_SecureChannels_FreeSocketsEvent(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam);
+void SOPC_SecureChannels_FreeInputEvent(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam);
+
 #endif /* SOPC_SECURE_CHANNELS_INTERNAL_CTX_H_ */

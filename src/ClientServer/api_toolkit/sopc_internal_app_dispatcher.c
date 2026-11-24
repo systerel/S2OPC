@@ -211,6 +211,61 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
     SOPC_CallContext_FreeCopy(cc);
 }
 
+// Frees the parameters of a communication event never treated (see ::SOPC_EventHandler_FreeEventFct)
+static void freeComEvent(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(id);
+    void* msg = (void*) params;
+    switch ((SOPC_App_Com_Event) event)
+    {
+    case SE_RCV_SESSION_RESPONSE:
+    case SE_RCV_DISCOVERY_RESPONSE:
+    case SE_LOCAL_SERVICE_RESPONSE:
+        if (NULL != msg)
+        {
+            SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) msg, &msg);
+        }
+        break;
+    case SE_CLOSED_CHANNEL:
+        SOPC_Free((void*) auxParam); // Encapsulated application context
+        break;
+    case SE_REVERSE_ENDPOINT_CLOSED:
+    case SE_SESSION_ACTIVATION_FAILURE:
+    case SE_ACTIVATED_SESSION:
+    case SE_SESSION_REACTIVATING:
+    case SE_CLOSED_SESSION:
+    case SE_SND_REQUEST_FAILED:
+    case SE_CLOSED_ENDPOINT:
+    default:
+        // No parameter to free
+        break;
+    }
+}
+
+// Frees the parameters of an address space notification never treated (see ::SOPC_EventHandler_FreeEventFct)
+static void freeAddressSpaceNotification(int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
+{
+    SOPC_UNUSED_ARG(id);
+    switch ((SOPC_App_AddSpace_Event) event)
+    {
+    case AS_WRITE_EVENT:
+        if (0 != params)
+        {
+            OpcUa_WriteValue_Clear((OpcUa_WriteValue*) params);
+            SOPC_Free((void*) params);
+        }
+        break;
+    case AS_SESSION_CREATION:
+    case AS_SESSION_ACTIVATION:
+    case AS_SESSION_INACTIVE:
+    case AS_SESSION_CLOSURE:
+    default:
+        // No parameter to free
+        break;
+    }
+    SOPC_CallContext_FreeCopy((SOPC_CallContextCopy*) auxParam);
+}
+
 void SOPC_App_Initialize(void)
 {
     int priority = 0;
@@ -225,6 +280,9 @@ void SOPC_App_Initialize(void)
 
     appAddressSpaceNotificationHandler = SOPC_EventHandler_Create(sopc_appLooper, onAddressSpaceNotification);
     SOPC_ASSERT(appAddressSpaceNotificationHandler != NULL);
+
+    SOPC_EventHandler_SetFreeEventFct(appComEventHandler, freeComEvent);
+    SOPC_EventHandler_SetFreeEventFct(appAddressSpaceNotificationHandler, freeAddressSpaceNotification);
 }
 
 SOPC_Looper* SOPC_App_GetLooper(void)
