@@ -629,7 +629,8 @@ static bool set_write_value_server_diagnostics_summary(OpcUa_WriteValue* wv,
 static bool set_server_server_diagnostics_variables(SOPC_Array* write_values,
                                                     const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics)
 {
-    // Diagnostic values are not available while diagnostics are disabled
+    /* Diagnostic values are not available while diagnostics are disabled:
+     * use default values => no concurrency issue with services thread in this case */
     const SOPC_Server_RuntimeVariablesDiagnostics noDiagnostics = {0};
     const SOPC_Server_RuntimeVariablesDiagnostics* diag = diagnostics->enabledFlag ? diagnostics : &noDiagnostics;
     const SOPC_StatusCode status = diagnostics->enabledFlag ? SOPC_GoodGenericStatus : OpcUa_BadNotReadable;
@@ -749,30 +750,37 @@ OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerDiagnosticsWriteReque
 
 static bool set_server_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVariables* vars)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 7);
+    OpcUa_WriteValue* values = append_write_values(write_values, 6);
     return values != NULL &&
            set_server_server_array_value(&values[0], &vars->serverConfig->serverDescription.ApplicationUri) &&
            set_server_service_level_value(&values[1], vars->service_level) &&
            set_write_value_bool(&values[2], OpcUaId_Server_Auditing, vars->auditing) &&
-           set_write_value_bool(&values[3], OpcUaId_Server_ServerDiagnostics_EnabledFlag,
-                                vars->diagnostics.enabledFlag) &&
-           set_write_value_int32(&values[4], OpcUaId_Server_ServerRedundancy_RedundancySupport,
+           set_write_value_int32(&values[3], OpcUaId_Server_ServerRedundancy_RedundancySupport,
                                  OpcUa_RedundancySupport_None) &&
-           set_server_capabilities_server_profile_array(&values[5]) &&
-           set_server_capabilities_locale_ids_array_value(&values[6], vars->serverConfig->localeIds) &&
+           set_server_capabilities_server_profile_array(&values[4]) &&
+           set_server_capabilities_locale_ids_array_value(&values[5], vars->serverConfig->localeIds) &&
            set_server_server_status_variables(write_values, vars) &&
            set_server_capabilities_max_variables(write_values) &&
-           set_server_capabilities_operation_limits_variables(write_values, vars) &&
-           set_server_server_diagnostics_variables(write_values, &vars->diagnostics) &&
+           set_server_capabilities_operation_limits_variables(write_values, vars);
+}
+
+static bool set_server_diagnostics_all_variables(SOPC_Array* write_values,
+                                                 const SOPC_Server_RuntimeVariablesDiagnostics* diagnostics)
+{
+    OpcUa_WriteValue* values = append_write_values(write_values, 1);
+    return values != NULL &&
+           set_write_value_bool(&values[0], OpcUaId_Server_ServerDiagnostics_EnabledFlag, diagnostics->enabledFlag) &&
+           set_server_server_diagnostics_variables(write_values, diagnostics) &&
            set_server_server_diagnostics_unmanaged_variables(write_values);
 }
 
-OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeVariables* vars)
+OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeVariables* vars, bool withDiagnostics)
 {
     OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
     SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 0, OpcUa_WriteValue_Clear);
 
-    bool ok = (write_values != NULL && request != NULL && set_server_variables(write_values, vars));
+    bool ok = (write_values != NULL && request != NULL && set_server_variables(write_values, vars) &&
+               (!withDiagnostics || set_server_diagnostics_all_variables(write_values, &vars->diagnostics)));
 
     if (!ok)
     {

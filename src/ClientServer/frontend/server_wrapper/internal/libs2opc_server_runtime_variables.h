@@ -110,6 +110,9 @@ void SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_info,
  * \brief Build a write request to write the values for runtime variables in the address space.
  *
  * \param vars                 Values of the runtime variables.
+ * \param withDiagnostics      Whether the ServerDiagnostics variables (including EnabledFlag) are written.
+ *                             They shall only be read when the services thread cannot modify them
+ *                             (see ::SOPC_ServerInternal_DiagnosticsStart).
  *
  * \return the WriteRequest to use with local services in case of success, NULL in case of failure.
  *
@@ -117,7 +120,7 @@ void SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_info,
  * single write request that should be used with ::SOPC_ToolkitServer_AsyncLocalServiceRequest
  * to update the runtime variables of the server.
  */
-OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeVariables* vars);
+OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeVariables* vars, bool withDiagnostics);
 
 /**
  * \brief Build a write request to update the server status values runtime variables in the address space.

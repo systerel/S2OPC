@@ -495,11 +495,12 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
                                     &sopc_server_helper_config.runtimeVariables);
     }
 
-    // Start diagnostics prior to runtime variables write: EnabledFlag value is part of the runtime variables
-    SOPC_ServerInternal_DiagnosticsStart();
+    /* Diagnostics hooks set before endpoints opening;
+     * diagnostics values are written only on first start since configuration or if not supported */
+    const bool withDiagnostics = SOPC_ServerInternal_DiagnosticsStart();
 
     OpcUa_WriteRequest* writeRequest =
-        SOPC_RuntimeVariables_BuildWriteRequest(&sopc_server_helper_config.runtimeVariables);
+        SOPC_RuntimeVariables_BuildWriteRequest(&sopc_server_helper_config.runtimeVariables, withDiagnostics);
 
     if (NULL != writeRequest)
     {

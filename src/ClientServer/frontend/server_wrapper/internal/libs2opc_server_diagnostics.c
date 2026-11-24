@@ -32,7 +32,7 @@
 
 /* ServerDiagnostics EnabledFlag state: set during configuration, then only accessed from the services thread
  * (EnabledFlag write behavior callback).
- * Copied into the runtime variables diagnostics on server start (see set_enabled_flag). */
+ * Copied into the runtime variables diagnostics on configuration and on change (see set_enabled_flag). */
 static bool diagEnabledFlag = false;
 
 /* ServerDiagnostics support state: set during configuration and read-only afterwards (services thread).
@@ -45,6 +45,12 @@ static bool diagSupported = false;
  * once server is started. */
 static bool updatePending = false;
 
+/* Diagnostics values written with the runtime variables on first start since configuration only (application thread).
+ * Not on restart (services thread may still modify them): nodes keep their values across a server stop and the
+ * services hooks, only removed on clear, write the updates requested while stopped once restarted.
+ * Not supported diagnostics are written on each start (see SOPC_ServerInternal_DiagnosticsStart). */
+static bool diagStartWriteNeeded = false;
+
 static const SOPC_NodeId enabledFlagNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_Server_ServerDiagnostics_EnabledFlag);
 
 // Keeps the module EnabledFlag state and its copy in the runtime variables diagnostics consistent
@@ -56,22 +62,23 @@ static void set_enabled_flag(bool value)
 
 /* Writes the runtime variables diagnostics into the ServerDiagnostics nodes of the AddressSpace.
  * Called from the services thread at the end of an event treatment: the local WriteRequest is a priority request,
- * it is treated before any other pending event (including already received client requests). */
-static void write_server_diagnostics(void)
+ * it is treated before any other pending event (including already received client requests).
+ * Returns true if the WriteRequest is enqueued. */
+static bool write_server_diagnostics(void)
 {
+    bool res = false;
     OpcUa_WriteRequest* writeRequest = SOPC_RuntimeVariables_BuildUpdateServerDiagnosticsWriteRequest(
         &sopc_server_helper_config.runtimeVariables.diagnostics);
 
     if (NULL != writeRequest)
     {
-        bool res = SOPC_ServerInternal_LocalServiceAsync(
+        res = SOPC_ServerInternal_LocalServiceAsync(
             SOPC_HelperInternal_RuntimeVariableSetResponseCb, writeRequest, (uintptr_t) NULL,
             "Updating server diagnostics runtime variables of server information nodes failed."
             " Please check address space content includes necessary diagnostic information nodes.",
             true);
-
-        SOPC_UNUSED_RESULT(res);
     }
+    return res;
 }
 
 // Requests the ServerDiagnostics nodes update at the end of the event treatment only if diagnostics are enabled
@@ -175,6 +182,7 @@ SOPC_ReturnStatus SOPC_ServerInternal_DiagnosticsConfigure(SOPC_AddressSpace* ad
     // Initialize and computes those 2 internal variable values
     diagSupported = false;
     diagEnabledFlag = false;
+    diagStartWriteNeeded = true;
     /* Diagnostics values are only reset on configuration: no session nor subscription exists and the services thread
      * does not modify them anymore. They are kept on server restart (only cumulated values are reset on stop). */
     memset(&sopc_server_helper_config.runtimeVariables.diagnostics, 0,
@@ -197,6 +205,8 @@ SOPC_ReturnStatus SOPC_ServerInternal_DiagnosticsConfigure(SOPC_AddressSpace* ad
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                  "ServerDiagnostics EnabledFlag node has an invalid value: diagnostics are disabled.");
     }
+    // Copy into the runtime variables diagnostics (not modified by the runtime variables build on server start)
+    set_enabled_flag(diagEnabledFlag);
 
     // Retrieve the AccessLevel writable property
     const bool writable = 0 != (SOPC_AddressSpace_Get_AccessLevel(addSpace, node) & OpcUa_AccessLevelType_CurrentWrite);
@@ -217,23 +227,29 @@ SOPC_ReturnStatus SOPC_ServerInternal_DiagnosticsConfigure(SOPC_AddressSpace* ad
     return SOPC_ServerInternal_RegisterWriteBehaviorCb(&enabledFlagNodeId, enabled_flag_write_behavior_cb, 0);
 }
 
-void SOPC_ServerInternal_DiagnosticsStart(void)
+bool SOPC_ServerInternal_DiagnosticsStart(void)
 {
-    // Runtime variables have been (re)built: copy the current EnabledFlag state
-    set_enabled_flag(diagEnabledFlag);
-    updatePending = false;
     if (diagSupported)
     {
         SOPC_Services_SetHooks(&diagnosticsHooks);
     }
+    /* On first start since configuration, the services thread did not modify the diagnostics yet: they can be read.
+     * On restart, the services thread may still update them (events of the previous run):
+     * do not write diagnostics due to concurrency issue unless diagnostics are not supported
+     * (and thus default values are used for counters) to be sure EnabledFlag is restored to FALSE. */
+    const bool writeDiagnostics = diagStartWriteNeeded || !diagSupported;
+    diagStartWriteNeeded = false;
+    return writeDiagnostics;
 }
 
 void SOPC_ServerInternal_DiagnosticsMayUpdateVariables(void)
 {
     if (updatePending)
     {
-        updatePending = false;
-        write_server_diagnostics();
+        /* Kept pending if the update is not enqueued: local services refused while the server is stopped
+         * (written once restarted) or allocation failure */
+        const bool written = write_server_diagnostics();
+        updatePending = !written;
     }
 }
 
@@ -350,7 +366,6 @@ void SOPC_ServerInternal_DiagnosticsClear(void)
     {
         SOPC_Services_SetHooks(NULL);
     }
-    diagSupported = false;
-    diagEnabledFlag = false;
-    updatePending = false;
+    /* Support and EnabledFlag states are not reset: the services thread may still read them
+     * (events treated until toolkit clear), they are initialized on next configuration. */
 }

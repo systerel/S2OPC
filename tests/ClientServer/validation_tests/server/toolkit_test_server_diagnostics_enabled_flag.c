@@ -226,8 +226,9 @@ static bool check_configure_case(SOPC_Byte accessLevel,
                  expEnabled == SOPC_ServerInternal_IsDiagnosticsEnabled();
     }
     SOPC_AddressSpace_Delete(addressSpace);
+    // Clear only resets the services hooks: the states are initialized by the next configuration
     SOPC_ServerInternal_DiagnosticsClear();
-    return result && !SOPC_ServerInternal_IsDiagnosticsSupported() && !SOPC_ServerInternal_IsDiagnosticsEnabled();
+    return result;
 }
 
 static SOPC_ReturnStatus check_configure(void)
@@ -344,6 +345,41 @@ static SOPC_ReturnStatus write_enabled_flag_sync(bool enabled)
 static bool is_expected_status(SOPC_StatusCode expected, SOPC_StatusCode actual)
 {
     return SOPC_IsGoodStatus(expected) ? SOPC_IsGoodStatus(actual) : expected == actual;
+}
+
+// Returns true if the EnabledFlag node value is the expected one
+static bool check_enabled_flag_node(bool expected)
+{
+    OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Neither);
+    OpcUa_ReadResponse* readResp = NULL;
+    SOPC_ReturnStatus status = (NULL == readReq) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ReadRequest_SetReadValue(readReq, 0, &enabledFlagNodeId, SOPC_AttributeId_Value, NULL);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerHelper_LocalServiceSync(readReq, (void**) &readResp);
+        readReq = NULL; // freed by toolkit
+    }
+    const bool result = SOPC_STATUS_OK == status && &OpcUa_ReadResponse_EncodeableType == readResp->encodeableType &&
+                        SOPC_IsGoodStatus(readResp->ResponseHeader.ServiceResult) && 1 == readResp->NoOfResults &&
+                        SOPC_IsGoodStatus(readResp->Results[0].Status) &&
+                        SOPC_Boolean_Id == readResp->Results[0].Value.BuiltInTypeId &&
+                        expected == readResp->Results[0].Value.Value.Boolean;
+    if (NULL != readResp)
+    {
+        SOPC_EncodeableObject_Delete(readResp->encodeableType, (void**) &readResp);
+    }
+    SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &readReq);
+    return result;
+}
+
+// Wait condition: EnabledFlag node value is FALSE
+static bool is_enabled_flag_node_false(void* context)
+{
+    SOPC_UNUSED_ARG(context);
+    return check_enabled_flag_node(false);
 }
 
 // Returns true if all the given UInt32 diagnostic nodes have the expected value and status
@@ -741,10 +777,14 @@ static SOPC_ReturnStatus check_inhibited_started(void)
     }
     /* The write is synchronous and no asynchronous effect is possible: no write behavior callback is registered when
      * diagnostics are inhibited (checked above) */
+    /* The node keeps the written value (TRUE) while the diagnostics remain disabled: restored on restart
+     * (see check_inhibited_on_restart) */
     if (SOPC_STATUS_OK == status)
     {
         status =
-            (!SOPC_ServerInternal_IsDiagnosticsEnabled() && check_disabled_nodes()) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            (!SOPC_ServerInternal_IsDiagnosticsEnabled() && check_disabled_nodes() && check_enabled_flag_node(true))
+                ? SOPC_STATUS_OK
+                : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: local write without effect: %s\n",
                SOPC_STATUS_OK == status ? "OK" : "NOK");
     }
@@ -851,14 +891,15 @@ static SOPC_ReturnStatus check_restart_with_active_subscription(SOPC_SecureConne
     return status;
 }
 
-// Shall be called in server started state with diagnostics inhibited: diagnostics remain inhibited after restart
+/* Shall be called in server started state with diagnostics inhibited and EnabledFlag node set to TRUE by a local write:
+ * diagnostics remain inhibited after restart and the EnabledFlag node value is restored */
 static SOPC_ReturnStatus check_inhibited_on_restart(void)
 {
     SOPC_ReturnStatus status = restart_server();
     if (SOPC_STATUS_OK == status)
     {
         status = (!SOPC_ServerInternal_IsDiagnosticsSupported() && !SOPC_ServerInternal_IsDiagnosticsEnabled() &&
-                  wait_disabled_nodes())
+                  wait_disabled_nodes() && wait_for(is_enabled_flag_node_false, NULL))
                      ? SOPC_STATUS_OK
                      : SOPC_STATUS_NOK;
         printf("<Test_Server_Diagnostics_Enabled_Flag: inhibited after restart: %s\n",
@@ -942,12 +983,6 @@ int main(int argc, char* argv[])
 
     SOPC_ClientConfigHelper_Clear();
     SOPC_ServerConfigHelper_Clear();
-    // Diagnostics state is reset on clear
-    if (SOPC_STATUS_OK == status &&
-        (SOPC_ServerInternal_IsDiagnosticsSupported() || SOPC_ServerInternal_IsDiagnosticsEnabled()))
-    {
-        status = SOPC_STATUS_NOK;
-    }
     SOPC_CommonHelper_Clear();
 
     printf("<Test_Server_Diagnostics_Enabled_Flag: final result: %s\n",

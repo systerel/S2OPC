@@ -25,12 +25,14 @@
  *        It should not be used outside of the server wrapper and services implementation.
  *
  * Threading model:
- * - the diagnostics support and EnabledFlag states are initialized and the runtime variables diagnostics are reset
- *   during server configuration (::SOPC_ServerInternal_DiagnosticsConfigure),
- * - the EnabledFlag state is copied into the server runtime variables before endpoints are opened
- *   (::SOPC_ServerInternal_DiagnosticsStart),
+ * - the diagnostics support and EnabledFlag states are initialized, the runtime variables diagnostics are reset and
+ *   the EnabledFlag state is copied into them during server configuration (::SOPC_ServerInternal_DiagnosticsConfigure),
+ * - the services hooks are set before endpoints are opened (::SOPC_ServerInternal_DiagnosticsStart): the diagnostics
+ *   are written with the other runtime variables on first server start only when it is thread safe,
+ *   the hooks keep the ServerDiagnostics nodes up to date afterwards (including on server restart).
+ *   When diagnostics are not supported, only default values are used and written on each server start,
  * - then the diagnostics support state is read-only, the EnabledFlag state and the runtime variables diagnostics are
- *   only accessed from the services thread.
+ *   only modified from the services thread.
  *
  * Diagnostics values are kept across server restarts: on server stop only the cumulated values are reset
  * (services thread), current values reflect the existing sessions and subscriptions.
@@ -63,8 +65,8 @@
  *
  * \note Local services bypass the AccessLevel check: when diagnostics are not supported,
  *       a local write of EnabledFlag remains possible but has no effect on diagnostics.
- * \note The EnabledFlag value is part of the runtime variables written on server start: its write behavior callback
- *       is then called and enqueues the ServerDiagnostics nodes update.
+ * \note The EnabledFlag value is copied into the runtime variables diagnostics:
+ *       it is written unchanged on first server start.
  * \note The runtime variables diagnostics values are reset.
  * \note Shall be called in server configuring state.
  *
@@ -76,18 +78,27 @@ SOPC_ReturnStatus SOPC_ServerInternal_DiagnosticsConfigure(SOPC_AddressSpace* ad
 
 /**
  * \brief Starts the ServerDiagnostics management on server start:
- *        copies the EnabledFlag state into the server runtime variables diagnostics and, if diagnostics are supported,
- *        sets the services hooks: ::SOPC_ServerInternal_DiagnosticsMayUpdateVariables after each event treatment and
- *        the reset of the cumulated session values on server stop.
+ *        if diagnostics are supported, sets the services hooks: ::SOPC_ServerInternal_DiagnosticsMayUpdateVariables
+ *        after each event treatment and the one resetting the cumulated session values on server stop.
  *
- * \note Shall be called after the server runtime variables are built, before they are written and before endpoints
- *       are opened.
+ * \note Shall be called before the server runtime variables are written and before endpoints are opened.
+ * \note The services thread may still treat events of a previous server run, in consequence:
+ *       the diagnostics state is not modified and the runtime variables diagnostics shall only be written if true is
+ *       returned.
+ *
+ * \return true on first server start since configuration or if diagnostics are not supported:
+ *         in this case the runtime variables diagnostics shall be written with the other runtime variables,
+ *         false otherwise (ServerDiagnostics nodes are then kept up to date by the services hooks).
+ *         When not supported, EnabledFlag is constant (FALSE): only EnabledFlag is read by the write
+ *         (other diagnostics values written as 0), it restores the EnabledFlag node value after a local write.
  */
-void SOPC_ServerInternal_DiagnosticsStart(void);
+bool SOPC_ServerInternal_DiagnosticsStart(void);
 
 /**
  * \brief Writes the ServerDiagnostics nodes in the AddressSpace with a priority local WriteRequest if an update was
  *        requested during the services event treatment (diagnostics values or EnabledFlag changed).
+ *        The update is kept pending if the WriteRequest is not treated (server stopped or allocation failure):
+ *        it will be written on the next event treated.
  *
  * \note Services event treated hook (see ::SOPC_Services_SetHooks): called from the services thread at the
  *       end of each event treatment.
@@ -158,9 +169,11 @@ void SOPC_ServerInternal_DiagnosticsUpdateRequestCounts(uint32_t rejectedRequest
                                                         uint32_t securityRejectedRequestsCount);
 
 /**
- * \brief Resets the ServerDiagnostics state: diagnostics not supported and disabled, services hooks reset.
+ * \brief Resets the ServerDiagnostics services hooks.
  *
  * \note Shall be called on server configuration clear.
+ * \note The support and EnabledFlag states are not reset since the services thread may read them until toolkit clear:
+ *       they are initialized on next configuration.
  */
 void SOPC_ServerInternal_DiagnosticsClear(void);
 
