@@ -183,7 +183,9 @@ typedef enum SOPC_Services_Event
     APP_TO_SE_CLOSE_CONNECTION,       /**< Client side only:<BR/>
                                          requests to close an established or pending SC connection.<BR/>
                                          id = secure channel config index<BR/>
-                                         auxParam = user application close connection context
+                                         auxParam = (uintptr_t*) allocated encapsulation of the user application close
+                                         connection context, NULL if allocation failed
+                                         (see ::SOPC_ToolkitClient_AsyncCloseChannel)
                                        */
     APP_TO_SE_CLOSE_ALL_CONNECTIONS,  /**< (internal use only). Request to close all established SC connections<BR/>
                                          It might be used to close only SC established as client or both client/server.

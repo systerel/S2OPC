@@ -79,7 +79,8 @@ typedef enum
     /* OPC UA chunks message manager -> SC connection manager */
     INT_SC_RCV_HEL,             /**<
                                   Hello message has been received on the secure channel with given connection index<br/>
-                                   id = secure channel connection index<br/>*/
+                                   id = secure channel connection index<br/>
+                                   params = (SOPC_Buffer*) buffer positioned to message payload */
     INT_SC_RCV_ACK,             /**<
                                   Acknowledge message has been received on the secure channel with given connection
                                   index and byte buffer containing message payload.<br/>
