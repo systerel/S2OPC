@@ -46,6 +46,7 @@ static struct
     SOPC_Socket sigClientSock;           /* A local client used to send signal interrupting "select" blocking call */
     SOPC_Socket sigServerConnectionSock; /* Accepted local client connection used to receive signal interrupting
                                        "select" blocking call*/
+    SOPC_Mutex sigMutex; /* Protects sigClientSock use against its close on thread stop (initDone set to false) */
 } receptionThread = {.initDone = false,
                      .stopFlag = 0,
                      .sigServerListeningSock = SOPC_INVALID_SOCKET,
@@ -389,16 +390,18 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     {
         return;
     }
-    // Ensure SOPC_SocketsNetworkEventMgr_InterruptForInputEvent is not enqueuing value during socket close
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&receptionThread.sigMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    // Ensure SOPC_SocketsNetworkEventMgr_InterruptForInputEvent does not use the signal socket closed below
     SOPC_Atomic_Int_Set(&receptionThread.initDone, false);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     // stop the reception thread
     SOPC_Atomic_Int_Set(&receptionThread.stopFlag, 1);
 
     /* Send signal to interrupt "select" and stop */
     SOPC_Socket_Close(&receptionThread.sigClientSock);
+    status = SOPC_Mutex_Unlock(&receptionThread.sigMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_Thread_Join(&receptionThread.thread);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
@@ -410,13 +413,22 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
 
 void SOPC_SocketsNetworkEventMgr_Initialize(void)
 {
+    SOPC_ReturnStatus status = SOPC_Mutex_Initialization(&receptionThread.sigMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     bool result = SOPC_SocketsNetworkEventMgr_LoopThreadStart();
     SOPC_ASSERT(result);
+}
+
+void SOPC_SocketsNetworkEventMgr_PreClear(void)
+{
+    SOPC_SocketsNetworkEventMgr_LoopThreadStop();
 }
 
 void SOPC_SocketsNetworkEventMgr_Clear(void)
 {
     SOPC_SocketsNetworkEventMgr_LoopThreadStop();
+    // All toolkit threads are stopped: the mutex can no longer be used by an interrupt
+    SOPC_Mutex_Clear(&receptionThread.sigMutex);
 }
 
 void SOPC_SocketsNetworkEventMgr_InterruptForInputEvent(void)
@@ -424,11 +436,13 @@ void SOPC_SocketsNetworkEventMgr_InterruptForInputEvent(void)
     const uint8_t data = 0;
     uint32_t length = 1;
 
-    if (!SOPC_Atomic_Int_Get(&receptionThread.initDone))
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&receptionThread.sigMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    if (SOPC_Atomic_Int_Get(&receptionThread.initDone))
     {
-        return;
+        /* Send signal to interrupt "select" and treat input event */
+        SOPC_Socket_Write(receptionThread.sigClientSock, &data, length, &length);
     }
-
-    /* Send signal to interrupt "select" and treat input event */
-    SOPC_Socket_Write(receptionThread.sigClientSock, &data, length, &length);
+    status = SOPC_Mutex_Unlock(&receptionThread.sigMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }

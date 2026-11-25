@@ -22,6 +22,8 @@
 
 void SOPC_SocketsNetworkEventMgr_Initialize(void);
 /** \brief Stops the sockets thread, no effect if already stopped */
+void SOPC_SocketsNetworkEventMgr_PreClear(void);
+/** \brief Stops the sockets thread if not already done and clears its resources, no other thread shall interrupt it */
 void SOPC_SocketsNetworkEventMgr_Clear(void);
 void SOPC_SocketsNetworkEventMgr_InterruptForInputEvent(void);
 

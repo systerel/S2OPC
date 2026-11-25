@@ -54,7 +54,7 @@ void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler)
 
 void SOPC_Sockets_PreClear(void)
 {
-    SOPC_SocketsNetworkEventMgr_Clear();
+    SOPC_SocketsNetworkEventMgr_PreClear();
 }
 
 void SOPC_Sockets_Clear(void)
