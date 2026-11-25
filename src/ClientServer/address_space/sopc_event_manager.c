@@ -25,6 +25,7 @@
 #include "sopc_address_space_utils_internal.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
+#include "sopc_atomic.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_dict.h"
@@ -274,7 +275,7 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
 
 static const SOPC_NodeId baseEventNodeId = SOPC_NODEID_NS0_NUMERIC(OpcUaId_BaseEventType);
 
-static uint64_t eventIdCounter = 0;
+static int32_t eventIdCounter = 0;
 
 static SOPC_ReturnStatus SOPC_InternalEventManagerUtil_QnPathToCString(uint16_t nbQnPath,
                                                                        const SOPC_QualifiedName* qualifiedNamePathArray,
@@ -386,8 +387,8 @@ static SOPC_ReturnStatus generate_unique_event_id(SOPC_ByteString* eventId)
     if (SOPC_STATUS_OK == status)
     {
         memcpy(eventId->Data, &tref, sizeof(tref));
-        eventIdCounter++;
-        memcpy(eventId->Data + sizeof(tref), &eventIdCounter, sizeof(eventIdCounter));
+        const uint32_t counterValue = (uint32_t) SOPC_Atomic_Int_Add(&eventIdCounter, 1) + 1;
+        memcpy(eventId->Data + sizeof(tref), &counterValue, sizeof(eventIdCounter));
         memcpy(eventId->Data + sizeof(tref) + sizeof(eventIdCounter), expBuffer, 8);
     }
     else
