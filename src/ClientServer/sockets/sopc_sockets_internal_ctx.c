@@ -82,15 +82,10 @@ static void SOPC_SocketsInternalContext_FreeInputEvent(struct Event* ev)
 
 void SOPC_SocketsInternalContext_Clear(void)
 {
-    // Close any not closed remaining socket
-    uint32_t idx = 0;
-    for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
+    // Close any not closed remaining socket and release its resources (write queue, addresses)
+    for (uint32_t idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
     {
-        if (socketsArray[idx].isUsed)
-        {
-            SOPC_Socket_Close(&(socketsArray[idx].sock));
-            socketsArray[idx].isUsed = false;
-        }
+        SOPC_SocketsInternalContext_CloseSocket(idx);
     }
 
     // Events enqueued after the sockets thread stop
