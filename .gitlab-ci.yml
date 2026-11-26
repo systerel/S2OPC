@@ -778,7 +778,7 @@ test-uactt:
         $WITH_COVERITY != null || \
         $WITH_COVERAGE != null || $WITH_DOC != null || \
         $S2OPC_PUBSUB_ONLY != null || $S2OPC_CLIENTSERVER_ONLY != null || \
-        $ALL_BUILDS != null || $ALL_TESTS != null"
+        $ALL_BUILDS != null || $ALL_TESTS != null || $RUN_TSAN != null"
       when: never
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG || $RUN_UACTT != null"
       when: on_success
@@ -798,7 +798,7 @@ test-uactt-server-diags:
         $WITH_COVERITY != null || \
         $WITH_COVERAGE != null || $WITH_DOC != null || \
         $S2OPC_PUBSUB_ONLY != null || $S2OPC_CLIENTSERVER_ONLY != null || \
-        $ALL_BUILDS != null || $ALL_TESTS != null"
+        $ALL_BUILDS != null || $ALL_TESTS != null || $RUN_TSAN != null"
       when: never
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || \
         $CI_COMMIT_BRANCH == 'master' || \
@@ -887,7 +887,8 @@ windows-appveyor:
         $GEN_PROOF_OBLIGATIONS == null && \
         $WITH_COVERITY == null && $WITH_COVERAGE == null && \
         $NO_ASAN == null && $NO_GEN == null && \
-        $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null" # Avoid to run job on master for all nightly build except ALL_BUILDS
+        $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
+        $RUN_TSAN == null" # Avoid to run job on master for all nightly build except ALL_BUILDS
       when: always # run even if previous job in pipeline failed
 
 windows-appveyor-artifacts:
