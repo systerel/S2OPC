@@ -655,44 +655,35 @@ static bool filterServerEvents(SOPC_Services_Event event, uint32_t id, uintptr_t
         }
         else
         {
-            /* On configuration, register the Services layer as used before forwarding the event to SC. */
             if (bParam)
             {
+                // Register the Services layer as using the configuration before forwarding the event to SC
                 status = SOPC_ToolkitServer_UsingLockedConfig(true);
-            }
-            if (SOPC_STATUS_OK == status)
-            {
-                isServerConfigurationLocked = bParam;
-                // Forward to SC layer
-                status = SOPC_SecureChannels_EnqueueEvent(SE_TO_SCS_SERVER_CONFIGURED, 0, (uintptr_t) params, 0);
-                SOPC_ASSERT(SOPC_STATUS_OK == status);
+                if (SOPC_STATUS_OK == status)
+                {
+                    isServerConfigurationLocked = true;
+                    status = SOPC_SecureChannels_EnqueueEvent(SE_TO_SCS_SERVER_CONFIGURED, 0, (uintptr_t) true, 0);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
+                }
             }
             else
             {
+                isServerConfigurationLocked = false;
+                status = SOPC_SecureChannels_EnqueueEvent(SE_TO_SCS_SERVER_CONFIGURED, 0, (uintptr_t) false, 0);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+                // Clear server context in B model (not configured anymore)
+                io_dispatch_mgr__clear_server_configuration_context();
+                /* Release the Services layer only after the B-model reset is complete. Otherwise
+                 * SOPC_ToolkitServer_UnConfigure() could return as soon as SecureChannels releases its
+                 * reference, allowing a new AddressSpace to be configured during the reset. */
+                status = SOPC_ToolkitServer_UsingLockedConfig(false);
+            }
+            if (SOPC_STATUS_OK != status)
+            {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "ServicesMgr: APP_TO_SE_SERVER_CONFIGURED FAILED: error in setting "
-                                       "server config as used: %s",
-                                       bParam ? "locked" : "unlocked");
-            }
-            if (!isServerConfigurationLocked)
-            {
-                // Clear server context in B model if configuration is unlocked (not configured anymore)
-                io_dispatch_mgr__clear_server_configuration_context();
-                if (!bParam)
-                {
-                    /* Release the Services layer only after the B-model reset is complete. Otherwise
-                     * SOPC_ToolkitServer_UnConfigure() could return as soon as SecureChannels releases its
-                     * reference, allowing a new AddressSpace to be configured during the reset. */
-                    status = SOPC_ToolkitServer_UsingLockedConfig(false);
-                    if (SOPC_STATUS_OK != status)
-                    {
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "Failed to release the Services layer reference to the locked server "
-                                               "configuration after clearing the B-model server configuration context "
-                                               "(status: %d).",
-                                               status);
-                    }
-                }
+                                       "server config as used: %s (status: %d)",
+                                       bParam ? "locked" : "unlocked", status);
             }
         }
         break;
